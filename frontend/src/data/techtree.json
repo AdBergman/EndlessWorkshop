@@ -6,8 +6,7 @@
     "unlocks": "District: Keep",
     "effect": ["+100 Fortification on Capital"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.10, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Voice of the Masses",
@@ -16,8 +15,7 @@
     "unlocks": "District: Forum",
     "effect": ["+1 Scribe slot on Capital"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.25, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Civil Order",
@@ -26,8 +24,7 @@
     "unlocks": "Improvement: Traveler's Shrine",
     "effect": ["+12 Approval on Capital"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.40, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Fencing",
@@ -36,8 +33,7 @@
     "unlocks": "District: Farm",
     "effect": ["+1 Citizen Slot on Capital", "+1 Artisan Slot on Capital"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.55, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Workshop",
@@ -46,8 +42,7 @@
     "unlocks": "District: Works; Action: Remove Forest",
     "effect": [],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.70, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Currency",
@@ -56,8 +51,7 @@
     "unlocks": "District: Merchant's House",
     "effect": ["+8 Dust on Capital"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.10, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Keystones",
@@ -66,8 +60,7 @@
     "unlocks": "District: Bridge; Action: Build Dam",
     "effect": [],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.25, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "Scientific Charter",
@@ -76,8 +69,7 @@
     "unlocks": "District: Laboratory; Improves the rewards from Curiosities",
     "effect": [],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.40, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   },
   {
     "name": "The Strength of Garin",
@@ -86,8 +78,7 @@
     "unlocks": "",
     "effect": ["+5 Defense on Units", "+2 Industry on Military Districts"],
     "prereq": "",
-    "faction": "Kin",
-    "coords": {"xPct": 0.55, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": "Kin"
   },
   {
     "name": "Scavenging",
@@ -96,7 +87,6 @@
     "unlocks": "",
     "effect": ["+25% gains on Battle Spoils", "+15 Health on non-Hero", "+5 Damage on non-Hero"],
     "prereq": "",
-    "faction": "",
-    "coords": {"xPct": 0.70, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+    "faction": ""
   }
 ]

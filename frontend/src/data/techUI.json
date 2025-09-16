@@ -1,0 +1,22 @@
+{
+  "techs": {
+    "boxSize": { "widthPct": 4.95, "heightPct": 8.80 },
+    "items": [
+      { "name": "Stonework", "coords": { "xPct": 21.30, "yPct": 41.30 } },
+      { "name": "Voice of the Masses", "coords": { "xPct": 35.57, "yPct": 22.78 } },
+      { "name": "Civil Order", "coords": { "xPct": 47.40, "yPct": 30.74 } },
+      { "name": "Fencing", "coords": { "xPct": 59.22, "yPct": 22.78 } },
+      { "name": "Workshop", "coords": { "xPct": 71.09, "yPct": 41.39 } },
+      { "name": "Currency", "coords": { "xPct": 71.04, "yPct": 65.09 } },
+      { "name": "Keystones", "coords": { "xPct": 56.88, "yPct": 78.24 } },
+      { "name": "Scientific Charter", "coords": { "xPct": 37.92, "yPct": 78.33 } },
+      { "name": "The Strength of Garin", "coords": { "xPct": 30.78, "yPct": 51.76 } },
+      { "name": "Scavenging", "coords": { "xPct": 21.30, "yPct": 65.00 } }
+    ]
+  },
+  "navigationButtons": {
+    "boxSize": { "widthPct": 13.28, "heightPct": 27.78 },
+    "previous": { "xPct": 0, "yPct": 35.83 },
+    "next": { "xPct": 86.72, "yPct": 35.83 }
+  }
+}

@@ -61,4 +61,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # graphic files
-/graphics/tmp/
+/frontend/public/graphics/tmp/
