@@ -1,0 +1,24 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #000; /* black background */
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.App {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100vh;
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.App h1 {
+    font-family: 'Orbitron', sans-serif; /* sci-fi style font */
+    color: #ff7f32; /* orange */
+    font-size: 3rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(255, 128, 50, 0.8), 0 0 16px rgba(255, 128, 50, 0.6);
+}

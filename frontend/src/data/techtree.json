@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Stonework",
+    "era": 1,
+    "type": "Defense",
+    "unlocks": "District: Keep",
+    "effect": ["+100 Fortification on Capital"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.10, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Voice of the Masses",
+    "era": 1,
+    "type": "Society",
+    "unlocks": "District: Forum",
+    "effect": ["+1 Scribe slot on Capital"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.25, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Civil Order",
+    "era": 1,
+    "type": "Society",
+    "unlocks": "Improvement: Traveler's Shrine",
+    "effect": ["+12 Approval on Capital"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.40, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Fencing",
+    "era": 1,
+    "type": "Society",
+    "unlocks": "District: Farm",
+    "effect": ["+1 Citizen Slot on Capital", "+1 Artisan Slot on Capital"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.55, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Workshop",
+    "era": 1,
+    "type": "Economy",
+    "unlocks": "District: Works; Action: Remove Forest",
+    "effect": [],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.70, "yPct": 0.20, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Currency",
+    "era": 1,
+    "type": "Economy",
+    "unlocks": "District: Merchant's House",
+    "effect": ["+8 Dust on Capital"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.10, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Keystones",
+    "era": 1,
+    "type": "Discovery",
+    "unlocks": "District: Bridge; Action: Build Dam",
+    "effect": [],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.25, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Scientific Charter",
+    "era": 1,
+    "type": "Discovery",
+    "unlocks": "District: Laboratory; Improves the rewards from Curiosities",
+    "effect": [],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.40, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "The Strength of Garin",
+    "era": 1,
+    "type": "Defense",
+    "unlocks": "",
+    "effect": ["+5 Defense on Units", "+2 Industry on Military Districts"],
+    "prereq": "",
+    "faction": "Kin",
+    "coords": {"xPct": 0.55, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+  },
+  {
+    "name": "Scavenging",
+    "era": 1,
+    "type": "Defense",
+    "unlocks": "",
+    "effect": ["+25% gains on Battle Spoils", "+15 Health on non-Hero", "+5 Damage on non-Hero"],
+    "prereq": "",
+    "faction": "",
+    "coords": {"xPct": 0.70, "yPct": 0.40, "widthPct": 0.05, "heightPct": 0.05}
+  }
+]
