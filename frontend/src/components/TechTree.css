@@ -1,0 +1,16 @@
+/* TechTree.css */
+
+.tech-tree-image-wrapper {
+    position: relative;
+    display: inline-block; /* shrink-wrap the image */
+}
+
+.tech-tree-bg {
+    display: block;        /* removes inline spacing below image */
+    width: 100%;
+    height: auto;          /* scales with wrapper */
+}
+
+.era-navigation-button {
+    position: absolute;         /* so nav buttons remain aligned */
+}
