@@ -3,9 +3,14 @@ import TechTree from './components/TechTree';
 import './App.css';
 
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
+const maxEra = 6; // dynamically could derive from JSON if needed
 
 function App() {
-    const [selectedFaction, setSelectedFaction] = useState("Kin"); // default
+    const [selectedFaction, setSelectedFaction] = useState("Kin");
+    const [era, setEra] = useState(1);
+
+    const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));
+    const handleNextEra = () => setEra(prev => Math.min(maxEra, prev + 1));
 
     return (
         <div className="App">
@@ -31,7 +36,11 @@ function App() {
             </header>
 
             <main className="main-content">
-                <TechTree era={1} faction={selectedFaction} />
+                <TechTree
+                    era={era}
+                    faction={selectedFaction}
+                    onEraChange={(dir) => dir === 'next' ? handleNextEra() : handlePrevEra()}
+                />
             </main>
         </div>
     );

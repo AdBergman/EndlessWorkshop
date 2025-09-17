@@ -1,4 +1,4 @@
-// Game data: comes from techtree.json
+// Game data: comes from techTree.json
 export interface Tech {
     name: string;
     era: number;

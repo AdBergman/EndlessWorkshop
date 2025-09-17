@@ -1,5 +1,5 @@
-import React from 'react';
-import techtreeJson from '../data/techtree.json';
+import React, { useMemo } from 'react';
+import techtreeJson from '../data/techTree.json';
 import techUIJson from '../data/techUI.json';
 import TechBox from './TechBox';
 import { Tech, TechUIData } from '../types/techTypes';
@@ -9,26 +9,36 @@ import './TechTree.css';
 interface TechTreeProps {
     faction: string;
     era: number;
+    onEraChange: (dir: 'previous' | 'next') => void;
 }
 
-const TechTree: React.FC<TechTreeProps> = ({ faction, era }) => {
+const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
     const [selectedTechs, setSelectedTechs] = React.useState<string[]>([]);
 
-    const techData: Tech[] = (techtreeJson as Tech[]).filter(
-        t => t.era === era && (t.faction === "" || t.faction === faction)
+    // filter techs for current era + faction
+    const techData: Tech[] = useMemo(
+        () => (techtreeJson as Tech[]).filter(
+            t => t.era === era && (t.faction === "" || t.faction === faction)
+        ),
+        [era, faction]
     );
 
+    // convert UI data to map for fast lookup
     const uiData: TechUIData = techUIJson as TechUIData;
+    const uiMap = useMemo(() => {
+        const map = new Map<string, typeof uiData.techs.items[0]>();
+        uiData.techs.items.forEach(item => map.set(item.name, item));
+        return map;
+    }, [uiData]);
 
     const handleTechClick = (techName: string) => {
-        setSelectedTechs((prev) =>
+        setSelectedTechs(prev =>
             prev.includes(techName)
-                ? prev.filter(t => t !== techName) // unselect
-                : [...prev, techName]              // select
+                ? prev.filter(t => t !== techName)
+                : [...prev, techName]
         );
     };
 
-    const imageRef = React.useRef<HTMLImageElement>(null);
     const isButtonHidden = (dir: 'previous' | 'next') =>
         (dir === 'previous' && era === 1) || (dir === 'next' && era === 6);
 
@@ -42,7 +52,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era }) => {
             />
 
             {techData.map((tech) => {
-                const uiItem = uiData.techs.items.find(u => u.name === tech.name);
+                const uiItem = uiMap.get(tech.name);
                 if (!uiItem) return null;
                 return (
                     <TechBox
@@ -56,16 +66,15 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era }) => {
             })}
 
             {/* Era navigation buttons */}
-
-            {(['previous', 'next'] as const).map((dir) => {
-                if (isButtonHidden(dir)) return null; // skip era 1 prev, era 6 next
+            {(['previous', 'next'] as const).map(dir => {
+                if (isButtonHidden(dir)) return null;
                 return (
                     <EraNavigationButton
                         key={dir}
                         direction={dir}
                         buttonData={uiData.navigationButtons[dir]}
                         boxSize={uiData.navigationButtons.boxSize}
-                        onClick={() => {}} // no-op for now
+                        onClick={() => onEraChange(dir)}
                     />
                 );
             })}
