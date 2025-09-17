@@ -10,7 +10,3 @@
     width: 100%;
     height: auto;          /* scales with wrapper */
 }
-
-.era-navigation-button {
-    position: absolute;         /* so nav buttons remain aligned */
-}

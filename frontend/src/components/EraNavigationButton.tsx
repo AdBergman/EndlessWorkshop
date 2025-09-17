@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationButtons } from '../types/techTypes';
+import './EraNavigationButton.css';
 
 interface Props {
     direction: 'previous' | 'next';
@@ -9,27 +10,18 @@ interface Props {
 }
 
 const EraNavigationButton: React.FC<Props> = ({ direction, buttonData, boxSize, onClick }) => {
-    const borderColor = direction === 'previous' ? 'blue' : 'green';
-    const label = direction === 'previous' ? 'Prev' : 'Next';
-
     return (
         <div
+            className={`era-navigation-button ${direction}`}
             style={{
-                position: 'absolute',
                 left: `${buttonData.xPct}%`,
                 top: `${buttonData.yPct}%`,
                 width: `${boxSize.widthPct}%`,
                 height: `${boxSize.heightPct}%`,
-                border: `2px solid ${borderColor}`,
-                cursor: 'pointer',
-                userSelect: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
             }}
             onClick={onClick}
         >
-            {label}
+            <div className="orb" />
         </div>
     );
 };

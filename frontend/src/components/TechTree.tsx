@@ -28,6 +28,10 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era }) => {
         );
     };
 
+    const imageRef = React.useRef<HTMLImageElement>(null);
+    const isButtonHidden = (dir: 'previous' | 'next') =>
+        (dir === 'previous' && era === 1) || (dir === 'next' && era === 6);
+
     return (
         <div className="tech-tree-image-wrapper">
             <img
@@ -52,16 +56,19 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era }) => {
             })}
 
             {/* Era navigation buttons */}
-            {(['previous', 'next'] as const).map((dir) => (
-                <EraNavigationButton
-                    key={dir}
-                    direction={dir}
-                    buttonData={uiData.navigationButtons[dir]}
-                    boxSize={uiData.navigationButtons.boxSize}
-                    onClick={() => {}} // no-op for now
-                    // onClick={dir === 'previous' ? handlePrevEra : handleNextEra}
-                />
-            ))}
+
+            {(['previous', 'next'] as const).map((dir) => {
+                if (isButtonHidden(dir)) return null; // skip era 1 prev, era 6 next
+                return (
+                    <EraNavigationButton
+                        key={dir}
+                        direction={dir}
+                        buttonData={uiData.navigationButtons[dir]}
+                        boxSize={uiData.navigationButtons.boxSize}
+                        onClick={() => {}} // no-op for now
+                    />
+                );
+            })}
         </div>
     );
 };

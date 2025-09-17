@@ -1,0 +1,54 @@
+.era-navigation-button {
+    position: absolute;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: all;
+}
+
+.orb {
+    width: 30%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: rgba(0, 200, 255, 0.15); /* subtle teal base */
+    box-shadow: 0 0 4px 2px rgba(0, 200, 255, 0.15);
+    transition: background 0.5s ease, box-shadow 0.5s ease, transform 0.5s ease;
+
+    /* gentle ambient pulse always active */
+    animation: ambientPulse 2s infinite alternate ease-in-out;
+}
+/* Slight directional shift for previous/next */
+.era-navigation-button.previous .orb {
+    /*TODO: check position of previous era*/
+    margin-left: 40%;
+}
+
+.era-navigation-button.next .orb {
+    margin-right: 36%;  /* keep horizontal offset */
+    margin-top: -9%;  /* moves orb up by 15px */
+}
+
+
+.era-navigation-button:hover .orb {
+    background: rgba(0, 200, 255, 0.35); /* enhanced glow on hover */
+    box-shadow: 0 0 10px 4px rgba(0, 200, 255, 0.35);
+    transform: scale(1.1);
+}
+
+@keyframes ambientPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 6px 3px rgba(0, 200, 255, 0.35);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px 4px rgba(0, 200, 255, 0.4);
+    }
+    100% {
+        transform: scale(1.05);
+        box-shadow: 0 0 8px 3px rgba(0, 200, 255, 0.38);
+    }
+}
+
