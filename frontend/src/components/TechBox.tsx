@@ -17,7 +17,7 @@ const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick })
                 left: `${coords.xPct}%`,
                 top: `${coords.yPct}%`,
                 width: `${boxSize.widthPct}%`,
-                height: `${boxSize.heightPct}%`,
+                aspectRatio: '1 / 1',   // keeps circle
                 cursor: 'pointer',
                 boxSizing: 'border-box',
                 userSelect: 'none',

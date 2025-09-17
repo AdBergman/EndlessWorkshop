@@ -45,7 +45,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
     return (
         <div className="tech-tree-image-wrapper">
             <img
-                src={`/graphics/final/${faction.toLowerCase()}_era_${era}.png`}
+                src={`/graphics/techEraScreens/${faction.toLowerCase()}_era_${era}.png`}
                 alt={`${faction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
