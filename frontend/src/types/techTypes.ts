@@ -3,7 +3,7 @@ export interface Tech {
     name: string;
     era: number;
     type: string;
-    unlocks: string;
+    unlocks: string[];
     effect: string[];
     prereq: string;
     faction: string;

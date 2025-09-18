@@ -1,4 +1,3 @@
-// src/components/TechBox.tsx
 import React from 'react';
 
 interface TechBoxProps {

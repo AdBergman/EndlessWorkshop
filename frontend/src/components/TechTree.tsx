@@ -5,7 +5,7 @@ import TechBox from './TechBox';
 import {Tech, TechUIData} from '../types/techTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
-import {Tooltip} from "./Tooltip";
+import Tooltip from "./Tooltip";
 
 interface TechTreeProps {
     faction: string;
@@ -16,10 +16,9 @@ interface TechTreeProps {
 const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
     const [selectedTechs, setSelectedTechs] = React.useState<string[]>([]);
 
-    const [hoveredTech, setHoveredTech] = React.useState<{
-        name: string;
-        coords: { xPct: number; yPct: number };
-    } | null>(null);
+    const [hoveredTech, setHoveredTech] = React.useState<
+        (Tech & { coords: { xPct: number; yPct: number } }) | null
+    >(null);
 
     // filter techs for current era + faction
     const techData: Tech[] = useMemo(
@@ -67,17 +66,13 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
                         boxSize={uiData.techs.boxSize}
                         selected={selectedTechs.includes(tech.name)}
                         onClick={() => handleTechClick(tech.name)}
-                        onMouseEnter={() =>
-                            setHoveredTech({ name: tech.name, coords: uiItem.coords })
-                        }
+                        onMouseEnter={() => setHoveredTech({ ...tech, coords: uiItem.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
                     />
                 );
             })}
 
-            {hoveredTech && (
-                <Tooltip hoveredTech={hoveredTech}/>
-            )}
+            {hoveredTech && <Tooltip hoveredTech={hoveredTech} />}
 
             {/* Era navigation buttons */}
             {(['previous', 'next'] as const).map(dir => {

@@ -3,8 +3,12 @@
     "name": "Stonework",
     "era": 1,
     "type": "Defense",
-    "unlocks": "District: Keep",
-    "effect": ["+100 Fortification on Capital"],
+    "unlocks": [
+      "District: Keep"
+    ],
+    "effect": [
+      "+100 Fortification on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -13,8 +17,12 @@
     "name": "Voice of the Masses",
     "era": 1,
     "type": "Society",
-    "unlocks": "District: Forum",
-    "effect": ["+1 Scribe slot on Capital"],
+    "unlocks": [
+      "District: Forum"
+    ],
+    "effect": [
+      "+1 Scribe slot on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -23,8 +31,12 @@
     "name": "Civil Order",
     "era": 1,
     "type": "Society",
-    "unlocks": "Improvement: Traveler's Shrine",
-    "effect": ["+12 Approval on Capital"],
+    "unlocks": [
+      "Improvement: Traveler's Shrine"
+    ],
+    "effect": [
+      "+12 Approval on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -33,8 +45,13 @@
     "name": "Fencing",
     "era": 1,
     "type": "Society",
-    "unlocks": "District: Farm",
-    "effect": ["+1 Citizen Slot on Capital", "+1 Artisan Slot on Capital"],
+    "unlocks": [
+      "District: Farm"
+    ],
+    "effect": [
+      "+1 Citizen Slot on Capital",
+      "+1 Artisan Slot on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -43,7 +60,10 @@
     "name": "Workshop",
     "era": 1,
     "type": "Economy",
-    "unlocks": "District: Works; Action: Remove Forest",
+    "unlocks": [
+      "District: Works",
+      "Action: Remove Forest"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -53,8 +73,12 @@
     "name": "Currency",
     "era": 1,
     "type": "Economy",
-    "unlocks": "District: Merchant's House",
-    "effect": ["+8 Dust on Capital"],
+    "unlocks": [
+      "District: Merchant's House"
+    ],
+    "effect": [
+      "+8 Dust on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -63,7 +87,10 @@
     "name": "Keystones",
     "era": 1,
     "type": "Discovery",
-    "unlocks": "District: Bridge; Action: Build Dam",
+    "unlocks": [
+      "District: Bridge",
+      "Action: Build Dam"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -73,7 +100,10 @@
     "name": "Scientific Charter",
     "era": 1,
     "type": "Discovery",
-    "unlocks": "District: Laboratory; Improves the rewards from Curiosities",
+    "unlocks": [
+      "District: Laboratory",
+      "Improves the rewards from Curiosities"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -83,8 +113,11 @@
     "name": "The Strength of Garin",
     "era": 1,
     "type": "Defense",
-    "unlocks": "",
-    "effect": ["+5 Defense on Units", "+2 Industry on Military Districts"],
+    "unlocks": [],
+    "effect": [
+      "+5 Defense on Units",
+      "+2 Industry on Military Districts"
+    ],
     "prereq": "",
     "faction": "Kin",
     "excludes": []
@@ -93,8 +126,12 @@
     "name": "Scavenging",
     "era": 1,
     "type": "Defense",
-    "unlocks": "",
-    "effect": ["+25% gains on Battle Spoils", "+15 Health on non-Hero", "+5 Damage on non-Hero"],
+    "unlocks": [],
+    "effect": [
+      "+25% gains on Battle Spoils",
+      "+15 Health on non-Hero",
+      "+5 Damage on non-Hero"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -103,8 +140,13 @@
     "name": "Shock Tactics",
     "era": 2,
     "type": "Defense",
-    "unlocks": "Improvement: Garrison",
-    "effect": ["+200 District Fortification on City Hall", "+200 District Fortification on Ministry"],
+    "unlocks": [
+      "Improvement: Garrison"
+    ],
+    "effect": [
+      "+200 District Fortification on City Hall",
+      "+200 District Fortification on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -113,7 +155,10 @@
     "name": "The Hand of Garin",
     "era": 2,
     "type": "Defense",
-    "unlocks": "Improvement: Legion Vaults; Unit Specialization: Architect",
+    "unlocks": [
+      "Improvement: Legion Vaults",
+      "Unit Specialization: Architect"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -123,7 +168,11 @@
     "name": "Sheredyn's Creed",
     "era": 2,
     "type": "Defense",
-    "unlocks": "Unit Specialization: Explorer; Unit Specialization: Harrier; Unit Specialization: Warden",
+    "unlocks": [
+      "Unit Specialization: Explorer",
+      "Unit Specialization: Harrier",
+      "Unit Specialization: Warden"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -133,8 +182,12 @@
     "name": "Foreign Affairs",
     "era": 2,
     "type": "Society",
-    "unlocks": "Protectorate Slot: 1",
-    "effect": ["-25% Dust cost for Bribe action"],
+    "unlocks": [
+      "Protectorate Slot: 1"
+    ],
+    "effect": [
+      "-25% Dust cost for Bribe action"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -143,8 +196,12 @@
     "name": "Common Rights",
     "era": 2,
     "type": "Society",
-    "unlocks": "Improvement: Scriptorium",
-    "effect": ["+4 Influence income on Capital"],
+    "unlocks": [
+      "Improvement: Scriptorium"
+    ],
+    "effect": [
+      "+4 Influence income on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -153,7 +210,10 @@
     "name": "Creed",
     "era": 2,
     "type": "Society",
-    "unlocks": "Improvement: Lodgings; Improvement: Emergency Dwellings",
+    "unlocks": [
+      "Improvement: Lodgings",
+      "Improvement: Emergency Dwellings"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -163,7 +223,11 @@
     "name": "Seedbank",
     "era": 2,
     "type": "Society",
-    "unlocks": "Improvement: Laborer's Hut; Improvement: Granary; Converter: Toil in the Fields",
+    "unlocks": [
+      "Improvement: Laborer's Hut",
+      "Improvement: Granary",
+      "Converter: Toil in the Fields"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -173,8 +237,13 @@
     "name": "Diplomat's Manse",
     "era": 2,
     "type": "Society",
-    "unlocks": "Treaty: Immigration Policy; Treaty: Win-Win Relations",
-    "effect": ["+100 Influence"],
+    "unlocks": [
+      "Treaty: Immigration Policy",
+      "Treaty: Win-Win Relations"
+    ],
+    "effect": [
+      "+100 Influence"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -183,8 +252,13 @@
     "name": "Markets",
     "era": 2,
     "type": "Economy",
-    "unlocks": "District: Trading Post; Traders' Trails: Dirt Roads",
-    "effect": ["1 Movement Points max to cross a road Tile"],
+    "unlocks": [
+      "District: Trading Post",
+      "Traders' Trails: Dirt Roads"
+    ],
+    "effect": [
+      "1 Movement Points max to cross a road Tile"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -193,8 +267,13 @@
     "name": "Collective Will",
     "era": 2,
     "type": "Economy",
-    "unlocks": "Improvement: Blast Furnace",
-    "effect": ["+4 Food on Capital", "+4 Industry on Capital"],
+    "unlocks": [
+      "Improvement: Blast Furnace"
+    ],
+    "effect": [
+      "+4 Food on Capital",
+      "+4 Industry on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -203,8 +282,13 @@
     "name": "Dustlytics",
     "era": 2,
     "type": "Economy",
-    "unlocks": "Improvement: Lithosphere Gallery",
-    "effect": ["+6 Dust on City Hall", "+4 Dust on Ministry"],
+    "unlocks": [
+      "Improvement: Lithosphere Gallery"
+    ],
+    "effect": [
+      "+6 Dust on City Hall",
+      "+4 Dust on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -213,8 +297,13 @@
     "name": "Materials Science",
     "era": 2,
     "type": "Discovery",
-    "unlocks": "Improvement: Geodesic Dome; Improvement: Beacon of Science",
-    "effect": ["+4 Science on Capital"],
+    "unlocks": [
+      "Improvement: Geodesic Dome",
+      "Improvement: Beacon of Science"
+    ],
+    "effect": [
+      "+4 Science on Capital"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -223,8 +312,12 @@
     "name": "Geology",
     "era": 2,
     "type": "Discovery",
-    "unlocks": "Landscape Action: Rewild (restores Barren Tiles)",
-    "effect": ["-25% Influence cost for Found Camp (Works for Necromancer and Aspects too)"],
+    "unlocks": [
+      "Landscape Action: Rewild (restores Barren Tiles)"
+    ],
+    "effect": [
+      "-25% Influence cost for Found Camp (Works for Necromancer and Aspects too)"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -233,8 +326,12 @@
     "name": "Hydromatic Laboratory",
     "era": 2,
     "type": "Discovery",
-    "unlocks": "Improvement: Hydropump",
-    "effect": ["+25% Precision for season predictability"],
+    "unlocks": [
+      "Improvement: Hydropump"
+    ],
+    "effect": [
+      "+25% Precision for season predictability"
+    ],
     "prereq": "Keystones",
     "faction": "",
     "excludes": []
@@ -243,8 +340,13 @@
     "name": "Conscription",
     "era": 3,
     "type": "Defense",
-    "unlocks": "Improvement: Military Efficiency; Converter: Propaganda Machine",
-    "effect": ["+50 District Fortification on Military Districts"],
+    "unlocks": [
+      "Improvement: Military Efficiency",
+      "Converter: Propaganda Machine"
+    ],
+    "effect": [
+      "+50 District Fortification on Military Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -253,8 +355,12 @@
     "name": "The Wisdom of Garin",
     "era": 3,
     "type": "Defense",
-    "unlocks": "Improvement: Legionaries Workshop",
-    "effect": ["-25% Industry cost on Military-related Improvements"],
+    "unlocks": [
+      "Improvement: Legionaries Workshop"
+    ],
+    "effect": [
+      "-25% Industry cost on Military-related Improvements"
+    ],
     "prereq": "",
     "faction": "Kin",
     "excludes": []
@@ -263,7 +369,12 @@
     "name": "Composite Materials",
     "era": 3,
     "type": "Defense",
-    "unlocks": "Unit Specialization: Heavy Archer; Unit Specialization: Bloodletter; Unit Specialization: Clarion; Unit Specialization: Protector",
+    "unlocks": [
+      "Unit Specialization: Heavy Archer",
+      "Unit Specialization: Bloodletter",
+      "Unit Specialization: Clarion",
+      "Unit Specialization: Protector"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -273,7 +384,10 @@
     "name": "Statecraft",
     "era": 3,
     "type": "Society",
-    "unlocks": "Protectorate Slot: 1; Unit Specialization: Minor Factions Tier 1",
+    "unlocks": [
+      "Protectorate Slot: 1",
+      "Unit Specialization: Minor Factions Tier 1"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -283,8 +397,13 @@
     "name": "Citizenship",
     "era": 3,
     "type": "Society",
-    "unlocks": "Improvement: Halls of Power",
-    "effect": ["+2 Influence on City Hall", "+1 Influence on Ministry"],
+    "unlocks": [
+      "Improvement: Halls of Power"
+    ],
+    "effect": [
+      "+2 Influence on City Hall",
+      "+1 Influence on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -293,8 +412,13 @@
     "name": "Urban Planning",
     "era": 3,
     "type": "Society",
-    "unlocks": "Improvement: Citizen's Center",
-    "effect": ["+4 Food on City Hall", "+2 Food on Ministry"],
+    "unlocks": [
+      "Improvement: Citizen's Center"
+    ],
+    "effect": [
+      "+4 Food on City Hall",
+      "+2 Food on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -303,8 +427,13 @@
     "name": "Hydrology",
     "era": 3,
     "type": "Society",
-    "unlocks": "Improvement: Irrigation Channels; Improvement: Wood Ash Pit",
-    "effect": ["+2 Food on Farm Districts"],
+    "unlocks": [
+      "Improvement: Irrigation Channels",
+      "Improvement: Wood Ash Pit"
+    ],
+    "effect": [
+      "+2 Food on Farm Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -313,7 +442,11 @@
     "name": "Embassy",
     "era": 3,
     "type": "Society",
-    "unlocks": "Treaty: Deeper Collaboration; Treaty: Vision Exchange; Treaty: Join Military",
+    "unlocks": [
+      "Treaty: Deeper Collaboration",
+      "Treaty: Vision Exchange",
+      "Treaty: Join Military"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -323,7 +456,10 @@
     "name": "Pyrometallurgy",
     "era": 3,
     "type": "Economy",
-    "unlocks": "Improvement: Spire of Industry; Improvement: Corkscrew Drill",
+    "unlocks": [
+      "Improvement: Spire of Industry",
+      "Improvement: Corkscrew Drill"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -333,8 +469,14 @@
     "name": "Commerce",
     "era": 3,
     "type": "Economy",
-    "unlocks": "Improvement: Alchemists' Commission; Improvement: Caravanserai; Traders' Trails: Graded Roads",
-    "effect": ["0.5 Movement Points max to cross a road Tile"],
+    "unlocks": [
+      "Improvement: Alchemists' Commission",
+      "Improvement: Caravanserai",
+      "Traders' Trails: Graded Roads"
+    ],
+    "effect": [
+      "0.5 Movement Points max to cross a road Tile"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -343,8 +485,13 @@
     "name": "Arboreal Insights",
     "era": 3,
     "type": "Economy",
-    "unlocks": "Improvement: Lumber Yard; Action: Reforest",
-    "effect": ["+2 Industry on Works Districts"],
+    "unlocks": [
+      "Improvement: Lumber Yard",
+      "Action: Reforest"
+    ],
+    "effect": [
+      "+2 Industry on Works Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -353,8 +500,13 @@
     "name": "Dustnomics",
     "era": 3,
     "type": "Economy",
-    "unlocks": "Improvement: Dust Blasting; Converter: Investors' Graft",
-    "effect": ["+4 Dust on Merchant's House Districts"],
+    "unlocks": [
+      "Improvement: Dust Blasting",
+      "Converter: Investors' Graft"
+    ],
+    "effect": [
+      "+4 Dust on Merchant's House Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -363,8 +515,14 @@
     "name": "Research Grants",
     "era": 3,
     "type": "Discovery",
-    "unlocks": "Improvement: Research Station; Improvement: Wildlife Lookout",
-    "effect": ["+4 Science on City Hall", "+2 Science on Ministry"],
+    "unlocks": [
+      "Improvement: Research Station",
+      "Improvement: Wildlife Lookout"
+    ],
+    "effect": [
+      "+4 Science on City Hall",
+      "+2 Science on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -373,8 +531,13 @@
     "name": "Collective Sacrifice",
     "era": 3,
     "type": "Discovery",
-    "unlocks": "Action: Bait Doomwraith; Action: Close Rift",
-    "effect": ["+8 Damage on non-Hero"],
+    "unlocks": [
+      "Action: Bait Doomwraith",
+      "Action: Close Rift"
+    ],
+    "effect": [
+      "+8 Damage on non-Hero"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -383,27 +546,42 @@
     "name": "Auxiliary Forces",
     "era": 4,
     "type": "Defense",
-    "unlocks": "Improvement: Commanders' Table",
-    "effect": ["+5 Approval on Improvement"],
+    "unlocks": [
+      "Improvement: Commanders' Table"
+    ],
+    "effect": [
+      "+5 Approval on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Logistics"]
+    "excludes": [
+      "Logistics"
+    ]
   },
   {
     "name": "Logistics",
     "era": 4,
     "type": "Defense",
-    "unlocks": "Improvement: Watchman's Bell",
-    "effect": ["-25% Industry on Keep"],
+    "unlocks": [
+      "Improvement: Watchman's Bell"
+    ],
+    "effect": [
+      "-25% Industry on Keep"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Auxiliary Forces"]
+    "excludes": [
+      "Auxiliary Forces"
+    ]
   },
   {
     "name": "The Gaze of Garin",
     "era": 4,
     "type": "Defense",
-    "unlocks": "Improvement: Martial Discipline; Unit Specialization: Greatsword",
+    "unlocks": [
+      "Improvement: Martial Discipline",
+      "Unit Specialization: Greatsword"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -413,7 +591,12 @@
     "name": "Zelevas' Stamina",
     "era": 4,
     "type": "Defense",
-    "unlocks": "Unit Specialization: Pathfinder; Unit Specialization: Harasser; Unit Specialization: Guardian; Unit Specialization: Custodian",
+    "unlocks": [
+      "Unit Specialization: Pathfinder",
+      "Unit Specialization: Harasser",
+      "Unit Specialization: Guardian",
+      "Unit Specialization: Custodian"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -423,27 +606,42 @@
     "name": "Public Works",
     "era": 4,
     "type": "Society",
-    "unlocks": "Improvement: Museum",
-    "effect": ["+3 Influence on Improvement"],
+    "unlocks": [
+      "Improvement: Museum"
+    ],
+    "effect": [
+      "+3 Influence on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Dramatic Arts"]
+    "excludes": [
+      "Dramatic Arts"
+    ]
   },
   {
     "name": "Dramatic Arts",
     "era": 4,
     "type": "Society",
-    "unlocks": "Improvement: Parade Stands",
-    "effect": ["-25% Industry cost on Forum"],
+    "unlocks": [
+      "Improvement: Parade Stands"
+    ],
+    "effect": [
+      "-25% Industry cost on Forum"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Public Works"]
+    "excludes": [
+      "Public Works"
+    ]
   },
   {
     "name": "Dignitary Goodwill",
     "era": 4,
     "type": "Society",
-    "unlocks": "Protectorate Slot: 1; Unit Specialization: Minor Factions Tier 2",
+    "unlocks": [
+      "Protectorate Slot: 1",
+      "Unit Specialization: Minor Factions Tier 2"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "",
@@ -453,48 +651,79 @@
     "name": "Cultivation",
     "era": 4,
     "type": "Society",
-    "unlocks": "Improvement: Windmill",
-    "effect": ["+3 Food on Improvement"],
+    "unlocks": [
+      "Improvement: Windmill"
+    ],
+    "effect": [
+      "+3 Food on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Hothouses"]
+    "excludes": [
+      "Hothouses"
+    ]
   },
   {
     "name": "Hothouses",
     "era": 4,
     "type": "Society",
-    "unlocks": "Improvement: Farming Cooperative",
-    "effect": ["-25% Industry cost on Laboratory", "-25% Industry cost on Farm"],
+    "unlocks": [
+      "Improvement: Farming Cooperative"
+    ],
+    "effect": [
+      "-25% Industry cost on Laboratory",
+      "-25% Industry cost on Farm"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Cultivation"]
+    "excludes": [
+      "Cultivation"
+    ]
   },
   {
     "name": "Guilds",
     "era": 4,
     "type": "Economy",
-    "unlocks": "Improvement: Workers' League",
-    "effect": ["+3 Industry on Improvement"],
+    "unlocks": [
+      "Improvement: Workers' League"
+    ],
+    "effect": [
+      "+3 Industry on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Standardization"]
+    "excludes": [
+      "Standardization"
+    ]
   },
   {
     "name": "Standardization",
     "era": 4,
     "type": "Economy",
-    "unlocks": "Improvement: Artisans' Tools",
-    "effect": ["-25% Industry cost on Works"],
+    "unlocks": [
+      "Improvement: Artisans' Tools"
+    ],
+    "effect": [
+      "-25% Industry cost on Works"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Guilds"]
+    "excludes": [
+      "Guilds"
+    ]
   },
   {
     "name": "Banks",
     "era": 4,
     "type": "Economy",
-    "unlocks": "Improvement: Thermal Baths; Improvement: Lined Crates",
-    "effect": ["+4 Industry on City Hall", "+2 Industry on Ministry"],
+    "unlocks": [
+      "Improvement: Thermal Baths",
+      "Improvement: Lined Crates"
+    ],
+    "effect": [
+      "+4 Industry on City Hall",
+      "+2 Industry on Ministry"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -503,8 +732,14 @@
     "name": "Highway Patrol",
     "era": 4,
     "type": "Economy",
-    "unlocks": "Improvement: Scientific Repository; Improvement: Quarry Oversight; Traders' Trails: Paved Roads",
-    "effect": ["0.2 Movement Points max to cross a road Tile"],
+    "unlocks": [
+      "Improvement: Scientific Repository",
+      "Improvement: Quarry Oversight",
+      "Traders' Trails: Paved Roads"
+    ],
+    "effect": [
+      "0.2 Movement Points max to cross a road Tile"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -513,8 +748,13 @@
     "name": "Mercenaries",
     "era": 4,
     "type": "Discovery",
-    "unlocks": "Action: Hire Doomwraith Hunter",
-    "effect": ["+20% Critical on Unit", "-50% Turn cost for Close Rift action"],
+    "unlocks": [
+      "Action: Hire Doomwraith Hunter"
+    ],
+    "effect": [
+      "+20% Critical on Unit",
+      "-50% Turn cost for Close Rift action"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -523,8 +763,12 @@
     "name": "Digs",
     "era": 4,
     "type": "Discovery",
-    "unlocks": "Landscaping Action: Scour",
-    "effect": ["-25% Influence cost for Attach Camp action"],
+    "unlocks": [
+      "Landscaping Action: Scour"
+    ],
+    "effect": [
+      "-25% Influence cost for Attach Camp action"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -533,8 +777,12 @@
     "name": "Aquadunamics",
     "era": 4,
     "type": "Discovery",
-    "unlocks": "Improvement: Fish Farms",
-    "effect": ["+25 Precision for season predictibility"],
+    "unlocks": [
+      "Improvement: Fish Farms"
+    ],
+    "effect": [
+      "+25 Precision for season predictibility"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -543,8 +791,12 @@
     "name": "Military Engineering",
     "era": 5,
     "type": "Defense",
-    "unlocks": "Improvement: Fortified Cities",
-    "effect": ["-2 Dust Upkeep on Unit"],
+    "unlocks": [
+      "Improvement: Fortified Cities"
+    ],
+    "effect": [
+      "-2 Dust Upkeep on Unit"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -553,8 +805,12 @@
     "name": "Armor Design",
     "era": 5,
     "type": "Defense",
-    "unlocks": "Improvement: Protective Carapaces",
-    "effect": ["-15% Industry cost on Unit"],
+    "unlocks": [
+      "Improvement: Protective Carapaces"
+    ],
+    "effect": [
+      "-15% Industry cost on Unit"
+    ],
     "prereq": "Military Engineering",
     "faction": "",
     "excludes": []
@@ -563,8 +819,12 @@
     "name": "The Nurture of Garin",
     "era": 5,
     "type": "Defense",
-    "unlocks": "Unit Specialization: Vanguard's Sword",
-    "effect": ["+1 Industry on Population"],
+    "unlocks": [
+      "Unit Specialization: Vanguard's Sword"
+    ],
+    "effect": [
+      "+1 Industry on Population"
+    ],
     "prereq": "",
     "faction": "Kin",
     "excludes": []
@@ -573,7 +833,12 @@
     "name": "Elite Focus",
     "era": 5,
     "type": "Defense",
-    "unlocks": "Unit Specialization: Bowmaster; Unit Specialization: Executor; Unit Specialization: Commander; Unit Specialization: Champion",
+    "unlocks": [
+      "Unit Specialization: Bowmaster",
+      "Unit Specialization: Executor",
+      "Unit Specialization: Commander",
+      "Unit Specialization: Champion"
+    ],
     "effect": [],
     "prereq": "",
     "faction": "Kin",
@@ -583,8 +848,12 @@
     "name": "Glory of Empire",
     "era": 5,
     "type": "Society",
-    "unlocks": "Improvement: Imperial Secretariat",
-    "effect": ["+2 Influence on Forums Districts"],
+    "unlocks": [
+      "Improvement: Imperial Secretariat"
+    ],
+    "effect": [
+      "+2 Influence on Forums Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -593,8 +862,12 @@
     "name": "Imperial Bureaucracy",
     "era": 5,
     "type": "Society",
-    "unlocks": "Improvement: Teahouse",
-    "effect": ["+50 Influence on Scribes"],
+    "unlocks": [
+      "Improvement: Teahouse"
+    ],
+    "effect": [
+      "+50 Influence on Scribes"
+    ],
     "prereq": "Glory of Empire",
     "faction": "",
     "excludes": []
@@ -603,8 +876,13 @@
     "name": "Preservation",
     "era": 5,
     "type": "Society",
-    "unlocks": "Improvement: Canning Shed; Improvement: Nectar Silo",
-    "effect": ["+50% Food per Population on Citizens"],
+    "unlocks": [
+      "Improvement: Canning Shed",
+      "Improvement: Nectar Silo"
+    ],
+    "effect": [
+      "+50% Food per Population on Citizens"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -613,8 +891,14 @@
     "name": "Cultural Education",
     "era": 5,
     "type": "Society",
-    "unlocks": "Treaty: Shared Victory",
-    "effect": ["+400 Influence", "+40 Public Opinion on my Empire", "+40 Public Opinion on the other Empire"],
+    "unlocks": [
+      "Treaty: Shared Victory"
+    ],
+    "effect": [
+      "+400 Influence",
+      "+40 Public Opinion on my Empire",
+      "+40 Public Opinion on the other Empire"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -623,8 +907,14 @@
     "name": "Large-scale Demolition",
     "era": 5,
     "type": "Economy",
-    "unlocks": "Improvement: Ore Breaker; Improvement: Land Clearance; Action: Clear Ridge",
-    "effect": ["+50% Industry per Population on Artisans"],
+    "unlocks": [
+      "Improvement: Ore Breaker",
+      "Improvement: Land Clearance",
+      "Action: Clear Ridge"
+    ],
+    "effect": [
+      "+50% Industry per Population on Artisans"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -633,8 +923,13 @@
     "name": "Financial Literacy",
     "era": 5,
     "type": "Economy",
-    "unlocks": "Improvement: Cashier's Lodge; Improvement: Treasury",
-    "effect": ["+25% Dust on Population Vocations"],
+    "unlocks": [
+      "Improvement: Cashier's Lodge",
+      "Improvement: Treasury"
+    ],
+    "effect": [
+      "+25% Dust on Population Vocations"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -643,48 +938,77 @@
     "name": "Tolls and Taxation",
     "era": 5,
     "type": "Economy",
-    "unlocks": "Improvement: Customs Inspector",
-    "effect": ["+3 Dust on Improvement"],
+    "unlocks": [
+      "Improvement: Customs Inspector"
+    ],
+    "effect": [
+      "+3 Dust on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Land Management"]
+    "excludes": [
+      "Land Management"
+    ]
   },
   {
     "name": "Land Management",
     "era": 5,
     "type": "Economy",
-    "unlocks": "Improvement: Collections Bureau",
-    "effect": ["-25% Industry cost on Merchant's House"],
+    "unlocks": [
+      "Improvement: Collections Bureau"
+    ],
+    "effect": [
+      "-25% Industry cost on Merchant's House"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Tolls and Taxation"]
+    "excludes": [
+      "Tolls and Taxation"
+    ]
   },
   {
     "name": "University",
     "era": 5,
     "type": "Discovery",
-    "unlocks": "Improvement: Lecture Hall",
-    "effect": ["+3 Science on Improvement"],
+    "unlocks": [
+      "Improvement: Lecture Hall"
+    ],
+    "effect": [
+      "+3 Science on Improvement"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Inventors' Endowments"]
+    "excludes": [
+      "Inventors' Endowments"
+    ]
   },
   {
     "name": "Inventors' Endowments",
     "era": 5,
     "type": "Discovery",
-    "unlocks": "Improvement: Philosophers' Circle",
-    "effect": ["-25% Industry cost on Laboratory"],
+    "unlocks": [
+      "Improvement: Philosophers' Circle"
+    ],
+    "effect": [
+      "-25% Industry cost on Laboratory"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["University"]
+    "excludes": [
+      "University"
+    ]
   },
   {
     "name": "Anomanology",
     "era": 5,
     "type": "Discovery",
-    "unlocks": "Landscaping Action: Distort (creation of Anomalies)",
-    "effect": ["+50% Precision for season predictability", "-50% Turn cost on Landscaping Actions"],
+    "unlocks": [
+      "Landscaping Action: Distort (creation of Anomalies)"
+    ],
+    "effect": [
+      "+50% Precision for season predictability",
+      "-50% Turn cost on Landscaping Actions"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -693,8 +1017,13 @@
     "name": "Scientific Prizes",
     "era": 5,
     "type": "Discovery",
-    "unlocks": "Improvement: Grant Treasury; Converter: Citizen Science",
-    "effect": ["+2 Science on Laboratories Districts"],
+    "unlocks": [
+      "Improvement: Grant Treasury",
+      "Converter: Citizen Science"
+    ],
+    "effect": [
+      "+2 Science on Laboratories Districts"
+    ],
     "prereq": "",
     "faction": "",
     "excludes": []
@@ -703,11 +1032,17 @@
     "name": "Research Institute",
     "era": 5,
     "type": "Discovery",
-    "unlocks": "Improvement: Field Studies",
-    "effect": ["+50% Science on Scribes"],
+    "unlocks": [
+      "Improvement: Field Studies"
+    ],
+    "effect": [
+      "+50% Science on Scribes"
+    ],
     "prereq": "",
     "faction": "",
-    "excludes": ["Scientific Prizes"]
+    "excludes": [
+      "Scientific Prizes"
+    ]
   },
   {
     "name": "Military Conditioning",
@@ -739,10 +1074,39 @@
     "excludes": []
   },
   {
+    "name": "Military Conditioning",
+    "era": 6,
+    "type": "Defense",
+    "unlocks": [],
+    "effect": [
+      "+50 Health on Unit",
+      "-50% Dust Upkeep on Unit",
+      "+5 Minimal Damage on Unit",
+      "+10 Maximum Damage on Unit",
+      "+10 Defense on Unit"
+    ],
+    "prereq": "",
+    "faction": "",
+    "excludes": []
+  },
+  {
+    "name": "Masss Psychology",
+    "era": 6,
+    "type": "Society",
+    "unlocks": [],
+    "effect": [
+      "+20 Approval on City Hall",
+      "+15% Influence on City Hall"
+    ],
+    "prereq": "",
+    "faction": "",
+    "excludes": []
+  },
+  {
     "name": "Civilization Optimizations",
     "era": 6,
     "type": "Society",
-    "unlocks": "",
+    "unlocks": [],
     "effect": [
       "+1 Industry on Population per Jubilant City",
       "+1 Dust on Population per Jubilant City",
@@ -758,7 +1122,7 @@
     "name": "Stock Exchange",
     "era": 6,
     "type": "Economy",
-    "unlocks": "",
+    "unlocks": [],
     "effect": [
       "+100% Food on District",
       "+100% Industry on District",
@@ -775,7 +1139,7 @@
     "name": "Dust Seismology",
     "era": 6,
     "type": "Economy",
-    "unlocks": "",
+    "unlocks": [],
     "effect": [
       "+15% Dust on City Hall",
       "-50% Buyout cost on Unit",
@@ -790,7 +1154,7 @@
     "name": "Arcana of the Ancients",
     "era": 6,
     "type": "Discovery",
-    "unlocks": "",
+    "unlocks": [],
     "effect": [
       "+15% Science on City Hall",
       "-20% on all Technology research cost"
