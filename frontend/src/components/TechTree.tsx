@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
+import React, {useMemo} from 'react';
 import techTreeJson from '../data/techTree.json';
 import techUIJson from '../data/techUI.json';
 import TechBox from './TechBox';
-import { Tech, TechUIData } from '../types/techTypes';
+import {Tech, TechUIData} from '../types/techTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
+import {Tooltip} from "./Tooltip";
 
 interface TechTreeProps {
     faction: string;
@@ -75,25 +76,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
             })}
 
             {hoveredTech && (
-                <div
-                    className="tech-tooltip"
-                    style={{
-                        position: 'absolute',
-                        top: `${hoveredTech.coords.yPct}%`,
-                        left: `${hoveredTech.coords.xPct + 5}%`,
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'none',
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        color: '#fff',
-                        padding: '0.3rem 0.6rem',
-                        borderRadius: '4px',
-                        fontSize: '0.8rem',
-                        whiteSpace: 'nowrap',
-                        zIndex: 10,
-                    }}
-                >
-                    {hoveredTech.name}
-                </div>
+                <Tooltip hoveredTech={hoveredTech}/>
             )}
 
             {/* Era navigation buttons */}
