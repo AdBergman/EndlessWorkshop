@@ -16,7 +16,7 @@
   },
   "navigationButtons": {
     "boxSize": { "widthPct": 13.28, "heightPct": 27.78 },
-    "previous": { "xPct": 0, "yPct": 23.96 },
-    "next": { "xPct": 86.72, "yPct": 23.96 }
+    "previous": { "xPct": 0.15, "yPct": 25.50},
+    "next": { "xPct": 86.90, "yPct": 25.50 }
   }
 }
