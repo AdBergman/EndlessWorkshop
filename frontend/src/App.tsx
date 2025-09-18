@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import TechTree from './components/TechTree';
+import TechTree from './components/techTree/TechTree';
 import './App.css';
 
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];

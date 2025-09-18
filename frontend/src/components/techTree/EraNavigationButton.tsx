@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationButtons } from '../types/techTypes';
+import { NavigationButtons } from '../../types/techTypes';
 import './EraNavigationButton.css';
 
 interface Props {

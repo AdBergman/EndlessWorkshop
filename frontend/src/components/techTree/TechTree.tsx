@@ -1,8 +1,8 @@
 import React, {useMemo} from 'react';
-import techTreeJson from '../data/techTree.json';
-import techUIJson from '../data/techUI.json';
-import TechBox from './TechBox';
-import {Tech, TechUIData} from '../types/techTypes';
+import techTreeJson from '../../data/techTree.json';
+import techUIJson from '../../data/techUI.json';
+import TechNode from './TechNode';
+import {Tech, TechUIData} from '../../types/techTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import Tooltip from "./Tooltip";
@@ -60,7 +60,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
                 const uiItem = uiMap.get(tech.name);
                 if (!uiItem) return null;
                 return (
-                    <TechBox
+                    <TechNode
                         key={tech.name}
                         coords={uiItem.coords}
                         boxSize={uiData.techs.boxSize}

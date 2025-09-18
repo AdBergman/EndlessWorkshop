@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface TechBoxProps {
+interface TechNodeProps {
     coords: { xPct: number; yPct: number }; // top-left from JSON
     boxSize: { widthPct: number; heightPct: number };
     selected: boolean;
@@ -9,7 +9,7 @@ interface TechBoxProps {
     onMouseLeave?: () => void;
 }
 
-const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick, onMouseEnter, onMouseLeave }) => {
+const TechNode: React.FC<TechNodeProps> = ({ coords, boxSize, selected, onClick, onMouseEnter, onMouseLeave }) => {
     return (
         <div
             onClick={onClick}
@@ -39,4 +39,4 @@ const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick, o
 };
 
 
-export default TechBox;
+export default TechNode;

@@ -1,5 +1,5 @@
 import React from "react";
-import { Tech } from "../types/techTypes";
+import { Tech } from "../../types/techTypes";
 
 interface TooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
