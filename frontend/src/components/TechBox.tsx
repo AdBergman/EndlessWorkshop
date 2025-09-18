@@ -6,12 +6,16 @@ interface TechBoxProps {
     boxSize: { widthPct: number; heightPct: number };
     selected: boolean;
     onClick: () => void;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
-const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick }) => {
+const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick, onMouseEnter, onMouseLeave }) => {
     return (
         <div
             onClick={onClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
             style={{
                 position: 'absolute',
                 left: `${coords.xPct}%`,
@@ -21,7 +25,7 @@ const TechBox: React.FC<TechBoxProps> = ({ coords, boxSize, selected, onClick })
                 cursor: 'pointer',
                 boxSizing: 'border-box',
                 userSelect: 'none',
-                transform: 'translate(3.0%, 3.0%', //Offset due to CSS bg-img borders
+                transform: 'translate(3.0%, 3.0%)', //Offset due to CSS bg-img borders
 
                 // Styling
                 border: selected ? '3px solid gold' : 'none',
