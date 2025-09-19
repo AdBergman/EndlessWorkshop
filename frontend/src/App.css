@@ -1,3 +1,8 @@
+/* ==========================
+   App.css — Global / Layout
+   ========================== */
+
+/* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
@@ -7,21 +12,27 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 body {
     background-color: #000;
     color: #fff;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 0 1px rgba(0,0,0,0.5);
 }
 
-.top-bar {
+.top-container {
     display: flex;
-    justify-content: space-between; /* keeps buttons on far right */
+    justify-content: space-between;
     align-items: center;
     padding: 0.5rem 1rem;
     background-color: #111;
     color: #fff;
 }
 
+/* Logo / Title */
 .logo-container {
     display: flex;
     align-items: center;
@@ -35,15 +46,13 @@ body {
 
 .logo-title {
     font-family: 'Audiowide', sans-serif;
-    font-size: 2.10rem;
+    font-size: 2.1rem;
     letter-spacing: 2px;
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: none;
-    transform: none;
 }
-
 
 /* Faction buttons */
 .faction-selector button {
@@ -54,6 +63,12 @@ body {
     color: #fff;
     cursor: pointer;
     transition: all 0.2s ease;
+
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 0 1px rgba(0,0,0,0.5);
 }
 
 .faction-selector button:hover {
@@ -63,14 +78,10 @@ body {
 .faction-selector button.active {
     background-color: #ff7f32;
     color: #000;
-
-    /* Remove glow */
     box-shadow: none;
 }
 
-/* Main content */
-.main-content {
+.main-container {
     padding: 1rem;
     display: flex;
-    justify-content: center;
 }

@@ -1,0 +1,71 @@
+.top-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #111;
+    color: #fff;
+}
+
+/* Logo + title */
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.top-bar-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 0.5rem;
+}
+
+.logo-title {
+    font-family: 'Audiowide', sans-serif;
+    font-size: 2.1rem;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* View selector */
+.view-selector button {
+    margin-right: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background-color: #222;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-selector button.active {
+    background-color: #ff7f32;
+    color: #000;
+    box-shadow: none;
+}
+
+.view-selector button:hover {
+    background-color: #333;
+}
+
+/* Faction buttons */
+.faction-selector button {
+    margin-left: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background-color: #222;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.faction-selector button:hover {
+    background-color: #333;
+}
+
+.faction-selector button.active {
+    background-color: #ff7f32;
+    color: #000;
+    box-shadow: none;
+}
