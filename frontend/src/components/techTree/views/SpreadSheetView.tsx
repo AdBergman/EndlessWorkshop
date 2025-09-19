@@ -7,31 +7,38 @@ interface SpreadSheetViewProps {
 }
 
 const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
-    if (!techs.length) return <div>No techs selected</div>;
+    if (!techs || techs.length === 0) return null;
 
     return (
-        <table>
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Era</th>
-                <th>Type</th>
-                <th>Unlocks</th>
-                <th>Effects</th>
-            </tr>
-            </thead>
-            <tbody>
-            {techs.map(t => (
-                <tr key={t.name}>
-                    <td>{t.name}</td>
-                    <td>{t.era}</td>
-                    <td>{t.type}</td>
-                    <td>{t.unlocks.join(', ')}</td>
-                    <td>{t.effect.join('; ')}</td>
+        <div className="spreadsheet-container">
+            <table className="spreadsheet-table">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Era</th>
+                    <th>Type</th>
+                    <th>Unlocks</th>
+                    <th>Effects</th>
                 </tr>
-            ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {techs.map((tech) => (
+                    <tr key={tech.name}>
+                        <td>{tech.name}</td>
+                        <td>{tech.era}</td>
+                        <td>{tech.type}</td>
+                        {/* replace commas with newline and use pre-line */}
+                        <td style={{ whiteSpace: 'pre-line' }}>
+                            {tech.unlocks.join(', ').replace(/, /g, '\n')}
+                        </td>
+                        <td style={{ whiteSpace: 'pre-line' }}>
+                            {tech.effect.join(', ').replace(/, /g, '\n')}
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
     );
 };
 
