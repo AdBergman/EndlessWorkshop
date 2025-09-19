@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import TechTree from './components/techTree/TechTree';
+import techTreeJson from './data/techTree.json';
+import { Tech } from './types/techTypes';
 import './App.css';
 import SpreadSheetView from "./components/techTree/views/SpreadSheetView";
 
@@ -9,14 +11,17 @@ const maxEra = 6; // dynamically could derive from JSON if needed
 function App() {
     const [selectedFaction, setSelectedFaction] = useState("Kin");
     const [era, setEra] = useState(1);
-    const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+    const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
 
     const handleTechClick = (techName: string) => {
-        setSelectedTechs(prev =>
-            prev.includes(techName)
-                ? prev.filter(t => t !== techName)
-                : [...prev, techName]
-        );
+        const techObj = (techTreeJson as Tech[]).find(t => t.name === techName);
+        if (!techObj) return; // exit if not found
+
+        setSelectedTechs(prev => {
+            return prev.some(t => t.name === techName)
+                ? prev.filter(t => t.name !== techName)
+                : [...prev, techObj];
+        });
     };
 
     const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));

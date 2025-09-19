@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import techTreeJson from '../../data/techTree.json';
 import techUIJson from '../../data/techUI.json';
 import TechNode from './TechNode';
-import {Tech, TechUIData} from '../../types/techTypes';
+import {Tech, TechUIData} from '@dataTypes/techTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import Tooltip from "./Tooltip";
@@ -11,7 +11,7 @@ interface TechTreeProps {
     faction: string;
     era: number;
     onEraChange: (dir: 'previous' | 'next') => void;
-    selectedTechs: string[];
+    selectedTechs: Tech[];
     onTechClick: (techName: string) => void;
 }
 
@@ -57,7 +57,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                         key={tech.name}
                         coords={uiItem.coords}
                         boxSize={uiData.techs.boxSize}
-                        selected={selectedTechs.includes(tech.name)}
+                        selected={selectedTechs.some(t => t.name === tech.name)}
                         onClick={() => onTechClick(tech.name)}
                         onMouseEnter={() => setHoveredTech({ ...tech, coords: uiItem.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
