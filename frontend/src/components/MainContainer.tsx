@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import TechTree from './techTree/TechTree';
 import SpreadSheetView from './techTree/views/SpreadSheetView';
-import { Tech } from '../types/techTypes';
+import { Tech } from '@dataTypes/dataTypes';
 import techTreeJson from '../data/techTree.json';
 import './MainContainer.css';
 

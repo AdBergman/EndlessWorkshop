@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import techTreeJson from '../../data/techTree.json';
 import techUIJson from '../../data/techUI.json';
 import TechNode from './TechNode';
-import {Tech, TechUIData} from '@dataTypes/techTypes';
+import {Tech, TechUIData} from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import Tooltip from "./Tooltip";

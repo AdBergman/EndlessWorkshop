@@ -1,5 +1,5 @@
 import React from "react";
-import { Tech } from '@dataTypes/techTypes';
+import { Tech } from '@dataTypes/dataTypes';
 import "./SpreadSheetView.css";
 
 interface SpreadSheetViewProps {
