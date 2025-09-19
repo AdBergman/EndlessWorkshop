@@ -11,11 +11,11 @@ interface TechTreeProps {
     faction: string;
     era: number;
     onEraChange: (dir: 'previous' | 'next') => void;
+    selectedTechs: string[];
+    onTechClick: (techName: string) => void;
 }
 
-const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
-    const [selectedTechs, setSelectedTechs] = React.useState<string[]>([]);
-
+const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedTechs, onTechClick }) => {
     const [hoveredTech, setHoveredTech] = React.useState<
         (Tech & { coords: { xPct: number; yPct: number } }) | null
     >(null);
@@ -36,13 +36,6 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
         return map;
     }, [uiData]);
 
-    const handleTechClick = (techName: string) => {
-        setSelectedTechs(prev =>
-            prev.includes(techName)
-                ? prev.filter(t => t !== techName)
-                : [...prev, techName]
-        );
-    };
 
     const isButtonHidden = (dir: 'previous' | 'next') =>
         (dir === 'previous' && era === 1) || (dir === 'next' && era === 6);
@@ -65,7 +58,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange }) => {
                         coords={uiItem.coords}
                         boxSize={uiData.techs.boxSize}
                         selected={selectedTechs.includes(tech.name)}
-                        onClick={() => handleTechClick(tech.name)}
+                        onClick={() => onTechClick(tech.name)}
                         onMouseEnter={() => setHoveredTech({ ...tech, coords: uiItem.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
                     />

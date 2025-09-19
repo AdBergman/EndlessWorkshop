@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import TechTree from './components/techTree/TechTree';
 import './App.css';
+import SpreadSheetView from "./components/techTree/views/SpreadSheetView";
 
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
 const maxEra = 6; // dynamically could derive from JSON if needed
@@ -8,6 +9,15 @@ const maxEra = 6; // dynamically could derive from JSON if needed
 function App() {
     const [selectedFaction, setSelectedFaction] = useState("Kin");
     const [era, setEra] = useState(1);
+    const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+
+    const handleTechClick = (techName: string) => {
+        setSelectedTechs(prev =>
+            prev.includes(techName)
+                ? prev.filter(t => t !== techName)
+                : [...prev, techName]
+        );
+    };
 
     const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));
     const handleNextEra = () => setEra(prev => Math.min(maxEra, prev + 1));
@@ -40,8 +50,13 @@ function App() {
                     era={era}
                     faction={selectedFaction}
                     onEraChange={(dir) => dir === 'next' ? handleNextEra() : handlePrevEra()}
+                    selectedTechs={selectedTechs}
+                    onTechClick={handleTechClick}
                 />
             </main>
+            <div>
+                <SpreadSheetView techs={selectedTechs} />
+            </div>
         </div>
     );
 }

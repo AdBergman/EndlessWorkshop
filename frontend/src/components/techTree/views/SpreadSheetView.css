@@ -1,0 +1,16 @@
+.spreadsheet-view {
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.spreadsheet-view table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.spreadsheet-view th,
+.spreadsheet-view td {
+    border: 1px solid #444;
+    padding: 0.5rem;
+    text-align: left;
+}
