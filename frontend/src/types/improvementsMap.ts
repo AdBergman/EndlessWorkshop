@@ -1,5 +1,5 @@
 import { Improvement } from "@dataTypes/dataTypes";
-import improvementsJson from "@data/improvements.json";
+import improvementsJson from "../data/improvements.json";
 
 // Tell TypeScript that improvementsJson is an array of Improvement
 const improvementsArray: Improvement[] = improvementsJson as Improvement[];

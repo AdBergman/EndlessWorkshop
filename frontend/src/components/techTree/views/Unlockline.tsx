@@ -1,58 +1,52 @@
 import React, { useState } from "react";
 import ImprovementTooltip from "../../tooltips/ImprovementTooltip";
+
 import { Improvement } from "@dataTypes/dataTypes";
+import { improvementsMap } from "../../../types/improvementsMap";
 
 interface UnlockLineProps {
     line: string;
-    // optionally, you can pass a lookup function to get full Improvement object by name
-    getImprovementByName?: (name: string) => Improvement;
 }
 
-const UnlockLine: React.FC<UnlockLineProps> = ({ line, getImprovementByName }) => {
+const UnlockLine: React.FC<UnlockLineProps> = ({ line }) => {
+    const [hoveredImprovement, setHoveredImprovement] = useState<
+        (Improvement & { coords: { xPct: number; yPct: number } }) | null
+    >(null);
+
     const prefix = "Improvement: ";
-    const [hoveredImprovement, setHoveredImprovement] = useState<Improvement & { coords: { xPct: number; yPct: number } } | null>(null);
 
-    if (line.startsWith(prefix)) {
-        const improvementName = line.slice(prefix.length);
+    if (!line.startsWith(prefix)) return <div>{line}</div>;
 
-        const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-            if (getImprovementByName) {
-                const improvement = getImprovementByName(improvementName);
-                if (improvement) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const xPct = (rect.left / window.innerWidth) * 100;
-                    const yPct = (rect.top / window.innerHeight) * 100;
-                    setHoveredImprovement({ ...improvement, coords: { xPct, yPct } });
-                }
-            }
-        };
+    const improvementName = line.slice(prefix.length);
+    const impObj = improvementsMap.get(improvementName);
 
-        const handleMouseLeave = () => {
-            setHoveredImprovement(null);
-        };
+    const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+        if (!impObj) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const xPct = (rect.left / window.innerWidth) * 100;
+        const yPct = (rect.top / window.innerHeight) * 100;
 
-        return (
-            <div style={{ position: "relative" }}>
-                {prefix}
-                <span
-                    style={{
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                    }}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                >
-                    {improvementName}
-                </span>
+        setHoveredImprovement({ ...impObj, coords: { xPct, yPct } });
+    };
 
-                {hoveredImprovement && (
-                    <ImprovementTooltip hoveredImprovement={hoveredImprovement} />
-                )}
-            </div>
-        );
-    } else {
-        return <div>{line}</div>;
-    }
+    const handleMouseLeave = () => setHoveredImprovement(null);
+
+    return (
+        <div style={{ position: "relative", display: "inline-block" }}>
+            {prefix}
+            <span
+                style={{ textDecoration: "underline", cursor: "pointer" }}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+            >
+                {improvementName}
+            </span>
+
+            {hoveredImprovement && (
+                <ImprovementTooltip hoveredImprovement={hoveredImprovement} />
+            )}
+        </div>
+    );
 };
 
 export default UnlockLine;
