@@ -4,7 +4,7 @@ export interface Tech {
     era: number;
     type: string;
     unlocks: string[];
-    effect: string[];
+    effects: string[];
     prereq: string;
     faction: string;
 }

@@ -43,10 +43,10 @@ const Tooltip: React.FC<TooltipProps> = ({ hoveredTech }) => {
                 </div>
             )}
 
-            {hoveredTech.effect && hoveredTech.effect.length > 0 && (
+            {hoveredTech.effects && hoveredTech.effects.length > 0 && (
                 <div style={{ marginTop: "0.2rem" }}>
                     <strong>Effects:</strong>
-                    {hoveredTech.effect.map((eff, i) => (
+                    {hoveredTech.effects.map((eff, i) => (
                         <div key={i} style={{ paddingLeft: "0.6rem" }}>
                             {eff}
                         </div>

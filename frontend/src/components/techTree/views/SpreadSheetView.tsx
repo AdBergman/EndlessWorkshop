@@ -32,7 +32,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
                             {tech.unlocks.join(', ').replace(/, /g, '\n')}
                         </td>
                         <td style={{ whiteSpace: 'pre-line' }}>
-                            {tech.effect.join(', ').replace(/, /g, '\n')}
+                            {tech.effects.join(', ').replace(/, /g, '\n')}
                         </td>
                     </tr>
                 ))}
