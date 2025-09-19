@@ -1,4 +1,5 @@
 import React from "react";
+import TechTooltip from "../../tooltip/TechTooltip";
 
 interface UnlockLineProps {
     line: string;
@@ -11,9 +12,16 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ line }) => {
         return (
             <div>
                 {prefix}
-                <span style={{ textDecoration: 'underline', cursor: 'default' }}>
-                    {improvementName}
-                </span>
+                {/*<TechTooltip content={improvementName /* or placeholder text *!/>*/}
+          <span
+              style={{
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+              }}
+          >
+            {improvementName}
+          </span>
+                {/*</TechTooltip>*/}
             </div>
         );
     } else {

@@ -1,35 +1,14 @@
 import React from "react";
 import { Tech } from "@dataTypes/dataTypes";
+import BaseTooltip from "./BaseTooltip";
 
-interface TooltipProps {
+interface TechTooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ hoveredTech }) => {
+const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech }) => {
     return (
-        <div
-            className="tech-tooltip"
-            style={{
-                position: "absolute",
-                top: `${hoveredTech.coords.yPct}%`,
-                left: `${hoveredTech.coords.xPct + 5}%`,
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-                backgroundColor: "rgba(0,0,0,0.85)",
-                color: "#fff",
-                padding: "0.4rem 0.8rem",
-                borderRadius: "4px",
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                fontSize: "0.9rem",
-                lineHeight: 1.3,
-                whiteSpace: "normal",
-                zIndex: 10,
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-                textShadow: "0 0 1px rgba(0,0,0,0.5)",
-            }}
-        >
+        <BaseTooltip xPct={hoveredTech.coords.xPct} yPct={hoveredTech.coords.yPct}>
             <div>{hoveredTech.name}</div>
 
             {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
@@ -53,8 +32,8 @@ const Tooltip: React.FC<TooltipProps> = ({ hoveredTech }) => {
                     ))}
                 </div>
             )}
-        </div>
+        </BaseTooltip>
     );
 };
 
-export default Tooltip;
+export default TechTooltip;

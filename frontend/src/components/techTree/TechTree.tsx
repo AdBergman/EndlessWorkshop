@@ -5,7 +5,7 @@ import TechNode from './TechNode';
 import {Tech, TechUIData} from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
-import Tooltip from "./Tooltip";
+import TechTooltip from "../tooltip/TechTooltip";
 
 interface TechTreeProps {
     faction: string;
@@ -65,7 +65,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                 );
             })}
 
-            {hoveredTech && <Tooltip hoveredTech={hoveredTech} />}
+            {hoveredTech && <TechTooltip hoveredTech={hoveredTech} />}
 
             {/* Era navigation buttons */}
             {(['previous', 'next'] as const).map(dir => {
