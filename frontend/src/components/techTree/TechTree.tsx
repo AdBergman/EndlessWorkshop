@@ -5,7 +5,7 @@ import TechNode from './TechNode';
 import {Tech, TechUIData} from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
-import TechTooltip from "../tooltip/TechTooltip";
+import TechTooltip from "../tooltips/TechTooltip";
 
 interface TechTreeProps {
     faction: string;

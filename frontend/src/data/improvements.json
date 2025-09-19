@@ -1,296 +1,296 @@
 [
   {
-    "Name": "Traveler's Shrine",
-    "Effects": ["+15 Approval"],
-    "Unique": "City",
-    "Cost": []
+    "name": "Traveler's Shrine",
+    "effects": ["+15 Approval"],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Garrison",
-    "Effects": ["+500 District Fortification"],
-    "Unique": "City",
-    "Cost": []
+    "name": "Garrison",
+    "effects": ["+500 District Fortification"],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Legion Vaults",
-    "Effects": [
+    "name": "Legion Vaults",
+    "effects": [
       "+200 District Fortification",
       "+50 Health on Militia",
       "+10 Defense on on Militia"
     ],
-    "Unique": "Empire",
-    "Cost": []
+    "unique": "Empire",
+    "cost": []
   },
   {
-    "Name": "Scriptorium",
-    "Effects": [
+    "name": "Scriptorium",
+    "effects": [
       "+5 Influence",
       "+2 Influence per Population on Scribes"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Lodgings",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Lodgings",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Emergency Dwellings",
-    "Effects": [
+    "name": "Emergency Dwellings",
+    "effects": [
       "+15 Approval",
       "+1 Attachable Territory on City",
       "+4 Influence on City Hall",
       "+4 Influence on Ministry"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Laborer's Hut",
-    "Effects": [
+    "name": "Laborer's Hut",
+    "effects": [
       "+5 Food",
       "+5 Food on Farms Districts"],
-    "Unique": "City",
-    "Cost": "5 Glassteel"
+    "unique": "City",
+    "cost": "5 Glassteel"
   },
   {
-    "Name": "Granary",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Granary",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Blast Furnace",
-    "Effects": [
+    "name": "Blast Furnace",
+    "effects": [
       "+25 Industry"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Lithosphere Gallery",
-    "Effects": [
+    "name": "Lithosphere Gallery",
+    "effects": [
       "+50 Dust"
     ],
-    "Unique": "City",
-    "Cost": "5 Glassteel"
+    "unique": "City",
+    "cost": "5 Glassteel"
   },
   {
-    "Name": "Geodesic Dome",
-    "Effects": [
+    "name": "Geodesic Dome",
+    "effects": [
       "+5 Science",
       "+5 Science on Laboratory"
     ],
-    "Unique": "City",
-    "Cost": "5 Glassteel"
+    "unique": "City",
+    "cost": "5 Glassteel"
   },
   {
-    "Name": "Beacon of Science",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Beacon of Science",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Hydropump",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Hydropump",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Military Efficiency",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Military Efficiency",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Legionaries Workshop",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Legionaries Workshop",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Halls of Power",
-    "Effects": [
+    "name": "Halls of Power",
+    "effects": [
       "+5 Influence",
       "+5 influence on District if Forum"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Citizen's Center",
-    "Effects": [
+    "name": "Citizen's Center",
+    "effects": [
       "+1 attachable Territory on City",
       "+20 Approval on City"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Irrigation Channels",
-    "Effects": [
+    "name": "Irrigation Channels",
+    "effects": [
       "+10 Food on Farm Districts if adjacent to River"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Wood Ash Pit",
-    "Effects": [
+    "name": "Wood Ash Pit",
+    "effects": [
       "+100% Food on Foundation "
     ],
-    "Unique": "City",
-    "Cost": "10 Glassteel"
+    "unique": "City",
+    "cost": "10 Glassteel"
   },
   {
-    "Name": "Spire of Industry",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Spire of Industry",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Corkscrew Drill",
-    "Effects": [
+    "name": "Corkscrew Drill",
+    "effects": [
       "+1 Exploited Resource on Mine"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Alchemists' Commission",
-    "Effects": ["+100 Dust on Foundation"],
-    "Unique": "City",
-    "Cost": "10 Glassteel"
+    "name": "Alchemists' Commission",
+    "effects": ["+100 Dust on Foundation"],
+    "unique": "City",
+    "cost": "10 Glassteel"
   },
   {
-    "Name": "Caravanserai",
-    "Effects": [
+    "name": "Caravanserai",
+    "effects": [
       "+10 Dust per adjacent Territory with Trading Post"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Lumber Yard",
-    "Effects": [
+    "name": "Lumber Yard",
+    "effects": [
       "+100% Industry on Foundation"
     ],
-    "Unique": "City",
-    "Cost": "10 Glassteel"
+    "unique": "City",
+    "cost": "10 Glassteel"
   },
   {
-    "Name": "Dust Blasting",
-    "Effects": [],
-    "Unique": "City",
-    "Cost": []
+    "name": "Dust Blasting",
+    "effects": [],
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Research Station",
-    "Effects": [
+    "name": "Research Station",
+    "effects": [
       "+8 Science to Laboratory if adjacent to Anomaly"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Wildlife Lookout",
-    "Effects": ["+100% Science on Foundation"],
-    "Unique": "City",
-    "Cost": "10 Glassteel"
+    "name": "Wildlife Lookout",
+    "effects": ["+100% Science on Foundation"],
+    "unique": "City",
+    "cost": "10 Glassteel"
   },
   {
-    "Name": "Commanders' Table",
-    "Effects": [
+    "name": "Commanders' Table",
+    "effects": [
       "+2 Approval per Population on Scribes",
       "-1 Influence per Population on Scribes"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Watchman's Bell",
-    "Effects": [
+    "name": "Watchman's Bell",
+    "effects": [
       "+1 Approval per Population on Citizens",
       "-1 Dust per Population on Citizens",
       "+1 Approval per Population on Artisans",
       "-1 Dust per Population on Artisans"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Martial Discipline",
-    "Effects": [
+    "name": "Martial Discipline",
+    "effects": [
       "+10% Food on City",
       "+10% Industry on City",
       "+10% Influence on City",
       "+10% Dust on City",
       "+10% Science on City"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Museum",
-    "Effects": [
+    "name": "Museum",
+    "effects": [
       "+1 Influence per Population on Citizens",
       "-1 Dust per Population on Citizens",
       "+1 Influence per Population on Artisans",
       "-1 Dust per Population on Artisans"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Parade Stands",
-    "Effects": [
+    "name": "Parade Stands",
+    "effects": [
       "-1 Approval per Population on Scribes",
       "+2 Influence per Population on Scribes"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Windmill",
-    "Effects": [
+    "name": "Windmill",
+    "effects": [
       "+2 Food per Population on Citizens",
       "-1 Dust per Population on Citizens"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Farming Cooperative",
-    "Effects": [
+    "name": "Farming Cooperative",
+    "effects": [
       "-1 Approval per Population on Citizens",
       "+2 Food per Population on Citizens"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Workers' League",
-    "Effects": [
+    "name": "Workers' League",
+    "effects": [
       "-1 Approval per Population on Artisans",
       "+2 Industry per Population on Artisans"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Artisans' Tools",
-    "Effects": [
+    "name": "Artisans' Tools",
+    "effects": [
       "+2 Industry per Population on Artisans",
       "-1 Dust per Population on Artisans"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Thermal Baths",
-    "Effects": [
+    "name": "Thermal Baths",
+    "effects": [
       "+18 Approval",
       "-25% Food consumption on Population",
       "+2 Food per Population on Citizens",
@@ -298,212 +298,212 @@
       "+2 Influence per Population on Scribes",
       "+5 Population slot on Population Vocations"
     ],
-    "Unique": "Empire",
-    "Cost": []
+    "unique": "Empire",
+    "cost": []
   },
   {
-    "Name": "Lined Crates",
-    "Effects": [
+    "name": "Lined Crates",
+    "effects": [
       "+3 exploited Resource Production on Quarry"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Scientific Repository",
-    "Effects": [
+    "name": "Scientific Repository",
+    "effects": [
       "+2 Science on Trading Post",
       "-25% Dust when purchasing Resources on Empire"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Quarry Oversight",
-    "Effects": [
+    "name": "Quarry Oversight",
+    "effects": [
       "+50 Dust on Quarry"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Fish Farms",
-    "Effects": [
+    "name": "Fish Farms",
+    "effects": [
       "+3 Food on River",
       "+5 Dust on River if active Monsoon"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Fortified Cities",
-    "Effects": [
+    "name": "Fortified Cities",
+    "effects": [
       "+Approval per City level",
       "+50% Fortification on City"
     ],
-    "Unique": "Empire",
-    "Cost": []
+    "unique": "Empire",
+    "cost": []
   },
   {
-    "Name": "Protective Carapaces",
-    "Effects": [
+    "name": "Protective Carapaces",
+    "effects": [
       "+500 District Fortification on District",
       "+20 Health Regenration on Unit",
       "-25% Industry on Unit"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Imperial Secretariat",
-    "Effects": [
+    "name": "Imperial Secretariat",
+    "effects": [
       "+4 Influence per City level"
     ],
-    "Unique": "Empire",
-    "Cost": "5"
+    "unique": "Empire",
+    "cost": "5"
   },
   {
-    "Name": "Teahouse",
-    "Effects": [
+    "name": "Teahouse",
+    "effects": [
       "+15% Influence income on City"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Canning Shed",
-    "Effects": [
+    "name": "Canning Shed",
+    "effects": [
       "+9 Approval per City level",
       "+5 Food per City level"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Nectar Silo",
-    "Effects": [
+    "name": "Nectar Silo",
+    "effects": [
       "+100 Food Stock capacity on City",
       "-25% cost to grow all Populations"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Ore Breaker",
-    "Effects": ["+10 Industry per City level"],
-    "Unique": "Empire",
-    "Cost": [
+    "name": "Ore Breaker",
+    "effects": ["+10 Industry per City level"],
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Land Clearance",
-    "Effects": [
+    "name": "Land Clearance",
+    "effects": [
       "-25% Industry cost on District",
       "-15% Industry cost on Improvement"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Cashier's Lodge",
-    "Effects": [
+    "name": "Cashier's Lodge",
+    "effects": [
       "+10 Dust per City level"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Customs Inspector",
-    "Effects": [
+    "name": "Customs Inspector",
+    "effects": [
       "+2 Dust per population on Citizens",
       "-1 Approval per Population on Citizens",
       "-1 Approval per Population on Artisans",
       "+2 Dust per population on Artisans"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Collections Bureau",
-    "Effects": [
+    "name": "Collections Bureau",
+    "effects": [
       "-1 Approval per Population on Scribes",
       "+3 Dust per population on Scribes",
       "-1 Approval per Population on Artisans",
       "-1 Approval per Population on Citizens"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Lecture Hall",
-    "Effects": [
+    "name": "Lecture Hall",
+    "effects": [
       "-1 Dust per Population on Scribes",
       "+2 Science per Population on Scribes"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Philosophers' Circle",
-    "Effects": [
+    "name": "Philosophers' Circle",
+    "effects": [
       "-1 Approval per Population on Scribes",
       "+2 Science per Population on Scribes"
     ],
-    "Unique": "City",
-    "Cost": []
+    "unique": "City",
+    "cost": []
   },
   {
-    "Name": "Grant Treasury",
-    "Effects": ["+10 Science per City level"],
-    "Unique": "Empire",
-    "Cost": [
+    "name": "Grant Treasury",
+    "effects": ["+10 Science per City level"],
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
     ]
   },
   {
-    "Name": "Field Studies",
-    "Effects": [
+    "name": "Field Studies",
+    "effects": [
       "-15% on all Technology research cost"
     ],
-    "Unique": "Empire",
-    "Cost": [
+    "unique": "Empire",
+    "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"

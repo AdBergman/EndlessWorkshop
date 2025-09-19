@@ -8,7 +8,7 @@ interface TechTooltipProps {
 
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech }) => {
     return (
-        <BaseTooltip xPct={hoveredTech.coords.xPct} yPct={hoveredTech.coords.yPct}>
+        <BaseTooltip coords={hoveredTech.coords}>
             <div>{hoveredTech.name}</div>
 
             {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (

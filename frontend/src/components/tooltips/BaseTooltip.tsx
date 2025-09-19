@@ -1,19 +1,18 @@
 import React, { ReactNode } from "react";
 
 interface BaseTooltipProps {
-    xPct: number;
-    yPct: number;
+    coords: { xPct: number; yPct: number };
     children: ReactNode;
 }
 
-const BaseTooltip: React.FC<BaseTooltipProps> = ({ xPct, yPct, children }) => {
+const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords , children }) => {
     return (
         <div
             className="base-tooltip"
             style={{
                 position: "absolute",
-                top: `${yPct}%`,
-                left: `${xPct + 5}%`,
+                top: `${coords.yPct}%`,
+                left: `${coords.xPct + 5}%`,
                 transform: "translateY(-50%)",
                 pointerEvents: "none",
                 backgroundColor: "rgba(0,0,0,0.85)",
