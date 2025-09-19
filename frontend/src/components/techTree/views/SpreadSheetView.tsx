@@ -1,6 +1,7 @@
 import React from "react";
 import { Tech } from '@dataTypes/dataTypes';
 import "./SpreadSheetView.css";
+import UnlockLine from "./Unlockline";
 
 interface SpreadSheetViewProps {
     techs: Tech[];
@@ -27,9 +28,10 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
                         <td>{tech.name}</td>
                         <td>{tech.era}</td>
                         <td>{tech.type}</td>
-                        {/* replace commas with newline and use pre-line */}
                         <td style={{ whiteSpace: 'pre-line' }}>
-                            {tech.unlocks.join(', ').replace(/, /g, '\n')}
+                            {tech.unlocks.map((line, i) => (
+                                <UnlockLine key={i} line={line} />
+                            ))}
                         </td>
                         <td style={{ whiteSpace: 'pre-line' }}>
                             {tech.effects.join(', ').replace(/, /g, '\n')}
