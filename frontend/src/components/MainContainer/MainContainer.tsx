@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import TechTree from './techTree/TechTree';
-import SpreadSheetView from './techTree/views/SpreadSheetView';
+import TechTree from '@components/TechTree/TechTree';
+import SpreadSheetView from '@components/TechTree/views/SpreadSheetView';
 import { Tech } from '@dataTypes/dataTypes';
-import techTreeJson from '../data/techTree.json';
+import techTreeJson from '@data/techTree.json';
 import './MainContainer.css';
 
 interface MainContainerProps {
