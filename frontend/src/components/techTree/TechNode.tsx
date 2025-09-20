@@ -2,14 +2,15 @@ import React from 'react';
 
 interface TechNodeProps {
     coords: { xPct: number; yPct: number }; // top-left from JSON
-    boxSize: { widthPct: number; heightPct: number };
     selected: boolean;
     onClick: () => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
 }
 
-const TechNode: React.FC<TechNodeProps> = ({ coords, boxSize, selected, onClick, onMouseEnter, onMouseLeave }) => {
+const BOX_SIZE_PCT = 4.95;
+
+const TechNode: React.FC<TechNodeProps> = ({ coords, selected, onClick, onMouseEnter, onMouseLeave }) => {
     return (
         <div
             onClick={onClick}
@@ -19,7 +20,7 @@ const TechNode: React.FC<TechNodeProps> = ({ coords, boxSize, selected, onClick,
                 position: 'absolute',
                 left: `${coords.xPct}%`,
                 top: `${coords.yPct}%`,
-                width: `${boxSize.widthPct}%`,
+                width: `${BOX_SIZE_PCT}%`,
                 aspectRatio: '1 / 1',   // keeps circle
                 cursor: 'pointer',
                 boxSizing: 'border-box',

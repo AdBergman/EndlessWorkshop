@@ -1,8 +1,7 @@
 import React, {useMemo} from 'react';
 import techTreeJson from '../../data/techTree.json';
-import techUIJson from '../../data/techUI.json';
 import TechNode from './TechNode';
-import {Tech, TechUIData} from '@dataTypes/dataTypes';
+import {Tech} from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from "../tooltips/TechTooltip";
@@ -14,6 +13,8 @@ interface TechTreeProps {
     selectedTechs: Tech[];
     onTechClick: (techName: string) => void;
 }
+
+
 
 const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedTechs, onTechClick }) => {
     const [hoveredTech, setHoveredTech] = React.useState<
@@ -28,15 +29,6 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
         [era, faction]
     );
 
-    // convert UI data to map for fast lookup
-    const uiData: TechUIData = techUIJson as TechUIData;
-    const uiMap = useMemo(() => {
-        const map = new Map<string, typeof uiData.techs.items[0]>();
-        uiData.techs.items.forEach(item => map.set(item.name, item));
-        return map;
-    }, [uiData]);
-
-
     const isButtonHidden = (dir: 'previous' | 'next') =>
         (dir === 'previous' && era === 1) || (dir === 'next' && era === 6);
 
@@ -50,16 +42,13 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
             />
 
             {techData.map((tech) => {
-                const uiItem = uiMap.get(tech.name);
-                if (!uiItem) return null;
                 return (
                     <TechNode
                         key={tech.name}
-                        coords={uiItem.coords}
-                        boxSize={uiData.techs.boxSize}
+                        coords={tech.coords}
                         selected={selectedTechs.some(t => t.name === tech.name)}
                         onClick={() => onTechClick(tech.name)}
-                        onMouseEnter={() => setHoveredTech({ ...tech, coords: uiItem.coords })}
+                        onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
                     />
                 );
@@ -74,8 +63,6 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                     <EraNavigationButton
                         key={dir}
                         direction={dir}
-                        buttonData={uiData.navigationButtons[dir]}
-                        boxSize={uiData.navigationButtons.boxSize}
                         onClick={() => onEraChange(dir)}
                     />
                 );

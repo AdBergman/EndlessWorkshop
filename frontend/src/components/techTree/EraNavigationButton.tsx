@@ -1,26 +1,28 @@
 import React from 'react';
-import { NavigationButtons } from '@dataTypes/dataTypes';
 import './EraNavigationButton.css';
 
 interface Props {
     direction: 'previous' | 'next';
-    buttonData: NavigationButtons['previous'];
-    boxSize: NavigationButtons['boxSize'];
     onClick: () => void;
 }
 
-const EraNavigationButton: React.FC<Props> = ({ direction, buttonData, boxSize, onClick }) => {
+const BOX_SIZE = { widthPct: 13.28, heightPct: 27.78 };
+const COORDS_MAP = {
+    previous: { xPct: 0.15, yPct: 25.5 },
+    next: { xPct: 86.9, yPct: 25.5 }
+};
+
+const EraNavigationButton: React.FC<Props> = ({ direction, onClick }) => {
+    const coords = COORDS_MAP[direction];
+    const style = {
+        left: `${coords.xPct}%`,
+        top: `${coords.yPct}%`,
+        width: `${BOX_SIZE.widthPct}%`,
+        height: `${BOX_SIZE.heightPct}%`
+    };
+
     return (
-        <div
-            className={`era-navigation-button ${direction}`}
-            style={{
-                left: `${buttonData.xPct}%`,
-                top: `${buttonData.yPct}%`,
-                width: `${boxSize.widthPct}%`,
-                height: `${boxSize.heightPct}%`,
-            }}
-            onClick={onClick}
-        >
+        <div className={`era-navigation-button ${direction}`} style={style} onClick={onClick}>
             <div className="orb" />
         </div>
     );
