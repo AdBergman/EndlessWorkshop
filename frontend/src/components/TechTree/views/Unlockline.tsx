@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ImprovementTooltip from "@components/Tooltips/ImprovementTooltip";
+import ImprovementTooltip from "../../Tooltips/ImprovementTooltip";
 
 import { Improvement } from "@dataTypes/dataTypes";
 import { improvementsMap } from "../../../types/improvementsMap";
