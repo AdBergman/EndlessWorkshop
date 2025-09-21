@@ -37,6 +37,20 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
         [selectedTechs]
     );
 
+    // build locked tech set
+    const lockedTechNames = useMemo(() => {
+        const locked = new Set<string>();
+
+        selectedTechs.forEach(t => {
+            if (t.excludes) locked.add(t.excludes); // add mutually exclusive tech
+        });
+
+        // remove already selected techs from locked set
+        selectedTechs.forEach(t => locked.delete(t.name));
+
+        return locked;
+    }, [selectedTechs]);
+
     return (
         <div className="tech-tree-image-wrapper">
             <img
@@ -52,6 +66,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                         key={tech.name}
                         coords={tech.coords}
                         selected={selectedTechNames.has(tech.name)}
+                        locked={lockedTechNames.has(tech.name)}
                         onClick={() => onTechClick(tech.name)}
                         onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
                         onMouseLeave={() => setHoveredTech(null)}

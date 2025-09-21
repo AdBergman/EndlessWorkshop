@@ -1,0 +1,20 @@
+.tech-node {
+    border-radius: 50%;
+    cursor: pointer;
+    box-sizing: border-box;
+    user-select: none;
+    background-color: transparent;
+    box-shadow: 0 0 4px 1px rgba(255,255,255,0.2);
+    transition: box-shadow 0.2s ease, border 0.2s ease;
+}
+
+.tech-node.selected {
+    border: 3px solid gold;
+    background-color: rgba(255,255,0,0.3);
+    box-shadow: 0 0 8px 2px gold;
+}
+
+.tech-node.locked:hover {
+    border: 2px solid rgba(255,0,0,0.5);
+    box-shadow: inset 0 0 12px 4px rgba(255,0,0,0.3); /* glow inside */
+}

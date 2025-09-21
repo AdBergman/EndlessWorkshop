@@ -1,8 +1,10 @@
 import React from 'react';
+import './TechNode.css';
 
 interface TechNodeProps {
-    coords: { xPct: number; yPct: number }; // top-left from JSON
+    coords: { xPct: number; yPct: number };
     selected: boolean;
+    locked?: boolean; // defaults to false
     onClick: () => void;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
@@ -10,10 +12,20 @@ interface TechNodeProps {
 
 const BOX_SIZE_PCT = 4.95;
 
-const TechNode: React.FC<TechNodeProps> = ({ coords, selected, onClick, onMouseEnter, onMouseLeave }) => {
+const TechNode: React.FC<TechNodeProps> = ({
+                                               coords,
+                                               selected,
+                                               locked = false,
+                                               onClick,
+                                               onMouseEnter,
+                                               onMouseLeave
+                                           }) => {
+    const clickable = !locked;
+
     return (
         <div
-            onClick={onClick}
+            className={`tech-node ${selected ? 'selected' : ''} ${locked ? 'locked' : ''}`}
+            onClick={clickable ? onClick : undefined}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
             style={{
@@ -21,23 +33,11 @@ const TechNode: React.FC<TechNodeProps> = ({ coords, selected, onClick, onMouseE
                 left: `${coords.xPct}%`,
                 top: `${coords.yPct}%`,
                 width: `${BOX_SIZE_PCT}%`,
-                aspectRatio: '1 / 1',   // keeps circle
-                cursor: 'pointer',
-                boxSizing: 'border-box',
-                userSelect: 'none',
-                transform: 'translate(3.0%, 3.0%)', //Offset due to CSS bg-img borders
-
-                // Styling
-                border: selected ? '3px solid gold' : 'none',
-                backgroundColor: selected ? 'rgba(255,255,0,0.3)' : 'transparent',
-                borderRadius: '50%',      // makes it circular
-                boxShadow: selected
-                    ? '0 0 8px 2px gold'
-                    : '0 0 4px 1px rgba(255,255,255,0.2)',
+                aspectRatio: '1 / 1',
+                transform: 'translate(3%, 3%)', // offset
             }}
         />
     );
 };
-
 
 export default TechNode;
