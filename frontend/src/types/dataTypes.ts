@@ -13,11 +13,19 @@ export interface Tech {
 
 export interface Improvement {
     name: string;
-    era?: number;          // optional if you link it to tech era
     effects: string[];
     unique: "City" | "District";
     industryCost?: number; // optional, if you later track it
     cost: string[];        // strategic resource costs only
+}
+
+interface District {
+    name: string;                   // e.g., "Marketplace"
+    info?: [string]
+    effect?: string;              // e.g., ["+10 Happiness", "+5 Gold"]
+    tileBonus?: string[];             // e.g., ["+2 Food on Plains"]
+    adjacencyBonus?: string[];       // e.g., ["+1 Gold for adjacent Market"]
+    placementPrereq?: string;       // optional, e.g., "Adjacent to River"
 }
 
 export const ERA_THRESHOLDS: Record<number, number> = {
