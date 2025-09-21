@@ -1,11 +1,11 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import techTreeJson from '../../data/techTree.json';
 import TechNode from './TechNode';
 import { Tech } from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
-import TechTooltip from "../Tooltips/TechTooltip";
-import EraProgressPanel from "./EraProgressPanel";
+import TechTooltip from '../Tooltips/TechTooltip';
+import EraProgressPanel from './EraProgressPanel';
 
 interface TechTreeProps {
     faction: string;
@@ -27,65 +27,48 @@ const TechTree: React.FC<TechTreeProps> = ({
                                                selectedTechs,
                                                onTechClick
                                            }) => {
-    // State
-    const [hoveredTech, setHoveredTech] = useState<Tech & { coords: { xPct: number; yPct: number } } | null>(null);
-    const [hoveredTooltip, setHoveredTooltip] = useState(false);
-    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    // --- NEW: a simple Set of tech names whose tooltips are currently shown ---
+    const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
 
-    // Clear timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-        };
+    const showTooltip = useCallback((techName: string) => {
+        setOpenTooltips(prev => {
+            const next = new Set(prev);
+            next.add(techName);
+            return next;
+        });
     }, []);
 
-    // Schedule hiding tooltip only if nothing is hovered
-    const scheduleHide = (delay: number = 250) => {
-        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = setTimeout(() => {
-            if (!hoveredTooltip) setHoveredTech(null);
-        }, delay);
-    };
+    const hideTooltip = useCallback((techName: string) => {
+        setOpenTooltips(prev => {
+            if (!prev.has(techName)) return prev;
+            const next = new Set(prev);
+            next.delete(techName);
+            return next;
+        });
+    }, []);
 
-    const handleNodeHover = (tech: Tech & { coords: { xPct: number; yPct: number } }, hovered: boolean) => {
-        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    const factionTechs = useMemo(
+        () => (techTreeJson as Tech[]).filter(t => t.era === era && t.faction.includes(faction)),
+        [era, faction]
+    );
 
-        if (hovered) {
-            // Reset tooltip hover state when moving to new node
-            setHoveredTooltip(false);
-            setHoveredTech(tech);
-        } else {
-            scheduleHide(250); // 0.25s delay to allow tooltip to appear if moving to it
-        }
-    };
-
-    const handleTooltipHover = (hovered: boolean) => {
-        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-        setHoveredTooltip(hovered);
-
-        if (!hovered) {
-            // Immediate hide when leaving tooltip
-            setHoveredTech(null);
-        }
-    };
-
-    const factionTechs = useMemo(() => {
-        return (techTreeJson as Tech[]).filter(t => t.era === era && t.faction.includes(faction));
-    }, [era, faction]);
-
-    const selectedTechNames = useMemo(() => new Set(selectedTechs.map(t => t.name)), [selectedTechs]);
+    const selectedTechNames = useMemo(
+        () => new Set(selectedTechs.map(t => t.name)),
+        [selectedTechs]
+    );
 
     const isLocked = (tech: Tech): boolean => {
         if (selectedTechs.some(t => t.excludes === tech.name)) return true;
         if (tech.era > maxUnlockedEra) return true;
-        if (selectedTechs.some(t => t.name === tech.name)) return false;
         return false;
     };
 
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
         for (let e = 1; e <= 6; e++) {
-            map[e] = (techTreeJson as Tech[]).filter(t => t.faction.includes(faction) && t.era === e);
+            map[e] = (techTreeJson as Tech[]).filter(
+                t => t.faction.includes(faction) && t.era === e
+            );
         }
         return map;
     }, [faction]);
@@ -103,23 +86,25 @@ const TechTree: React.FC<TechTreeProps> = ({
             />
 
             {factionTechs.map(tech => (
-                <TechNode
-                    key={tech.name}
-                    coords={tech.coords}
-                    selected={selectedTechNames.has(tech.name)}
-                    locked={isLocked(tech)}
-                    onClick={() => onTechClick(tech.name)}
-                    onHoverChange={(hovered) => handleNodeHover(tech, hovered)}
-                />
+                <React.Fragment key={tech.name}>
+                    <TechNode
+                        coords={tech.coords}
+                        selected={selectedTechNames.has(tech.name)}
+                        locked={isLocked(tech)}
+                        onClick={() => onTechClick(tech.name)}
+                        onHoverChange={hovered =>
+                            hovered ? showTooltip(tech.name) : hideTooltip(tech.name)
+                        }
+                    />
+                    {openTooltips.has(tech.name) && (
+                        <TechTooltip
+                            hoveredTech={tech}
+                            onMouseEnter={() => showTooltip(tech.name)}
+                            onMouseLeave={() => hideTooltip(tech.name)}
+                        />
+                    )}
+                </React.Fragment>
             ))}
-
-            {hoveredTech && (
-                <TechTooltip
-                    hoveredTech={hoveredTech}
-                    onMouseEnter={() => handleTooltipHover(true)}
-                    onMouseLeave={() => handleTooltipHover(false)}
-                />
-            )}
 
             {(['previous', 'next'] as const).map(dir =>
                     !isButtonHidden(dir) && (
