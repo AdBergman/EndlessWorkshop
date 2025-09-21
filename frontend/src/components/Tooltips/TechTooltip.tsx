@@ -55,7 +55,9 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
                     <div style={{ marginTop: "0.2rem" }}>
                         <strong>Unlocks:</strong>
-                        {hoveredTech.unlocks.map(renderUnlockLine)}
+                        <div style={{ paddingLeft: "0.6rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                            {hoveredTech.unlocks.map(renderUnlockLine)}
+                        </div>
                     </div>
                 )}
 
