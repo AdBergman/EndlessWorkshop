@@ -5,6 +5,7 @@ import {Tech} from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from "../Tooltips/TechTooltip";
+import EraProgressPanel from "./EraProgressPanel";
 
 interface TechTreeProps {
     faction: string;
@@ -65,6 +66,14 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
         return false;
     };
 
+    const eraTechsByEra = useMemo(() => {
+        const map: Record<number, Tech[]> = {};
+        for (let e = 1; e <= 6; e++) {
+            map[e] = (techTreeJson as Tech[]).filter(t => t.faction.includes(faction) && t.era === e);
+        }
+        return map;
+    }, [faction]);
+
     return (
         <div className="tech-tree-image-wrapper">
             <img
@@ -74,34 +83,40 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
                 draggable={false}
             />
 
-            {factionTechs.map((tech) => {
-                return (
-                    <TechNode
-                        key={tech.name}
-                        coords={tech.coords}
-                        selected={selectedTechNames.has(tech.name)}
-                        locked={isLocked(tech)}
-                        onClick={() => onTechClick(tech.name)}
-                        onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
-                        onMouseLeave={() => setHoveredTech(null)}
-                    />
-                );
-            })}
+            {factionTechs.map(tech => (
+                <TechNode
+                    key={tech.name}
+                    coords={tech.coords}
+                    selected={selectedTechNames.has(tech.name)}
+                    locked={isLocked(tech)}
+                    onClick={() => onTechClick(tech.name)}
+                    onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
+                    onMouseLeave={() => setHoveredTech(null)}
+                />
+            ))}
 
             {hoveredTech && <TechTooltip hoveredTech={hoveredTech} />}
 
-            {/* Era navigation buttons */}
-            {(['previous', 'next'] as const).map(dir => {
-                if (isButtonHidden(dir)) return null;
-                return (
-                    <EraNavigationButton
-                        key={dir}
-                        direction={dir}
-                        onClick={() => onEraChange(dir)}
-                    />
-                );
-            })}
+            {(['previous', 'next'] as const).map(dir =>
+                    !isButtonHidden(dir) && (
+                        <EraNavigationButton
+                            key={dir}
+                            direction={dir}
+                            onClick={() => onEraChange(dir)}
+                        />
+                    )
+            )}
+
+            {/* Bottom panel aligned to image */}
+            <div className="era-panel-wrapper bottom-left">
+                <EraProgressPanel
+                    selectedTechs={selectedTechs}
+                    eraTechsByEra={eraTechsByEra}
+                    maxUnlockedEra={maxUnlockedEra}
+                />
+            </div>
         </div>
+
     );
 };
 

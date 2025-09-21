@@ -1,12 +1,37 @@
-/* TechTree.css */
-
 .tech-tree-image-wrapper {
     position: relative;
-    display: inline-block; /* shrink-wrap the image */
+    width: 100%;
+    height: auto; /* wrapper matches image */
 }
 
 .tech-tree-bg {
-    display: block;        /* removes inline spacing below image */
     width: 100%;
-    height: auto;          /* scales with wrapper */
+    display: block; /* remove inline spacing */
 }
+
+.era-panel-wrapper.bottom-left {
+    position: absolute;
+    bottom: 10px;   /* small offset from bottom of tech-tree-bg */
+    left: 10px;     /* small offset from left edge */
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 50;
+}
+
+
+.era-progress-panel {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column; /* top summary + bottom era counts */
+    align-items: center;
+    gap: 2px;               /* spacing between lines */
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: white;
+}
+

@@ -1,0 +1,44 @@
+.era-progress-panel {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background-color: transparent;
+    border-radius: 4px;
+}
+
+/* Top summary line */
+.era-summary {
+    font-weight: bold;
+}
+
+/* Horizontal era lines container */
+.era-lines {
+    display: flex;
+    gap: 12px;
+}
+
+/* Text style for everything inside panel */
+.era-progress-panel,
+.era-progress-panel .era-summary,
+.era-progress-panel .era-lines,
+.era-progress-panel .era-line {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+    line-height: 1.3;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Unlock status colors */
+.era-line.met {
+    color: #4caf50; /* green */
+}
+
+.era-line.not-met {
+    color: #f44336; /* red */
+}
