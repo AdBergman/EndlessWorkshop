@@ -1,7 +1,7 @@
-import React, {useMemo} from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import techTreeJson from '../../data/techTree.json';
 import TechNode from './TechNode';
-import {Tech} from '@dataTypes/dataTypes';
+import { Tech } from '@dataTypes/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from "../Tooltips/TechTooltip";
@@ -19,50 +19,66 @@ interface TechTreeProps {
 const MIN_ERA = 1;
 const MAX_ERA = 6;
 
-const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlockedEra, selectedTechs, onTechClick }) => {
-    const [hoveredTech, setHoveredTech] = React.useState<
-        (Tech & { coords: { xPct: number; yPct: number } }) | null
-    >(null);
+const TechTree: React.FC<TechTreeProps> = ({
+                                               faction,
+                                               era,
+                                               onEraChange,
+                                               maxUnlockedEra,
+                                               selectedTechs,
+                                               onTechClick
+                                           }) => {
+    // State
+    const [hoveredTech, setHoveredTech] = useState<Tech & { coords: { xPct: number; yPct: number } } | null>(null);
+    const [hoveredTooltip, setHoveredTooltip] = useState(false);
+    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // filter techs for current era + faction
+    // Clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+        };
+    }, []);
+
+    // Schedule hiding tooltip only if nothing is hovered
+    const scheduleHide = (delay: number = 250) => {
+        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = setTimeout(() => {
+            if (!hoveredTooltip) setHoveredTech(null);
+        }, delay);
+    };
+
+    const handleNodeHover = (tech: Tech & { coords: { xPct: number; yPct: number } }, hovered: boolean) => {
+        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+
+        if (hovered) {
+            // Reset tooltip hover state when moving to new node
+            setHoveredTooltip(false);
+            setHoveredTech(tech);
+        } else {
+            scheduleHide(250); // 0.25s delay to allow tooltip to appear if moving to it
+        }
+    };
+
+    const handleTooltipHover = (hovered: boolean) => {
+        if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+        setHoveredTooltip(hovered);
+
+        if (!hovered) {
+            // Immediate hide when leaving tooltip
+            setHoveredTech(null);
+        }
+    };
+
     const factionTechs = useMemo(() => {
-        return (techTreeJson as Tech[])
-            .filter(t => t.era === era && t.faction.includes(faction));
+        return (techTreeJson as Tech[]).filter(t => t.era === era && t.faction.includes(faction));
     }, [era, faction]);
 
-
-    const isButtonHidden = (dir: 'previous' | 'next') =>
-        (dir === 'previous' && era === MIN_ERA) || (dir === 'next' && era === MAX_ERA);
-
-    const selectedTechNames = useMemo(
-        () => new Set(selectedTechs.map(t => t.name)),
-        [selectedTechs]
-    );
-
-    // build locked tech set
-    const lockedTechNames = useMemo(() => {
-        const locked = new Set<string>();
-
-        selectedTechs.forEach(t => {
-            if (t.excludes) locked.add(t.excludes); // add mutually exclusive tech
-        });
-
-        // remove already selected techs from locked set
-        selectedTechs.forEach(t => locked.delete(t.name));
-
-        return locked;
-    }, [selectedTechs]);
+    const selectedTechNames = useMemo(() => new Set(selectedTechs.map(t => t.name)), [selectedTechs]);
 
     const isLocked = (tech: Tech): boolean => {
-        // Mutual exclusion
         if (selectedTechs.some(t => t.excludes === tech.name)) return true;
-
-        // Era unlock
         if (tech.era > maxUnlockedEra) return true;
-
-        // Already selected? Not locked
         if (selectedTechs.some(t => t.name === tech.name)) return false;
-
         return false;
     };
 
@@ -73,6 +89,9 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
         }
         return map;
     }, [faction]);
+
+    const isButtonHidden = (dir: 'previous' | 'next') =>
+        (dir === 'previous' && era === MIN_ERA) || (dir === 'next' && era === MAX_ERA);
 
     return (
         <div className="tech-tree-image-wrapper">
@@ -90,12 +109,17 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
                     selected={selectedTechNames.has(tech.name)}
                     locked={isLocked(tech)}
                     onClick={() => onTechClick(tech.name)}
-                    onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
-                    onMouseLeave={() => setHoveredTech(null)}
+                    onHoverChange={(hovered) => handleNodeHover(tech, hovered)}
                 />
             ))}
 
-            {hoveredTech && <TechTooltip hoveredTech={hoveredTech} />}
+            {hoveredTech && (
+                <TechTooltip
+                    hoveredTech={hoveredTech}
+                    onMouseEnter={() => handleTooltipHover(true)}
+                    onMouseLeave={() => handleTooltipHover(false)}
+                />
+            )}
 
             {(['previous', 'next'] as const).map(dir =>
                     !isButtonHidden(dir) && (
@@ -107,7 +131,6 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
                     )
             )}
 
-            {/* Bottom panel aligned to image */}
             <div className="era-panel-wrapper bottom-left">
                 <EraProgressPanel
                     selectedTechs={selectedTechs}
@@ -116,7 +139,6 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlock
                 />
             </div>
         </div>
-
     );
 };
 

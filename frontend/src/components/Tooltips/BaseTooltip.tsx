@@ -1,11 +1,36 @@
-import React, { ReactNode } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface BaseTooltipProps {
     coords: { xPct: number; yPct: number };
-    children: ReactNode;
+    children: React.ReactNode;
+    hideDelay?: number; // milliseconds
 }
 
-const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords , children }) => {
+const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, hideDelay = 500 }) => {
+    const [visible, setVisible] = useState(true);
+    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleMouseEnter = () => {
+        if (hideTimeoutRef.current) {
+            clearTimeout(hideTimeoutRef.current);
+            hideTimeoutRef.current = null;
+        }
+        setVisible(true);
+    };
+
+    const handleMouseLeave = () => {
+        hideTimeoutRef.current = setTimeout(() => setVisible(false), hideDelay);
+    };
+
+    // clear timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+        };
+    }, []);
+
+    if (!visible) return null;
+
     return (
         <div
             className="base-tooltip"
@@ -14,7 +39,7 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords , children }) => {
                 top: `${coords.yPct}%`,
                 left: `${coords.xPct + 5}%`,
                 transform: "translateY(-50%)",
-                pointerEvents: "none",
+                pointerEvents: "auto", // allow hover
                 backgroundColor: "rgba(0,0,0,0.85)",
                 color: "#fff",
                 padding: "0.4rem 0.8rem",
@@ -23,12 +48,11 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords , children }) => {
                 fontWeight: 500,
                 fontSize: "0.9rem",
                 lineHeight: 1.3,
-                whiteSpace: "normal",
                 zIndex: 10,
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
                 textShadow: "0 0 1px rgba(0,0,0,0.5)",
             }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             {children}
         </div>
