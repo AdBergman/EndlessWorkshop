@@ -10,8 +10,8 @@
       "+100 Fortification on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.30,
       "yPct": 29.76
@@ -28,8 +28,8 @@
       "+1 Scribe slot on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 35.57,
       "yPct": 7.25
@@ -46,8 +46,8 @@
       "+12 Approval on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.40,
       "yPct": 16.96
@@ -65,8 +65,8 @@
       "+1 Artisan Slot on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 59.22,
       "yPct": 7.25
@@ -82,8 +82,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 71.09,
       "yPct": 29.82
@@ -100,8 +100,8 @@
       "+8 Dust on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 71.04,
       "yPct": 58.00
@@ -117,8 +117,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 56.88,
       "yPct": 73.96
@@ -134,8 +134,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 37.92,
       "yPct": 74.06
@@ -151,8 +151,8 @@
       "+2 Industry on Military Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 30.78,
       "yPct": 42.00
@@ -169,8 +169,8 @@
       "+5 Damage on non-Hero"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.30,
       "yPct": 58.00
@@ -188,8 +188,8 @@
       "+200 District Fortification on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Aspect","Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.30,
       "yPct": 29.76
@@ -205,8 +205,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 30.78,
       "yPct": 42.00
@@ -223,8 +223,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.30,
       "yPct": 58.00
@@ -241,8 +241,8 @@
       "-25% Dust cost for Bribe action"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 28.45,
       "yPct": 4.30
@@ -259,8 +259,8 @@
       "+4 Influence income on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 40.28,
       "yPct": 23.42
@@ -276,8 +276,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.41,
       "yPct": 10.64
@@ -294,8 +294,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.50,
       "yPct": 23.42
@@ -313,8 +313,8 @@
       "+100 Influence"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 66.32,
       "yPct": 4.30
@@ -332,8 +332,8 @@
       "1 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 63.97,
       "yPct": 42.42
@@ -351,8 +351,8 @@
       "+4 Industry on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.40,
       "yPct": 29.75
@@ -370,8 +370,8 @@
       "+4 Dust on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.40,
       "yPct": 58.30
@@ -389,8 +389,8 @@
       "+4 Science on Capital"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 40.28,
       "yPct": 64.64
@@ -407,8 +407,8 @@
       "-25% Influence cost for Found Camp (Works for Necromancer and Aspects too)"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.41,
       "yPct": 77.30
@@ -425,8 +425,8 @@
       "+25% Precision for season predictability"
     ],
     "prereq": "Keystones",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.50,
       "yPct": 64.64
@@ -444,8 +444,8 @@
       "+50 District Fortification on Military Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.32,
       "yPct": 26.42
@@ -462,8 +462,8 @@
       "-25% Industry cost on Military-related Improvements"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 30.78,
       "yPct": 42.00
@@ -481,8 +481,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.32,
       "yPct": 64.53
@@ -498,8 +498,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 28.45,
       "yPct": 4.30
@@ -517,8 +517,8 @@
       "+1 Influence on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 40.28,
       "yPct": 23.42
@@ -536,8 +536,8 @@
       "+2 Food on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.41,
       "yPct": 10.64
@@ -555,8 +555,8 @@
       "+2 Food on Farm Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.50,
       "yPct": 23.42
@@ -573,8 +573,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 66.32,
       "yPct": 4.30
@@ -590,8 +590,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 63.92,
       "yPct": 32.75
@@ -610,8 +610,8 @@
       "0.5 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 63.92,
       "yPct": 54.97
@@ -629,8 +629,8 @@
       "+2 Industry on Works Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.40,
       "yPct": 26.42
@@ -648,8 +648,8 @@
       "+4 Dust on Merchant's House Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.40,
       "yPct": 64.53
@@ -668,8 +668,8 @@
       "+2 Science on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 40.28,
       "yPct": 70.86
@@ -687,8 +687,8 @@
       "+8 Damage on non-Hero"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.44,
       "yPct": 70.86
@@ -705,10 +705,8 @@
       "+5 Approval on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Logistics"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Logistics",
     "coords": {
       "xPct": 16.63,
       "yPct": 26.64
@@ -725,10 +723,8 @@
       "-25% Industry on Keep"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Auxiliary Forces"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Auxiliary Forces",
     "coords": {
       "xPct": 26.09,
       "yPct": 26.64
@@ -744,8 +740,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 30.78,
       "yPct": 42.00
@@ -763,8 +759,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 21.32,
       "yPct": 61.42
@@ -781,10 +777,8 @@
       "+3 Influence on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Dramatic Arts"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Dramatic Arts",
     "coords": {
       "xPct": 28.45,
       "yPct": 4.42
@@ -801,10 +795,8 @@
       "-25% Industry cost on Forum"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Public Works"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Public Works",
     "coords": {
       "xPct": 37.90,
       "yPct": 4.42
@@ -820,8 +812,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.41,
       "yPct": 10.71
@@ -838,10 +830,8 @@
       "+3 Food on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Hothouses"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Hothouses",
     "coords": {
       "xPct": 56.87,
       "yPct": 4.42
@@ -859,10 +849,8 @@
       "-25% Industry cost on Farm"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Cultivation"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Cultivation",
     "coords": {
       "xPct": 66.31,
       "yPct": 4.42
@@ -879,10 +867,8 @@
       "+3 Industry on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Standardization"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Standardization",
     "coords": {
       "xPct": 68.71,
       "yPct": 26.53
@@ -899,10 +885,8 @@
       "-25% Industry cost on Works"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Guilds"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Guilds",
     "coords": {
       "xPct": 78.19,
       "yPct": 26.53
@@ -921,8 +905,8 @@
       "+2 Industry on Ministry"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.45,
       "yPct": 42.42
@@ -941,8 +925,8 @@
       "0.2 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.40,
       "yPct": 61.30
@@ -960,8 +944,8 @@
       "-50% Turn cost for Close Rift action"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 40.26,
       "yPct": 64.64
@@ -978,8 +962,8 @@
       "-25% Influence cost for Attach Camp action"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.36,
       "yPct": 77.16
@@ -996,8 +980,8 @@
       "+25 Precision for season predictability"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.46,
       "yPct": 64.64
@@ -1014,8 +998,8 @@
       "-2 Dust Upkeep on Unit"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 30.80,
       "yPct": 32.97
@@ -1032,8 +1016,8 @@
       "-15% Industry cost on Unit"
     ],
     "prereq": "Military Engineering",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 18.97,
       "yPct": 20.19
@@ -1050,8 +1034,8 @@
       "+1 Industry on Population"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 23.71,
       "yPct": 42.30
@@ -1069,8 +1053,8 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 23.71,
       "yPct": 61.31
@@ -1087,8 +1071,8 @@
       "+2 Influence on Forums Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 37.88,
       "yPct": 20.19
@@ -1105,8 +1089,8 @@
       "+50 Influence on Scribes"
     ],
     "prereq": "Glory of Empire",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 28.44,
       "yPct": 4.26
@@ -1124,8 +1108,8 @@
       "+50% Food per Population on Citizens"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 56.84,
       "yPct": 20.19
@@ -1144,8 +1128,8 @@
       "+40 Public Opinion on the other Empire"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 66.32,
       "yPct": 4.34
@@ -1164,8 +1148,8 @@
       "+50% Industry per Population on Artisans"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.45,
       "yPct": 23.30
@@ -1183,8 +1167,8 @@
       "+25% Dust on Population Vocations"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 73.45,
       "yPct": 42.42
@@ -1201,10 +1185,8 @@
       "+3 Dust on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Land Management"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Land Management",
     "coords": {
       "xPct": 68.71,
       "yPct": 61.42
@@ -1221,10 +1203,8 @@
       "-25% Industry cost on Merchant's House"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Tolls and Taxation"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Tolls and Taxation",
     "coords": {
       "xPct": 78.19,
       "yPct": 61.42
@@ -1241,10 +1221,8 @@
       "+3 Science on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "Inventors' Endowments"
-    ],
+    "faction": ["Kin"],
+    "excludes": "Inventors' Endowments",
     "coords": {
       "xPct": 30.80,
       "yPct": 80.44
@@ -1261,10 +1239,8 @@
       "-25% Industry cost on Laboratory"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [
-      "University"
-    ],
+    "faction": ["Kin"],
+    "excludes": "University",
     "coords": {
       "xPct": 40.26,
       "yPct": 80.42
@@ -1282,8 +1258,8 @@
       "-50% Turn cost on Landscaping Actions"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.36,
       "yPct": 70.97
@@ -1301,8 +1277,8 @@
       "+2 Science on Laboratories Districts"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 54.44,
       "yPct": 64.64
@@ -1319,9 +1295,8 @@
       "+50% Science on Scribes"
     ],
     "prereq": "Scientific Prizes",
-    "faction": "Kin",
-    "excludes": [
-    ],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 61.56,
       "yPct": 80.42
@@ -1340,8 +1315,8 @@
       "+10 Defense on Unit"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 27.06,
       "yPct": 45.00
@@ -1357,8 +1332,8 @@
       "+15% Influence on City Hall"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 41.63,
       "yPct": 11.75
@@ -1377,8 +1352,8 @@
       "-50% cost to grow all Populations"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 51.51,
       "yPct": 11.63
@@ -1398,8 +1373,8 @@
       "-50% Influence cost on Foundation"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 66.63,
       "yPct": 29.50
@@ -1417,8 +1392,8 @@
       "-50% Buyout cost on Improvement"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 67.15,
       "yPct": 56.23
@@ -1434,8 +1409,8 @@
       "-20% on all Technology research cost"
     ],
     "prereq": "",
-    "faction": "Kin",
-    "excludes": [],
+    "faction": ["Kin"],
+    "excludes": "",
     "coords": {
       "xPct": 47.40,
       "yPct": 73.83

@@ -6,7 +6,8 @@ export interface Tech {
     unlocks: string[];
     effects: string[];
     prereq: string;
-    faction: string;
+    faction: string[];
+    excludes: string;
     coords: { xPct: number; yPct: number };
 }
 

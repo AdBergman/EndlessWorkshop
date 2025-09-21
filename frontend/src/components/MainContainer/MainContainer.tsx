@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import { Tech } from '@dataTypes/dataTypes';
@@ -16,6 +16,13 @@ const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFact
     // All internal state lives here now
     const [era, setEra] = useState(1);
     const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
+
+    // Filter selectedTechs when faction changes
+    useEffect(() => {
+        setSelectedTechs(prev =>
+            prev.filter(t => t.faction.includes(selectedFaction))
+        );
+    }, [selectedFaction]);
 
     const handleTechClick = (techName: string) => {
         const techObj = (techTreeJson as Tech[]).find(t => t.name === techName);

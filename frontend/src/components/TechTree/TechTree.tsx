@@ -14,7 +14,8 @@ interface TechTreeProps {
     onTechClick: (techName: string) => void;
 }
 
-
+const MIN_ERA = 1;
+const MAX_ERA = 6;
 
 const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedTechs, onTechClick }) => {
     const [hoveredTech, setHoveredTech] = React.useState<
@@ -22,15 +23,19 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
     >(null);
 
     // filter techs for current era + faction
-    const techData: Tech[] = useMemo(
-        () => (techTreeJson as Tech[]).filter(
-            t => t.era === era && (t.faction === "" || t.faction === faction)
-        ),
-        [era, faction]
-    );
+    const factionTechs = useMemo(() => {
+        return (techTreeJson as Tech[])
+            .filter(t => t.era === era && t.faction.includes(faction));
+    }, [era, faction]);
+
 
     const isButtonHidden = (dir: 'previous' | 'next') =>
-        (dir === 'previous' && era === 1) || (dir === 'next' && era === 6);
+        (dir === 'previous' && era === MIN_ERA) || (dir === 'next' && era === MAX_ERA);
+
+    const selectedTechNames = useMemo(
+        () => new Set(selectedTechs.map(t => t.name)),
+        [selectedTechs]
+    );
 
     return (
         <div className="tech-tree-image-wrapper">
@@ -41,12 +46,12 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                 draggable={false}
             />
 
-            {techData.map((tech) => {
+            {factionTechs.map((tech) => {
                 return (
                     <TechNode
                         key={tech.name}
                         coords={tech.coords}
-                        selected={selectedTechs.some(t => t.name === tech.name)}
+                        selected={selectedTechNames.has(tech.name)}
                         onClick={() => onTechClick(tech.name)}
                         onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
