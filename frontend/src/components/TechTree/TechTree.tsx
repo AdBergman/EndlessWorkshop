@@ -10,6 +10,7 @@ interface TechTreeProps {
     faction: string;
     era: number;
     onEraChange: (dir: 'previous' | 'next') => void;
+    maxUnlockedEra: number;
     selectedTechs: Tech[];
     onTechClick: (techName: string) => void;
 }
@@ -17,7 +18,7 @@ interface TechTreeProps {
 const MIN_ERA = 1;
 const MAX_ERA = 6;
 
-const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedTechs, onTechClick }) => {
+const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,maxUnlockedEra, selectedTechs, onTechClick }) => {
     const [hoveredTech, setHoveredTech] = React.useState<
         (Tech & { coords: { xPct: number; yPct: number } }) | null
     >(null);
@@ -51,6 +52,19 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
         return locked;
     }, [selectedTechs]);
 
+    const isLocked = (tech: Tech): boolean => {
+        // Mutual exclusion
+        if (selectedTechs.some(t => t.excludes === tech.name)) return true;
+
+        // Era unlock
+        if (tech.era > maxUnlockedEra) return true;
+
+        // Already selected? Not locked
+        if (selectedTechs.some(t => t.name === tech.name)) return false;
+
+        return false;
+    };
+
     return (
         <div className="tech-tree-image-wrapper">
             <img
@@ -66,7 +80,7 @@ const TechTree: React.FC<TechTreeProps> = ({ faction, era, onEraChange,selectedT
                         key={tech.name}
                         coords={tech.coords}
                         selected={selectedTechNames.has(tech.name)}
-                        locked={lockedTechNames.has(tech.name)}
+                        locked={isLocked(tech)}
                         onClick={() => onTechClick(tech.name)}
                         onMouseEnter={() => setHoveredTech({ ...tech, coords: tech.coords })}
                         onMouseLeave={() => setHoveredTech(null)}
