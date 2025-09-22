@@ -1,0 +1,30 @@
+/* SpreadsheetToolbar.css */
+.spreadsheet-toolbar {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid #333;
+    background-color: #111;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;   /* added font */
+}
+
+.spreadsheet-toolbar button {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 3px;
+    border: none;
+    background-color: #222;
+    color: #ff7f32;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.1;
+    font-family: 'Inter', sans-serif;   /* added font */
+}
+
+.spreadsheet-toolbar button:hover {
+    background-color: #333;
+}

@@ -1,17 +1,49 @@
-/* Container centers the table */
+/* ===== Container and Inner Wrapper ===== */
 .spreadsheet-container {
     width: 100%;
     display: flex;
-    justify-content: center;
+    justify-content: center;     /* centers the inner block */
     margin-top: 1rem;
 }
 
-/* Responsive table */
+.spreadsheet-inner {
+    width: 90%;
+    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;                   /* space between toolbar and table */
+}
+
+/* ===== Toolbar ===== */
+.spreadsheet-toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.spreadsheet-toolbar button,
+.spreadsheet-toolbar .csv-button {
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background: #1b1b1b;
+    color: #ffcc00;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.spreadsheet-toolbar button:hover,
+.spreadsheet-toolbar .csv-button:hover {
+    background: #2a2a2a;
+}
+
+/* ===== Table ===== */
 .spreadsheet-table {
-    width: 90%;           /* scales with screen */
-    max-width: 1400px;    /* optional max width */
+    width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;   /* keeps borders stable */
+    table-layout: fixed;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     background-color: #000;
@@ -27,9 +59,9 @@
 
 .spreadsheet-table th:nth-child(2),
 .spreadsheet-table td:nth-child(2) {
-    width: 50px;        /* fixed pixel width */
-    min-width: 50px;    /* optional, ensures it doesn’t shrink */
-    max-width: 50px;    /* optional, ensures it doesn’t expand */
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
     text-align: center;
 }
 
@@ -61,7 +93,7 @@
 .spreadsheet-table td {
     border: 1px solid #333;
     padding: 8px 12px;
-    white-space: pre-line;  /* multi-line support */
+    white-space: pre-line;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 500;
