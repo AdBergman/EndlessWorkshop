@@ -19,7 +19,7 @@ export interface Improvement {
     cost: string[];        // strategic resource costs only
 }
 
-interface District {
+export interface District {
     name: string;                   // e.g., "Marketplace"
     info?: [string]
     effect?: string;              // e.g., ["+10 Happiness", "+5 Gold"]

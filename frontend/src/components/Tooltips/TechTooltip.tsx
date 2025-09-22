@@ -1,8 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Tech, Improvement } from "@dataTypes/dataTypes";
+import React, { useState } from "react";
+import { Tech, Improvement, District } from "@dataTypes/dataTypes";
 import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
+import DistrictTooltip from "./DistrictTooltip";
 import { improvementsMap } from "../../types/improvementsMap";
+import { districtsMap } from "../../types/districtsMap";
 
 interface TechTooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
@@ -12,36 +14,70 @@ interface TechTooltipProps {
 
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
     const [hoveredImprovement, setHoveredImprovement] = useState<Improvement & { coords: { xPct: number; yPct: number } } | null>(null);
+    const [hoveredDistrict, setHoveredDistrict] = useState<District & { coords: { xPct: number; yPct: number } } | null>(null);
 
     const renderUnlockLine = (line: string, index: number) => {
-        const prefix = "Improvement: ";
-        if (!line.startsWith(prefix)) return <div key={index}>{line}</div>;
+        const impPrefix = "Improvement: ";
+        const distPrefix = "District: ";
 
-        const impName = line.slice(prefix.length);
-        const impObj = improvementsMap.get(impName);
-        if (!impObj) return <div key={index}>{line}</div>;
+        // Improvement
+        if (line.startsWith(impPrefix)) {
+            const impName = line.slice(impPrefix.length);
+            const impObj = improvementsMap.get(impName);
+            if (!impObj) return <div key={index}>{line}</div>;
 
-        const handleImpMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const xPct = (rect.left / window.innerWidth) * 100;
-            const yPct = (rect.top / window.innerHeight) * 100;
-            setHoveredImprovement({ ...impObj, coords: { xPct, yPct } });
-        };
+            const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const xPct = (rect.left / window.innerWidth) * 100;
+                const yPct = (rect.top / window.innerHeight) * 100;
+                setHoveredImprovement({ ...impObj, coords: { xPct, yPct } });
+            };
+            const handleMouseLeave = () => setHoveredImprovement(null);
 
-        const handleImpMouseLeave = () => setHoveredImprovement(null);
+            return (
+                <div key={index} style={{ display: "inline-block" }}>
+                    {impPrefix}
+                    <span
+                        style={{ textDecoration: "underline", cursor: "pointer" }}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        {impName}
+                    </span>
+                </div>
+            );
+        }
 
-        return (
-            <div key={index} style={{ display: "inline-block" }}>
-                {prefix}
-                <span
-                    style={{ textDecoration: "underline", cursor: "pointer" }}
-                    onMouseEnter={handleImpMouseEnter}
-                    onMouseLeave={handleImpMouseLeave}
-                >
-                    {impName}
-                </span>
-            </div>
-        );
+        // District
+        if (line.startsWith(distPrefix)) {
+            const distName = line.slice(distPrefix.length);
+            const distObj = districtsMap.get(distName);
+            if (!distObj) return <div key={index}>{line}</div>;
+
+            const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const xPct = (rect.left / window.innerWidth) * 100;
+                const yPct = (rect.top / window.innerHeight) * 100;
+                setHoveredDistrict({ ...distObj, coords: { xPct, yPct } });
+            };
+            const handleMouseLeave = () => setHoveredDistrict(null);
+
+            return (
+                <div key={index} style={{ display: "inline-block" }}>
+                    {distPrefix}
+                    <span
+                        style={{ textDecoration: "underline", cursor: "pointer" }}
+                        onMouseEnter={handleMouseEnter}
+                        onMouseLeave={handleMouseLeave}
+                    >
+                        {distName}
+                    </span>
+                </div>
+            );
+        }
+
+        // Fallback: plain text
+        return <div key={index}>{line}</div>;
     };
 
     return (
@@ -50,7 +86,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             onMouseLeave={onMouseLeave}
         >
             <BaseTooltip coords={hoveredTech.coords} hideDelay={250}>
-                <div>{hoveredTech.name}</div>
+                <div style={{ fontWeight: 600 }}>{hoveredTech.name}</div>
 
                 {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
                     <div style={{ marginTop: "0.2rem" }}>
@@ -73,6 +109,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 )}
 
                 {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
+                {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
             </BaseTooltip>
         </div>
     );
