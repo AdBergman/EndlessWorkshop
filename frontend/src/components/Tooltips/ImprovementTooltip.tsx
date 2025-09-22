@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import BaseTooltip from "./BaseTooltip";
+import TooltipSection from "./TooltipSection";
 import { Improvement } from "@dataTypes/dataTypes";
 
 interface ImprovementTooltipProps {
@@ -12,24 +13,18 @@ const ImprovementTooltip: React.FC<ImprovementTooltipProps> = ({ hoveredImprovem
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords}>
-            <div style={{ minWidth: "200px" }}> {/* same size as TechTooltip */}
-                <div>{name}</div>
-                <div style={{ marginTop: "0.2rem" }}>
-                    <strong>Type:</strong> {unique}
-                </div>
+            <div style={{ minWidth: "200px" }}>
+                <div style={{ fontWeight: 500 }}>{name}</div>
+                <TooltipSection title="Type:">{unique}</TooltipSection>
+
                 {effects.length > 0 && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Effects:</strong>
-                        {effects.map((eff, i) => (
-                            <div key={i} style={{ paddingLeft: "0.6rem" }}>
-                                {eff}
-                            </div>
-                        ))}
-                    </div>
+                    <TooltipSection title="Effects:">
+                        {effects.map((eff, i) => <div key={i}>{eff}</div>)}
+                    </TooltipSection>
                 )}
             </div>
         </BaseTooltip>,
-        document.body // portal ensures it floats above the table
+        document.body
     );
 };
 

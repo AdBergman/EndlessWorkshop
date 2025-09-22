@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import BaseTooltip from "./BaseTooltip";
+import TooltipSection from "./TooltipSection";
 import { District } from "@dataTypes/dataTypes";
 
 interface DistrictTooltipProps {
@@ -16,36 +17,24 @@ const DistrictTooltip: React.FC<DistrictTooltipProps> = ({ hoveredDistrict }) =>
                 <div style={{ fontWeight: 500 }}>{name}</div>
 
                 {info && info.length > 0 && (
-                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                        {info.map((i, idx) => <div key={idx}>{i}</div>)}
-                    </div>
+                    <TooltipSection>{info.map((i, idx) => <div key={idx}>{i}</div>)}</TooltipSection>
                 )}
 
-                {effect && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Effect:</strong> {effect}
-                    </div>
-                )}
+                {effect && <TooltipSection title="Effect:">{effect}</TooltipSection>}
 
                 {tileBonus && tileBonus.length > 0 && (
-                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                        <strong>Tile Bonus:</strong>
-                        {tileBonus.map((tb, idx) => <div key={idx} style={{ paddingLeft: "0.6rem" }}>{tb}</div>)}
-                    </div>
+                    <TooltipSection title="Tile Bonus:">
+                        {tileBonus.map((tb, idx) => <div key={idx}>{tb}</div>)}
+                    </TooltipSection>
                 )}
 
                 {adjacencyBonus && adjacencyBonus.length > 0 && (
-                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                        <strong>Adjacency Bonus:</strong>
-                        {adjacencyBonus.map((ab, idx) => <div key={idx} style={{ paddingLeft: "0.6rem" }}>{ab}</div>)}
-                    </div>
+                    <TooltipSection title="Adjacency Bonus:">
+                        {adjacencyBonus.map((ab, idx) => <div key={idx}>{ab}</div>)}
+                    </TooltipSection>
                 )}
 
-                {placementPrereq && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Placement:</strong> {placementPrereq}
-                    </div>
-                )}
+                {placementPrereq && <TooltipSection title="Placement:">{placementPrereq}</TooltipSection>}
             </div>
         </BaseTooltip>,
         document.body
