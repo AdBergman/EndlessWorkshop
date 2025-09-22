@@ -12,27 +12,35 @@ const DistrictTooltip: React.FC<DistrictTooltipProps> = ({ hoveredDistrict }) =>
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords}>
-            <div style={{ minWidth: "220px" }}>
-                <div style={{ fontWeight: 600 }}>{name}</div>
-                {info && <div style={{ marginTop: "0.2rem" }}>{info}</div>}
-                {effect && effect.length > 0 && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Effect:</strong>
-                        <div style={{ paddingLeft: "0.6rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                            {effect.map((eff, i) => <div key={i}>{eff}</div>)}
-                        </div>
+            <div style={{ minWidth: "200px" }}>
+                <div style={{ fontWeight: 500 }}>{name}</div>
+
+                {info && info.length > 0 && (
+                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                        {info.map((i, idx) => <div key={idx}>{i}</div>)}
                     </div>
                 )}
-                {tileBonus && (
+
+                {effect && (
                     <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Tile Bonus:</strong> {tileBonus}
+                        <strong>Effect:</strong> {effect}
                     </div>
                 )}
-                {adjacencyBonus && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Adjacency Bonus:</strong> {adjacencyBonus}
+
+                {tileBonus && tileBonus.length > 0 && (
+                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                        <strong>Tile Bonus:</strong>
+                        {tileBonus.map((tb, idx) => <div key={idx} style={{ paddingLeft: "0.6rem" }}>{tb}</div>)}
                     </div>
                 )}
+
+                {adjacencyBonus && adjacencyBonus.length > 0 && (
+                    <div style={{ marginTop: "0.2rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
+                        <strong>Adjacency Bonus:</strong>
+                        {adjacencyBonus.map((ab, idx) => <div key={idx} style={{ paddingLeft: "0.6rem" }}>{ab}</div>)}
+                    </div>
+                )}
+
                 {placementPrereq && (
                     <div style={{ marginTop: "0.2rem" }}>
                         <strong>Placement:</strong> {placementPrereq}

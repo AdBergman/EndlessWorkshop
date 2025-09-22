@@ -5,7 +5,7 @@
   },
   {
     "name": "Bridge",
-    "placementPrereq": "All neighbouring Districts cannot be Bridge. This District must be built on a Stream or River."
+    "placementPrereq": "No adjacent bridge. This District must be built on a Stream or River."
   },
   {
     "name": "Merchant's House",
@@ -40,12 +40,12 @@
   },
   {
     "name": "Forum",
-    "effect": "+2 Food",
+    "effect": "+2 Influence",
     "tileBonus": ["+1 Food on tile producing Food"],
     "adjacencyBonus": [
-      "+1 Food for each adjacent River",
-      "+1 Food for each adjacent Lake",
-      "+1 Food for each adjacent Communal Habitations"
+      "+1 Influence for each adjacent River",
+      "+1 Influence for each adjacent Lake",
+      "+1 Influence for each adjacent Communal Habitations"
     ]
   },
   {
