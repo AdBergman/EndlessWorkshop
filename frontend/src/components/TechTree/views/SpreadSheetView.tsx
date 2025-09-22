@@ -5,17 +5,17 @@ import UnlockLine from "./UnlockLine";
 import SpreadsheetToolbar from "./SpreadsheetToolbar";
 
 interface SpreadSheetViewProps {
-    techs: Tech[];
+    selectedTechs: Tech[];
+    setSelectedTechs: (techs: Tech[]) => void;
 }
 
-const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
+const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSelectedTechs }) => {
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
-    const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
 
     // --- Sync props ---
     useEffect(() => {
-        setSortedTechs(techs);
-    }, [techs]);
+        setSortedTechs([...selectedTechs]); // Sort/display only selectedTechs
+    }, [selectedTechs]);
 
     // --- Sorting ---
     const handleSort = () => {
@@ -26,11 +26,12 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
         setSortedTechs(newOrder);
     };
 
-    // --- Selection helpers ---
-    const handleSelectAll = () => setSelectedTechs([...sortedTechs]);
+    // --- Deselect All ---
     const handleDeselectAll = () => setSelectedTechs([]);
+
+    // --- Copy Link ---
     const handleGenerateShareLink = () => {
-        const names = selectedTechs.map((t) => t.name).join(",");
+        const names = selectedTechs.map(t => t.name).join(",");
         const link = `${window.location.origin}?share=${encodeURIComponent(names)}`;
         navigator.clipboard.writeText(link).catch(() => {});
         alert("Share link copied to clipboard!");
@@ -38,21 +39,20 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
 
     // --- Row toggle selection ---
     const toggleTechSelection = (tech: Tech) => {
-        setSelectedTechs((prev) =>
-            prev.includes(tech)
-                ? prev.filter((t) => t !== tech)
-                : [...prev, tech]
-        );
+        if (selectedTechs.includes(tech)) {
+            setSelectedTechs(selectedTechs.filter(t => t !== tech));
+        } else {
+            setSelectedTechs([...selectedTechs, tech]);
+        }
     };
 
-    if (!sortedTechs || sortedTechs.length === 0) return <div>No techs available</div>;
+    if (!sortedTechs || sortedTechs.length === 0) return <div>No techs selected</div>;
 
     return (
         <div className="spreadsheet-wrapper">
             <SpreadsheetToolbar
                 selectedTechs={selectedTechs}
                 allTechs={sortedTechs}
-                onSelectAll={handleSelectAll}
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}

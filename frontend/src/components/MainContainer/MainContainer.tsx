@@ -71,7 +71,10 @@ const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFact
                 />
 
                 <div className="view-container">
-                    <SpreadSheetView techs={selectedTechs} />
+                    <SpreadSheetView
+                        selectedTechs={selectedTechs}
+                        setSelectedTechs={setSelectedTechs}
+                    />
                 </div>
             </main>
         );
