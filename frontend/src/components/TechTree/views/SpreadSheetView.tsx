@@ -1,7 +1,7 @@
 import React from "react";
 import { Tech } from '@dataTypes/dataTypes';
 import "./SpreadSheetView.css";
-import UnlockLine from "./Unlockline";
+import UnlockLine from "./UnlockLine";
 
 interface SpreadSheetViewProps {
     techs: Tech[];
