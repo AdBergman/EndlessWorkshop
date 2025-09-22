@@ -27,13 +27,22 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
     };
 
     // --- Selection helpers ---
-    const handleSelectAll = () => setSelectedTechs(sortedTechs);
+    const handleSelectAll = () => setSelectedTechs([...sortedTechs]);
     const handleDeselectAll = () => setSelectedTechs([]);
     const handleGenerateShareLink = () => {
         const names = selectedTechs.map((t) => t.name).join(",");
         const link = `${window.location.origin}?share=${encodeURIComponent(names)}`;
         navigator.clipboard.writeText(link).catch(() => {});
         alert("Share link copied to clipboard!");
+    };
+
+    // --- Row toggle selection ---
+    const toggleTechSelection = (tech: Tech) => {
+        setSelectedTechs((prev) =>
+            prev.includes(tech)
+                ? prev.filter((t) => t !== tech)
+                : [...prev, tech]
+        );
     };
 
     if (!sortedTechs || sortedTechs.length === 0) return <div>No techs available</div>;
@@ -60,21 +69,28 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ techs }) => {
                     </tr>
                     </thead>
                     <tbody>
-                    {sortedTechs.map((tech) => (
-                        <tr key={tech.name}>
-                            <td>{tech.name}</td>
-                            <td>{tech.era}</td>
-                            <td>{tech.type}</td>
-                            <td style={{ whiteSpace: "pre-line" }}>
-                                {tech.unlocks.map((line, i) => (
-                                    <UnlockLine key={i} line={line} />
-                                ))}
-                            </td>
-                            <td style={{ whiteSpace: "pre-line" }}>
-                                {tech.effects.join(", ").replace(/, /g, "\n")}
-                            </td>
-                        </tr>
-                    ))}
+                    {sortedTechs.map((tech) => {
+                        const isSelected = selectedTechs.includes(tech);
+                        return (
+                            <tr
+                                key={tech.name}
+                                className={isSelected ? "selected-row" : ""}
+                                onClick={() => toggleTechSelection(tech)}
+                            >
+                                <td>{tech.name}</td>
+                                <td>{tech.era}</td>
+                                <td>{tech.type}</td>
+                                <td style={{ whiteSpace: "pre-line" }}>
+                                    {tech.unlocks.map((line, i) => (
+                                        <UnlockLine key={i} line={line} />
+                                    ))}
+                                </td>
+                                <td style={{ whiteSpace: "pre-line" }}>
+                                    {tech.effects.join(", ").replace(/, /g, "\n")}
+                                </td>
+                            </tr>
+                        );
+                    })}
                     </tbody>
                 </table>
             </div>

@@ -19,6 +19,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    generateShareLink,
                                                                    onSort,
                                                                }) => {
+    // Prepare CSV data
     const csvData = allTechs.map((t) => ({
         Name: t.name,
         Era: t.era,
@@ -28,7 +29,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
     }));
 
     return (
-        <div className="spreadsheet-toolbar">
+        <div className="spreadsheet-toolbar" style={{ fontFamily: "Inter, sans-serif" }}>
             <button onClick={onSelectAll}>All</button>
             <button onClick={onDeselectAll}>None</button>
             <button onClick={onSort}>Sort</button>
