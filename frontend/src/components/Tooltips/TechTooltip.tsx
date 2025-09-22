@@ -3,8 +3,10 @@ import { Tech, Improvement, District } from "@dataTypes/dataTypes";
 import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";
+import TooltipSection from "./TooltipSection";
 import { improvementsMap } from "../../types/improvementsMap";
 import { districtsMap } from "../../types/districtsMap";
+import { createHoveredImprovement, createHoveredDistrict } from "./hoverHelpers";
 
 interface TechTooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
@@ -20,23 +22,19 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
         const impPrefix = "Improvement: ";
         const distPrefix = "District: ";
 
-        // Improvement
         if (line.startsWith(impPrefix)) {
             const impName = line.slice(impPrefix.length);
             const impObj = improvementsMap.get(impName);
             if (!impObj) return <div key={index}>{line}</div>;
 
             const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const xPct = (rect.left / window.innerWidth) * 100;
-                const yPct = (rect.top / window.innerHeight) * 100;
-                setHoveredImprovement({ ...impObj, coords: { xPct, yPct } });
+                setHoveredImprovement({ ...createHoveredImprovement(impObj, e).data, coords: createHoveredImprovement(impObj, e).coords });
             };
             const handleMouseLeave = () => setHoveredImprovement(null);
 
             return (
                 <div key={index} style={{ display: "inline-block" }}>
-                    {impPrefix}
+                    <span>{impPrefix}</span>
                     <span
                         style={{ textDecoration: "underline", cursor: "pointer" }}
                         onMouseEnter={handleMouseEnter}
@@ -48,23 +46,19 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             );
         }
 
-        // District
         if (line.startsWith(distPrefix)) {
             const distName = line.slice(distPrefix.length);
             const distObj = districtsMap.get(distName);
             if (!distObj) return <div key={index}>{line}</div>;
 
             const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const xPct = (rect.left / window.innerWidth) * 100;
-                const yPct = (rect.top / window.innerHeight) * 100;
-                setHoveredDistrict({ ...distObj, coords: { xPct, yPct } });
+                setHoveredDistrict({ ...createHoveredDistrict(distObj, e).data, coords: createHoveredDistrict(distObj, e).coords });
             };
             const handleMouseLeave = () => setHoveredDistrict(null);
 
             return (
                 <div key={index} style={{ display: "inline-block" }}>
-                    {distPrefix}
+                    <span>{distPrefix}</span>
                     <span
                         style={{ textDecoration: "underline", cursor: "pointer" }}
                         onMouseEnter={handleMouseEnter}
@@ -76,36 +70,26 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             );
         }
 
-        // Fallback: plain text
         return <div key={index}>{line}</div>;
     };
 
     return (
-        <div
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-        >
+        <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <BaseTooltip coords={hoveredTech.coords} hideDelay={250}>
                 <div style={{ fontWeight: 600 }}>{hoveredTech.name}</div>
 
                 {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Unlocks:</strong>
-                        <div style={{ paddingLeft: "0.6rem", display: "flex", flexDirection: "column", gap: "0.2rem" }}>
-                            {hoveredTech.unlocks.map(renderUnlockLine)}
-                        </div>
-                    </div>
+                    <TooltipSection title="Unlocks:">
+                        {hoveredTech.unlocks.map(renderUnlockLine)}
+                    </TooltipSection>
                 )}
 
                 {hoveredTech.effects && hoveredTech.effects.length > 0 && (
-                    <div style={{ marginTop: "0.2rem" }}>
-                        <strong>Effects:</strong>
+                    <TooltipSection title="Effects:">
                         {hoveredTech.effects.map((eff, i) => (
-                            <div key={i} style={{ paddingLeft: "0.6rem" }}>
-                                {eff}
-                            </div>
+                            <div key={i}>{eff}</div>
                         ))}
-                    </div>
+                    </TooltipSection>
                 )}
 
                 {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
