@@ -8,7 +8,15 @@ interface TopContainerProps {
     setCurrentView: (view: 'TechTree' | 'CityPlanner') => void;
 }
 
+// All factions in your game
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
+// Only available faction(s)
+const availableFactions = ["Kin"];
+
+// All views
+const allViews: ('TechTree' | 'CityPlanner')[] = ["TechTree", "CityPlanner"];
+// Only available view(s)
+const availableViews: ('TechTree' | 'CityPlanner')[] = ["TechTree"];
 
 const TopContainer: React.FC<TopContainerProps> = ({
                                                        selectedFaction,
@@ -24,33 +32,38 @@ const TopContainer: React.FC<TopContainerProps> = ({
                 <div className="logo-title">Endless Workshop</div>
             </div>
 
-            {/* View selector buttons (techtree / city planner) */}
+            {/* View selector */}
             <div className="view-selector">
-                <button
-                    className={currentView === 'TechTree' ? 'active' : ''}
-                    onClick={() => setCurrentView('TechTree')}
-                >
-                    Tech Tree
-                </button>
-                <button
-                    className={currentView === 'CityPlanner' ? 'active' : ''}
-                    onClick={() => setCurrentView('CityPlanner')}
-                >
-                    City Planner
-                </button>
+                {allViews.map(view => {
+                    const isAvailable = availableViews.includes(view);
+                    return (
+                        <button
+                            key={view}
+                            className={`${currentView === view ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
+                            onClick={() => isAvailable && setCurrentView(view)}
+                            title={!isAvailable ? "Coming Soon" : ""}
+                        >
+                            {view}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Faction buttons */}
             <div className="faction-selector">
-                {factions.map(f => (
-                    <button
-                        key={f}
-                        className={f === selectedFaction ? 'active' : ''}
-                        onClick={() => setSelectedFaction(f)}
-                    >
-                        {f}
-                    </button>
-                ))}
+                {factions.map(f => {
+                    const isAvailable = availableFactions.includes(f);
+                    return (
+                        <button
+                            key={f}
+                            className={`${f === selectedFaction ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
+                            onClick={() => isAvailable && setSelectedFaction(f)}
+                            title={!isAvailable ? "Coming Soon" : ""}
+                        >
+                            {f}
+                        </button>
+                    );
+                })}
             </div>
         </header>
     );

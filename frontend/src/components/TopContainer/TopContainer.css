@@ -85,3 +85,34 @@
     color: #000;
     box-shadow: none;
 }
+
+/* Ensure disabled buttons have black text regardless of parent */
+.faction-selector button.disabled,
+.view-selector button.disabled {
+    background: repeating-linear-gradient(
+            45deg,
+            #ff7f32,
+            #ff7f32 4px,
+            #777 4px,
+            #777 8px
+    );
+    color: #000 !important;   /* force black text */
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+.faction-selector button.disabled.active,
+.view-selector button.disabled.active {
+    background: repeating-linear-gradient(
+            45deg,
+            #ff7f32,
+            #ff7f32 4px,
+            #777 4px,
+            #777 8px
+    );
+    color: #000 !important;
+    box-shadow: none;
+}
