@@ -75,7 +75,6 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
                             <tr
                                 key={tech.name}
                                 className={isSelected ? "selected-row" : ""}
-                                onClick={() => toggleTechSelection(tech)}
                             >
                                 <td>{tech.name}</td>
                                 <td>{tech.era}</td>
