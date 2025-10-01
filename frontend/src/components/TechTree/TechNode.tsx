@@ -22,6 +22,7 @@ const TechNode: React.FC<TechNodeProps> = ({
 
     return (
         <div
+            data-testid="tech-node"
             className={`tech-node ${selected ? 'selected' : ''} ${locked ? 'locked' : ''}`}
             onClick={clickable ? onClick : undefined}
             onMouseEnter={() => onHoverChange?.(true)}
