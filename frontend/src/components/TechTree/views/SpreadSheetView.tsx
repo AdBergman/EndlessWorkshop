@@ -38,14 +38,6 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
     };
 
     // --- Row toggle selection ---
-    const toggleTechSelection = (tech: Tech) => {
-        if (selectedTechs.includes(tech)) {
-            setSelectedTechs(selectedTechs.filter(t => t !== tech));
-        } else {
-            setSelectedTechs([...selectedTechs, tech]);
-        }
-    };
-
     if (!sortedTechs || sortedTechs.length === 0) return <div>No techs selected</div>;
 
     return (
