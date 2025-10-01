@@ -59,8 +59,8 @@ const TechTree: React.FC<TechTreeProps> = ({
 
     const isLocked = (tech: Tech): boolean => {
         if (selectedTechs.some(t => t.excludes === tech.name)) return true;
-        if (tech.era > maxUnlockedEra) return true;
-        return false;
+        return tech.era > maxUnlockedEra;
+
     };
 
     const eraTechsByEra = useMemo(() => {
