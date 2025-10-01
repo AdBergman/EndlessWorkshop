@@ -1,9 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
 import HoverableItem from '@/components/TechTree/views/HoverableItem';
 
-// Mock tooltip components
 vi.mock('@/components/Tooltips/ImprovementTooltip', () => ({
     default: ({ hoveredImprovement }: any) => (
         <div data-testid="imp-tooltip">{hoveredImprovement.name}</div>
@@ -19,23 +17,32 @@ vi.mock('@/components/Tooltips/DistrictTooltip', () => ({
 describe('HoverableItem', () => {
     it('renders improvement tooltip on hover', async () => {
         const user = userEvent.setup();
-        const itemName = "Traveler's Shrine";
-        render(<HoverableItem type="Improvement" name={itemName} prefix="" />);
+        const name = "Traveler's Shrine";
+        render(<HoverableItem type="Improvement" name={name} prefix="💎 " />);
 
-        await user.hover(screen.getByText(itemName));
+        // Hover **only the span** containing the name
+        const hoverTarget = screen.getByText(name, { selector: 'span' });
+        await user.hover(hoverTarget);
 
         const tooltip = await screen.findByTestId('imp-tooltip');
-        expect(tooltip).toHaveTextContent(itemName);
+        expect(tooltip).toHaveTextContent(name);
+
+        await user.unhover(hoverTarget);
+        expect(screen.queryByTestId('imp-tooltip')).toBeNull();
     });
 
     it('renders district tooltip on hover', async () => {
         const user = userEvent.setup();
-        const itemName = 'Communal Habitations';
-        render(<HoverableItem type="District" name={itemName} prefix="" />);
+        const name = 'Communal Habitations';
+        render(<HoverableItem type="District" name={name} prefix="🏘️ " />);
 
-        await user.hover(screen.getByText(itemName));
+        const hoverTarget = screen.getByText(name, { selector: 'span' });
+        await user.hover(hoverTarget);
 
         const tooltip = await screen.findByTestId('dist-tooltip');
-        expect(tooltip).toHaveTextContent(itemName);
+        expect(tooltip).toHaveTextContent(name);
+
+        await user.unhover(hoverTarget);
+        expect(screen.queryByTestId('dist-tooltip')).toBeNull();
     });
 });
