@@ -22,7 +22,12 @@ const EraNavigationButton: React.FC<Props> = ({ direction, onClick }) => {
     };
 
     return (
-        <div className={`era-navigation-button ${direction}`} style={style} onClick={onClick}>
+        <div
+            className={`era-navigation-button ${direction}`}
+            style={style}
+            onClick={onClick}
+            data-testid="era-nav-button"
+        >
             <div className="orb" />
         </div>
     );
