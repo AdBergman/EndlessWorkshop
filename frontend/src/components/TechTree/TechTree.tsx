@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import techTreeJson from '../../data/techTree.json';
 import TechNode from './TechNode';
-import { Tech } from '../../types/dataTypes';
+import { Tech } from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';

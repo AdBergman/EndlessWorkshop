@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import ImprovementTooltip from '../components/Tooltips/ImprovementTooltip';
-import { Improvement } from '../types/dataTypes';
+import { Improvement } from '@/types/dataTypes';
 
 // Helper function to create type-safe mock data
 const createMockImprovement = (

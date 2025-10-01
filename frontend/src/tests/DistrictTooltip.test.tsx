@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import DistrictTooltip from '../components/Tooltips/DistrictTooltip';
-import { District } from '../types/dataTypes';
+import { District } from '@/types/dataTypes';
 
 // Helper function to create type-safe mock data, mirroring the pattern from other tests
 const createMockDistrict = (

@@ -13,7 +13,6 @@ const SelectAllButton: React.FC<SelectAllButtonProps> = ({
                                                              eraTechs,
                                                              selectedTechs,
                                                              onTechClick,
-                                                             className = '',
                                                          }) => {
     const handleSelectAll = () => {
         eraTechs.forEach(tech => {
