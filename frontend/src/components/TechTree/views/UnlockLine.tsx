@@ -15,6 +15,7 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ line }) => {
                 type="Improvement"
                 name={line.slice(impPrefix.length)}
                 prefix={impPrefix}
+                useContainer={false} // window-relative coordinates
             />
         );
     }
@@ -25,6 +26,7 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ line }) => {
                 type="District"
                 name={line.slice(distPrefix.length)}
                 prefix={distPrefix}
+                useContainer={false} // window-relative coordinates
             />
         );
     }

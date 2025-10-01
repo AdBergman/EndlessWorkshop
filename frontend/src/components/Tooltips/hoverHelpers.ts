@@ -6,34 +6,42 @@ export interface HoveredWithCoords<T> {
 }
 
 /**
- * Calculate mouse hover coordinates as percentages of window dimensions.
+ * Calculate hover coordinates either relative to a container or the viewport.
  */
-export const getHoverCoords = (e: React.MouseEvent<HTMLElement>) => {
+export const getHoverCoords = (
+    e: React.MouseEvent<HTMLElement>,
+    container?: HTMLElement
+): { xPct: number; yPct: number } => {
     const rect = e.currentTarget.getBoundingClientRect();
-    return {
-        xPct: (rect.left / window.innerWidth) * 100,
-        yPct: (rect.top / window.innerHeight) * 100,
-    };
+
+    if (container) {
+        const containerRect = container.getBoundingClientRect();
+        return {
+            xPct: ((rect.left - containerRect.left) / containerRect.width) * 100,
+            yPct: ((rect.top - containerRect.top) / containerRect.height) * 100,
+        };
+    } else {
+        return {
+            xPct: (rect.left / window.innerWidth) * 100,
+            yPct: (rect.top / window.innerHeight) * 100,
+        };
+    }
 };
 
-/**
- * Create hovered improvement with coordinates
- */
 export const createHoveredImprovement = (
     impObj: Improvement,
-    e: React.MouseEvent<HTMLElement>
+    e: React.MouseEvent<HTMLElement>,
+    container?: HTMLElement
 ): HoveredWithCoords<Improvement> => ({
     data: impObj,
-    coords: getHoverCoords(e),
+    coords: getHoverCoords(e, container),
 });
 
-/**
- * Create hovered district with coordinates
- */
 export const createHoveredDistrict = (
     distObj: District,
-    e: React.MouseEvent<HTMLElement>
+    e: React.MouseEvent<HTMLElement>,
+    container?: HTMLElement
 ): HoveredWithCoords<District> => ({
     data: distObj,
-    coords: getHoverCoords(e),
+    coords: getHoverCoords(e, container),
 });
