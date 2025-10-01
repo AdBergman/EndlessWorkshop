@@ -1,4 +1,4 @@
-import { District } from "./dataTypes";
+import { District } from "../types/dataTypes";
 import districtsJson from "../data/districts.json";
 
 // Tell TypeScript that districtsJson is an array of District

@@ -4,8 +4,8 @@ import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";
 import TooltipSection from "./TooltipSection";
-import { improvementsMap } from "../../types/improvementsMap";
-import { districtsMap } from "../../types/districtsMap";
+import { improvementsMap } from "../../utils/improvementsMap";
+import { districtsMap } from "../../utils/districtsMap";
 import { createHoveredImprovement, createHoveredDistrict } from "./hoverHelpers";
 
 interface TechTooltipProps {

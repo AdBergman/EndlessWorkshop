@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
 import ImprovementTooltip from "../../Tooltips/ImprovementTooltip";
 import DistrictTooltip from "../../Tooltips/DistrictTooltip";
-import { improvementsMap } from "../../../types/improvementsMap";
-import { districtsMap } from "../../../types/districtsMap";
+import { improvementsMap } from "../../../utils/improvementsMap";
+import { districtsMap } from "../../../utils/districtsMap";
 import {
     createHoveredImprovement,
     createHoveredDistrict,
