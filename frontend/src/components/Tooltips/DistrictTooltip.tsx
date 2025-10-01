@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import BaseTooltip from "./BaseTooltip";
 import TooltipSection from "./TooltipSection";
-import { District } from "@dataTypes/dataTypes";
+import { District } from "../../types/dataTypes";
 
 interface DistrictTooltipProps {
     hoveredDistrict: District & { coords: { xPct: number; yPct: number } };

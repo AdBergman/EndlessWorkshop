@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import techTreeJson from '../../data/techTree.json';
 import TechNode from './TechNode';
-import { Tech } from '@dataTypes/dataTypes';
+import { Tech } from '../../types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
@@ -106,7 +106,7 @@ const TechTree: React.FC<TechTreeProps> = ({
                 </React.Fragment>
             ))}
 
-            {(['previous', 'next'] as const).map(dir =>
+            {(["previous", "next"] as const).map(dir =>
                     !isButtonHidden(dir) && (
                         <EraNavigationButton
                             key={dir}

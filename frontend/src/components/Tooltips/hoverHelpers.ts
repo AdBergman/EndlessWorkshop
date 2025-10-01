@@ -1,4 +1,4 @@
-import { Improvement, District } from "@dataTypes/dataTypes";
+import { Improvement, District } from "../../types/dataTypes";
 
 export interface HoveredWithCoords<T> {
     data: T;

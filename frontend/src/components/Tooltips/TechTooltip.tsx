@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Tech, Improvement, District } from "@dataTypes/dataTypes";
+import { Tech, Improvement, District } from "../../types/dataTypes";
 import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";

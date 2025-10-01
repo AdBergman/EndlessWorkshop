@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Tech } from "@dataTypes/dataTypes";
+import { Tech } from "../../../types/dataTypes";
 import "./SpreadSheetView.css";
 import UnlockLine from "./UnlockLine";
 import SpreadsheetToolbar from "./SpreadsheetToolbar";
