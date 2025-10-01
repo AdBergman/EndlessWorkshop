@@ -1,26 +1,17 @@
-import React, { useState } from 'react';
+import React from "react";
 import TopContainer from './components/TopContainer/TopContainer';
 import MainContainer from './components/MainContainer/MainContainer';
+import { AppProvider } from "./context/AppContext"; // <-- use named import
 import './App.css';
 
 function App() {
-    const [selectedFaction, setSelectedFaction] = useState("Kin");
-    const [currentView, setCurrentView] = useState<'TechTree' | 'CityPlanner'>('TechTree');
-
     return (
-        <div className="App">
-            <TopContainer
-                selectedFaction={selectedFaction}
-                setSelectedFaction={setSelectedFaction}
-                currentView={currentView}
-                setCurrentView={setCurrentView}
-            />
-
-            <MainContainer
-                currentView={currentView}
-                selectedFaction={selectedFaction}
-            />
-        </div>
+        <AppProvider>
+            <div className="app"> {/* styling still applies */}
+                <TopContainer />
+                <MainContainer />
+            </div>
+        </AppProvider>
     );
 }
 

@@ -2,18 +2,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import BackgroundPreloader from './BackGroundPreloader';
-import { Tech, ERA_THRESHOLDS } from '../../types/dataTypes';
+import { Tech, ERA_THRESHOLDS } from '@/types/dataTypes';
 import techTreeJson from '../../data/techTree.json';
 import './MainContainer.css';
-
-interface MainContainerProps {
-    currentView: 'TechTree' | 'CityPlanner';
-    selectedFaction: string;
-}
+import { useAppContext } from '@/context/AppContext';
 
 const maxEra = 6;
 
-const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFaction }) => {
+const MainContainer: React.FC = () => {
+    const { currentView, selectedFaction } = useAppContext();
     const [era, setEra] = useState(1);
     const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
 
@@ -38,9 +35,8 @@ const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFact
     const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));
     const handleNextEra = () => setEra(prev => Math.min(maxEra, prev + 1));
 
-    // Compute maxUnlockedEra based on selectedTechs
     const maxUnlockedEra = useMemo(() => {
-        const eraCounts = Array(maxEra).fill(0); // index 0 = era 1
+        const eraCounts = Array(maxEra).fill(0);
         selectedTechs.forEach(t => {
             if (t.era >= 1 && t.era <= maxEra) eraCounts[t.era - 1]++;
         });
@@ -55,8 +51,8 @@ const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFact
         return unlocked;
     }, [selectedTechs]);
 
-    // Helper to get background URL for the preloader
-    const getBackgroundUrl = (eraNumber: number) => `/images/backgrounds/${selectedFaction}/era${eraNumber}.png`;
+    const getBackgroundUrl = (eraNumber: number) =>
+        `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${eraNumber}.png`;
 
     if (currentView === 'TechTree') {
         return (
@@ -67,10 +63,9 @@ const MainContainer: React.FC<MainContainerProps> = ({ currentView, selectedFact
                     selectedTechs={selectedTechs}
                     maxUnlockedEra={maxUnlockedEra}
                     onTechClick={handleTechClick}
-                    onEraChange={(dir) => (dir === 'next' ? handleNextEra() : handlePrevEra())}
+                    onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
                 />
 
-                {/* ---------- Background Preloader ---------- */}
                 <BackgroundPreloader
                     currentEra={era}
                     maxEra={maxUnlockedEra}

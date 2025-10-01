@@ -1,12 +1,6 @@
 import React from 'react';
 import './TopContainer.css';
-
-interface TopContainerProps {
-    selectedFaction: string;
-    setSelectedFaction: (faction: string) => void;
-    currentView: 'TechTree' | 'CityPlanner';
-    setCurrentView: (view: 'TechTree' | 'CityPlanner') => void;
-}
+import { useAppContext } from '@/context/AppContext';
 
 // All factions in your game
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
@@ -18,12 +12,9 @@ const allViews: ('TechTree' | 'CityPlanner')[] = ["TechTree", "CityPlanner"];
 // Only available view(s)
 const availableViews: ('TechTree' | 'CityPlanner')[] = ["TechTree"];
 
-const TopContainer: React.FC<TopContainerProps> = ({
-                                                       selectedFaction,
-                                                       setSelectedFaction,
-                                                       currentView,
-                                                       setCurrentView
-                                                   }) => {
+const TopContainer: React.FC = () => {
+    const { selectedFaction, setSelectedFaction, currentView, setCurrentView } = useAppContext();
+
     return (
         <header className="top-container">
             {/* Logo and title */}
