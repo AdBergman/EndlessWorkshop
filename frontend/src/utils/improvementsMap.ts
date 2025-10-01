@@ -1,4 +1,4 @@
-import { Improvement } from "../types/dataTypes";
+import { Improvement } from "@/types/dataTypes";
 import improvementsJson from "../data/improvements.json";
 
 // Tell TypeScript that improvementsJson is an array of Improvement

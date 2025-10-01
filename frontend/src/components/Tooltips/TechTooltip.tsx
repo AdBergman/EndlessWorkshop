@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Tech, Improvement, District } from "../../types/dataTypes";
+import { Tech, Improvement, District } from "@/types/dataTypes";
 import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";
 import TooltipSection from "./TooltipSection";
-import { improvementsMap } from "../../utils/improvementsMap";
-import { districtsMap } from "../../utils/districtsMap";
+import { improvementsMap } from "@/utils/improvementsMap";
+import { districtsMap } from "@/utils/districtsMap";
 import { createHoveredImprovement, createHoveredDistrict } from "./hoverHelpers";
 
 interface TechTooltipProps {
