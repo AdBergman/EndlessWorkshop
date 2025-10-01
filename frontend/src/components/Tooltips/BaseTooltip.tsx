@@ -23,8 +23,8 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnte
         positionStyles = {
             position: "absolute",
             top: `${coords.yPct}%`,
-            left: `${coords.xPct + 1}%`, // Use a small offset for a better experience
-            transform: "translateY(-50%)",
+            left: `${coords.xPct + 4}%`, // Increased horizontal offset
+            transform: "translateY(-75%)", // Shift tooltip further upwards
         };
     }
 
