@@ -6,6 +6,7 @@ import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
+import SelectAllButton from "@/components/TechTree/SelectAllButton";
 
 interface TechTreeProps {
     faction: string;
@@ -83,6 +84,11 @@ const TechTree: React.FC<TechTreeProps> = ({
                 alt={`${faction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
+            />
+            <SelectAllButton
+                eraTechs={factionTechs}
+                selectedTechs={selectedTechs}
+                onTechClick={onTechClick}
             />
 
             {factionTechs.map(tech => (
