@@ -33,7 +33,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             const handleMouseLeave = () => setHoveredImprovement(null);
 
             return (
-                <div key={index} style={{ display: "inline-block" }}>
+                <div key={index} style={{ display: "block" }}>
                     <span>{impPrefix}</span>
                     <span
                         style={{ textDecoration: "underline", cursor: "pointer" }}
