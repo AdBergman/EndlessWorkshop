@@ -61,8 +61,9 @@ const TechTree: React.FC<TechTreeProps> = ({
     const isLocked = (tech: Tech): boolean => {
         if (selectedTechs.some(t => t.excludes === tech.name)) return true;
         return tech.era > maxUnlockedEra;
-
     };
+
+    const selectableTechs = factionTechs.filter(t => !isLocked(t));
 
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
@@ -86,7 +87,7 @@ const TechTree: React.FC<TechTreeProps> = ({
                 draggable={false}
             />
             <SelectAllButton
-                eraTechs={factionTechs}
+                eraTechs={selectableTechs}   // only unlocked/selectable techs
                 selectedTechs={selectedTechs}
                 onTechClick={onTechClick}
             />
