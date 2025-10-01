@@ -74,28 +74,30 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
     };
 
     return (
-        <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <BaseTooltip coords={hoveredTech.coords} hideDelay={250}>
-                <div style={{ fontWeight: 600 }}>{hoveredTech.name}</div>
+        <BaseTooltip
+            coords={hoveredTech.coords}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+        >
+            <div style={{ fontWeight: 600 }}>{hoveredTech.name}</div>
 
-                {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
-                    <TooltipSection title="Unlocks:">
-                        {hoveredTech.unlocks.map(renderUnlockLine)}
-                    </TooltipSection>
-                )}
+            {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
+                <TooltipSection title="Unlocks:">
+                    {hoveredTech.unlocks.map(renderUnlockLine)}
+                </TooltipSection>
+            )}
 
-                {hoveredTech.effects && hoveredTech.effects.length > 0 && (
-                    <TooltipSection title="Effects:">
-                        {hoveredTech.effects.map((eff, i) => (
-                            <div key={i}>{eff}</div>
-                        ))}
-                    </TooltipSection>
-                )}
+            {hoveredTech.effects && hoveredTech.effects.length > 0 && (
+                <TooltipSection title="Effects:">
+                    {hoveredTech.effects.map((eff, i) => (
+                        <div key={i}>{eff}</div>
+                    ))}
+                </TooltipSection>
+            )}
 
-                {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
-                {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
-            </BaseTooltip>
-        </div>
+            {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
+            {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
+        </BaseTooltip>
     );
 };
 

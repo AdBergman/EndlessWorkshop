@@ -1,31 +1,26 @@
-import { Improvement, District } from "../../types/dataTypes";
+import { Improvement, District } from "@/types/dataTypes";
 
+// The coords property is now a union type to support both coordinate systems.
 export interface HoveredWithCoords<T> {
     data: T;
-    coords: { xPct: number; yPct: number };
+    coords: { xPct: number; yPct: number } | { x: number; y: number; mode: 'pixel' };
 }
 
 /**
- * Calculate hover coordinates either relative to a container or the viewport.
+ * Calculates the absolute pixel coordinates for a tooltip.
  */
 export const getHoverCoords = (
-    e: React.MouseEvent<HTMLElement>,
-    container?: HTMLElement
-): { xPct: number; yPct: number } => {
+    e: React.MouseEvent<HTMLElement>
+): { x: number; y: number; mode: 'pixel' } => {
     const rect = e.currentTarget.getBoundingClientRect();
 
-    if (container) {
-        const containerRect = container.getBoundingClientRect();
-        return {
-            xPct: ((rect.left - containerRect.left) / containerRect.width) * 100,
-            yPct: ((rect.top - containerRect.top) / containerRect.height) * 100,
-        };
-    } else {
-        return {
-            xPct: (rect.left / window.innerWidth) * 100,
-            yPct: (rect.top / window.innerHeight) * 100,
-        };
-    }
+    // Position the tooltip based on the RIGHT edge of the hovered element, plus a small offset.
+    // This ensures the tooltip doesn't obscure the item being hovered.
+    return {
+        x: rect.right + window.scrollX + 10, // Position 10px to the right of the element
+        y: rect.top + window.scrollY,
+        mode: 'pixel',
+    };
 };
 
 export const createHoveredImprovement = (
@@ -34,7 +29,7 @@ export const createHoveredImprovement = (
     container?: HTMLElement
 ): HoveredWithCoords<Improvement> => ({
     data: impObj,
-    coords: getHoverCoords(e, container),
+    coords: getHoverCoords(e),
 });
 
 export const createHoveredDistrict = (
@@ -43,5 +38,5 @@ export const createHoveredDistrict = (
     container?: HTMLElement
 ): HoveredWithCoords<District> => ({
     data: distObj,
-    coords: getHoverCoords(e, container),
+    coords: getHoverCoords(e),
 });

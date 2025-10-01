@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import ImprovementTooltip from "../../Tooltips/ImprovementTooltip";
 import DistrictTooltip from "../../Tooltips/DistrictTooltip";
 import { improvementsMap } from "@/utils/improvementsMap";
@@ -15,20 +15,20 @@ interface HoverableItemProps {
     type: HoverType;
     name: string;
     prefix: string;
-    useContainer?: boolean; // new optional prop
+    containerRef: React.RefObject<HTMLDivElement>; // Accept the container ref from the parent
 }
 
 const HoverableItem: React.FC<HoverableItemProps> = ({
                                                          type,
                                                          name,
                                                          prefix,
-                                                         useContainer = true, // default true
+                                                         containerRef,
                                                      }) => {
     const [hovered, setHovered] = useState<HoveredWithCoords<any> | null>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-        const container = useContainer ? containerRef.current ?? undefined : undefined;
+        // Use the passed-in containerRef to get the correct positioning context
+        const container = containerRef.current ?? undefined;
 
         if (type === "Improvement") {
             const imp = improvementsMap.get(name);
@@ -44,7 +44,7 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
     const handleMouseLeave = () => setHovered(null);
 
     return (
-        <div ref={containerRef} style={{ position: "relative", display: "inline-block" }}>
+        <div style={{ display: "inline-block" }}>
             {prefix}
             <span
                 style={{ textDecoration: "underline", cursor: "pointer" }}

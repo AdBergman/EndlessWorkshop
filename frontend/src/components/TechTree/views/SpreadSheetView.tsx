@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Tech } from "../../../types/dataTypes";
+import React, { useState, useEffect, useRef } from "react";
+import { Tech } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import UnlockLine from "./UnlockLine";
 import SpreadsheetToolbar from "./SpreadsheetToolbar";
@@ -11,10 +11,11 @@ interface SpreadSheetViewProps {
 
 const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSelectedTechs }) => {
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
+    const containerRef = useRef<HTMLDivElement>(null); // Create a ref for the container
 
     // --- Sync props ---
     useEffect(() => {
-        setSortedTechs([...selectedTechs]); // Sort/display only selectedTechs
+        setSortedTechs([...selectedTechs]);
     }, [selectedTechs]);
 
     // --- Sorting ---
@@ -37,7 +38,6 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
         alert("Share link copied to clipboard!");
     };
 
-    // --- Row toggle selection ---
     if (!sortedTechs || sortedTechs.length === 0) return <div>No techs selected</div>;
 
     return (
@@ -49,7 +49,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}
             />
-            <div className="spreadsheet-container">
+            <div className="spreadsheet-container" ref={containerRef}>
                 <table className="spreadsheet-table">
                     <thead>
                     <tr>
@@ -73,7 +73,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
                                 <td>{tech.type}</td>
                                 <td style={{ whiteSpace: "pre-line" }}>
                                     {tech.unlocks.map((line, i) => (
-                                        <UnlockLine key={i} line={line} />
+                                        <UnlockLine key={i} line={line} containerRef={containerRef} />
                                     ))}
                                 </td>
                                 <td style={{ whiteSpace: "pre-line" }}>

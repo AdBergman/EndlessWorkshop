@@ -1,39 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 
 interface BaseTooltipProps {
-    coords: { xPct: number; yPct: number };
+    coords: { xPct: number; yPct: number } | { x: number; y: number; mode: 'pixel' };
     children: React.ReactNode;
-    hideDelay?: number; // milliseconds
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
-const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, hideDelay = 500 }) => {
-    const [visible, setVisible] = useState(true);
-    const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    const handleMouseEnter = () => {
-        if (hideTimeoutRef.current) {
-            clearTimeout(hideTimeoutRef.current);
-            hideTimeoutRef.current = null;
-        }
-        setVisible(true);
-    };
-
-    const handleMouseLeave = () => {
-        hideTimeoutRef.current = setTimeout(() => setVisible(false), hideDelay);
-    };
-
-    // clear timeout on unmount
-    useEffect(() => {
-        return () => {
-            if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnter, onMouseLeave }) => {
+    // --- Determine styling based on the coordinate system ---
+    let positionStyles: React.CSSProperties;
+    if ('mode' in coords && coords.mode === 'pixel') {
+        // Use absolute pixel coordinates for portaled tooltips (e.g., from SpreadsheetView)
+        positionStyles = {
+            position: "absolute",
+            top: `${coords.y}px`,
+            left: `${coords.x}px`,
+            transform: "translateY(-50%)", // Vertically center on the cursor
         };
-    }, []);
+    } else {
+        // Use percentage-based coordinates for tooltips within a specific container (e.g., TechTree)
+        positionStyles = {
+            position: "absolute",
+            top: `${coords.yPct}%`,
+            left: `${coords.xPct + 1}%`, // Use a small offset for a better experience
+            transform: "translateY(-50%)",
+        };
+    }
 
-    if (!visible) return null;
-
-    const tooltipStyles: React.CSSProperties = {
-        position: "absolute",
-        transform: "translateY(-50%)",
+    const baseStyles: React.CSSProperties = {
+        // This MUST be auto for the onMouseEnter/Leave handlers to work.
         pointerEvents: "auto",
         backgroundColor: "rgba(0,0,0,0.85)",
         color: "#fff",
@@ -50,15 +46,13 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, hideDelay =
     return (
         <div
             className="base-tooltip"
-            style={{ ...tooltipStyles, top: `${coords.yPct}%`, left: `${coords.xPct + 5}%` }}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            style={{ ...baseStyles, ...positionStyles }}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             {children}
         </div>
     );
-
-
 };
 
 export default BaseTooltip;

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import techTreeJson from '../../data/techTree.json';
 import TechNode from './TechNode';
 import { Tech } from '@/types/dataTypes';
@@ -19,6 +19,7 @@ interface TechTreeProps {
 
 const MIN_ERA = 1;
 const MAX_ERA = 6;
+const HIDE_DELAY = 300; // Grace period in ms to move mouse to tooltip
 
 const TechTree: React.FC<TechTreeProps> = ({
                                                faction,
@@ -28,11 +29,24 @@ const TechTree: React.FC<TechTreeProps> = ({
                                                selectedTechs,
                                                onTechClick
                                            }) => {
-    // --- NEW: a simple Set of tech names whose tooltips are currently shown ---
     const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
+    const hideTimers = useRef<Record<string, NodeJS.Timeout>>({});
+
+    // Clear timers on unmount
+    useEffect(() => {
+        const timers = hideTimers.current;
+        return () => {
+            Object.values(timers).forEach(clearTimeout);
+        };
+    }, []);
 
     const showTooltip = useCallback((techName: string) => {
+        // If there's a pending timer to hide this tooltip, cancel it.
+        if (hideTimers.current[techName]) {
+            clearTimeout(hideTimers.current[techName]);
+        }
         setOpenTooltips(prev => {
+            if (prev.has(techName)) return prev; // Already open
             const next = new Set(prev);
             next.add(techName);
             return next;
@@ -40,12 +54,15 @@ const TechTree: React.FC<TechTreeProps> = ({
     }, []);
 
     const hideTooltip = useCallback((techName: string) => {
-        setOpenTooltips(prev => {
-            if (!prev.has(techName)) return prev;
-            const next = new Set(prev);
-            next.delete(techName);
-            return next;
-        });
+        // Set a timer to hide the tooltip, allowing a grace period.
+        hideTimers.current[techName] = setTimeout(() => {
+            setOpenTooltips(prev => {
+                if (!prev.has(techName)) return prev;
+                const next = new Set(prev);
+                next.delete(techName);
+                return next;
+            });
+        }, HIDE_DELAY);
     }, []);
 
     const factionTechs = useMemo(
@@ -106,8 +123,8 @@ const TechTree: React.FC<TechTreeProps> = ({
                     {openTooltips.has(tech.name) && (
                         <TechTooltip
                             hoveredTech={tech}
-                            onMouseEnter={() => showTooltip(tech.name)}
-                            onMouseLeave={() => hideTooltip(tech.name)}
+                            onMouseEnter={() => showTooltip(tech.name)} // Cancels the hide timer
+                            onMouseLeave={() => hideTooltip(tech.name)} // Schedules a new hide timer
                         />
                     )}
                 </React.Fragment>
