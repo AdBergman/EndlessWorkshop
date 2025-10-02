@@ -9,8 +9,10 @@ import { useAppContext } from '@/context/AppContext';
 
 const maxEra = 6;
 
+// This component is now only responsible for the TechTree page.
 const MainContainer: React.FC = () => {
-    const { currentView, selectedFaction } = useAppContext();
+    // It no longer needs currentView, as routing handles which page is shown.
+    const { selectedFaction } = useAppContext();
     const [era, setEra] = useState(1);
     const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
 
@@ -54,39 +56,31 @@ const MainContainer: React.FC = () => {
     const getBackgroundUrl = (eraNumber: number) =>
         `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${eraNumber}.png`;
 
-    if (currentView === 'TechTree') {
-        return (
-            <main className="main-container">
-                <TechTree
-                    era={era}
-                    faction={selectedFaction}
+    return (
+        <main className="main-container">
+            <TechTree
+                era={era}
+                faction={selectedFaction}
+                selectedTechs={selectedTechs}
+                maxUnlockedEra={maxUnlockedEra}
+                onTechClick={handleTechClick}
+                onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
+            />
+
+            <BackgroundPreloader
+                currentEra={era}
+                maxEra={maxUnlockedEra}
+                getBackgroundUrl={getBackgroundUrl}
+            />
+
+            <div className="view-container">
+                <SpreadSheetView
                     selectedTechs={selectedTechs}
-                    maxUnlockedEra={maxUnlockedEra}
-                    onTechClick={handleTechClick}
-                    onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
+                    setSelectedTechs={setSelectedTechs}
                 />
-
-                <BackgroundPreloader
-                    currentEra={era}
-                    maxEra={maxUnlockedEra}
-                    getBackgroundUrl={getBackgroundUrl}
-                />
-
-                <div className="view-container">
-                    <SpreadSheetView
-                        selectedTechs={selectedTechs}
-                        setSelectedTechs={setSelectedTechs}
-                    />
-                </div>
-            </main>
-        );
-    }
-
-    if (currentView === 'CityPlanner') {
-        return <div className="main-container">City Planner placeholder</div>;
-    }
-
-    return null;
+            </div>
+        </main>
+    );
 };
 
 export default MainContainer;

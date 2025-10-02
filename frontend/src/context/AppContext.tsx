@@ -1,20 +1,18 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
+// The context is now only responsible for shared application data, not navigation.
 interface AppContextType {
     selectedFaction: string;
     setSelectedFaction: (f: string) => void;
-    currentView: string;
-    setCurrentView: (v: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [selectedFaction, setSelectedFaction] = useState('Kin');
-    const [currentView, setCurrentView] = useState('TechTree');
 
     return (
-        <AppContext.Provider value={{ selectedFaction, setSelectedFaction, currentView, setCurrentView }}>
+        <AppContext.Provider value={{ selectedFaction, setSelectedFaction }}>
             {children}
         </AppContext.Provider>
     );

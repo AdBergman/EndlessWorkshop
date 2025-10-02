@@ -1,3 +1,8 @@
+/*
+  TopContainer.css
+  Styling for the main header/navigation bar.
+*/
+
 .top-container {
     display: grid;
     grid-template-columns: auto 1fr auto; /* left | center | right */
@@ -28,38 +33,55 @@
     -webkit-text-fill-color: transparent;
 }
 
-/* View selector */
+/* View selector (Main Navigation) */
 .view-selector {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem; /* Scaled up gap */
     justify-content: center;
 }
 
-.view-selector button {
-    margin-right: 0.5rem;
-    padding: 0.4rem 0.8rem;   /* keep consistent */
-    font-size: 1rem;          /* slightly larger but not huge */
-    font-weight: 600;
-    border-radius: 4px;
-    border: none;
+/* Base style for NavLink elements, scaled up from SpreadsheetToolbar */
+.view-selector a {
+    display: inline-block;
+    padding: 0.4rem 0.8rem; /* Scaled from 0.25rem 0.5rem */
+    font-size: 1.25rem;      /* Scaled from 0.85rem */
+    font-weight: 500;
+    border-radius: 5px;      /* Scaled from 3px */
+    border: 1px solid transparent;
     background-color: #222;
-    color: #fff;
+    color: #ccc;
     cursor: pointer;
     transition: all 0.2s ease;
-    line-height: 1.2;         /* helps make text “pop” without changing height */
+    line-height: 1.2;
+    text-decoration: none;
 }
 
-.view-selector button.active {
-    background-color: #ff7f32;
-    color: #000;
-    box-shadow: none;
-}
-
-.view-selector button:hover {
+/* Hover state for clickable links */
+.view-selector a:not(.disabled):hover {
     background-color: #333;
 }
 
-/* Faction selector */
+/* Active state for the current page's link */
+.view-selector a.active {
+    background-color: #3a3a3a;
+    color: #ff7f32;
+    font-weight: 600;
+}
+
+/* Disabled state for unavailable links */
+.view-selector a.disabled {
+    color: #666;
+    cursor: not-allowed;
+    background-color: #1c1c1c;
+}
+
+/* Remove hover effect for disabled links */
+.view-selector a.disabled:hover {
+    background-color: #1c1c1c;
+}
+
+
+/* Faction selector (Right side) */
 .faction-selector {
     display: flex;
     justify-content: flex-end;
@@ -86,33 +108,12 @@
     box-shadow: none;
 }
 
-/* Ensure disabled buttons have black text regardless of parent */
-.faction-selector button.disabled,
-.view-selector button.disabled {
-    background: repeating-linear-gradient(
-            45deg,
-            #ff7f32,
-            #ff7f32 4px,
-            #777 4px,
-            #777 8px
-    );
-    color: #000 !important;   /* force black text */
-    font-weight: 600;
-    border-radius: 4px;
+.faction-selector button.disabled {
+    color: #666;
     cursor: not-allowed;
-    pointer-events: none;
-    box-shadow: none;
+    background-color: #1c1c1c;
 }
 
-.faction-selector button.disabled.active,
-.view-selector button.disabled.active {
-    background: repeating-linear-gradient(
-            45deg,
-            #ff7f32,
-            #ff7f32 4px,
-            #777 4px,
-            #777 8px
-    );
-    color: #000 !important;
-    box-shadow: none;
+.faction-selector button.disabled:hover {
+    background-color: #1c1c1c;
 }
