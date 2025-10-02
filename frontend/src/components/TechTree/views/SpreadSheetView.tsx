@@ -68,6 +68,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
         <div className="spreadsheet-wrapper">
             <SpreadsheetToolbar
                 selectedTechs={selectedTechs}
+                unlockedImprovements={unlockedImprovements} // Pass the new data down
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}

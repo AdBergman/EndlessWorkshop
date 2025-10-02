@@ -23,19 +23,18 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                 </thead>
                 <tbody>
                 {improvements
-                    .filter(imp => imp) // Defensively filter out any null or undefined items
+                    .filter(imp => imp && imp.name) // Defensively filter items without a name to prevent key errors
                     .map((imp) => (
                     <tr key={imp.name}>
                         <td>{imp.name}</td>
                         <td style={{ whiteSpace: 'pre-line' }}>
-                            {/* Explicitly check for content and provide clear feedback if missing */}
                             {imp.effects && imp.effects.length > 0
                                 ? imp.effects.join('\n')
                                 : <span style={{ color: '#888' }}>-- No effects data --</span>}
                         </td>
                         <td>{imp.unique}</td>
                         <td>
-                            {/* Same explicit check for cost */}
+                            {/* With consistent data, we can now safely join the array */}
                             {imp.cost && imp.cost.length > 0
                                 ? imp.cost.join(', ')
                                 : <span style={{ color: '#888' }}>-- No cost data --</span>}

@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { CSVLink } from "react-csv";
 import "./SpreadsheetToolbar.css";
-import { Tech } from "@/types/dataTypes";
+import { Tech, Improvement } from "@/types/dataTypes";
 
 // Define the possible views the sheet can display
 export type SheetView = 'techs' | 'improvements' | 'districts';
 
 interface SpreadsheetToolbarProps {
     selectedTechs: Tech[];
+    unlockedImprovements: Improvement[]; // The new data prop
     onDeselectAll: () => void;
     generateShareLink: () => void;
     onSort: () => void;
@@ -16,48 +17,54 @@ interface SpreadsheetToolbarProps {
 }
 
 const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
-                                                                   selectedTechs,
-                                                                   onDeselectAll,
-                                                                   generateShareLink,
-                                                                   onSort,
-                                                                   activeSheet,
-                                                                   setActiveSheet,
-                                                               }) => {
-    // CSV export data depends on current view
-    let csvData;
-    if (activeSheet === 'techs') {
-        csvData = selectedTechs.map((t) => ({
-            Name: t.name,
-            Era: t.era,
-            Type: t.type,
-            Unlocks: t.unlocks.join("; "),
-            Effects: t.effects.join("; "),
-        }));
-    } else if (activeSheet === 'improvements') {
-        // You can replace this with the actual unlocked improvements logic later
-        csvData = selectedTechs.flatMap(t =>
-            t.unlocks
-                .filter(line => line.startsWith("Improvement: "))
-                .map(line => ({ Name: line.slice("Improvement: ".length) }))
-        );
-    } else {
-        // districts or units
-        csvData = []; // placeholder until we implement
-    }
+    selectedTechs,
+    unlockedImprovements,
+    onDeselectAll,
+    generateShareLink,
+    onSort,
+    activeSheet,
+    setActiveSheet,
+}) => {
+    // useMemo efficiently calculates the CSV data and filename only when the relevant data changes.
+    const { csvData, filename } = useMemo(() => {
+        switch (activeSheet) {
+            case 'improvements':
+                return {
+                    filename: `endless-workshop-improvements.csv`,
+                    csvData: unlockedImprovements.map((imp) => ({
+                        Name: imp.name,
+                        Unique: imp.unique,
+                        Effects: imp.effects?.join("; ") ?? "",
+                        Cost: imp.cost?.join("; ") ?? "",
+                    })),
+                };
+            case 'techs':
+            default:
+                return {
+                    filename: `endless-workshop-techs.csv`,
+                    csvData: selectedTechs.map((t) => ({
+                        Name: t.name,
+                        Era: t.era,
+                        Type: t.type,
+                        Unlocks: t.unlocks.join("; "),
+                        Effects: t.effects.join("; "),
+                    })),
+                };
+        }
+    }, [activeSheet, selectedTechs, unlockedImprovements]);
 
     return (
         <div className="spreadsheet-toolbar">
-            {/* Action buttons on the left */}
             <div className="action-buttons">
+                {/* These buttons are now always visible, as requested */}
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
                 <button onClick={generateShareLink}>Copy Link</button>
-                <CSVLink data={csvData} filename={`endless-workshop-${activeSheet}.csv`}>
+                <CSVLink data={csvData} filename={filename}>
                     <button>Export CSV</button>
                 </CSVLink>
             </div>
 
-            {/* View toggle buttons on the right */}
             <div className="view-toggle-buttons">
                 <button
                     onClick={() => setActiveSheet('techs')}
@@ -73,7 +80,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 </button>
                 <button
                     onClick={() => setActiveSheet('districts')}
-                    className={activeSheet === 'districts' ? 'active disabled' : 'disabled'}
+                    className={`${activeSheet === 'districts' ? 'active' : ''} disabled`}
                     title="Coming Soon"
                 >
                     Districts

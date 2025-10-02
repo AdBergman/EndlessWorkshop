@@ -53,7 +53,7 @@
       "+5 Food",
       "+5 Food on Farms Districts"],
     "unique": "City",
-    "cost": "5 Glassteel"
+    "cost": ["5 Glassteel"]
   },
   {
     "name": "Granary",
@@ -75,7 +75,7 @@
       "+50 Dust"
     ],
     "unique": "City",
-    "cost": "5 Glassteel"
+    "cost": ["5 Glassteel"]
   },
   {
     "name": "Geodesic Dome",
@@ -84,7 +84,7 @@
       "+5 Science on Laboratory"
     ],
     "unique": "City",
-    "cost": "5 Glassteel"
+    "cost": ["5 Glassteel"]
   },
   {
     "name": "Beacon of Science",
@@ -142,7 +142,7 @@
       "+100% Food on Foundation "
     ],
     "unique": "City",
-    "cost": "10 Glassteel"
+    "cost": ["10 Glassteel"]
   },
   {
     "name": "Spire of Industry",
@@ -162,7 +162,7 @@
     "name": "Alchemists' Commission",
     "effects": ["+100 Dust on Foundation"],
     "unique": "City",
-    "cost": "10 Glassteel"
+    "cost": ["10 Glassteel"]
   },
   {
     "name": "Caravanserai",
@@ -178,7 +178,7 @@
       "+100% Industry on Foundation"
     ],
     "unique": "City",
-    "cost": "10 Glassteel"
+    "cost": ["10 Glassteel"]
   },
   {
     "name": "Dust Blasting",
@@ -198,7 +198,7 @@
     "name": "Wildlife Lookout",
     "effects": ["+100% Science on Foundation"],
     "unique": "City",
-    "cost": "10 Glassteel"
+    "cost": ["10 Glassteel"]
   },
   {
     "name": "Commanders' Table",
@@ -372,7 +372,7 @@
       "+4 Influence per City level"
     ],
     "unique": "Empire",
-    "cost": "5"
+    "cost": ["5"]
   },
   {
     "name": "Teahouse",
