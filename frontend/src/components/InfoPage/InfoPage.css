@@ -1,3 +1,5 @@
+/* InfoPage.css */
+
 .info-content {
     max-width: 800px;
     margin: 2rem auto;
@@ -18,13 +20,14 @@
     margin-bottom: 1rem;
 }
 
-/* Animated orange lines above and below main text */
-@keyframes gradient-shimmer {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+/* Pulse animation for top/bottom lines */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 4px #ff7f32; opacity: 0.7; }
+    50% { box-shadow: 0 0 12px #ff7f32; opacity: 1; }
+    100% { box-shadow: 0 0 4px #ff7f32; opacity: 0.7; }
 }
 
+/* Animated orange lines above and below main text */
 .info-content::before,
 .info-content::after {
     content: "";
@@ -33,9 +36,8 @@
     height: 2px;
     margin: 1.5rem auto;
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d, #e67328);
-    background-size: 200% 100%;
     border-radius: 2px;
-    animation: gradient-shimmer 3s linear infinite;
+    animation: pulseGlow 2s ease-in-out infinite;
 }
 
 /* Thin centered orange line before copyright */
@@ -44,11 +46,10 @@
     height: 1.5px;
     margin: 2rem auto;
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d, #e67328);
-    background-size: 200% 100%;
     border-radius: 1px;
-    animation: gradient-shimmer 3s linear infinite;
 }
 
+/* Paragraph styling */
 .info-content p {
     margin: 1rem 0;
     line-height: 1.6;
