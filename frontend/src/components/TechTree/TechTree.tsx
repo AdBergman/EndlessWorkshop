@@ -7,6 +7,7 @@ import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
 import SelectAllButton from "@/components/TechTree/SelectAllButton";
+import ClearAllButton from "./ClearAllButton"; // Import the new component
 
 interface TechTreeProps {
     faction: string;
@@ -65,7 +66,7 @@ const TechTree: React.FC<TechTreeProps> = ({
         }, HIDE_DELAY);
     }, []);
 
-    const factionTechs = useMemo(
+    const currentFactionEraTechs = useMemo(
         () => (techTreeJson as Tech[]).filter(t => t.era === era && t.faction.includes(faction)),
         [era, faction]
     );
@@ -80,7 +81,7 @@ const TechTree: React.FC<TechTreeProps> = ({
         return tech.era > maxUnlockedEra;
     };
 
-    const selectableTechs = factionTechs.filter(t => !isLocked(t));
+    const selectableTechs = currentFactionEraTechs.filter(t => !isLocked(t));
 
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
@@ -108,8 +109,13 @@ const TechTree: React.FC<TechTreeProps> = ({
                 selectedTechs={selectedTechs}
                 onTechClick={onTechClick}
             />
+            <ClearAllButton
+                eraTechs={currentFactionEraTechs} // Changed to all techs in the era
+                selectedTechs={selectedTechs}
+                onTechClick={onTechClick}
+            />
 
-            {factionTechs.map(tech => (
+            {currentFactionEraTechs.map(tech => (
                 <React.Fragment key={tech.name}>
                     <TechNode
                         coords={tech.coords}
