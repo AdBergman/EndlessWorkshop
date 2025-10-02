@@ -1,13 +1,13 @@
-package com.endlessworkshop.ewbackend;
+package ewshop.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class EndlessWorkshopApplication {
+@SpringBootApplication(scanBasePackages = "ewshop")
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(EndlessWorkshopApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
 }
