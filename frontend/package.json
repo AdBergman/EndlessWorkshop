@@ -11,6 +11,7 @@
     "react": "^19.1.1",
     "react-csv": "^2.2.2",
     "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

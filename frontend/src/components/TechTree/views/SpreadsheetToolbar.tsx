@@ -33,7 +33,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     filename: `endless-workshop-improvements.csv`,
                     csvData: unlockedImprovements.map((imp) => ({
                         Name: imp.name,
-                        Era: imp.era, // Reverted to number
+                        Era: imp.era,
                         Unique: imp.unique,
                         Effects: imp.effects?.join("; ") ?? "",
                         Cost: imp.cost?.join("; ") ?? "",
@@ -45,7 +45,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     filename: `endless-workshop-techs.csv`,
                     csvData: selectedTechs.map((t) => ({
                         Name: t.name,
-                        Era: t.era, // Reverted to number
+                        Era: t.era,
                         Type: t.type,
                         Unlocks: t.unlocks.join("; "),
                         Effects: t.effects.join("; "),

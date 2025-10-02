@@ -1,0 +1,90 @@
+.info-content {
+    max-width: 800px;
+    margin: 2rem auto;
+    text-align: center;
+    padding: 1rem;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 0 1px rgba(0,0,0,0.5);
+}
+
+.info-content h1 {
+    color: #ff7f32; /* orange heading */
+    font-family: 'Audiowide', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Animated orange lines above and below main text */
+@keyframes gradient-shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.info-content::before,
+.info-content::after {
+    content: "";
+    display: block;
+    width: 80%;
+    height: 2px;
+    margin: 1.5rem auto;
+    background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d, #e67328);
+    background-size: 200% 100%;
+    border-radius: 2px;
+    animation: gradient-shimmer 3s linear infinite;
+}
+
+/* Thin centered orange line before copyright */
+.orange-line.thin-center {
+    width: 45%;
+    height: 1.5px;
+    margin: 2rem auto;
+    background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d, #e67328);
+    background-size: 200% 100%;
+    border-radius: 1px;
+    animation: gradient-shimmer 3s linear infinite;
+}
+
+.info-content p {
+    margin: 1rem 0;
+    line-height: 1.6;
+}
+
+.info-content p.italic {
+    font-style: italic;
+    margin-top: 1rem;
+}
+
+.info-content p.top-margin {
+    margin-top: 1.5rem;
+}
+
+/* Horizontal resource links as outlined buttons */
+.resource-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.resource-links a {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 6px;
+    background-color: #000;
+    border: 2px solid #ff7f32;
+    color: #ff7f32;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.resource-links a:hover {
+    background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
+    color: #000;
+}
