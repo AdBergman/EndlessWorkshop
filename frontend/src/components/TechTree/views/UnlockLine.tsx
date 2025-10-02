@@ -3,10 +3,9 @@ import HoverableItem from "./HoverableItem";
 
 interface UnlockLineProps {
     line: string;
-    containerRef: React.RefObject<HTMLDivElement>; // Accept the container ref
 }
 
-const UnlockLine: React.FC<UnlockLineProps> = ({ line, containerRef }) => {
+const UnlockLine: React.FC<UnlockLineProps> = ({ line }) => {
     const impPrefix = "Improvement: ";
     const distPrefix = "District: ";
 
@@ -16,7 +15,6 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ line, containerRef }) => {
                 type="Improvement"
                 name={line.slice(impPrefix.length)}
                 prefix={impPrefix}
-                containerRef={containerRef} // Pass the ref down
             />
         );
     }
@@ -27,7 +25,6 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ line, containerRef }) => {
                 type="District"
                 name={line.slice(distPrefix.length)}
                 prefix={distPrefix}
-                containerRef={containerRef} // Pass the ref down
             />
         );
     }

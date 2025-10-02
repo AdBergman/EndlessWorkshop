@@ -15,7 +15,6 @@ interface HoverableItemProps {
     type: HoverType;
     name: string;
     prefix: string;
-    containerRef: React.RefObject<HTMLDivElement>; // Accept the container ref from the parent
 }
 
 const HoverableItem: React.FC<HoverableItemProps> = ({
@@ -50,21 +49,12 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
                 {name}
             </span>
 
+            {/* Pass the entire 'hovered' object directly to the child tooltips */}
             {hovered && type === "Improvement" && (
-                <ImprovementTooltip
-                    hoveredImprovement={{
-                        ...hovered.data,
-                        coords: hovered.coords,
-                    }}
-                />
+                <ImprovementTooltip hoveredImprovement={hovered} />
             )}
             {hovered && type === "District" && (
-                <DistrictTooltip
-                    hoveredDistrict={{
-                        ...hovered.data,
-                        coords: hovered.coords,
-                    }}
-                />
+                <DistrictTooltip hoveredDistrict={hovered} />
             )}
         </div>
     );

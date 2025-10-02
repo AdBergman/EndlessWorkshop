@@ -6,7 +6,7 @@ import DistrictTooltip from "./DistrictTooltip";
 import TooltipSection from "./TooltipSection";
 import { improvementsMap } from "@/utils/improvementsMap";
 import { districtsMap } from "@/utils/districtsMap";
-import { createHoveredImprovement, createHoveredDistrict } from "./hoverHelpers";
+import { createHoveredImprovement, createHoveredDistrict, HoveredWithCoords } from "./hoverHelpers";
 
 interface TechTooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
@@ -14,9 +14,14 @@ interface TechTooltipProps {
     onMouseLeave: () => void;
 }
 
+// Define a reusable type for the hovered state to match the return type of our helpers
+type HoveredImprovementState = HoveredWithCoords<Improvement> | null;
+type HoveredDistrictState = HoveredWithCoords<District> | null;
+
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
-    const [hoveredImprovement, setHoveredImprovement] = useState<Improvement & { coords: { xPct: number; yPct: number } } | null>(null);
-    const [hoveredDistrict, setHoveredDistrict] = useState<District & { coords: { xPct: number; yPct: number } } | null>(null);
+    // Use the new, more flexible types for the state
+    const [hoveredImprovement, setHoveredImprovement] = useState<HoveredImprovementState>(null);
+    const [hoveredDistrict, setHoveredDistrict] = useState<HoveredDistrictState>(null);
 
     const renderUnlockLine = (line: string, index: number) => {
         const impPrefix = "Improvement: ";
@@ -28,7 +33,8 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             if (!impObj) return <div key={index}>{line}</div>;
 
             const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                setHoveredImprovement({ ...createHoveredImprovement(impObj, e).data, coords: createHoveredImprovement(impObj, e).coords });
+                // The type now correctly matches, so this assignment is valid
+                setHoveredImprovement(createHoveredImprovement(impObj, e));
             };
             const handleMouseLeave = () => setHoveredImprovement(null);
 
@@ -52,7 +58,8 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             if (!distObj) return <div key={index}>{line}</div>;
 
             const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                setHoveredDistrict({ ...createHoveredDistrict(distObj, e).data, coords: createHoveredDistrict(distObj, e).coords });
+                // The type now correctly matches, so this assignment is valid
+                setHoveredDistrict(createHoveredDistrict(distObj, e));
             };
             const handleMouseLeave = () => setHoveredDistrict(null);
 

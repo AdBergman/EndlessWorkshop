@@ -2,14 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom";
 import BaseTooltip from "./BaseTooltip";
 import TooltipSection from "./TooltipSection";
-import { District } from "../../types/dataTypes";
+import { District } from "@/types/dataTypes";
+import { HoveredWithCoords } from "./hoverHelpers";
 
 interface DistrictTooltipProps {
-    hoveredDistrict: District & { coords: { xPct: number; yPct: number } };
+    hoveredDistrict: HoveredWithCoords<District>;
 }
 
 const DistrictTooltip: React.FC<DistrictTooltipProps> = ({ hoveredDistrict }) => {
-    const { name, info, effect, tileBonus, adjacencyBonus, placementPrereq, coords } = hoveredDistrict;
+    // Destructure the data and coords from the new prop shape
+    const { data, coords } = hoveredDistrict;
+    const { name, info, effect, tileBonus, adjacencyBonus, placementPrereq } = data;
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords}>

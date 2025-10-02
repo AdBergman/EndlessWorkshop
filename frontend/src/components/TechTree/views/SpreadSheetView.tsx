@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Tech } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import UnlockLine from "./UnlockLine";
@@ -11,7 +11,6 @@ interface SpreadSheetViewProps {
 
 const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSelectedTechs }) => {
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
-    const containerRef = useRef<HTMLDivElement>(null); // Create a ref for the container
 
     // --- Sync props ---
     useEffect(() => {
@@ -49,7 +48,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}
             />
-            <div className="spreadsheet-container" ref={containerRef}>
+            <div className="spreadsheet-container">
                 <table className="spreadsheet-table">
                     <thead>
                     <tr>
@@ -73,7 +72,7 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
                                 <td>{tech.type}</td>
                                 <td style={{ whiteSpace: "pre-line" }}>
                                     {tech.unlocks.map((line, i) => (
-                                        <UnlockLine key={i} line={line} containerRef={containerRef} />
+                                        <UnlockLine key={i} line={line} />
                                     ))}
                                 </td>
                                 <td style={{ whiteSpace: "pre-line" }}>

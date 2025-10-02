@@ -2,15 +2,18 @@ import React from "react";
 import ReactDOM from "react-dom";
 import BaseTooltip from "./BaseTooltip";
 import TooltipSection from "./TooltipSection";
-import {Improvement} from "@/types/dataTypes";
-import {TooltipFlavor} from "@/components/Tooltips/TooltipFlavor";
+import { Improvement } from "@/types/dataTypes";
+import { TooltipFlavor } from "@/components/Tooltips/TooltipFlavor";
+import { HoveredWithCoords } from "./hoverHelpers";
 
 interface ImprovementTooltipProps {
-    hoveredImprovement: Improvement & { coords: { xPct: number; yPct: number } };
+    hoveredImprovement: HoveredWithCoords<Improvement>;
 }
 
 const ImprovementTooltip: React.FC<ImprovementTooltipProps> = ({ hoveredImprovement }) => {
-    const { name, effects, unique, coords } = hoveredImprovement;
+    // Destructure the data and coords from the new prop shape
+    const { data, coords } = hoveredImprovement;
+    const { name, effects, unique } = data;
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords}>
