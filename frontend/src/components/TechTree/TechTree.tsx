@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import techTreeJson from '../../data/techTree.json';
+import techTreeJson from '../../data/techs.json';
 import TechNode from './TechNode';
 import { Tech } from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';

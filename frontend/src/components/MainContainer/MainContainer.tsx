@@ -3,7 +3,7 @@ import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import BackgroundPreloader from './BackGroundPreloader';
 import { Tech, ERA_THRESHOLDS } from '@/types/dataTypes';
-import techTreeJson from '../../data/techTree.json';
+import techTreeJson from '../../data/techs.json';
 import './MainContainer.css';
 import { useAppContext } from '@/context/AppContext';
 
