@@ -40,11 +40,10 @@
     justify-content: center;
 }
 
-/* Base style for NavLink elements */
 .view-selector a {
     display: inline-block;
     padding: 0.4rem 0.6rem;
-    font-size: 1.05rem; /* Correctly set to the halfway size */
+    font-size: 1.05rem;
     font-weight: 500;
     border-radius: 5px;
     border: 1px solid transparent;
@@ -56,26 +55,22 @@
     text-decoration: none;
 }
 
-/* Hover state for clickable links */
 .view-selector a:not(.disabled):hover {
     background-color: #333;
 }
 
-/* Active state for the current page's link */
 .view-selector a.active {
     background-color: #3a3a3a;
     color: #ff7f32;
     font-weight: 600;
 }
 
-/* Disabled state for unavailable links */
 .view-selector a.disabled {
     color: #666;
     cursor: not-allowed;
     background-color: #1c1c1c;
 }
 
-/* Remove hover effect for disabled links */
 .view-selector a.disabled:hover {
     background-color: #1c1c1c;
 }
@@ -88,24 +83,28 @@
     gap: 0.5rem;
 }
 
+/* Faction buttons now have the vibrant style */
 .faction-selector button {
     margin-left: 0.5rem;
     padding: 0.4rem 0.8rem;
     border: none;
-    border-radius: 5px; /* Added for consistency */
-    background-color: #222;
-    color: #fff;
+    border-radius: 5px;
+    background-color: #222; /* Dark background for inactive */
+    color: #ff7f32; /* Orange text for inactive */
     cursor: pointer;
     transition: all 0.2s ease;
+    font-weight: 500;
 }
 
 .faction-selector button:hover {
     background-color: #333;
 }
 
+/* Active faction button is bright orange */
 .faction-selector button.active {
-    background-color: #ff7f32;
-    color: #000;
+    background-color: #ff7f32; /* Bright orange background */
+    color: #000; /* Black text */
+    font-weight: 600;
     box-shadow: none;
 }
 
