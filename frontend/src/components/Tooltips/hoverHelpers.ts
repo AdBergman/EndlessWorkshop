@@ -25,8 +25,7 @@ export const getHoverCoords = (
 
 export const createHoveredImprovement = (
     impObj: Improvement,
-    e: React.MouseEvent<HTMLElement>,
-    container?: HTMLElement
+    e: React.MouseEvent<HTMLElement>
 ): HoveredWithCoords<Improvement> => ({
     data: impObj,
     coords: getHoverCoords(e),
@@ -34,8 +33,7 @@ export const createHoveredImprovement = (
 
 export const createHoveredDistrict = (
     distObj: District,
-    e: React.MouseEvent<HTMLElement>,
-    container?: HTMLElement
+    e: React.MouseEvent<HTMLElement>
 ): HoveredWithCoords<District> => ({
     data: distObj,
     coords: getHoverCoords(e),

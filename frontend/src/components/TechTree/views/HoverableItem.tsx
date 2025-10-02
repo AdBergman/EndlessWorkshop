@@ -33,11 +33,11 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
         if (type === "Improvement") {
             const imp = improvementsMap.get(name);
             if (!imp) return;
-            setHovered(createHoveredImprovement(imp, e, container));
+            setHovered(createHoveredImprovement(imp, e));
         } else if (type === "District") {
             const dist = districtsMap.get(name);
             if (!dist) return;
-            setHovered(createHoveredDistrict(dist, e, container));
+            setHovered(createHoveredDistrict(dist, e));
         }
     };
 
