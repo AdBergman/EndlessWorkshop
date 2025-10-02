@@ -22,12 +22,10 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
                                                          type,
                                                          name,
                                                          prefix,
-                                                         containerRef,
                                                      }) => {
     const [hovered, setHovered] = useState<HoveredWithCoords<any> | null>(null);
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-        // Use the passed-in containerRef to get the correct positioning context
         if (type === "Improvement") {
             const imp = improvementsMap.get(name);
             if (!imp) return;
