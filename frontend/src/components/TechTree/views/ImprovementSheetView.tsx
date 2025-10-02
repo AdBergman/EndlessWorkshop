@@ -16,6 +16,7 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                 <thead>
                 <tr>
                     <th>Name</th>
+                    <th>Era</th>
                     <th>Effects</th>
                     <th>Unique</th>
                     <th>Cost</th>
@@ -27,6 +28,7 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                     .map((imp) => (
                     <tr key={imp.name}>
                         <td>{imp.name}</td>
+                        <td>{imp.era}</td>
                         <td style={{ whiteSpace: 'pre-line' }}>
                             {imp.effects && imp.effects.length > 0
                                 ? imp.effects.join('\n')

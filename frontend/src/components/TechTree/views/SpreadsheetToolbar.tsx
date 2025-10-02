@@ -33,6 +33,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     filename: `endless-workshop-improvements.csv`,
                     csvData: unlockedImprovements.map((imp) => ({
                         Name: imp.name,
+                        Era: imp.era, // Reverted to number
                         Unique: imp.unique,
                         Effects: imp.effects?.join("; ") ?? "",
                         Cost: imp.cost?.join("; ") ?? "",
@@ -44,7 +45,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     filename: `endless-workshop-techs.csv`,
                     csvData: selectedTechs.map((t) => ({
                         Name: t.name,
-                        Era: t.era,
+                        Era: t.era, // Reverted to number
                         Type: t.type,
                         Unlocks: t.unlocks.join("; "),
                         Effects: t.effects.join("; "),
@@ -56,7 +57,6 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
     return (
         <div className="spreadsheet-toolbar">
             <div className="action-buttons">
-                {/* These buttons are now always visible, as requested */}
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
                 <button onClick={generateShareLink}>Copy Link</button>

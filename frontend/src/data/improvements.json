@@ -1,15 +1,21 @@
 [
   {
     "name": "Traveler's Shrine",
-    "effects": ["+15 Approval"],
+    "effects": [
+      "+15 Approval"
+    ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 1
   },
   {
     "name": "Garrison",
-    "effects": ["+500 District Fortification"],
+    "effects": [
+      "+500 District Fortification"
+    ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Legion Vaults",
@@ -19,7 +25,8 @@
       "+10 Defense on on Militia"
     ],
     "unique": "Empire",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Scriptorium",
@@ -28,13 +35,15 @@
       "+2 Influence per Population on Scribes"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Lodgings",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Emergency Dwellings",
@@ -45,21 +54,27 @@
       "+4 Influence on Ministry"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Laborer's Hut",
     "effects": [
       "+5 Food",
-      "+5 Food on Farms Districts"],
+      "+5 Food on Farms Districts"
+    ],
     "unique": "City",
-    "cost": ["5 Glassteel"]
+    "cost": [
+      "5 Glassteel"
+    ],
+    "era": 2
   },
   {
     "name": "Granary",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Blast Furnace",
@@ -67,7 +82,8 @@
       "+25 Industry"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Lithosphere Gallery",
@@ -75,7 +91,10 @@
       "+50 Dust"
     ],
     "unique": "City",
-    "cost": ["5 Glassteel"]
+    "cost": [
+      "5 Glassteel"
+    ],
+    "era": 2
   },
   {
     "name": "Geodesic Dome",
@@ -84,31 +103,38 @@
       "+5 Science on Laboratory"
     ],
     "unique": "City",
-    "cost": ["5 Glassteel"]
+    "cost": [
+      "5 Glassteel"
+    ],
+    "era": 2
   },
   {
     "name": "Beacon of Science",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Hydropump",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 2
   },
   {
     "name": "Military Efficiency",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Legionaries Workshop",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Halls of Power",
@@ -117,7 +143,8 @@
       "+5 influence on District if Forum"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Citizen's Center",
@@ -126,7 +153,8 @@
       "+20 Approval on City"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Irrigation Channels",
@@ -134,7 +162,8 @@
       "+10 Food on Farm Districts if adjacent to River"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Wood Ash Pit",
@@ -142,13 +171,17 @@
       "+100% Food on Foundation "
     ],
     "unique": "City",
-    "cost": ["10 Glassteel"]
+    "cost": [
+      "10 Glassteel"
+    ],
+    "era": 3
   },
   {
     "name": "Spire of Industry",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Corkscrew Drill",
@@ -156,13 +189,19 @@
       "+1 Exploited Resource on Mine"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Alchemists' Commission",
-    "effects": ["+100 Dust on Foundation"],
+    "effects": [
+      "+100 Dust on Foundation"
+    ],
     "unique": "City",
-    "cost": ["10 Glassteel"]
+    "cost": [
+      "10 Glassteel"
+    ],
+    "era": 3
   },
   {
     "name": "Caravanserai",
@@ -170,7 +209,8 @@
       "+10 Dust per adjacent Territory with Trading Post"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Lumber Yard",
@@ -178,13 +218,17 @@
       "+100% Industry on Foundation"
     ],
     "unique": "City",
-    "cost": ["10 Glassteel"]
+    "cost": [
+      "10 Glassteel"
+    ],
+    "era": 3
   },
   {
     "name": "Dust Blasting",
     "effects": [],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Research Station",
@@ -192,13 +236,19 @@
       "+8 Science to Laboratory if adjacent to Anomaly"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 3
   },
   {
     "name": "Wildlife Lookout",
-    "effects": ["+100% Science on Foundation"],
+    "effects": [
+      "+100% Science on Foundation"
+    ],
     "unique": "City",
-    "cost": ["10 Glassteel"]
+    "cost": [
+      "10 Glassteel"
+    ],
+    "era": 3
   },
   {
     "name": "Commanders' Table",
@@ -207,7 +257,8 @@
       "-1 Influence per Population on Scribes"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Watchman's Bell",
@@ -218,7 +269,8 @@
       "-1 Dust per Population on Artisans"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Martial Discipline",
@@ -230,7 +282,8 @@
       "+10% Science on City"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Museum",
@@ -241,7 +294,8 @@
       "-1 Dust per Population on Artisans"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Parade Stands",
@@ -250,7 +304,8 @@
       "+2 Influence per Population on Scribes"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Windmill",
@@ -259,7 +314,8 @@
       "-1 Dust per Population on Citizens"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Farming Cooperative",
@@ -268,7 +324,8 @@
       "+2 Food per Population on Citizens"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Workers' League",
@@ -277,7 +334,8 @@
       "+2 Industry per Population on Artisans"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Artisans' Tools",
@@ -286,7 +344,8 @@
       "-1 Dust per Population on Artisans"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Thermal Baths",
@@ -299,7 +358,8 @@
       "+5 Population slot on Population Vocations"
     ],
     "unique": "Empire",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Lined Crates",
@@ -307,7 +367,8 @@
       "+3 exploited Resource Production on Quarry"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Scientific Repository",
@@ -320,7 +381,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 4
   },
   {
     "name": "Quarry Oversight",
@@ -332,7 +394,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 4
   },
   {
     "name": "Fish Farms",
@@ -341,7 +404,8 @@
       "+5 Dust on River if active Monsoon"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 4
   },
   {
     "name": "Fortified Cities",
@@ -350,7 +414,8 @@
       "+50% Fortification on City"
     ],
     "unique": "Empire",
-    "cost": []
+    "cost": [],
+    "era": 5
   },
   {
     "name": "Protective Carapaces",
@@ -364,7 +429,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Imperial Secretariat",
@@ -372,7 +438,10 @@
       "+4 Influence per City level"
     ],
     "unique": "Empire",
-    "cost": ["5"]
+    "cost": [
+      "5"
+    ],
+    "era": 5
   },
   {
     "name": "Teahouse",
@@ -384,7 +453,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Canning Shed",
@@ -397,7 +467,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Nectar Silo",
@@ -410,17 +481,21 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Ore Breaker",
-    "effects": ["+10 Industry per City level"],
+    "effects": [
+      "+10 Industry per City level"
+    ],
     "unique": "Empire",
     "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Land Clearance",
@@ -433,7 +508,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Cashier's Lodge",
@@ -445,7 +521,8 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Customs Inspector",
@@ -456,7 +533,8 @@
       "+2 Dust per population on Artisans"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 5
   },
   {
     "name": "Collections Bureau",
@@ -467,7 +545,8 @@
       "-1 Approval per Population on Citizens"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 5
   },
   {
     "name": "Lecture Hall",
@@ -476,7 +555,8 @@
       "+2 Science per Population on Scribes"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 5
   },
   {
     "name": "Philosophers' Circle",
@@ -485,17 +565,21 @@
       "+2 Science per Population on Scribes"
     ],
     "unique": "City",
-    "cost": []
+    "cost": [],
+    "era": 5
   },
   {
     "name": "Grant Treasury",
-    "effects": ["+10 Science per City level"],
+    "effects": [
+      "+10 Science per City level"
+    ],
     "unique": "Empire",
     "cost": [
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   },
   {
     "name": "Field Studies",
@@ -507,6 +591,7 @@
       "5 Glassteel",
       "5 Hyperium",
       "5 Thalanite"
-    ]
+    ],
+    "era": 5
   }
 ]
