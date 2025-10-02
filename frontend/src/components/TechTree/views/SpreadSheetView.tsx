@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Tech } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
-import UnlockLine from "./UnlockLine";
-import SpreadsheetToolbar from "./SpreadsheetToolbar";
+import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
+import TechSheetView from "./TechSheetView";
+import ImprovementSheetView from "./ImprovementSheetView";
+import DistrictSheetView from "./DistrictSheetView";
+import { getUnlockedImprovements } from "@/utils/unlocks";
+import { improvementsMap } from "@/utils/improvementsMap";
 
 interface SpreadSheetViewProps {
     selectedTechs: Tech[];
@@ -10,14 +14,20 @@ interface SpreadSheetViewProps {
 }
 
 const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSelectedTechs }) => {
+    const [activeSheet, setActiveSheet] = useState<SheetView>('techs');
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
 
-    // --- Sync props ---
     useEffect(() => {
         setSortedTechs([...selectedTechs]);
     }, [selectedTechs]);
 
-    // --- Sorting ---
+    // --- Data Derivation ---
+    const unlockedImprovements = useMemo(
+        () => getUnlockedImprovements(selectedTechs, improvementsMap),
+        [selectedTechs]
+    );
+
+    // --- Handlers for the Toolbar (currently specific to Techs) ---
     const handleSort = () => {
         const newOrder = [...sortedTechs].sort((a, b) => {
             if (a.era !== b.era) return a.era - b.era;
@@ -26,10 +36,8 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
         setSortedTechs(newOrder);
     };
 
-    // --- Deselect All ---
     const handleDeselectAll = () => setSelectedTechs([]);
 
-    // --- Copy Link ---
     const handleGenerateShareLink = () => {
         const names = selectedTechs.map(t => t.name).join(",");
         const link = `${window.location.origin}?share=${encodeURIComponent(names)}`;
@@ -37,53 +45,36 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
         alert("Share link copied to clipboard!");
     };
 
-    if (!sortedTechs || sortedTechs.length === 0) return <div>No techs selected</div>;
+    // If no techs are selected, render nothing but the message.
+    if (selectedTechs.length === 0) {
+        return <div className="empty-sheet-message">No techs selected</div>;
+    }
+
+    // --- Dynamic Rendering Logic ---
+    const renderActiveSheet = () => {
+        switch (activeSheet) {
+            case 'techs':
+                return <TechSheetView techs={sortedTechs} />;
+            case 'improvements':
+                return <ImprovementSheetView improvements={unlockedImprovements} />;
+            case 'districts':
+                return <DistrictSheetView />;
+            default:
+                return <TechSheetView techs={sortedTechs} />;
+        }
+    };
 
     return (
         <div className="spreadsheet-wrapper">
             <SpreadsheetToolbar
                 selectedTechs={selectedTechs}
-                allTechs={sortedTechs}
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}
+                activeSheet={activeSheet}
+                setActiveSheet={setActiveSheet}
             />
-            <div className="spreadsheet-container">
-                <table className="spreadsheet-table">
-                    <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Era</th>
-                        <th>Type</th>
-                        <th>Unlocks</th>
-                        <th>Effects</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {sortedTechs.map((tech) => {
-                        const isSelected = selectedTechs.includes(tech);
-                        return (
-                            <tr
-                                key={tech.name}
-                                className={isSelected ? "selected-row" : ""}
-                            >
-                                <td>{tech.name}</td>
-                                <td>{tech.era}</td>
-                                <td>{tech.type}</td>
-                                <td style={{ whiteSpace: "pre-line" }}>
-                                    {tech.unlocks.map((line, i) => (
-                                        <UnlockLine key={i} line={line} />
-                                    ))}
-                                </td>
-                                <td style={{ whiteSpace: "pre-line" }}>
-                                    {tech.effects.join(", ").replace(/, /g, "\n")}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    </tbody>
-                </table>
-            </div>
+            {renderActiveSheet()}
         </div>
     );
 };

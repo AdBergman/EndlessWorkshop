@@ -1,14 +1,19 @@
 /* SpreadsheetToolbar.css */
 .spreadsheet-toolbar {
     display: flex;
-    gap: 0.3rem;
     padding: 0.25rem 0.5rem;
     border-bottom: 1px solid #333;
     background-color: #111;
-    justify-content: flex-start;
     align-items: center;
-    font-size: 0.85rem;
-    font-family: 'Inter', sans-serif;   /* added font */
+    font-family: 'Inter', sans-serif;
+    justify-content: space-between; /* Pushes the two button groups apart */
+}
+
+.action-buttons,
+.view-toggle-buttons {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
 }
 
 .spreadsheet-toolbar button {
@@ -16,15 +21,37 @@
     font-size: 0.85rem;
     font-weight: 500;
     border-radius: 3px;
-    border: none;
+    border: 1px solid transparent; /* Use border for consistent sizing */
     background-color: #222;
-    color: #ff7f32;
+    color: #ccc; /* Default color for non-active buttons */
     cursor: pointer;
     transition: all 0.2s ease;
     line-height: 1.1;
-    font-family: 'Inter', sans-serif;   /* added font */
 }
 
 .spreadsheet-toolbar button:hover {
     background-color: #333;
+}
+
+/* Style for the active view-toggle button */
+.view-toggle-buttons button.active {
+    background-color: #3a3a3a;
+    color: #ff7f32; /* Highlight color for active text */
+    font-weight: 600;
+}
+
+/* Style for disabled buttons */
+.spreadsheet-toolbar button.disabled {
+    color: #666;
+    cursor: not-allowed;
+    background-color: #1c1c1c;
+}
+
+.spreadsheet-toolbar button.disabled:hover {
+    background-color: #1c1c1c; /* No hover effect for disabled buttons */
+}
+
+/* Action buttons use the primary color */
+.action-buttons button {
+    color: #ff7f32;
 }
