@@ -28,8 +28,6 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
         // Use the passed-in containerRef to get the correct positioning context
-        const container = containerRef.current ?? undefined;
-
         if (type === "Improvement") {
             const imp = improvementsMap.get(name);
             if (!imp) return;
