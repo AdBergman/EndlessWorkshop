@@ -10,10 +10,16 @@
       "+100 Fortification on Capital"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 21.30,
+      "xPct": 21.3,
       "yPct": 29.76
     }
   },
@@ -28,7 +34,13 @@
       "+1 Scribe slot on Capital"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 35.57,
@@ -46,10 +58,16 @@
       "+12 Approval on Capital"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 47.40,
+      "xPct": 47.4,
       "yPct": 16.96
     }
   },
@@ -65,7 +83,13 @@
       "+1 Artisan Slot on Capital"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 59.22,
@@ -82,7 +106,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 71.09,
@@ -100,11 +130,17 @@
       "+8 Dust on Capital"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 71.04,
-      "yPct": 58.00
+      "yPct": 58.0
     }
   },
   {
@@ -117,7 +153,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 56.88,
@@ -134,7 +176,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 37.92,
@@ -151,11 +199,13 @@
       "+2 Industry on Military Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 30.78,
-      "yPct": 42.00
+      "yPct": 42.0
     }
   },
   {
@@ -169,11 +219,17 @@
       "+5 Damage on non-Hero"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 21.30,
-      "yPct": 58.00
+      "xPct": 21.3,
+      "yPct": 58.0
     }
   },
   {
@@ -188,10 +244,16 @@
       "+200 District Fortification on Ministry"
     ],
     "prereq": "",
-    "faction": ["Aspect","Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 21.30,
+      "xPct": 21.3,
       "yPct": 29.76
     }
   },
@@ -205,11 +267,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 30.78,
-      "yPct": 42.00
+      "yPct": 42.0
     }
   },
   {
@@ -223,11 +287,17 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 21.30,
-      "yPct": 58.00
+      "xPct": 21.3,
+      "yPct": 58.0
     }
   },
   {
@@ -241,11 +311,17 @@
       "-25% Dust cost for Bribe action"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 28.45,
-      "yPct": 4.30
+      "yPct": 4.3
     }
   },
   {
@@ -259,7 +335,13 @@
       "+4 Influence income on Capital"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 40.28,
@@ -276,7 +358,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.41,
@@ -294,10 +382,16 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 54.50,
+      "xPct": 54.5,
       "yPct": 23.42
     }
   },
@@ -313,11 +407,17 @@
       "+100 Influence"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 66.32,
-      "yPct": 4.30
+      "yPct": 4.3
     }
   },
   {
@@ -332,7 +432,13 @@
       "1 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 63.97,
@@ -351,10 +457,16 @@
       "+4 Industry on Capital"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 73.40,
+      "xPct": 73.4,
       "yPct": 29.75
     }
   },
@@ -370,11 +482,17 @@
       "+4 Dust on Ministry"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 73.40,
-      "yPct": 58.30
+      "xPct": 73.4,
+      "yPct": 58.3
     }
   },
   {
@@ -389,7 +507,13 @@
       "+4 Science on Capital"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 40.28,
@@ -407,11 +531,17 @@
       "-25% Influence cost for Found Camp (Works for Necromancer and Aspects too)"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.41,
-      "yPct": 77.30
+      "yPct": 77.3
     }
   },
   {
@@ -425,10 +555,16 @@
       "+25% Precision for season predictability"
     ],
     "prereq": "Keystones",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 54.50,
+      "xPct": 54.5,
       "yPct": 64.64
     }
   },
@@ -444,7 +580,13 @@
       "+50 District Fortification on Military Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 21.32,
@@ -462,11 +604,13 @@
       "-25% Industry cost on Military-related Improvements"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 30.78,
-      "yPct": 42.00
+      "yPct": 42.0
     }
   },
   {
@@ -481,7 +625,9 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 21.32,
@@ -498,11 +644,17 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 28.45,
-      "yPct": 4.30
+      "yPct": 4.3
     }
   },
   {
@@ -517,7 +669,13 @@
       "+1 Influence on Ministry"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 40.28,
@@ -536,7 +694,13 @@
       "+2 Food on Ministry"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.41,
@@ -555,10 +719,16 @@
       "+2 Food on Farm Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 54.50,
+      "xPct": 54.5,
       "yPct": 23.42
     }
   },
@@ -573,11 +743,17 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 66.32,
-      "yPct": 4.30
+      "yPct": 4.3
     }
   },
   {
@@ -590,7 +766,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 63.92,
@@ -610,7 +792,13 @@
       "0.5 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 63.92,
@@ -629,10 +817,16 @@
       "+2 Industry on Works Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 73.40,
+      "xPct": 73.4,
       "yPct": 26.42
     }
   },
@@ -648,10 +842,16 @@
       "+4 Dust on Merchant's House Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 73.40,
+      "xPct": 73.4,
       "yPct": 64.53
     }
   },
@@ -668,7 +868,13 @@
       "+2 Science on Ministry"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 40.28,
@@ -687,7 +893,13 @@
       "+8 Damage on non-Hero"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 54.44,
@@ -705,7 +917,13 @@
       "+5 Approval on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Logistics",
     "coords": {
       "xPct": 16.63,
@@ -723,7 +941,13 @@
       "-25% Industry on Keep"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Auxiliary Forces",
     "coords": {
       "xPct": 26.09,
@@ -740,11 +964,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 30.78,
-      "yPct": 42.00
+      "yPct": 42.0
     }
   },
   {
@@ -759,7 +985,9 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 21.32,
@@ -777,7 +1005,13 @@
       "+3 Influence on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Dramatic Arts",
     "coords": {
       "xPct": 28.45,
@@ -795,10 +1029,16 @@
       "-25% Industry cost on Forum"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Public Works",
     "coords": {
-      "xPct": 37.90,
+      "xPct": 37.9,
       "yPct": 4.42
     }
   },
@@ -812,7 +1052,13 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.41,
@@ -830,7 +1076,13 @@
       "+3 Food on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Hothouses",
     "coords": {
       "xPct": 56.87,
@@ -849,7 +1101,13 @@
       "-25% Industry cost on Farm"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Cultivation",
     "coords": {
       "xPct": 66.31,
@@ -867,7 +1125,13 @@
       "+3 Industry on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Standardization",
     "coords": {
       "xPct": 68.71,
@@ -885,7 +1149,13 @@
       "-25% Industry cost on Works"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Guilds",
     "coords": {
       "xPct": 78.19,
@@ -905,7 +1175,13 @@
       "+2 Industry on Ministry"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 73.45,
@@ -925,11 +1201,17 @@
       "0.2 Movement Points max to cross a road Tile"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 73.40,
-      "yPct": 61.30
+      "xPct": 73.4,
+      "yPct": 61.3
     }
   },
   {
@@ -944,7 +1226,13 @@
       "-50% Turn cost for Close Rift action"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 40.26,
@@ -962,7 +1250,13 @@
       "-25% Influence cost for Attach Camp action"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.36,
@@ -980,7 +1274,13 @@
       "+25 Precision for season predictability"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 54.46,
@@ -998,10 +1298,16 @@
       "-2 Dust Upkeep on Unit"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 30.80,
+      "xPct": 30.8,
       "yPct": 32.97
     }
   },
@@ -1016,7 +1322,13 @@
       "-15% Industry cost on Unit"
     ],
     "prereq": "Military Engineering",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 18.97,
@@ -1034,11 +1346,13 @@
       "+1 Industry on Population"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 23.71,
-      "yPct": 42.30
+      "yPct": 42.3
     }
   },
   {
@@ -1053,7 +1367,9 @@
     ],
     "effects": [],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Kin"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 23.71,
@@ -1071,7 +1387,13 @@
       "+2 Influence on Forums Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 37.88,
@@ -1089,7 +1411,13 @@
       "+50 Influence on Scribes"
     ],
     "prereq": "Glory of Empire",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 28.44,
@@ -1108,7 +1436,13 @@
       "+50% Food per Population on Citizens"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 56.84,
@@ -1128,7 +1462,13 @@
       "+40 Public Opinion on the other Empire"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 66.32,
@@ -1148,11 +1488,17 @@
       "+50% Industry per Population on Artisans"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 73.45,
-      "yPct": 23.30
+      "yPct": 23.3
     }
   },
   {
@@ -1167,7 +1513,13 @@
       "+25% Dust on Population Vocations"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 73.45,
@@ -1185,7 +1537,13 @@
       "+3 Dust on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Land Management",
     "coords": {
       "xPct": 68.71,
@@ -1203,7 +1561,13 @@
       "-25% Industry cost on Merchant's House"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Tolls and Taxation",
     "coords": {
       "xPct": 78.19,
@@ -1221,10 +1585,16 @@
       "+3 Science on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "Inventors' Endowments",
     "coords": {
-      "xPct": 30.80,
+      "xPct": 30.8,
       "yPct": 80.44
     }
   },
@@ -1239,7 +1609,13 @@
       "-25% Industry cost on Laboratory"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "University",
     "coords": {
       "xPct": 40.26,
@@ -1258,7 +1634,13 @@
       "-50% Turn cost on Landscaping Actions"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 47.36,
@@ -1277,7 +1659,13 @@
       "+2 Science on Laboratories Districts"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 54.44,
@@ -1295,7 +1683,13 @@
       "+50% Science on Scribes"
     ],
     "prereq": "Scientific Prizes",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 61.56,
@@ -1315,11 +1709,17 @@
       "+10 Defense on Unit"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 27.06,
-      "yPct": 45.00
+      "yPct": 45.0
     }
   },
   {
@@ -1332,7 +1732,13 @@
       "+15% Influence on City Hall"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 41.63,
@@ -1352,7 +1758,13 @@
       "-50% cost to grow all Populations"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 51.51,
@@ -1373,11 +1785,17 @@
       "-50% Influence cost on Foundation"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 66.63,
-      "yPct": 29.50
+      "yPct": 29.5
     }
   },
   {
@@ -1392,7 +1810,13 @@
       "-50% Buyout cost on Improvement"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
       "xPct": 67.15,
@@ -1409,10 +1833,16 @@
       "-20% on all Technology research cost"
     ],
     "prereq": "",
-    "faction": ["Kin"],
+    "faction": [
+      "Aspect",
+      "Kin",
+      "Lost Lords",
+      "Necrophage",
+      "Tahuk"
+    ],
     "excludes": "",
     "coords": {
-      "xPct": 47.40,
+      "xPct": 47.4,
       "yPct": 73.83
     }
   }
