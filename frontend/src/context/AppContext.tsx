@@ -1,18 +1,21 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-// The context is now only responsible for shared application data, not navigation.
+// The context now manages the names of selected techs as a string array.
 interface AppContextType {
     selectedFaction: string;
     setSelectedFaction: (f: string) => void;
+    selectedTechs: string[];
+    setSelectedTechs: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [selectedFaction, setSelectedFaction] = useState('Kin');
+    const [selectedTechs, setSelectedTechs] = useState<string[]>([]); // State is now a string array
 
     return (
-        <AppContext.Provider value={{ selectedFaction, setSelectedFaction }}>
+        <AppContext.Provider value={{ selectedFaction, setSelectedFaction, selectedTechs, setSelectedTechs }}>
             {children}
         </AppContext.Provider>
     );

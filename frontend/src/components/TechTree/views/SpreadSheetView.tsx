@@ -7,27 +7,33 @@ import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
 import { getUnlockedImprovements } from "@/utils/unlocks";
 import { improvementsMap } from "@/utils/improvementsMap";
+import { useAppContext } from "@/context/AppContext";
+import techTreeJson from "@/data/techs.json";
 
-interface SpreadSheetViewProps {
-    selectedTechs: Tech[];
-    setSelectedTechs: (techs: Tech[]) => void;
-}
-
-const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSelectedTechs }) => {
+// This component no longer receives props, as it gets its state from the context.
+const SpreadSheetView: React.FC = () => {
+    const { selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
     const [activeSheet, setActiveSheet] = useState<SheetView>('techs');
+
+    // --- Data Derivation from Context and JSON ---
+    const allTechs = useMemo(() => techTreeJson as Tech[], []);
+    const selectedTechObjects = useMemo(() => {
+        const techNameSet = new Set(selectedTechNames);
+        return allTechs.filter(tech => techNameSet.has(tech.name));
+    }, [selectedTechNames, allTechs]);
+
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
 
     useEffect(() => {
-        setSortedTechs([...selectedTechs]);
-    }, [selectedTechs]);
+        setSortedTechs([...selectedTechObjects]);
+    }, [selectedTechObjects]);
 
-    // --- Data Derivation ---
     const unlockedImprovements = useMemo(
-        () => getUnlockedImprovements(selectedTechs, improvementsMap),
-        [selectedTechs]
+        () => getUnlockedImprovements(selectedTechObjects, improvementsMap),
+        [selectedTechObjects]
     );
 
-    // --- Handlers for the Toolbar (currently specific to Techs) ---
+    // --- Handlers for the Toolbar ---
     const handleSort = () => {
         const newOrder = [...sortedTechs].sort((a, b) => {
             if (a.era !== b.era) return a.era - b.era;
@@ -36,17 +42,17 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
         setSortedTechs(newOrder);
     };
 
+    // This now clears the global state.
     const handleDeselectAll = () => setSelectedTechs([]);
 
     const handleGenerateShareLink = () => {
-        const names = selectedTechs.map(t => t.name).join(",");
-        const link = `${window.location.origin}?share=${encodeURIComponent(names)}`;
+        const link = `${window.location.origin}?share=${encodeURIComponent(selectedTechNames.join(","))}`;
         navigator.clipboard.writeText(link).catch(() => {});
         alert("Share link copied to clipboard!");
     };
 
     // If no techs are selected, render nothing but the message.
-    if (selectedTechs.length === 0) {
+    if (selectedTechNames.length === 0) {
         return <div className="empty-sheet-message">No techs selected</div>;
     }
 
@@ -67,8 +73,8 @@ const SpreadSheetView: React.FC<SpreadSheetViewProps> = ({ selectedTechs, setSel
     return (
         <div className="spreadsheet-wrapper">
             <SpreadsheetToolbar
-                selectedTechs={selectedTechs}
-                unlockedImprovements={unlockedImprovements} // Pass the new data down
+                selectedTechs={selectedTechObjects}
+                unlockedImprovements={unlockedImprovements}
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}

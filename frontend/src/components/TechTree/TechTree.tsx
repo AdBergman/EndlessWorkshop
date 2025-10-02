@@ -7,15 +7,14 @@ import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
 import SelectAllButton from "@/components/TechTree/SelectAllButton";
-import ClearAllButton from "./ClearAllButton"; // Import the new component
+import ClearAllButton from "./ClearAllButton";
+import { useAppContext } from "@/context/AppContext";
 
+// Props are now simpler, as selectedTechs state is handled by context.
 interface TechTreeProps {
-    faction: string;
     era: number;
     onEraChange: (dir: 'previous' | 'next') => void;
     maxUnlockedEra: number;
-    selectedTechs: Tech[];
-    onTechClick: (techName: string) => void;
 }
 
 const MIN_ERA = 1;
@@ -23,17 +22,46 @@ const MAX_ERA = 6;
 const HIDE_DELAY = 300; // Grace period in ms to move mouse to tooltip
 
 const TechTree: React.FC<TechTreeProps> = ({
-                                               faction,
-                                               era,
-                                               onEraChange,
-                                               maxUnlockedEra,
-                                               selectedTechs,
-                                               onTechClick
-                                           }) => {
+   era,
+   onEraChange,
+   maxUnlockedEra,
+}) => {
+    const { selectedFaction, selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
     const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
     const hideTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
-    // Clear timers on unmount
+    // The onTechClick handler now lives here and updates the global context.
+    const onTechClick = (techName: string) => {
+        setSelectedTechs(prev =>
+            prev.includes(techName)
+                ? prev.filter(t => t !== techName)
+                : [...prev, techName]
+        );
+    };
+
+    // --- Data Derivation from Context and JSON ---
+    const allTechs = useMemo(() => techTreeJson as Tech[], []);
+    const selectedTechObjects = useMemo(() => {
+        const techNameSet = new Set(selectedTechNames);
+        return allTechs.filter(tech => techNameSet.has(tech.name));
+    }, [selectedTechNames, allTechs]);
+
+    const currentFactionEraTechs = useMemo(
+        () => allTechs.filter(t => t.era === era && t.faction.includes(selectedFaction)),
+        [era, selectedFaction, allTechs]
+    );
+
+    const eraTechsByEra = useMemo(() => {
+        const map: Record<number, Tech[]> = {};
+        for (let e = 1; e <= 6; e++) {
+            map[e] = allTechs.filter(
+                t => t.faction.includes(selectedFaction) && t.era === e
+            );
+        }
+        return map;
+    }, [selectedFaction, allTechs]);
+
+    // --- Tooltip and Locking Logic ---
     useEffect(() => {
         const timers = hideTimers.current;
         return () => {
@@ -42,12 +70,10 @@ const TechTree: React.FC<TechTreeProps> = ({
     }, []);
 
     const showTooltip = useCallback((techName: string) => {
-        // If there's a pending timer to hide this tooltip, cancel it.
         if (hideTimers.current[techName]) {
             clearTimeout(hideTimers.current[techName]);
         }
         setOpenTooltips(prev => {
-            if (prev.has(techName)) return prev; // Already open
             const next = new Set(prev);
             next.add(techName);
             return next;
@@ -55,10 +81,8 @@ const TechTree: React.FC<TechTreeProps> = ({
     }, []);
 
     const hideTooltip = useCallback((techName: string) => {
-        // Set a timer to hide the tooltip, allowing a grace period.
         hideTimers.current[techName] = setTimeout(() => {
             setOpenTooltips(prev => {
-                if (!prev.has(techName)) return prev;
                 const next = new Set(prev);
                 next.delete(techName);
                 return next;
@@ -66,52 +90,31 @@ const TechTree: React.FC<TechTreeProps> = ({
         }, HIDE_DELAY);
     }, []);
 
-    const currentFactionEraTechs = useMemo(
-        () => (techTreeJson as Tech[]).filter(t => t.era === era && t.faction.includes(faction)),
-        [era, faction]
-    );
-
-    const selectedTechNames = useMemo(
-        () => new Set(selectedTechs.map(t => t.name)),
-        [selectedTechs]
-    );
-
     const isLocked = (tech: Tech): boolean => {
-        if (selectedTechs.some(t => t.excludes === tech.name)) return true;
+        if (selectedTechObjects.some(t => t.excludes === tech.name)) return true;
         return tech.era > maxUnlockedEra;
     };
 
     const selectableTechs = currentFactionEraTechs.filter(t => !isLocked(t));
-
-    const eraTechsByEra = useMemo(() => {
-        const map: Record<number, Tech[]> = {};
-        for (let e = 1; e <= 6; e++) {
-            map[e] = (techTreeJson as Tech[]).filter(
-                t => t.faction.includes(faction) && t.era === e
-            );
-        }
-        return map;
-    }, [faction]);
-
     const isButtonHidden = (dir: 'previous' | 'next') =>
         (dir === 'previous' && era === MIN_ERA) || (dir === 'next' && era === MAX_ERA);
 
     return (
         <div className="tech-tree-image-wrapper">
             <img
-                src={`/graphics/techEraScreens/${faction.toLowerCase()}_era_${era}.png`}
-                alt={`${faction} Era ${era}`}
+                src={`/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${era}.png`}
+                alt={`${selectedFaction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
             />
             <SelectAllButton
-                eraTechs={selectableTechs}   // only unlocked/selectable techs
-                selectedTechs={selectedTechs}
+                eraTechs={selectableTechs}
+                selectedTechs={selectedTechObjects}
                 onTechClick={onTechClick}
             />
             <ClearAllButton
-                eraTechs={currentFactionEraTechs} // Changed to all techs in the era
-                selectedTechs={selectedTechs}
+                eraTechs={currentFactionEraTechs}
+                selectedTechs={selectedTechObjects}
                 onTechClick={onTechClick}
             />
 
@@ -119,7 +122,7 @@ const TechTree: React.FC<TechTreeProps> = ({
                 <React.Fragment key={tech.name}>
                     <TechNode
                         coords={tech.coords}
-                        selected={selectedTechNames.has(tech.name)}
+                        selected={selectedTechNames.includes(tech.name)}
                         locked={isLocked(tech)}
                         onClick={() => onTechClick(tech.name)}
                         onHoverChange={hovered =>
@@ -129,8 +132,8 @@ const TechTree: React.FC<TechTreeProps> = ({
                     {openTooltips.has(tech.name) && (
                         <TechTooltip
                             hoveredTech={tech}
-                            onMouseEnter={() => showTooltip(tech.name)} // Cancels the hide timer
-                            onMouseLeave={() => hideTooltip(tech.name)} // Schedules a new hide timer
+                            onMouseEnter={() => showTooltip(tech.name)}
+                            onMouseLeave={() => hideTooltip(tech.name)}
                         />
                     )}
                 </React.Fragment>
@@ -148,7 +151,7 @@ const TechTree: React.FC<TechTreeProps> = ({
 
             <div className="era-panel-wrapper bottom-left">
                 <EraProgressPanel
-                    selectedTechs={selectedTechs}
+                    selectedTechs={selectedTechObjects}
                     eraTechsByEra={eraTechsByEra}
                     maxUnlockedEra={maxUnlockedEra}
                 />

@@ -9,37 +9,26 @@ import { useAppContext } from '@/context/AppContext';
 
 const maxEra = 6;
 
-// This component is now only responsible for the TechTree page.
 const MainContainer: React.FC = () => {
-    // It no longer needs currentView, as routing handles which page is shown.
-    const { selectedFaction } = useAppContext();
+    // State for era is local to this view, which is correct.
     const [era, setEra] = useState(1);
-    const [selectedTechs, setSelectedTechs] = useState<Tech[]>([]);
+    // Get global state from the context.
+    const { selectedFaction, selectedTechs: selectedTechNames } = useAppContext();
 
-    // Filter selectedTechs when faction changes
-    useEffect(() => {
-        setSelectedTechs(prev =>
-            prev.filter(t => t.faction.includes(selectedFaction))
-        );
-    }, [selectedFaction]);
-
-    const handleTechClick = (techName: string) => {
-        const techObj = (techTreeJson as Tech[]).find(t => t.name === techName);
-        if (!techObj) return;
-
-        setSelectedTechs(prev =>
-            prev.some(t => t.name === techName)
-                ? prev.filter(t => t.name !== techName)
-                : [...prev, techObj]
-        );
-    };
+    // Derive the full Tech objects from the names stored in the context.
+    const allTechs = useMemo(() => techTreeJson as Tech[], []);
+    const selectedTechObjects = useMemo(() => {
+        const techNameSet = new Set(selectedTechNames);
+        return allTechs.filter(tech => techNameSet.has(tech.name));
+    }, [selectedTechNames, allTechs]);
 
     const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));
     const handleNextEra = () => setEra(prev => Math.min(maxEra, prev + 1));
 
+    // This calculation now correctly uses the derived tech objects.
     const maxUnlockedEra = useMemo(() => {
         const eraCounts = Array(maxEra).fill(0);
-        selectedTechs.forEach(t => {
+        selectedTechObjects.forEach(t => {
             if (t.era >= 1 && t.era <= maxEra) eraCounts[t.era - 1]++;
         });
 
@@ -51,19 +40,17 @@ const MainContainer: React.FC = () => {
             else break;
         }
         return unlocked;
-    }, [selectedTechs]);
+    }, [selectedTechObjects]);
 
     const getBackgroundUrl = (eraNumber: number) =>
         `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${eraNumber}.png`;
 
     return (
         <main className="main-container">
+            {/* Props related to selectedTechs have been removed */}
             <TechTree
                 era={era}
-                faction={selectedFaction}
-                selectedTechs={selectedTechs}
                 maxUnlockedEra={maxUnlockedEra}
-                onTechClick={handleTechClick}
                 onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
             />
 
@@ -74,10 +61,8 @@ const MainContainer: React.FC = () => {
             />
 
             <div className="view-container">
-                <SpreadSheetView
-                    selectedTechs={selectedTechs}
-                    setSelectedTechs={setSelectedTechs}
-                />
+                {/* Props related to selectedTechs have been removed */}
+                <SpreadSheetView />
             </div>
         </main>
     );
