@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Treaty;
-import ewshop.domain.repository.entities.TreatyEntity;
+import ewshop.infrastructure.persistence.entities.TreatyEntity;
 
 public class TreatyMapper {
 

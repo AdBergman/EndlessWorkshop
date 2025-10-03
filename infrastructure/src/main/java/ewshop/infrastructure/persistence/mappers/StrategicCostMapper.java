@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.StrategicCost;
-import ewshop.domain.repository.entities.StrategicCostEntity;
+import ewshop.infrastructure.persistence.entities.StrategicCostEntity;
 
 public class StrategicCostMapper {
 

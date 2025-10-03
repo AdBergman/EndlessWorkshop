@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Convertor;
-import ewshop.domain.repository.entities.ConvertorEntity;
+import ewshop.infrastructure.persistence.entities.ConvertorEntity;
 
 public class ConvertorMapper {
 

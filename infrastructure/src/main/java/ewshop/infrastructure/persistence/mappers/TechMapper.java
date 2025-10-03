@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Tech;
-import ewshop.domain.repository.entities.TechEntity;
+import ewshop.infrastructure.persistence.entities.TechEntity;
 
 import java.util.stream.Collectors;
 

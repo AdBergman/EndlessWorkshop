@@ -4,8 +4,8 @@ import ewshop.domain.entity.Tech;
 import ewshop.domain.entity.TechUnlock;
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
-import ewshop.domain.repository.entities.TechEntity;
-import ewshop.domain.repository.entities.TechUnlockEntity;
+import ewshop.infrastructure.persistence.entities.TechEntity;
+import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package ewshop.domain.entity;
 
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
-import ewshop.domain.repository.entities.TechCoords;
+import ewshop.infrastructure.persistence.entities.TechCoords;
 
 import java.util.ArrayList;
 import java.util.HashSet;

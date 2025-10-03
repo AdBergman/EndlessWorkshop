@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Improvement;
-import ewshop.domain.repository.entities.ImprovementEntity;
+import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import java.util.stream.Collectors;
 
 public class ImprovementMapper {

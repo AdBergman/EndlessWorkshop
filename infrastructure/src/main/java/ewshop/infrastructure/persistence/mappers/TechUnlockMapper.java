@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.*;
-import ewshop.domain.repository.entities.TechUnlockEntity;
+import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 
 public class TechUnlockMapper {
 

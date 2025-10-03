@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.District;
-import ewshop.domain.repository.entities.DistrictEntity;
+import ewshop.infrastructure.persistence.entities.DistrictEntity;
 
 public class DistrictMapper {
 

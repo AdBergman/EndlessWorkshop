@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.UnitSpecialization;
-import ewshop.domain.repository.entities.UnitSpecializationEntity;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
 
 public class UnitSpecializationMapper {
 

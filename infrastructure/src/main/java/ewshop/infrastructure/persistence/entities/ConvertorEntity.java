@@ -1,4 +1,5 @@
-package ewshop.domain.repository.entities;
+package ewshop.infrastructure.persistence.entities;
+
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,8 +9,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 
 @Entity
-@Table(name = "unit_specialization")
-public class UnitSpecializationEntity {
+@Table(name = "convertor")
+public class ConvertorEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +22,7 @@ public class UnitSpecializationEntity {
     @Column(nullable = true)
     private String description;
 
-    public UnitSpecializationEntity() {}
+    public ConvertorEntity() {}
 
     public Long getId() {
         return id;

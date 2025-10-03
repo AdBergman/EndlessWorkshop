@@ -1,4 +1,4 @@
-package ewshop.domain.repository.entities;
+package ewshop.infrastructure.persistence.entities;
 
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
