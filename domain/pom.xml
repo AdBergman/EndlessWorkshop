@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.endlessworkshop</groupId>
-        <artifactId>ewbackend</artifactId>
+        <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath> <!-- Link to the parent POM -->
     </parent>
@@ -38,12 +38,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- H2 database for dev/testing -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
     </dependencies>
 
 </project>

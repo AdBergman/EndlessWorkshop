@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.endlessworkshop</groupId>
-    <artifactId>ewbackend</artifactId>
+    <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging> <!-- Changed to pom for multi-module project -->
+    <packaging>pom</packaging>
     <name>EndlessWorkshop</name>
     <description>EndlessWorkshop Parent Project</description>
 
@@ -20,6 +20,7 @@
         <module>domain</module>
         <module>facade</module>
         <module>api</module>
+        <module>infrastructure</module>
     </modules>
 
     <properties>
@@ -28,7 +29,6 @@
 
     <!-- Common dependencies for all modules can go here -->
     <dependencies>
-        <!-- Runtime dependencies have been moved to the api module -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>

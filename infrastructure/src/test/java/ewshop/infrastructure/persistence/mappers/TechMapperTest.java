@@ -1,9 +1,11 @@
-package ewshop.domain.repository.mappers;
+package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.*;
+import ewshop.domain.entity.Tech;
+import ewshop.domain.entity.TechUnlock;
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
-import ewshop.domain.repository.entities.*;
+import ewshop.domain.repository.entities.TechEntity;
+import ewshop.domain.repository.entities.TechUnlockEntity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

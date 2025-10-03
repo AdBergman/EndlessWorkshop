@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.endlessworkshop</groupId>
-        <artifactId>ewbackend</artifactId>
+        <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
