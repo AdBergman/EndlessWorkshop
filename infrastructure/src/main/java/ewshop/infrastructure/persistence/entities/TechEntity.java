@@ -1,5 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
+import ewshop.domain.entity.TechCoords;
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
 import jakarta.persistence.Entity;
