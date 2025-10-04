@@ -12,28 +12,28 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class ConvertorRepositoryIntegrationTest {
+class ConvertorIT {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataConvertorRepository convertorRepository;
+    private SpringDataConvertorRepository repository;
 
     @Test
-    void testSaveAndFindByName() {
+    void shouldSaveAndFindByName() {
         // Arrange
         ConvertorEntity newConvertor = new ConvertorEntity();
-        newConvertor.setName("Test Convertor");
-        newConvertor.setDescription("A test description.");
+        newConvertor.setName("Propaganda Machine");
+        newConvertor.setDescription("Converts Industry to Influence.");
         entityManager.persistAndFlush(newConvertor);
 
         // Act
-        Optional<ConvertorEntity> foundConvertor = convertorRepository.findByName("Test Convertor");
+        Optional<ConvertorEntity> foundConvertor = repository.findByName("Propaganda Machine");
 
         // Assert
         assertThat(foundConvertor).isPresent();
-        assertThat(foundConvertor.get().getName()).isEqualTo("Test Convertor");
-        assertThat(foundConvertor.get().getDescription()).isEqualTo("A test description.");
+        assertThat(foundConvertor.get().getName()).isEqualTo("Propaganda Machine");
+        assertThat(foundConvertor.get().getDescription()).isEqualTo("Converts Industry to Influence.");
     }
 }

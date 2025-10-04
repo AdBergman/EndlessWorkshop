@@ -13,28 +13,34 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class DistrictRepositoryIntegrationTest {
+class DistrictIT {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataDistrictRepository districtRepository;
+    private SpringDataDistrictRepository repository;
 
     @Test
-    void testSaveAndFindByName() {
+    void shouldSaveAndFindByName() {
         // Arrange
         DistrictEntity newDistrict = new DistrictEntity();
-        newDistrict.setName("Test District");
-        newDistrict.setInfo(List.of("Info 1", "Info 2"));
+        newDistrict.setName("Market District");
+        newDistrict.setEffect("+10 Dust per population");
+        newDistrict.setAdjacencyBonus(List.of("+5 Dust if next to River"));
+
         entityManager.persistAndFlush(newDistrict);
 
         // Act
-        Optional<DistrictEntity> foundDistrict = districtRepository.findByName("Test District");
+        Optional<DistrictEntity> foundDistrict = repository.findByName("Market District");
 
         // Assert
         assertThat(foundDistrict).isPresent();
-        assertThat(foundDistrict.get().getName()).isEqualTo("Test District");
-        assertThat(foundDistrict.get().getInfo()).containsExactly("Info 1", "Info 2");
+        DistrictEntity result = foundDistrict.get();
+        assertThat(result.getName()).isEqualTo("Market District");
+        assertThat(result.getEffect()).isEqualTo("+10 Dust per population");
+
+        // Assert that the element collection was persisted and retrieved correctly
+        assertThat(result.getAdjacencyBonus()).containsExactly("+5 Dust if next to River");
     }
 }

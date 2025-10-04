@@ -12,7 +12,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class TreatyRepositoryIntegrationTest {
+class TreatyRepositoryIT {
 
     @Autowired
     private TestEntityManager entityManager;

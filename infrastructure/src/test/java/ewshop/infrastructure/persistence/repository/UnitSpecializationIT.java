@@ -12,28 +12,28 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class UnitSpecializationRepositoryIntegrationTest {
+class UnitSpecializationIT {
 
     @Autowired
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataUnitSpecializationRepository unitSpecializationRepository;
+    private SpringDataUnitSpecializationRepository repository;
 
     @Test
-    void testSaveAndFindByName() {
+    void shouldSaveAndFindByName() {
         // Arrange
-        UnitSpecializationEntity newSpec = new UnitSpecializationEntity();
-        newSpec.setName("Test Specialization");
-        newSpec.setDescription("A test description.");
-        entityManager.persistAndFlush(newSpec);
+        UnitSpecializationEntity newEntity = new UnitSpecializationEntity();
+        newEntity.setName("Vanguard");
+        newEntity.setDescription("A powerful frontline unit.");
+        entityManager.persistAndFlush(newEntity);
 
         // Act
-        Optional<UnitSpecializationEntity> foundSpec = unitSpecializationRepository.findByName("Test Specialization");
+        Optional<UnitSpecializationEntity> foundEntity = repository.findByName("Vanguard");
 
         // Assert
-        assertThat(foundSpec).isPresent();
-        assertThat(foundSpec.get().getName()).isEqualTo("Test Specialization");
-        assertThat(foundSpec.get().getDescription()).isEqualTo("A test description.");
+        assertThat(foundEntity).isPresent();
+        assertThat(foundEntity.get().getName()).isEqualTo("Vanguard");
+        assertThat(foundEntity.get().getDescription()).isEqualTo("A powerful frontline unit.");
     }
 }
