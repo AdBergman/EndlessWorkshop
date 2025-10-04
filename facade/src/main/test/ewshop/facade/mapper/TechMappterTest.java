@@ -26,11 +26,11 @@ class TechMapperTest {
         TechDto dto = TechMapper.toDto(tech);
 
         assertThat(dto).isNotNull();
-        assertThat(dto.getName()).isEqualTo("Stonework");
-        assertThat(dto.getEra()).isEqualTo(1);
-        assertThat(dto.getType()).isEqualTo("DEFENSE");
-        assertThat(dto.getEffects()).isEqualTo("+100 Fortification on Capital");
-        assertThat(dto.getFactions()).isEqualTo("ASPECT, KIN");
+        assertThat(dto.name()).isEqualTo("Stonework");
+        assertThat(dto.era()).isEqualTo(1);
+        assertThat(dto.type()).isEqualTo("DEFENSE");
+        assertThat(dto.effects()).isEqualTo("+100 Fortification on Capital");
+        assertThat(dto.factions()).isEqualTo("ASPECT, KIN"); // sorted by name in mapper
     }
 
     @Test

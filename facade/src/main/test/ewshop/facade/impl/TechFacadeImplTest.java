@@ -48,8 +48,12 @@ class TechFacadeImplTest {
         List<TechDto> dtos = techFacade.getAllTechs();
 
         assertThat(dtos).hasSize(2);
-        assertThat(dtos.get(0).getName()).isEqualTo("Stonework");
-        assertThat(dtos.get(0).getEffects()).contains("+100 Fortification on Capital");
-        assertThat(dtos.get(1).getName()).isEqualTo("Agriculture");
+
+        // record-style accessors
+        assertThat(dtos.get(0).name()).isEqualTo("Stonework");
+        assertThat(dtos.get(0).effects()).contains("+100 Fortification on Capital");
+
+        assertThat(dtos.get(1).name()).isEqualTo("Agriculture");
+        assertThat(dtos.get(1).effects()).isEmpty(); // empty list mapped to ""
     }
 }
