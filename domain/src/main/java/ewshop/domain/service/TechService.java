@@ -1,7 +1,7 @@
 package ewshop.domain.service;
 
-import ewshop.infrastructure.persistence.entities.TechEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataTechRepository;
+import ewshop.domain.entity.Tech;
+import ewshop.domain.repository.TechRepository; // <-- domain port
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,16 +10,16 @@ import java.util.stream.Collectors;
 @Service
 public class TechService {
 
-    private final SpringDataTechRepository techRepository;
+    private final TechRepository techRepository; // <-- domain interface
 
-    public TechService(SpringDataTechRepository techRepository) {
+    public TechService(TechRepository techRepository) {
         this.techRepository = techRepository;
     }
 
     public List<String> getAllTechNames() {
         return techRepository.findAll()
                 .stream()
-                .map(TechEntity::getName)
+                .map(Tech::getName)  // <-- domain entity, not persistence entity
                 .collect(Collectors.toList());
     }
 }
