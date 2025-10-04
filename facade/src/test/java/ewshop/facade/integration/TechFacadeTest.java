@@ -26,23 +26,15 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = TechFacadeTest.TestConfig.class)
-@Import(FacadeConfig.class) // Import the manual facade wiring
+@Import(FacadeConfig.class)
 @Transactional
 class TechFacadeTest {
 
-    /**
-     * This TestConfig creates a complete Spring Boot environment by scanning all
-     * required packages from the domain and infrastructure modules.
-     */
     @SpringBootConfiguration
     @EnableAutoConfiguration
-    // Corrected to scan for JPA entities in the infrastructure module
     @EntityScan("ewshop.infrastructure.persistence.entities")
     @EnableJpaRepositories("ewshop.infrastructure.persistence.repositories")
-    @ComponentScan(basePackages = {
-            "ewshop.domain",         // Scans for @Service
-            "ewshop.infrastructure"  // Scans for @Repository adapters and @Component mappers
-    })
+    @ComponentScan(basePackages = {"ewshop.domain", "ewshop.infrastructure"})
     static class TestConfig {
     }
 
@@ -52,9 +44,6 @@ class TechFacadeTest {
     @Autowired
     private TechRepository techRepository;
 
-    /**
-     * A simple sanity check test that fails if the application context cannot start.
-     */
     @Test
     void contextLoads() {
         assertThat(techFacade).isNotNull();
@@ -75,7 +64,7 @@ class TechFacadeTest {
                 .type(TechType.DEFENSE)
                 .effects(List.of("+100 Fortification on Capital"))
                 .factions(Set.of(Faction.ASPECT, Faction.KIN))
-                .techCoords(new TechCoords(10.0, 20.0)) // Added non-null value
+                .techCoords(new TechCoords(10.0, 20.0))
                 .build();
 
         Tech agriculture = Tech.builder()
@@ -84,7 +73,7 @@ class TechFacadeTest {
                 .type(TechType.DISCOVERY)
                 .effects(List.of("Unlocks Farms"))
                 .factions(Set.of(Faction.LOST_LORDS))
-                .techCoords(new TechCoords(30.0, 40.0)) // Added non-null value
+                .techCoords(new TechCoords(30.0, 40.0))
                 .build();
 
         techRepository.save(stonework);
@@ -95,6 +84,26 @@ class TechFacadeTest {
 
         // Then
         assertThat(result).hasSize(2);
-        assertThat(result).extracting(TechDto::name).containsExactlyInAnyOrder("Stonework", "Agriculture");
+
+// Verify Stonework DTO
+        TechDto stoneworkDto = result.stream()
+                .filter(t -> "Stonework".equals(t.name()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Stonework DTO not found"));
+        assertThat(stoneworkDto.era()).isEqualTo(1);
+        assertThat(stoneworkDto.type()).isEqualTo("DEFENSE");
+        assertThat(stoneworkDto.effects()).isEqualTo("+100 Fortification on Capital"); // String now
+        assertThat(stoneworkDto.factions()).isEqualTo("ASPECT, KIN"); // String now
+
+// Verify Agriculture DTO
+        TechDto agricultureDto = result.stream()
+                .filter(t -> "Agriculture".equals(t.name()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Agriculture DTO not found"));
+        assertThat(agricultureDto.era()).isEqualTo(1);
+        assertThat(agricultureDto.type()).isEqualTo("DISCOVERY");
+        assertThat(agricultureDto.effects()).isEqualTo("Unlocks Farms");
+        assertThat(agricultureDto.factions()).isEqualTo("LOST_LORDS");
+
     }
 }
