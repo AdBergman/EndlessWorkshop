@@ -2,10 +2,12 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.UnitSpecialization;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UnitSpecializationMapper {
 
-    public static UnitSpecialization toDomain(UnitSpecializationEntity entity) {
+    public UnitSpecialization toDomain(UnitSpecializationEntity entity) {
         if (entity == null) return null;
 
         return UnitSpecialization.builder()
@@ -14,7 +16,7 @@ public class UnitSpecializationMapper {
                 .build();
     }
 
-    public static UnitSpecializationEntity toEntity(UnitSpecialization domain) {
+    public UnitSpecializationEntity toEntity(UnitSpecialization domain) {
         if (domain == null) return null;
 
         UnitSpecializationEntity entity = new UnitSpecializationEntity();

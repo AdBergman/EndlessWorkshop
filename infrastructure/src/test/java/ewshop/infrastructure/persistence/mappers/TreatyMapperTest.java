@@ -8,36 +8,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TreatyMapperTest {
 
+    private final TreatyMapper treatyMapper = new TreatyMapper();
+
     @Test
-    void testToDomainMapping() {
-        // Setup
+    void testToDomainMapping_shouldMapAllFields() {
+        // Setup: Create an entity with all fields set
         TreatyEntity entity = new TreatyEntity();
         entity.setName("Test Treaty");
-        entity.setDescription("A test treaty.");
+        entity.setDescription("Test Description");
 
-        // Act
-        Treaty domain = TreatyMapper.toDomain(entity);
+        // Act: Map to domain
+        Treaty domain = treatyMapper.toDomain(entity);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Test Treaty");
-        assertThat(domain.getDescription()).isEqualTo("A test treaty.");
+        assertThat(domain.getDescription()).isEqualTo("Test Description");
     }
 
     @Test
-    void testToEntityMapping() {
-        // Setup
+    void testToEntityMapping_shouldMapAllFields() {
+        // Setup: Create a domain object with all fields set
         Treaty domain = Treaty.builder()
                 .name("Test Treaty")
-                .description("A test treaty.")
+                .description("Test Description")
                 .build();
 
-        // Act
-        TreatyEntity entity = TreatyMapper.toEntity(domain);
+        // Act: Map to entity
+        TreatyEntity entity = treatyMapper.toEntity(domain);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo("Test Treaty");
-        assertThat(entity.getDescription()).isEqualTo("A test treaty.");
+        assertThat(entity.getDescription()).isEqualTo("Test Description");
     }
 }

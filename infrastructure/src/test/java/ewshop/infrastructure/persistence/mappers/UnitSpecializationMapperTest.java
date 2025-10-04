@@ -8,36 +8,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class UnitSpecializationMapperTest {
 
+    private final UnitSpecializationMapper unitSpecializationMapper = new UnitSpecializationMapper();
+
     @Test
-    void testToDomainMapping() {
-        // Setup
+    void toDomain_shouldMapAllFields() {
+        // Setup: Create an entity with all fields set
         UnitSpecializationEntity entity = new UnitSpecializationEntity();
-        entity.setName("Test Spec");
-        entity.setDescription("A test specialization.");
+        entity.setName("Test Specialization");
+        entity.setDescription("A test description.");
 
-        // Act
-        UnitSpecialization domain = UnitSpecializationMapper.toDomain(entity);
+        // Act: Map to domain
+        UnitSpecialization domain = unitSpecializationMapper.toDomain(entity);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(domain).isNotNull();
-        assertThat(domain.getName()).isEqualTo("Test Spec");
-        assertThat(domain.getDescription()).isEqualTo("A test specialization.");
+        assertThat(domain.getName()).isEqualTo("Test Specialization");
+        assertThat(domain.getDescription()).isEqualTo("A test description.");
     }
 
     @Test
-    void testToEntityMapping() {
-        // Setup
+    void toEntity_shouldMapAllFields() {
+        // Setup: Create a domain object with all fields set
         UnitSpecialization domain = UnitSpecialization.builder()
-                .name("Test Spec")
-                .description("A test specialization.")
+                .name("Test Specialization")
+                .description("A test description.")
                 .build();
 
-        // Act
-        UnitSpecializationEntity entity = UnitSpecializationMapper.toEntity(domain);
+        // Act: Map to entity
+        UnitSpecializationEntity entity = unitSpecializationMapper.toEntity(domain);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(entity).isNotNull();
-        assertThat(entity.getName()).isEqualTo("Test Spec");
-        assertThat(entity.getDescription()).isEqualTo("A test specialization.");
+        assertThat(entity.getName()).isEqualTo("Test Specialization");
+        assertThat(entity.getDescription()).isEqualTo("A test description.");
     }
 }

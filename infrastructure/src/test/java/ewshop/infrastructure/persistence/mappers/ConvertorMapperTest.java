@@ -8,34 +8,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ConvertorMapperTest {
 
+    private final ConvertorMapper convertorMapper = new ConvertorMapper();
+
     @Test
-    void testToDomainMapping() {
-        // Setup
+    void testToDomainMapping_shouldMapAllFields() {
+        // Setup: Create an entity with all fields set
         ConvertorEntity entity = new ConvertorEntity();
         entity.setName("Test Convertor");
         entity.setDescription("Test Description");
 
-        // Act
-        Convertor domain = ConvertorMapper.toDomain(entity);
+        // Act: Map to domain
+        Convertor domain = convertorMapper.toDomain(entity);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Test Convertor");
         assertThat(domain.getDescription()).isEqualTo("Test Description");
     }
 
     @Test
-    void testToEntityMapping() {
-        // Setup
+    void testToEntityMapping_shouldMapAllFields() {
+        // Setup: Create a domain object with all fields set
         Convertor domain = Convertor.builder()
                 .name("Test Convertor")
                 .description("Test Description")
                 .build();
 
-        // Act
-        ConvertorEntity entity = ConvertorMapper.toEntity(domain);
+        // Act: Map to entity
+        ConvertorEntity entity = convertorMapper.toEntity(domain);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo("Test Convertor");
         assertThat(entity.getDescription()).isEqualTo("Test Description");

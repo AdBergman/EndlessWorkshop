@@ -2,10 +2,12 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Treaty;
 import ewshop.infrastructure.persistence.entities.TreatyEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class TreatyMapper {
 
-    public static Treaty toDomain(TreatyEntity entity) {
+    public Treaty toDomain(TreatyEntity entity) {
         if (entity == null) return null;
 
         return Treaty.builder()
@@ -14,7 +16,7 @@ public class TreatyMapper {
                 .build();
     }
 
-    public static TreatyEntity toEntity(Treaty domain) {
+    public TreatyEntity toEntity(Treaty domain) {
         if (domain == null) return null;
 
         TreatyEntity entity = new TreatyEntity();

@@ -9,29 +9,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class StrategicCostMapperTest {
 
+    private final StrategicCostMapper strategicCostMapper = new StrategicCostMapper();
+
     @Test
-    void testToDomainMapping() {
-        // Setup
-        StrategicCostEntity entity = new StrategicCostEntity(StrategicResourceType.IRON, 5);
+    void toDomain_shouldMapAllFields() {
+        // Setup: Create an entity with all fields set
+        StrategicCostEntity entity = new StrategicCostEntity();
+        entity.setType(StrategicResourceType.IRON);
+        entity.setAmount(5);
 
-        // Act
-        StrategicCost domain = StrategicCostMapper.toDomain(entity);
+        // Act: Map to domain
+        StrategicCost domain = strategicCostMapper.toDomain(entity);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(domain).isNotNull();
         assertThat(domain.type()).isEqualTo(StrategicResourceType.IRON);
         assertThat(domain.amount()).isEqualTo(5);
     }
 
     @Test
-    void testToEntityMapping() {
-        // Setup
+    void toEntity_shouldMapAllFields() {
+        // Setup: Create a domain object with all fields set
         StrategicCost domain = new StrategicCost(StrategicResourceType.IRON, 5);
 
-        // Act
-        StrategicCostEntity entity = StrategicCostMapper.toEntity(domain);
+        // Act: Map to entity
+        StrategicCostEntity entity = strategicCostMapper.toEntity(domain);
 
-        // Assert
+        // Assert: Check all fields
         assertThat(entity).isNotNull();
         assertThat(entity.getType()).isEqualTo(StrategicResourceType.IRON);
         assertThat(entity.getAmount()).isEqualTo(5);

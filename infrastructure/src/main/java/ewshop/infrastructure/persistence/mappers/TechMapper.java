@@ -2,21 +2,29 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Tech;
 import ewshop.infrastructure.persistence.entities.TechEntity;
+import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 
+@Component
 public class TechMapper {
 
-    public static Tech toDomain(TechEntity entity) {
+    private final TechUnlockMapper techUnlockMapper;
+
+    public TechMapper(TechUnlockMapper techUnlockMapper) {
+        this.techUnlockMapper = techUnlockMapper;
+    }
+
+    public Tech toDomain(TechEntity entity) {
         if (entity == null) return null;
 
         return Tech.builder()
                 .name(entity.getName())
                 .type(entity.getType())
                 .era(entity.getEra())
-                .effects(entity.getEffects())
+                .effects(entity.getEffects() != null ? entity.getEffects() : Collections.emptyList())
                 .techCoords(entity.getTechCoords())
-                // Shallow mapping for prereq/excludes to avoid recursion
                 .prereq(entity.getPrereq() != null
                         ? Tech.builder()
                         .name(entity.getPrereq().getName())
@@ -31,23 +39,22 @@ public class TechMapper {
                         .era(entity.getExcludes().getEra())
                         .build()
                         : null)
-                .factions(entity.getFactions())
-                .unlocks(entity.getUnlocks().stream()
-                        .map(TechUnlockMapper::toDomain)
-                        .collect(Collectors.toList()))
+                .factions(entity.getFactions() != null ? entity.getFactions() : Collections.emptySet())
+                .unlocks(entity.getUnlocks() != null ? entity.getUnlocks().stream()
+                        .map(techUnlockMapper::toDomain)
+                        .collect(Collectors.toList()) : Collections.emptyList())
                 .build();
     }
 
-    public static TechEntity toEntity(Tech domain) {
+    public TechEntity toEntity(Tech domain) {
         if (domain == null) return null;
 
         TechEntity entity = new TechEntity();
         entity.setName(domain.getName());
         entity.setType(domain.getType());
         entity.setEra(domain.getEra());
-        entity.setEffects(domain.getEffects());
+        entity.setEffects(domain.getEffects() != null ? domain.getEffects() : Collections.emptyList());
         entity.setTechCoords(domain.getTechCoords());
-        // shallow mapping for prereq/excludes: only set ID if known
         if (domain.getPrereq() != null) {
             TechEntity prereqEntity = new TechEntity();
             prereqEntity.setName(domain.getPrereq().getName());
@@ -62,10 +69,10 @@ public class TechMapper {
             excludesEntity.setEra(domain.getExcludes().getEra());
             entity.setExcludes(excludesEntity);
         }
-        entity.setFactions(domain.getFactions());
-        entity.setUnlocks(domain.getUnlocks().stream()
-                .map(TechUnlockMapper::toEntity)
-                .collect(Collectors.toList()));
+        entity.setFactions(domain.getFactions() != null ? domain.getFactions() : Collections.emptySet());
+        entity.setUnlocks(domain.getUnlocks() != null ? domain.getUnlocks().stream()
+                .map(techUnlockMapper::toEntity)
+                .collect(Collectors.toList()) : Collections.emptyList());
 
         return entity;
     }

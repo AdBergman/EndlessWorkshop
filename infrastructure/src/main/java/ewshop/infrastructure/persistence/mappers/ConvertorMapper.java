@@ -2,10 +2,12 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.entity.Convertor;
 import ewshop.infrastructure.persistence.entities.ConvertorEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ConvertorMapper {
 
-    public static Convertor toDomain(ConvertorEntity entity) {
+    public Convertor toDomain(ConvertorEntity entity) {
         if (entity == null) return null;
 
         return Convertor.builder()
@@ -14,7 +16,7 @@ public class ConvertorMapper {
                 .build();
     }
 
-    public static ConvertorEntity toEntity(Convertor domain) {
+    public ConvertorEntity toEntity(Convertor domain) {
         if (domain == null) return null;
 
         ConvertorEntity entity = new ConvertorEntity();
