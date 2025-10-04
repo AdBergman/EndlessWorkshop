@@ -1,10 +1,11 @@
 package ewshop.facade.interfaces;
 
+import ewshop.facade.dto.TechDto;
 import java.util.List;
 
 public interface TechFacade {
     /**
-     * Returns a list of all tech names.
+     * Returns all Techs as DTOs.
      */
-    List<String> getAllTechNames();
+    List<TechDto> getAllTechs();
 }

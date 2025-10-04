@@ -13,7 +13,7 @@ public interface TechRepository {
 
     Tech save(Tech tech);
 
-    Optional<Tech> findByName(String name);
-
     List<Tech> findAll();
+
+    void deleteAll();
 }

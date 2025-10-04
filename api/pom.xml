@@ -21,6 +21,13 @@
             <groupId>com.endlessworkshop</groupId>
             <artifactId>facade</artifactId>
             <version>${project.version}</version>
+            <!-- explicitly exclude domain in case it comes transitively -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.endlessworkshop</groupId>
+                    <artifactId>domain</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Spring Web dependencies for controllers -->

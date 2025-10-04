@@ -1,12 +1,16 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.service.TechService;
+import ewshop.facade.dto.TechDto;
 import ewshop.facade.interfaces.TechFacade;
-import org.springframework.stereotype.Service;
+import ewshop.facade.mapper.TechMapper;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Service
+/**
+ * Spring-agnostic facade implementation.
+ */
 public class TechFacadeImpl implements TechFacade {
 
     private final TechService techService;
@@ -16,7 +20,10 @@ public class TechFacadeImpl implements TechFacade {
     }
 
     @Override
-    public List<String> getAllTechNames() {
-        return techService.getAllTechNames();
+    public List<TechDto> getAllTechs() {
+        return techService.getAllTechs()
+                .stream()
+                .map(TechMapper::toDto)
+                .collect(Collectors.toList());
     }
 }
