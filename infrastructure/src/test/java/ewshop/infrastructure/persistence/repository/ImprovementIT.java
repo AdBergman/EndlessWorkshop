@@ -29,7 +29,7 @@ class ImprovementIT {
     void shouldSaveAndFindByName_WithCosts() {
         // Arrange
         StrategicCostEntity cost1 = new StrategicCostEntity(StrategicResourceType.GLASSTEEL, 10);
-        StrategicCostEntity cost2 = new StrategicCostEntity(StrategicResourceType.CRYSTAL, 5);
+        StrategicCostEntity cost2 = new StrategicCostEntity(StrategicResourceType.TITANIUM, 5);
 
         ImprovementEntity newImprovement = new ImprovementEntity();
         newImprovement.setName("Crystal Forge");
@@ -55,7 +55,7 @@ class ImprovementIT {
                 .extracting(StrategicCostEntity::getType, StrategicCostEntity::getAmount)
                 .containsExactlyInAnyOrder(
                         tuple(StrategicResourceType.GLASSTEEL, 10),
-                        tuple(StrategicResourceType.CRYSTAL, 5)
+                        tuple(StrategicResourceType.TITANIUM, 5)
                 );
     }
 }

@@ -21,19 +21,26 @@ class TechMapperTest {
 
     @BeforeEach
     void setUp() {
-        // Manually create the full dependency chain for the unit test
+        // Initialize full dependency chain for TechMapper
         var convertorMapper = new ConvertorMapper();
         var unitSpecializationMapper = new UnitSpecializationMapper();
         var treatyMapper = new TreatyMapper();
         var districtMapper = new DistrictMapper();
-        var improvementMapper = new ImprovementMapper(new StrategicCostMapper());
-        var techUnlockMapper = new TechUnlockMapper(convertorMapper, unitSpecializationMapper, treatyMapper, districtMapper, improvementMapper);
+        var strategicCostMapper = new StrategicCostMapper();
+        var improvementMapper = new ImprovementMapper(strategicCostMapper);
+        var techUnlockMapper = new TechUnlockMapper(
+                convertorMapper,
+                unitSpecializationMapper,
+                treatyMapper,
+                districtMapper,
+                improvementMapper
+        );
         this.techMapper = new TechMapper(techUnlockMapper);
     }
 
     @Test
     void toDomain_shouldMapAllFields() {
-        // Setup: Create a complex entity with all fields populated
+        // Arrange: fully populated entity
         TechUnlockEntity unlockEntity = new TechUnlockEntity();
         unlockEntity.setUnlockText("Unlocks Advanced Quarry");
 
@@ -50,29 +57,34 @@ class TechMapperTest {
         entity.setPrereq(prereqEntity);
         entity.setUnlocks(List.of(unlockEntity));
 
-        // Act: Map to domain
+        // Act
         Tech domain = techMapper.toDomain(entity);
 
-        // Assert: Check every single field
+        // Assert
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Architecture");
         assertThat(domain.getType()).isEqualTo(TechType.DISCOVERY);
         assertThat(domain.getEra()).isEqualTo(2);
         assertThat(domain.getEffects()).containsExactly("Unlocks new buildings");
         assertThat(domain.getFactions()).containsExactly(Faction.ASPECT);
+
         assertThat(domain.getTechCoords()).isNotNull();
         assertThat(domain.getTechCoords().getXPct()).isEqualTo(50.5);
         assertThat(domain.getTechCoords().getYPct()).isEqualTo(75.5);
+
         assertThat(domain.getPrereq()).isNotNull();
         assertThat(domain.getPrereq().getName()).isEqualTo("Masonry");
+
         assertThat(domain.getUnlocks()).hasSize(1);
         assertThat(domain.getUnlocks().get(0).getUnlockText()).isEqualTo("Unlocks Advanced Quarry");
-        assertThat(domain.getExcludes()).isNull(); // Ensure null fields are handled
+
+        // Defensive: ensure null/empty fields are handled gracefully
+        assertThat(domain.getExcludes()).isNull();
     }
 
     @Test
     void toEntity_shouldMapAllFields() {
-        // Setup: Create a complex domain object with all fields populated
+        // Arrange: fully populated domain
         Tech prereqDomain = Tech.builder().name("Masonry").build();
         TechUnlock unlockDomain = TechUnlock.builder().unlockText("Unlocks Advanced Quarry").build();
 
@@ -87,23 +99,28 @@ class TechMapperTest {
                 .unlocks(List.of(unlockDomain))
                 .build();
 
-        // Act: Map to entity
+        // Act
         TechEntity entity = techMapper.toEntity(domain);
 
-        // Assert: Check every single field
+        // Assert
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo("Architecture");
         assertThat(entity.getType()).isEqualTo(TechType.DISCOVERY);
         assertThat(entity.getEra()).isEqualTo(2);
         assertThat(entity.getEffects()).containsExactly("Unlocks new buildings");
         assertThat(entity.getFactions()).containsExactly(Faction.ASPECT);
+
         assertThat(entity.getTechCoords()).isNotNull();
         assertThat(entity.getTechCoords().getXPct()).isEqualTo(50.5);
         assertThat(entity.getTechCoords().getYPct()).isEqualTo(75.5);
+
         assertThat(entity.getPrereq()).isNotNull();
         assertThat(entity.getPrereq().getName()).isEqualTo("Masonry");
+
         assertThat(entity.getUnlocks()).hasSize(1);
         assertThat(entity.getUnlocks().get(0).getUnlockText()).isEqualTo("Unlocks Advanced Quarry");
-        assertThat(entity.getExcludes()).isNull(); // Ensure null fields are handled
+
+        // Ensure null fields are still mapped safely
+        assertThat(entity.getExcludes()).isNull();
     }
 }

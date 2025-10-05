@@ -14,8 +14,8 @@ public class Tech {
     private final int era;
     private final List<String> effects;
     private final TechCoords techCoords;
-    private final Tech prereq; // single prerequisite
-    private final Tech excludes; // mutually exclusive tech
+    private Tech prereq; // single prerequisite
+    private Tech excludes; // mutually exclusive tech
     private final Set<Faction> factions;
     private final List<TechUnlock> unlocks; // keep domain object, not string
 
@@ -44,6 +44,14 @@ public class Tech {
 
     // --- Builder ---
     public static Builder builder() { return new Builder(); }
+
+    public void setPrereq(Tech prereqTech) {
+        this.prereq = prereqTech;
+    }
+
+    public void setExcludes(Tech excludesTech) {
+        this.excludes = excludesTech;
+    }
 
     public static class Builder {
         private String name;
