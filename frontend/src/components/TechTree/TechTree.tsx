@@ -47,7 +47,7 @@ const TechTree: React.FC<TechTreeProps> = ({
     }, [selectedTechNames, allTechs]);
 
     const currentFactionEraTechs = useMemo(
-        () => allTechs.filter(t => t.era === era && t.faction.includes(selectedFaction)),
+        () => allTechs.filter(t => t.era === era && t.factions.includes(selectedFaction)),
         [era, selectedFaction, allTechs]
     );
 
@@ -55,7 +55,7 @@ const TechTree: React.FC<TechTreeProps> = ({
         const map: Record<number, Tech[]> = {};
         for (let e = 1; e <= 6; e++) {
             map[e] = allTechs.filter(
-                t => t.faction.includes(selectedFaction) && t.era === e
+                t => t.factions.includes(selectedFaction) && t.era === e
             );
         }
         return map;
