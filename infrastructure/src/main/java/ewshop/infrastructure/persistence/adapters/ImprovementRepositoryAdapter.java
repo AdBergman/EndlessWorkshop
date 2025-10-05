@@ -2,11 +2,13 @@ package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.entity.Improvement;
 import ewshop.domain.repository.ImprovementRepository;
+import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import ewshop.infrastructure.persistence.mappers.ImprovementMapper;
 import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -19,6 +21,13 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
                                         ImprovementMapper mapper) {
         this.springDataImprovementRepository = springDataImprovementRepository;
         this.mapper = mapper;
+    }
+
+    @Override
+    public Improvement findByName(String name) {
+        Optional<ImprovementEntity> entityOpt =
+                springDataImprovementRepository.findByName(name);
+        return entityOpt.map(mapper::toDomain).orElse(null);
     }
 
     @Override

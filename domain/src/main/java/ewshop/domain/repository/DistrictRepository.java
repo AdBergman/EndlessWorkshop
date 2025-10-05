@@ -10,6 +10,8 @@ public interface DistrictRepository {
 
     void saveAll(List<District> districts);
 
+    District findByName(String name);
+
     List<District> findAll();
 
     void deleteAll();

@@ -2,11 +2,13 @@ package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.entity.District;
 import ewshop.domain.repository.DistrictRepository;
+import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import ewshop.infrastructure.persistence.mappers.DistrictMapper;
 import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Repository
@@ -19,6 +21,17 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
                                      DistrictMapper mapper) {
         this.springDataDistrictRepository = springDataDistrictRepository;
         this.mapper = mapper;
+    }
+
+    @Override
+    public District findByName(String name) {
+        Optional<DistrictEntity> entityOpt =
+                springDataDistrictRepository.findByName(name);
+        return entityOpt.map(mapper::toDomain).orElse(null);
+    }
+
+    public Optional<DistrictEntity> findEntityByName(String name) {
+        return springDataDistrictRepository.findByName(name);
     }
 
     @Override

@@ -10,6 +10,8 @@ public interface ImprovementRepository {
 
     void saveAll(List<Improvement> improvements);
 
+    Improvement findByName(String name);
+
     List<Improvement> findAll();
 
     void deleteAll();
