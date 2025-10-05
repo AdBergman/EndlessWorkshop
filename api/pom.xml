@@ -21,7 +21,6 @@
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>facade</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Spring Boot Web for @RestController and other web annotations -->
@@ -29,8 +28,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-    </dependencies>
 
-    <!-- The build plugin is removed as this is no longer a runnable application -->
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -15,15 +15,21 @@
     <groupId>com.endlessworkshop</groupId>
     <artifactId>ewshop</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging> <!-- Must be 'pom' for an aggregator project -->
+    <packaging>pom</packaging>
     <name>EndlessWorkshop</name>
     <description>EndlessWorkshop Parent Project</description>
 
     <properties>
         <java.version>24</java.version>
+        <spring.boot.version>3.5.5</spring.boot.version>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+    </dependencies>
 
-    <!-- Define all modules, including the new 'app' module -->
     <modules>
         <module>app</module>
         <module>api</module>
@@ -32,24 +38,49 @@
         <module>infrastructure</module>
     </modules>
 
-    <!-- Common dependencies for all modules (test scope) -->
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM for consistent versions of Spring dependencies -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Project Modules Version Management -->
+            <dependency>
+                <groupId>com.endlessworkshop</groupId>
+                <artifactId>app</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.endlessworkshop</groupId>
+                <artifactId>api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.endlessworkshop</groupId>
+                <artifactId>facade</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.endlessworkshop</groupId>
+                <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.endlessworkshop</groupId>
+                <artifactId>infrastructure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Spring Boot plugin can be defined here for child modules to use -->
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>

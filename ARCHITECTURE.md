@@ -7,7 +7,7 @@
                 |
                 v
     +-------------------------+
-    |      Facade Module       |  <- Application / Use Case Layer
+    |      Facade Module       |  <- ewshop.app.Application / Use Case Layer
     |  (Maps DTOs, orchestrates|
     |   services in domain)    |
     +-----------+-------------+

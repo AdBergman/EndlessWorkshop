@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -16,32 +15,18 @@
     <name>Facade Module</name>
     <description>Facade module for DTOs, mappers, and application services.</description>
 
-    <properties>
-        <java.version>${java.version}</java.version>
-    </properties>
-
     <dependencies>
-        <!-- Domain module: core business logic -->
+        <!-- This module depends on the domain module for production code -->
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>domain</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
-        <!-- Infrastructure module: only for testing repositories -->
+        <!-- This module needs infrastructure for integration testing -->
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>infrastructure</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Spring Boot test support -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

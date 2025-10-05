@@ -16,10 +16,6 @@
     <name>Domain Module</name>
     <description>Core business logic, JPA entities, and domain models.</description>
 
-    <properties>
-        <java.version>${java.version}</java.version>
-    </properties>
-
     <dependencies>
         <!-- For JPA annotations like @Embeddable -->
         <dependency>
@@ -32,11 +28,10 @@
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- Spring Boot test support -->
+        <!-- Add Spring Data Commons for Repository abstraction -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
         </dependency>
     </dependencies>
 
