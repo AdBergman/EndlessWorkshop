@@ -92,8 +92,8 @@ class TechFacadeTest {
                 .orElseThrow(() -> new AssertionError("Stonework DTO not found"));
         assertThat(stoneworkDto.era()).isEqualTo(1);
         assertThat(stoneworkDto.type()).isEqualTo("DEFENSE");
-        assertThat(stoneworkDto.effects()).isEqualTo("+100 Fortification on Capital"); // String now
-        assertThat(stoneworkDto.factions()).isEqualTo("ASPECT, KIN"); // String now
+        assertThat(stoneworkDto.effects()).containsExactly("+100 Fortification on Capital"); // String now
+        assertThat(stoneworkDto.factions()).containsExactly("ASPECT", "KIN"); // String now
 
 // Verify Agriculture DTO
         TechDto agricultureDto = result.stream()
@@ -102,8 +102,8 @@ class TechFacadeTest {
                 .orElseThrow(() -> new AssertionError("Agriculture DTO not found"));
         assertThat(agricultureDto.era()).isEqualTo(1);
         assertThat(agricultureDto.type()).isEqualTo("DISCOVERY");
-        assertThat(agricultureDto.effects()).isEqualTo("Unlocks Farms");
-        assertThat(agricultureDto.factions()).isEqualTo("LOST_LORDS");
+        assertThat(agricultureDto.effects()).containsExactly("Unlocks Farms");
+        assertThat(agricultureDto.factions()).containsExactly("LOST_LORDS");
 
     }
 }

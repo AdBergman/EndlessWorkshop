@@ -1,5 +1,7 @@
 package ewshop.domain.entity;
 
+import java.util.List;
+
 public class TechUnlock {
     private final Convertor convertor;
     private final UnitSpecialization unitSpecialization;
@@ -23,6 +25,32 @@ public class TechUnlock {
     public District getDistrict() { return district; }
     public Improvement getImprovement() { return improvement; }
     public String getUnlockText() { return unlockText; }
+
+    public static List<String> convertUnlocks(List<TechUnlock> unlocks) {
+        if (unlocks == null || unlocks.isEmpty()) return List.of();
+
+        return unlocks.stream()
+                .map(TechUnlock::describe)
+                .toList();
+    }
+
+    private String describe() {
+        return switch (this) {
+            case TechUnlock t when t.convertor != null ->
+                    "Convertor: " + t.convertor.getName();
+            case TechUnlock t when t.unitSpecialization != null ->
+                    "Unit: " + t.unitSpecialization.getName();
+            case TechUnlock t when t.treaty != null ->
+                    "Treaty: " + t.treaty.getName();
+            case TechUnlock t when t.district != null ->
+                    "District: " + t.district.getName();
+            case TechUnlock t when t.improvement != null ->
+                    "Improvement: " + t.improvement.getName();
+            case TechUnlock t when t.unlockText != null ->
+                    t.unlockText;
+            default -> "(unknown unlock)";
+        };
+    }
 
     public static Builder builder() { return new Builder(); }
 

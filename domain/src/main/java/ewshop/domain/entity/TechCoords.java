@@ -19,19 +19,19 @@ public class TechCoords {
         this.yPct = yPct;
     }
 
-    public double getxPct() {
+    public double getXPct() {
         return xPct;
     }
 
-    public void setxPct(double xPct) {
+    public void setXPct(double xPct) {
         this.xPct = xPct;
     }
 
-    public double getyPct() {
+    public double getYPct() {
         return yPct;
     }
 
-    public void setyPct(double yPct) {
+    public void setYPct(double yPct) {
         this.yPct = yPct;
     }
 }

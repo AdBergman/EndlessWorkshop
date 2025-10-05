@@ -48,6 +48,6 @@ class TechRepositoryIT {
         assertThat(result.getEra()).isEqualTo(3);
         assertThat(result.getType()).isEqualTo(TechType.ECONOMY);
         assertThat(result.getFactions()).contains(Faction.KIN, Faction.ASPECT);
-        assertThat(result.getTechCoords().getxPct()).isEqualTo(10.5);
+        assertThat(result.getTechCoords().getXPct()).isEqualTo(10.5);
     }
 }

@@ -61,8 +61,8 @@ class TechMapperTest {
         assertThat(domain.getEffects()).containsExactly("Unlocks new buildings");
         assertThat(domain.getFactions()).containsExactly(Faction.ASPECT);
         assertThat(domain.getTechCoords()).isNotNull();
-        assertThat(domain.getTechCoords().getxPct()).isEqualTo(50.5);
-        assertThat(domain.getTechCoords().getyPct()).isEqualTo(75.5);
+        assertThat(domain.getTechCoords().getXPct()).isEqualTo(50.5);
+        assertThat(domain.getTechCoords().getYPct()).isEqualTo(75.5);
         assertThat(domain.getPrereq()).isNotNull();
         assertThat(domain.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(domain.getUnlocks()).hasSize(1);
@@ -98,8 +98,8 @@ class TechMapperTest {
         assertThat(entity.getEffects()).containsExactly("Unlocks new buildings");
         assertThat(entity.getFactions()).containsExactly(Faction.ASPECT);
         assertThat(entity.getTechCoords()).isNotNull();
-        assertThat(entity.getTechCoords().getxPct()).isEqualTo(50.5);
-        assertThat(entity.getTechCoords().getyPct()).isEqualTo(75.5);
+        assertThat(entity.getTechCoords().getXPct()).isEqualTo(50.5);
+        assertThat(entity.getTechCoords().getYPct()).isEqualTo(75.5);
         assertThat(entity.getPrereq()).isNotNull();
         assertThat(entity.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(entity.getUnlocks()).hasSize(1);

@@ -15,19 +15,29 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(TechController.class) // Only load the controller layer
+@WebMvcTest(TechController.class)
 class TechControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private TechFacade techFacade; // Mocked, so no domain/db needed
+    private TechFacade techFacade;
 
     @Test
     void getAllTechs_returnsJson() throws Exception {
-        TechDto t1 = new TechDto("Stonework", 1, "Defense", "+100 Fortification on Capital",
-                "Aspect, Kin, Lost Lords, Necrophage, Tahuk");
+        // Use the new builder
+        TechDto t1 = TechDto.builder()
+                .name("Stonework")
+                .era(1)
+                .type("Defense")
+                .effects(List.of("+100 Fortification on Capital"))
+                .factions(List.of("Aspect", "Kin", "Lost Lords", "Necrophage", "Tahuk"))
+                .unlocks(List.of("District: Keep"))
+                .prereq("")
+                .excludes("")
+                .coords(null) // can also create a TechCoordsDto if needed
+                .build();
 
         when(techFacade.getAllTechs()).thenReturn(List.of(t1));
 
@@ -38,7 +48,9 @@ class TechControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Stonework"))
                 .andExpect(jsonPath("$[0].era").value(1))
                 .andExpect(jsonPath("$[0].type").value("Defense"))
-                .andExpect(jsonPath("$[0].effects").value("+100 Fortification on Capital"))
-                .andExpect(jsonPath("$[0].factions").value("Aspect, Kin, Lost Lords, Necrophage, Tahuk"));
+                .andExpect(jsonPath("$[0].effects[0]").value("+100 Fortification on Capital"))
+                .andExpect(jsonPath("$[0].factions[0]").value("Aspect"))
+                .andExpect(jsonPath("$[0].factions[1]").value("Kin"))
+                .andExpect(jsonPath("$[0].unlocks[0]").value("District: Keep"));
     }
 }

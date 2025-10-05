@@ -29,8 +29,8 @@ class TechMapperTest {
         assertThat(dto.name()).isEqualTo("Stonework");
         assertThat(dto.era()).isEqualTo(1);
         assertThat(dto.type()).isEqualTo("DEFENSE");
-        assertThat(dto.effects()).isEqualTo("+100 Fortification on Capital");
-        assertThat(dto.factions()).isEqualTo("ASPECT, KIN"); // sorted by name in mapper
+        assertThat(dto.effects()).containsExactly("+100 Fortification on Capital");
+        assertThat(dto.factions()).containsExactly("ASPECT", "KIN"); // sorted by name in mapper
     }
 
     @Test
