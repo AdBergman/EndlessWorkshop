@@ -36,6 +36,14 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
     }
 
     @Override
+    public void saveAll(List<Improvement> improvements) {
+        var entities = improvements.stream()
+                .map(mapper::toEntity)
+                .toList();
+        springDataImprovementRepository.saveAll(entities);
+    }
+
+    @Override
     public void deleteAll() {
         springDataImprovementRepository.deleteAll();
     }

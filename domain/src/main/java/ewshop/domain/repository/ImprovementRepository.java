@@ -8,6 +8,8 @@ public interface ImprovementRepository {
 
     Improvement save(Improvement improvement);
 
+    void saveAll(List<Improvement> improvements);
+
     List<Improvement> findAll();
 
     void deleteAll();

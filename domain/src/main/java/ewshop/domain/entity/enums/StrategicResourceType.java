@@ -1,10 +1,10 @@
 package ewshop.domain.entity.enums;
 
 public enum StrategicResourceType {
+    TITANIUM,
     GLASSTEEL,
-    CRYSTAL,
-    IRON,
-    OIL,
-    GOLD,
-    SILVER
+    LAZUALIN,
+    HYPERIUM,
+    ERADIONE,
+    THALITINE
 }
