@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.endlessworkshop</groupId>
+        <artifactId>ewshop</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>app</artifactId>
+    <name>Application Module</name>
+    <description>The main runnable Spring Boot application.</description>
+
+    <properties>
+        <java.version>${java.version}</java.version>
+    </properties>
+
+    <dependencies>
+        <!-- Core Spring Boot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Web/API Layer -->
+        <dependency>
+            <groupId>com.endlessworkshop</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Facade (application logic) -->
+        <dependency>
+            <groupId>com.endlessworkshop</groupId>
+            <artifactId>facade</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Domain (entities & rules) -->
+        <dependency>
+            <groupId>com.endlessworkshop</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Infrastructure (JPA, external systems) -->
+        <dependency>
+            <groupId>com.endlessworkshop</groupId>
+            <artifactId>infrastructure</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Database & Migrations -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Package as a runnable Boot JAR -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.endlessworkshop.app.Application</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
