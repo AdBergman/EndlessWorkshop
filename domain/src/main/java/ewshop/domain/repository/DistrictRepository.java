@@ -8,6 +8,8 @@ public interface DistrictRepository {
 
     District save(District district);
 
+    void saveAll(List<District> districts);
+
     List<District> findAll();
 
     void deleteAll();

@@ -1,0 +1,71 @@
+[
+  {
+    "name": "Communal Habitations",
+    "info": ["+1 Population slot on Population Vocations"]
+  },
+  {
+    "name": "Bridge",
+    "placementPrereq": "No adjacent bridge. This District must be built on a Stream or River."
+  },
+  {
+    "name": "Merchant's House",
+    "effect": "+6 Dust",
+    "tileBonus": ["+2 Dust on tile producing Dust"],
+    "adjacencyBonus": ["+2 Dust for each adjacent Communal Habitations"]
+  },
+  {
+    "name": "Trading Post",
+    "info": ["Roads will be automatically created between Districts containing a Trading Post", "+10 Resource stock"],
+    "effect": "+4 Dust",
+    "adjacencyBonus": ["+4 Dust for each adjacent Resource Deposit"]
+  },
+  {
+    "name": "Works",
+    "effect": "+2 Industry",
+    "tileBonus": ["+1 Industry on tile producing Industry"],
+    "adjacencyBonus": [
+      "+1 Industry for each adjacent Ridge",
+      "+1 Industry for each adjacent Communal Habitations"
+    ]
+  },
+  {
+    "name": "Farm",
+    "effect": "+2 Food",
+    "tileBonus": ["+1 Food on tile producing Food"],
+    "adjacencyBonus": [
+      "+1 Food for each adjacent River",
+      "+1 Food for each adjacent Lake",
+      "+1 Food for each adjacent Communal Habitations"
+    ]
+  },
+  {
+    "name": "Forum",
+    "effect": "+2 Influence",
+    "tileBonus": ["+1 Food on tile producing Food"],
+    "adjacencyBonus": [
+      "+1 Influence for each adjacent River",
+      "+1 Influence for each adjacent Lake",
+      "+1 Influence for each adjacent Communal Habitations"
+    ]
+  },
+  {
+    "name": "Laboratory",
+    "effect": "+2 Science",
+    "tileBonus": ["+1 Science on tile producing at least two types of yields"],
+    "adjacencyBonus": [
+      "+2 Science for each adjacent Anomaly",
+      "+1 Science for each adjacent Communal Habitations"
+    ]
+  },
+  {
+    "name": "Keep",
+    "info": [
+      "+1 Vision Range",
+      "+100 District Fortification"
+    ],
+    "effect": "+3 Approval on Military Districts",
+    "adjacencyBonus": [
+      "+50 Fortification for each adjacent District"
+    ]
+  }
+]

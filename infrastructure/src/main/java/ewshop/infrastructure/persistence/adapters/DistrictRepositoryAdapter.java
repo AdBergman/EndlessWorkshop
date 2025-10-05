@@ -29,6 +29,15 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
     }
 
     @Override
+    public void saveAll(List<District> districts) {
+        // Convert each domain object to entity, then save all via Spring Data JPA
+        var entities = districts.stream()
+                .map(mapper::toEntity)
+                .toList();
+        springDataDistrictRepository.saveAll(entities);
+    }
+
+    @Override
     public District save(District district) {
         var entityToSave = mapper.toEntity(district);
         var savedEntity = springDataDistrictRepository.save(entityToSave);

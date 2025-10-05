@@ -1,8 +1,12 @@
 package ewshop.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonDeserialize(builder = District.Builder.class)
 public class District {
     private final String name;
     private final List<String> info;
@@ -37,14 +41,16 @@ public class District {
         private final List<String> adjacencyBonus = new ArrayList<>();
         private String placementPrereq;
 
+        @JsonProperty("name")
         public Builder name(String name) {
             this.name = name;
             return this;
         }
 
+        @JsonProperty("info")
         public Builder info(List<String> info) {
             this.info.clear();
-            this.info.addAll(info);
+            if (info != null) this.info.addAll(info);
             return this;
         }
 
@@ -53,14 +59,16 @@ public class District {
             return this;
         }
 
+        @JsonProperty("effect")
         public Builder effect(String effect) {
             this.effect = effect;
             return this;
         }
 
+        @JsonProperty("tileBonus")
         public Builder tileBonus(List<String> tileBonus) {
             this.tileBonus.clear();
-            this.tileBonus.addAll(tileBonus);
+            if (tileBonus != null) this.tileBonus.addAll(tileBonus);
             return this;
         }
 
@@ -69,9 +77,10 @@ public class District {
             return this;
         }
 
+        @JsonProperty("adjacencyBonus")
         public Builder adjacencyBonus(List<String> adjacencyBonus) {
             this.adjacencyBonus.clear();
-            this.adjacencyBonus.addAll(adjacencyBonus);
+            if (adjacencyBonus != null) this.adjacencyBonus.addAll(adjacencyBonus);
             return this;
         }
 
@@ -80,6 +89,7 @@ public class District {
             return this;
         }
 
+        @JsonProperty("placementPrereq")
         public Builder placementPrereq(String placementPrereq) {
             this.placementPrereq = placementPrereq;
             return this;
