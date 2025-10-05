@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.endlessworkshop</groupId>
+    <artifactId>ewshop</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>EndlessWorkshop</name>
+    <description>EndlessWorkshop Parent Project</description>
+
+    <!-- Spring Boot parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.endlessworkshop</groupId>
-    <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>EndlessWorkshop</name>
-    <description>EndlessWorkshop Parent Project</description>
 
-    <!-- Define modules -->
+    <!-- Modules -->
     <modules>
         <module>domain</module>
         <module>facade</module>
@@ -23,11 +28,43 @@
         <module>infrastructure</module>
     </modules>
 
+    <!-- Properties -->
     <properties>
         <java.version>24</java.version>
+        <spring.boot.version>3.5.5</spring.boot.version>
+        <flyway.version>11.7.2</flyway.version>
+        <h2.version>2.3.232</h2.version>
+        <maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
     </properties>
 
-    <!-- Common dependencies for all modules can go here -->
+    <!-- Dependency Management (versions locked for all modules) -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring.boot.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Common dependencies (test/shared) -->
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -39,8 +76,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- Added H2 for in-memory testing -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -48,4 +83,28 @@
         </dependency>
     </dependencies>
 
+    <!-- Plugin Management -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Compiler plugin for JDK 24 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <release>${java.version}</release>
+                    </configuration>
+                </plugin>
+
+                <!-- Spring Boot plugin (child modules can use without version) -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

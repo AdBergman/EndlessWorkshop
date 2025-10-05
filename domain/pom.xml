@@ -1,35 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.endlessworkshop</groupId>
-        <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
+        <artifactId>ewshop</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath> <!-- Link to the parent POM -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>domain</artifactId>
-    <name>domain</name>
-    <description>Domain module containing core business logic and models.</description>
+    <name>Domain Module</name>
+    <description>Core business logic, JPA entities, and domain models.</description>
+
+    <properties>
+        <java.version>${java.version}</java.version>
+    </properties>
 
     <dependencies>
-        <!-- JPA for repositories and entities -->
+        <!-- For JPA annotations like @Embeddable -->
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <!-- For Spring annotations like @Service -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- Spring Boot test support -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!-- AssertJ for fluent assertions -->
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>3.24.2</version>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
 </project>

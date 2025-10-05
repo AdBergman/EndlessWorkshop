@@ -15,6 +15,10 @@
     <name>infrastructure</name>
     <description>Infrastructure module for persistence, external APIs, etc.</description>
 
+    <properties>
+        <java.version>${java.version}</java.version>
+    </properties>
+
     <dependencies>
         <!-- This module depends on the domain module -->
         <dependency>

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>com.endlessworkshop</groupId>
-        <artifactId>ewshop</artifactId> <!-- Renamed from ewbackend -->
+        <artifactId>ewshop</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -15,13 +16,16 @@
     <name>API Module</name>
     <description>Module containing REST controllers and web configuration.</description>
 
+    <properties>
+        <java.version>${java.version}</java.version>
+    </properties>
+
     <dependencies>
-        <!-- This module depends on the facade module -->
+        <!-- Depend on facade, but exclude domain (if needed) -->
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>facade</artifactId>
             <version>${project.version}</version>
-            <!-- explicitly exclude domain in case it comes transitively -->
             <exclusions>
                 <exclusion>
                     <groupId>com.endlessworkshop</groupId>
@@ -30,30 +34,33 @@
             </exclusions>
         </dependency>
 
-        <!-- Spring Web dependencies for controllers -->
+        <!-- Spring Boot Web for REST controllers -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Runtime and Infrastructure Dependencies -->
+        <!-- Database migrations -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Spring Boot plugin to run the application -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
