@@ -1,6 +1,6 @@
 package ewshop.facade.interfaces;
 
-import ewshop.facade.dto.ImprovementDto;
+import ewshop.facade.dto.response.ImprovementDto;
 import java.util.List;
 
 public interface ImprovementFacade {

@@ -1,7 +1,7 @@
 package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
-import ewshop.facade.dto.ImprovementDto;
+import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

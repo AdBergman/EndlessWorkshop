@@ -1,4 +1,4 @@
-package ewshop.facade.dto;
+package ewshop.facade.dto.response;
 
 public record TechCoordsDto(
         double xPct,

@@ -1,6 +1,6 @@
 package ewshop.api.controller;
 
-import ewshop.facade.dto.DistrictDto;
+import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

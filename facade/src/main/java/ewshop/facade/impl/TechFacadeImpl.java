@@ -1,7 +1,7 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.service.TechService;
-import ewshop.facade.dto.TechDto;
+import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;
 import ewshop.facade.mapper.TechMapper;
 

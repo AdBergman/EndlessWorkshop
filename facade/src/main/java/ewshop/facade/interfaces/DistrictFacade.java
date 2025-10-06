@@ -1,6 +1,7 @@
 package ewshop.facade.interfaces;
 
-import ewshop.facade.dto.DistrictDto;
+
+import ewshop.facade.dto.response.DistrictDto;
 
 import java.util.List;
 

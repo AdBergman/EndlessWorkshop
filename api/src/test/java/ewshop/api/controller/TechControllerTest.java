@@ -1,8 +1,8 @@
 package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
-import ewshop.facade.dto.TechCoordsDto;
-import ewshop.facade.dto.TechDto;
+import ewshop.facade.dto.response.TechCoordsDto;
+import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

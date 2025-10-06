@@ -2,8 +2,8 @@ package ewshop.facade.mapper;
 
 import ewshop.domain.entity.Tech;
 import ewshop.domain.entity.TechCoords;
-import ewshop.facade.dto.TechCoordsDto;
-import ewshop.facade.dto.TechDto;
+import ewshop.facade.dto.response.TechCoordsDto;
+import ewshop.facade.dto.response.TechDto;
 
 import java.util.Arrays;
 import java.util.List;

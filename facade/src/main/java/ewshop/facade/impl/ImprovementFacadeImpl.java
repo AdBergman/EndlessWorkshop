@@ -1,7 +1,7 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.service.ImprovementService;
-import ewshop.facade.dto.ImprovementDto;
+import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
 import ewshop.facade.mapper.ImprovementMapper;
 import org.springframework.stereotype.Component;

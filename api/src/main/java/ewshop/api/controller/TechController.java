@@ -1,6 +1,6 @@
 package ewshop.api.controller;
 
-import ewshop.facade.dto.TechDto;
+import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
