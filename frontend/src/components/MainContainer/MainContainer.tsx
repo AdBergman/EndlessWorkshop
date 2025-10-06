@@ -1,15 +1,15 @@
-import React, { useMemo, useState, useEffect, useCallback, useRef } from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import BackgroundPreloader from './BackGroundPreloader';
-import { ERA_THRESHOLDS, Tech, Improvement, District } from '@/types/dataTypes';
-import { useGameData } from '@/context/GameDataContext';
+import {ERA_THRESHOLDS, Tech} from '@/types/dataTypes';
+import {useGameData} from '@/context/GameDataContext';
 import './MainContainer.css';
 
 const MAX_ERA = 6;
 
 const MainContainer: React.FC = () => {
-    const { selectedFaction, selectedTechs, setSelectedTechs, techs, improvements, districts } = useGameData();
+    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
 
     // --- Hook: Load shared build from URL once ---
     useSharedBuildLoader(setSelectedTechs);

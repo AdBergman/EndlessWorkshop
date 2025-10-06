@@ -13,6 +13,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [selectedFaction, setSelectedFaction] = useState("Kin");
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
 
+    // --- Track if shared build has been loaded ---
+    const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
+
     // --- Fetch core game data ---
     useEffect(() => {
         const fetchData = async () => {
@@ -33,6 +36,28 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         fetchData();
     }, []);
 
+    // --- Load shared build from URL param (runs once) ---
+    useEffect(() => {
+        if (sharedBuildLoaded) return;
+
+        const params = new URLSearchParams(window.location.search);
+        const shareUuid = params.get("share");
+        if (!shareUuid) return;
+
+        const loadSharedBuild = async () => {
+            try {
+                const res = await apiClient.getSavedBuild(shareUuid);
+                setSelectedTechs(res.techIds); // populate tech selection
+                setSharedBuildLoaded(true);
+            } catch (err) {
+                console.error("Failed to load shared build:", err);
+            }
+        };
+
+        loadSharedBuild();
+    }, [sharedBuildLoaded, setSelectedTechs]);
+
+    // --- API helpers ---
     const createSavedTechBuild = async (name: string, techIds: string[]): Promise<SavedTechBuild> => {
         try {
             const saved = await apiClient.createSavedBuild(name, techIds);
@@ -49,9 +74,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             const saved = await apiClient.getSavedBuild(uuid);
             console.log("Loaded saved build:", saved);
 
-            // Populate selectedTechs when loading
-            setSelectedTechs(saved.techIds);
-
+            setSelectedTechs(saved.techIds); // populate selected techs
             return saved;
         } catch (err) {
             console.error("Failed to load saved tech build:", err);
