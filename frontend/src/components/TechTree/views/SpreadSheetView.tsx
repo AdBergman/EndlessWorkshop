@@ -11,10 +11,9 @@ import { useGameData } from "@/context/GameDataContext";
 
 const SpreadSheetView: React.FC = () => {
     const { selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
-    const { techs, improvements, districts } = useGameData(); // Get districts from context
+    const { techs, improvements, districts } = useGameData();
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
-    // --- Data Derivation from Context ---
     const selectedTechObjects = useMemo(() => {
         return selectedTechNames
             .map(name => techs.get(name))
@@ -27,13 +26,11 @@ const SpreadSheetView: React.FC = () => {
         setSortedTechs([...selectedTechObjects]);
     }, [selectedTechObjects]);
 
-    // --- Compute Unlocked Items ---
     const unlockedImprovements = useMemo(() => {
         const improvementArray: Improvement[] = Array.from(improvements.values());
         return getUnlockedImprovements(selectedTechObjects, improvementArray);
     }, [selectedTechObjects, improvements]);
 
-    // *** THIS IS THE NEW LOGIC FOR DISTRICTS ***
     const unlockedDistricts = useMemo(() => {
         const districtUnlocks: (District & { era: number })[] = [];
         const districtPrefix = "District: ";
@@ -44,7 +41,6 @@ const SpreadSheetView: React.FC = () => {
                     const distName = unlockLine.substring(districtPrefix.length).trim();
                     const district = districts.get(distName);
                     if (district) {
-                        // Create a new object combining the district data with the tech's era
                         districtUnlocks.push({ ...district, era: tech.era });
                     }
                 }
@@ -53,8 +49,6 @@ const SpreadSheetView: React.FC = () => {
         return districtUnlocks;
     }, [selectedTechObjects, districts]);
 
-
-    // --- Handlers ---
     const handleSort = () => {
         const newOrder = [...sortedTechs].sort((a, b) => {
             if (a.era !== b.era) return a.era - b.era;
@@ -77,7 +71,6 @@ const SpreadSheetView: React.FC = () => {
         return <div className="empty-sheet-message">No techs selected</div>;
     }
 
-    // --- Sheet rendering ---
     const renderActiveSheet = () => {
         switch (activeSheet) {
             case "techs":
@@ -85,7 +78,6 @@ const SpreadSheetView: React.FC = () => {
             case "improvements":
                 return <ImprovementSheetView improvements={unlockedImprovements} />;
             case "districts":
-                // Pass the new unlockedDistricts prop
                 return <DistrictSheetView districts={unlockedDistricts} />;
             default:
                 return <TechSheetView techs={sortedTechs} />;
@@ -97,6 +89,7 @@ const SpreadSheetView: React.FC = () => {
             <SpreadsheetToolbar
                 selectedTechs={selectedTechObjects}
                 unlockedImprovements={unlockedImprovements}
+                unlockedDistricts={unlockedDistricts} // <-- Pass the new data down
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateShareLink}
                 onSort={handleSort}

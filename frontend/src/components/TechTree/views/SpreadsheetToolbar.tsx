@@ -1,14 +1,14 @@
 import React, { useMemo } from "react";
 import { CSVLink } from "react-csv";
 import "./SpreadsheetToolbar.css";
-import { Tech, Improvement } from "@/types/dataTypes";
+import { Tech, Improvement, District } from "@/types/dataTypes";
 
-// Define the possible views the sheet can display
 export type SheetView = 'techs' | 'improvements' | 'districts';
 
 interface SpreadsheetToolbarProps {
     selectedTechs: Tech[];
-    unlockedImprovements: Improvement[]; // The new data prop
+    unlockedImprovements: Improvement[];
+    unlockedDistricts: (District & { era: number })[]; // Correct type for districts with era
     onDeselectAll: () => void;
     generateShareLink: () => void;
     onSort: () => void;
@@ -19,19 +19,22 @@ interface SpreadsheetToolbarProps {
 const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
     selectedTechs,
     unlockedImprovements,
+    unlockedDistricts,
     onDeselectAll,
     generateShareLink,
     onSort,
     activeSheet,
     setActiveSheet,
 }) => {
-    // useMemo efficiently calculates the CSV data and filename only when the relevant data changes.
-    const { csvData, filename } = useMemo(() => {
+
+    // This function now correctly handles all data types for CSV export.
+    const getExportConfig = () => {
         switch (activeSheet) {
             case 'improvements':
                 return {
                     filename: `endless-workshop-improvements.csv`,
-                    csvData: unlockedImprovements.map((imp) => ({
+                    headers: ["Name", "Era", "Unique", "Effects", "Cost"],
+                    data: unlockedImprovements.map((imp) => ({
                         Name: imp.name,
                         Era: imp.era,
                         Unique: imp.unique,
@@ -39,20 +42,39 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                         Cost: imp.cost?.join("; ") ?? "",
                     })),
                 };
+
+            case 'districts':
+                return {
+                    filename: `endless-workshop-districts.csv`,
+                    headers: ["Name", "Era", "Effect", "Info", "Tile Bonus", "Adjacency Bonus", "Placement Prerequisite"],
+                    data: unlockedDistricts.map((d) => ({
+                        Name: d.name,
+                        Era: d.era,
+                        Effect: d.effect ?? "", // Correctly access the string 'effect' property
+                        Info: d.info?.join("; ") ?? "",
+                        "Tile Bonus": d.tileBonus?.join("; ") ?? "", // Fix typo from d.t
+                        "Adjacency Bonus": d.adjacencyBonus?.join("; ") ?? "",
+                        "Placement Prerequisite": d.placementPrereq ?? "None",
+                    })),
+                };
+
             case 'techs':
             default:
                 return {
                     filename: `endless-workshop-techs.csv`,
-                    csvData: selectedTechs.map((t) => ({
+                    headers: ["Name", "Era", "Type", "Unlocks", "Effects"],
+                    data: selectedTechs.map((t) => ({
                         Name: t.name,
                         Era: t.era,
                         Type: t.type,
-                        Unlocks: t.unlocks.join("; "),
-                        Effects: t.effects.join("; "),
+                        Unlocks: t.unlocks?.join("; ") ?? "",
+                        Effects: t.effects?.join("; ") ?? "",
                     })),
                 };
         }
-    }, [activeSheet, selectedTechs, unlockedImprovements]);
+    };
+
+    const { data, headers, filename } = useMemo(getExportConfig, [activeSheet, selectedTechs, unlockedImprovements, unlockedDistricts]);
 
     return (
         <div className="spreadsheet-toolbar">
@@ -60,7 +82,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
                 <button onClick={generateShareLink}>Copy Link</button>
-                <CSVLink data={csvData} filename={filename}>
+                <CSVLink data={data} headers={headers} filename={filename} >
                     <button>Export CSV</button>
                 </CSVLink>
             </div>
