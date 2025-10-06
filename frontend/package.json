@@ -15,7 +15,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "vite",
+    "start": "vite --config vite.config.ts",
     "build": "vite build",
     "test": "node --loader ts-node/esm node_modules/vitest/vitest.mjs"
   },

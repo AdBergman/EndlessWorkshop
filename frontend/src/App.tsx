@@ -4,14 +4,14 @@ import TopContainer from './components/TopContainer/TopContainer';
 import MainContainer from './components/MainContainer/MainContainer';
 import InfoPage from './components/InfoPage/InfoPage';
 import { AppProvider } from "./context/AppContext";
+import GameDataProvider from './context/GameDataProvider';
 import './App.css';
 
-// Layout wrapper that keeps TopContainer always visible
 const AppLayout: React.FC = () => (
     <AppProvider>
         <div className="app">
             <TopContainer />
-            <Outlet /> {/* This will render either MainContainer or InfoPage */}
+            <Outlet /> {/* Will render MainContainer or InfoPage */}
         </div>
     </AppProvider>
 );
@@ -21,8 +21,16 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<AppLayout />}>
-                    <Route index element={<MainContainer />} /> {/* default route */}
-                    <Route path="info" element={<InfoPage />} />  {/* /info route */}
+                    {/* Wrap MainContainer with GameDataProvider */}
+                    <Route
+                        index
+                        element={
+                            <GameDataProvider>
+                                <MainContainer />
+                            </GameDataProvider>
+                        }
+                    />
+                    <Route path="info" element={<InfoPage />} />
                 </Route>
             </Routes>
         </Router>

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
@@ -10,15 +10,15 @@ export default defineConfig({
             '@': resolve(__dirname, 'src'),
         },
     },
-    optimizeDeps: {
-        include: ['prop-types'],
-    },
     server: {
         open: true,
-    },
-    test: {
-        globals: true,
-        environment: 'jsdom',
-        setupFiles: './src/setupTests.ts',
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                secure: false,
+                // The rewrite rule has been removed as the backend expects the /api prefix.
+            },
+        },
     },
 });
