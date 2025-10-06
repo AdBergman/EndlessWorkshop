@@ -30,6 +30,10 @@ const InfoPage: React.FC = () => {
                 <a href="https://community.amplitude-studios.com/amplitude-studios/endless-legend-2/forums" target="_blank" rel="noopener noreferrer">Forums</a>
                 <a href="https://wiki.hoodedhorse.com/ENDLESS_Legend_2/Main_Page" target="_blank" rel="noopener noreferrer">Wiki</a>
             </div>
+
+            <p className="contact-note">
+                I’m usually on the official Discord as <strong>CalmBreakfast</strong>.
+            </p>
         </div>
     );
 };

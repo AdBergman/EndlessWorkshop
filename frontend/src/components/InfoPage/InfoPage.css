@@ -89,3 +89,11 @@
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
     color: #000;
 }
+
+.contact-note {
+    font-size: 0.85rem;
+    text-align: center;
+    color: #ccc;
+    margin-top: 1rem;
+}
+
