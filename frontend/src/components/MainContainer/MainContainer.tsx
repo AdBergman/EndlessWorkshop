@@ -4,24 +4,20 @@ import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import BackgroundPreloader from './BackGroundPreloader';
 import { Tech, ERA_THRESHOLDS } from '@/types/dataTypes';
 import './MainContainer.css';
-import { useAppContext } from '@/context/AppContext';
 import { useGameData } from '@/context/GameDataContext';
-
-
 
 const maxEra = 6;
 
 const MainContainer: React.FC = () => {
     const [era, setEra] = useState(1);
 
-    const { selectedFaction, selectedTechs: selectedTechNames } = useAppContext();
-    const { techs } = useGameData(); // <- Using GameDataProvider
+    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
 
     const selectedTechObjects = useMemo(() => {
-        const techNameSet = new Set(selectedTechNames);
+        const techNameSet = new Set(selectedTechs);
         return allTechs.filter(tech => techNameSet.has(tech.name));
-    }, [selectedTechNames, allTechs]);
+    }, [selectedTechs, allTechs]);
 
     const handlePrevEra = () => setEra(prev => Math.max(1, prev - 1));
     const handleNextEra = () => setEra(prev => Math.min(maxEra, prev + 1));

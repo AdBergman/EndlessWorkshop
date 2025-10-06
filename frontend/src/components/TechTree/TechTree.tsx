@@ -7,8 +7,7 @@ import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
 import SelectAllButton from "@/components/TechTree/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
-import { useAppContext } from "@/context/AppContext";
-import { useGameData } from "@/context/GameDataContext"; // Use API data context
+import { useGameData } from "@/context/GameDataContext"; // Only GameDataContext now
 
 interface TechTreeProps {
     era: number;
@@ -21,15 +20,15 @@ const MAX_ERA = 6;
 const HIDE_DELAY = 300; // Grace period in ms to move mouse to tooltip
 
 const TechTree: React.FC<TechTreeProps> = ({
-   era,
-   onEraChange,
-   maxUnlockedEra,
-}) => {
-    const { selectedFaction, selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
-    const { techs } = useGameData(); // <-- Get techs from the context
+                                               era,
+                                               onEraChange,
+                                               maxUnlockedEra,
+                                           }) => {
+    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
     const hideTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
+    // Toggle selection of a tech
     const onTechClick = (techName: string) => {
         setSelectedTechs(prev =>
             prev.includes(techName)
@@ -42,9 +41,9 @@ const TechTree: React.FC<TechTreeProps> = ({
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
 
     const selectedTechObjects = useMemo(() => {
-        const techNameSet = new Set(selectedTechNames);
+        const techNameSet = new Set(selectedTechs);
         return allTechs.filter(tech => techNameSet.has(tech.name));
-    }, [selectedTechNames, allTechs]);
+    }, [selectedTechs, allTechs]);
 
     const currentFactionEraTechs = useMemo(
         () => allTechs.filter(t => t.era === era && t.factions.includes(selectedFaction)),
@@ -53,7 +52,7 @@ const TechTree: React.FC<TechTreeProps> = ({
 
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
-        for (let e = 1; e <= 6; e++) {
+        for (let e = MIN_ERA; e <= MAX_ERA; e++) {
             map[e] = allTechs.filter(
                 t => t.factions.includes(selectedFaction) && t.era === e
             );
@@ -122,7 +121,7 @@ const TechTree: React.FC<TechTreeProps> = ({
                 <React.Fragment key={tech.name}>
                     <TechNode
                         coords={tech.coords}
-                        selected={selectedTechNames.includes(tech.name)}
+                        selected={selectedTechs.includes(tech.name)}
                         locked={isLocked(tech)}
                         onClick={() => onTechClick(tech.name)}
                         onHoverChange={hovered =>

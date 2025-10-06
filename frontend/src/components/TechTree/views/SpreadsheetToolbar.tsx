@@ -10,7 +10,7 @@ interface SpreadsheetToolbarProps {
     unlockedImprovements: Improvement[];
     unlockedDistricts: (District & { era: number })[]; // Correct type for districts with era
     onDeselectAll: () => void;
-    generateShareLink: () => void;
+    generateShareLink: (name: string, techIds: string[]) => void;
     onSort: () => void;
     activeSheet: SheetView;
     setActiveSheet: (view: SheetView) => void;
@@ -81,7 +81,12 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
             <div className="action-buttons">
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
-                <button onClick={generateShareLink}>Copy Link</button>
+                <button
+                    onClick={() => generateShareLink("My Build Name", selectedTechs.map(t => t.name))}
+                >
+                    Copy Link
+                </button>
+
                 <CSVLink data={data} headers={headers} filename={filename} >
                     <button>Export CSV</button>
                 </CSVLink>

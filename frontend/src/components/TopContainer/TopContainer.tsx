@@ -1,6 +1,6 @@
 import React from 'react';
 import './TopContainer.css';
-import { useAppContext } from '@/context/AppContext';
+import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom'; // Import NavLink
 
 // All factions in your game
@@ -16,8 +16,8 @@ const routes = [
 ];
 
 const TopContainer: React.FC = () => {
-    // The component now only gets data it needs, not navigation state.
-    const { selectedFaction, setSelectedFaction } = useAppContext();
+    // Use GameDataContext for selectedFaction now
+    const { selectedFaction, setSelectedFaction } = useGameData();
 
     return (
         <header className="top-container">
@@ -32,12 +32,9 @@ const TopContainer: React.FC = () => {
                     <NavLink
                         key={route.label}
                         to={route.path}
-                        // NavLink automatically adds the 'active' class, but we can customize it
-                        // to also handle the disabled state.
                         className={({ isActive }) =>
                             `${isActive ? 'active' : ''} ${!route.isAvailable ? 'disabled' : ''}`
                         }
-                        // Prevent navigation for disabled links
                         onClick={(e) => !route.isAvailable && e.preventDefault()}
                         title={!route.isAvailable ? "Coming Soon" : ""}
                     >
@@ -46,7 +43,7 @@ const TopContainer: React.FC = () => {
                 ))}
             </div>
 
-            {/* Faction buttons remain unchanged */}
+            {/* Faction buttons */}
             <div className="faction-selector">
                 {factions.map(f => {
                     const isAvailable = availableFactions.includes(f);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Tech, Improvement, District } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
@@ -6,22 +6,28 @@ import TechSheetView from "./TechSheetView";
 import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
 import { getUnlockedImprovements } from "@/utils/unlocks";
-import { useAppContext } from "@/context/AppContext";
 import { useGameData } from "@/context/GameDataContext";
 
 const SpreadSheetView: React.FC = () => {
-    const { selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
-    const { techs, improvements, districts } = useGameData();
+    const {
+        selectedTechs,
+        setSelectedTechs,
+        techs,
+        improvements,
+        districts,
+        createSavedTechBuild
+    } = useGameData();
+
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
     const selectedTechObjects = useMemo(() => {
-        return selectedTechNames
+        return selectedTechs
             .map(name => techs.get(name))
             .filter((tech): tech is Tech => tech !== undefined);
-    }, [selectedTechNames, techs]);
+    }, [selectedTechs, techs]);
 
+    // --- Keep sortedTechs in sync with selectedTechObjects ---
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
-
     useEffect(() => {
         setSortedTechs([...selectedTechObjects]);
     }, [selectedTechObjects]);
@@ -40,9 +46,7 @@ const SpreadSheetView: React.FC = () => {
                 if (unlockLine.startsWith(districtPrefix)) {
                     const distName = unlockLine.substring(districtPrefix.length).trim();
                     const district = districts.get(distName);
-                    if (district) {
-                        districtUnlocks.push({ ...district, era: tech.era });
-                    }
+                    if (district) districtUnlocks.push({ ...district, era: tech.era });
                 }
             }
         }
@@ -50,24 +54,31 @@ const SpreadSheetView: React.FC = () => {
     }, [selectedTechObjects, districts]);
 
     const handleSort = () => {
-        const newOrder = [...sortedTechs].sort((a, b) => {
+        setSortedTechs([...selectedTechObjects].sort((a, b) => {
             if (a.era !== b.era) return a.era - b.era;
             return a.name.localeCompare(b.name);
-        });
-        setSortedTechs(newOrder);
+        }));
     };
 
     const handleDeselectAll = () => setSelectedTechs([]);
 
-    const handleGenerateShareLink = () => {
-        const link = `${window.location.origin}?share=${encodeURIComponent(
-            selectedTechNames.join(",")
-        )}`;
-        navigator.clipboard.writeText(link).catch(() => {});
-        alert("Share link copied to clipboard!");
+    const handleGenerateLink = async () => {
+        try {
+            if (!createSavedTechBuild) return;
+
+            const buildName = "My Build Name";
+            const techIds = selectedTechObjects.map(t => t.name);
+            const saved = await createSavedTechBuild(buildName, techIds);
+
+            alert(`Link copied! Build UUID: ${saved.uuid}`);
+            navigator.clipboard.writeText(`${window.location.origin}?share=${saved.uuid}`);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to generate link");
+        }
     };
 
-    if (selectedTechNames.length === 0) {
+    if (selectedTechs.length === 0) {
         return <div className="empty-sheet-message">No techs selected</div>;
     }
 
@@ -89,9 +100,9 @@ const SpreadSheetView: React.FC = () => {
             <SpreadsheetToolbar
                 selectedTechs={selectedTechObjects}
                 unlockedImprovements={unlockedImprovements}
-                unlockedDistricts={unlockedDistricts} // <-- Pass the new data down
+                unlockedDistricts={unlockedDistricts}
                 onDeselectAll={handleDeselectAll}
-                generateShareLink={handleGenerateShareLink}
+                generateShareLink={handleGenerateLink}
                 onSort={handleSort}
                 activeSheet={activeSheet}
                 setActiveSheet={setActiveSheet}
