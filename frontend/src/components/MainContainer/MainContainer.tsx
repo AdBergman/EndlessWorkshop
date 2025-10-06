@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, {useMemo, useState} from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
 import BackgroundPreloader from './BackGroundPreloader';
-import { Tech, ERA_THRESHOLDS } from '@/types/dataTypes';
+import {ERA_THRESHOLDS} from '@/types/dataTypes';
 import './MainContainer.css';
-import { useGameData } from '@/context/GameDataContext';
+import {useGameData} from '@/context/GameDataContext';
+import SharedBuildLoader from "@/components/SharedBuildLoader";
 
 const maxEra = 6;
 
@@ -43,6 +44,7 @@ const MainContainer: React.FC = () => {
 
     return (
         <main className="main-container">
+            <SharedBuildLoader />  {/* <-- This loads the URL parameter */}
             <TechTree
                 era={era}
                 maxUnlockedEra={maxUnlockedEra}
