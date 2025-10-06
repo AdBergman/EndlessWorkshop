@@ -28,7 +28,7 @@ public class ImprovementMapper {
         return ImprovementDto.builder()
                 .name(entity.getName())
                 .effects(effects)
-                .unique(entity.getUnique() != null ? entity.getUnique().name() : "")
+                .unique(formatEnumName(entity.getUnique()))
                 .cost(cost)
                 .era(entity.getEra())
                 .build();
@@ -38,4 +38,12 @@ public class ImprovementMapper {
         if (cost == null) return "";
         return cost.amount() + " " + cost.type().name(); // Example: "5 Glassteel"
     }
+
+    private static String formatEnumName(Enum<?> enumConstant) {
+        if (enumConstant == null) return "";
+        return java.util.Arrays.stream(enumConstant.name().split("_"))
+                .map(word -> word.substring(0,1).toUpperCase() + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+
 }

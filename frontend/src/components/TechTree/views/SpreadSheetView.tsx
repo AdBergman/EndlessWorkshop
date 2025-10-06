@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Tech, Improvement } from "@/types/dataTypes";
+import { Tech, Improvement, District } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
 import TechSheetView from "./TechSheetView";
@@ -7,20 +7,19 @@ import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
 import { getUnlockedImprovements } from "@/utils/unlocks";
 import { useAppContext } from "@/context/AppContext";
-import { useGameData } from "@/context/GameDataContext"; // API context
+import { useGameData } from "@/context/GameDataContext";
 
 const SpreadSheetView: React.FC = () => {
     const { selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
-    const { improvements } = useGameData(); // Improvements from API
+    const { techs, improvements, districts } = useGameData(); // Get districts from context
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
-    // --- Techs from JSON ---
-    const { techs } = useGameData();
-    const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
+    // --- Data Derivation from Context ---
     const selectedTechObjects = useMemo(() => {
-        const techNameSet = new Set(selectedTechNames);
-        return allTechs.filter((tech) => techNameSet.has(tech.name));
-    }, [selectedTechNames, allTechs]);
+        return selectedTechNames
+            .map(name => techs.get(name))
+            .filter((tech): tech is Tech => tech !== undefined);
+    }, [selectedTechNames, techs]);
 
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
 
@@ -28,11 +27,32 @@ const SpreadSheetView: React.FC = () => {
         setSortedTechs([...selectedTechObjects]);
     }, [selectedTechObjects]);
 
-    // --- Compute unlocked improvements using the PREFIX-aware utility ---
+    // --- Compute Unlocked Items ---
     const unlockedImprovements = useMemo(() => {
         const improvementArray: Improvement[] = Array.from(improvements.values());
         return getUnlockedImprovements(selectedTechObjects, improvementArray);
     }, [selectedTechObjects, improvements]);
+
+    // *** THIS IS THE NEW LOGIC FOR DISTRICTS ***
+    const unlockedDistricts = useMemo(() => {
+        const districtUnlocks: (District & { era: number })[] = [];
+        const districtPrefix = "District: ";
+
+        for (const tech of selectedTechObjects) {
+            for (const unlockLine of tech.unlocks ?? []) {
+                if (unlockLine.startsWith(districtPrefix)) {
+                    const distName = unlockLine.substring(districtPrefix.length).trim();
+                    const district = districts.get(distName);
+                    if (district) {
+                        // Create a new object combining the district data with the tech's era
+                        districtUnlocks.push({ ...district, era: tech.era });
+                    }
+                }
+            }
+        }
+        return districtUnlocks;
+    }, [selectedTechObjects, districts]);
+
 
     // --- Handlers ---
     const handleSort = () => {
@@ -65,7 +85,8 @@ const SpreadSheetView: React.FC = () => {
             case "improvements":
                 return <ImprovementSheetView improvements={unlockedImprovements} />;
             case "districts":
-                return <DistrictSheetView />;
+                // Pass the new unlockedDistricts prop
+                return <DistrictSheetView districts={unlockedDistricts} />;
             default:
                 return <TechSheetView techs={sortedTechs} />;
         }

@@ -80,8 +80,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 </button>
                 <button
                     onClick={() => setActiveSheet('districts')}
-                    className={`${activeSheet === 'districts' ? 'active' : ''} disabled`}
-                    title="Coming Soon"
+                    className={`${activeSheet === 'districts' ? 'active' : ''} `}
                 >
                     Districts
                 </button>
