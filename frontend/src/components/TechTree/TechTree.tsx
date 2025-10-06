@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import techTreeJson from '../../data/techs.json';
 import TechNode from './TechNode';
 import { Tech } from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
@@ -9,8 +8,8 @@ import EraProgressPanel from './EraProgressPanel';
 import SelectAllButton from "@/components/TechTree/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
 import { useAppContext } from "@/context/AppContext";
+import { useGameData } from "@/context/GameDataContext"; // Use API data context
 
-// Props are now simpler, as selectedTechs state is handled by context.
 interface TechTreeProps {
     era: number;
     onEraChange: (dir: 'previous' | 'next') => void;
@@ -27,10 +26,10 @@ const TechTree: React.FC<TechTreeProps> = ({
    maxUnlockedEra,
 }) => {
     const { selectedFaction, selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
+    const { techs } = useGameData(); // <-- Get techs from the context
     const [openTooltips, setOpenTooltips] = useState<Set<string>>(new Set());
     const hideTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
-    // The onTechClick handler now lives here and updates the global context.
     const onTechClick = (techName: string) => {
         setSelectedTechs(prev =>
             prev.includes(techName)
@@ -39,8 +38,9 @@ const TechTree: React.FC<TechTreeProps> = ({
         );
     };
 
-    // --- Data Derivation from Context and JSON ---
-    const allTechs = useMemo(() => techTreeJson as Tech[], []);
+    // --- Data Derivation from API Context ---
+    const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
+
     const selectedTechObjects = useMemo(() => {
         const techNameSet = new Set(selectedTechNames);
         return allTechs.filter(tech => techNameSet.has(tech.name));

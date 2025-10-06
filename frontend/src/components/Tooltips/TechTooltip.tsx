@@ -18,7 +18,7 @@ type HoveredImprovementState = HoveredWithCoords<Improvement> | null;
 type HoveredDistrictState = HoveredWithCoords<District> | null;
 
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
-    const { districts, improvements } = useGameData(); // <-- use API data
+    const { districts, improvements } = useGameData();
 
     const [hoveredImprovement, setHoveredImprovement] = useState<HoveredImprovementState>(null);
     const [hoveredDistrict, setHoveredDistrict] = useState<HoveredDistrictState>(null);
@@ -53,7 +53,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
 
         if (line.startsWith(distPrefix)) {
             const distName = line.slice(distPrefix.length);
-            const distObj = districts.get(distName); // <-- use API districts
+            const distObj = districts.get(distName);
             if (!distObj) return <div key={index}>{line}</div>;
 
             const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {

@@ -6,7 +6,6 @@ import ewshop.facade.dto.TechCoordsDto;
 import ewshop.facade.dto.TechDto;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
