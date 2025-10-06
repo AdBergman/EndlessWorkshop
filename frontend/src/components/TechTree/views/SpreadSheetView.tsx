@@ -1,25 +1,25 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Tech } from "@/types/dataTypes";
+import { Tech, Improvement } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
 import TechSheetView from "./TechSheetView";
 import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
 import { getUnlockedImprovements } from "@/utils/unlocks";
-import { improvementsMap } from "@/utils/improvementsMap";
 import { useAppContext } from "@/context/AppContext";
-import techTreeJson from "@/data/techs.json";
+import { useGameData } from "@/context/GameDataContext"; // API context
 
-// This component no longer receives props, as it gets its state from the context.
 const SpreadSheetView: React.FC = () => {
     const { selectedTechs: selectedTechNames, setSelectedTechs } = useAppContext();
-    const [activeSheet, setActiveSheet] = useState<SheetView>('techs');
+    const { improvements } = useGameData(); // Improvements from API
+    const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
-    // --- Data Derivation from Context and JSON ---
-    const allTechs = useMemo(() => techTreeJson as Tech[], []);
+    // --- Techs from JSON ---
+    const { techs } = useGameData();
+    const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
     const selectedTechObjects = useMemo(() => {
         const techNameSet = new Set(selectedTechNames);
-        return allTechs.filter(tech => techNameSet.has(tech.name));
+        return allTechs.filter((tech) => techNameSet.has(tech.name));
     }, [selectedTechNames, allTechs]);
 
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
@@ -28,12 +28,13 @@ const SpreadSheetView: React.FC = () => {
         setSortedTechs([...selectedTechObjects]);
     }, [selectedTechObjects]);
 
-    const unlockedImprovements = useMemo(
-        () => getUnlockedImprovements(selectedTechObjects, improvementsMap),
-        [selectedTechObjects]
-    );
+    // --- Compute unlocked improvements using the PREFIX-aware utility ---
+    const unlockedImprovements = useMemo(() => {
+        const improvementArray: Improvement[] = Array.from(improvements.values());
+        return getUnlockedImprovements(selectedTechObjects, improvementArray);
+    }, [selectedTechObjects, improvements]);
 
-    // --- Handlers for the Toolbar ---
+    // --- Handlers ---
     const handleSort = () => {
         const newOrder = [...sortedTechs].sort((a, b) => {
             if (a.era !== b.era) return a.era - b.era;
@@ -42,28 +43,28 @@ const SpreadSheetView: React.FC = () => {
         setSortedTechs(newOrder);
     };
 
-    // This now clears the global state.
     const handleDeselectAll = () => setSelectedTechs([]);
 
     const handleGenerateShareLink = () => {
-        const link = `${window.location.origin}?share=${encodeURIComponent(selectedTechNames.join(","))}`;
+        const link = `${window.location.origin}?share=${encodeURIComponent(
+            selectedTechNames.join(",")
+        )}`;
         navigator.clipboard.writeText(link).catch(() => {});
         alert("Share link copied to clipboard!");
     };
 
-    // If no techs are selected, render nothing but the message.
     if (selectedTechNames.length === 0) {
         return <div className="empty-sheet-message">No techs selected</div>;
     }
 
-    // --- Dynamic Rendering Logic ---
+    // --- Sheet rendering ---
     const renderActiveSheet = () => {
         switch (activeSheet) {
-            case 'techs':
+            case "techs":
                 return <TechSheetView techs={sortedTechs} />;
-            case 'improvements':
+            case "improvements":
                 return <ImprovementSheetView improvements={unlockedImprovements} />;
-            case 'districts':
+            case "districts":
                 return <DistrictSheetView />;
             default:
                 return <TechSheetView techs={sortedTechs} />;

@@ -3,35 +3,27 @@ import { Tech, Improvement } from "@/types/dataTypes";
 const IMPROVEMENT_PREFIX = "Improvement: ";
 
 /**
- * Parses the currently selected techs to find all unique improvements they unlock.
- * @param selectedTechs - The array of currently selected Tech objects.
- * @param improvementsMap - The map of all available improvements.
- * @returns An array of unique Improvement objects unlocked by the selected techs.
+ * Finds all improvements unlocked by the currently selected techs.
+ * Compatible with array-based data from the API.
  */
 export const getUnlockedImprovements = (
     selectedTechs: Tech[],
-    improvementsMap: Map<string, Improvement>
+    improvements: Improvement[]
 ): Improvement[] => {
     const unlockedImprovementNames = new Set<string>();
 
-    // Iterate through each selected tech to find what it unlocks
+    // Collect all improvement unlocks from selected techs
     for (const tech of selectedTechs) {
-        for (const unlockLine of tech.unlocks) {
+        for (const unlockLine of tech.unlocks ?? []) {
             if (unlockLine.startsWith(IMPROVEMENT_PREFIX)) {
-                const improvementName = unlockLine.substring(IMPROVEMENT_PREFIX.length);
-                unlockedImprovementNames.add(improvementName);
+                const impName = unlockLine.substring(IMPROVEMENT_PREFIX.length).trim().toLowerCase();
+                unlockedImprovementNames.add(impName);
             }
         }
     }
 
-    // Look up the full Improvement objects from the map
-    const unlockedImprovements: Improvement[] = [];
-    for (const name of unlockedImprovementNames) {
-        const improvement = improvementsMap.get(name);
-        if (improvement) {
-            unlockedImprovements.push(improvement);
-        }
-    }
-
-    return unlockedImprovements;
+    // Filter matching improvement objects from API
+    return improvements.filter(
+        (imp) => unlockedImprovementNames.has(imp.name.trim().toLowerCase())
+    );
 };

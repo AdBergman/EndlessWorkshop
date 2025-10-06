@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 import ImprovementTooltip from "../../Tooltips/ImprovementTooltip";
 import DistrictTooltip from "../../Tooltips/DistrictTooltip";
-import { improvementsMap } from "@/utils/improvementsMap";
-import { districtsMap } from "@/utils/districtsMap";
-import {
-    createHoveredImprovement,
-    createHoveredDistrict,
-    HoveredWithCoords,
-} from "../../Tooltips/hoverHelpers";
+import { createHoveredImprovement, createHoveredDistrict, HoveredWithCoords } from "../../Tooltips/hoverHelpers";
+import { useGameData } from "@/context/GameDataContext";
 
 type HoverType = "Improvement" | "District";
 
@@ -17,20 +12,17 @@ interface HoverableItemProps {
     prefix: string;
 }
 
-const HoverableItem: React.FC<HoverableItemProps> = ({
-                                                         type,
-                                                         name,
-                                                         prefix,
-                                                     }) => {
+const HoverableItem: React.FC<HoverableItemProps> = ({ type, name, prefix }) => {
+    const { improvements, districts } = useGameData();
     const [hovered, setHovered] = useState<HoveredWithCoords<any> | null>(null);
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
         if (type === "Improvement") {
-            const imp = improvementsMap.get(name);
+            const imp = improvements.get(name);
             if (!imp) return;
             setHovered(createHoveredImprovement(imp, e));
         } else if (type === "District") {
-            const dist = districtsMap.get(name);
+            const dist = districts.get(name);
             if (!dist) return;
             setHovered(createHoveredDistrict(dist, e));
         }
@@ -49,13 +41,8 @@ const HoverableItem: React.FC<HoverableItemProps> = ({
                 {name}
             </span>
 
-            {/* Pass the entire 'hovered' object directly to the child tooltips */}
-            {hovered && type === "Improvement" && (
-                <ImprovementTooltip hoveredImprovement={hovered} />
-            )}
-            {hovered && type === "District" && (
-                <DistrictTooltip hoveredDistrict={hovered} />
-            )}
+            {hovered && type === "Improvement" && <ImprovementTooltip hoveredImprovement={hovered} />}
+            {hovered && type === "District" && <DistrictTooltip hoveredDistrict={hovered} />}
         </div>
     );
 };
