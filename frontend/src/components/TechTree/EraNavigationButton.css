@@ -37,6 +37,14 @@
     transform: scale(1.1);
 }
 
+.fade-in {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.fade-in.visible {
+    opacity: 1;
+}
+
 @keyframes ambientPulse {
     0% {
         transform: scale(1);

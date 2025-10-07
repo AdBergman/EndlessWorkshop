@@ -2,17 +2,18 @@ import React from 'react';
 import './EraNavigationButton.css';
 
 interface Props {
-    direction: 'previous' | 'next';
-    onClick: () => void;
+    direction: 'previous' | 'next',
+    onClick: () => void,
+    visible?: boolean
 }
 
-const BOX_SIZE = { widthPct: 13.28, heightPct: 27.78 };
+const BOX_SIZE = {widthPct: 13.28, heightPct: 27.78};
 const COORDS_MAP = {
-    previous: { xPct: 0.15, yPct: 25.5 },
-    next: { xPct: 86.9, yPct: 25.5 }
+    previous: {xPct: 0.15, yPct: 25.5},
+    next: {xPct: 86.9, yPct: 25.5}
 };
 
-const EraNavigationButton: React.FC<Props> = ({ direction, onClick }) => {
+const EraNavigationButton: React.FC<Props> = ({direction, onClick, visible}) => {
     const coords = COORDS_MAP[direction];
     const style = {
         left: `${coords.xPct}%`,
@@ -23,12 +24,12 @@ const EraNavigationButton: React.FC<Props> = ({ direction, onClick }) => {
 
     return (
         <div
-            className={`era-navigation-button ${direction}`}
+            className={`era-navigation-button ${direction} ${visible ? 'visible' : ''}`}
             style={style}
             onClick={onClick}
             data-testid="era-nav-button"
         >
-            <div className="orb" />
+            <div className="orb"/>
         </div>
     );
 };

@@ -114,6 +114,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                             key={dir}
                             direction={dir}
                             onClick={() => onEraChange(dir)}
+                            visible={bgLoaded}
                         />
                     )
             )}
