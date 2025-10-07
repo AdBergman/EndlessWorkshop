@@ -43,12 +43,6 @@ EXPOSE 8080
 #  -Xms256m  initial heap
 #  -Xmx512m  max heap
 #  -XX:MaxMetaspaceSize=128m  class metadata cap
-#  G1GC + StringDeduplication for efficiency
-ENTRYPOINT ["java",
-  "-Xms256m",
-  "-Xmx512m",
-  "-XX:MaxMetaspaceSize=128m",
-  "-XX:+UseG1GC",
-  "-XX:+UseStringDeduplication",
-  "-jar", "app.jar"]
+ENTRYPOINT ["java","-Xms256m","-Xmx512m","-XX:MaxMetaspaceSize=128m","-jar","app.jar"]
+
 
