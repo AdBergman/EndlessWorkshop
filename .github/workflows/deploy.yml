@@ -1,0 +1,57 @@
+name: Build & Deploy EWShop
+
+on:
+  push:
+    branches:
+      - main   # or your release branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Docker
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      # 3. Build Docker image locally in Actions
+      - name: Build Docker image
+        run: |
+          docker build -t ewshop-app .
+
+      # 4. Set up SSH agent with Lightsail key
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+
+      # 5. Deploy to Lightsail with rollback logging
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@3.76.217.5 << 'EOF'
+            echo "Saving new image as tar..."
+            docker save ewshop-app -o ewshop-app.tar
+
+            echo "Loading image on Lightsail..."
+            docker load -i ewshop-app.tar
+
+            echo "Attempting to start new container..."
+            if docker run -d --name ewshop-app-new -p 8080:8080 ewshop-app; then
+              echo "✅ New container started successfully. Stopping old container..."
+              docker stop ewshop-app || true
+              docker rm ewshop-app || true
+              docker rename ewshop-app-new ewshop-app
+              echo "✅ Deployment complete!"
+            else
+              echo "❌ Failed to start new container."
+              echo "=== Logs from failed container ==="
+              docker logs ewshop-app-new || echo "No logs available"
+              echo "Keeping old container running."
+              docker rm ewshop-app-new || true
+              exit 1
+            fi
+          EOF
