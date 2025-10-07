@@ -3,22 +3,28 @@ import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
 
-export default defineConfig({
-    plugins: [tsconfigPaths(), react()],
-    resolve: {
-        alias: {
-            '@': resolve(__dirname, 'src'),
-        },
-    },
-    server: {
-        open: true,
-        proxy: {
-            '/api': {
-                target: 'http://localhost:8080',
-                changeOrigin: true,
-                secure: false,
-                // The rewrite rule has been removed as the backend expects the /api prefix.
+export default defineConfig(({ mode }) => {
+    const isProduction = mode === 'production';
+
+    return {
+        plugins: [tsconfigPaths(), react()],
+        resolve: {
+            alias: {
+                '@': resolve(__dirname, 'src'),
             },
         },
-    },
+        base: isProduction ? './' : '/', // relative paths in production, root in dev
+        server: {
+            open: true,
+            proxy: !isProduction
+                ? {
+                    '/api': {
+                        target: 'http://localhost:8080',
+                        changeOrigin: true,
+                        secure: false,
+                    },
+                }
+                : undefined,
+        },
+    };
 });

@@ -7,8 +7,9 @@ export type SavedTechBuild = {
     createdAt: string;
 };
 
-// Hardcode the base URL to '/api' to ensure it always points to the Vite proxy.
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
+
 
 async function fetcher<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
