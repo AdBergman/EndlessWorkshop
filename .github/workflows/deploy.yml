@@ -66,7 +66,8 @@ jobs:
             echo "Starting new container..."
             if docker run -d \
               --name $CONTAINER_NAME \
-              -p 80:8080 \
+              -p 8080:8080 \
+              --restart=unless-stopped \
               -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m" \
               $IMAGE_NAME:$TAG; then
               echo "✅ New container started successfully!"
