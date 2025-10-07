@@ -28,7 +28,7 @@ jobs:
       # 4. Build and push Docker image
       - name: Build & Push Docker image
         run: |
-          IMAGE_NAME=calmbreakfast/ewshop-app
+          IMAGE_NAME=calmbreakfast/ew-shop
           TAG=latest
           echo "Building Docker image $IMAGE_NAME:$TAG..."
           docker build -t $IMAGE_NAME:$TAG .
@@ -44,8 +44,8 @@ jobs:
       # 6. Deploy to Lightsail
       - name: Deploy to Lightsail via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.76.217.5 << 'EOF'
-            IMAGE_NAME=calmbreakfast/ewshop-app
+          ssh -o StrictHostKeyChecking=no ubuntu@3.65.107.28 << 'EOF'
+            IMAGE_NAME=calmbreakfast/ew-shop
             TAG=latest
             CONTAINER_NAME=ewshop-app
             NEW_CONTAINER=${CONTAINER_NAME}-new
@@ -57,7 +57,7 @@ jobs:
             fi
 
             echo "Starting new container $NEW_CONTAINER..."
-            if docker run -d --name $NEW_CONTAINER -p 8080:8080 $IMAGE_NAME:$TAG; then
+            if docker run -d --name $NEW_CONTAINER -p 80:8080 $IMAssh -o StrictHostKeyChecking=no ubuntu@3.65.107.28 << 'EOF'GE_NAME:$TAG; then
               echo "✅ New container started successfully."
               echo "Stopping old container $CONTAINER_NAME..."
               docker stop $CONTAINER_NAME || true
