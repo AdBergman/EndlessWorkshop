@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import TechNode from './TechNode';
 import { Tech } from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
@@ -22,8 +22,13 @@ const MAX_ERA = 6;
 const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra }) => {
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300); // HIDE_DELAY
-
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
+    const [bgLoaded, setBgLoaded] = useState(false);
+
+// Reset when era changes
+    useEffect(() => {
+        setBgLoaded(false);
+    }, [era]);
 
     const selectedTechObjects = useMemo(() => {
         const techSet = new Set(selectedTechs);
@@ -66,6 +71,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 alt={`${selectedFaction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
+                onLoad={() => setBgLoaded(true)}
             />
 
             <SelectAllButton
@@ -79,7 +85,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 onTechClick={onTechClick}
             />
 
-            {currentFactionEraTechs.map(tech => (
+            {bgLoaded && currentFactionEraTechs.map(tech => (
                 <React.Fragment key={tech.name}>
                     <TechNode
                         coords={tech.coords}
@@ -89,6 +95,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                         onHoverChange={hovered =>
                             hovered ? showTooltip(tech.name) : hideTooltip(tech.name)
                         }
+                        visible={bgLoaded}
                     />
                     {openTooltips.has(tech.name) && (
                         <TechTooltip
@@ -99,6 +106,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                     )}
                 </React.Fragment>
             ))}
+
 
             {(['previous', 'next'] as const).map(dir =>
                     !isButtonHidden(dir) && (

@@ -7,6 +7,7 @@ interface TechNodeProps {
     locked?: boolean;
     onClick: () => void;
     onHoverChange?: (hovered: boolean) => void;
+    visible?: boolean;
 }
 
 const BOX_SIZE_PCT = 4.95;
@@ -16,14 +17,18 @@ const TechNode: React.FC<TechNodeProps> = ({
                                                selected,
                                                locked = false,
                                                onClick,
-                                               onHoverChange
+                                               onHoverChange,
+    visible
                                            }) => {
     const clickable = !locked;
 
     return (
         <div
             data-testid="tech-node"
-            className={`tech-node ${selected ? 'selected' : ''} ${locked ? 'locked' : ''}`}
+            className={`tech-node 
+                ${selected ? 'selected' : ''} 
+                ${locked ? 'locked' : ''} 
+                ${visible ? 'visible' : ''}`}
             onClick={clickable ? onClick : undefined}
             onMouseEnter={() => onHoverChange?.(true)}
             onMouseLeave={() => onHoverChange?.(false)}
