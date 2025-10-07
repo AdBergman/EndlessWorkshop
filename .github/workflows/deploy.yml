@@ -14,7 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up Docker Buildx
+      # 2. Set up Docker Build
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
@@ -56,19 +56,26 @@ jobs:
               exit 1
             fi
 
-            echo "Starting new container $NEW_CONTAINER..."
-            if docker run -d --name $NEW_CONTAINER -p 80:8080 $IMAGE_NAME:$TAG; then
-              echo "✅ New container started successfully."
-              echo "Stopping old container $CONTAINER_NAME..."
+            echo "Stopping old container if it exists..."
+            if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER_NAME\$"; then
               docker stop $CONTAINER_NAME || true
               docker rm $CONTAINER_NAME || true
+            fi
+
+            echo "Starting new container $NEW_CONTAINER..."
+            # Limit JVM memory to avoid OOM on small Lightsail instance
+            if docker run -d \
+              --name $NEW_CONTAINER \
+              -p 80:8080 \
+              -e JAVA_OPTS="-Xmx256m -Xms128m" \
+              $IMAGE_NAME:$TAG; then
+              echo "✅ New container started successfully."
+              # Rename new container to standard name
               docker rename $NEW_CONTAINER $CONTAINER_NAME
               echo "✅ Deployment complete!"
             else
               echo "❌ Failed to start new container."
-              echo "=== Logs from failed container ==="
               docker logs $NEW_CONTAINER || echo "No logs available"
-              echo "Keeping old container running."
               docker rm $NEW_CONTAINER || true
               exit 1
             fi
