@@ -14,44 +14,62 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Set up Docker
+      # 2. Set up Docker Buildx
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
-      # 3. Build Docker image locally in Actions
-      - name: Build Docker image
-        run: |
-          docker build -t ewshop-app .
+      # 3. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Set up SSH agent with Lightsail key
+      # 4. Build and push Docker image
+      - name: Build & Push Docker image
+        run: |
+          IMAGE_NAME=calmbreakfast/ewshop-app
+          TAG=latest
+          echo "Building Docker image $IMAGE_NAME:$TAG..."
+          docker build -t $IMAGE_NAME:$TAG .
+          echo "Pushing Docker image to Docker Hub..."
+          docker push $IMAGE_NAME:$TAG
+
+      # 5. Set up SSH agent for Lightsail
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
 
-      # 5. Deploy to Lightsail with rollback logging
-      - name: Deploy via SSH
+      # 6. Deploy to Lightsail
+      - name: Deploy to Lightsail via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@3.76.217.5 << 'EOF'
-            echo "Saving new image as tar..."
-            docker save ewshop-app -o ewshop-app.tar
+            IMAGE_NAME=calmbreakfast/ewshop-app
+            TAG=latest
+            CONTAINER_NAME=ewshop-app
+            NEW_CONTAINER=${CONTAINER_NAME}-new
 
-            echo "Loading image on Lightsail..."
-            docker load -i ewshop-app.tar
+            echo "Pulling latest image from Docker Hub..."
+            if ! docker pull $IMAGE_NAME:$TAG; then
+              echo "❌ Failed to pull image $IMAGE_NAME:$TAG"
+              exit 1
+            fi
 
-            echo "Attempting to start new container..."
-            if docker run -d --name ewshop-app-new -p 8080:8080 ewshop-app; then
-              echo "✅ New container started successfully. Stopping old container..."
-              docker stop ewshop-app || true
-              docker rm ewshop-app || true
-              docker rename ewshop-app-new ewshop-app
+            echo "Starting new container $NEW_CONTAINER..."
+            if docker run -d --name $NEW_CONTAINER -p 8080:8080 $IMAGE_NAME:$TAG; then
+              echo "✅ New container started successfully."
+              echo "Stopping old container $CONTAINER_NAME..."
+              docker stop $CONTAINER_NAME || true
+              docker rm $CONTAINER_NAME || true
+              docker rename $NEW_CONTAINER $CONTAINER_NAME
               echo "✅ Deployment complete!"
             else
               echo "❌ Failed to start new container."
               echo "=== Logs from failed container ==="
-              docker logs ewshop-app-new || echo "No logs available"
+              docker logs $NEW_CONTAINER || echo "No logs available"
               echo "Keeping old container running."
-              docker rm ewshop-app-new || true
+              docker rm $NEW_CONTAINER || true
               exit 1
             fi
           EOF
