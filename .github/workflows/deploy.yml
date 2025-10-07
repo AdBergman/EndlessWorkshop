@@ -3,7 +3,7 @@ name: Build & Deploy EWShop
 on:
   push:
     branches:
-      - main   # or your release branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -25,7 +25,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Build and push Docker image
+      # 4. Build & Push Docker image
       - name: Build & Push Docker image
         run: |
           IMAGE_NAME=calmbreakfast/ew-shop
@@ -41,14 +41,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
 
-      # 6. Deploy to Lightsail
+      # 6. Deploy safely to Lightsail (stop old → start new → rollback if needed)
       - name: Deploy to Lightsail via SSH
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@3.65.107.28 << 'EOF'
             IMAGE_NAME=calmbreakfast/ew-shop
             TAG=latest
             CONTAINER_NAME=ewshop-app
-            NEW_CONTAINER=${CONTAINER_NAME}-new
+            BACKUP_CONTAINER=${CONTAINER_NAME}-backup
 
             echo "Pulling latest image from Docker Hub..."
             if ! docker pull $IMAGE_NAME:$TAG; then
@@ -56,27 +56,35 @@ jobs:
               exit 1
             fi
 
-            echo "Stopping old container if it exists..."
+            # Backup running container (if any)
             if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER_NAME\$"; then
+              echo "Stopping and backing up existing container..."
               docker stop $CONTAINER_NAME || true
-              docker rm $CONTAINER_NAME || true
+              docker rename $CONTAINER_NAME $BACKUP_CONTAINER || true
             fi
 
-            echo "Starting new container $NEW_CONTAINER..."
-            # Limit JVM memory to avoid OOM on small Lightsail instance
+            echo "Starting new container..."
             if docker run -d \
-              --name $NEW_CONTAINER \
+              --name $CONTAINER_NAME \
               -p 80:8080 \
-              -e JAVA_OPTS="-Xmx256m -Xms128m" \
+              -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m" \
               $IMAGE_NAME:$TAG; then
-              echo "✅ New container started successfully."
-              # Rename new container to standard name
-              docker rename $NEW_CONTAINER $CONTAINER_NAME
+              echo "✅ New container started successfully!"
+              echo "Cleaning up old backup..."
+              docker rm $BACKUP_CONTAINER || true
               echo "✅ Deployment complete!"
             else
               echo "❌ Failed to start new container."
-              docker logs $NEW_CONTAINER || echo "No logs available"
-              docker rm $NEW_CONTAINER || true
+              docker logs $CONTAINER_NAME || true
+              echo "Rolling back to previous version..."
+              docker rm $CONTAINER_NAME || true
+              if docker ps -a --format '{{.Names}}' | grep -q "^$BACKUP_CONTAINER\$"; then
+                docker rename $BACKUP_CONTAINER $CONTAINER_NAME
+                docker start $CONTAINER_NAME
+                echo "✅ Rollback complete. Old container restored."
+              else
+                echo "⚠️ No backup container found, manual restore needed."
+              fi
               exit 1
             fi
           EOF

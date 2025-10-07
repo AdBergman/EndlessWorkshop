@@ -39,5 +39,16 @@ COPY --from=backend-build /app/app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
 
 EXPOSE 8080
 
-# Run Spring Boot with JVM memory limits (safe for 512MB RAM)
-ENTRYPOINT ["java", "-Xms128m", "-Xmx256m", "-jar", "app.jar"]
+# JVM tuned for 1 GB tier:
+#  -Xms256m  initial heap
+#  -Xmx512m  max heap
+#  -XX:MaxMetaspaceSize=128m  class metadata cap
+#  G1GC + StringDeduplication for efficiency
+ENTRYPOINT ["java",
+  "-Xms256m",
+  "-Xmx512m",
+  "-XX:MaxMetaspaceSize=128m",
+  "-XX:+UseG1GC",
+  "-XX:+UseStringDeduplication",
+  "-jar", "app.jar"]
+
