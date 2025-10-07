@@ -1,0 +1,22 @@
+# Node / React
+frontend/node_modules
+frontend/dist
+frontend/.env
+frontend/.vite
+frontend/.idea
+frontend/.DS_Store
+frontend/*.log
+
+# Maven / Java
+backend/target
+backend/.mvn
+backend/.idea
+backend/*.log
+backend/.DS_Store
+
+# General
+.git
+.gitignore
+Dockerfile
+README.md
+ARCHITECTURE.md
