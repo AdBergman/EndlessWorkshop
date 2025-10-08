@@ -124,12 +124,12 @@
   },
   {
     "name": "Hydropump",
-    "effects": [],
-    "unique": "EMPIRE",
-    "cost": [
+    "effects": [
       "+5 Industry if adjacent to River on district",
       "+5 Dust if adjacent to River on district"
     ],
+    "unique": "EMPIRE",
+    "cost": [],
     "era": 2
   },
   {

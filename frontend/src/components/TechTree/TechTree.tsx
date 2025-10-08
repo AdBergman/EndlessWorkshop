@@ -67,7 +67,11 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     return (
         <div className="tech-tree-image-wrapper">
             <img
-                src={`/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${era}.png`}
+                src={
+                    era === 6
+                        ? "/graphics/techEraScreens/default_era_6.png"
+                        : `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${era}.png`
+                }
                 alt={`${selectedFaction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
