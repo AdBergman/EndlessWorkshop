@@ -86,7 +86,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
@@ -288,11 +287,7 @@
     "effects": [],
     "prereq": "",
     "factions": [
-      "ASPECT",
-      "KIN",
-      "LORDS",
-      "NECROPHAGE",
-      "TAHUK"
+      "KIN"
     ],
     "excludes": "",
     "coords": {
@@ -385,7 +380,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
@@ -722,7 +716,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
@@ -1079,7 +1072,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
@@ -1103,7 +1095,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
@@ -1438,7 +1429,6 @@
     "factions": [
       "ASPECT",
       "KIN",
-      "LORDS",
       "NECROPHAGE",
       "TAHUK"
     ],
