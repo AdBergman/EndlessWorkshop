@@ -1,11 +1,10 @@
 import React from 'react';
 import './TopContainer.css';
 import { useGameData } from '@/context/GameDataContext';
-import { NavLink } from 'react-router-dom'; // Import NavLink
+import { NavLink } from 'react-router-dom';
+import {trackTabClick} from "@/analytics"; // Import NavLink
 
-// All factions in your game
 const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
-// Only available faction(s)
 const availableFactions = ["Kin"];
 
 // Define the application's main routes
@@ -16,7 +15,6 @@ const routes = [
 ];
 
 const TopContainer: React.FC = () => {
-    // Use GameDataContext for selectedFaction now
     const { selectedFaction, setSelectedFaction } = useGameData();
 
     return (
@@ -26,7 +24,6 @@ const TopContainer: React.FC = () => {
                 <div className="logo-title">Endless Workshop</div>
             </div>
 
-            {/* View selector now uses NavLink for routing */}
             <div className="view-selector">
                 {routes.map(route => (
                     <NavLink
@@ -35,15 +32,21 @@ const TopContainer: React.FC = () => {
                         className={({ isActive }) =>
                             `${isActive ? 'active' : ''} ${!route.isAvailable ? 'disabled' : ''}`
                         }
-                        onClick={(e) => !route.isAvailable && e.preventDefault()}
+                        onClick={(e) => {
+                            if (!route.isAvailable) {
+                                e.preventDefault();
+                            } else {
+                                trackTabClick(route.label);
+                            }
+                        }}
                         title={!route.isAvailable ? "Coming Soon" : ""}
                     >
                         {route.label}
                     </NavLink>
+
                 ))}
             </div>
 
-            {/* Faction buttons */}
             <div className="faction-selector">
                 {factions.map(f => {
                     const isAvailable = availableFactions.includes(f);
