@@ -17,9 +17,14 @@ const InfoPage: React.FC = () => {
 
             <div className="orange-line thin-center" />
 
-            <p className="italic">
-                Endless Legend 2 is the copyrighted property of Amplitude Games. This project is independent and not affiliated with them.
-            </p>
+            <div className="italic-group">
+                <p className="italic">
+                    Endless Legend 2 is the copyrighted property of Amplitude Games.
+                </p>
+                <p className="italic">
+                    This project is independent and not affiliated with them.
+                </p>
+            </div>
 
             <p className="top-margin">
                 Please visit these links for official resources.

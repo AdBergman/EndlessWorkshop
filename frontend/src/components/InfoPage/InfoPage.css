@@ -97,3 +97,10 @@
     margin-top: 1rem;
 }
 
+.info-content .italic-group p {
+    margin: 0; /* remove all default spacing */
+}
+
+.info-content .italic-group p + p {
+    margin-top: 0.2em; /* small gap between the two */
+}
