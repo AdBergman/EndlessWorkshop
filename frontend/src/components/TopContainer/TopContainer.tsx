@@ -4,8 +4,8 @@ import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom';
 import {trackTabClick} from "@/analytics"; // Import NavLink
 
-const factions = ["Kin", "Aspect", "Necrophage", "Lords", "Tahuk"];
-const availableFactions = ["Kin"];
+const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage", ];
+const availableFactions = ["Kin", "Lords", "Tahuk"];
 
 // Define the application's main routes
 const routes = [
