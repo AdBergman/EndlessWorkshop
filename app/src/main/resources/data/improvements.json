@@ -71,8 +71,11 @@
   },
   {
     "name": "Granary",
-    "effects": [],
-    "unique": "CITY",
+    "effects": [
+      "+5 Food per Population on Citizens",
+      "+3 Population slot on Citizen"
+    ],
+    "unique": "EMPIRE",
     "cost": [],
     "era": 2
   },
@@ -110,23 +113,34 @@
   },
   {
     "name": "Beacon of Science",
-    "effects": [],
-    "unique": "CITY",
+    "effects": [
+      "+10 Science",
+      "+4 Science per Population on Scribes",
+      "+3 Population slot on Scribes"
+    ],
+    "unique": "EMPIRE",
     "cost": [],
     "era": 2
   },
   {
     "name": "Hydropump",
     "effects": [],
-    "unique": "CITY",
-    "cost": [],
+    "unique": "EMPIRE",
+    "cost": [
+      "+5 Industry if adjacent to River on district",
+      "+5 Dust if adjacent to River on district"
+    ],
     "era": 2
   },
   {
     "name": "Military Efficiency",
-    "effects": [],
-    "unique": "CITY",
-    "cost": [],
+    "effects": [
+      "+100 Experience on new Units on City",
+      "-3 Dust upkeep on Unit",
+      "-25% Industry cost on Military Districts"
+    ],
+    "unique": "EMPIRE",
+    "cost": ["20 GLASSTEEL"],
     "era": 3
   },
   {
@@ -178,9 +192,14 @@
   },
   {
     "name": "Spire of Industry",
-    "effects": [],
-    "unique": "CITY",
-    "cost": [],
+    "effects": [
+      "+25 Industry",
+      "+4 Industry per Population on Artisans",
+      "+3 Population slot on Artisans",
+      "+20 Resource stock"
+    ],
+    "unique": "EMPIRE",
+    "cost": ["20 GLASSTEEL"],
     "era": 3
   },
   {
@@ -225,9 +244,15 @@
   },
   {
     "name": "Dust Blasting",
-    "effects": [],
-    "unique": "CITY",
-    "cost": [],
+    "effects": [
+      "+2 Dust on Population",
+      "+2 Population slot on Population Vocations",
+      "-25% Buyout cost on District",
+      "-25% Buyout cost on Improvement",
+      "-25% Buyout cost on Unit"
+    ],
+    "unique": "EMPIRE",
+    "cost": ["20 GLASSTEEL"],
     "era": 3
   },
   {

@@ -216,7 +216,7 @@
     "effects": [
       "+25% gains on Battle Spoils",
       "+15 Health on non-Hero",
-      "+5 Damage on non-Hero"
+      "+3 Damage on non-Hero"
     ],
     "prereq": "",
     "factions": [
@@ -914,7 +914,7 @@
       "Improvement: Commanders' Table"
     ],
     "effects": [
-      "+5 Approval on Improvement"
+      "100 Fortifications on Keep"
     ],
     "prereq": "",
     "factions": [
@@ -1002,7 +1002,7 @@
       "Improvement: Museum"
     ],
     "effects": [
-      "+3 Influence on Improvement"
+      "+2 Influence on Forum district"
     ],
     "prereq": "",
     "factions": [
@@ -1073,7 +1073,7 @@
       "Improvement: Windmill"
     ],
     "effects": [
-      "+3 Food on Improvement"
+      "+4 Food on Farm districts"
     ],
     "prereq": "",
     "factions": [
@@ -1097,7 +1097,6 @@
       "Improvement: Farming Cooperative"
     ],
     "effects": [
-      "-25% Industry cost on Laboratory",
       "-25% Industry cost on Farm"
     ],
     "prereq": "",
@@ -1122,7 +1121,7 @@
       "Improvement: Workers' League"
     ],
     "effects": [
-      "+3 Industry on Improvement"
+      "+4 Industry on Work districts"
     ],
     "prereq": "",
     "factions": [
@@ -1534,7 +1533,7 @@
       "Improvement: Customs Inspector"
     ],
     "effects": [
-      "+3 Dust on Improvement"
+      "+8 Dust on Merchant's House districts"
     ],
     "prereq": "",
     "factions": [
@@ -1582,7 +1581,7 @@
       "Improvement: Lecture Hall"
     ],
     "effects": [
-      "+3 Science on Improvement"
+      "4 Science on Laboratory districts"
     ],
     "prereq": "",
     "factions": [
