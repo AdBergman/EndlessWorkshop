@@ -15,7 +15,7 @@ const routes = [
 ];
 
 const TopContainer: React.FC = () => {
-    const { selectedFaction, setSelectedFaction } = useGameData();
+    const { selectedFaction, setSelectedFaction, setSelectedTechs } = useGameData();
 
     return (
         <header className="top-container">
@@ -54,7 +54,12 @@ const TopContainer: React.FC = () => {
                         <button
                             key={f}
                             className={`${f === selectedFaction ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
-                            onClick={() => isAvailable && setSelectedFaction(f)}
+                            onClick={() => {
+                                if (isAvailable) {
+                                    setSelectedFaction(f);   // change faction
+                                    setSelectedTechs([]);    // clear selected techs
+                                }
+                            }}
                             title={!isAvailable ? "Coming Soon" : ""}
                         >
                             {f}
@@ -62,6 +67,7 @@ const TopContainer: React.FC = () => {
                     );
                 })}
             </div>
+
         </header>
     );
 };
