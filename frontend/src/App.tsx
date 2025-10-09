@@ -4,6 +4,7 @@ import TopContainer from './components/TopContainer/TopContainer';
 import MainContainer from './components/MainContainer/MainContainer';
 import InfoPage from './components/InfoPage/InfoPage';
 import GameDataProvider from './context/GameDataProvider';
+import LandscapeWrapper from './components/Layout/LandscapeWrapper'; // <- new
 import './App.css';
 
 // Extend the Window type for Cloudflare beacon
@@ -29,10 +30,12 @@ const AppLayout: React.FC = () => {
 
     return (
         <GameDataProvider>
-            <div className="app">
-                <TopContainer />
-                <Outlet />
-            </div>
+            <LandscapeWrapper>
+                <div className="app">
+                    <TopContainer />
+                    <Outlet />
+                </div>
+            </LandscapeWrapper>
         </GameDataProvider>
     );
 };

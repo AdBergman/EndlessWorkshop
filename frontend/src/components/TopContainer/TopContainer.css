@@ -79,8 +79,16 @@
 /* Faction selector (Right side) */
 .faction-selector {
     display: flex;
+    flex-wrap: wrap;          /* allow buttons to go onto 2+ rows */
     justify-content: flex-end;
     gap: 0.5rem;
+}
+
+/* Optional: center on very small screens */
+@media (max-width: 600px) {
+    .faction-selector {
+        justify-content: center;
+    }
 }
 
 /* Faction buttons now have the vibrant style */
