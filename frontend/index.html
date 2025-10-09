@@ -2,9 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Fan-made tool for exploring Endless Legend 2 game data." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        const isPhone = window.innerWidth <= 768; // adjust breakpoint as needed
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+
+        if (metaViewport) {
+            if (isPhone) {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+                );
+            } else {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+                );
+            }
+        }
+    </script>
+
 
     <title>Endless Workshop</title>
     <script type="module" src="./src/index.tsx"></script>
