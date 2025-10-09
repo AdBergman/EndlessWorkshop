@@ -75,17 +75,22 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
     };
 
     const { data, headers, filename } = useMemo(getExportConfig, [activeSheet, selectedTechs, unlockedImprovements, unlockedDistricts]);
+    const _placeHolder = generateShareLink("Default", selectedTechs.map(t => t.name));
+
 
     return (
         <div className="spreadsheet-toolbar">
             <div className="action-buttons">
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
+
+                {/* Links won’t be saved until database is implemented!
                 <button
-                    onClick={() => generateShareLink("My Build Name", selectedTechs.map(t => t.name))}
+                    onClick={() => generateShareLink("Default", selectedTechs.map(t => t.name))}
                 >
                     Copy Link
                 </button>
+                */}
 
                 <CSVLink data={data} headers={headers} filename={filename} >
                     <button>Export CSV</button>
