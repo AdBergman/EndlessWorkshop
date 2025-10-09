@@ -1,13 +1,13 @@
-/* Wrapper fills the viewport */
+/* Full viewport wrapper */
 .landscape-wrapper {
     position: relative;
     width: 100vw;
     height: 100vh;
-    overflow-x: hidden; /* hide horizontal overflow */
+    overflow-x: hidden; /* remove horizontal scroll */
     overflow-y: auto;   /* allow vertical scroll */
 }
 
-/* Overlay for portrait phones */
+/* Rotate overlay for portrait devices */
 .rotate-overlay {
     position: fixed;
     top: 0;
@@ -15,7 +15,7 @@
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.85);
-    color: #fff;
+    color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -26,31 +26,30 @@
     padding: 0 1rem;
 }
 
-/* Actual app content container */
+/* Main app content */
 .landscape-content {
-    width: 100vw;       /* use viewport width */
-    max-width: 100%;    /* never exceed wrapper */
-    height: 100%;
+    width: 100vw;
+    max-width: 100%;
+    min-height: 100vh; /* ensure full height */
     display: block;
     transform-origin: top left;
 }
 
-/* Tablet portrait scaling */
+/* Tablet scaling: slightly shrink to fit portrait screens */
 @media (min-width: 769px) and (max-width: 1200px) and (orientation: portrait) {
     .landscape-content {
         transform: scale(0.95);
-        transform-origin: top left;
     }
 }
 
-/* Tablet landscape scaling */
+/* Optional: tablet landscape scaling */
 @media (min-width: 769px) and (max-width: 1200px) and (orientation: landscape) {
     .landscape-content {
         transform: scale(1);
     }
 }
 
-/* Optional: ultra-small phones font tweak */
+/* Small phones: adjust overlay text */
 @media (max-width: 400px) {
     .rotate-overlay p {
         font-size: clamp(1.5rem, 5vw + 0.5rem, 2.5rem);

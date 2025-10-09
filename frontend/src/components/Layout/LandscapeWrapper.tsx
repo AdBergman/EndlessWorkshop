@@ -13,27 +13,25 @@ const LandscapeWrapper: React.FC<Props> = ({ children }) => {
         const isRotatable = /Mobi|Android|iPad|Tablet/i.test(navigator.userAgent);
         setIsRotatableDevice(isRotatable);
 
-        if (isRotatable && window.screen.orientation?.type) {
-            setIsPortrait(window.screen.orientation.type.startsWith("portrait"));
-        } else if (isRotatable) {
-            setIsPortrait(window.innerHeight > window.innerWidth);
-        } else {
-            setIsPortrait(false); // desktop never shows overlay
-        }
+        const portrait = isRotatable
+            ? window.screen.orientation?.type
+                ? window.screen.orientation.type.startsWith("portrait")
+                : window.innerHeight > window.innerWidth
+            : false;
+
+        setIsPortrait(portrait);
     };
 
     useEffect(() => {
         checkOrientation();
         window.addEventListener("resize", checkOrientation);
         window.addEventListener("orientationchange", checkOrientation);
-
         return () => {
             window.removeEventListener("resize", checkOrientation);
             window.removeEventListener("orientationchange", checkOrientation);
         };
     }, []);
 
-    // Show overlay only if it’s a rotatable device in portrait
     const showOverlay = isRotatableDevice && isPortrait;
 
     return (
