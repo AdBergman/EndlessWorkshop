@@ -1,19 +1,24 @@
 import { useEffect } from "react";
 
 interface Props {
-    currentEra: number;
+    selectedFaction: string;
     maxEra: number;
     getBackgroundUrl: (era: number) => string;
 }
 
-export default function BackgroundPreloader({ currentEra, maxEra, getBackgroundUrl }: Props) {
-    useEffect(() => {
-        const next = currentEra + 1;
-        if (next <= maxEra) {
-            const img = new Image();
-            img.src = getBackgroundUrl(next);
-        }
-    }, [currentEra, maxEra, getBackgroundUrl]);
+const preloadedFactions = new Set<string>();
 
-    return null; // nothing visible
+export default function BackgroundPreloader({ selectedFaction, maxEra, getBackgroundUrl }: Props) {
+    useEffect(() => {
+        if (!selectedFaction || preloadedFactions.has(selectedFaction)) return;
+
+        for (let era = 1; era <= maxEra; era++) {
+            const img = new Image();
+            img.src = getBackgroundUrl(era);
+        }
+
+        preloadedFactions.add(selectedFaction);
+    }, [selectedFaction, maxEra, getBackgroundUrl]);
+
+    return null;
 }

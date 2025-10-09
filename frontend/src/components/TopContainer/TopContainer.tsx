@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './TopContainer.css';
 import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom';
+import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
 
-const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage", ];
+const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage"];
 const availableFactions = ["Kin", "Lords", "Tahuk"];
+const MAX_ERA = 6;
 
 // Define the application's main routes
 const routes = [
@@ -15,6 +17,16 @@ const routes = [
 
 const TopContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, setSelectedTechs } = useGameData();
+
+    // Preload all backgrounds for the selected faction
+    useEffect(() => {
+        if (!selectedFaction) return;
+
+        for (let era = 1; era <= MAX_ERA; era++) {
+            const img = new Image();
+            img.src = getBackgroundUrl(selectedFaction, era);
+        }
+    }, [selectedFaction]);
 
     return (
         <header className="top-container">
@@ -32,15 +44,12 @@ const TopContainer: React.FC = () => {
                             `${isActive ? 'active' : ''} ${!route.isAvailable ? 'disabled' : ''}`
                         }
                         onClick={(e) => {
-                            if (!route.isAvailable) {
-                                e.preventDefault();
-                            }
+                            if (!route.isAvailable) e.preventDefault();
                         }}
                         title={!route.isAvailable ? "Coming Soon" : ""}
                     >
                         {route.label}
                     </NavLink>
-
                 ))}
             </div>
 
@@ -52,10 +61,9 @@ const TopContainer: React.FC = () => {
                             key={f}
                             className={`${f === selectedFaction ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
                             onClick={() => {
-                                if (isAvailable) {
-                                    setSelectedFaction(f);   // change faction
-                                    setSelectedTechs([]);    // clear selected techs
-                                }
+                                if (!isAvailable) return;
+                                setSelectedFaction(f);   // change faction
+                                setSelectedTechs([]);    // clear selected techs
                             }}
                             title={!isAvailable ? "Coming Soon" : ""}
                         >
@@ -64,7 +72,6 @@ const TopContainer: React.FC = () => {
                     );
                 })}
             </div>
-
         </header>
     );
 };

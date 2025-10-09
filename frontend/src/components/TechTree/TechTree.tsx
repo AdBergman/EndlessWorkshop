@@ -1,14 +1,15 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useMemo} from 'react';
 import TechNode from './TechNode';
-import { Tech } from '@/types/dataTypes';
+import {Tech} from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
 import SelectAllButton from "@/components/TechTree/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
-import { useGameData } from "@/context/GameDataContext";
+import {useGameData} from "@/context/GameDataContext";
 import {useTooltip} from "@/hooks/useTooltips";
+import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
 
 interface TechTreeProps {
     era: number;
@@ -23,12 +24,6 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300); // HIDE_DELAY
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
-    const [bgLoaded, setBgLoaded] = useState(false);
-
-// Reset when era changes
-    useEffect(() => {
-        setBgLoaded(false);
-    }, [era]);
 
     const selectedTechObjects = useMemo(() => {
         const techSet = new Set(selectedTechs);
@@ -67,15 +62,10 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     return (
         <div className="tech-tree-image-wrapper">
             <img
-                src={
-                    era === 6
-                        ? "/graphics/techEraScreens/default_era_6.png"
-                        : `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${era}.png`
-                }
+                src={getBackgroundUrl(selectedFaction, era)}
                 alt={`${selectedFaction} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
-                onLoad={() => setBgLoaded(true)}
             />
 
             <SelectAllButton
@@ -89,7 +79,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 onTechClick={onTechClick}
             />
 
-            {bgLoaded && currentFactionEraTechs.map(tech => (
+            {currentFactionEraTechs.map(tech => (
                 <React.Fragment key={tech.name}>
                     <TechNode
                         coords={tech.coords}
@@ -99,7 +89,6 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                         onHoverChange={hovered =>
                             hovered ? showTooltip(tech.name) : hideTooltip(tech.name)
                         }
-                        visible={bgLoaded}
                     />
                     {openTooltips.has(tech.name) && (
                         <TechTooltip
@@ -111,14 +100,12 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 </React.Fragment>
             ))}
 
-
             {(['previous', 'next'] as const).map(dir =>
                     !isButtonHidden(dir) && (
                         <EraNavigationButton
                             key={dir}
                             direction={dir}
                             onClick={() => onEraChange(dir)}
-                            visible={bgLoaded}
                         />
                     )
             )}

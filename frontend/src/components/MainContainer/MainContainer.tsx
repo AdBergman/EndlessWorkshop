@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
-import BackgroundPreloader from './BackGroundPreloader';
 import {ERA_THRESHOLDS, Tech} from '@/types/dataTypes';
 import {useGameData} from '@/context/GameDataContext';
 import './MainContainer.css';
@@ -23,24 +22,12 @@ const MainContainer: React.FC = () => {
     // --- Era management hook ---
     const { era, maxUnlockedEra, handleNextEra, handlePrevEra } = useEraController(selectedTechObjects);
 
-    // --- Background URL helper ---
-    const getBackgroundUrl = useCallback(
-        (eraNumber: number) => `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${eraNumber}.png`,
-        [selectedFaction]
-    );
-
     return (
         <main className="main-container">
             <TechTree
                 era={era}
                 maxUnlockedEra={maxUnlockedEra}
                 onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
-            />
-
-            <BackgroundPreloader
-                currentEra={era}
-                maxEra={maxUnlockedEra}
-                getBackgroundUrl={getBackgroundUrl}
             />
 
             <div className="view-container">
