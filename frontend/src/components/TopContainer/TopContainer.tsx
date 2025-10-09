@@ -2,7 +2,6 @@ import React from 'react';
 import './TopContainer.css';
 import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom';
-import {trackTabClick} from "@/analytics"; // Import NavLink
 
 const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage", ];
 const availableFactions = ["Kin", "Lords", "Tahuk"];
@@ -35,8 +34,6 @@ const TopContainer: React.FC = () => {
                         onClick={(e) => {
                             if (!route.isAvailable) {
                                 e.preventDefault();
-                            } else {
-                                trackTabClick(route.label);
                             }
                         }}
                         title={!route.isAvailable ? "Coming Soon" : ""}
