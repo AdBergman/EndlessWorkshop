@@ -75,8 +75,6 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
     };
 
     const { data, headers, filename } = useMemo(getExportConfig, [activeSheet, selectedTechs, unlockedImprovements, unlockedDistricts]);
-    const _placeHolder = generateShareLink("Default", selectedTechs.map(t => t.name));
-
 
     return (
         <div className="spreadsheet-toolbar">
