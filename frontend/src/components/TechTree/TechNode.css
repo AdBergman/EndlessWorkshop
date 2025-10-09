@@ -3,14 +3,29 @@
     cursor: pointer;
     box-sizing: border-box;
     user-select: none;
-    background-color: transparent;
+    background-color: rgba(255,255,0,0); /* base invisible */
+    border: 2px solid rgba(255,215,0,0); /* base invisible */
     box-shadow: 0 0 4px 1px rgba(255,255,255,0.2);
-    border: 2px solid transparent;
     transition: box-shadow 0.3s ease, border 0.3s ease, background-color 0.3s ease;
 }
 
+/* Hover for normal nodes (50% intensity) */
+.tech-node:not(.selected):not(.locked):hover {
+    border-color: rgba(255,215,0,0.5);          /* 50% of gold */
+    background-color: rgba(255,255,0,0.15);     /* 50% glow */
+    box-shadow: 0 0 6px 1.5px rgba(255,215,0,0.5);
+}
+
+/* Selected state (100% intensity) */
 .tech-node.selected {
-    border: 3px solid gold;
+    border-color: gold;
+    background-color: rgba(255,255,0,0.3);
+    box-shadow: 0 0 8px 2px gold;
+}
+
+/* Hover on selected (stay at 100%) */
+.tech-node.selected:hover {
+    border-color: gold;
     background-color: rgba(255,255,0,0.3);
     box-shadow: 0 0 8px 2px gold;
 }
@@ -20,11 +35,4 @@
     border: 2px solid rgba(255,0,0,0.5);
     box-shadow: inset 0 0 12px 4px rgba(255,0,0,0.3);
     background-color: transparent;
-}
-
-/* Hover for normal nodes to match selected style */
-.tech-node:not(.selected):not(.locked):hover {
-    border: 3px solid gold;
-    background-color: rgba(255,255,0,0.3);
-    box-shadow: 0 0 8px 2px gold;
 }
