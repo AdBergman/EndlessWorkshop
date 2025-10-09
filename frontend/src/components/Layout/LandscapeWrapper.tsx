@@ -5,30 +5,39 @@ interface Props {
     children: React.ReactNode;
 }
 
+// Design reference width
+const DESIGN_WIDTH = 1920;
+
 const LandscapeWrapper: React.FC<Props> = ({ children }) => {
     const [isPortrait, setIsPortrait] = useState(false);
     const [isRotatableDevice, setIsRotatableDevice] = useState(false);
+    const [scale, setScale] = useState(1);
 
-    const checkOrientation = () => {
+    const updateLayout = () => {
         const isRotatable = /Mobi|Android|iPad|Tablet/i.test(navigator.userAgent);
         setIsRotatableDevice(isRotatable);
 
+        // Portrait detection
         const portrait = isRotatable
             ? window.screen.orientation?.type
                 ? window.screen.orientation.type.startsWith("portrait")
                 : window.innerHeight > window.innerWidth
             : false;
-
         setIsPortrait(portrait);
+
+        // Scale by width only
+        const widthScale = window.innerWidth / DESIGN_WIDTH;
+        setScale(widthScale);
     };
 
     useEffect(() => {
-        checkOrientation();
-        window.addEventListener("resize", checkOrientation);
-        window.addEventListener("orientationchange", checkOrientation);
+        updateLayout();
+        window.addEventListener("resize", updateLayout);
+        window.addEventListener("orientationchange", updateLayout);
+
         return () => {
-            window.removeEventListener("resize", checkOrientation);
-            window.removeEventListener("orientationchange", checkOrientation);
+            window.removeEventListener("resize", updateLayout);
+            window.removeEventListener("orientationchange", updateLayout);
         };
     }, []);
 
@@ -41,7 +50,16 @@ const LandscapeWrapper: React.FC<Props> = ({ children }) => {
                     <p>Please rotate your device to landscape</p>
                 </div>
             ) : (
-                <div className="landscape-content">{children}</div>
+                <div
+                    className="landscape-content"
+                    style={{
+                        transform: `scale(${scale})`,
+                        transformOrigin: "top left",
+                        width: DESIGN_WIDTH,
+                    }}
+                >
+                    {children}
+                </div>
             )}
         </div>
     );
