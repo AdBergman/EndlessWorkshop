@@ -1,14 +1,15 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import TechTree from '../TechTree/TechTree';
 import SpreadSheetView from '../TechTree/views/SpreadSheetView';
-import {ERA_THRESHOLDS, Tech} from '@/types/dataTypes';
-import {useGameData} from '@/context/GameDataContext';
+import { ERA_THRESHOLDS, Tech } from '@/types/dataTypes';
+import { useGameData } from '@/context/GameDataContext';
 import './MainContainer.css';
 
 const MAX_ERA = 6;
 
 const MainContainer: React.FC = () => {
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
+    const [firstEraLoaded, setFirstEraLoaded] = useState(false);
 
     // --- Hook: Load shared build from URL once ---
     useSharedBuildLoader(setSelectedTechs);
@@ -22,28 +23,53 @@ const MainContainer: React.FC = () => {
     // --- Era management hook ---
     const { era, maxUnlockedEra, handleNextEra, handlePrevEra } = useEraController(selectedTechObjects);
 
-    return (
-        <main className="main-container">
-            <TechTree
-                era={era}
-                maxUnlockedEra={maxUnlockedEra}
-                onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
-            />
+    // --- Preload first era for selected faction and show main container when loaded ---
+    useEffect(() => {
+        if (!selectedFaction) return;
 
-            <div className="view-container">
-                <SpreadSheetView />
-            </div>
+        const img = new Image();
+        img.src = `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_1.png`;
+        img.onload = () => setFirstEraLoaded(true);
+
+        return () => {
+            img.onload = null; // cleanup
+        };
+    }, [selectedFaction]);
+
+    // --- Preload all remaining eras in the background ---
+    useEffect(() => {
+        if (!selectedFaction) return;
+
+        for (let e = 1; e <= MAX_ERA; e++) {
+            const img = new Image();
+            img.src = e === 6
+                ? '/graphics/techEraScreens/default_era_6.png'
+                : `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${e}.png`;
+        }
+    }, [selectedFaction]);
+
+    return (
+        <main className={`main-container ${firstEraLoaded ? 'loaded' : ''}`}>
+            {firstEraLoaded && (
+                <>
+                    <TechTree
+                        era={era}
+                        maxUnlockedEra={maxUnlockedEra}
+                        onEraChange={dir => (dir === 'next' ? handleNextEra() : handlePrevEra())}
+                    />
+
+                    <div className="view-container">
+                        <SpreadSheetView />
+                    </div>
+                </>
+            )}
         </main>
     );
 };
 
 export default MainContainer;
 
-
-
-
 // ------------------------ INTERNAL HOOKS --------------------------------- //
-// Hook to load shared build once from URL
 function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -58,7 +84,6 @@ function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
                 if (!res.ok) throw new Error("Build not found");
                 const data = await res.json();
 
-                // filter only valid techs (just in case)
                 const validTechs = data.techIds.filter((name: string) => !!name);
                 if (!cancelled) setSelectedTechs(validTechs);
             } catch (err) {
@@ -74,7 +99,6 @@ function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
     }, [setSelectedTechs]);
 }
 
-// Hook to manage era and maxUnlockedEra
 function useEraController(selectedTechObjects: Tech[]) {
     const [era, setEra] = useState(1);
 
