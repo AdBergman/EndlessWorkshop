@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom';
 import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
 
 const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage"];
-const availableFactions = ["Kin", "Lords", "Tahuk"];
+const availableFactions = ["Kin", "Lords", "Tahuk", "Necrophage"];
 const MAX_ERA = 6;
 
 // Define the application's main routes

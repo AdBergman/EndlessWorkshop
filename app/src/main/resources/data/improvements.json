@@ -618,5 +618,98 @@
       "5 THALITINE"
     ],
     "era": 5
+  },
+  {
+    "name": "Fungal Gardens",
+    "effects": [
+      "+20 Food",
+      "´20 Industry",
+      "+10 Influence",
+      "+400 Fortification on City",
+      "+1 Population Slot on Population Vocations"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Scavengers Lair",
+    "effects": [
+      "+25 Health Regeneration on Units in allied Territory",
+      "+1 Movement Points outside battle on Unit",
+      "+10 Dust income on District"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Mycology Lab",
+    "effects": [
+      "+5 Health Regeneration on Unit",
+      "+10 Food on City"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Chitinous Matriarch",
+    "effects": [
+      "+10 Influence",
+      "+20 Dust",
+      "+20 Science",
+      "+400 Fortification on City",
+      "+1 Population Slot on Population Vocations"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 3
+  },
+  {
+    "name": "Ocular Evolution",
+    "effects": [
+      "+20 Food",
+      "+20 Industry",
+      "+10 Influence",
+      "+20 Dust",
+      "+20 Science",
+      "+400 Fortification on City",
+      "+1 Population Slot on Population Vocations"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 4
+  },
+  {
+    "name": "Chitin Vats",
+    "effects": [
+      "+5 Industry per Territory on City",
+      "+5 Industry on City"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 4
+  },
+  {
+    "name": "Memory Well",
+    "effects": [
+      "+5 Science per Territory on City",
+      "+5 Science on City"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 4
+  },
+  {
+    "name": "Deeper Caverns",
+    "effects": [
+      "+5 Dust per Territory on City",
+      "+10 Dust on City",
+      "-50% Dust on Burrow cost on Empire"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 4
   }
 ]

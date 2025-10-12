@@ -67,5 +67,38 @@
     "adjacencyBonus": [
       "+50 Fortification for each adjacent District"
     ]
+  },
+  {
+    "name": "Feedhole",
+    "info": [
+      "-25% Corpses cost for the Feed the masses action"
+    ],
+    "effect": "+5 Corpses",
+    "adjacencyBonus": [
+      "+1 Corpse for each adjacent District"
+    ]
+  },
+  {
+    "name": "Matriarch's Eye",
+    "info": [
+      "+1 Science on Population"
+    ],
+    "effect": "+15 Science",
+    "adjacencyBonus": [
+      "+3 Science for each adjacent District"
+    ]
+  },
+  {
+    "name": "Matriarch's Tail",
+    "info": [
+      "+100 District Fortification",
+      "+3 Attack Range on Defensive District",
+      "+50 Damage on Defensive District",
+      "+100 Experience on new Units on City"
+    ],
+    "effect": "50 District Fortification on Military Districts",
+    "adjacencyBonus": [
+      "+20 Fortification for each adjacent District"
+    ]
   }
 ]
