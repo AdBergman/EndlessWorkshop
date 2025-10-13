@@ -742,5 +742,25 @@
       "10 HYPERIUM"
     ],
     "era": 4
+  },
+  {
+    "name": "Celestial Guidance",
+    "effects": [
+      "+1 Science on Population"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Solar Strobe",
+    "effects": [
+      "+3 Populator slot on Scribes",
+      "+2 Science on Scribes",
+      "-25% Food consumption on Cities"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 4
   }
 ]

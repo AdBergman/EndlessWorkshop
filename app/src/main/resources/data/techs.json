@@ -2171,6 +2171,153 @@
       "xPct": 23.71,
       "yPct": 61.31
     }
+  },
+  {
+    "name": "Celestial Scrying",
+    "era": 1,
+    "type": "Discovery",
+    "unlocks": [],
+    "effects": [
+      "+2 Science on Anomaly",
+      "+1 Vision Range on Unit"
+    ],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 47.35,
+      "yPct": 67.68
+    }
+  },
+  {
+    "name": "Deciphering Stone",
+    "era": 2,
+    "type": "Discovery",
+    "unlocks": [
+      "Upgrade: Observatory"
+    ],
+    "effects": [
+      "+5 Science on Observatories"
+    ],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 61.62,
+      "yPct": 77.23
+    }
+  },
+  {
+    "name": "Sage's Blessing",
+    "era": 2,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Apprentice",
+      "Unit Specialization: Vigil Keeper",
+      "Unit Specialization: Fanatic",
+      "Unit Specialization: Illuminator"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.3,
+      "yPct": 58.0
+    }
+  },
+  {
+    "name": "Stargazing",
+    "era": 2,
+    "type": "Discovery",
+    "unlocks": [
+      "Improvement: Celestial Guidance"
+    ],
+    "effects": [
+      "+1 Science on Tile producing Science"
+    ],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 33.18,
+      "yPct": 77.22
+    }
+  },
+  {
+    "name": "Sages' Wisdom",
+    "era": 3,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Holy Protector",
+      "Unit Specialization: Holy Smiter",
+      "Unit Specialization: Magnified Wrath",
+      "Unit Specialization: Skeptics' Bane"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 64.53
+    }
+  },
+  {
+    "name": "Sages' Insight",
+    "era": 4,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: True Guide",
+      "Unit Specialization: Vigil Master",
+      "Unit Specialization: Zealot",
+      "Unit Specialization: Ligthbringer"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 61.42
+    }
+  },
+  {
+    "name": "Stellar Astronomy",
+    "era": 4,
+    "type": "Discovery",
+    "unlocks": [
+      "Improvement: Solar Strobe"
+    ],
+    "effects": [
+      "+5 Science per Holy Oculum Level on City"
+    ],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 33.18,
+      "yPct": 77.22
+    }
+  },
+  {
+    "name": "Sages' Vision",
+    "era": 5,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Divine Protector",
+      "Unit Specialization: Divine Smiter",
+      "Unit Specialization: Devastating Wrath",
+      "Unit Specialization: Fire of the Gods"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["TAHUK"],
+    "excludes": "",
+    "coords": {
+      "xPct": 23.71,
+      "yPct": 61.31
+    }
   }
 
 ]
