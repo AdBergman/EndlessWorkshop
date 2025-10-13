@@ -711,5 +711,36 @@
     "unique": "CITY",
     "cost": [],
     "era": 4
+  },
+  {
+    "name": "Mineral Inquisition",
+    "effects": [
+      "+15 Science on Extractor"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Dust Divination",
+    "effects": [
+      "+5 Dust on Merchant's House Districts",
+      "+1 Dust on Tiles not producing Dust"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Knightwatch",
+    "effects": [
+      "+1 Approval per Population on Citizens"
+    ],
+    "unique": "CITY",
+    "cost": [
+      "20 GLASSTEEL",
+      "10 HYPERIUM"
+    ],
+    "era": 4
   }
 ]

@@ -2004,6 +2004,173 @@
           "xPct": 54.43,
           "yPct": 23.23
     }
+  },
+  {
+    "name": "Feudalism",
+    "era": 1,
+    "type": "Economy",
+    "unlocks": [
+      "District: Soul Repository"
+    ],
+    "effects": [
+      "+1 Dust per Population on Citizens",
+      "+1 Dust per Population on Artisans"
+    ],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 63.91,
+      "yPct": 42.46
+    }
+  },
+  {
+    "name": "Saiadhan Inquisition",
+    "era": 1,
+    "type": "Discovery",
+    "unlocks": [],
+    "effects": [
+      "+5 Science on Lord's Estate",
+      "-25% Dust to healing costs on Units"
+    ],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 47.35,
+      "yPct": 67.68
+    }
+  },
+  {
+    "name": "Thanatology",
+    "era": 2,
+    "type": "Discovery",
+    "unlocks": [
+      "Improvement: Mineral Inquisition",
+      "Improvement: Dust Divination"
+    ],
+    "effects": [
+      "+2 Science on Soul Repository",
+      "+2 Science on Lord's Estate"
+    ],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 33.18,
+      "yPct": 77.22
+    }
+  },
+  {
+    "name": "Lords' Discipline",
+    "era": 2,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Scavenger",
+      "Unit Specialization: Fleetfoot",
+      "Unit Specialization: Fallen Knight",
+      "Unit Specialization: Eldritch Knight"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.3,
+      "yPct": 58.0
+    }
+  },
+  {
+    "name": "Lords' Piety",
+    "era": 3,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Venerable Palanquin",
+      "Unit Specialization: Leeching Palanquin",
+      "Unit Specialization: Blood Master",
+      "Unit Specialization: Dread Lord"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 64.53
+    }
+  },
+  {
+    "name": "Penitent Shrine",
+    "era": 4,
+    "type": "Economy",
+    "unlocks": [
+      "Improvement: Knightwatch"
+    ],
+    "effects": [
+      "+4 Dust on Soul Repository",
+      "+4 Dust on Lord's Estate"
+    ],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 63.96,
+      "yPct": 42.34
+    }
+  },
+  {
+    "name": "Supreme Fealty",
+    "era": 4,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Shadow Lord",
+      "Unit Specialization: Executioner",
+      "Unit Specialization: Merciless Knight",
+      "Unit Specialization: Consul's Guard"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 61.42
+    }
+  },
+  {
+    "name": "Sacred Vow",
+    "era": 5,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Ancient Palanquin",
+      "Unit Specialization: Soulsapping Palanquin",
+      "Unit Specialization: Blood Tyrant",
+      "Unit Specialization: Dread Duke"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": [
+      "LORDS"
+    ],
+    "excludes": "",
+    "coords": {
+      "xPct": 23.71,
+      "yPct": 61.31
+    }
   }
 
 ]

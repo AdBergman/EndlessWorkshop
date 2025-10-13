@@ -100,5 +100,26 @@
     "adjacencyBonus": [
       "+20 Fortification for each adjacent District"
     ]
+  },
+  {
+    "name": "Soul Repository",
+    "info": [
+      "+1 Primordial Lords Population",
+      "+4 Dust on Soul Repository",
+      "+2 Science on Soul Repository"
+    ],
+    "effect": "+12 Approval",
+    "adjacencyBonus": [
+    ]
+  },
+  {
+    "name": "Lord's Estate",
+    "info": [
+      "+4 Dust on Lord's Estate",
+      "+2 Science on Lord's Estate"
+    ],
+    "effect": "District must be placed on a Pacified Village",
+    "adjacencyBonus": [
+    ]
   }
 ]
