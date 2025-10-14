@@ -2,11 +2,12 @@ import React from 'react';
 import './TechNode.css';
 
 interface TechNodeProps {
-    coords: { xPct: number; yPct: number };
-    selected: boolean;
-    locked?: boolean;
-    onClick: () => void;
-    onHoverChange?: (hovered: boolean) => void;
+    coords: { xPct: number; yPct: number },
+    selected: boolean,
+    locked?: boolean,
+    onClick: () => void,
+    onHoverChange?: (hovered: boolean) => void,
+    offsetPx?: number
 }
 
 const BOX_SIZE_PCT = 4.95;
@@ -16,7 +17,8 @@ const TechNode: React.FC<TechNodeProps> = ({
                                                selected,
                                                locked = false,
                                                onClick,
-                                               onHoverChange
+                                               onHoverChange,
+                                               offsetPx
                                            }) => {
     const clickable = !locked;
 
@@ -32,7 +34,7 @@ const TechNode: React.FC<TechNodeProps> = ({
             style={{
                 position: 'absolute',
                 left: `${coords.xPct}%`,
-                top: `${coords.yPct}%`,
+                top: `calc(${coords.yPct}% + ${offsetPx ?? 0}px)`,
                 width: `${BOX_SIZE_PCT}%`,
                 aspectRatio: '1 / 1',
                 transform: 'translate(3%, 3%)',

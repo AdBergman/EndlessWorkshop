@@ -24,6 +24,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300); // HIDE_DELAY
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
+    const OFFSET_PX = selectedFaction === 'Aspect' ? -35 : 0; //TEMPORARY OFFSET FOR NEW BACKGROUND - TLPROD-55944
 
     const selectedTechObjects = useMemo(() => {
         const techSet = new Set(selectedTechs);
@@ -89,6 +90,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                         onHoverChange={hovered =>
                             hovered ? showTooltip(tech.name) : hideTooltip(tech.name)
                         }
+                        offsetPx={OFFSET_PX}
                     />
                     {openTooltips.has(tech.name) && (
                         <TechTooltip
