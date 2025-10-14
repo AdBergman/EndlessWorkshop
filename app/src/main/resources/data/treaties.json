@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Non-Aggresion Pact",
+    "description": "Signing this Treaty will prevent both Empires from fighting skirmishes in neutral Territories."
+  },
+  {
+    "name": "Military Alliance",
+    "description": "Signing this Treaty will make it free for the other Empire to declare War on your own enemies."
+  },
+  {
+    "name": "Cartography Exchange",
+    "description": "Signing this Treaty will reveal to each Empire the Tiles already discovered by the other."
+  },
+  {
+    "name": "Vision Exchange",
+    "description": "Signing this Treaty will show each Empire the Tiles over which the other has vision."
+  },
+  {
+    "name": "Shared Research",
+    "description": "Signing this Treaty will provide Science bonuses to Cities in both Empires and make Technologies discovered by one Empire cost 20% less for the other Empire."
+  },
+  {
+    "name": "Deeper Collaboration",
+    "description": "Signing this Treaty will provide an additional Science bonus to Cities in both Empires and make Technologies cost another 20% less."
+  },
+  {
+    "name": "Immigration Policy",
+    "description": "Signing this Treaty will allow each Empire to grow the other Empire's available Population."
+  },
+  {
+    "name": "Shared Victory",
+    "description": "Signing this Treaty will allow one Empire to also be declared victorious should the other Empire earn Victory. This excludes Conquest and Score victories."
+  }
+]

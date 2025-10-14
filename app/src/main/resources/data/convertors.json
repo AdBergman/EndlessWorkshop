@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Propaganda Machine",
+    "description": "Convert Industry into Approval"
+  },
+  {
+    "name": "Toil in the Fields",
+    "description": "Convert Industry into Food"
+  },
+  {
+    "name": "Artisans' Activism",
+    "description": "Convert Industry into Influence"
+  },
+  {
+    "name": "Investor's Graft",
+    "description": "Convert Industry into Dust"
+  },
+  {
+    "name": "Citizen Science",
+    "description": "Convert Industry into Science"
+  }
+]
