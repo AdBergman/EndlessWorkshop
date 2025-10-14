@@ -5,7 +5,6 @@ import { NavLink } from 'react-router-dom';
 import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
 
 const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage"];
-const availableFactions = ["Kin", "Lords", "Tahuk", "Necrophage"];
 const MAX_ERA = 6;
 
 // Define the application's main routes
@@ -55,21 +54,19 @@ const TopContainer: React.FC = () => {
 
             <div className="faction-selector">
                 {factions.map(f => {
-                    const isAvailable = availableFactions.includes(f);
                     return (
                         <button
                             key={f}
-                            className={`${f === selectedFaction ? 'active' : ''} ${!isAvailable ? 'disabled' : ''}`}
+                            className={f === selectedFaction ? "active" : ""}
                             onClick={() => {
-                                if (!isAvailable) return;
                                 setSelectedFaction(f);   // change faction
                                 setSelectedTechs([]);    // clear selected techs
                             }}
-                            title={!isAvailable ? "Coming Soon" : ""}
                         >
                             {f}
                         </button>
                     );
+
                 })}
             </div>
         </header>
