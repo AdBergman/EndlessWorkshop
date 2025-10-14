@@ -1,10 +1,35 @@
 package ewshop.domain.entity.enums;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum UnitType {
-    SWARM,
-    FLYING,
-    RANGED,
-    JUGGERNAUT,
+    @JsonProperty("Infantry")
     INFANTRY,
-    CAVALRY
+
+    @JsonProperty("Ranged")
+    RANGED,
+
+    @JsonProperty("Cavalry")
+    CAVALRY,
+
+    @JsonProperty("Juggernaut")
+    JUGGERNAUT,
+
+    @JsonProperty("Flying")
+    FLYING,
+
+    @JsonProperty("Swarm")
+    SWARM,
+
+    @JsonProperty("Flying Swarm")
+    FLYING_SWARM,
+
+    @JsonProperty("Flying Ranged")
+    FLYING_RANGED,
+
+    @JsonProperty("Juggernaut Ranged")
+    JUGGERNAUT_RANGED,
+
+    @JsonProperty("Cavalry Ranged")
+    CAVALRY_RANGED,
 }

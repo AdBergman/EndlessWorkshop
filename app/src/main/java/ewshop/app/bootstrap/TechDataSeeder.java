@@ -27,7 +27,7 @@ public class TechDataSeeder {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Order(3) // after districts and improvements
+    @Order(4) // after districts and improvements
     public void seedData() {
         try {
             if (!techRepository.findAll().isEmpty()) return;

@@ -3,6 +3,7 @@ package ewshop.infrastructure.persistence.entities;
 import ewshop.domain.entity.enums.UnitType;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,8 +39,9 @@ public class UnitSpecializationEntity {
     @Column(nullable = false)
     private int movementPoints;
 
-    @Column(nullable = true)
-    private Integer cost;
+    @ElementCollection
+    @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
+    private List<UnitCostEmbeddable> costs = new ArrayList<>();
 
     @Column(nullable = true)
     private Integer upkeepPerTurn;
@@ -47,110 +49,49 @@ public class UnitSpecializationEntity {
     @ElementCollection
     @CollectionTable(name = "unit_specialization_skills", joinColumns = @JoinColumn(name = "unit_id"))
     @Column(name = "skill")
-    private List<String> skills;
+    private List<String> skills = new ArrayList<>();
 
     @Column(nullable = true)
-    private String faction; // Optional: for minor/major faction mapping
+    private String faction; // Optional
 
     public UnitSpecializationEntity() {}
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public String getDescription() {
-        return description;
-    }
+    public UnitType getType() { return type; }
+    public void setType(UnitType type) { this.type = type; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public int getHealth() { return health; }
+    public void setHealth(int health) { this.health = health; }
 
-    public UnitType getType() {
-        return type;
-    }
+    public int getDefense() { return defense; }
+    public void setDefense(int defense) { this.defense = defense; }
 
-    public void setType(UnitType type) {
-        this.type = type;
-    }
+    public int getMinDamage() { return minDamage; }
+    public void setMinDamage(int minDamage) { this.minDamage = minDamage; }
 
-    public int getHealth() {
-        return health;
-    }
+    public int getMaxDamage() { return maxDamage; }
+    public void setMaxDamage(int maxDamage) { this.maxDamage = maxDamage; }
 
-    public void setHealth(int health) {
-        this.health = health;
-    }
+    public int getMovementPoints() { return movementPoints; }
+    public void setMovementPoints(int movementPoints) { this.movementPoints = movementPoints; }
 
-    public int getDefense() {
-        return defense;
-    }
+    public List<UnitCostEmbeddable> getCosts() { return costs; }
+    public void setCosts(List<UnitCostEmbeddable> costs) { this.costs = costs; }
 
-    public void setDefense(int defense) {
-        this.defense = defense;
-    }
+    public Integer getUpkeepPerTurn() { return upkeepPerTurn; }
+    public void setUpkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; }
 
-    public int getMinDamage() {
-        return minDamage;
-    }
+    public List<String> getSkills() { return skills; }
+    public void setSkills(List<String> skills) { this.skills = skills; }
 
-    public void setMinDamage(int minDamage) {
-        this.minDamage = minDamage;
-    }
-
-    public int getMaxDamage() {
-        return maxDamage;
-    }
-
-    public void setMaxDamage(int maxDamage) {
-        this.maxDamage = maxDamage;
-    }
-
-    public int getMovementPoints() {
-        return movementPoints;
-    }
-
-    public void setMovementPoints(int movementPoints) {
-        this.movementPoints = movementPoints;
-    }
-
-    public Integer getCost() {
-        return cost;
-    }
-
-    public void setCost(Integer cost) {
-        this.cost = cost;
-    }
-
-    public Integer getUpkeepPerTurn() {
-        return upkeepPerTurn;
-    }
-
-    public void setUpkeepPerTurn(Integer upkeepPerTurn) {
-        this.upkeepPerTurn = upkeepPerTurn;
-    }
-
-    public List<String> getSkills() {
-        return skills;
-    }
-
-    public void setSkills(List<String> skills) {
-        this.skills = skills;
-    }
-
-    public String getFaction() {
-        return faction;
-    }
-
-    public void setFaction(String faction) {
-        this.faction = faction;
-    }
+    public String getFaction() { return faction; }
+    public void setFaction(String faction) { this.faction = faction; }
 }
+

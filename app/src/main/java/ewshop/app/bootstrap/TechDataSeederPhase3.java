@@ -47,7 +47,7 @@ public class TechDataSeederPhase3 {
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    @Order(5) // Run after Phase 2
+    @Order(6) // Run after Phase 2
     public void seedPhase3() {
         try {
             log.info("Starting Tech Seeding Phase 3: Unlocks.");

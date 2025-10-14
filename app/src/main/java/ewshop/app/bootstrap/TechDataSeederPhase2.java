@@ -31,7 +31,7 @@ public class TechDataSeederPhase2 {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Order(4) // Run after the main seeder (Order 3)
+    @Order(5) // Run after the main seeder (Order 3)
     public void seedPhase2() {
         try {
             log.info("Starting Tech Seeding Phase 2: Relationships.");
