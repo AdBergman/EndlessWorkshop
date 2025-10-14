@@ -1,11 +1,9 @@
 package ewshop.infrastructure.persistence.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import ewshop.domain.entity.enums.UnitType;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "unit_specialization")
@@ -20,6 +18,39 @@ public class UnitSpecializationEntity {
 
     @Column(nullable = true)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private UnitType type;
+
+    @Column(nullable = false)
+    private int health;
+
+    @Column(nullable = false)
+    private int defense;
+
+    @Column(nullable = false)
+    private int minDamage;
+
+    @Column(nullable = false)
+    private int maxDamage;
+
+    @Column(nullable = false)
+    private int movementPoints;
+
+    @Column(nullable = true)
+    private Integer cost;
+
+    @Column(nullable = true)
+    private Integer upkeepPerTurn;
+
+    @ElementCollection
+    @CollectionTable(name = "unit_specialization_skills", joinColumns = @JoinColumn(name = "unit_id"))
+    @Column(name = "skill")
+    private List<String> skills;
+
+    @Column(nullable = true)
+    private String faction; // Optional: for minor/major faction mapping
 
     public UnitSpecializationEntity() {}
 
@@ -41,5 +72,85 @@ public class UnitSpecializationEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public UnitType getType() {
+        return type;
+    }
+
+    public void setType(UnitType type) {
+        this.type = type;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getDefense() {
+        return defense;
+    }
+
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getMinDamage() {
+        return minDamage;
+    }
+
+    public void setMinDamage(int minDamage) {
+        this.minDamage = minDamage;
+    }
+
+    public int getMaxDamage() {
+        return maxDamage;
+    }
+
+    public void setMaxDamage(int maxDamage) {
+        this.maxDamage = maxDamage;
+    }
+
+    public int getMovementPoints() {
+        return movementPoints;
+    }
+
+    public void setMovementPoints(int movementPoints) {
+        this.movementPoints = movementPoints;
+    }
+
+    public Integer getCost() {
+        return cost;
+    }
+
+    public void setCost(Integer cost) {
+        this.cost = cost;
+    }
+
+    public Integer getUpkeepPerTurn() {
+        return upkeepPerTurn;
+    }
+
+    public void setUpkeepPerTurn(Integer upkeepPerTurn) {
+        this.upkeepPerTurn = upkeepPerTurn;
+    }
+
+    public List<String> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(List<String> skills) {
+        this.skills = skills;
+    }
+
+    public String getFaction() {
+        return faction;
+    }
+
+    public void setFaction(String faction) {
+        this.faction = faction;
     }
 }
