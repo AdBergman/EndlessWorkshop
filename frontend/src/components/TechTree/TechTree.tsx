@@ -62,6 +62,13 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
 
     return (
         <div className="tech-tree-image-wrapper">
+            {selectedFaction === 'Aspect' && (
+                <div className="wip-banner">
+                    WORK IN PROGRESS<br />
+                    NEW BACKGROUND IMAGES<br />
+                    ARE ALIGNED DIFFERENTLY
+                </div>
+            )}
             <img
                 src={getBackgroundUrl(selectedFaction, era)}
                 alt={`${selectedFaction} Era ${era}`}
