@@ -762,5 +762,33 @@
     "unique": "EMPIRE",
     "cost": [],
     "era": 4
+  },
+  {
+    "name": "Consular Mission",
+    "effects": [
+      "+20% Approval",
+      "-25% Influence cost on Treaties"
+    ],
+    "unique": "EMPIRE",
+    "cost": [],
+    "era": 2
+  },
+  {
+    "name": "Hall of Harmony",
+    "effects": [
+      "+1 Influence on Corals in City's Territories"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 3
+  },
+  {
+    "name": "Nutrient Extractor",
+    "effects": [
+      "-15% Food consumption on Population"
+    ],
+    "unique": "CITY",
+    "cost": [],
+    "era": 4
   }
 ]

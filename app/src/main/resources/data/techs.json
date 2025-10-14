@@ -2318,6 +2318,155 @@
       "xPct": 23.71,
       "yPct": 61.31
     }
+  },
+  {
+    "name": "Asceticism",
+    "era": 1,
+    "type": "Defense",
+    "unlocks": [
+      "Protectorate Slot: 1"
+    ],
+    "effects": [
+      "+5 Defense while Defending on Unit"
+    ],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 40.26,
+      "yPct": 23.35
+    }
+  },
+  {
+    "name": "Choral Amplifier",
+    "era": 2,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Crawler",
+      "Unit Specialization: Surveyor",
+      "Unit Specialization: Stinger",
+      "Unit Specialization: Resistor"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.3,
+      "yPct": 58.0
+    }
+  },
+  {
+    "name": "Persuasion",
+    "era": 2,
+    "type": "Society",
+    "unlocks": [
+      "Diplomatic Ability: Force a Treaty",
+      "Improvement: Consular Mission"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 37.92,
+      "yPct": 4.35
+    }
+  },
+  {
+    "name": "Coral Sensorium",
+    "era": 3,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Peacemaker",
+      "Unit Specialization: Guard of the Current",
+      "Unit Specialization: Brightscale",
+      "Unit Specialization: Shadowscale"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 62.25
+    }
+  },
+  {
+    "name": "Glorification",
+    "era": 3,
+    "type": "Society",
+    "unlocks": [
+      "Protectorate Slot: 1",
+      "Improvement: Hall of Harmony"
+    ],
+    "effects": [
+      "+3 Influence income per Pacified Village under Protectorate"
+    ],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 37.92,
+      "yPct": 4.35
+    }
+  },
+  {
+    "name": "Synaptic Acceleration",
+    "era": 4,
+    "type": "Society",
+    "unlocks": [
+      "Faction Trait: Impose Balance",
+      "Improvement: Nutrient Extractor"
+    ],
+    "effects": [
+      "+10 Influence on City Approval Jubilant"
+    ],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 40.32,
+      "yPct": 23.05
+    }
+  },
+  {
+    "name": "Meditative Routines",
+    "era": 4,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Scraper",
+      "Unit Specialization: Emissary",
+      "Unit Specialization: Pitiless Stinger",
+      "Unit Specialization: Pitiless Resistor"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 21.32,
+      "yPct": 61.42
+    }
+  },
+  {
+    "name": "Harmonized Chorus",
+    "era": 5,
+    "type": "Defense",
+    "unlocks": [
+      "Unit Specialization: Arbiter",
+      "Unit Specialization: Currentwalker",
+      "Unit Specialization: Scales of Balance",
+      "Unit Specialization: Scales of Justice"
+    ],
+    "effects": [],
+    "prereq": "",
+    "factions": ["ASPECT"],
+    "excludes": "",
+    "coords": {
+      "xPct": 23.71,
+      "yPct": 59.14
+    }
   }
 
 ]
