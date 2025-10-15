@@ -25,8 +25,9 @@ public class UnitSpecializationRepositoryAdapter implements UnitSpecializationRe
 
     @Override
     public UnitSpecialization findByName(String name) {
-        Optional<UnitSpecializationEntity> entityOpt = springDataRepository.findByName(name);
-        return entityOpt.map(mapper::toDomain).orElse(null);
+        return springDataRepository.findByName(name)
+                .map(mapper::toDomain)
+                .orElseThrow(() -> new IllegalStateException("UnitSpecialization not found: " + name));
     }
 
     @Override

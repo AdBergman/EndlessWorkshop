@@ -4,12 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.entity.Tech;
 import ewshop.domain.entity.TechUnlock;
-import ewshop.domain.repository.DistrictRepository;
-import ewshop.domain.repository.ImprovementRepository;
-import ewshop.domain.repository.TechRepository;
-import ewshop.domain.repository.TechUnlockRepository;
+import ewshop.domain.entity.UnitSpecialization;
+import ewshop.domain.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -29,26 +28,36 @@ public class TechDataSeederPhase3 {
     private final TechUnlockRepository techUnlockRepository;
     private final ImprovementRepository improvementRepository;
     private final DistrictRepository districtRepository;
+    private final UnitSpecializationRepository unitSpecializationRepository;
     private final ObjectMapper objectMapper;
+
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
 
     public TechDataSeederPhase3(
             TechRepository techRepository,
             TechUnlockRepository techUnlockRepository,
             ImprovementRepository improvementRepository,
             DistrictRepository districtRepository,
+            UnitSpecializationRepository unitSpecializationRepository,
             ObjectMapper objectMapper
     ) {
         this.techRepository = techRepository;
         this.techUnlockRepository = techUnlockRepository;
         this.improvementRepository = improvementRepository;
         this.districtRepository = districtRepository;
+        this.unitSpecializationRepository = unitSpecializationRepository;
         this.objectMapper = objectMapper;
     }
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    @Order(6) // Run after Phase 2
+    @Order(6)
     public void seedPhase3() {
+        if (!seedersEnabled) {
+            System.out.println("TechDataSeeder3 is disabled, skipping...");
+            return;
+        }
         try {
             log.info("Starting Tech Seeding Phase 3: Unlocks.");
 
@@ -60,14 +69,13 @@ public class TechDataSeederPhase3 {
 
             TechDTO[] techDTOs = objectMapper.readValue(is, TechDTO[].class);
 
-            // Step 1: Load all Tech domain objects
+            // Load all Techs
             Map<String, Tech> techDomainMap = techRepository.findAll()
                     .stream()
                     .collect(Collectors.toMap(Tech::getName, t -> t));
 
             int totalUnlocks = 0;
 
-            // Step 2: Iterate DTOs and build TechUnlocks
             for (TechDTO dto : techDTOs) {
                 Tech tech = techDomainMap.get(dto.name);
                 if (tech == null) {
@@ -87,19 +95,35 @@ public class TechDataSeederPhase3 {
                     String value = parts.length > 1 ? parts[1].trim() : null;
 
                     switch (key) {
-                        case "Improvement" -> builder.improvement(
-                                improvementRepository.findByName(value)
-                        );
-                        case "District" -> builder.district(
-                                districtRepository.findByName(value)
-                        );
-                        default -> builder.unlockText(rawUnlock); // everything else
+                        case "Improvement" -> {
+                            var improvement = improvementRepository.findByName(value);
+                            if (improvement == null) {
+                                throw new IllegalStateException("Improvement not found: " + value);
+                            }
+                            builder.improvement(improvement);
+                        }
+                        case "District" -> {
+                            var district = districtRepository.findByName(value);
+                            if (district == null) {
+                                throw new IllegalStateException("District not found: " + value);
+                            }
+                            builder.district(district);
+                        }
+                        case "Unit Specialization" -> {
+                            var unit = unitSpecializationRepository.findByName(value);
+                            if (unit == null) {
+                                throw new IllegalStateException("UnitSpecialization not found: " + value);
+                            }
+                            log.info("Linking UnitSpecialization '{}' to TechUnlock", value);
+                            builder.unitSpecialization(unit);
+                        }
+                        default -> builder.unlockText(rawUnlock);
                     }
 
                     unlocks.add(builder.build());
                 }
 
-                // Persist the unlocks transactionally via repository
+                // Persist the unlocks for this tech
                 techUnlockRepository.updateUnlocksForTech(tech, unlocks);
                 totalUnlocks += unlocks.size();
             }

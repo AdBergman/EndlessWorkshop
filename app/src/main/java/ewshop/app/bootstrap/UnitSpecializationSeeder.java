@@ -3,6 +3,7 @@ package ewshop.app.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.entity.UnitSpecialization;
 import ewshop.domain.repository.UnitSpecializationRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -18,6 +19,9 @@ public class UnitSpecializationSeeder {
     private final UnitSpecializationRepository unitSpecializationRepository;
     private final ObjectMapper objectMapper;
 
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
+
     public UnitSpecializationSeeder(UnitSpecializationRepository unitSpecializationRepository,
                                     ObjectMapper objectMapper) {
         this.unitSpecializationRepository = unitSpecializationRepository;
@@ -27,6 +31,10 @@ public class UnitSpecializationSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Order(3)
     public void seedData() {
+        if (!seedersEnabled) {
+            System.out.println("UnitDataSeeder is disabled, skipping...");
+            return;
+        }
         try {
             if (unitSpecializationRepository.findAll().isEmpty()) {
                 InputStream is = getClass().getResourceAsStream("/data/units.json");

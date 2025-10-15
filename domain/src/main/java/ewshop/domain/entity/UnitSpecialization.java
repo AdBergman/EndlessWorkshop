@@ -122,7 +122,12 @@ public class UnitSpecialization {
             return this;
         }
 
-
+        public Builder cost(List<UnitCost> costs) {
+            if (costs != null) {
+                this.cost = new ArrayList<>(costs);
+            }
+            return this;
+        }
 
         @JsonProperty("upkeepPerTurn")
         public Builder upkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; return this; }

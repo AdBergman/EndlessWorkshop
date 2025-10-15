@@ -1,18 +1,13 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.District;
-import ewshop.domain.entity.Improvement;
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechUnlock;
+import ewshop.domain.entity.*;
 import ewshop.domain.repository.TechUnlockRepository;
-import ewshop.infrastructure.persistence.entities.DistrictEntity;
-import ewshop.infrastructure.persistence.entities.ImprovementEntity;
-import ewshop.infrastructure.persistence.entities.TechEntity;
-import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
+import ewshop.infrastructure.persistence.entities.*;
 import ewshop.infrastructure.persistence.mappers.TechUnlockMapper;
 import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
 import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
 import ewshop.infrastructure.persistence.repositories.SpringDataTechRepository;
+import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -29,17 +24,18 @@ public class TechUnlockRepositoryAdapter implements TechUnlockRepository {
     private final SpringDataTechRepository techRepository;
     private final SpringDataDistrictRepository districtRepository;
     private final SpringDataImprovementRepository improvementRepository;
+    private final SpringDataUnitSpecializationRepository unitSpecializationRepository;
     private final TechUnlockMapper mapper;
 
-    public TechUnlockRepositoryAdapter(
-            SpringDataTechRepository techRepository,
-            SpringDataDistrictRepository districtRepository,
-            SpringDataImprovementRepository improvementRepository,
-            TechUnlockMapper mapper
-    ) {
+    public TechUnlockRepositoryAdapter(SpringDataTechRepository techRepository,
+                                       SpringDataDistrictRepository districtRepository,
+                                       SpringDataImprovementRepository improvementRepository,
+                                       SpringDataUnitSpecializationRepository unitSpecializationRepository,
+                                       TechUnlockMapper mapper) {
         this.techRepository = techRepository;
         this.districtRepository = districtRepository;
         this.improvementRepository = improvementRepository;
+        this.unitSpecializationRepository = unitSpecializationRepository;
         this.mapper = mapper;
     }
 
@@ -55,48 +51,65 @@ public class TechUnlockRepositoryAdapter implements TechUnlockRepository {
     @Override
     @Transactional
     public void updateUnlocksForTech(Tech tech, List<TechUnlock> unlocks) {
-        // Step 1: Fetch the MANAGED TechEntity from the database. This is the root of our graph.
+        // 1️⃣ Fetch the managed TechEntity
         TechEntity managedTechEntity = techRepository.findByName(tech.getName())
                 .orElseThrow(() -> new IllegalStateException("Cannot update unlocks for a non-existent tech: " + tech.getName()));
 
-        // Step 2: For idempotency, clear the existing collection of unlocks.
-        // Hibernate will issue DELETE statements for the old unlocks (due to orphanRemoval=true).
+        // 2️⃣ Clear existing unlocks for idempotency
         managedTechEntity.getUnlocks().clear();
 
-        // Step 3: Map the new domain unlocks to entities, resolving relationships along the way.
+        // 3️⃣ Map new domain unlocks to managed entities
         List<TechUnlockEntity> newUnlockEntities = unlocks.stream()
                 .map(domainUnlock -> {
-                    // Map the basic fields from the domain object to a new entity.
-                    TechUnlockEntity newUnlockEntity = mapper.toEntity(domainUnlock);
+                    TechUnlockEntity entity = mapper.toEntity(domainUnlock);
 
-                    // Set the mandatory back-reference to the managed parent tech entity.
-                    newUnlockEntity.setTech(managedTechEntity);
+                    // Mandatory back-reference
+                    entity.setTech(managedTechEntity);
 
-                    // --- This is the CRITICAL part for avoiding TransientObjectException ---
-                    // Resolve relationships by fetching the MANAGED entity for each one.
+                    // ✅ Resolve relationships to MANAGED entities
                     if (domainUnlock.getImprovement() != null) {
-                        Improvement improvement = domainUnlock.getImprovement();
-                        ImprovementEntity managedImprovement = improvementRepository.findByName(improvement.getName())
-                                .orElse(null);
-                        newUnlockEntity.setImprovement(managedImprovement);
+                        improvementRepository.findByName(domainUnlock.getImprovement().getName())
+                                .ifPresentOrElse(entity::setImprovement,
+                                        () -> log.warn("Improvement not found: {}", domainUnlock.getImprovement().getName()));
                     }
 
                     if (domainUnlock.getDistrict() != null) {
-                        District district = domainUnlock.getDistrict();
-                        DistrictEntity managedDistrict = districtRepository.findByName(district.getName())
-                                .orElse(null);
-                        newUnlockEntity.setDistrict(managedDistrict);
+                        districtRepository.findByName(domainUnlock.getDistrict().getName())
+                                .ifPresentOrElse(entity::setDistrict,
+                                        () -> log.warn("District not found: {}", domainUnlock.getDistrict().getName()));
                     }
 
-                    return newUnlockEntity;
+                    if (domainUnlock.getUnitSpecialization() != null) {
+                        unitSpecializationRepository.findByName(domainUnlock.getUnitSpecialization().getName())
+                                .ifPresentOrElse(entity::setUnitSpecialization,
+                                        () -> log.warn("UnitSpecialization not found: {}", domainUnlock.getUnitSpecialization().getName()));
+                    }
+
+                    if (domainUnlock.getConvertor() != null) {
+                        // handle convertor if needed
+                    }
+
+                    if (domainUnlock.getTreaty() != null) {
+                        // handle treaty if needed
+                    }
+
+                    return entity;
                 })
                 .collect(Collectors.toList());
 
-        // Step 4: Add the new, fully-managed unlock entities to the parent's collection.
+        // 4️⃣ Count linked unit specializations after mapping
+        final long linkedCount = newUnlockEntities.stream()
+                .filter(e -> e.getUnitSpecialization() != null)
+                .count();
+
+        // 5️⃣ Add fully managed unlock entities to the TechEntity
         managedTechEntity.getUnlocks().addAll(newUnlockEntities);
 
-        // Step 5: No explicit save is needed. When the @Transactional method completes,
-        // Hibernate's dirty checking will detect the changes to the 'unlocks' collection
-        // and persist all inserts/deletes.
+        // 6️⃣ Logging
+        log.info("Tech '{}' updated with {} unlocks ({} unit specializations linked).",
+                tech.getName(), newUnlockEntities.size(), linkedCount);
+
+        // 7️⃣ Done — transaction will flush changes automatically
     }
+
 }

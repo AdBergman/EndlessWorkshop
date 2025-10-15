@@ -7,6 +7,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -18,6 +19,9 @@ public class DistrictDataSeeder {
     private final DistrictRepository districtRepository;
     private final ObjectMapper objectMapper;
 
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
+
     public DistrictDataSeeder(DistrictRepository districtRepository, ObjectMapper objectMapper) {
         this.districtRepository = districtRepository;
         this.objectMapper = objectMapper;
@@ -26,6 +30,11 @@ public class DistrictDataSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Order(1)
     public void seedData() {
+        if (!seedersEnabled) {
+            System.out.println("DistrictDataSeeder is disabled, skipping...");
+            return;
+        }
+
         try {
             // Only seed if repository is empty
             if (districtRepository.findAll().isEmpty()) {

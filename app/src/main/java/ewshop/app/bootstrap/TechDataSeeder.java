@@ -6,6 +6,7 @@ import ewshop.domain.entity.TechCoords;
 import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
 import ewshop.domain.repository.TechRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,9 @@ public class TechDataSeeder {
     private final TechRepository techRepository;
     private final ObjectMapper objectMapper;
 
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
+
     public TechDataSeeder(TechRepository techRepository, ObjectMapper objectMapper) {
         this.techRepository = techRepository;
         this.objectMapper = objectMapper;
@@ -29,6 +33,10 @@ public class TechDataSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Order(4) // after districts and improvements
     public void seedData() {
+        if (!seedersEnabled) {
+            System.out.println("TechDataSeeder1 is disabled, skipping...");
+            return;
+        }
         try {
             if (!techRepository.findAll().isEmpty()) return;
 

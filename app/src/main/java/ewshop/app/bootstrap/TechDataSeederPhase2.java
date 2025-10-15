@@ -6,6 +6,7 @@ import ewshop.domain.entity.Tech;
 import ewshop.domain.repository.TechRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -25,6 +26,9 @@ public class TechDataSeederPhase2 {
     private final TechRepository techRepository;
     private final ObjectMapper objectMapper;
 
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
+
     public TechDataSeederPhase2(TechRepository techRepository, ObjectMapper objectMapper) {
         this.techRepository = techRepository;
         this.objectMapper = objectMapper;
@@ -33,6 +37,10 @@ public class TechDataSeederPhase2 {
     @EventListener(ApplicationReadyEvent.class)
     @Order(5) // Run after the main seeder (Order 3)
     public void seedPhase2() {
+        if (!seedersEnabled) {
+            System.out.println("TechDataSeeder2 is disabled, skipping...");
+            return;
+        }
         try {
             log.info("Starting Tech Seeding Phase 2: Relationships.");
 

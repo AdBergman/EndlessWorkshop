@@ -550,6 +550,20 @@
     "era": 5
   },
   {
+    "name": "Treasury",
+    "effects": [
+      "+2 Dust on Trading Post",
+      "+25% Dust when selling Resources on Empire"
+    ],
+    "unique": "EMPIRE",
+    "cost": [
+      "5 GLASSTEEL",
+      "5 HYPERIUM",
+      "5 THALITINE"
+    ],
+    "era": 5
+  },
+  {
     "name": "Customs Inspector",
     "effects": [
       "+2 Dust per population on Citizens",
@@ -654,7 +668,7 @@
     "era": 2
   },
   {
-    "name": "Chitinous Matriarch",
+    "name": "Chitinous Matriach",
     "effects": [
       "+10 Influence",
       "+20 Dust",

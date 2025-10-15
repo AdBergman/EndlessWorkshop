@@ -629,7 +629,7 @@
     "type": "Society",
     "unlocks": [
       "Protectorate Slot: 1",
-      "Unit Specialization: Minor factionss Tier 1"
+      "Unit Specialization Minor factions Tier 1"
     ],
     "effects": [],
     "prereq": "",
@@ -1035,7 +1035,7 @@
     "type": "Society",
     "unlocks": [
       "Protectorate Slot: 1",
-      "Unit Specialization: Minor factionss Tier 2"
+      "Unit Specialization Minor factions Tier 2"
     ],
     "effects": [],
     "prereq": "",
@@ -2271,7 +2271,7 @@
       "Unit Specialization: True Guide",
       "Unit Specialization: Vigil Master",
       "Unit Specialization: Zealot",
-      "Unit Specialization: Ligthbringer"
+      "Unit Specialization: Lightbringer"
     ],
     "effects": [],
     "prereq": "",

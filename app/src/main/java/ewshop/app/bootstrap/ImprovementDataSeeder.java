@@ -3,6 +3,7 @@ package ewshop.app.bootstrap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.entity.Improvement;
 import ewshop.domain.repository.ImprovementRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
@@ -18,6 +19,9 @@ public class ImprovementDataSeeder {
     private final ImprovementRepository improvementRepository;
     private final ObjectMapper objectMapper;
 
+    @Value("${seeders.enabled:true}")
+    private boolean seedersEnabled;
+
     public ImprovementDataSeeder(ImprovementRepository improvementRepository,
                                  ObjectMapper objectMapper) {
         this.improvementRepository = improvementRepository;
@@ -27,6 +31,10 @@ public class ImprovementDataSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Order(2)
     public void seedData() {
+        if (!seedersEnabled) {
+            System.out.println("ImprovementDataSeeder is disabled, skipping...");
+            return;
+        }
         try {
             if (improvementRepository.findAll().isEmpty()) {
                 InputStream is = getClass().getResourceAsStream("/data/improvements.json");
