@@ -31,7 +31,7 @@ public class TechDataSeeder {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Order(4) // after districts and improvements
+    @Order(5) // after districts and improvements
     public void seedData() {
         if (!seedersEnabled) {
             System.out.println("TechDataSeeder1 is disabled, skipping...");

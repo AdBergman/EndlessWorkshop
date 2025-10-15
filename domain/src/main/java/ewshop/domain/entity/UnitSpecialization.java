@@ -3,7 +3,6 @@ package ewshop.domain.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import ewshop.domain.entity.enums.CostType;
-import ewshop.domain.entity.enums.FIDSI;
 import ewshop.domain.entity.enums.UnitType;
 
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import java.util.List;
 
 @JsonDeserialize(builder = UnitSpecialization.Builder.class)
 public class UnitSpecialization {
+
     private final String name;
     private final String description;
     private final UnitType type;
@@ -19,10 +19,10 @@ public class UnitSpecialization {
     private final int minDamage;
     private final int maxDamage;
     private final int movementPoints;
-    private final List<UnitCost> cost; // now a list
+    private final List<UnitCost> costs;
     private final Integer upkeepPerTurn;
-    private final List<String> skills;
-    private final String faction; // Optional
+    private final List<String> skills; // now list of skill names
+    private final String faction;
 
     private UnitSpecialization(Builder builder) {
         this.name = builder.name;
@@ -33,7 +33,7 @@ public class UnitSpecialization {
         this.minDamage = builder.minDamage;
         this.maxDamage = builder.maxDamage;
         this.movementPoints = builder.movementPoints;
-        this.cost = List.copyOf(builder.cost); // immutable
+        this.costs = List.copyOf(builder.cost);
         this.upkeepPerTurn = builder.upkeepPerTurn;
         this.skills = List.copyOf(builder.skills);
         this.faction = builder.faction;
@@ -47,7 +47,7 @@ public class UnitSpecialization {
     public int getMinDamage() { return minDamage; }
     public int getMaxDamage() { return maxDamage; }
     public int getMovementPoints() { return movementPoints; }
-    public List<UnitCost> getCosts() { return cost; }
+    public List<UnitCost> getCosts() { return costs; }
     public Integer getUpkeepPerTurn() { return upkeepPerTurn; }
     public List<String> getSkills() { return skills; }
     public String getFaction() { return faction; }
@@ -95,11 +95,9 @@ public class UnitSpecialization {
         @JsonProperty("cost")
         public Builder cost(Object rawCost) {
             if (rawCost == null) return this;
-
             this.cost.clear();
 
             if (rawCost instanceof String s) {
-                // handle "5 Titanium & 100 Dust" or "15 Titanium"
                 String[] parts = s.split("&");
                 for (String part : parts) {
                     part = part.trim();
@@ -118,14 +116,11 @@ public class UnitSpecialization {
             } else {
                 throw new IllegalArgumentException("Unsupported cost type: " + rawCost.getClass());
             }
-
             return this;
         }
 
         public Builder cost(List<UnitCost> costs) {
-            if (costs != null) {
-                this.cost = new ArrayList<>(costs);
-            }
+            if (costs != null) this.cost = new ArrayList<>(costs);
             return this;
         }
 
@@ -133,7 +128,10 @@ public class UnitSpecialization {
         public Builder upkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; return this; }
 
         @JsonProperty("skills")
-        public Builder skills(List<String> skills) { this.skills = skills != null ? skills : new ArrayList<>(); return this; }
+        public Builder skills(List<String> skills) {
+            this.skills = (skills != null) ? new ArrayList<>(skills) : new ArrayList<>();
+            return this;
+        }
 
         @JsonProperty("faction")
         public Builder faction(String faction) { this.faction = faction; return this; }

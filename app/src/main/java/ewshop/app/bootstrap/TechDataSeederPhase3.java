@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.entity.Tech;
 import ewshop.domain.entity.TechUnlock;
-import ewshop.domain.entity.UnitSpecialization;
 import ewshop.domain.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +30,8 @@ public class TechDataSeederPhase3 {
     private final UnitSpecializationRepository unitSpecializationRepository;
     private final ObjectMapper objectMapper;
 
-    @Value("${seeders.enabled:true}")
-    private boolean seedersEnabled;
+    @Value("${seeders.techPhase3.enabled:false}")
+    private boolean phase3Enabled;
 
     public TechDataSeederPhase3(
             TechRepository techRepository,
@@ -52,9 +51,9 @@ public class TechDataSeederPhase3 {
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
-    @Order(6)
+    @Order(7)
     public void seedPhase3() {
-        if (!seedersEnabled) {
+        if (!phase3Enabled) {
             System.out.println("TechDataSeeder3 is disabled, skipping...");
             return;
         }

@@ -46,10 +46,8 @@ public class UnitSpecializationEntity {
     @Column(nullable = true)
     private Integer upkeepPerTurn;
 
-    @ElementCollection
-    @CollectionTable(name = "unit_specialization_skills", joinColumns = @JoinColumn(name = "unit_id"))
-    @Column(name = "skill")
-    private List<String> skills = new ArrayList<>();
+    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UnitSpecializationSkillEntity> unitSkills = new ArrayList<>();
 
     @Column(nullable = true)
     private String faction; // Optional
@@ -88,8 +86,18 @@ public class UnitSpecializationEntity {
     public Integer getUpkeepPerTurn() { return upkeepPerTurn; }
     public void setUpkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; }
 
-    public List<String> getSkills() { return skills; }
-    public void setSkills(List<String> skills) { this.skills = skills; }
+    public List<UnitSpecializationSkillEntity> getUnitSkills() {
+        return unitSkills;
+    }
+
+    public void setUnitSkills(List<UnitSpecializationSkillEntity> unitSkills) {
+        this.unitSkills = unitSkills;
+    }
+
+    public void addSkill(UnitSkillEntity skill, Integer level) {
+        UnitSpecializationSkillEntity uss = new UnitSpecializationSkillEntity(this, skill, level);
+        this.unitSkills.add(uss);
+    }
 
     public String getFaction() { return faction; }
     public void setFaction(String faction) { this.faction = faction; }

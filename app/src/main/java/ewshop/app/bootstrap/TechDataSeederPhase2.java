@@ -35,7 +35,7 @@ public class TechDataSeederPhase2 {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    @Order(5) // Run after the main seeder (Order 3)
+    @Order(6) // Run after the main seeder (Order 3)
     public void seedPhase2() {
         if (!seedersEnabled) {
             System.out.println("TechDataSeeder2 is disabled, skipping...");
