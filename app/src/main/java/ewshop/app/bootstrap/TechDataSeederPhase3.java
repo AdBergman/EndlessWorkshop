@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.entity.Tech;
 import ewshop.domain.entity.TechUnlock;
 import ewshop.domain.repository.*;
+import ewshop.infrastructure.persistence.mappers.UnitSpecializationMapper;
+import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +30,10 @@ public class TechDataSeederPhase3 {
     private final ImprovementRepository improvementRepository;
     private final DistrictRepository districtRepository;
     private final UnitSpecializationRepository unitSpecializationRepository;
+    private final SpringDataUnitSpecializationRepository unitSpecializationJpa;
+    private final UnitSpecializationMapper mapper;
+
+
     private final ObjectMapper objectMapper;
 
     @Value("${seeders.techPhase3.enabled:false}")
@@ -38,7 +44,7 @@ public class TechDataSeederPhase3 {
             TechUnlockRepository techUnlockRepository,
             ImprovementRepository improvementRepository,
             DistrictRepository districtRepository,
-            UnitSpecializationRepository unitSpecializationRepository,
+            UnitSpecializationRepository unitSpecializationRepository, SpringDataUnitSpecializationRepository unitSpecializationJpa, UnitSpecializationMapper mapper,
             ObjectMapper objectMapper
     ) {
         this.techRepository = techRepository;
@@ -46,6 +52,8 @@ public class TechDataSeederPhase3 {
         this.improvementRepository = improvementRepository;
         this.districtRepository = districtRepository;
         this.unitSpecializationRepository = unitSpecializationRepository;
+        this.unitSpecializationJpa = unitSpecializationJpa;
+        this.mapper = mapper;
         this.objectMapper = objectMapper;
     }
 
@@ -101,6 +109,7 @@ public class TechDataSeederPhase3 {
                             }
                             builder.improvement(improvement);
                         }
+
                         case "District" -> {
                             var district = districtRepository.findByName(value);
                             if (district == null) {
@@ -108,14 +117,22 @@ public class TechDataSeederPhase3 {
                             }
                             builder.district(district);
                         }
+
                         case "Unit Specialization" -> {
-                            var unit = unitSpecializationRepository.findByName(value);
-                            if (unit == null) {
-                                throw new IllegalStateException("UnitSpecialization not found: " + value);
-                            }
-                            log.info("Linking UnitSpecialization '{}' to TechUnlock", value);
-                            builder.unitSpecialization(unit);
+                            // Fetch existing UnitSpecialization entity
+                            var unitEntity = unitSpecializationJpa.findByName(value)
+                                    .orElseThrow(() -> new IllegalStateException("UnitSpecialization not found: " + value));
+
+                            log.info("Linking existing UnitSpecialization '{}' to TechUnlock", value);
+
+                            // Build a minimal domain object with just name/id to avoid skill mapping
+                            var minimalDomainUnit = ewshop.domain.entity.UnitSpecialization.builder()
+                                    .name(unitEntity.getName())
+                                    .build();
+
+                            builder.unitSpecialization(minimalDomainUnit);
                         }
+
                         default -> builder.unlockText(rawUnlock);
                     }
 

@@ -68,6 +68,7 @@ jobs:
               --name $CONTAINER_NAME \
               -p 8080:8080 \
               --restart=unless-stopped \
+              -e SPRING_PROFILES_ACTIVE=prod \
               -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m" \
               $IMAGE_NAME:$TAG; then
               echo "✅ New container started successfully!"

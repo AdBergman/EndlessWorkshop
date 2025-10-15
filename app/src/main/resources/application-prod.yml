@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: EndlessWorkshop
+
+  datasource:
+    url: jdbc:h2:mem:ewshop;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
+          batch_versioned_data: true
+
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration/prod
+
+  web:
+    resources:
+      cache:
+        period: 259200
+      static-locations:
+        - classpath:/static/
+
+h2:
+  tcp:
+    url: jdbc:h2:tcp://localhost:9092/mem:ewshop
+
+logging:
+  level:
+    org.springframework.boot.autoconfigure: warn
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+seeders:
+  enabled: false
+  techPhase3:
+    enabled: false
