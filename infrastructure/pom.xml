@@ -12,10 +12,10 @@
 
     <artifactId>infrastructure</artifactId>
     <name>Infrastructure Module</name>
-    <description>Infrastructure module for persistence, external APIs, etc.</description>
+    <description>Persistence, external integrations, and database adapters.</description>
 
     <dependencies>
-        <!-- Implements domain repository ports -->
+        <!-- Domain layer interfaces (so we can implement the repositories) -->
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>domain</artifactId>
@@ -27,15 +27,24 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Testing dependencies -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+        <!-- H2 for dev and test environments -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- PostgreSQL for Neon (staging/prod) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Spring Boot testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
