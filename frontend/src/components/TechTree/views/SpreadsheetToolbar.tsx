@@ -8,33 +8,31 @@ export type SheetView = 'techs' | 'improvements' | 'districts';
 interface SpreadsheetToolbarProps {
     selectedTechs: Tech[];
     unlockedImprovements: Improvement[];
-    unlockedDistricts: (District & { era: number })[]; // Correct type for districts with era
+    unlockedDistricts: (District & { era: number })[];
     onDeselectAll: () => void;
-    generateShareLink: (name: string, techIds: string[]) => void;
+    generateShareLink: () => void;
     onSort: () => void;
     activeSheet: SheetView;
     setActiveSheet: (view: SheetView) => void;
 }
 
 const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
-    selectedTechs,
-    unlockedImprovements,
-    unlockedDistricts,
-    onDeselectAll,
-    generateShareLink,
-    onSort,
-    activeSheet,
-    setActiveSheet,
-}) => {
-
-    // This function now correctly handles all data types for CSV export.
-    const getExportConfig = () => {
+                                                                   selectedTechs,
+                                                                   unlockedImprovements,
+                                                                   unlockedDistricts,
+                                                                   onDeselectAll,
+                                                                   generateShareLink,
+                                                                   onSort,
+                                                                   activeSheet,
+                                                                   setActiveSheet,
+                                                               }) => {
+    const { data, headers, filename } = useMemo(() => {
         switch (activeSheet) {
             case 'improvements':
                 return {
                     filename: `endless-workshop-improvements.csv`,
                     headers: ["Name", "Era", "Unique", "Effects", "Cost"],
-                    data: unlockedImprovements.map((imp) => ({
+                    data: unlockedImprovements.map(imp => ({
                         Name: imp.name,
                         Era: imp.era,
                         Unique: imp.unique,
@@ -42,28 +40,26 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                         Cost: imp.cost?.join("; ") ?? "",
                     })),
                 };
-
             case 'districts':
                 return {
                     filename: `endless-workshop-districts.csv`,
                     headers: ["Name", "Era", "Effect", "Info", "Tile Bonus", "Adjacency Bonus", "Placement Prerequisite"],
-                    data: unlockedDistricts.map((d) => ({
+                    data: unlockedDistricts.map(d => ({
                         Name: d.name,
                         Era: d.era,
-                        Effect: d.effect ?? "", // Correctly access the string 'effect' property
+                        Effect: d.effect ?? "",
                         Info: d.info?.join("; ") ?? "",
-                        "Tile Bonus": d.tileBonus?.join("; ") ?? "", // Fix typo from d.t
+                        "Tile Bonus": d.tileBonus?.join("; ") ?? "",
                         "Adjacency Bonus": d.adjacencyBonus?.join("; ") ?? "",
                         "Placement Prerequisite": d.placementPrereq ?? "None",
                     })),
                 };
-
             case 'techs':
             default:
                 return {
                     filename: `endless-workshop-techs.csv`,
                     headers: ["Name", "Era", "Type", "Unlocks", "Effects"],
-                    data: selectedTechs.map((t) => ({
+                    data: selectedTechs.map(t => ({
                         Name: t.name,
                         Era: t.era,
                         Type: t.type,
@@ -72,29 +68,18 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     })),
                 };
         }
-    };
-
-    const { data, headers, filename } = useMemo(getExportConfig, [activeSheet, selectedTechs, unlockedImprovements, unlockedDistricts]);
+    }, [activeSheet, selectedTechs, unlockedImprovements, unlockedDistricts]);
 
     return (
         <div className="spreadsheet-toolbar">
             <div className="action-buttons">
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
-
-                {/* Links won’t be saved until database is implemented!
-                <button
-                    onClick={() => generateShareLink("Default", selectedTechs.map(t => t.name))}
-                >
-                    Copy Link
-                </button>
-                */}
-
-                <CSVLink data={data} headers={headers} filename={filename} >
+                <button onClick={generateShareLink}>Copy Link</button>
+                <CSVLink data={data} headers={headers} filename={filename}>
                     <button>Export CSV</button>
                 </CSVLink>
             </div>
-
             <div className="view-toggle-buttons">
                 <button
                     onClick={() => setActiveSheet('techs')}
@@ -110,7 +95,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 </button>
                 <button
                     onClick={() => setActiveSheet('districts')}
-                    className={`${activeSheet === 'districts' ? 'active' : ''} `}
+                    className={activeSheet === 'districts' ? 'active' : ''}
                 >
                     Districts
                 </button>
