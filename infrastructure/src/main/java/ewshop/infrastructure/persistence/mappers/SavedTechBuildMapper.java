@@ -16,6 +16,7 @@ public class SavedTechBuildMapper {
         return SavedTechBuild.builder()
                 .uuid(entity.getUuid())
                 .name(entity.getName())
+                .faction(entity.getFaction())
                 .techIds(entity.getTechIds() != null ? entity.getTechIds() : Collections.emptyList())
                 .createdAt(entity.getCreatedAt())
                 .build();
@@ -27,6 +28,7 @@ public class SavedTechBuildMapper {
         SavedTechBuildEntity entity = new SavedTechBuildEntity();
         entity.setUuid(domain.getUuid() != null ? domain.getUuid() : UUID.randomUUID());
         entity.setName(domain.getName());
+        entity.setFaction(domain.getFaction());
         entity.setTechIds(domain.getTechIds() != null ? domain.getTechIds() : Collections.emptyList());
         entity.setCreatedAt(domain.getCreatedAt());
         return entity;

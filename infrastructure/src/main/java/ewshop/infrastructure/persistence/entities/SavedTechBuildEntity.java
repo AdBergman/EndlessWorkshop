@@ -1,5 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
+import ewshop.domain.entity.enums.Faction;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,10 @@ public class SavedTechBuildEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "faction", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Faction faction;
+
     // List of tech IDs in this build
     @ElementCollection
     @CollectionTable(name = "shared_tech_build_techs", joinColumns = @JoinColumn(name = "build_id"))
@@ -33,14 +38,23 @@ public class SavedTechBuildEntity {
 
     public SavedTechBuildEntity() {}
 
-    public SavedTechBuildEntity(UUID uuid, String name, List<String> techIds) {
+    public SavedTechBuildEntity(UUID uuid, String name, Faction faction, List<String> techIds) {
         this.uuid = uuid;
         this.name = name;
+        this.faction = faction;
         this.techIds = techIds;
         this.createdAt = LocalDateTime.now();
     }
 
     // --- Getters and setters ---
+
+    public Faction getFaction() {
+        return faction;
+    }
+
+    public void setFaction(Faction faction) {
+        this.faction = faction;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

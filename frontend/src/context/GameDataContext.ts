@@ -12,8 +12,8 @@ export interface GameDataContextType {
     selectedTechs: string[];
     setSelectedTechs: React.Dispatch<React.SetStateAction<string[]>>;
 
-    createSavedTechBuild?: (name: string, techIds: string[]) => Promise<{ uuid: string }>;
-    getSavedBuild?: (uuid: string) => Promise<{ uuid: string; name: string; techIds: string[]; createdAt: string }>;
+    createSavedTechBuild?: (name: string, selectedFaction: string, techIds: string[]) => Promise<{ uuid: string }>;
+    getSavedBuild?: (uuid: string) => Promise<{ uuid: string; name: string; selectedFaction: string; techIds: string[]; createdAt: string }>;
 }
 
 const GameDataContext = createContext<GameDataContextType>({
@@ -25,7 +25,7 @@ const GameDataContext = createContext<GameDataContextType>({
     selectedTechs: [],
     setSelectedTechs: () => {},
     createSavedTechBuild: async () => ({ uuid: "" }),
-    getSavedBuild: async () => ({ uuid: "", name: "", techIds: [], createdAt: "" }),
+    getSavedBuild: async () => ({ uuid: "", name: "", selectedFaction: "", techIds: [], createdAt: "" }),
 });
 
 export const useGameData = () => useContext(GameDataContext);

@@ -36,7 +36,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         fetchData();
     }, []);
 
-    // --- Load shared build from URL param (runs once) ---
+// --- Load shared build from URL param (runs once) ---
     useEffect(() => {
         if (sharedBuildLoaded) return;
 
@@ -47,20 +47,32 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         const loadSharedBuild = async () => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
+                setSelectedFaction(res.selectedFaction);
                 setSelectedTechs(res.techIds); // populate tech selection
                 setSharedBuildLoaded(true);
+
+                // --- REMOVE share param from URL without reloading ---
+                params.delete("share");
+                const newUrl =
+                    window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
+                window.history.replaceState({}, "", newUrl);
             } catch (err) {
                 console.error("Failed to load shared build:", err);
             }
         };
 
         loadSharedBuild();
-    }, [sharedBuildLoaded, setSelectedTechs]);
+    }, [sharedBuildLoaded]);
 
-    // --- API helpers ---
-    const createSavedTechBuild = async (name: string, techIds: string[]): Promise<SavedTechBuild> => {
+
+// --- API helpers ---
+    const createSavedTechBuild = async (
+        name: string,
+        faction: string = selectedFaction,
+        techIds: string[] = selectedTechs
+    ): Promise<SavedTechBuild> => {
         try {
-            const saved = await apiClient.createSavedBuild(name, techIds);
+            const saved = await apiClient.createSavedBuild(name, faction, techIds);
             console.log("Build saved:", saved);
             return saved;
         } catch (err) {
@@ -74,13 +86,17 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             const saved = await apiClient.getSavedBuild(uuid);
             console.log("Loaded saved build:", saved);
 
-            setSelectedTechs(saved.techIds); // populate selected techs
+            // populate current state
+            setSelectedFaction(saved.selectedFaction);
+            setSelectedTechs(saved.techIds);
+
             return saved;
         } catch (err) {
             console.error("Failed to load saved tech build:", err);
             throw err;
         }
     };
+
 
     return (
         <GameDataContext.Provider value={{

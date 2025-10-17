@@ -11,7 +11,7 @@ import {Bounce, toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const SpreadSheetView: React.FC = () => {
-    const { selectedTechs, setSelectedTechs, techs, improvements, districts, createSavedTechBuild } = useGameData();
+    const { selectedTechs, setSelectedTechs, techs, improvements, districts, createSavedTechBuild, selectedFaction } = useGameData();
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
     const selectedTechObjects = useMemo(() =>
@@ -48,7 +48,7 @@ const SpreadSheetView: React.FC = () => {
     const handleGenerateLink = async () => {
         if (!createSavedTechBuild) return;
         try {
-            const saved = await createSavedTechBuild("My Build", selectedTechObjects.map(t => t.name));
+            const saved = await createSavedTechBuild("My Build", selectedFaction, selectedTechObjects.map(t => t.name));
             await navigator.clipboard.writeText(`${window.location.origin}?share=${saved.uuid}`);
             toast.success("Link copied!");
         } catch (err) {

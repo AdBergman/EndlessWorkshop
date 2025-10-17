@@ -3,6 +3,7 @@ import { District, Improvement, Tech } from "@/types/dataTypes";
 export type SavedTechBuild = {
     uuid: string;
     name: string;
+    selectedFaction: string;
     techIds: string[];
     createdAt: string;
 };
@@ -29,10 +30,10 @@ export const apiClient = {
 
     // ---- Saved Tech Builds ----
     getSavedBuild: (uuid: string) => fetcher<SavedTechBuild>(`/builds/${uuid}`),
-    createSavedBuild: (name: string, techIds: string[]) =>
+    createSavedBuild: (name: string, selectedFaction: string, techIds: string[]) =>
         fetcher<SavedTechBuild>('/builds', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, techIds }),
+            body: JSON.stringify({ name, selectedFaction, techIds }),
         }),
 };

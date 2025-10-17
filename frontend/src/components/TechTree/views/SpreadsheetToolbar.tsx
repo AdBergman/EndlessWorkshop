@@ -75,7 +75,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
             <div className="action-buttons">
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
-                {/*<button onClick={generateShareLink}>Copy Link</button>*/}
+                <button onClick={generateShareLink}>Copy Link</button>
                 <CSVLink data={data} headers={headers} filename={filename}>
                     <button>Export CSV</button>
                 </CSVLink>

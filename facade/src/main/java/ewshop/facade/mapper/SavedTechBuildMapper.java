@@ -1,6 +1,7 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.entity.SavedTechBuild;
+import ewshop.domain.entity.enums.Faction;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 
@@ -18,7 +19,8 @@ public class SavedTechBuildMapper {
 
         return SavedTechBuildDto.builder()
                 .uuid(entity.getUuid())
-                .name(entity.getName() != null ? entity.getName() : "")
+                .name(entity.getName())
+                .selectedFaction(entity.getFaction())
                 .techIds(techIds)
                 .createdAt(entity.getCreatedAt())
                 .build();
@@ -33,6 +35,7 @@ public class SavedTechBuildMapper {
         return SavedTechBuild.builder()
                 .uuid(UUID.randomUUID()) // always generate new UUID
                 .name(request.name() != null ? request.name() : "")
+                .faction(Faction.fromString(request.selectedFaction()))
                 .techIds(techIds)
                 .build();
     }
