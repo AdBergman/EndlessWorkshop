@@ -1,0 +1,41 @@
+SET CONSTRAINTS ALL DEFERRED;
+
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (3, '+2 Dust for each adjacent Communal Habitations');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (4, '+4 Dust for each adjacent Resource Deposit');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (5, '+1 Industry for each adjacent Ridge');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (5, '+1 Industry for each adjacent Communal Habitations');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (6, '+1 Food for each adjacent River');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (6, '+1 Food for each adjacent Lake');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (6, '+1 Food for each adjacent Communal Habitations');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (7, '+1 Influence for each adjacent River');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (7, '+1 Influence for each adjacent Lake');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (7, '+1 Influence for each adjacent Communal Habitations');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (8, '+2 Science for each adjacent Anomaly');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (8, '+1 Science for each adjacent Communal Habitations');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (9, '+50 Fortification for each adjacent District');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (10, '+1 Corpse for each adjacent District');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (11, '+3 Science for each adjacent District');
+INSERT INTO "public"."district_adjacency_bonuses" ("district_id", "adjacency_bonus") VALUES (12, '+20 Fortification for each adjacent District');
+
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (1, '+1 Population slot on Population Vocations');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (4, 'Roads will be automatically created between Districts containing a Trading Post');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (4, '+10 Resource stock');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (9, '+1 Vision Range');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (9, '+100 District Fortification');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (10, '-25% Corpses cost for the Feed the masses action');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (11, '+1 Science on Population');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (12, '+100 District Fortification');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (12, '+3 Attack Range on Defensive District');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (12, '+50 Damage on Defensive District');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (12, '+100 Experience on new Units on City');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (13, '+1 Primordial Lords Population');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (13, '+4 Dust on Soul Repository');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (13, '+2 Science on Soul Repository');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (14, '+4 Dust on Lord''s Estate');
+INSERT INTO "public"."district_info" ("district_id", "info") VALUES (14, '+2 Science on Lord''s Estate');
+
+INSERT INTO "public"."district_tile_bonuses" ("district_id", "tile_bonus") VALUES (3, '+2 Dust on tile producing Dust');
+INSERT INTO "public"."district_tile_bonuses" ("district_id", "tile_bonus") VALUES (5, '+1 Industry on tile producing Industry');
+INSERT INTO "public"."district_tile_bonuses" ("district_id", "tile_bonus") VALUES (6, '+1 Food on tile producing Food');
+INSERT INTO "public"."district_tile_bonuses" ("district_id", "tile_bonus") VALUES (7, '+1 Food on tile producing Food');
+INSERT INTO "public"."district_tile_bonuses" ("district_id", "tile_bonus") VALUES (8, '+1 Science on tile producing at least two types of yields');

@@ -1,45 +1,44 @@
 spring:
-  application:
-    name: EndlessWorkshop
-
   datasource:
-    url: jdbc:postgresql://<your-neon-dev-host>:5432/<your-neon-dev-db>
-    username: ${NEON_DB_USER}
-    password: ${NEON_DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require&channelBinding=require
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+  cache:
+    type: simple
 
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         format_sql: true
-        jdbc:
-          batch_size: 50
-          order_inserts: true
-          order_updates: true
-          batch_versioned_data: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
 
   flyway:
     enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    baseline-on-migrate: true
+    baseline-version: 1
+    clean-disabled: true
+    validate-on-migrate: true
     locations:
       - classpath:db/migration/common
-      - classpath:db/migration/staging
-
-  web:
-    resources:
-      cache:
-        period: 259200
-      static-locations:
-        - classpath:/static/
+      - classpath:db/migration/${spring.profiles.active:staging}
+    # Workaround for Neon/Postgres detection issues
+    database: postgresql
+    postgresql:
+      transactional-lock: false
 
 logging:
   level:
-    org.springframework.boot.autoconfigure: warn
-    org.hibernate.SQL: WARN
-    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.flywaydb: INFO
 
 seeders:
   enabled: false

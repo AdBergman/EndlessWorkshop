@@ -1,6 +1,4 @@
--- Temporarily disable all foreign key checks for this session !!! H2 !!!
-SET REFERENTIAL_INTEGRITY FALSE;
-
+SET CONSTRAINTS ALL DEFERRED;
 
 INSERT INTO "public"."districts" ("effect", "name", "placement_prereq") VALUES (null, 'Communal Habitations', null);
 INSERT INTO "public"."districts" ("effect", "name", "placement_prereq") VALUES (null, 'Bridge', 'No adjacent bridge. This District must be built on a Stream or River.');
@@ -2186,5 +2184,14 @@ INSERT INTO "public"."tech_unlocks" ("tech_entity_id", "unlocks_id") VALUES (110
 INSERT INTO "public"."tech_unlocks" ("tech_entity_id", "unlocks_id") VALUES (110, 198);
 INSERT INTO "public"."tech_unlocks" ("tech_entity_id", "unlocks_id") VALUES (110, 199);
 
--- Re-enable foreign key checks !!! H2 !!!
-SET REFERENTIAL_INTEGRITY TRUE;
+-- Reset sequences after insert data
+SELECT setval('convertor_id_seq', (SELECT COALESCE(MAX(id),0) FROM "convertor"));
+SELECT setval('districts_id_seq', (SELECT COALESCE(MAX(id),0) FROM "districts"));
+SELECT setval('improvements_id_seq', (SELECT COALESCE(MAX(id),0) FROM "improvements"));
+SELECT setval('shared_tech_builds_id_seq', (SELECT COALESCE(MAX(id),0) FROM "shared_tech_builds"));
+SELECT setval('tech_id_seq', (SELECT COALESCE(MAX(id),0) FROM "tech"));
+SELECT setval('treaty_id_seq', (SELECT COALESCE(MAX(id),0) FROM "treaty"));
+SELECT setval('unit_skills_id_seq', (SELECT COALESCE(MAX(id),0) FROM "unit_skills"));
+SELECT setval('unit_specialization_id_seq', (SELECT COALESCE(MAX(id),0) FROM "unit_specialization"));
+SELECT setval('tech_unlock_id_seq', (SELECT COALESCE(MAX(id),0) FROM "tech_unlock"));
+SELECT setval('unit_specialization_skills_id_seq', (SELECT COALESCE(MAX(id),0) FROM "unit_specialization_skills"));

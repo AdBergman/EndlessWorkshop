@@ -2,7 +2,9 @@ package ewshop.domain.service;
 
 import ewshop.domain.entity.District;
 import ewshop.domain.repository.DistrictRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,9 +17,8 @@ public class DistrictService {
         this.districtRepository = districtRepository;
     }
 
-    /**
-     * Returns all District domain entities.
-     */
+    @Transactional(readOnly = true)
+    @Cacheable("districts")
     public List<District> getAllDistricts() {
         return districtRepository.findAll();
     }

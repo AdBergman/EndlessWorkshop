@@ -3,6 +3,7 @@ package ewshop.domain.service;
 import ewshop.domain.entity.SavedTechBuild;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,16 +17,12 @@ public class SavedTechBuildService {
         this.buildRepository = buildRepository;
     }
 
-    /**
-     * Saves a new tech build in the domain.
-     */
+    @Transactional
     public SavedTechBuild save(SavedTechBuild build) {
         return buildRepository.save(build);
     }
 
-    /**
-     * Finds a saved build by UUID.
-     */
+    @Transactional(readOnly = true)
     public Optional<SavedTechBuild> findByUuid(UUID uuid) {
         return buildRepository.findByUuid(uuid);
     }
