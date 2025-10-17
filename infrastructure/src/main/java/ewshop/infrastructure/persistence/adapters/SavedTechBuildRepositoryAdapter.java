@@ -15,37 +15,37 @@ import java.util.stream.Collectors;
 @Repository
 public class SavedTechBuildRepositoryAdapter implements SavedTechBuildRepository {
 
-    private final SpringDataSavedTechBuildRepository jpaRepository;
+    private final SpringDataSavedTechBuildRepository springDataRepository;
     private final SavedTechBuildMapper mapper;
 
-    public SavedTechBuildRepositoryAdapter(SpringDataSavedTechBuildRepository jpaRepository,
+    public SavedTechBuildRepositoryAdapter(SpringDataSavedTechBuildRepository springDataRepository,
                                            SavedTechBuildMapper mapper) {
-        this.jpaRepository = jpaRepository;
+        this.springDataRepository = springDataRepository;
         this.mapper = mapper;
     }
 
     @Override
     public SavedTechBuild save(SavedTechBuild build) {
         SavedTechBuildEntity entity = mapper.toEntity(build);
-        SavedTechBuildEntity savedEntity = jpaRepository.save(entity);
+        SavedTechBuildEntity savedEntity = springDataRepository.save(entity);
         return mapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<SavedTechBuild> findByUuid(UUID uuid) {
-        return jpaRepository.findByUuid(uuid)
+        return springDataRepository.findByUuid(uuid)
                 .map(mapper::toDomain);
     }
 
     @Override
     public List<SavedTechBuild> findAll() {
-        return jpaRepository.findAll().stream()
+        return springDataRepository.findAll().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteAll() {
-        jpaRepository.deleteAll();
+        springDataRepository.deleteAll();
     }
 }
