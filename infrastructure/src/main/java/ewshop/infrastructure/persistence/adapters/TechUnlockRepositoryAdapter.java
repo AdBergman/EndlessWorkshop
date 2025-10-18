@@ -85,17 +85,18 @@ public class TechUnlockRepositoryAdapter implements TechUnlockRepository {
                                         () -> log.warn("UnitSpecialization not found: {}", domainUnlock.getUnitSpecialization().getName()));
                     }
 
-                    if (domainUnlock.getConvertor() != null) {
-                        // handle convertor if needed
-                    }
-
-                    if (domainUnlock.getTreaty() != null) {
-                        // handle treaty if needed
-                    }
+//                   TO BE IMPLEMENTED LATER
+//                    if (domainUnlock.getConvertor() != null) {
+//                        // handle convertor if needed
+//                    }
+//
+//                    if (domainUnlock.getTreaty() != null) {
+//                        // handle treaty if needed
+//                    }
 
                     return entity;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         // 4️⃣ Count linked unit specializations after mapping
         final long linkedCount = newUnlockEntities.stream()
