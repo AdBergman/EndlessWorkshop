@@ -19,7 +19,7 @@ public class UnitSpecializationSkillEntity {
     private UnitSkillEntity skill;
 
     // optional metadata, e.g., skill level
-    @Column(nullable = true)
+    @Column()
     private Integer level;
 
     // --- Constructors ---

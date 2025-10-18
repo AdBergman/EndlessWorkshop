@@ -18,7 +18,7 @@ public class TreatyEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
+    @Column()
     private String description;
 
     public TreatyEntity() {}

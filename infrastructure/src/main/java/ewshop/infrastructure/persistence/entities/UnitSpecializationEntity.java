@@ -17,11 +17,11 @@ public class UnitSpecializationEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
+    @Column()
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
+    @Column()
     private UnitType type;
 
     @Column(nullable = false)
@@ -43,13 +43,13 @@ public class UnitSpecializationEntity {
     @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
     private List<UnitCostEmbeddable> costs = new ArrayList<>();
 
-    @Column(nullable = true)
+    @Column()
     private Integer upkeepPerTurn;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UnitSpecializationSkillEntity> unitSkills = new ArrayList<>();
 
-    @Column(nullable = true)
+    @Column()
     private String faction; // Optional
 
     public UnitSpecializationEntity() {}

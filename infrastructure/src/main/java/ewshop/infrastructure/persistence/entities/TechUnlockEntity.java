@@ -16,26 +16,26 @@ public class TechUnlockEntity {
 
     // Optional relationships
     @ManyToOne
-    @JoinColumn(name = "convertor_id", nullable = true)
+    @JoinColumn(name = "convertor_id")
     private ConvertorEntity convertor;
 
     @ManyToOne
-    @JoinColumn(name = "unit_specialization_id", nullable = true)
+    @JoinColumn(name = "unit_specialization_id")
     private UnitSpecializationEntity unitSpecialization;
 
     @ManyToOne
-    @JoinColumn(name = "treaty_id", nullable = true)
+    @JoinColumn(name = "treaty_id")
     private TreatyEntity treaty;
 
     @ManyToOne
-    @JoinColumn(name = "district_id", nullable = true)
+    @JoinColumn(name = "district_id")
     private DistrictEntity district;
 
     @ManyToOne
-    @JoinColumn(name = "improvement_id", nullable = true)
+    @JoinColumn(name = "improvement_id")
     private ImprovementEntity improvement;
 
-    @Column(name = "unlock_text", nullable = true)
+    @Column(name = "unlock_text")
     private String unlockText;
 
     public TechUnlockEntity() {}

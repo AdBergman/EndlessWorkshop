@@ -11,11 +11,11 @@ public class UnitCostEmbeddable {
     private int amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
+    @Column()
     private FIDSI resource;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
+    @Column()
     private StrategicResourceType strategic;
 
     public UnitCostEmbeddable() {}

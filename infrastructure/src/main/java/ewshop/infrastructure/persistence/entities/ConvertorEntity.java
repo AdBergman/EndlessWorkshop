@@ -19,7 +19,7 @@ public class ConvertorEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
+    @Column()
     private String description;
 
     public ConvertorEntity() {}
