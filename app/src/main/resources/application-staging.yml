@@ -34,10 +34,6 @@ spring:
     locations:
       - classpath:db/migration/common
       - classpath:db/migration/${spring.profiles.active:staging}
-    # Workaround for Neon/Postgres detection issues
-    database: postgresql
-    postgresql:
-      transactional-lock: false
 
 logging:
   level:
