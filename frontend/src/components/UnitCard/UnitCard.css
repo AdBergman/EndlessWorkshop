@@ -1,0 +1,128 @@
+.cardContainer {
+    position: relative;
+    width: 220px;
+    background-color: #111;
+    border: 2px solid #ff7f32;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #ff9b4c;
+    font-family: 'Audiowide', sans-serif;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+}
+
+.name {
+    font-weight: 700;
+    font-size: 1.3rem;
+    background: linear-gradient(90deg, #ffb366, #ff7f32, #ff9b4c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.fortIcon {
+    font-size: 1.5rem;
+    color: #4faaff;
+}
+
+.typeTier {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #ff7f32;
+}
+
+.tierBadge {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #ff7f32;
+}
+
+.artContainer {
+    width: 100%;
+    margin: 6px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #111;
+}
+
+.artContainer img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.cardGlowOverlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,127,50,0.05), transparent);
+    border-radius: 12px;
+}
+
+.statsBox {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 8px 0;
+    gap: 6px;
+}
+
+.statsRow {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.stat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #ff8c40;
+}
+
+.skills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.skill {
+    background-color: #222;
+    color: #ff7f32;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.skill:hover {
+    transform: scale(1.1);
+    background-color: #333;
+}

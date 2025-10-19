@@ -4,7 +4,9 @@ import TopContainer from './components/TopContainer/TopContainer';
 import MainContainer from './components/MainContainer/MainContainer';
 import InfoPage from './components/InfoPage/InfoPage';
 import GameDataProvider from './context/GameDataProvider';
-import LandscapeWrapper from './components/Layout/LandscapeWrapper'; // <- new
+import LandscapeWrapper from './components/Layout/LandscapeWrapper';
+import DemoUnitCard from './components/UnitCard/DemoUnitCard';
+
 import './App.css';
 
 // Extend the Window type for Cloudflare beacon
@@ -47,6 +49,7 @@ function App() {
                 <Route path="/" element={<AppLayout />}>
                     <Route index element={<MainContainer />} />
                     <Route path="info" element={<InfoPage />} />
+                    <Route path="demo-unit-card" element={<DemoUnitCard />} />
                 </Route>
             </Routes>
         </Router>
