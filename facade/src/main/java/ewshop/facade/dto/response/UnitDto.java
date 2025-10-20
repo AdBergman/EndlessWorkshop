@@ -11,6 +11,8 @@ public record UnitDto(
         int minDamage,
         int maxDamage,
         int movementPoints,
+        int tier,
+        int upkeep,
         List<String> costs,
         List<String> skills,
         String faction
@@ -28,6 +30,8 @@ public record UnitDto(
         private int minDamage;
         private int maxDamage;
         private int movementPoints;
+        private int tier;
+        private int upkeep;
         private List<String> costs = List.of();
         private List<String> skills = List.of();
         private String faction = "";
@@ -40,13 +44,28 @@ public record UnitDto(
         public Builder minDamage(int minDamage) { this.minDamage = minDamage; return this; }
         public Builder maxDamage(int maxDamage) { this.maxDamage = maxDamage; return this; }
         public Builder movementPoints(int movementPoints) { this.movementPoints = movementPoints; return this; }
+        public Builder tier(int tier) { this.tier = tier; return this; }
+        public Builder upkeep(int upkeep) { this.upkeep = upkeep; return this; }
         public Builder costs(List<String> costs) { this.costs = costs; return this; }
         public Builder skills(List<String> skills) { this.skills = skills; return this; }
         public Builder faction(String faction) { this.faction = faction; return this; }
 
         public UnitDto build() {
-            return new UnitDto(name, description, type, health, defense, minDamage, maxDamage,
-                    movementPoints, costs, skills, faction);
+            return new UnitDto(
+                    name,
+                    description,
+                    type,
+                    health,
+                    defense,
+                    minDamage,
+                    maxDamage,
+                    movementPoints,
+                    tier,
+                    upkeep,
+                    costs,
+                    skills,
+                    faction
+            );
         }
     }
 }

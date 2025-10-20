@@ -1,27 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
-import { FaBolt, FaHeart, FaRunning, FaShieldAlt } from "react-icons/fa";
+import { FaBolt, FaHeart, FaRunning, FaShieldAlt, FaCoins } from "react-icons/fa";
 import { FactionIcon, FactionType } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "src/types/factionColors";
+import {Unit} from "@/types/dataTypes";
 
-export interface Unit {
-    name: string;
-    tier: number;
-    type: string;
-    skills: string[];
-    health: number;
-    minDamage: number;
-    maxDamage: number;
-    defense: number;
-    movement: number;
-    cost: number;
-    requiredTechnology: string;
-    upgrade: string;
-    faction: string;
-    FactionType: string;
-    imageUrl?: string;
-}
 
 interface UnitCardProps {
     unit: Unit;
@@ -65,10 +49,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true }) 
                     {unit.name}
                 </div>
                 <div className="fortIcon" style={{ color: colors.accent }}>
-                    <FactionIcon
-                        factionType={unit.FactionType as "major" | "minor"}
-                        faction={unit.faction as FactionType}
-                    />
+                    <FactionIcon faction={unit.faction as FactionType} />
                 </div>
             </div>
 
@@ -115,8 +96,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true }) 
                 </div>
                 <div className="statsRow">
                     <div className="stat"><FaShieldAlt /> {unit.defense}</div>
-                    <div className="stat"><FaRunning /> {unit.movement}</div>
-                    <div className="stat">Cost: {unit.cost}</div>
+                    <div className="stat"><FaRunning /> {unit.movementPoints}</div>
+                    <div className="stat"><FaCoins /> {unit.upkeep} </div>
                 </div>
             </div>
 

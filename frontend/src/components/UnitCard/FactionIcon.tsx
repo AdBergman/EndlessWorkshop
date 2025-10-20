@@ -1,32 +1,29 @@
 import React from "react";
 import {
     FaFortAwesomeAlt,
-    FaCoins,
+    FaChessKing,
     FaBug,
     FaFlask,
-    FaHandshake,
+    FaPeace,
 } from "react-icons/fa";
 
 export type FactionType = "KIN" | "LAST_LORDS" | "NECROPHAGE" | "TAHUK" | "ASPECT";
 
 interface FactionIconProps {
-    factionType: "major" | "minor";
     faction: FactionType;
     size?: number;
     color?: string;
 }
 
-const majorFactionIcons: Record<FactionType, React.ElementType> = {
+const factionIcons: Record<FactionType, React.ElementType> = {
     KIN: FaFortAwesomeAlt,
-    LAST_LORDS: FaCoins,
+    LAST_LORDS: FaChessKing,
     NECROPHAGE: FaBug,
     TAHUK: FaFlask,
-    ASPECT: FaHandshake,
+    ASPECT: FaPeace,
 };
 
-export const FactionIcon: React.FC<FactionIconProps> = ({ factionType, faction, size = 20, color = "#4faaff" }) => {
-    if (factionType !== "major") return null;
-
-    const IconComponent = majorFactionIcons[faction];
+export const FactionIcon: React.FC<FactionIconProps> = ({ faction, size = 20, color = "#4faaff" }) => {
+    const IconComponent = factionIcons[faction] || FaFortAwesomeAlt;
     return <IconComponent size={size} color={color} />;
 };

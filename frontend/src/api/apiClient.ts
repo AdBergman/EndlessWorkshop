@@ -1,4 +1,4 @@
-import { District, Improvement, Tech } from "@/types/dataTypes";
+import {District, Improvement, Tech, Unit} from "@/types/dataTypes";
 
 export type SavedTechBuild = {
     uuid: string;
@@ -27,6 +27,7 @@ export const apiClient = {
     getDistricts: () => fetcher<District[]>('/districts'),
     getImprovements: () => fetcher<Improvement[]>('/improvements'),
     getTechs: () => fetcher<Tech[]>('/techs'),
+    getUnits: () => fetcher<Unit[]>('/units'),
 
     // ---- Saved Tech Builds ----
     getSavedBuild: (uuid: string) => fetcher<SavedTechBuild>(`/builds/${uuid}`),

@@ -1,4 +1,22 @@
-// Game data: comes from techs.json
+export interface Unit {
+    name: string;
+    description: string;
+    type: string;
+    health: number;
+    defense: number;
+    minDamage: number;
+    maxDamage: number;
+    movementPoints: number;
+    costs: string[];
+    skills: string[];
+    faction: string;
+    tier: number;
+    upkeep: number;
+
+    // Frontend-only
+    imageUrl?: string; // placeholder for now
+}
+
 export interface Tech {
     name: string;
     era: number;

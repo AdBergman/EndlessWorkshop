@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode } from "react";
 import GameDataContext from "./GameDataContext";
-import { District, Improvement, Tech } from "@/types/dataTypes";
+import {District, Improvement, Tech, Unit} from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 
 interface Props { children: ReactNode }
@@ -9,6 +9,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [districts, setDistricts] = useState<Map<string, District>>(new Map());
     const [improvements, setImprovements] = useState<Map<string, Improvement>>(new Map());
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
+    const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
     const [selectedFaction, setSelectedFaction] = useState("Kin");
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
@@ -34,6 +35,32 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             }
         };
         fetchData();
+    }, []);
+
+    // --- Fetch units asynchronously after initial data load ---
+    useEffect(() => {
+        const fetchUnits = async () => {
+            try {
+                console.log("🔄 Bootstrapping units...");
+                const unitData = await apiClient.getUnits();
+                console.log("✅ Loaded units:", unitData.length);
+
+                const unitMap = new Map(
+                    unitData.map(u => [
+                        u.name,
+                        {
+                            ...u,
+                            imageUrl: "/graphics/units/placeholder.png"
+                        }
+                    ])
+                );
+                setUnits(unitMap);
+            } catch (err) {
+                console.error("❌ Failed to load units:", err);
+            }
+        };
+
+        fetchUnits();
     }, []);
 
 // --- Load shared build from URL param (runs once) ---
@@ -103,6 +130,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             districts,
             improvements,
             techs,
+            units,
             selectedFaction,
             setSelectedFaction,
             selectedTechs,

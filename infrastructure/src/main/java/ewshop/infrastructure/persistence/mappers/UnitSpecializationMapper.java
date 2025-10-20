@@ -49,9 +49,10 @@ public class UnitSpecializationMapper {
                 .maxDamage(entity.getMaxDamage())
                 .movementPoints(entity.getMovementPoints())
                 .cost(domainCosts)
-                .upkeepPerTurn(entity.getUpkeepPerTurn())
+                .upkeep(entity.getUpkeep())
                 .skills(domainSkills)
                 .faction(entity.getFaction())
+                .tier(entity.getTier())
                 .build();
     }
 
@@ -68,13 +69,15 @@ public class UnitSpecializationMapper {
         entity.setMinDamage(domain.getMinDamage());
         entity.setMaxDamage(domain.getMaxDamage());
         entity.setMovementPoints(domain.getMovementPoints());
+        entity.setTier(domain.getTier());
+
 
         Set<UnitCostEmbeddable> entityCosts = domain.getCosts() != null
                 ? domain.getCosts().stream().map(this::toEntityCost).collect(Collectors.toSet())
                 : Set.of();
         entity.setCosts(entityCosts);
 
-        entity.setUpkeepPerTurn(domain.getUpkeepPerTurn());
+        entity.setUpkeep(domain.getUpkeep());
 
         // Map UnitSkill → join entities
         Set<UnitSpecializationSkillEntity> joinEntities = domain.getSkills() != null

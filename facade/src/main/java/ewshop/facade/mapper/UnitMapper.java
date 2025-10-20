@@ -17,7 +17,7 @@ public class UnitMapper {
         // Convert costs to strings
         List<String> costs = unit.getCosts() != null
                 ? unit.getCosts().stream()
-                .map(cost -> formatCost(cost))
+                .map(UnitMapper::formatCost)
                 .collect(Collectors.toList())
                 : Collections.emptyList();
 
@@ -37,6 +37,8 @@ public class UnitMapper {
                 .minDamage(unit.getMinDamage())
                 .maxDamage(unit.getMaxDamage())
                 .movementPoints(unit.getMovementPoints())
+                .tier(unit.getTier() != null ? unit.getTier() : 0)
+                .upkeep(unit.getUpkeep() != null ? unit.getUpkeep() : 0)
                 .costs(costs)
                 .skills(skills)
                 .faction(unit.getFaction())
@@ -44,10 +46,13 @@ public class UnitMapper {
     }
 
     private static String formatCost(UnitCost cost) {
+        if (cost == null || cost.getType() == null) return "";
         return cost.getAmount() + " " + cost.getType().name();
     }
 
     private static String formatEnumName(Enum<?> value) {
-        return value.name().substring(0,1) + value.name().substring(1).toLowerCase();
+        if (value == null) return "";
+        String name = value.name().toLowerCase();
+        return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 }

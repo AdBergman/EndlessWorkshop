@@ -2,10 +2,10 @@ package ewshop.infrastructure.persistence.entities;
 
 import ewshop.domain.entity.enums.UnitType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,14 +41,20 @@ public class UnitSpecializationEntity {
     @Column(nullable = false)
     private int movementPoints;
 
+    @Column(nullable = false)
+    private Integer tier;
+
+
     @ElementCollection
     @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
+    @Fetch(FetchMode.SUBSELECT)
     private Set<UnitCostEmbeddable> costs = new HashSet<>();
 
     @Column()
-    private Integer upkeepPerTurn;
+    private Integer upkeep;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private Set<UnitSpecializationSkillEntity> unitSkills = new HashSet<>();
 
     @Column()
@@ -82,11 +88,19 @@ public class UnitSpecializationEntity {
     public int getMovementPoints() { return movementPoints; }
     public void setMovementPoints(int movementPoints) { this.movementPoints = movementPoints; }
 
+    public Integer getTier() {
+        return tier;
+    }
+    public void setTier(Integer tier) {
+        this.tier = tier;
+    }
+
+
     public Set<UnitCostEmbeddable> getCosts() { return costs; }
     public void setCosts(Set<UnitCostEmbeddable> costs) { this.costs = costs; }
 
-    public Integer getUpkeepPerTurn() { return upkeepPerTurn; }
-    public void setUpkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; }
+    public Integer getUpkeep() { return upkeep; }
+    public void setUpkeep(Integer upkeep) { this.upkeep = upkeep; }
 
     public Set<UnitSpecializationSkillEntity> getUnitSkills() {
         return unitSkills;
