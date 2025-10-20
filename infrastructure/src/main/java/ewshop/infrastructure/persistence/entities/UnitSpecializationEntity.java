@@ -4,7 +4,9 @@ import ewshop.domain.entity.enums.UnitType;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "unit_specialization")
@@ -41,13 +43,13 @@ public class UnitSpecializationEntity {
 
     @ElementCollection
     @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
-    private List<UnitCostEmbeddable> costs = new ArrayList<>();
+    private Set<UnitCostEmbeddable> costs = new HashSet<>();
 
     @Column()
     private Integer upkeepPerTurn;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UnitSpecializationSkillEntity> unitSkills = new ArrayList<>();
+    private Set<UnitSpecializationSkillEntity> unitSkills = new HashSet<>();
 
     @Column()
     private String faction; // Optional
@@ -80,17 +82,17 @@ public class UnitSpecializationEntity {
     public int getMovementPoints() { return movementPoints; }
     public void setMovementPoints(int movementPoints) { this.movementPoints = movementPoints; }
 
-    public List<UnitCostEmbeddable> getCosts() { return costs; }
-    public void setCosts(List<UnitCostEmbeddable> costs) { this.costs = costs; }
+    public Set<UnitCostEmbeddable> getCosts() { return costs; }
+    public void setCosts(Set<UnitCostEmbeddable> costs) { this.costs = costs; }
 
     public Integer getUpkeepPerTurn() { return upkeepPerTurn; }
     public void setUpkeepPerTurn(Integer upkeepPerTurn) { this.upkeepPerTurn = upkeepPerTurn; }
 
-    public List<UnitSpecializationSkillEntity> getUnitSkills() {
+    public Set<UnitSpecializationSkillEntity> getUnitSkills() {
         return unitSkills;
     }
 
-    public void setUnitSkills(List<UnitSpecializationSkillEntity> unitSkills) {
+    public void setUnitSkills(Set<UnitSpecializationSkillEntity> unitSkills) {
         this.unitSkills = unitSkills;
     }
 

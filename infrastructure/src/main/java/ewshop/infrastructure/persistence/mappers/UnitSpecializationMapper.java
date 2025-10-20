@@ -1,5 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
+import ewshop.domain.entity.UnitSkill;
 import ewshop.domain.entity.UnitSpecialization;
 import ewshop.domain.entity.UnitCost;
 import ewshop.domain.entity.enums.CostType;
@@ -12,6 +13,7 @@ import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,12 +27,17 @@ public class UnitSpecializationMapper {
                 ? entity.getCosts().stream().map(this::toDomainCost).collect(Collectors.toList())
                 : List.of();
 
-        // Convert join entities → skill names
-        List<String> domainSkills = entity.getUnitSkills() != null
+        // Map join entities → UnitSkill objects
+        Set<UnitSkill> domainSkills = entity.getUnitSkills() != null
                 ? entity.getUnitSkills().stream()
-                .map(join -> join.getSkill().getName())
-                .collect(Collectors.toList())
-                : List.of();
+                .map(join -> UnitSkill.builder()
+                        .name(join.getSkill().getName())
+                        .target(join.getSkill().getTarget())
+                        .type(join.getSkill().getType())
+                        .amount(join.getSkill().getAmount())
+                        .build())
+                .collect(Collectors.toSet())
+                : Set.of();
 
         return UnitSpecialization.builder()
                 .name(entity.getName())
@@ -62,29 +69,30 @@ public class UnitSpecializationMapper {
         entity.setMaxDamage(domain.getMaxDamage());
         entity.setMovementPoints(domain.getMovementPoints());
 
-        List<UnitCostEmbeddable> entityCosts = domain.getCosts() != null
-                ? domain.getCosts().stream().map(this::toEntityCost).collect(Collectors.toList())
-                : List.of();
+        Set<UnitCostEmbeddable> entityCosts = domain.getCosts() != null
+                ? domain.getCosts().stream().map(this::toEntityCost).collect(Collectors.toSet())
+                : Set.of();
         entity.setCosts(entityCosts);
 
         entity.setUpkeepPerTurn(domain.getUpkeepPerTurn());
 
-        // Map skill names → join entities
-        List<UnitSpecializationSkillEntity> joinEntities = domain.getSkills() != null
+        // Map UnitSkill → join entities
+        Set<UnitSpecializationSkillEntity> joinEntities = domain.getSkills() != null
                 ? domain.getSkills().stream()
-                .map(name -> {
+                .map(skill -> {
+                    // find the persisted entity
                     UnitSkillEntity skillEntity = persistedSkills.stream()
-                            .filter(s -> s.getName().equals(name))
+                            .filter(s -> s.getName().equals(skill.getName()))
                             .findFirst()
-                            .orElseThrow(() -> new IllegalStateException("UnitSkill not found: " + name));
+                            .orElseThrow(() -> new IllegalStateException("UnitSkill not found: " + skill.getName()));
 
                     UnitSpecializationSkillEntity joinEntity = new UnitSpecializationSkillEntity();
                     joinEntity.setSkill(skillEntity);
-                    joinEntity.setUnit(entity); // set parent unit
+                    joinEntity.setUnit(entity); // parent reference
                     return joinEntity;
                 })
-                .collect(Collectors.toList())
-                : List.of();
+                .collect(Collectors.toSet())
+                : Set.of();
         entity.setUnitSkills(joinEntities);
 
         entity.setFaction(domain.getFaction());
