@@ -15,8 +15,8 @@ const sentinel: Unit = {
     requiredTechnology: "",
     upgrade: "",
     faction: "KIN",
-    FactionType: "MAJOR",
-    imageUrl: "/graphics/units/sentinel.png",
+    FactionType: "major",
+    // imageUrl: "/graphics/units/placeholder.png",
 };
 
 
