@@ -39,6 +39,7 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units }) => {
                             <motion.div
                                 key={unit.name}
                                 className={`carouselItem ${isActive ? "active" : "dimmed"}`}
+                                initial={false}
                                 animate={{
                                     x: rawOffset * spacing,
                                     scale: isActive ? 1.05 : 0.85,
