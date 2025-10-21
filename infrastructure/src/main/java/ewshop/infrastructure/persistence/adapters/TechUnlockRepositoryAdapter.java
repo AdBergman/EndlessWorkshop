@@ -1,8 +1,10 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.*;
+import ewshop.domain.entity.Tech;
+import ewshop.domain.entity.TechUnlock;
 import ewshop.domain.repository.TechUnlockRepository;
-import ewshop.infrastructure.persistence.entities.*;
+import ewshop.infrastructure.persistence.entities.TechEntity;
+import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import ewshop.infrastructure.persistence.mappers.TechUnlockMapper;
 import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
 import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class TechUnlockRepositoryAdapter implements TechUnlockRepository {

@@ -5,9 +5,10 @@ import MainContainer from './components/MainContainer/MainContainer';
 import InfoPage from './components/InfoPage/InfoPage';
 import GameDataProvider from './context/GameDataProvider';
 import LandscapeWrapper from './components/Layout/LandscapeWrapper';
-import DemoUnitCard from './components/UnitCard/DemoUnitCard';
+import DemoUnitCard from '@/components/Units/UnitCard/DemoUnitCard';
 
 import './App.css';
+import {UnitCarouselDemo} from "@/components/Units/UnitCarouselDemo";
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -50,6 +51,7 @@ function App() {
                     <Route index element={<MainContainer />} />
                     <Route path="info" element={<InfoPage />} />
                     <Route path="demo-unit-card" element={<DemoUnitCard />} />
+                    <Route path="demo-carousel" element={<UnitCarouselDemo />} />
                 </Route>
             </Routes>
         </Router>

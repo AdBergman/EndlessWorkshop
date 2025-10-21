@@ -1,0 +1,62 @@
+.unitCarouselContainer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    margin: 40px auto;
+}
+
+.carouselTrack {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 720px;
+    height: 380px;
+}
+
+.carouselItem {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    will-change: transform, opacity;
+}
+
+.carouselItem.dimmed {
+    filter: brightness(0.55) contrast(0.9);
+}
+
+.carouselItem.active {
+    filter: brightness(1);
+    z-index: 3;
+}
+
+/* === ARROWS === */
+.carouselArrow {
+    background: none;
+    border: none;
+    color: #ff8c40;
+    font-size: 2.5rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    z-index: 10;
+    user-select: none;
+    padding: 0 12px;
+}
+
+.carouselArrow:hover {
+    color: #ffa866;
+    transform: scale(1.2);
+}
+
+.carouselArrow.left {
+    position: absolute;
+    left: calc(50% - 420px);
+}
+
+.carouselArrow.right {
+    position: absolute;
+    right: calc(50% - 420px);
+}
