@@ -9,9 +9,10 @@ import { Unit } from "@/types/dataTypes";
 interface UnitCardProps {
     unit: Unit;
     showArtwork?: boolean;
+    disableFlip?: boolean;
 }
 
-export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true }) => {
+export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, disableFlip = false }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
 
@@ -25,7 +26,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true }) 
                 scale: 1.1,
                 y: -4,
             }}
-            onClick={() => setFlipped(!flipped)}
+            onClick={() => {
+                if (!disableFlip) setFlipped(!flipped);
+            }}
         >
             <motion.div
                 className="cardFlipWrapper"

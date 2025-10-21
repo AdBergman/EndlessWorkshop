@@ -1,31 +1,49 @@
+/* Page-level wrapper */
 .unitCarouselContainer {
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    overflow: hidden;
     margin: 40px auto;
 }
 
-.carouselTrack {
+/* One merged stage that defines size + positioning context */
+.carouselStage {
+    --stage-w: 820px;   /* 3 cards (220*3) + 2 gaps (40*2) + breathing room */
+    --stage-h: 400px;
+    --arrow-gap: 40px;  /* how far arrows sit outside the stage edges */
+
     position: relative;
+    width: var(--stage-w);
+    height: var(--stage-h);
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 720px;
-    height: 380px;
+    overflow: visible;  /* allow shadows and arrows */
 }
 
+/* Animated track (unchanged) */
+.carouselTrack {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    perspective: 1200px;
+    transform: translateX(-110px); /* or whatever centers it visually */
+}
+
+/* Card wrapper (anchored to stage center) */
 .carouselItem {
     position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: filter 0.25s ease;
     will-change: transform, opacity;
 }
 
 .carouselItem.dimmed {
-    filter: brightness(0.55) contrast(0.9);
+    filter: brightness(0.6) contrast(0.9);
 }
 
 .carouselItem.active {
@@ -33,30 +51,34 @@
     z-index: 3;
 }
 
-/* === ARROWS === */
+/* Arrows are now positioned relative to the stage */
 .carouselArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: #ff8c40;
-    font-size: 2.5rem;
+    font-size: 2.4rem;
     cursor: pointer;
-    transition: all 0.25s ease;
     z-index: 10;
     user-select: none;
-    padding: 0 12px;
+    line-height: 1;         /* kill UA line-height weirdness */
+    padding: 0;             /* remove default button padding */
 }
 
 .carouselArrow:hover {
     color: #ffa866;
-    transform: scale(1.2);
+    transform: translateY(-50%) scale(1.15);
 }
 
-.carouselArrow.left {
-    position: absolute;
-    left: calc(50% - 420px);
-}
+.carouselArrow.left  { left:  calc(-1 * var(--arrow-gap)); }
+.carouselArrow.right { right: calc(-1 * var(--arrow-gap)); }
 
-.carouselArrow.right {
-    position: absolute;
-    right: calc(50% - 420px);
+/* Responsive stage + arrow gaps scale together */
+@media (max-width: 900px) {
+    .carouselStage { --stage-w: 700px; --stage-h: 360px; --arrow-gap: 30px; }
+}
+@media (max-width: 700px) {
+    .carouselStage { --stage-w: 580px; --stage-h: 340px; --arrow-gap: 24px; }
 }
