@@ -14,7 +14,9 @@ export const UnitEvolutionExplorer: React.FC = () => {
     }
 
     const unitsArray = Array.from(gameData.units.values());
-    const tierOneUnits = unitsArray.filter((u) => u.tier === 1);
+    const tierOneUnits = unitsArray.filter(
+        (u) => u.tier === 1 && u.faction?.toLowerCase() === "kin"
+    );
     const selectedUnit: Unit | null = tierOneUnits[selectedIndex] || null;
 
     return (
