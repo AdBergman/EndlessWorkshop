@@ -12,6 +12,7 @@ export interface Unit {
     faction: string;
     tier: number;
     upkeep: number;
+    upgradesTo: string[];
 
     // Frontend-only
     imageUrl?: string; // placeholder for now

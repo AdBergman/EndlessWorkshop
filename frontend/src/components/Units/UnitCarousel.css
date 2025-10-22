@@ -9,17 +9,18 @@
 
 /* One merged stage that defines size + positioning context */
 .carouselStage {
-    --stage-w: 820px;   /* 3 cards (220*3) + 2 gaps (40*2) + breathing room */
-    --stage-h: 400px;
-    --arrow-gap: 40px;  /* how far arrows sit outside the stage edges */
+    --stage-w: 820px;
+    --arrow-gap: 40px;
 
     position: relative;
     width: var(--stage-w);
-    height: var(--stage-h);
+    height: auto; /* ✅ shrink-wrap to visible content */
+    min-height: 300px; /* optional safety if cards vary in height */
     display: flex;
     justify-content: center;
-    align-items: center;
-    overflow: visible;  /* allow shadows and arrows */
+    align-items: flex-start; /* ✅ anchor cards at top instead of centering */
+    overflow: visible;
+    padding-bottom: 20px; /* ✅ gives subtle breathing space below */
 }
 
 /* Animated track (unchanged) */

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Unit } from "@/types/dataTypes";
 import { UnitCard } from "@/components/Units/UnitCard/UnitCard";
@@ -6,26 +6,28 @@ import "./UnitCarousel.css";
 
 interface UnitCarouselProps {
     units: Unit[];
+    selectedIndex: number;
+    setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units }) => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
+export const UnitCarousel: React.FC<UnitCarouselProps> = ({
+                                                              units,
+                                                              selectedIndex,
+                                                              setSelectedIndex,
+                                                          }) => {
     const total = units.length;
-    const spacing = 260; // card(220) + gap(40)
+    const spacing = 260; // card(220)+gap(40)
 
     const handlePrev = () => setSelectedIndex((p) => (p - 1 + total) % total);
     const handleNext = () => setSelectedIndex((p) => (p + 1) % total);
 
     return (
         <div className="unitCarouselContainer">
-            {/* Merged container: stage holds cards + arrows */}
             <div className="carouselStage">
-                {/* Left Arrow (relative to stage edges) */}
                 <button className="carouselArrow left" onClick={handlePrev} aria-label="Previous">
                     ❮
                 </button>
 
-                {/* Track (unchanged animation math) */}
                 <motion.div className="carouselTrack">
                     {units.map((unit, index) => {
                         let rawOffset = index - selectedIndex;
@@ -51,7 +53,7 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units }) => {
                                     position: "absolute",
                                     top: 0,
                                     left: "50%",
-                                    transform: "translateX(-50%)", // anchor to stage center
+                                    transform: "translateX(-50%)",
                                     pointerEvents: visible ? "auto" : "none",
                                 }}
                                 onClick={() => !isActive && setSelectedIndex(index)}
@@ -62,7 +64,6 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units }) => {
                     })}
                 </motion.div>
 
-                {/* Right Arrow (relative to stage edges) */}
                 <button className="carouselArrow right" onClick={handleNext} aria-label="Next">
                     ❯
                 </button>

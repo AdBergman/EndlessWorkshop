@@ -9,6 +9,7 @@ import DemoUnitCard from '@/components/Units/UnitCard/DemoUnitCard';
 
 import './App.css';
 import {UnitCarouselDemo} from "@/components/Units/UnitCarouselDemo";
+import {UnitEvolutionExplorer} from "@/components/Units/UnitEvolutionExplorer";
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -52,6 +53,7 @@ function App() {
                     <Route path="info" element={<InfoPage />} />
                     <Route path="demo-unit-card" element={<DemoUnitCard />} />
                     <Route path="demo-carousel" element={<UnitCarouselDemo />} />
+                    <Route path="units" element={<UnitEvolutionExplorer />} />
                 </Route>
             </Routes>
         </Router>

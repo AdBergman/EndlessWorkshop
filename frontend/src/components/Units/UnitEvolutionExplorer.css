@@ -1,0 +1,48 @@
+.unitEvolutionExplorer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* small consistent vertical gap between carousel & tree */
+    min-height: 100vh;
+    color: white;
+}
+
+.evolutionTreeWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.evoLevelBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.rootAnchorWrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 0;           /* no visual height */
+    margin: 6px 0;       /* space to pull lines nicely from above */
+}
+
+.rootAnchorPoint {
+    width: 0;
+    height: 0;
+}
+
+.evoChildrenRow {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 28px; /* your doubled spacing */
+}
+
+.evoNodeWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

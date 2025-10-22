@@ -1,0 +1,83 @@
+/* === TREE LAYOUT ROOT === */
+.evolutionTreeWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 80px;                /* vertical space between tiers */
+    position: relative;
+    overflow: visible;
+    margin-top: 20px;
+}
+
+/* === EACH TIER ROW === */
+.evoRow {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 60px;                /* horizontal space between units */
+    position: relative;
+    overflow: visible;
+    flex-wrap: wrap;          /* wrap if too many units */
+    padding: 0 10px;
+}
+
+/* === UNIT CARD WRAPPER === */
+.evoNodeWrapper {
+    position: relative;
+    transition: transform 0.2s ease;
+    overflow: visible;
+}
+.evoNodeWrapper:hover {
+    transform: translateY(-4px);
+}
+
+/* === DIVIDER BETWEEN UNITS === */
+.evoRow > .evoNodeWrapper:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -30px;             /* half of the gap (60px / 2) */
+    transform: translateY(-50%) rotate(8deg);
+    width: 2px;
+    height: 70%;
+    background: linear-gradient(to bottom, #ff8c4044, #ff8c40dd, #ff8c4044);
+    border-radius: 1px;
+    filter: drop-shadow(0 0 8px rgba(255, 140, 64, 0.6));
+    pointer-events: none;
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* === GLOW PULSE ANIMATION === */
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 0.8;
+        filter: drop-shadow(0 0 6px rgba(255, 140, 64, 0.6));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 14px rgba(255, 180, 100, 0.9));
+    }
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 900px) {
+    .evolutionTreeWrapper {
+        gap: 60px;
+    }
+    .evoRow {
+        gap: 40px;
+    }
+    .evoRow > .evoNodeWrapper:not(:last-child)::after {
+        right: -20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .evoRow {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+    .evoRow > .evoNodeWrapper:not(:last-child)::after {
+        display: none; /* hide dividers on small screens */
+    }
+}

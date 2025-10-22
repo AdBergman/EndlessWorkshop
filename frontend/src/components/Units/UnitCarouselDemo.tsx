@@ -1,9 +1,10 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { UnitCarousel } from "./UnitCarousel";
 import GameDataContext from "@/context/GameDataContext";
 
 export const UnitCarouselDemo: React.FC = () => {
     const gameData = useContext(GameDataContext);
+    const [selectedIndex, setSelectedIndex] = useState(0);
 
     if (!gameData || gameData.units.size === 0) {
         return (
@@ -59,7 +60,11 @@ export const UnitCarouselDemo: React.FC = () => {
                 KIN Unit Carousel
             </h2>
 
-            <UnitCarousel units={kinUnits} />
+            <UnitCarousel
+                units={kinUnits}
+                selectedIndex={selectedIndex}
+                setSelectedIndex={setSelectedIndex}
+            />
         </div>
     );
 };
