@@ -50,6 +50,11 @@ public class UnitSpecializationEntity {
     @Fetch(FetchMode.SUBSELECT)
     private Set<UnitCostEmbeddable> costs = new HashSet<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "unit_evolutions_to", joinColumns = @JoinColumn(name = "unit_id"))
+    @Column(name = "target_unit_name")
+    private Set<String> upgradesTo = new HashSet<>();
+
     @Column()
     private Integer upkeep;
 
@@ -108,6 +113,14 @@ public class UnitSpecializationEntity {
 
     public void setUnitSkills(Set<UnitSpecializationSkillEntity> unitSkills) {
         this.unitSkills = unitSkills;
+    }
+
+    public Set<String> getUpgradesTo() {
+        return upgradesTo;
+    }
+
+    public void setUpgradesTo(Set<String> upgradesTo) {
+        this.upgradesTo = upgradesTo;
     }
 
     public void addSkill(UnitSkillEntity skill, Integer level) {

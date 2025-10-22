@@ -105,22 +105,23 @@
 /* === ART === */
 .artContainer {
     width: 100%;
-    border-radius: 0px;
-    margin: 6px 0;
+    height: 200px;               /* sweet spot for 300×500 art */
     overflow: hidden;
+    border-radius: 0;            /* sharp edges as you wanted */
+    margin: 8px 0;
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: #111;
     position: relative;
-    min-height: 120px;
 }
 
 .artContainer img {
     width: 100%;
-    height: auto;
-    object-fit: cover;
-    border-radius: 0px;
+    height: 100%;
+    object-fit: cover;           /* fills the area naturally */
+    object-position: center top; /* keeps the focus on the upper part */
+    border-radius: 0;
 }
 
 .artPlaceholder {

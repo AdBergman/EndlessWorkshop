@@ -81,7 +81,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                         <div className="artContainer">
                             {!imageLoaded && <div className="artPlaceholder" />}
                             <motion.img
-                                src={unit.imageUrl || "/graphics/units/placeholder.png"}
+                                src={`/graphics/units/${unit.faction?.toLowerCase()}_${unit.type?.toLowerCase()}.png`}
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = "/graphics/units/placeholder3.png";
+                                }}
                                 alt={unit.name}
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{
@@ -93,6 +96,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                             />
                         </div>
                     )}
+
 
                     <div className="statsBox">
                         <div className="statsRow">
