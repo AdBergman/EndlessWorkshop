@@ -1,8 +1,8 @@
 package ewshop.infrastructure.persistence.mappers;
 
+import ewshop.domain.entity.UnitCost;
 import ewshop.domain.entity.UnitSkill;
 import ewshop.domain.entity.UnitSpecialization;
-import ewshop.domain.entity.UnitCost;
 import ewshop.domain.entity.enums.CostType;
 import ewshop.domain.entity.enums.FIDSI;
 import ewshop.domain.entity.enums.StrategicResourceType;
@@ -12,7 +12,6 @@ import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,12 +22,11 @@ public class UnitSpecializationMapper {
     public UnitSpecialization toDomain(UnitSpecializationEntity entity) {
         if (entity == null) return null;
 
-        List<UnitCost> domainCosts = entity.getCosts() != null
-                ? entity.getCosts().stream().map(this::toDomainCost).collect(Collectors.toList())
-                : List.of();
+        var domainCosts = entity.getCosts() != null
+                ? entity.getCosts().stream().map(this::toDomainCost).collect(Collectors.toSet())
+                : Set.<UnitCost>of();
 
-        // Map join entities → UnitSkill objects
-        Set<UnitSkill> domainSkills = entity.getUnitSkills() != null
+        var domainSkills = entity.getUnitSkills() != null
                 ? entity.getUnitSkills().stream()
                 .map(join -> UnitSkill.builder()
                         .name(join.getSkill().getName())
@@ -37,7 +35,11 @@ public class UnitSpecializationMapper {
                         .amount(join.getSkill().getAmount())
                         .build())
                 .collect(Collectors.toSet())
-                : Set.of();
+                : Set.<UnitSkill>of();
+
+        var upgradesTo = entity.getUpgradesTo() != null
+                ? Set.copyOf(entity.getUpgradesTo())
+                : Set.<String>of();
 
         return UnitSpecialization.builder()
                 .name(entity.getName())
@@ -48,19 +50,20 @@ public class UnitSpecializationMapper {
                 .minDamage(entity.getMinDamage())
                 .maxDamage(entity.getMaxDamage())
                 .movementPoints(entity.getMovementPoints())
-                .cost(domainCosts)
+                .cost(domainCosts.stream().toList())
                 .upkeep(entity.getUpkeep())
                 .skills(domainSkills)
                 .faction(entity.getFaction())
                 .tier(entity.getTier())
+                .upgradesTo(upgradesTo)
                 .build();
     }
 
     /** Domain → Entity */
-    public UnitSpecializationEntity toEntity(UnitSpecialization domain, List<UnitSkillEntity> persistedSkills) {
+    public UnitSpecializationEntity toEntity(UnitSpecialization domain, Set<UnitSkillEntity> persistedSkills) {
         if (domain == null) return null;
 
-        UnitSpecializationEntity entity = new UnitSpecializationEntity();
+        var entity = new UnitSpecializationEntity();
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
         entity.setType(domain.getType());
@@ -70,48 +73,39 @@ public class UnitSpecializationMapper {
         entity.setMaxDamage(domain.getMaxDamage());
         entity.setMovementPoints(domain.getMovementPoints());
         entity.setTier(domain.getTier());
-
-
-        Set<UnitCostEmbeddable> entityCosts = domain.getCosts() != null
-                ? domain.getCosts().stream().map(this::toEntityCost).collect(Collectors.toSet())
-                : Set.of();
-        entity.setCosts(entityCosts);
-
+        entity.setFaction(domain.getFaction());
         entity.setUpkeep(domain.getUpkeep());
 
-        // Map UnitSkill → join entities
-        Set<UnitSpecializationSkillEntity> joinEntities = domain.getSkills() != null
+        entity.setCosts(domain.getCosts() != null
+                ? domain.getCosts().stream().map(this::toEntityCost).collect(Collectors.toSet())
+                : Set.of());
+
+        entity.setUnitSkills(domain.getSkills() != null
                 ? domain.getSkills().stream()
                 .map(skill -> {
-                    // find the persisted entity
-                    UnitSkillEntity skillEntity = persistedSkills.stream()
+                    var skillEntity = persistedSkills.stream()
                             .filter(s -> s.getName().equals(skill.getName()))
                             .findFirst()
                             .orElseThrow(() -> new IllegalStateException("UnitSkill not found: " + skill.getName()));
-
-                    UnitSpecializationSkillEntity joinEntity = new UnitSpecializationSkillEntity();
+                    var joinEntity = new UnitSpecializationSkillEntity();
                     joinEntity.setSkill(skillEntity);
-                    joinEntity.setUnit(entity); // parent reference
+                    joinEntity.setUnit(entity);
                     return joinEntity;
                 })
                 .collect(Collectors.toSet())
-                : Set.of();
-        entity.setUnitSkills(joinEntities);
+                : Set.of());
 
-        entity.setFaction(domain.getFaction());
+        entity.setUpgradesTo(domain.getUpgradesTo() != null
+                ? Set.copyOf(domain.getUpgradesTo())
+                : Set.of());
+
         return entity;
     }
 
-    /** Map UnitCostEmbeddable → UnitCost */
     private UnitCost toDomainCost(UnitCostEmbeddable embeddable) {
-        CostType type;
-        if (embeddable.getResource() != null) {
-            type = CostType.valueOf(embeddable.getResource().name());
-        } else if (embeddable.getStrategic() != null) {
-            type = CostType.valueOf(embeddable.getStrategic().name());
-        } else {
-            throw new IllegalStateException("UnitCostEmbeddable must have either FIDSI or Strategic resource set");
-        }
+        var type = embeddable.getResource() != null
+                ? CostType.valueOf(embeddable.getResource().name())
+                : CostType.valueOf(embeddable.getStrategic().name());
 
         return UnitCost.builder()
                 .amount(embeddable.getAmount())
@@ -119,24 +113,18 @@ public class UnitSpecializationMapper {
                 .build();
     }
 
-    /** Map UnitCost → UnitCostEmbeddable */
     private UnitCostEmbeddable toEntityCost(UnitCost domain) {
         FIDSI fid = null;
         StrategicResourceType strat = null;
 
-        if (domain.getType().isFIDSI()) {
-            fid = domain.getType().asFIDSI();
-        } else if (domain.getType().isStrategic()) {
-            strat = domain.getType().asStrategic();
-        } else {
-            throw new IllegalStateException("Unknown CostType: " + domain.getType());
-        }
+        if (domain.getType().isFIDSI()) fid = domain.getType().asFIDSI();
+        else if (domain.getType().isStrategic()) strat = domain.getType().asStrategic();
+        else throw new IllegalStateException("Unknown CostType: " + domain.getType());
 
         return new UnitCostEmbeddable(domain.getAmount(), fid, strat);
     }
 
-    /** Convenience overload when skill list is not yet available */
     public UnitSpecializationEntity toEntity(UnitSpecialization domain) {
-        return toEntity(domain, List.of());
+        return toEntity(domain, Set.of());
     }
 }

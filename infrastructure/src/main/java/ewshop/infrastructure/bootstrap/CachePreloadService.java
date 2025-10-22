@@ -3,6 +3,7 @@ package ewshop.infrastructure.bootstrap;
 import ewshop.domain.service.DistrictService;
 import ewshop.domain.service.TechService;
 import ewshop.domain.service.ImprovementService;
+import ewshop.domain.service.UnitSpecializationService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,59 +21,53 @@ public class CachePreloadService {
     private final DistrictService districtService;
     private final TechService techService;
     private final ImprovementService improvementService;
+    private final UnitSpecializationService unitService;
 
     public CachePreloadService(DistrictService districtService,
                                TechService techService,
-                               ImprovementService improvementService) {
+                               ImprovementService improvementService,
+                               UnitSpecializationService unitService) {
         this.districtService = districtService;
         this.techService = techService;
         this.improvementService = improvementService;
+        this.unitService = unitService;
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadDistricts() {
-        return CompletableFuture.runAsync(() -> {
-                    long start = System.currentTimeMillis();
-                    log.info("Preloading districts cache...");
-                    districtService.getAllDistricts(); // @Cacheable triggers
-                    long duration = System.currentTimeMillis() - start;
-                    log.info("Districts cache preloaded in " + duration + " ms");
-                }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
-                .exceptionally(ex -> {
-                    log.warning("Districts preload timed out: " + ex.getMessage());
-                    return null;
-                });
+        return preload("districts", districtService::getAllDistricts);
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadTechs() {
-        return CompletableFuture.runAsync(() -> {
-                    long start = System.currentTimeMillis();
-                    log.info("Preloading techs cache...");
-                    techService.getAllTechs(); // @Cacheable triggers
-                    long duration = System.currentTimeMillis() - start;
-                    log.info("Techs cache preloaded in " + duration + " ms");
-                }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
-                .exceptionally(ex -> {
-                    log.warning("Techs preload timed out: " + ex.getMessage());
-                    return null;
-                });
+        return preload("techs", techService::getAllTechs);
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadImprovements() {
+        return preload("improvements", improvementService::getAllImprovements);
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<Void> preloadUnits() {
+        return preload("units", unitService::getAllUnits);
+    }
+
+    // --- Shared logic ---
+    private CompletableFuture<Void> preload(String name, Runnable loader) {
         return CompletableFuture.runAsync(() -> {
                     long start = System.currentTimeMillis();
-                    log.info("Preloading improvements cache...");
-                    improvementService.getAllImprovements(); // @Cacheable triggers
+                    log.info("Preloading " + name + " cache...");
+                    loader.run(); // triggers @Cacheable
                     long duration = System.currentTimeMillis() - start;
-                    log.info("Improvements cache preloaded in " + duration + " ms");
+                    log.info(name.substring(0, 1).toUpperCase() + name.substring(1) + " cache preloaded in " + duration + " ms");
                 }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .exceptionally(ex -> {
-                    log.warning("Improvements preload timed out: " + ex.getMessage());
+                    log.warning(name + " preload timed out: " + ex.getMessage());
                     return null;
                 });
     }

@@ -22,6 +22,8 @@ public class UnitSpecialization {
     private final Set<UnitSkill> skills;
     private final String faction;
     private final Integer tier;
+    private final Set<String> upgradesTo;
+
 
     private UnitSpecialization(Builder builder) {
         this.name = builder.name;
@@ -36,7 +38,8 @@ public class UnitSpecialization {
         this.upkeep = builder.upkeep;
         this.skills = Set.copyOf(builder.skills);
         this.faction = builder.faction;
-        this.tier = builder.tier; // 🆕 Added
+        this.tier = builder.tier; //
+        this.upgradesTo = Set.copyOf(builder.upgradesTo);
     }
 
     // --- Getters ---
@@ -52,7 +55,8 @@ public class UnitSpecialization {
     public Integer getUpkeep() { return upkeep; }
     public Set<UnitSkill> getSkills() { return skills; }
     public String getFaction() { return faction; }
-    public Integer getTier() { return tier; } // 🆕
+    public Integer getTier() { return tier; }
+    public Set<String> getUpgradesTo() { return upgradesTo; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -70,7 +74,8 @@ public class UnitSpecialization {
         private Integer upkeep;
         private Set<UnitSkill> skills = new HashSet<>();
         private String faction = "";
-        private Integer tier; //
+        private Integer tier;
+        private Set<String> upgradesTo = new HashSet<>();
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
@@ -96,6 +101,11 @@ public class UnitSpecialization {
         public Builder faction(String faction) { this.faction = faction; return this; }
 
         public Builder tier(Integer tier) { this.tier = tier; return this; }
+
+        public Builder upgradesTo(Set<String> upgradesTo) {
+            this.upgradesTo = (upgradesTo != null) ? new HashSet<>(upgradesTo) : new HashSet<>();
+            return this;
+        }
 
         public UnitSpecialization build() { return new UnitSpecialization(this); }
     }

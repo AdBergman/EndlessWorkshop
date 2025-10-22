@@ -28,6 +28,11 @@ public class UnitMapper {
                 .collect(Collectors.toList())
                 : Collections.emptyList();
 
+        // Map upgradesTo directly from domain
+        List<String> upgradesTo = unit.getUpgradesTo() != null
+                ? unit.getUpgradesTo().stream().toList()
+                : Collections.emptyList();
+
         return UnitDto.builder()
                 .name(unit.getName())
                 .description(unit.getDescription())
@@ -42,6 +47,8 @@ public class UnitMapper {
                 .costs(costs)
                 .skills(skills)
                 .faction(unit.getFaction())
+                .upgradesTo(upgradesTo)
+                // upgradesFrom is filled later in UnitFacade
                 .build();
     }
 

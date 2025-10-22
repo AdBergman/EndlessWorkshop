@@ -11,7 +11,6 @@ import java.util.logging.Logger;
 public class CachePreloader {
 
     private static final Logger log = Logger.getLogger(CachePreloader.class.getName());
-
     private final CachePreloadService preloadService;
 
     public CachePreloader(CachePreloadService preloadService) {
@@ -25,8 +24,9 @@ public class CachePreloader {
         CompletableFuture<Void> districtsFuture = preloadService.preloadDistricts();
         CompletableFuture<Void> techsFuture = preloadService.preloadTechs();
         CompletableFuture<Void> improvementsFuture = preloadService.preloadImprovements();
+        CompletableFuture<Void> unitsFuture = preloadService.preloadUnits();
 
-        CompletableFuture.allOf(districtsFuture, techsFuture, improvementsFuture)
+        CompletableFuture.allOf(districtsFuture, techsFuture, improvementsFuture, unitsFuture)
                 .thenRun(() -> log.info("All caches preloaded successfully"))
                 .exceptionally(ex -> {
                     log.warning("Some cache preloads did not complete: " + ex.getMessage());
