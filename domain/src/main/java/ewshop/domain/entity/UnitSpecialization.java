@@ -23,7 +23,7 @@ public class UnitSpecialization {
     private final String faction;
     private final Integer tier;
     private final Set<String> upgradesTo;
-
+    private final String artId; // 🆕 new field
 
     private UnitSpecialization(Builder builder) {
         this.name = builder.name;
@@ -38,8 +38,9 @@ public class UnitSpecialization {
         this.upkeep = builder.upkeep;
         this.skills = Set.copyOf(builder.skills);
         this.faction = builder.faction;
-        this.tier = builder.tier; //
+        this.tier = builder.tier;
         this.upgradesTo = Set.copyOf(builder.upgradesTo);
+        this.artId = builder.artId; // 🆕 added
     }
 
     // --- Getters ---
@@ -57,6 +58,7 @@ public class UnitSpecialization {
     public String getFaction() { return faction; }
     public Integer getTier() { return tier; }
     public Set<String> getUpgradesTo() { return upgradesTo; }
+    public String getArtId() { return artId; } // 🆕
 
     public static Builder builder() { return new Builder(); }
 
@@ -76,6 +78,7 @@ public class UnitSpecialization {
         private String faction = "";
         private Integer tier;
         private Set<String> upgradesTo = new HashSet<>();
+        private String artId; // 🆕
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
@@ -106,6 +109,8 @@ public class UnitSpecialization {
             this.upgradesTo = (upgradesTo != null) ? new HashSet<>(upgradesTo) : new HashSet<>();
             return this;
         }
+
+        public Builder artId(String artId) { this.artId = artId; return this; } // 🆕
 
         public UnitSpecialization build() { return new UnitSpecialization(this); }
     }

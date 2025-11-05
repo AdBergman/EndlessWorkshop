@@ -13,9 +13,7 @@ export interface Unit {
     tier: number;
     upkeep: number;
     upgradesTo: string[];
-
-    // Frontend-only
-    imageUrl?: string; // placeholder for now
+    artId: string | null;
 }
 
 export interface Tech {

@@ -44,6 +44,8 @@ public class UnitSpecializationEntity {
     @Column(nullable = false)
     private Integer tier;
 
+    @Column(name = "art_id")
+    private String artId;
 
     @ElementCollection
     @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
@@ -55,57 +57,113 @@ public class UnitSpecializationEntity {
     @Column(name = "target_unit_name")
     private Set<String> upgradesTo = new HashSet<>();
 
-    @Column()
+    @Column
     private Integer upkeep;
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
     private Set<UnitSpecializationSkillEntity> unitSkills = new HashSet<>();
 
-    @Column()
-    private String faction; // Optional
+    @Column
+    private String faction;
+
+
 
     public UnitSpecializationEntity() {}
 
-    public Long getId() { return id; }
+    // --- Getters & Setters ---
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getName() {
+        return name;
+    }
 
-    public UnitType getType() { return type; }
-    public void setType(UnitType type) { this.type = type; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public int getHealth() { return health; }
-    public void setHealth(int health) { this.health = health; }
+    public String getDescription() {
+        return description;
+    }
 
-    public int getDefense() { return defense; }
-    public void setDefense(int defense) { this.defense = defense; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public int getMinDamage() { return minDamage; }
-    public void setMinDamage(int minDamage) { this.minDamage = minDamage; }
+    public UnitType getType() {
+        return type;
+    }
 
-    public int getMaxDamage() { return maxDamage; }
-    public void setMaxDamage(int maxDamage) { this.maxDamage = maxDamage; }
+    public void setType(UnitType type) {
+        this.type = type;
+    }
 
-    public int getMovementPoints() { return movementPoints; }
-    public void setMovementPoints(int movementPoints) { this.movementPoints = movementPoints; }
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getDefense() {
+        return defense;
+    }
+
+    public void setDefense(int defense) {
+        this.defense = defense;
+    }
+
+    public int getMinDamage() {
+        return minDamage;
+    }
+
+    public void setMinDamage(int minDamage) {
+        this.minDamage = minDamage;
+    }
+
+    public int getMaxDamage() {
+        return maxDamage;
+    }
+
+    public void setMaxDamage(int maxDamage) {
+        this.maxDamage = maxDamage;
+    }
+
+    public int getMovementPoints() {
+        return movementPoints;
+    }
+
+    public void setMovementPoints(int movementPoints) {
+        this.movementPoints = movementPoints;
+    }
 
     public Integer getTier() {
         return tier;
     }
+
     public void setTier(Integer tier) {
         this.tier = tier;
     }
 
+    public Set<UnitCostEmbeddable> getCosts() {
+        return costs;
+    }
 
-    public Set<UnitCostEmbeddable> getCosts() { return costs; }
-    public void setCosts(Set<UnitCostEmbeddable> costs) { this.costs = costs; }
+    public void setCosts(Set<UnitCostEmbeddable> costs) {
+        this.costs = costs;
+    }
 
-    public Integer getUpkeep() { return upkeep; }
-    public void setUpkeep(Integer upkeep) { this.upkeep = upkeep; }
+    public Integer getUpkeep() {
+        return upkeep;
+    }
+
+    public void setUpkeep(Integer upkeep) {
+        this.upkeep = upkeep;
+    }
 
     public Set<UnitSpecializationSkillEntity> getUnitSkills() {
         return unitSkills;
@@ -128,7 +186,19 @@ public class UnitSpecializationEntity {
         this.unitSkills.add(uss);
     }
 
-    public String getFaction() { return faction; }
-    public void setFaction(String faction) { this.faction = faction; }
-}
+    public String getFaction() {
+        return faction;
+    }
 
+    public void setFaction(String faction) {
+        this.faction = faction;
+    }
+
+    public String getArtId() {
+        return artId;
+    }
+
+    public void setArtId(String artId) {
+        this.artId = artId;
+    }
+}

@@ -52,6 +52,7 @@ public class UnitFacadeImpl implements UnitFacade {
                         .faction(dto.faction())
                         .upgradesTo(dto.upgradesTo())
                         .upgradesFrom(reverseMap.get(dto.name()))
+                        .artId(dto.artId())
                         .build())
                 .toList();
     }

@@ -45,15 +45,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 const unitData = await apiClient.getUnits();
                 console.log("✅ Loaded units:", unitData.length);
 
-                const unitMap = new Map(
-                    unitData.map(u => [
-                        u.name,
-                        {
-                            ...u,
-                            imageUrl: "/graphics/units/placeholder.png"
-                        }
-                    ])
-                );
+                const unitMap = new Map(unitData.map(u => [u.name, u]));
                 setUnits(unitMap);
             } catch (err) {
                 console.error("❌ Failed to load units:", err);

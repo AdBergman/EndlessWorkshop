@@ -19,6 +19,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
     const factionKey = (unit.faction?.toUpperCase() || "PLACEHOLDER") as keyof typeof FACTION_COLORS;
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
 
+    const faction = unit.faction?.toLowerCase();
+    const artId = unit.artId?.toLowerCase();
+    const type = unit.type?.toLowerCase();
+
+    const imageUrl = unit.artId
+        ? `/graphics/units/${faction}_${artId}.png`
+        : `/graphics/units/${faction}_${type}.png`;
+
 
     return (
         <motion.div
@@ -82,7 +90,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                         <div className="artContainer">
                             {!imageLoaded && <div className="artPlaceholder" />}
                             <motion.img
-                                src={`/graphics/units/${unit.faction?.toLowerCase()}_${unit.type?.toLowerCase()}.png`}
+                                src={imageUrl}
                                 onError={(e) => {
                                     (e.target as HTMLImageElement).src = "/graphics/units/placeholder.png";
                                 }}

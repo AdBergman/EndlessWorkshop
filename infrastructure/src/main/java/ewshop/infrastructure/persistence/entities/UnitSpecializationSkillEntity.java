@@ -1,6 +1,8 @@
 package ewshop.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Entity
 @Table(name = "unit_specialization_skills")
@@ -16,6 +18,7 @@ public class UnitSpecializationSkillEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "skill_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private UnitSkillEntity skill;
 
     // optional metadata, e.g., skill level

@@ -17,7 +17,8 @@ public record UnitDto(
         List<String> skills,
         String faction,
         List<String> upgradesTo,
-        String upgradesFrom
+        String upgradesFrom,
+        String artId
 ) {
     public static Builder builder() {
         return new Builder();
@@ -39,6 +40,7 @@ public record UnitDto(
         private String faction = "";
         private List<String> upgradesTo = List.of();
         private String upgradesFrom = null;
+        private String artId;
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
@@ -55,6 +57,7 @@ public record UnitDto(
         public Builder faction(String faction) { this.faction = faction; return this; }
         public Builder upgradesTo(List<String> upgradesTo) { this.upgradesTo = upgradesTo; return this; }
         public Builder upgradesFrom(String upgradesFrom) { this.upgradesFrom = upgradesFrom; return this; }
+        public Builder artId(String artId) { this.artId = artId; return this; }
 
         public UnitDto build() {
             return new UnitDto(
@@ -72,7 +75,8 @@ public record UnitDto(
                     skills,
                     faction,
                     upgradesTo,
-                    upgradesFrom
+                    upgradesFrom,
+                    artId
             );
         }
     }

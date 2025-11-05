@@ -48,7 +48,7 @@ public class UnitMapper {
                 .skills(skills)
                 .faction(unit.getFaction())
                 .upgradesTo(upgradesTo)
-                // upgradesFrom is filled later in UnitFacade
+                .artId(unit.getArtId())
                 .build();
     }
 
