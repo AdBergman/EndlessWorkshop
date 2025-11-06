@@ -1,7 +1,8 @@
 import React, { useState, useEffect, ReactNode } from "react";
-import GameDataContext from "./GameDataContext";
-import {District, Improvement, Tech, Unit} from "@/types/dataTypes";
+import GameDataContext, { FactionInfo } from "./GameDataContext";
+import {District, Improvement, Tech, Unit, Faction} from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
+import { identifyFaction } from "@/utils/factionIdentity";
 
 interface Props { children: ReactNode }
 
@@ -11,7 +12,8 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
     const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
-    const [selectedFaction, setSelectedFaction] = useState("Kin");
+    const initialFaction = identifyFaction({ faction: Faction.KIN, minorFaction: null });
+    const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(initialFaction);
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
 
     // --- Track if shared build has been loaded ---
@@ -29,7 +31,12 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
                 setDistricts(new Map(districtData.map(d => [d.name, d])));
                 setImprovements(new Map(improvementData.map(i => [i.name, i])));
-                setTechs(new Map(techData.map(t => [t.name, t])));
+                // Normalize tech.factions to uppercase here
+                const normalizedTechData = techData.map(t => ({
+                    ...t,
+                    factions: t.factions.map(f => f.toUpperCase())
+                }));
+                setTechs(new Map(normalizedTechData.map(t => [t.name, t])));
             } catch (err) {
                 console.error("Failed to fetch game data from API.", err);
             }
@@ -66,7 +73,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         const loadSharedBuild = async () => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
-                setSelectedFaction(res.selectedFaction);
+                // Convert the string faction from API to FactionInfo object
+                const loadedFactionInfo = identifyFaction({ faction: Faction[res.selectedFaction as keyof typeof Faction], minorFaction: null });
+                setSelectedFaction(loadedFactionInfo);
                 setSelectedTechs(res.techIds); // populate tech selection
                 setSharedBuildLoaded(true);
 
@@ -87,11 +96,12 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 // --- API helpers ---
     const createSavedTechBuild = async (
         name: string,
-        faction: string = selectedFaction,
+        faction: FactionInfo = selectedFaction, // Changed type to FactionInfo
         techIds: string[] = selectedTechs
     ): Promise<SavedTechBuild> => {
         try {
-            const saved = await apiClient.createSavedBuild(name, faction, techIds);
+            // Pass the enumFaction string to the API
+            const saved = await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
             console.log("Build saved:", saved);
             return saved;
         } catch (err) {
@@ -106,7 +116,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             console.log("Loaded saved build:", saved);
 
             // populate current state
-            setSelectedFaction(saved.selectedFaction);
+            // Convert the string faction from API to FactionInfo object
+            const loadedFactionInfo = identifyFaction({ faction: Faction[saved.selectedFaction as keyof typeof Faction], minorFaction: null });
+            setSelectedFaction(loadedFactionInfo);
             setSelectedTechs(saved.techIds);
 
             return saved;

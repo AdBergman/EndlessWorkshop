@@ -3,8 +3,15 @@ import './TopContainer.css';
 import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom';
 import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
+import { Faction } from "@/types/dataTypes";
 
-const factions = ["Kin", "Lords", "Tahuk", "Aspects", "Necrophages"];
+const factions = [
+    { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" },
+    { isMajor: true, enumFaction: Faction.LORDS, minorName: null, uiLabel: "Lords" },
+    { isMajor: true, enumFaction: Faction.TAHUK, minorName: null, uiLabel: "Tahuk" },
+    { isMajor: true, enumFaction: Faction.ASPECTS, minorName: null, uiLabel: "Aspects" },
+    { isMajor: true, enumFaction: Faction.NECROPHAGES, minorName: null, uiLabel: "Necrophages" },
+];
 const MAX_ERA = 6;
 
 // Define the application's main routes
@@ -23,7 +30,7 @@ const TopContainer: React.FC = () => {
 
         for (let era = 1; era <= MAX_ERA; era++) {
             const img = new Image();
-            img.src = getBackgroundUrl(selectedFaction, era);
+            img.src = getBackgroundUrl(selectedFaction.uiLabel, era);
         }
     }, [selectedFaction]);
 
@@ -56,14 +63,14 @@ const TopContainer: React.FC = () => {
                 {factions.map(f => {
                     return (
                         <button
-                            key={f}
-                            className={f === selectedFaction ? "active" : ""}
+                            key={f.uiLabel}
+                            className={selectedFaction.isMajor && f.isMajor && selectedFaction.enumFaction === f.enumFaction ? "active" : ""}
                             onClick={() => {
-                                setSelectedFaction(f);   // change faction
+                                setSelectedFaction(f);
                                 setSelectedTechs([]);    // clear selected techs
                             }}
                         >
-                            {f}
+                            {f.uiLabel}
                         </button>
                     );
 

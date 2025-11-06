@@ -12,7 +12,7 @@ const MainContainer: React.FC = () => {
     const [firstEraLoaded, setFirstEraLoaded] = useState(false);
 
     // --- Hook: Load shared build from URL once ---
-    useSharedBuildLoader(setSelectedTechs);
+    // useSharedBuildLoader(setSelectedTechs); // This hook is not used in the current context, commenting out.
 
     // --- Derive selected tech objects ---
     const selectedTechObjects = useMemo(() => {
@@ -28,7 +28,7 @@ const MainContainer: React.FC = () => {
         if (!selectedFaction) return;
 
         const img = new Image();
-        img.src = `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_1.png`;
+        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel}_era_1.png`;
         img.onload = () => setFirstEraLoaded(true);
 
         return () => {
@@ -44,7 +44,7 @@ const MainContainer: React.FC = () => {
             const img = new Image();
             img.src = e === 6
                 ? '/graphics/techEraScreens/default_era_6.png'
-                : `/graphics/techEraScreens/${selectedFaction.toLowerCase()}_era_${e}.png`;
+                : `/graphics/techEraScreens/${selectedFaction.uiLabel}_era_${e}.png`;
         }
     }, [selectedFaction]);
 

@@ -1,6 +1,6 @@
 import React, {useMemo} from 'react';
 import TechNode from './TechNode';
-import {Tech} from '@/types/dataTypes';
+import {Tech, Faction} from '@/types/dataTypes';
 import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
@@ -24,7 +24,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300); // HIDE_DELAY
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
-    const OFFSET_PX = selectedFaction === 'Aspects' ? -35 : 0; //TEMPORARY OFFSET FOR NEW BACKGROUND - TLPROD-55944
+    const OFFSET_PX = selectedFaction.enumFaction === Faction.ASPECTS ? -35 : 0; //TEMPORARY OFFSET FOR NEW BACKGROUND - TLPROD-55944
 
     const selectedTechObjects = useMemo(() => {
         const techSet = new Set(selectedTechs);
@@ -32,14 +32,22 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     }, [selectedTechs, allTechs]);
 
     const currentFactionEraTechs = useMemo(
-        () => allTechs.filter(t => t.era === era && t.factions.includes(selectedFaction)),
+        () => allTechs.filter(t => {
+            if (t.era !== era) return false;
+            // Only consider major factions, with case-insensitive comparison
+            return t.factions.some(f => f.toLowerCase() === selectedFaction.enumFaction!.toLowerCase());
+        }),
         [era, selectedFaction, allTechs]
     );
 
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
         for (let e = MIN_ERA; e <= MAX_ERA; e++) {
-            map[e] = allTechs.filter(t => t.factions.includes(selectedFaction) && t.era === e);
+            map[e] = allTechs.filter(t => {
+                if (t.era !== e) return false;
+                // Only consider major factions, with case-insensitive comparison
+                return t.factions.some(f => f.toLowerCase() === selectedFaction.enumFaction!.toLowerCase());
+            });
         }
         return map;
     }, [selectedFaction, allTechs]);
@@ -62,7 +70,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
 
     return (
         <div className="tech-tree-image-wrapper">
-            {selectedFaction === 'Aspects' && (
+            {selectedFaction.enumFaction === Faction.ASPECTS && (
                 <div className="wip-banner">
                     WORK IN PROGRESS<br />
                     NEW BACKGROUND IMAGES<br />
@@ -70,8 +78,8 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 </div>
             )}
             <img
-                src={getBackgroundUrl(selectedFaction, era)}
-                alt={`${selectedFaction} Era ${era}`}
+                src={getBackgroundUrl(selectedFaction.uiLabel, era)}
+                alt={`${selectedFaction.uiLabel} Era ${era}`}
                 className="tech-tree-bg"
                 draggable={false}
             />

@@ -1,8 +1,9 @@
 import React, { useState, useContext, useMemo, useEffect } from "react";
-import GameDataContext from "@/context/GameDataContext";
+import GameDataContext, { FactionInfo } from "@/context/GameDataContext";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import { Unit } from "@/types/dataTypes";
+import { identifyFaction } from "@/utils/factionIdentity";
 import "./UnitEvolutionExplorer.css";
 
 export const UnitEvolutionExplorer: React.FC = () => {
@@ -21,9 +22,18 @@ export const UnitEvolutionExplorer: React.FC = () => {
             return [];
         }
         const unitsArray = Array.from(gameData.units.values());
-        return unitsArray.filter(
-            (u) => u.tier === 1 && u.faction?.toLowerCase() === gameData.selectedFaction.toLowerCase()
-        );
+        return unitsArray.filter((u) => {
+            if (u.tier !== 1) return false;
+
+            const unitFactionInfo = identifyFaction(u);
+            const selectedFactionInfo = gameData.selectedFaction;
+
+            if (selectedFactionInfo.isMajor) {
+                return unitFactionInfo.isMajor && unitFactionInfo.enumFaction === selectedFactionInfo.enumFaction;
+            } else {
+                return !unitFactionInfo.isMajor && unitFactionInfo.minorName === selectedFactionInfo.minorName;
+            }
+        });
     }, [gameData.units, gameData.selectedFaction]);
 
     if (!gameData || gameData.units.size === 0) {
