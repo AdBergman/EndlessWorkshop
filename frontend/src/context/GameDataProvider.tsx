@@ -3,6 +3,7 @@ import GameDataContext, { FactionInfo } from "./GameDataContext";
 import {District, Improvement, Tech, Unit, Faction} from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { identifyFaction } from "@/utils/factionIdentity";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 interface Props { children: ReactNode }
 
@@ -18,6 +19,12 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
     // --- Track if shared build has been loaded ---
     const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
+
+    const navigate = useNavigate(); // Initialize useNavigate
+
+    // Determine initial processing state for shared builds
+    const initialShareUuid = new URLSearchParams(window.location.search).get("share");
+    const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
 
     // --- Fetch core game data ---
     useEffect(() => {
@@ -68,29 +75,35 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
         const params = new URLSearchParams(window.location.search);
         const shareUuid = params.get("share");
-        if (!shareUuid) return;
+        if (!shareUuid) {
+            setIsProcessingSharedBuild(false); // No share param, so not processing
+            return;
+        }
 
         const loadSharedBuild = async () => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
                 // Convert the string faction from API to FactionInfo object
-                const loadedFactionInfo = identifyFaction({ faction: Faction[res.selectedFaction as keyof typeof Faction], minorFaction: null });
+                // FIX: Convert res.selectedFaction to uppercase to match TypeScript Faction enum keys
+                const factionEnumLookup = Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
+                const loadedFactionInfo = identifyFaction({ faction: factionEnumLookup, minorFaction: null });
                 setSelectedFaction(loadedFactionInfo);
                 setSelectedTechs(res.techIds); // populate tech selection
                 setSharedBuildLoaded(true);
 
-                // --- REMOVE share param from URL without reloading ---
+                // --- REMOVE share param from URL and redirect to /tech using useNavigate ---
                 params.delete("share");
-                const newUrl =
-                    window.location.pathname + (params.toString() ? `?${params.toString()}` : "");
-                window.history.replaceState({}, "", newUrl);
+                const newSearch = params.toString() ? `?${params.toString()}` : "";
+                navigate(`/tech${newSearch}`, { replace: true }); // Use navigate
             } catch (err) {
                 console.error("Failed to load shared build:", err);
+            } finally {
+                setIsProcessingSharedBuild(false); // Always set to false after attempt
             }
         };
 
         loadSharedBuild();
-    }, [sharedBuildLoaded]);
+    }, [sharedBuildLoaded, navigate]);
 
 
 // --- API helpers ---
@@ -140,7 +153,8 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             selectedTechs,
             setSelectedTechs,
             createSavedTechBuild,
-            getSavedBuild
+            getSavedBuild,
+            isProcessingSharedBuild, // Expose the new state
         }}>
             {children}
         </GameDataContext.Provider>

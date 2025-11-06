@@ -8,11 +8,14 @@ import './TechContainer.css';
 const MAX_ERA = 6;
 
 const TechContainer: React.FC = () => {
+    console.log("TechContainer is rendering!");
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const [firstEraLoaded, setFirstEraLoaded] = useState(false);
+    console.log("TechContainer - selectedFaction:", selectedFaction);
+    console.log("TechContainer - firstEraLoaded:", firstEraLoaded);
 
     // --- Hook: Load shared build from URL once ---
-    // useSharedBuildLoader(setSelectedTechs); // This hook is not used in the current context, commenting out.
+    useSharedBuildLoader(setSelectedTechs);
 
     // --- Derive selected tech objects ---
     const selectedTechObjects = useMemo(() => {
@@ -25,14 +28,29 @@ const TechContainer: React.FC = () => {
 
     // --- Preload first era for selected faction and show main container when loaded ---
     useEffect(() => {
-        if (!selectedFaction) return;
+        if (!selectedFaction) {
+            console.log("TechContainer - No selectedFaction, skipping image preload.");
+            return;
+        }
 
+        console.log("TechContainer - Attempting to preload image for faction:", selectedFaction.uiLabel);
         const img = new Image();
-        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel}_era_1.png`;
-        img.onload = () => setFirstEraLoaded(true);
+        // Convert uiLabel to lowercase for the image path
+        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.png`;
+        img.onload = () => {
+            console.log(`TechContainer - Image for ${selectedFaction.uiLabel} loaded successfully.`);
+            setFirstEraLoaded(true);
+        };
+        img.onerror = () => {
+            console.error(`TechContainer - Failed to load image for ${selectedFaction.uiLabel} from ${img.src}`);
+            // Optionally, you might want to set firstEraLoaded to true here
+            // or handle the error in a way that doesn't block rendering.
+            // setFirstEraLoaded(true); // Consider this if you want to render even if image fails
+        };
 
         return () => {
             img.onload = null; // cleanup
+            img.onerror = null; // cleanup
         };
     }, [selectedFaction]);
 
@@ -42,9 +60,10 @@ const TechContainer: React.FC = () => {
 
         for (let e = 1; e <= MAX_ERA; e++) {
             const img = new Image();
+            // Convert uiLabel to lowercase for the image path
             img.src = e === 6
                 ? '/graphics/techEraScreens/default_era_6.png'
-                : `/graphics/techEraScreens/${selectedFaction.uiLabel}_era_${e}.png`;
+                : `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${e}.png`;
         }
     }, [selectedFaction]);
 

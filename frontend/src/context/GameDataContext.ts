@@ -16,6 +16,7 @@ export interface GameDataContextType {
 
     createSavedTechBuild?: (name: string, selectedFaction: FactionInfo, techIds: string[]) => Promise<{ uuid: string }>;
     getSavedBuild?: (uuid: string) => Promise<{ uuid: string; name: string; selectedFaction: FactionInfo; techIds: string[]; createdAt: string }>;
+    isProcessingSharedBuild: boolean; // Add this new property
 }
 
 const GameDataContext = createContext<GameDataContextType>({
@@ -29,6 +30,7 @@ const GameDataContext = createContext<GameDataContextType>({
     setSelectedTechs: () => {},
     createSavedTechBuild: async () => ({ uuid: "" }),
     getSavedBuild: async () => ({ uuid: "", name: "", selectedFaction: { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "kin" }, techIds: [], createdAt: "" }),
+    isProcessingSharedBuild: false, // Provide a default value
 });
 
 export const useGameData = () => useContext(GameDataContext);
