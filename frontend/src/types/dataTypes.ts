@@ -53,3 +53,11 @@ export const ERA_THRESHOLDS: Record<number, number> = {
     5: 32,
     6: 40,
 };
+
+export enum Faction {
+    KIN = "KIN",
+    LORDS = "LORDS",
+    ASPECTS = "ASPECTS",
+    NECROPHAGES = "NECROPHAGES",
+    TAHUK = "TAHUK"
+}
