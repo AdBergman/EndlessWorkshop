@@ -3,6 +3,7 @@ import { UnitCard } from "@/components/Units/UnitCard/UnitCard";
 import GameDataContext from "@/context/GameDataContext";
 import { Unit } from "@/types/dataTypes";
 import "./EvolutionTreeViewer.css";
+import {buildEvolutionLayers} from "@/components/Units/unitEvolution";
 
 interface EvolutionTreeViewerProps {
     rootUnit: Unit | null;
@@ -30,31 +31,17 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
 
     // 🧩 Build tier structure for vertical layout
     const tiers = useMemo(() => {
-        if (!rootUnit) return [];
-        const result: Unit[][] = [];
-        let currentTier: Unit[] = findChildren(rootUnit);
-        let visited = new Set<string>();
-        let depth = 0;
-
-        while (currentTier.length > 0 && depth < 10) {
-            result.push(currentTier);
-            const nextTier: Unit[] = [];
-            for (const u of currentTier) {
-                visited.add(u.name);
-                for (const child of findChildren(u)) {
-                    if (!visited.has(child.name)) nextTier.push(child);
-                }
-            }
-            currentTier = nextTier;
-            depth++;
-        }
-        return result;
+        const unitsMap = new Map(
+            Array.from(gameData.units.values()).map(u => [u.name, u])
+        );
+        return buildEvolutionLayers(rootUnit, unitsMap);
     }, [rootUnit, gameData.units]);
+
 
     const isChosen = rootUnit.name.toLowerCase() === "chosen";
     const isMajor =
         !isChosen &&
-        ["KIN", "TAHUK", "LORDS", "ASPECT", "NECROPHAGE"].includes(
+        ["KIN", "TAHUK", "LORDS", "ASPECTS", "NECROPHAGES"].includes(
             rootUnit.faction.toUpperCase()
         );
 
