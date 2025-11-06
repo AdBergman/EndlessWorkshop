@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./TopContainer.css";
-import { useGameData } from "@/context/GameDataContext";
+import { useGameData } from "@/context/GameDataContext"; // Import useGameData
 import { NavLink } from "react-router-dom";
 import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
 import { Faction } from "@/types/dataTypes";
@@ -24,7 +24,7 @@ const routes = [
 ];
 
 const TopContainer: React.FC = () => {
-    const { selectedFaction, setSelectedFaction, setSelectedTechs } = useGameData();
+    const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
 
     // Preload backgrounds on faction change
     useEffect(() => {
@@ -55,26 +55,29 @@ const TopContainer: React.FC = () => {
                 ))}
             </div>
 
-            <div className="faction-selector">
-                {factions.map((f) => (
-                    <button
-                        key={f.uiLabel}
-                        className={
-                            selectedFaction.isMajor &&
-                            f.isMajor &&
-                            selectedFaction.enumFaction === f.enumFaction
-                                ? "active"
-                                : ""
-                        }
-                        onClick={() => {
-                            setSelectedFaction(f);
-                            setSelectedTechs([]); // clear tech tree selections
-                        }}
-                    >
-                        {f.uiLabel}
-                    </button>
-                ))}
-            </div>
+            {/* Conditionally render faction selector based on isProcessingSharedBuild */}
+            {!isProcessingSharedBuild && (
+                <div className="faction-selector">
+                    {factions.map((f) => (
+                        <button
+                            key={f.uiLabel}
+                            className={
+                                selectedFaction.isMajor &&
+                                f.isMajor &&
+                                selectedFaction.enumFaction === f.enumFaction
+                                    ? "active"
+                                    : ""
+                            }
+                            onClick={() => {
+                                setSelectedFaction(f);
+                                setSelectedTechs([]); // clear tech tree selections
+                            }}
+                        >
+                            {f.uiLabel}
+                        </button>
+                    ))}
+                </div>
+            )}
         </header>
     );
 };
