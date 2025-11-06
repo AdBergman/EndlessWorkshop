@@ -33,7 +33,7 @@ class TechRepositoryIT {
         newTech.setEra(3);
         newTech.setType(TechType.ECONOMY);
         newTech.setEffects(List.of("+10 Dust"));
-        newTech.setFactions(Set.of(Faction.KIN, Faction.ASPECT));
+        newTech.setFactions(Set.of(Faction.KIN, Faction.ASPECTS));
         newTech.setTechCoords(new TechCoords(10.5, 20.5));
         // We are NOT testing relationships in this simple test
         entityManager.persistAndFlush(newTech);
@@ -47,7 +47,7 @@ class TechRepositoryIT {
         assertThat(result.getName()).isEqualTo("Test Tech");
         assertThat(result.getEra()).isEqualTo(3);
         assertThat(result.getType()).isEqualTo(TechType.ECONOMY);
-        assertThat(result.getFactions()).contains(Faction.KIN, Faction.ASPECT);
+        assertThat(result.getFactions()).contains(Faction.KIN, Faction.ASPECTS);
         assertThat(result.getTechCoords().getXPct()).isEqualTo(10.5);
     }
 }
