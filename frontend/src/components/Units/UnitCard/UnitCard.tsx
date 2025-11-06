@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
 import { FaBolt, FaHeart, FaRunning, FaShieldAlt, FaCoins } from "react-icons/fa";
-import { FactionIcon, FactionType } from "./FactionIcon";
+import { FactionIcon } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
-import { Unit } from "@/types/dataTypes";
+import { Unit, Faction } from "@/types/dataTypes";
 import { getUnitImageUrl } from "@/utils/assetHelpers";
+import { identifyFaction } from "@/utils/factionIdentity"; // Import the new helper
 
 interface UnitCardProps {
     unit: Unit;
@@ -17,7 +18,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
 
-    const factionKey = (unit.faction?.toUpperCase() || "PLACEHOLDER") as keyof typeof FACTION_COLORS;
+    const factionInfo = identifyFaction(unit); // Use the helper
+
+    // Determine factionKey for colors/gradients based on identified faction
+    const factionKey = factionInfo.isMajor ? (factionInfo.enumFaction as Faction).toUpperCase() as keyof typeof FACTION_COLORS : "PLACEHOLDER";
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
     const imageUrl = getUnitImageUrl(unit);
 
@@ -70,7 +74,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                             {unit.name}
                         </div>
                         <div className="fortIcon" style={{ color: colors.accent }}>
-                            <FactionIcon faction={unit.faction as FactionType} />
+                            {factionInfo.isMajor ? (
+                                <FactionIcon faction={factionInfo.enumFaction as Faction} />
+                            ) : (
+                                <span>{factionInfo.uiLabel}</span>
+                            )}
                         </div>
                     </div>
 

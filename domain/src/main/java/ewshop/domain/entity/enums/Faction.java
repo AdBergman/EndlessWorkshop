@@ -1,10 +1,10 @@
 package ewshop.domain.entity.enums;
 
 public enum Faction {
-    ASPECT,
+    ASPECTS,
     KIN,
     LORDS,
-    NECROPHAGE,
+    NECROPHAGES,
     TAHUK;
 
     public String getDisplayName() {

@@ -9,7 +9,8 @@ export interface Unit {
     movementPoints: number;
     costs: string[];
     skills: string[];
-    faction: string;
+    faction: Faction | null;
+    minorFaction: string | null;
     tier: number;
     upkeep: number;
     upgradesTo: string[];

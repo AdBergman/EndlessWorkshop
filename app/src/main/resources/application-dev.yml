@@ -15,7 +15,6 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        hibernate.hbm2ddl.auto: validate
         jdbc:
           batch_size: 50
           order_inserts: true
