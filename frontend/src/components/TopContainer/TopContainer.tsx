@@ -4,7 +4,7 @@ import { useGameData } from '@/context/GameDataContext';
 import { NavLink } from 'react-router-dom';
 import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
 
-const factions = ["Kin", "Lords", "Tahuk", "Aspect", "Necrophage"];
+const factions = ["Kin", "Lords", "Tahuk", "Aspects", "Necrophages"];
 const MAX_ERA = 6;
 
 // Define the application's main routes

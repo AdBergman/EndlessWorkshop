@@ -1,5 +1,5 @@
 export const getBackgroundUrl = (faction: string, era: number) => {
-    const legacyBackground = ["Kin", "Lords", "Tahuk", "Necrophage"];
+    const legacyBackground = ["Kin", "Lords", "Tahuk", "Necrophages"];
 
     // Check for era 6 and legacy faction
     if (era === 6) {

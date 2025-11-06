@@ -5,6 +5,7 @@ import { FaBolt, FaHeart, FaRunning, FaShieldAlt, FaCoins } from "react-icons/fa
 import { FactionIcon, FactionType } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import { Unit } from "@/types/dataTypes";
+import { getUnitImageUrl } from "@/utils/assetHelpers";
 
 interface UnitCardProps {
     unit: Unit;
@@ -18,15 +19,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
 
     const factionKey = (unit.faction?.toUpperCase() || "PLACEHOLDER") as keyof typeof FACTION_COLORS;
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
-
-    const faction = unit.faction?.toLowerCase();
-    const artId = unit.artId?.toLowerCase();
-    const type = unit.type?.toLowerCase();
-
-    const imageUrl = unit.artId
-        ? `/graphics/units/${faction}_${artId}.png`
-        : `/graphics/units/${faction}_${type}.png`;
-
+    const imageUrl = getUnitImageUrl(unit);
 
     return (
         <motion.div
