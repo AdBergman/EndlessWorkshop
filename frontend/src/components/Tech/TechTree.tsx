@@ -5,7 +5,7 @@ import EraNavigationButton from './EraNavigationButton';
 import './TechTree.css';
 import TechTooltip from '../Tooltips/TechTooltip';
 import EraProgressPanel from './EraProgressPanel';
-import SelectAllButton from "@/components/TechTree/SelectAllButton";
+import SelectAllButton from "@/components/Tech/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
 import {useGameData} from "@/context/GameDataContext";
 import {useTooltip} from "@/hooks/useTooltips";

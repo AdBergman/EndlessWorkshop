@@ -1,14 +1,12 @@
-import React, { useEffect } from "react";
-import { BrowserRouter as Router, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import React, {useEffect} from "react";
+import {BrowserRouter as Router, Outlet, Route, Routes, useLocation} from "react-router-dom";
 import TopContainer from './components/TopContainer/TopContainer';
-import MainContainer from './components/MainContainer/MainContainer';
+import TechContainer from './components/Tech/TechContainer';
 import InfoPage from './components/InfoPage/InfoPage';
 import GameDataProvider from './context/GameDataProvider';
 import LandscapeWrapper from './components/Layout/LandscapeWrapper';
-import DemoUnitCard from '@/components/Units/UnitCard/DemoUnitCard';
 
 import './App.css';
-import {UnitCarouselDemo} from "@/components/Units/UnitCarouselDemo";
 import {UnitEvolutionExplorer} from "@/components/Units/UnitEvolutionExplorer";
 
 // Extend the Window type for Cloudflare beacon
@@ -49,10 +47,9 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<AppLayout />}>
-                    <Route index element={<MainContainer />} />
+                    <Route index element={<InfoPage />} />
                     <Route path="info" element={<InfoPage />} />
-                    <Route path="demo-unit-card" element={<DemoUnitCard />} />
-                    <Route path="demo-carousel" element={<UnitCarouselDemo />} />
+                    <Route path="tech" element={<TechContainer />} />
                     <Route path="units" element={<UnitEvolutionExplorer />} />
                 </Route>
             </Routes>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tech } from '@/types/dataTypes';
-import '@/components/TechTree/ClearAllButton.css'; // Use the new CSS file
+import '@/components/Tech/ClearAllButton.css'; // Use the new CSS file
 
 interface ClearAllButtonProps {
     eraTechs: Tech[];

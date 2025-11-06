@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import EraNavigationButton from '@/components/TechTree/EraNavigationButton';
+import EraNavigationButton from '@/components/Tech/EraNavigationButton';
 
 describe('EraNavigationButton', () => {
     const mockOnClick = vi.fn();

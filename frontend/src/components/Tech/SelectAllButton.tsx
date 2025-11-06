@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tech } from '@/types/dataTypes';
-import '@/components/TechTree/SelectAllButton.css'; // for styling
+import '@/components/Tech/SelectAllButton.css'; // for styling
 
 interface SelectAllButtonProps {
     eraTechs: Tech[];

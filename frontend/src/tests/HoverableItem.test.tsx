@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import HoverableItem from '@/components/TechTree/views/HoverableItem';
+import HoverableItem from '@/components/Tech/views/HoverableItem';
 
 // Mock tooltips
 vi.mock('@/components/Tooltips/ImprovementTooltip', () => ({

@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import TechTree from '../TechTree/TechTree';
-import SpreadSheetView from '../TechTree/views/SpreadSheetView';
-import { ERA_THRESHOLDS, Tech } from '@/types/dataTypes';
-import { useGameData } from '@/context/GameDataContext';
-import './MainContainer.css';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import TechTree from '@/components/Tech/TechTree';
+import SpreadSheetView from '@/components/Tech/views/SpreadSheetView';
+import {ERA_THRESHOLDS, Tech} from '@/types/dataTypes';
+import {useGameData} from '@/context/GameDataContext';
+import './TechContainer.css';
 
 const MAX_ERA = 6;
 
-const MainContainer: React.FC = () => {
+const TechContainer: React.FC = () => {
     const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
     const [firstEraLoaded, setFirstEraLoaded] = useState(false);
 
@@ -67,7 +67,7 @@ const MainContainer: React.FC = () => {
     );
 };
 
-export default MainContainer;
+export default TechContainer;
 
 // ------------------------ INTERNAL HOOKS --------------------------------- //
 function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
