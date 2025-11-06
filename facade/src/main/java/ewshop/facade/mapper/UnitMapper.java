@@ -47,6 +47,7 @@ public class UnitMapper {
                 .costs(costs)
                 .skills(skills)
                 .faction(unit.getFaction())
+                .minorFaction(unit.getMinorFaction())
                 .upgradesTo(upgradesTo)
                 .artId(unit.getArtId())
                 .build();

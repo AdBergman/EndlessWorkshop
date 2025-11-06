@@ -1,7 +1,10 @@
 package ewshop.facade.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import ewshop.domain.entity.enums.Faction;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record UnitDto(
         String name,
         String description,
@@ -15,7 +18,8 @@ public record UnitDto(
         int upkeep,
         List<String> costs,
         List<String> skills,
-        String faction,
+        Faction faction,
+        String minorFaction,
         List<String> upgradesTo,
         String upgradesFrom,
         String artId
@@ -37,10 +41,33 @@ public record UnitDto(
         private int upkeep;
         private List<String> costs = List.of();
         private List<String> skills = List.of();
-        private String faction = "";
+        private Faction faction;
+        private String minorFaction;
         private List<String> upgradesTo = List.of();
         private String upgradesFrom = null;
         private String artId;
+
+        public Builder() {}
+
+        public Builder(UnitDto original) {
+            this.name = original.name();
+            this.description = original.description();
+            this.type = original.type();
+            this.health = original.health();
+            this.defense = original.defense();
+            this.minDamage = original.minDamage();
+            this.maxDamage = original.maxDamage();
+            this.movementPoints = original.movementPoints();
+            this.tier = original.tier();
+            this.upkeep = original.upkeep();
+            this.costs = original.costs();
+            this.skills = original.skills();
+            this.faction = original.faction();
+            this.minorFaction = original.minorFaction();
+            this.upgradesTo = original.upgradesTo();
+            this.upgradesFrom = original.upgradesFrom();
+            this.artId = original.artId();
+        }
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
@@ -54,7 +81,8 @@ public record UnitDto(
         public Builder upkeep(int upkeep) { this.upkeep = upkeep; return this; }
         public Builder costs(List<String> costs) { this.costs = costs; return this; }
         public Builder skills(List<String> skills) { this.skills = skills; return this; }
-        public Builder faction(String faction) { this.faction = faction; return this; }
+        public Builder faction(Faction faction) { this.faction = faction; return this; }
+        public Builder minorFaction(String minorFaction) { this.minorFaction = minorFaction; return this; }
         public Builder upgradesTo(List<String> upgradesTo) { this.upgradesTo = upgradesTo; return this; }
         public Builder upgradesFrom(String upgradesFrom) { this.upgradesFrom = upgradesFrom; return this; }
         public Builder artId(String artId) { this.artId = artId; return this; }
@@ -74,6 +102,7 @@ public record UnitDto(
                     costs,
                     skills,
                     faction,
+                    minorFaction,
                     upgradesTo,
                     upgradesFrom,
                     artId

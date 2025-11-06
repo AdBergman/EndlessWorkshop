@@ -5,6 +5,7 @@ import ewshop.domain.entity.UnitSkill;
 import ewshop.domain.entity.UnitSpecialization;
 import ewshop.domain.entity.enums.CostType;
 import ewshop.domain.entity.enums.FIDSI;
+import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.StrategicResourceType;
 import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +31,12 @@ import java.util.stream.Collectors;
 public class UnitSpecializationMapper {
 
     private static final Logger logger = LogManager.getLogger(UnitSpecializationMapper.class);
+
+    private static boolean isMajorFaction(String value) {
+        if (value == null) return false;
+        return Arrays.stream(Faction.values())
+            .anyMatch(f -> f.name().equalsIgnoreCase(value));
+    }
 
     /**
      * Maps a {@link UnitSpecializationEntity} to its corresponding {@link UnitSpecialization} domain object.
@@ -72,8 +80,16 @@ public class UnitSpecializationMapper {
                         return Collections.emptySet();
                     });
 
+            // --- Faction Mapping ---
+            Faction faction = null;
+            String minorFaction = null;
+            if (isMajorFaction(entity.getFaction())) {
+                faction = Faction.valueOf(entity.getFaction().toUpperCase());
+            } else {
+                minorFaction = entity.getFaction();
+            }
+
             // --- Final Object Construction ---
-            // Note: Assumes UnitSpecialization has a manual builder, not a Lombok one.
             return UnitSpecialization.builder()
                     .name(entity.getName())
                     .description(entity.getDescription())
@@ -86,7 +102,8 @@ public class UnitSpecializationMapper {
                     .cost(domainCosts.stream().toList()) // Convert Set to List for builder
                     .upkeep(entity.getUpkeep())
                     .skills(domainSkills)
-                    .faction(entity.getFaction())
+                    .faction(faction)
+                    .minorFaction(minorFaction)
                     .tier(entity.getTier())
                     .upgradesTo(upgradesTo)
                     .artId(entity.getArtId())
@@ -121,7 +138,13 @@ public class UnitSpecializationMapper {
         entity.setMaxDamage(domain.getMaxDamage());
         entity.setMovementPoints(domain.getMovementPoints());
         entity.setTier(domain.getTier());
-        entity.setFaction(domain.getFaction());
+
+        if (domain.getFaction() != null) {
+            entity.setFaction(domain.getFaction().name());
+        } else if (domain.getMinorFaction() != null) {
+            entity.setFaction(domain.getMinorFaction());
+        }
+
         entity.setUpkeep(domain.getUpkeep());
         entity.setArtId(domain.getArtId());
 

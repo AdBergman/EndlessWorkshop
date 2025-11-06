@@ -1,7 +1,10 @@
 package ewshop.domain.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.UnitType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +23,9 @@ public class UnitSpecialization {
     private final Set<UnitCost> costs;
     private final Integer upkeep;
     private final Set<UnitSkill> skills;
-    private final String faction;
+    @Enumerated(EnumType.STRING)
+    private final Faction faction;
+    private final String minorFaction;
     private final Integer tier;
     private final Set<String> upgradesTo;
     private final String artId; // 🆕 new field
@@ -38,6 +43,7 @@ public class UnitSpecialization {
         this.upkeep = builder.upkeep;
         this.skills = Set.copyOf(builder.skills);
         this.faction = builder.faction;
+        this.minorFaction = builder.minorFaction;
         this.tier = builder.tier;
         this.upgradesTo = Set.copyOf(builder.upgradesTo);
         this.artId = builder.artId; // 🆕 added
@@ -55,7 +61,8 @@ public class UnitSpecialization {
     public Set<UnitCost> getCosts() { return costs; }
     public Integer getUpkeep() { return upkeep; }
     public Set<UnitSkill> getSkills() { return skills; }
-    public String getFaction() { return faction; }
+    public Faction getFaction() { return faction; }
+    public String getMinorFaction() { return minorFaction; }
     public Integer getTier() { return tier; }
     public Set<String> getUpgradesTo() { return upgradesTo; }
     public String getArtId() { return artId; } // 🆕
@@ -75,7 +82,8 @@ public class UnitSpecialization {
         private Set<UnitCost> costs = new HashSet<>();
         private Integer upkeep;
         private Set<UnitSkill> skills = new HashSet<>();
-        private String faction = "";
+        private Faction faction;
+        private String minorFaction;
         private Integer tier;
         private Set<String> upgradesTo = new HashSet<>();
         private String artId; // 🆕
@@ -101,7 +109,9 @@ public class UnitSpecialization {
             return this;
         }
 
-        public Builder faction(String faction) { this.faction = faction; return this; }
+        public Builder faction(Faction faction) { this.faction = faction; return this; }
+
+        public Builder minorFaction(String minorFaction) { this.minorFaction = minorFaction; return this; }
 
         public Builder tier(Integer tier) { this.tier = tier; return this; }
 
