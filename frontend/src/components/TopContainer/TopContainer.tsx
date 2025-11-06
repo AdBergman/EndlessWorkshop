@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import './TopContainer.css';
-import { useGameData } from '@/context/GameDataContext';
-import { NavLink } from 'react-router-dom';
-import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
+import React, { useEffect } from "react";
+import "./TopContainer.css";
+import { useGameData } from "@/context/GameDataContext";
+import { NavLink } from "react-router-dom";
+import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
 import { Faction } from "@/types/dataTypes";
 
 const factions = [
@@ -12,19 +12,21 @@ const factions = [
     { isMajor: true, enumFaction: Faction.ASPECTS, minorName: null, uiLabel: "Aspects" },
     { isMajor: true, enumFaction: Faction.NECROPHAGES, minorName: null, uiLabel: "Necrophages" },
 ];
+
 const MAX_ERA = 6;
 
-// Define the application's main routes
+// ✅ Available routes only — clean and simple
 const routes = [
-    { path: '/', label: 'TechTree', isAvailable: true },
-    { path: '/city-planner', label: 'CityPlanner', isAvailable: false }, // Coming soon
-    { path: '/info', label: 'Info', isAvailable: true },
+    { path: "/info", label: "Info" },
+    { path: "/tech", label: "Tech" },
+    { path: "/units", label: "Units" },
+    // { path: "/city", label: "City" }, // uncomment when feature is ready
 ];
 
 const TopContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, setSelectedTechs } = useGameData();
 
-    // Preload all backgrounds for the selected faction
+    // Preload backgrounds on faction change
     useEffect(() => {
         if (!selectedFaction) return;
 
@@ -42,17 +44,11 @@ const TopContainer: React.FC = () => {
             </div>
 
             <div className="view-selector">
-                {routes.map(route => (
+                {routes.map((route) => (
                     <NavLink
                         key={route.label}
                         to={route.path}
-                        className={({ isActive }) =>
-                            `${isActive ? 'active' : ''} ${!route.isAvailable ? 'disabled' : ''}`
-                        }
-                        onClick={(e) => {
-                            if (!route.isAvailable) e.preventDefault();
-                        }}
-                        title={!route.isAvailable ? "Coming Soon" : ""}
+                        className={({ isActive }) => (isActive ? "active" : "")}
                     >
                         {route.label}
                     </NavLink>
@@ -60,21 +56,24 @@ const TopContainer: React.FC = () => {
             </div>
 
             <div className="faction-selector">
-                {factions.map(f => {
-                    return (
-                        <button
-                            key={f.uiLabel}
-                            className={selectedFaction.isMajor && f.isMajor && selectedFaction.enumFaction === f.enumFaction ? "active" : ""}
-                            onClick={() => {
-                                setSelectedFaction(f);
-                                setSelectedTechs([]);    // clear selected techs
-                            }}
-                        >
-                            {f.uiLabel}
-                        </button>
-                    );
-
-                })}
+                {factions.map((f) => (
+                    <button
+                        key={f.uiLabel}
+                        className={
+                            selectedFaction.isMajor &&
+                            f.isMajor &&
+                            selectedFaction.enumFaction === f.enumFaction
+                                ? "active"
+                                : ""
+                        }
+                        onClick={() => {
+                            setSelectedFaction(f);
+                            setSelectedTechs([]); // clear tech tree selections
+                        }}
+                    >
+                        {f.uiLabel}
+                    </button>
+                ))}
             </div>
         </header>
     );
