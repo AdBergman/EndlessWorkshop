@@ -1,10 +1,4 @@
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
@@ -13,7 +7,6 @@ import { useGameData } from "@/context/GameDataContext";
 import "./TechContainer.css";
 
 const MAX_ERA = 6;
-
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_");
 
 const TechContainer: React.FC = () => {
@@ -30,18 +23,6 @@ const TechContainer: React.FC = () => {
     // --- Hook: Load shared build from URL once ---
     useSharedBuildLoader(setSelectedTechs);
 
-    // --- Hook: Deep link handler for /tech?faction=kin&tech=strength_of_garin ---
-    const { era, setEra, maxUnlockedEra, handleNextEra, handlePrevEra } =
-        useEraController([]);
-
-    useDeepLinkedTech({
-        techs,
-        selectedFaction,
-        setSelectedFaction,
-        setSelectedTechs,
-        setEra,
-    });
-
     // --- Derive selected tech objects ---
     const selectedTechObjects = useMemo(() => {
         const techNameSet = new Set(selectedTechs);
@@ -50,6 +31,15 @@ const TechContainer: React.FC = () => {
 
     // --- Era management hook ---
     const eraController = useEraController(selectedTechObjects);
+
+    // --- Deep link handler for /tech?faction=kin&tech=strength_of_garin ---
+    useDeepLinkedTech({
+        techs,
+        selectedFaction,
+        setSelectedFaction,
+        setSelectedTechs,
+        setEra: eraController.setEra,
+    });
 
     // --- Preload first era for selected faction and show main container when loaded ---
     useEffect(() => {
@@ -104,9 +94,7 @@ export default TechContainer;
 // ------------------------ INTERNAL HOOKS --------------------------------- //
 //
 
-/**
- * Handles loading of shared builds from a ?share=UUID param
- */
+/** Handles loading of shared builds from a ?share=UUID param */
 function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -126,16 +114,11 @@ function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
             }
         };
         loadBuild();
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [setSelectedTechs]);
 }
 
-/**
- * Handles deep-link routing for /tech?faction=X&tech=Y
- * Applies faction + tech selection once when data is ready.
- */
+/** Handles deep-link routing for /tech?faction=X&tech=Y */
 function useDeepLinkedTech({
                                techs,
                                selectedFaction,
@@ -170,10 +153,7 @@ function useDeepLinkedTech({
             uiLabel: factionParam.toLowerCase(),
         };
 
-        if (
-            !selectedFaction.isMajor ||
-            selectedFaction.enumFaction !== fi.enumFaction
-        ) {
+        if (!selectedFaction.isMajor || selectedFaction.enumFaction !== fi.enumFaction) {
             setSelectedFaction(fi);
         }
 
@@ -181,18 +161,21 @@ function useDeepLinkedTech({
         const match = Array.from(techs.values()).find(
             (t) => normalize(t.name) === normalize(techParam)
         );
+
         if (match) {
             setSelectedTechs([match.name]);
             setEra(match.era);
+
+            // ✅ Clean the URL silently (no reload)
+            const newUrl = window.location.origin + "/tech";
+            window.history.replaceState({}, "", newUrl);
         } else {
             console.warn("⚠️ No tech match found for", techParam);
         }
     }, [techs]);
 }
 
-/**
- * Handles era progression logic and unlocks
- */
+/** Handles era progression logic and unlocks */
 function useEraController(selectedTechObjects: Tech[]) {
     const [era, setEra] = useState(1);
 
