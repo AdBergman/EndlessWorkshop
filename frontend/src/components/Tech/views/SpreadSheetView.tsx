@@ -93,6 +93,7 @@ const SpreadSheetView: React.FC = () => {
                 selectedTechs={selectedTechObjects}
                 unlockedImprovements={unlockedImprovements}
                 unlockedDistricts={unlockedDistricts}
+                unlockedUnits={unlockedUnits}
                 onDeselectAll={handleDeselectAll}
                 generateShareLink={handleGenerateLink}
                 onSort={handleSort}

@@ -43,49 +43,19 @@
 .spreadsheet-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;               /* 👈 let columns size dynamically */
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     background-color: #000;
 }
 
-/* Column widths and alignment */
-.spreadsheet-table th:nth-child(1),
-.spreadsheet-table td:nth-child(1) {
-    min-width: 120px;
-    width: 20%;
-    text-align: center;
-}
-
-.spreadsheet-table th:nth-child(2),
-.spreadsheet-table td:nth-child(2) {
-    width: 50px;
-    min-width: 50px;
-    max-width: 50px;
-    text-align: center;
-}
-
-.spreadsheet-table th:nth-child(3),
-.spreadsheet-table td:nth-child(3) {
-    min-width: 100px;
-    width: 12%;
-    text-align: center;
-}
-
-.spreadsheet-table th:nth-child(4),
-.spreadsheet-table td:nth-child(4) {
-    min-width: 150px;
-    width: 25%;
-    text-align: left;
-    padding-left: 12px;
-}
-
-.spreadsheet-table th:nth-child(5),
-.spreadsheet-table td:nth-child(5) {
-    min-width: 200px;
-    width: auto;
-    text-align: left;
-    padding-left: 12px;
+/* optional — prevent insane stretching on big screens */
+.spreadsheet-table th,
+.spreadsheet-table td {
+    max-width: 280px;                 /* 👈 cap column width */
+    min-width: 60px;                  /* 👈 ensures it doesn’t collapse */
+    white-space: normal;              /* 👈 allow wrapping */
+    word-wrap: break-word;
 }
 
 /* Cell styling */
