@@ -38,3 +38,13 @@ export const createHoveredDistrict = (
     data: distObj,
     coords: getHoverCoords(e),
 });
+
+import { Unit } from "@/types/dataTypes";
+
+export const createHoveredUnit = (
+    unitObj: Unit,
+    e: React.MouseEvent<HTMLElement>
+): HoveredWithCoords<Unit> => ({
+    data: unitObj,
+    coords: getHoverCoords(e),
+});

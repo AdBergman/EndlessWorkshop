@@ -54,3 +54,18 @@
 .techTooltipName {
     color: #fff;
 }
+
+/* === Units: look more like clickable links === */
+.hoverable-link.unit-link {
+    text-decoration: underline;
+    text-decoration-color: #ffb673;
+    cursor: pointer;
+    color: #ffd4a3;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.hoverable-link.unit-link:hover {
+    color: #ffa866;
+    text-decoration-color: #ffa866;
+    filter: drop-shadow(0 0 3px rgba(255, 180, 115, 0.4));
+}

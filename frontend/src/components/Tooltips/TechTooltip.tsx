@@ -1,15 +1,12 @@
-import React, { useState } from "react";
-import { Tech, Improvement, District } from "@/types/dataTypes";
+import React, {useState} from "react";
+import {District, Improvement, Tech, Unit} from "@/types/dataTypes";
 import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";
+import UnitTooltip from "@/components/Tooltips/UnitTooltip";
 import TooltipSection from "./TooltipSection";
-import {
-    createHoveredImprovement,
-    createHoveredDistrict,
-    HoveredWithCoords,
-} from "./hoverHelpers";
-import { useGameData } from "@/context/GameDataContext";
+import {createHoveredDistrict, createHoveredImprovement, createHoveredUnit, HoveredWithCoords,} from "./hoverHelpers";
+import {useGameData} from "@/context/GameDataContext";
 import "./TechTooltip.css";
 
 interface TechTooltipProps {
@@ -18,19 +15,23 @@ interface TechTooltipProps {
     onMouseLeave: () => void;
 }
 
+// Reusable hovered state types
 type HoveredImprovementState = HoveredWithCoords<Improvement> | null;
 type HoveredDistrictState = HoveredWithCoords<District> | null;
+type HoveredUnitState = HoveredWithCoords<Unit> | null;
 
 const TechTooltip: React.FC<TechTooltipProps> = ({
                                                      hoveredTech,
                                                      onMouseEnter,
                                                      onMouseLeave,
                                                  }) => {
-    const { districts, improvements, selectedFaction } = useGameData();
+    const { districts, improvements, units, selectedFaction } = useGameData();
+
     const [hoveredImprovement, setHoveredImprovement] =
         useState<HoveredImprovementState>(null);
     const [hoveredDistrict, setHoveredDistrict] =
         useState<HoveredDistrictState>(null);
+    const [hoveredUnit, setHoveredUnit] = useState<HoveredUnitState>(null);
     const [copied, setCopied] = useState(false);
 
     const handleCopyLink = () => {
@@ -47,11 +48,12 @@ const TechTooltip: React.FC<TechTooltipProps> = ({
     const renderUnlockLine = (line: string, index: number) => {
         const impPrefix = "Improvement: ";
         const distPrefix = "District: ";
+        const unitPrefix = "Unit Specialization: ";
 
         if (line.startsWith(impPrefix)) {
-            const impName = line.slice(impPrefix.length);
-            const impObj = improvements.get(impName);
-            if (!impObj) return <div key={index}>{line}</div>;
+            const name = line.slice(impPrefix.length);
+            const obj = improvements.get(name);
+            if (!obj) return <div key={index}>{line}</div>;
 
             return (
                 <div key={index} style={{ display: "block" }}>
@@ -59,20 +61,20 @@ const TechTooltip: React.FC<TechTooltipProps> = ({
                     <span
                         className="hoverable-link"
                         onMouseEnter={(e) =>
-                            setHoveredImprovement(createHoveredImprovement(impObj, e))
+                            setHoveredImprovement(createHoveredImprovement(obj, e))
                         }
                         onMouseLeave={() => setHoveredImprovement(null)}
                     >
-            {impName}
+            {name}
           </span>
                 </div>
             );
         }
 
         if (line.startsWith(distPrefix)) {
-            const distName = line.slice(distPrefix.length);
-            const distObj = districts.get(distName);
-            if (!distObj) return <div key={index}>{line}</div>;
+            const name = line.slice(distPrefix.length);
+            const obj = districts.get(name);
+            if (!obj) return <div key={index}>{line}</div>;
 
             return (
                 <div key={index} style={{ display: "block" }}>
@@ -80,15 +82,40 @@ const TechTooltip: React.FC<TechTooltipProps> = ({
                     <span
                         className="hoverable-link"
                         onMouseEnter={(e) =>
-                            setHoveredDistrict(createHoveredDistrict(distObj, e))
+                            setHoveredDistrict(createHoveredDistrict(obj, e))
                         }
                         onMouseLeave={() => setHoveredDistrict(null)}
                     >
-            {distName}
+            {name}
           </span>
                 </div>
             );
         }
+
+        if (line.startsWith(unitPrefix)) {
+            const name = line.slice(unitPrefix.length);
+            const obj = units?.get(name);
+            if (!obj) return <div key={index}>{line}</div>;
+
+            return (
+                <div key={index} style={{ display: "block" }}>
+                    <span>{unitPrefix}</span>
+                    <span
+                        className="hoverable-link unit-link"
+                        onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(obj, e))}
+                        onMouseLeave={() => setHoveredUnit(null)}
+                        onClick={() => {
+                            const faction = selectedFaction?.uiLabel.toLowerCase();
+                            const unit = obj.name.toLowerCase().replace(/\s+/g, "_");
+                            window.open(`/units?faction=${faction}&unit=${unit}`, "_blank");
+                        }}
+                    >
+        {name}
+      </span>
+                </div>
+            );
+        }
+
 
         return <div key={index}>{line}</div>;
     };
@@ -99,7 +126,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            {/* Title row with inline copy icon */}
+            {/* Header + copy icon */}
             <div className="techTooltipHeader">
                 <span className="techTooltipName">{hoveredTech.name}</span>
                 <button
@@ -125,12 +152,12 @@ const TechTooltip: React.FC<TechTooltipProps> = ({
                 </TooltipSection>
             )}
 
+            {/* Nested hover tooltips */}
             {hoveredImprovement && (
                 <ImprovementTooltip hoveredImprovement={hoveredImprovement} />
             )}
-            {hoveredDistrict && (
-                <DistrictTooltip hoveredDistrict={hoveredDistrict} />
-            )}
+            {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
+            {hoveredUnit && <UnitTooltip hoveredUnit={hoveredUnit} />}
         </BaseTooltip>
     );
 };
