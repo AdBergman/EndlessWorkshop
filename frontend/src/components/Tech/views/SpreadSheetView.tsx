@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {District, Tech} from "@/types/dataTypes";
+import {District, Tech, Unit} from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import SpreadsheetToolbar, {SheetView} from "./SpreadsheetToolbar";
 import TechSheetView from "./TechSheetView";
@@ -9,9 +9,10 @@ import {getUnlockedImprovements} from "@/utils/unlocks";
 import {useGameData} from "@/context/GameDataContext";
 import {Bounce, toast, ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import UnitSheetView from "./UnitSheetView";
 
 const SpreadSheetView: React.FC = () => {
-    const { selectedTechs, setSelectedTechs, techs, improvements, districts, createSavedTechBuild, selectedFaction } = useGameData();
+    const { selectedTechs, setSelectedTechs, techs, improvements, districts, units, createSavedTechBuild, selectedFaction } = useGameData();
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
     const selectedTechObjects = useMemo(() =>
@@ -42,6 +43,23 @@ const SpreadSheetView: React.FC = () => {
         return districtUnlocks;
     }, [selectedTechObjects, districts]);
 
+    const unlockedUnits = useMemo(() => {
+        const unitUnlocks: (Unit & { era: number })[] = [];
+        const prefix = "Unit Specialization: ";
+
+        for (const tech of selectedTechObjects) {
+            for (const unlock of tech.unlocks ?? []) {
+                if (unlock.startsWith(prefix)) {
+                    const name = unlock.substring(prefix.length).trim();
+                    const unit = units.get(name);
+                    if (unit) unitUnlocks.push({ ...unit, era: tech.era });
+                }
+            }
+        }
+
+        return unitUnlocks;
+    }, [selectedTechObjects, units]);
+
     const handleSort = () => setSortedTechs([...selectedTechObjects].sort((a, b) => a.era - b.era || a.name.localeCompare(b.name)));
     const handleDeselectAll = () => setSelectedTechs([]);
 
@@ -64,6 +82,7 @@ const SpreadSheetView: React.FC = () => {
             case "techs": return <TechSheetView techs={sortedTechs} />;
             case "improvements": return <ImprovementSheetView improvements={unlockedImprovements} />;
             case "districts": return <DistrictSheetView districts={unlockedDistricts} />;
+            case "units": return <UnitSheetView units={unlockedUnits} />;
             default: return <TechSheetView techs={sortedTechs} />;
         }
     };

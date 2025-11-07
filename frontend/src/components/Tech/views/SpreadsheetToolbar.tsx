@@ -3,7 +3,8 @@ import { CSVLink } from "react-csv";
 import "./SpreadsheetToolbar.css";
 import { Tech, Improvement, District } from "@/types/dataTypes";
 
-export type SheetView = 'techs' | 'improvements' | 'districts';
+export type SheetView = "techs" | "improvements" | "districts" | "units";
+
 
 interface SpreadsheetToolbarProps {
     selectedTechs: Tech[];
@@ -98,6 +99,12 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     className={activeSheet === 'districts' ? 'active' : ''}
                 >
                     Districts
+                </button>
+                <button
+                    onClick={() => setActiveSheet("units")}
+                    className={activeSheet === "units" ? "active" : ""}
+                >
+                    Units
                 </button>
             </div>
         </div>
