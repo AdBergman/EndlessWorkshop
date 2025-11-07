@@ -2,9 +2,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px; /* small consistent vertical gap between carousel & tree */
-    min-height: 100vh;
+    gap: 20px;
+    min-height: calc(100vh - 80px); /* account for carousel margins */
+    padding: 20px 0;                /* visual breathing instead of margin stacking */
     color: white;
+    overflow-x: hidden;             /* prevent horizontal flicker on hover */
 }
 
 .evolutionTreeWrapper {
