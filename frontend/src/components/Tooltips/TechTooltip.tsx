@@ -4,8 +4,13 @@ import BaseTooltip from "./BaseTooltip";
 import ImprovementTooltip from "./ImprovementTooltip";
 import DistrictTooltip from "./DistrictTooltip";
 import TooltipSection from "./TooltipSection";
-import { createHoveredImprovement, createHoveredDistrict, HoveredWithCoords } from "./hoverHelpers";
+import {
+    createHoveredImprovement,
+    createHoveredDistrict,
+    HoveredWithCoords,
+} from "./hoverHelpers";
 import { useGameData } from "@/context/GameDataContext";
+import "./TechTooltip.css";
 
 interface TechTooltipProps {
     hoveredTech: Tech & { coords: { xPct: number; yPct: number } };
@@ -13,15 +18,31 @@ interface TechTooltipProps {
     onMouseLeave: () => void;
 }
 
-// Reusable types for hovered state
 type HoveredImprovementState = HoveredWithCoords<Improvement> | null;
 type HoveredDistrictState = HoveredWithCoords<District> | null;
 
-const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
-    const { districts, improvements } = useGameData();
+const TechTooltip: React.FC<TechTooltipProps> = ({
+                                                     hoveredTech,
+                                                     onMouseEnter,
+                                                     onMouseLeave,
+                                                 }) => {
+    const { districts, improvements, selectedFaction } = useGameData();
+    const [hoveredImprovement, setHoveredImprovement] =
+        useState<HoveredImprovementState>(null);
+    const [hoveredDistrict, setHoveredDistrict] =
+        useState<HoveredDistrictState>(null);
+    const [copied, setCopied] = useState(false);
 
-    const [hoveredImprovement, setHoveredImprovement] = useState<HoveredImprovementState>(null);
-    const [hoveredDistrict, setHoveredDistrict] = useState<HoveredDistrictState>(null);
+    const handleCopyLink = () => {
+        if (!selectedFaction) return;
+        const faction = selectedFaction.uiLabel.toLowerCase();
+        const tech = hoveredTech.name.toLowerCase().replace(/\s+/g, "_");
+        const link = `${window.location.origin}/tech?faction=${faction}&tech=${tech}`;
+        navigator.clipboard.writeText(link).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        });
+    };
 
     const renderUnlockLine = (line: string, index: number) => {
         const impPrefix = "Improvement: ";
@@ -32,21 +53,18 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             const impObj = improvements.get(impName);
             if (!impObj) return <div key={index}>{line}</div>;
 
-            const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                setHoveredImprovement(createHoveredImprovement(impObj, e));
-            };
-            const handleMouseLeave = () => setHoveredImprovement(null);
-
             return (
                 <div key={index} style={{ display: "block" }}>
                     <span>{impPrefix}</span>
                     <span
-                        style={{ textDecoration: "underline", cursor: "pointer" }}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
+                        className="hoverable-link"
+                        onMouseEnter={(e) =>
+                            setHoveredImprovement(createHoveredImprovement(impObj, e))
+                        }
+                        onMouseLeave={() => setHoveredImprovement(null)}
                     >
-                        {impName}
-                    </span>
+            {impName}
+          </span>
                 </div>
             );
         }
@@ -56,21 +74,18 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             const distObj = districts.get(distName);
             if (!distObj) return <div key={index}>{line}</div>;
 
-            const handleMouseEnter = (e: React.MouseEvent<HTMLSpanElement>) => {
-                setHoveredDistrict(createHoveredDistrict(distObj, e));
-            };
-            const handleMouseLeave = () => setHoveredDistrict(null);
-
             return (
                 <div key={index} style={{ display: "block" }}>
                     <span>{distPrefix}</span>
                     <span
-                        style={{ textDecoration: "underline", cursor: "pointer" }}
-                        onMouseEnter={handleMouseEnter}
-                        onMouseLeave={handleMouseLeave}
+                        className="hoverable-link"
+                        onMouseEnter={(e) =>
+                            setHoveredDistrict(createHoveredDistrict(distObj, e))
+                        }
+                        onMouseLeave={() => setHoveredDistrict(null)}
                     >
-                        {distName}
-                    </span>
+            {distName}
+          </span>
                 </div>
             );
         }
@@ -84,15 +99,25 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            <div style={{ fontWeight: 600 }}>{hoveredTech.name}</div>
+            {/* Title row with inline copy icon */}
+            <div className="techTooltipHeader">
+                <span className="techTooltipName">{hoveredTech.name}</span>
+                <button
+                    className={`copyInlineButton ${copied ? "copied" : ""}`}
+                    title={copied ? "Copied!" : "Copy link"}
+                    onClick={handleCopyLink}
+                >
+                    ⧉
+                </button>
+            </div>
 
-            {hoveredTech.unlocks && hoveredTech.unlocks.length > 0 && (
+            {hoveredTech.unlocks?.length > 0 && (
                 <TooltipSection title="Unlocks:">
                     {hoveredTech.unlocks.map(renderUnlockLine)}
                 </TooltipSection>
             )}
 
-            {hoveredTech.effects && hoveredTech.effects.length > 0 && (
+            {hoveredTech.effects?.length > 0 && (
                 <TooltipSection title="Effects:">
                     {hoveredTech.effects.map((eff, i) => (
                         <div key={i}>{eff}</div>
@@ -100,8 +125,12 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 </TooltipSection>
             )}
 
-            {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
-            {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
+            {hoveredImprovement && (
+                <ImprovementTooltip hoveredImprovement={hoveredImprovement} />
+            )}
+            {hoveredDistrict && (
+                <DistrictTooltip hoveredDistrict={hoveredDistrict} />
+            )}
         </BaseTooltip>
     );
 };
