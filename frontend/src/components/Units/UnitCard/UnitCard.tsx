@@ -5,7 +5,7 @@ import { FaBolt, FaHeart, FaRunning, FaShieldAlt, FaCoins } from "react-icons/fa
 import { FactionIcon } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import { Unit, Faction } from "@/types/dataTypes";
-import { getUnitImageUrl } from "@/utils/assetHelpers";
+import {DEFAULT_UNIT_IMAGE, getUnitImageUrl} from "@/utils/assetHelpers";
 import { identifyFaction } from "@/utils/factionIdentity"; // Import the new helper
 
 interface UnitCardProps {
@@ -92,10 +92,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                             {!imageLoaded && <div className="artPlaceholder" />}
                             <motion.img
                                 src={imageUrl}
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = "/graphics/units/placeholder.png";
-                                }}
                                 alt={unit.name}
+                                draggable={false}
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = DEFAULT_UNIT_IMAGE;
+                                }}
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{
                                     opacity: imageLoaded ? 1 : 0,

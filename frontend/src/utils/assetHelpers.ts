@@ -7,13 +7,14 @@ import { Unit } from "@/types/dataTypes";
  * @param unit The unit object.
  * @returns A string representing the image URL.
  */
+export const DEFAULT_UNIT_IMAGE = "/graphics/units/placeholder.png";
+
 export function getUnitImageUrl(unit: Unit): string {
     const faction = unit.faction?.toLowerCase();
-    const defaultImage = `/graphics/units/placeholder.png`;
 
     // If faction isn't defined, we can't build a proper URL.
     if (!faction) {
-        return defaultImage;
+        return DEFAULT_UNIT_IMAGE;
     }
 
     // Use artId if it exists, otherwise fall back to the unit's type.
@@ -22,7 +23,7 @@ export function getUnitImageUrl(unit: Unit): string {
         : unit.type.toLowerCase();
 
     if (!variant) {
-        return defaultImage;
+        return DEFAULT_UNIT_IMAGE;
     }
 
     return `/graphics/units/${faction}_${variant}.png`;
