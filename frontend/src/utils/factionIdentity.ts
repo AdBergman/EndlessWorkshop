@@ -1,11 +1,4 @@
-import { Faction } from "@/types/dataTypes";
-
-export interface FactionInfo {
-    isMajor: boolean;
-    enumFaction: Faction | null;
-    uiLabel: string;
-    minorName: string | null;
-}
+import { Faction, FactionInfo } from "@/types/dataTypes";
 
 export function identifyFaction(unit: {
     faction: Faction | null;

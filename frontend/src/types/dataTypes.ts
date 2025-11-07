@@ -62,3 +62,10 @@ export enum Faction {
     NECROPHAGES = "NECROPHAGES",
     TAHUK = "TAHUK"
 }
+
+export interface FactionInfo {
+    isMajor: boolean;
+    enumFaction: Faction | null;
+    uiLabel: string;
+    minorName: string | null;
+}
