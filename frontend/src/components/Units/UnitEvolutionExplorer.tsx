@@ -1,9 +1,9 @@
 import React, { useState, useContext, useMemo, useEffect } from "react";
-import GameDataContext, { FactionInfo } from "@/context/GameDataContext";
+import GameDataContext from "@/context/GameDataContext";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import { Unit } from "@/types/dataTypes";
-import { identifyFaction } from "@/utils/factionIdentity";
+import { FactionInfo, identifyFaction } from "@/utils/factionIdentity";
 import { useSearchParams } from "react-router-dom";
 import "./UnitEvolutionExplorer.css";
 
