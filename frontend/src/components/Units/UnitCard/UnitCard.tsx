@@ -5,8 +5,8 @@ import { FaBolt, FaHeart, FaRunning, FaShieldAlt, FaCoins } from "react-icons/fa
 import { FactionIcon } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import { Unit, Faction } from "@/types/dataTypes";
-import {DEFAULT_UNIT_IMAGE, getUnitImageUrl} from "@/utils/assetHelpers";
-import { identifyFaction } from "@/utils/factionIdentity"; // Import the new helper
+import { DEFAULT_UNIT_IMAGE, getUnitImageUrl } from "@/utils/assetHelpers";
+import { identifyFaction } from "@/utils/factionIdentity";
 
 interface UnitCardProps {
     unit: Unit;
@@ -18,68 +18,70 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
 
-    const factionInfo = identifyFaction(unit); // Use the helper
+    const factionInfo = identifyFaction(unit);
+    const isMinor = !factionInfo.isMajor;
 
-    // Determine factionKey for colors/gradients based on identified faction
-    const factionKey = factionInfo.isMajor ? (factionInfo.enumFaction as Faction).toUpperCase() as keyof typeof FACTION_COLORS : "PLACEHOLDER";
+    const factionKey = isMinor
+        ? "MINOR"
+        : ((factionInfo.enumFaction as Faction)?.toUpperCase() as keyof typeof FACTION_COLORS);
+
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
+    const gradient = FACTION_GRADIENT[factionKey] || FACTION_GRADIENT.PLACEHOLDER;
+
     const imageUrl = getUnitImageUrl(unit);
+
+    const formatMinorName = (name?: string) => {
+        if (!name) return "";
+        return name
+            .toLowerCase()
+            .split(" ")
+            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+            .join(" ");
+    };
 
     return (
         <motion.div
             className="cardContainer"
-            whileHover={{
-                scale: 1.1,
-                y: -4,
-            }}
-            onClick={() => {
-                if (!disableFlip) setFlipped(!flipped);
-            }}
+            whileHover={{ scale: 1.1, y: -4 }}
+            onClick={() => !disableFlip && setFlipped(!flipped)}
         >
             <motion.div
                 className="cardFlipWrapper"
-                animate={{
-                    rotateY: flipped ? 180 : 0,
-                    z: flipped ? 30 : 0,
-                }}
-                transition={{
-                    duration: 0.55,
-                    ease: [0.45, 0.05, 0.55, 0.95],
-                }}
-                style={{
-                    transformStyle: "preserve-3d",
-                    ["--card-border" as any]: colors.border,
-                }}
+                animate={{ rotateY: flipped ? 180 : 0, z: flipped ? 30 : 0 }}
+                transition={{ duration: 0.55, ease: [0.45, 0.05, 0.55, 0.95] }}
+                style={{ ["--card-border" as any]: colors.border }}
             >
-                {/* GLOW + BORDER now INSIDE the flipping wrapper */}
                 <div
-                    className="cardBorderAndGlow"
-                    style={{
-                        border: `2px solid ${colors.border}`,
-                        boxShadow: `0 5px 15px rgba(0,0,0,0.5), 0 0 10px ${colors.accent}55`,
-                    }}
+                    className={`cardBorderAndGlow ${isMinor ? "minorBorderGlow" : ""}`}
                 />
 
                 {/* FRONT */}
-                <div className="cardFace cardFront">
+                <div className={`cardFace cardFront ${isMinor ? "minorCardFace" : ""}`}>
                     <div className="header">
-                        <div
-                            className="name"
-                            style={{
-                                background: FACTION_GRADIENT[factionKey],
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
-                            }}
-                        >
-                            {unit.name}
-                        </div>
-                        <div className="fortIcon" style={{ color: colors.accent }}>
-                            {factionInfo.isMajor ? (
-                                <FactionIcon faction={factionInfo.enumFaction as Faction} />
-                            ) : (
-                                <span>{factionInfo.uiLabel}</span>
+                        <div className="nameBlock">
+                            <div
+                                className="name"
+                                style={{
+                                    background: gradient,
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                }}
+                            >
+                                {unit.name}
+                            </div>
+
+                            {!factionInfo.isMajor && (
+                                <div className="minorFactionName">
+                                    {formatMinorName(factionInfo.uiLabel)}
+                                </div>
                             )}
                         </div>
+
+                        {factionInfo.isMajor && (
+                            <div className="fortIcon">
+                                <FactionIcon faction={factionInfo.enumFaction as Faction} />
+                            </div>
+                        )}
                     </div>
 
                     <div className="typeTier" style={{ color: colors.border }}>
@@ -108,7 +110,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                         </div>
                     )}
 
-
                     <div className="statsBox">
                         <div className="statsRow">
                             <div className="stat"><FaHeart /> {unit.health}</div>
@@ -126,7 +127,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                 <div className="cardFace cardBack">
                     <div className="skillsTitle">Skills</div>
                     <div className="skillsList">
-                        {unit.skills && unit.skills.length > 0 ? (
+                        {unit.skills?.length ? (
                             unit.skills.map((skill, idx) => (
                                 <span key={idx} className="skill">{skill}</span>
                             ))
@@ -137,7 +138,5 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                 </div>
             </motion.div>
         </motion.div>
-
     );
-
 };

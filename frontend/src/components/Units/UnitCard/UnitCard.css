@@ -74,17 +74,18 @@
     justify-content: space-between;
     align-items: center;
     padding: 8px 10px;
+    flex-wrap: wrap;
 }
 
 .name {
     font-weight: 700;
     font-size: 1.3rem;
     text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere; /* breaks long words */
 }
 
-.fortIcon {
-    font-size: 1.5rem;
-}
 
 /* === TYPE & TIER === */
 .typeTier {
@@ -213,3 +214,45 @@
     z-index: 1; /* sits behind content but rotates with the card */
     transform: translateZ(-1px);
 }
+
+/* Fort icon / faction area */
+.fortIcon {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 0.85rem;
+    padding-left: 6px; /* prevents overlap with name */
+    min-width: 70px;   /* keeps consistent width */
+    max-width: 50%;
+}
+
+/* === NAME BLOCK (new wrapper for unit + minor faction) === */
+.nameBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.1;
+}
+
+/* Only active on minor faction cards, gives a bit more top spacing */
+.minorHeader {
+    align-items: flex-start;
+}
+
+/* Minor faction text — silver, crisp, soft halo */
+.minorFactionName {
+    margin-top: 2px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    line-height: 1.05;
+    color: #b5c7d3; /* solid tempered steel */
+    text-shadow:
+            0 0 1px rgba(100, 160, 190, 0.5),
+            0 0 2px rgba(120, 180, 200, 0.25);
+}
+
