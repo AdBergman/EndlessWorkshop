@@ -14,12 +14,16 @@ interface UnitCardProps {
     disableFlip?: boolean;
 }
 
-export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, disableFlip = false }) => {
+export const UnitCard: React.FC<UnitCardProps> = ({
+                                                      unit,
+                                                      showArtwork = true,
+                                                      disableFlip = false,
+                                                  }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
 
     const factionInfo = identifyFaction(unit);
-    const isMinor = !factionInfo.isMajor;
+    const isMinor = unit.minorFaction || (!factionInfo.isMajor && factionInfo.enumFaction === "MINOR");
 
     const factionKey = isMinor
         ? "MINOR"
@@ -51,8 +55,13 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                 transition={{ duration: 0.55, ease: [0.45, 0.05, 0.55, 0.95] }}
                 style={{ ["--card-border" as any]: colors.border }}
             >
+                {/* Border + ambient glow */}
                 <div
                     className={`cardBorderAndGlow ${isMinor ? "minorBorderGlow" : ""}`}
+                    style={{
+                        border: `2px solid ${colors.border}`,
+                        boxShadow: `0 5px 15px rgba(0,0,0,0.5), 0 0 10px ${colors.accent}55`,
+                    }}
                 />
 
                 {/* FRONT */}
@@ -70,14 +79,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                                 {unit.name}
                             </div>
 
-                            {!factionInfo.isMajor && (
+                            {isMinor && (
                                 <div className="minorFactionName">
-                                    {formatMinorName(factionInfo.uiLabel)}
+                                    {formatMinorName(factionInfo.uiLabel || unit.faction)}
                                 </div>
                             )}
                         </div>
 
-                        {factionInfo.isMajor && (
+                        {!isMinor && factionInfo.isMajor && (
                             <div className="fortIcon">
                                 <FactionIcon faction={factionInfo.enumFaction as Faction} />
                             </div>
@@ -89,14 +98,19 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                         <span className="tierBadge">Tier {unit.tier}</span>
                     </div>
 
+                    {/* === ART === */}
                     {showArtwork && (
                         <div className="artContainer">
                             {!imageLoaded && <div className="artPlaceholder" />}
+
                             <motion.img
                                 src={imageUrl}
                                 alt={unit.name}
                                 draggable={false}
                                 onError={(e) => {
+                                    console.warn(
+                                        `⚠️ Missing art for ${isMinor ? "minor" : "major"} faction unit: ${unit.name}`
+                                    );
                                     (e.target as HTMLImageElement).src = DEFAULT_UNIT_IMAGE;
                                 }}
                                 initial={{ opacity: 0, scale: 0.95 }}
@@ -110,15 +124,26 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                         </div>
                     )}
 
+                    {/* === STATS === */}
                     <div className="statsBox">
                         <div className="statsRow">
-                            <div className="stat"><FaHeart /> {unit.health}</div>
-                            <div className="stat"><FaBolt /> {unit.minDamage} - {unit.maxDamage}</div>
+                            <div className="stat">
+                                <FaHeart /> {unit.health}
+                            </div>
+                            <div className="stat">
+                                <FaBolt /> {unit.minDamage} - {unit.maxDamage}
+                            </div>
                         </div>
                         <div className="statsRow">
-                            <div className="stat"><FaShieldAlt /> {unit.defense}</div>
-                            <div className="stat"><FaRunning /> {unit.movementPoints}</div>
-                            <div className="stat"><FaCoins /> {unit.upkeep}</div>
+                            <div className="stat">
+                                <FaShieldAlt /> {unit.defense}
+                            </div>
+                            <div className="stat">
+                                <FaRunning /> {unit.movementPoints}
+                            </div>
+                            <div className="stat">
+                                <FaCoins /> {unit.upkeep}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -129,7 +154,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showArtwork = true, di
                     <div className="skillsList">
                         {unit.skills?.length ? (
                             unit.skills.map((skill, idx) => (
-                                <span key={idx} className="skill">{skill}</span>
+                                <span key={idx} className="skill">
+                                    {skill}
+                                </span>
                             ))
                         ) : (
                             <span className="noSkills">No special skills</span>

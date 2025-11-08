@@ -1,30 +1,35 @@
+// assetHelpers.ts
 import { Unit } from "@/types/dataTypes";
 
-/**
- * Generates the correct image URL for a given unit.
- * This centralizes the logic for asset paths and naming conventions.
- *
- * @param unit The unit object.
- * @returns A string representing the image URL.
- */
 export const DEFAULT_UNIT_IMAGE = "/graphics/units/placeholder.png";
 
 export function getUnitImageUrl(unit: Unit): string {
-    const faction = unit.faction?.toLowerCase();
+    const isMinor =
+        (unit.faction && unit.faction.toUpperCase() === "MINOR") || unit.minorFaction;
 
-    // If faction isn't defined, we can't build a proper URL.
-    if (!faction) {
-        return DEFAULT_UNIT_IMAGE;
+    if (isMinor) {
+        // Use the faction's UI label or name — both usually map to the minor faction
+        const factionName = (unit.minorFaction || unit.name || "")
+            .toLowerCase()
+            .replace(/\s+/g, "_")
+            .replace(/[^a-z0-9_]/g, "");
+
+        // Build full path under /graphics/units/minorFactions/
+        const basePath = `/graphics/units/minorFactions/${factionName}`;
+
+        // Try .png first (since Ametrine.png exists), fallback handled by <img> onError
+        return `${basePath}.png`;
     }
 
-    // Use artId if it exists, otherwise fall back to the unit's type.
+    // ✅ Restore the working path for major factions
+    const faction = unit.faction?.toLowerCase();
+    if (!faction) return DEFAULT_UNIT_IMAGE;
+
     const variant = unit.artId
         ? unit.artId.toLowerCase()
-        : unit.type.toLowerCase();
+        : unit.type?.toLowerCase();
 
-    if (!variant) {
-        return DEFAULT_UNIT_IMAGE;
-    }
+    if (!variant) return DEFAULT_UNIT_IMAGE;
 
     return `/graphics/units/${faction}_${variant}.png`;
 }
