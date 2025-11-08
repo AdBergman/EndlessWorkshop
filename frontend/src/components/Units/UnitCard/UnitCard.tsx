@@ -43,6 +43,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             .join(" ");
     };
 
+    const formatUnitType = (type?: string) => {
+        if (!type) return "";
+        return type
+            .split(/[_\s]+/) // split on underscore or space
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+            .join(" ");
+    };
+
     return (
         <motion.div
             className="cardContainer"
@@ -94,7 +102,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                     </div>
 
                     <div className="typeTier" style={{ color: colors.border }}>
-                        <span className="type">{unit.type}</span>
+                        <span className="type">{formatUnitType(unit.type)}</span>
                         <span className="tierBadge">Tier {unit.tier}</span>
                     </div>
 
