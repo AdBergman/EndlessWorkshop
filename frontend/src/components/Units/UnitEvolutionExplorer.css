@@ -2,18 +2,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    min-height: calc(100vh - 80px); /* account for carousel margins */
-    padding: 20px 0;                /* visual breathing instead of margin stacking */
+    gap: 12px;                /* ↓ tighter spacing between header & carousel */
+    min-height: calc(100vh - 80px);
+    padding: 16px 0 32px;     /* ↓ less top padding, keep bottom breathing */
     color: white;
-    overflow-x: hidden;             /* prevent horizontal flicker on hover */
+    overflow-x: hidden;
 }
-
 .evolutionTreeWrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 14px;
+    margin-top: 46px;
 }
 
 .evoLevelBlock {
@@ -47,4 +47,91 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+/* ============================
+   Header / Toggle Row
+============================ */
+.unitExplorerHeader {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    max-width: 1280px;
+    padding: 0 1.8rem;
+    margin-bottom: 6px;
+    border-bottom: none;
+}
+
+/* Toggle group aligned right */
+.minorSegmentedToggle.single {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-right: 10rem; /* ✅ back in alignment with carousel edge */
+    font-size: 0.9rem;   /* ✅ slightly larger for readability */
+    font-weight: 500;
+}
+
+.toggleLabel {
+    color: #ff944d; /* ✅ warmer tone in line with navbar accent */
+}
+
+/* ============================
+   Pill-style toggle
+============================ */
+.togglePill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 92px;
+    height: 28px;
+    border-radius: 999px;
+    border: 1px solid #e67328;
+    background: #1a1a1a;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(230, 115, 40, 0.25);
+    transition: all 0.25s ease;
+}
+
+/* Glowing highlight with brand orange */
+.toggleHighlight {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #e67328, #ff7f32);
+    box-shadow: 0 0 8px rgba(255, 127, 50, 0.35);
+    transform: translateX(0%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    z-index: 1;
+}
+
+.togglePill.on .toggleHighlight {
+    transform: translateX(100%);
+}
+
+/* Text inside toggle */
+.toggleOption {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    text-align: center;
+    color: #ff944d;
+    user-select: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.toggleOption.active {
+    color: #000;
+    font-weight: 600;
+}
+
+/* Hover glow for whole toggle */
+.togglePill:hover {
+    box-shadow: 0 0 6px rgba(255, 127, 50, 0.45);
 }

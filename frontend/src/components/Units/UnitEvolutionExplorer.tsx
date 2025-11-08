@@ -1,16 +1,10 @@
-import React, {
-    useState,
-    useContext,
-    useMemo,
-    useEffect,
-    useRef,
-} from "react";
-import { useSearchParams } from "react-router-dom";
+import React, {useContext, useEffect, useMemo, useRef, useState,} from "react";
+import {useSearchParams} from "react-router-dom";
 import GameDataContext from "@/context/GameDataContext";
-import { UnitCarousel } from "./UnitCarousel";
-import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
-import { Unit, FactionInfo } from "@/types/dataTypes";
-import { identifyFaction } from "@/utils/factionIdentity";
+import {UnitCarousel} from "./UnitCarousel";
+import {EvolutionTreeViewer} from "./EvolutionTreeViewer";
+import {FactionInfo, Unit} from "@/types/dataTypes";
+import {identifyFaction} from "@/utils/factionIdentity";
 import "./UnitEvolutionExplorer.css";
 
 // --- Utility helpers ---
@@ -26,14 +20,14 @@ export const UnitEvolutionExplorer: React.FC = () => {
     const gameData = useContext(GameDataContext);
     const [params, setParams] = useSearchParams();
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [showMinorUnits, setShowMinorUnits] = useState(false);
 
-    // NEW: guard so deep-link hydration runs only once
     const hydratedFromUrl = useRef(false);
 
-    // Reset carousel when faction changes
-    useEffect(() => setSelectedIndex(0), [gameData.selectedFaction]);
+    // Reset carousel when faction or toggle changes
+    useEffect(() => setSelectedIndex(0), [gameData.selectedFaction, showMinorUnits]);
 
-    // Tier-1 roots for the current faction
+    // Filter Tier 1 roots based on major/minor toggle
     const tierOneUnits = useMemo(() => {
         if (!gameData || gameData.units.size === 0) return [];
         const { selectedFaction } = gameData;
@@ -41,17 +35,22 @@ export const UnitEvolutionExplorer: React.FC = () => {
         return Array.from(gameData.units.values()).filter((u) => {
             if (u.tier !== 1) return false;
             const unitFaction = identifyFaction(u);
-            return selectedFaction.isMajor
-                ? unitFaction.isMajor &&
+
+            if (showMinorUnits) {
+                return !unitFaction.isMajor; // all minor faction units
+            }
+
+            return (
+                selectedFaction.isMajor &&
+                unitFaction.isMajor &&
                 unitFaction.enumFaction === selectedFaction.enumFaction
-                : !unitFaction.isMajor &&
-                unitFaction.minorName === selectedFaction.minorName;
+            );
         });
-    }, [gameData.units, gameData.selectedFaction]);
+    }, [gameData.units, gameData.selectedFaction, showMinorUnits]);
 
     // --- URL → State (only once after data ready) ---
     useEffect(() => {
-        if (hydratedFromUrl.current) return; // ✅ already applied
+        if (hydratedFromUrl.current) return;
         if (!gameData) return;
 
         const factionParam = params.get("faction");
@@ -66,19 +65,17 @@ export const UnitEvolutionExplorer: React.FC = () => {
             gameData.selectedFaction.isMajor &&
             gameData.selectedFaction.enumFaction === fi.enumFaction;
 
-        // Step 1 — set faction if needed
         if (!factionMatches) {
             gameData.setSelectedFaction(fi);
-            return; // wait for next render; don’t mark hydrated yet
+            return;
         }
 
-        // Step 2 — once faction matches & data loaded, set unit
         if (tierOneUnits.length > 0) {
             const idx = tierOneUnits.findIndex(
                 (u) => normalize(u.name) === normalize(unitParam)
             );
             if (idx >= 0) setSelectedIndex(idx);
-            hydratedFromUrl.current = true; // ✅ done, never re-run
+            hydratedFromUrl.current = true;
         }
     }, [params, gameData, tierOneUnits]);
 
@@ -98,7 +95,6 @@ export const UnitEvolutionExplorer: React.FC = () => {
         setParams({ faction: factionKey, unit: unitKey }, { replace: true });
     }, [gameData?.selectedFaction, selectedIndex, tierOneUnits]);
 
-    // --- Render ---
     if (!gameData || gameData.units.size === 0) {
         return <div>Loading units...</div>;
     }
@@ -107,6 +103,23 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
     return (
         <div className="unitEvolutionExplorer">
+
+            {/* --- Header Row (toggle only, aligned right) --- */}
+            <div className="unitExplorerHeader">
+                <div className="minorSegmentedToggle single">
+                    <span className="toggleLabel">Show Minor Factions:</span>
+                    <div
+                        className={`togglePill ${showMinorUnits ? "on" : "off"}`}
+                        onClick={() => setShowMinorUnits(!showMinorUnits)}
+                    >
+                        <div className="toggleHighlight" />
+                        <span className={`toggleOption ${!showMinorUnits ? "active" : ""}`}> Off </span>
+                        <span className={`toggleOption ${showMinorUnits ? "active" : ""}`}> On </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* --- Content --- */}
             <UnitCarousel
                 units={tierOneUnits}
                 selectedIndex={selectedIndex}
