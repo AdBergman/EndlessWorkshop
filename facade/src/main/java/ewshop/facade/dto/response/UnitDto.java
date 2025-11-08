@@ -80,7 +80,9 @@ public record UnitDto(
         public Builder tier(int tier) { this.tier = tier; return this; }
         public Builder upkeep(int upkeep) { this.upkeep = upkeep; return this; }
         public Builder costs(List<String> costs) { this.costs = costs; return this; }
-        public Builder skills(List<String> skills) { this.skills = skills; return this; }
+        public Builder skills(List<String> skills) { this.skills = skills.stream()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList(); return this; }
         public Builder faction(Faction faction) { this.faction = faction; return this; }
         public Builder minorFaction(String minorFaction) { this.minorFaction = minorFaction; return this; }
         public Builder upgradesTo(List<String> upgradesTo) { this.upgradesTo = upgradesTo; return this; }
