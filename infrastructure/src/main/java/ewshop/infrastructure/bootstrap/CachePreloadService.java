@@ -1,24 +1,21 @@
 package ewshop.infrastructure.bootstrap;
 
 import ewshop.domain.service.DistrictService;
-import ewshop.domain.service.TechService;
 import ewshop.domain.service.ImprovementService;
+import ewshop.domain.service.TechService;
 import ewshop.domain.service.UnitSpecializationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class CachePreloadService {
 
     private static final Logger log = LoggerFactory.getLogger(CachePreloadService.class);
-    private static final long PRELOAD_TIMEOUT_SEC = 60;
-
     private final DistrictService districtService;
     private final TechService techService;
     private final ImprovementService improvementService;
@@ -60,16 +57,19 @@ public class CachePreloadService {
 
     // --- Shared logic ---
     private CompletableFuture<Void> preload(String name, Runnable loader) {
-        return CompletableFuture.runAsync(() -> {
-                    long start = System.currentTimeMillis();
-                    log.info("Preloading {} cache...", name);
-                    loader.run(); // triggers @Cacheable
-                    long duration = System.currentTimeMillis() - start;
-                    log.info("{} cache preloaded in {} ms", name, duration);
-                }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
-                .exceptionally(ex -> {
-                    log.warn("{} preload timed out after {} seconds", name, PRELOAD_TIMEOUT_SEC, ex);
-                    return null;
-                });
+        long start = System.currentTimeMillis();
+        try {
+            log.info("Preloading {} cache...", name);
+            loader.run(); // triggers @Cacheable in the @Async thread
+            long duration = System.currentTimeMillis() - start;
+            log.info("{} cache preloaded in {} ms", name, duration);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception ex) {
+            long duration = System.currentTimeMillis() - start;
+            log.warn("{} preload failed after {} ms", name, duration, ex);
+            CompletableFuture<Void> f = new CompletableFuture<>();
+            f.completeExceptionally(ex);
+            return f;
+        }
     }
 }
