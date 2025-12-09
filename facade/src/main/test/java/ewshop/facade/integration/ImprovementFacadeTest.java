@@ -3,22 +3,19 @@ package ewshop.facade.integration;
 import ewshop.domain.entity.Improvement;
 import ewshop.domain.entity.enums.UniqueType;
 import ewshop.domain.repository.ImprovementRepository;
-import ewshop.facade.config.FacadeConfig;
 import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = IntegrationTestConfig.class) // Use the shared IntegrationTestConfig
-@Import(FacadeConfig.class)
+@SpringBootTest(classes = IntegrationTestConfig.class)
 @Transactional
 class ImprovementFacadeTest {
 
