@@ -35,18 +35,14 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         if (path.startsWith("/error")) {
             return true;
         }
-        if (path.startsWith("/graphics/")
+        return path.startsWith("/graphics/")
                 || path.endsWith(".css")
                 || path.endsWith(".js")
                 || path.endsWith(".ico")
                 || path.endsWith(".png")
                 || path.endsWith(".jpg")
                 || path.endsWith(".jpeg")
-                || path.endsWith(".webp")) {
-            return true;
-        }
-
-        return false;
+                || path.endsWith(".webp");
     }
 
     @Override
