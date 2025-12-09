@@ -32,18 +32,19 @@ public class DatabaseHeartbeatJob {
      */
     @Scheduled(cron = "0 5 0 * * *", zone = "Europe/Stockholm")
     public void pingDatabase() {
-        if (!enabled) return;
+        if (!enabled) {
+            log.debug("Database heartbeat is disabled, skipping.");
+            return;
+        }
 
+        long startTime = System.currentTimeMillis();
         try {
-            Integer result = jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-
-            if (result != null && result == 1) {
-                log.debug("💓 Database heartbeat OK (SELECT 1)");
-            } else {
-                log.warn("💓 Database heartbeat returned unexpected result: {}", result);
-            }
+            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("Database heartbeat successful in {} ms", duration);
         } catch (Exception ex) {
-            log.warn("💥 Database heartbeat FAILED", ex);
+            long duration = System.currentTimeMillis() - startTime;
+            log.warn("Database heartbeat failed after {} ms", duration, ex);
         }
     }
 }

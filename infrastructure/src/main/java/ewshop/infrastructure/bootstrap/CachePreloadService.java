@@ -37,38 +37,38 @@ public class CachePreloadService {
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadDistricts() {
-        return preload("districts", districtService::getAllDistricts);
+        return preload("Districts", districtService::getAllDistricts);
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadTechs() {
-        return preload("techs", techService::getAllTechs);
+        return preload("Techs", techService::getAllTechs);
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadImprovements() {
-        return preload("improvements", improvementService::getAllImprovements);
+        return preload("Improvements", improvementService::getAllImprovements);
     }
 
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadUnits() {
-        return preload("units", unitService::getAllUnits);
+        return preload("Units", unitService::getAllUnits);
     }
 
     // --- Shared logic ---
     private CompletableFuture<Void> preload(String name, Runnable loader) {
         return CompletableFuture.runAsync(() -> {
                     long start = System.currentTimeMillis();
-                    log.info("Preloading " + name + " cache...");
+                    log.info("Preloading {} cache...", name);
                     loader.run(); // triggers @Cacheable
                     long duration = System.currentTimeMillis() - start;
-                    log.info(name.substring(0, 1).toUpperCase() + name.substring(1) + " cache preloaded in " + duration + " ms");
+                    log.info("{} cache preloaded in {} ms", name, duration);
                 }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .exceptionally(ex -> {
-                    log.warn("{} preload timed out: {}", name, ex.getMessage());
+                    log.warn("{} preload timed out after {} seconds", name, PRELOAD_TIMEOUT_SEC, ex);
                     return null;
                 });
     }
