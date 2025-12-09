@@ -9,14 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/builds")
 public class SavedTechBuildController {
 
-    private static final Logger log = LoggerFactory.getLogger(SavedTechBuildController.class);
     private final SavedTechBuildFacade facade;
 
     public SavedTechBuildController(SavedTechBuildFacade facade) {
@@ -33,7 +30,6 @@ public class SavedTechBuildController {
     @Cacheable(value = "savedTechBuilds", key = "#uuid")
     @GetMapping("/{uuid}")
     public ResponseEntity<SavedTechBuildDto> getBuild(@PathVariable UUID uuid) {
-        log.info("Cache miss, fetching from DB: " + uuid);
         Optional<SavedTechBuildDto> dtoOpt = facade.getSavedBuildByUuid(uuid);
         return dtoOpt.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

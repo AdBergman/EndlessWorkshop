@@ -45,6 +45,8 @@ logging:
     org.springframework.boot.autoconfigure: warn
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [%X{correlationId}] %logger{36} - %msg%n"
 
 seeders:
   enabled: false
