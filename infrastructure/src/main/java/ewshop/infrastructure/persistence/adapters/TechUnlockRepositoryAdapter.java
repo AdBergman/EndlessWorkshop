@@ -54,7 +54,10 @@ public class TechUnlockRepositoryAdapter implements TechUnlockRepository {
     public void updateUnlocksForTech(Tech tech, List<TechUnlock> unlocks) {
         // 1️⃣ Fetch the managed TechEntity
         TechEntity managedTechEntity = techRepository.findByName(tech.getName())
-                .orElseThrow(() -> new IllegalStateException("Cannot update unlocks for a non-existent tech: " + tech.getName()));
+                .orElseThrow(() -> {
+                    log.warn("Cannot update unlocks for a non-existent tech: {}", tech.getName());
+                    return new IllegalStateException("Cannot update unlocks for a non-existent tech: " + tech.getName());
+                });
 
         // 2️⃣ Clear existing unlocks for idempotency
         managedTechEntity.getUnlocks().clear();

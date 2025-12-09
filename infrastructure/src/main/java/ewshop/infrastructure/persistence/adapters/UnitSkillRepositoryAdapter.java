@@ -5,6 +5,8 @@ import ewshop.domain.repository.UnitSkillRepository;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.mappers.UnitSkillMapper;
 import ewshop.infrastructure.persistence.repositories.SpringDataUnitSkillRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
 
 @Repository
 public class UnitSkillRepositoryAdapter implements UnitSkillRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(UnitSkillRepositoryAdapter.class);
 
     private final SpringDataUnitSkillRepository springDataUnitSkillRepository;
     private final UnitSkillMapper mapper;
@@ -27,7 +31,10 @@ public class UnitSkillRepositoryAdapter implements UnitSkillRepository {
     public UnitSkill findByName(String name) {
         return springDataUnitSkillRepository.findByName(name)
                 .map(mapper::toDomain)
-                .orElseThrow(() -> new IllegalStateException("UnitSkill not found: " + name));
+                .orElseThrow(() -> {
+                    log.warn("UnitSkill not found for name={}", name);
+                    return new IllegalStateException("UnitSkill not found: " + name);
+                });
     }
 
 
