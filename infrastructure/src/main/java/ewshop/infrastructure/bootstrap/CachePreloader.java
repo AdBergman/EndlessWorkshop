@@ -5,12 +5,13 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class CachePreloader {
 
-    private static final Logger log = Logger.getLogger(CachePreloader.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(CachePreloader.class);
     private final CachePreloadService preloadService;
 
     public CachePreloader(CachePreloadService preloadService) {
@@ -29,7 +30,7 @@ public class CachePreloader {
         CompletableFuture.allOf(districtsFuture, techsFuture, improvementsFuture, unitsFuture)
                 .thenRun(() -> log.info("All caches preloaded successfully"))
                 .exceptionally(ex -> {
-                    log.warning("Some cache preloads did not complete: " + ex.getMessage());
+                    log.warn("Some cache preloads did not complete: {}", ex.getMessage());
                     return null;
                 });
     }

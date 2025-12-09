@@ -10,12 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CachePreloadService {
 
-    private static final Logger log = Logger.getLogger(CachePreloadService.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(CachePreloadService.class);
     private static final long PRELOAD_TIMEOUT_SEC = 60;
 
     private final DistrictService districtService;
@@ -67,7 +68,7 @@ public class CachePreloadService {
                     log.info(name.substring(0, 1).toUpperCase() + name.substring(1) + " cache preloaded in " + duration + " ms");
                 }).orTimeout(PRELOAD_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .exceptionally(ex -> {
-                    log.warning(name + " preload timed out: " + ex.getMessage());
+                    log.warn("{} preload timed out: {}", name, ex.getMessage());
                     return null;
                 });
     }

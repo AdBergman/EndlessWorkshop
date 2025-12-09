@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/builds")
 public class SavedTechBuildController {
 
-    private static final Logger log = Logger.getLogger(SavedTechBuildController.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(SavedTechBuildController.class);
     private final SavedTechBuildFacade facade;
 
     public SavedTechBuildController(SavedTechBuildFacade facade) {

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 /**
  * Periodic lightweight heartbeat to keep Neon Postgres awake.
  * Runs once every midnight (00:05 Stockholm time).
- *
  * Infrastructure-only responsibility: does NOT touch domain logic.
  */
 @Component
