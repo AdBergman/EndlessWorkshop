@@ -6,18 +6,13 @@ import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
 import ewshop.domain.repository.TechRepository;
 import ewshop.facade.config.FacadeConfig;
-import ewshop.facade.dto.TechDto;
+import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -25,18 +20,10 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = TechFacadeTest.TestConfig.class)
+@SpringBootTest(classes = IntegrationTestConfig.class) // Use the shared IntegrationTestConfig
 @Import(FacadeConfig.class)
 @Transactional
 class TechFacadeTest {
-
-    @SpringBootConfiguration
-    @EnableAutoConfiguration
-    @EntityScan("ewshop.infrastructure.persistence.entities")
-    @EnableJpaRepositories("ewshop.infrastructure.persistence.repositories")
-    @ComponentScan(basePackages = {"ewshop.domain", "ewshop.infrastructure"})
-    static class TestConfig {
-    }
 
     @Autowired
     private TechFacade techFacade;
@@ -56,14 +43,14 @@ class TechFacadeTest {
     }
 
     @Test
-    void getAllTechs_integration() {
+    void shouldReturnAllTechs() {
         // Given
         Tech stonework = Tech.builder()
                 .name("Stonework")
                 .era(1)
                 .type(TechType.DEFENSE)
                 .effects(List.of("+100 Fortification on Capital"))
-                .factions(Set.of(Faction.ASPECT, Faction.KIN))
+                .factions(Set.of(Faction.ASPECTS, Faction.KIN))
                 .techCoords(new TechCoords(10.0, 20.0))
                 .build();
 
@@ -72,7 +59,7 @@ class TechFacadeTest {
                 .era(1)
                 .type(TechType.DISCOVERY)
                 .effects(List.of("Unlocks Farms"))
-                .factions(Set.of(Faction.LOST_LORDS))
+                .factions(Set.of(Faction.LORDS))
                 .techCoords(new TechCoords(30.0, 40.0))
                 .build();
 
@@ -91,9 +78,9 @@ class TechFacadeTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Stonework DTO not found"));
         assertThat(stoneworkDto.era()).isEqualTo(1);
-        assertThat(stoneworkDto.type()).isEqualTo("DEFENSE");
+        assertThat(stoneworkDto.type()).isEqualTo("Defense");
         assertThat(stoneworkDto.effects()).containsExactly("+100 Fortification on Capital"); // String now
-        assertThat(stoneworkDto.factions()).containsExactly("ASPECT", "KIN"); // String now
+        assertThat(stoneworkDto.factions()).containsExactly("Aspects", "Kin"); // String now
 
 // Verify Agriculture DTO
         TechDto agricultureDto = result.stream()
@@ -101,9 +88,9 @@ class TechFacadeTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Agriculture DTO not found"));
         assertThat(agricultureDto.era()).isEqualTo(1);
-        assertThat(agricultureDto.type()).isEqualTo("DISCOVERY");
+        assertThat(agricultureDto.type()).isEqualTo("Discovery");
         assertThat(agricultureDto.effects()).containsExactly("Unlocks Farms");
-        assertThat(agricultureDto.factions()).containsExactly("LOST_LORDS");
+        assertThat(agricultureDto.factions()).containsExactly("Lords");
 
     }
 }

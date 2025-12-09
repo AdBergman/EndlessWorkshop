@@ -3,35 +3,23 @@ package ewshop.facade.integration;
 import ewshop.domain.entity.District;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.facade.config.FacadeConfig;
-import ewshop.facade.dto.DistrictDto;
+import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = DistrictFacadeTest.TestConfig.class)
+@SpringBootTest(classes = IntegrationTestConfig.class) // Use the shared IntegrationTestConfig
 @Import(FacadeConfig.class)
 @Transactional
 class DistrictFacadeTest {
-
-    @SpringBootConfiguration
-    @EnableAutoConfiguration
-    @EntityScan("ewshop.infrastructure.persistence.entities")
-    @EnableJpaRepositories("ewshop.infrastructure.persistence.repositories")
-    @ComponentScan(basePackages = {"ewshop.domain", "ewshop.infrastructure"})
-    static class TestConfig {}
 
     @Autowired
     private DistrictFacade districtFacade;
@@ -51,7 +39,7 @@ class DistrictFacadeTest {
     }
 
     @Test
-    void getAllDistricts_integration() {
+    void shouldReturnAllDistricts() {
         // Given
         District farm = District.builder()
                 .name("Farm")

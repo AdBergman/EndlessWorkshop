@@ -1,28 +1,15 @@
 package ewshop.facade.config;
 
-import ewshop.domain.service.SavedTechBuildService;
-import ewshop.domain.service.TechService;
-import ewshop.domain.service.DistrictService;
-import ewshop.domain.service.ImprovementService;
-import ewshop.facade.impl.SavedTechBuildFacadeImpl;
-import ewshop.facade.impl.TechFacadeImpl;
-import ewshop.facade.impl.DistrictFacadeImpl;
-import ewshop.facade.impl.ImprovementFacadeImpl;
-import ewshop.facade.interfaces.SavedTechBuildFacade;
-import ewshop.facade.interfaces.TechFacade;
-import ewshop.facade.interfaces.DistrictFacade;
-import ewshop.facade.interfaces.ImprovementFacade;
+import ewshop.domain.service.*;
+import ewshop.facade.impl.*;
+import ewshop.facade.interfaces.*;
+import ewshop.facade.mapper.UnitDtoPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class FacadeConfig {
-
-    @Bean
-    public TechFacade techFacade(TechService techService) {
-        return new TechFacadeImpl(techService);
-    }
 
     @Bean
     public DistrictFacade districtFacade(DistrictService districtService) {
@@ -38,5 +25,15 @@ public class FacadeConfig {
     @Primary // Spring confuses the bean of the Interface with the bean of the implementation
     public SavedTechBuildFacade savedTechBuildFacade(SavedTechBuildService savedTechBuildService) {
         return new SavedTechBuildFacadeImpl(savedTechBuildService);
+    }
+
+    @Bean
+    public TechFacade techFacade(TechService techService) {
+        return new TechFacadeImpl(techService);
+    }
+
+    @Bean
+    public UnitFacade unitFacade(UnitSpecializationService unitSpecializationService, UnitDtoPostProcessor postProcessor) {
+        return new UnitFacadeImpl(unitSpecializationService, postProcessor);
     }
 }
