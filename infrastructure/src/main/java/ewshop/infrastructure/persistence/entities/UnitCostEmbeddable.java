@@ -4,6 +4,8 @@ import ewshop.domain.entity.enums.FIDSI;
 import ewshop.domain.entity.enums.StrategicResourceType;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Embeddable
 public class UnitCostEmbeddable {
 
@@ -34,4 +36,17 @@ public class UnitCostEmbeddable {
 
     public StrategicResourceType getStrategic() { return strategic; }
     public void setStrategic(StrategicResourceType strategic) { this.strategic = strategic; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnitCostEmbeddable that = (UnitCostEmbeddable) o;
+        return amount == that.amount && resource == that.resource && strategic == that.strategic;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(amount, resource, strategic);
+    }
 }

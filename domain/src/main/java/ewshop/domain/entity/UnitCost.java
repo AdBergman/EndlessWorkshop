@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import ewshop.domain.entity.enums.CostType;
 
+import java.util.Objects;
+
 @JsonDeserialize(builder = UnitCost.Builder.class)
 public class UnitCost {
     private final int amount;
@@ -33,6 +35,21 @@ public class UnitCost {
             if (type == null) throw new IllegalStateException("CostType must be set");
             return new UnitCost(this);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UnitCost unitCost = (UnitCost) o;
+        return amount == unitCost.amount && type == unitCost.type;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = amount;
+        result = 31 * result + Objects.hashCode(type);
+        return result;
     }
 
     @Override

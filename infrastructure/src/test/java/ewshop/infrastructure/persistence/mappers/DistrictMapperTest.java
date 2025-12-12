@@ -13,7 +13,7 @@ class DistrictMapperTest {
     private final DistrictMapper districtMapper = new DistrictMapper();
 
     @Test
-    void testToDomainMapping_shouldMapAllFields() {
+    void toDomain_shouldMapAllFields() {
         // Setup: Create an entity with all fields set
         DistrictEntity entity = new DistrictEntity();
         entity.setName("Test District");
@@ -37,7 +37,7 @@ class DistrictMapperTest {
     }
 
     @Test
-    void testToEntityMapping_shouldMapAllFields() {
+    void toEntity_shouldMapAllFields() {
         // Setup: Create a domain object with all fields set
         District domain = District.builder()
                 .name("Test District")
@@ -59,5 +59,54 @@ class DistrictMapperTest {
         assertThat(entity.getTileBonus()).containsExactly("+1 Production on Hills");
         assertThat(entity.getAdjacencyBonus()).containsExactly("+1 Science per adjacent University");
         assertThat(entity.getPlacementPrereq()).isEqualTo("Must be placed on a River");
+    }
+
+    @Test
+    void toDomain_shouldMapNullListsToEmptyLists() {
+        // Setup
+        DistrictEntity entity = new DistrictEntity();
+        entity.setName("Test District");
+        entity.setInfo(null);
+        entity.setTileBonus(null);
+        entity.setAdjacencyBonus(null);
+
+        // Act
+        District domain = districtMapper.toDomain(entity);
+
+        // Assert
+        assertThat(domain).isNotNull();
+        assertThat(domain.getInfo()).isNotNull().isEmpty();
+        assertThat(domain.getTileBonus()).isNotNull().isEmpty();
+        assertThat(domain.getAdjacencyBonus()).isNotNull().isEmpty();
+    }
+
+    @Test
+    void toEntity_shouldMapNullListsToEmptyLists() {
+        // Setup
+        District domain = District.builder()
+                .name("Test District")
+                .info(null)
+                .tileBonus(null)
+                .adjacencyBonus(null)
+                .build();
+
+        // Act
+        DistrictEntity entity = districtMapper.toEntity(domain);
+
+        // Assert
+        assertThat(entity).isNotNull();
+        assertThat(entity.getInfo()).isNotNull().isEmpty();
+        assertThat(entity.getTileBonus()).isNotNull().isEmpty();
+        assertThat(entity.getAdjacencyBonus()).isNotNull().isEmpty();
+    }
+
+    @Test
+    void toDomain_returnsNullWhenEntityIsNull() {
+        assertThat(districtMapper.toDomain(null)).isNull();
+    }
+
+    @Test
+    void toEntity_returnsNullWhenDomainIsNull() {
+        assertThat(districtMapper.toEntity(null)).isNull();
     }
 }

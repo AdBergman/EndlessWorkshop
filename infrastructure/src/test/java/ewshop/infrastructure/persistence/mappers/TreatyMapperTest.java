@@ -11,35 +11,45 @@ class TreatyMapperTest {
     private final TreatyMapper treatyMapper = new TreatyMapper();
 
     @Test
-    void testToDomainMapping_shouldMapAllFields() {
-        // Setup: Create an entity with all fields set
+    void toDomain_shouldMapAllFields() {
+        // Setup
         TreatyEntity entity = new TreatyEntity();
         entity.setName("Test Treaty");
         entity.setDescription("Test Description");
 
-        // Act: Map to domain
+        // Act
         Treaty domain = treatyMapper.toDomain(entity);
 
-        // Assert: Check all fields
+        // Assert
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Test Treaty");
         assertThat(domain.getDescription()).isEqualTo("Test Description");
     }
 
     @Test
-    void testToEntityMapping_shouldMapAllFields() {
-        // Setup: Create a domain object with all fields set
+    void toEntity_shouldMapAllFields() {
+        // Setup
         Treaty domain = Treaty.builder()
                 .name("Test Treaty")
                 .description("Test Description")
                 .build();
 
-        // Act: Map to entity
+        // Act
         TreatyEntity entity = treatyMapper.toEntity(domain);
 
-        // Assert: Check all fields
+        // Assert
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo("Test Treaty");
         assertThat(entity.getDescription()).isEqualTo("Test Description");
+    }
+
+    @Test
+    void toDomain_returnsNullWhenEntityIsNull() {
+        assertThat(treatyMapper.toDomain(null)).isNull();
+    }
+
+    @Test
+    void toEntity_returnsNullWhenDomainIsNull() {
+        assertThat(treatyMapper.toEntity(null)).isNull();
     }
 }

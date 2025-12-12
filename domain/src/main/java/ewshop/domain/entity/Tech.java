@@ -67,14 +67,14 @@ public class Tech {
         public Builder name(String name) { this.name = name; return this; }
         public Builder type(TechType type) { this.type = type; return this; }
         public Builder era(int era) { this.era = era; return this; }
-        public Builder effects(List<String> effects) { this.effects.clear(); this.effects.addAll(effects); return this; }
+        public Builder effects(List<String> effects) { this.effects.clear(); if (effects != null) { this.effects.addAll(effects); } return this; }
         public Builder addEffect(String effect) { this.effects.add(effect); return this; }
         public Builder techCoords(TechCoords techCoords) { this.techCoords = techCoords; return this; }
         public Builder prereq(Tech prereq) { this.prereq = prereq; return this; }
         public Builder excludes(Tech excludes) { this.excludes = excludes; return this; }
-        public Builder factions(Set<Faction> factions) { this.factions.clear(); this.factions.addAll(factions); return this; }
+        public Builder factions(Set<Faction> factions) { this.factions.clear(); if (factions != null) { this.factions.addAll(factions); } return this; }
         public Builder addFaction(Faction faction) { this.factions.add(faction); return this; }
-        public Builder unlocks(List<TechUnlock> unlocks) { this.unlocks.clear(); this.unlocks.addAll(unlocks); return this; }
+        public Builder unlocks(List<TechUnlock> unlocks) { this.unlocks.clear(); if (unlocks != null) { this.unlocks.addAll(unlocks); } return this; }
         public Builder addUnlock(TechUnlock unlock) { this.unlocks.add(unlock); return this; }
 
         public Tech build() { return new Tech(this); }

@@ -14,13 +14,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ImprovementMapperTest {
 
-    // Instantiate the mappers to use their instance methods
     private final StrategicCostMapper strategicCostMapper = new StrategicCostMapper();
     private final ImprovementMapper improvementMapper = new ImprovementMapper(strategicCostMapper);
 
     @Test
-    void testToDomainMapping_shouldMapAllFields() {
-        // Setup: Create an entity with all fields set
+    void toDomain_shouldMapAllFields() {
+        // Setup
         StrategicCostEntity costEntity = new StrategicCostEntity();
         costEntity.setType(StrategicResourceType.GLASSTEEL);
         costEntity.setAmount(10);
@@ -32,10 +31,10 @@ class ImprovementMapperTest {
         entity.setEffects(List.of("Effect 1"));
         entity.setCost(List.of(costEntity));
 
-        // Act: Map to domain
+        // Act
         Improvement domain = improvementMapper.toDomain(entity);
 
-        // Assert: Check all fields
+        // Assert
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Test Improvement");
         assertThat(domain.getEra()).isEqualTo(2);
@@ -47,8 +46,8 @@ class ImprovementMapperTest {
     }
 
     @Test
-    void testToEntityMapping_shouldMapAllFields() {
-        // Setup: Create a domain object with all fields set
+    void toEntity_shouldMapAllFields() {
+        // Setup
         StrategicCost cost = new StrategicCost(StrategicResourceType.GLASSTEEL, 10);
         Improvement domain = Improvement.builder()
                 .name("Test Improvement")
@@ -58,10 +57,10 @@ class ImprovementMapperTest {
                 .cost(List.of(cost))
                 .build();
 
-        // Act: Map to entity
+        // Act
         ImprovementEntity entity = improvementMapper.toEntity(domain);
 
-        // Assert: Check all fields
+        // Assert
         assertThat(entity).isNotNull();
         assertThat(entity.getName()).isEqualTo("Test Improvement");
         assertThat(entity.getEra()).isEqualTo(2);
@@ -70,5 +69,50 @@ class ImprovementMapperTest {
         assertThat(entity.getCost()).hasSize(1);
         assertThat(entity.getCost().get(0).getType()).isEqualTo(StrategicResourceType.GLASSTEEL);
         assertThat(entity.getCost().get(0).getAmount()).isEqualTo(10);
+    }
+
+    @Test
+    void toDomain_shouldMapNullListsToEmptyLists() {
+        // Setup
+        ImprovementEntity entity = new ImprovementEntity();
+        entity.setName("Test Improvement");
+        entity.setCost(null);
+        entity.setEffects(null);
+
+        // Act
+        Improvement domain = improvementMapper.toDomain(entity);
+
+        // Assert
+        assertThat(domain).isNotNull();
+        assertThat(domain.getCost()).isNotNull().isEmpty();
+        assertThat(domain.getEffects()).isNotNull().isEmpty();
+    }
+
+    @Test
+    void toEntity_shouldMapNullListsToEmptyLists() {
+        // Setup
+        Improvement domain = Improvement.builder()
+                .name("Test Improvement")
+                .cost(null)
+                .effects(null)
+                .build();
+
+        // Act
+        ImprovementEntity entity = improvementMapper.toEntity(domain);
+
+        // Assert
+        assertThat(entity).isNotNull();
+        assertThat(entity.getCost()).isNotNull().isEmpty();
+        assertThat(entity.getEffects()).isNotNull().isEmpty();
+    }
+
+    @Test
+    void toDomain_returnsNullWhenEntityIsNull() {
+        assertThat(improvementMapper.toDomain(null)).isNull();
+    }
+
+    @Test
+    void toEntity_returnsNullWhenDomainIsNull() {
+        assertThat(improvementMapper.toEntity(null)).isNull();
     }
 }
