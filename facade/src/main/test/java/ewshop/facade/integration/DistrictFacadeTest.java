@@ -4,7 +4,8 @@ import ewshop.domain.entity.District;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,10 +25,8 @@ class DistrictFacadeTest {
     @Autowired
     private DistrictRepository districtRepository;
 
-    @BeforeEach
-    void cleanDatabase() {
-        districtRepository.deleteAll();
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void contextLoads() {
@@ -54,6 +53,7 @@ class DistrictFacadeTest {
 
         districtRepository.save(farm);
         districtRepository.save(forum);
+        entityManager.flush();
 
         // When
         List<DistrictDto> result = districtFacade.getAllDistricts();
@@ -79,4 +79,5 @@ class DistrictFacadeTest {
         assertThat(forumDto.tileBonus()).containsExactly("+1 Food on tile producing Food");
         assertThat(forumDto.adjacencyBonus()).containsExactly("+1 Influence for each adjacent River");
     }
+
 }

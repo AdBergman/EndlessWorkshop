@@ -5,7 +5,8 @@ import ewshop.domain.entity.enums.UniqueType;
 import ewshop.domain.repository.ImprovementRepository;
 import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,10 +26,8 @@ class ImprovementFacadeTest {
     @Autowired
     private ImprovementRepository improvementRepository;
 
-    @BeforeEach
-    void cleanDatabase() {
-        improvementRepository.deleteAll();
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void contextLoads() {
@@ -55,6 +54,7 @@ class ImprovementFacadeTest {
 
         improvementRepository.save(shrine);
         improvementRepository.save(garrison);
+        entityManager.flush();
 
         // When
         List<ImprovementDto> result = improvementFacade.getAllImprovements();
@@ -80,4 +80,5 @@ class ImprovementFacadeTest {
         assertThat(garrisonDto.unique()).isEqualTo("City");
         assertThat(garrisonDto.era()).isEqualTo(2);
     }
+
 }

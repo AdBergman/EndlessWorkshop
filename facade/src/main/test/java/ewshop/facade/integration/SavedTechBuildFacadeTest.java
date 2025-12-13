@@ -5,7 +5,8 @@ import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,10 +28,8 @@ class SavedTechBuildFacadeTest {
     @Autowired
     private SavedTechBuildRepository savedTechBuildRepository;
 
-    @BeforeEach
-    void cleanDatabase() {
-        savedTechBuildRepository.deleteAll();
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void contextLoads() {
@@ -51,6 +50,7 @@ class SavedTechBuildFacadeTest {
                 .build();
 
         savedTechBuildRepository.save(build);
+        entityManager.flush();
 
         // When
         Optional<SavedTechBuildDto> result = savedTechBuildFacade.getSavedBuildByUuid(uuid);

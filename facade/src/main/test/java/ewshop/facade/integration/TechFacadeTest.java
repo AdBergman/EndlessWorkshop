@@ -7,7 +7,8 @@ import ewshop.domain.entity.enums.TechType;
 import ewshop.domain.repository.TechRepository;
 import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,15 +29,13 @@ class TechFacadeTest {
     @Autowired
     private TechRepository techRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Test
     void contextLoads() {
         assertThat(techFacade).isNotNull();
         assertThat(techRepository).isNotNull();
-    }
-
-    @BeforeEach
-    void cleanDatabase() {
-        techRepository.deleteAll();
     }
 
     @Test
@@ -62,6 +61,7 @@ class TechFacadeTest {
 
         techRepository.save(stonework);
         techRepository.save(agriculture);
+        entityManager.flush();
 
         // When
         List<TechDto> result = techFacade.getAllTechs();
@@ -69,17 +69,17 @@ class TechFacadeTest {
         // Then
         assertThat(result).hasSize(2);
 
-// Verify Stonework DTO
+        // Verify Stonework DTO
         TechDto stoneworkDto = result.stream()
                 .filter(t -> "Stonework".equals(t.name()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Stonework DTO not found"));
         assertThat(stoneworkDto.era()).isEqualTo(1);
         assertThat(stoneworkDto.type()).isEqualTo("Defense");
-        assertThat(stoneworkDto.effects()).containsExactly("+100 Fortification on Capital"); // String now
-        assertThat(stoneworkDto.factions()).containsExactly("Aspects", "Kin"); // String now
+        assertThat(stoneworkDto.effects()).containsExactly("+100 Fortification on Capital");
+        assertThat(stoneworkDto.factions()).containsExactlyInAnyOrder("Aspects", "Kin");
 
-// Verify Agriculture DTO
+        // Verify Agriculture DTO
         TechDto agricultureDto = result.stream()
                 .filter(t -> "Agriculture".equals(t.name()))
                 .findFirst()
@@ -88,6 +88,6 @@ class TechFacadeTest {
         assertThat(agricultureDto.type()).isEqualTo("Discovery");
         assertThat(agricultureDto.effects()).containsExactly("Unlocks Farms");
         assertThat(agricultureDto.factions()).containsExactly("Lords");
-
     }
+
 }

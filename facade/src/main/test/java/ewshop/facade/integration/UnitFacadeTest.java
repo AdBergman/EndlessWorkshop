@@ -6,7 +6,8 @@ import ewshop.domain.entity.enums.UnitType;
 import ewshop.domain.repository.UnitSpecializationRepository;
 import ewshop.facade.dto.response.UnitDto;
 import ewshop.facade.interfaces.UnitFacade;
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,10 +27,8 @@ class UnitFacadeTest {
     @Autowired
     private UnitSpecializationRepository unitRepository;
 
-    @BeforeEach
-    void cleanDatabase() {
-        unitRepository.deleteAll();
-    }
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Test
     void contextLoads() {
@@ -68,6 +67,7 @@ class UnitFacadeTest {
 
         unitRepository.save(unit1);
         unitRepository.save(unit2);
+        entityManager.flush();
 
         // When
         List<UnitDto> result = unitFacade.getAllUnits();
@@ -90,4 +90,5 @@ class UnitFacadeTest {
         assertThat(unit1Dto.movementPoints()).isEqualTo(4);
         assertThat(unit1Dto.upkeep()).isEqualTo(2);
     }
+
 }
