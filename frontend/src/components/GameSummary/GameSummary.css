@@ -1,0 +1,165 @@
+/* GameSummary.css — minimal styling consistent with EWShop */
+
+.gs-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 1.5rem auto;
+    padding: 1rem;
+}
+
+.gs-title {
+    font-family: 'Audiowide', sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+    color: #ff7f32;
+    margin-bottom: 0.75rem;
+}
+
+.gs-section {
+    margin-top: 1rem;
+}
+
+.gs-panel {
+    background: rgba(17, 17, 17, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.gs-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.gs-muted {
+    opacity: 0.75;
+    line-height: 1.5;
+}
+
+.gs-pre {
+    margin-top: 0.75rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.9rem;
+}
+
+/* Buttons: reuse the spreadsheet vibe */
+.gs-btn {
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: #1b1b1b;
+    color: #ffcc00;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.gs-btn:hover {
+    background: #2a2a2a;
+}
+
+.gs-btn:active {
+    transform: translateY(1px);
+}
+
+.gs-btn--active {
+    border-color: rgba(255, 127, 50, 0.75);
+    color: #ff7f32;
+}
+
+/* Upload */
+.gs-fileInput {
+    display: none;
+}
+
+.gs-uploadLabel {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Meta bar */
+.gs-metaBar {
+    justify-content: flex-start;
+}
+
+.gs-metaItem {
+    display: inline-flex;
+    gap: 8px;
+    align-items: baseline;
+}
+
+.gs-metaLabel {
+    opacity: 0.65;
+    font-size: 0.9rem;
+}
+
+.gs-metaValue {
+    font-weight: 600;
+    color: #fff;
+}
+
+.gs-metaReset {
+    margin-left: auto;
+}
+
+/* Tech Progress timeline (hooks for TechProgressView) */
+.gs-h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: #ffcc00;
+}
+
+.gs-toolbar {
+    margin-top: 0.75rem;
+}
+
+.gs-select {
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: #1b1b1b;
+    color: #fff;
+}
+
+.gs-turnRow {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gs-turnBadge {
+    min-width: 92px;
+    font-size: 13px;
+    opacity: 0.85;
+    padding-top: 2px;
+}
+
+.gs-pillWrap {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gs-pill {
+    padding: 5px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 13px;
+    line-height: 18px;
+    background: rgba(0,0,0,0.25);
+}
+
+.gs-pillPrefix {
+    opacity: 0.7;
+    margin-right: 6px;
+}

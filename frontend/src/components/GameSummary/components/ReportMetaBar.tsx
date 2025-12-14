@@ -1,5 +1,6 @@
 import React from "react";
-import { ParseWarning } from "../../../types/endGameReport";
+import { ParseWarning } from "@/types/endGameReport";
+import "../GameSummary.css";
 
 type Props = {
     version: string;
@@ -10,23 +11,23 @@ type Props = {
 
 export default function ReportMetaBar({ version, generatedAtUtc, warnings, onReset }: Props) {
     return (
-        <div
-            style={{
-                marginTop: 8,
-                padding: 12,
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 8,
-                display: "flex",
-                gap: 12,
-                alignItems: "center",
-                flexWrap: "wrap",
-            }}
-        >
-            <span style={{ opacity: 0.85 }}>Version: {version}</span>
-            <span style={{ opacity: 0.85 }}>Generated: {generatedAtUtc}</span>
-            <span style={{ opacity: 0.85 }}>Warnings: {warnings.length}</span>
+        <div className="gs-panel gs-row gs-metaBar">
+      <span className="gs-metaItem">
+        <span className="gs-metaLabel">Version</span>
+        <span className="gs-metaValue">{version}</span>
+      </span>
 
-            <button style={{ marginLeft: "auto" }} onClick={onReset}>
+            <span className="gs-metaItem">
+        <span className="gs-metaLabel">Generated</span>
+        <span className="gs-metaValue">{generatedAtUtc}</span>
+      </span>
+
+            <span className="gs-metaItem">
+        <span className="gs-metaLabel">Warnings</span>
+        <span className="gs-metaValue">{warnings.length}</span>
+      </span>
+
+            <button className="gs-btn gs-metaReset" onClick={onReset}>
                 Load another file
             </button>
         </div>

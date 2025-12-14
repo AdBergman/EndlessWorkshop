@@ -1,4 +1,5 @@
 import React from "react";
+import "../GameSummary.css";
 
 type Props = {
     onLoadedJsonText: (jsonText: string) => void;
@@ -27,38 +28,34 @@ export default function SummaryLoadView({ onLoadedJsonText }: Props) {
     };
 
     return (
-        <div style={{ padding: 16 }}>
-            <h2>Game Summary</h2>
-            <p style={{ opacity: 0.8 }}>
-                Load an end-game export JSON to view your run.
-            </p>
+        <div className="gs-page">
+            <h2 className="gs-title">Game Summary</h2>
 
-            <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 12 }}>
-                <button onClick={loadExample}>Load example</button>
+            <div className="gs-panel gs-section">
+                <p className="gs-muted">
+                    Load an end-game export JSON to view your run.
+                </p>
 
-                <label style={{ display: "inline-block" }}>
-                    <input
-                        type="file"
-                        accept=".json,application/json"
-                        style={{ display: "none" }}
-                        onChange={(e) => onFilePicked(e.target.files?.[0] ?? null)}
-                    />
-                    <span
-                        style={{
-                            padding: "6px 10px",
-                            border: "1px solid rgba(255,255,255,0.2)",
-                            borderRadius: 6,
-                            cursor: "pointer",
-                        }}
-                    >
-            Upload JSON…
-          </span>
-                </label>
+                <div className="gs-row gs-section">
+                    <button className="gs-btn" onClick={loadExample}>
+                        Load example
+                    </button>
+
+                    <label className="gs-uploadLabel">
+                        <input
+                            type="file"
+                            accept=".json,application/json"
+                            className="gs-fileInput"
+                            onChange={(e) => onFilePicked(e.target.files?.[0] ?? null)}
+                        />
+                        <span className="gs-btn">Upload JSON…</span>
+                    </label>
+                </div>
+
+                <p className="gs-muted gs-section">
+                    Later: save to DB + reload. Auth comes later.
+                </p>
             </div>
-
-            <p style={{ marginTop: 16, opacity: 0.7 }}>
-                Later: Save to DB + reload. Auth comes later.
-            </p>
         </div>
     );
 }
