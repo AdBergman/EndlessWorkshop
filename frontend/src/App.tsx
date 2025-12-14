@@ -6,6 +6,7 @@ import InfoPage from './components/InfoPage/InfoPage';
 import GameDataProvider from './context/GameDataProvider';
 import { useGameData } from './context/GameDataContext';
 import LandscapeWrapper from './components/Layout/LandscapeWrapper';
+import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
 
 import './App.css';
 import {UnitEvolutionExplorer} from "@/components/Units/UnitEvolutionExplorer";
@@ -55,6 +56,7 @@ function App() {
                         <Route path="info" element={<InfoPage />} />
                         <Route path="tech" element={<TechContainer />} />
                         <Route path="units" element={<UnitEvolutionExplorer />} />
+                        <Route path="summary" element={<GameSummaryPage />} />
                     </Route>
                 </Routes>
             </GameDataProvider>

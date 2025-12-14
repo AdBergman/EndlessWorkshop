@@ -20,7 +20,7 @@ const routes = [
     { path: "/info", label: "Info" },
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
-    // { path: "/city", label: "City" }, // uncomment when feature is ready
+    { path: "/summary", label: "Game Summary" },
 ];
 
 const TopContainer: React.FC = () => {
