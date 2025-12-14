@@ -9,8 +9,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,9 +16,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(classes = IntegrationTestConfig.class)
-@Transactional
-class SavedTechBuildFacadeTest {
+class SavedTechBuildFacadeTest extends  BaseIT {
 
     @Autowired
     private SavedTechBuildFacade savedTechBuildFacade;
