@@ -9,32 +9,30 @@ import {
     YAxis,
 } from "recharts";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
-import { EmpireMetricKey, useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
+import {
+    useEmpireStatsViewStore,
+} from "@/stores/empireStatsViewStore";
 import "../GameSummary.css";
 import {
+    METRICS,
+    EmpireMetricKey,
     buildTicks,
     EMPIRE_COLORS,
     empireIndex,
     factionName,
     formatNumber,
     legendLabelForEmpire,
+    metricLabel,
 } from "./empireStats.helpers";
 import TurnTooltip, { LegendLabelByIndex } from "./TurnTooltip";
 
-const METRICS: EmpireMetricKey[] = [
-    "Score",
-    "Food",
-    "Industry",
-    "Dust",
-    "Science",
-    "Influence",
-    "Approval",
-    "Populations",
-    "Technologies",
-    "Units",
-    "Cities",
-    "Territories",
-];
+function getEmpireKey(idx: number) {
+    return `e${idx}`;
+}
+
+function getEmpireColor(idx: number) {
+    return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
+}
 
 export default function EmpireStatsView() {
     const state = useEndGameReportStore((s) => s.state);
@@ -82,10 +80,14 @@ export default function EmpireStatsView() {
         return map;
     }, [empires]);
 
+    // One row per turn: { turn, e0: value, e1: value, ... }
     const chartData = useMemo(() => {
-        const maxLen = empires.reduce((acc, e) => Math.max(acc, e?.PerTurn?.length ?? 0), 0);
-        const rows: any[] = [];
+        const maxLen = empires.reduce(
+            (acc, e) => Math.max(acc, e?.PerTurn?.length ?? 0),
+            0
+        );
 
+        const rows: any[] = [];
         for (let i = 0; i < maxLen; i++) {
             const row: any = { turn: i + 1 };
 
@@ -93,7 +95,7 @@ export default function EmpireStatsView() {
                 const idx = empireIndex(e);
                 const entry = e?.PerTurn?.[i];
                 const v = entry?.[selectedMetric];
-                row[`e${idx}`] = typeof v === "number" ? v : 0;
+                row[getEmpireKey(idx)] = typeof v === "number" ? v : 0;
             }
 
             rows.push(row);
@@ -102,7 +104,9 @@ export default function EmpireStatsView() {
         return rows;
     }, [empires, selectedMetric]);
 
-    const maxTurn = chartData.length > 0 ? Number(chartData[chartData.length - 1].turn) : 1;
+    const maxTurn =
+        chartData.length > 0 ? Number(chartData[chartData.length - 1].turn) : 1;
+
     const ticks = useMemo(() => buildTicks(maxTurn), [maxTurn]);
 
     return (
@@ -110,7 +114,7 @@ export default function EmpireStatsView() {
             <div className="gs-row gs-spaceBetween">
                 <h3 className="gs-h3">Empire Stats</h3>
                 <div className="gs-muted">
-                    Metric: {selectedMetric} • Empires: {empireCount}
+                    Metric: {metricLabel(selectedMetric)} • Empires: {empireCount}
                 </div>
             </div>
 
@@ -124,7 +128,7 @@ export default function EmpireStatsView() {
                     >
                         {METRICS.map((m) => (
                             <option key={m} value={m}>
-                                {m}
+                                {metricLabel(m)}
                             </option>
                         ))}
                     </select>
@@ -146,22 +150,31 @@ export default function EmpireStatsView() {
                         const idx = empireIndex(e);
                         const checked = selectedEmpires.includes(idx);
                         const faction = factionName(e, idx);
-                        const dotColor = EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
+                        const dotColor = getEmpireColor(idx);
 
                         return (
                             <label key={idx} className="gs-empireCheck">
-                                <input type="checkbox" checked={checked} onChange={() => toggleEmpire(idx)} />
+                                <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggleEmpire(idx)}
+                                />
 
                                 <span
                                     aria-hidden
                                     className="gs-empireDot"
                                     style={{
                                         background: dotColor,
-                                        boxShadow: idx === 0 ? "0 0 10px rgba(255,127,50,0.55)" : "none",
+                                        boxShadow:
+                                            idx === 0
+                                                ? "0 0 10px rgba(255,127,50,0.55)"
+                                                : "none",
                                     }}
                                 />
 
-                                <span className="gs-empireName">{idx === 0 ? "Player" : faction}</span>
+                                <span className="gs-empireName">
+                  {idx === 0 ? "Player" : faction}
+                </span>
                                 <span className="gs-empireIndex">(E{idx})</span>
                             </label>
                         );
@@ -191,19 +204,22 @@ export default function EmpireStatsView() {
                                     wrapperStyle={{ pointerEvents: "none" }}
                                     allowEscapeViewBox={{ x: false, y: false }}
                                     content={(props) => (
-                                        <TurnTooltip {...(props as any)} legendLabelByIndex={legendLabelByIndex} />
+                                        <TurnTooltip
+                                            {...(props as any)}
+                                            legendLabelByIndex={legendLabelByIndex}
+                                        />
                                     )}
                                 />
 
                                 <Legend />
 
                                 {selectedEmpires.map((idx) => {
-                                    const color = EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
+                                    const color = getEmpireColor(idx);
                                     return (
                                         <Line
                                             key={idx}
                                             type="monotone"
-                                            dataKey={`e${idx}`}
+                                            dataKey={getEmpireKey(idx)}
                                             stroke={color}
                                             strokeWidth={idx === 0 ? 3 : 2}
                                             dot={false}

@@ -1,18 +1,5 @@
 import { create } from "zustand";
-
-export type EmpireMetricKey =
-    | "Food"
-    | "Industry"
-    | "Dust"
-    | "Science"
-    | "Influence"
-    | "Approval"
-    | "Populations"
-    | "Technologies"
-    | "Units"
-    | "Cities"
-    | "Territories"
-    | "Score";
+import type { EmpireMetricKey } from "@/components/GameSummary/views/empireStats.helpers";
 
 type Store = {
     selectedMetric: EmpireMetricKey;

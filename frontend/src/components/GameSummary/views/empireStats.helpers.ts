@@ -16,6 +16,34 @@ export const EMPIRE_COLORS = [
     "#ff437a", // E7 — pink
 ] as const;
 
+// --- Metrics (single source of truth) ---
+export const METRICS = [
+    "Score",
+    "Food",
+    "Industry",
+    "Dust",
+    "Science",
+    "Influence",
+    "Approval",
+    "Populations",
+    "Technologies",
+    "Units",
+    "Cities",
+    "Territories",
+] as const;
+
+export type EmpireMetricKey = (typeof METRICS)[number];
+
+// Keep only label overrides (anything not listed falls back to the key)
+const METRIC_LABEL_OVERRIDES: Partial<Record<EmpireMetricKey, string>> = {
+    Populations: "Population",
+    // Technologies: "Techs",
+};
+
+export function metricLabel(key: EmpireMetricKey): string {
+    return METRIC_LABEL_OVERRIDES[key] ?? key;
+}
+
 export function buildTicks(maxTurn: number): number[] {
     if (!maxTurn || maxTurn < 1) return [1];
 
