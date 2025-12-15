@@ -32,8 +32,7 @@ export function loadEndGameReportFromText(rawJsonText: string) {
 
     // Minimal validation: must look like an EL2 end-game export
     const hasMeta = !!report.version || !!report.generatedAtUtc;
-    const hasAnySection =
-        !!report.techOrder || !!report.allStats || !!report.cityBreakdown;
+    const hasAnySection = !!report.techOrder || !!report.allStats || !!report.cityBreakdown;
 
     if (!hasMeta || !hasAnySection) {
         store.setState({
