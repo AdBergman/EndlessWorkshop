@@ -8,31 +8,26 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
+
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
-import {
-    useEmpireStatsViewStore,
-} from "@/stores/empireStatsViewStore";
+import { useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
+
+import TurnTooltip, { LegendLabelByIndex } from "./TurnTooltip";
 import "../GameSummary.css";
+
 import {
-    METRICS,
-    EmpireMetricKey,
     buildTicks,
-    EMPIRE_COLORS,
+    buildChartData,
     empireIndex,
     factionName,
     formatNumber,
+    getEmpireColor,
+    getEmpireKey,
     legendLabelForEmpire,
     metricLabel,
+    METRICS,
+    EmpireMetricKey,
 } from "./empireStats.helpers";
-import TurnTooltip, { LegendLabelByIndex } from "./TurnTooltip";
-
-function getEmpireKey(idx: number) {
-    return `e${idx}`;
-}
-
-function getEmpireColor(idx: number) {
-    return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
-}
 
 export default function EmpireStatsView() {
     const state = useEndGameReportStore((s) => s.state);
@@ -80,28 +75,8 @@ export default function EmpireStatsView() {
         return map;
     }, [empires]);
 
-    // One row per turn: { turn, e0: value, e1: value, ... }
     const chartData = useMemo(() => {
-        const maxLen = empires.reduce(
-            (acc, e) => Math.max(acc, e?.PerTurn?.length ?? 0),
-            0
-        );
-
-        const rows: any[] = [];
-        for (let i = 0; i < maxLen; i++) {
-            const row: any = { turn: i + 1 };
-
-            for (const e of empires) {
-                const idx = empireIndex(e);
-                const entry = e?.PerTurn?.[i];
-                const v = entry?.[selectedMetric];
-                row[getEmpireKey(idx)] = typeof v === "number" ? v : 0;
-            }
-
-            rows.push(row);
-        }
-
-        return rows;
+        return buildChartData(empires, selectedMetric);
     }, [empires, selectedMetric]);
 
     const maxTurn =
@@ -166,15 +141,14 @@ export default function EmpireStatsView() {
                                     style={{
                                         background: dotColor,
                                         boxShadow:
-                                            idx === 0
-                                                ? "0 0 10px rgba(255,127,50,0.55)"
-                                                : "none",
+                                            idx === 0 ? "0 0 10px rgba(255,127,50,0.55)" : "none",
                                     }}
                                 />
 
                                 <span className="gs-empireName">
                   {idx === 0 ? "Player" : faction}
                 </span>
+
                                 <span className="gs-empireIndex">(E{idx})</span>
                             </label>
                         );
@@ -186,7 +160,10 @@ export default function EmpireStatsView() {
                 <p className="gs-muted">Select at least one empire to show the chart.</p>
             ) : (
                 <>
-                    <div className="gs-section gs-chartWrap" style={{ width: "100%", height: 360 }}>
+                    <div
+                        className="gs-section gs-chartWrap"
+                        style={{ width: "100%", height: 360 }}
+                    >
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <XAxis
@@ -196,6 +173,7 @@ export default function EmpireStatsView() {
                                     allowDecimals={false}
                                     ticks={ticks}
                                 />
+
                                 <YAxis tickFormatter={(v) => formatNumber(v)} />
 
                                 <Tooltip
