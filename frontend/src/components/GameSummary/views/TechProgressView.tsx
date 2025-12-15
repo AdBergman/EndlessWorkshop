@@ -1,10 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { EndGameExportV1, TechOrderEntryV1 } from "@/types/endGameReport";
+import { TechOrderEntryV1 } from "@/types/endGameReport";
+import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
-
-type Props = {
-    report: EndGameExportV1;
-};
 
 type Mode = "global" | "empire";
 
@@ -14,16 +11,36 @@ function displayLabel(e: TechOrderEntryV1): string {
     return dn || e.technologyDefinitionName;
 }
 
-export default function TechProgressView({ report }: Props) {
-    const techOrder = report.techOrder;
+export default function TechProgressView() {
+    const state = useEndGameReportStore((s) => s.state);
 
     const [mode, setMode] = useState<Mode>("global");
     const [selectedEmpire, setSelectedEmpire] = useState<number>(0);
 
-    const empireCount = techOrder?.empireCount ?? 0;
+    if (state.status !== "ok") {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Tech Progress</h3>
+                <p className="gs-muted">No loaded report.</p>
+            </div>
+        );
+    }
+
+    const techOrder = state.techOrder;
+
+    if (!techOrder) {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Tech Progress</h3>
+                <p className="gs-muted">No techOrder section found in this report.</p>
+            </div>
+        );
+    }
+
+    const empireCount = techOrder.empireCount ?? 0;
 
     const { maxTurn, groupedGlobal, groupedByEmpire } = useMemo(() => {
-        const entries = techOrder?.entries ?? [];
+        const entries = techOrder.entries ?? [];
         let maxTurn = 0;
 
         const groupedGlobal = new Map<number, TechOrderEntryV1[]>();
@@ -54,23 +71,12 @@ export default function TechProgressView({ report }: Props) {
 
         groupedByEmpire.forEach((perEmpire) => {
             perEmpire.forEach((list) => {
-                list.sort((a, b) =>
-                    a.technologyDefinitionName.localeCompare(b.technologyDefinitionName)
-                );
+                list.sort((a, b) => a.technologyDefinitionName.localeCompare(b.technologyDefinitionName));
             });
         });
 
         return { maxTurn, groupedGlobal, groupedByEmpire };
     }, [techOrder]);
-
-    if (!techOrder) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Tech Progress</h3>
-                <p className="gs-muted">No techOrder section found in this report.</p>
-            </div>
-        );
-    }
 
     const turnsSorted = (
         mode === "global"

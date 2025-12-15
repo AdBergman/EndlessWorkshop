@@ -30,15 +30,17 @@ export function loadEndGameReportFromText(rawJsonText: string) {
 
     const report = parsed.data;
 
-// Minimal "is this really our export?" validation
+    // Minimal validation: must look like an EL2 end-game export
     const hasMeta = !!report.version || !!report.generatedAtUtc;
-    const hasAnySection = !!report.techOrder || !!report.allStats || !!report.cityBreakdown;
+    const hasAnySection =
+        !!report.techOrder || !!report.allStats || !!report.cityBreakdown;
 
     if (!hasMeta || !hasAnySection) {
         store.setState({
             status: "error",
             rawJsonText,
-            error: "This file is valid JSON, but it does not look like an Endless Legend 2 end-game export.",
+            error:
+                "This file is valid JSON, but it does not look like an Endless Legend 2 end-game export.",
             warnings: parsed.warnings,
         });
         return;
@@ -48,6 +50,9 @@ export function loadEndGameReportFromText(rawJsonText: string) {
         status: "ok",
         rawJsonText,
         report,
+        techOrder: report.techOrder ?? null,
+        allStats: report.allStats ?? null,
+        cityBreakdown: report.cityBreakdown ?? null,
         warnings: parsed.warnings,
     });
 }
