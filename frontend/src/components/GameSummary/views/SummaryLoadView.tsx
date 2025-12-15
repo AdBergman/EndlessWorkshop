@@ -1,14 +1,17 @@
 import React from "react";
 import "../GameSummary.css";
-import { useEndGameReportStore } from "@/stores/endGameReportStore";
+import { loadEndGameReportFromText } from "@/features/endGame/import/endGameReportLoader";
 
 export default function SummaryLoadView() {
-    const setRawJsonText = useEndGameReportStore((s) => s.setRawJsonText);
-
     const onFilePicked = async (file: File | null) => {
         if (!file) return;
         const text = await file.text();
-        setRawJsonText(text);
+        try {
+            loadEndGameReportFromText(text);
+        } catch (e) {
+            console.error(e);
+            alert((e as Error)?.message ?? "Failed to load report.");
+        }
     };
 
     const loadExample = async () => {
@@ -19,10 +22,10 @@ export default function SummaryLoadView() {
                 return;
             }
             const text = await res.text();
-            setRawJsonText(text);
+            loadEndGameReportFromText(text);
         } catch (e) {
             console.error(e);
-            alert("Failed to load example JSON. Check devtools console.");
+            alert((e as Error)?.message ?? "Failed to load example JSON.");
         }
     };
 

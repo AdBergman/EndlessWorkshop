@@ -1,17 +1,22 @@
 import { create } from "zustand";
+import { EndGameExportV1, ParseWarning } from "@/types/endGameReport";
 
-type EndGameReportState = {
-  rawJsonText: string | null;
-  setRawJsonText: (text: string | null) => void;
-  clear: () => void;
+export type EndGameReportState =
+    | { status: "empty" }
+    | { status: "loading"; rawJsonText: string }
+    | { status: "error"; rawJsonText: string; error: string; warnings: ParseWarning[] }
+    | { status: "ok"; rawJsonText: string; report: EndGameExportV1; warnings: ParseWarning[] };
+
+type Store = {
+    state: EndGameReportState;
+
+    setState: (state: EndGameReportState) => void;
+    clear: () => void;
 };
 
-/**
- * Minimal "sticky import" store.
- * Stores only the raw JSON text so the report persists across route changes.
- */
-export const useEndGameReportStore = create<EndGameReportState>((set) => ({
-  rawJsonText: null,
-  setRawJsonText: (text) => set({ rawJsonText: text }),
-  clear: () => set({ rawJsonText: null }),
+export const useEndGameReportStore = create<Store>((set) => ({
+    state: { status: "empty" },
+
+    setState: (state) => set({ state }),
+    clear: () => set({ state: { status: "empty" } }),
 }));
