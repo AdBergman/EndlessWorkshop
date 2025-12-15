@@ -1,15 +1,14 @@
 import React from "react";
 import "../GameSummary.css";
+import { useEndGameReportStore } from "@/stores/endGameReportStore";
 
-type Props = {
-    onLoadedJsonText: (jsonText: string) => void;
-};
+export default function SummaryLoadView() {
+    const setRawJsonText = useEndGameReportStore((s) => s.setRawJsonText);
 
-export default function SummaryLoadView({ onLoadedJsonText }: Props) {
     const onFilePicked = async (file: File | null) => {
         if (!file) return;
         const text = await file.text();
-        onLoadedJsonText(text);
+        setRawJsonText(text);
     };
 
     const loadExample = async () => {
@@ -20,7 +19,7 @@ export default function SummaryLoadView({ onLoadedJsonText }: Props) {
                 return;
             }
             const text = await res.text();
-            onLoadedJsonText(text);
+            setRawJsonText(text);
         } catch (e) {
             console.error(e);
             alert("Failed to load example JSON. Check devtools console.");
@@ -32,9 +31,7 @@ export default function SummaryLoadView({ onLoadedJsonText }: Props) {
             <h2 className="gs-title">Game Summary</h2>
 
             <div className="gs-panel gs-section">
-                <p className="gs-muted">
-                    Load an end-game export JSON to view your run.
-                </p>
+                <p className="gs-muted">Load an end-game export JSON to view your run.</p>
 
                 <div className="gs-row gs-section">
                     <button className="gs-btn" onClick={loadExample}>
@@ -53,7 +50,7 @@ export default function SummaryLoadView({ onLoadedJsonText }: Props) {
                 </div>
 
                 <p className="gs-muted gs-section">
-                    Later: save to DB + reload. Auth comes later.
+                    Preview: this report stays loaded while you browse other tabs.
                 </p>
             </div>
         </div>

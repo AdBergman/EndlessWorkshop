@@ -1,13 +1,16 @@
-import React, { useMemo, useState } from "react";
-import { EndGameExportV1 } from "@/types/endGameReport";
+import React, { useMemo } from "react";
 import { parseEndGameExport } from "@/utils/parsers/endGameReportParser";
 import SummaryLoadView from "./views/SummaryLoadView";
 import TechProgressView from "./views/TechProgressView";
 import ReportMetaBar from "./components/ReportMetaBar";
 import "./GameSummary.css";
+import { useEndGameReportStore } from "@/stores/endGameReportStore";
+import { EndGameExportV1 } from "@/types/endGameReport";
 
 export default function GameSummaryPage() {
-    const [rawJsonText, setRawJsonText] = useState<string | null>(null);
+    const rawJsonText = useEndGameReportStore((s) => s.rawJsonText);
+    const setRawJsonText = useEndGameReportStore((s) => s.setRawJsonText);
+    const clear = useEndGameReportStore((s) => s.clear);
 
     const parsed = useMemo(() => {
         if (!rawJsonText) return null;
@@ -17,7 +20,7 @@ export default function GameSummaryPage() {
     const report: EndGameExportV1 | undefined = parsed?.ok ? parsed.data : undefined;
 
     if (!rawJsonText) {
-        return <SummaryLoadView onLoadedJsonText={setRawJsonText} />;
+        return <SummaryLoadView />;
     }
 
     if (!parsed?.ok) {
@@ -64,7 +67,7 @@ export default function GameSummaryPage() {
                     version={report.version ?? "unknown"}
                     generatedAtUtc={report.generatedAtUtc ?? "unknown"}
                     warnings={parsed.warnings}
-                    onReset={() => setRawJsonText(null)}
+                    onReset={clear}
                 />
             </div>
 
