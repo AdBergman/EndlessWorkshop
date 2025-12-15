@@ -2,6 +2,8 @@ import React, { useMemo, useState } from "react";
 import { TechOrderEntryV1 } from "@/types/endGameReport";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
+import { EMPIRE_COLORS } from "./empireStats.helpers";
+import { buildEmpireMeta, EmpireMeta, groupTechOrderEntries } from "./techProgress.helpers";
 
 type Mode = "global" | "empire";
 
@@ -9,6 +11,10 @@ function displayLabel(e: TechOrderEntryV1): string {
     const dn = e.technologyDisplayName;
     if (dn && dn.startsWith("%")) return e.technologyDefinitionName;
     return dn || e.technologyDefinitionName;
+}
+
+function empireColor(idx: number): string {
+    return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
 }
 
 export default function TechProgressView() {
@@ -39,43 +45,21 @@ export default function TechProgressView() {
 
     const empireCount = techOrder.empireCount ?? 0;
 
+    // Build empire labels using allStats if available (best UX), fallback otherwise.
+    const empireMeta: EmpireMeta[] = useMemo(() => {
+        const allStats: any = (state as any).allStats;
+        return buildEmpireMeta(empireCount, allStats);
+    }, [empireCount, state]);
+
+    const empireLabelByIndex = useMemo(() => {
+        const m = new Map<number, EmpireMeta>();
+        for (const e of empireMeta) m.set(e.idx, e);
+        return m;
+    }, [empireMeta]);
+
     const { maxTurn, groupedGlobal, groupedByEmpire } = useMemo(() => {
         const entries = techOrder.entries ?? [];
-        let maxTurn = 0;
-
-        const groupedGlobal = new Map<number, TechOrderEntryV1[]>();
-        const groupedByEmpire = new Map<number, Map<number, TechOrderEntryV1[]>>();
-
-        for (const e of entries) {
-            if (e.turn > maxTurn) maxTurn = e.turn;
-
-            // global
-            if (!groupedGlobal.has(e.turn)) groupedGlobal.set(e.turn, []);
-            groupedGlobal.get(e.turn)!.push(e);
-
-            // per empire -> per turn
-            if (!groupedByEmpire.has(e.empireIndex)) groupedByEmpire.set(e.empireIndex, new Map());
-            const perEmpire = groupedByEmpire.get(e.empireIndex)!;
-            if (!perEmpire.has(e.turn)) perEmpire.set(e.turn, []);
-            perEmpire.get(e.turn)!.push(e);
-        }
-
-        // sort within turn for stable display
-        groupedGlobal.forEach((list) => {
-            list.sort(
-                (a, b) =>
-                    a.empireIndex - b.empireIndex ||
-                    a.technologyDefinitionName.localeCompare(b.technologyDefinitionName)
-            );
-        });
-
-        groupedByEmpire.forEach((perEmpire) => {
-            perEmpire.forEach((list) => {
-                list.sort((a, b) => a.technologyDefinitionName.localeCompare(b.technologyDefinitionName));
-            });
-        });
-
-        return { maxTurn, groupedGlobal, groupedByEmpire };
+        return groupTechOrderEntries(entries);
     }, [techOrder]);
 
     const turnsSorted = (
@@ -125,15 +109,41 @@ export default function TechProgressView() {
                             value={selectedEmpire}
                             onChange={(e) => setSelectedEmpire(Number(e.target.value))}
                         >
-                            {Array.from({ length: empireCount }, (_, i) => i).map((i) => (
-                                <option key={i} value={i}>
-                                    {i}
+                            {empireMeta.map((em) => (
+                                <option key={em.idx} value={em.idx}>
+                                    {em.labelLong}
                                 </option>
                             ))}
                         </select>
                     </div>
                 )}
             </div>
+
+            {/* Always show legend in global mode (no click, no "Empire legend" line) */}
+            {mode === "global" && empireCount > 0 && (
+                <div className="gs-section">
+                    <div className="gs-row gs-wrap" style={{ gap: 10 }}>
+                        {empireMeta.map((em) => (
+                            <span
+                                key={em.idx}
+                                className="gs-pill"
+                                style={{ display: "inline-flex", gap: 8, alignItems: "center" }}
+                            >
+                <span
+                    className="gs-pillPrefix"
+                    style={{
+                        color: empireColor(em.idx),
+                        fontWeight: em.isPlayer ? 600 : 500,
+                    }}
+                >
+                  E{em.idx}
+                </span>
+                <span>{em.labelShort}</span>
+              </span>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             <div className="gs-section">
                 {turnsSorted.length === 0 ? (
@@ -145,17 +155,27 @@ export default function TechProgressView() {
                             <div key={turn} className="gs-turnRow">
                                 <div className="gs-turnBadge">Turn {turn}</div>
                                 <div className="gs-pillWrap">
-                                    {entries.map((e, idx) => (
-                                        <span
-                                            key={`${e.empireIndex}-${e.turn}-${e.technologyDefinitionName}-${idx}`}
-                                            className="gs-pill"
-                                        >
-                      {mode === "global" ? (
-                          <span className="gs-pillPrefix">E{e.empireIndex}</span>
-                      ) : null}
-                                            {displayLabel(e)}
-                    </span>
-                                    ))}
+                                    {entries.map((e, idx) => {
+                                        const prefixColor = empireColor(e.empireIndex);
+                                        return (
+                                            <span
+                                                key={`${e.empireIndex}-${e.turn}-${e.technologyDefinitionName}-${idx}`}
+                                                className="gs-pill"
+                                                title={
+                                                    mode === "global"
+                                                        ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
+                                                        : undefined
+                                                }
+                                            >
+                        {mode === "global" ? (
+                            <span className="gs-pillPrefix" style={{ color: prefixColor }}>
+                            E{e.empireIndex}
+                          </span>
+                        ) : null}
+                                                {displayLabel(e)}
+                      </span>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         );
