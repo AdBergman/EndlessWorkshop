@@ -114,7 +114,7 @@
 .gs-h3 {
     margin: 0;
     font-size: 1.15rem;
-    color: #ffcc00;
+    color: #ff7f32; /* EWShop orange */
 }
 
 .gs-toolbar {
@@ -166,6 +166,9 @@
 
 .gs-spaceBetween { justify-content: space-between; }
 .gs-wrap { flex-wrap: wrap; }
+.gs-chartWrap {
+    position: relative;
+}
 
 .gs-empireCheck {
     display: flex;

@@ -8,7 +8,7 @@ function chooseTurnTickStep(maxTurn: number): number {
 export const EMPIRE_COLORS = [
     "#ff7f32", // E0 — Player (orange, EWShop primary)
     "#4fc3f7", // E1 — light blue
-    "rgba(0,236,10,0.57)", // E2 — green
+    "#4caf50", // E2 — green
     "#661277", // E3 — purple
     "#ffd54f", // E4 — yellow
     "#fb0000", // E5 — red

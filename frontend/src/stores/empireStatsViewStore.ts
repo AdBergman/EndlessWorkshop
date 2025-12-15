@@ -26,7 +26,7 @@ type Store = {
 
 export const useEmpireStatsViewStore = create<Store>((set, get) => ({
     selectedMetric: "Score",
-    selectedEmpires: [0],
+    selectedEmpires: [], // start empty so ensureDefaults can initialize
 
     setMetric: (m) => set({ selectedMetric: m }),
 
@@ -49,9 +49,9 @@ export const useEmpireStatsViewStore = create<Store>((set, get) => ({
 
     ensureDefaults: (empireCount) => {
         const { selectedEmpires } = get();
-        // If nothing selected, default to player empire 0 (if it exists)
         if (selectedEmpires.length === 0 && empireCount > 0) {
-            set({ selectedEmpires: [0] });
+            // default = select all
+            set({ selectedEmpires: Array.from({ length: empireCount }, (_, i) => i) });
         }
     },
 }));

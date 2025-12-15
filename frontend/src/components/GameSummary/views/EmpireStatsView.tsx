@@ -173,7 +173,7 @@ export default function EmpireStatsView() {
                 <p className="gs-muted">Select at least one empire to show the chart.</p>
             ) : (
                 <>
-                    <div className="gs-section" style={{ width: "100%", height: 360 }}>
+                    <div className="gs-section gs-chartWrap" style={{ width: "100%", height: 360 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <XAxis
@@ -186,6 +186,10 @@ export default function EmpireStatsView() {
                                 <YAxis tickFormatter={(v) => formatNumber(v)} />
 
                                 <Tooltip
+                                    isAnimationActive={false}
+                                    cursor={false}
+                                    wrapperStyle={{ pointerEvents: "none" }}
+                                    allowEscapeViewBox={{ x: false, y: false }}
                                     content={(props) => (
                                         <TurnTooltip {...(props as any)} legendLabelByIndex={legendLabelByIndex} />
                                     )}
