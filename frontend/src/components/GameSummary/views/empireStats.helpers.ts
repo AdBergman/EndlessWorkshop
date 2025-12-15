@@ -5,6 +5,17 @@ function chooseTurnTickStep(maxTurn: number): number {
     return 25;
 }
 
+export const EMPIRE_COLORS = [
+    "#ff7f32", // E0 — Player (orange, EWShop primary)
+    "#4fc3f7", // E1 — light blue
+    "rgba(0,236,10,0.57)", // E2 — green
+    "#661277", // E3 — purple
+    "#ffd54f", // E4 — yellow
+    "#fb0000", // E5 — red
+    "#001fea", // E6 — dark blue
+    "#ff437a", // E7 — pink
+] as const;
+
 export function buildTicks(maxTurn: number): number[] {
     if (!maxTurn || maxTurn < 1) return [1];
 
@@ -12,7 +23,6 @@ export function buildTicks(maxTurn: number): number[] {
     const ticks: number[] = [1];
 
     for (let t = step; t < maxTurn; t += step) ticks.push(t);
-
     if (ticks[ticks.length - 1] !== maxTurn) ticks.push(maxTurn);
 
     return ticks;

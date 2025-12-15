@@ -1,16 +1,25 @@
-import React, {useEffect, useMemo} from "react";
-import {Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
-import {useEndGameReportStore} from "@/stores/endGameReportStore";
-import {EmpireMetricKey, useEmpireStatsViewStore,} from "@/stores/empireStatsViewStore";
+import React, { useEffect, useMemo } from "react";
+import {
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
+import { useEndGameReportStore } from "@/stores/endGameReportStore";
+import { EmpireMetricKey, useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
 import "../GameSummary.css";
 import {
     buildTicks,
+    EMPIRE_COLORS,
     empireIndex,
     factionName,
     formatNumber,
-    legendLabelForEmpire
-} from "@/components/GameSummary/views/empireStats.helpers";
-import TurnTooltip from "./TurnTooltip";
+    legendLabelForEmpire,
+} from "./empireStats.helpers";
+import TurnTooltip, { LegendLabelByIndex } from "./TurnTooltip";
 
 const METRICS: EmpireMetricKey[] = [
     "Score",
@@ -26,19 +35,6 @@ const METRICS: EmpireMetricKey[] = [
     "Cities",
     "Territories",
 ];
-
-const EMPIRE_COLORS = [
-    "#ff7f32", // E0 — Player (orange, EWShop primary)
-    "#4fc3f7", // E1 — light blue
-    "rgba(0,236,10,0.57)", // E2 — green
-    "#661277", // E3 — purple
-    "#ffd54f", // E4 — yellow
-    "#fb0000", // E5 — red
-    "#001fea", // E6 — dark blue
-    "#ff437a", // E7 — pink
-];
-
-// ---------- component ----------
 
 export default function EmpireStatsView() {
     const state = useEndGameReportStore((s) => s.state);
@@ -77,7 +73,7 @@ export default function EmpireStatsView() {
         ensureDefaults(empireCount);
     }, [empireCount, ensureDefaults]);
 
-    const legendLabelByIndex = useMemo(() => {
+    const legendLabelByIndex: LegendLabelByIndex = useMemo(() => {
         const map = new Map<number, string>();
         empires.forEach((e) => {
             const idx = empireIndex(e);
@@ -87,12 +83,9 @@ export default function EmpireStatsView() {
     }, [empires]);
 
     const chartData = useMemo(() => {
-        const maxLen = empires.reduce(
-            (acc, e) => Math.max(acc, e?.PerTurn?.length ?? 0),
-            0
-        );
-
+        const maxLen = empires.reduce((acc, e) => Math.max(acc, e?.PerTurn?.length ?? 0), 0);
         const rows: any[] = [];
+
         for (let i = 0; i < maxLen; i++) {
             const row: any = { turn: i + 1 };
 
@@ -109,9 +102,7 @@ export default function EmpireStatsView() {
         return rows;
     }, [empires, selectedMetric]);
 
-    const maxTurn =
-        chartData.length > 0 ? Number(chartData[chartData.length - 1].turn) : 1;
-
+    const maxTurn = chartData.length > 0 ? Number(chartData[chartData.length - 1].turn) : 1;
     const ticks = useMemo(() => buildTicks(maxTurn), [maxTurn]);
 
     return (
@@ -159,26 +150,18 @@ export default function EmpireStatsView() {
 
                         return (
                             <label key={idx} className="gs-empireCheck">
-                                <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    onChange={() => toggleEmpire(idx)}
-                                />
+                                <input type="checkbox" checked={checked} onChange={() => toggleEmpire(idx)} />
 
                                 <span
                                     aria-hidden
                                     className="gs-empireDot"
                                     style={{
                                         background: dotColor,
-                                        boxShadow:
-                                            idx === 0 ? "0 0 10px rgba(255,127,50,0.55)" : "none",
+                                        boxShadow: idx === 0 ? "0 0 10px rgba(255,127,50,0.55)" : "none",
                                     }}
                                 />
 
-                                <span className="gs-empireName">
-                  {idx === 0 ? "Player" : faction}
-                </span>
-
+                                <span className="gs-empireName">{idx === 0 ? "Player" : faction}</span>
                                 <span className="gs-empireIndex">(E{idx})</span>
                             </label>
                         );
@@ -201,20 +184,14 @@ export default function EmpireStatsView() {
                                     ticks={ticks}
                                 />
                                 <YAxis tickFormatter={(v) => formatNumber(v)} />
+
                                 <Tooltip
                                     content={(props) => (
                                         <TurnTooltip {...(props as any)} legendLabelByIndex={legendLabelByIndex} />
                                     )}
                                 />
-                                <Legend
-                                    formatter={(value) => {
-                                        if (typeof value === "string" && value.startsWith("e")) {
-                                            const idx = Number(value.slice(1));
-                                            return legendLabelByIndex.get(idx) ?? value;
-                                        }
-                                        return value;
-                                    }}
-                                />
+
+                                <Legend />
 
                                 {selectedEmpires.map((idx) => {
                                     const color = EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
