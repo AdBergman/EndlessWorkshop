@@ -1,19 +1,16 @@
-import React, { useEffect, useMemo } from "react";
-import {
-    Legend,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts";
-import { useEndGameReportStore } from "@/stores/endGameReportStore";
-import {
-    EmpireMetricKey,
-    useEmpireStatsViewStore,
-} from "@/stores/empireStatsViewStore";
+import React, {useEffect, useMemo} from "react";
+import {Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import {useEndGameReportStore} from "@/stores/endGameReportStore";
+import {EmpireMetricKey, useEmpireStatsViewStore,} from "@/stores/empireStatsViewStore";
 import "../GameSummary.css";
+import {
+    buildTicks,
+    empireIndex,
+    factionName,
+    formatNumber,
+    legendLabelForEmpire
+} from "@/components/GameSummary/views/empireStats.helpers";
+import TurnTooltip from "./TurnTooltip";
 
 const METRICS: EmpireMetricKey[] = [
     "Score",
@@ -40,85 +37,6 @@ const EMPIRE_COLORS = [
     "#001fea", // E6 — dark blue
     "#ff437a", // E7 — pink
 ];
-
-// ---------- helpers (pure) ----------
-
-function chooseTurnTickStep(maxTurn: number): number {
-    if (maxTurn <= 60) return 5;
-    if (maxTurn <= 140) return 10;
-    if (maxTurn <= 260) return 20;
-    return 25;
-}
-
-function buildTicks(maxTurn: number): number[] {
-    if (!maxTurn || maxTurn < 1) return [1];
-
-    const step = chooseTurnTickStep(maxTurn);
-    const ticks: number[] = [1];
-
-    for (let t = step; t < maxTurn; t += step) ticks.push(t);
-
-    if (ticks[ticks.length - 1] !== maxTurn) ticks.push(maxTurn);
-
-    return ticks;
-}
-
-function empireIndex(e: any): number {
-    return e?.EmpireIndex ?? e?.empireIndex ?? 0;
-}
-
-function factionName(e: any, idx: number): string {
-    return e?.FactionDisplayName || e?.FactionKey || `Empire ${idx}`;
-}
-
-function legendLabelForEmpire(e: any, idx: number): string {
-    const faction = factionName(e, idx);
-    return idx === 0 ? `${faction} ★` : faction;
-}
-
-function formatNumber(v: unknown): string {
-    const n = typeof v === "number" ? v : Number(v);
-    if (!Number.isFinite(n)) return "0";
-    return Math.round(n).toString();
-}
-
-// ---------- tooltip (typed locally; stable across recharts versions) ----------
-
-type RechartsTooltipPayloadItem = {
-    dataKey?: string | number;
-    name?: string;
-    value?: unknown;
-    color?: string;
-};
-
-type RechartsTooltipProps = {
-    active?: boolean;
-    payload?: RechartsTooltipPayloadItem[];
-    label?: number | string;
-};
-
-function TurnTooltip({ active, payload, label }: RechartsTooltipProps) {
-    if (!active || !payload || payload.length === 0) return null;
-
-    return (
-        <div className="gs-tooltip">
-            <div className="gs-tooltip__title">Turn {label}</div>
-            <div className="gs-tooltip__rows">
-                {payload.map((p) => (
-                    <div key={String(p.dataKey)} className="gs-tooltip__row">
-            <span
-                className="gs-tooltip__dot"
-                style={{ background: p.color || "#fff" }}
-                aria-hidden
-            />
-                        <span className="gs-tooltip__name">{p.name ?? p.dataKey}</span>
-                        <span className="gs-tooltip__value">{formatNumber(p.value)}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
 
 // ---------- component ----------
 
@@ -284,9 +202,9 @@ export default function EmpireStatsView() {
                                 />
                                 <YAxis tickFormatter={(v) => formatNumber(v)} />
                                 <Tooltip
-                                    content={<TurnTooltip />}
-                                    formatter={(value) => formatNumber(value)}
-                                    labelFormatter={(label) => `Turn ${label}`}
+                                    content={(props) => (
+                                        <TurnTooltip {...(props as any)} legendLabelByIndex={legendLabelByIndex} />
+                                    )}
                                 />
                                 <Legend
                                     formatter={(value) => {
