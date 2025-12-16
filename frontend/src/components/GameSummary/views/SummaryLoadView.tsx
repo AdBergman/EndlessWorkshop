@@ -1,5 +1,6 @@
 import React from "react";
 import "../GameSummary.css";
+import "../CityBreakdown.css";
 import { loadEndGameReportFromText } from "@/features/endGame/import/endGameReportLoader";
 
 export default function SummaryLoadView() {

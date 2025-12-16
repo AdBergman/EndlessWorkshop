@@ -1,24 +1,18 @@
-import React, { useEffect, useMemo } from "react";
-import {
-    Legend,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from "recharts";
+import React, {useEffect, useMemo} from "react";
+import {Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
 
-import { useEndGameReportStore } from "@/stores/endGameReportStore";
-import { useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
+import {useEndGameReportStore} from "@/stores/endGameReportStore";
+import {useEmpireStatsViewStore} from "@/stores/empireStatsViewStore";
 
-import TurnTooltip, { LegendLabelByIndex } from "./TurnTooltip";
+import TurnTooltip, {LegendLabelByIndex} from "./TurnTooltip";
 import "../GameSummary.css";
+import "../CityBreakdown.css";
 
 import {
-    buildTicks,
     buildChartData,
+    buildTicks,
     empireIndex,
+    EmpireMetricKey,
     factionName,
     formatNumber,
     getEmpireColor,
@@ -26,7 +20,6 @@ import {
     legendLabelForEmpire,
     metricLabel,
     METRICS,
-    EmpireMetricKey,
 } from "./empireStats.helpers";
 
 export default function EmpireStatsView() {

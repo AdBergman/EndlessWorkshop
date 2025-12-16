@@ -1,6 +1,7 @@
 import React from "react";
 import { formatNumber } from "./empireStats.helpers";
 import "../GameSummary.css";
+import "../CityBreakdown.css";
 
 export type LegendLabelByIndex = Map<number, string>;
 

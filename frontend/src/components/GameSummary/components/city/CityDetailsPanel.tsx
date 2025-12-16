@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import "../../GameSummary.css";
+import "../../CityDetailsPanel.css";
 import type { CityVM } from "../../views/cityBreakdown.helpers";
 import {
     empireColor,

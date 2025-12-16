@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { TechOrderEntryV1 } from "@/types/endGameReport";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
+import "../TechProgress.css";
 import { EMPIRE_COLORS } from "./empireStats.helpers";
 import { buildEmpireMeta, EmpireMeta, groupTechOrderEntries } from "./techProgress.helpers";
 

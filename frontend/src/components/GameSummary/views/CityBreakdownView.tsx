@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../GameSummary.css";
+import '../CityBreakdown.css';
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import { buildEmpireMeta, type EmpireMeta } from "./techProgress.helpers";
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { ParseWarning } from "@/types/endGameReport";
 import "../GameSummary.css";
+import "../CityBreakdown.css";
 
 type Props = {
     version: string;

@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
+import "../CityBreakdown.css";
 import { buildEmpireMeta, EmpireMeta } from "./techProgress.helpers";
 import { formatNumber } from "./empireStats.helpers";
 
