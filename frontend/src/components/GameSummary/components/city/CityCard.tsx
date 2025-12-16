@@ -1,7 +1,12 @@
 import React from "react";
 import "../../GameSummary.css";
 import type { CityVM } from "../../views/cityBreakdown.helpers";
-import { empireColor, formatInt, formatRatioPctMaybe, humanizeApprovalState } from "../../views/cityBreakdown.helpers";
+import {
+    empireColor,
+    formatInt,
+    formatRatioPctMaybe,
+    humanizeApprovalState,
+} from "../../views/cityBreakdown.helpers";
 
 type Props = {
     city: CityVM;
@@ -13,14 +18,17 @@ export default function CityCard({ city, selected, onSelect }: Props) {
     const color = empireColor(city.empireIndex);
 
     const approvalHuman = humanizeApprovalState(city.scoreLike.approvalState);
-    const approvalPctText = city.scoreLike.approvalPct !== null ? formatRatioPctMaybe(city.scoreLike.approvalPct) : null;
+    const approvalPctText =
+        city.scoreLike.approvalPct !== null
+            ? formatRatioPctMaybe(city.scoreLike.approvalPct)
+            : null;
 
     const pop = city.scoreLike.population;
     const popMax = city.scoreLike.maxPopulation;
 
     const prod = city.scoreLike.productionNet;
 
-    const regions = city.map.territoryCount ?? 0;
+    const territories = city.map.territoryCount ?? 0;
     const footprint = city.map.extensionDistrictsCount ?? 0;
 
     return (
@@ -29,11 +37,13 @@ export default function CityCard({ city, selected, onSelect }: Props) {
             className={`gs-cityCard ${selected ? "gs-cityCard--selected" : ""}`}
             style={{ ["--empire-color" as any]: color }}
             onClick={() => onSelect(city.id)}
+            aria-pressed={selected}
         >
+            {/* Top row */}
             <div className="gs-cityCardTop">
                 <div className="gs-cityTitleRow">
                     <div className="gs-cityName">{city.name}</div>
-                    <div className="gs-cityEmpire" style={{ color: "rgba(255,255,255,0.72)" }}>
+                    <div className="gs-cityEmpire">
                         <span style={{ color, fontWeight: 700 }}>{city.empireLabel}</span>
                     </div>
                 </div>
@@ -49,6 +59,7 @@ export default function CityCard({ city, selected, onSelect }: Props) {
                 ) : null}
             </div>
 
+            {/* Stats */}
             <div className="gs-cityStats">
                 <div className="gs-cityStat">
                     <div className="gs-cityStatValue">
@@ -66,22 +77,27 @@ export default function CityCard({ city, selected, onSelect }: Props) {
                 <div className="gs-cityStat">
                     <div className="gs-cityStatValue">
                         {approvalHuman}
-                        {approvalPctText ? <span className="gs-muted"> • {approvalPctText}</span> : null}
+                        {approvalPctText ? (
+                            <span className="gs-muted"> • {approvalPctText}</span>
+                        ) : null}
                     </div>
                     <div className="gs-cityStatLabel">Approval</div>
                 </div>
 
                 <div className="gs-cityStat">
                     <div className="gs-cityStatValue">
-                        {formatInt(regions)} <span className="gs-muted">•</span> {formatInt(footprint)}
+                        {formatInt(territories)} <span className="gs-muted">•</span>{" "}
+                        {formatInt(footprint)}
                     </div>
-                    <div className="gs-cityStatLabel">Regions • Footprint</div>
+                    <div className="gs-cityStatLabel">Territories • Footprint</div>
                 </div>
             </div>
 
+            {/* Growth hint */}
             {city.growth.turnBeforeGrowth !== null ? (
                 <div className="gs-citySubline">
-                    +1 pop in <b>{city.growth.turnBeforeGrowth}</b> turn{city.growth.turnBeforeGrowth === 1 ? "" : "s"}
+                    +1 pop in <b>{city.growth.turnBeforeGrowth}</b>{" "}
+                    turn{city.growth.turnBeforeGrowth === 1 ? "" : "s"}
                 </div>
             ) : null}
         </button>

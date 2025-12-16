@@ -411,3 +411,63 @@ export function buildEmpireFilterOptions(params: {
 
     return opts;
 }
+
+// Defaults player empire (E0 by convention)
+export function defaultEmpireFilterIndex(): number {
+    return 0;
+}
+
+export function findCityById(cities: CityVM[], id: string | null): CityVM | null {
+    if (!id) return null;
+    return cities.find((c) => c.id === id) ?? null;
+}
+
+/**
+ * Keeps selection stable when sort/filter changes.
+ * Priority:
+ *  1) If prevSelectedId still exists in current list => keep it
+ *  2) Else pick best default city in the current list
+ */
+export function pickStableSelectedCityId(params: {
+    currentCities: CityVM[];
+    prevSelectedId: string | null;
+    sortKey: CitySortKey;
+    sortDir: SortDir;
+}): string | null {
+    const { currentCities, prevSelectedId } = params;
+
+    if (!currentCities.length) return null;
+
+    if (prevSelectedId && currentCities.some((c) => c.id === prevSelectedId)) {
+        return prevSelectedId;
+    }
+
+    // Prefer player capital, else any player city, else first.
+    return pickBestDefaultCityId(currentCities);
+}
+
+export function hasCityTag(city: { tags?: string[] } | null | undefined, tag: string): boolean {
+    return !!city?.tags?.includes(tag as any);
+}
+
+export function isDestroyedCity(city: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
+    if (!city) return false;
+    if (hasCityTag(city, "Destroyed")) return true;
+    const s = typeof (city as any).settlementStatus === "string" ? (city as any).settlementStatus : "";
+    return s.toLowerCase().includes("destroy");
+}
+
+export function isOutpostCity(city: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
+    if (!city) return false;
+    if (hasCityTag(city, "Outpost")) return true;
+    const s = typeof (city as any).settlementStatus === "string" ? (city as any).settlementStatus : "";
+    return s.toLowerCase().includes("outpost");
+}
+
+export function humanizeConstructible(raw: unknown): string {
+    const s = typeof raw === "string" ? raw.trim() : "";
+    if (!s) return "—";
+    // make "Constructible_FooBar" → "Foo Bar"
+    const last = s.includes("_") ? s.split("_").slice(1).join("_") : s;
+    return humanizePascal(last);
+}

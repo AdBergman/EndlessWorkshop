@@ -7,77 +7,82 @@ import {
     formatRatioPctMaybe,
     formatSignedPct1Decimal,
     humanizeApprovalState,
+    humanizeConstructible,
+    isDestroyedCity,
+    isOutpostCity,
 } from "../../views/cityBreakdown.helpers";
 
 type Props = {
     city: CityVM | null;
 };
 
+function safeText(v: unknown, fallback = "—"): string {
+    const s = typeof v === "string" ? v.trim() : "";
+    return s ? s : fallback;
+}
+
 export default function CityDetailsPanel({ city }: Props) {
+    // ✅ Hooks must run unconditionally
     const [showDebug, setShowDebug] = useState(false);
 
     const color = empireColor(city?.empireIndex ?? 0);
 
-    const headerBadges = useMemo(() => {
+    const badges = useMemo(() => {
         if (!city) return [];
         const list: Array<{ key: string; label: string; tone?: "danger" | "warn" | "neutral" }> = [];
+
         if (city.isCapital) list.push({ key: "capital", label: "Capital", tone: "neutral" });
         if (city.defense?.isBesieged) list.push({ key: "besieged", label: "Besieged", tone: "warn" });
         if (city.defense?.isMutinous) list.push({ key: "mutiny", label: "Mutiny", tone: "danger" });
+
+        // tags from parser (if present)
+        if (city.tags?.includes("Outpost")) list.push({ key: "outpost", label: "Outpost", tone: "warn" });
+        if (city.tags?.includes("Destroyed")) list.push({ key: "destroyed", label: "Destroyed", tone: "danger" });
+
         return list;
     }, [city]);
+
+    // ✅ Derived values (safe even when city is null)
+    const destroyed = isDestroyedCity(city as any);
+    const outpost = isOutpostCity(city as any);
 
     const population = city?.scoreLike?.population ?? 0;
     const maxPopulation = city?.scoreLike?.maxPopulation ?? null;
 
-    const approvalState = humanizeApprovalState(city?.scoreLike?.approvalState);
-    const approvalPct = city?.scoreLike?.approvalPct ?? null;
+    const approvalStateRaw = city?.scoreLike?.approvalState ?? "Unknown";
+    const approvalStateHuman = humanizeApprovalState(approvalStateRaw);
+    const approvalPctText =
+        city?.scoreLike?.approvalPct !== null && city?.scoreLike?.approvalPct !== undefined
+            ? formatRatioPctMaybe(city.scoreLike.approvalPct)
+            : null;
 
     const productionNet = city?.scoreLike?.productionNet ?? 0;
+
+    const controlledTiles = city?.map?.extensionDistrictsCount ?? null; // “Controlled Tiles” label in UI
+    const territories = city?.map?.territoryCount ?? null;
+    const distToCapital = city?.map?.distanceWithCapital ?? null;
 
     const turnsBeforeGrowth = city?.growth?.turnBeforeGrowth ?? null;
     const foodStock = city?.growth?.foodStock ?? null;
     const maxFoodStock = city?.growth?.maxFoodStock ?? null;
     const foodGainPct = city?.growth?.foodGainPct ?? null;
-    const growingPop = city?.growth?.growingPopulationName ?? null;
+    const foodGainText = foodGainPct !== null ? formatSignedPct1Decimal(foodGainPct) : null;
+    const growingPopName = safeText(city?.growth?.growingPopulationName, "—");
 
     const fortification = city?.defense?.fortification ?? null;
     const militia = city?.defense?.militiaUnits ?? null;
+    const isBesieged = !!city?.defense?.isBesieged;
+    const isMutinous = !!city?.defense?.isMutinous;
 
-    const isBesieged = Boolean(city?.defense?.isBesieged);
-    const isMutinous = Boolean(city?.defense?.isMutinous);
+    const settlementStatus = safeText(city?.settlementStatus, "—");
 
-    const status = city?.settlementStatus;
-    const statusLine = typeof status === "string" && status.trim() ? `Status: ${status}` : null;
+    const metaGuid = safeText(city?.meta?.guid, "—");
+    const metaTile = city?.meta?.tileIndex ?? null;
+    const metaFaction = safeText(city?.meta?.factionDefinitionName, "—");
+    const metaConstructible = humanizeConstructible(city?.meta?.currentConstructible);
+    const metaAffinity = humanizeConstructible(city?.meta?.currentConstructibleAffinity);
 
-    const defensePills = useMemo(() => {
-        if (!city) return [];
-        const pills: Array<{ key: string; label: string; tone?: "danger" | "warn" | "neutral" }> = [];
-        if (isBesieged) pills.push({ key: "besieged", label: "Besieged", tone: "warn" });
-        if (isMutinous) pills.push({ key: "mutiny", label: "Mutiny", tone: "danger" });
-        if (!isBesieged && !isMutinous) pills.push({ key: "stable", label: "Stable", tone: "neutral" });
-        return pills;
-    }, [city, isBesieged, isMutinous]);
-
-    const metaRows = useMemo(() => {
-        if (!city) return [];
-        const rows: Array<{ k: string; v: string }> = [];
-        const meta = city.meta;
-
-        if (meta.tileIndex !== null) rows.push({ k: "Tile index", v: String(meta.tileIndex) });
-        if (typeof meta.guid === "string" && meta.guid.trim()) rows.push({ k: "GUID", v: meta.guid });
-        if (typeof meta.factionDefinitionName === "string" && meta.factionDefinitionName.trim()) {
-            rows.push({ k: "Faction", v: meta.factionDefinitionName });
-        }
-        if (typeof meta.currentConstructible === "string" && meta.currentConstructible.trim()) {
-            rows.push({ k: "Constructing", v: meta.currentConstructible });
-        }
-        if (typeof meta.currentConstructibleAffinity === "string" && meta.currentConstructibleAffinity.trim()) {
-            rows.push({ k: "Constructible affinity", v: meta.currentConstructibleAffinity });
-        }
-        return rows;
-    }, [city]);
-
+    // ✅ Early return after hooks
     if (!city) {
         return (
             <div className="gs-panel">
@@ -88,7 +93,8 @@ export default function CityDetailsPanel({ city }: Props) {
     }
 
     return (
-        <div className="gs-panel">
+        <div className="gs-panel gs-cityDetailsPanel">
+            {/* Header */}
             <div className="gs-cityDetailsHeader">
                 <div className="gs-cityDetailsTitleRow">
                     <h3 className="gs-h3" style={{ margin: 0 }}>
@@ -97,9 +103,9 @@ export default function CityDetailsPanel({ city }: Props) {
                     <div className="gs-muted">{city.empireLabel}</div>
                 </div>
 
-                {headerBadges.length > 0 ? (
+                {badges.length > 0 ? (
                     <div className="gs-cityDetailsBadges">
-                        {headerBadges.map((b) => (
+                        {badges.map((b) => (
                             <span
                                 key={b.key}
                                 className={`gs-cityDetailsBadge ${
@@ -110,8 +116,8 @@ export default function CityDetailsPanel({ city }: Props) {
                                             : ""
                                 }`}
                             >
-                {b.label}
-              </span>
+                                {b.label}
+                            </span>
                         ))}
                     </div>
                 ) : (
@@ -119,26 +125,44 @@ export default function CityDetailsPanel({ city }: Props) {
                 )}
             </div>
 
-            {statusLine ? <div className="gs-muted gs-cityDetailsStatus">{statusLine}</div> : null}
+            <div className="gs-muted gs-cityDetailsStatus">
+                {settlementStatus !== "—" ? `Status: ${settlementStatus}` : null}
+            </div>
 
-            {/* Snapshot */}
+            {/* Step 2: empty-state messaging for destroyed/outpost */}
+            {destroyed || outpost ? (
+                <div className={`gs-cityNotice ${destroyed ? "gs-cityNotice--danger" : "gs-cityNotice--warn"}`}>
+                    <div className="gs-cityNoticeTitle">
+                        {destroyed ? "Destroyed settlement" : "Outpost settlement"}
+                    </div>
+                    <div className="gs-cityNoticeBody">
+                        {destroyed
+                            ? "This settlement was destroyed before the end of the game. Some city stats may be missing or meaningless."
+                            : "This settlement never became a full city. Growth/approval/production may be incomplete or not applicable."}
+                    </div>
+                </div>
+            ) : null}
+
+            {/* City Snapshot */}
             <div className="gs-section">
-                <div className="gs-overviewTitle">City Snapshot</div>
+                <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
+                    Snapshot
+                </div>
 
                 <div className="gs-cityDetailsGrid">
                     <div className="gs-cityDetailsMetric">
                         <div className="gs-cityDetailsMetricLabel">Population</div>
                         <div className="gs-cityDetailsMetricValue">
-                            {population}
-                            {maxPopulation ? <span className="gs-muted"> / {maxPopulation}</span> : null}
+                            {formatInt(population)}
+                            {maxPopulation ? <span className="gs-muted"> / {formatInt(maxPopulation)}</span> : null}
                         </div>
                     </div>
 
                     <div className="gs-cityDetailsMetric">
                         <div className="gs-cityDetailsMetricLabel">Approval</div>
                         <div className="gs-cityDetailsMetricValue">
-                            {approvalState}
-                            {approvalPct !== null ? <span className="gs-muted"> • {formatRatioPctMaybe(approvalPct) ?? "—"}</span> : null}
+                            {approvalStateHuman}
+                            {approvalPctText ? <span className="gs-muted"> • {approvalPctText}</span> : null}
                         </div>
                     </div>
 
@@ -148,77 +172,81 @@ export default function CityDetailsPanel({ city }: Props) {
                     </div>
 
                     <div className="gs-cityDetailsMetric">
-                        <div className="gs-cityDetailsMetricLabel">Fortification</div>
-                        <div className="gs-cityDetailsMetricValue">{fortification !== null ? formatInt(fortification) : "—"}</div>
+                        <div className="gs-cityDetailsMetricLabel">Defense</div>
+                        <div className="gs-cityDetailsMetricValue">
+                            {formatInt(fortification ?? "—")}
+                            <span className="gs-muted"> • </span>
+                            {formatInt(militia ?? "—")} <span className="gs-muted">militia</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* City Size */}
             <div className="gs-section">
-                <div className="gs-overviewTitle">City Size</div>
+                <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
+                    City Size
+                </div>
 
                 <div className="gs-cityDetailsGrid gs-cityDetailsGrid--two">
                     <div className="gs-cityDetailsMetric">
-                        <div className="gs-cityDetailsMetricLabel">City Footprint</div>
-                        <div className="gs-cityDetailsMetricValue">{formatInt(city.map?.extensionDistrictsCount ?? 0)}</div>
+                        <div className="gs-cityDetailsMetricLabel">Controlled tiles</div>
+                        <div className="gs-cityDetailsMetricValue">{formatInt(controlledTiles ?? 0)}</div>
                     </div>
 
                     <div className="gs-cityDetailsMetric">
-                        <div className="gs-cityDetailsMetricLabel">Controlled Regions</div>
-                        <div className="gs-cityDetailsMetricValue">{formatInt(city.map?.territoryCount ?? 0)}</div>
+                        <div className="gs-cityDetailsMetricLabel">Territories</div>
+                        <div className="gs-cityDetailsMetricValue">{formatInt(territories ?? 0)}</div>
                     </div>
                 </div>
 
-                <div className="gs-muted" style={{ marginTop: 6, fontSize: 11 }}>
-                    City footprint reflects the total area and extensions controlled by the city.
-                </div>
-
-                {(city.map?.distanceWithCapital ?? 0) > 0 ? (
+                {distToCapital !== null && distToCapital > 0 ? (
                     <div className="gs-muted" style={{ marginTop: 8, fontSize: 12 }}>
-                        Distance to capital: {formatInt(city.map?.distanceWithCapital)}
+                        Distance to capital: {formatInt(distToCapital)}
                     </div>
                 ) : null}
             </div>
 
             {/* Growth */}
             <div className="gs-section">
-                <div className="gs-overviewTitle">Growth</div>
+                <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
+                    Growth
+                </div>
 
-                <div className="gs-cityDetailsNote">
-                    {turnsBeforeGrowth !== null
-                        ? `+1 population in ${turnsBeforeGrowth} turn${turnsBeforeGrowth === 1 ? "" : "s"}`
-                        : "No growth estimate available in this export."}
-
-                    {(foodStock !== null && maxFoodStock !== null) || foodGainPct !== null || (typeof growingPop === "string" && growingPop) ? (
-                        <div className="gs-muted" style={{ marginTop: 6 }}>
-                            {foodStock !== null && maxFoodStock !== null ? `Food: ${formatInt(foodStock)} / ${formatInt(maxFoodStock)}` : null}
-                            {foodGainPct !== null ? <span>{` • ${formatSignedPct1Decimal(foodGainPct)}`}</span> : null}
-                            {typeof growingPop === "string" && growingPop ? <span>{` • ${growingPop}`}</span> : null}
+                <div className="gs-cityDetailsGrid gs-cityDetailsGrid--two">
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Next population</div>
+                        <div className="gs-cityDetailsMetricValue">
+                            {turnsBeforeGrowth !== null
+                                ? `+1 in ${turnsBeforeGrowth} turn${turnsBeforeGrowth === 1 ? "" : "s"}`
+                                : "—"}
                         </div>
-                    ) : null}
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Food stock</div>
+                        <div className="gs-cityDetailsMetricValue">
+                            {foodStock !== null ? formatInt(foodStock) : "—"}
+                            {maxFoodStock !== null ? <span className="gs-muted"> / {formatInt(maxFoodStock)}</span> : null}
+                        </div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Food gain</div>
+                        <div className="gs-cityDetailsMetricValue">{foodGainText ?? "—"}</div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Growing pop</div>
+                        <div className="gs-cityDetailsMetricValue">{growingPopName}</div>
+                    </div>
                 </div>
             </div>
 
             {/* Defense */}
             <div className="gs-section">
-                <div className="gs-overviewTitle">Defense</div>
-
-                <div className="gs-row gs-wrap" style={{ gap: 8, marginBottom: 10 }}>
-                    {defensePills.map((p) => (
-                        <span
-                            key={p.key}
-                            className={`gs-cityDetailsBadge ${
-                                p.tone === "danger"
-                                    ? "gs-cityDetailsBadge--danger"
-                                    : p.tone === "warn"
-                                        ? "gs-cityDetailsBadge--warn"
-                                        : ""
-                            }`}
-                        >
-              {p.label}
-            </span>
-                    ))}
+                <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
+                    Defense
                 </div>
 
                 <div className="gs-cityDetailsGrid gs-cityDetailsGrid--two">
@@ -231,26 +259,52 @@ export default function CityDetailsPanel({ city }: Props) {
                         <div className="gs-cityDetailsMetricLabel">Militia</div>
                         <div className="gs-cityDetailsMetricValue">{militia !== null ? formatInt(militia) : "—"}</div>
                     </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Besieged</div>
+                        <div className="gs-cityDetailsMetricValue">{isBesieged ? "Yes" : "No"}</div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Mutiny</div>
+                        <div className="gs-cityDetailsMetricValue">{isMutinous ? "Yes" : "No"}</div>
+                    </div>
                 </div>
             </div>
 
             {/* Meta */}
-            {metaRows.length > 0 ? (
-                <div className="gs-section">
-                    <div className="gs-overviewTitle">City Meta</div>
+            <div className="gs-section">
+                <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
+                    Meta
+                </div>
 
-                    <div className="gs-kvList">
-                        {metaRows.map((r) => (
-                            <div key={r.k} className="gs-kv">
-                                <div className="gs-kvLabel">{r.k}</div>
-                                <div className="gs-kvValue" style={{ fontVariantNumeric: "tabular-nums" }}>
-                                    {r.v}
-                                </div>
-                            </div>
-                        ))}
+                <div className="gs-cityDetailsGrid gs-cityDetailsGrid--two">
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Tile</div>
+                        <div className="gs-cityDetailsMetricValue">{metaTile !== null ? formatInt(metaTile) : "—"}</div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">GUID</div>
+                        <div className="gs-cityDetailsMetricValue" style={{ fontVariantNumeric: "tabular-nums" }}>
+                            {metaGuid}
+                        </div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Faction</div>
+                        <div className="gs-cityDetailsMetricValue">{metaFaction}</div>
+                    </div>
+
+                    <div className="gs-cityDetailsMetric">
+                        <div className="gs-cityDetailsMetricLabel">Constructing</div>
+                        <div className="gs-cityDetailsMetricValue">
+                            {metaConstructible}
+                            {metaAffinity !== "—" ? <span className="gs-muted"> • {metaAffinity}</span> : null}
+                        </div>
                     </div>
                 </div>
-            ) : null}
+            </div>
 
             {/* Debug */}
             <div className="gs-section">
@@ -265,8 +319,8 @@ export default function CityDetailsPanel({ city }: Props) {
                         </div>
 
                         <pre className="gs-pre" style={{ fontSize: "0.85rem" }}>
-              {JSON.stringify(city, null, 2)}
-            </pre>
+                            {JSON.stringify(city, null, 2)}
+                        </pre>
                     </div>
                 ) : null}
             </div>
