@@ -23,7 +23,7 @@ function safeText(v: unknown, fallback = "—"): string {
 }
 
 export default function CityDetailsPanel({ city }: Props) {
-    // ✅ Hooks must run unconditionally
+    // ✅ hooks must run unconditionally
     const [showDebug, setShowDebug] = useState(false);
 
     const color = empireColor(city?.empireIndex ?? 0);
@@ -36,14 +36,14 @@ export default function CityDetailsPanel({ city }: Props) {
         if (city.defense?.isBesieged) list.push({ key: "besieged", label: "Besieged", tone: "warn" });
         if (city.defense?.isMutinous) list.push({ key: "mutiny", label: "Mutiny", tone: "danger" });
 
-        // tags from parser (if present)
+        // tags from parser
         if (city.tags?.includes("Outpost")) list.push({ key: "outpost", label: "Outpost", tone: "warn" });
         if (city.tags?.includes("Destroyed")) list.push({ key: "destroyed", label: "Destroyed", tone: "danger" });
 
         return list;
     }, [city]);
 
-    // ✅ Derived values (safe even when city is null)
+    // ✅ derived values (safe even when city is null)
     const destroyed = isDestroyedCity(city as any);
     const outpost = isOutpostCity(city as any);
 
@@ -59,7 +59,7 @@ export default function CityDetailsPanel({ city }: Props) {
 
     const productionNet = city?.scoreLike?.productionNet ?? 0;
 
-    const controlledTiles = city?.map?.extensionDistrictsCount ?? null; // “Controlled Tiles” label in UI
+    const controlledTiles = city?.map?.extensionDistrictsCount ?? null; // “Controlled tiles” label in UI
     const territories = city?.map?.territoryCount ?? null;
     const distToCapital = city?.map?.distanceWithCapital ?? null;
 
@@ -83,7 +83,7 @@ export default function CityDetailsPanel({ city }: Props) {
     const metaConstructible = humanizeConstructible(city?.meta?.currentConstructible);
     const metaAffinity = humanizeConstructible(city?.meta?.currentConstructibleAffinity);
 
-    // ✅ Early return after hooks
+    // ✅ early return AFTER hooks
     if (!city) {
         return (
             <div className="gs-panel">
@@ -117,8 +117,8 @@ export default function CityDetailsPanel({ city }: Props) {
                                             : ""
                                 }`}
                             >
-                                {b.label}
-                            </span>
+                {b.label}
+              </span>
                         ))}
                     </div>
                 ) : (
@@ -130,12 +130,10 @@ export default function CityDetailsPanel({ city }: Props) {
                 {settlementStatus !== "—" ? `Status: ${settlementStatus}` : null}
             </div>
 
-            {/* Step 2: empty-state messaging for destroyed/outpost */}
+            {/* Destroyed / Outpost notice */}
             {destroyed || outpost ? (
                 <div className={`gs-cityNotice ${destroyed ? "gs-cityNotice--danger" : "gs-cityNotice--warn"}`}>
-                    <div className="gs-cityNoticeTitle">
-                        {destroyed ? "Destroyed settlement" : "Outpost settlement"}
-                    </div>
+                    <div className="gs-cityNoticeTitle">{destroyed ? "Destroyed settlement" : "Outpost settlement"}</div>
                     <div className="gs-cityNoticeBody">
                         {destroyed
                             ? "This settlement was destroyed before the end of the game. Some city stats may be missing or meaningless."
@@ -144,7 +142,7 @@ export default function CityDetailsPanel({ city }: Props) {
                 </div>
             ) : null}
 
-            {/* City Snapshot */}
+            {/* Snapshot */}
             <div className="gs-section">
                 <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
                     Snapshot
@@ -175,9 +173,9 @@ export default function CityDetailsPanel({ city }: Props) {
                     <div className="gs-cityDetailsMetric">
                         <div className="gs-cityDetailsMetricLabel">Defense</div>
                         <div className="gs-cityDetailsMetricValue">
-                            {formatInt(fortification ?? "—")}
+                            {fortification !== null ? formatInt(fortification) : "—"}
                             <span className="gs-muted"> • </span>
-                            {formatInt(militia ?? "—")} <span className="gs-muted">militia</span>
+                            {militia !== null ? formatInt(militia) : "—"} <span className="gs-muted">militia</span>
                         </div>
                     </div>
                 </div>
@@ -320,8 +318,8 @@ export default function CityDetailsPanel({ city }: Props) {
                         </div>
 
                         <pre className="gs-pre" style={{ fontSize: "0.85rem" }}>
-                            {JSON.stringify(city, null, 2)}
-                        </pre>
+              {JSON.stringify(city, null, 2)}
+            </pre>
                     </div>
                 ) : null}
             </div>

@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import "../GameSummary.css";
-import '../CityBreakdown.css';
+import "../CityBreakdown.css";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import { buildEmpireMeta, type EmpireMeta } from "./techProgress.helpers";
 
 import {
-    CitySortKey,
-    SortDir,
+    type CitySortKey,
+    type SortDir,
     buildCityBreakdownVM,
     defaultEmpireFilterIndex,
     filterCitiesByEmpire,
@@ -16,7 +15,6 @@ import {
     findCityById,
 } from "./cityBreakdown.helpers";
 
-// If your components live in different paths, update these imports accordingly:
 import CityDetailsPanel from "../components/city/CityDetailsPanel";
 import CityCard from "../components/city/CityCard";
 
@@ -34,7 +32,7 @@ export default function CityBreakdownView() {
     // Selection
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
-    // ---- Edge states (Batch A Step 2) ----
+    // ---- Edge states ----
     if (state.status !== "ok") {
         return (
             <div className="gs-panel">
@@ -85,12 +83,11 @@ export default function CityBreakdownView() {
     // Grouped view data
     const grouped = useMemo(() => {
         const g = groupCitiesByEmpire(sortedCities);
-        // Ensure deterministic order of groups: by empire index ascending
-        const entries = Array.from(g.entries()).sort((a, b) => a[0] - b[0]);
-        return entries;
+        // deterministic order of groups
+        return Array.from(g.entries()).sort((a, b) => a[0] - b[0]);
     }, [sortedCities]);
 
-    // ---- Selection stability (Batch A Step 1) ----
+    // ---- Selection stability ----
     useEffect(() => {
         const next = pickStableSelectedCityId({
             currentCities: sortedCities,
@@ -109,7 +106,6 @@ export default function CityBreakdownView() {
         return findCityById(vm.cities, selectedCityId);
     }, [vm.cities, selectedCityId]);
 
-    // ---- More edge states: “no cities for this selection” ----
     const hasCities = vm.cities.length > 0;
     const hasFilteredCities = sortedCities.length > 0;
 
@@ -206,7 +202,7 @@ export default function CityBreakdownView() {
                                             key={c.id}
                                             city={c}
                                             selected={c.id === selectedCityId}
-                                            onSelect={setSelectedCityId}
+                                            onSelect={(id) => setSelectedCityId(id)}
                                         />
                                     ))}
                                 </div>
@@ -229,7 +225,7 @@ export default function CityBreakdownView() {
                                                             key={c.id}
                                                             city={c}
                                                             selected={c.id === selectedCityId}
-                                                            onSelect={setSelectedCityId}
+                                                            onSelect={(id) => setSelectedCityId(id)}
                                                         />
                                                     ))}
                                                 </div>
