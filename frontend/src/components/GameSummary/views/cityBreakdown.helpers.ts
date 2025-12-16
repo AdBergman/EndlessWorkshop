@@ -120,6 +120,46 @@ export function humanizePascal(s: string): string {
     return s.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
+/**
+ * UI helpers used by CityDetailsPanel (kept here so the component stays clean)
+ */
+export function formatInt(v: unknown): string {
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isFinite(n)) return "—";
+    return Math.round(n).toString();
+}
+
+export function formatRatioPctMaybe(v: unknown): string | null {
+    // Handles 0..1 fractions (1 => 100%) AND already-percents (75 => 75%)
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isFinite(n)) return null;
+
+    const pct = n <= 1 ? n * 100 : n;
+    return `${Math.round(pct)}%`;
+}
+
+export function formatSignedPct1Decimal(v: unknown): string | null {
+    // 0.377 => +37.7%
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isFinite(n)) return null;
+
+    const pct = Math.round(n * 1000) / 10;
+    const sign = pct > 0 ? "+" : "";
+    return `${sign}${pct}%`;
+}
+
+export function humanizeApprovalState(raw: unknown): string {
+    const s = typeof raw === "string" ? raw : "";
+    if (!s) return "Unknown";
+
+    // Common pattern: SettlementApproval_VeryHappy
+    const last = s.includes("_") ? s.split("_").pop() : s;
+    if (!last) return s;
+
+    // VeryHappy -> Very Happy
+    return last.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
 /* ----------------------------
  * parsing + view-model building
  * ---------------------------- */
