@@ -15,12 +15,9 @@ export type CitySortKey =
     | "territories"
     | "fortification";
 
-export type CityTag =
-    | "Capital"
-    | "Besieged"
-    | "Mutiny"
-    | "Destroyed"
-    | "Outpost";
+export type SortDir = "desc" | "asc";
+
+export type CityTag = "Capital" | "Besieged" | "Mutiny" | "Destroyed" | "Outpost";
 
 export type CityVM = {
     // identity
@@ -40,15 +37,15 @@ export type CityVM = {
         population: number;
         maxPopulation: number | null;
         productionNet: number;
-        approvalPct: number | null;
-        approvalState: string; // e.g. SettlementApprovalDefinitionName
+        approvalPct: number | null; // may be 0..1 or 0..100 depending on exporter
+        approvalState: string; // e.g. SettlementApproval_VeryHappy
     };
 
     growth: {
         turnBeforeGrowth: number | null;
         foodStock: number | null;
         maxFoodStock: number | null;
-        foodGainPct: number | null;
+        foodGainPct: number | null; // might be 0..1
         growingPopulationName: string | null;
     };
 
@@ -91,8 +88,16 @@ export type CityBreakdownVM = {
     empireCityCounts: Map<number, number>;
 };
 
+export type EmpireFilterOption = {
+    value: number | "all";
+    label: string; // "Necrophage (Player) • 3"
+    empireIndex?: number;
+    isPlayer?: boolean;
+    count: number;
+};
+
 /* ----------------------------
- * small utilities
+ * tiny utilities
  * ---------------------------- */
 
 export function empireColor(idx: number): string {
@@ -120,44 +125,39 @@ export function humanizePascal(s: string): string {
     return s.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
-/**
- * UI helpers used by CityDetailsPanel (kept here so the component stays clean)
- */
+export function humanizeApprovalState(raw: unknown): string {
+    const s = typeof raw === "string" ? raw : "";
+    if (!s) return "Unknown";
+    const last = s.includes("_") ? s.split("_").pop() : s;
+    if (!last) return s;
+    return last.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+
+/** Formats to rounded integer string, returns "—" for invalid. */
 export function formatInt(v: unknown): string {
     const n = typeof v === "number" ? v : Number(v);
     if (!Number.isFinite(n)) return "—";
     return Math.round(n).toString();
 }
 
+/**
+ * Handles 0..1 fractions (1 => 100%) AND already-percents (75 => 75%).
+ * Returns null if invalid.
+ */
 export function formatRatioPctMaybe(v: unknown): string | null {
-    // Handles 0..1 fractions (1 => 100%) AND already-percents (75 => 75%)
     const n = typeof v === "number" ? v : Number(v);
     if (!Number.isFinite(n)) return null;
-
     const pct = n <= 1 ? n * 100 : n;
     return `${Math.round(pct)}%`;
 }
 
+/** +3.2% / -1.0% style for 0..1 ratio inputs */
 export function formatSignedPct1Decimal(v: unknown): string | null {
-    // 0.377 => +37.7%
     const n = typeof v === "number" ? v : Number(v);
     if (!Number.isFinite(n)) return null;
-
-    const pct = Math.round(n * 1000) / 10;
+    const pct = n * 100;
     const sign = pct > 0 ? "+" : "";
-    return `${sign}${pct}%`;
-}
-
-export function humanizeApprovalState(raw: unknown): string {
-    const s = typeof raw === "string" ? raw : "";
-    if (!s) return "Unknown";
-
-    // Common pattern: SettlementApproval_VeryHappy
-    const last = s.includes("_") ? s.split("_").pop() : s;
-    if (!last) return s;
-
-    // VeryHappy -> Very Happy
-    return last.replace(/([a-z])([A-Z])/g, "$1 $2");
+    return `${sign}${pct.toFixed(1)}%`;
 }
 
 /* ----------------------------
@@ -205,15 +205,11 @@ function computeTags(raw: any): CityTag[] {
 /**
  * Build a clean, UI-friendly model from cityBreakdown + empireMeta.
  */
-export function buildCityBreakdownVM(params: {
-    cityBreakdown: any;
-    empireMeta: EmpireMeta[];
-}): CityBreakdownVM {
+export function buildCityBreakdownVM(params: { cityBreakdown: any; empireMeta: EmpireMeta[] }): CityBreakdownVM {
     const { cityBreakdown, empireMeta } = params;
 
     const rawCities: any[] = Array.isArray(cityBreakdown?.Cities) ? cityBreakdown.Cities : [];
-    const cityCount =
-        typeof cityBreakdown?.CityCount === "number" ? cityBreakdown.CityCount : rawCities.length;
+    const cityCount = typeof cityBreakdown?.CityCount === "number" ? cityBreakdown.CityCount : rawCities.length;
 
     const empireCityCounts = new Map<number, number>();
 
@@ -255,9 +251,7 @@ export function buildCityBreakdownVM(params: {
         const distanceWithCapital = safeNumber(c?.DistanceWithCapital);
 
         const guid =
-            typeof c?.SimulationEntityGUID === "string" && c.SimulationEntityGUID.trim()
-                ? c.SimulationEntityGUID.trim()
-                : null;
+            typeof c?.SimulationEntityGUID === "string" && c.SimulationEntityGUID.trim() ? c.SimulationEntityGUID.trim() : null;
 
         const tileIndex = safeInt(c?.TileIndex);
 
@@ -277,7 +271,6 @@ export function buildCityBreakdownVM(params: {
                 : null;
 
         const tags = computeTags(c);
-
         const id = getCityId(c, empireIndex, name);
 
         // For sorting, we keep simple numeric versions:
@@ -348,25 +341,21 @@ export function buildCityBreakdownVM(params: {
 }
 
 /* ----------------------------
- * grouping + sorting
+ * filtering + sorting + grouping
  * ---------------------------- */
-
-export function defaultEmpireFilterIndex(): number {
-    return 0; // player = E0 by convention
-}
 
 export function filterCitiesByEmpire(cities: CityVM[], empireIndex: number | "all"): CityVM[] {
     if (empireIndex === "all") return cities;
     return cities.filter((c) => c.empireIndex === empireIndex);
 }
 
-export function sortCities(cities: CityVM[], key: CitySortKey): CityVM[] {
+export function sortCities(cities: CityVM[], key: CitySortKey, dir: SortDir): CityVM[] {
     const sorted = [...cities];
     sorted.sort((a, b) => {
         const av = a._sort[key];
         const bv = b._sort[key];
-        // desc, stable-ish fallback by name
-        return bv - av || a.name.localeCompare(b.name);
+        const primary = dir === "desc" ? bv - av : av - bv;
+        return primary || a.name.localeCompare(b.name);
     });
     return sorted;
 }
@@ -380,7 +369,45 @@ export function groupCitiesByEmpire(cities: CityVM[]): Map<number, CityVM[]> {
     return map;
 }
 
-export function pickDefaultSelectedCityId(cities: CityVM[]): string | null {
-    if (!cities.length) return null;
-    return cities[0].id;
+/** Prefer player capital, else any player city, else first in list. */
+export function pickBestDefaultCityId(citiesInScope: CityVM[]): string | null {
+    if (!citiesInScope.length) return null;
+
+    const playerCapital = citiesInScope.find((c) => c.isPlayer && c.isCapital);
+    if (playerCapital) return playerCapital.id;
+
+    const anyPlayer = citiesInScope.find((c) => c.isPlayer);
+    if (anyPlayer) return anyPlayer.id;
+
+    return citiesInScope[0].id;
+}
+
+export function buildEmpireFilterOptions(params: {
+    empireMeta: EmpireMeta[];
+    empireCityCounts: Map<number, number>;
+    totalCityCount: number;
+}): EmpireFilterOption[] {
+    const { empireMeta, empireCityCounts, totalCityCount } = params;
+
+    const opts: EmpireFilterOption[] = [
+        {
+            value: "all",
+            label: `All empires • ${totalCityCount}`,
+            count: totalCityCount,
+        },
+    ];
+
+    for (const em of empireMeta) {
+        const count = empireCityCounts.get(em.idx) ?? 0;
+        const base = em.idx === 0 ? `${em.faction} (Player)` : em.faction;
+        opts.push({
+            value: em.idx,
+            label: `${base} • ${count}`,
+            empireIndex: em.idx,
+            isPlayer: em.idx === 0,
+            count,
+        });
+    }
+
+    return opts;
 }
