@@ -6,11 +6,12 @@ import EmpireStatsView from "./views/EmpireStatsView";
 import ReportMetaBar from "./components/ReportMetaBar";
 import "./GameSummary.css";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
+import CityBreakdownView from "@/components/GameSummary/views/CityBreakdownView";
 
 export default function GameSummaryPage() {
     const state = useEndGameReportStore((s) => s.state);
     const clear = useEndGameReportStore((s) => s.clear);
-    const [activeTab, setActiveTab] = useState<"overview" | "tech" | "empire">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "tech" | "empire" | "cities">("overview");
 
     if (state.status === "empty") {
         return <SummaryLoadView />;
@@ -89,6 +90,12 @@ export default function GameSummaryPage() {
                 >
                     Empire Stats
                 </button>
+                <button
+                    className={`gs-btn ${activeTab === "cities" ? "gs-btn--active" : ""}`}
+                    onClick={() => setActiveTab("cities")}
+                >
+                    Cities
+                </button>
             </div>
 
             {activeTab === "overview" ? (
@@ -96,6 +103,7 @@ export default function GameSummaryPage() {
                     <GameOverviewView />
                 </div>
             ) : null}
+
             {activeTab === "tech" ? (
                 <div className="gs-section">
                     <TechProgressView />
@@ -105,6 +113,12 @@ export default function GameSummaryPage() {
             {activeTab === "empire" ? (
                 <div className="gs-section">
                     <EmpireStatsView />
+                </div>
+            ) : null}
+
+            {activeTab === "cities" ? (
+                <div className="gs-section">
+                    <CityBreakdownView />
                 </div>
             ) : null}
         </div>
