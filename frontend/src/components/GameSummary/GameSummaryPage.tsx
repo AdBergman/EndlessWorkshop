@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SummaryLoadView from "./views/SummaryLoadView";
+import GameOverviewView from "./views/GameOverviewView";
 import TechProgressView from "./views/TechProgressView";
 import EmpireStatsView from "./views/EmpireStatsView";
 import ReportMetaBar from "./components/ReportMetaBar";
@@ -9,7 +10,7 @@ import { useEndGameReportStore } from "@/stores/endGameReportStore";
 export default function GameSummaryPage() {
     const state = useEndGameReportStore((s) => s.state);
     const clear = useEndGameReportStore((s) => s.clear);
-    const [activeTab, setActiveTab] = useState<"tech" | "empire">("tech");
+    const [activeTab, setActiveTab] = useState<"overview" | "tech" | "empire">("overview");
 
     if (state.status === "empty") {
         return <SummaryLoadView />;
@@ -69,6 +70,13 @@ export default function GameSummaryPage() {
 
             <div className="gs-row gs-toolbar">
                 <button
+                    className={`gs-btn ${activeTab === "overview" ? "gs-btn--active" : ""}`}
+                    onClick={() => setActiveTab("overview")}
+                >
+                    Overview
+                </button>
+
+                <button
                     className={`gs-btn ${activeTab === "tech" ? "gs-btn--active" : ""}`}
                     onClick={() => setActiveTab("tech")}
                 >
@@ -83,6 +91,11 @@ export default function GameSummaryPage() {
                 </button>
             </div>
 
+            {activeTab === "overview" ? (
+                <div className="gs-section">
+                    <GameOverviewView />
+                </div>
+            ) : null}
             {activeTab === "tech" ? (
                 <div className="gs-section">
                     <TechProgressView />

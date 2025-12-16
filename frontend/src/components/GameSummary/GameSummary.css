@@ -233,3 +233,158 @@
     font-variant-numeric: tabular-nums;
     opacity: 0.95;
 }
+
+/* -----------------------------
+ * Overview view (GameOverviewView)
+ * ----------------------------- */
+
+.gs-overviewGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 860px) {
+    .gs-overviewGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gs-overviewBlock {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px 12px;
+}
+
+.gs-overviewTitle {
+    font-weight: 700;
+    color: #ffcc99;
+    margin-bottom: 10px;
+}
+
+.gs-kvList {
+    display: grid;
+    gap: 8px;
+}
+
+.gs-kv {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.gs-kvLabel {
+    opacity: 0.65;
+    font-size: 0.9rem;
+}
+
+.gs-kvValue {
+    font-weight: 600;
+    color: #fff;
+}
+
+.gs-winnerBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.22);
+    white-space: nowrap;
+}
+
+.gs-empireCards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 860px) {
+    .gs-empireCards {
+        grid-template-columns: 1fr;
+    }
+}
+
+.gs-empireCard {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 12px;
+}
+
+.gs-empireCard--winner {
+    border-color: rgba(255, 127, 50, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 127, 50, 0.18);
+}
+
+.gs-empireCardTitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.gs-empireCode {
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.gs-empireFaction {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 360px;
+}
+
+.gs-empireWin {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 127, 50, 0.35);
+    color: #ff7f32;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.gs-empireCardSub {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.gs-empireScore {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    font-size: 18px;
+    color: #fff;
+}
+
+.gs-empireScoreLabel {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.gs-empireMiniStats {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gs-miniStatValue {
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    color: #fff;
+}
+
+.gs-miniStatLabel {
+    opacity: 0.65;
+    font-size: 12px;
+    margin-top: 2px;
+}
