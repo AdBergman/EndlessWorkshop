@@ -17,7 +17,7 @@ export default function SummaryLoadView() {
 
     const loadExample = async () => {
         try {
-            const res = await fetch("/EL2_EndGame_20251207_194724.json");
+            const res = await fetch("/EL2_EndGame_20251219_224434.json");
             if (!res.ok) {
                 alert(`Could not load example JSON (HTTP ${res.status}).`);
                 return;
