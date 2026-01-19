@@ -178,14 +178,14 @@ This module contains no business logic.
 - Logging designed not to trigger database connections
 
 ### Caching
-Caching is used deliberately and sparingly.
+Caching is used deliberately for read-heavy reference data.
 
-Learnings:
-- Cache placement can affect database wake-ups
-- Controller-level caching avoided unnecessary DB access
-- Facade-level caching caused connection behavior in practice
+Where it provides clear value, data is cached to:
+- Reduce unnecessary database usage (important on serverless/free-tier environments)
+- Improve response times for repeated reads
+- Keep read paths predictable
 
-Cache placement is treated as an architectural decision.
+Cache placement is treated as an architectural decision rather than a convenience.
 
 ### Database migrations
 - Flyway manages schema migrations
