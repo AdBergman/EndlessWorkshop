@@ -22,7 +22,7 @@ public class FacadeConfig {
     }
 
     @Bean
-    @Primary // Spring confuses the bean of the Interface with the bean of the implementation
+    @Primary
     public SavedTechBuildFacade savedTechBuildFacade(SavedTechBuildService savedTechBuildService) {
         return new SavedTechBuildFacadeImpl(savedTechBuildService);
     }

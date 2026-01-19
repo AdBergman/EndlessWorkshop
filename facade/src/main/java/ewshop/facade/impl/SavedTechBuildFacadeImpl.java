@@ -41,7 +41,6 @@ public class SavedTechBuildFacadeImpl implements SavedTechBuildFacade {
         if (result.isEmpty()) {
             log.warn("Saved tech build not found for uuid={}", uuid);
         }
-        // Removed the debug log for successful fetch as per clarification.
         return result;
     }
 }

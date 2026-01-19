@@ -8,9 +8,6 @@ import ewshop.facade.mapper.TechMapper;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Spring-agnostic facade implementation.
- */
 public class TechFacadeImpl implements TechFacade {
 
     private final TechService techService;

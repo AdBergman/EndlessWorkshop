@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 public class TechController {
 
-    private final TechFacade techFacade;  // <-- interface
+    private final TechFacade techFacade;
 
     public TechController(TechFacade techFacade) {
         this.techFacade = techFacade;

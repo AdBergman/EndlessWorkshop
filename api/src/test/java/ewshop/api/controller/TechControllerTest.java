@@ -34,11 +34,11 @@ class TechControllerTest {
         TechDto t1 = TechDto.builder()
                 .name("Stonework")
                 .era(1)
-                .type("DEFENSE") // Mapper uses .name() on the enum
+                .type("DEFENSE")
                 .effects(List.of("+100 Fortification on Capital"))
-                .factions(List.of("ASPECT", "KIN")) // Mapper creates a sorted list of strings
-                .unlocks(List.of("District: Keep")) // This comes from TechUnlock.convertUnlocks()
-                .prereq("Masonry") // Mapper uses .getName()
+                .factions(List.of("ASPECT", "KIN"))
+                .unlocks(List.of("District: Keep"))
+                .prereq("Masonry")
                 .excludes("")
                 .coords(new TechCoordsDto(10.5, 20.5))
                 .build();

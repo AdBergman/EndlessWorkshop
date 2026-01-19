@@ -59,15 +59,12 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         String query = request.getQueryString();
         String fullPath = (query != null) ? uri + "?" + query : uri;
 
-        // Reuse existing correlation id header if present, otherwise generate one
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
         if (correlationId == null || correlationId.isBlank()) {
             correlationId = UUID.randomUUID().toString();
         }
 
-        // Put into MDC so it appears in all logs for this thread
         MDC.put(CORRELATION_ID_KEY, correlationId);
-        // Expose it to the client as well
         response.setHeader(CORRELATION_ID_HEADER, correlationId);
 
         try {

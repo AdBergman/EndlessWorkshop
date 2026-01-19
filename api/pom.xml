@@ -17,13 +17,11 @@
     <description>Module containing REST controllers and web configuration.</description>
 
     <dependencies>
-        <!-- COMPILE-TIME dependency: API needs the facade to function -->
         <dependency>
             <groupId>com.endlessworkshop</groupId>
             <artifactId>facade</artifactId>
         </dependency>
 
-        <!-- Spring Boot Web for @RestController and other web annotations -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
