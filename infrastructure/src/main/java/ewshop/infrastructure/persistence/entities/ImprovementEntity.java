@@ -15,9 +15,6 @@ import jakarta.persistence.EnumType;
 
 import java.util.List;
 
-/**
- * Represents an Improvement in the game (like a building, structure, or city enhancement).
- */
 @Entity
 @Table(name = "improvements")
 public class ImprovementEntity {

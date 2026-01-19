@@ -6,9 +6,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Column;
 
-/**
- * Represents the cost of an Improvement in strategic resources.
- */
 @Embeddable
 public class StrategicCostEntity {
 

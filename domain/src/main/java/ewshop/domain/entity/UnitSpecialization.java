@@ -28,7 +28,7 @@ public class UnitSpecialization {
     private final String minorFaction;
     private final Integer tier;
     private final Set<String> upgradesTo;
-    private final String artId; // 🆕 new field
+    private final String artId;
 
     private UnitSpecialization(Builder builder) {
         this.name = builder.name;
@@ -46,7 +46,7 @@ public class UnitSpecialization {
         this.minorFaction = builder.minorFaction;
         this.tier = builder.tier;
         this.upgradesTo = Set.copyOf(builder.upgradesTo);
-        this.artId = builder.artId; // 🆕 added
+        this.artId = builder.artId;
     }
 
     // --- Getters ---
@@ -65,7 +65,7 @@ public class UnitSpecialization {
     public String getMinorFaction() { return minorFaction; }
     public Integer getTier() { return tier; }
     public Set<String> getUpgradesTo() { return upgradesTo; }
-    public String getArtId() { return artId; } // 🆕
+    public String getArtId() { return artId; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -86,7 +86,7 @@ public class UnitSpecialization {
         private String minorFaction;
         private Integer tier;
         private Set<String> upgradesTo = new HashSet<>();
-        private String artId; // 🆕
+        private String artId;
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder description(String description) { this.description = description; return this; }
@@ -120,7 +120,7 @@ public class UnitSpecialization {
             return this;
         }
 
-        public Builder artId(String artId) { this.artId = artId; return this; } // 🆕
+        public Builder artId(String artId) { this.artId = artId; return this; }
 
         public UnitSpecialization build() { return new UnitSpecialization(this); }
     }

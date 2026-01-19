@@ -14,10 +14,10 @@ public class Tech {
     private final int era;
     private final List<String> effects;
     private final TechCoords techCoords;
-    private Tech prereq; // single prerequisite
-    private Tech excludes; // mutually exclusive tech
+    private Tech prereq;
+    private Tech excludes;
     private final Set<Faction> factions;
-    private final List<TechUnlock> unlocks; // keep domain object, not string
+    private final List<TechUnlock> unlocks;
 
     private Tech(Builder builder) {
         this.name = builder.name;

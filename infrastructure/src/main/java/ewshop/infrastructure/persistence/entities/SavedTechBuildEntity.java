@@ -14,11 +14,9 @@ public class SavedTechBuildEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // UUID used for sharing links (e.g., /shared/{uuid})
     @Column(nullable = false, unique = true, name = "uuid")
     private UUID uuid;
 
-    // Optional name or label for the build
     @Column(name = "name")
     private String name;
 
@@ -26,13 +24,11 @@ public class SavedTechBuildEntity {
     @Enumerated(EnumType.STRING)
     private Faction faction;
 
-    // List of tech IDs in this build
     @ElementCollection
     @CollectionTable(name = "shared_tech_build_techs", joinColumns = @JoinColumn(name = "build_id"))
     @Column(name = "tech_id")
     private List<String> techIds;
 
-    // Creation timestamp for sorting or cleanup
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

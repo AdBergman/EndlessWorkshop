@@ -18,7 +18,7 @@ public class UnitSpecializationService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("units")  // key can be "units" for all, or you can have separate caches if needed
+    @Cacheable("units")
     public List<UnitSpecialization> getAllUnits() {
         return unitRepository.findAll();
     }

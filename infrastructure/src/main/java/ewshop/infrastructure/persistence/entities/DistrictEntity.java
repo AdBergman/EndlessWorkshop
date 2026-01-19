@@ -11,34 +11,28 @@ public class DistrictEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Name of the district (unique)
     @Column(nullable = false, unique = true)
     private String name;
 
-    // General description or info for display purposes
     @ElementCollection
     @CollectionTable(name = "district_info", joinColumns = @JoinColumn(name = "district_id"))
     @Column(name = "info")
     private List<String> info;
 
 
-    // Base effect, like "+2 Food"
     @Column(name = "effect")
     private String effect;
 
-    // Tile bonuses: e.g., "+1 Food on tile producing Food"
     @ElementCollection
     @CollectionTable(name = "district_tile_bonuses", joinColumns = @JoinColumn(name = "district_id"))
     @Column(name = "tile_bonus")
     private List<String> tileBonus;
 
-    // Adjacency bonuses: e.g., "+1 Industry for each adjacent Ridge"
     @ElementCollection
     @CollectionTable(name = "district_adjacency_bonuses", joinColumns = @JoinColumn(name = "district_id"))
     @Column(name = "adjacency_bonus")
     private List<String> adjacencyBonus;
 
-    // Placement requirements for special districts (nullable)
     @Column(name = "placement_prereq")
     private String placementPrereq;
 
@@ -54,7 +48,6 @@ public class DistrictEntity {
         this.placementPrereq = placementPrereq;
     }
 
-    // --- Getters / setters ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
