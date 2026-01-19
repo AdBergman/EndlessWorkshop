@@ -100,7 +100,6 @@ Key characteristics:
 
 Contains:
 - REST controllers
-- HTTP-specific request/response DTOs
 - API validation
 - Global exception-to-response mapping
 
@@ -117,6 +116,7 @@ Design principles:
 Contains:
 - Facade services invoked by controllers
 - Domain-to-DTO mapping
+- HTTP-specific request/response DTOs
 - Aggregation and read-model shaping
 - Coordination across domain services
 
