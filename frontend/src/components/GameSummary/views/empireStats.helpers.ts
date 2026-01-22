@@ -51,10 +51,14 @@ export function empireIndex(e: AllStatsEmpire): number {
 }
 
 export function factionName(e: AllStatsEmpire, idx: number): string {
-    const dn = typeof (e as any).factionDisplayName === "string" ? (e as any).factionDisplayName.trim() : "";
+    const dn =
+        typeof (e as any).factionDisplayName === "string"
+            ? (e as any).factionDisplayName.trim()
+            : "";
     if (dn) return dn;
 
-    const key = typeof (e as any).factionKey === "string" ? (e as any).factionKey.trim() : "";
+    const key =
+        typeof (e as any).factionKey === "string" ? (e as any).factionKey.trim() : "";
     if (key) return key;
 
     return `Empire ${idx}`;
@@ -118,16 +122,12 @@ export function formatNumber(v: unknown): string {
 }
 
 /* ----------------------------
- * Chart data builder (camelCase export)
+ * Chart data builder (empire compare)
  * ---------------------------- */
 
 /**
  * Produces rows like:
  *   { turn: 1, e0: 12, e1: 9, ... }
- *
- * Rules:
- * - Missing values become 0
- * - Accepts either numbers or number-like values
  */
 export function buildChartData(
     empires: AllStatsEmpire[],
@@ -154,6 +154,64 @@ export function buildChartData(
             const raw = entry?.[metricField] as unknown;
             const n = typeof raw === "number" ? raw : Number(raw);
             row[getEmpireKey(idx)] = Number.isFinite(n) ? n : 0;
+        }
+
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+/* ----------------------------
+ * Player economy (FIDSI) overlay
+ * ---------------------------- */
+
+export const ECON_METRICS = [
+    "Food",
+    "Industry",
+    "Dust",
+    "Science",
+    "Influence",
+] as const;
+
+export type EconomyMetricKey = (typeof ECON_METRICS)[number];
+
+const ECON_COLORS: Record<EconomyMetricKey, string> = {
+    Food: "#4caf50",
+    Industry: "#ffd54f",
+    Dust: "#ff7f32",
+    Science: "#4fc3f7",
+    Influence: "#661277",
+};
+
+export function getEconomyMetricColor(key: EconomyMetricKey): string {
+    return ECON_COLORS[key];
+}
+
+/**
+ * Produces rows like:
+ *   { turn: 1, Food: 12, Industry: 9, Dust: 4, Science: 7, Influence: 1 }
+ *
+ * Missing/invalid values become 0.
+ */
+export function buildPlayerEconomyChartData(
+    playerEmpire: AllStatsEmpire | null
+): Array<{ turn: number; [k: string]: number }> {
+    const perTurnField = "perTurn";
+    const arr = (playerEmpire as any)?.[perTurnField];
+    const perTurn = Array.isArray(arr) ? arr : [];
+
+    const rows: Array<{ turn: number; [k: string]: number }> = [];
+
+    for (let i = 0; i < perTurn.length; i++) {
+        const entry = perTurn[i];
+        const row: { turn: number; [k: string]: number } = { turn: i + 1 };
+
+        for (const m of ECON_METRICS) {
+            const metricField = METRIC_TO_FIELD[m as EmpireMetricKey];
+            const raw = entry?.[metricField] as unknown;
+            const n = typeof raw === "number" ? raw : Number(raw);
+            row[m] = Number.isFinite(n) ? n : 0;
         }
 
         rows.push(row);
