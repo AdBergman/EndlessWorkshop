@@ -119,7 +119,27 @@ function guessEmpireCount(entries: TechOrderEntry[]): number {
     return max + 1;
 }
 
-function parseTechOrder(rawRoot: any, warnings: ParseWarning[]): TechOrderExport | undefined {
+function humanizeDefName(defName: string): string {
+    // Only apply when we are forced to fall back (loc key / missing display name).
+    // Keep it conservative to avoid mangling real names.
+    let s = defName;
+
+    // Remove common tech prefix (optional)
+    s = s.replace(/^Technology_/, "");
+
+    // Underscores -> spaces
+    s = s.replace(/_/g, " ").trim();
+
+    // Collapse multiple spaces
+    s = s.replace(/\s+/g, " ");
+
+    // Convert 00 -> 0, 01 -> 1 etc (keeps other numbers intact)
+    s = s.replace(/\b0+(\d)\b/g, "$1");
+
+    return s;
+}
+
+function parseTechOrder(rawRoot: any, _warnings: ParseWarning[]): TechOrderExport | undefined {
     const sectionPath = "techOrder";
     const section = get(rawRoot, sectionPath);
 
@@ -135,22 +155,21 @@ function parseTechOrder(rawRoot: any, warnings: ParseWarning[]): TechOrderExport
         const turn = reqNumber(rawRoot, `${base}.turn`);
         const defName = reqString(rawRoot, `${base}.technologyDefinitionName`);
 
-        const dn = get(rawRoot, `${base}.technologyDisplayName`);
-        const displayName = typeof dn === "string" && dn.trim() ? dn.trim() : defName;
+        // Normalize silently:
+        // - If displayName is missing/blank OR a localization key (starts with '%'),
+        //   fall back to a conservative humanized definitionName.
+        const dnVal = get(rawRoot, `${base}.technologyDisplayName`);
+        const dnStr: string | undefined = typeof dnVal === "string" ? dnVal : undefined;
+        const dnTrimmed = dnStr?.trim();
 
-        // If exporter ever leaks localization keys, warn + fall back safely.
-        if (isLocKey(displayName)) {
-            warnings.push({
-                code: "techorder_loc_key_displayname",
-                message: `TechOrder displayName is a localization key for '${defName}'. Falling back to definition name.`,
-            });
-        }
+        const technologyDisplayName =
+            dnTrimmed && !isLocKey(dnTrimmed) ? dnTrimmed : humanizeDefName(defName);
 
         return {
             empireIndex,
             turn,
             technologyDefinitionName: defName,
-            technologyDisplayName: isLocKey(displayName) ? defName : displayName,
+            technologyDisplayName,
         };
     });
 

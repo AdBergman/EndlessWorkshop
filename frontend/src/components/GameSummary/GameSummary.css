@@ -278,3 +278,22 @@
 .gs-wrap {
     flex-wrap: wrap;
 }
+
+.gs-btn--chip {
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    line-height: 1.4;
+}
+
+.gs-warningsPanel {
+    margin-top: 10px;
+}
+
+.gs-warningsList {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.gs-warningsItem {
+    margin: 8px 0;
+}
