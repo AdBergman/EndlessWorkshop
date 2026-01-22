@@ -5,6 +5,10 @@
     padding: 1rem;
 }
 
+.gs-page--wide {
+    max-width: 1680px;
+}
+
 .gs-title {
     font-family: "Audiowide", sans-serif;
     font-size: 1.9rem;
@@ -47,7 +51,6 @@
     font-size: 0.9rem;
 }
 
-/* Buttons: reuse the spreadsheet vibe */
 .gs-btn {
     text-decoration: none;
     padding: 0.4rem 0.8rem;
@@ -73,7 +76,6 @@
     color: #ff7f32;
 }
 
-/* Upload */
 .gs-fileInput {
     display: none;
 }
@@ -83,7 +85,6 @@
     align-items: center;
 }
 
-/* Meta bar */
 .gs-metaBar {
     justify-content: flex-start;
 }
@@ -107,10 +108,6 @@
 .gs-metaReset {
     margin-left: auto;
 }
-
-/* -----------------------------
- * Overview view (GameOverviewView)
- * ----------------------------- */
 
 .gs-overviewGrid {
     display: grid;
@@ -159,12 +156,10 @@
     color: #fff;
 }
 
-/* Small inline icon next to "Top score" label/value */
 .gs-topScoreIcon {
     opacity: 0.85;
 }
 
-/* Empires grid */
 .gs-empireCards {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -184,7 +179,6 @@
     padding: 12px 12px;
 }
 
-/* Highlight for the top-score empire (not "winner") */
 .gs-empireCard--topScore {
     border-color: rgba(255, 127, 50, 0.35);
     box-shadow: 0 0 0 1px rgba(255, 127, 50, 0.18);
@@ -210,7 +204,6 @@
     max-width: 360px;
 }
 
-/* Tag pill shown on the top-score empire card */
 .gs-topScore {
     margin-left: 6px;
     padding: 2px 8px;

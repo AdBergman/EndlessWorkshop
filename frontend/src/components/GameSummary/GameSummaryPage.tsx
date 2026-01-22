@@ -51,9 +51,7 @@ export default function GameSummaryPage() {
                     <p className="gs-muted">Could not parse report JSON.</p>
                     <pre className="gs-pre">{state.error}</pre>
 
-                    {warningsCount > 0 ? (
-                        <p className="gs-muted gs-section">Warnings: {warningsCount}</p>
-                    ) : null}
+                    {warningsCount > 0 ? <p className="gs-muted gs-section">Warnings: {warningsCount}</p> : null}
 
                     <div className="gs-row gs-section">
                         <button className="gs-btn" onClick={clear}>
@@ -65,13 +63,14 @@ export default function GameSummaryPage() {
         );
     }
 
-    // ok
     const { report, warnings } = state;
 
     const activeView = tabs.find((t) => t.key === activeTab)?.view ?? tabs[0].view;
 
+    const pageClassName = `gs-page ${activeTab === "empire" ? "gs-page--wide" : ""}`;
+
     return (
-        <div className="gs-page">
+        <div className={pageClassName}>
             <h2 className="gs-title">Game Summary</h2>
 
             <div className="gs-section">
