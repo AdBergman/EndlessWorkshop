@@ -1,18 +1,27 @@
-import React, {useEffect, useMemo} from "react";
-import {Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from "recharts";
+import React, { useEffect, useMemo } from "react";
+import {
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 
-import {useEndGameReportStore} from "@/stores/endGameReportStore";
-import {useEmpireStatsViewStore} from "@/stores/empireStatsViewStore";
+import { useEndGameReportStore } from "@/stores/endGameReportStore";
+import { useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
 
-import TurnTooltip, {LegendLabelByIndex} from "./TurnTooltip";
+import TurnTooltip, { type LegendLabelByIndex } from "./TurnTooltip";
 import "../GameSummary.css";
 import "../CityBreakdown.css";
 
+import type { AllStats, AllStatsEmpire } from "@/types/endGameReport";
 import {
     buildChartData,
     buildTicks,
     empireIndex,
-    EmpireMetricKey,
+    type EmpireMetricKey,
     factionName,
     formatNumber,
     getEmpireColor,
@@ -42,17 +51,10 @@ export default function EmpireStatsView() {
         );
     }
 
-    const allStats: any = state.allStats;
-    if (!allStats) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Empire Stats</h3>
-                <p className="gs-muted">No allStats section found in this report.</p>
-            </div>
-        );
-    }
+    const { report } = state;
 
-    const empires: any[] = allStats.Empires ?? [];
+    const allStats: AllStats = report.allStats;
+    const empires: AllStatsEmpire[] = allStats.empires ?? [];
     const empireCount = empires.length;
 
     useEffect(() => {
@@ -61,10 +63,10 @@ export default function EmpireStatsView() {
 
     const legendLabelByIndex: LegendLabelByIndex = useMemo(() => {
         const map = new Map<number, string>();
-        empires.forEach((e) => {
+        for (const e of empires) {
             const idx = empireIndex(e);
             map.set(idx, legendLabelForEmpire(e, idx));
-        });
+        }
         return map;
     }, [empires]);
 
@@ -138,9 +140,7 @@ export default function EmpireStatsView() {
                                     }}
                                 />
 
-                                <span className="gs-empireName">
-                  {idx === 0 ? "Player" : faction}
-                </span>
+                                <span className="gs-empireName">{idx === 0 ? "Player" : faction}</span>
 
                                 <span className="gs-empireIndex">(E{idx})</span>
                             </label>
@@ -153,10 +153,7 @@ export default function EmpireStatsView() {
                 <p className="gs-muted">Select at least one empire to show the chart.</p>
             ) : (
                 <>
-                    <div
-                        className="gs-section gs-chartWrap"
-                        style={{ width: "100%", height: 360 }}
-                    >
+                    <div className="gs-section gs-chartWrap" style={{ width: "100%", height: 360 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
                                 <XAxis

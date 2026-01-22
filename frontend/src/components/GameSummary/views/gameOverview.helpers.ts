@@ -1,5 +1,5 @@
-// views/gameOverview.helpers.ts
 import { EMPIRE_COLORS } from "./empireStats.helpers";
+import type { AllStatsEmpire, AllStatsTurnSnapshot } from "@/types/endGameReport";
 
 export type FinalSnapshot = {
     score: number;
@@ -18,25 +18,30 @@ export function safeNumber(v: unknown): number | null {
 }
 
 export function labelize(s: unknown, fallback: string): string {
-    if (typeof s === "string" && s.trim()) return s;
-    return fallback;
+    return typeof s === "string" && s.trim() ? s.trim() : fallback;
+}
+
+const VICTORY_LABELS: Record<string, string> = {
+    dungeonsCleared: "Dungeons cleared",
+    territoriesControlled: "Territories controlled",
+    wondersBuilt: "Wonders built",
+    allResearchesDone: "All research completed",
+    population: "Population",
+    resources: "Resources",
+    pacifiedVillages: "Pacified villages",
+    turnLimit: "Turn limit",
+    empireEliminated: "Empire eliminated",
+};
+
+function humanizePascalOrCamel(s: string): string {
+    const spaced = s.replace(/([a-z])([A-Z])/g, "$1 $2");
+    return spaced.length ? spaced[0].toUpperCase() + spaced.slice(1) : spaced;
 }
 
 export function victoryLabel(raw: unknown): string {
-    const s = typeof raw === "string" ? raw : "";
-    const MAP: Record<string, string> = {
-        DungeonsCleared: "Dungeons cleared",
-        TerritoriesControlled: "Territories controlled",
-        WondersBuilt: "Wonders built",
-        AllResearchesDone: "All research completed",
-        Population: "Population",
-        Resources: "Resources",
-        PacifiedVillages: "Pacified villages",
-        TurnLimit: "Turn limit",
-        EmpireEliminated: "Empire eliminated",
-    };
-    if (MAP[s]) return MAP[s];
-    return s ? s.replace(/([a-z])([A-Z])/g, "$1 $2") : "Unknown";
+    const key = typeof raw === "string" ? raw.trim() : "";
+    if (!key) return "Unknown";
+    return VICTORY_LABELS[key] ?? humanizePascalOrCamel(key);
 }
 
 export function formatLocalDateTime(utcIso: unknown): string {
@@ -59,31 +64,32 @@ export function formatLocalDateTime(utcIso: unknown): string {
     return `${date} • ${time}`;
 }
 
-/**
- * Picks a "final" per-turn snapshot:
- * - Prefer the row where Turn === maxTurn if available
- * - Else fallback to the last PerTurn entry
- */
-export function getFinalSnapshotForEmpire(
-    empire: any,
-    maxTurn: number | null
-): FinalSnapshot {
-    const perTurn: any[] = Array.isArray(empire?.PerTurn) ? empire.PerTurn : [];
-    if (perTurn.length === 0) {
-        return { score: 0, technologies: 0, cities: 0, territories: 0 };
+const EMPTY_TURN: AllStatsTurnSnapshot = {
+    turn: 0,
+    score: 0,
+    technologies: 0,
+    cities: 0,
+    territories: 0,
+};
+
+function pickFinalTurnSnapshot(perTurn: AllStatsTurnSnapshot[], maxTurn: number): AllStatsTurnSnapshot {
+    if (!perTurn?.length) return EMPTY_TURN;
+
+    if (maxTurn > 0) {
+        const exact = perTurn.find((pt) => pt.turn === maxTurn);
+        if (exact) return exact;
     }
 
-    let pick: any = perTurn[perTurn.length - 1];
+    return perTurn[perTurn.length - 1];
+}
 
-    if (maxTurn && maxTurn > 0) {
-        const match = perTurn.find((pt) => Number(pt?.Turn) === maxTurn);
-        if (match) pick = match;
-    }
+export function getFinalSnapshotForEmpire(empire: AllStatsEmpire, maxTurn: number): FinalSnapshot {
+    const pick = pickFinalTurnSnapshot(empire.perTurn ?? [], maxTurn);
 
     return {
-        score: typeof pick?.Score === "number" ? pick.Score : 0,
-        technologies: typeof pick?.Technologies === "number" ? pick.Technologies : 0,
-        cities: typeof pick?.Cities === "number" ? pick.Cities : 0,
-        territories: typeof pick?.Territories === "number" ? pick.Territories : 0,
+        score: pick.score ?? 0,
+        technologies: pick.technologies ?? 0,
+        cities: pick.cities ?? 0,
+        territories: pick.territories ?? 0,
     };
 }

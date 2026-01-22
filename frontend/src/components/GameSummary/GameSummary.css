@@ -1,5 +1,3 @@
-/* GameSummary.css — minimal styling consistent with EWShop */
-
 .gs-page {
     width: 100%;
     max-width: 1200px;
@@ -8,7 +6,7 @@
 }
 
 .gs-title {
-    font-family: 'Audiowide', sans-serif;
+    font-family: "Audiowide", sans-serif;
     font-size: 1.9rem;
     letter-spacing: 1px;
     color: #ff7f32;
@@ -161,17 +159,12 @@
     color: #fff;
 }
 
-.gs-winnerBadge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(0, 0, 0, 0.22);
-    white-space: nowrap;
+/* Small inline icon next to "Top score" label/value */
+.gs-topScoreIcon {
+    opacity: 0.85;
 }
 
+/* Empires grid */
 .gs-empireCards {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -191,7 +184,8 @@
     padding: 12px 12px;
 }
 
-.gs-empireCard--winner {
+/* Highlight for the top-score empire (not "winner") */
+.gs-empireCard--topScore {
     border-color: rgba(255, 127, 50, 0.35);
     box-shadow: 0 0 0 1px rgba(255, 127, 50, 0.18);
 }
@@ -216,7 +210,8 @@
     max-width: 360px;
 }
 
-.gs-empireWin {
+/* Tag pill shown on the top-score empire card */
+.gs-topScore {
     margin-left: 6px;
     padding: 2px 8px;
     border-radius: 999px;
@@ -278,10 +273,15 @@
 .gs-select {
     padding: 0.35rem 0.55rem;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     background: #1b1b1b;
     color: #fff;
 }
 
-.gs-spaceBetween { justify-content: space-between; }
-.gs-wrap { flex-wrap: wrap; }
+.gs-spaceBetween {
+    justify-content: space-between;
+}
+
+.gs-wrap {
+    flex-wrap: wrap;
+}

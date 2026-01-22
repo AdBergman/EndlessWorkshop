@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "../CityBreakdown.css";
+
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import { buildEmpireMeta, type EmpireMeta } from "./techProgress.helpers";
+import type { AllStats } from "@/types/endGameReport";
 
 import {
     type CitySortKey,
@@ -23,16 +25,12 @@ type GroupMode = "grouped" | "flat";
 export default function CityBreakdownView() {
     const state = useEndGameReportStore((s) => s.state);
 
-    // View controls
     const [empireFilter, setEmpireFilter] = useState<number | "all">(defaultEmpireFilterIndex());
     const [sortKey, setSortKey] = useState<CitySortKey>("production");
     const [sortDir, setSortDir] = useState<SortDir>("desc");
     const [groupMode, setGroupMode] = useState<GroupMode>("grouped");
-
-    // Selection
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
-    // ---- Edge states ----
     if (state.status !== "ok") {
         return (
             <div className="gs-panel">
@@ -42,8 +40,17 @@ export default function CityBreakdownView() {
         );
     }
 
-    const allStats: any = state.allStats;
-    const cityBreakdown: any = state.cityBreakdown;
+    const allStats = state.allStats as AllStats | null;
+    const cityBreakdown = state.cityBreakdown;
+
+    if (!allStats) {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">City Breakdown</h3>
+                <p className="gs-muted">Missing required section: allStats</p>
+            </div>
+        );
+    }
 
     if (!cityBreakdown) {
         return (
@@ -54,24 +61,19 @@ export default function CityBreakdownView() {
         );
     }
 
-    // Empire meta (for labels)
+    // ✅ camelCase contract (new export)
+    const empires = Array.isArray((allStats as any).empires) ? (allStats as any).empires : [];
     const empireCount =
-        typeof allStats?.EmpireCount === "number"
-            ? allStats.EmpireCount
-            : Array.isArray(allStats?.Empires)
-                ? allStats.Empires.length
-                : 0;
+        typeof (allStats as any).empireCount === "number" ? (allStats as any).empireCount : empires.length;
 
     const empireMeta: EmpireMeta[] = useMemo(() => {
-        return buildEmpireMeta(empireCount, allStats);
+        return buildEmpireMeta(empireCount, allStats as any);
     }, [empireCount, allStats]);
 
-    // Build City VM once
     const vm = useMemo(() => {
         return buildCityBreakdownVM({ cityBreakdown, empireMeta });
     }, [cityBreakdown, empireMeta]);
 
-    // Filter + sort list used by the left column
     const filteredCities = useMemo(() => {
         return filterCitiesByEmpire(vm.cities, empireFilter);
     }, [vm.cities, empireFilter]);
@@ -80,14 +82,11 @@ export default function CityBreakdownView() {
         return sortCities(filteredCities, sortKey, sortDir);
     }, [filteredCities, sortKey, sortDir]);
 
-    // Grouped view data
     const grouped = useMemo(() => {
         const g = groupCitiesByEmpire(sortedCities);
-        // deterministic order of groups
         return Array.from(g.entries()).sort((a, b) => a[0] - b[0]);
     }, [sortedCities]);
 
-    // ---- Selection stability ----
     useEffect(() => {
         const next = pickStableSelectedCityId({
             currentCities: sortedCities,
@@ -96,9 +95,7 @@ export default function CityBreakdownView() {
             sortDir,
         });
 
-        if (next !== selectedCityId) {
-            setSelectedCityId(next);
-        }
+        if (next !== selectedCityId) setSelectedCityId(next);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sortedCities, sortKey, sortDir]);
 
@@ -123,7 +120,6 @@ export default function CityBreakdownView() {
                 <p className="gs-muted gs-section">No cities found in this export.</p>
             ) : (
                 <>
-                    {/* Toolbar */}
                     <div className="gs-row gs-toolbar gs-wrap" style={{ gap: 12 }}>
                         <div className="gs-row" style={{ gap: 8 }}>
                             <span className="gs-muted">Empire:</span>
@@ -185,9 +181,7 @@ export default function CityBreakdownView() {
                         </div>
                     </div>
 
-                    {/* Layout */}
                     <div className="gs-cityLayout gs-section">
-                        {/* Left: list */}
                         <div className="gs-cityLeft">
                             {!hasFilteredCities ? (
                                 <div className="gs-cityGroup">
@@ -236,7 +230,6 @@ export default function CityBreakdownView() {
                             )}
                         </div>
 
-                        {/* Right: details */}
                         <div className="gs-cityRight">
                             <CityDetailsPanel city={selectedCity} />
                         </div>

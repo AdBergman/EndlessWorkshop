@@ -2,18 +2,55 @@ import React, { useMemo } from "react";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
 import "../CityBreakdown.css";
-import { buildEmpireMeta, EmpireMeta } from "./techProgress.helpers";
 import { formatNumber } from "./empireStats.helpers";
 
 import {
     empireColor,
     formatLocalDateTime,
     getFinalSnapshotForEmpire,
-    labelize,
-    safeNumber,
     victoryLabel,
-    FinalSnapshot,
+    type FinalSnapshot,
 } from "./gameOverview.helpers";
+
+import type { AllStats } from "@/types/endGameReport";
+
+type EmpireMeta = {
+    idx: number;
+    faction: string;
+    isPlayer: boolean;
+    labelLong: string;
+};
+
+function buildEmpireMetaFromAllStats(allStats: AllStats): EmpireMeta[] {
+    const empires = allStats.empires ?? [];
+    const empireCount =
+        typeof allStats.empireCount === "number" ? allStats.empireCount : empires.length;
+
+    const byIndex = new Map<number, { faction: string }>();
+
+    for (const e of empires) {
+        const idx = e.empireIndex;
+        const faction =
+            e.factionDisplayName?.trim() ||
+            e.factionKey?.trim() ||
+            `Empire ${idx}`;
+        byIndex.set(idx, { faction });
+    }
+
+    const result: EmpireMeta[] = [];
+    for (let i = 0; i < empireCount; i++) {
+        const isPlayer = i === 0;
+        const faction = byIndex.get(i)?.faction ?? `Empire ${i}`;
+        result.push({
+            idx: i,
+            faction,
+            isPlayer,
+            labelLong: isPlayer ? `${faction} (Player) (E${i})` : `${faction} (E${i})`,
+        });
+    }
+
+    return result;
+}
 
 export default function GameOverviewView() {
     const state = useEndGameReportStore((s) => s.state);
@@ -27,66 +64,50 @@ export default function GameOverviewView() {
         );
     }
 
-    const report = state.report;
-    const allStats: any = state.allStats;
+    const { report } = state;
 
-    if (!allStats) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Overview</h3>
-                <p className="gs-muted">No allStats section found in this report.</p>
-            </div>
+    if (report.meta.version !== "1.0") {
+        console.error(
+            `[schema] Expected report.meta.version === "1.0" but got: ${report.meta.version}`
         );
     }
 
-    const gameId = labelize(allStats?.GameId, "Unknown");
-    const maxTurn: number | null = safeNumber(allStats?.MaxTurn);
+    const allStats = report.allStats as AllStats;
 
-    const empireCount: number =
-        typeof allStats?.EmpireCount === "number"
-            ? allStats.EmpireCount
-            : Array.isArray(allStats?.Empires)
-                ? allStats.Empires.length
-                : 0;
+    const gameId = report.meta.gameId;
+    const generatedAtUtc = report.meta.generatedAtUtc;
 
-    const winnerEmpire: number | null = safeNumber(allStats?.WinnerEmpire);
-    const winnerScore: number | null = safeNumber(allStats?.WinnerScore);
+    const maxTurn = allStats.maxTurn;
+    const empires = allStats.empires ?? [];
+    const empireCount =
+        typeof allStats.empireCount === "number" ? allStats.empireCount : empires.length;
 
-    const difficulty = labelize(allStats?.Game?.Difficulty, "Unknown");
-    const mapSize = labelize(allStats?.Game?.MapSize, "Unknown");
-    const gameSpeed = labelize(allStats?.Game?.GameSpeed, "Unknown");
-    const mapType = labelize(allStats?.Game?.MapType, "—");
+    const topScoreEmpire = allStats.topScoreEmpire;
+    const topScore = allStats.topScore;
 
-    const victory = victoryLabel(allStats?.Victory?.ActualVictoryCondition);
+    const difficulty = allStats.game?.difficulty ?? "Unknown";
+    const mapSize = allStats.game?.mapSize ?? "Unknown";
+    const gameSpeed = allStats.game?.gameSpeed ?? "Unknown";
 
-    const generatedUtc = labelize(
-        allStats?.GeneratedAtUtc,
-        labelize(report?.generatedAtUtc, "Unknown")
-    );
-    const generatedHuman = formatLocalDateTime(generatedUtc);
+    const victory = victoryLabel(allStats.victory?.actualVictoryCondition);
+    const generatedHuman = formatLocalDateTime(generatedAtUtc);
 
-    const empires: any[] = Array.isArray(allStats?.Empires) ? allStats.Empires : [];
-
-    const empireMeta: EmpireMeta[] = useMemo(() => {
-        return buildEmpireMeta(empireCount, allStats);
-    }, [empireCount, allStats]);
+    const empireMeta = useMemo(() => buildEmpireMetaFromAllStats(allStats), [allStats]);
 
     const finalByIdx = useMemo(() => {
         const map = new Map<number, FinalSnapshot>();
         for (const e of empires) {
-            const idx = e?.EmpireIndex ?? e?.empireIndex ?? 0;
-            map.set(idx, getFinalSnapshotForEmpire(e, maxTurn));
+            map.set(e.empireIndex, getFinalSnapshotForEmpire(e, maxTurn));
         }
         return map;
     }, [empires, maxTurn]);
 
-    const winnerFaction = useMemo(() => {
-        if (winnerEmpire === null) return "Unknown";
-        const m = empireMeta.find((x) => x.idx === winnerEmpire);
-        return m?.faction ?? `Empire ${winnerEmpire}`;
-    }, [winnerEmpire, empireMeta]);
+    const topScoreFaction = useMemo(() => {
+        const m = empireMeta.find((x) => x.idx === topScoreEmpire);
+        return m?.faction ?? `Empire ${topScoreEmpire}`;
+    }, [topScoreEmpire, empireMeta]);
 
-    const winnerColor = winnerEmpire !== null ? empireColor(winnerEmpire) : "#fff";
+    const topScoreColor = empireColor(topScoreEmpire);
 
     return (
         <div className="gs-panel">
@@ -94,7 +115,6 @@ export default function GameOverviewView() {
                 <h3 className="gs-h3">Overview</h3>
             </div>
 
-            {/* GAME OVERVIEW */}
             <div className="gs-section">
                 <div className="gs-overviewGrid">
                     <div className="gs-overviewBlock">
@@ -108,10 +128,7 @@ export default function GameOverviewView() {
 
                             <div className="gs-kv">
                                 <div className="gs-kvLabel">Map</div>
-                                <div className="gs-kvValue">
-                                    {mapSize}
-                                    {mapType !== "—" ? ` • ${mapType}` : ""}
-                                </div>
+                                <div className="gs-kvValue">{mapSize}</div>
                             </div>
 
                             <div className="gs-kv">
@@ -121,7 +138,7 @@ export default function GameOverviewView() {
 
                             <div className="gs-kv">
                                 <div className="gs-kvLabel">Turns</div>
-                                <div className="gs-kvValue">{maxTurn ?? "—"}</div>
+                                <div className="gs-kvValue">{maxTurn}</div>
                             </div>
                         </div>
                     </div>
@@ -136,19 +153,20 @@ export default function GameOverviewView() {
                             </div>
 
                             <div className="gs-kv">
-                                <div className="gs-kvLabel">Winner</div>
-                                <div className="gs-kvValue" style={{ fontWeight: 800, color: winnerColor }}>
-                                    {winnerFaction}
-                                    {winnerEmpire === 0 ? " (Player)" : ""}
-                                    <span className="gs-muted"> 👑</span>
+                                <div className="gs-kvLabel">Top score</div>
+                                <div className="gs-kvValue" style={{ fontWeight: 800, color: topScoreColor }}>
+                                    {topScoreFaction}
+                                    {topScoreEmpire === 0 ? " (Player)" : ""}
+                                    <span className="gs-topScoreIcon" aria-hidden>
+                    {" "}
+                                        🥇
+                  </span>
                                 </div>
                             </div>
 
                             <div className="gs-kv">
-                                <div className="gs-kvLabel">Winner score</div>
-                                <div className="gs-kvValue">
-                                    {winnerScore !== null ? formatNumber(winnerScore) : "—"}
-                                </div>
+                                <div className="gs-kvLabel">Score</div>
+                                <div className="gs-kvValue">{formatNumber(topScore)}</div>
                             </div>
 
                             <div className="gs-kv">
@@ -169,7 +187,6 @@ export default function GameOverviewView() {
                 </div>
             </div>
 
-            {/* EMPIRES OVERVIEW */}
             <div className="gs-section">
                 <div className="gs-overviewTitle" style={{ marginBottom: 10 }}>
                     Empires
@@ -177,18 +194,21 @@ export default function GameOverviewView() {
 
                 <div className="gs-empireCards">
                     {empireMeta.map((em) => {
-                        const snap = finalByIdx.get(em.idx) ?? {
-                            score: 0,
-                            technologies: 0,
-                            cities: 0,
-                            territories: 0,
-                        };
-                        const isWinner = winnerEmpire !== null && em.idx === winnerEmpire;
+                        const snap =
+                            finalByIdx.get(em.idx) ??
+                            ({
+                                score: 0,
+                                technologies: 0,
+                                cities: 0,
+                                territories: 0,
+                            } satisfies FinalSnapshot);
+
+                        const isTopScore = em.idx === topScoreEmpire;
 
                         return (
                             <div
                                 key={em.idx}
-                                className={`gs-empireCard ${isWinner ? "gs-empireCard--winner" : ""}`}
+                                className={`gs-empireCard ${isTopScore ? "gs-empireCard--topScore" : ""}`}
                                 title={em.labelLong}
                             >
                                 <div className="gs-row gs-spaceBetween" style={{ gap: 10 }}>
@@ -198,7 +218,12 @@ export default function GameOverviewView() {
                         {em.faction}
                           {em.idx === 0 ? " (Player)" : ""}
                       </span>
-                                            {isWinner ? <span className="gs-empireWin">Winner</span> : null}
+
+                                            {isTopScore ? (
+                                                <span className="gs-empireWin">
+                          Top score <span aria-hidden>🥇</span>
+                        </span>
+                                            ) : null}
                                         </div>
                                     </div>
 
@@ -228,6 +253,10 @@ export default function GameOverviewView() {
                         );
                     })}
                 </div>
+
+                {empireCount === 0 ? (
+                    <p className="gs-muted gs-section">No empires found in this export.</p>
+                ) : null}
             </div>
         </div>
     );

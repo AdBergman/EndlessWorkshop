@@ -1,11 +1,9 @@
-// views/cityBreakdown.helpers.ts
 import { EMPIRE_COLORS } from "./empireStats.helpers";
 import type { EmpireMeta } from "./techProgress.helpers";
 
-/**
- * Raw city shape is currently "any" (export format may evolve).
- * We keep parsing logic here so UI remains clean.
- */
+/* ---------------------------------------------
+ * Types
+ * ------------------------------------------- */
 
 export type CitySortKey =
     | "production"
@@ -20,32 +18,29 @@ export type SortDir = "desc" | "asc";
 export type CityTag = "Capital" | "Besieged" | "Mutiny" | "Destroyed" | "Outpost";
 
 export type CityVM = {
-    // identity
-    id: string; // stable-ish key (guid if present else composite)
+    id: string;
     name: string;
     empireIndex: number;
-    empireLabel: string; // faction (+ optional Player)
+    empireLabel: string;
     isPlayer: boolean;
     isCapital: boolean;
 
-    // status/tags
     tags: CityTag[];
-    settlementStatus: string; // raw but humanized in UI if desired
+    settlementStatus: string; // "—" when not present in export
 
-    // key stats
     scoreLike: {
         population: number;
         maxPopulation: number | null;
-        productionNet: number;
-        approvalPct: number | null; // may be 0..1 or 0..100 depending on exporter
-        approvalState: string; // e.g. SettlementApproval_VeryHappy
+        productionNet: number; // industry
+        approvalPct: number | null; // 0..1 ratio in current export
+        approvalState: string; // e.g. "Jubilant"
     };
 
     growth: {
         turnBeforeGrowth: number | null;
         foodStock: number | null;
         maxFoodStock: number | null;
-        foodGainPct: number | null; // might be 0..1
+        foodGainPct: number | null; // ratio (0..1)
         growingPopulationName: string | null;
     };
 
@@ -62,16 +57,6 @@ export type CityVM = {
         isMutinous: boolean;
     };
 
-    // low-priority / debug
-    meta: {
-        guid: string | null;
-        tileIndex: number | null;
-        factionDefinitionName: string | null;
-        currentConstructible: string | null;
-        currentConstructibleAffinity: string | null;
-    };
-
-    // computed for sorting convenience
     _sort: {
         production: number;
         population: number;
@@ -88,17 +73,9 @@ export type CityBreakdownVM = {
     empireCityCounts: Map<number, number>;
 };
 
-export type EmpireFilterOption = {
-    value: number | "all";
-    label: string; // "Necrophage (Player) • 3"
-    empireIndex?: number;
-    isPlayer?: boolean;
-    count: number;
-};
-
-/* ----------------------------
- * tiny utilities
- * ---------------------------- */
+/* ---------------------------------------------
+ * Small helpers
+ * ------------------------------------------- */
 
 export function empireColor(idx: number): string {
     return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
@@ -109,68 +86,54 @@ export function safeNumber(v: unknown): number | null {
     return Number.isFinite(n) ? n : null;
 }
 
+// No decimals anywhere → always round UP if fractional.
 export function safeInt(v: unknown): number | null {
     const n = safeNumber(v);
-    if (n === null) return null;
-    return Math.trunc(n);
+    return n === null ? null : Math.ceil(n);
 }
 
 export function labelize(s: unknown, fallback: string): string {
-    if (typeof s === "string" && s.trim()) return s.trim();
-    return fallback;
-}
-
-export function humanizePascal(s: string): string {
-    if (!s) return "Unknown";
-    return s.replace(/([a-z])([A-Z])/g, "$1 $2");
+    return typeof s === "string" && s.trim() ? s.trim() : fallback;
 }
 
 export function humanizeApprovalState(raw: unknown): string {
     const s = typeof raw === "string" ? raw : "";
     if (!s) return "Unknown";
     const last = s.includes("_") ? s.split("_").pop() : s;
-    if (!last) return s;
-    return last.replace(/([a-z])([A-Z])/g, "$1 $2");
+    return last ? last.replace(/([a-z])([A-Z])/g, "$1 $2") : s;
 }
 
-/** Formats to rounded integer string, returns "—" for invalid. */
 export function formatInt(v: unknown): string {
-    const n = typeof v === "number" ? v : Number(v);
-    if (!Number.isFinite(n)) return "—";
-    return Math.round(n).toString();
+    const n = safeNumber(v);
+    if (n === null) return "—";
+    return Math.ceil(n).toString();
 }
 
-/**
- * Handles 0..1 fractions (1 => 100%) AND already-percents (75 => 75%).
- * Returns null if invalid.
- */
 export function formatRatioPctMaybe(v: unknown): string | null {
-    const n = typeof v === "number" ? v : Number(v);
-    if (!Number.isFinite(n)) return null;
+    const n = safeNumber(v);
+    if (n === null) return null;
     const pct = n <= 1 ? n * 100 : n;
-    return `${Math.round(pct)}%`;
+    return `${Math.ceil(pct)}%`;
 }
 
-/** +3.2% / -1.0% style for 0..1 ratio inputs */
-export function formatSignedPct1Decimal(v: unknown): string | null {
-    const n = typeof v === "number" ? v : Number(v);
-    if (!Number.isFinite(n)) return null;
-    const pct = n * 100;
+export function formatSignedPct(v: unknown): string | null {
+    const n = safeNumber(v);
+    if (n === null) return null;
+    const pct = Math.ceil(n * 100);
     const sign = pct > 0 ? "+" : "";
-    return `${sign}${pct.toFixed(1)}%`;
+    return `${sign}${pct}%`;
 }
 
-/* ----------------------------
- * parsing + view-model building
- * ---------------------------- */
+/* ---------------------------------------------
+ * City model builder (camelCase export)
+ * ------------------------------------------- */
 
-function getCityId(raw: any, fallbackEmpireIndex: number, fallbackName: string): string {
-    const guid = typeof raw?.SimulationEntityGUID === "string" ? raw.SimulationEntityGUID : null;
-    if (guid) return guid;
+type RawCity = any;
 
-    const tile = safeInt(raw?.TileIndex);
+function getCityId(raw: RawCity, fallbackEmpireIndex: number, fallbackName: string): string {
+    // Export currently doesn't provide a stable GUID. If tileIndex ever appears later, this keeps IDs stable.
+    const tile = safeInt(raw?.tileIndex);
     if (tile !== null) return `E${fallbackEmpireIndex}:${fallbackName}:T${tile}`;
-
     return `E${fallbackEmpireIndex}:${fallbackName}`;
 }
 
@@ -183,101 +146,75 @@ function resolveEmpireLabel(empireMeta: EmpireMeta[], idx: number): { label: str
     return { label: em.idx === 0 ? `${em.faction} (Player)` : em.faction, isPlayer: em.idx === 0 };
 }
 
-function computeTags(raw: any): CityTag[] {
+function computeTags(raw: RawCity): CityTag[] {
     const tags: CityTag[] = [];
-
-    const isCapital = !!raw?.IsCapital;
-    if (isCapital) tags.push("Capital");
-
-    const isBesieged = !!raw?.IsBesieged;
-    if (isBesieged) tags.push("Besieged");
-
-    const isMutinous = !!raw?.IsMutinous;
-    if (isMutinous) tags.push("Mutiny");
-
-    const status = typeof raw?.SettlementStatus === "string" ? raw.SettlementStatus : "";
-    if (status.toLowerCase().includes("destroy")) tags.push("Destroyed");
-    if (status.toLowerCase().includes("outpost")) tags.push("Outpost");
-
+    if (!!raw?.isCapital) tags.push("Capital");
+    if (!!raw?.isBesieged) tags.push("Besieged");
+    if (!!raw?.isMutinous) tags.push("Mutiny");
     return tags;
 }
 
-/**
- * Build a clean, UI-friendly model from cityBreakdown + empireMeta.
- */
-export function buildCityBreakdownVM(params: { cityBreakdown: any; empireMeta: EmpireMeta[] }): CityBreakdownVM {
-    const { cityBreakdown, empireMeta } = params;
+function pickApprovalState(c: RawCity): string {
+    const s =
+        typeof c?.settlementApprovalDisplayName === "string" && c.settlementApprovalDisplayName.trim()
+            ? c.settlementApprovalDisplayName.trim()
+            : null;
+    return s ?? "Unknown";
+}
 
-    const rawCities: any[] = Array.isArray(cityBreakdown?.Cities) ? cityBreakdown.Cities : [];
-    const cityCount = typeof cityBreakdown?.CityCount === "number" ? cityBreakdown.CityCount : rawCities.length;
+export function buildCityBreakdownVM(params: {
+    cityBreakdown: unknown;
+    empireMeta: EmpireMeta[];
+}): CityBreakdownVM {
+    const { cityBreakdown, empireMeta } = params;
+    const cb: any = cityBreakdown as any;
+
+    const rawCities: RawCity[] = Array.isArray(cb?.cities) ? cb.cities : [];
+    const cityCount = typeof cb?.cityCount === "number" ? cb.cityCount : rawCities.length;
 
     const empireCityCounts = new Map<number, number>();
 
     const cities: CityVM[] = rawCities.map((c) => {
-        const empireIndex = typeof c?.EmpireIndex === "number" ? c.EmpireIndex : 0;
+        const empireIndex = typeof c?.empireIndex === "number" ? c.empireIndex : 0;
         empireCityCounts.set(empireIndex, (empireCityCounts.get(empireIndex) ?? 0) + 1);
 
-        const name = labelize(c?.Name, "Unknown city");
+        const name = labelize(c?.name, "Unknown city");
         const { label: empireLabel, isPlayer } = resolveEmpireLabel(empireMeta, empireIndex);
 
-        const isCapital = !!c?.IsCapital;
-        const settlementStatus = labelize(c?.SettlementStatus, "Unknown");
+        const isCapital = !!c?.isCapital;
 
-        const population = safeInt(c?.Population) ?? 0;
-        const maxPopulation = safeInt(c?.MaxPopulation);
-        const productionNet = safeNumber(c?.ProductionNet) ?? 0;
+        // Not in current export → keep UI honest.
+        const settlementStatus = "—";
 
-        const approvalPct = safeNumber(c?.ApprovalNetInPercent);
-        const approvalState = labelize(c?.SettlementApprovalDefinitionName, "Unknown");
+        const population = safeInt(c?.population) ?? 0;
+        const maxPopulation = safeInt(c?.maxPopulation);
+        const productionNet = safeNumber(c?.productionNet) ?? 0;
 
-        const territoryCount = safeInt(c?.TerritoryCount);
-        const extensionDistrictsCount = safeInt(c?.ExtensionDistrictsCount);
+        const approvalPct = safeNumber(c?.approvalNetInPercent); // ratio 0..1
+        const approvalState = pickApprovalState(c);
 
-        const fortification = safeNumber(c?.Fortification);
-        const militiaUnits = safeInt(c?.NumberOfPresentMilitiaUnits);
+        const territoryCount = safeInt(c?.territoryCount);
+        const extensionDistrictsCount = safeInt(c?.extensionDistrictsCount);
 
-        const isBesieged = !!c?.IsBesieged;
-        const isMutinous = !!c?.IsMutinous;
+        const fortification = safeNumber(c?.fortification);
+        const militiaUnits = safeInt(c?.numberOfPresentMilitiaUnits);
 
-        const turnBeforeGrowth = safeInt(c?.TurnBeforeGrowth);
-        const foodStock = safeNumber(c?.FoodStock);
-        const maxFoodStock = safeNumber(c?.MaxFoodStock);
-        const foodGainPct = safeNumber(c?.FoodGainInPercent);
+        const isBesieged = !!c?.isBesieged;
+        const isMutinous = !!c?.isMutinous;
+
+        const turnBeforeGrowth = safeInt(c?.turnBeforeGrowth);
+        const foodStock = safeNumber(c?.foodStock);
+        const maxFoodStock = safeNumber(c?.maxFoodStock);
+        const foodGainPct = safeNumber(c?.foodGainInPercent);
         const growingPopulationName =
-            typeof c?.GrowingPopulationName === "string" && c.GrowingPopulationName.trim()
-                ? c.GrowingPopulationName.trim()
+            typeof c?.growingPopulationName === "string" && c.growingPopulationName.trim()
+                ? c.growingPopulationName.trim()
                 : null;
 
-        const distanceWithCapital = safeNumber(c?.DistanceWithCapital);
-
-        const guid =
-            typeof c?.SimulationEntityGUID === "string" && c.SimulationEntityGUID.trim() ? c.SimulationEntityGUID.trim() : null;
-
-        const tileIndex = safeInt(c?.TileIndex);
-
-        const factionDefinitionName =
-            typeof c?.FactionDefinitionName === "string" && c.FactionDefinitionName.trim()
-                ? c.FactionDefinitionName.trim()
-                : null;
-
-        const currentConstructible =
-            typeof c?.CurrentConstructibleDefinitionName === "string" && c.CurrentConstructibleDefinitionName.trim()
-                ? c.CurrentConstructibleDefinitionName.trim()
-                : null;
-
-        const currentConstructibleAffinity =
-            typeof c?.CurrentConstructibleVisualAffinityName === "string" && c.CurrentConstructibleVisualAffinityName.trim()
-                ? c.CurrentConstructibleVisualAffinityName.trim()
-                : null;
+        const distanceWithCapital = safeNumber(c?.distanceWithCapital);
 
         const tags = computeTags(c);
         const id = getCityId(c, empireIndex, name);
-
-        // For sorting, we keep simple numeric versions:
-        const districtsSort = extensionDistrictsCount ?? 0;
-        const territoriesSort = territoryCount ?? 0;
-        const fortSort = fortification ?? 0;
-        const approvalSort = approvalPct ?? 0;
 
         return {
             id,
@@ -318,21 +255,13 @@ export function buildCityBreakdownVM(params: { cityBreakdown: any; empireMeta: E
                 isMutinous,
             },
 
-            meta: {
-                guid,
-                tileIndex,
-                factionDefinitionName,
-                currentConstructible,
-                currentConstructibleAffinity,
-            },
-
             _sort: {
                 production: productionNet,
                 population,
-                approval: approvalSort,
-                districts: districtsSort,
-                territories: territoriesSort,
-                fortification: fortSort,
+                approval: approvalPct ?? 0,
+                districts: extensionDistrictsCount ?? 0,
+                territories: territoryCount ?? 0,
+                fortification: fortification ?? 0,
             },
         };
     });
@@ -340,9 +269,9 @@ export function buildCityBreakdownVM(params: { cityBreakdown: any; empireMeta: E
     return { cityCount, cities, empireCityCounts };
 }
 
-/* ----------------------------
- * filtering + sorting + grouping
- * ---------------------------- */
+/* ---------------------------------------------
+ * View helpers
+ * ------------------------------------------- */
 
 export function filterCitiesByEmpire(cities: CityVM[], empireIndex: number | "all"): CityVM[] {
     if (empireIndex === "all") return cities;
@@ -363,13 +292,22 @@ export function sortCities(cities: CityVM[], key: CitySortKey, dir: SortDir): Ci
 export function groupCitiesByEmpire(cities: CityVM[]): Map<number, CityVM[]> {
     const map = new Map<number, CityVM[]>();
     for (const c of cities) {
-        if (!map.has(c.empireIndex)) map.set(c.empireIndex, []);
-        map.get(c.empireIndex)!.push(c);
+        const list = map.get(c.empireIndex);
+        if (list) list.push(c);
+        else map.set(c.empireIndex, [c]);
     }
     return map;
 }
 
-/** Prefer player capital, else any player city, else first in list. */
+export function defaultEmpireFilterIndex(): number {
+    return 0;
+}
+
+export function findCityById(cities: CityVM[], id: string | null): CityVM | null {
+    if (!id) return null;
+    return cities.find((c) => c.id === id) ?? null;
+}
+
 export function pickBestDefaultCityId(citiesInScope: CityVM[]): string | null {
     if (!citiesInScope.length) return null;
 
@@ -382,52 +320,6 @@ export function pickBestDefaultCityId(citiesInScope: CityVM[]): string | null {
     return citiesInScope[0].id;
 }
 
-export function buildEmpireFilterOptions(params: {
-    empireMeta: EmpireMeta[];
-    empireCityCounts: Map<number, number>;
-    totalCityCount: number;
-}): EmpireFilterOption[] {
-    const { empireMeta, empireCityCounts, totalCityCount } = params;
-
-    const opts: EmpireFilterOption[] = [
-        {
-            value: "all",
-            label: `All empires • ${totalCityCount}`,
-            count: totalCityCount,
-        },
-    ];
-
-    for (const em of empireMeta) {
-        const count = empireCityCounts.get(em.idx) ?? 0;
-        const base = em.idx === 0 ? `${em.faction} (Player)` : em.faction;
-        opts.push({
-            value: em.idx,
-            label: `${base} • ${count}`,
-            empireIndex: em.idx,
-            isPlayer: em.idx === 0,
-            count,
-        });
-    }
-
-    return opts;
-}
-
-// Defaults player empire (E0 by convention)
-export function defaultEmpireFilterIndex(): number {
-    return 0;
-}
-
-export function findCityById(cities: CityVM[], id: string | null): CityVM | null {
-    if (!id) return null;
-    return cities.find((c) => c.id === id) ?? null;
-}
-
-/**
- * Keeps selection stable when sort/filter changes.
- * Priority:
- *  1) If prevSelectedId still exists in current list => keep it
- *  2) Else pick best default city in the current list
- */
 export function pickStableSelectedCityId(params: {
     currentCities: CityVM[];
     prevSelectedId: string | null;
@@ -437,37 +329,17 @@ export function pickStableSelectedCityId(params: {
     const { currentCities, prevSelectedId } = params;
 
     if (!currentCities.length) return null;
+    if (prevSelectedId && currentCities.some((c) => c.id === prevSelectedId)) return prevSelectedId;
 
-    if (prevSelectedId && currentCities.some((c) => c.id === prevSelectedId)) {
-        return prevSelectedId;
-    }
-
-    // Prefer player capital, else any player city, else first.
     return pickBestDefaultCityId(currentCities);
 }
 
-export function hasCityTag(city: { tags?: string[] } | null | undefined, tag: string): boolean {
-    return !!city?.tags?.includes(tag as any);
+// Current export doesn't provide destroyed/outpost signals → don't guess.
+export function isDestroyedCity(_: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
+    return false;
 }
 
-export function isDestroyedCity(city: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
-    if (!city) return false;
-    if (hasCityTag(city, "Destroyed")) return true;
-    const s = typeof (city as any).settlementStatus === "string" ? (city as any).settlementStatus : "";
-    return s.toLowerCase().includes("destroy");
-}
-
-export function isOutpostCity(city: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
-    if (!city) return false;
-    if (hasCityTag(city, "Outpost")) return true;
-    const s = typeof (city as any).settlementStatus === "string" ? (city as any).settlementStatus : "";
-    return s.toLowerCase().includes("outpost");
-}
-
-export function humanizeConstructible(raw: unknown): string {
-    const s = typeof raw === "string" ? raw.trim() : "";
-    if (!s) return "—";
-    // make "Constructible_FooBar" → "Foo Bar"
-    const last = s.includes("_") ? s.split("_").slice(1).join("_") : s;
-    return humanizePascal(last);
+// Current export doesn't provide destroyed/outpost signals → don't guess.
+export function isOutpostCity(_: { tags?: string[]; settlementStatus?: string } | null | undefined): boolean {
+    return false;
 }

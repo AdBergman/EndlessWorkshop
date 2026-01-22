@@ -1,21 +1,33 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import SummaryLoadView from "./views/SummaryLoadView";
 import GameOverviewView from "./views/GameOverviewView";
 import TechProgressView from "./views/TechProgressView";
 import EmpireStatsView from "./views/EmpireStatsView";
+import CityBreakdownView from "./views/CityBreakdownView";
 import ReportMetaBar from "./components/ReportMetaBar";
-import "./GameSummary.css";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
-import CityBreakdownView from "@/components/GameSummary/views/CityBreakdownView";
+import "./GameSummary.css";
+
+type TabKey = "overview" | "tech" | "empire" | "cities";
 
 export default function GameSummaryPage() {
     const state = useEndGameReportStore((s) => s.state);
     const clear = useEndGameReportStore((s) => s.clear);
-    const [activeTab, setActiveTab] = useState<"overview" | "tech" | "empire" | "cities">("overview");
 
-    if (state.status === "empty") {
-        return <SummaryLoadView />;
-    }
+    const [activeTab, setActiveTab] = useState<TabKey>("overview");
+
+    const tabs = useMemo(
+        () =>
+            [
+                { key: "overview" as const, label: "Overview", view: <GameOverviewView /> },
+                { key: "tech" as const, label: "Tech Progress", view: <TechProgressView /> },
+                { key: "empire" as const, label: "Empire Stats", view: <EmpireStatsView /> },
+                { key: "cities" as const, label: "Cities", view: <CityBreakdownView /> },
+            ] satisfies Array<{ key: TabKey; label: string; view: React.ReactNode }>,
+        []
+    );
+
+    if (state.status === "empty") return <SummaryLoadView />;
 
     if (state.status === "loading") {
         return (
@@ -29,6 +41,8 @@ export default function GameSummaryPage() {
     }
 
     if (state.status === "error") {
+        const warningsCount = Array.isArray((state as any).warnings) ? (state as any).warnings.length : 0;
+
         return (
             <div className="gs-page">
                 <h2 className="gs-title">Game Summary</h2>
@@ -37,11 +51,9 @@ export default function GameSummaryPage() {
                     <p className="gs-muted">Could not parse report JSON.</p>
                     <pre className="gs-pre">{state.error}</pre>
 
-                    {state.warnings.length > 0 && (
-                        <p className="gs-muted gs-section">
-                            Warnings: {state.warnings.length}
-                        </p>
-                    )}
+                    {warningsCount > 0 ? (
+                        <p className="gs-muted gs-section">Warnings: {warningsCount}</p>
+                    ) : null}
 
                     <div className="gs-row gs-section">
                         <button className="gs-btn" onClick={clear}>
@@ -56,71 +68,34 @@ export default function GameSummaryPage() {
     // ok
     const { report, warnings } = state;
 
+    const activeView = tabs.find((t) => t.key === activeTab)?.view ?? tabs[0].view;
+
     return (
         <div className="gs-page">
             <h2 className="gs-title">Game Summary</h2>
 
             <div className="gs-section">
                 <ReportMetaBar
-                    version={report.version ?? "unknown"}
-                    generatedAtUtc={report.generatedAtUtc ?? "unknown"}
+                    version={report.meta.version}
+                    generatedAtUtc={report.meta.generatedAtUtc}
                     warnings={warnings}
                     onReset={clear}
                 />
             </div>
 
             <div className="gs-row gs-toolbar">
-                <button
-                    className={`gs-btn ${activeTab === "overview" ? "gs-btn--active" : ""}`}
-                    onClick={() => setActiveTab("overview")}
-                >
-                    Overview
-                </button>
-
-                <button
-                    className={`gs-btn ${activeTab === "tech" ? "gs-btn--active" : ""}`}
-                    onClick={() => setActiveTab("tech")}
-                >
-                    Tech Progress
-                </button>
-
-                <button
-                    className={`gs-btn ${activeTab === "empire" ? "gs-btn--active" : ""}`}
-                    onClick={() => setActiveTab("empire")}
-                >
-                    Empire Stats
-                </button>
-                <button
-                    className={`gs-btn ${activeTab === "cities" ? "gs-btn--active" : ""}`}
-                    onClick={() => setActiveTab("cities")}
-                >
-                    Cities
-                </button>
+                {tabs.map((t) => (
+                    <button
+                        key={t.key}
+                        className={`gs-btn ${activeTab === t.key ? "gs-btn--active" : ""}`}
+                        onClick={() => setActiveTab(t.key)}
+                    >
+                        {t.label}
+                    </button>
+                ))}
             </div>
 
-            {activeTab === "overview" ? (
-                <div className="gs-section">
-                    <GameOverviewView />
-                </div>
-            ) : null}
-
-            {activeTab === "tech" ? (
-                <div className="gs-section">
-                    <TechProgressView />
-                </div>
-            ) : null}
-
-            {activeTab === "empire" ? (
-                <div className="gs-section">
-                    <EmpireStatsView />
-                </div>
-            ) : null}
-
-            {activeTab === "cities" ? (
-                <div className="gs-section">
-                    <CityBreakdownView />
-                </div>
-            ) : null}
+            <div className="gs-section">{activeView}</div>
         </div>
     );
 }

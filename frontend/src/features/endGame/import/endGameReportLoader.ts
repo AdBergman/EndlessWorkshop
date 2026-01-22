@@ -8,7 +8,7 @@ export function loadEndGameReportFromText(rawJsonText: string) {
 
     const parsed = parseEndGameExport(rawJsonText);
 
-    if (!parsed.ok) {
+    if (!parsed.ok || !parsed.data) {
         store.setState({
             status: "error",
             rawJsonText,
@@ -18,20 +18,10 @@ export function loadEndGameReportFromText(rawJsonText: string) {
         return;
     }
 
-    if (!parsed.data) {
-        store.setState({
-            status: "error",
-            rawJsonText,
-            error: "Parser returned ok but no data.",
-            warnings: parsed.warnings,
-        });
-        return;
-    }
-
     const report = parsed.data;
 
-    // Minimal validation: must look like an EL2 end-game export
-    const hasMeta = !!report.version || !!report.generatedAtUtc;
+    const meta = report.meta;
+    const hasMeta = !!meta?.version && !!meta?.generatedAtUtc;
     const hasAnySection = !!report.techOrder || !!report.allStats || !!report.cityBreakdown;
 
     if (!hasMeta || !hasAnySection) {

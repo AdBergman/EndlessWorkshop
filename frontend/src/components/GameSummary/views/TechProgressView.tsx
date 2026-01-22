@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from "react";
-import { TechOrderEntryV1 } from "@/types/endGameReport";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
 import "../TechProgress.css";
+
+import type { TechOrderEntry } from "@/types/endGameReport";
 import { EMPIRE_COLORS } from "./empireStats.helpers";
-import { buildEmpireMeta, EmpireMeta, groupTechOrderEntries } from "./techProgress.helpers";
+import { buildEmpireMeta, groupTechOrderEntries, type EmpireMeta } from "./techProgress.helpers";
 
 type Mode = "global" | "empire";
 
-function displayLabel(e: TechOrderEntryV1): string {
+function displayLabel(e: TechOrderEntry): string {
     const dn = e.technologyDisplayName;
     if (dn && dn.startsWith("%")) return e.technologyDefinitionName;
     return dn || e.technologyDefinitionName;
@@ -33,7 +34,8 @@ export default function TechProgressView() {
         );
     }
 
-    const techOrder = state.techOrder;
+    const { report } = state;
+    const techOrder = report.techOrder;
 
     if (!techOrder) {
         return (
@@ -44,13 +46,12 @@ export default function TechProgressView() {
         );
     }
 
-    const empireCount = techOrder.empireCount ?? 0;
+    const empireCount = techOrder.empireCount;
+    const entries = techOrder.entries;
 
-    // Build empire labels using allStats if available (best UX), fallback otherwise.
     const empireMeta: EmpireMeta[] = useMemo(() => {
-        const allStats: any = (state as any).allStats;
-        return buildEmpireMeta(empireCount, allStats);
-    }, [empireCount, state]);
+        return buildEmpireMeta(empireCount, report.allStats);
+    }, [empireCount, report.allStats]);
 
     const empireLabelByIndex = useMemo(() => {
         const m = new Map<number, EmpireMeta>();
@@ -59,21 +60,26 @@ export default function TechProgressView() {
     }, [empireMeta]);
 
     const { maxTurn, groupedGlobal, groupedByEmpire } = useMemo(() => {
-        const entries = techOrder.entries ?? [];
         return groupTechOrderEntries(entries);
-    }, [techOrder]);
+    }, [entries]);
 
-    const turnsSorted = (
-        mode === "global"
-            ? Array.from(groupedGlobal.keys())
-            : Array.from((groupedByEmpire.get(selectedEmpire) ?? new Map()).keys())
-    ).sort((a, b) => a - b);
+    const turnsSorted = useMemo(() => {
+        const turns =
+            mode === "global"
+                ? Array.from(groupedGlobal.keys())
+                : Array.from(groupedByEmpire.get(selectedEmpire)?.keys() ?? []);
+        return turns.sort((a, b) => a - b);
+    }, [mode, groupedGlobal, groupedByEmpire, selectedEmpire]);
 
-    const getEntriesForTurn = (turn: number): TechOrderEntryV1[] => {
+    const getEntriesForTurn = (turn: number): TechOrderEntry[] => {
         if (mode === "global") return groupedGlobal.get(turn) ?? [];
-        const perEmpire = groupedByEmpire.get(selectedEmpire);
-        return perEmpire?.get(turn) ?? [];
+        return groupedByEmpire.get(selectedEmpire)?.get(turn) ?? [];
     };
+
+    const selectedEmpireIsValid = useMemo(() => {
+        if (mode !== "empire") return true;
+        return selectedEmpire >= 0 && selectedEmpire < empireCount;
+    }, [mode, selectedEmpire, empireCount]);
 
     return (
         <div className="gs-panel">
@@ -120,7 +126,6 @@ export default function TechProgressView() {
                 )}
             </div>
 
-            {/* Always show legend in global mode (no click, no "Empire legend" line) */}
             {mode === "global" && empireCount > 0 && (
                 <div className="gs-section">
                     <div className="gs-row gs-wrap" style={{ gap: 10 }}>
@@ -146,43 +151,49 @@ export default function TechProgressView() {
                 </div>
             )}
 
-            <div className="gs-section">
-                {turnsSorted.length === 0 ? (
-                    <p className="gs-muted">No tech entries to display.</p>
-                ) : (
-                    turnsSorted.map((turn) => {
-                        const entries = getEntriesForTurn(turn);
-                        return (
-                            <div key={turn} className="gs-turnRow">
-                                <div className="gs-turnBadge">Turn {turn}</div>
-                                <div className="gs-pillWrap">
-                                    {entries.map((e, idx) => {
-                                        const prefixColor = empireColor(e.empireIndex);
-                                        return (
-                                            <span
-                                                key={`${e.empireIndex}-${e.turn}-${e.technologyDefinitionName}-${idx}`}
-                                                className="gs-pill"
-                                                title={
-                                                    mode === "global"
-                                                        ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
-                                                        : undefined
-                                                }
-                                            >
-                        {mode === "global" ? (
-                            <span className="gs-pillPrefix" style={{ color: prefixColor }}>
-                            E{e.empireIndex}
-                          </span>
-                        ) : null}
-                                                {displayLabel(e)}
-                      </span>
-                                        );
-                                    })}
+            {mode === "empire" && !selectedEmpireIsValid ? (
+                <p className="gs-muted gs-section">Selected empire is out of range for this report.</p>
+            ) : (
+                <div className="gs-section">
+                    {turnsSorted.length === 0 ? (
+                        <p className="gs-muted">No tech entries to display.</p>
+                    ) : (
+                        turnsSorted.map((turn) => {
+                            const turnEntries = getEntriesForTurn(turn);
+                            return (
+                                <div key={turn} className="gs-turnRow">
+                                    <div className="gs-turnBadge">Turn {turn}</div>
+                                    <div className="gs-pillWrap">
+                                        {turnEntries.map((e, idx) => {
+                                            const prefixColor = empireColor(e.empireIndex);
+                                            const key = `${e.empireIndex}-${e.turn}-${e.technologyDefinitionName}-${idx}`;
+
+                                            return (
+                                                <span
+                                                    key={key}
+                                                    className="gs-pill"
+                                                    title={
+                                                        mode === "global"
+                                                            ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
+                                                            : undefined
+                                                    }
+                                                >
+                          {mode === "global" ? (
+                              <span className="gs-pillPrefix" style={{ color: prefixColor }}>
+                              E{e.empireIndex}
+                            </span>
+                          ) : null}
+                                                    {displayLabel(e)}
+                        </span>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })
-                )}
-            </div>
+                            );
+                        })
+                    )}
+                </div>
+            )}
         </div>
     );
 }

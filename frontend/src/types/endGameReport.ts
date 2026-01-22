@@ -1,28 +1,101 @@
-export interface TechOrderEntryV1 {
+export interface EndGameMeta {
+    version: string;
+    generatedAtUtc: string;
+    gameId: string;
+}
+
+/* -----------------------------
+ * Tech order
+ * ----------------------------- */
+
+export interface TechOrderEntry {
     empireIndex: number;
     turn: number;
     technologyDefinitionName: string;
     technologyDisplayName: string;
 }
 
-export interface TechOrderExportV1 {
-    version: string;
-    generatedAtUtc: string;
+export interface TechOrderExport {
     empireCount: number;
     entryCount: number;
-    entries: TechOrderEntryV1[];
+    entries: TechOrderEntry[];
+    [key: string]: unknown;
 }
 
-export interface EndGameExportV1 {
-    version: string;
-    generatedAtUtc: string;
+/* -----------------------------
+ * All-stats (game-wide)
+ * ----------------------------- */
 
-    // Keep unknown for now; we’ll type these later as we implement views
-    allStats?: unknown;
+export interface AllStatsTurnSnapshot {
+    turn: number;
+    score: number;
+    technologies: number;
+    cities: number;
+    territories: number;
+    [key: string]: unknown;
+}
+
+export interface AllStatsEmpire {
+    empireIndex: number;
+
+    factionKey?: string;
+    factionDisplayName?: string;
+
+    techCount?: number;
+    finalEraIndex?: number;
+    firstTurnPerEra?: number[];
+
+    perTurn: AllStatsTurnSnapshot[];
+    [key: string]: unknown;
+}
+
+export interface AllStatsGameMeta {
+    difficulty?: string;
+    mapSize?: string;
+    gameSpeed?: string;
+    mapType?: string;
+    [key: string]: unknown;
+}
+
+export interface AllStatsVictory {
+    actualVictoryCondition?: string;
+    victoryPreset?: string;
+    victoryConditionsEnabled?: unknown;
+    [key: string]: unknown;
+}
+
+export interface AllStats {
+    maxTurn: number;
+    empireCount?: number;
+
+    game?: AllStatsGameMeta;
+    victory?: AllStatsVictory;
+
+    empires: AllStatsEmpire[];
+
+    topScoreEmpire: number;
+    topScore: number;
+
+    [key: string]: unknown;
+}
+
+/* -----------------------------
+ * Root export
+ * ----------------------------- */
+
+export interface EndGameExport {
+    meta: EndGameMeta;
+
+    allStats: AllStats;
     cityBreakdown?: unknown;
+    techOrder?: TechOrderExport;
 
-    techOrder?: TechOrderExportV1;
+    [key: string]: unknown;
 }
+
+/* -----------------------------
+ * Parsing result wrapper
+ * ----------------------------- */
 
 export interface ParseWarning {
     code: string;
