@@ -51,17 +51,15 @@ export function formatLocalDateTime(utcIso: unknown): string {
     const d = new Date(s);
     if (Number.isNaN(d.getTime())) return "Unknown";
 
-    const date = d.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-    });
-    const time = d.toLocaleTimeString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
+    const pad = (n: number) => String(n).padStart(2, "0");
 
-    return `${date} • ${time}`;
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hour = pad(d.getHours());
+    const minute = pad(d.getMinutes());
+
+    return `${year}-${month}-${day} ${hour}:${minute}`;
 }
 
 const EMPTY_TURN: AllStatsTurnSnapshot = {

@@ -7,6 +7,7 @@ import CityBreakdownView from "./views/CityBreakdownView";
 import ReportMetaBar from "./components/ReportMetaBar";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "./GameSummary.css";
+import {formatLocalDateTime} from "@/components/GameSummary/views/gameOverview.helpers";
 
 type TabKey = "overview" | "tech" | "empire" | "cities";
 
@@ -76,7 +77,7 @@ export default function GameSummaryPage() {
             <div className="gs-section">
                 <ReportMetaBar
                     version={report.meta.version}
-                    generatedAtUtc={report.meta.generatedAtUtc}
+                    generatedAtUtc={formatLocalDateTime(report.meta.generatedAtUtc)}
                     warnings={warnings}
                     onReset={clear}
                 />
