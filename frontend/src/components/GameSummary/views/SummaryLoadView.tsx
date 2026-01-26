@@ -3,7 +3,7 @@ import "../GameSummary.css";
 import "../CityBreakdown.css";
 import { loadEndGameReportFromText } from "@/features/endGame/import/endGameReportLoader";
 
-const EXAMPLE_PATH = "/EL2_EndGame_20260122_112521.json";
+const EXAMPLE_PATH = "/EL2_EndGame_20260126_000618.json";
 
 export default function SummaryLoadView() {
     const [isLoadingExample, setIsLoadingExample] = useState(false);
