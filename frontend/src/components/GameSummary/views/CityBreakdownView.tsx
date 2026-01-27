@@ -22,13 +22,20 @@ import CityCard from "../components/city/CityCard";
 
 type GroupMode = "grouped" | "flat";
 
+function cityRenderKey(c: any, i: number): string {
+    // Prefer stable unique ids; add empire index and index as last-resort anti-collision
+    const id = typeof c?.id === "string" ? c.id : String(c?.id ?? "");
+    const e = typeof c?.empireIndex === "number" ? c.empireIndex : typeof c?.empireIdx === "number" ? c.empireIdx : "e?";
+    return `city:${e}:${id || "noid"}:${i}`;
+}
+
 export default function CityBreakdownView() {
     const state = useEndGameReportStore((s) => s.state);
 
-    const [empireFilter, setEmpireFilter] = useState<number | "all">(defaultEmpireFilterIndex());
+    const [empireFilter, setEmpireFilter] = useState<number | "all">("all");
+    const [groupMode, setGroupMode] = useState<GroupMode>("flat");
     const [sortKey, setSortKey] = useState<CitySortKey>("production");
     const [sortDir, setSortDir] = useState<SortDir>("desc");
-    const [groupMode, setGroupMode] = useState<GroupMode>("grouped");
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
     if (state.status !== "ok") {
@@ -182,7 +189,9 @@ export default function CityBreakdownView() {
                     </div>
 
                     <div className="gs-cityLayout gs-section">
-                        <div className="gs-cityLeft">
+                        {/* Key forces React to fully remount the list subtree when switching modes,
+                            preventing “sticky” cards from the other layout. */}
+                        <div className="gs-cityLeft" key={`cityLeft:${groupMode}`}>
                             {!hasFilteredCities ? (
                                 <div className="gs-cityGroup">
                                     <div className="gs-muted">
@@ -191,9 +200,9 @@ export default function CityBreakdownView() {
                                 </div>
                             ) : groupMode === "flat" ? (
                                 <div className="gs-cityList">
-                                    {sortedCities.map((c) => (
+                                    {sortedCities.map((c, i) => (
                                         <CityCard
-                                            key={c.id}
+                                            key={cityRenderKey(c, i)}
                                             city={c}
                                             selected={c.id === selectedCityId}
                                             onSelect={(id) => setSelectedCityId(id)}
@@ -214,9 +223,9 @@ export default function CityBreakdownView() {
                                                 </div>
 
                                                 <div className="gs-cityList">
-                                                    {cities.map((c) => (
+                                                    {cities.map((c, i) => (
                                                         <CityCard
-                                                            key={c.id}
+                                                            key={cityRenderKey(c, i)}
                                                             city={c}
                                                             selected={c.id === selectedCityId}
                                                             onSelect={(id) => setSelectedCityId(id)}
