@@ -6,12 +6,8 @@ import { loadEndGameReportFromText } from "@/features/endGame/import/endGameRepo
 const EXAMPLE_PATH = "/EL2_EndGame_20260126_000618.json";
 const MOD_URL = "https://github.com/AdBergman/EL2StatsMod";
 
-// Placeholder: update once confirmed on Windows
-const EXPORT_PATH_PLACEHOLDER =
-    "…/BepInEx/plugins/EL2StatsMod/<export-folder>/ (placeholder — confirm on Windows)";
-
-// Suggested export folder name (short + clear + future-proof)
-const SUGGESTED_EXPORT_FOLDER = "EndGameReports"; // alternatives: "Exports", "EL2StatExports", "EndGameExports"
+const EXPORT_PATH =
+    "BepInEx/reports/ (e.g. C:\\Program Files (x86)\\Steam\\steamapps\\common\\ENDLESS Legend 2\\BepInEx\\reports\\)";
 
 type DropState =
     | { status: "idle" }
@@ -60,7 +56,10 @@ export default function SummaryLoadView() {
         try {
             const res = await fetch(EXAMPLE_PATH, { cache: "no-store" });
             if (!res.ok) {
-                setDropState({ status: "error", message: `Could not load example JSON (HTTP ${res.status}).` });
+                setDropState({
+                    status: "error",
+                    message: `Could not load example report (HTTP ${res.status}).`,
+                });
                 return;
             }
             const text = await res.text();
@@ -69,7 +68,7 @@ export default function SummaryLoadView() {
             console.error(e);
             setDropState({
                 status: "error",
-                message: (e as Error)?.message ?? "Failed to load example JSON.",
+                message: (e as Error)?.message ?? "Failed to load example report.",
             });
         } finally {
             setIsLoadingExample(false);
@@ -82,13 +81,13 @@ export default function SummaryLoadView() {
 
     const dropTitle = useMemo(() => {
         if (isLoading) return "Loading report…";
-        if (isDragging) return "Drop your JSON file to load it";
-        return "Drag & drop your report JSON here";
+        if (isDragging) return "Drop your report file to load it";
+        return "Drag & drop your report file here";
     }, [isDragging, isLoading]);
 
     const dropSubtitle = useMemo(() => {
         if (isLoading) return dropState.status === "loading" && dropState.name ? dropState.name : "";
-        return "Or browse your files to select a JSON report.";
+        return "Or browse your files to select a report file.";
     }, [isLoading, dropState]);
 
     const onDrop = useCallback(
@@ -116,21 +115,27 @@ export default function SummaryLoadView() {
         [loadFile]
     );
 
-    const onDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (dropState.status !== "dragging" && dropState.status !== "loading") {
-            setDropState({ status: "dragging" });
-        }
-    }, [dropState.status]);
+    const onDragOver = useCallback(
+        (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (dropState.status !== "dragging" && dropState.status !== "loading") {
+                setDropState({ status: "dragging" });
+            }
+        },
+        [dropState.status]
+    );
 
-    const onDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (dropState.status === "dragging") {
-            setDropState({ status: "idle" });
-        }
-    }, [dropState.status]);
+    const onDragLeave = useCallback(
+        (e: React.DragEvent<HTMLDivElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (dropState.status === "dragging") {
+                setDropState({ status: "idle" });
+            }
+        },
+        [dropState.status]
+    );
 
     return (
         <div className="gs-page">
@@ -138,7 +143,7 @@ export default function SummaryLoadView() {
 
             <div className="gs-panel gs-section">
                 <p className="gs-muted" style={{ marginBottom: 10 }}>
-                    Upload a report JSON exported from Endless Legend 2 to view your run.
+                    Upload an end-game report to analyze your Endless Legend 2 run.
                 </p>
 
                 <div
@@ -165,7 +170,10 @@ export default function SummaryLoadView() {
                             <span className="gs-btn">{isLoading ? "Loading…" : "Browse files…"}</span>
                         </label>
 
-                        <span className="gs-muted gs-or" aria-hidden> or </span>
+                        <span className="gs-muted gs-or" aria-hidden>
+                            {" "}
+                            or{" "}
+                        </span>
 
                         <button
                             type="button"
@@ -192,11 +200,11 @@ export default function SummaryLoadView() {
                     <div className="gs-muted">
                         To analyze your own game, you need a report exported from Endless Legend 2.
                         <br />
-                        Generate it using the{" "}
+                        It’s exported at the Victory screen by the{" "}
                         <a href={MOD_URL} target="_blank" rel="noreferrer">
                             End Game Report mod
-                        </a>{" "}
-                        and load the resulting JSON file here.
+                        </a>
+                        . Then load the resulting file here.
                     </div>
 
                     <button
@@ -213,19 +221,15 @@ export default function SummaryLoadView() {
                         <div className="gs-panel gs-section" style={{ marginTop: 10 }}>
                             <div style={{ fontWeight: 800, marginBottom: 6 }}>Finding your export</div>
                             <ol className="gs-muted" style={{ margin: 0, paddingLeft: 18 }}>
-                                <li>Export the report from inside the game (via the mod).</li>
+                                <li>Finish a game and reach the Victory screen (the mod exports automatically).</li>
                                 <li>
                                     Look for a <code>.json</code> file in:
                                     <div style={{ marginTop: 6 }}>
-                                        <code>{EXPORT_PATH_PLACEHOLDER}</code>
+                                        <code>{EXPORT_PATH}</code>
                                     </div>
                                 </li>
                                 <li>Drag &amp; drop the file here, or use “Browse files…”.</li>
                             </ol>
-
-                            <div className="gs-muted" style={{ marginTop: 10 }}>
-                                Placeholder note: the exact path will be updated once confirmed on Windows.
-                            </div>
                         </div>
                     ) : null}
                 </div>

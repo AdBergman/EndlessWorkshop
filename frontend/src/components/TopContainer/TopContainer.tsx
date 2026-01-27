@@ -19,7 +19,7 @@ const routes = [
     { path: "/info", label: "Info" },
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
-    { path: "/summary", label: "Aftermath" },
+    { path: "/summary", label: "Summary" },
 ];
 
 const TopContainer: React.FC = () => {
