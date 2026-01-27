@@ -3,6 +3,7 @@ import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
 import "../CityBreakdown.css";
 import { formatNumber } from "./empireStats.helpers";
+import { getEmpireLabel } from "@/lib/labels/empireLabels";
 
 import {
     empireColor,
@@ -30,10 +31,7 @@ function buildEmpireMetaFromAllStats(allStats: AllStats): EmpireMeta[] {
 
     for (const e of empires) {
         const idx = e.empireIndex;
-        const faction =
-            e.factionDisplayName?.trim() ||
-            e.factionKey?.trim() ||
-            `Empire ${idx}`;
+        const faction = getEmpireLabel(e.factionKey);
         byIndex.set(idx, { faction });
     }
 

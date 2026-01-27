@@ -1,5 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+    DefaultLegendContent,
+    Legend,
+    Line,
+    LineChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from "recharts";
 
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import { useEmpireStatsViewStore } from "@/stores/empireStatsViewStore";
@@ -11,11 +20,14 @@ import "./EmpireStatsView.css";
 import type { AllStats, AllStatsEmpire } from "@/types/endGameReport";
 import {
     buildChartData,
+    buildPlayerEconomyChartData,
     buildTicks,
+    ECON_METRICS,
     empireIndex,
     type EmpireMetricKey,
     factionName,
     formatNumber,
+    getEconomyMetricColor,
     getEmpireColor,
     getEmpireKey,
     legendLabelForEmpire,
@@ -24,28 +36,46 @@ import {
 } from "./empireStats.helpers";
 
 type Mode = "compare" | "economy";
-
 const Y_AXIS_WIDTH = 64;
 
-const ECON_KEYS = [
-    { key: "food", consideredLabel: "Food" },
-    { key: "industry", consideredLabel: "Industry" },
-    { key: "dust", consideredLabel: "Dust" },
-    { key: "science", consideredLabel: "Science" },
-    { key: "influence", consideredLabel: "Influence" },
-] as const;
+type LegendItem = {
+    value?: any;
+    dataKey?: any;
+    color?: string;
+    type?: any;
+    inactive?: boolean;
+    payload?: any;
+};
 
-const ECON_COLORS = [
-    "#ffd54f",
-    "#4caf50",
-    "#ff7f32",
-    "#4fc3f7",
-    "#661277",
-] as const;
+function orderLegendPayload(payload: LegendItem[] | undefined, order: readonly string[]) {
+    const rows = Array.isArray(payload) ? payload : [];
 
-function safeNum(v: unknown): number {
-    const n = typeof v === "number" ? v : Number(v);
-    return Number.isFinite(n) ? n : 0;
+    const byKey = new Map<string, LegendItem[]>();
+    for (const it of rows) {
+        const k = String(it.dataKey ?? "");
+        if (!k) continue;
+        const arr = byKey.get(k) ?? [];
+        arr.push(it);
+        byKey.set(k, arr);
+    }
+
+    const out: LegendItem[] = [];
+    const used = new Set<LegendItem>();
+
+    for (const k of order) {
+        const hit = byKey.get(k);
+        if (hit?.length) {
+            for (const it of hit) {
+                out.push(it);
+                used.add(it);
+            }
+        }
+    }
+
+    // Append remaining entries in the original order (for safety)
+    for (const it of rows) if (!used.has(it)) out.push(it);
+
+    return out;
 }
 
 export default function EmpireStatsView() {
@@ -103,13 +133,8 @@ export default function EmpireStatsView() {
     const compareChartData = useMemo(() => buildChartData(empires, selectedMetric), [empires, selectedMetric]);
 
     const economyChartData = useMemo(() => {
-        const player = empires.find((e) => empireIndex(e) === 0) ?? empires[0];
-        const perTurn = Array.isArray((player as any)?.perTurn) ? (player as any).perTurn : [];
-        return perTurn.map((pt: any, i: number) => {
-            const row: any = { turn: i + 1 };
-            for (const k of ECON_KEYS) row[k.key] = safeNum(pt?.[k.key]);
-            return row;
-        });
+        const player = empires.find((e) => empireIndex(e) === 0) ?? empires[0] ?? null;
+        return buildPlayerEconomyChartData(player);
     }, [empires]);
 
     const chartData = mode === "economy" ? economyChartData : compareChartData;
@@ -118,7 +143,6 @@ export default function EmpireStatsView() {
     const ticks = useMemo(() => buildTicks(maxTurn), [maxTurn]);
 
     const rightHeaderMetricText = mode === "economy" ? "Player economy" : `Metric: ${metricLabel(selectedMetric)}`;
-
     const showCompareControls = mode === "compare";
 
     return (
@@ -199,7 +223,7 @@ export default function EmpireStatsView() {
                         {empires.map((e) => {
                             const idx = empireIndex(e);
                             const checked = selectedEmpires.includes(idx);
-                            const faction = factionName(e, idx);
+                            const faction = factionName(e);
                             const dotColor = getEmpireColor(idx);
 
                             return (
@@ -237,13 +261,7 @@ export default function EmpireStatsView() {
                     <div className="gs-section gs-chartWrap" style={{ width: "100%", height: 360 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData} margin={{ left: 0, right: 12, top: 6, bottom: 0 }}>
-                                <XAxis
-                                    dataKey="turn"
-                                    type="number"
-                                    domain={[1, maxTurn]}
-                                    allowDecimals={false}
-                                    ticks={ticks}
-                                />
+                                <XAxis dataKey="turn" type="number" domain={[1, maxTurn]} allowDecimals={false} ticks={ticks} />
 
                                 <YAxis width={Y_AXIS_WIDTH} tickFormatter={(v) => formatNumber(v)} />
 
@@ -253,23 +271,35 @@ export default function EmpireStatsView() {
                                     wrapperStyle={{ pointerEvents: "none" }}
                                     allowEscapeViewBox={{ x: false, y: false }}
                                     content={(props) => (
-                                        <TurnTooltip {...(props as any)} legendLabelByIndex={legendLabelByIndex} />
+                                        <TurnTooltip
+                                            {...(props as any)}
+                                            legendLabelByIndex={legendLabelByIndex}
+                                            metricOrder={mode === "economy" ? ECON_METRICS : undefined}
+                                        />
                                     )}
                                 />
 
-                                <Legend />
+                                <Legend
+                                    content={(props: any) => {
+                                        const orderedPayload =
+                                            mode === "economy" ? orderLegendPayload(props?.payload as LegendItem[], ECON_METRICS) : props?.payload;
+
+                                        // Use Recharts' own default legend renderer so visuals stay identical.
+                                        return <DefaultLegendContent {...props} payload={orderedPayload} />;
+                                    }}
+                                />
 
                                 {mode === "economy"
-                                    ? ECON_KEYS.map((m, i) => (
+                                    ? ECON_METRICS.map((m) => (
                                         <Line
-                                            key={m.key}
+                                            key={m}
                                             type="monotone"
-                                            dataKey={m.key}
-                                            stroke={ECON_COLORS[i] ?? "#fff"}
+                                            dataKey={m}
+                                            stroke={getEconomyMetricColor(m)}
                                             strokeWidth={2}
                                             dot={false}
                                             isAnimationActive={false}
-                                            name={m.consideredLabel}
+                                            name={m}
                                         />
                                     ))
                                     : selectedEmpires.map((idx) => {

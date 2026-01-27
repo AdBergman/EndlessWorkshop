@@ -1,4 +1,5 @@
 import type { AllStatsEmpire } from "@/types/endGameReport";
+import { getEmpireLabel } from "@/lib/labels/empireLabels";
 
 export const EMPIRE_COLORS = [
     "#ff7f32",
@@ -50,22 +51,12 @@ export function empireIndex(e: AllStatsEmpire): number {
     return (e as any).empireIndex ?? 0;
 }
 
-export function factionName(e: AllStatsEmpire, idx: number): string {
-    const dn =
-        typeof (e as any).factionDisplayName === "string"
-            ? (e as any).factionDisplayName.trim()
-            : "";
-    if (dn) return dn;
-
-    const key =
-        typeof (e as any).factionKey === "string" ? (e as any).factionKey.trim() : "";
-    if (key) return key;
-
-    return `Empire ${idx}`;
+export function factionName(e: AllStatsEmpire): string {
+    return getEmpireLabel((e as any)?.factionKey);
 }
 
 export function legendLabelForEmpire(e: AllStatsEmpire, idx: number): string {
-    const faction = factionName(e, idx);
+    const faction = factionName(e);
     return idx === 0 ? `${faction} ★` : faction;
 }
 
@@ -178,8 +169,8 @@ export type EconomyMetricKey = (typeof ECON_METRICS)[number];
 
 const ECON_COLORS: Record<EconomyMetricKey, string> = {
     Food: "#4caf50",
-    Industry: "#ffd54f",
-    Dust: "#ff7f32",
+    Industry: "#ff7f32",
+    Dust: "#ffd54f",
     Science: "#4fc3f7",
     Influence: "#661277",
 };
