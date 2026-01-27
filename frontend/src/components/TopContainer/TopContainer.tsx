@@ -15,12 +15,11 @@ const factions = [
 
 const MAX_ERA = 6;
 
-// ✅ Available routes only — clean and simple
 const routes = [
     { path: "/info", label: "Info" },
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
-    // { path: "/summary", label: "Game Summary" }, // intentionally hidden for now
+    { path: "/summary", label: "Aftermath" },
 ];
 
 const TopContainer: React.FC = () => {
