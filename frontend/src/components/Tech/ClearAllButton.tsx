@@ -1,44 +1,28 @@
-import React from 'react';
-import { Tech } from '@/types/dataTypes';
-import '@/components/Tech/ClearAllButton.css'; // Use the new CSS file
+import React from "react";
+import "@/components/Tech/ClearAllButton.css";
 
 interface ClearAllButtonProps {
-    eraTechs: Tech[];
-    selectedTechs: Tech[];
-    onTechClick: (techName: string) => void;
+    setSelectedTechNames: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const ClearAllButton: React.FC<ClearAllButtonProps> = ({
-                                                           eraTechs,
-                                                           selectedTechs,
-                                                           onTechClick,
-                                                       }) => {
+const ClearAllButton: React.FC<ClearAllButtonProps> = ({ setSelectedTechNames }) => {
     const handleClearAll = () => {
-        // Create a set of names for the techs in the current era for efficient lookup
-        const eraTechNames = new Set(eraTechs.map(t => t.name));
-
-        // Find which of the globally selected techs are in the current era
-        selectedTechs.forEach(tech => {
-            if (eraTechNames.has(tech.name)) {
-                onTechClick(tech.name); // Call onTechClick to deselect it
-            }
-        });
+        setSelectedTechNames([]); // ✅ clear ALL eras
     };
 
-    // Position it directly below the Select All button
-    const xPct = 86.9 + 5.5; // Same horizontal position
-    const yPct = 29.5 + 14.0 + 4.5; // Add vertical offset
+    const xPct = 86.9 + 5.5;
+    const yPct = 29.5 + 14.0 + 4.5;
 
     return (
         <button
             data-testid="clear-all-button"
             onClick={handleClearAll}
-            className="select-all-button" // Use the same class for identical styling
+            className="select-all-button"
             style={{
-                position: 'absolute',
+                position: "absolute",
                 left: `${xPct}%`,
                 top: `${yPct}%`,
-                transform: 'translateX(-50%)',
+                transform: "translateX(-50%)",
                 zIndex: 10,
             }}
         >

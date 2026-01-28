@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
 import "../TechProgress.css";
@@ -20,10 +21,6 @@ function empireColor(idx: number): string {
 }
 
 function tokenizeFilter(input: string): string[] {
-    // Token-based, case-insensitive, dynamic filter:
-    // - trim
-    // - split on whitespace
-    // - remove empty tokens
     return input
         .toLowerCase()
         .trim()
@@ -32,7 +29,6 @@ function tokenizeFilter(input: string): string[] {
 }
 
 function searchableTechText(e: TechOrderEntry): string {
-    // Search display name first, fallback to definition name
     const label = displayLabel(e);
     const def = e.technologyDefinitionName ?? "";
     return `${label} ${def}`.toLowerCase();
@@ -41,7 +37,6 @@ function searchableTechText(e: TechOrderEntry): string {
 function matchesTokenFilter(e: TechOrderEntry, tokens: string[]): boolean {
     if (tokens.length === 0) return true;
     const hay = searchableTechText(e);
-    // All tokens must appear somewhere (order-independent)
     for (const t of tokens) {
         if (!hay.includes(t)) return false;
     }
@@ -50,6 +45,7 @@ function matchesTokenFilter(e: TechOrderEntry, tokens: string[]): boolean {
 
 export default function TechProgressView() {
     const state = useEndGameReportStore((s) => s.state);
+    const navigate = useNavigate();
 
     const [mode, setMode] = useState<Mode>("global");
     const [selectedEmpire, setSelectedEmpire] = useState<number>(0);
@@ -118,12 +114,11 @@ export default function TechProgressView() {
     const filterTokens = useMemo(() => tokenizeFilter(filterText), [filterText]);
 
     const filteredTurns = useMemo(() => {
-        // Build turns that have >=1 matching entry under the current filter.
-        // Keep filtered entries per turn so rendering stays simple.
         const out: Array<{ turn: number; entries: TechOrderEntry[] }> = [];
 
         for (const turn of turnsSorted) {
             const list = getEntriesForTurn(turn);
+
             const filtered =
                 filterTokens.length === 0 ? list : list.filter((e) => matchesTokenFilter(e, filterTokens));
 
@@ -131,7 +126,6 @@ export default function TechProgressView() {
         }
 
         return out;
-        // Note: getEntriesForTurn is derived from mode/grouped maps; deps below cover it.
     }, [turnsSorted, filterTokens, mode, selectedEmpire, groupedGlobal, groupedByEmpire]);
 
     const matchCount = useMemo(() => {
@@ -145,13 +139,9 @@ export default function TechProgressView() {
         const el = filterSizerRef.current;
         if (!el) return;
 
-        // Measure either current text or placeholder so the control never looks broken when empty.
         const measured = el.getBoundingClientRect().width;
-
-        // + input horizontal padding (20) + space for clear button (28) + a tiny buffer.
         const raw = Math.ceil(measured) + 20 + 28 + 6;
 
-        // Keep a stable, intentional baseline; only grow when needed.
         const min = 180;
         const max = 260;
         const next = Math.max(min, Math.min(max, raw));
@@ -159,6 +149,68 @@ export default function TechProgressView() {
         if (next !== filterWidthPx) setFilterWidthPx(next);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterText]);
+
+    /**
+     * Flatten the currently-visible tech list (respecting mode + filter + sort),
+     * and navigate to /tech without saving anything to DB.
+     */
+    const handleViewInTechTree = () => {
+        const targetEmpireIndex = mode === "empire" ? selectedEmpire : 0;
+
+        const em = empireMeta.find((x) => x.idx === targetEmpireIndex);
+        const factionHint = em?.faction ?? null; // may be displayName or key, depending on report
+
+        const flattened: TechOrderEntry[] = [];
+        for (const t of filteredTurns) {
+            for (const e of t.entries) {
+                if (mode === "global" && e.empireIndex !== targetEmpireIndex) continue;
+                flattened.push(e);
+            }
+        }
+
+        const techNames = flattened.map(displayLabel).filter(Boolean);
+
+        navigate("/tech", {
+            state: {
+                source: "gamesummary",
+                mode,
+                empireIndex: targetEmpireIndex,
+                factionHint,          // ✅ NEW
+                techNames,
+                techDefs: flattened.map((e) => e.technologyDefinitionName).filter(Boolean),
+            },
+        });
+    };
+
+    const viewButtonLabel = useMemo(() => {
+        if (mode === "empire") {
+            const em = empireMeta.find((x) => x.idx === selectedEmpire);
+            return `View in Tech Tree (${em?.labelShort ?? `E${selectedEmpire}`})`;
+        }
+        return "View in Tech Tree (Player)";
+    }, [mode, selectedEmpire, empireMeta]);
+
+    const viewButtonDisabled = useMemo(() => {
+        if (mode === "empire" && !selectedEmpireIsValid) return true;
+
+        // If global: disabled if player has no entries under current filter
+        if (mode === "global") {
+            let hasAny = false;
+            for (const t of filteredTurns) {
+                for (const e of t.entries) {
+                    if (e.empireIndex === 0) {
+                        hasAny = true;
+                        break;
+                    }
+                }
+                if (hasAny) break;
+            }
+            return !hasAny;
+        }
+
+        // If empire: disabled if no entries under current filter
+        return filteredTurns.length === 0;
+    }, [mode, selectedEmpireIsValid, filteredTurns]);
 
     return (
         <div className="gs-panel">
@@ -168,6 +220,17 @@ export default function TechProgressView() {
                     <div className="gs-muted">
                         Entries: {techOrder.entryCount} • Empires: {empireCount} • Max turn: {maxTurn}
                     </div>
+                </div>
+
+                <div className="gs-row" style={{ gap: 10 }}>
+                    <button
+                        className="gs-btn"
+                        onClick={handleViewInTechTree}
+                        disabled={viewButtonDisabled}
+                        title="Open these techs in the Tech Tree view (no link is saved until you explicitly share)."
+                    >
+                        {viewButtonLabel}
+                    </button>
                 </div>
             </div>
 
@@ -210,14 +273,14 @@ export default function TechProgressView() {
                 <div className="gs-filter" aria-label="Tech filter">
                     {filterTokens.length > 0 ? (
                         <span className="gs-filterMeta gs-muted">
-                            {matchCount} match{matchCount === 1 ? "" : "es"}
-                        </span>
+              {matchCount} match{matchCount === 1 ? "" : "es"}
+            </span>
                     ) : null}
 
                     <div className="gs-filterInputWrap">
-                        <span ref={filterSizerRef} className="gs-filterSizer" aria-hidden="true">
-                            {(filterText && filterText.length > 0 ? filterText : "Filter techs…") + " "}
-                        </span>
+            <span ref={filterSizerRef} className="gs-filterSizer" aria-hidden="true">
+              {(filterText && filterText.length > 0 ? filterText : "Filter techs…") + " "}
+            </span>
 
                         <input
                             className="gs-input gs-filterInput"
@@ -255,17 +318,17 @@ export default function TechProgressView() {
                                 className="gs-pill"
                                 style={{ display: "inline-flex", gap: 8, alignItems: "center" }}
                             >
-                                <span
-                                    className="gs-pillPrefix"
-                                    style={{
-                                        color: empireColor(em.idx),
-                                        fontWeight: em.isPlayer ? 600 : 500,
-                                    }}
-                                >
-                                    E{em.idx}
-                                </span>
-                                <span>{em.labelShort}</span>
-                            </span>
+                <span
+                    className="gs-pillPrefix"
+                    style={{
+                        color: empireColor(em.idx),
+                        fontWeight: em.isPlayer ? 600 : 500,
+                    }}
+                >
+                  E{em.idx}
+                </span>
+                <span>{em.labelShort}</span>
+              </span>
                         ))}
                     </div>
                 </div>
@@ -295,18 +358,17 @@ export default function TechProgressView() {
                                                     className="gs-pill"
                                                     title={
                                                         mode === "global"
-                                                            ? empireLabelByIndex.get(e.empireIndex)?.labelLong ??
-                                                            `E${e.empireIndex}`
+                                                            ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
                                                             : undefined
                                                     }
                                                 >
-                                                    {mode === "global" ? (
-                                                        <span className="gs-pillPrefix" style={{ color: prefixColor }}>
-                                                            E{e.empireIndex}
-                                                        </span>
-                                                    ) : null}
+                          {mode === "global" ? (
+                              <span className="gs-pillPrefix" style={{ color: prefixColor }}>
+                              E{e.empireIndex}
+                            </span>
+                          ) : null}
                                                     {displayLabel(e)}
-                                                </span>
+                        </span>
                                             );
                                         })}
                                     </div>

@@ -101,8 +101,14 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                 draggable={false}
             />
 
-            <SelectAllButton eraTechs={selectableTechs} selectedTechs={selectedTechObjects} onTechClick={onTechClick} />
-            <ClearAllButton eraTechs={currentFactionEraTechs} selectedTechs={selectedTechObjects} onTechClick={onTechClick} />
+            <SelectAllButton
+                eraTechs={selectableTechs}          // current era only (and not locked)
+                setSelectedTechNames={setSelectedTechs}
+            />
+
+            <ClearAllButton
+                setSelectedTechNames={setSelectedTechs} // clears everything
+            />
 
             {currentFactionEraTechs.map((tech) => {
                 const orderNumber = techOrderNumberByName.get(tech.name);
