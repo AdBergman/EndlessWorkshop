@@ -111,3 +111,86 @@
     font-variant-numeric: tabular-nums;
     opacity: 0.95;
 }
+
+/* If gs-input doesn't exist elsewhere, add this to TechProgress.css (or GameSummary.css if that's where inputs live) */
+.gs-input {
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+}
+
+.gs-input::placeholder {
+    opacity: 0.6;
+}
+
+/* Tech filter (auto-sized search field) */
+
+.gs-filter {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.gs-filterMeta {
+    font-size: 12px;
+    opacity: 0.75;
+    white-space: nowrap;
+}
+
+.gs-filterInputWrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Hidden sizer used by JS to measure text width */
+.gs-filterSizer {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
+    /* Match input typography so width measurement is accurate */
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 400;
+    letter-spacing: normal;
+    padding: 0 10px;
+}
+
+/* Input width is set inline via style={{ width: filterWidthPx }} (clamped in JS) */
+.gs-filterInput {
+    max-width: 42vw;
+    padding-right: 28px; /* space for × button */
+    transition: width 120ms ease;
+}
+
+.gs-filterClear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 22px;
+    width: 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+}
+
+.gs-filterClear:hover {
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(0, 0, 0, 0.35); /* optional: makes it feel less “buttony” */
+}
