@@ -1,6 +1,6 @@
 package ewshop.facade.dto.response;
 
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.enums.Faction;
 
 import java.time.LocalDateTime;
 import java.util.List;

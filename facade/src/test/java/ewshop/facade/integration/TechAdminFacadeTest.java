@@ -1,8 +1,8 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.TechType;
 import ewshop.domain.repository.TechRepository;
 import ewshop.facade.dto.request.TechAdminDto;
 import ewshop.facade.dto.response.TechCoordsDto;

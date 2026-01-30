@@ -1,4 +1,4 @@
-package ewshop.domain.entity.enums;
+package ewshop.domain.model.enums;
 
 public enum Faction {
     ASPECTS,

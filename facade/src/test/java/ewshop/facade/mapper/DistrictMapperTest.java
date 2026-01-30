@@ -1,6 +1,6 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.facade.dto.response.DistrictDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

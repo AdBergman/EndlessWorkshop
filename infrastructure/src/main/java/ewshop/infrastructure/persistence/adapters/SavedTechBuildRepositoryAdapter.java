@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.SavedTechBuild;
+import ewshop.domain.model.SavedTechBuild;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import ewshop.infrastructure.persistence.entities.SavedTechBuildEntity;
 import ewshop.infrastructure.persistence.mappers.SavedTechBuildMapper;

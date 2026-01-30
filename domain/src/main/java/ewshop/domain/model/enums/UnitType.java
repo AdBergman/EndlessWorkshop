@@ -1,4 +1,4 @@
-package ewshop.domain.entity.enums;
+package ewshop.domain.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

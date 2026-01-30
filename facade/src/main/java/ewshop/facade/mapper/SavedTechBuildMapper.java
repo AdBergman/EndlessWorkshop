@@ -1,7 +1,7 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.SavedTechBuild;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.SavedTechBuild;
+import ewshop.domain.model.enums.Faction;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 

@@ -1,11 +1,11 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.UnitCost;
-import ewshop.domain.entity.UnitSkill;
-import ewshop.domain.entity.UnitSpecialization;
-import ewshop.domain.entity.enums.CostType;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.UnitCost;
+import ewshop.domain.model.UnitSkill;
+import ewshop.domain.model.UnitSpecialization;
+import ewshop.domain.model.enums.CostType;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.UnitType;
 import ewshop.facade.dto.response.UnitDto;
 import org.junit.jupiter.api.Test;
 

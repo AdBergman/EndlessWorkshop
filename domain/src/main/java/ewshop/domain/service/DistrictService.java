@@ -1,6 +1,6 @@
 package ewshop.domain.service;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.domain.repository.DistrictRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

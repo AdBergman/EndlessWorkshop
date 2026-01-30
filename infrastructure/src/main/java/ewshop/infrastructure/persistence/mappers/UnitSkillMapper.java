@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.UnitSkill;
+import ewshop.domain.model.UnitSkill;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import org.springframework.stereotype.Component;
 

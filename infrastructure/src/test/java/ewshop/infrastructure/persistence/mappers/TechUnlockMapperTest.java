@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.*;
+import ewshop.domain.model.*;
 import ewshop.infrastructure.persistence.entities.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.SavedTechBuild;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.SavedTechBuild;
+import ewshop.domain.model.enums.Faction;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;

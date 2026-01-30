@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.SavedTechBuild;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.SavedTechBuild;
+import ewshop.domain.model.enums.Faction;
 import ewshop.infrastructure.persistence.entities.SavedTechBuildEntity;
 import org.junit.jupiter.api.Test;
 

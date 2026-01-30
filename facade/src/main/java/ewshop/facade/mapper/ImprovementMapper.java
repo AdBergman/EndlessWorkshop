@@ -1,7 +1,7 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.Improvement;
-import ewshop.domain.entity.StrategicCost;
+import ewshop.domain.model.Improvement;
+import ewshop.domain.model.StrategicCost;
 import ewshop.facade.dto.response.ImprovementDto;
 
 import java.util.Collections;

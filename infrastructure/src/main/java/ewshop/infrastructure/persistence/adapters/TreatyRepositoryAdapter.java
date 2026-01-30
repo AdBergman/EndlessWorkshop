@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.Treaty;
+import ewshop.domain.model.Treaty;
 import ewshop.domain.repository.TreatyRepository;
 import ewshop.infrastructure.persistence.entities.TreatyEntity;
 import ewshop.infrastructure.persistence.mappers.TreatyMapper;

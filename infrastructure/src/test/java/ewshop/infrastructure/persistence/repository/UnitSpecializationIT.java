@@ -1,8 +1,8 @@
 package ewshop.infrastructure.persistence.repository;
 
-import ewshop.domain.entity.enums.FIDSI;
-import ewshop.domain.entity.enums.StrategicResourceType;
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.enums.FIDSI;
+import ewshop.domain.model.enums.StrategicResourceType;
+import ewshop.domain.model.enums.UnitType;
 import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;

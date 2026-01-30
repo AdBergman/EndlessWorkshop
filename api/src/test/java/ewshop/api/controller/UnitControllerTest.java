@@ -1,7 +1,7 @@
 package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.enums.Faction;
 import ewshop.facade.dto.response.UnitDto;
 import ewshop.facade.interfaces.UnitFacade;
 import org.junit.jupiter.api.Test;

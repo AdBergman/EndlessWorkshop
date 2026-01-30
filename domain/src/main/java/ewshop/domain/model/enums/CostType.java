@@ -1,7 +1,4 @@
-package ewshop.domain.entity.enums;
-
-import ewshop.domain.entity.enums.FIDSI;
-import ewshop.domain.entity.enums.StrategicResourceType;
+package ewshop.domain.model.enums;
 
 public enum CostType {
     // FIDSI types

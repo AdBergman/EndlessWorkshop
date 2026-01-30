@@ -1,7 +1,7 @@
 package ewshop.domain.service;
 
 import ewshop.domain.command.TechPlacementUpdate;
-import ewshop.domain.entity.Tech;
+import ewshop.domain.model.Tech;
 import ewshop.domain.repository.TechRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

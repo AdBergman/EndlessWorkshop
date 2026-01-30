@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechUnlock;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechUnlock;
 import ewshop.domain.repository.TechUnlockRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockEntity;

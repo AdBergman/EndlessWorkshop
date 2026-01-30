@@ -1,9 +1,9 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.Improvement;
-import ewshop.domain.entity.StrategicCost;
-import ewshop.domain.entity.enums.StrategicResourceType;
-import ewshop.domain.entity.enums.UniqueType;
+import ewshop.domain.model.Improvement;
+import ewshop.domain.model.StrategicCost;
+import ewshop.domain.model.enums.StrategicResourceType;
+import ewshop.domain.model.enums.UniqueType;
 import ewshop.facade.dto.response.ImprovementDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

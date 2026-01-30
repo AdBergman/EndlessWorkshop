@@ -1,8 +1,8 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.UnitSpecialization;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.UnitSpecialization;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.UnitType;
 import ewshop.domain.repository.UnitSpecializationRepository;
 import ewshop.facade.dto.response.UnitDto;
 import ewshop.facade.interfaces.UnitFacade;

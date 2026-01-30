@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repositories;
 
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;

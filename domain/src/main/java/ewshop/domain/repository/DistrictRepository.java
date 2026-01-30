@@ -1,6 +1,6 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 
 import java.util.List;
 

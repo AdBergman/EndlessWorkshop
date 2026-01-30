@@ -1,6 +1,6 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.UnitSkill;
+import ewshop.domain.model.UnitSkill;
 
 import java.util.List;
 

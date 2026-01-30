@@ -1,6 +1,6 @@
 package ewshop.domain.service;
 
-import ewshop.domain.entity.UnitSpecialization;
+import ewshop.domain.model.UnitSpecialization;
 import ewshop.domain.repository.UnitSpecializationRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

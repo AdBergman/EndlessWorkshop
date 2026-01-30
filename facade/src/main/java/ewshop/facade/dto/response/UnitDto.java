@@ -1,7 +1,7 @@
 package ewshop.facade.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.enums.Faction;
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

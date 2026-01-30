@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @SpringBootApplication
 @EnableJpaRepositories(basePackages = "ewshop.infrastructure.persistence.repositories")
-@EntityScan(basePackages = {"ewshop.domain.entity", "ewshop.infrastructure.persistence.entities"})
+@EntityScan(basePackages = {"ewshop.domain.model", "ewshop.infrastructure.persistence.entities"})
 public class TestInfrastructureApplication {
     // main method not needed for tests
 }

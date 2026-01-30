@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.Improvement;
+import ewshop.domain.model.Improvement;
 import ewshop.domain.repository.ImprovementRepository;
 import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import ewshop.infrastructure.persistence.mappers.ImprovementMapper;

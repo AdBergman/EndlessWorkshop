@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.Convertor;
+import ewshop.domain.model.Convertor;
 import ewshop.infrastructure.persistence.entities.ConvertorEntity;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.enums.Faction;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;

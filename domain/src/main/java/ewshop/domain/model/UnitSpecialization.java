@@ -1,8 +1,8 @@
-package ewshop.domain.entity;
+package ewshop.domain.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.UnitType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import java.util.HashSet;

@@ -1,12 +1,12 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.UnitCost;
-import ewshop.domain.entity.UnitSkill;
-import ewshop.domain.entity.UnitSpecialization;
-import ewshop.domain.entity.enums.CostType;
-import ewshop.domain.entity.enums.FIDSI;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.StrategicResourceType;
+import ewshop.domain.model.UnitCost;
+import ewshop.domain.model.UnitSkill;
+import ewshop.domain.model.UnitSpecialization;
+import ewshop.domain.model.enums.CostType;
+import ewshop.domain.model.enums.FIDSI;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.StrategicResourceType;
 import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
@@ -42,7 +42,7 @@ class UnitSpecializationMapperTest {
         UnitSpecializationEntity entity = new UnitSpecializationEntity();
         entity.setName("Knight");
         entity.setDescription("A heavy cavalry unit.");
-        entity.setType(ewshop.domain.entity.enums.UnitType.INFANTRY);
+        entity.setType(ewshop.domain.model.enums.UnitType.INFANTRY);
         entity.setHealth(150);
         entity.setDefense(10);
         entity.setMinDamage(20);
@@ -68,7 +68,7 @@ class UnitSpecializationMapperTest {
         assertThat(domain).isNotNull();
         assertThat(domain.getName()).isEqualTo("Knight");
         assertThat(domain.getDescription()).isEqualTo("A heavy cavalry unit.");
-        assertThat(domain.getType()).isEqualTo(ewshop.domain.entity.enums.UnitType.INFANTRY);
+        assertThat(domain.getType()).isEqualTo(ewshop.domain.model.enums.UnitType.INFANTRY);
         assertThat(domain.getHealth()).isEqualTo(150);
         assertThat(domain.getDefense()).isEqualTo(10);
         assertThat(domain.getMinDamage()).isEqualTo(20);
@@ -99,7 +99,7 @@ class UnitSpecializationMapperTest {
         UnitSpecialization domain = UnitSpecialization.builder()
                 .name("Knight")
                 .description("A heavy cavalry unit.")
-                .type(ewshop.domain.entity.enums.UnitType.INFANTRY)
+                .type(ewshop.domain.model.enums.UnitType.INFANTRY)
                 .health(150)
                 .defense(10)
                 .minDamage(20)

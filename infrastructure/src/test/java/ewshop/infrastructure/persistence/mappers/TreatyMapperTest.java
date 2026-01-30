@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.Treaty;
+import ewshop.domain.model.Treaty;
 import ewshop.infrastructure.persistence.entities.TreatyEntity;
 import org.junit.jupiter.api.Test;
 

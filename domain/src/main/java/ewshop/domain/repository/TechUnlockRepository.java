@@ -1,7 +1,7 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechUnlock;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechUnlock;
 
 import java.util.List;
 

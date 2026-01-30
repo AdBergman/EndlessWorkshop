@@ -1,6 +1,6 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;

@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.entity.enums.FIDSI;
-import ewshop.domain.entity.enums.StrategicResourceType;
+import ewshop.domain.model.enums.FIDSI;
+import ewshop.domain.model.enums.StrategicResourceType;
 import jakarta.persistence.*;
 
 import java.util.Objects;

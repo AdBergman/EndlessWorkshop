@@ -1,6 +1,6 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.Treaty;
+import ewshop.domain.model.Treaty;
 
 import java.util.Optional;
 

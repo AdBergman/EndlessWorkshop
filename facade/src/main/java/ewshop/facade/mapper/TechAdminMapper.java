@@ -1,8 +1,8 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.command.TechPlacementUpdate;
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.request.TechAdminDto;
 
 public class TechAdminMapper {

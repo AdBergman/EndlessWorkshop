@@ -1,10 +1,10 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.TechUnlock;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.TechUnlock;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import org.junit.jupiter.api.BeforeEach;

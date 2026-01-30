@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import org.springframework.stereotype.Component;
 

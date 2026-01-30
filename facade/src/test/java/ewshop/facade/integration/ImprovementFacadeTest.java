@@ -1,7 +1,7 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.Improvement;
-import ewshop.domain.entity.enums.UniqueType;
+import ewshop.domain.model.Improvement;
+import ewshop.domain.model.enums.UniqueType;
 import ewshop.domain.repository.ImprovementRepository;
 import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;

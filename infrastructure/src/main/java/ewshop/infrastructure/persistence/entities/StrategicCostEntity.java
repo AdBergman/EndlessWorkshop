@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.entity.enums.StrategicResourceType;
+import ewshop.domain.model.enums.StrategicResourceType;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

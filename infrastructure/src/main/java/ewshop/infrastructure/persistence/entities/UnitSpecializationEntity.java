@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.enums.UnitType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;

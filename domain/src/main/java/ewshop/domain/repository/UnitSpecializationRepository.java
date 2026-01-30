@@ -1,6 +1,6 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.UnitSpecialization;
+import ewshop.domain.model.UnitSpecialization;
 
 import java.util.List;
 

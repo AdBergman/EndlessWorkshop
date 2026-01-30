@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.domain.repository.DistrictRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

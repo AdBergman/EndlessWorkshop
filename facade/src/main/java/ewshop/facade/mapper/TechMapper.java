@@ -1,7 +1,7 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechCoords;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechCoords;
 import ewshop.facade.dto.response.TechCoordsDto;
 import ewshop.facade.dto.response.TechDto;
 

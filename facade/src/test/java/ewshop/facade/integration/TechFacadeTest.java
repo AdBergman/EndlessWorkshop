@@ -1,9 +1,9 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.Tech;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.TechType;
 import ewshop.domain.repository.TechRepository;
 import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.interfaces.TechFacade;

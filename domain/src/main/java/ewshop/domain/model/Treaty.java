@@ -1,10 +1,10 @@
-package ewshop.domain.entity;
+package ewshop.domain.model;
 
-public class Convertor {
+public class Treaty {
     private final String name;
     private final String description;
 
-    private Convertor(Builder builder) {
+    private Treaty(Builder builder) {
         this.name = builder.name;
         this.description = builder.description;
     }
@@ -28,6 +28,8 @@ public class Convertor {
             return this;
         }
 
-        public Convertor build() { return new Convertor(this); }
+        public Treaty build() {
+            return new Treaty(this);
+        }
     }
 }

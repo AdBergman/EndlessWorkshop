@@ -2,7 +2,7 @@ package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.api.TestApplication;
-import ewshop.domain.entity.enums.Faction;
+import ewshop.domain.model.enums.Faction;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;

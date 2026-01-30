@@ -1,6 +1,6 @@
 package ewshop.domain.repository;
 
-import ewshop.domain.entity.Improvement;
+import ewshop.domain.model.Improvement;
 
 import java.util.List;
 

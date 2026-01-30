@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.junit.jupiter.api.Test;

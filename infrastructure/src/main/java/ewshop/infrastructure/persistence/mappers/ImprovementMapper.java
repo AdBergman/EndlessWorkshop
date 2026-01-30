@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.Improvement;
+import ewshop.domain.model.Improvement;
 import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import org.springframework.stereotype.Component;
 

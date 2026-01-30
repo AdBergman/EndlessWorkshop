@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.StrategicCost;
-import ewshop.domain.entity.enums.StrategicResourceType;
+import ewshop.domain.model.StrategicCost;
+import ewshop.domain.model.enums.StrategicResourceType;
 import ewshop.infrastructure.persistence.entities.StrategicCostEntity;
 import org.junit.jupiter.api.Test;
 

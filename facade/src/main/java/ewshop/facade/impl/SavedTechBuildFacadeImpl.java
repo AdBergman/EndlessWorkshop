@@ -1,6 +1,6 @@
 package ewshop.facade.impl;
 
-import ewshop.domain.entity.SavedTechBuild;
+import ewshop.domain.model.SavedTechBuild;
 import ewshop.domain.service.SavedTechBuildService;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;

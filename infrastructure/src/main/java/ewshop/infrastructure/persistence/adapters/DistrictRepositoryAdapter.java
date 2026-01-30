@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import ewshop.infrastructure.persistence.mappers.DistrictMapper;

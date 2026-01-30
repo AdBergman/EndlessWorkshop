@@ -1,8 +1,8 @@
-package ewshop.domain.entity;
+package ewshop.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import ewshop.domain.entity.enums.UniqueType;
+import ewshop.domain.model.enums.UniqueType;
 
 import java.util.ArrayList;
 import java.util.List;

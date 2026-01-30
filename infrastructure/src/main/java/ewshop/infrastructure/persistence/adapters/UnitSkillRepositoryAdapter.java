@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.UnitSkill;
+import ewshop.domain.model.UnitSkill;
 import ewshop.domain.repository.UnitSkillRepository;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.mappers.UnitSkillMapper;

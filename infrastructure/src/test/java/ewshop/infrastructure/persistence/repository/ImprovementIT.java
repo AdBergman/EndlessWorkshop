@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
-import ewshop.domain.entity.enums.StrategicResourceType;
-import ewshop.domain.entity.enums.UniqueType;
+import ewshop.domain.model.enums.StrategicResourceType;
+import ewshop.domain.model.enums.UniqueType;
 import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import ewshop.infrastructure.persistence.entities.StrategicCostEntity;
 import ewshop.infrastructure.persistence.repositories.ImprovementJpaRepository;

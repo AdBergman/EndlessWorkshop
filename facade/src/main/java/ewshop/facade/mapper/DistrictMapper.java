@@ -1,6 +1,6 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.District;
+import ewshop.domain.model.District;
 import ewshop.facade.dto.response.DistrictDto;
 
 import java.util.Collections;

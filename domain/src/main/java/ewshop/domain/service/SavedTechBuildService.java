@@ -1,6 +1,6 @@
 package ewshop.domain.service;
 
-import ewshop.domain.entity.SavedTechBuild;
+import ewshop.domain.model.SavedTechBuild;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

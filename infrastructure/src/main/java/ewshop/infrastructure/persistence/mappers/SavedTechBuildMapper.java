@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.SavedTechBuild;
+import ewshop.domain.model.SavedTechBuild;
 import ewshop.infrastructure.persistence.entities.SavedTechBuildEntity;
 import org.springframework.stereotype.Component;
 

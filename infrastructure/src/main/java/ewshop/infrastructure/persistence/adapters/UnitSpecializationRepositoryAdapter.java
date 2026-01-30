@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.adapters;
 
-import ewshop.domain.entity.UnitSpecialization;
+import ewshop.domain.model.UnitSpecialization;
 import ewshop.domain.repository.UnitSpecializationRepository;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
 import ewshop.infrastructure.persistence.mappers.UnitSpecializationMapper;

@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.entity.TechUnlock;
+import ewshop.domain.model.TechUnlock;
 import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import org.springframework.stereotype.Component;
 

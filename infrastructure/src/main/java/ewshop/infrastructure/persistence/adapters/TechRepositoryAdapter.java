@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.command.TechPlacementUpdate;
-import ewshop.domain.entity.Tech;
+import ewshop.domain.model.Tech;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.mappers.TechMapper;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;

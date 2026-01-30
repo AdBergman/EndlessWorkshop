@@ -1,8 +1,8 @@
-package ewshop.domain.entity;
+package ewshop.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import ewshop.domain.entity.enums.StrategicResourceType;
+import ewshop.domain.model.enums.StrategicResourceType;
 
 public record StrategicCost(StrategicResourceType type, int amount) {
 

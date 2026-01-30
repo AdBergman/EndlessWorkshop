@@ -1,9 +1,9 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.*;
-import ewshop.domain.entity.enums.Faction;
-import ewshop.domain.entity.enums.TechType;
-import ewshop.domain.entity.enums.UnitType;
+import ewshop.domain.model.*;
+import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.TechType;
+import ewshop.domain.model.enums.UnitType;
 import ewshop.facade.dto.response.TechDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

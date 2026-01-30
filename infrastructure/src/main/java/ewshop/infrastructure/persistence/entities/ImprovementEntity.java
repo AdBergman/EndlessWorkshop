@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.entity.enums.UniqueType;
+import ewshop.domain.model.enums.UniqueType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;

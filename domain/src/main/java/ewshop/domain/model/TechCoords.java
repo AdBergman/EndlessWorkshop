@@ -1,4 +1,4 @@
-package ewshop.domain.entity;
+package ewshop.domain.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

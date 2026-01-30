@@ -1,8 +1,8 @@
 package ewshop.facade.mapper;
 
-import ewshop.domain.entity.UnitCost;
-import ewshop.domain.entity.UnitSkill;
-import ewshop.domain.entity.UnitSpecialization;
+import ewshop.domain.model.UnitCost;
+import ewshop.domain.model.UnitSkill;
+import ewshop.domain.model.UnitSpecialization;
 import ewshop.facade.dto.response.UnitDto;
 
 import java.util.Collections;

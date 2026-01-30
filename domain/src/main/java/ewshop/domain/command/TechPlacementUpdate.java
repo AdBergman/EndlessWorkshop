@@ -1,7 +1,7 @@
 package ewshop.domain.command;
 
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
+import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.TechType;
 
 public record TechPlacementUpdate(
         String name,
