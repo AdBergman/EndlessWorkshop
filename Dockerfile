@@ -27,22 +27,19 @@ COPY domain ./domain
 COPY facade ./facade
 COPY infrastructure ./infrastructure
 
+# Frontend build output into Spring Boot static resources
 COPY --from=frontend-build /app/frontend/dist ./app/src/main/resources/static
 
+# Build the backend (single runnable jar ends up in app/target/)
 RUN mvn clean package -DskipTests
 
 # ---------- Stage 3: Run Spring Boot ----------
 FROM eclipse-temurin:25-jdk AS runtime
 WORKDIR /app
 
-COPY --from=backend-build /app/app/target/app-0.0.1-SNAPSHOT.jar ./app.jar
+# Copy the built jar regardless of version -> stable filename in runtime image
+COPY --from=backend-build /app/app/target/*.jar ./app.jar
 
 EXPOSE 8080
 
-# JVM tuned for 1 GB tier:
-#  -Xms256m  initial heap
-#  -Xmx512m  max heap
-#  -XX:MaxMetaspaceSize=128m  class metadata cap
 ENTRYPOINT ["java","-Xms256m","-Xmx512m","-XX:MaxMetaspaceSize=128m","-jar","app.jar"]
-
-

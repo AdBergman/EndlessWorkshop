@@ -41,31 +41,30 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
 
-           # 6. Deploy safely to Lightsail (stop old → start new → rollback if needed)
+      # 6. Deploy safely to Lightsail (stop old → start new → rollback if needed)
       - name: Deploy to Lightsail via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@3.65.107.28 << 'EOF'
+          ssh -o StrictHostKeyChecking=no ubuntu@3.65.107.28 << EOF
+            set -euo pipefail
+
             IMAGE_NAME=calmbreakfast/ew-shop
             TAG=latest
             CONTAINER_NAME=ewshop-app
-            BACKUP_CONTAINER=${CONTAINER_NAME}-backup
+            BACKUP_CONTAINER=\${CONTAINER_NAME}-backup
 
             echo "Pulling latest image from Docker Hub..."
-            if ! docker pull $IMAGE_NAME:$TAG; then
-              echo "❌ Failed to pull image $IMAGE_NAME:$TAG"
-              exit 1
-            fi
+            docker pull \$IMAGE_NAME:\$TAG
 
             # Backup running container (if any)
-            if docker ps -a --format '{{.Names}}' | grep -q "^$CONTAINER_NAME\$"; then
+            if docker ps -a --format '{{.Names}}' | grep -q "^\$CONTAINER_NAME\$"; then
               echo "Stopping and backing up existing container..."
-              docker stop $CONTAINER_NAME || true
-              docker rename $CONTAINER_NAME $BACKUP_CONTAINER || true
+              docker stop \$CONTAINER_NAME || true
+              docker rename \$CONTAINER_NAME \$BACKUP_CONTAINER || true
             fi
 
             echo "Starting new container..."
             if docker run -d \
-              --name $CONTAINER_NAME \
+              --name \$CONTAINER_NAME \
               -p 8080:8080 \
               --restart=unless-stopped \
               -e SPRING_PROFILES_ACTIVE=prod \
@@ -79,19 +78,22 @@ jobs:
               -e METRICS_TOKEN=${{ secrets.METRICS_TOKEN }} \
               -e DB_SSLMODE=require \
               -e DB_CHANNEL_BINDING=require \
-              $IMAGE_NAME:$TAG; then
+              \$IMAGE_NAME:\$TAG; then
+
               echo "✅ New container started successfully!"
               echo "Cleaning up old backup..."
-              docker rm $BACKUP_CONTAINER || true
+              docker rm \$BACKUP_CONTAINER || true
               echo "✅ Deployment complete!"
             else
               echo "❌ Failed to start new container."
-              docker logs $CONTAINER_NAME || true
+              docker logs \$CONTAINER_NAME || true
+
               echo "Rolling back to previous version..."
-              docker rm $CONTAINER_NAME || true
-              if docker ps -a --format '{{.Names}}' | grep -q "^$BACKUP_CONTAINER\$"; then
-                docker rename $BACKUP_CONTAINER $CONTAINER_NAME
-                docker start $CONTAINER_NAME
+              docker rm \$CONTAINER_NAME || true
+
+              if docker ps -a --format '{{.Names}}' | grep -q "^\$BACKUP_CONTAINER\$"; then
+                docker rename \$BACKUP_CONTAINER \$CONTAINER_NAME
+                docker start \$CONTAINER_NAME
                 echo "✅ Rollback complete. Old container restored."
               else
                 echo "⚠️ No backup container found, manual restore needed."
