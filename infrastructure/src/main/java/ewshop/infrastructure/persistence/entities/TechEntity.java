@@ -45,7 +45,7 @@ public class TechEntity {
 
     // Coordinates for front-end placement
     @Embedded
-    private TechCoords TechCoords;
+    private TechCoords techCoords;
 
     // Only one prereq tech allowed
     @ManyToOne(fetch = FetchType.LAZY)
@@ -107,11 +107,11 @@ public class TechEntity {
     }
 
     public TechCoords getTechCoords() {
-        return TechCoords;
+        return techCoords;
     }
 
     public void setTechCoords(TechCoords TechCoords) {
-        this.TechCoords = TechCoords;
+        this.techCoords = TechCoords;
     }
 
     public TechEntity getPrereq() {

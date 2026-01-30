@@ -1,9 +1,11 @@
 package ewshop.domain.repository;
 
+import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.entity.Tech;
+import ewshop.domain.entity.TechCoords;
+import ewshop.domain.entity.enums.TechType;
 
 import java.util.List;
-import java.util.Map;
 
 public interface TechRepository {
 
@@ -15,8 +17,6 @@ public interface TechRepository {
 
     void deleteAll();
 
-    /**
-     * Replaces all relationships with the provided state.
-     */
-    void updateRelationships(Map<String, Tech> techDomainMap);
+    void updateEraAndCoordsByNameAndType(TechPlacementUpdate update);
+
 }

@@ -33,6 +33,11 @@ public class FacadeConfig {
     }
 
     @Bean
+    public TechAdminFacade techAdminFacade(TechService techService) {
+        return new TechAdminFacadeImpl(techService);
+    }
+
+    @Bean
     public UnitFacade unitFacade(UnitSpecializationService unitSpecializationService, UnitDtoPostProcessor postProcessor) {
         return new UnitFacadeImpl(unitSpecializationService, postProcessor);
     }
