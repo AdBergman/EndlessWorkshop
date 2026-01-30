@@ -8,27 +8,20 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.5</version>
+        <version>3.5.6</version>
         <relativePath/>
     </parent>
 
     <groupId>com.endlessworkshop</groupId>
     <artifactId>ewshop</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>EndlessWorkshop</name>
     <description>EndlessWorkshop Parent Project</description>
 
     <properties>
-        <java.version>24</java.version>
-        <spring.boot.version>3.5.6</spring.boot.version>
+        <java.version>25</java.version>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-    </dependencies>
 
     <modules>
         <module>app</module>
@@ -40,15 +33,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot BOM for consistent versions of Spring dependencies -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <!-- Project Modules Version Management -->
             <dependency>
                 <groupId>com.endlessworkshop</groupId>
