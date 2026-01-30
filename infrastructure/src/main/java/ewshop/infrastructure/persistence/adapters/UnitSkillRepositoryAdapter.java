@@ -4,7 +4,7 @@ import ewshop.domain.entity.UnitSkill;
 import ewshop.domain.repository.UnitSkillRepository;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.mappers.UnitSkillMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSkillRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSkillJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -18,18 +18,18 @@ public class UnitSkillRepositoryAdapter implements UnitSkillRepository {
 
     private static final Logger log = LoggerFactory.getLogger(UnitSkillRepositoryAdapter.class);
 
-    private final SpringDataUnitSkillRepository springDataUnitSkillRepository;
+    private final UnitSkillJpaRepository unitSkillJpaRepository;
     private final UnitSkillMapper mapper;
 
-    public UnitSkillRepositoryAdapter(SpringDataUnitSkillRepository springDataUnitSkillRepository,
+    public UnitSkillRepositoryAdapter(UnitSkillJpaRepository unitSkillJpaRepository,
                                       UnitSkillMapper mapper) {
-        this.springDataUnitSkillRepository = springDataUnitSkillRepository;
+        this.unitSkillJpaRepository = unitSkillJpaRepository;
         this.mapper = mapper;
     }
 
     @Override
     public UnitSkill findByName(String name) {
-        return springDataUnitSkillRepository.findByName(name)
+        return unitSkillJpaRepository.findByName(name)
                 .map(mapper::toDomain)
                 .orElseThrow(() -> {
                     log.warn("UnitSkill not found for name={}", name);
@@ -39,12 +39,12 @@ public class UnitSkillRepositoryAdapter implements UnitSkillRepository {
 
 
     public Optional<UnitSkillEntity> findEntityByName(String name) {
-        return springDataUnitSkillRepository.findByName(name);
+        return unitSkillJpaRepository.findByName(name);
     }
 
     @Override
     public List<UnitSkill> findAll() {
-        return springDataUnitSkillRepository.findAll().stream()
+        return unitSkillJpaRepository.findAll().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -54,24 +54,24 @@ public class UnitSkillRepositoryAdapter implements UnitSkillRepository {
         List<UnitSkillEntity> entities = skills.stream()
                 .map(mapper::toEntity)
                 .collect(Collectors.toList());
-        springDataUnitSkillRepository.saveAll(entities);
+        unitSkillJpaRepository.saveAll(entities);
     }
 
     @Override
     public UnitSkill save(UnitSkill skill) {
         UnitSkillEntity entity = mapper.toEntity(skill);
-        UnitSkillEntity savedEntity = springDataUnitSkillRepository.save(entity);
+        UnitSkillEntity savedEntity = unitSkillJpaRepository.save(entity);
         return mapper.toDomain(savedEntity);
     }
 
     @Override
     public void deleteAll() {
-        springDataUnitSkillRepository.deleteAll();
+        unitSkillJpaRepository.deleteAll();
     }
 
     @Override
     public boolean existsByName(String name) {
-        return springDataUnitSkillRepository.existsByName(name);
+        return unitSkillJpaRepository.existsByName(name);
     }
 
 

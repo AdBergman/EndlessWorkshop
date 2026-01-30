@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface SpringDataUnitSkillRepository extends JpaRepository<UnitSkillEntity, Long> {
+public interface UnitSkillJpaRepository extends JpaRepository<UnitSkillEntity, Long> {
     Optional<UnitSkillEntity> findByName(String name);
 
     boolean existsByName(String name);

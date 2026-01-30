@@ -8,6 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface SpringDataSavedTechBuildRepository extends JpaRepository<SavedTechBuildEntity, Long> {
+public interface SavedTechBuildJpaRepository extends JpaRepository<SavedTechBuildEntity, Long> {
     Optional<SavedTechBuildEntity> findByUuid(UUID uuid);
 }

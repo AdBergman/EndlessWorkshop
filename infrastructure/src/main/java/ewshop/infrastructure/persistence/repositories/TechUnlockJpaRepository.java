@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SpringDataTechUnlockRepository extends JpaRepository<TechUnlockEntity, Long> {
+public interface TechUnlockJpaRepository extends JpaRepository<TechUnlockEntity, Long> {
 
     /**
      * Fetch all unlocks for a given Tech by its ID.

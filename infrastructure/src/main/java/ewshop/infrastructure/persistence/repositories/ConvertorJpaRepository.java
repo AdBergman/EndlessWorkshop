@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataConvertorRepository extends JpaRepository<ConvertorEntity, Long> {
+public interface ConvertorJpaRepository extends JpaRepository<ConvertorEntity, Long> {
     Optional<ConvertorEntity> findByName(String name);
 }

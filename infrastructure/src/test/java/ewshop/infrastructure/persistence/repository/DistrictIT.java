@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
+import ewshop.infrastructure.persistence.repositories.DistrictJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,7 +19,7 @@ class DistrictIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataDistrictRepository repository;
+    private DistrictJpaRepository repository;
 
     @Test
     void shouldSaveAndFindByName() {

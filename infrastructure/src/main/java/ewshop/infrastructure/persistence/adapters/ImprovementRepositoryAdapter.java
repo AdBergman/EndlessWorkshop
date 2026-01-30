@@ -4,7 +4,7 @@ import ewshop.domain.entity.Improvement;
 import ewshop.domain.repository.ImprovementRepository;
 import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import ewshop.infrastructure.persistence.mappers.ImprovementMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
+import ewshop.infrastructure.persistence.repositories.ImprovementJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,25 +14,25 @@ import java.util.stream.Collectors;
 @Repository
 public class ImprovementRepositoryAdapter implements ImprovementRepository {
 
-    private final SpringDataImprovementRepository springDataImprovementRepository;
+    private final ImprovementJpaRepository improvementJpaRepository;
     private final ImprovementMapper mapper;
 
-    public ImprovementRepositoryAdapter(SpringDataImprovementRepository springDataImprovementRepository,
+    public ImprovementRepositoryAdapter(ImprovementJpaRepository improvementJpaRepository,
                                         ImprovementMapper mapper) {
-        this.springDataImprovementRepository = springDataImprovementRepository;
+        this.improvementJpaRepository = improvementJpaRepository;
         this.mapper = mapper;
     }
 
     @Override
     public Improvement findByName(String name) {
         Optional<ImprovementEntity> entityOpt =
-                springDataImprovementRepository.findByName(name);
+                improvementJpaRepository.findByName(name);
         return entityOpt.map(mapper::toDomain).orElse(null);
     }
 
     @Override
     public List<Improvement> findAll() {
-        return springDataImprovementRepository.findAll().stream()
+        return improvementJpaRepository.findAll().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -40,7 +40,7 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
     @Override
     public Improvement save(Improvement improvement) {
         var entityToSave = mapper.toEntity(improvement);
-        var savedEntity = springDataImprovementRepository.save(entityToSave);
+        var savedEntity = improvementJpaRepository.save(entityToSave);
         return mapper.toDomain(savedEntity);
     }
 
@@ -49,11 +49,11 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
         var entities = improvements.stream()
                 .map(mapper::toEntity)
                 .toList();
-        springDataImprovementRepository.saveAll(entities);
+        improvementJpaRepository.saveAll(entities);
     }
 
     @Override
     public void deleteAll() {
-        springDataImprovementRepository.deleteAll();
+        improvementJpaRepository.deleteAll();
     }
 }

@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSkillRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSkillJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,7 +18,7 @@ class UnitSkillRepositoryIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataUnitSkillRepository unitSkillRepository;
+    private UnitSkillJpaRepository unitSkillRepository;
 
     @Test
     void shouldSaveAndFindByName() {

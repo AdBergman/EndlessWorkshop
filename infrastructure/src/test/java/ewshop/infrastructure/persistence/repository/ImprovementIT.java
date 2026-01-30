@@ -4,7 +4,7 @@ import ewshop.domain.entity.enums.StrategicResourceType;
 import ewshop.domain.entity.enums.UniqueType;
 import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import ewshop.infrastructure.persistence.entities.StrategicCostEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
+import ewshop.infrastructure.persistence.repositories.ImprovementJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,7 +23,7 @@ class ImprovementIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataImprovementRepository repository;
+    private ImprovementJpaRepository repository;
 
     @Test
     void shouldSaveAndFindByName_WithCosts() {

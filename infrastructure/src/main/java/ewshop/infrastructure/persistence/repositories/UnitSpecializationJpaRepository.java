@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataUnitSpecializationRepository extends JpaRepository<UnitSpecializationEntity, Long> {
+public interface UnitSpecializationJpaRepository extends JpaRepository<UnitSpecializationEntity, Long> {
     Optional<UnitSpecializationEntity> findByName(String name);
 
     @EntityGraph(attributePaths = {

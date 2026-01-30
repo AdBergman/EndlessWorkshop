@@ -4,7 +4,7 @@ import ewshop.domain.entity.SavedTechBuild;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import ewshop.infrastructure.persistence.entities.SavedTechBuildEntity;
 import ewshop.infrastructure.persistence.mappers.SavedTechBuildMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataSavedTechBuildRepository;
+import ewshop.infrastructure.persistence.repositories.SavedTechBuildJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 @Repository
 public class SavedTechBuildRepositoryAdapter implements SavedTechBuildRepository {
 
-    private final SpringDataSavedTechBuildRepository springDataRepository;
+    private final SavedTechBuildJpaRepository springDataRepository;
     private final SavedTechBuildMapper mapper;
 
-    public SavedTechBuildRepositoryAdapter(SpringDataSavedTechBuildRepository springDataRepository,
+    public SavedTechBuildRepositoryAdapter(SavedTechBuildJpaRepository springDataRepository,
                                            SavedTechBuildMapper mapper) {
         this.springDataRepository = springDataRepository;
         this.mapper = mapper;

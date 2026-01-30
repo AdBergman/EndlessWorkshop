@@ -4,7 +4,7 @@ import ewshop.domain.entity.Treaty;
 import ewshop.domain.repository.TreatyRepository;
 import ewshop.infrastructure.persistence.entities.TreatyEntity;
 import ewshop.infrastructure.persistence.mappers.TreatyMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataTreatyRepository;
+import ewshop.infrastructure.persistence.repositories.TreatyJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,24 +15,24 @@ import java.util.Optional;
 @Repository
 public class TreatyRepositoryAdapter implements TreatyRepository {
 
-    private final SpringDataTreatyRepository springDataTreatyRepository;
+    private final TreatyJpaRepository treatyJpaRepository;
     private final TreatyMapper treatyMapper;
 
-    public TreatyRepositoryAdapter(SpringDataTreatyRepository springDataTreatyRepository, TreatyMapper treatyMapper) {
-        this.springDataTreatyRepository = springDataTreatyRepository;
+    public TreatyRepositoryAdapter(TreatyJpaRepository treatyJpaRepository, TreatyMapper treatyMapper) {
+        this.treatyJpaRepository = treatyJpaRepository;
         this.treatyMapper = treatyMapper;
     }
 
     @Override
     public Treaty save(Treaty treaty) {
         TreatyEntity treatyEntity = treatyMapper.toEntity(treaty);
-        TreatyEntity savedEntity = springDataTreatyRepository.save(treatyEntity);
+        TreatyEntity savedEntity = treatyJpaRepository.save(treatyEntity);
         return treatyMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<Treaty> findByName(String name) {
-        return springDataTreatyRepository.findByName(name)
+        return treatyJpaRepository.findByName(name)
                 .map(treatyMapper::toDomain);
     }
 }

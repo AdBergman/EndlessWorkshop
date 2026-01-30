@@ -3,7 +3,7 @@ package ewshop.infrastructure.persistence.repository;
 import ewshop.domain.entity.TechCoords;
 import ewshop.domain.entity.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataTechRepository;
+import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,7 +18,7 @@ class TechRepositoryUpdateIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataTechRepository repository;
+    private TechJpaRepository repository;
 
     @Test
     void updateEraAndCoordsByNameAndType_shouldUpdateExactlyOneRow_whenMatchExists() {

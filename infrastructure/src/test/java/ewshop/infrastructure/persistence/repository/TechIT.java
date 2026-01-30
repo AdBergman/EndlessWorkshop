@@ -5,7 +5,7 @@ import ewshop.domain.entity.enums.Faction;
 import ewshop.domain.entity.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataTechRepository;
+import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,7 +24,7 @@ class TechIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataTechRepository repository;
+    private TechJpaRepository repository;
 
     @Test
     void shouldSaveAndFindByName_WithUnlocks() {

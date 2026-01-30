@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataImprovementRepository extends JpaRepository<ImprovementEntity, Long> {
+public interface ImprovementJpaRepository extends JpaRepository<ImprovementEntity, Long> {
     Optional<ImprovementEntity> findByName(String name);
 }

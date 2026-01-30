@@ -4,7 +4,7 @@ import ewshop.domain.entity.District;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import ewshop.infrastructure.persistence.mappers.DistrictMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
+import ewshop.infrastructure.persistence.repositories.DistrictJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,29 +14,29 @@ import java.util.stream.Collectors;
 @Repository
 public class DistrictRepositoryAdapter implements DistrictRepository {
 
-    private final SpringDataDistrictRepository springDataDistrictRepository;
+    private final DistrictJpaRepository districtJpaRepository;
     private final DistrictMapper mapper;
 
-    public DistrictRepositoryAdapter(SpringDataDistrictRepository springDataDistrictRepository,
+    public DistrictRepositoryAdapter(DistrictJpaRepository districtJpaRepository,
                                      DistrictMapper mapper) {
-        this.springDataDistrictRepository = springDataDistrictRepository;
+        this.districtJpaRepository = districtJpaRepository;
         this.mapper = mapper;
     }
 
     @Override
     public District findByName(String name) {
         Optional<DistrictEntity> entityOpt =
-                springDataDistrictRepository.findByName(name);
+                districtJpaRepository.findByName(name);
         return entityOpt.map(mapper::toDomain).orElse(null);
     }
 
     public Optional<DistrictEntity> findEntityByName(String name) {
-        return springDataDistrictRepository.findByName(name);
+        return districtJpaRepository.findByName(name);
     }
 
     @Override
     public List<District> findAll() {
-        return springDataDistrictRepository.findAll().stream()
+        return districtJpaRepository.findAll().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -47,18 +47,18 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
         var entities = districts.stream()
                 .map(mapper::toEntity)
                 .toList();
-        springDataDistrictRepository.saveAll(entities);
+        districtJpaRepository.saveAll(entities);
     }
 
     @Override
     public District save(District district) {
         var entityToSave = mapper.toEntity(district);
-        var savedEntity = springDataDistrictRepository.save(entityToSave);
+        var savedEntity = districtJpaRepository.save(entityToSave);
         return mapper.toDomain(savedEntity);
     }
 
     @Override
     public void deleteAll() {
-        springDataDistrictRepository.deleteAll();
+        districtJpaRepository.deleteAll();
     }
 }

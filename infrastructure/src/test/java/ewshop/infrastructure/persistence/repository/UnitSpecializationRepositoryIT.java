@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,7 +18,7 @@ class UnitSpecializationRepositoryIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataUnitSpecializationRepository unitSpecializationRepository;
+    private UnitSpecializationJpaRepository unitSpecializationRepository;
 
     @Test
     void testSaveAndFindByName() {

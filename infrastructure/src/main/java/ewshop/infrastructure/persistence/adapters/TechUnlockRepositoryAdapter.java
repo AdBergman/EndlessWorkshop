@@ -6,10 +6,10 @@ import ewshop.domain.repository.TechUnlockRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import ewshop.infrastructure.persistence.mappers.TechUnlockMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataDistrictRepository;
-import ewshop.infrastructure.persistence.repositories.SpringDataImprovementRepository;
-import ewshop.infrastructure.persistence.repositories.SpringDataTechRepository;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
+import ewshop.infrastructure.persistence.repositories.DistrictJpaRepository;
+import ewshop.infrastructure.persistence.repositories.ImprovementJpaRepository;
+import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -22,16 +22,16 @@ public class TechUnlockRepositoryAdapter implements TechUnlockRepository {
 
     private static final Logger log = LoggerFactory.getLogger(TechUnlockRepositoryAdapter.class);
 
-    private final SpringDataTechRepository techRepository;
-    private final SpringDataDistrictRepository districtRepository;
-    private final SpringDataImprovementRepository improvementRepository;
-    private final SpringDataUnitSpecializationRepository unitSpecializationRepository;
+    private final TechJpaRepository techRepository;
+    private final DistrictJpaRepository districtRepository;
+    private final ImprovementJpaRepository improvementRepository;
+    private final UnitSpecializationJpaRepository unitSpecializationRepository;
     private final TechUnlockMapper mapper;
 
-    public TechUnlockRepositoryAdapter(SpringDataTechRepository techRepository,
-                                       SpringDataDistrictRepository districtRepository,
-                                       SpringDataImprovementRepository improvementRepository,
-                                       SpringDataUnitSpecializationRepository unitSpecializationRepository,
+    public TechUnlockRepositoryAdapter(TechJpaRepository techRepository,
+                                       DistrictJpaRepository districtRepository,
+                                       ImprovementJpaRepository improvementRepository,
+                                       UnitSpecializationJpaRepository unitSpecializationRepository,
                                        TechUnlockMapper mapper) {
         this.techRepository = techRepository;
         this.districtRepository = districtRepository;

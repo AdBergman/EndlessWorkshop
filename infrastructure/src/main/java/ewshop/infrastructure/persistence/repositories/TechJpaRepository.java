@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataTechRepository extends JpaRepository<TechEntity, Long> {
+public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
     Optional<TechEntity> findByName(String name);
 
     @EntityGraph(attributePaths = {"unlocks", "unlocks.unitSpecialization", "unlocks.improvement", "unlocks.district"})

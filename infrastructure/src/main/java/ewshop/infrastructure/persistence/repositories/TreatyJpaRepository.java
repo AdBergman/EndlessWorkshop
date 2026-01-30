@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface SpringDataTreatyRepository extends JpaRepository<TreatyEntity, Long> {
+public interface TreatyJpaRepository extends JpaRepository<TreatyEntity, Long> {
     Optional<TreatyEntity> findByName(String name);
 }

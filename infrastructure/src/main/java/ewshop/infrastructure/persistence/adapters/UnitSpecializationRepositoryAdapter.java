@@ -4,7 +4,7 @@ import ewshop.domain.entity.UnitSpecialization;
 import ewshop.domain.repository.UnitSpecializationRepository;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
 import ewshop.infrastructure.persistence.mappers.UnitSpecializationMapper;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
 import org.springframework.stereotype.Repository;
 
 import org.slf4j.Logger;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 @Repository
 public class UnitSpecializationRepositoryAdapter implements UnitSpecializationRepository {
     private static final Logger log = LoggerFactory.getLogger(UnitSpecializationRepositoryAdapter.class);
-    private final SpringDataUnitSpecializationRepository springDataRepository;
+    private final UnitSpecializationJpaRepository springDataRepository;
     private final UnitSpecializationMapper mapper;
 
-    public UnitSpecializationRepositoryAdapter(SpringDataUnitSpecializationRepository springDataRepository,
+    public UnitSpecializationRepositoryAdapter(UnitSpecializationJpaRepository springDataRepository,
                                                UnitSpecializationMapper mapper) {
         this.springDataRepository = springDataRepository;
         this.mapper = mapper;

@@ -2,8 +2,6 @@ package ewshop.domain.repository;
 
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.entity.Tech;
-import ewshop.domain.entity.TechCoords;
-import ewshop.domain.entity.enums.TechType;
 
 import java.util.List;
 

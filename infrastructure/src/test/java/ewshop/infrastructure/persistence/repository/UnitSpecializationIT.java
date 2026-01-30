@@ -7,7 +7,7 @@ import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
 import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
 import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
-import ewshop.infrastructure.persistence.repositories.SpringDataUnitSpecializationRepository;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ class UnitSpecializationIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private SpringDataUnitSpecializationRepository repository;
+    private UnitSpecializationJpaRepository repository;
 
     private UnitSkillEntity skill1;
     private UnitSkillEntity skill2;
