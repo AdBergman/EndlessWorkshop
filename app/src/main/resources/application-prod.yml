@@ -53,9 +53,20 @@ management:
     web:
       exposure:
         include: health,info,prometheus
+
   endpoint:
     health:
       show-details: never
+
+  otlp:
+    metrics:
+      export:
+        enabled: ${OTLP_METRICS_ENABLED:false}
+        url: ${OTLP_METRICS_URL:}
+        step: 60s
+        headers:
+          Authorization: ${OTLP_AUTH_HEADER:}
+
 
 admin:
   token: ${ADMIN_TOKEN:}

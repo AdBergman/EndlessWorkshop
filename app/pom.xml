@@ -52,6 +52,12 @@
             <artifactId>infrastructure</artifactId>
         </dependency>
 
+        <!-- OTLP metrics export (push) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-otlp</artifactId>
+        </dependency>
+
         <!-- Flyway Migration -->
         <dependency>
             <groupId>org.flywaydb</groupId>

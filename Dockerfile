@@ -12,6 +12,7 @@ RUN npm run build
 FROM maven:4.0.0-rc-4-eclipse-temurin-25-alpine AS backend-build
 WORKDIR /app
 
+# Copy only poms first for better layer caching
 COPY pom.xml ./
 COPY app/pom.xml app/pom.xml
 COPY api/pom.xml api/pom.xml
@@ -21,6 +22,7 @@ COPY infrastructure/pom.xml infrastructure/pom.xml
 
 RUN mvn dependency:go-offline -B
 
+# Copy sources
 COPY app ./app
 COPY api ./api
 COPY domain ./domain
@@ -42,4 +44,5 @@ COPY --from=backend-build /app/app/target/*.jar ./app.jar
 
 EXPOSE 8080
 
+# JAVA_OPTS passed at runtime (from deploy.yml)
 ENTRYPOINT ["sh","-c","exec java $JAVA_OPTS -jar app.jar"]
