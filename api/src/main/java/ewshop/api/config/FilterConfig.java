@@ -27,7 +27,7 @@ public class FilterConfig {
     public FilterRegistrationBean<AdminTokenFilter> adminTokenFilterRegistration(AdminTokenFilter filter) {
         FilterRegistrationBean<AdminTokenFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.setOrder(0); // first
+        reg.setOrder(0);
         return reg;
     }
 
@@ -35,7 +35,7 @@ public class FilterConfig {
     public FilterRegistrationBean<MetricsTokenFilter> metricsTokenFilterRegistration(MetricsTokenFilter filter) {
         FilterRegistrationBean<MetricsTokenFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.setOrder(5); // after admin token, before logging
+        reg.setOrder(5);
         return reg;
     }
 
@@ -43,7 +43,7 @@ public class FilterConfig {
     public FilterRegistrationBean<RequestLoggingFilter> requestLoggingFilterRegistration(RequestLoggingFilter filter) {
         FilterRegistrationBean<RequestLoggingFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.setOrder(10); // after auth-ish filters
+        reg.setOrder(10);
         return reg;
     }
 }

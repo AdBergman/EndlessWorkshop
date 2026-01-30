@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,14 +16,21 @@ public class MetricsTokenFilter extends OncePerRequestFilter {
 
     private final String metricsToken;
 
-    public MetricsTokenFilter(@Value("${metrics.token:}") String metricsToken) {
+    public MetricsTokenFilter(String metricsToken) {
         this.metricsToken = metricsToken == null ? "" : metricsToken.trim();
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return path == null || !PROMETHEUS_PATH.equals(path);
+        if (path == null) return true;
+
+        // Be slightly forgiving: allow a trailing slash
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        return !PROMETHEUS_PATH.equals(path);
     }
 
     @Override
@@ -34,7 +40,7 @@ public class MetricsTokenFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // Fail closed if token isn't configured (safe-by-default for prod)
+        // Fail closed if token isn't configured
         if (metricsToken.isEmpty()) {
             response.sendError(HttpStatus.FORBIDDEN.value(), "Metrics endpoint is disabled");
             return;
