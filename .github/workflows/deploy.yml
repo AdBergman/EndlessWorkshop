@@ -68,7 +68,7 @@ jobs:
               -p 8080:8080 \
               --restart=unless-stopped \
               -e SPRING_PROFILES_ACTIVE=prod \
-              -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m" \
+              -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=192m" \
               -e DB_HOST=${{ secrets.NEON_DB_HOST }} \
               -e DB_PORT=${{ secrets.NEON_DB_PORT }} \
               -e DB_NAME=${{ secrets.NEON_DB_NAME }} \
