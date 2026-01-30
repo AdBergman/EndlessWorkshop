@@ -57,5 +57,8 @@ management:
     health:
       show-details: never
 
+admin:
+  token: ${ADMIN_TOKEN:}
+
 metrics:
   token: ${METRICS_TOKEN:}
