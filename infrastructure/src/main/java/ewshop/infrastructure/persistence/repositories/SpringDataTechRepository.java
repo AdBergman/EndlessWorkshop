@@ -20,7 +20,7 @@ public interface SpringDataTechRepository extends JpaRepository<TechEntity, Long
     @EntityGraph(attributePaths = {"unlocks", "unlocks.unitSpecialization", "unlocks.improvement", "unlocks.district"})
     List<TechEntity> findAll();
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
     update TechEntity t
        set t.era = :era,
