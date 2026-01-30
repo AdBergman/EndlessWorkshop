@@ -9,12 +9,17 @@ import org.springframework.context.annotation.Configuration;
 public class FilterConfig {
 
     @Bean
-    public AdminTokenFilter adminTokenFilterBean(@Value("${admin.token:}") String adminToken) {
+    public AdminTokenFilter adminTokenFilter(@Value("${admin.token:}") String adminToken) {
         return new AdminTokenFilter(adminToken);
     }
 
     @Bean
-    public RequestLoggingFilter requestLoggingFilterBean() {
+    public MetricsTokenFilter metricsTokenFilter(@Value("${metrics.token:}") String metricsToken) {
+        return new MetricsTokenFilter(metricsToken);
+    }
+
+    @Bean
+    public RequestLoggingFilter requestLoggingFilter() {
         return new RequestLoggingFilter();
     }
 
@@ -22,7 +27,15 @@ public class FilterConfig {
     public FilterRegistrationBean<AdminTokenFilter> adminTokenFilterRegistration(AdminTokenFilter filter) {
         FilterRegistrationBean<AdminTokenFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.setOrder(0); // run first
+        reg.setOrder(0); // first
+        return reg;
+    }
+
+    @Bean
+    public FilterRegistrationBean<MetricsTokenFilter> metricsTokenFilterRegistration(MetricsTokenFilter filter) {
+        FilterRegistrationBean<MetricsTokenFilter> reg = new FilterRegistrationBean<>();
+        reg.setFilter(filter);
+        reg.setOrder(5); // after admin token, before logging
         return reg;
     }
 
@@ -30,7 +43,7 @@ public class FilterConfig {
     public FilterRegistrationBean<RequestLoggingFilter> requestLoggingFilterRegistration(RequestLoggingFilter filter) {
         FilterRegistrationBean<RequestLoggingFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
-        reg.setOrder(10); // run after security
+        reg.setOrder(10); // after auth-ish filters
         return reg;
     }
 }

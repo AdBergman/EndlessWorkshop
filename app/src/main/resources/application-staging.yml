@@ -49,3 +49,6 @@ management:
   endpoint:
     health:
       show-details: never
+
+metrics:
+  token: ${METRICS_TOKEN:}
