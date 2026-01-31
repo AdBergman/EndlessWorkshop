@@ -7,12 +7,12 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     hikari:
-      minimum-idle: 0        # allow no idle connections
-      maximum-pool-size: 5   # keep pool small to save hours
-      idle-timeout: 30000    # 30 seconds idle before closing
-      max-lifetime: 1800000  # 30 min max lifetime
-      connection-timeout: 30000 # 30 sec wait to acquire connection
-      keepalive-time: 0      # do NOT ping DB constantly
+      minimum-idle: 0
+      maximum-pool-size: 5
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+      keepalive-time: 0
 
   cache:
     type: simple
@@ -67,6 +67,11 @@ management:
         headers:
           Authorization: ${OTLP_AUTH_HEADER:}
 
+  opentelemetry:
+    resource-attributes:
+      service.instance.id: ${HOSTNAME:ewshop}
+      service.namespace: ewshop
+      deployment.environment: prod
 
 admin:
   token: ${ADMIN_TOKEN:}
