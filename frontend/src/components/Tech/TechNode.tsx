@@ -7,11 +7,11 @@ interface TechNodeProps {
     locked?: boolean;
 
     onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-
     onHoverChange?: (hovered: boolean) => void;
     offsetPx?: number;
     orderNumber?: number;
 
+    adminMode?: boolean;
     adminActive?: boolean;
 }
 
@@ -25,9 +25,11 @@ const TechNode: React.FC<TechNodeProps> = ({
                                                onHoverChange,
                                                offsetPx,
                                                orderNumber,
+                                               adminMode = false,
                                                adminActive = false,
                                            }) => {
-    const clickable = !locked;
+    // In admin mode, always allow click so you can pick locked nodes.
+    const clickable = adminMode ? true : !locked;
 
     return (
         <div
