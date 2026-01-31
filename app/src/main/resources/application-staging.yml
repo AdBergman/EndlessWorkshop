@@ -45,13 +45,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus
+        include: health,info
   endpoint:
     health:
       show-details: never
 
 admin:
   token: ${ADMIN_TOKEN:}
-
-metrics:
-  token: ${METRICS_TOKEN:}

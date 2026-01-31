@@ -14,11 +14,6 @@ public class FilterConfig {
     }
 
     @Bean
-    public MetricsTokenFilter metricsTokenFilter(@Value("${metrics.token:}") String metricsToken) {
-        return new MetricsTokenFilter(metricsToken);
-    }
-
-    @Bean
     public RequestLoggingFilter requestLoggingFilter() {
         return new RequestLoggingFilter();
     }
@@ -28,14 +23,6 @@ public class FilterConfig {
         FilterRegistrationBean<AdminTokenFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
         reg.setOrder(0);
-        return reg;
-    }
-
-    @Bean
-    public FilterRegistrationBean<MetricsTokenFilter> metricsTokenFilterRegistration(MetricsTokenFilter filter) {
-        FilterRegistrationBean<MetricsTokenFilter> reg = new FilterRegistrationBean<>();
-        reg.setFilter(filter);
-        reg.setOrder(5);
         return reg;
     }
 
