@@ -5,12 +5,14 @@ interface TechNodeProps {
     coords: { xPct: number; yPct: number };
     selected: boolean;
     locked?: boolean;
-    onClick: () => void;
+
+    onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+
     onHoverChange?: (hovered: boolean) => void;
     offsetPx?: number;
-
-    // Phase 1: If selected, show this number inside the node
     orderNumber?: number;
+
+    adminActive?: boolean;
 }
 
 const BOX_SIZE_PCT = 4.95;
@@ -23,13 +25,16 @@ const TechNode: React.FC<TechNodeProps> = ({
                                                onHoverChange,
                                                offsetPx,
                                                orderNumber,
+                                               adminActive = false,
                                            }) => {
     const clickable = !locked;
 
     return (
         <div
             data-testid="tech-node"
-            className={`tech-node ${selected ? "selected" : ""} ${locked ? "locked" : ""}`}
+            className={`tech-node ${selected ? "selected" : ""} ${locked ? "locked" : ""} ${
+                adminActive ? "tech-node--adminActive" : ""
+            }`}
             onClick={clickable ? onClick : undefined}
             onMouseEnter={() => onHoverChange?.(true)}
             onMouseLeave={() => onHoverChange?.(false)}

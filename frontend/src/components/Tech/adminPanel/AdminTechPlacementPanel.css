@@ -1,0 +1,312 @@
+.admin-panel {
+    position: fixed;
+    width: 340px;
+    z-index: 1000;
+    background: rgba(0, 0, 0,  0.74);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(6px);
+}
+
+/* Prevent “stick out” overflow from grid/flex children */
+.admin-panel,
+.admin-panel__body,
+.admin-card,
+.admin-grid2,
+.admin-panel__row,
+.admin-panel__copyRow {
+    min-width: 0;
+}
+
+.admin-panel__header {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: move;
+    user-select: none;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.admin-panel__title {
+    font-weight: 800;
+    letter-spacing: 0.2px;
+}
+
+.admin-panel__subtitle {
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.admin-panel__body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-panel__row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-panel__token {
+    margin-top: 2px;
+}
+
+.admin-panel__hint {
+    font-size: 12px;
+    opacity: 0.78;
+    line-height: 1.35;
+}
+
+.admin-panel__empty {
+    font-size: 13px;
+    opacity: 0.88;
+}
+
+.admin-panel__emptySub {
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.admin-panel__footer {
+    margin-top: 2px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+/* Cards */
+.admin-card {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.22);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-card__top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.admin-card__name {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.admin-card__nameText {
+    font-weight: 800;
+    line-height: 1.15;
+    word-break: break-word;
+}
+
+.admin-card__type {
+    font-size: 12px;
+    opacity: 0.72;
+}
+
+.admin-card__actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Fields */
+.admin-grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    align-items: end;
+}
+
+.admin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.admin-field--button {
+    justify-content: flex-end;
+}
+
+.admin-field__label {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.admin-input,
+.admin-select {
+    height: 36px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.34);
+    color: rgba(255, 255, 255, 0.92);
+    outline: none;
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+}
+
+.admin-input:focus,
+.admin-select:focus {
+    border-color: rgba(255, 255, 255, 0.30);
+}
+
+.admin-input--mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.admin-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* --- Fix 1: Click-to-place button should be compact (not full-width) --- */
+.admin-field--button .admin-button {
+    width: fit-content;
+    align-self: flex-start;
+    padding: 6px 10px;
+    border-radius: 999px;
+    height: 32px; /* slightly smaller looks better as a chip */
+}
+
+/* --- Fix 2: xPct / yPct number inputs should not be huge --- */
+.admin-grid2 .admin-field input[type="number"].admin-input {
+    width: 7ch;
+    max-width: 7ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+.admin-button {
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+    white-space: nowrap;
+    width: auto; /* prevents “Paste” style over-stretching */
+}
+
+.admin-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.admin-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.admin-button--primary {
+    background: rgba(255, 255, 255, 0.16);
+    font-weight: 800;
+}
+
+.admin-button--toggled {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+/* --- Fix 3: Copy/Paste row layout should never stick out --- */
+.admin-panel__copyRow {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+}
+
+.admin-panel__copyRow .admin-input {
+    width: 100%;
+    min-width: 0;
+}
+
+.admin-panel__copyRow .admin-button {
+    width: fit-content;
+    padding: 6px 10px;
+}
+
+/* Divider */
+.admin-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    margin: 4px 0;
+}
+
+/* Save flash */
+.admin-flash {
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.3;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.admin-flash--ok {
+    border-color: rgba(120, 255, 160, 0.25);
+}
+
+.admin-flash--err {
+    border-color: rgba(255, 120, 120, 0.30);
+}
+
+/* Staged list */
+.admin-list {
+    max-height: 170px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 2px;
+}
+
+.admin-list__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.admin-list__left {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.admin-list__name {
+    font-size: 12px;
+    font-weight: 800;
+    word-break: break-word;
+}
+
+.admin-list__summary {
+    font-size: 11px;
+    opacity: 0.72;
+}
+
+.admin-list__right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}

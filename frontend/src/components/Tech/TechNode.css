@@ -109,3 +109,32 @@
             0 1px 2px rgba(0,0,0,0.75),
             0 0 4px rgba(0,0,0,0.45);
 }
+
+/* Admin-only alignment overlay: does not affect layout or existing selected/locked visuals */
+.tech-node.tech-node--adminActive::after {
+    content: "";
+    position: absolute;
+    inset: -4px;               /* ring slightly outside */
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.35); /* helps on bright backgrounds */
+    pointer-events: none;
+}
+
+.tech-node.tech-node--adminActive::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow:
+            0 0 0 2px rgba(0, 0, 0, 0.9),
+            0 0 6px rgba(0, 0, 0, 0.6);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+
+    z-index: 2; /* IMPORTANT: above background, below order number */
+}
