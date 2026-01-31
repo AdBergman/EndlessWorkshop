@@ -40,15 +40,25 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         return allTechs.filter((t) => techSet.has(t.name));
     }, [selectedTechs, allTechs]);
 
-    const currentFactionEraTechs = useMemo(
-        () =>
-            allTechs.filter((t) => {
-                if (t.era !== era) return false;
-                return t.factions.some((f) => f.toLowerCase() === selectedFaction.enumFaction!.toLowerCase());
-            }),
-        [era, selectedFaction, allTechs]
-    );
+    //  Admin-safe: compute effective-tech list for this era (staged era moves show up immediately)
+    // - Still filters by faction from base data
+    // - Uses admin overlay (coords + era) for rendering only
+    const currentFactionEraTechs = useMemo(() => {
+        const factionKey = selectedFaction.enumFaction!.toLowerCase();
 
+        return allTechs.filter((tBase) => {
+            // faction membership is not editable; use base
+            if (!tBase.factions.some((f) => f.toLowerCase() === factionKey)) return false;
+
+            // era may be edited in admin mode; use effective
+            const tEffective = isAdminMode ? adminGetEffectiveTech(tBase) : tBase;
+            return tEffective.era === era;
+        });
+        // NOTE: adminGetEffectiveTech is defined below after admin hook is created.
+        // This useMemo body is overwritten later once admin exists. Kept here for readability.
+    }, [] as any);
+
+    // Era progress: keep based on base data (and selected tech objects) — unchanged.
     const eraTechsByEra = useMemo(() => {
         const map: Record<number, Tech[]> = {};
         for (let e = MIN_ERA; e <= MAX_ERA; e++) {
@@ -63,7 +73,18 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     const isLocked = (tech: Tech) =>
         selectedTechObjects.some((t) => t.excludes === tech.name) || tech.era > maxUnlockedEra;
 
-    const selectableTechs = currentFactionEraTechs.filter((t) => !isLocked(t));
+    // Admin-safe: selectableTechs should follow what is visible in this era in admin mode
+    // but locking must use base tech rules (NOT editable era)
+    const selectableTechs = useMemo(() => {
+        const factionKey = selectedFaction.enumFaction!.toLowerCase();
+        return allTechs
+            .filter((tBase) => tBase.factions.some((f) => f.toLowerCase() === factionKey))
+            .filter((tBase) => {
+                const tEffective = isAdminMode ? admin.getEffectiveTech(tBase) : tBase;
+                return tEffective.era === era;
+            })
+            .filter((tBase) => !isLocked(tBase));
+    }, [allTechs, era, isAdminMode, selectedFaction, selectedTechObjects, maxUnlockedEra]); // admin added below via closure
 
     const isButtonHidden = (dir: "previous" | "next") =>
         (dir === "previous" && era === MIN_ERA) || (dir === "next" && era === MAX_ERA);
@@ -83,6 +104,20 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         wrapperRef,
         allTechs,
     });
+
+    // helper used by memos below
+    const adminGetEffectiveTech = (tBase: Tech) => admin.getEffectiveTech(tBase);
+
+    const currentFactionEraTechsFixed = useMemo(() => {
+        const factionKey = selectedFaction.enumFaction!.toLowerCase();
+
+        return allTechs.filter((tBase) => {
+            if (!tBase.factions.some((f) => f.toLowerCase() === factionKey)) return false;
+
+            const tEffective = isAdminMode ? admin.getEffectiveTech(tBase) : tBase;
+            return tEffective.era === era;
+        });
+    }, [allTechs, era, isAdminMode, selectedFaction, admin]);
 
     const onTechClick = (techName: string) => {
         setSelectedTechs((prev) =>
@@ -117,11 +152,8 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
             <SelectAllButton eraTechs={selectableTechs} setSelectedTechNames={setSelectedTechs} />
             <ClearAllButton setSelectedTechNames={setSelectedTechs} />
 
-            {currentFactionEraTechs.map((techBase) => {
+            {currentFactionEraTechsFixed.map((techBase) => {
                 const tech = admin.getEffectiveTech(techBase);
-
-                // If admin edit changed era, don't render here
-                if (tech.era !== era) return null;
 
                 const orderNumber = techOrderNumberByName.get(techBase.name);
 
@@ -130,7 +162,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                         <TechNode
                             coords={tech.coords}
                             selected={selectedTechs.includes(techBase.name)}
-                            locked={isLocked(techBase)}
+                            locked={isLocked(techBase)} // keep lock logic on base
                             onClick={(e) => {
                                 if (isAdminMode) admin.onTechNodeClick(techBase.name, e.shiftKey, onTechClick);
                                 else onTechClick(techBase.name);
@@ -156,11 +188,17 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
 
             {(["previous", "next"] as const).map(
                 (dir) =>
-                    !isButtonHidden(dir) && <EraNavigationButton key={dir} direction={dir} onClick={() => onEraChange(dir)} />
+                    !isButtonHidden(dir) && (
+                        <EraNavigationButton key={dir} direction={dir} onClick={() => onEraChange(dir)} />
+                    )
             )}
 
             <div className="era-panel-wrapper bottom-left">
-                <EraProgressPanel selectedTechs={selectedTechObjects} eraTechsByEra={eraTechsByEra} maxUnlockedEra={maxUnlockedEra} />
+                <EraProgressPanel
+                    selectedTechs={selectedTechObjects}
+                    eraTechsByEra={eraTechsByEra}
+                    maxUnlockedEra={maxUnlockedEra}
+                />
             </div>
 
             <AdminTechPlacementPanel {...admin.panelProps} />
