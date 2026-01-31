@@ -69,7 +69,7 @@ management:
 
   opentelemetry:
     resource-attributes:
-      service.instance.id: ${HOSTNAME:ewshop}
+      service.instance.id: ${SERVICE_INSTANCE_ID:ewshop-lightsail-1}
       service.namespace: ewshop
       deployment.environment: prod
 

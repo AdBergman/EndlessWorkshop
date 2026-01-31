@@ -76,6 +76,7 @@ jobs:
               -e DB_PASSWORD=${{ secrets.NEON_DB_PASSWORD }} \
               -e ADMIN_TOKEN=${{ secrets.ADMIN_TOKEN }} \
               -e METRICS_TOKEN=${{ secrets.METRICS_TOKEN }} \
+              -e SERVICE_INSTANCE_ID=${{ secrets.SERVICE_INSTANCE_ID }} \
               -e OTLP_METRICS_ENABLED=true \
               -e OTLP_METRICS_URL="${{ secrets.OTLP_METRICS_URL }}" \
               -e OTLP_AUTH_HEADER="${{ secrets.OTLP_AUTH_HEADER }}" \
