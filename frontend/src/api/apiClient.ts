@@ -46,8 +46,8 @@ async function fetcherVoid(endpoint: string, options?: RequestInit): Promise<voi
     const response = await fetch(url, options);
 
     if (!response.ok) {
-        // Surface status for caller (we'll use it to show token prompt etc)
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const text = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
     }
 
     // Expect 204; but don't crash if backend ever returns 200.
