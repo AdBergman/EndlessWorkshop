@@ -56,6 +56,12 @@ management:
   endpoint:
     health:
       show-details: never
+  otlp:
+    tracing:
+      endpoint: ""
+    metrics:
+      export:
+        enabled: false
 
 admin:
-  token: ${ADMIN_TOKEN:}
+  token: dev-admin-token
