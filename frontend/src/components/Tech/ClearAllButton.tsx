@@ -10,8 +10,8 @@ const ClearAllButton: React.FC<ClearAllButtonProps> = ({ setSelectedTechNames })
         setSelectedTechNames([]); // ✅ clear ALL eras
     };
 
-    const xPct = 86.9 + 5.5;
-    const yPct = 29.5 + 14.0 + 4.5;
+    const xPct = 86.9 + 6.5;
+    const yPct = 40.5 + 14.0 + 3.5;
 
     return (
         <button

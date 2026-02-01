@@ -8,8 +8,8 @@ interface Props {
 
 const BOX_SIZE = { widthPct: 13.28, heightPct: 27.78 };
 const COORDS_MAP = {
-    previous: { xPct: 0.15, yPct: 25.5 },
-    next: { xPct: 86.9, yPct: 25.5 }
+    previous: { xPct: 0.15, yPct: 36.0 },
+    next: { xPct: 86.9, yPct: 36.0 }
 };
 
 const EraNavigationButton: React.FC<Props> = ({ direction, onClick }) => {

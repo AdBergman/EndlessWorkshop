@@ -102,7 +102,7 @@ const TechContainer: React.FC = () => {
     useEffect(() => {
         if (!selectedFaction) return;
         const img = new Image();
-        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.png`;
+        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.webp`;
         img.onload = () => setFirstEraLoaded(true);
         img.onerror = () => setFirstEraLoaded(true);
         return () => {
@@ -116,10 +116,7 @@ const TechContainer: React.FC = () => {
         if (!selectedFaction) return;
         for (let e = 1; e <= MAX_ERA; e++) {
             const img = new Image();
-            img.src =
-                e === 6
-                    ? "/graphics/techEraScreens/default_era_6.png"
-                    : `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${e}.png`;
+            img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${e}.webp`;
         }
     }, [selectedFaction]);
 

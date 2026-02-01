@@ -43,7 +43,7 @@ const TechNode: React.FC<TechNodeProps> = ({
             style={{
                 position: "absolute",
                 left: `${coords.xPct}%`,
-                top: `calc(${coords.yPct}% + ${offsetPx ?? 0}px)`,
+                top: `${coords.yPct}%`,
                 width: `${BOX_SIZE_PCT}%`,
                 aspectRatio: "1 / 1",
                 transform: "translate(3%, 3%)",

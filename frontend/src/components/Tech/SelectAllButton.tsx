@@ -26,8 +26,8 @@ const SelectAllButton: React.FC<SelectAllButtonProps> = ({ eraTechs, setSelected
         });
     };
 
-    const xPct = 86.9 + 5.5;
-    const yPct = 29.5 + 14.0;
+    const xPct = 86.9 + 6.5;
+    const yPct = 40.5 + 14.0;
 
     return (
         <button

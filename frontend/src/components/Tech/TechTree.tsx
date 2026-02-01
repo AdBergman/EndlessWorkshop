@@ -1,18 +1,18 @@
-import React, { useMemo, useRef } from "react";
+import React, {useMemo, useRef} from "react";
 import TechNode from "./TechNode";
-import { Tech, Faction } from "@/types/dataTypes";
+import {Tech} from "@/types/dataTypes";
 import EraNavigationButton from "./EraNavigationButton";
 import "./TechTree.css";
 import TechTooltip from "../Tooltips/TechTooltip";
 import EraProgressPanel from "./EraProgressPanel";
 import SelectAllButton from "@/components/Tech/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
-import { useGameData } from "@/context/GameDataContext";
-import { useTooltip } from "@/hooks/useTooltips";
-import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
-import { useSearchParams } from "react-router-dom";
+import {useGameData} from "@/context/GameDataContext";
+import {useTooltip} from "@/hooks/useTooltips";
+import {getBackgroundUrl} from "@/utils/getBackgroundUrl";
+import {useSearchParams} from "react-router-dom";
 import AdminTechPlacementPanel from "@/components/Tech/adminPanel/AdminTechPlacementPanel";
-import { useTechTreeAdminPlacement } from "@/components/Tech/adminPanel/useTechTreeAdminPlacement";
+import {useTechTreeAdminPlacement} from "@/components/Tech/adminPanel/useTechTreeAdminPlacement";
 
 interface TechTreeProps {
     era: number;
@@ -24,11 +24,10 @@ const MIN_ERA = 1;
 const MAX_ERA = 6;
 
 const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra }) => {
-    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
+    const { selectedFaction, selectedTechs, setSelectedTechs, techs, refreshTechs } = useGameData();
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300);
 
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
-    const OFFSET_PX = selectedFaction.enumFaction === Faction.ASPECTS ? -35 : 0;
 
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";
@@ -40,6 +39,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         isAdminMode,
         wrapperRef,
         allTechs,
+        refreshTechs: refreshTechs!,
     });
 
     const selectedTechObjects = useMemo(() => {
@@ -113,15 +113,11 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
             onClick={admin.onWrapperClick}
             style={{ cursor: admin.wrapperCursor }}
         >
-            {selectedFaction.enumFaction === Faction.ASPECTS && (
-                <div className="wip-banner">
-                    WORK IN PROGRESS
-                    <br />
-                    NEW BACKGROUND IMAGES
-                    <br />
-                    ARE ALIGNED DIFFERENTLY
-                </div>
-            )}
+            <div className="wip-banner">
+                EARLY ACCESS / WIP
+                <br />
+                TECH TREE DATA MAY CHANGE
+            </div>
 
             <img
                 src={getBackgroundUrl(selectedFaction.uiLabel, era)}
@@ -155,7 +151,6 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
                             onHoverChange={(hovered) =>
                                 hovered ? showTooltip(techBase.name) : hideTooltip(techBase.name)
                             }
-                            offsetPx={OFFSET_PX}
                             orderNumber={orderNumber}
                             adminActive={isAdminMode && admin.panelProps.activeDraft?.name === techBase.name}
                         />

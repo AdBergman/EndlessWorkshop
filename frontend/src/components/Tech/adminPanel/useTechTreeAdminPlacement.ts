@@ -22,11 +22,23 @@ type Args = {
     isAdminMode: boolean;
     wrapperRef: RefObject<HTMLDivElement | null>;
     allTechs: Tech[];
+    refreshTechs: () => Promise<void>;
 };
 
-export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }: Args) {
+export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, refreshTechs }: Args) {
     const [activeTechName, setActiveTechName] = useState<string | null>(null);
     const [stagedEdits, setStagedEdits] = useState<Map<string, TechAdminDto>>(new Map());
+
+    /**
+     * Keeps the UI stable immediately after Save:
+     * - we copy stagedEdits into pendingSaved
+     * - refreshTechs updates the base list
+     * - then we clear pendingSaved
+     *
+     * This prevents "snapback" even if refreshTechs is briefly stale.
+     */
+    const [pendingSaved, setPendingSaved] = useState<Map<string, TechAdminDto>>(new Map());
+
     const [repositionEnabled, setRepositionEnabled] = useState(false);
 
     const [stepMode, setStepMode] = useState<StepMode>("pct");
@@ -48,14 +60,18 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
     }, [allTechs]);
 
     /**
-     * Effective tech map lets TechTree render staged coords/era immediately (admin preview),
-     * but only for items that have edits.
+     * Effective tech map lets TechTree render admin preview immediately.
+     * We render from:
+     *  - stagedEdits (current unsaved edits)
+     *  - pendingSaved (just-saved edits while refresh is happening)
      */
     const effectiveTechByName = useMemo(() => {
-        if (!isAdminMode || stagedEdits.size === 0) return null;
+        if (!isAdminMode) return null;
+        if (stagedEdits.size === 0 && pendingSaved.size === 0) return null;
+
         const m = new Map<string, Tech>();
         for (const base of allTechs) {
-            const edit = stagedEdits.get(base.name);
+            const edit = stagedEdits.get(base.name) ?? pendingSaved.get(base.name);
             if (!edit) continue;
             m.set(base.name, {
                 ...base,
@@ -64,23 +80,27 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
             });
         }
         return m;
-    }, [isAdminMode, stagedEdits, allTechs]);
+    }, [isAdminMode, stagedEdits, pendingSaved, allTechs]);
 
     useEffect(() => {
         if (isAdminMode) return;
+
         setActiveTechName(null);
         setRepositionEnabled(false);
         setSaveMessage(undefined);
         setIsSaving(false);
+
+        // Cleanup any preview leftovers when leaving admin mode
+        setStagedEdits(new Map());
+        setPendingSaved(new Map());
     }, [isAdminMode]);
-
-
 
     const upsertEdit = (base: Tech, next: Partial<TechAdminDto>) => {
         setStagedEdits((prev) => {
             const copy = new Map(prev);
             const current =
-                prev.get(base.name) ?? ({
+                prev.get(base.name) ??
+                ({
                     name: base.name,
                     type: base.type,
                     era: base.era,
@@ -111,6 +131,14 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
             copy.delete(name);
             return copy;
         });
+
+        // If it was in pendingSaved too, remove there as well (rare but safe)
+        setPendingSaved((prev) => {
+            if (!prev.has(name)) return prev;
+            const copy = new Map(prev);
+            copy.delete(name);
+            return copy;
+        });
     };
 
     const handleSetToken = (token: string) => {
@@ -125,18 +153,19 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
         if (!activeTechName) return null;
         const base = techByName.get(activeTechName);
         if (!base) return null;
-        const ed = stagedEdits.get(activeTechName);
+
+        const ed = stagedEdits.get(activeTechName) ?? pendingSaved.get(activeTechName);
+
         return {
             name: base.name,
             type: base.type,
             era: ed ? ed.era : base.era,
             coords: ed ? { ...ed.coords } : { ...base.coords },
         };
-    }, [activeTechName, techByName, stagedEdits]);
+    }, [activeTechName, techByName, stagedEdits, pendingSaved]);
 
     /**
-     * IMPORTANT: fix repeated arrow nudges
-     * The keydown handler must read the *latest* coords, not a stale closure snapshot.
+     * Keydown handler must read latest draft to avoid stale closure.
      */
     const activeDraftRef = useRef<AdminPlacementDraft | null>(null);
     useEffect(() => {
@@ -172,13 +201,6 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
         };
     };
 
-    /**
-     * Fix click-to-place anchor:
-     * Your TechNode currently positions by top-left at (xPct,yPct) and then nudges via transform translate(3%,3%).
-     * To place the *center* under the mouse click, we subtract:
-     * - half the node size
-     * - the translate offset (size * 3%)
-     */
     const centerCoordsFromClickPct = (clickXPct: number, clickYPct: number) => {
         const half = TECHNODE_BOX_SIZE_PCT / 2;
         const translate = TECHNODE_BOX_SIZE_PCT * TECHNODE_TRANSLATE_PCT;
@@ -219,12 +241,10 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
         if (!isAdminMode) return;
 
         const onKeyDown = (ev: KeyboardEvent) => {
-            // Must have an active draft to nudge
             const draft = activeDraftRef.current;
             if (!draft) return;
             if (repositionEnabled) return;
 
-            // Don’t nudge while typing in panel inputs/selects
             const target = ev.target as HTMLElement | null;
             const tag = target?.tagName?.toLowerCase();
             const isTyping =
@@ -268,7 +288,6 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
                 dyPct = d.dyPct;
             }
 
-            // IMPORTANT: use the latest coords from draft (ref), not from a stale "getOrCreateEdit"
             const next = {
                 xPct: draft.coords.xPct + dxPct,
                 yPct: draft.coords.yPct + dyPct,
@@ -280,7 +299,8 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
 
         window.addEventListener("keydown", onKeyDown, { passive: false });
         return () => window.removeEventListener("keydown", onKeyDown as any);
-    }, [isAdminMode, repositionEnabled, stepMode, stepPct, stepPx, techByName, wrapperRef]); // eslint-disable-line react-hooks/exhaustive-deps
+        // techByName is stable via memo; wrapperRef stable; step values included.
+    }, [isAdminMode, repositionEnabled, stepMode, stepPct, stepPx, techByName, wrapperRef]);
 
     const stagedRows: AdminStagedRow[] = useMemo(() => {
         const rows: AdminStagedRow[] = [];
@@ -322,12 +342,26 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs }:
             return;
         }
 
+        // Snapshot payload (avoid reading mutable state during async)
+        const payload = Array.from(stagedEdits.values());
+
         setIsSaving(true);
         setSaveMessage(undefined);
 
         try {
-            await apiClient.saveTechPlacementsAdmin(Array.from(stagedEdits.values()), token);
+            await apiClient.saveTechPlacementsAdmin(payload, token);
+
+            // Keep UI stable immediately after save.
+            // (Don't clear stagedEdits yet.)
+            setPendingSaved(new Map(stagedEdits));
+
+            // Refresh base tech list so the saved coords become the new truth.
+            await refreshTechs();
+
+            // Now we can clear staged edits (and the temporary preview map)
             setStagedEdits(new Map());
+            setPendingSaved(new Map());
+
             setSaveMessage({ kind: "ok", text: "Saved (204)." });
         } catch (err: any) {
             const msg = String(err?.message ?? err);
