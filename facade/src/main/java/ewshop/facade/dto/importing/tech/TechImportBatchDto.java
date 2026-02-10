@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record TechImportFileDto(
+public record TechImportBatchDto(
         String game,
         String gameVersion,
         String exporterVersion,

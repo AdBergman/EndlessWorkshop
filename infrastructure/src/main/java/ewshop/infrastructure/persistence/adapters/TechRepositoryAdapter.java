@@ -10,8 +10,10 @@ import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Repository
@@ -56,13 +58,20 @@ public class TechRepositoryAdapter implements TechRepository {
 
     @Override
     public void updateEraAndCoordsByNameAndType(TechPlacementUpdate update) {
-        int updated = techJpaRepository.updateEraAndCoordsByNameAndType(update.name(), update.type(), update.era(), update.coords());
+        int updated = techJpaRepository.updateEraAndCoordsByNameAndType(
+                update.name(),
+                update.type(),
+                update.era(),
+                update.coords()
+        );
         if (updated != 1) {
-            log.warn("Expected to update 1 tech for name='{}' and type='{}' but updated {}", update.name(), update.type(), updated);
+            log.warn("Expected to update 1 tech for name='{}' and type='{}' but updated {}",
+                    update.name(), update.type(), updated);
         }
     }
 
     @Override
+    @Transactional
     public void importTechSnapshot(List<TechImportSnapshot> snapshots) {
         if (snapshots == null || snapshots.isEmpty()) {
             return;
@@ -75,7 +84,7 @@ public class TechRepositoryAdapter implements TechRepository {
         var existingByKey = techJpaRepository.findAllByTechKeyIn(techKeys).stream()
                 .collect(Collectors.toMap(
                         TechEntity::getTechKey,
-                        e -> e
+                        Function.identity()
                 ));
 
         for (TechImportSnapshot snapshot : snapshots) {
@@ -86,14 +95,29 @@ public class TechRepositoryAdapter implements TechRepository {
                 entity.setTechKey(snapshot.techKey());
             }
 
-            // baseline-only updates
-            entity.setName(snapshot.displayName());
+            // --- curated / fill-missing-only fields ---
+
+            // name: only fill if missing AND snapshot has something meaningful
+            if ((entity.getName() == null || entity.getName().isBlank())
+                    && snapshot.displayName() != null && !snapshot.displayName().isBlank()) {
+                entity.setName(snapshot.displayName());
+            }
+
+            // coords: only fill if missing (new techs get 0,0 via snapshot invariant)
+            if (entity.getTechCoords() == null) {
+                entity.setTechCoords(snapshot.techCoords());
+            }
+
+            // --- baseline fields (safe to refresh) ---
             entity.setLore(snapshot.lore());
             entity.setHidden(snapshot.hidden());
             entity.setEra(snapshot.era());
             entity.setType(snapshot.type());
 
             techJpaRepository.save(entity);
+
+            // keep map consistent in case of repeated keys in input list
+            existingByKey.put(entity.getTechKey(), entity);
         }
     }
 }

@@ -1,7 +1,7 @@
 package ewshop.facade.interfaces;
 
-import ewshop.facade.dto.importing.tech.TechImportFileDto;
+import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 
 public interface ImportAdminFacade {
-    void importTechs(TechImportFileDto file);
+    void importTechs(TechImportBatchDto file);
 }

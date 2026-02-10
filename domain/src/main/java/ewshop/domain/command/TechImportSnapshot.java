@@ -1,5 +1,6 @@
 package ewshop.domain.command;
 
+import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
 
 import java.util.List;
@@ -11,11 +12,14 @@ public record TechImportSnapshot(
         boolean hidden,
         int era,
         TechType type,
+        TechCoords techCoords,
         List<String> prereqTechKeys,
         List<String> exclusivePrereqTechKeys,
         List<TechTraitPrereq> traitPrereqs,
         List<TechUnlockTuple> unlocks
 ) {
+    private static final TechCoords DEFAULT_COORDS = new TechCoords(0.0, 0.0);
+
     public TechImportSnapshot {
         String trimmedKey = techKey == null ? null : techKey.trim();
         if (trimmedKey == null || trimmedKey.isEmpty()) {
@@ -34,6 +38,9 @@ public record TechImportSnapshot(
                     "TechImportSnapshot.era must be between 1 and 6 (got: " + era + ")"
             );
         }
+
+        // every tech must have coords (admin UI needs renderable position)
+        techCoords = techCoords == null ? DEFAULT_COORDS : techCoords;
 
         prereqTechKeys = prereqTechKeys == null ? List.of() : List.copyOf(prereqTechKeys);
         exclusivePrereqTechKeys = exclusivePrereqTechKeys == null ? List.of() : List.copyOf(exclusivePrereqTechKeys);
@@ -78,6 +85,7 @@ public record TechImportSnapshot(
                     hidden,
                     era,
                     type,
+                    DEFAULT_COORDS,
                     prereqTechKeys,
                     exclusivePrereqTechKeys,
                     traitPrereqs,

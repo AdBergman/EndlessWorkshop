@@ -23,28 +23,20 @@ public class TechImportMapper {
             );
         }
 
-        TechType type;
-        try {
-            type = TechType.valueOf(dto.quadrant().trim().toUpperCase().replace(" ", "_"));
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(
-                    "Invalid quadrant '" + dto.quadrant() + "' for techKey: " + dto.techKey()
-            );
-        }
-
+        TechType type = mapQuadrantToTechType(dto.quadrant(), dto.techKey());
         int era = dto.eraIndex() == null ? 1 : dto.eraIndex();
 
-        var prereqs = safeList(dto.technologyPrerequisiteTechKeys()).stream()
+        var prereqs = emptyIfNull(dto.technologyPrerequisiteTechKeys()).stream()
                 .filter(s -> s != null && !s.isBlank())
                 .map(String::trim)
                 .toList();
 
-        var exclusivePrereqs = safeList(dto.exclusiveTechnologyPrerequisiteTechKeys()).stream()
+        var exclusivePrereqs = emptyIfNull(dto.exclusiveTechnologyPrerequisiteTechKeys()).stream()
                 .filter(s -> s != null && !s.isBlank())
                 .map(String::trim)
                 .toList();
 
-        var traits = safeList(dto.factionTraitPrerequisites()).stream()
+        var traits = emptyIfNull(dto.factionTraitPrerequisites()).stream()
                 .filter(t -> t != null && t.traitKey() != null && !t.traitKey().isBlank())
                 .map(t -> TechTraitPrereq.builder()
                         .operator(t.operator())
@@ -52,7 +44,7 @@ public class TechImportMapper {
                         .build())
                 .toList();
 
-        var unlocks = safeList(dto.unlocks()).stream()
+        var unlocks = emptyIfNull(dto.unlocks()).stream()
                 .filter(u -> u != null && u.unlockElementName() != null && !u.unlockElementName().isBlank())
                 .map(u -> TechUnlockTuple.builder()
                         .unlockType(u.unlockType())
@@ -65,7 +57,7 @@ public class TechImportMapper {
                 .techKey(dto.techKey())
                 .displayName(dto.displayName())
                 .lore(dto.lore())
-                .hidden(dto.hidden() != null && dto.hidden())
+                .hidden(Boolean.TRUE.equals(dto.hidden()))
                 .era(era)
                 .type(type)
                 .prereqTechKeys(prereqs)
@@ -75,7 +67,24 @@ public class TechImportMapper {
                 .build();
     }
 
-    private static <T> List<T> safeList(List<T> list) {
+    private static TechType mapQuadrantToTechType(String quadrantRaw, String techKey) {
+        String q = quadrantRaw.trim().toUpperCase();
+
+        // Game uses "Development" where domain expects ECONOMY
+        if ("DEVELOPMENT".equals(q)) {
+            return TechType.ECONOMY;
+        }
+
+        try {
+            return TechType.valueOf(q);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                    "Invalid quadrant '" + quadrantRaw + "' for techKey: " + techKey
+            );
+        }
+    }
+
+    private static <T> List<T> emptyIfNull(List<T> list) {
         return list == null ? List.of() : list;
     }
 }

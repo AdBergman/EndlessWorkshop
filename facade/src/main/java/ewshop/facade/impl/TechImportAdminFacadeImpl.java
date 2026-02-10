@@ -2,7 +2,7 @@ package ewshop.facade.impl;
 
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.service.TechImportService;
-import ewshop.facade.dto.importing.tech.TechImportFileDto;
+import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.interfaces.ImportAdminFacade;
 import ewshop.facade.mapper.TechImportMapper;
@@ -21,7 +21,7 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
     }
 
     @Override
-    public void importTechs(TechImportFileDto fileDto) {
+    public void importTechs(TechImportBatchDto fileDto) {
         if (fileDto == null) {
             return;
         }
