@@ -1,0 +1,403 @@
+/* =========================================================
+ * Admin Import Page — isolated styling (NO global .admin-* names)
+ * ========================================================= */
+
+.admin-import-page {
+    width: 100%;
+    max-width: 1200px;
+    margin: 1.5rem auto;
+    padding: 1rem;
+}
+
+.admin-import-title {
+    font-family: "Audiowide", sans-serif;
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+    color: #ff7f32;
+    margin-bottom: 0.75rem;
+}
+
+.admin-import-section {
+    margin-top: 1rem;
+}
+
+/* =========================================================
+ * Panels & layout
+ * ========================================================= */
+
+.admin-import-panel {
+    background: rgba(17, 17, 17, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.admin-import-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-import-muted {
+    opacity: 0.75;
+    line-height: 1.5;
+}
+
+.admin-import-hint {
+    font-size: 0.9rem;
+    opacity: 0.65;
+}
+
+/* =========================================================
+ * Buttons
+ * ========================================================= */
+
+.admin-import-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid #555;
+    background: #1b1b1b;
+    color: #ffcc00;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            transform 0.05s ease;
+}
+
+.admin-import-btn:hover {
+    background: #2a2a2a;
+}
+
+.admin-import-btn:active {
+    transform: translateY(1px);
+}
+
+.admin-import-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.admin-import-btn--primary {
+    border-color: rgba(255, 127, 50, 0.6);
+    color: #ff7f32;
+}
+
+.admin-import-btn--ghost {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    opacity: 0.9;
+}
+
+.admin-import-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+/* =========================================================
+ * Key / value metadata grid
+ * ========================================================= */
+
+.admin-import-kvGrid {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-import-kv {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.admin-import-kvLabel {
+    font-size: 0.9rem;
+    opacity: 0.65;
+}
+
+.admin-import-kvValue {
+    font-weight: 600;
+    color: #fff;
+}
+
+/* =========================================================
+ * Dropzone (Admin JSON upload)
+ * ========================================================= */
+
+.admin-import-dropzone {
+    border: 1px dashed rgba(255, 255, 255, 0.22);
+    border-radius: 10px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.12);
+    transition:
+            border-color 0.2s ease,
+            background 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.admin-import-dropzone:hover {
+    border-color: rgba(255, 127, 50, 0.55);
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.admin-import-dropzone.is-dragging {
+    border-color: rgba(255, 127, 50, 0.75);
+    box-shadow: 0 0 0 1px rgba(255, 127, 50, 0.18);
+    background: rgba(0, 0, 0, 0.22);
+}
+
+.admin-import-dropzone.is-loading {
+    opacity: 0.9;
+}
+
+.admin-import-dropzoneTitle {
+    font-weight: 800;
+    color: #ffcc99;
+    margin-bottom: 6px;
+}
+
+.admin-import-fileInput {
+    display: none;
+}
+
+.admin-import-uploadLabel {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* =========================================================
+ * Error / status blocks
+ * ========================================================= */
+
+.admin-import-error {
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 80, 80, 0.35);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.admin-import-errorTitle {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.admin-import-success {
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(80, 200, 120, 0.45);
+    border-radius: 8px;
+    padding: 10px;
+    color: rgba(180, 255, 200, 0.95);
+}
+
+/* =========================================================
+ * Admin Import — inputs
+ * ========================================================= */
+
+.admin-import-input {
+    min-width: 320px;
+    flex: 1 1 320px;
+    padding: 0.45rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: #1b1b1b;
+    color: #fff;
+}
+
+.admin-import-input::placeholder {
+    opacity: 0.55;
+}
+
+.admin-import-input:focus {
+    outline: none;
+    border-color: rgba(255, 127, 50, 0.6);
+    box-shadow: 0 0 0 1px rgba(255, 127, 50, 0.25);
+}
+
+/* =========================================================
+ * Token status pill
+ * ========================================================= */
+
+.admin-import-status {
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.admin-import-status.is-ok {
+    border-color: rgba(80, 200, 120, 0.35);
+    color: rgba(180, 255, 200, 0.95);
+}
+
+.admin-import-status.is-warn {
+    border-color: rgba(255, 200, 120, 0.35);
+    color: rgba(255, 220, 160, 0.95);
+}
+
+/* =========================================================
+ * Import pipeline list (row layout)
+ * ========================================================= */
+
+.admin-import-pipelineTitle {
+    font-weight: 900;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.admin-import-pipeline {
+    margin-top: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    overflow: hidden; /* containment */
+    background: rgba(0, 0, 0, 0.10);
+}
+
+/* Each row is a contained block inside the list */
+.admin-import-pipelineRow {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-import-pipelineRow:first-child {
+    border-top: none;
+}
+
+.admin-import-pipelineRow.is-disabled {
+    opacity: 0.65;
+}
+
+/* Header row */
+.admin-import-pipelineRowHeader {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: inherit;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 12px 12px;
+}
+
+.admin-import-pipelineRowHeader:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-import-pipelineLeft {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.admin-import-step {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.95);
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.22);
+    flex: 0 0 auto;
+}
+
+.admin-import-pipelineText {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.admin-import-pipelineRowTitle {
+    font-weight: 900;
+    font-size: 15px;
+    line-height: 1.15;
+}
+
+.admin-import-pipelineRowDesc {
+    font-size: 12px;
+}
+
+/* Right side: badge + import + chevron */
+.admin-import-pipelineRight {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.admin-import-pipelineImportBtn {
+    white-space: nowrap;
+}
+
+/* Chevron (rotation handled by framer-motion) */
+.admin-import-chevron {
+    display: inline-flex;
+    width: 18px;
+    justify-content: center;
+    opacity: 0.75;
+}
+
+/* Collapsible body */
+.admin-import-pipelineRowBody {
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(17, 17, 17, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* =========================================================
+ * Status badges
+ * ========================================================= */
+
+.admin-import-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+}
+
+.admin-import-badge--ok {
+    border-color: rgba(80, 200, 120, 0.35);
+    color: rgba(180, 255, 200, 0.95);
+}
+
+.admin-import-badge--err {
+    border-color: rgba(255, 80, 80, 0.35);
+    color: rgba(255, 200, 200, 0.95);
+}
+
+.admin-import-badge--busy {
+    border-color: rgba(255, 127, 50, 0.35);
+    color: rgba(255, 200, 160, 0.95);
+}
+
+.admin-import-badge--ready {
+    border-color: rgba(79, 195, 247, 0.35);
+    color: rgba(180, 230, 255, 0.95);
+}
+
+.admin-import-badge--disabled {
+    opacity: 0.85;
+}

@@ -10,6 +10,7 @@ import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
 
 import './App.css';
 import {UnitEvolutionExplorer} from "@/components/Units/UnitEvolutionExplorer";
+import AdminImportPage from "@/components/AdminImport/AdminImportPage";
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -57,6 +58,7 @@ function App() {
                         <Route path="tech" element={<TechContainer />} />
                         <Route path="units" element={<UnitEvolutionExplorer />} />
                         <Route path="summary" element={<GameSummaryPage />} />
+                        <Route path="admin/import" element={<AdminImportPage />} />
                     </Route>
                 </Routes>
             </GameDataProvider>

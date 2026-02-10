@@ -15,6 +15,12 @@ public class ImportAdminController {
         this.importAdminFacade = importAdminFacade;
     }
 
+    @GetMapping("/check-token")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void checkAdminToken() {
+        // Intentionally empty - Admin auth is enforced before controller execution.
+    }
+
     @PostMapping(value = "/techs", consumes = "application/json")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void importTechs(@RequestBody(required = false) TechImportBatchDto dto) {
