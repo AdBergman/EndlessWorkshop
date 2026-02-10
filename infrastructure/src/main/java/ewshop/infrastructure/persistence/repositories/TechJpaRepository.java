@@ -15,19 +15,30 @@ import java.util.Optional;
 
 @Repository
 public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
+
     Optional<TechEntity> findByName(String name);
 
-    @EntityGraph(attributePaths = {"unlocks", "unlocks.unitSpecialization", "unlocks.improvement", "unlocks.district"})
+    Optional<TechEntity> findByTechKey(String techKey);
+
+    List<TechEntity> findAllByTechKeyIn(List<String> techKeys);
+
+    @Override
+    @EntityGraph(attributePaths = {
+            "unlocks",
+            "unlocks.unitSpecialization",
+            "unlocks.improvement",
+            "unlocks.district"
+    })
     List<TechEntity> findAll();
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
-    update TechEntity t
-       set t.era = :era,
-           t.techCoords = :coords
-     where t.name = :name
-       and t.type = :type
-""")
+        update TechEntity t
+           set t.era = :era,
+               t.techCoords = :coords
+         where t.name = :name
+           and t.type = :type
+    """)
     int updateEraAndCoordsByNameAndType(@Param("name") String name,
                                         @Param("type") TechType type,
                                         @Param("era") int era,

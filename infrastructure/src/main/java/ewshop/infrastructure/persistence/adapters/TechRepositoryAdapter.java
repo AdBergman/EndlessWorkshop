@@ -1,8 +1,10 @@
 package ewshop.infrastructure.persistence.adapters;
 
+import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
 import ewshop.domain.repository.TechRepository;
+import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.mappers.TechMapper;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.slf4j.Logger;
@@ -57,6 +59,41 @@ public class TechRepositoryAdapter implements TechRepository {
         int updated = techJpaRepository.updateEraAndCoordsByNameAndType(update.name(), update.type(), update.era(), update.coords());
         if (updated != 1) {
             log.warn("Expected to update 1 tech for name='{}' and type='{}' but updated {}", update.name(), update.type(), updated);
+        }
+    }
+
+    @Override
+    public void importTechSnapshot(List<TechImportSnapshot> snapshots) {
+        if (snapshots == null || snapshots.isEmpty()) {
+            return;
+        }
+
+        var techKeys = snapshots.stream()
+                .map(TechImportSnapshot::techKey)
+                .toList();
+
+        var existingByKey = techJpaRepository.findAllByTechKeyIn(techKeys).stream()
+                .collect(Collectors.toMap(
+                        TechEntity::getTechKey,
+                        e -> e
+                ));
+
+        for (TechImportSnapshot snapshot : snapshots) {
+            TechEntity entity = existingByKey.get(snapshot.techKey());
+
+            if (entity == null) {
+                entity = new TechEntity();
+                entity.setTechKey(snapshot.techKey());
+            }
+
+            // baseline-only updates
+            entity.setName(snapshot.displayName());
+            entity.setLore(snapshot.lore());
+            entity.setHidden(snapshot.hidden());
+            entity.setEra(snapshot.era());
+            entity.setType(snapshot.type());
+
+            techJpaRepository.save(entity);
         }
     }
 }

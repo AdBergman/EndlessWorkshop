@@ -1,5 +1,6 @@
 package ewshop.domain.repository;
 
+import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
 
@@ -17,4 +18,5 @@ public interface TechRepository {
 
     void updateEraAndCoordsByNameAndType(TechPlacementUpdate update);
 
+    void importTechSnapshot(List<TechImportSnapshot> techs);
 }

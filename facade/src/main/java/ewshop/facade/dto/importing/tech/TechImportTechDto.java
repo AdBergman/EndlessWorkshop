@@ -1,7 +1,6 @@
 package ewshop.facade.dto.importing.tech;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import ewshop.facade.dto.importing.tech.TechImportTraitPrereqDto;
 
 import java.util.List;
 
