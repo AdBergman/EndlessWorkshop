@@ -3,21 +3,8 @@ package ewshop.infrastructure.persistence.entities;
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.TechType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.*;
+
 import java.util.List;
 import java.util.Set;
 
@@ -39,37 +26,45 @@ public class TechEntity {
     @Column(nullable = false)
     private int era;
 
-    // Effects are just text for now
     @ElementCollection
     private List<String> effects;
 
-    // Coordinates for front-end placement
     @Embedded
     private TechCoords techCoords;
 
-    // Only one prereq tech allowed
+    // Legacy – replaced by tech_prereq_key
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prereq_id")
     private TechEntity prereq;
 
-    // Only one mutually exclusive tech allowed
+    // Legacy – replaced by tech_exclusive_prereq_key
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "excludes_id")
     private TechEntity excludes;
 
-    // Multiple factions can access this tech
+    // Legacy – replaced by tech_trait_prereq
     @ElementCollection(targetClass = Faction.class)
     @Enumerated(EnumType.STRING)
     @Column(name = "faction")
     private Set<Faction> factions;
 
-    // Optional unlocks
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "tech_key")
+    private String techKey;
+
+    @Column(name = "baseline_hash", length = 64)
+    private String baselineHash;
+
+    @Column(columnDefinition = "text")
+    private String lore;
+
+    @Column
+    private Boolean hidden;
+
+    @OneToMany(mappedBy = "tech", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TechUnlockEntity> unlocks;
 
     public TechEntity() {}
 
-    // Getters and setters for all fields
     public Long getId() {
         return id;
     }
@@ -110,8 +105,8 @@ public class TechEntity {
         return techCoords;
     }
 
-    public void setTechCoords(TechCoords TechCoords) {
-        this.techCoords = TechCoords;
+    public void setTechCoords(TechCoords techCoords) {
+        this.techCoords = techCoords;
     }
 
     public TechEntity getPrereq() {
@@ -136,6 +131,38 @@ public class TechEntity {
 
     public void setFactions(Set<Faction> factions) {
         this.factions = factions;
+    }
+
+    public String getTechKey() {
+        return techKey;
+    }
+
+    public void setTechKey(String techKey) {
+        this.techKey = techKey;
+    }
+
+    public String getBaselineHash() {
+        return baselineHash;
+    }
+
+    public void setBaselineHash(String baselineHash) {
+        this.baselineHash = baselineHash;
+    }
+
+    public String getLore() {
+        return lore;
+    }
+
+    public void setLore(String lore) {
+        this.lore = lore;
+    }
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Boolean hidden) {
+        this.hidden = hidden;
     }
 
     public List<TechUnlockEntity> getUnlocks() {

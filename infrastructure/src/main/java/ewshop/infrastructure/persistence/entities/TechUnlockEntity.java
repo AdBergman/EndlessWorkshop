@@ -14,33 +14,45 @@ public class TechUnlockEntity {
     @JoinColumn(name = "tech_id")
     private TechEntity tech;
 
-    // Optional relationships
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @ManyToOne
     @JoinColumn(name = "convertor_id")
     private ConvertorEntity convertor;
 
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @ManyToOne
     @JoinColumn(name = "unit_specialization_id")
     private UnitSpecializationEntity unitSpecialization;
 
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @ManyToOne
     @JoinColumn(name = "treaty_id")
     private TreatyEntity treaty;
 
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @ManyToOne
     @JoinColumn(name = "district_id")
     private DistrictEntity district;
 
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @ManyToOne
     @JoinColumn(name = "improvement_id")
     private ImprovementEntity improvement;
 
+    // Legacy – replaced by unlock_type / unlock_category / unlock_element_name
     @Column(name = "unlock_text")
     private String unlockText;
 
-    public TechUnlockEntity() {}
+    @Column(name = "unlock_type")
+    private String unlockType;
 
-    // Getters and Setters
+    @Column(name = "unlock_category")
+    private String unlockCategory;
+
+    @Column(name = "unlock_element_name")
+    private String unlockElementName;
+
+    public TechUnlockEntity() {}
 
     public Long getId() {
         return id;
@@ -100,5 +112,29 @@ public class TechUnlockEntity {
 
     public void setUnlockText(String unlockText) {
         this.unlockText = unlockText;
+    }
+
+    public String getUnlockType() {
+        return unlockType;
+    }
+
+    public void setUnlockType(String unlockType) {
+        this.unlockType = unlockType;
+    }
+
+    public String getUnlockCategory() {
+        return unlockCategory;
+    }
+
+    public void setUnlockCategory(String unlockCategory) {
+        this.unlockCategory = unlockCategory;
+    }
+
+    public String getUnlockElementName() {
+        return unlockElementName;
+    }
+
+    public void setUnlockElementName(String unlockElementName) {
+        this.unlockElementName = unlockElementName;
     }
 }
