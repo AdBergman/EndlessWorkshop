@@ -195,6 +195,20 @@
     color: rgba(180, 255, 200, 0.95);
 }
 
+/* Pretty JSON / raw blocks */
+.admin-import-pre {
+    margin: 0;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.35);
+    overflow: auto;
+    max-height: 320px;
+    font-size: 12px;
+    line-height: 1.35;
+    white-space: pre;
+}
+
 /* =========================================================
  * Admin Import — inputs
  * ========================================================= */
@@ -400,4 +414,77 @@
 
 .admin-import-badge--disabled {
     opacity: 0.85;
+}
+
+/* Raw JSON block: page scrolls, not inner scroll */
+.admin-import-json {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.22);
+
+    /* IMPORTANT: no vertical scroll box */
+    max-height: none;
+    overflow-y: visible;
+
+    /* Horizontal scrolling is fine */
+    overflow-x: auto;
+    white-space: pre;
+}
+
+/* Small admin “code pill” */
+.admin-import-codePill {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    opacity: 0.85;
+}
+
+.admin-import-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Errors table */
+.admin-import-tableWrap {
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.10);
+    overflow-x: auto;
+}
+
+.admin-import-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-import-table th,
+.admin-import-table td {
+    padding: 8px 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    vertical-align: top;
+}
+
+.admin-import-table thead th {
+    border-top: none;
+    text-align: left;
+    font-weight: 800;
+    opacity: 0.8;
+}
+
+/* Raw JSON toggle placement */
+.admin-import-rawRow {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.admin-import-rawBtn {
+    opacity: 0.9;
 }

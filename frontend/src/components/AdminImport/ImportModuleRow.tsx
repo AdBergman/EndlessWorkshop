@@ -16,11 +16,20 @@ function getActionMode(args: { canImport: boolean; isImporting: boolean; isEnabl
     return "none";
 }
 
+// Keep it admin-ish: show code, but allow light label mapping where it helps.
+// You can expand this later without changing the backend.
+const warningLabels: Record<string, string> = {
+    HIDDEN_TECH_IN_FILE: "Hidden techs in file",
+    EMPTY_LORE_IN_FILE: "Empty lore in file",
+    TBD_NAME_IN_FILE: "TBD names in file",
+    MISSING_EXPORTER_VERSION: "Missing exporterVersion",
+    MISSING_EXPORTED_AT_UTC: "Missing exportedAtUtc",
+};
+
 type Props<TJson> = {
     index: number;
     token: string;
     module: ImportModuleDefinition<TJson>;
-
     isOpen: boolean;
     onToggle: () => void;
 };
@@ -30,10 +39,10 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
     const [meta, setMeta] = useState<ModuleMetaKV[] | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [importState, setImportState] = useState<ImportState>({ status: "idle" });
+    const [showRaw, setShowRaw] = useState(false);
 
     const hasToken = token.length > 0;
     const isImporting = importState.status === "importing";
-    const isImported = importState.status === "success";
 
     const isEnabled = module.enabled;
     const endpoint = module.endpoint;
@@ -41,7 +50,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
     const onLoaded = useCallback(
         (result: DropResult<TJson>) => {
             setDrop(result);
-            // New file loaded => reset import state for this module
+            setShowRaw(false);
             setImportState({ status: "idle" });
 
             const nextMeta = module.getMeta ? module.getMeta(result.json) : null;
@@ -61,6 +70,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
 
     const onCleared = useCallback(() => {
         clearLoadedFile();
+        setShowRaw(false);
         setImportState({ status: "idle" });
     }, [clearLoadedFile]);
 
@@ -88,6 +98,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
     const doImport = useCallback(async () => {
         if (!endpoint || !drop) return;
 
+        setShowRaw(false);
         setImportState({ status: "importing" });
 
         try {
@@ -100,20 +111,27 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                 body: drop.rawText,
             });
 
-            if (res.status === 204) {
-                setImportState({ status: "success", atUtc: nowUtcIso() });
+            const contentType = res.headers.get("content-type") ?? "";
+            const isJson = contentType.includes("application/json");
 
-                // UX: prevent accidental double-import
+            if (res.ok) {
+                const summary = isJson ? await res.json() : null;
+
+                setImportState({
+                    status: "success",
+                    atUtc: nowUtcIso(),
+                    httpStatus: res.status,
+                    summary,
+                });
+
                 clearLoadedFile();
                 return;
             }
 
             const text = await res.text().catch(() => "");
-            const msg = text?.trim()
-                ? `Import failed (HTTP ${res.status}): ${text.trim()}`
-                : `Import failed (HTTP ${res.status}).`;
+            const msg = text?.trim() ? `HTTP ${res.status}: ${text.trim()}` : `HTTP ${res.status}.`;
 
-            setImportState({ status: "error", message: msg });
+            setImportState({ status: "error", message: msg, httpStatus: res.status });
         } catch (e) {
             console.error(e);
             setImportState({
@@ -136,6 +154,20 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
         return null;
     }, [drop, hasToken, isEnabled, validationError]);
 
+    const summary: any = importState.status === "success" ? (importState as any).summary : null;
+
+    const warnings: Array<{ code: string; count: number }> =
+        Array.isArray(summary?.diagnostics?.warnings) ? summary.diagnostics.warnings : [];
+
+    const errors: Array<{ code: string; entityKind?: string; entityKey?: string; displayName?: string; details?: string }> =
+        Array.isArray(summary?.diagnostics?.errors) ? summary.diagnostics.errors : [];
+
+    const details: Record<string, any> | null = summary?.diagnostics?.details ?? null;
+
+    const hasWarnings = warnings.length > 0;
+    const hasErrors = errors.length > 0;
+    const hasDetails = !!details && Object.keys(details).length > 0;
+
     return (
         <div className={`admin-import-pipelineRow ${!isEnabled ? "is-disabled" : ""}`}>
             <button type="button" className="admin-import-pipelineRowHeader" onClick={onToggle} aria-expanded={isOpen}>
@@ -153,7 +185,6 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                 <div className="admin-import-pipelineRight">
                     <span className={badge.cls}>{badge.text}</span>
 
-                    {/* Action slot: only show real action buttons (no header hints) */}
                     <AnimatePresence mode="popLayout" initial={false}>
                         {actionMode === "ready" ? (
                             <motion.button
@@ -194,7 +225,6 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                         ) : null}
                     </AnimatePresence>
 
-                    {/* Motion-driven chevron rotation */}
                     <motion.span
                         className="admin-import-chevron"
                         aria-hidden
@@ -206,7 +236,6 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                 </div>
             </button>
 
-            {/* Motion-driven body expand/collapse */}
             <AnimatePresence initial={false}>
                 {isOpen ? (
                     <motion.div
@@ -247,22 +276,146 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                                 </div>
                             ) : null}
 
-                            {/* Summary persists even after file is cleared */}
                             {importState.status === "success" ? (
                                 <div className="admin-import-success">
-                                    Imported ✓ (HTTP 204) — ran at <code>{importState.atUtc}</code>
+                                    <div style={{ fontWeight: 900 }}>
+                                        Imported ✓ (HTTP {(importState as any).httpStatus}) — ran at{" "}
+                                        <code>{(importState as any).atUtc}</code>
+                                    </div>
+
+                                    {summary ? (
+                                        <div style={{ marginTop: 10 }}>
+                                            <div style={{ fontWeight: 800, marginBottom: 6 }}>Summary</div>
+
+                                            <div className="admin-import-kvGrid">
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Received</div>
+                                                    <div className="admin-import-kvValue">{summary.counts?.received}</div>
+                                                </div>
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Inserted</div>
+                                                    <div className="admin-import-kvValue">{summary.counts?.inserted}</div>
+                                                </div>
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Updated</div>
+                                                    <div className="admin-import-kvValue">{summary.counts?.updated}</div>
+                                                </div>
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Unchanged</div>
+                                                    <div className="admin-import-kvValue">{summary.counts?.unchanged}</div>
+                                                </div>
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Failed</div>
+                                                    <div className="admin-import-kvValue">{summary.counts?.failed}</div>
+                                                </div>
+                                                <div className="admin-import-kv">
+                                                    <div className="admin-import-kvLabel">Duration</div>
+                                                    <div className="admin-import-kvValue">{summary.durationMs} ms</div>
+                                                </div>
+                                            </div>
+
+                                            {hasWarnings ? (
+                                                <div style={{ marginTop: 12 }}>
+                                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Warnings</div>
+
+                                                    <div className="admin-import-kvGrid">
+                                                        {warnings.map((w) => (
+                                                            <div key={w.code} className="admin-import-kv">
+                                                                <div className="admin-import-kvLabel">
+                                                                    {warningLabels[w.code] ?? w.code}
+                                                                    <span className="admin-import-codePill" title={w.code}>
+                                                                        {w.code}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="admin-import-kvValue">{w.count}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : null}
+
+                                            {hasErrors ? (
+                                                <div style={{ marginTop: 12 }}>
+                                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Errors</div>
+
+                                                    <div className="admin-import-tableWrap">
+                                                        <table className="admin-import-table">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>Key</th>
+                                                                <th>Name</th>
+                                                                <th>Message</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            {errors.map((e, i) => (
+                                                                <tr key={`${e.code}-${e.entityKey ?? "?"}-${i}`}>
+                                                                    <td>
+                                                                        <span className="admin-import-mono">{e.entityKey ?? "—"}</span>
+                                                                        <span className="admin-import-codePill" title={e.code}>
+                                                                                {e.code}
+                                                                            </span>
+                                                                    </td>
+                                                                    <td>{e.displayName ?? "—"}</td>
+                                                                    <td className="admin-import-muted">{e.details ?? "—"}</td>
+                                                                </tr>
+                                                            ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            ) : null}
+
+                                            {hasDetails ? (
+                                                <div style={{ marginTop: 12 }}>
+                                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Details</div>
+
+                                                    <div className="admin-import-kvGrid">
+                                                        {Object.entries(details!).map(([k, v]) => (
+                                                            <div key={k} className="admin-import-kv">
+                                                                <div className="admin-import-kvLabel">{k}</div>
+                                                                <div className="admin-import-kvValue">{String(v)}</div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : null}
+
+                                            {/* Raw JSON: tucked away */}
+                                            <div className="admin-import-rawRow">
+                                                <button
+                                                    type="button"
+                                                    className="admin-import-btn admin-import-btn--ghost admin-import-rawBtn"
+                                                    onClick={() => setShowRaw((v) => !v)}
+                                                >
+                                                    {showRaw ? "Hide raw JSON" : "Show raw JSON"}
+                                                </button>
+                                            </div>
+
+                                            <AnimatePresence initial={false}>
+                                                {showRaw ? (
+                                                    <motion.pre
+                                                        className="admin-import-json"
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: "auto" }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.18, ease: "easeOut" }}
+                                                    >
+                                                        {JSON.stringify(summary, null, 2)}
+                                                    </motion.pre>
+                                                ) : null}
+                                            </AnimatePresence>
+                                        </div>
+                                    ) : null}
                                 </div>
                             ) : null}
 
                             {importState.status === "error" ? (
                                 <div className="admin-import-error">
                                     <div className="admin-import-errorTitle">Import failed</div>
-                                    <div className="admin-import-muted">{importState.message}</div>
+                                    <div className="admin-import-muted">{(importState as any).message}</div>
                                 </div>
                             ) : null}
-
-                            {/* Optional: keep this for later summaries when backend returns details */}
-                            {isImported ? null : null}
                         </div>
                     </motion.div>
                 ) : null}
