@@ -14,6 +14,8 @@ import java.util.Set;
 
 public class TechImportAdminFacadeImpl implements ImportAdminFacade {
 
+    private static final String EXPECTED_EXPORT_KIND = "tech";
+
     private final TechImportService techImportService;
 
     public TechImportAdminFacadeImpl(TechImportService techImportService) {
@@ -25,6 +27,8 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
         if (fileDto == null) {
             return;
         }
+
+        assertExportKind(fileDto.exportKind());
 
         List<TechImportTechDto> techDtos =
                 fileDto.techs() == null ? List.of() : fileDto.techs();
@@ -45,6 +49,15 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
         assertNoDuplicateTechKeys(snapshots);
 
         techImportService.importSnapshot(snapshots);
+    }
+
+    private static void assertExportKind(String exportKind) {
+        if (!EXPECTED_EXPORT_KIND.equals(exportKind)) {
+            throw new IllegalArgumentException(
+                    "Wrong import file type: expected exportKind='" + EXPECTED_EXPORT_KIND +
+                            "' but got '" + exportKind + "'"
+            );
+        }
     }
 
     private static void assertNoDuplicateTechKeys(List<TechImportSnapshot> snapshots) {

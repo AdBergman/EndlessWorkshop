@@ -9,5 +9,6 @@ public record TechImportBatchDto(
         String gameVersion,
         String exporterVersion,
         String exportedAtUtc,
+        String exportKind,
         List<TechImportTechDto> techs
 ) {}
