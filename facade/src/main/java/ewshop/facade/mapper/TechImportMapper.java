@@ -8,10 +8,14 @@ import ewshop.facade.dto.importing.tech.TechImportTechDto;
 
 import java.util.List;
 
-public class TechImportMapper {
+public final class TechImportMapper {
+
+    private TechImportMapper() {}
 
     public static TechImportSnapshot toDomain(TechImportTechDto dto) {
-        if (dto == null) return null;
+        if (dto == null) {
+            throw new IllegalArgumentException("Import tech entry is null");
+        }
 
         if (dto.techKey() == null || dto.techKey().isBlank()) {
             throw new IllegalArgumentException("Import techKey is required");
@@ -70,7 +74,6 @@ public class TechImportMapper {
     private static TechType mapQuadrantToTechType(String quadrantRaw, String techKey) {
         String q = quadrantRaw.trim().toUpperCase();
 
-        // Game uses "Development" where domain expects ECONOMY
         if ("DEVELOPMENT".equals(q)) {
             return TechType.ECONOMY;
         }

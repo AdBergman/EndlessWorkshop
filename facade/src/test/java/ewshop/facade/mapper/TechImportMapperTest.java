@@ -14,12 +14,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class TechImportMapperTest {
 
     @Test
-    void toDomain_shouldReturnNull_whenInputIsNull() {
-        // when
-        TechImportSnapshot result = TechImportMapper.toDomain(null);
-
-        // then
-        assertThat(result).isNull();
+    void toDomain_shouldThrow_whenInputIsNull() {
+        assertThatThrownBy(() -> TechImportMapper.toDomain(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Import tech entry is null");
     }
 
     @Test

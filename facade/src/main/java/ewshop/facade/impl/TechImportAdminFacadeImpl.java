@@ -1,20 +1,20 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.command.TechImportSnapshot;
+import ewshop.domain.model.results.TechImportResult;
 import ewshop.domain.service.TechImportService;
+import ewshop.facade.dto.importing.*;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.interfaces.ImportAdminFacade;
 import ewshop.facade.mapper.TechImportMapper;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 public class TechImportAdminFacadeImpl implements ImportAdminFacade {
 
     private static final String EXPECTED_EXPORT_KIND = "tech";
+    private static final int MAX_ERRORS = 50;
 
     private final TechImportService techImportService;
 
@@ -23,32 +23,99 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
     }
 
     @Override
-    public void importTechs(TechImportBatchDto fileDto) {
+    public ImportSummaryDto importTechs(TechImportBatchDto fileDto) {
+        long startMs = System.currentTimeMillis();
+
         if (fileDto == null) {
-            return;
+            throw new IllegalArgumentException("Import file is required");
         }
 
         assertExportKind(fileDto.exportKind());
 
-        List<TechImportTechDto> techDtos =
-                fileDto.techs() == null ? List.of() : fileDto.techs();
-
-        if (techDtos.isEmpty()) {
-            return;
+        List<TechImportTechDto> techDtos = fileDto.techs();
+        if (techDtos == null || techDtos.isEmpty()) {
+            throw new IllegalArgumentException("Import file has no techs");
         }
 
-        List<TechImportSnapshot> snapshots = techDtos.stream()
-                .map(TechImportMapper::toDomain)
-                .filter(Objects::nonNull)
-                .toList();
+        int received = techDtos.size();
+
+        List<ImportIssueDto> errors = new ArrayList<>();
+        List<TechImportSnapshot> snapshots = new ArrayList<>(received);
+
+        for (TechImportTechDto dto : techDtos) {
+            try {
+                TechImportSnapshot s = TechImportMapper.toDomain(dto);
+                snapshots.add(s);
+            } catch (RuntimeException ex) {
+                if (errors.size() < MAX_ERRORS) {
+                    errors.add(toIssue(dto, ex));
+                }
+            }
+        }
 
         if (snapshots.isEmpty()) {
-            return;
+            long durationMs = System.currentTimeMillis() - startMs;
+
+            ImportCountsDto counts = new ImportCountsDto(
+                    received,
+                    0,
+                    0,
+                    0,
+                    received
+            );
+
+            ImportDiagnosticsDto diagnostics = new ImportDiagnosticsDto(
+                    buildWarnings(fileDto, List.of()),
+                    errors,
+                    buildDetails(List.of(), received)
+            );
+
+            return ImportSummaryDto.forTech(counts, diagnostics, durationMs);
         }
 
         assertNoDuplicateTechKeys(snapshots);
 
-        techImportService.importSnapshot(snapshots);
+        List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
+
+        TechImportResult result = techImportService.importSnapshot(snapshots);
+
+        int inserted = result.getInserted();
+        int updated = result.getUpdated();
+        int unchanged = result.getUnchanged();
+
+        int failed = received - (inserted + updated + unchanged);
+
+        long durationMs = System.currentTimeMillis() - startMs;
+
+        ImportCountsDto counts = new ImportCountsDto(
+                received,
+                inserted,
+                updated,
+                unchanged,
+                failed
+        );
+
+        ImportDiagnosticsDto diagnostics = new ImportDiagnosticsDto(
+                warnings,
+                errors,
+                buildDetails(snapshots, received)
+        );
+
+        return ImportSummaryDto.forTech(counts, diagnostics, durationMs);
+    }
+
+    private static ImportIssueDto toIssue(TechImportTechDto dto, RuntimeException ex) {
+        String key = dto == null ? null : dto.techKey();
+        String name = dto == null ? null : dto.displayName();
+        String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+
+        return new ImportIssueDto(
+                "TECH_IMPORT_INVALID_ROW",
+                "tech",
+                key,
+                name,
+                message
+        );
     }
 
     private static void assertExportKind(String exportKind) {
@@ -68,5 +135,39 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
                 throw new IllegalArgumentException("Duplicate techKey in import file: " + key);
             }
         }
+    }
+
+    private static ImportDetailsDto buildDetails(List<TechImportSnapshot> snapshots, int received) {
+        int distinct = (int) snapshots.stream()
+                .map(TechImportSnapshot::techKey)
+                .distinct()
+                .count();
+
+        int duplicates = received - distinct;
+
+        return new ImportDetailsDto(distinct, duplicates);
+    }
+
+    private static List<ImportCountDto> buildWarnings(TechImportBatchDto fileDto, List<TechImportSnapshot> snapshots) {
+        long hidden = snapshots.stream().filter(TechImportSnapshot::hidden).count();
+        long emptyLore = snapshots.stream().filter(s -> s.lore() == null || s.lore().isBlank()).count();
+        long tbdNames = snapshots.stream().filter(s -> {
+            String n = s.displayName();
+            return n != null && n.toUpperCase().contains("[TBD]");
+        }).count();
+
+        List<ImportCountDto> warnings = new ArrayList<>();
+        if (hidden > 0) warnings.add(new ImportCountDto("HIDDEN_TECH_IN_FILE", (int) hidden));
+        if (emptyLore > 0) warnings.add(new ImportCountDto("EMPTY_LORE_IN_FILE", (int) emptyLore));
+        if (tbdNames > 0) warnings.add(new ImportCountDto("TBD_NAME_IN_FILE", (int) tbdNames));
+
+        if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
+            warnings.add(new ImportCountDto("MISSING_EXPORTER_VERSION", 1));
+        }
+        if (fileDto.exportedAtUtc() == null || fileDto.exportedAtUtc().isBlank()) {
+            warnings.add(new ImportCountDto("MISSING_EXPORTED_AT_UTC", 1));
+        }
+
+        return warnings;
     }
 }

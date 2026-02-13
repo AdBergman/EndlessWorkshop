@@ -1,6 +1,7 @@
 package ewshop.domain.service;
 
 import ewshop.domain.command.TechImportSnapshot;
+import ewshop.domain.model.results.TechImportResult;
 import ewshop.domain.repository.TechRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,10 @@ public class TechImportService {
 
     @Transactional
     @CacheEvict(value = "techs", allEntries = true)
-    public void importSnapshot(List<TechImportSnapshot> techs) {
-        if (techs == null || techs.isEmpty()) return;
-
-        techRepository.importTechSnapshot(techs);
+    public TechImportResult importSnapshot(List<TechImportSnapshot> techs) {
+        if (techs == null || techs.isEmpty()) {
+            return new TechImportResult();
+        }
+        return techRepository.importTechSnapshot(techs);
     }
 }

@@ -3,6 +3,7 @@ package ewshop.infrastructure.persistence.adapters;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
+import ewshop.domain.model.results.TechImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.mappers.TechMapper;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -70,54 +73,81 @@ public class TechRepositoryAdapter implements TechRepository {
         }
     }
 
+    private enum UpsertOutcome { INSERTED, UPDATED, UNCHANGED }
+
     @Override
     @Transactional
-    public void importTechSnapshot(List<TechImportSnapshot> snapshots) {
-        if (snapshots == null || snapshots.isEmpty()) {
-            return;
-        }
+    public TechImportResult importTechSnapshot(List<TechImportSnapshot> snapshots) {
+        TechImportResult result = new TechImportResult();
 
         var techKeys = snapshots.stream()
                 .map(TechImportSnapshot::techKey)
                 .toList();
 
-        var existingByKey = techJpaRepository.findAllByTechKeyIn(techKeys).stream()
+        Map<String, TechEntity> existingByKey = techJpaRepository.findAllByTechKeyIn(techKeys).stream()
                 .collect(Collectors.toMap(
                         TechEntity::getTechKey,
                         Function.identity()
                 ));
 
+        List<TechEntity> toSave = new java.util.ArrayList<>();
+
         for (TechImportSnapshot snapshot : snapshots) {
             TechEntity entity = existingByKey.get(snapshot.techKey());
+            boolean isInsert = (entity == null);
 
-            if (entity == null) {
+            if (isInsert) {
                 entity = new TechEntity();
                 entity.setTechKey(snapshot.techKey());
             }
 
-            // --- curated / fill-missing-only fields ---
+            UpsertOutcome outcome = applySnapshot(entity, snapshot, isInsert);
 
-            // name: only fill if missing AND snapshot has something meaningful
-            if ((entity.getName() == null || entity.getName().isBlank())
-                    && snapshot.displayName() != null && !snapshot.displayName().isBlank()) {
-                entity.setName(snapshot.displayName());
+            switch (outcome) {
+                case INSERTED -> {
+                    toSave.add(entity);
+                    result.incrementInserted();
+                }
+                case UPDATED -> {
+                    toSave.add(entity);
+                    result.incrementUpdated();
+                }
+                case UNCHANGED -> result.incrementUnchanged();
             }
-
-            // coords: only fill if missing (new techs get 0,0 via snapshot invariant)
-            if (entity.getTechCoords() == null) {
-                entity.setTechCoords(snapshot.techCoords());
-            }
-
-            // --- baseline fields (safe to refresh) ---
-            entity.setLore(snapshot.lore());
-            entity.setHidden(snapshot.hidden());
-            entity.setEra(snapshot.era());
-            entity.setType(snapshot.type());
-
-            techJpaRepository.save(entity);
-
-            // keep map consistent in case of repeated keys in input list
-            existingByKey.put(entity.getTechKey(), entity);
         }
+
+        if (!toSave.isEmpty()) {
+            techJpaRepository.saveAll(toSave);
+        }
+
+        return result;
+    }
+
+    private static UpsertOutcome applySnapshot(TechEntity entity, TechImportSnapshot update, boolean isInsert) {
+        boolean changed = isInsert;
+
+        if ((entity.getName() == null || entity.getName().isBlank())
+                && update.displayName() != null && !update.displayName().isBlank()) {
+            entity.setName(update.displayName());
+            changed = true;
+        }
+
+        if (entity.getTechCoords() == null) { entity.setTechCoords(update.techCoords()); changed = true; }
+        if (!Objects.equals(entity.getLore(), update.lore())) { entity.setLore(update.lore()); changed = true; }
+
+        Boolean hiddenDb = entity.isHidden();              // nullable
+        boolean hiddenDbVal = Boolean.TRUE.equals(hiddenDb);
+        boolean hiddenNewVal = update.hidden();
+
+        if (hiddenDb == null || hiddenDbVal != hiddenNewVal) {
+            entity.setHidden(hiddenNewVal);
+            changed = true;
+        }
+
+        if (entity.getEra() != update.era()) { entity.setEra(update.era()); changed = true; }
+        if (entity.getType() != update.type()) { entity.setType(update.type()); changed = true; }
+
+        if (isInsert) return UpsertOutcome.INSERTED;
+        return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
 }

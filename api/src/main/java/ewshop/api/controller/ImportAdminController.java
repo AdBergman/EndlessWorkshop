@@ -1,5 +1,6 @@
 package ewshop.api.controller;
 
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.interfaces.ImportAdminFacade;
 import org.springframework.http.HttpStatus;
@@ -21,12 +22,11 @@ public class ImportAdminController {
         // Intentionally empty - Admin auth is enforced before controller execution.
     }
 
-    @PostMapping(value = "/techs", consumes = "application/json")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void importTechs(@RequestBody(required = false) TechImportBatchDto dto) {
-        if (dto == null || dto.techs() == null || dto.techs().isEmpty()) {
-            return;
+    @PostMapping(value = "/techs", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importTechs(@RequestBody TechImportBatchDto dto) {
+        if (dto.techs() == null || dto.techs().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing techs[]");
         }
-        importAdminFacade.importTechs(dto);
+        return importAdminFacade.importTechs(dto);
     }
 }

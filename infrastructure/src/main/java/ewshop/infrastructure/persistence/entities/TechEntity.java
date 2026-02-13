@@ -157,7 +157,7 @@ public class TechEntity {
         this.lore = lore;
     }
 
-    public Boolean getHidden() {
+    public Boolean isHidden() {
         return hidden;
     }
 
@@ -172,4 +172,5 @@ public class TechEntity {
     public void setUnlocks(List<TechUnlockEntity> unlocks) {
         this.unlocks = unlocks;
     }
+
 }
