@@ -1,9 +1,12 @@
 package ewshop.domain.command;
 
 import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.TechType;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public record TechImportSnapshot(
         String techKey,
@@ -16,7 +19,10 @@ public record TechImportSnapshot(
         List<String> prereqTechKeys,
         List<String> exclusivePrereqTechKeys,
         List<TechTraitPrereq> traitPrereqs,
-        List<TechUnlockTuple> unlocks
+        List<TechUnlockTuple> unlocks,
+
+        // NEW: derived at import-time (service postprocessor)
+        Set<Faction> availableFactions
 ) {
     private static final TechCoords DEFAULT_COORDS = new TechCoords(0.0, 0.0);
 
@@ -46,6 +52,28 @@ public record TechImportSnapshot(
         exclusivePrereqTechKeys = exclusivePrereqTechKeys == null ? List.of() : List.copyOf(exclusivePrereqTechKeys);
         traitPrereqs = traitPrereqs == null ? List.of() : List.copyOf(traitPrereqs);
         unlocks = unlocks == null ? List.of() : List.copyOf(unlocks);
+
+        // Store as an immutable EnumSet copy (fast + safe)
+        availableFactions = availableFactions == null || availableFactions.isEmpty()
+                ? Set.of()
+                : Set.copyOf(availableFactions);
+    }
+
+    public TechImportSnapshot withAvailableFactions(Set<Faction> next) {
+        return new TechImportSnapshot(
+                techKey,
+                displayName,
+                lore,
+                hidden,
+                era,
+                type,
+                techCoords,
+                prereqTechKeys,
+                exclusivePrereqTechKeys,
+                traitPrereqs,
+                unlocks,
+                next
+        );
     }
 
     public static Builder builder() {
@@ -65,6 +93,8 @@ public record TechImportSnapshot(
         private List<TechTraitPrereq> traitPrereqs = List.of();
         private List<TechUnlockTuple> unlocks = List.of();
 
+        private Set<Faction> availableFactions = Set.of();
+
         public Builder techKey(String techKey) { this.techKey = techKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
         public Builder lore(String lore) { this.lore = lore; return this; }
@@ -76,6 +106,8 @@ public record TechImportSnapshot(
         public Builder exclusivePrereqTechKeys(List<String> exclusivePrereqTechKeys) { this.exclusivePrereqTechKeys = exclusivePrereqTechKeys; return this; }
         public Builder traitPrereqs(List<TechTraitPrereq> traitPrereqs) { this.traitPrereqs = traitPrereqs; return this; }
         public Builder unlocks(List<TechUnlockTuple> unlocks) { this.unlocks = unlocks; return this; }
+
+        public Builder availableFactions(Set<Faction> availableFactions) { this.availableFactions = availableFactions; return this; }
 
         public TechImportSnapshot build() {
             return new TechImportSnapshot(
@@ -89,7 +121,8 @@ public record TechImportSnapshot(
                     prereqTechKeys,
                     exclusivePrereqTechKeys,
                     traitPrereqs,
-                    unlocks
+                    unlocks,
+                    availableFactions
             );
         }
     }

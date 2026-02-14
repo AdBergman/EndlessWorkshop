@@ -42,10 +42,10 @@ public class TechEntity {
     @JoinColumn(name = "excludes_id")
     private TechEntity excludes;
 
-    // Legacy – replaced by tech_trait_prereq
-    @ElementCollection(targetClass = Faction.class)
+    @ElementCollection(targetClass = Faction.class, fetch = FetchType.LAZY)
+    @CollectionTable(name = "tech_faction", joinColumns = @JoinColumn(name = "tech_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "faction")
+    @Column(name = "faction", nullable = false)
     private Set<Faction> factions;
 
     @Column(name = "tech_key")

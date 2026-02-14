@@ -3,6 +3,7 @@ package ewshop.infrastructure.persistence.adapters;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
+import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.results.TechImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
@@ -13,9 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -80,6 +85,10 @@ public class TechRepositoryAdapter implements TechRepository {
     public TechImportResult importTechSnapshot(List<TechImportSnapshot> snapshots) {
         TechImportResult result = new TechImportResult();
 
+        if (snapshots == null || snapshots.isEmpty()) {
+            return result;
+        }
+
         var techKeys = snapshots.stream()
                 .map(TechImportSnapshot::techKey)
                 .toList();
@@ -90,7 +99,7 @@ public class TechRepositoryAdapter implements TechRepository {
                         Function.identity()
                 ));
 
-        List<TechEntity> toSave = new java.util.ArrayList<>();
+        List<TechEntity> toSave = new ArrayList<>();
 
         for (TechImportSnapshot snapshot : snapshots) {
             TechEntity entity = existingByKey.get(snapshot.techKey());
@@ -126,16 +135,25 @@ public class TechRepositoryAdapter implements TechRepository {
     private static UpsertOutcome applySnapshot(TechEntity entity, TechImportSnapshot update, boolean isInsert) {
         boolean changed = isInsert;
 
+        // name: import fills only if DB is empty (keeps manual overrides)
         if ((entity.getName() == null || entity.getName().isBlank())
                 && update.displayName() != null && !update.displayName().isBlank()) {
             entity.setName(update.displayName());
             changed = true;
         }
 
-        if (entity.getTechCoords() == null) { entity.setTechCoords(update.techCoords()); changed = true; }
-        if (!Objects.equals(entity.getLore(), update.lore())) { entity.setLore(update.lore()); changed = true; }
+        if (entity.getTechCoords() == null) {
+            entity.setTechCoords(update.techCoords());
+            changed = true;
+        }
 
-        Boolean hiddenDb = entity.isHidden();              // nullable
+        if (!Objects.equals(entity.getLore(), update.lore())) {
+            entity.setLore(update.lore());
+            changed = true;
+        }
+
+        // hidden is nullable in DB, boolean in snapshot
+        Boolean hiddenDb = entity.isHidden();
         boolean hiddenDbVal = Boolean.TRUE.equals(hiddenDb);
         boolean hiddenNewVal = update.hidden();
 
@@ -144,10 +162,34 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        if (entity.getEra() != update.era()) { entity.setEra(update.era()); changed = true; }
-        if (entity.getType() != update.type()) { entity.setType(update.type()); changed = true; }
+        if (entity.getEra() != update.era()) {
+            entity.setEra(update.era());
+            changed = true;
+        }
+
+        if (entity.getType() != update.type()) {
+            entity.setType(update.type());
+            changed = true;
+        }
+
+        // NEW: factions (import-wins derived availability)
+        EnumSet<Faction> nextSet = toEnumSet(update.availableFactions());
+        EnumSet<Faction> currentSet = toEnumSet(entity.getFactions());
+
+        if (!currentSet.equals(nextSet)) {
+            entity.setFactions(nextSet.isEmpty() ? Collections.emptySet() : nextSet);
+            changed = true;
+        }
 
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
+    }
+
+    private static EnumSet<Faction> toEnumSet(Set<Faction> in) {
+        if (in == null || in.isEmpty()) {
+            return EnumSet.noneOf(Faction.class);
+        }
+        // defensive: ensure we own the set and it's EnumSet-backed
+        return EnumSet.copyOf(in);
     }
 }
