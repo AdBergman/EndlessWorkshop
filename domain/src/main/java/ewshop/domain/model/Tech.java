@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class Tech {
     private final String name;
+    private final String techKey;
     private final TechType type;
     private final int era;
     private final List<String> effects;
@@ -21,6 +22,7 @@ public class Tech {
 
     private Tech(Builder builder) {
         this.name = builder.name;
+        this.techKey = builder.techKey;
         this.type = builder.type;
         this.era = builder.era;
         this.effects = List.copyOf(builder.effects);
@@ -31,8 +33,8 @@ public class Tech {
         this.unlocks = List.copyOf(builder.unlocks);
     }
 
-    // --- Getters ---
     public String getName() { return name; }
+    public String getTechKey() { return techKey; }
     public TechType getType() { return type; }
     public int getEra() { return era; }
     public List<String> getEffects() { return effects; }
@@ -42,9 +44,6 @@ public class Tech {
     public Set<Faction> getFactions() { return factions; }
     public List<TechUnlock> getUnlocks() { return unlocks; }
 
-    // --- Builder ---
-    public static Builder builder() { return new Builder(); }
-
     public void setPrereq(Tech prereqTech) {
         this.prereq = prereqTech;
     }
@@ -53,8 +52,11 @@ public class Tech {
         this.excludes = excludesTech;
     }
 
+    public static Builder builder() { return new Builder(); }
+
     public static class Builder {
         private String name;
+        private String techKey;
         private TechType type;
         private int era;
         private final List<String> effects = new ArrayList<>();
@@ -65,6 +67,7 @@ public class Tech {
         private final List<TechUnlock> unlocks = new ArrayList<>();
 
         public Builder name(String name) { this.name = name; return this; }
+        public Builder techKey(String techKey) { this.techKey = techKey; return this; }
         public Builder type(TechType type) { this.type = type; return this; }
         public Builder era(int era) { this.era = era; return this; }
         public Builder effects(List<String> effects) { this.effects.clear(); if (effects != null) { this.effects.addAll(effects); } return this; }

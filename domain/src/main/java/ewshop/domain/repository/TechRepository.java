@@ -17,7 +17,7 @@ public interface TechRepository {
 
     void deleteAll();
 
-    void updateEraAndCoordsByNameAndType(TechPlacementUpdate update);
+    void updateEraAndCoordsByTechKey(TechPlacementUpdate update);
 
     TechImportResult importTechSnapshot(List<TechImportSnapshot> techs);
 }

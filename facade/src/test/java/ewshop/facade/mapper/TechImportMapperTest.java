@@ -24,7 +24,7 @@ class TechImportMapperTest {
     void toDomain_shouldThrow_whenTechKeyIsNullOrBlank() {
         // given
         TechImportTechDto nullKey = new TechImportTechDto(
-                null,
+                "",
                 "Stonework",
                 "Lore",
                 false,
@@ -37,7 +37,7 @@ class TechImportMapperTest {
         );
 
         TechImportTechDto blankKey = new TechImportTechDto(
-                "   ",
+                null,
                 "Stonework",
                 "Lore",
                 false,

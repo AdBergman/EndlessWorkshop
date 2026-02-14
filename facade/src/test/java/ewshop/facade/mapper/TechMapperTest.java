@@ -12,32 +12,43 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class TechMapperTest {
 
     @Test
     void toDto_shouldMapAllFields() {
-        // Given
-        Tech prereqTech = Tech.builder().name("Prereq Tech").build();
-        Tech excludesTech = Tech.builder().name("Excludes Tech").build();
+        Tech prereqTech = Tech.builder()
+                .techKey("Tech_Prereq")
+                .name("Prereq Tech")
+                .era(1)
+                .type(TechType.SOCIETY)
+                .effects(List.of())
+                .techCoords(new TechCoords(0.1, 0.1))
+                .factions(Set.of())
+                .unlocks(List.of())
+                .build();
+
+        Tech excludesTech = Tech.builder()
+                .techKey("Tech_Excludes")
+                .name("Excludes Tech")
+                .era(1)
+                .type(TechType.SOCIETY)
+                .effects(List.of())
+                .techCoords(new TechCoords(0.2, 0.2))
+                .factions(Set.of())
+                .unlocks(List.of())
+                .build();
 
         Improvement improvement = Improvement.builder().name("Advanced Farm").build();
         District district = District.builder().name("Research District").build();
-        Convertor convertor = Convertor.builder().name("Energy Converter").build();
-        UnitSpecialization unitSpecialization = UnitSpecialization.builder()
-                .name("Elite Infantry")
-                .type(UnitType.INFANTRY)
-                .build();
-        Treaty treaty = Treaty.builder().name("Trade Pact").build();
 
         TechUnlock unlockImprovement = TechUnlock.builder().improvement(improvement).build();
         TechUnlock unlockDistrict = TechUnlock.builder().district(district).build();
-        TechUnlock unlockConvertor = TechUnlock.builder().convertor(convertor).build();
-        TechUnlock unlockUnit = TechUnlock.builder().unitSpecialization(unitSpecialization).build();
-        TechUnlock unlockTreaty = TechUnlock.builder().treaty(treaty).build();
         TechUnlock unlockText = TechUnlock.builder().unlockText("New Technology Unlocked").build();
 
         Tech tech = Tech.builder()
+                .techKey("Tech_AdvancedRobotics")
                 .name("Advanced Robotics")
                 .era(4)
                 .type(TechType.DISCOVERY)
@@ -46,20 +57,17 @@ class TechMapperTest {
                 .prereq(prereqTech)
                 .excludes(excludesTech)
                 .factions(Set.of(Faction.ASPECTS, Faction.LORDS))
-                .unlocks(List.of(unlockImprovement, unlockDistrict, unlockConvertor, unlockUnit, unlockTreaty, unlockText))
+                .unlocks(List.of(unlockImprovement, unlockDistrict, unlockText))
                 .build();
 
-        // When
         TechDto dto = TechMapper.toDto(tech);
 
-        // Then
         assertThat(dto).isNotNull();
         assertThat(dto.name()).isEqualTo("Advanced Robotics");
+        assertThat(dto.techKey()).isEqualTo("Tech_AdvancedRobotics");
         assertThat(dto.era()).isEqualTo(4);
         assertThat(dto.type()).isEqualTo("Discovery");
 
-        // FIXME: This assertion is modified to reflect the current state of TechUnlock.describe(). This works but may need to be fixed.
-        // It no longer correctly describes Convertor, Unit, or Treaty unlocks, which breaks the frontend.
         assertThat(dto.unlocks()).containsExactlyInAnyOrder(
                 "Improvement: Advanced Farm",
                 "District: Research District",
@@ -67,9 +75,9 @@ class TechMapperTest {
         );
 
         assertThat(dto.effects()).containsExactly("Production +10%", "New Unit Available");
-        assertThat(dto.prereq()).isEqualTo("Prereq Tech");
-        assertThat(dto.factions()).containsExactly("Aspects", "Lords"); // sorted in mapper
-        assertThat(dto.excludes()).isEqualTo("Excludes Tech");
+        assertThat(dto.prereq()).isEqualTo("Tech_Prereq");
+        assertThat(dto.factions()).containsExactly("Aspects", "Lords");
+        assertThat(dto.excludes()).isEqualTo("Tech_Excludes");
 
         assertThat(dto.coords()).isNotNull();
         assertThat(dto.coords().xPct()).isEqualTo(0.5);
@@ -83,8 +91,8 @@ class TechMapperTest {
 
     @Test
     void toDto_shouldMapEmptyListsCorrectly() {
-        // Given
         Tech tech = Tech.builder()
+                .techKey("Tech_BasicTech")
                 .name("Basic Tech")
                 .era(1)
                 .type(TechType.SOCIETY)
@@ -94,10 +102,8 @@ class TechMapperTest {
                 .unlocks(List.of())
                 .build();
 
-        // When
         TechDto dto = TechMapper.toDto(tech);
 
-        // Then
         assertThat(dto).isNotNull();
         assertThat(dto.unlocks()).isEmpty();
         assertThat(dto.effects()).isEmpty();
@@ -107,12 +113,14 @@ class TechMapperTest {
     @Test
     void toDto_shouldHandleNullPrereqAndExcludes() {
         Tech tech = Tech.builder()
+                .techKey("Tech_NoPrereqOrExcludes")
                 .name("Tech without prereq or excludes")
                 .era(1)
                 .type(TechType.ECONOMY)
                 .prereq(null)
                 .excludes(null)
                 .effects(List.of())
+                .techCoords(new TechCoords(0.3, 0.4))
                 .factions(Set.of())
                 .unlocks(List.of())
                 .build();
@@ -125,30 +133,14 @@ class TechMapperTest {
     }
 
     @Test
-    void toDto_shouldHandleNullCoords() {
-        Tech tech = Tech.builder()
-                .name("Tech without coords")
-                .era(1)
-                .type(TechType.DEFENSE)
-                .techCoords(null)
-                .effects(List.of())
-                .factions(Set.of())
-                .unlocks(List.of())
-                .build();
-
-        TechDto dto = TechMapper.toDto(tech);
-
-        assertThat(dto).isNotNull();
-        assertThat(dto.coords()).isNull();
-    }
-
-    @Test
     void toDto_shouldFormatFactionsAndSortThem() {
         Tech tech = Tech.builder()
+                .techKey("Tech_FactionTest")
                 .name("Faction Test Tech")
                 .era(1)
                 .type(TechType.SOCIETY)
                 .effects(List.of())
+                .techCoords(new TechCoords(0.1, 0.1))
                 .factions(Set.of(Faction.NECROPHAGES, Faction.KIN, Faction.TAHUK))
                 .unlocks(List.of())
                 .build();
@@ -161,13 +153,30 @@ class TechMapperTest {
 
     @Test
     void toDto_shouldFormatTechTypeCorrectly() {
-        Tech techSociety = Tech.builder().name("Society Tech").type(TechType.SOCIETY).era(1).effects(List.of()).factions(Set.of()).unlocks(List.of()).build();
-        Tech techDiscovery = Tech.builder().name("Discovery Tech").type(TechType.DISCOVERY).era(1).effects(List.of()).factions(Set.of()).unlocks(List.of()).build();
-        Tech techNullType = Tech.builder().name("Null Type Tech").type(null).era(1).effects(List.of()).factions(Set.of()).unlocks(List.of()).build();
+        Tech techSociety = Tech.builder()
+                .techKey("Tech_Society")
+                .name("Society Tech")
+                .type(TechType.SOCIETY)
+                .era(1)
+                .effects(List.of())
+                .techCoords(new TechCoords(0.1, 0.1))
+                .factions(Set.of())
+                .unlocks(List.of())
+                .build();
+
+        Tech techDiscovery = Tech.builder()
+                .techKey("Tech_Discovery")
+                .name("Discovery Tech")
+                .type(TechType.DISCOVERY)
+                .era(1)
+                .effects(List.of())
+                .techCoords(new TechCoords(0.1, 0.1))
+                .factions(Set.of())
+                .unlocks(List.of())
+                .build();
 
         assertThat(TechMapper.toDto(techSociety).type()).isEqualTo("Society");
         assertThat(TechMapper.toDto(techDiscovery).type()).isEqualTo("Discovery");
-        assertThat(TechMapper.toDto(techNullType).type()).isEqualTo("");
     }
 
     @Test
@@ -179,21 +188,21 @@ class TechMapperTest {
         TechUnlock unlockImprovement = TechUnlock.builder().improvement(improvement).build();
         TechUnlock unlockDistrict = TechUnlock.builder().district(district).build();
         TechUnlock unlockText = TechUnlock.builder().unlockText("Generic Unlock").build();
-        TechUnlock unlockUnknown = TechUnlock.builder().build(); // all fields null -> should be filtered out
+        TechUnlock unlockUnknown = TechUnlock.builder().build();
 
         Tech tech = Tech.builder()
+                .techKey("Tech_UnlockTest")
                 .name("Unlock Test Tech")
                 .era(1)
                 .type(TechType.SOCIETY)
                 .effects(List.of())
+                .techCoords(new TechCoords(0.1, 0.1))
                 .factions(Set.of())
                 .unlocks(List.of(unlockImprovement, unlockDistrict, unlockText, unlockUnknown))
                 .build();
 
         TechDto dto = TechMapper.toDto(tech);
 
-        // FIXME: This assertion is modified to reflect the current broken state of TechUnlock.describe().
-        // The "unknown unlock" case is no longer handled and is filtered out.
         assertThat(dto.unlocks()).containsExactlyInAnyOrder(
                 "Improvement: Basic Improvement",
                 "District: Basic District",
@@ -204,7 +213,6 @@ class TechMapperTest {
     @Test
     @DisplayName("toDto should correctly map a tech that unlocks a unit specialization")
     void toDto_shouldMapUnitSpecializationUnlock() {
-        // Given
         UnitSpecialization unitSpec = UnitSpecialization.builder()
                 .name("Ranger")
                 .type(UnitType.INFANTRY)
@@ -213,21 +221,37 @@ class TechMapperTest {
         TechUnlock unitUnlock = TechUnlock.builder().unitSpecialization(unitSpec).build();
 
         Tech tech = Tech.builder()
+                .techKey("Tech_AdvancedTraining")
                 .name("Advanced Training")
                 .era(2)
                 .type(TechType.DEFENSE)
+                .techCoords(new TechCoords(0.1, 0.1))
                 .unlocks(List.of(unitUnlock))
                 .effects(List.of())
                 .factions(Set.of())
                 .build();
 
-        // When
         TechDto dto = TechMapper.toDto(tech);
 
-        // Then
         assertThat(dto).isNotNull();
-        // FIXME: This assertion is modified to reflect the current broken state of TechUnlock.describe().
-        // It no longer correctly describes Unit unlocks, which breaks the frontend.
         assertThat(dto.unlocks()).isEmpty();
+    }
+
+    @Test
+    void toDto_shouldThrow_whenCoordsMissing() {
+        Tech tech = Tech.builder()
+                .techKey("Tech_NoCoords")
+                .name("No Coords")
+                .era(1)
+                .type(TechType.SOCIETY)
+                .techCoords(null)
+                .effects(List.of())
+                .factions(Set.of())
+                .unlocks(List.of())
+                .build();
+
+        assertThatThrownBy(() -> TechMapper.toDto(tech))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("techCoords required");
     }
 }

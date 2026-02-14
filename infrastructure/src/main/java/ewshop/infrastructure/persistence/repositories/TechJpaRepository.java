@@ -31,16 +31,15 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
     })
     List<TechEntity> findAll();
 
+
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
-        update TechEntity t
-           set t.era = :era,
-               t.techCoords = :coords
-         where t.name = :name
-           and t.type = :type
-    """)
-    int updateEraAndCoordsByNameAndType(@Param("name") String name,
-                                        @Param("type") TechType type,
-                                        @Param("era") int era,
-                                        @Param("coords") TechCoords coords);
+    update TechEntity t
+       set t.era = :era,
+           t.techCoords = :coords
+     where t.techKey = :techKey
+""")
+    int updateEraAndCoordsByTechKey(@Param("techKey") String techKey,
+                                    @Param("era") int era,
+                                    @Param("coords") TechCoords coords);
 }

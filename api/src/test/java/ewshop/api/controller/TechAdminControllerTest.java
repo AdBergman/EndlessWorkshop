@@ -35,6 +35,7 @@ class TechAdminControllerTest {
     @Test
     void applyPlacementUpdates_returnsNoContent() throws Exception {
         TechAdminDto dto = new TechAdminDto(
+                "Tech_Stonework",
                 "Stonework",
                 2,
                 "DEFENSE",

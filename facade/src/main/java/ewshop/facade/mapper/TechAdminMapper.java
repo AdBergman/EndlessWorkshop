@@ -21,6 +21,7 @@ public class TechAdminMapper {
         }
 
         return TechPlacementUpdate.builder()
+                .techKey(dto.techKey())
                 .name(dto.name())
                 .type(type)
                 .era(dto.era())

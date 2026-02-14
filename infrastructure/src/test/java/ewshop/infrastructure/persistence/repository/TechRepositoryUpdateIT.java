@@ -21,32 +21,27 @@ class TechRepositoryUpdateIT {
     private TechJpaRepository repository;
 
     @Test
-    void updateEraAndCoordsByNameAndType_shouldUpdateExactlyOneRow_whenMatchExists() {
-        // Arrange: persist a tech row we will update
+    void updateEraAndCoordsByTechKey_shouldUpdateExactlyOneRow_whenMatchExists() {
         TechEntity tech = new TechEntity();
+        tech.setTechKey("Tech_AdvancedWeapons");
         tech.setName("Advanced Weapons");
         tech.setType(TechType.DEFENSE);
         tech.setEra(4);
         tech.setTechCoords(new TechCoords(10.0, 20.0));
         entityManager.persistAndFlush(tech);
 
-        // Act: run bulk update
-        int updated = repository.updateEraAndCoordsByNameAndType(
-                "Advanced Weapons",
-                TechType.DEFENSE,
+        int updated = repository.updateEraAndCoordsByTechKey(
+                "Tech_AdvancedWeapons",
                 5,
                 new TechCoords(55.5, 66.6)
         );
 
-        // Assert: update count
         assertThat(updated).isEqualTo(1);
 
-        // IMPORTANT: bulk updates bypass the persistence context
         entityManager.flush();
         entityManager.clear();
 
-        // Assert: entity is actually updated in DB
-        TechEntity reloaded = repository.findByName("Advanced Weapons").orElseThrow();
+        TechEntity reloaded = repository.findByTechKey("Tech_AdvancedWeapons").orElseThrow();
         assertThat(reloaded.getEra()).isEqualTo(5);
         assertThat(reloaded.getTechCoords()).isNotNull();
         assertThat(reloaded.getTechCoords().getXPct()).isEqualTo(55.5);
@@ -54,62 +49,56 @@ class TechRepositoryUpdateIT {
     }
 
     @Test
-    void updateEraAndCoordsByNameAndType_shouldReturnZero_whenNameDoesNotMatch() {
-        // Arrange
+    void updateEraAndCoordsByTechKey_shouldReturnZero_whenTechKeyDoesNotMatch() {
         TechEntity tech = new TechEntity();
+        tech.setTechKey("Tech_AdvancedWeapons");
         tech.setName("Advanced Weapons");
         tech.setType(TechType.DEFENSE);
         tech.setEra(4);
         tech.setTechCoords(new TechCoords(10.0, 20.0));
         entityManager.persistAndFlush(tech);
 
-        // Act
-        int updated = repository.updateEraAndCoordsByNameAndType(
-                "Different Name",
-                TechType.DEFENSE,
+        int updated = repository.updateEraAndCoordsByTechKey(
+                "Tech_Different",
                 5,
                 new TechCoords(55.5, 66.6)
         );
 
-        // Assert
         assertThat(updated).isEqualTo(0);
 
         entityManager.flush();
         entityManager.clear();
 
-        TechEntity reloaded = repository.findByName("Advanced Weapons").orElseThrow();
+        TechEntity reloaded = repository.findByTechKey("Tech_AdvancedWeapons").orElseThrow();
         assertThat(reloaded.getEra()).isEqualTo(4);
         assertThat(reloaded.getTechCoords().getXPct()).isEqualTo(10.0);
         assertThat(reloaded.getTechCoords().getYPct()).isEqualTo(20.0);
     }
 
     @Test
-    void updateEraAndCoordsByNameAndType_shouldReturnZero_whenTypeDoesNotMatch() {
-        // Arrange
+    void updateEraAndCoordsByTechKey_shouldUpdateEvenIfTypeDiffers() {
         TechEntity tech = new TechEntity();
+        tech.setTechKey("Tech_AdvancedWeapons");
         tech.setName("Advanced Weapons");
         tech.setType(TechType.DEFENSE);
         tech.setEra(4);
         tech.setTechCoords(new TechCoords(10.0, 20.0));
         entityManager.persistAndFlush(tech);
 
-        // Act
-        int updated = repository.updateEraAndCoordsByNameAndType(
-                "Advanced Weapons",
-                TechType.SOCIETY, // wrong type
+        int updated = repository.updateEraAndCoordsByTechKey(
+                "Tech_AdvancedWeapons",
                 5,
                 new TechCoords(55.5, 66.6)
         );
 
-        // Assert
-        assertThat(updated).isEqualTo(0);
+        assertThat(updated).isEqualTo(1);
 
         entityManager.flush();
         entityManager.clear();
 
-        TechEntity reloaded = repository.findByName("Advanced Weapons").orElseThrow();
-        assertThat(reloaded.getEra()).isEqualTo(4);
-        assertThat(reloaded.getTechCoords().getXPct()).isEqualTo(10.0);
-        assertThat(reloaded.getTechCoords().getYPct()).isEqualTo(20.0);
+        TechEntity reloaded = repository.findByTechKey("Tech_AdvancedWeapons").orElseThrow();
+        assertThat(reloaded.getEra()).isEqualTo(5);
+        assertThat(reloaded.getTechCoords().getXPct()).isEqualTo(55.5);
+        assertThat(reloaded.getTechCoords().getYPct()).isEqualTo(66.6);
     }
 }

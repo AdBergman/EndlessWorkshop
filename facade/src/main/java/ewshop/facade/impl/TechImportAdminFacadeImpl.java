@@ -3,6 +3,7 @@ package ewshop.facade.impl;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.model.results.TechImportResult;
 import ewshop.domain.service.TechImportService;
+import ewshop.domain.service.TechService;
 import ewshop.facade.dto.importing.*;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
@@ -17,9 +18,11 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
     private static final int MAX_ERRORS = 50;
 
     private final TechImportService techImportService;
+    private final TechService techService;
 
-    public TechImportAdminFacadeImpl(TechImportService techImportService) {
+    public TechImportAdminFacadeImpl(TechImportService techImportService, TechService techService) {
         this.techImportService = techImportService;
+        this.techService = techService;
     }
 
     @Override
@@ -100,6 +103,9 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
                 errors,
                 buildDetails(snapshots, received)
         );
+
+        // warm cache immediately so next public read doesn't hit DB
+        techService.getAllTechs();
 
         return ImportSummaryDto.forTech(counts, diagnostics, durationMs);
     }

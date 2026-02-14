@@ -17,12 +17,12 @@ public class TechMapper {
         this.techUnlockMapper = techUnlockMapper;
     }
 
-    // --- Domain -> Entity (base, without prereq/excludes) ---
     public TechEntity toEntityBase(Tech domain) {
         if (domain == null) return null;
 
         TechEntity entity = new TechEntity();
         entity.setName(domain.getName());
+        entity.setTechKey(domain.getTechKey());
         entity.setType(domain.getType());
         entity.setEra(domain.getEra());
         entity.setEffects(domain.getEffects() != null ? domain.getEffects() : Collections.emptyList());
@@ -34,11 +34,11 @@ public class TechMapper {
                 .collect(Collectors.toList())
                 : Collections.emptyList());
 
-        // Shallow prereq/excludes for normal domain usage
         if (domain.getPrereq() != null) {
             Tech prereq = domain.getPrereq();
             TechEntity prereqEntity = new TechEntity();
             prereqEntity.setName(prereq.getName());
+            prereqEntity.setTechKey(prereq.getTechKey());
             prereqEntity.setType(prereq.getType());
             prereqEntity.setEra(prereq.getEra());
             entity.setPrereq(prereqEntity);
@@ -48,6 +48,7 @@ public class TechMapper {
             Tech excludes = domain.getExcludes();
             TechEntity excludesEntity = new TechEntity();
             excludesEntity.setName(excludes.getName());
+            excludesEntity.setTechKey(excludes.getTechKey());
             excludesEntity.setType(excludes.getType());
             excludesEntity.setEra(excludes.getEra());
             entity.setExcludes(excludesEntity);
@@ -56,47 +57,54 @@ public class TechMapper {
         return entity;
     }
 
-    // --- Update references (after all entities are persisted, e.g., Phase 2) ---
-    public void updateReferences(TechEntity entity, Tech domain, Map<String, TechEntity> savedMap) {
+    public void updateReferences(TechEntity entity, Tech domain, Map<String, TechEntity> savedByTechKey) {
         if (domain.getPrereq() != null) {
-            TechEntity prereqEntity = savedMap.get(domain.getPrereq().getName());
-            if (prereqEntity != null) {
-                entity.setPrereq(prereqEntity);
+            String prereqKey = domain.getPrereq().getTechKey();
+            if (prereqKey != null) {
+                TechEntity prereqEntity = savedByTechKey.get(prereqKey);
+                if (prereqEntity != null) {
+                    entity.setPrereq(prereqEntity);
+                } else {
+                    System.out.println("Warning: prereq not found for " + domain.getTechKey() + ": " + prereqKey);
+                }
             } else {
-                System.out.println("Warning: prereq not found for " + domain.getName() + ": " + domain.getPrereq().getName());
+                System.out.println("Warning: prereq techKey missing for " + domain.getTechKey());
             }
         }
 
         if (domain.getExcludes() != null) {
-            TechEntity excludesEntity = savedMap.get(domain.getExcludes().getName());
-            if (excludesEntity != null) {
-                entity.setExcludes(excludesEntity);
+            String excludesKey = domain.getExcludes().getTechKey();
+            if (excludesKey != null) {
+                TechEntity excludesEntity = savedByTechKey.get(excludesKey);
+                if (excludesEntity != null) {
+                    entity.setExcludes(excludesEntity);
+                } else {
+                    System.out.println("Warning: excludes not found for " + domain.getTechKey() + ": " + excludesKey);
+                }
             } else {
-                System.out.println("Warning: excludes not found for " + domain.getName() + ": " + domain.getExcludes().getName());
+                System.out.println("Warning: excludes techKey missing for " + domain.getTechKey());
             }
         }
     }
 
-    // --- Domain -> Entity (full, optionally update prereq/excludes with saved map) ---
-    public TechEntity toEntity(Tech domain, Map<String, TechEntity> savedMap) {
+    public TechEntity toEntity(Tech domain, Map<String, TechEntity> savedByTechKey) {
         TechEntity entity = toEntityBase(domain);
-        if (savedMap != null) {
-            updateReferences(entity, domain, savedMap);
+        if (savedByTechKey != null) {
+            updateReferences(entity, domain, savedByTechKey);
         }
         return entity;
     }
 
-    // --- Domain -> Entity (legacy simple, just shallow mapping) ---
     public TechEntity toEntity(Tech domain) {
         return toEntityBase(domain);
     }
 
-    // --- Entity -> Domain ---
     public Tech toDomain(TechEntity entity) {
         if (entity == null) return null;
 
         return Tech.builder()
                 .name(entity.getName())
+                .techKey(entity.getTechKey())
                 .type(entity.getType())
                 .era(entity.getEra())
                 .effects(entity.getEffects() != null ? entity.getEffects() : Collections.emptyList())
@@ -104,6 +112,7 @@ public class TechMapper {
                 .prereq(entity.getPrereq() != null
                         ? Tech.builder()
                         .name(entity.getPrereq().getName())
+                        .techKey(entity.getPrereq().getTechKey())
                         .type(entity.getPrereq().getType())
                         .era(entity.getPrereq().getEra())
                         .build()
@@ -111,6 +120,7 @@ public class TechMapper {
                 .excludes(entity.getExcludes() != null
                         ? Tech.builder()
                         .name(entity.getExcludes().getName())
+                        .techKey(entity.getExcludes().getTechKey())
                         .type(entity.getExcludes().getType())
                         .era(entity.getExcludes().getEra())
                         .build()

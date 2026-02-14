@@ -60,16 +60,16 @@ public class TechRepositoryAdapter implements TechRepository {
     }
 
     @Override
-    public void updateEraAndCoordsByNameAndType(TechPlacementUpdate update) {
-        int updated = techJpaRepository.updateEraAndCoordsByNameAndType(
-                update.name(),
-                update.type(),
+    public void updateEraAndCoordsByTechKey(TechPlacementUpdate update) {
+        int updated = techJpaRepository.updateEraAndCoordsByTechKey(
+                update.techKey(),
                 update.era(),
                 update.coords()
         );
+
         if (updated != 1) {
-            log.warn("Expected to update 1 tech for name='{}' and type='{}' but updated {}",
-                    update.name(), update.type(), updated);
+            log.warn("Expected to update 1 tech for techKey='{}' but updated {}",
+                    update.techKey(), updated);
         }
     }
 

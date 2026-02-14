@@ -19,6 +19,7 @@ class TechAdminMapperTest {
     @Test
     void toDomain_shouldMapValidDto_andNormalizeType() {
         TechAdminDto dto = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(2)
                 .type("Defense")
@@ -28,6 +29,7 @@ class TechAdminMapperTest {
         TechPlacementUpdate update = TechAdminMapper.toDomain(dto);
 
         assertThat(update).isNotNull();
+        assertThat(update.techKey()).isEqualTo("Tech_Stonework");
         assertThat(update.name()).isEqualTo("Stonework");
         assertThat(update.era()).isEqualTo(2);
         assertThat(update.type()).isEqualTo(TechType.DEFENSE);
@@ -38,6 +40,7 @@ class TechAdminMapperTest {
     @Test
     void toDomain_shouldTrimName_viaDomainValidation() {
         TechAdminDto dto = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("   Stonework   ")
                 .era(2)
                 .type("Defense")
@@ -50,8 +53,9 @@ class TechAdminMapperTest {
     }
 
     @Test
-    void toDomain_shouldThrow_whenNameIsNullOrBlank() {
+    void toDomain_shouldAllowNullOrBlankName_forNow() {
         TechAdminDto nullName = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name(null)
                 .era(2)
                 .type("Defense")
@@ -59,24 +63,54 @@ class TechAdminMapperTest {
                 .build();
 
         TechAdminDto blankName = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("   ")
                 .era(2)
                 .type("Defense")
                 .coords(new TechCoordsDto(1.0, 2.0))
                 .build();
 
-        assertThatThrownBy(() -> TechAdminMapper.toDomain(nullName))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("TechPlacementUpdate.name is required");
+        TechPlacementUpdate u1 = TechAdminMapper.toDomain(nullName);
+        TechPlacementUpdate u2 = TechAdminMapper.toDomain(blankName);
 
-        assertThatThrownBy(() -> TechAdminMapper.toDomain(blankName))
+        assertThat(u1).isNotNull();
+        assertThat(u1.techKey()).isEqualTo("Tech_Stonework");
+
+        assertThat(u2).isNotNull();
+        assertThat(u2.techKey()).isEqualTo("Tech_Stonework");
+    }
+
+    @Test
+    void toDomain_shouldThrow_whenTechKeyIsNullOrBlank() {
+        TechAdminDto nullKey = TechAdminDto.builder()
+                .techKey(null)
+                .name("Stonework")
+                .era(2)
+                .type("Defense")
+                .coords(new TechCoordsDto(1.0, 2.0))
+                .build();
+
+        TechAdminDto blankKey = TechAdminDto.builder()
+                .techKey("   ")
+                .name("Stonework")
+                .era(2)
+                .type("Defense")
+                .coords(new TechCoordsDto(1.0, 2.0))
+                .build();
+
+        assertThatThrownBy(() -> TechAdminMapper.toDomain(nullKey))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("TechPlacementUpdate.name is required");
+                .hasMessage("TechPlacementUpdate.techKey is required");
+
+        assertThatThrownBy(() -> TechAdminMapper.toDomain(blankKey))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("TechPlacementUpdate.techKey is required");
     }
 
     @Test
     void toDomain_shouldThrow_whenTypeIsNullOrBlank() {
         TechAdminDto nullType = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(2)
                 .type(null)
@@ -84,13 +118,13 @@ class TechAdminMapperTest {
                 .build();
 
         TechAdminDto blankType = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(2)
                 .type("   ")
                 .coords(new TechCoordsDto(1.0, 2.0))
                 .build();
 
-        // Mapper passes null -> domain rejects
         assertThatThrownBy(() -> TechAdminMapper.toDomain(nullType))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("TechPlacementUpdate.type is required");
@@ -103,6 +137,7 @@ class TechAdminMapperTest {
     @Test
     void toDomain_shouldThrow_whenCoordsIsNull() {
         TechAdminDto dto = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(2)
                 .type("Defense")
@@ -117,6 +152,7 @@ class TechAdminMapperTest {
     @Test
     void toDomain_shouldThrow_whenEraOutOfRange() {
         TechAdminDto tooLow = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(0)
                 .type("Defense")
@@ -124,6 +160,7 @@ class TechAdminMapperTest {
                 .build();
 
         TechAdminDto tooHigh = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(7)
                 .type("Defense")
@@ -142,6 +179,7 @@ class TechAdminMapperTest {
     @Test
     void toDomain_shouldThrow_whenTypeDoesNotMatchEnum() {
         TechAdminDto dto = TechAdminDto.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(2)
                 .type("NotARealType")

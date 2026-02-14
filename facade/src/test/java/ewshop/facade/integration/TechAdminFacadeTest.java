@@ -40,8 +40,8 @@ class TechAdminFacadeTest extends BaseIT {
 
     @Test
     void applyPlacementUpdates_updatesEraAndCoords_andWarmsCache() {
-        // Given: existing tech in DB
         Tech stonework = Tech.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(1)
                 .type(TechType.DEFENSE)
@@ -51,14 +51,13 @@ class TechAdminFacadeTest extends BaseIT {
         techRepository.save(stonework);
         entityManager.flush();
 
-        // Warm cache once (so we know the facade has something to evict/refresh)
         var before = techFacade.getAllTechs();
         assertThat(before).hasSize(1);
         assertThat(before.get(0).era()).isEqualTo(1);
         assertThat(before.get(0).coords().xPct()).isEqualTo(10.0);
 
-        // When: admin updates placement
         TechAdminDto updateDto = new TechAdminDto(
+                "Tech_Stonework",
                 "Stonework",
                 2,
                 "Defense",
@@ -69,7 +68,6 @@ class TechAdminFacadeTest extends BaseIT {
         entityManager.flush();
         entityManager.clear();
 
-        // Then: public read reflects updated state (also proves cache was warmed correctly)
         var after = techFacade.getAllTechs();
         assertThat(after).hasSize(1);
 
@@ -82,8 +80,8 @@ class TechAdminFacadeTest extends BaseIT {
 
     @Test
     void applyPlacementUpdates_noopOnNullOrEmpty() {
-        // Given: existing tech in DB
         Tech stonework = Tech.builder()
+                .techKey("Tech_Stonework")
                 .name("Stonework")
                 .era(1)
                 .type(TechType.DEFENSE)
@@ -94,11 +92,9 @@ class TechAdminFacadeTest extends BaseIT {
         entityManager.flush();
         entityManager.clear();
 
-        // When
         techAdminFacade.applyPlacementUpdates(null);
         techAdminFacade.applyPlacementUpdates(List.of());
 
-        // Then: unchanged
         var result = techFacade.getAllTechs();
         assertThat(result).hasSize(1);
         assertThat(result.get(0).era()).isEqualTo(1);

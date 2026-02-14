@@ -14,69 +14,57 @@ public class TechMapper {
     public static TechDto toDto(Tech domain) {
         if (domain == null) return null;
 
-        // --- Prerequisite and Excludes Transformation ---
-        String prereqName = (domain.getPrereq() != null) ? domain.getPrereq().getName() : null;
-        String excludesName = (domain.getExcludes() != null) ? domain.getExcludes().getName() : null;
+        TechCoords c = domain.getTechCoords();
+        if (c == null) {
+            throw new IllegalStateException("techCoords required (techKey=" + domain.getTechKey() + ")");
+        }
+        TechCoordsDto coordsDto = new TechCoordsDto(c.getXPct(), c.getYPct());
 
-        // --- Unlocks Transformation ---
-        List<String> unlockStrings = domain.getUnlocks().stream()
+        String prereqKey = domain.getPrereq() != null ? domain.getPrereq().getTechKey() : null;
+        String excludesKey = domain.getExcludes() != null ? domain.getExcludes().getTechKey() : null;
+
+        List<String> unlocks = domain.getUnlocks().stream()
                 .map(unlock -> {
+                    if (unlock == null) return null;
+
                     if (unlock.getImprovement() != null) {
-                        return "Improvement: " + unlock.getImprovement().getName();
+                        String n = unlock.getImprovement().getName();
+                        return (n == null || n.isBlank()) ? null : "Improvement: " + n;
                     }
                     if (unlock.getDistrict() != null) {
-                        return "District: " + unlock.getDistrict().getName();
+                        String n = unlock.getDistrict().getName();
+                        return (n == null || n.isBlank()) ? null : "District: " + n;
                     }
-                    return unlock.getUnlockText();
+
+                    String t = unlock.getUnlockText();
+                    return (t == null || t.isBlank()) ? null : t;
                 })
                 .filter(s -> s != null && !s.isBlank())
                 .collect(Collectors.toList());
 
-        // --- Effects Transformation ---
-        List<String> effects = List.copyOf(domain.getEffects());
-
-        // --- Factions Transformation ---
         List<String> factions = domain.getFactions().stream()
                 .map(TechMapper::formatEnumName)
                 .sorted()
                 .collect(Collectors.toList());
 
-        // --- Type Transformation ---
-        String typeName = (domain.getType() != null) ? formatEnumName(domain.getType()) : "";
-
-        // --- Coordinates Transformation ---
-        TechCoords coords = domain.getTechCoords();
-        TechCoordsDto coordsDto = (coords != null) ? new TechCoordsDto(coords.getXPct(), coords.getYPct()) : null;
-
-        // --- Build the DTO ---
         return TechDto.builder()
                 .name(domain.getName())
+                .techKey(domain.getTechKey())
                 .era(domain.getEra())
-                .type(typeName)
-                .unlocks(unlockStrings)
-                .effects(effects)
-                .prereq(prereqName)
+                .type(formatEnumName(domain.getType()))
+                .unlocks(unlocks)
+                .effects(domain.getEffects())
+                .prereq(prereqKey)
                 .factions(factions)
-                .excludes(excludesName)
+                .excludes(excludesKey)
                 .coords(coordsDto)
                 .build();
     }
 
-    /**
-     * A generic helper method to format any enum into a user-friendly, title-cased string.
-     * It converts an enum like LOST_LORDS into "Lost Lords" and SOCIETY into "Society".
-     *
-     * @param enumConstant The enum constant (e.g., Faction.LOST_LORDS, TechType.SOCIETY).
-     * @return A properly formatted string.
-     */
-    private static String formatEnumName(Enum<?> enumConstant) {
-        if (enumConstant == null) {
-            return "";
-        }
-        String enumName = enumConstant.name();
-
-        return Arrays.stream(enumName.split("_"))
-                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+    private static String formatEnumName(Enum<?> e) {
+        if (e == null) return "";
+        return Arrays.stream(e.name().split("_"))
+                .map(w -> w.substring(0, 1).toUpperCase() + w.substring(1).toLowerCase())
                 .collect(Collectors.joining(" "));
     }
 }

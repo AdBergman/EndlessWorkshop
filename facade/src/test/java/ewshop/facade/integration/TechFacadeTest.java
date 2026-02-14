@@ -36,54 +36,62 @@ class TechFacadeTest extends BaseIT {
 
     @Test
     void shouldReturnAllTechs() {
-        // Given
         Tech stonework = Tech.builder()
                 .name("Stonework")
+                .techKey("Stonework_X")
                 .era(1)
                 .type(TechType.DEFENSE)
                 .effects(List.of("+100 Fortification on Capital"))
                 .factions(Set.of(Faction.ASPECTS, Faction.KIN))
                 .techCoords(new TechCoords(10.0, 20.0))
+                .unlocks(List.of())
                 .build();
 
         Tech agriculture = Tech.builder()
                 .name("Agriculture")
+                .techKey("Agriculture_X")
                 .era(1)
                 .type(TechType.DISCOVERY)
                 .effects(List.of("Unlocks Farms"))
                 .factions(Set.of(Faction.LORDS))
                 .techCoords(new TechCoords(30.0, 40.0))
+                .unlocks(List.of())
                 .build();
 
         techRepository.save(stonework);
         techRepository.save(agriculture);
         entityManager.flush();
 
-        // When
         List<TechDto> result = techFacade.getAllTechs();
 
-        // Then
         assertThat(result).hasSize(2);
 
-        // Verify Stonework DTO
         TechDto stoneworkDto = result.stream()
-                .filter(t -> "Stonework".equals(t.name()))
+                .filter(t -> "Stonework_X".equals(t.techKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Stonework DTO not found"));
+
+        assertThat(stoneworkDto.name()).isEqualTo("Stonework");
         assertThat(stoneworkDto.era()).isEqualTo(1);
         assertThat(stoneworkDto.type()).isEqualTo("Defense");
         assertThat(stoneworkDto.effects()).containsExactly("+100 Fortification on Capital");
-        assertThat(stoneworkDto.factions()).containsExactlyInAnyOrder("Aspects", "Kin");
+        assertThat(stoneworkDto.factions()).containsExactly("Aspects", "Kin");
+        assertThat(stoneworkDto.coords()).isNotNull();
+        assertThat(stoneworkDto.coords().xPct()).isEqualTo(10.0);
+        assertThat(stoneworkDto.coords().yPct()).isEqualTo(20.0);
 
-        // Verify Agriculture DTO
         TechDto agricultureDto = result.stream()
-                .filter(t -> "Agriculture".equals(t.name()))
+                .filter(t -> "Agriculture_X".equals(t.techKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Agriculture DTO not found"));
+
+        assertThat(agricultureDto.name()).isEqualTo("Agriculture");
         assertThat(agricultureDto.era()).isEqualTo(1);
         assertThat(agricultureDto.type()).isEqualTo("Discovery");
         assertThat(agricultureDto.effects()).containsExactly("Unlocks Farms");
         assertThat(agricultureDto.factions()).containsExactly("Lords");
+        assertThat(agricultureDto.coords()).isNotNull();
+        assertThat(agricultureDto.coords().xPct()).isEqualTo(30.0);
+        assertThat(agricultureDto.coords().yPct()).isEqualTo(40.0);
     }
-
 }

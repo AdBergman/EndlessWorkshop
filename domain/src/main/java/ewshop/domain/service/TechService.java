@@ -43,7 +43,7 @@ public class TechService {
         if (updates == null || updates.isEmpty()) return;
 
         for (TechPlacementUpdate techPlacementUpdate : updates) {
-            techRepository.updateEraAndCoordsByNameAndType(techPlacementUpdate);
+            techRepository.updateEraAndCoordsByTechKey(techPlacementUpdate);
         }
     }
 }

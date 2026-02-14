@@ -3,6 +3,7 @@ package ewshop.facade.dto.request;
 import ewshop.facade.dto.response.TechCoordsDto;
 
 public record TechAdminDto(
+        String techKey,
         String name,
         int era,
         String type,
@@ -13,10 +14,16 @@ public record TechAdminDto(
     }
 
     public static class Builder {
+        private String techKey;
         private String name;
         private int era;
         private String type;
         private TechCoordsDto coords;
+
+        public Builder techKey(String techKey) {
+            this.techKey = techKey;
+            return this;
+        }
 
         public Builder name(String name) {
             this.name = name;
@@ -39,7 +46,7 @@ public record TechAdminDto(
         }
 
         public TechAdminDto build() {
-            return new TechAdminDto(name, era, type, coords);
+            return new TechAdminDto(techKey, name, era, type, coords);
         }
     }
 }

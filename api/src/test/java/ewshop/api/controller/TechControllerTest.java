@@ -33,6 +33,7 @@ class TechControllerTest {
         // Setup: Create a DTO that accurately reflects the real mapper's output
         TechDto t1 = TechDto.builder()
                 .name("Stonework")
+                .techKey("Stonework_X")
                 .era(1)
                 .type("DEFENSE")
                 .effects(List.of("+100 Fortification on Capital"))
@@ -52,6 +53,7 @@ class TechControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 // Assert on the actual complex fields of the DTO
                 .andExpect(jsonPath("$[0].name").value("Stonework"))
+                .andExpect(jsonPath("$[0].techKey").value("Stonework_X"))
                 .andExpect(jsonPath("$[0].era").value(1))
                 .andExpect(jsonPath("$[0].type").value("DEFENSE"))
                 .andExpect(jsonPath("$[0].effects[0]").value("+100 Fortification on Capital"))
