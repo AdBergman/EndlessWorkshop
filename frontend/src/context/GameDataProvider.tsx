@@ -1,6 +1,7 @@
+// GameDataProvider.tsx
 import React, { useState, useEffect, ReactNode, useCallback } from "react";
-import GameDataContext, { FactionInfo } from "./GameDataContext";
-import { District, Improvement, Tech, Unit, Faction } from "@/types/dataTypes";
+import GameDataContext from "./GameDataContext";
+import { District, Improvement, Tech, Unit, Faction, FactionInfo } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { identifyFaction } from "@/utils/factionIdentity";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +13,7 @@ interface Props {
 const normalizeTechs = (techData: Tech[]) =>
     techData.map((t) => ({
         ...t,
-        factions: t.factions.map((f) => f.toUpperCase()),
+        factions: (t.factions ?? []).map((f) => f.toUpperCase()),
     }));
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
@@ -25,23 +26,32 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(initialFaction);
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
 
-    // --- Track if shared build has been loaded ---
     const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
 
     const navigate = useNavigate();
 
-    // Determine initial processing state for shared builds
     const initialShareUuid = new URLSearchParams(window.location.search).get("share");
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
 
-    // NEW: refresh techs (used by admin placement save to avoid "snap back")
     const refreshTechs = useCallback(async () => {
-        const techData = await apiClient.getTechs();
-        const normalizedTechData = normalizeTechs(techData);
-        setTechs(new Map(normalizedTechData.map((t) => [t.name, t])));
+        try {
+            const techData = await apiClient.getTechs();
+            const normalizedTechData = normalizeTechs(techData);
+
+            // Local H2 pre-import: backend returns rows without techKey -> don't load techs yet
+            const missingKey = normalizedTechData.some((t) => !t.techKey || !t.techKey.trim());
+            if (missingKey) {
+                setTechs(new Map());
+                return;
+            }
+
+            setTechs(new Map(normalizedTechData.map((t) => [t.techKey, t])));
+        } catch (err) {
+            console.error("Failed to fetch techs from API.", err);
+            setTechs(new Map());
+        }
     }, []);
 
-    // --- Fetch core game data ---
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -53,35 +63,28 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 setDistricts(new Map(districtData.map((d) => [d.name, d])));
                 setImprovements(new Map(improvementData.map((i) => [i.name, i])));
 
-                // Techs via refreshTechs so admin can reuse the exact same logic
                 await refreshTechs();
             } catch (err) {
                 console.error("Failed to fetch game data from API.", err);
             }
         };
 
-        fetchData();
+        void fetchData();
     }, [refreshTechs]);
 
-    // --- Fetch units asynchronously after initial data load ---
     useEffect(() => {
         const fetchUnits = async () => {
             try {
-                console.log("🔄 Bootstrapping units...");
                 const unitData = await apiClient.getUnits();
-                console.log("✅ Loaded units:", unitData.length);
-
-                const unitMap = new Map(unitData.map((u) => [u.name, u]));
-                setUnits(unitMap);
+                setUnits(new Map(unitData.map((u) => [u.name, u])));
             } catch (err) {
                 console.error("❌ Failed to load units:", err);
             }
         };
 
-        fetchUnits();
+        void fetchUnits();
     }, []);
 
-    // --- Load shared build from URL param (runs once) ---
     useEffect(() => {
         if (sharedBuildLoaded) return;
 
@@ -96,9 +99,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
 
-                // Convert the string faction from API to FactionInfo object
                 const factionEnumLookup =
                     Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
+
                 const loadedFactionInfo = identifyFaction({
                     faction: factionEnumLookup,
                     minorFaction: null,
@@ -108,7 +111,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 setSelectedTechs(res.techIds);
                 setSharedBuildLoaded(true);
 
-                // Remove share param from URL and redirect to /tech
                 params.delete("share");
                 const newSearch = params.toString() ? `?${params.toString()}` : "";
                 navigate(`/tech${newSearch}`, { replace: true });
@@ -119,23 +121,16 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             }
         };
 
-        loadSharedBuild();
+        void loadSharedBuild();
     }, [sharedBuildLoaded, navigate]);
 
-    // --- API helpers ---
     const createSavedTechBuild = async (
         name: string,
         faction: FactionInfo = selectedFaction,
         techIds: string[] = selectedTechs
     ): Promise<SavedTechBuild> => {
         try {
-            const saved = await apiClient.createSavedBuild(
-                name,
-                faction.enumFaction!.toString(),
-                techIds
-            );
-            console.log("Build saved:", saved);
-            return saved;
+            return await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
         } catch (err) {
             console.error("Failed to save tech build:", err);
             throw err;
@@ -145,12 +140,12 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const getSavedBuild = async (uuid: string): Promise<SavedTechBuild> => {
         try {
             const saved = await apiClient.getSavedBuild(uuid);
-            console.log("Loaded saved build:", saved);
 
             const loadedFactionInfo = identifyFaction({
-                faction: Faction[saved.selectedFaction as keyof typeof Faction],
+                faction: Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction],
                 minorFaction: null,
             });
+
             setSelectedFaction(loadedFactionInfo);
             setSelectedTechs(saved.techIds);
 
@@ -169,7 +164,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 techs,
                 units,
 
-                // NEW: expose so admin can refresh base tech state after save
                 setTechs,
                 refreshTechs,
 
@@ -177,8 +171,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 setSelectedFaction,
                 selectedTechs,
                 setSelectedTechs,
+
                 createSavedTechBuild,
                 getSavedBuild,
+
                 isProcessingSharedBuild,
             }}
         >

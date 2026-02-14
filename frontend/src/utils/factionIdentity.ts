@@ -1,22 +1,24 @@
-import { Faction, FactionInfo } from "@/types/dataTypes";
+import type { Faction, FactionInfo } from "@/types/dataTypes";
 
 export function identifyFaction(unit: {
     faction: Faction | null;
     minorFaction: string | null;
 }): FactionInfo {
-    const isMajor = !!unit.faction;
-    if (isMajor) {
+    if (unit.faction) {
         return {
             isMajor: true,
-            enumFaction: unit.faction as Faction,
+            enumFaction: unit.faction,
             uiLabel: unit.faction.toLowerCase(),
             minorName: null,
         };
     }
+
+    const minor = unit.minorFaction ?? "";
+
     return {
         isMajor: false,
         enumFaction: null,
-        uiLabel: (unit.minorFaction || "").toLowerCase(),
-        minorName: unit.minorFaction,
+        uiLabel: minor.toLowerCase(),
+        minorName: minor || null,
     };
 }

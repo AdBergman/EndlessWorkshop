@@ -2,11 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { Tech } from "@/types/dataTypes";
 import { apiClient, TechAdminDto } from "@/api/apiClient";
-import type {
-    AdminPlacementDraft,
-    AdminStagedRow,
-    StepMode,
-} from "@/components/Tech/adminPanel/AdminTechPlacementPanel";
+import type { AdminPlacementDraft, AdminStagedRow, StepMode } from "@/components/Tech/adminPanel/adminPlacementTypes";
 
 const ADMIN_TOKEN_STORAGE_KEY = "ewshop_admin_token";
 
@@ -26,17 +22,10 @@ type Args = {
 };
 
 export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, refreshTechs }: Args) {
-    const [activeTechName, setActiveTechName] = useState<string | null>(null);
-    const [stagedEdits, setStagedEdits] = useState<Map<string, TechAdminDto>>(new Map());
+    const [activeTechKey, setActiveTechKey] = useState<string | null>(null);
 
-    /**
-     * Keeps the UI stable immediately after Save:
-     * - we copy stagedEdits into pendingSaved
-     * - refreshTechs updates the base list
-     * - then we clear pendingSaved
-     *
-     * This prevents "snapback" even if refreshTechs is briefly stale.
-     */
+    // staged edits keyed by techKey
+    const [stagedEdits, setStagedEdits] = useState<Map<string, TechAdminDto>>(new Map());
     const [pendingSaved, setPendingSaved] = useState<Map<string, TechAdminDto>>(new Map());
 
     const [repositionEnabled, setRepositionEnabled] = useState(false);
@@ -45,35 +34,32 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
     const [stepPct, setStepPct] = useState(0.2);
     const [stepPx, setStepPx] = useState(10);
 
-    const [adminToken, setAdminToken] = useState<string>(
-        () => localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) ?? ""
-    );
+    const [adminToken, setAdminToken] = useState<string>(() => localStorage.getItem(ADMIN_TOKEN_STORAGE_KEY) ?? "");
     const [isSaving, setIsSaving] = useState(false);
-    const [saveMessage, setSaveMessage] = useState<
-        { kind: "idle" | "ok" | "err"; text: string } | undefined
-    >(undefined);
+    const [saveMessage, setSaveMessage] = useState<{ kind: "idle" | "ok" | "err"; text: string } | undefined>(undefined);
 
-    const techByName = useMemo(() => {
+    const techByKey = useMemo(() => {
         const m = new Map<string, Tech>();
-        for (const t of allTechs) m.set(t.name, t);
+        for (const t of allTechs) {
+            const k = (t.techKey ?? "").trim();
+            if (k) m.set(k, t);
+        }
         return m;
     }, [allTechs]);
 
-    /**
-     * Effective tech map lets TechTree render admin preview immediately.
-     * We render from:
-     *  - stagedEdits (current unsaved edits)
-     *  - pendingSaved (just-saved edits while refresh is happening)
-     */
-    const effectiveTechByName = useMemo(() => {
+    const effectiveTechByKey = useMemo(() => {
         if (!isAdminMode) return null;
         if (stagedEdits.size === 0 && pendingSaved.size === 0) return null;
 
         const m = new Map<string, Tech>();
         for (const base of allTechs) {
-            const edit = stagedEdits.get(base.name) ?? pendingSaved.get(base.name);
+            const k = (base.techKey ?? "").trim();
+            if (!k) continue;
+
+            const edit = stagedEdits.get(k) ?? pendingSaved.get(k);
             if (!edit) continue;
-            m.set(base.name, {
+
+            m.set(k, {
                 ...base,
                 era: edit.era,
                 coords: { xPct: edit.coords.xPct, yPct: edit.coords.yPct },
@@ -85,22 +71,26 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
     useEffect(() => {
         if (isAdminMode) return;
 
-        setActiveTechName(null);
+        setActiveTechKey(null);
         setRepositionEnabled(false);
         setSaveMessage(undefined);
         setIsSaving(false);
-
-        // Cleanup any preview leftovers when leaving admin mode
         setStagedEdits(new Map());
         setPendingSaved(new Map());
     }, [isAdminMode]);
 
     const upsertEdit = (base: Tech, next: Partial<TechAdminDto>) => {
+        const techKey = (base.techKey ?? "").trim();
+        if (!techKey) return;
+
         setStagedEdits((prev) => {
             const copy = new Map(prev);
+
             const current =
-                prev.get(base.name) ??
+                prev.get(techKey) ??
                 ({
+                    techKey,
+                    // optional for server / summaries, not identity
                     name: base.name,
                     type: base.type,
                     era: base.era,
@@ -110,6 +100,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
             const merged: TechAdminDto = {
                 ...current,
                 ...next,
+                techKey,
                 coords: {
                     xPct: next.coords?.xPct ?? current.coords.xPct,
                     yPct: next.coords?.yPct ?? current.coords.yPct,
@@ -120,23 +111,25 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
             merged.coords.xPct = round4(clamp(merged.coords.xPct, 0, 100));
             merged.coords.yPct = round4(clamp(merged.coords.yPct, 0, 100));
 
-            copy.set(base.name, merged);
+            copy.set(techKey, merged);
             return copy;
         });
     };
 
-    const removeEdit = (name: string) => {
+    const removeEdit = (techKey: string) => {
+        const k = (techKey ?? "").trim();
+        if (!k) return;
+
         setStagedEdits((prev) => {
             const copy = new Map(prev);
-            copy.delete(name);
+            copy.delete(k);
             return copy;
         });
 
-        // If it was in pendingSaved too, remove there as well (rare but safe)
         setPendingSaved((prev) => {
-            if (!prev.has(name)) return prev;
+            if (!prev.has(k)) return prev;
             const copy = new Map(prev);
-            copy.delete(name);
+            copy.delete(k);
             return copy;
         });
     };
@@ -150,44 +143,50 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
     };
 
     const activeDraft: AdminPlacementDraft | null = useMemo(() => {
-        if (!activeTechName) return null;
-        const base = techByName.get(activeTechName);
+        if (!activeTechKey) return null;
+        const base = techByKey.get(activeTechKey);
         if (!base) return null;
 
-        const ed = stagedEdits.get(activeTechName) ?? pendingSaved.get(activeTechName);
+        const ed = stagedEdits.get(activeTechKey) ?? pendingSaved.get(activeTechKey);
 
         return {
-            name: base.name,
+            techKey: base.techKey, // logic only; panel doesn't render it
+            name: base.name,       // display
             type: base.type,
             era: ed ? ed.era : base.era,
             coords: ed ? { ...ed.coords } : { ...base.coords },
         };
-    }, [activeTechName, techByName, stagedEdits, pendingSaved]);
+    }, [activeTechKey, techByKey, stagedEdits, pendingSaved]);
 
-    /**
-     * Keydown handler must read latest draft to avoid stale closure.
-     */
+    // avoid stale closure in keydown
     const activeDraftRef = useRef<AdminPlacementDraft | null>(null);
     useEffect(() => {
         activeDraftRef.current = activeDraft;
     }, [activeDraft]);
 
+    const activeTechKeyRef = useRef<string | null>(null);
+    useEffect(() => {
+        activeTechKeyRef.current = activeTechKey;
+    }, [activeTechKey]);
+
     const handleChangeEra = (nextEra: number) => {
-        if (!activeTechName) return;
-        const base = techByName.get(activeTechName);
+        const k = activeTechKeyRef.current;
+        if (!k) return;
+        const base = techByKey.get(k);
         if (!base) return;
         upsertEdit(base, { era: clamp(nextEra, 1, 6) });
     };
 
     const handleChangeCoords = (coords: { xPct: number; yPct: number }) => {
-        if (!activeTechName) return;
-        const base = techByName.get(activeTechName);
+        const k = activeTechKeyRef.current;
+        if (!k) return;
+        const base = techByKey.get(k);
         if (!base) return;
         upsertEdit(base, { coords });
     };
 
     const toggleReposition = () => {
-        if (!activeTechName) return;
+        if (!activeTechKeyRef.current) return;
         setRepositionEnabled((v) => !v);
     };
 
@@ -213,9 +212,11 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
     const onWrapperClick = (e: any) => {
         if (!isAdminMode) return;
         if (!repositionEnabled) return;
-        if (!activeTechName) return;
 
-        const base = techByName.get(activeTechName);
+        const k = activeTechKeyRef.current;
+        if (!k) return;
+
+        const base = techByKey.get(k);
         if (!base) return;
 
         const wrapper = wrapperRef.current;
@@ -230,9 +231,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
         const rawXPct = (clickX / rect.width) * 100;
         const rawYPct = (clickY / rect.height) * 100;
 
-        const centered = centerCoordsFromClickPct(rawXPct, rawYPct);
-
-        upsertEdit(base, { coords: centered });
+        upsertEdit(base, { coords: centerCoordsFromClickPct(rawXPct, rawYPct) });
         setRepositionEnabled(false);
         setSaveMessage(undefined);
     };
@@ -242,17 +241,13 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
 
         const onKeyDown = (ev: KeyboardEvent) => {
             const draft = activeDraftRef.current;
-            if (!draft) return;
+            const k = activeTechKeyRef.current;
+            if (!draft || !k) return;
             if (repositionEnabled) return;
 
             const target = ev.target as HTMLElement | null;
             const tag = target?.tagName?.toLowerCase();
-            const isTyping =
-                tag === "input" ||
-                tag === "textarea" ||
-                tag === "select" ||
-                (target as any)?.isContentEditable;
-
+            const isTyping = tag === "input" || tag === "textarea" || tag === "select" || (target as any)?.isContentEditable;
             if (isTyping) return;
 
             const key = ev.key;
@@ -260,7 +255,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
 
             ev.preventDefault();
 
-            const base = techByName.get(draft.name);
+            const base = techByKey.get(k);
             if (!base) return;
 
             const mult = ev.shiftKey ? 5 : 1;
@@ -288,43 +283,43 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
                 dyPct = d.dyPct;
             }
 
-            const next = {
-                xPct: draft.coords.xPct + dxPct,
-                yPct: draft.coords.yPct + dyPct,
-            };
-
-            upsertEdit(base, { coords: next });
+            upsertEdit(base, { coords: { xPct: draft.coords.xPct + dxPct, yPct: draft.coords.yPct + dyPct } });
             setSaveMessage(undefined);
         };
 
         window.addEventListener("keydown", onKeyDown, { passive: false });
         return () => window.removeEventListener("keydown", onKeyDown as any);
-        // techByName is stable via memo; wrapperRef stable; step values included.
-    }, [isAdminMode, repositionEnabled, stepMode, stepPct, stepPx, techByName, wrapperRef]);
+    }, [isAdminMode, repositionEnabled, stepMode, stepPct, stepPx, techByKey, wrapperRef]);
 
     const stagedRows: AdminStagedRow[] = useMemo(() => {
         const rows: AdminStagedRow[] = [];
+
         for (const ed of stagedEdits.values()) {
-            const orig = techByName.get(ed.name);
-            const summary = orig
-                ? `(${round4(orig.coords.xPct)}→${round4(ed.coords.xPct)}, ${round4(orig.coords.yPct)}→${round4(
-                    ed.coords.yPct
-                )} | ${orig.era}→${ed.era})`
+            const base = techByKey.get(ed.techKey);
+            const summary = base
+                ? `(${round4(base.coords.xPct)}→${round4(ed.coords.xPct)}, ${round4(base.coords.yPct)}→${round4(ed.coords.yPct)} | ${base.era}→${ed.era})`
                 : undefined;
-            rows.push({ name: ed.name, summary });
+
+            rows.push({
+                techKey: ed.techKey,               // identity
+                name: base?.name ?? ed.name ?? "", // display
+                summary,
+            });
         }
+
         rows.sort((a, b) => a.name.localeCompare(b.name));
         return rows;
-    }, [stagedEdits, techByName]);
+    }, [stagedEdits, techByKey]);
 
     const handleUndoActive = () => {
-        if (!activeTechName) return;
-        removeEdit(activeTechName);
+        const k = activeTechKeyRef.current;
+        if (!k) return;
+        removeEdit(k);
         setSaveMessage(undefined);
     };
 
-    const handleUndoStaged = (name: string) => {
-        removeEdit(name);
+    const handleUndoStaged = (techKey: string) => {
+        removeEdit(techKey);
         setSaveMessage(undefined);
     };
 
@@ -342,7 +337,6 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
             return;
         }
 
-        // Snapshot payload (avoid reading mutable state during async)
         const payload = Array.from(stagedEdits.values());
 
         setIsSaving(true);
@@ -351,37 +345,37 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
         try {
             await apiClient.saveTechPlacementsAdmin(payload, token);
 
-            // Keep UI stable immediately after save.
-            // (Don't clear stagedEdits yet.)
             setPendingSaved(new Map(stagedEdits));
-
-            // Refresh base tech list so the saved coords become the new truth.
             await refreshTechs();
 
-            // Now we can clear staged edits (and the temporary preview map)
             setStagedEdits(new Map());
             setPendingSaved(new Map());
 
             setSaveMessage({ kind: "ok", text: "Saved (204)." });
         } catch (err: any) {
             const msg = String(err?.message ?? err);
-            if (msg.includes("status: 401"))
-                setSaveMessage({ kind: "err", text: "401 Unauthorized. Token missing or not sent." });
-            else if (msg.includes("status: 403"))
-                setSaveMessage({ kind: "err", text: "403 Forbidden. Wrong token or admin disabled on server." });
+            if (msg.includes("status: 401")) setSaveMessage({ kind: "err", text: "401 Unauthorized." });
+            else if (msg.includes("status: 403")) setSaveMessage({ kind: "err", text: "403 Forbidden." });
             else setSaveMessage({ kind: "err", text: msg });
         } finally {
             setIsSaving(false);
         }
     };
 
-    const onTechNodeClick = (techName: string, shiftKey: boolean, toggleSelection: (name: string) => void) => {
-        setActiveTechName(techName);
+    const onTechNodeClick = (techKey: string, shiftKey: boolean, toggleSelection: (techKey: string) => void) => {
+        const k = (techKey ?? "").trim();
+        if (!k) return;
+
+        setActiveTechKey(k);
         setSaveMessage(undefined);
-        if (shiftKey) toggleSelection(techName);
+        if (shiftKey) toggleSelection(k);
     };
 
-    const getEffectiveTech = (base: Tech): Tech => effectiveTechByName?.get(base.name) ?? base;
+    const getEffectiveTech = (base: Tech): Tech => {
+        const k = (base.techKey ?? "").trim();
+        if (!k) return base;
+        return effectiveTechByKey?.get(k) ?? base;
+    };
 
     const panelProps = {
         isOpen: isAdminMode,
@@ -405,7 +399,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
 
         stagedCount: stagedEdits.size,
         stagedRows,
-        onFocusStaged: (name: string) => setActiveTechName(name),
+        onFocusStaged: (techKey: string) => setActiveTechKey(techKey),
         onUndoStaged: handleUndoStaged,
         onDiscardAll: handleDiscardAll,
 

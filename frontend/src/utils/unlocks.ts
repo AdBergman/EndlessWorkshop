@@ -1,29 +1,37 @@
+// utils/unlocks.ts
 import { Tech, Improvement } from "@/types/dataTypes";
 
 const IMPROVEMENT_PREFIX = "Improvement: ";
 
-/**
- * Finds all improvements unlocked by the currently selected techs.
- * Compatible with array-based data from the API.
- */
+export type UnlockedImprovement = Improvement & { era: number };
+
 export const getUnlockedImprovements = (
     selectedTechs: Tech[],
     improvements: Improvement[]
-): Improvement[] => {
-    const unlockedImprovementNames = new Set<string>();
+): UnlockedImprovement[] => {
+    // name -> earliest era it was unlocked in (stable + useful)
+    const unlockedByName = new Map<string, number>();
 
-    // Collect all improvement unlocks from selected techs
     for (const tech of selectedTechs) {
+        const era = tech.era ?? 1;
+
         for (const unlockLine of tech.unlocks ?? []) {
-            if (unlockLine.startsWith(IMPROVEMENT_PREFIX)) {
-                const impName = unlockLine.substring(IMPROVEMENT_PREFIX.length).trim().toLowerCase();
-                unlockedImprovementNames.add(impName);
-            }
+            if (!unlockLine.startsWith(IMPROVEMENT_PREFIX)) continue;
+
+            const rawName = unlockLine.substring(IMPROVEMENT_PREFIX.length).trim();
+            if (!rawName) continue;
+
+            const key = rawName.toLowerCase();
+
+            const prevEra = unlockedByName.get(key);
+            if (prevEra === undefined || era < prevEra) unlockedByName.set(key, era);
         }
     }
 
-    // Filter matching improvement objects from API
-    return improvements.filter(
-        (imp) => unlockedImprovementNames.has(imp.name.trim().toLowerCase())
-    );
+    return improvements
+        .filter((imp) => unlockedByName.has(imp.name.trim().toLowerCase()))
+        .map((imp) => ({
+            ...imp,
+            era: unlockedByName.get(imp.name.trim().toLowerCase()) ?? 1,
+        }));
 };

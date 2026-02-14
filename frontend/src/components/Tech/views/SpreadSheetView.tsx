@@ -1,36 +1,48 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {District, Tech, Unit} from "@/types/dataTypes";
+import React, { useEffect, useMemo, useState } from "react";
+import { District, Tech, Unit } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
-import SpreadsheetToolbar, {SheetView} from "./SpreadsheetToolbar";
+import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
 import TechSheetView from "./TechSheetView";
 import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
-import {getUnlockedImprovements} from "@/utils/unlocks";
-import {useGameData} from "@/context/GameDataContext";
-import {Bounce, toast, ToastContainer} from "react-toastify";
+import { getUnlockedImprovements } from "@/utils/unlocks";
+import { useGameData } from "@/context/GameDataContext";
+import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import UnitSheetView from "./UnitSheetView";
 
 const SpreadSheetView: React.FC = () => {
-    const { selectedTechs, setSelectedTechs, techs, improvements, districts, units, createSavedTechBuild, selectedFaction } = useGameData();
+    const {
+        selectedTechs,
+        setSelectedTechs,
+        techs,
+        improvements,
+        districts,
+        units,
+        createSavedTechBuild,
+        selectedFaction,
+    } = useGameData();
+
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
 
-    const selectedTechObjects = useMemo(() =>
-            selectedTechs.map(name => techs.get(name)).filter((t): t is Tech => !!t),
+    // selectedTechs is now an array of TECH KEYS
+    const selectedTechObjects = useMemo(
+        () => selectedTechs.map((key) => techs.get(key)).filter((t): t is Tech => !!t),
         [selectedTechs, techs]
     );
 
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
     useEffect(() => setSortedTechs([...selectedTechObjects]), [selectedTechObjects]);
 
-    const unlockedImprovements = useMemo(() =>
-            getUnlockedImprovements(selectedTechObjects, Array.from(improvements.values())),
+    const unlockedImprovements = useMemo(
+        () => getUnlockedImprovements(selectedTechObjects, Array.from(improvements.values())),
         [selectedTechObjects, improvements]
     );
 
     const unlockedDistricts = useMemo(() => {
         const districtUnlocks: (District & { era: number })[] = [];
         const prefix = "District: ";
+
         for (const tech of selectedTechObjects) {
             for (const unlock of tech.unlocks ?? []) {
                 if (unlock.startsWith(prefix)) {
@@ -40,6 +52,7 @@ const SpreadSheetView: React.FC = () => {
                 }
             }
         }
+
         return districtUnlocks;
     }, [selectedTechObjects, districts]);
 
@@ -60,14 +73,28 @@ const SpreadSheetView: React.FC = () => {
         return unitUnlocks;
     }, [selectedTechObjects, units]);
 
-    const handleSort = () => setSortedTechs([...selectedTechObjects].sort((a, b) => a.era - b.era || a.name.localeCompare(b.name)));
+    const handleSort = () =>
+        setSortedTechs(
+            [...selectedTechObjects].sort((a, b) => a.era - b.era || a.name.localeCompare(b.name))
+        );
+
     const handleDeselectAll = () => setSelectedTechs([]);
 
     const handleGenerateLink = async () => {
         if (!createSavedTechBuild) return;
+
         try {
-            const saved = await createSavedTechBuild("My Build", selectedFaction, selectedTechObjects.map(t => t.name));
-            await navigator.clipboard.writeText(`${window.location.origin}?share=${saved.uuid}`);
+            // Save TECH KEYS, not names
+            const saved = await createSavedTechBuild(
+                "My Build",
+                selectedFaction,
+                selectedTechObjects.map((t) => t.techKey)
+            );
+
+            const url = new URL("/tech", window.location.origin);
+            url.searchParams.set("share", saved.uuid);
+
+            await navigator.clipboard.writeText(url.toString());
             toast.success("Link copied!");
         } catch (err) {
             console.error(err);
@@ -79,11 +106,16 @@ const SpreadSheetView: React.FC = () => {
 
     const renderActiveSheet = () => {
         switch (activeSheet) {
-            case "techs": return <TechSheetView techs={sortedTechs} />;
-            case "improvements": return <ImprovementSheetView improvements={unlockedImprovements} />;
-            case "districts": return <DistrictSheetView districts={unlockedDistricts} />;
-            case "units": return <UnitSheetView units={unlockedUnits} />;
-            default: return <TechSheetView techs={sortedTechs} />;
+            case "techs":
+                return <TechSheetView techs={sortedTechs} />;
+            case "improvements":
+                return <ImprovementSheetView improvements={unlockedImprovements} />;
+            case "districts":
+                return <DistrictSheetView districts={unlockedDistricts} />;
+            case "units":
+                return <UnitSheetView units={unlockedUnits} />;
+            default:
+                return <TechSheetView techs={sortedTechs} />;
         }
     };
 

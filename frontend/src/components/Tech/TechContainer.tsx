@@ -2,20 +2,20 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
-import { ERA_THRESHOLDS, Tech, Faction } from "@/types/dataTypes";
+import { ERA_THRESHOLDS, Faction, Tech } from "@/types/dataTypes";
 import { useGameData } from "@/context/GameDataContext";
 import "./TechContainer.css";
 
 const MAX_ERA = 6;
-const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_");
 
-// Used for matching display names safely (apostrophes/punctuation/case)
+const normalize = (s: string) => String(s ?? "").toLowerCase().replace(/\s+/g, "_");
+
 const normalizeForMatch = (s: string) => {
     return String(s ?? "")
         .trim()
         .toLowerCase()
         .replace(/[’']/g, "'")
-        .replace(/[^a-z0-9\s']/g, " ") // drop punctuation except apostrophe
+        .replace(/[^a-z0-9\s']/g, " ")
         .replace(/\s+/g, " ")
         .trim();
 };
@@ -26,7 +26,7 @@ type ImportedTechState = {
     techDefs?: string[];
     empireIndex?: number;
     mode?: "global" | "empire";
-    factionHint?: string | null; // may be factionKey or displayName
+    factionHint?: string | null;
 };
 
 function resolveFactionFromHint(hint: unknown) {
@@ -36,7 +36,6 @@ function resolveFactionFromHint(hint: unknown) {
 
     const norm = h.toLowerCase().replace(/[\s_-]+/g, "");
 
-    // Accept either faction keys or display names
     if (norm.includes("lastlord") || norm.includes("lastlords") || norm.includes("lords")) {
         return { isMajor: true, enumFaction: Faction.LORDS, minorName: null, uiLabel: "Lords" };
     }
@@ -57,30 +56,20 @@ function resolveFactionFromHint(hint: unknown) {
 }
 
 const TechContainer: React.FC = () => {
-    const {
-        selectedFaction,
-        setSelectedFaction,
-        selectedTechs,
-        setSelectedTechs,
-        techs,
-    } = useGameData();
+    const { selectedFaction, setSelectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
 
     const [firstEraLoaded, setFirstEraLoaded] = useState(false);
     const [importToast, setImportToast] = useState<string | null>(null);
 
-    // --- Hook: Load shared build from URL once ---
     useSharedBuildLoader(setSelectedTechs);
 
-    // --- Derive selected tech objects ---
     const selectedTechObjects = useMemo(() => {
-        const techNameSet = new Set(selectedTechs);
-        return Array.from(techs.values()).filter((t) => techNameSet.has(t.name));
+        const techKeySet = new Set(selectedTechs);
+        return Array.from(techs.values()).filter((t) => techKeySet.has(t.techKey));
     }, [selectedTechs, techs]);
 
-    // --- Era management hook ---
     const eraController = useEraController(selectedTechObjects);
 
-    // --- Deep link handler for /tech?faction=kin&tech=strength_of_garin ---
     useDeepLinkedTech({
         techs,
         selectedFaction,
@@ -89,7 +78,6 @@ const TechContainer: React.FC = () => {
         setEra: eraController.setEra,
     });
 
-    // --- Import tech selection from Game Summary via navigation state (no DB write) ---
     useImportedTechListLoader({
         techs,
         setSelectedTechs,
@@ -98,7 +86,6 @@ const TechContainer: React.FC = () => {
         setSelectedFaction,
     });
 
-    // --- Preload first era for selected faction and show main container when loaded ---
     useEffect(() => {
         if (!selectedFaction) return;
         const img = new Image();
@@ -111,7 +98,6 @@ const TechContainer: React.FC = () => {
         };
     }, [selectedFaction]);
 
-    // --- Preload all remaining eras in the background ---
     useEffect(() => {
         if (!selectedFaction) return;
         for (let e = 1; e <= MAX_ERA; e++) {
@@ -124,7 +110,6 @@ const TechContainer: React.FC = () => {
         <main className={`main-container ${firstEraLoaded ? "loaded" : ""}`}>
             {firstEraLoaded && (
                 <>
-                    {/* Optional tiny toast for partial imports */}
                     {importToast ? (
                         <div
                             style={{
@@ -148,9 +133,7 @@ const TechContainer: React.FC = () => {
                     <TechTree
                         era={eraController.era}
                         maxUnlockedEra={eraController.maxUnlockedEra}
-                        onEraChange={(dir) =>
-                            dir === "next" ? eraController.handleNextEra() : eraController.handlePrevEra()
-                        }
+                        onEraChange={(dir) => (dir === "next" ? eraController.handleNextEra() : eraController.handlePrevEra())}
                     />
 
                     <div className="view-container">
@@ -164,37 +147,34 @@ const TechContainer: React.FC = () => {
 
 export default TechContainer;
 
-//
-// ------------------------ INTERNAL HOOKS --------------------------------- //
-//
-
-/** Handles loading of shared builds from a ?share=UUID param */
-function useSharedBuildLoader(setSelectedTechs: (names: string[]) => void) {
+function useSharedBuildLoader(setSelectedTechs: (techKeys: string[]) => void) {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const shareUuid = params.get("share");
         if (!shareUuid) return;
 
         let cancelled = false;
+
         const loadBuild = async () => {
             try {
                 const res = await fetch(`/api/builds/${shareUuid}`);
                 if (!res.ok) throw new Error("Build not found");
                 const data = await res.json();
-                const validTechs = data.techIds.filter((name: string) => !!name);
+                const validTechs = Array.isArray(data.techIds) ? data.techIds.filter((k: string) => !!k) : [];
                 if (!cancelled) setSelectedTechs(validTechs);
             } catch (err) {
                 console.error("Failed to load shared build", err);
             }
         };
-        loadBuild();
+
+        void loadBuild();
+
         return () => {
             cancelled = true;
         };
     }, [setSelectedTechs]);
 }
 
-/** Import tech selection from Game Summary via navigation state */
 function useImportedTechListLoader({
                                        techs,
                                        setSelectedTechs,
@@ -203,7 +183,7 @@ function useImportedTechListLoader({
                                        setSelectedFaction,
                                    }: {
     techs: Map<string, Tech>;
-    setSelectedTechs: (names: string[]) => void;
+    setSelectedTechs: (techKeys: string[]) => void;
     setEra: (era: number) => void;
     setImportToast: (msg: string | null) => void;
     setSelectedFaction: (f: any) => void;
@@ -224,17 +204,13 @@ function useImportedTechListLoader({
 
         appliedRef.current = true;
 
-        // 1) Set faction if we can resolve it (prevents showing the wrong tech tree background)
         const resolvedFaction = resolveFactionFromHint(st.factionHint);
-        if (resolvedFaction) {
-            setSelectedFaction(resolvedFaction);
-        }
+        if (resolvedFaction) setSelectedFaction(resolvedFaction);
 
-        // 2) Match tech display names to current dataset
-        const normToTechName = new Map<string, string>();
+        const normToTechKey = new Map<string, string>();
         for (const t of techs.values()) {
             const key = normalizeForMatch(t.name);
-            if (key && !normToTechName.has(key)) normToTechName.set(key, t.name);
+            if (key && !normToTechKey.has(key)) normToTechKey.set(key, t.techKey);
         }
 
         const matched: string[] = [];
@@ -242,20 +218,18 @@ function useImportedTechListLoader({
 
         for (const name of incoming) {
             const norm = normalizeForMatch(name);
-            const resolved = normToTechName.get(norm);
+            const resolved = normToTechKey.get(norm);
             if (resolved) matched.push(resolved);
             else missing.push(name);
         }
 
         setSelectedTechs(matched);
 
-        // Jump to era of first matched tech
         if (matched.length > 0) {
-            const first = Array.from(techs.values()).find((t) => t.name === matched[0]);
+            const first = techs.get(matched[0]);
             if (first?.era) setEra(first.era);
         }
 
-        // Tiny toast (auto-hide)
         if (missing.length > 0) {
             setImportToast(`Loaded ${matched.length}/${incoming.length} techs (missing ${missing.length}).`);
             window.setTimeout(() => setImportToast(null), 4500);
@@ -264,7 +238,6 @@ function useImportedTechListLoader({
             window.setTimeout(() => setImportToast(null), 2500);
         }
 
-        // Clear navigation state so back/forward doesn't re-apply
         navigate(location.pathname + location.search, { replace: true, state: null });
     }, [
         techs,
@@ -279,7 +252,6 @@ function useImportedTechListLoader({
     ]);
 }
 
-/** Handles deep-link routing for /tech?faction=X&tech=Y */
 function useDeepLinkedTech({
                                techs,
                                selectedFaction,
@@ -290,7 +262,7 @@ function useDeepLinkedTech({
     techs: Map<string, Tech>;
     selectedFaction: any;
     setSelectedFaction: (faction: any) => void;
-    setSelectedTechs: (names: string[]) => void;
+    setSelectedTechs: (techKeys: string[]) => void;
     setEra: (era: number) => void;
 }) {
     const [params] = useSearchParams();
@@ -306,7 +278,6 @@ function useDeepLinkedTech({
 
         appliedRef.current = true;
 
-        // 1️⃣ Select faction
         const fi = {
             isMajor: true,
             enumFaction: factionParam.toUpperCase() as any,
@@ -314,27 +285,27 @@ function useDeepLinkedTech({
             uiLabel: factionParam.toLowerCase(),
         };
 
-        if (!selectedFaction.isMajor || selectedFaction.enumFaction !== fi.enumFaction) {
+        if (!selectedFaction?.isMajor || selectedFaction.enumFaction !== fi.enumFaction) {
             setSelectedFaction(fi);
         }
 
-        // 2️⃣ Find and select tech
-        const match = Array.from(techs.values()).find((t) => normalize(t.name) === normalize(techParam));
+        const match =
+            Array.from(techs.values()).find((t) => t.techKey === techParam) ??
+            // optional backward-compat: old links used name-ish
+            Array.from(techs.values()).find((t) => normalize(t.name) === normalize(techParam));
 
         if (match) {
-            setSelectedTechs([match.name]);
+            setSelectedTechs([match.techKey]);
             setEra(match.era);
 
-            // ✅ Clean the URL silently (no reload)
             const newUrl = window.location.origin + "/tech";
             window.history.replaceState({}, "", newUrl);
         } else {
             console.warn("⚠️ No tech match found for", techParam);
         }
-    }, [techs]);
+    }, [params, techs, selectedFaction, setSelectedFaction, setSelectedTechs, setEra]);
 }
 
-/** Handles era progression logic and unlocks */
 function useEraController(selectedTechObjects: Tech[]) {
     const [era, setEra] = useState(1);
 
@@ -343,6 +314,7 @@ function useEraController(selectedTechObjects: Tech[]) {
 
     const maxUnlockedEra = useMemo(() => {
         const eraCounts = Array(MAX_ERA).fill(0);
+
         selectedTechObjects.forEach((t) => {
             if (t.era >= 1 && t.era <= MAX_ERA) eraCounts[t.era - 1]++;
         });

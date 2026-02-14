@@ -1,26 +1,18 @@
+// AdminTechPlacementPanel.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./AdminTechPlacementPanel.css";
-
-export type StepMode = "pct" | "px";
-
-export type AdminCoords = { xPct: number; yPct: number };
-
-export type AdminPlacementDraft = {
-    name: string;
-    type: string;
-    era: number; // 1..6
-    coords: AdminCoords; // ALWAYS stored as %
-};
-
-export type AdminStagedRow = {
-    name: string;
-    summary?: string; // optional display string like "(12.3→12.5, 44.0→43.8 | 1→2)"
-};
+import type {
+    StepMode,
+    AdminCoords,
+    AdminPlacementDraft,
+    AdminStagedRow,
+    AdminSaveMessage,
+} from "./adminPlacementTypes";
 
 type Props = {
     isOpen: boolean;
 
-    // Token (A1)
+    // Token
     tokenIsSet: boolean;
     onSetToken: (token: string) => void;
 
@@ -36,26 +28,25 @@ type Props = {
 
     // Nudging
     stepMode: StepMode;
-    stepPct: number; // e.g. 0.2
-    stepPx: number; // e.g. 10
+    stepPct: number;
+    stepPx: number;
     onChangeStepMode: (mode: StepMode) => void;
     onChangeStepPct: (pct: number) => void;
     onChangeStepPx: (px: number) => void;
 
-    // Optional: if you want to show “Shift = 5x” and also wire it later
-    shiftMultiplierLabel?: string; // default "Shift = 5×"
+    shiftMultiplierLabel?: string; // default "Shift + Arrow = 5×"
 
     // Staged edits
     stagedCount: number;
     stagedRows: AdminStagedRow[];
-    onFocusStaged: (techName: string) => void;
-    onUndoStaged: (techName: string) => void;
+    onFocusStaged: (techKey: string) => void;
+    onUndoStaged: (techKey: string) => void;
     onDiscardAll: () => void;
 
     // Save
     saveDisabled: boolean;
-    saveLabel: string; // "Save" / "Saving..."
-    saveMessage?: { kind: "idle" | "ok" | "err"; text: string };
+    saveLabel: string;
+    saveMessage?: AdminSaveMessage;
     onSave: () => void;
 
     // Optional: let parent reset panel position on faction/route changes
@@ -69,7 +60,6 @@ const toNumberOr = (s: string, fallback: number) => {
 };
 
 const DEFAULT_POS = { x: 18, y: 18 };
-
 const DEFAULT_SHIFT_LABEL = "Shift + Arrow = 5×";
 
 export default function AdminTechPlacementPanel({
@@ -162,7 +152,9 @@ export default function AdminTechPlacementPanel({
         try {
             const el = e.currentTarget as HTMLElement;
             el.releasePointerCapture(e.pointerId);
-        } catch {}
+        } catch {
+            // ignore
+        }
     };
 
     if (!isOpen) return null;
@@ -252,7 +244,12 @@ export default function AdminTechPlacementPanel({
                                         type="number"
                                         step={0.01}
                                         value={xValue}
-                                        onChange={(e) => onChangeCoords({ xPct: toNumberOr(e.target.value, xValue), yPct: yValue })}
+                                        onChange={(e) =>
+                                            onChangeCoords({
+                                                xPct: toNumberOr(e.target.value, xValue),
+                                                yPct: yValue,
+                                            })
+                                        }
                                     />
                                 </label>
 
@@ -263,7 +260,12 @@ export default function AdminTechPlacementPanel({
                                         type="number"
                                         step={0.01}
                                         value={yValue}
-                                        onChange={(e) => onChangeCoords({ xPct: xValue, yPct: toNumberOr(e.target.value, yValue) })}
+                                        onChange={(e) =>
+                                            onChangeCoords({
+                                                xPct: xValue,
+                                                yPct: toNumberOr(e.target.value, yValue),
+                                            })
+                                        }
                                     />
                                 </label>
                             </div>
@@ -275,7 +277,9 @@ export default function AdminTechPlacementPanel({
                                     onClick={async () => {
                                         try {
                                             await navigator.clipboard.writeText(coordsCsv);
-                                        } catch {}
+                                        } catch {
+                                            // ignore
+                                        }
                                     }}
                                     title="Copy xPct,yPct"
                                 >
@@ -292,7 +296,9 @@ export default function AdminTechPlacementPanel({
                                             const y = Number(parts[1]);
                                             if (!Number.isFinite(x) || !Number.isFinite(y)) return;
                                             onChangeCoords({ xPct: x, yPct: y });
-                                        } catch {}
+                                        } catch {
+                                            // ignore
+                                        }
                                     }}
                                     title="Paste xPct,yPct"
                                 >
@@ -390,16 +396,16 @@ export default function AdminTechPlacementPanel({
                     {stagedRows.length > 0 ? (
                         <div className="admin-list">
                             {stagedRows.map((row) => (
-                                <div className="admin-list__row" key={row.name}>
+                                <div className="admin-list__row" key={row.techKey}>
                                     <div className="admin-list__left">
                                         <div className="admin-list__name">{row.name}</div>
                                         {row.summary ? <div className="admin-list__summary">{row.summary}</div> : null}
                                     </div>
                                     <div className="admin-list__right">
-                                        <button className="admin-button" onClick={() => onFocusStaged(row.name)}>
+                                        <button className="admin-button" onClick={() => onFocusStaged(row.techKey)}>
                                             Focus
                                         </button>
-                                        <button className="admin-button" onClick={() => onUndoStaged(row.name)}>
+                                        <button className="admin-button" onClick={() => onUndoStaged(row.techKey)}>
                                             Undo
                                         </button>
                                     </div>
@@ -414,6 +420,12 @@ export default function AdminTechPlacementPanel({
                 {/* Small reminder */}
                 <div className="admin-panel__footer">
                     Storage format: <span className="admin-mono">coords.xPct / coords.yPct</span> (always %)
+                    {activeDraft?.techKey ? (
+                        <>
+                            {" "}
+                            · <span className="admin-mono">{activeDraft.techKey}</span>
+                        </>
+                    ) : null}
                 </div>
             </div>
         </aside>

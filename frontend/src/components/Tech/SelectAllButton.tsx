@@ -9,17 +9,18 @@ interface SelectAllButtonProps {
 
 const SelectAllButton: React.FC<SelectAllButtonProps> = ({ eraTechs, setSelectedTechNames }) => {
     const handleSelectAll = () => {
-        const eraNames = eraTechs.map((t) => t.name);
+        const eraKeys = eraTechs.map((t) => t.techKey);
 
         setSelectedTechNames((prev) => {
-            if (eraNames.length === 0) return prev;
+            if (eraKeys.length === 0) return prev;
 
             const prevSet = new Set(prev);
             const toAdd: string[] = [];
 
             // Preserve the era order and avoid duplicates
-            for (const name of eraNames) {
-                if (!prevSet.has(name)) toAdd.push(name);
+            for (const k of eraKeys) {
+                if (!k) continue;
+                if (!prevSet.has(k)) toAdd.push(k);
             }
 
             return toAdd.length > 0 ? [...prev, ...toAdd] : prev;

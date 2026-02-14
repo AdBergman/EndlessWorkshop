@@ -1,8 +1,9 @@
-import React from 'react';
-import { Improvement } from '@/types/dataTypes';
+// ImprovementSheetView.tsx
+import React from "react";
+import type { UnlockedImprovement } from "@/utils/unlocks";
 
 interface ImprovementSheetViewProps {
-    improvements: Improvement[];
+    improvements: UnlockedImprovement[];
 }
 
 const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvements }) => {
@@ -23,23 +24,16 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                 </tr>
                 </thead>
                 <tbody>
-                {improvements
-                    .filter(imp => imp && imp.name) // Defensively filter items without a name to prevent key errors
-                    .map((imp) => (
+                {improvements.map((imp) => (
                     <tr key={imp.name}>
                         <td>{imp.name}</td>
                         <td>{imp.era}</td>
-                        <td style={{ whiteSpace: 'pre-line' }}>
-                            {imp.effects && imp.effects.length > 0
-                                ? imp.effects.join('\n')
-                                : <span style={{ color: '#888' }}>-- No effects data --</span>}
+                        <td style={{ whiteSpace: "pre-line" }}>
+                            {imp.effects?.length ? imp.effects.join("\n") : <span style={{ color: "#888" }}>-- No effects data --</span>}
                         </td>
                         <td>{imp.unique}</td>
                         <td>
-                            {/* With consistent data, we can now safely join the array */}
-                            {imp.cost && imp.cost.length > 0
-                                ? imp.cost.join(', ')
-                                : <span style={{ color: '#888' }}>-- No cost data --</span>}
+                            {imp.cost?.length ? imp.cost.join(", ") : <span style={{ color: "#888" }}>-- No cost data --</span>}
                         </td>
                     </tr>
                 ))}

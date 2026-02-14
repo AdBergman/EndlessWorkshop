@@ -18,14 +18,15 @@ export interface Unit {
 }
 
 export interface Tech {
+    techKey: string;
     name: string;
     era: number;
     type: string;
     unlocks: string[];
     effects: string[];
-    prereq: string;
+    prereq: string | null;
     factions: string[];
-    excludes: string;
+    excludes: string | null;
     coords: { xPct: number; yPct: number };
 }
 
