@@ -304,8 +304,14 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                                                     <div className="admin-import-kvLabel">Unchanged</div>
                                                     <div className="admin-import-kvValue">{summary.counts?.unchanged}</div>
                                                 </div>
+                                                {summary.counts?.deleted !== undefined ? (
+                                                    <div className="admin-import-kv">
+                                                        <div className="admin-import-kvLabel">Deleted</div>
+                                                        <div className="admin-import-kvValue">{summary.counts?.deleted}</div>
+                                                    </div>
+                                                ) : null}
                                                 <div className="admin-import-kv">
-                                                    <div className="admin-import-kvLabel">Failed</div>
+                                                    <div className="admin-import-kvLabel">Invalid</div>
                                                     <div className="admin-import-kvValue">{summary.counts?.failed}</div>
                                                 </div>
                                                 <div className="admin-import-kv">
@@ -322,7 +328,6 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                                                         {warnings.map((w) => (
                                                             <div key={w.code} className="admin-import-kv">
                                                                 <div className="admin-import-kvLabel">
-                                                                    {warningLabels[w.code] ?? w.code}
                                                                     <span className="admin-import-codePill" title={w.code}>
                                                                         {w.code}
                                                                     </span>

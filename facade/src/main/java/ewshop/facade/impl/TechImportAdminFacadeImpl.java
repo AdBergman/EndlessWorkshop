@@ -56,6 +56,9 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
             }
         }
 
+        // "failed" means: rows that failed to map/validate into snapshots (not filtered by policy)
+        int failed = received - snapshots.size();
+
         if (snapshots.isEmpty()) {
             long durationMs = System.currentTimeMillis() - startMs;
 
@@ -64,7 +67,8 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
                     0,
                     0,
                     0,
-                    received
+                    0,      // deleted
+                    failed
             );
 
             ImportDiagnosticsDto diagnostics = new ImportDiagnosticsDto(
@@ -85,8 +89,7 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
         int inserted = result.getInserted();
         int updated = result.getUpdated();
         int unchanged = result.getUnchanged();
-
-        int failed = received - (inserted + updated + unchanged);
+        int deleted = result.getDeleted();
 
         long durationMs = System.currentTimeMillis() - startMs;
 
@@ -95,6 +98,7 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
                 inserted,
                 updated,
                 unchanged,
+                deleted,
                 failed
         );
 

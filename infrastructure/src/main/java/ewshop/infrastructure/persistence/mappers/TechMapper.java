@@ -25,7 +25,7 @@ public class TechMapper {
         entity.setTechKey(domain.getTechKey());
         entity.setType(domain.getType());
         entity.setEra(domain.getEra());
-        entity.setEffects(domain.getEffects() != null ? domain.getEffects() : Collections.emptyList());
+        entity.setEffectLines(domain.getEffects() != null ? domain.getEffects() : Collections.emptyList());
         entity.setTechCoords(domain.getTechCoords());
         entity.setFactions(domain.getFactions() != null ? domain.getFactions() : Collections.emptySet());
         entity.setUnlocks(domain.getUnlocks() != null
@@ -107,7 +107,7 @@ public class TechMapper {
                 .techKey(entity.getTechKey())
                 .type(entity.getType())
                 .era(entity.getEra())
-                .effects(entity.getEffects() != null ? entity.getEffects() : Collections.emptyList())
+                .effects(entity.getEffectLines() != null ? entity.getEffectLines() : Collections.emptyList())
                 .techCoords(entity.getTechCoords())
                 .prereq(entity.getPrereq() != null
                         ? Tech.builder()

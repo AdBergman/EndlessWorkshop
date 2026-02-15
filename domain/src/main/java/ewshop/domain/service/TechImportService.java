@@ -29,6 +29,17 @@ public class TechImportService {
                 .map(gateEvaluator::withDerivedAvailableFactions)
                 .toList();
 
-        return techRepository.importTechSnapshot(enriched);
+        // filter: never store hidden or no factions
+        List<TechImportSnapshot> publicOnly = enriched.stream()
+                .filter(t -> !t.hidden())
+                .filter(t -> t.availableFactions() != null && !t.availableFactions().isEmpty())
+                .toList();
+
+        // fail-safe
+        if (!enriched.isEmpty() && publicOnly.isEmpty()) {
+            throw new IllegalStateException("Tech import produced 0 public techs; refusing to write/delete.");
+        }
+
+        return techRepository.importTechSnapshot(publicOnly);
     }
 }

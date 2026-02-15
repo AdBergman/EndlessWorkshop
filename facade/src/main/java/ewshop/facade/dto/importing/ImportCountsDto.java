@@ -5,5 +5,6 @@ public record ImportCountsDto(
         int inserted,
         int updated,
         int unchanged,
+        int deleted,
         int failed
 ) { }

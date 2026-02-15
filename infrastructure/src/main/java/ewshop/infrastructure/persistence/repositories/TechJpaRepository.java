@@ -22,6 +22,25 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
 
     List<TechEntity> findAllByTechKeyIn(List<String> techKeys);
 
+    // used for entity deletes (cascades / orphans)
+    List<TechEntity> findAllByTechKeyNotIn(List<String> techKeys);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "delete from tech_unlocks where tech_entity_id in (:techIds)", nativeQuery = true)
+    int deleteTechUnlockLinksByTechIds(@Param("techIds") List<Long> techIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "delete from tech_unlock where tech_id in (:techIds)", nativeQuery = true)
+    int deleteTechUnlockRowsByTechIds(@Param("techIds") List<Long> techIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "update tech set excludes_id = null where excludes_id in (:ids)", nativeQuery = true)
+    int clearExcludesRefsToTechIds(@Param("ids") List<Long> ids);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(value = "update tech set prereq_id = null where prereq_id in (:ids)", nativeQuery = true)
+    int clearPrereqRefsToTechIds(@Param("ids") List<Long> ids);
+
     @Override
     @EntityGraph(attributePaths = {
             "unlocks",

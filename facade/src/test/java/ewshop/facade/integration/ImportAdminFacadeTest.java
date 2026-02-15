@@ -61,7 +61,7 @@ class ImportAdminFacadeTest extends BaseIT {
                 "Technology_X",
                 "Imported Name (should NOT overwrite curated)",
                 "New lore",
-                true,
+                false,
                 3,
                 "Development",
                 List.of(),
@@ -96,7 +96,7 @@ class ImportAdminFacadeTest extends BaseIT {
         assertThat(reloaded.getTechCoords().getYPct()).isEqualTo(20.0);
 
         assertThat(reloaded.getLore()).isEqualTo("New lore");
-        assertThat(reloaded.isHidden()).isTrue();
+        assertThat(reloaded.isHidden()).isFalse();
         assertThat(reloaded.getEra()).isEqualTo(3);
         assertThat(reloaded.getType()).isEqualTo(TechType.ECONOMY);
     }

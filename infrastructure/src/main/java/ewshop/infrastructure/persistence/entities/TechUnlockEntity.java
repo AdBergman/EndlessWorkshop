@@ -10,8 +10,8 @@ public class TechUnlockEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "tech_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tech_id", nullable = false)
     private TechEntity tech;
 
     // Legacy – replaced by unlock_type / unlock_category / unlock_element_name

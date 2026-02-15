@@ -83,25 +83,30 @@ public class TechRepositoryAdapter implements TechRepository {
     @Override
     @Transactional
     public TechImportResult importTechSnapshot(List<TechImportSnapshot> snapshots) {
+
         TechImportResult result = new TechImportResult();
 
         if (snapshots == null || snapshots.isEmpty()) {
             return result;
         }
 
-        var techKeys = snapshots.stream()
+        List<String> keepKeys = snapshots.stream()
                 .map(TechImportSnapshot::techKey)
+                .distinct()
                 .toList();
 
-        Map<String, TechEntity> existingByKey = techJpaRepository.findAllByTechKeyIn(techKeys).stream()
-                .collect(Collectors.toMap(
-                        TechEntity::getTechKey,
-                        Function.identity()
-                ));
+        if (keepKeys.isEmpty()) {
+            throw new IllegalStateException("Refusing to delete all techs: keepKeys empty.");
+        }
+
+        Map<String, TechEntity> existingByKey =
+                techJpaRepository.findAllByTechKeyIn(keepKeys).stream()
+                        .collect(Collectors.toMap(TechEntity::getTechKey, Function.identity()));
 
         List<TechEntity> toSave = new ArrayList<>();
 
         for (TechImportSnapshot snapshot : snapshots) {
+
             TechEntity entity = existingByKey.get(snapshot.techKey());
             boolean isInsert = (entity == null);
 
@@ -113,20 +118,42 @@ public class TechRepositoryAdapter implements TechRepository {
             UpsertOutcome outcome = applySnapshot(entity, snapshot, isInsert);
 
             switch (outcome) {
-                case INSERTED -> {
-                    toSave.add(entity);
-                    result.incrementInserted();
-                }
-                case UPDATED -> {
-                    toSave.add(entity);
-                    result.incrementUpdated();
-                }
+                case INSERTED -> { toSave.add(entity); result.incrementInserted(); }
+                case UPDATED  -> { toSave.add(entity); result.incrementUpdated(); }
                 case UNCHANGED -> result.incrementUnchanged();
             }
         }
 
         if (!toSave.isEmpty()) {
             techJpaRepository.saveAll(toSave);
+        }
+
+        List<TechEntity> obsolete = techJpaRepository.findAllByTechKeyNotIn(keepKeys);
+
+        if (!obsolete.isEmpty()) {
+
+            List<Long> obsoleteIds = obsolete.stream()
+                    .map(TechEntity::getId)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            if (!obsoleteIds.isEmpty()) {
+                // remove join rows (if present)
+                techJpaRepository.deleteTechUnlockLinksByTechIds(obsoleteIds);
+
+                // remove legacy child rows (if present)
+                techJpaRepository.deleteTechUnlockRowsByTechIds(obsoleteIds);
+
+                // ensure DB sees those deletes before deleting tech
+                techJpaRepository.flush();
+            }
+
+            techJpaRepository.clearExcludesRefsToTechIds(obsoleteIds);
+            techJpaRepository.clearPrereqRefsToTechIds(obsoleteIds);
+            techJpaRepository.flush();
+
+            techJpaRepository.deleteAll(obsolete);
+            result.setDeleted(obsolete.size());
         }
 
         return result;

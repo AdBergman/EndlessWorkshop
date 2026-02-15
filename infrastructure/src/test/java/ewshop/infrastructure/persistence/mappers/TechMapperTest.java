@@ -52,7 +52,7 @@ class TechMapperTest {
         entity.setName("Architecture");
         entity.setType(TechType.DISCOVERY);
         entity.setEra(2);
-        entity.setEffects(List.of("Unlocks new buildings"));
+        entity.setEffectLines(List.of("Unlocks new buildings"));
         entity.setFactions(Set.of(Faction.ASPECTS));
         entity.setTechCoords(new TechCoords(50.5, 75.5));
         entity.setPrereq(prereqEntity);
@@ -108,7 +108,7 @@ class TechMapperTest {
         assertThat(entity.getTechKey()).isEqualTo("Tech_Architecture");
         assertThat(entity.getType()).isEqualTo(TechType.DISCOVERY);
         assertThat(entity.getEra()).isEqualTo(2);
-        assertThat(entity.getEffects()).containsExactly("Unlocks new buildings");
+        assertThat(entity.getEffectLines()).containsExactly("Unlocks new buildings");
         assertThat(entity.getFactions()).containsExactlyInAnyOrder(Faction.ASPECTS);
         assertThat(entity.getTechCoords()).isNotNull();
         assertThat(entity.getTechCoords().getXPct()).isEqualTo(50.5);
@@ -136,7 +136,7 @@ class TechMapperTest {
         TechEntity entity = new TechEntity();
         entity.setTechKey("Tech_Any");
         entity.setName("Any");
-        entity.setEffects(null);
+        entity.setEffectLines(null);
         entity.setFactions(null);
         entity.setUnlocks(null);
 
@@ -161,7 +161,7 @@ class TechMapperTest {
         TechEntity entity = techMapper.toEntity(domain);
 
         assertThat(entity).isNotNull();
-        assertThat(entity.getEffects()).isNotNull().isEmpty();
+        assertThat(entity.getEffectLines()).isNotNull().isEmpty();
         assertThat(entity.getFactions()).isNotNull().isEmpty();
         assertThat(entity.getUnlocks()).isNotNull().isEmpty();
     }

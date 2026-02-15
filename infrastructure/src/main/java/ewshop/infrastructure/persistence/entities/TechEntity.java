@@ -26,8 +26,10 @@ public class TechEntity {
     @Column(nullable = false)
     private int era;
 
-    @ElementCollection
-    private List<String> effects;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "tech_effect_lines", joinColumns = @JoinColumn(name = "tech_id"))
+    @Column(name = "effect_line", nullable = false)
+    private List<String> effectLines;
 
     @Embedded
     private TechCoords techCoords;
@@ -60,7 +62,7 @@ public class TechEntity {
     @Column
     private Boolean hidden;
 
-    @OneToMany(mappedBy = "tech", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "tech", fetch = FetchType.LAZY)
     private List<TechUnlockEntity> unlocks;
 
     public TechEntity() {}
@@ -93,12 +95,12 @@ public class TechEntity {
         this.era = era;
     }
 
-    public List<String> getEffects() {
-        return effects;
+    public List<String> getEffectLines() {
+        return effectLines;
     }
 
-    public void setEffects(List<String> effects) {
-        this.effects = effects;
+    public void setEffectLines(List<String> effects) {
+        this.effectLines = effects;
     }
 
     public TechCoords getTechCoords() {
