@@ -1,8 +1,8 @@
-package ewshop.facade.dto.response;
+package ewshop.facade.dto.importing.improvements;
 
 import java.util.List;
 
-public record ImprovementDto(
+public record ImprovementImportImprovementDto(
         String constructibleKey,
         String displayName,
         String category,

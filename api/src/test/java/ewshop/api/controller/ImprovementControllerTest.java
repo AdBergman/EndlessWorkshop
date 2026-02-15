@@ -29,13 +29,12 @@ class ImprovementControllerTest {
 
     @Test
     void getAllImprovements_returnsJson() throws Exception {
-        ImprovementDto i1 = ImprovementDto.builder()
-                .name("Traveler's Shrine")
-                .effects(List.of("+15 Approval"))
-                .unique("CITY")
-                .cost(List.of())
-                .era(1)
-                .build();
+        ImprovementDto i1 = new ImprovementDto(
+                "DistrictImprovement_TravelersShrine",
+                "Traveler's Shrine",
+                "Economy",
+                List.of("+15 Approval")
+        );
 
         when(improvementFacade.getAllImprovements()).thenReturn(List.of(i1));
 
@@ -43,10 +42,9 @@ class ImprovementControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].name").value("Traveler's Shrine"))
-                .andExpect(jsonPath("$[0].effects[0]").value("+15 Approval"))
-                .andExpect(jsonPath("$[0].unique").value("CITY"))
-                .andExpect(jsonPath("$[0].cost").isEmpty())
-                .andExpect(jsonPath("$[0].era").value(1));
+                .andExpect(jsonPath("$[0].constructibleKey").value("DistrictImprovement_TravelersShrine"))
+                .andExpect(jsonPath("$[0].displayName").value("Traveler's Shrine"))
+                .andExpect(jsonPath("$[0].category").value("Economy"))
+                .andExpect(jsonPath("$[0].descriptionLines[0]").value("+15 Approval"));
     }
 }

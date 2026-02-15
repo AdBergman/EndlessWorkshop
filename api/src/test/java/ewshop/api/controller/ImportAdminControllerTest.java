@@ -6,6 +6,7 @@ import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ class ImportAdminControllerTest {
 
     @MockBean
     private DistrictImportAdminFacade districtImportAdminFacade;
+
+    @MockBean
+    private ImprovementImportAdminFacade improvementImportAdminFacade;
 
     @Test
     void importTechs_returnsOk_andCallsFacade_whenPayloadHasTechs() throws Exception {

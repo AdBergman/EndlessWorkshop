@@ -1,10 +1,8 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.model.Improvement;
-import ewshop.domain.model.enums.UniqueType;
-import ewshop.domain.repository.ImprovementRepository;
 import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
+import ewshop.infrastructure.persistence.entities.ImprovementEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
@@ -19,38 +17,33 @@ class ImprovementFacadeTest extends BaseIT {
     @Autowired
     private ImprovementFacade improvementFacade;
 
-    @Autowired
-    private ImprovementRepository improvementRepository;
-
     @PersistenceContext
     private EntityManager entityManager;
 
     @Test
     void contextLoads() {
         assertThat(improvementFacade).isNotNull();
-        assertThat(improvementRepository).isNotNull();
     }
 
     @Test
     void shouldReturnAllImprovements() {
-        // Given
-        Improvement shrine = Improvement.builder()
-                .name("Traveler's Shrine")
-                .effects(List.of("+15 Approval"))
-                .unique(UniqueType.CITY)
-                .era(1)
-                .build();
+        // Given (seed DB directly, since domain repo no longer has save())
+        ImprovementEntity shrine = new ImprovementEntity();
+        shrine.setConstructibleKey("DistrictImprovement_TravelersShrine");
+        shrine.setDisplayName("Traveler's Shrine");
+        shrine.setCategory("Economy");
+        shrine.setDescriptionLines(List.of("+15 Approval"));
 
-        Improvement garrison = Improvement.builder()
-                .name("Garrison")
-                .effects(List.of("+500 District Fortification"))
-                .unique(UniqueType.CITY)
-                .era(2)
-                .build();
+        ImprovementEntity garrison = new ImprovementEntity();
+        garrison.setConstructibleKey("DistrictImprovement_Garrison");
+        garrison.setDisplayName("Garrison");
+        garrison.setCategory("Defense");
+        garrison.setDescriptionLines(List.of("+500 District Fortification"));
 
-        improvementRepository.save(shrine);
-        improvementRepository.save(garrison);
+        entityManager.persist(shrine);
+        entityManager.persist(garrison);
         entityManager.flush();
+        entityManager.clear();
 
         // When
         List<ImprovementDto> result = improvementFacade.getAllImprovements();
@@ -58,23 +51,22 @@ class ImprovementFacadeTest extends BaseIT {
         // Then
         assertThat(result).hasSize(2);
 
-        // Verify Traveler's Shrine DTO
         ImprovementDto shrineDto = result.stream()
-                .filter(i -> "Traveler's Shrine".equals(i.name()))
+                .filter(i -> "DistrictImprovement_TravelersShrine".equals(i.constructibleKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Traveler's Shrine DTO not found"));
-        assertThat(shrineDto.effects()).containsExactly("+15 Approval");
-        assertThat(shrineDto.unique()).isEqualTo("City");
-        assertThat(shrineDto.era()).isEqualTo(1);
 
-        // Verify Garrison DTO
+        assertThat(shrineDto.displayName()).isEqualTo("Traveler's Shrine");
+        assertThat(shrineDto.category()).isEqualTo("Economy");
+        assertThat(shrineDto.descriptionLines()).containsExactly("+15 Approval");
+
         ImprovementDto garrisonDto = result.stream()
-                .filter(i -> "Garrison".equals(i.name()))
+                .filter(i -> "DistrictImprovement_Garrison".equals(i.constructibleKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Garrison DTO not found"));
-        assertThat(garrisonDto.effects()).containsExactly("+500 District Fortification");
-        assertThat(garrisonDto.unique()).isEqualTo("City");
-        assertThat(garrisonDto.era()).isEqualTo(2);
-    }
 
+        assertThat(garrisonDto.displayName()).isEqualTo("Garrison");
+        assertThat(garrisonDto.category()).isEqualTo("Defense");
+        assertThat(garrisonDto.descriptionLines()).containsExactly("+500 District Fortification");
+    }
 }

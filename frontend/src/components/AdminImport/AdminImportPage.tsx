@@ -62,6 +62,33 @@ function validateDistrictFile(json: DistrictImportFile): string | null {
     return null;
 }
 
+type ImprovementImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    improvements?: unknown[];
+};
+
+function metaFromImprovementFile(json: ImprovementImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.improvements) ? json.improvements.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Improvement count", value: String(count) },
+    ];
+}
+
+function validateImprovementFile(json: ImprovementImportFile): string | null {
+    if (!json || !Array.isArray(json.improvements) || json.improvements.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'improvements' array.";
+    }
+    return null;
+}
+
 async function checkAdminToken(token: string): Promise<{ ok: boolean; message?: string }> {
     try {
         const res = await fetch("/api/admin/import/check-token", {
@@ -108,7 +135,16 @@ export default function AdminImportPage() {
                 validate: validateDistrictFile,
                 importButtonLabel: "Import districts",
             },
-            { id: "improvements", title: "Improvements", description: "Not implemented yet.", enabled: false },
+            {
+                id: "improvements",
+                title: "Improvements",
+                description: "Upload an improvement export and import it into the database.",
+                enabled: true,
+                endpoint: "/api/admin/import/improvements",
+                getMeta: metaFromImprovementFile,
+                validate: validateImprovementFile,
+                importButtonLabel: "Import improvements",
+            },
             { id: "units", title: "Units", description: "Not implemented yet.", enabled: false },
             {
                 id: "techs",

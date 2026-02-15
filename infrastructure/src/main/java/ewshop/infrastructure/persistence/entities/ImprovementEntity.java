@@ -1,104 +1,82 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.model.enums.UniqueType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "improvements")
+@Table(
+        name = "improvements",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_improvement_constructible_key",
+                columnNames = "constructible_key"
+        )
+)
 public class ImprovementEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+    @Column(name = "constructible_key", nullable = false)
+    private String constructibleKey;
+
+    @Column(name = "display_name", nullable = false)
+    private String displayName;
+
+    @Column(name = "category")
+    private String category;
 
     @ElementCollection
-    @CollectionTable(name = "improvement_effects", joinColumns = @JoinColumn(name = "improvement_id"))
-    @Column(name = "effect")
-    private List<String> effects;
+    @CollectionTable(
+            name = "improvement_description_lines",
+            joinColumns = @JoinColumn(
+                    name = "improvement_id",
+                    foreignKey = @ForeignKey(name = "fk_improvement_desc_lines_improvement")
+            )
+    )
+    @OrderColumn(name = "line_index")
+    @Column(name = "line", nullable = false, columnDefinition = "text")
+    private List<String> descriptionLines = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "unique_type")
-    private UniqueType unique;
-
-    @ElementCollection
-    @CollectionTable(name = "improvement_costs", joinColumns = @JoinColumn(name = "improvement_id"))
-    private List<StrategicCostEntity> cost;
-
-    @Column(name = "era", nullable = false)
-    private int era;
-
-    // Constructors
     public ImprovementEntity() {}
 
-    public ImprovementEntity(String name, List<String> effects, UniqueType unique, List<StrategicCostEntity> cost, int era) {
-        this.name = name;
-        this.effects = effects;
-        this.unique = unique;
-        this.cost = cost;
-        this.era = era;
-    }
-
-    // Getters & Setters
     public Long getId() {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getConstructibleKey() {
+        return constructibleKey;
     }
 
-    public String getName() {
-        return name;
+    public void setConstructibleKey(String constructibleKey) {
+        this.constructibleKey = constructibleKey;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getDisplayName() {
+        return displayName;
     }
 
-    public List<String> getEffects() {
-        return effects;
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
-    public void setEffects(List<String> effects) {
-        this.effects = effects;
+    public String getCategory() {
+        return category;
     }
 
-    public UniqueType getUnique() {
-        return unique;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public void setUnique(UniqueType unique) {
-        this.unique = unique;
+    public List<String> getDescriptionLines() {
+        return descriptionLines;
     }
 
-    public List<StrategicCostEntity> getCost() {
-        return cost;
-    }
-
-    public void setCost(List<StrategicCostEntity> cost) {
-        this.cost = cost;
-    }
-
-    public int getEra() {
-        return era;
-    }
-
-    public void setEra(int era) {
-        this.era = era;
+    public void setDescriptionLines(List<String> descriptionLines) {
+        this.descriptionLines = (descriptionLines == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(descriptionLines);
     }
 }

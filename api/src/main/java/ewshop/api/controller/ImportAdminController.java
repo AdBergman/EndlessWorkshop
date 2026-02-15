@@ -1,8 +1,10 @@
 package ewshop.api.controller;
 
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import org.springframework.http.HttpStatus;
@@ -14,13 +16,16 @@ public class ImportAdminController {
 
     private final TechImportAdminFacade techImportAdminFacade;
     private final DistrictImportAdminFacade districtImportAdminFacade;
+    private final ImprovementImportAdminFacade improvementImportAdminFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
-            DistrictImportAdminFacade districtImportAdminFacade
+            DistrictImportAdminFacade districtImportAdminFacade,
+            ImprovementImportAdminFacade improvementImportAdminFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
+        this.improvementImportAdminFacade = improvementImportAdminFacade;
     }
 
     @GetMapping("/check-token")
@@ -43,5 +48,13 @@ public class ImportAdminController {
             throw new IllegalArgumentException("Import file is missing districts[]");
         }
         return districtImportAdminFacade.importDistricts(dto);
+    }
+
+    @PostMapping(value = "/improvements", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importImprovements(@RequestBody ImprovementImportBatchDto dto) {
+        if (dto.improvements() == null || dto.improvements().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing improvements[]");
+        }
+        return improvementImportAdminFacade.importImprovements(dto);
     }
 }

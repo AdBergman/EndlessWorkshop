@@ -49,6 +49,14 @@ public class FacadeConfig {
     }
 
     @Bean
+    public ImprovementImportAdminFacade improvementImportAdminFacade(
+            ImprovementImportService improvementImportService,
+            ImprovementService improvementService
+    ) {
+        return new ImprovementImportAdminFacadeImpl(improvementImportService, improvementService);
+    }
+
+    @Bean
     public UnitFacade unitFacade(
             UnitSpecializationService unitSpecializationService,
             UnitDtoPostProcessor postProcessor

@@ -1,18 +1,16 @@
 package ewshop.domain.repository;
 
+import ewshop.domain.command.ImprovementImportSnapshot;
 import ewshop.domain.model.Improvement;
+import ewshop.domain.model.results.ImportResult;
 
 import java.util.List;
 
 public interface ImprovementRepository {
 
-    Improvement save(Improvement improvement);
-
-    void saveAll(List<Improvement> improvements);
-
-    Improvement findByName(String name);
 
     List<Improvement> findAll();
 
-    void deleteAll();
+
+    ImportResult importImprovementSnapshot(List<ImprovementImportSnapshot> snapshots);
 }
