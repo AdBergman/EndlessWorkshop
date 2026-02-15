@@ -29,24 +29,22 @@ class DistrictControllerTest {
 
     @Test
     void getAllDistricts_returnsJson() throws Exception {
-        DistrictDto d1 = DistrictDto.builder()
-                .name("Farm")
-                .effect("+2 Food")
-                .tileBonus(List.of("+1 Food on tile producing Food"))
-                .adjacencyBonus(List.of("+1 Food for each adjacent River"))
-                .info(List.of())
-                .placementPrereq("")
-                .build();
+        DistrictDto dto = new DistrictDto(
+                "Aspect_District_Tier1_Science",
+                "Laboratory",
+                "Science",
+                List.of("+2 Science per District Level")
+        );
 
-        when(districtFacade.getAllDistricts()).thenReturn(List.of(d1));
+        when(districtFacade.getAllDistricts()).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/districts")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].name").value("Farm"))
-                .andExpect(jsonPath("$[0].effect").value("+2 Food"))
-                .andExpect(jsonPath("$[0].tileBonus[0]").value("+1 Food on tile producing Food"))
-                .andExpect(jsonPath("$[0].adjacencyBonus[0]").value("+1 Food for each adjacent River"));
+                .andExpect(jsonPath("$[0].districtKey").value("Aspect_District_Tier1_Science"))
+                .andExpect(jsonPath("$[0].displayName").value("Laboratory"))
+                .andExpect(jsonPath("$[0].category").value("Science"))
+                .andExpect(jsonPath("$[0].descriptionLines[0]").value("+2 Science per District Level"));
     }
 }

@@ -2,11 +2,9 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.TechUnlock;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
-import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,27 +20,11 @@ class TechMapperTest {
 
     @BeforeEach
     void setUp() {
-        var convertorMapper = new ConvertorMapper();
-        var unitSpecializationMapper = new UnitSpecializationMapper();
-        var treatyMapper = new TreatyMapper();
-        var districtMapper = new DistrictMapper();
-        var strategicCostMapper = new StrategicCostMapper();
-        var improvementMapper = new ImprovementMapper(strategicCostMapper);
-        var techUnlockMapper = new TechUnlockMapper(
-                convertorMapper,
-                unitSpecializationMapper,
-                treatyMapper,
-                districtMapper,
-                improvementMapper
-        );
-        this.techMapper = new TechMapper(techUnlockMapper);
+        this.techMapper = new TechMapper();
     }
 
     @Test
     void toDomain_shouldMapAllFields() {
-        TechUnlockEntity unlockEntity = new TechUnlockEntity();
-        unlockEntity.setUnlockText("Unlocks Advanced Quarry");
-
         TechEntity prereqEntity = new TechEntity();
         prereqEntity.setTechKey("Tech_Masonry");
         prereqEntity.setName("Masonry");
@@ -56,7 +38,6 @@ class TechMapperTest {
         entity.setFactions(Set.of(Faction.ASPECTS));
         entity.setTechCoords(new TechCoords(50.5, 75.5));
         entity.setPrereq(prereqEntity);
-        entity.setUnlocks(List.of(unlockEntity));
 
         Tech domain = techMapper.toDomain(entity);
 
@@ -67,14 +48,15 @@ class TechMapperTest {
         assertThat(domain.getEra()).isEqualTo(2);
         assertThat(domain.getEffects()).containsExactly("Unlocks new buildings");
         assertThat(domain.getFactions()).containsExactly(Faction.ASPECTS);
+
         assertThat(domain.getTechCoords()).isNotNull();
         assertThat(domain.getTechCoords().getXPct()).isEqualTo(50.5);
         assertThat(domain.getTechCoords().getYPct()).isEqualTo(75.5);
+
         assertThat(domain.getPrereq()).isNotNull();
         assertThat(domain.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(domain.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
-        assertThat(domain.getUnlocks()).hasSize(1);
-        assertThat(domain.getUnlocks().get(0).getUnlockText()).isEqualTo("Unlocks Advanced Quarry");
+
         assertThat(domain.getExcludes()).isNull();
     }
 
@@ -83,10 +65,6 @@ class TechMapperTest {
         Tech prereqDomain = Tech.builder()
                 .techKey("Tech_Masonry")
                 .name("Masonry")
-                .build();
-
-        TechUnlock unlockDomain = TechUnlock.builder()
-                .unlockText("Unlocks Advanced Quarry")
                 .build();
 
         Tech domain = Tech.builder()
@@ -98,7 +76,6 @@ class TechMapperTest {
                 .factions(Set.of(Faction.ASPECTS))
                 .techCoords(new TechCoords(50.5, 75.5))
                 .prereq(prereqDomain)
-                .unlocks(List.of(unlockDomain))
                 .build();
 
         TechEntity entity = techMapper.toEntity(domain);
@@ -110,14 +87,15 @@ class TechMapperTest {
         assertThat(entity.getEra()).isEqualTo(2);
         assertThat(entity.getEffectLines()).containsExactly("Unlocks new buildings");
         assertThat(entity.getFactions()).containsExactlyInAnyOrder(Faction.ASPECTS);
+
         assertThat(entity.getTechCoords()).isNotNull();
         assertThat(entity.getTechCoords().getXPct()).isEqualTo(50.5);
         assertThat(entity.getTechCoords().getYPct()).isEqualTo(75.5);
+
         assertThat(entity.getPrereq()).isNotNull();
         assertThat(entity.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(entity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
-        assertThat(entity.getUnlocks()).hasSize(1);
-        assertThat(entity.getUnlocks().get(0).getUnlockText()).isEqualTo("Unlocks Advanced Quarry");
+
         assertThat(entity.getExcludes()).isNull();
     }
 
@@ -132,30 +110,27 @@ class TechMapperTest {
     }
 
     @Test
-    void toDomain_shouldMapNullListsToEmptyLists() {
+    void toDomain_shouldMapNullCollectionsToEmpty() {
         TechEntity entity = new TechEntity();
         entity.setTechKey("Tech_Any");
         entity.setName("Any");
         entity.setEffectLines(null);
         entity.setFactions(null);
-        entity.setUnlocks(null);
 
         Tech domain = techMapper.toDomain(entity);
 
         assertThat(domain).isNotNull();
         assertThat(domain.getEffects()).isNotNull().isEmpty();
         assertThat(domain.getFactions()).isNotNull().isEmpty();
-        assertThat(domain.getUnlocks()).isNotNull().isEmpty();
     }
 
     @Test
-    void toEntity_shouldMapNullListsToEmptyLists() {
+    void toEntity_shouldMapNullCollectionsToEmpty() {
         Tech domain = Tech.builder()
                 .techKey("Tech_Any")
                 .name("Any")
                 .effects(null)
                 .factions(null)
-                .unlocks(null)
                 .build();
 
         TechEntity entity = techMapper.toEntity(domain);
@@ -163,7 +138,6 @@ class TechMapperTest {
         assertThat(entity).isNotNull();
         assertThat(entity.getEffectLines()).isNotNull().isEmpty();
         assertThat(entity.getFactions()).isNotNull().isEmpty();
-        assertThat(entity.getUnlocks()).isNotNull().isEmpty();
     }
 
     @Test

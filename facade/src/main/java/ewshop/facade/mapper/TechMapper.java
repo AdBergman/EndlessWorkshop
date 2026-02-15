@@ -23,24 +23,6 @@ public class TechMapper {
         String prereqKey = domain.getPrereq() != null ? domain.getPrereq().getTechKey() : null;
         String excludesKey = domain.getExcludes() != null ? domain.getExcludes().getTechKey() : null;
 
-        List<String> unlocks = domain.getUnlocks().stream()
-                .map(unlock -> {
-                    if (unlock == null) return null;
-
-                    if (unlock.getImprovement() != null) {
-                        String n = unlock.getImprovement().getName();
-                        return (n == null || n.isBlank()) ? null : "Improvement: " + n;
-                    }
-                    if (unlock.getDistrict() != null) {
-                        String n = unlock.getDistrict().getName();
-                        return (n == null || n.isBlank()) ? null : "District: " + n;
-                    }
-
-                    String t = unlock.getUnlockText();
-                    return (t == null || t.isBlank()) ? null : t;
-                })
-                .filter(s -> s != null && !s.isBlank())
-                .collect(Collectors.toList());
 
         List<String> factions = domain.getFactions().stream()
                 .map(TechMapper::formatEnumName)
@@ -52,7 +34,6 @@ public class TechMapper {
                 .techKey(domain.getTechKey())
                 .era(domain.getEra())
                 .type(formatEnumName(domain.getType()))
-                .unlocks(unlocks)
                 .effects(domain.getEffects())
                 .prereq(prereqKey)
                 .factions(factions)

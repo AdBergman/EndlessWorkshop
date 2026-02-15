@@ -4,7 +4,8 @@ import ewshop.domain.model.District;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class DistrictMapper {
@@ -13,12 +14,12 @@ public class DistrictMapper {
         if (entity == null) return null;
 
         return District.builder()
-                .name(entity.getName())
-                .info(entity.getInfo() != null ? entity.getInfo() : Collections.emptyList())
-                .effect(entity.getEffect())
-                .tileBonus(entity.getTileBonus() != null ? entity.getTileBonus() : Collections.emptyList())
-                .adjacencyBonus(entity.getAdjacencyBonus() != null ? entity.getAdjacencyBonus() : Collections.emptyList())
-                .placementPrereq(entity.getPlacementPrereq())
+                .districtKey(entity.getDistrictKey())
+                .displayName(entity.getDisplayName())
+                .category(entity.getCategory())
+                .descriptionLines(entity.getDescriptionLines() == null
+                        ? List.of()
+                        : List.copyOf(entity.getDescriptionLines()))
                 .build();
     }
 
@@ -26,12 +27,12 @@ public class DistrictMapper {
         if (domain == null) return null;
 
         DistrictEntity entity = new DistrictEntity();
-        entity.setName(domain.getName());
-        entity.setInfo(domain.getInfo() != null ? domain.getInfo() : Collections.emptyList());
-        entity.setEffect(domain.getEffect());
-        entity.setTileBonus(domain.getTileBonus() != null ? domain.getTileBonus() : Collections.emptyList());
-        entity.setAdjacencyBonus(domain.getAdjacencyBonus() != null ? domain.getAdjacencyBonus() : Collections.emptyList());
-        entity.setPlacementPrereq(domain.getPlacementPrereq());
+        entity.setDistrictKey(domain.getDistrictKey());
+        entity.setDisplayName(domain.getDisplayName());
+        entity.setCategory(domain.getCategory());
+        entity.setDescriptionLines(domain.getDescriptionLines() == null
+                ? List.of()
+                : new ArrayList<>(domain.getDescriptionLines()));
         return entity;
     }
 }

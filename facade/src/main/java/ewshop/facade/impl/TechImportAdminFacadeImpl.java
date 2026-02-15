@@ -1,18 +1,18 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.command.TechImportSnapshot;
-import ewshop.domain.model.results.TechImportResult;
+import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.TechImportService;
 import ewshop.domain.service.TechService;
 import ewshop.facade.dto.importing.*;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
-import ewshop.facade.interfaces.ImportAdminFacade;
+import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.mapper.TechImportMapper;
 
 import java.util.*;
 
-public class TechImportAdminFacadeImpl implements ImportAdminFacade {
+public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
 
     private static final String EXPECTED_EXPORT_KIND = "tech";
     private static final int MAX_ERRORS = 50;
@@ -77,14 +77,14 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
                     buildDetails(List.of(), received)
             );
 
-            return ImportSummaryDto.forTech(counts, diagnostics, durationMs);
+            return ImportSummaryDto.of("tech", counts, diagnostics, durationMs);
         }
 
         assertNoDuplicateTechKeys(snapshots);
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
 
-        TechImportResult result = techImportService.importSnapshot(snapshots);
+        ImportResult result = techImportService.importSnapshot(snapshots);
 
         int inserted = result.getInserted();
         int updated = result.getUpdated();
@@ -111,7 +111,7 @@ public class TechImportAdminFacadeImpl implements ImportAdminFacade {
         // warm cache immediately so next public read doesn't hit DB
         techService.getAllTechs();
 
-        return ImportSummaryDto.forTech(counts, diagnostics, durationMs);
+        return ImportSummaryDto.of("tech", counts, diagnostics, durationMs);
     }
 
     private static ImportIssueDto toIssue(TechImportTechDto dto, RuntimeException ex) {

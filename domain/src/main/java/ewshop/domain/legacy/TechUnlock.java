@@ -1,4 +1,6 @@
-package ewshop.domain.model;
+package ewshop.domain.legacy;
+
+import ewshop.domain.model.*;
 
 import java.util.List;
 
@@ -43,7 +45,7 @@ public class TechUnlock {
             case TechUnlock t when t.treaty != null ->
                     "Treaty: " + t.treaty.getName();
             case TechUnlock t when t.district != null ->
-                    "District: " + t.district.getName();
+                    "District: " + t.district.getDisplayName();
             case TechUnlock t when t.improvement != null ->
                     "Improvement: " + t.improvement.getName();
             case TechUnlock t when t.unlockText != null ->

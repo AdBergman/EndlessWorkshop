@@ -62,9 +62,6 @@ public class TechEntity {
     @Column
     private Boolean hidden;
 
-    @OneToMany(mappedBy = "tech", fetch = FetchType.LAZY)
-    private List<TechUnlockEntity> unlocks;
-
     public TechEntity() {}
 
     public Long getId() {
@@ -165,14 +162,6 @@ public class TechEntity {
 
     public void setHidden(Boolean hidden) {
         this.hidden = hidden;
-    }
-
-    public List<TechUnlockEntity> getUnlocks() {
-        return unlocks;
-    }
-
-    public void setUnlocks(List<TechUnlockEntity> unlocks) {
-        this.unlocks = unlocks;
     }
 
 }

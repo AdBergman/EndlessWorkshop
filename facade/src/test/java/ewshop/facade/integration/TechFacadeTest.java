@@ -44,7 +44,6 @@ class TechFacadeTest extends BaseIT {
                 .effects(List.of("+100 Fortification on Capital"))
                 .factions(Set.of(Faction.ASPECTS, Faction.KIN))
                 .techCoords(new TechCoords(10.0, 20.0))
-                .unlocks(List.of())
                 .build();
 
         Tech agriculture = Tech.builder()
@@ -55,7 +54,6 @@ class TechFacadeTest extends BaseIT {
                 .effects(List.of("Unlocks Farms"))
                 .factions(Set.of(Faction.LORDS))
                 .techCoords(new TechCoords(30.0, 40.0))
-                .unlocks(List.of())
                 .build();
 
         techRepository.save(stonework);

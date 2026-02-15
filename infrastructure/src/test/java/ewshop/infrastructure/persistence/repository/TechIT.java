@@ -4,7 +4,6 @@ import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
-import ewshop.infrastructure.persistence.entities.TechUnlockEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,38 +26,29 @@ class TechIT {
     private TechJpaRepository repository;
 
     @Test
-    void shouldSaveAndFindByName_WithUnlocks() {
-        // Arrange
-        // Create the child entity first
-        TechUnlockEntity unlock = new TechUnlockEntity();
-        unlock.setUnlockText("Unlocks a powerful new weapon.");
+    void shouldSaveAndFindByTechKey() {
+        TechEntity tech = new TechEntity();
+        tech.setTechKey("Tech_AdvancedWeapons");
+        tech.setName("Advanced Weapons");
+        tech.setEra(4);
+        tech.setType(TechType.DEFENSE);
+        tech.setFactions(Set.of(Faction.KIN));
+        tech.setTechCoords(new TechCoords(50, 50));
+        tech.setEffectLines(List.of("Unlocks a powerful new weapon."));
 
-        // Create the parent entity
-        TechEntity newTech = new TechEntity();
-        newTech.setName("Advanced Weapons");
-        newTech.setEra(4);
-        newTech.setType(TechType.DEFENSE);
-        newTech.setFactions(Set.of(Faction.KIN));
-        newTech.setTechCoords(new TechCoords(50, 50));
+        entityManager.persistAndFlush(tech);
 
-        // Set the relationship
-        // Because of CascadeType.ALL, persisting the tech will also persist the unlock.
-        newTech.setUnlocks(List.of(unlock));
-        unlock.setTech(newTech); // Set the back-reference for bidirectional consistency
+        Optional<TechEntity> found = repository.findByTechKey("Tech_AdvancedWeapons");
 
-        entityManager.persistAndFlush(newTech);
+        assertThat(found).isPresent();
+        TechEntity result = found.get();
 
-        // Act
-        Optional<TechEntity> foundTech = repository.findByName("Advanced Weapons");
-
-        // Assert
-        assertThat(foundTech).isPresent();
-        TechEntity result = foundTech.get();
+        assertThat(result.getTechKey()).isEqualTo("Tech_AdvancedWeapons");
         assertThat(result.getName()).isEqualTo("Advanced Weapons");
         assertThat(result.getEra()).isEqualTo(4);
-
-        // Assert that the relationship was persisted and retrieved correctly
-        assertThat(result.getUnlocks()).hasSize(1);
-        assertThat(result.getUnlocks().get(0).getUnlockText()).isEqualTo("Unlocks a powerful new weapon.");
+        assertThat(result.getEffectLines())
+                .containsExactly("Unlocks a powerful new weapon.");
+        assertThat(result.getFactions())
+                .containsExactly(Faction.KIN);
     }
 }

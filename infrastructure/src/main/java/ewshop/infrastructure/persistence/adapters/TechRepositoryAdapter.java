@@ -4,7 +4,7 @@ import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.enums.Faction;
-import ewshop.domain.model.results.TechImportResult;
+import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.mappers.TechMapper;
@@ -82,9 +82,9 @@ public class TechRepositoryAdapter implements TechRepository {
 
     @Override
     @Transactional
-    public TechImportResult importTechSnapshot(List<TechImportSnapshot> snapshots) {
+    public ImportResult importTechSnapshot(List<TechImportSnapshot> snapshots) {
 
-        TechImportResult result = new TechImportResult();
+        ImportResult result = new ImportResult();
 
         if (snapshots == null || snapshots.isEmpty()) {
             return result;
@@ -138,19 +138,11 @@ public class TechRepositoryAdapter implements TechRepository {
                     .toList();
 
             if (!obsoleteIds.isEmpty()) {
-                // remove join rows (if present)
-                techJpaRepository.deleteTechUnlockLinksByTechIds(obsoleteIds);
-
-                // remove legacy child rows (if present)
-                techJpaRepository.deleteTechUnlockRowsByTechIds(obsoleteIds);
-
-                // ensure DB sees those deletes before deleting tech
+                // clear self-FKs before delete
+                techJpaRepository.clearExcludesRefsToTechIds(obsoleteIds);
+                techJpaRepository.clearPrereqRefsToTechIds(obsoleteIds);
                 techJpaRepository.flush();
             }
-
-            techJpaRepository.clearExcludesRefsToTechIds(obsoleteIds);
-            techJpaRepository.clearPrereqRefsToTechIds(obsoleteIds);
-            techJpaRepository.flush();
 
             techJpaRepository.deleteAll(obsolete);
             result.setDeleted(obsolete.size());
@@ -199,7 +191,7 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        // NEW: factions (import-wins derived availability)
+        // factions (import-wins derived availability)
         EnumSet<Faction> nextSet = toEnumSet(update.availableFactions());
         EnumSet<Faction> currentSet = toEnumSet(entity.getFactions());
 
@@ -216,7 +208,6 @@ public class TechRepositoryAdapter implements TechRepository {
         if (in == null || in.isEmpty()) {
             return EnumSet.noneOf(Faction.class);
         }
-        // defensive: ensure we own the set and it's EnumSet-backed
         return EnumSet.copyOf(in);
     }
 }

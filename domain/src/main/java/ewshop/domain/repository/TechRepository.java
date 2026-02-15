@@ -3,7 +3,7 @@ package ewshop.domain.repository;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
-import ewshop.domain.model.results.TechImportResult;
+import ewshop.domain.model.results.ImportResult;
 
 import java.util.List;
 
@@ -19,5 +19,5 @@ public interface TechRepository {
 
     void updateEraAndCoordsByTechKey(TechPlacementUpdate update);
 
-    TechImportResult importTechSnapshot(List<TechImportSnapshot> techs);
+    ImportResult importTechSnapshot(List<TechImportSnapshot> techs);
 }

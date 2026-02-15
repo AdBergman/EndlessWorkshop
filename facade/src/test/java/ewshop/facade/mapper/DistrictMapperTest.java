@@ -14,91 +14,66 @@ class DistrictMapperTest {
     @Test
     @DisplayName("toDto should map all fields correctly when input is fully populated")
     void toDto_shouldMapAllFields() {
-        // Given
         District district = District.builder()
-                .name("Commercial Hub")
-                .info(List.of("Provides gold", "Requires river"))
-                .effect("Gold +5")
-                .tileBonus(List.of("Adjacent to river: +2 Gold"))
-                .adjacencyBonus(List.of("Adjacent to City Center: +1 Gold"))
-                .placementPrereq("Flat land")
+                .districtKey("Aspect_District_Tier1_Science")
+                .displayName("Laboratory")
+                .category("Science")
+                .descriptionLines(List.of(
+                        "+1 Science on special tiles",
+                        "+2 Science per level"
+                ))
                 .build();
 
-        // When
         DistrictDto dto = DistrictMapper.toDto(district);
 
-        // Then
         assertThat(dto).isNotNull();
-        assertThat(dto.name()).isEqualTo("Commercial Hub");
-        assertThat(dto.info()).containsExactly("Provides gold", "Requires river");
-        assertThat(dto.effect()).isEqualTo("Gold +5");
-        assertThat(dto.tileBonus()).containsExactly("Adjacent to river: +2 Gold");
-        assertThat(dto.adjacencyBonus()).containsExactly("Adjacent to City Center: +1 Gold");
-        assertThat(dto.placementPrereq()).isEqualTo("Flat land");
+        assertThat(dto.districtKey()).isEqualTo("Aspect_District_Tier1_Science");
+        assertThat(dto.displayName()).isEqualTo("Laboratory");
+        assertThat(dto.category()).isEqualTo("Science");
+        assertThat(dto.descriptionLines()).containsExactly(
+                "+1 Science on special tiles",
+                "+2 Science per level"
+        );
     }
 
     @Test
     @DisplayName("toDto should return null when input District is null")
     void toDto_shouldReturnNull_whenInputIsNull() {
-        // Given
-        District district = null;
-
-        // When
-        DistrictDto dto = DistrictMapper.toDto(district);
-
-        // Then
-        assertThat(dto).isNull();
+        assertThat(DistrictMapper.toDto(null)).isNull();
     }
 
     @Test
-    @DisplayName("toDto should map empty lists correctly when input lists are empty")
+    @DisplayName("toDto should map empty lists correctly")
     void toDto_shouldMapEmptyListsCorrectly() {
-        // Given
         District district = District.builder()
-                .name("Empty District")
-                .info(List.of())
-                .effect("No effect")
-                .tileBonus(List.of())
-                .adjacencyBonus(List.of())
-                .placementPrereq("")
+                .districtKey("Aspect_District_Empty")
+                .displayName("Empty District")
+                .category(null)
+                .descriptionLines(List.of())
                 .build();
 
-        // When
         DistrictDto dto = DistrictMapper.toDto(district);
 
-        // Then
         assertThat(dto).isNotNull();
-        assertThat(dto.name()).isEqualTo("Empty District");
-        assertThat(dto.info()).isEmpty();
-        assertThat(dto.effect()).isEqualTo("No effect");
-        assertThat(dto.tileBonus()).isEmpty();
-        assertThat(dto.adjacencyBonus()).isEmpty();
-        assertThat(dto.placementPrereq()).isEqualTo("");
+        assertThat(dto.districtKey()).isEqualTo("Aspect_District_Empty");
+        assertThat(dto.displayName()).isEqualTo("Empty District");
+        assertThat(dto.category()).isNull();
+        assertThat(dto.descriptionLines()).isEmpty();
     }
 
     @Test
     @DisplayName("toDto should map null list fields to empty lists")
     void toDto_shouldMapNullListFieldsToEmptyLists() {
-        // Given
         District district = District.builder()
-                .name("District with null lists")
-                .info(null)
-                .effect("Some effect")
-                .tileBonus(null)
-                .adjacencyBonus(null)
-                .placementPrereq("Some prereq")
+                .districtKey("Aspect_District_Nulls")
+                .displayName("District with null lists")
+                .category("Science")
+                .descriptionLines(null)
                 .build();
 
-        // When
         DistrictDto dto = DistrictMapper.toDto(district);
 
-        // Then
         assertThat(dto).isNotNull();
-        assertThat(dto.name()).isEqualTo("District with null lists");
-        assertThat(dto.info()).isEmpty();
-        assertThat(dto.effect()).isEqualTo("Some effect");
-        assertThat(dto.tileBonus()).isEmpty();
-        assertThat(dto.adjacencyBonus()).isEmpty();
-        assertThat(dto.placementPrereq()).isEqualTo("Some prereq");
+        assertThat(dto.descriptionLines()).isNotNull().isEmpty();
     }
 }

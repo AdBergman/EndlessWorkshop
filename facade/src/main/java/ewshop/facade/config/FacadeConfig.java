@@ -38,8 +38,14 @@ public class FacadeConfig {
     }
 
     @Bean
-    public ImportAdminFacade importAdminFacade(TechImportService techImportService, TechService techService) {
+    public TechImportAdminFacade techImportAdminFacade(TechImportService techImportService, TechService techService) {
         return new TechImportAdminFacadeImpl(techImportService, techService);
+    }
+
+    @Bean
+    public DistrictImportAdminFacade districtImportAdminFacade(DistrictImportService districtImportService,
+                                                               DistrictService districtService) {
+        return new DistrictImportAdminFacadeImpl(districtImportService, districtService);
     }
 
     @Bean

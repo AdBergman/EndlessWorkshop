@@ -1,8 +1,8 @@
-package ewshop.facade.dto.response;
+package ewshop.facade.dto.importing.districts;
 
 import java.util.List;
 
-public record DistrictDto(
+public record DistrictImportDistrictDto(
         String districtKey,
         String displayName,
         String category,

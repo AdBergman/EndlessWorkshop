@@ -1,9 +1,12 @@
 package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
-import ewshop.facade.interfaces.ImportAdminFacade;
+import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.TechImportAdminFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,12 +35,14 @@ class ImportAdminControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private ImportAdminFacade importAdminFacade;
+    private TechImportAdminFacade techImportAdminFacade;
+
+    @MockBean
+    private DistrictImportAdminFacade districtImportAdminFacade;
 
     @Test
     void importTechs_returnsOk_andCallsFacade_whenPayloadHasTechs() throws Exception {
 
-        // given
         TechImportTechDto tech = new TechImportTechDto(
                 "Technology_X",
                 "Stonework",
@@ -60,20 +65,17 @@ class ImportAdminControllerTest {
                 List.of(tech)
         );
 
-        // when / then
         mockMvc.perform(post("/api/admin/import/techs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        // then
-        verify(importAdminFacade).importTechs(payload);
+        verify(techImportAdminFacade).importTechs(payload);
     }
 
     @Test
     void importTechs_returnsBadRequest_andDoesNotCallFacade_whenTechListIsEmpty() throws Exception {
 
-        // given
         TechImportBatchDto payload = new TechImportBatchDto(
                 "Endless Legend 2",
                 "0.75",
@@ -83,20 +85,17 @@ class ImportAdminControllerTest {
                 List.<TechImportTechDto>of()
         );
 
-        // when / then
         mockMvc.perform(post("/api/admin/import/techs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
 
-        // then
-        verifyNoInteractions(importAdminFacade);
+        verifyNoInteractions(techImportAdminFacade);
     }
 
     @Test
     void importTechs_returnsBadRequest_andDoesNotCallFacade_whenTechsFieldIsMissing() throws Exception {
 
-        // given
         String payload = """
         {
           "game": "Endless Legend 2",
@@ -107,14 +106,58 @@ class ImportAdminControllerTest {
         }
         """;
 
-        // when / then
         mockMvc.perform(post("/api/admin/import/techs")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isBadRequest());
 
-        // then
-        verifyNoInteractions(importAdminFacade);
+        verifyNoInteractions(techImportAdminFacade);
     }
 
+    @Test
+    void importDistricts_returnsOk_andCallsFacade_whenPayloadHasDistricts() throws Exception {
+
+        DistrictImportDistrictDto dto = new DistrictImportDistrictDto(
+                "Aspect_District_Tier1_Science",
+                "Laboratory",
+                "Science",
+                List.of("+2 Science per District Level")
+        );
+
+        DistrictImportBatchDto payload = new DistrictImportBatchDto(
+                "Endless Legend 2",
+                "0.75",
+                "0.1.0",
+                "2026-02-15T00:00:00Z",
+                "district",
+                List.of(dto)
+        );
+
+        mockMvc.perform(post("/api/admin/import/districts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+
+        verify(districtImportAdminFacade).importDistricts(payload);
+    }
+
+    @Test
+    void importDistricts_returnsBadRequest_andDoesNotCallFacade_whenDistrictListIsEmpty() throws Exception {
+
+        DistrictImportBatchDto payload = new DistrictImportBatchDto(
+                "Endless Legend 2",
+                "0.75",
+                "0.1.0",
+                "2026-02-15T00:00:00Z",
+                "district",
+                List.<DistrictImportDistrictDto>of()
+        );
+
+        mockMvc.perform(post("/api/admin/import/districts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(districtImportAdminFacade);
+    }
 }

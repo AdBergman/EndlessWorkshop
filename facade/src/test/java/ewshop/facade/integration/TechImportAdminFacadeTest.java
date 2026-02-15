@@ -4,7 +4,7 @@ import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
-import ewshop.facade.interfaces.ImportAdminFacade;
+import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import jakarta.persistence.EntityManager;
@@ -18,10 +18,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ImportAdminFacadeTest extends BaseIT {
+class TechImportAdminFacadeTest extends BaseIT {
 
     @Autowired
-    private ImportAdminFacade importAdminFacade;
+    private TechImportAdminFacade techImportAdminFacade;
 
     @Autowired
     private TechJpaRepository techJpaRepository;
@@ -36,7 +36,7 @@ class ImportAdminFacadeTest extends BaseIT {
 
     @Test
     void contextLoads() {
-        assertThat(importAdminFacade).isNotNull();
+        assertThat(techImportAdminFacade).isNotNull();
         assertThat(techJpaRepository).isNotNull();
     }
 
@@ -80,7 +80,7 @@ class ImportAdminFacadeTest extends BaseIT {
         );
 
         // when
-        importAdminFacade.importTechs(file);
+        techImportAdminFacade.importTechs(file);
         entityManager.flush();
         entityManager.clear();
 
@@ -130,7 +130,7 @@ class ImportAdminFacadeTest extends BaseIT {
         );
 
         // when
-        importAdminFacade.importTechs(file);
+        techImportAdminFacade.importTechs(file);
         entityManager.flush();
         entityManager.clear();
 
@@ -153,7 +153,7 @@ class ImportAdminFacadeTest extends BaseIT {
     void importTechs_shouldThrow_whenFileIsNull() {
 
         // given / when / then
-        assertThatThrownBy(() -> importAdminFacade.importTechs(null))
+        assertThatThrownBy(() -> techImportAdminFacade.importTechs(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Import file is required");
     }

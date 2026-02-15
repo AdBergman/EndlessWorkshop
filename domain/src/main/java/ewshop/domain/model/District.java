@@ -1,97 +1,39 @@
 package ewshop.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@JsonDeserialize(builder = District.Builder.class)
 public class District {
-    private final String name;
-    private final List<String> info;
-    private final String effect;
-    private final List<String> tileBonus;
-    private final List<String> adjacencyBonus;
-    private final String placementPrereq;
+    private final String districtKey;
+    private final String displayName;
+    private final String category; // nullable ok
+    private final List<String> descriptionLines;
 
-    private District(Builder builder) {
-        this.name = builder.name;
-        this.info = List.copyOf(builder.info);
-        this.effect = builder.effect;
-        this.tileBonus = List.copyOf(builder.tileBonus);
-        this.adjacencyBonus = List.copyOf(builder.adjacencyBonus);
-        this.placementPrereq = builder.placementPrereq;
+    private District(Builder b) {
+        this.districtKey = b.districtKey;
+        this.displayName = b.displayName;
+        this.category = b.category;
+        this.descriptionLines = List.copyOf(b.descriptionLines);
     }
 
-    public String getName() { return name; }
-    public List<String> getInfo() { return info; }
-    public String getEffect() { return effect; }
-    public List<String> getTileBonus() { return tileBonus; }
-    public List<String> getAdjacencyBonus() { return adjacencyBonus; }
-    public String getPlacementPrereq() { return placementPrereq; }
+    public String getDistrictKey() { return districtKey; }
+    public String getDisplayName() { return displayName; }
+    public String getCategory() { return category; }
+    public List<String> getDescriptionLines() { return descriptionLines; }
 
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
-        private String name;
-        private final List<String> info = new ArrayList<>();
-        private String effect;
-        private final List<String> tileBonus = new ArrayList<>();
-        private final List<String> adjacencyBonus = new ArrayList<>();
-        private String placementPrereq;
+        private String districtKey;
+        private String displayName;
+        private String category;
+        private final java.util.ArrayList<String> descriptionLines = new java.util.ArrayList<>();
 
-        @JsonProperty("name")
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        @JsonProperty("info")
-        public Builder info(List<String> info) {
-            this.info.clear();
-            if (info != null) this.info.addAll(info);
-            return this;
-        }
-
-        public Builder addInfo(String info) {
-            this.info.add(info);
-            return this;
-        }
-
-        @JsonProperty("effect")
-        public Builder effect(String effect) {
-            this.effect = effect;
-            return this;
-        }
-
-        @JsonProperty("tileBonus")
-        public Builder tileBonus(List<String> tileBonus) {
-            this.tileBonus.clear();
-            if (tileBonus != null) this.tileBonus.addAll(tileBonus);
-            return this;
-        }
-
-        public Builder addTileBonus(String bonus) {
-            this.tileBonus.add(bonus);
-            return this;
-        }
-
-        @JsonProperty("adjacencyBonus")
-        public Builder adjacencyBonus(List<String> adjacencyBonus) {
-            this.adjacencyBonus.clear();
-            if (adjacencyBonus != null) this.adjacencyBonus.addAll(adjacencyBonus);
-            return this;
-        }
-
-        public Builder addAdjacencyBonus(String bonus) {
-            this.adjacencyBonus.add(bonus);
-            return this;
-        }
-
-        @JsonProperty("placementPrereq")
-        public Builder placementPrereq(String placementPrereq) {
-            this.placementPrereq = placementPrereq;
+        public Builder districtKey(String v) { this.districtKey = v; return this; }
+        public Builder displayName(String v) { this.displayName = v; return this; }
+        public Builder category(String v) { this.category = v; return this; }
+        public Builder descriptionLines(List<String> v) {
+            this.descriptionLines.clear();
+            if (v != null) this.descriptionLines.addAll(v);
             return this;
         }
 

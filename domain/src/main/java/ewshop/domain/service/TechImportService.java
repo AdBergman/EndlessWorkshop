@@ -1,7 +1,7 @@
 package ewshop.domain.service;
 
 import ewshop.domain.command.TechImportSnapshot;
-import ewshop.domain.model.results.TechImportResult;
+import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.TechRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -22,8 +22,8 @@ public class TechImportService {
 
     @Transactional
     @CacheEvict(value = "techs", allEntries = true)
-    public TechImportResult importSnapshot(List<TechImportSnapshot> techs) {
-        if (techs == null || techs.isEmpty()) return new TechImportResult();
+    public ImportResult importSnapshot(List<TechImportSnapshot> techs) {
+        if (techs == null || techs.isEmpty()) return new ImportResult();
 
         List<TechImportSnapshot> enriched = techs.stream()
                 .map(gateEvaluator::withDerivedAvailableFactions)

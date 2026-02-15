@@ -6,15 +6,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class TechMapper {
 
-    private final TechUnlockMapper techUnlockMapper;
-
-    public TechMapper(TechUnlockMapper techUnlockMapper) {
-        this.techUnlockMapper = techUnlockMapper;
+    public TechMapper() {
     }
 
     public TechEntity toEntityBase(Tech domain) {
@@ -28,11 +24,6 @@ public class TechMapper {
         entity.setEffectLines(domain.getEffects() != null ? domain.getEffects() : Collections.emptyList());
         entity.setTechCoords(domain.getTechCoords());
         entity.setFactions(domain.getFactions() != null ? domain.getFactions() : Collections.emptySet());
-        entity.setUnlocks(domain.getUnlocks() != null
-                ? domain.getUnlocks().stream()
-                .map(techUnlockMapper::toEntity)
-                .collect(Collectors.toList())
-                : Collections.emptyList());
 
         if (domain.getPrereq() != null) {
             Tech prereq = domain.getPrereq();
@@ -126,11 +117,6 @@ public class TechMapper {
                         .build()
                         : null)
                 .factions(entity.getFactions() != null ? entity.getFactions() : Collections.emptySet())
-                .unlocks(entity.getUnlocks() != null
-                        ? entity.getUnlocks().stream()
-                        .map(techUnlockMapper::toDomain)
-                        .collect(Collectors.toList())
-                        : Collections.emptyList())
                 .build();
     }
 }

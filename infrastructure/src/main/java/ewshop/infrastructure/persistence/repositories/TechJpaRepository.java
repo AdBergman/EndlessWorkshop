@@ -1,7 +1,6 @@
 package ewshop.infrastructure.persistence.repositories;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,14 +25,6 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
     List<TechEntity> findAllByTechKeyNotIn(List<String> techKeys);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = "delete from tech_unlocks where tech_entity_id in (:techIds)", nativeQuery = true)
-    int deleteTechUnlockLinksByTechIds(@Param("techIds") List<Long> techIds);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query(value = "delete from tech_unlock where tech_id in (:techIds)", nativeQuery = true)
-    int deleteTechUnlockRowsByTechIds(@Param("techIds") List<Long> techIds);
-
-    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = "update tech set excludes_id = null where excludes_id in (:ids)", nativeQuery = true)
     int clearExcludesRefsToTechIds(@Param("ids") List<Long> ids);
 
@@ -41,23 +32,21 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
     @Query(value = "update tech set prereq_id = null where prereq_id in (:ids)", nativeQuery = true)
     int clearPrereqRefsToTechIds(@Param("ids") List<Long> ids);
 
+    /**
+     * Eager-load the self references so TechMapper can safely map prereq/excludes without N+1.
+     * (Coords/factions are not relations.)
+     */
     @Override
-    @EntityGraph(attributePaths = {
-            "unlocks",
-            "unlocks.unitSpecialization",
-            "unlocks.improvement",
-            "unlocks.district"
-    })
+    @EntityGraph(attributePaths = { "prereq", "excludes" })
     List<TechEntity> findAll();
-
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
-    update TechEntity t
-       set t.era = :era,
-           t.techCoords = :coords
-     where t.techKey = :techKey
-""")
+        update TechEntity t
+           set t.era = :era,
+               t.techCoords = :coords
+         where t.techKey = :techKey
+    """)
     int updateEraAndCoordsByTechKey(@Param("techKey") String techKey,
                                     @Param("era") int era,
                                     @Param("coords") TechCoords coords);

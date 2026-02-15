@@ -1,71 +1,52 @@
 package ewshop.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "districts")
+@Table(
+        name = "districts",
+        uniqueConstraints = @UniqueConstraint(name = "uq_district_key", columnNames = "district_key")
+)
 public class DistrictEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+    @Column(name = "district_key", nullable = false, unique = true, length = 220)
+    private String districtKey;
+
+    @Column(name = "display_name", nullable = false, length = 400)
+    private String displayName;
+
+    @Column(name = "category", length = 200)
+    private String category;
 
     @ElementCollection
-    @CollectionTable(name = "district_info", joinColumns = @JoinColumn(name = "district_id"))
-    @Column(name = "info")
-    private List<String> info;
-
-
-    @Column(name = "effect")
-    private String effect;
-
-    @ElementCollection
-    @CollectionTable(name = "district_tile_bonuses", joinColumns = @JoinColumn(name = "district_id"))
-    @Column(name = "tile_bonus")
-    private List<String> tileBonus;
-
-    @ElementCollection
-    @CollectionTable(name = "district_adjacency_bonuses", joinColumns = @JoinColumn(name = "district_id"))
-    @Column(name = "adjacency_bonus")
-    private List<String> adjacencyBonus;
-
-    @Column(name = "placement_prereq")
-    private String placementPrereq;
+    @CollectionTable(name = "district_description_lines", joinColumns = @JoinColumn(name = "district_id"))
+    @OrderColumn(name = "line_index")
+    @Column(name = "line", nullable = false, length = 800)
+    private List<String> descriptionLines = new ArrayList<>();
 
     public DistrictEntity() {}
-
-    public DistrictEntity(String name, List<String> info, String effect,
-                          List<String> tileBonus, List<String> adjacencyBonus, String placementPrereq) {
-        this.name = name;
-        this.info = info;
-        this.effect = effect;
-        this.tileBonus = tileBonus;
-        this.adjacencyBonus = adjacencyBonus;
-        this.placementPrereq = placementPrereq;
-    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getDistrictKey() { return districtKey; }
+    public void setDistrictKey(String districtKey) { this.districtKey = districtKey; }
 
-    public List<String> getInfo() { return info; }
-    public void setInfo(List<String> info) { this.info = info; }
+    public String getDisplayName() { return displayName; }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
 
-    public String getEffect() { return effect; }
-    public void setEffect(String effect) { this.effect = effect; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public List<String> getTileBonus() { return tileBonus; }
-    public void setTileBonus(List<String> tileBonus) { this.tileBonus = tileBonus; }
-
-    public List<String> getAdjacencyBonus() { return adjacencyBonus; }
-    public void setAdjacencyBonus(List<String> adjacencyBonus) { this.adjacencyBonus = adjacencyBonus; }
-
-    public String getPlacementPrereq() { return placementPrereq; }
-    public void setPlacementPrereq(String placementPrereq) { this.placementPrereq = placementPrereq; }
+    public List<String> getDescriptionLines() { return descriptionLines; }
+    public void setDescriptionLines(List<String> descriptionLines) {
+        this.descriptionLines = (descriptionLines == null) ? new ArrayList<>() : new ArrayList<>(descriptionLines);
+    }
 }

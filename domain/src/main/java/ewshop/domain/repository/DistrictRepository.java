@@ -1,18 +1,14 @@
 package ewshop.domain.repository;
 
+import ewshop.domain.command.DistrictImportSnapshot;
 import ewshop.domain.model.District;
+import ewshop.domain.model.results.ImportResult;
 
 import java.util.List;
 
 public interface DistrictRepository {
 
-    District save(District district);
-
-    void saveAll(List<District> districts);
-
-    District findByName(String name);
-
     List<District> findAll();
 
-    void deleteAll();
+    ImportResult importDistrictSnapshot(List<DistrictImportSnapshot> snapshots);
 }

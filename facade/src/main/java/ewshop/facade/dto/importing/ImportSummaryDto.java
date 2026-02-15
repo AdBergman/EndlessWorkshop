@@ -1,5 +1,7 @@
 package ewshop.facade.dto.importing;
 
+import java.time.Instant;
+
 public record ImportSummaryDto(
         String importKind,
         String importedAtUtc,
@@ -7,16 +9,19 @@ public record ImportSummaryDto(
         ImportDiagnosticsDto diagnostics,
         long durationMs
 ) {
-    private static final String TECH = "tech";
-
-    public static ImportSummaryDto forTech(
+    public static ImportSummaryDto of(
+            String importKind,
             ImportCountsDto counts,
             ImportDiagnosticsDto diagnostics,
             long durationMs
     ) {
+        if (importKind == null || importKind.isBlank()) {
+            throw new IllegalArgumentException("importKind is required");
+        }
+
         return new ImportSummaryDto(
-                TECH,
-                java.time.Instant.now().toString(),
+                importKind,
+                Instant.now().toString(),
                 counts,
                 diagnostics,
                 durationMs
