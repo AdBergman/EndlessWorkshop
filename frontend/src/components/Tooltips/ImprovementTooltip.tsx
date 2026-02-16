@@ -11,20 +11,29 @@ interface ImprovementTooltipProps {
 }
 
 const ImprovementTooltip: React.FC<ImprovementTooltipProps> = ({ hoveredImprovement }) => {
-    // Destructure the data and coords from the new prop shape
     const { data, coords } = hoveredImprovement;
-    const { name, effects, unique } = data;
+    const { displayName, descriptionLines, unique, cost } = data;
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords}>
-            <div style={{minWidth: "200px"}}>
-                <div style={{fontWeight: 500}}>{name}</div>
+            <div style={{ minWidth: "220px" }}>
+                <div style={{ fontWeight: 500 }}>{displayName}</div>
 
-                <TooltipFlavor unique={unique}/>
+                <TooltipFlavor unique={unique} />
 
-                {effects.length > 0 && (
+                {(descriptionLines?.length ?? 0) > 0 && (
                     <TooltipSection title="Effects:">
-                        {effects.map((eff, i) => <div key={i}>{eff}</div>)}
+                        {(descriptionLines ?? []).map((line, i) => (
+                            <div key={i}>{line}</div>
+                        ))}
+                    </TooltipSection>
+                )}
+
+                {(cost?.length ?? 0) > 0 && (
+                    <TooltipSection title="Cost:">
+                        {(cost ?? []).map((c, i) => (
+                            <div key={i}>{c}</div>
+                        ))}
                     </TooltipSection>
                 )}
             </div>

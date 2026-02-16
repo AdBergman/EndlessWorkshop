@@ -1,15 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { District, Tech, Unit } from "@/types/dataTypes";
 import "./SpreadSheetView.css";
 import SpreadsheetToolbar, { SheetView } from "./SpreadsheetToolbar";
 import TechSheetView from "./TechSheetView";
 import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
-import { getUnlockedImprovements } from "@/utils/unlocks";
+import UnitSheetView from "./UnitSheetView";
 import { useGameData } from "@/context/GameDataContext";
+import { Tech } from "@/types/dataTypes";
+import {
+    getUnlockedDistricts,
+    getUnlockedImprovements,
+    getUnlockedUnits,
+    UnlockedDistrict,
+    UnlockedImprovement,
+    UnlockedUnit,
+} from "@/utils/unlocks";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import UnitSheetView from "./UnitSheetView";
 
 const SpreadSheetView: React.FC = () => {
     const {
@@ -24,59 +31,37 @@ const SpreadSheetView: React.FC = () => {
     } = useGameData();
 
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
+    const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
 
-    // selectedTechs is now an array of TECH KEYS
     const selectedTechObjects = useMemo(
         () => selectedTechs.map((key) => techs.get(key)).filter((t): t is Tech => !!t),
         [selectedTechs, techs]
     );
 
-    const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
-    useEffect(() => setSortedTechs([...selectedTechObjects]), [selectedTechObjects]);
+    useEffect(() => {
+        setSortedTechs([...selectedTechObjects]);
+    }, [selectedTechObjects]);
 
-    const unlockedImprovements = useMemo(
+    const unlockedImprovements: UnlockedImprovement[] = useMemo(
         () => getUnlockedImprovements(selectedTechObjects, Array.from(improvements.values())),
         [selectedTechObjects, improvements]
     );
 
-    const unlockedDistricts = useMemo(() => {
-        const districtUnlocks: (District & { era: number })[] = [];
-        const prefix = "District: ";
+    const unlockedDistricts: UnlockedDistrict[] = useMemo(
+        () => getUnlockedDistricts(selectedTechObjects, Array.from(districts.values())),
+        [selectedTechObjects, districts]
+    );
 
-        for (const tech of selectedTechObjects) {
-            for (const unlock of tech.unlocks ?? []) {
-                if (unlock.startsWith(prefix)) {
-                    const name = unlock.substring(prefix.length).trim();
-                    const district = districts.get(name);
-                    if (district) districtUnlocks.push({ ...district, era: tech.era });
-                }
-            }
-        }
+    const unlockedUnits: UnlockedUnit[] = useMemo(
+        () => getUnlockedUnits(selectedTechObjects, Array.from(units.values())),
+        [selectedTechObjects, units]
+    );
 
-        return districtUnlocks;
-    }, [selectedTechObjects, districts]);
-
-    const unlockedUnits = useMemo(() => {
-        const unitUnlocks: (Unit & { era: number })[] = [];
-        const prefix = "Unit Specialization: ";
-
-        for (const tech of selectedTechObjects) {
-            for (const unlock of tech.unlocks ?? []) {
-                if (unlock.startsWith(prefix)) {
-                    const name = unlock.substring(prefix.length).trim();
-                    const unit = units.get(name);
-                    if (unit) unitUnlocks.push({ ...unit, era: tech.era });
-                }
-            }
-        }
-
-        return unitUnlocks;
-    }, [selectedTechObjects, units]);
-
-    const handleSort = () =>
+    const handleSort = () => {
         setSortedTechs(
             [...selectedTechObjects].sort((a, b) => a.era - b.era || a.name.localeCompare(b.name))
         );
+    };
 
     const handleDeselectAll = () => setSelectedTechs([]);
 
@@ -84,7 +69,6 @@ const SpreadSheetView: React.FC = () => {
         if (!createSavedTechBuild) return;
 
         try {
-            // Save TECH KEYS, not names
             const saved = await createSavedTechBuild(
                 "My Build",
                 selectedFaction,
@@ -102,7 +86,9 @@ const SpreadSheetView: React.FC = () => {
         }
     };
 
-    if (selectedTechs.length === 0) return <div className="empty-sheet-message">No techs selected</div>;
+    if (selectedTechs.length === 0) {
+        return <div className="empty-sheet-message">No techs selected</div>;
+    }
 
     const renderActiveSheet = () => {
         switch (activeSheet) {
@@ -132,7 +118,9 @@ const SpreadSheetView: React.FC = () => {
                 activeSheet={activeSheet}
                 setActiveSheet={setActiveSheet}
             />
+
             {renderActiveSheet()}
+
             <ToastContainer
                 position="top-right"
                 autoClose={2000}

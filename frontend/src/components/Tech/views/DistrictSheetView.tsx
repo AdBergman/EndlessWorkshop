@@ -1,21 +1,18 @@
-import React from 'react';
-import { District } from '@/types/dataTypes';
+import React from "react";
+import { District } from "@/types/dataTypes";
 
 interface DistrictSheetViewProps {
     districts: (District & { era: number })[];
 }
 
 const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
-    if (!districts || districts.length === 0) {
-        return <div className="empty-sheet-message">No districts unlocked by current tech selections.</div>;
+    if (!districts?.length) {
+        return (
+            <div className="empty-sheet-message">
+                No districts unlocked by current tech selections.
+            </div>
+        );
     }
-
-    const renderArrayCell = (items: string[] | undefined | null) => {
-        if (!items || items.length === 0) {
-            return <span style={{ color: '#888' }}>--</span>;
-        }
-        return items.join('\n');
-    };
 
     return (
         <div className="spreadsheet-container">
@@ -24,28 +21,23 @@ const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
                 <tr>
                     <th>Name</th>
                     <th>Era</th>
-                    <th>Effect</th>
-                    <th>Info</th>
-                    <th>Tile Bonus</th>
-                    <th>Adjacency Bonus</th>
-                    <th>Placement Prerequisite</th>
+                    <th>Description</th>
                 </tr>
                 </thead>
                 <tbody>
                 {districts
-                    .filter(dist => dist && dist.name)
-                    .map((district) => (
-                    <tr key={district.name}>
-                        <td>{district.name}</td>
-                        <td>{district.era}</td>
-                        {/* This now correctly renders the 'effect' string or a fallback */}
-                        <td>{district.effect ?? <span style={{ color: '#888' }}>--</span>}</td>
-                        <td style={{ whiteSpace: 'pre-line' }}>{renderArrayCell(district.info)}</td>
-                        <td style={{ whiteSpace: 'pre-line' }}>{renderArrayCell(district.tileBonus)}</td>
-                        <td style={{ whiteSpace: 'pre-line' }}>{renderArrayCell(district.adjacencyBonus)}</td>
-                        <td>{district.placementPrereq ?? 'None'}</td>
-                    </tr>
-                ))}
+                    .filter((d) => !!d?.displayName)
+                    .map((d) => (
+                        <tr key={d.districtKey ?? d.displayName}>
+                            <td>{d.displayName ?? "--"}</td>
+                            <td>{d.era ?? "--"}</td>
+                            <td style={{ whiteSpace: "pre-line" }}>
+                                {(d.descriptionLines ?? []).length
+                                    ? d.descriptionLines.join("\n")
+                                    : "--"}
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>

@@ -54,9 +54,7 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
                     <span>🛡️ Defense:</span>
                     <span>{defense}</span>
                     <span>⚔️ Damage:</span>
-                    <span>
-    {minDamage}–{maxDamage}
-  </span>
+                    <span>{minDamage}–{maxDamage}</span>
                     <span>👣 Move:</span>
                     <span>{movementPoints}</span>
                 </div>

@@ -1,8 +1,7 @@
 import React from "react";
-import { Tech } from "@/types/dataTypes";
+import { Tech, TechUnlockRef } from "@/types/dataTypes";
 import UnlockLine from "./UnlockLine";
 
-// This component is now only responsible for rendering the table of techs.
 interface TechSheetViewProps {
     techs: Tech[];
 }
@@ -17,22 +16,26 @@ const TechSheetView: React.FC<TechSheetViewProps> = ({ techs }) => {
                     <th>Era</th>
                     <th>Type</th>
                     <th>Unlocks</th>
-                    <th>Effects</th>
+                    <th>Description</th>
                 </tr>
                 </thead>
                 <tbody>
                 {techs.map((tech) => (
-                    <tr key={tech.techKey || tech.name}>
-                        <td>{tech.name}</td>
-                        <td>{tech.era}</td>
-                        <td>{tech.type}</td>
+                    <tr key={tech.techKey ?? tech.name}>
+                        <td>{tech.name ?? "--"}</td>
+                        <td>{tech.era ?? "--"}</td>
+                        <td>{tech.type ?? "--"}</td>
+
                         <td style={{ whiteSpace: "pre-line" }}>
-                            {(tech.unlocks ?? []).map((line, i) => (
-                                <UnlockLine key={i} line={line} />
+                            {(tech.unlocks ?? []).map((u: TechUnlockRef, i: number) => (
+                                <UnlockLine key={`${u.unlockType}:${u.unlockKey}:${i}`} unlock={u} />
                             ))}
                         </td>
+
                         <td style={{ whiteSpace: "pre-line" }}>
-                            {(tech.effects ?? []).join(", ").replace(/, /g, "\n")}
+                            {(tech.descriptionLines ?? []).length
+                                ? tech.descriptionLines.join("\n")
+                                : "--"}
                         </td>
                     </tr>
                 ))}

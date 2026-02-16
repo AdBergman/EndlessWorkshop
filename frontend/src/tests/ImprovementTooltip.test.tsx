@@ -9,7 +9,7 @@ const createMockImprovement = (
 
 describe('ImprovementTooltip', () => {
     // This mock now correctly matches the Improvement type.
-    const baseImprovement: Omit<Improvement, 'name' | 'effects' | 'unique'> = {
+    const baseImprovement: Omit<Improvement, 'displayName' | 'effects' | 'unique'> = {
         cost: [], // Strategic resource costs
     };
 
@@ -17,7 +17,7 @@ describe('ImprovementTooltip', () => {
         // Use the helper to ensure the object has the correct, specific type
         const mockData = createMockImprovement({
             ...baseImprovement,
-            name: 'Test Shrine',
+            displayName: 'Test Shrine',
             unique: 'City',
             effects: ['+1 Faith', '+1 Culture'],
             coords: { xPct: 50, yPct: 50 },
@@ -36,7 +36,7 @@ describe('ImprovementTooltip', () => {
     it('renders correctly without an effects section when effects are empty', () => {
         const mockData = createMockImprovement({
             ...baseImprovement,
-            name: 'Basic Farm',
+            displayName: 'Basic Farm',
             unique: 'District',
             effects: [],
             coords: { xPct: 50, yPct: 50 },

@@ -10,7 +10,7 @@ const createMockDistrict = (
 describe('DistrictTooltip', () => {
     it('renders correctly with all optional data present', () => {
         const mockData = createMockDistrict({
-            name: 'Test District',
+            displayName: 'Test District',
             info: ['A special district.'],
             effect: '+5 Gold',
             tileBonus: ['+1 Food on Plains'],
@@ -40,7 +40,7 @@ describe('DistrictTooltip', () => {
 
     it('renders correctly with only required and some optional data', () => {
         const mockData = createMockDistrict({
-            name: 'Simple Farm',
+            displayName: 'Simple Farm',
             effect: '+2 Food',
             coords: { xPct: 50, yPct: 50 },
         });

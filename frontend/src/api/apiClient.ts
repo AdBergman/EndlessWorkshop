@@ -23,7 +23,8 @@ async function fetcherJson<T>(endpoint: string, options?: RequestInit): Promise<
     const response = await fetch(url, options);
 
     if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const text = await response.text().catch(() => "");
+        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
     }
 
     if (response.status === 204) {
@@ -38,11 +39,9 @@ async function fetcherVoid(endpoint: string, options?: RequestInit): Promise<voi
     const response = await fetch(url, options);
 
     if (!response.ok) {
-        const text = await response.text();
+        const text = await response.text().catch(() => "");
         throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
     }
-
-    return;
 }
 
 export const apiClient = {
@@ -52,6 +51,7 @@ export const apiClient = {
     getUnits: () => fetcherJson<Unit[]>("/units"),
 
     getSavedBuild: (uuid: string) => fetcherJson<SavedTechBuild>(`/builds/${uuid}`),
+
     createSavedBuild: (name: string, selectedFaction: string, techIds: string[]) =>
         fetcherJson<SavedTechBuild>("/builds", {
             method: "POST",

@@ -1,4 +1,3 @@
-// GameDataProvider.tsx
 import React, { useState, useEffect, ReactNode, useCallback } from "react";
 import GameDataContext from "./GameDataContext";
 import { District, Improvement, Tech, Unit, Faction, FactionInfo } from "@/types/dataTypes";
@@ -14,7 +13,19 @@ const normalizeTechs = (techData: Tech[]) =>
     techData.map((t) => ({
         ...t,
         factions: (t.factions ?? []).map((f) => f.toUpperCase()),
+        descriptionLines: t.descriptionLines ?? [],
+        unlocks: t.unlocks ?? [],
     }));
+
+const toKeyedMap = <T,>(items: T[], getKey: (x: T) => string | null | undefined): Map<string, T> => {
+    const m = new Map<string, T>();
+    for (const item of items) {
+        const k = (getKey(item) ?? "").trim();
+        if (!k) continue;
+        m.set(k, item);
+    }
+    return m;
+};
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [districts, setDistricts] = useState<Map<string, District>>(new Map());
@@ -36,16 +47,15 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const refreshTechs = useCallback(async () => {
         try {
             const techData = await apiClient.getTechs();
-            const normalizedTechData = normalizeTechs(techData);
+            const normalized = normalizeTechs(techData);
 
-            // Local H2 pre-import: backend returns rows without techKey -> don't load techs yet
-            const missingKey = normalizedTechData.some((t) => !t.techKey || !t.techKey.trim());
+            const missingKey = normalized.some((t) => !t.techKey || !t.techKey.trim());
             if (missingKey) {
                 setTechs(new Map());
                 return;
             }
 
-            setTechs(new Map(normalizedTechData.map((t) => [t.techKey, t])));
+            setTechs(toKeyedMap(normalized, (t) => t.techKey));
         } catch (err) {
             console.error("Failed to fetch techs from API.", err);
             setTechs(new Map());
@@ -54,19 +64,26 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            try {
-                const [districtData, improvementData] = await Promise.all([
-                    apiClient.getDistricts(),
-                    apiClient.getImprovements(),
-                ]);
+            const [districtRes, improvementRes] = await Promise.allSettled([
+                apiClient.getDistricts(),
+                apiClient.getImprovements(),
+            ]);
 
-                setDistricts(new Map(districtData.map((d) => [d.name, d])));
-                setImprovements(new Map(improvementData.map((i) => [i.name, i])));
-
-                await refreshTechs();
-            } catch (err) {
-                console.error("Failed to fetch game data from API.", err);
+            if (districtRes.status === "fulfilled") {
+                setDistricts(toKeyedMap(districtRes.value, (d) => d.districtKey));
+            } else {
+                console.error("Failed to fetch districts from API.", districtRes.reason);
+                setDistricts(new Map());
             }
+
+            if (improvementRes.status === "fulfilled") {
+                setImprovements(toKeyedMap(improvementRes.value, (i) => i.improvementKey));
+            } else {
+                console.error("Failed to fetch improvements from API.", improvementRes.reason);
+                setImprovements(new Map());
+            }
+
+            await refreshTechs();
         };
 
         void fetchData();
@@ -76,9 +93,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         const fetchUnits = async () => {
             try {
                 const unitData = await apiClient.getUnits();
-                setUnits(new Map(unitData.map((u) => [u.name, u])));
+                setUnits(toKeyedMap(unitData, (u) => u.name));
             } catch (err) {
-                console.error("❌ Failed to load units:", err);
+                console.error("Failed to load units:", err);
+                setUnits(new Map());
             }
         };
 
@@ -99,8 +117,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
 
-                const factionEnumLookup =
-                    Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
+                const factionEnumLookup = Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
 
                 const loadedFactionInfo = identifyFaction({
                     faction: factionEnumLookup,
@@ -129,31 +146,21 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         faction: FactionInfo = selectedFaction,
         techIds: string[] = selectedTechs
     ): Promise<SavedTechBuild> => {
-        try {
-            return await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
-        } catch (err) {
-            console.error("Failed to save tech build:", err);
-            throw err;
-        }
+        return await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
     };
 
     const getSavedBuild = async (uuid: string): Promise<SavedTechBuild> => {
-        try {
-            const saved = await apiClient.getSavedBuild(uuid);
+        const saved = await apiClient.getSavedBuild(uuid);
 
-            const loadedFactionInfo = identifyFaction({
-                faction: Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction],
-                minorFaction: null,
-            });
+        const loadedFactionInfo = identifyFaction({
+            faction: Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction],
+            minorFaction: null,
+        });
 
-            setSelectedFaction(loadedFactionInfo);
-            setSelectedTechs(saved.techIds);
+        setSelectedFaction(loadedFactionInfo);
+        setSelectedTechs(saved.techIds);
 
-            return saved;
-        } catch (err) {
-            console.error("Failed to load saved tech build:", err);
-            throw err;
-        }
+        return saved;
     };
 
     return (
@@ -169,6 +176,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
                 selectedFaction,
                 setSelectedFaction,
+
                 selectedTechs,
                 setSelectedTechs,
 

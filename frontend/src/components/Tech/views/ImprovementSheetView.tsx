@@ -1,4 +1,3 @@
-// ImprovementSheetView.tsx
 import React from "react";
 import type { UnlockedImprovement } from "@/utils/unlocks";
 
@@ -7,8 +6,12 @@ interface ImprovementSheetViewProps {
 }
 
 const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvements }) => {
-    if (!improvements || improvements.length === 0) {
-        return <div className="empty-sheet-message">No improvements unlocked by current tech selections.</div>;
+    if (!improvements?.length) {
+        return (
+            <div className="empty-sheet-message">
+                No improvements unlocked by current tech selections.
+            </div>
+        );
     }
 
     return (
@@ -18,23 +21,23 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                 <tr>
                     <th>Name</th>
                     <th>Era</th>
-                    <th>Effects</th>
+                    <th>Description</th>
                     <th>Unique</th>
                     <th>Cost</th>
                 </tr>
                 </thead>
                 <tbody>
                 {improvements.map((imp) => (
-                    <tr key={imp.name}>
-                        <td>{imp.name}</td>
-                        <td>{imp.era}</td>
+                    <tr key={imp.improvementKey ?? imp.displayName}>
+                        <td>{imp.displayName ?? "--"}</td>
+                        <td>{imp.era ?? "--"}</td>
                         <td style={{ whiteSpace: "pre-line" }}>
-                            {imp.effects?.length ? imp.effects.join("\n") : <span style={{ color: "#888" }}>-- No effects data --</span>}
+                            {(imp.descriptionLines ?? []).length
+                                ? imp.descriptionLines.join("\n")
+                                : "--"}
                         </td>
-                        <td>{imp.unique}</td>
-                        <td>
-                            {imp.cost?.length ? imp.cost.join(", ") : <span style={{ color: "#888" }}>-- No cost data --</span>}
-                        </td>
+                        <td>{imp.unique ?? "--"}</td>
+                        <td>{(imp.cost ?? []).length ? imp.cost.join(", ") : "--"}</td>
                     </tr>
                 ))}
                 </tbody>

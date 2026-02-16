@@ -27,7 +27,7 @@ class ImprovementMapperTest {
 
         // Then
         assertThat(dto).isNotNull();
-        assertThat(dto.constructibleKey()).isEqualTo("DistrictImprovement_Test_01");
+        assertThat(dto.improvementKey()).isEqualTo("DistrictImprovement_Test_01");
         assertThat(dto.displayName()).isEqualTo("Crystal Forge");
         assertThat(dto.category()).isEqualTo("Industry");
         assertThat(dto.descriptionLines()).containsExactly("Line 1", "Line 2");
@@ -55,7 +55,7 @@ class ImprovementMapperTest {
 
         // Then
         assertThat(dto).isNotNull();
-        assertThat(dto.constructibleKey()).isEqualTo("DistrictImprovement_Empty_01");
+        assertThat(dto.improvementKey()).isEqualTo("DistrictImprovement_Empty_01");
         assertThat(dto.displayName()).isEqualTo("Empty Improvement");
         assertThat(dto.category()).isNull();
         assertThat(dto.descriptionLines()).isEmpty();

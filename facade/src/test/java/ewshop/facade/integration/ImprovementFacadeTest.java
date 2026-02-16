@@ -52,7 +52,7 @@ class ImprovementFacadeTest extends BaseIT {
         assertThat(result).hasSize(2);
 
         ImprovementDto shrineDto = result.stream()
-                .filter(i -> "DistrictImprovement_TravelersShrine".equals(i.constructibleKey()))
+                .filter(i -> "DistrictImprovement_TravelersShrine".equals(i.improvementKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Traveler's Shrine DTO not found"));
 
@@ -61,7 +61,7 @@ class ImprovementFacadeTest extends BaseIT {
         assertThat(shrineDto.descriptionLines()).containsExactly("+15 Approval");
 
         ImprovementDto garrisonDto = result.stream()
-                .filter(i -> "DistrictImprovement_Garrison".equals(i.constructibleKey()))
+                .filter(i -> "DistrictImprovement_Garrison".equals(i.improvementKey()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Garrison DTO not found"));
 

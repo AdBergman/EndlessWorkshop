@@ -1,6 +1,17 @@
+export type TechCoords = {
+    xPct: number;
+    yPct: number;
+};
+
+export type TechUnlockRef = {
+    unlockType: string;
+    unlockKey: string;
+};
+
 export interface Unit {
+    unitKey: string;
     name: string;
-    description: string;
+    descriptionLines: string[];
     type: string;
     health: number;
     defense: number;
@@ -22,33 +33,33 @@ export interface Tech {
     name: string;
     era: number;
     type: string;
-    unlocks: string[];
-    effects: string[];
+
+    unlocks: TechUnlockRef[];
+    descriptionLines: string[];
+
     prereq: string | null;
     factions: string[];
     excludes: string | null;
-    coords: { xPct: number; yPct: number };
+
+    coords: TechCoords;
 }
 
 export interface Improvement {
-    name: string;
-    effects: string[];
+    improvementKey: string;
+    displayName: string;
+    descriptionLines: string[];
     unique: "City" | "District";
-    industryCost?: number; // optional, if you later track it
-    cost: string[];        // strategic resource costs only
+    cost: string[];
 }
 
 export interface District {
-    name: string;                   // e.g., "Marketplace"
-    info?: [string]
-    effect?: string;              // e.g., ["+10 Happiness", "+5 Gold"]
-    tileBonus?: string[];             // e.g., ["+2 Food on Plains"]
-    adjacencyBonus?: string[];       // e.g., ["+1 Gold for adjacent Market"]
-    placementPrereq?: string;       // optional, e.g., "Adjacent to River"
+    districtKey: string;
+    displayName: string;
+    descriptionLines: string[];
 }
 
 export const ERA_THRESHOLDS: Record<number, number> = {
-    1: 0,   // Era 1 is always unlocked
+    1: 0,
     2: 8,
     3: 16,
     4: 24,

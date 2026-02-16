@@ -3,7 +3,7 @@ package ewshop.facade.dto.response;
 import java.util.List;
 
 public record ImprovementDto(
-        String constructibleKey,
+        String improvementKey,
         String displayName,
         String category,
         List<String> descriptionLines

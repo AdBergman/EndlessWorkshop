@@ -13,7 +13,7 @@ public class ImprovementImportMapper {
         if (dto == null) throw new IllegalArgumentException("Row is required");
 
         return new ImprovementImportSnapshot(
-                req(dto.constructibleKey(), "constructibleKey"),
+                req(dto.constructibleKey(), "improvementKey"),
                 req(dto.displayName(), "displayName"),
                 trimToNull(dto.category()),
                 cleanLines(dto.descriptionLines())

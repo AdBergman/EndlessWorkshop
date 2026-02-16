@@ -134,7 +134,7 @@ public class ImprovementImportAdminFacadeImpl implements ImprovementImportAdminF
         for (ImprovementImportSnapshot s : snapshots) {
             String key = s.constructibleKey();
             if (!seen.add(key)) {
-                throw new IllegalArgumentException("Duplicate constructibleKey in import file: " + key);
+                throw new IllegalArgumentException("Duplicate improvementKey in import file: " + key);
             }
         }
     }

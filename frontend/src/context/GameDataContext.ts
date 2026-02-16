@@ -1,4 +1,3 @@
-// GameDataContext.ts
 import { createContext, useContext } from "react";
 import type React from "react";
 import { District, Improvement, Tech, Unit, Faction, FactionInfo } from "@/types/dataTypes";
@@ -10,10 +9,7 @@ export interface GameDataContextType {
     techs: Map<string, Tech>;
     units: Map<string, Unit>;
 
-    // Optional setters (useful for refresh flows)
     setTechs?: React.Dispatch<React.SetStateAction<Map<string, Tech>>>;
-
-    // Used after admin save so TechTree base state updates immediately
     refreshTechs?: () => Promise<void>;
 
     selectedFaction: FactionInfo;
@@ -40,6 +36,14 @@ const DEFAULT_FACTION: FactionInfo = {
     uiLabel: "kin",
 };
 
+const EMPTY_SAVED_BUILD: SavedTechBuild = {
+    uuid: "",
+    name: "",
+    selectedFaction: "",
+    techIds: [],
+    createdAt: "",
+};
+
 const GameDataContext = createContext<GameDataContextType>({
     districts: new Map(),
     improvements: new Map(),
@@ -55,25 +59,8 @@ const GameDataContext = createContext<GameDataContextType>({
     selectedTechs: [],
     setSelectedTechs: () => {},
 
-    // Return an empty SavedTechBuild-shaped object to satisfy callers.
-    // (Provider overrides these anyway.)
-    createSavedTechBuild: async () =>
-        ({
-            uuid: "",
-            name: "",
-            selectedFaction: "",
-            techIds: [],
-            createdAt: "",
-        } as SavedTechBuild),
-
-    getSavedBuild: async () =>
-        ({
-            uuid: "",
-            name: "",
-            selectedFaction: "",
-            techIds: [],
-            createdAt: "",
-        } as SavedTechBuild),
+    createSavedTechBuild: async () => EMPTY_SAVED_BUILD,
+    getSavedBuild: async () => EMPTY_SAVED_BUILD,
 
     isProcessingSharedBuild: false,
 });

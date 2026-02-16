@@ -1,17 +1,20 @@
 import React from "react";
 import { Unit } from "@/types/dataTypes";
 
+type UnlockedUnit = Unit & { era?: number };
+
 interface UnitSheetViewProps {
-    units: (Unit & { era: number })[];
+    units: UnlockedUnit[];
 }
 
 const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
-    if (!units || units.length === 0)
+    if (!units?.length) {
         return (
             <div className="empty-sheet-message">
                 No units unlocked by current tech selections.
             </div>
         );
+    }
 
     return (
         <div className="spreadsheet-container">
@@ -31,17 +34,17 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                 </thead>
                 <tbody>
                 {units.map((u) => (
-                    <tr key={u.name}>
-                        <td>{u.name}</td>
-                        <td>{u.era}</td>
-                        <td>{u.tier}</td>
-                        <td>{u.type}</td>
-                        <td>{u.health}</td>
-                        <td>{u.defense}</td>
+                    <tr key={(u as any).unitKey ?? u.name}>
+                        <td>{u.name ?? "--"}</td>
+                        <td>{u.era ?? "--"}</td>
+                        <td>{u.tier ?? "--"}</td>
+                        <td>{u.type ?? "--"}</td>
+                        <td>{u.health ?? "--"}</td>
+                        <td>{u.defense ?? "--"}</td>
                         <td>
-                            {u.minDamage}–{u.maxDamage}
+                            {(u.minDamage ?? "--")}–{(u.maxDamage ?? "--")}
                         </td>
-                        <td>{u.movementPoints}</td>
+                        <td>{u.movementPoints ?? "--"}</td>
                         <td style={{ whiteSpace: "pre-line" }}>
                             {u.skills?.length ? u.skills.join("\n") : "--"}
                         </td>
