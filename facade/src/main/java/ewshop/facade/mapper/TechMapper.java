@@ -4,42 +4,52 @@ import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
 import ewshop.facade.dto.response.TechCoordsDto;
 import ewshop.facade.dto.response.TechDto;
+import ewshop.facade.dto.response.TechUnlockDto;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TechMapper {
+public final class TechMapper {
 
-    public static TechDto toDto(Tech domain) {
-        if (domain == null) return null;
+    private TechMapper() {
+    }
 
-        TechCoords c = domain.getTechCoords();
-        if (c == null) {
-            throw new IllegalStateException("techCoords required (techKey=" + domain.getTechKey() + ")");
-        }
-        TechCoordsDto coordsDto = new TechCoordsDto(c.getXPct(), c.getYPct());
+    public static TechDto toDto(Tech t) {
+        if (t == null) return null;
 
-        String prereqKey = domain.getPrereq() != null ? domain.getPrereq().getTechKey() : null;
-        String excludesKey = domain.getExcludes() != null ? domain.getExcludes().getTechKey() : null;
+        TechCoords c = t.getTechCoords();
+        if (c == null) throw new IllegalStateException("techCoords required (techKey=" + t.getTechKey() + ")");
 
+        TechCoordsDto coords = new TechCoordsDto(c.getXPct(), c.getYPct());
 
-        List<String> factions = domain.getFactions().stream()
+        String type = formatEnumName(t.getType());
+        String prereq = (t.getPrereq() != null) ? t.getPrereq().getTechKey() : null;
+        String excludes = (t.getExcludes() != null) ? t.getExcludes().getTechKey() : null;
+
+        List<String> factions = t.getFactions().stream()
                 .map(TechMapper::formatEnumName)
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
 
-        return TechDto.builder()
-                .name(domain.getName())
-                .techKey(domain.getTechKey())
-                .era(domain.getEra())
-                .type(formatEnumName(domain.getType()))
-                .effects(domain.getEffects())
-                .prereq(prereqKey)
-                .factions(factions)
-                .excludes(excludesKey)
-                .coords(coordsDto)
-                .build();
+        List<TechUnlockDto> unlocks = t.getUnlocks().stream()
+                .map(u -> new TechUnlockDto(u.unlockType(), u.unlockKey()))
+                .toList();
+
+        List<String> descriptionLines = t.getDescriptionLines();
+
+        return new TechDto(
+                t.getName(),
+                t.getTechKey(),
+                t.getEra(),
+                type,
+                unlocks,
+                descriptionLines,
+                prereq,
+                factions,
+                excludes,
+                coords
+        );
     }
 
     private static String formatEnumName(Enum<?> e) {

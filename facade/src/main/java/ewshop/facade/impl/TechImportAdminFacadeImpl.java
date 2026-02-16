@@ -139,8 +139,8 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
 
     private static void assertNoDuplicateTechKeys(List<TechImportSnapshot> snapshots) {
         Set<String> seen = new HashSet<>();
-        for (TechImportSnapshot s : snapshots) {
-            String key = s.techKey();
+        for (TechImportSnapshot snapshot : snapshots) {
+            String key = snapshot.techKey();
             if (!seen.add(key)) {
                 throw new IllegalArgumentException("Duplicate techKey in import file: " + key);
             }

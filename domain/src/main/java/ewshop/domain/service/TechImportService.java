@@ -22,24 +22,24 @@ public class TechImportService {
 
     @Transactional
     @CacheEvict(value = "techs", allEntries = true)
-    public ImportResult importSnapshot(List<TechImportSnapshot> techs) {
-        if (techs == null || techs.isEmpty()) return new ImportResult();
+    public ImportResult importSnapshot(List<TechImportSnapshot> techImportSnapshots) {
+        if (techImportSnapshots == null || techImportSnapshots.isEmpty()) {
+            return new ImportResult();
+        }
 
-        List<TechImportSnapshot> enriched = techs.stream()
+        List<TechImportSnapshot> enrichedSnapshots = techImportSnapshots.stream()
                 .map(gateEvaluator::withDerivedAvailableFactions)
                 .toList();
 
-        // filter: never store hidden or no factions
-        List<TechImportSnapshot> publicOnly = enriched.stream()
-                .filter(t -> !t.hidden())
-                .filter(t -> t.availableFactions() != null && !t.availableFactions().isEmpty())
+        List<TechImportSnapshot> publicSnapshots = enrichedSnapshots.stream()
+                .filter(snapshot -> !snapshot.hidden())
+                .filter(snapshot -> snapshot.availableFactions() != null && !snapshot.availableFactions().isEmpty())
                 .toList();
 
-        // fail-safe
-        if (!enriched.isEmpty() && publicOnly.isEmpty()) {
+        if (!enrichedSnapshots.isEmpty() && publicSnapshots.isEmpty()) {
             throw new IllegalStateException("Tech import produced 0 public techs; refusing to write/delete.");
         }
 
-        return techRepository.importTechSnapshot(publicOnly);
+        return techRepository.importTechSnapshot(publicSnapshots);
     }
 }

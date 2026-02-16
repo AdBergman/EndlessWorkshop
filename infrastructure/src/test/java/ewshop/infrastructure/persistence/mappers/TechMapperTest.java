@@ -2,9 +2,11 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.TechUnlockRef;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
+import ewshop.infrastructure.persistence.entities.TechUnlockRefEmbeddable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,74 +31,94 @@ class TechMapperTest {
         prereqEntity.setTechKey("Tech_Masonry");
         prereqEntity.setName("Masonry");
 
-        TechEntity entity = new TechEntity();
-        entity.setTechKey("Tech_Architecture");
-        entity.setName("Architecture");
-        entity.setType(TechType.DISCOVERY);
-        entity.setEra(2);
-        entity.setEffectLines(List.of("Unlocks new buildings"));
-        entity.setFactions(Set.of(Faction.ASPECTS));
-        entity.setTechCoords(new TechCoords(50.5, 75.5));
-        entity.setPrereq(prereqEntity);
+        TechEntity techEntity = new TechEntity();
+        techEntity.setTechKey("Tech_Architecture");
+        techEntity.setName("Architecture");
+        techEntity.setType(TechType.DISCOVERY);
+        techEntity.setEra(2);
+        techEntity.setDescriptionLines(List.of("Unlocks new buildings"));
+        techEntity.setUnlocks(List.of(
+                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
+        ));
+        techEntity.setFactions(Set.of(Faction.ASPECTS));
+        techEntity.setTechCoords(new TechCoords(50.5, 75.5));
+        techEntity.setPrereq(prereqEntity);
 
-        Tech domain = techMapper.toDomain(entity);
+        Tech tech = techMapper.toDomain(techEntity);
 
-        assertThat(domain).isNotNull();
-        assertThat(domain.getName()).isEqualTo("Architecture");
-        assertThat(domain.getTechKey()).isEqualTo("Tech_Architecture");
-        assertThat(domain.getType()).isEqualTo(TechType.DISCOVERY);
-        assertThat(domain.getEra()).isEqualTo(2);
-        assertThat(domain.getEffects()).containsExactly("Unlocks new buildings");
-        assertThat(domain.getFactions()).containsExactly(Faction.ASPECTS);
+        assertThat(tech).isNotNull();
+        assertThat(tech.getName()).isEqualTo("Architecture");
+        assertThat(tech.getTechKey()).isEqualTo("Tech_Architecture");
+        assertThat(tech.getType()).isEqualTo(TechType.DISCOVERY);
+        assertThat(tech.getEra()).isEqualTo(2);
 
-        assertThat(domain.getTechCoords()).isNotNull();
-        assertThat(domain.getTechCoords().getXPct()).isEqualTo(50.5);
-        assertThat(domain.getTechCoords().getYPct()).isEqualTo(75.5);
+        assertThat(tech.getDescriptionLines()).containsExactly("Unlocks new buildings");
+        assertThat(tech.getUnlocks()).containsExactly(
+                new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRef("Action", "ActionTypeCutForest")
+        );
 
-        assertThat(domain.getPrereq()).isNotNull();
-        assertThat(domain.getPrereq().getName()).isEqualTo("Masonry");
-        assertThat(domain.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(tech.getFactions()).containsExactly(Faction.ASPECTS);
 
-        assertThat(domain.getExcludes()).isNull();
+        assertThat(tech.getTechCoords()).isNotNull();
+        assertThat(tech.getTechCoords().getXPct()).isEqualTo(50.5);
+        assertThat(tech.getTechCoords().getYPct()).isEqualTo(75.5);
+
+        assertThat(tech.getPrereq()).isNotNull();
+        assertThat(tech.getPrereq().getName()).isEqualTo("Masonry");
+        assertThat(tech.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+
+        assertThat(tech.getExcludes()).isNull();
     }
 
     @Test
     void toEntity_shouldMapAllFields() {
-        Tech prereqDomain = Tech.builder()
+        Tech prereqTech = Tech.builder()
                 .techKey("Tech_Masonry")
                 .name("Masonry")
                 .build();
 
-        Tech domain = Tech.builder()
+        Tech tech = Tech.builder()
                 .techKey("Tech_Architecture")
                 .name("Architecture")
                 .type(TechType.DISCOVERY)
                 .era(2)
-                .effects(List.of("Unlocks new buildings"))
+                .descriptionLines(List.of("Unlocks new buildings"))
+                .unlocks(List.of(
+                        new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry"),
+                        new TechUnlockRef("Action", "ActionTypeCutForest")
+                ))
                 .factions(Set.of(Faction.ASPECTS))
                 .techCoords(new TechCoords(50.5, 75.5))
-                .prereq(prereqDomain)
+                .prereq(prereqTech)
                 .build();
 
-        TechEntity entity = techMapper.toEntity(domain);
+        TechEntity techEntity = techMapper.toEntity(tech);
 
-        assertThat(entity).isNotNull();
-        assertThat(entity.getName()).isEqualTo("Architecture");
-        assertThat(entity.getTechKey()).isEqualTo("Tech_Architecture");
-        assertThat(entity.getType()).isEqualTo(TechType.DISCOVERY);
-        assertThat(entity.getEra()).isEqualTo(2);
-        assertThat(entity.getEffectLines()).containsExactly("Unlocks new buildings");
-        assertThat(entity.getFactions()).containsExactlyInAnyOrder(Faction.ASPECTS);
+        assertThat(techEntity).isNotNull();
+        assertThat(techEntity.getName()).isEqualTo("Architecture");
+        assertThat(techEntity.getTechKey()).isEqualTo("Tech_Architecture");
+        assertThat(techEntity.getType()).isEqualTo(TechType.DISCOVERY);
+        assertThat(techEntity.getEra()).isEqualTo(2);
 
-        assertThat(entity.getTechCoords()).isNotNull();
-        assertThat(entity.getTechCoords().getXPct()).isEqualTo(50.5);
-        assertThat(entity.getTechCoords().getYPct()).isEqualTo(75.5);
+        assertThat(techEntity.getDescriptionLines()).containsExactly("Unlocks new buildings");
+        assertThat(techEntity.getUnlocks()).containsExactly(
+                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
+        );
 
-        assertThat(entity.getPrereq()).isNotNull();
-        assertThat(entity.getPrereq().getName()).isEqualTo("Masonry");
-        assertThat(entity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(techEntity.getFactions()).containsExactlyInAnyOrder(Faction.ASPECTS);
 
-        assertThat(entity.getExcludes()).isNull();
+        assertThat(techEntity.getTechCoords()).isNotNull();
+        assertThat(techEntity.getTechCoords().getXPct()).isEqualTo(50.5);
+        assertThat(techEntity.getTechCoords().getYPct()).isEqualTo(75.5);
+
+        assertThat(techEntity.getPrereq()).isNotNull();
+        assertThat(techEntity.getPrereq().getName()).isEqualTo("Masonry");
+        assertThat(techEntity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+
+        assertThat(techEntity.getExcludes()).isNull();
     }
 
     @Test
@@ -111,57 +133,61 @@ class TechMapperTest {
 
     @Test
     void toDomain_shouldMapNullCollectionsToEmpty() {
-        TechEntity entity = new TechEntity();
-        entity.setTechKey("Tech_Any");
-        entity.setName("Any");
-        entity.setEffectLines(null);
-        entity.setFactions(null);
+        TechEntity techEntity = new TechEntity();
+        techEntity.setTechKey("Tech_Any");
+        techEntity.setName("Any");
+        techEntity.setDescriptionLines(null);
+        techEntity.setUnlocks(null);
+        techEntity.setFactions(null);
 
-        Tech domain = techMapper.toDomain(entity);
+        Tech tech = techMapper.toDomain(techEntity);
 
-        assertThat(domain).isNotNull();
-        assertThat(domain.getEffects()).isNotNull().isEmpty();
-        assertThat(domain.getFactions()).isNotNull().isEmpty();
+        assertThat(tech).isNotNull();
+        assertThat(tech.getDescriptionLines()).isNotNull().isEmpty();
+        assertThat(tech.getUnlocks()).isNotNull().isEmpty();
+        assertThat(tech.getFactions()).isNotNull().isEmpty();
     }
 
     @Test
     void toEntity_shouldMapNullCollectionsToEmpty() {
-        Tech domain = Tech.builder()
+        Tech tech = Tech.builder()
                 .techKey("Tech_Any")
                 .name("Any")
-                .effects(null)
+                .descriptionLines(null)
+                .unlocks(null)
                 .factions(null)
                 .build();
 
-        TechEntity entity = techMapper.toEntity(domain);
+        TechEntity techEntity = techMapper.toEntity(tech);
 
-        assertThat(entity).isNotNull();
-        assertThat(entity.getEffectLines()).isNotNull().isEmpty();
-        assertThat(entity.getFactions()).isNotNull().isEmpty();
+        assertThat(techEntity).isNotNull();
+        assertThat(techEntity.getDescriptionLines()).isNotNull().isEmpty();
+        assertThat(techEntity.getUnlocks()).isNotNull().isEmpty();
+        assertThat(techEntity.getFactions()).isNotNull().isEmpty();
     }
 
     @Test
     void updateReferences_shouldUpdatePrereqAndExcludes() {
-        Tech prereqDomain = Tech.builder()
+        Tech prereqTech = Tech.builder()
                 .techKey("Tech_Masonry")
                 .name("Masonry")
                 .build();
 
-        Tech excludesDomain = Tech.builder()
+        Tech excludesTech = Tech.builder()
                 .techKey("Tech_AlternativeTech")
                 .name("AlternativeTech")
                 .build();
 
-        Tech domain = Tech.builder()
+        Tech tech = Tech.builder()
                 .techKey("Tech_Architecture")
                 .name("Architecture")
-                .prereq(prereqDomain)
-                .excludes(excludesDomain)
+                .prereq(prereqTech)
+                .excludes(excludesTech)
                 .build();
 
-        TechEntity entity = new TechEntity();
-        entity.setTechKey("Tech_Architecture");
-        entity.setName("Architecture");
+        TechEntity techEntity = new TechEntity();
+        techEntity.setTechKey("Tech_Architecture");
+        techEntity.setName("Architecture");
 
         TechEntity prereqEntity = new TechEntity();
         prereqEntity.setTechKey("Tech_Masonry");
@@ -171,19 +197,20 @@ class TechMapperTest {
         excludesEntity.setTechKey("Tech_AlternativeTech");
         excludesEntity.setName("AlternativeTech");
 
-        Map<String, TechEntity> savedMap = Map.of(
+        Map<String, TechEntity> savedByTechKey = Map.of(
                 "Tech_Masonry", prereqEntity,
                 "Tech_AlternativeTech", excludesEntity
         );
 
-        techMapper.updateReferences(entity, domain, savedMap);
+        techMapper.updateReferences(techEntity, tech, savedByTechKey);
 
-        assertThat(entity.getPrereq()).isNotNull();
-        assertThat(entity.getPrereq().getName()).isEqualTo("Masonry");
-        assertThat(entity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(techEntity.getPrereq()).isNotNull();
+        assertThat(techEntity.getPrereq().getName()).isEqualTo("Masonry");
+        assertThat(techEntity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
 
-        assertThat(entity.getExcludes()).isNotNull();
-        assertThat(entity.getExcludes().getName()).isEqualTo("AlternativeTech");
-        assertThat(entity.getExcludes().getTechKey()).isEqualTo("Tech_AlternativeTech");
+        assertThat(techEntity.getExcludes()).isNotNull();
+        assertThat(techEntity.getExcludes().getName()).isEqualTo("AlternativeTech");
+        assertThat(techEntity.getExcludes()).isNotNull();
+        assertThat(techEntity.getExcludes().getTechKey()).isEqualTo("Tech_AlternativeTech");
     }
 }

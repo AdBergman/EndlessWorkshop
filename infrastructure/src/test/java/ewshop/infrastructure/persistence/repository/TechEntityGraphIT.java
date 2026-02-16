@@ -30,7 +30,7 @@ class TechEntityGraphIT {
         prereq.setType(TechType.DISCOVERY);
         prereq.setEra(1);
         prereq.setTechCoords(new TechCoords(0.0, 0.0));
-        prereq.setEffectLines(List.of("Prereq line"));
+        prereq.setDescriptionLines(List.of("Prereq line"));
         prereq.setFactions(Set.of(Faction.ASPECTS));
 
         // main tech
@@ -40,7 +40,7 @@ class TechEntityGraphIT {
         tech.setType(TechType.DEFENSE);
         tech.setEra(4);
         tech.setTechCoords(new TechCoords(0.0, 0.0));
-        tech.setEffectLines(List.of("Unlocks something"));
+        tech.setDescriptionLines(List.of("Unlocks something"));
         tech.setFactions(Set.of(Faction.ASPECTS));
         tech.setPrereq(prereq);
 
@@ -48,12 +48,12 @@ class TechEntityGraphIT {
         em.persistAndFlush(tech);
         em.clear();
 
-        var loaded = repo.findAll().stream()
+        var loaded = repo.findAllForCache().stream()
                 .filter(t -> "Tech_AdvancedWeapons".equals(t.getTechKey()))
                 .findFirst()
                 .orElseThrow();
 
-        assertThat(loaded.getEffectLines()).containsExactly("Unlocks something");
+        assertThat(loaded.getDescriptionLines()).containsExactly("Unlocks something");
         assertThat(loaded.getPrereq()).isNotNull();
         assertThat(loaded.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
     }

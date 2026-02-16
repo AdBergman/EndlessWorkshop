@@ -7,6 +7,7 @@ import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
+import ewshop.infrastructure.persistence.entities.TechUnlockRefEmbeddable;
 import ewshop.infrastructure.persistence.mappers.TechMapper;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
 import org.slf4j.Logger;
@@ -39,21 +40,21 @@ public class TechRepositoryAdapter implements TechRepository {
 
     @Override
     public List<Tech> findAll() {
-        return techJpaRepository.findAll().stream()
+        return techJpaRepository.findAllForCache().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Tech save(Tech tech) {
-        var entityToSave = mapper.toEntity(tech);
-        var savedEntity = techJpaRepository.save(entityToSave);
+        TechEntity entityToSave = mapper.toEntity(tech);
+        TechEntity savedEntity = techJpaRepository.save(entityToSave);
         return mapper.toDomain(savedEntity);
     }
 
     @Override
     public void saveAll(List<Tech> techs) {
-        var entities = techs.stream()
+        List<TechEntity> entities = techs.stream()
                 .map(mapper::toEntity)
                 .toList();
         techJpaRepository.saveAll(entities);
@@ -138,7 +139,6 @@ public class TechRepositoryAdapter implements TechRepository {
                     .toList();
 
             if (!obsoleteIds.isEmpty()) {
-                // clear self-FKs before delete
                 techJpaRepository.clearExcludesRefsToTechIds(obsoleteIds);
                 techJpaRepository.clearPrereqRefsToTechIds(obsoleteIds);
                 techJpaRepository.flush();
@@ -154,7 +154,6 @@ public class TechRepositoryAdapter implements TechRepository {
     private static UpsertOutcome applySnapshot(TechEntity entity, TechImportSnapshot update, boolean isInsert) {
         boolean changed = isInsert;
 
-        // name: import fills only if DB is empty (keeps manual overrides)
         if ((entity.getName() == null || entity.getName().isBlank())
                 && update.displayName() != null && !update.displayName().isBlank()) {
             entity.setName(update.displayName());
@@ -171,7 +170,6 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        // hidden is nullable in DB, boolean in snapshot
         Boolean hiddenDb = entity.isHidden();
         boolean hiddenDbVal = Boolean.TRUE.equals(hiddenDb);
         boolean hiddenNewVal = update.hidden();
@@ -191,12 +189,27 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        // factions (import-wins derived availability)
-        EnumSet<Faction> nextSet = toEnumSet(update.availableFactions());
-        EnumSet<Faction> currentSet = toEnumSet(entity.getFactions());
+        List<String> nextDescriptionLines = update.descriptionLines() == null ? List.of() : update.descriptionLines();
+        List<String> currentDescriptionLines = entity.getDescriptionLines() == null ? List.of() : entity.getDescriptionLines();
 
-        if (!currentSet.equals(nextSet)) {
-            entity.setFactions(nextSet.isEmpty() ? Collections.emptySet() : nextSet);
+        if (!currentDescriptionLines.equals(nextDescriptionLines)) {
+            entity.setDescriptionLines(new ArrayList<>(nextDescriptionLines));
+            changed = true;
+        }
+
+        List<TechUnlockRefEmbeddable> nextUnlocks = toUnlockEmbeddables(update.unlocks());
+        List<TechUnlockRefEmbeddable> currentUnlocks = entity.getUnlocks() == null ? List.of() : entity.getUnlocks();
+
+        if (!currentUnlocks.equals(nextUnlocks)) {
+            entity.setUnlocks(new ArrayList<>(nextUnlocks));
+            changed = true;
+        }
+
+        EnumSet<Faction> nextFactions = toEnumSet(update.availableFactions());
+        EnumSet<Faction> currentFactions = toEnumSet(entity.getFactions());
+
+        if (!currentFactions.equals(nextFactions)) {
+            entity.setFactions(nextFactions.isEmpty() ? Collections.emptySet() : nextFactions);
             changed = true;
         }
 
@@ -209,5 +222,17 @@ public class TechRepositoryAdapter implements TechRepository {
             return EnumSet.noneOf(Faction.class);
         }
         return EnumSet.copyOf(in);
+    }
+
+    private static List<TechUnlockRefEmbeddable> toUnlockEmbeddables(List<?> unlockTuples) {
+        if (unlockTuples == null || unlockTuples.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return unlockTuples.stream()
+                .filter(Objects::nonNull)
+                .map(value -> (ewshop.domain.command.TechUnlockTuple) value)
+                .map(tuple -> new TechUnlockRefEmbeddable(tuple.unlockType(), tuple.unlockElementName()))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

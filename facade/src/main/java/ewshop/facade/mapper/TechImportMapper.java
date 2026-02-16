@@ -5,7 +5,9 @@ import ewshop.domain.command.TechTraitPrereq;
 import ewshop.domain.command.TechUnlockTuple;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
+import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class TechImportMapper {
@@ -22,38 +24,43 @@ public final class TechImportMapper {
         }
 
         if (dto.quadrant() == null || dto.quadrant().isBlank()) {
-            throw new IllegalArgumentException(
-                    "Missing quadrant for techKey: " + dto.techKey()
-            );
+            throw new IllegalArgumentException("Missing quadrant for techKey: " + dto.techKey());
         }
 
         TechType type = mapQuadrantToTechType(dto.quadrant(), dto.techKey());
         int era = dto.eraIndex() == null ? 1 : dto.eraIndex();
 
-        var prereqs = emptyIfNull(dto.technologyPrerequisiteTechKeys()).stream()
-                .filter(s -> s != null && !s.isBlank())
+        List<String> prereqTechKeys = emptyIfNull(dto.technologyPrerequisiteTechKeys()).stream()
+                .filter(value -> value != null && !value.isBlank())
                 .map(String::trim)
                 .toList();
 
-        var exclusivePrereqs = emptyIfNull(dto.exclusiveTechnologyPrerequisiteTechKeys()).stream()
-                .filter(s -> s != null && !s.isBlank())
+        List<String> exclusivePrereqTechKeys = emptyIfNull(dto.exclusiveTechnologyPrerequisiteTechKeys()).stream()
+                .filter(value -> value != null && !value.isBlank())
                 .map(String::trim)
                 .toList();
 
-        var traits = emptyIfNull(dto.factionTraitPrerequisites()).stream()
-                .filter(t -> t != null && t.traitKey() != null && !t.traitKey().isBlank())
-                .map(t -> TechTraitPrereq.builder()
-                        .operator(t.operator())
-                        .traitKey(t.traitKey())
+        List<TechTraitPrereq> traitPrereqs = emptyIfNull(dto.factionTraitPrerequisites()).stream()
+                .filter(trait -> trait != null && trait.traitKey() != null && !trait.traitKey().isBlank())
+                .map(trait -> TechTraitPrereq.builder()
+                        .operator(trait.operator())
+                        .traitKey(trait.traitKey())
                         .build())
                 .toList();
 
-        var unlocks = emptyIfNull(dto.unlocks()).stream()
-                .filter(u -> u != null && u.unlockElementName() != null && !u.unlockElementName().isBlank())
-                .map(u -> TechUnlockTuple.builder()
-                        .unlockType(u.unlockType())
-                        .unlockCategory(u.unlockCategory())
-                        .unlockElementName(u.unlockElementName())
+        List<TechImportUnlockDto> unlockDtos = emptyIfNull(dto.unlocks());
+
+        List<String> descriptionLines = collectDescriptorLines(unlockDtos);
+
+        List<TechUnlockTuple> unlocks = unlockDtos.stream()
+                .filter(unlockDto -> unlockDto != null)
+                .filter(unlockDto -> unlockDto.unlockType() != null && !unlockDto.unlockType().isBlank())
+                .filter(unlockDto -> !"Descriptor".equalsIgnoreCase(unlockDto.unlockType()))
+                .filter(unlockDto -> unlockDto.unlockElementName() != null && !unlockDto.unlockElementName().isBlank())
+                .map(unlockDto -> TechUnlockTuple.builder()
+                        .unlockType(unlockDto.unlockType())
+                        .unlockCategory(unlockDto.unlockCategory())
+                        .unlockElementName(unlockDto.unlockElementName())
                         .build())
                 .toList();
 
@@ -64,23 +71,47 @@ public final class TechImportMapper {
                 .hidden(Boolean.TRUE.equals(dto.hidden()))
                 .era(era)
                 .type(type)
-                .prereqTechKeys(prereqs)
-                .exclusivePrereqTechKeys(exclusivePrereqs)
-                .traitPrereqs(traits)
+                .prereqTechKeys(prereqTechKeys)
+                .exclusivePrereqTechKeys(exclusivePrereqTechKeys)
+                .traitPrereqs(traitPrereqs)
+                .descriptionLines(descriptionLines)
                 .unlocks(unlocks)
                 .build();
     }
 
-    private static TechType mapQuadrantToTechType(String quadrantRaw, String techKey) {
-        String q = quadrantRaw.trim().toUpperCase();
+    private static List<String> collectDescriptorLines(List<TechImportUnlockDto> unlockDtos) {
+        if (unlockDtos == null || unlockDtos.isEmpty()) {
+            return List.of();
+        }
 
-        if ("DEVELOPMENT".equals(q)) {
+        List<String> lines = new ArrayList<>();
+        for (TechImportUnlockDto unlockDto : unlockDtos) {
+            if (unlockDto == null) continue;
+
+            List<String> descriptorLines = unlockDto.descriptorLines();
+            if (descriptorLines == null || descriptorLines.isEmpty()) continue;
+
+            for (String line : descriptorLines) {
+                if (line == null) continue;
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    lines.add(trimmed);
+                }
+            }
+        }
+        return lines;
+    }
+
+    private static TechType mapQuadrantToTechType(String quadrantRaw, String techKey) {
+        String quadrant = quadrantRaw.trim().toUpperCase();
+
+        if ("DEVELOPMENT".equals(quadrant)) {
             return TechType.ECONOMY;
         }
 
         try {
-            return TechType.valueOf(q);
-        } catch (IllegalArgumentException e) {
+            return TechType.valueOf(quadrant);
+        } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException(
                     "Invalid quadrant '" + quadrantRaw + "' for techKey: " + techKey
             );

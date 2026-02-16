@@ -85,7 +85,7 @@ class TechImportAdminFacadeTest extends BaseIT {
         entityManager.clear();
 
         // then
-        List<TechEntity> all = techJpaRepository.findAll();
+        List<TechEntity> all = techJpaRepository.findAllForCache();
         assertThat(all).hasSize(1);
 
         TechEntity reloaded = techJpaRepository.findByTechKey("Technology_X").orElseThrow();
@@ -105,7 +105,7 @@ class TechImportAdminFacadeTest extends BaseIT {
     void importTechs_shouldInsertNewTech_withDefaultCoords_0_0_andHiddenNotNull() {
 
         // given
-        assertThat(techJpaRepository.findAll()).isEmpty();
+        assertThat(techJpaRepository.findAllForCache()).isEmpty();
 
         TechImportTechDto dto = new TechImportTechDto(
                 "Technology_NEW",

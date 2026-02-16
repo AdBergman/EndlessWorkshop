@@ -27,12 +27,18 @@ public class TechEntity {
     private int era;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "tech_effect_lines", joinColumns = @JoinColumn(name = "tech_id"))
-    @Column(name = "effect_line", nullable = false)
-    private List<String> effectLines;
+    @CollectionTable(name = "tech_description_lines", joinColumns = @JoinColumn(name = "tech_id"))
+    @OrderColumn(name = "line_index")
+    @Column(name = "line_text", nullable = false)
+    private List<String> descriptionLines;
 
     @Embedded
     private TechCoords techCoords;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "tech_unlocks", joinColumns = @JoinColumn(name = "tech_id"))
+    @OrderColumn(name = "order_index")
+    private List<TechUnlockRefEmbeddable> unlocks;
 
     // Legacy – replaced by tech_prereq_key
     @ManyToOne(fetch = FetchType.LAZY)
@@ -92,13 +98,13 @@ public class TechEntity {
         this.era = era;
     }
 
-    public List<String> getEffectLines() {
-        return effectLines;
-    }
+    public List<String> getDescriptionLines() { return descriptionLines; }
 
-    public void setEffectLines(List<String> effects) {
-        this.effectLines = effects;
-    }
+    public void setDescriptionLines(List<String> lines) { this.descriptionLines = lines; }
+
+    public List<TechUnlockRefEmbeddable> getUnlocks() { return unlocks; }
+
+    public void setUnlocks(List<TechUnlockRefEmbeddable> unlocks) { this.unlocks = unlocks; }
 
     public TechCoords getTechCoords() {
         return techCoords;

@@ -2,7 +2,6 @@ package ewshop.infrastructure.persistence.repositories;
 
 import ewshop.domain.model.TechCoords;
 import ewshop.infrastructure.persistence.entities.TechEntity;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,7 +20,6 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
 
     List<TechEntity> findAllByTechKeyIn(List<String> techKeys);
 
-    // used for entity deletes (cascades / orphans)
     List<TechEntity> findAllByTechKeyNotIn(List<String> techKeys);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
@@ -32,20 +30,22 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
     @Query(value = "update tech set prereq_id = null where prereq_id in (:ids)", nativeQuery = true)
     int clearPrereqRefsToTechIds(@Param("ids") List<Long> ids);
 
-    /**
-     * Eager-load the self references so TechMapper can safely map prereq/excludes without N+1.
-     * (Coords/factions are not relations.)
-     */
-    @Override
-    @EntityGraph(attributePaths = { "prereq", "excludes" })
-    List<TechEntity> findAll();
+    @Query("""
+        select distinct tech
+          from TechEntity tech
+          left join fetch tech.prereq
+          left join fetch tech.excludes
+          left join fetch tech.descriptionLines
+          left join fetch tech.unlocks
+    """)
+    List<TechEntity> findAllForCache();
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
-        update TechEntity t
-           set t.era = :era,
-               t.techCoords = :coords
-         where t.techKey = :techKey
+        update TechEntity tech
+           set tech.era = :era,
+               tech.techCoords = :coords
+         where tech.techKey = :techKey
     """)
     int updateEraAndCoordsByTechKey(@Param("techKey") String techKey,
                                     @Param("era") int era,

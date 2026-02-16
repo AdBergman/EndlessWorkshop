@@ -34,7 +34,7 @@ class TechIT {
         tech.setType(TechType.DEFENSE);
         tech.setFactions(Set.of(Faction.KIN));
         tech.setTechCoords(new TechCoords(50, 50));
-        tech.setEffectLines(List.of("Unlocks a powerful new weapon."));
+        tech.setDescriptionLines(List.of("Unlocks a powerful new weapon."));
 
         entityManager.persistAndFlush(tech);
 
@@ -46,7 +46,7 @@ class TechIT {
         assertThat(result.getTechKey()).isEqualTo("Tech_AdvancedWeapons");
         assertThat(result.getName()).isEqualTo("Advanced Weapons");
         assertThat(result.getEra()).isEqualTo(4);
-        assertThat(result.getEffectLines())
+        assertThat(result.getDescriptionLines())
                 .containsExactly("Unlocks a powerful new weapon.");
         assertThat(result.getFactions())
                 .containsExactly(Faction.KIN);
