@@ -16,8 +16,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -209,7 +209,8 @@ public class TechRepositoryAdapter implements TechRepository {
         EnumSet<Faction> currentFactions = toEnumSet(entity.getFactions());
 
         if (!currentFactions.equals(nextFactions)) {
-            entity.setFactions(nextFactions.isEmpty() ? Collections.emptySet() : nextFactions);
+            // Give Hibernate a mutable collection for dirty-tracking
+            entity.setFactions(nextFactions.isEmpty() ? new HashSet<>() : new HashSet<>(nextFactions));
             changed = true;
         }
 

@@ -50,10 +50,10 @@ public class TechEntity {
     @JoinColumn(name = "excludes_id")
     private TechEntity excludes;
 
-    @ElementCollection(targetClass = Faction.class, fetch = FetchType.LAZY)
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "tech_faction", joinColumns = @JoinColumn(name = "tech_id"))
+    @Column(name = "faction", nullable = false, length = 64)
     @Enumerated(EnumType.STRING)
-    @Column(name = "faction", nullable = false)
     private Set<Faction> factions;
 
     @Column(name = "tech_key")
@@ -68,7 +68,8 @@ public class TechEntity {
     @Column
     private Boolean hidden;
 
-    public TechEntity() {}
+    public TechEntity() {
+    }
 
     public Long getId() {
         return id;
@@ -98,13 +99,21 @@ public class TechEntity {
         this.era = era;
     }
 
-    public List<String> getDescriptionLines() { return descriptionLines; }
+    public List<String> getDescriptionLines() {
+        return descriptionLines;
+    }
 
-    public void setDescriptionLines(List<String> lines) { this.descriptionLines = lines; }
+    public void setDescriptionLines(List<String> lines) {
+        this.descriptionLines = lines;
+    }
 
-    public List<TechUnlockRefEmbeddable> getUnlocks() { return unlocks; }
+    public List<TechUnlockRefEmbeddable> getUnlocks() {
+        return unlocks;
+    }
 
-    public void setUnlocks(List<TechUnlockRefEmbeddable> unlocks) { this.unlocks = unlocks; }
+    public void setUnlocks(List<TechUnlockRefEmbeddable> unlocks) {
+        this.unlocks = unlocks;
+    }
 
     public TechCoords getTechCoords() {
         return techCoords;
