@@ -5,6 +5,7 @@ import TooltipSection from "./TooltipSection";
 import { Improvement } from "@/types/dataTypes";
 import { TooltipFlavor } from "@/components/Tooltips/TooltipFlavor";
 import { HoveredWithCoords } from "./hoverHelpers";
+import {renderDescriptionLine} from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface ImprovementTooltipProps {
     hoveredImprovement: HoveredWithCoords<Improvement>;
@@ -24,7 +25,7 @@ const ImprovementTooltip: React.FC<ImprovementTooltipProps> = ({ hoveredImprovem
                 {(descriptionLines?.length ?? 0) > 0 && (
                     <TooltipSection title="Effects:">
                         {(descriptionLines ?? []).map((line, i) => (
-                            <div key={i}>{line}</div>
+                            <div key={i}>{renderDescriptionLine(line)}</div>
                         ))}
                     </TooltipSection>
                 )}

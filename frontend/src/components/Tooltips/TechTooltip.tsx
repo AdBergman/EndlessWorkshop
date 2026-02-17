@@ -13,6 +13,7 @@ import {
 } from "./hoverHelpers";
 import { useGameData } from "@/context/GameDataContext";
 import "./TechTooltip.css";
+import {renderDescriptionLine} from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface TechTooltipProps {
     hoveredTech: Tech;
@@ -48,108 +49,95 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
         });
     };
 
-    /**
-     * Build a fast lookup from unlockKey -> constructible object.
-     * This is the *correct join* for TechUnlockRef.unlockKey, and it’s computed once per data refresh.
-     *
-     * We intentionally only index:
-     * - improvementKey/districtKey (primary IDs)
-     * - constructibleKey (if present on DTO)
-     *
-     * We do NOT index by display name here (units are the only legacy exception elsewhere).
-     */
-    const improvementByUnlockKey = useMemo(() => {
-        const m = new Map<string, Improvement>();
-
-        for (const imp of improvements.values()) {
-            const k1 = keyOf((imp as any).improvementKey);
-            if (k1) m.set(k1, imp);
-
-            const k2 = keyOf((imp as any).constructibleKey);
-            if (k2) m.set(k2, imp);
-        }
-
-        return m;
-    }, [improvements]);
-
-    const districtByUnlockKey = useMemo(() => {
-        const m = new Map<string, District>();
-
-        for (const dist of districts.values()) {
-            const k1 = keyOf((dist as any).districtKey);
-            if (k1) m.set(k1, dist);
-
-            const k2 = keyOf((dist as any).constructibleKey);
-            if (k2) m.set(k2, dist);
-        }
-
-        return m;
-    }, [districts]);
+    // Pre-filter so we don't even iterate Actions/CostModifiers etc.
+    const visibleUnlocks = useMemo(
+        () =>
+            (hoveredTech.unlocks ?? []).filter((u) => {
+                const k = keyOf(u.unlockKey);
+                if (!k) return false;
+                // Show only Constructible + (optional) Unit
+                return isType(u, "Constructible") || isType(u, "Unit");
+            }),
+        [hoveredTech.unlocks]
+    );
 
     const renderUnlockRef = (u: TechUnlockRef, index: number) => {
-        // 2) show ONLY constructible in this tooltip
-        if (!isType(u, "Constructible")) return null;
-
         const unlockKey = keyOf(u.unlockKey);
         if (!unlockKey) return null;
 
-        // Resolve object (improvement first, then district)
-        const imp = improvementByUnlockKey.get(unlockKey);
-        if (imp) {
+        // Constructible -> resolve to Improvement or District; if not resolvable, hide it.
+        if (isType(u, "Constructible")) {
+            // These MUST be keyed by improvementKey / districtKey in the provider.
+            const imp = improvements.get(unlockKey);
+            if (imp) {
+                return (
+                    <div key={index} style={{ display: "block" }}>
+                        <span>Improvement: </span>
+                        <span
+                            className="hoverable-link"
+                            onMouseEnter={(e) => {
+                                setHoveredDistrict(null);
+                                setHoveredImprovement(createHoveredImprovement(imp, e));
+                            }}
+                            onMouseLeave={() => setHoveredImprovement(null)}
+                        >
+              {imp.displayName ?? unlockKey}
+            </span>
+                    </div>
+                );
+            }
+
+            const dist = districts.get(unlockKey);
+            if (dist) {
+                return (
+                    <div key={index} style={{ display: "block" }}>
+                        <span>District: </span>
+                        <span
+                            className="hoverable-link"
+                            onMouseEnter={(e) => {
+                                setHoveredImprovement(null);
+                                setHoveredDistrict(createHoveredDistrict(dist, e));
+                            }}
+                            onMouseLeave={() => setHoveredDistrict(null)}
+                        >
+              {dist.displayName ?? unlockKey}
+            </span>
+                    </div>
+                );
+            }
+
+            return null;
+        }
+
+        // Unit: legacy backend is name-based; best-effort resolve by NAME. If not resolved, hide.
+        if (isType(u, "Unit")) {
+            const faction = selectedFaction?.uiLabel?.toLowerCase() ?? "";
+            const slugFromKey = unlockKey.toLowerCase().replace(/\s+/g, "_");
+
+            const unit =
+                units?.get(unlockKey) ??
+                units?.get(unlockKey.replace(/_/g, " ")) ??
+                null;
+
+            if (!unit) return null;
+
             return (
                 <div key={index} style={{ display: "block" }}>
-                    <span>Constructible: </span>
+                    <span>Unit: </span>
                     <span
-                        className="hoverable-link"
-                        onMouseEnter={(e) => {
-                            setHoveredDistrict(null);
-                            setHoveredImprovement(createHoveredImprovement(imp, e));
-                        }}
-                        onMouseLeave={() => setHoveredImprovement(null)}
+                        className="hoverable-link unit-link"
+                        onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(unit, e))}
+                        onMouseLeave={() => setHoveredUnit(null)}
+                        onClick={() => window.open(`/units?faction=${faction}&unit=${slugFromKey}`, "_blank")}
                     >
-                        {/* 1) show NAME, never the key */}
-                        {imp.displayName}
-                    </span>
+            {unit.name}
+          </span>
                 </div>
             );
         }
 
-        const dist = districtByUnlockKey.get(unlockKey);
-        if (dist) {
-            return (
-                <div key={index} style={{ display: "block" }}>
-                    <span>Constructible: </span>
-                    <span
-                        className="hoverable-link"
-                        onMouseEnter={(e) => {
-                            setHoveredImprovement(null);
-                            setHoveredDistrict(createHoveredDistrict(dist, e));
-                        }}
-                        onMouseLeave={() => setHoveredDistrict(null)}
-                    >
-                        {/* 1) show NAME, never the key */}
-                        {dist.displayName}
-                    </span>
-                </div>
-            );
-        }
-
-        // If we can’t resolve, still show something (but keep it obvious it’s unresolved)
-        return (
-            <div key={index} style={{ display: "block", opacity: 0.9 }}>
-                <span>Constructible: </span>
-                <span className="hoverable-link" style={{ textDecoration: "none", cursor: "default" }}>
-                    {unlockKey}
-                </span>
-            </div>
-        );
+        return null;
     };
-
-    // Optional: pre-filter unlocks so we don’t even iterate over Actions etc.
-    const constructibleUnlocks = useMemo(
-        () => (hoveredTech.unlocks ?? []).filter((u) => isType(u, "Constructible") && keyOf(u.unlockKey)),
-        [hoveredTech.unlocks]
-    );
 
     return (
         <BaseTooltip coords={hoveredTech.coords} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
@@ -164,21 +152,18 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 </button>
             </div>
 
-            {constructibleUnlocks.length > 0 && (
-                <TooltipSection title="Unlocks:">
-                    {constructibleUnlocks.map(renderUnlockRef)}
-                </TooltipSection>
+            {visibleUnlocks.length > 0 && (
+                <TooltipSection title="Unlocks:">{visibleUnlocks.map(renderUnlockRef)}</TooltipSection>
             )}
 
             {(hoveredTech.descriptionLines?.length ?? 0) > 0 && (
                 <TooltipSection title="Effects:">
                     {hoveredTech.descriptionLines.map((line, i) => (
-                        <div key={i}>{line}</div>
+                        <div key={i}>{renderDescriptionLine(line)}</div>
                     ))}
                 </TooltipSection>
             )}
 
-            {/* Nested hover tooltips */}
             {hoveredImprovement && <ImprovementTooltip hoveredImprovement={hoveredImprovement} />}
             {hoveredDistrict && <DistrictTooltip hoveredDistrict={hoveredDistrict} />}
             {hoveredUnit && <UnitTooltip hoveredUnit={hoveredUnit} />}

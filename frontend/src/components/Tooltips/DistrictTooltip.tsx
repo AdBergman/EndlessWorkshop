@@ -4,6 +4,7 @@ import BaseTooltip from "./BaseTooltip";
 import TooltipSection from "./TooltipSection";
 import { District } from "@/types/dataTypes";
 import { HoveredWithCoords } from "./hoverHelpers";
+import {renderDescriptionLine} from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface DistrictTooltipProps {
     hoveredDistrict: HoveredWithCoords<District>;
@@ -21,7 +22,7 @@ const DistrictTooltip: React.FC<DistrictTooltipProps> = ({ hoveredDistrict }) =>
                 {(descriptionLines?.length ?? 0) > 0 && (
                     <TooltipSection>
                         {descriptionLines.map((line, idx) => (
-                            <div key={idx}>{line}</div>
+                            <div key={idx}>{renderDescriptionLine(line)}</div>
                         ))}
                     </TooltipSection>
                 )}
