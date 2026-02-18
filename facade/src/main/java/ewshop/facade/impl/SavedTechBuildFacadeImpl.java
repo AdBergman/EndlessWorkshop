@@ -8,12 +8,10 @@ import ewshop.facade.interfaces.SavedTechBuildFacade;
 import ewshop.facade.mapper.SavedTechBuildMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.UUID;
 
-@Component
 public class SavedTechBuildFacadeImpl implements SavedTechBuildFacade {
 
     private static final Logger log = LoggerFactory.getLogger(SavedTechBuildFacadeImpl.class);

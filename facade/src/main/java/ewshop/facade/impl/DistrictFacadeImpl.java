@@ -4,11 +4,9 @@ import ewshop.domain.service.DistrictService;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;
 import ewshop.facade.mapper.DistrictMapper;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public class DistrictFacadeImpl implements DistrictFacade {
 
     private final DistrictService districtService;
