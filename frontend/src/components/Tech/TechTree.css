@@ -37,15 +37,14 @@
 
 .wip-banner {
     position: absolute;
-    top: 20px;
-    left: 30px;
-    color: rgba(255, 80, 80, 0.9);
-    font-size: 1.8rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-    letter-spacing: 1px;
+    top: 16px;
+    left: 24px;
+    color: rgba(255, 255, 255, 0.6); /* soft neutral */
+    font-size: 1.1rem;
+    font-weight: 500; /* medium instead of bold */
+    text-transform: none; /* remove ALL CAPS */
+    letter-spacing: 0.5px;
     z-index: 20;
-    pointer-events: none; /* so you can still click techs below */
+    pointer-events: none;
     line-height: 1.4;
 }

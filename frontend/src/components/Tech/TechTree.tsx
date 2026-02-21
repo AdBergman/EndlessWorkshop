@@ -107,9 +107,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
             style={{ cursor: admin.wrapperCursor }}
         >
             <div className="wip-banner">
-                EARLY ACCESS / WIP
-                <br />
-                TECH TREE DATA MAY CHANGE
+                Early Access
             </div>
 
             <img
