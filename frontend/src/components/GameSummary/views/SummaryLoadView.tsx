@@ -4,6 +4,7 @@ import "../CityBreakdown.css";
 import { loadEndGameReportFromText } from "@/features/endGame/import/endGameReportLoader";
 
 const EXAMPLE_PATH = "/EL2_EndGame_20260221_090536.json";
+
 const MOD_URL = "https://github.com/AdBergman/EL2StatsMod";
 
 const EXPORT_PATH =
