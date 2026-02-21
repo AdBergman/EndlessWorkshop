@@ -24,16 +24,19 @@ public class TechFactionTraitsProvider {
         return Map.of(
                 Faction.KIN, Set.of(
                         "FactionAffinity_KinOfSheredyn",
-                        "FactionTrait_KinOfSheredyn_Units"
+                        "FactionTrait_KinOfSheredyn_Units",
+                        "Unit_KinOfSheredyn_Chosen_Builder"
                 ),
                 Faction.ASPECTS, Set.of(
                         "FactionAffinity_Aspect",
-                        "FactionTrait_Aspect_Units"
+                        "FactionTrait_Aspect_Units",
+                        "FactionTrait_Aspects_Units"
                 ),
                 Faction.LORDS, Set.of(
                         "FactionAffinity_Lords",
                         "FactionAffinity_LastLord",
-                        "FactionTrait_Lords_Units"
+                        "FactionTrait_Lords_Units",
+                        "FactionTrait_LastLord_Units"
                 ),
                 Faction.NECROPHAGES, Set.of(
                         "FactionAffinity_Necrophage",
