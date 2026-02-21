@@ -19,6 +19,17 @@ public class TechFactionGateEvaluator {
         this.allowedFactions = traitsProvider.getAllowedFactions();
     }
 
+    /**
+     * Intended semantics:
+     * - Operator "None": exclude factions that HAVE the trait (i.e. must NOT have it).
+     * - Operator "Any": include factions that HAVE at least ONE of the "Any" traits (OR group).
+     *
+     * Combined rules:
+     * - All "None" prereqs are enforced (fail if any forbidden trait is present).
+     * - If there is at least one "Any" prereq, faction must match at least one of them.
+     * - Unknown operators fail closed.
+     * - Blank/null trait keys are ignored.
+     */
     public TechImportSnapshot withDerivedAvailableFactions(TechImportSnapshot s) {
         if (s.traitPrereqs() == null || s.traitPrereqs().isEmpty()) {
             return s.withAvailableFactions(allowedFactions);
@@ -27,25 +38,48 @@ public class TechFactionGateEvaluator {
         EnumSet<Faction> passing = EnumSet.noneOf(Faction.class);
         for (Faction f : allowedFactions) {
             Set<String> traits = factionTraits.getOrDefault(f, Set.of());
-            if (passesAllTraitPrereqs(s, traits)) passing.add(f);
+            if (passesTraitGate(s, traits)) {
+                passing.add(f);
+            }
         }
 
         return s.withAvailableFactions(passing);
     }
 
-    private boolean passesAllTraitPrereqs(TechImportSnapshot s, Set<String> traits) {
+    private boolean passesTraitGate(TechImportSnapshot s, Set<String> traits) {
+        boolean hasAnyGroup = false;
+        boolean anyMatched = false;
+
         for (var p : s.traitPrereqs()) {
-            if (p == null || p.traitKey() == null || p.traitKey().isBlank()) continue;
+            if (p == null) continue;
 
-            boolean has = traits.contains(p.traitKey().trim());
+            String rawKey = p.traitKey();
+            if (rawKey == null) continue;
+
+            String key = rawKey.trim();
+            if (key.isEmpty()) continue;
+
             String op = p.operator() == null ? "" : p.operator().trim();
+            boolean hasTrait = traits.contains(key);
 
-            if ("Any".equalsIgnoreCase(op) && !has) return false;
-            if ("None".equalsIgnoreCase(op) && has) return false;
+            // "None" => must NOT have trait (exclude list)
+            if ("None".equalsIgnoreCase(op)) {
+                if (hasTrait) return false;
+                continue;
+            }
 
-            // fail closed
-            if (!"Any".equalsIgnoreCase(op) && !"None".equalsIgnoreCase(op)) return false;
+            // "Any" => OR group: must match at least one of these, if any exist
+            if ("Any".equalsIgnoreCase(op)) {
+                hasAnyGroup = true;
+                if (hasTrait) anyMatched = true;
+                continue;
+            }
+
+            // fail closed on unknown operators (including blank)
+            return false;
         }
-        return true;
+
+        // If there were Any-prereqs, require at least one match
+        return !hasAnyGroup || anyMatched;
     }
 }
