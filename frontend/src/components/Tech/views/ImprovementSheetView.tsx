@@ -1,5 +1,6 @@
 import React from "react";
 import type { UnlockedImprovement } from "@/utils/unlocks";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface ImprovementSheetViewProps {
     improvements: UnlockedImprovement[];
@@ -7,11 +8,7 @@ interface ImprovementSheetViewProps {
 
 const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvements }) => {
     if (!improvements?.length) {
-        return (
-            <div className="empty-sheet-message">
-                No improvements unlocked by current tech selections.
-            </div>
-        );
+        return <div className="empty-sheet-message">No improvements unlocked by current tech selections.</div>;
     }
 
     return (
@@ -26,18 +23,27 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                     <th>Cost</th>
                 </tr>
                 </thead>
+
                 <tbody>
-                {improvements.map((imp) => (
-                    <tr key={imp.improvementKey ?? imp.displayName}>
-                        <td>{imp.displayName ?? "--"}</td>
-                        <td>{imp.era ?? "--"}</td>
-                        <td style={{ whiteSpace: "pre-line" }}>
-                            {(imp.descriptionLines ?? []).length
-                                ? imp.descriptionLines.join("\n")
-                                : "--"}
+                {improvements.map((improvement) => (
+                    <tr key={improvement.improvementKey ?? improvement.displayName}>
+                        <td>{improvement.displayName ?? "--"}</td>
+                        <td>{improvement.era ?? "--"}</td>
+
+                        <td>
+                            {(improvement.descriptionLines ?? []).length ? (
+                                <div style={{ display: "grid", gap: 2 }}>
+                                    {improvement.descriptionLines!.map((line, index) => (
+                                        <div key={index}>{renderDescriptionLine(line)}</div>
+                                    ))}
+                                </div>
+                            ) : (
+                                "--"
+                            )}
                         </td>
-                        <td>{imp.unique ?? "--"}</td>
-                        <td>{(imp.cost ?? []).length ? imp.cost.join(", ") : "--"}</td>
+
+                        <td>{improvement.unique ?? "--"}</td>
+                        <td>{(improvement.cost ?? []).length ? improvement.cost!.join(", ") : "--"}</td>
                     </tr>
                 ))}
                 </tbody>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Tech, TechUnlockRef } from "@/types/dataTypes";
 import UnlockLine from "./UnlockLine";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface TechSheetViewProps {
     techs: Tech[];
@@ -19,6 +20,7 @@ const TechSheetView: React.FC<TechSheetViewProps> = ({ techs }) => {
                     <th>Description</th>
                 </tr>
                 </thead>
+
                 <tbody>
                 {techs.map((tech) => (
                     <tr key={tech.techKey ?? tech.name}>
@@ -27,15 +29,24 @@ const TechSheetView: React.FC<TechSheetViewProps> = ({ techs }) => {
                         <td>{tech.type ?? "--"}</td>
 
                         <td style={{ whiteSpace: "pre-line" }}>
-                            {(tech.unlocks ?? []).map((u: TechUnlockRef, i: number) => (
-                                <UnlockLine key={`${u.unlockType}:${u.unlockKey}:${i}`} unlock={u} />
+                            {(tech.unlocks ?? []).map((unlock: TechUnlockRef, index: number) => (
+                                <UnlockLine
+                                    key={`${unlock.unlockType}:${unlock.unlockKey}:${index}`}
+                                    unlock={unlock}
+                                />
                             ))}
                         </td>
 
-                        <td style={{ whiteSpace: "pre-line" }}>
-                            {(tech.descriptionLines ?? []).length
-                                ? tech.descriptionLines.join("\n")
-                                : "--"}
+                        <td>
+                            {(tech.descriptionLines ?? []).length ? (
+                                <div style={{ display: "grid", gap: 2 }}>
+                                    {tech.descriptionLines!.map((line, index) => (
+                                        <div key={index}>{renderDescriptionLine(line)}</div>
+                                    ))}
+                                </div>
+                            ) : (
+                                "--"
+                            )}
                         </td>
                     </tr>
                 ))}

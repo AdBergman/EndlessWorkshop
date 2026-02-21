@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import { CSVLink } from "react-csv";
 import "./SpreadsheetToolbar.css";
-import { Tech, Improvement, District, Unit, TechUnlockRef } from "@/types/dataTypes";
+import { Tech, Improvement, District, Unit } from "@/types/dataTypes";
 import { useGameData } from "@/context/GameDataContext";
+import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
 
@@ -19,8 +20,8 @@ interface SpreadsheetToolbarProps {
     setActiveSheet: (view: SheetView) => void;
 }
 
-const formatUnlocks = (unlocks: TechUnlockRef[] | undefined) =>
-    (unlocks ?? []).map((u) => `${u.unlockType}:${u.unlockKey}`);
+const exportDescriptionLines = (lines: string[] | undefined) =>
+    (lines ?? []).map(stripDescriptionTokens).join("; ");
 
 const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    selectedTechs,
@@ -41,44 +42,51 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
             case "improvements":
                 return {
                     filename: `endless-workshop-${factionLabel}-improvements.csv`,
-                    headers: ["Era", "Key", "Name", "Description Lines", "Unique", "Cost"],
-                    data: unlockedImprovements.map((imp) => ({
-                        Era: imp.era ?? "",
-                        Key: imp.improvementKey ?? "",
-                        Name: imp.displayName ?? "",
-                        "Description Lines": (imp.descriptionLines ?? []).join("; "),
-                        Unique: imp.unique ?? "",
-                        Cost: (imp.cost ?? []).join("; "),
+                    headers: ["Era", "Name", "Description Lines", "Unique", "Cost"],
+                    data: unlockedImprovements.map((improvement) => ({
+                        Era: improvement.era ?? "",
+                        Name: improvement.displayName ?? "",
+                        "Description Lines": exportDescriptionLines(improvement.descriptionLines),
+                        Unique: improvement.unique ?? "",
+                        Cost: (improvement.cost ?? []).join("; "),
                     })),
                 };
 
             case "districts":
                 return {
                     filename: `endless-workshop-${factionLabel}-districts.csv`,
-                    headers: ["Era", "Key", "Name", "Description Lines"],
-                    data: unlockedDistricts.map((d) => ({
-                        Era: d.era ?? "",
-                        Key: d.districtKey ?? "",
-                        Name: d.displayName ?? "",
-                        "Description Lines": (d.descriptionLines ?? []).join("; "),
+                    headers: ["Era", "Name", "Description Lines"],
+                    data: unlockedDistricts.map((district) => ({
+                        Era: district.era ?? "",
+                        Name: district.displayName ?? "",
+                        "Description Lines": exportDescriptionLines(district.descriptionLines),
                     })),
                 };
 
             case "units":
                 return {
                     filename: `endless-workshop-${factionLabel}-units.csv`,
-                    headers: ["Era", "Key", "Name", "Tier", "Type", "Health", "Defense", "Damage (Min–Max)", "Movement", "Skills"],
-                    data: unlockedUnits.map((u) => ({
-                        Era: u.era ?? "",
-                        Key: u.unitKey ?? "",
-                        Name: u.name ?? "",
-                        Tier: u.tier ?? "",
-                        Type: u.type ?? "",
-                        Health: u.health ?? "",
-                        Defense: u.defense ?? "",
-                        "Damage (Min–Max)": `${u.minDamage ?? ""}-${u.maxDamage ?? ""}`,
-                        Movement: u.movementPoints ?? "",
-                        Skills: (u.skills ?? []).join("; "),
+                    headers: [
+                        "Era",
+                        "Name",
+                        "Tier",
+                        "Type",
+                        "Health",
+                        "Defense",
+                        "Damage (Min–Max)",
+                        "Movement",
+                        "Skills",
+                    ],
+                    data: unlockedUnits.map((unit) => ({
+                        Era: unit.era ?? "",
+                        Name: unit.name ?? "",
+                        Tier: unit.tier ?? "",
+                        Type: unit.type ?? "",
+                        Health: unit.health ?? "",
+                        Defense: unit.defense ?? "",
+                        "Damage (Min–Max)": `${unit.minDamage ?? ""}-${unit.maxDamage ?? ""}`,
+                        Movement: unit.movementPoints ?? "",
+                        Skills: (unit.skills ?? []).join("; "),
                     })),
                 };
 
@@ -86,17 +94,15 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
             default:
                 return {
                     filename: `endless-workshop-${factionLabel}-techs.csv`,
-                    headers: ["Key", "Name", "Era", "Type", "Prereq", "Excludes", "Factions", "Description Lines", "Unlocks"],
-                    data: selectedTechs.map((t) => ({
-                        Key: t.techKey ?? "",
-                        Name: t.name ?? "",
-                        Era: t.era ?? "",
-                        Type: t.type ?? "",
-                        Prereq: t.prereq ?? "",
-                        Excludes: t.excludes ?? "",
-                        Factions: (t.factions ?? []).join("; "),
-                        "Description Lines": (t.descriptionLines ?? []).join("; "),
-                        Unlocks: formatUnlocks(t.unlocks).join("; "),
+                    headers: ["Name", "Era", "Type", "Prereq", "Excludes", "Factions", "Description Lines"],
+                    data: selectedTechs.map((tech) => ({
+                        Name: tech.name ?? "",
+                        Era: tech.era ?? "",
+                        Type: tech.type ?? "",
+                        Prereq: tech.prereq ?? "",
+                        Excludes: tech.excludes ?? "",
+                        Factions: (tech.factions ?? []).join("; "),
+                        "Description Lines": exportDescriptionLines(tech.descriptionLines),
                     })),
                 };
         }
@@ -108,6 +114,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 <button onClick={onSort}>Sort</button>
                 <button onClick={onDeselectAll}>Deselect All</button>
                 <button onClick={generateShareLink}>Copy Link</button>
+
                 <CSVLink data={data} headers={headers} filename={filename}>
                     <button>Export CSV</button>
                 </CSVLink>
@@ -123,7 +130,10 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                 >
                     Improvements
                 </button>
-                <button onClick={() => setActiveSheet("districts")} className={activeSheet === "districts" ? "active" : ""}>
+                <button
+                    onClick={() => setActiveSheet("districts")}
+                    className={activeSheet === "districts" ? "active" : ""}
+                >
                     Districts
                 </button>
                 <button onClick={() => setActiveSheet("units")} className={activeSheet === "units" ? "active" : ""}>

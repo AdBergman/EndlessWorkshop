@@ -1,5 +1,6 @@
 import React from "react";
 import { District } from "@/types/dataTypes";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface DistrictSheetViewProps {
     districts: (District & { era: number })[];
@@ -7,11 +8,7 @@ interface DistrictSheetViewProps {
 
 const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
     if (!districts?.length) {
-        return (
-            <div className="empty-sheet-message">
-                No districts unlocked by current tech selections.
-            </div>
-        );
+        return <div className="empty-sheet-message">No districts unlocked by current tech selections.</div>;
     }
 
     return (
@@ -24,17 +21,24 @@ const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
                     <th>Description</th>
                 </tr>
                 </thead>
+
                 <tbody>
                 {districts
-                    .filter((d) => !!d?.displayName)
-                    .map((d) => (
-                        <tr key={d.districtKey ?? d.displayName}>
-                            <td>{d.displayName ?? "--"}</td>
-                            <td>{d.era ?? "--"}</td>
-                            <td style={{ whiteSpace: "pre-line" }}>
-                                {(d.descriptionLines ?? []).length
-                                    ? d.descriptionLines.join("\n")
-                                    : "--"}
+                    .filter((district) => !!district?.displayName)
+                    .map((district) => (
+                        <tr key={district.districtKey ?? district.displayName}>
+                            <td>{district.displayName ?? "--"}</td>
+                            <td>{district.era ?? "--"}</td>
+                            <td>
+                                {(district.descriptionLines ?? []).length ? (
+                                    <div style={{ display: "grid", gap: 2 }}>
+                                        {district.descriptionLines!.map((line, index) => (
+                                            <div key={index}>{renderDescriptionLine(line)}</div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    "--"
+                                )}
                             </td>
                         </tr>
                     ))}
