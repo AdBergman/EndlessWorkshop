@@ -154,10 +154,14 @@ public class TechRepositoryAdapter implements TechRepository {
     private static UpsertOutcome applySnapshot(TechEntity entity, TechImportSnapshot update, boolean isInsert) {
         boolean changed = isInsert;
 
-        if ((entity.getName() == null || entity.getName().isBlank())
-                && update.displayName() != null && !update.displayName().isBlank()) {
-            entity.setName(update.displayName());
-            changed = true;
+        String nextName = update.displayName(); // "" possible
+        String curName  = entity.getName();
+
+        if (nextName != null && !nextName.isBlank()) {
+            if (!Objects.equals(curName, nextName)) {
+                entity.setName(nextName);
+                changed = true;
+            }
         }
 
         if (entity.getTechCoords() == null) {
