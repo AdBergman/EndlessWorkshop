@@ -1,3 +1,5 @@
+// TechContainer.tsx
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import TechTree from "@/components/Tech/TechTree";
@@ -10,45 +12,38 @@ const MAX_ERA = 6;
 
 const normalize = (s: string) => String(s ?? "").toLowerCase().replace(/\s+/g, "_");
 
-const normalizeForMatch = (s: string) => {
-    return String(s ?? "")
-        .trim()
-        .toLowerCase()
-        .replace(/[’']/g, "'")
-        .replace(/[^a-z0-9\s']/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-};
-
 type ImportedTechState = {
     source?: "gamesummary";
-    techNames?: string[];
-    techDefs?: string[];
+    techKeys?: string[];
+    focusTechKey?: string | null;
+    factionKeyHint?: string | null;
     empireIndex?: number;
     mode?: "global" | "empire";
-    factionHint?: string | null;
 };
 
-function resolveFactionFromHint(hint: unknown) {
-    if (typeof hint !== "string") return null;
-    const h = hint.trim();
-    if (!h) return null;
+function cleanString(x: unknown): string {
+    return typeof x === "string" ? x.trim() : "";
+}
 
-    const norm = h.toLowerCase().replace(/[\s_-]+/g, "");
+function resolveFactionFromKeyHint(hint: unknown) {
+    const raw = cleanString(hint);
+    if (!raw) return null;
 
-    if (norm.includes("lastlord") || norm.includes("lastlords") || norm.includes("lords")) {
+    const normalized = raw.toLowerCase().replace(/[\s_-]+/g, "");
+
+    if (normalized.includes("lastlord") || normalized.includes("lastlords") || normalized === "lords") {
         return { isMajor: true, enumFaction: Faction.LORDS, minorName: null, uiLabel: "Lords" };
     }
-    if (norm.includes("kinofsheredyn") || norm.includes("kin")) {
+    if (normalized.includes("kinofsheredyn") || normalized === "kin") {
         return { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" };
     }
-    if (norm.includes("mukag") || norm.includes("tahuk") || norm.includes("tahuks")) {
+    if (normalized.includes("mukag") || normalized.includes("tahuk")) {
         return { isMajor: true, enumFaction: Faction.TAHUK, minorName: null, uiLabel: "Tahuk" };
     }
-    if (norm.includes("aspect") || norm.includes("aspects")) {
+    if (normalized.includes("aspect")) {
         return { isMajor: true, enumFaction: Faction.ASPECTS, minorName: null, uiLabel: "Aspects" };
     }
-    if (norm.includes("necro") || norm.includes("necrophage") || norm.includes("necrophages")) {
+    if (normalized.includes("necro") || normalized.includes("necrophage")) {
         return { isMajor: true, enumFaction: Faction.NECROPHAGES, minorName: null, uiLabel: "Necrophages" };
     }
 
@@ -64,8 +59,8 @@ const TechContainer: React.FC = () => {
     useSharedBuildLoader(setSelectedTechs);
 
     const selectedTechObjects = useMemo(() => {
-        const techKeySet = new Set(selectedTechs);
-        return Array.from(techs.values()).filter((t) => techKeySet.has(t.techKey));
+        const selectedTechKeySet = new Set(selectedTechs);
+        return Array.from(techs.values()).filter((tech) => selectedTechKeySet.has(tech.techKey));
     }, [selectedTechs, techs]);
 
     const eraController = useEraController(selectedTechObjects);
@@ -88,21 +83,24 @@ const TechContainer: React.FC = () => {
 
     useEffect(() => {
         if (!selectedFaction) return;
-        const img = new Image();
-        img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.webp`;
-        img.onload = () => setFirstEraLoaded(true);
-        img.onerror = () => setFirstEraLoaded(true);
+
+        const preload = new Image();
+        preload.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.webp`;
+        preload.onload = () => setFirstEraLoaded(true);
+        preload.onerror = () => setFirstEraLoaded(true);
+
         return () => {
-            img.onload = null;
-            img.onerror = null;
+            preload.onload = null;
+            preload.onerror = null;
         };
     }, [selectedFaction]);
 
     useEffect(() => {
         if (!selectedFaction) return;
-        for (let e = 1; e <= MAX_ERA; e++) {
+
+        for (let eraIndex = 1; eraIndex <= MAX_ERA; eraIndex++) {
             const img = new Image();
-            img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${e}.webp`;
+            img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${eraIndex}.webp`;
         }
     }, [selectedFaction]);
 
@@ -133,7 +131,9 @@ const TechContainer: React.FC = () => {
                     <TechTree
                         era={eraController.era}
                         maxUnlockedEra={eraController.maxUnlockedEra}
-                        onEraChange={(dir) => (dir === "next" ? eraController.handleNextEra() : eraController.handlePrevEra())}
+                        onEraChange={(direction) =>
+                            direction === "next" ? eraController.handleNextEra() : eraController.handlePrevEra()
+                        }
                     />
 
                     <div className="view-container">
@@ -160,8 +160,8 @@ function useSharedBuildLoader(setSelectedTechs: (techKeys: string[]) => void) {
                 const res = await fetch(`/api/builds/${shareUuid}`);
                 if (!res.ok) throw new Error("Build not found");
                 const data = await res.json();
-                const validTechs = Array.isArray(data.techIds) ? data.techIds.filter((k: string) => !!k) : [];
-                if (!cancelled) setSelectedTechs(validTechs);
+                const validTechKeys = Array.isArray(data.techIds) ? data.techIds.filter((k: string) => !!k) : [];
+                if (!cancelled) setSelectedTechs(validTechKeys);
             } catch (err) {
                 console.error("Failed to load shared build", err);
             }
@@ -196,47 +196,39 @@ function useImportedTechListLoader({
         if (appliedRef.current) return;
         if (techs.size === 0) return;
 
-        const st = (location.state ?? null) as ImportedTechState | null;
-        if (!st || st.source !== "gamesummary") return;
+        const importedState = (location.state ?? null) as ImportedTechState | null;
+        if (!importedState || importedState.source !== "gamesummary") return;
 
-        const incoming = Array.isArray(st.techNames) ? st.techNames.filter(Boolean) : [];
-        if (incoming.length === 0) return;
+        const incomingTechKeys = (Array.isArray(importedState.techKeys) ? importedState.techKeys : [])
+            .map(cleanString)
+            .filter(Boolean);
+
+        if (incomingTechKeys.length === 0) return;
 
         appliedRef.current = true;
 
-        const resolvedFaction = resolveFactionFromHint(st.factionHint);
+        const resolvedFaction = resolveFactionFromKeyHint(importedState.factionKeyHint);
         if (resolvedFaction) setSelectedFaction(resolvedFaction);
 
-        const normToTechKey = new Map<string, string>();
-        for (const t of techs.values()) {
-            const key = normalizeForMatch(t.name);
-            if (key && !normToTechKey.has(key)) normToTechKey.set(key, t.techKey);
+        const resolvedTechKeys: string[] = [];
+        let missingCount = 0;
+
+        for (const techKey of incomingTechKeys) {
+            if (techs.has(techKey)) resolvedTechKeys.push(techKey);
+            else missingCount++;
         }
 
-        const matched: string[] = [];
-        const missing: string[] = [];
+        setSelectedTechs(resolvedTechKeys);
 
-        for (const name of incoming) {
-            const norm = normalizeForMatch(name);
-            const resolved = normToTechKey.get(norm);
-            if (resolved) matched.push(resolved);
-            else missing.push(name);
-        }
+        // Always land on Era 1 when importing from Game Summary.
+        setEra(1);
 
-        setSelectedTechs(matched);
-
-        if (matched.length > 0) {
-            const first = techs.get(matched[0]);
-            if (first?.era) setEra(first.era);
-        }
-
-        if (missing.length > 0) {
-            setImportToast(`Loaded ${matched.length}/${incoming.length} techs (missing ${missing.length}).`);
-            window.setTimeout(() => setImportToast(null), 4500);
-        } else {
-            setImportToast(`Loaded ${matched.length} techs.`);
-            window.setTimeout(() => setImportToast(null), 2500);
-        }
+        setImportToast(
+            missingCount > 0
+                ? `Loaded ${resolvedTechKeys.length}/${incomingTechKeys.length} techs.`
+                : `Loaded ${resolvedTechKeys.length} techs.`
+        );
+        window.setTimeout(() => setImportToast(null), missingCount > 0 ? 4500 : 2500);
 
         navigate(location.pathname + location.search, { replace: true, state: null });
     }, [
@@ -278,30 +270,27 @@ function useDeepLinkedTech({
 
         appliedRef.current = true;
 
-        const fi = {
+        const deepLinkFaction = {
             isMajor: true,
             enumFaction: factionParam.toUpperCase() as any,
             minorName: null,
             uiLabel: factionParam.toLowerCase(),
         };
 
-        if (!selectedFaction?.isMajor || selectedFaction.enumFaction !== fi.enumFaction) {
-            setSelectedFaction(fi);
+        if (!selectedFaction?.isMajor || selectedFaction.enumFaction !== deepLinkFaction.enumFaction) {
+            setSelectedFaction(deepLinkFaction);
         }
 
-        const match =
-            Array.from(techs.values()).find((t) => t.techKey === techParam) ??
-            // optional backward-compat: old links used name-ish
-            Array.from(techs.values()).find((t) => normalize(t.name) === normalize(techParam));
+        const matchedTech =
+            Array.from(techs.values()).find((tech) => tech.techKey === techParam) ??
+            Array.from(techs.values()).find((tech) => normalize(tech.name) === normalize(techParam));
 
-        if (match) {
-            setSelectedTechs([match.techKey]);
-            setEra(match.era);
+        if (matchedTech) {
+            setSelectedTechs([matchedTech.techKey]);
+            setEra(matchedTech.era);
 
             const newUrl = window.location.origin + "/tech";
             window.history.replaceState({}, "", newUrl);
-        } else {
-            console.warn("⚠️ No tech match found for", techParam);
         }
     }, [params, techs, selectedFaction, setSelectedFaction, setSelectedTechs, setEra]);
 }
@@ -315,18 +304,18 @@ function useEraController(selectedTechObjects: Tech[]) {
     const maxUnlockedEra = useMemo(() => {
         const eraCounts = Array(MAX_ERA).fill(0);
 
-        selectedTechObjects.forEach((t) => {
-            if (t.era >= 1 && t.era <= MAX_ERA) eraCounts[t.era - 1]++;
+        selectedTechObjects.forEach((tech) => {
+            if (tech.era >= 1 && tech.era <= MAX_ERA) eraCounts[tech.era - 1]++;
         });
 
-        let unlocked = 1;
-        for (let i = 2; i <= MAX_ERA; i++) {
-            const required = ERA_THRESHOLDS[i];
-            const totalSelectedPrev = eraCounts.slice(0, i - 1).reduce((a, b) => a + b, 0);
-            if (totalSelectedPrev >= required) unlocked = i;
+        let unlockedEra = 1;
+        for (let eraIndex = 2; eraIndex <= MAX_ERA; eraIndex++) {
+            const required = ERA_THRESHOLDS[eraIndex];
+            const totalSelectedPrev = eraCounts.slice(0, eraIndex - 1).reduce((a, b) => a + b, 0);
+            if (totalSelectedPrev >= required) unlockedEra = eraIndex;
             else break;
         }
-        return unlocked;
+        return unlockedEra;
     }, [selectedTechObjects]);
 
     return { era, setEra, maxUnlockedEra, handleNextEra, handlePrevEra };

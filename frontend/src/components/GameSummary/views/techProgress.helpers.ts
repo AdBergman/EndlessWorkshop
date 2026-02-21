@@ -2,24 +2,32 @@ import type { AllStats, TechOrderEntry } from "@/types/endGameReport";
 
 export type EmpireMeta = {
     idx: number;
-    faction: string;
+    factionKey: string | null;    // canonical
+    factionLabel: string;         // render-only
     isPlayer: boolean;
-    labelLong: string;  // "Necrophage ★ (Player) (E0)"
-    labelShort: string; // "Necrophage ★"
+    labelLong: string;
+    labelShort: string;
 };
 
-function factionFromAllStatsEmpire(e: AllStats["empires"][number], idx: number): string {
-    const dn = typeof e.factionDisplayName === "string" ? e.factionDisplayName.trim() : "";
-    if (dn) return dn;
+function cleanString(x: unknown): string {
+    return typeof x === "string" ? x.trim() : "";
+}
 
-    const key = typeof e.factionKey === "string" ? e.factionKey.trim() : "";
-    if (key) return key;
+function factionFromAllStatsEmpire(
+    e: AllStats["empires"][number],
+    idx: number
+): { factionKey: string | null; factionLabel: string } {
+    const key = cleanString(e.factionKey);
+    const dn = cleanString(e.factionDisplayName);
 
-    return `Empire ${idx}`;
+    return {
+        factionKey: key || null,
+        factionLabel: dn || key || `Empire ${idx}`,
+    };
 }
 
 export function buildEmpireMeta(empireCount: number, allStats: AllStats): EmpireMeta[] {
-    const byIndex = new Map<number, string>();
+    const byIndex = new Map<number, { factionKey: string | null; factionLabel: string }>();
 
     for (const e of allStats.empires) {
         byIndex.set(e.empireIndex, factionFromAllStatsEmpire(e, e.empireIndex));
@@ -28,17 +36,17 @@ export function buildEmpireMeta(empireCount: number, allStats: AllStats): Empire
     const result: EmpireMeta[] = [];
     for (let idx = 0; idx < empireCount; idx++) {
         const isPlayer = idx === 0;
-        const faction = byIndex.get(idx) ?? `Empire ${idx}`;
 
-        const short = isPlayer ? `${faction} ★` : faction;
-        const long = isPlayer ? `${faction} ★ (Player) (E${idx})` : `${faction} (E${idx})`;
+        const meta = byIndex.get(idx) ?? { factionKey: null, factionLabel: `Empire ${idx}` };
+        const label = meta.factionLabel;
 
         result.push({
             idx,
-            faction,
+            factionKey: meta.factionKey,
+            factionLabel: label,
             isPlayer,
-            labelShort: short,
-            labelLong: long,
+            labelShort: isPlayer ? `${label} ★` : label,
+            labelLong: isPlayer ? `${label} ★ (Player) (E${idx})` : `${label} (E${idx})`,
         });
     }
 
@@ -75,19 +83,6 @@ export function groupTechOrderEntries(entries: TechOrderEntry[]): GroupedTechOrd
         else perEmpire.set(e.turn, [e]);
     }
 
-    groupedGlobal.forEach((list) => {
-        list.sort(
-            (a, b) =>
-                a.empireIndex - b.empireIndex ||
-                a.technologyDefinitionName.localeCompare(b.technologyDefinitionName)
-        );
-    });
-
-    groupedByEmpire.forEach((perEmpire) => {
-        perEmpire.forEach((list) => {
-            list.sort((a, b) => a.technologyDefinitionName.localeCompare(b.technologyDefinitionName));
-        });
-    });
-
+    // Do NOT sort: preserve exporter order within each turn.
     return { maxTurn, groupedGlobal, groupedByEmpire };
 }

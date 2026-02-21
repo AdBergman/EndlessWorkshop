@@ -1,3 +1,5 @@
+// TechProgressView.tsx
+
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
@@ -16,16 +18,16 @@ function displayLabel(e: TechOrderEntry): string {
     return dn || e.technologyDefinitionName;
 }
 
+function techKeyOf(e: TechOrderEntry): string {
+    return e.technologyDefinitionName;
+}
+
 function empireColor(idx: number): string {
     return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
 }
 
 function tokenizeFilter(input: string): string[] {
-    return input
-        .toLowerCase()
-        .trim()
-        .split(/\s+/g)
-        .filter(Boolean);
+    return input.toLowerCase().trim().split(/\s+/g).filter(Boolean);
 }
 
 function searchableTechText(e: TechOrderEntry): string {
@@ -51,7 +53,6 @@ export default function TechProgressView() {
     const [selectedEmpire, setSelectedEmpire] = useState<number>(0);
     const [filterText, setFilterText] = useState<string>("");
 
-    // Autosized filter input width (in px)
     const [filterWidthPx, setFilterWidthPx] = useState<number>(180);
     const filterSizerRef = useRef<HTMLSpanElement | null>(null);
 
@@ -118,10 +119,7 @@ export default function TechProgressView() {
 
         for (const turn of turnsSorted) {
             const list = getEntriesForTurn(turn);
-
-            const filtered =
-                filterTokens.length === 0 ? list : list.filter((e) => matchesTokenFilter(e, filterTokens));
-
+            const filtered = filterTokens.length === 0 ? list : list.filter((e) => matchesTokenFilter(e, filterTokens));
             if (filtered.length > 0) out.push({ turn, entries: filtered });
         }
 
@@ -150,34 +148,30 @@ export default function TechProgressView() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterText]);
 
-    /**
-     * Flatten the currently-visible tech list (respecting mode + filter + sort),
-     * and navigate to /tech without saving anything to DB.
-     */
     const handleViewInTechTree = () => {
         const targetEmpireIndex = mode === "empire" ? selectedEmpire : 0;
 
         const em = empireMeta.find((x) => x.idx === targetEmpireIndex);
-        const factionHint = em?.faction ?? null; // may be displayName or key, depending on report
+        const factionKeyHint = em?.factionKey ?? null;
 
-        const flattened: TechOrderEntry[] = [];
+        const techKeys: string[] = [];
         for (const t of filteredTurns) {
             for (const e of t.entries) {
                 if (mode === "global" && e.empireIndex !== targetEmpireIndex) continue;
-                flattened.push(e);
+                techKeys.push(techKeyOf(e));
             }
         }
 
-        const techNames = flattened.map(displayLabel).filter(Boolean);
+        const focusTechKey = techKeys.length > 0 ? techKeys[techKeys.length - 1] : null;
 
         navigate("/tech", {
             state: {
                 source: "gamesummary",
                 mode,
                 empireIndex: targetEmpireIndex,
-                factionHint,          // ✅ NEW
-                techNames,
-                techDefs: flattened.map((e) => e.technologyDefinitionName).filter(Boolean),
+                factionKeyHint,
+                techKeys,
+                focusTechKey,
             },
         });
     };
@@ -193,22 +187,15 @@ export default function TechProgressView() {
     const viewButtonDisabled = useMemo(() => {
         if (mode === "empire" && !selectedEmpireIsValid) return true;
 
-        // If global: disabled if player has no entries under current filter
         if (mode === "global") {
-            let hasAny = false;
             for (const t of filteredTurns) {
                 for (const e of t.entries) {
-                    if (e.empireIndex === 0) {
-                        hasAny = true;
-                        break;
-                    }
+                    if (e.empireIndex === 0) return false;
                 }
-                if (hasAny) break;
             }
-            return !hasAny;
+            return true;
         }
 
-        // If empire: disabled if no entries under current filter
         return filteredTurns.length === 0;
     }, [mode, selectedEmpireIsValid, filteredTurns]);
 
@@ -223,12 +210,7 @@ export default function TechProgressView() {
                 </div>
 
                 <div className="gs-row" style={{ gap: 10 }}>
-                    <button
-                        className="gs-btn"
-                        onClick={handleViewInTechTree}
-                        disabled={viewButtonDisabled}
-                        title="Open these techs in the Tech Tree view (no link is saved until you explicitly share)."
-                    >
+                    <button className="gs-btn" onClick={handleViewInTechTree} disabled={viewButtonDisabled}>
                         {viewButtonLabel}
                     </button>
                 </div>
@@ -269,18 +251,17 @@ export default function TechProgressView() {
                     )}
                 </div>
 
-                {/* Filter (token-based, case-insensitive) */}
                 <div className="gs-filter" aria-label="Tech filter">
                     {filterTokens.length > 0 ? (
                         <span className="gs-filterMeta gs-muted">
-              {matchCount} match{matchCount === 1 ? "" : "es"}
-            </span>
+                            {matchCount} match{matchCount === 1 ? "" : "es"}
+                        </span>
                     ) : null}
 
                     <div className="gs-filterInputWrap">
-            <span ref={filterSizerRef} className="gs-filterSizer" aria-hidden="true">
-              {(filterText && filterText.length > 0 ? filterText : "Filter techs…") + " "}
-            </span>
+                        <span ref={filterSizerRef} className="gs-filterSizer" aria-hidden="true">
+                            {(filterText && filterText.length > 0 ? filterText : "Filter techs…") + " "}
+                        </span>
 
                         <input
                             className="gs-input gs-filterInput"
@@ -295,13 +276,7 @@ export default function TechProgressView() {
                         />
 
                         {filterText.trim().length > 0 ? (
-                            <button
-                                type="button"
-                                className="gs-filterClear"
-                                onClick={() => setFilterText("")}
-                                aria-label="Clear filter"
-                                title="Clear"
-                            >
+                            <button type="button" className="gs-filterClear" onClick={() => setFilterText("")}>
                                 ×
                             </button>
                         ) : null}
@@ -318,17 +293,17 @@ export default function TechProgressView() {
                                 className="gs-pill"
                                 style={{ display: "inline-flex", gap: 8, alignItems: "center" }}
                             >
-                <span
-                    className="gs-pillPrefix"
-                    style={{
-                        color: empireColor(em.idx),
-                        fontWeight: em.isPlayer ? 600 : 500,
-                    }}
-                >
-                  E{em.idx}
-                </span>
-                <span>{em.labelShort}</span>
-              </span>
+                                <span
+                                    className="gs-pillPrefix"
+                                    style={{
+                                        color: empireColor(em.idx),
+                                        fontWeight: em.isPlayer ? 600 : 500,
+                                    }}
+                                >
+                                    E{em.idx}
+                                </span>
+                                <span>{em.labelShort}</span>
+                            </span>
                         ))}
                     </div>
                 </div>
@@ -343,38 +318,36 @@ export default function TechProgressView() {
                     ) : filterTokens.length > 0 && filteredTurns.length === 0 ? (
                         <p className="gs-muted">No matching techs for “{filterText.trim()}”.</p>
                     ) : (
-                        filteredTurns.map(({ turn, entries: turnEntries }) => {
-                            return (
-                                <div key={turn} className="gs-turnRow">
-                                    <div className="gs-turnBadge">Turn {turn}</div>
-                                    <div className="gs-pillWrap">
-                                        {turnEntries.map((e, idx) => {
-                                            const prefixColor = empireColor(e.empireIndex);
-                                            const key = `${e.empireIndex}-${e.turn}-${e.technologyDefinitionName}-${idx}`;
+                        filteredTurns.map(({ turn, entries: turnEntries }) => (
+                            <div key={turn} className="gs-turnRow">
+                                <div className="gs-turnBadge">Turn {turn}</div>
+                                <div className="gs-pillWrap">
+                                    {turnEntries.map((e, idx) => {
+                                        const prefixColor = empireColor(e.empireIndex);
+                                        const key = `${e.empireIndex}-${e.turn}-${techKeyOf(e)}-${idx}`;
 
-                                            return (
-                                                <span
-                                                    key={key}
-                                                    className="gs-pill"
-                                                    title={
-                                                        mode === "global"
-                                                            ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
-                                                            : undefined
-                                                    }
-                                                >
-                          {mode === "global" ? (
-                              <span className="gs-pillPrefix" style={{ color: prefixColor }}>
-                              E{e.empireIndex}
-                            </span>
-                          ) : null}
-                                                    {displayLabel(e)}
-                        </span>
-                                            );
-                                        })}
-                                    </div>
+                                        return (
+                                            <span
+                                                key={key}
+                                                className="gs-pill"
+                                                title={
+                                                    mode === "global"
+                                                        ? empireLabelByIndex.get(e.empireIndex)?.labelLong ?? `E${e.empireIndex}`
+                                                        : undefined
+                                                }
+                                            >
+                                                {mode === "global" ? (
+                                                    <span className="gs-pillPrefix" style={{ color: prefixColor }}>
+                                                        E{e.empireIndex}
+                                                    </span>
+                                                ) : null}
+                                                {displayLabel(e)}
+                                            </span>
+                                        );
+                                    })}
                                 </div>
-                            );
-                        })
+                            </div>
+                        ))
                     )}
                 </div>
             )}
