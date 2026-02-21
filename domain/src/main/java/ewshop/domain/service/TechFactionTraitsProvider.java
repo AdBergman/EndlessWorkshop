@@ -32,6 +32,7 @@ public class TechFactionTraitsProvider {
                 ),
                 Faction.LORDS, Set.of(
                         "FactionAffinity_Lords",
+                        "FactionAffinity_LastLord",
                         "FactionTrait_Lords_Units"
                 ),
                 Faction.NECROPHAGES, Set.of(
