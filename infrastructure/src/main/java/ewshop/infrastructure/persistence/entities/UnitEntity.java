@@ -22,6 +22,9 @@ public class UnitEntity {
     @Column(name = "display_name", nullable = false, length = 255)
     private String displayName;
 
+    @Column(name = "art_id", length = 255)
+    private String artId;
+
     @Column(name = "is_hero", nullable = false)
     private boolean isHero;
 
@@ -79,6 +82,9 @@ public class UnitEntity {
 
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+    public String getArtId() { return artId; }
+    public void setArtId(String artId) { this.artId = artId; }
 
     public boolean isHero() { return isHero; }
     public void setHero(boolean hero) { isHero = hero; }

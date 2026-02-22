@@ -33,6 +33,7 @@ class UnitControllerTest {
         UnitDto unit1 = new UnitDto(
                 "Unit_Test_1",
                 "Test Unit 1",
+                null,
                 false,
                 false,
                 "Land",
@@ -48,6 +49,7 @@ class UnitControllerTest {
         UnitDto unit2 = new UnitDto(
                 "Unit_Test_2",
                 "Test Unit 2",
+                "herald",
                 false,
                 false,
                 "Land",
@@ -67,6 +69,7 @@ class UnitControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].unitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[0].displayName").value("Test Unit 1"))
+                .andExpect(jsonPath("$[0].artId").doesNotExist())
                 .andExpect(jsonPath("$[0].isHero").value(false))
                 .andExpect(jsonPath("$[0].isChosen").value(false))
                 .andExpect(jsonPath("$[0].spawnType").value("Land"))
@@ -81,6 +84,7 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
                 .andExpect(jsonPath("$[1].unitKey").value("Unit_Test_2"))
                 .andExpect(jsonPath("$[1].displayName").value("Test Unit 2"))
+                .andExpect(jsonPath("$[1].artId").value("herald"))
                 .andExpect(jsonPath("$[1].previousUnitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[1].nextEvolutionUnitKeys").isEmpty())
                 .andExpect(jsonPath("$[1].evolutionTierIndex").value(2))

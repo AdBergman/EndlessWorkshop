@@ -7,6 +7,7 @@ public class Unit {
 
     private final String unitKey;
     private final String displayName;
+    private final String artId;
 
     private final boolean isHero;
     private final boolean isChosen;
@@ -26,6 +27,8 @@ public class Unit {
     private Unit(Builder builder) {
         this.unitKey = builder.unitKey;
         this.displayName = builder.displayName;
+        this.artId = builder.artId;
+
         this.isHero = builder.isHero;
         this.isChosen = builder.isChosen;
         this.spawnType = builder.spawnType;
@@ -43,6 +46,7 @@ public class Unit {
 
     public String getUnitKey() { return unitKey; }
     public String getDisplayName() { return displayName; }
+    public String getArtId() { return artId; }
 
     public boolean isHero() { return isHero; }
     public boolean isChosen() { return isChosen; }
@@ -64,6 +68,7 @@ public class Unit {
     public static class Builder {
         private String unitKey;
         private String displayName;
+        private String artId;
 
         private boolean isHero;
         private boolean isChosen;
@@ -82,6 +87,7 @@ public class Unit {
 
         public Builder unitKey(String unitKey) { this.unitKey = unitKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
+        public Builder artId(String artId) { this.artId = artId; return this; }
 
         public Builder isHero(boolean isHero) { this.isHero = isHero; return this; }
         public Builder isChosen(boolean isChosen) { this.isChosen = isChosen; return this; }

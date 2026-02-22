@@ -13,6 +13,7 @@ public final class UnitMapper {
         return new UnitDto(
                 unit.getUnitKey(),
                 unit.getDisplayName(),
+                unit.getArtId(),
                 unit.isHero(),
                 unit.isChosen(),
                 unit.getSpawnType(),

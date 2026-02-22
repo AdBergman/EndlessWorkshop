@@ -5,6 +5,7 @@ import java.util.List;
 public record UnitDto(
         String unitKey,
         String displayName,
+        String artId,
         boolean isHero,
         boolean isChosen,
         String spawnType,
