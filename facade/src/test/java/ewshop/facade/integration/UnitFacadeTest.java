@@ -1,9 +1,7 @@
 package ewshop.facade.integration;
 
-import ewshop.domain.model.UnitSpecialization;
-import ewshop.domain.model.enums.Faction;
-import ewshop.domain.model.enums.UnitType;
-import ewshop.domain.repository.UnitSpecializationRepository;
+import ewshop.domain.command.UnitImportSnapshot;
+import ewshop.domain.repository.UnitRepository;
 import ewshop.facade.dto.response.UnitDto;
 import ewshop.facade.interfaces.UnitFacade;
 import jakarta.persistence.EntityManager;
@@ -21,7 +19,7 @@ class UnitFacadeTest extends BaseIT {
     private UnitFacade unitFacade;
 
     @Autowired
-    private UnitSpecializationRepository unitRepository;
+    private UnitRepository unitRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -34,57 +32,59 @@ class UnitFacadeTest extends BaseIT {
 
     @Test
     void getAllUnits_integration() {
-        // Given
-        UnitSpecialization unit1 = UnitSpecialization.builder()
-                .name("Test Unit 1")
-                .tier(1)
-                .faction(Faction.ASPECTS)
-                .type(UnitType.INFANTRY)
-                .health(100)
-                .defense(10)
-                .minDamage(5)
-                .maxDamage(15)
-                .movementPoints(4)
-                .upkeep(2)
-                .build();
 
-        UnitSpecialization unit2 = UnitSpecialization.builder()
-                .name("Test Unit 2")
-                .tier(2)
-                .faction(Faction.KIN)
-                .type(UnitType.CAVALRY)
-                .health(150)
-                .defense(15)
-                .minDamage(10)
-                .maxDamage(25)
-                .movementPoints(6)
-                .upkeep(4)
-                .build();
+        UnitImportSnapshot unit1 = new UnitImportSnapshot(
+                "Unit_Test_1",
+                "Test Unit 1",
+                false,
+                false,
+                "Land",
+                null,
+                List.of("Unit_Test_1_Upgraded"),
+                1,
+                "UnitClass_Infantry",
+                "Skill_Attack_1",
+                List.of("UnitAbility_A", "UnitAbility_B"),
+                List.of("Line 1", "Line 2")
+        );
 
-        unitRepository.save(unit1);
-        unitRepository.save(unit2);
+        UnitImportSnapshot unit2 = new UnitImportSnapshot(
+                "Unit_Test_2",
+                "Test Unit 2",
+                false,
+                false,
+                "Land",
+                "Unit_Test_1",
+                List.of(),
+                2,
+                "UnitClass_Cavalry",
+                "Skill_Attack_2",
+                List.of("UnitAbility_C"),
+                List.of("Only line")
+        );
+
+        unitRepository.importUnitSnapshot(List.of(unit1, unit2));
         entityManager.flush();
 
-        // When
         List<UnitDto> result = unitFacade.getAllUnits();
 
-        // Then
         assertThat(result).hasSize(2);
 
-        UnitDto unit1Dto = result.stream()
-                .filter(u -> "Test Unit 1".equals(u.name()))
+        UnitDto dto = result.stream()
+                .filter(u -> "Unit_Test_1".equals(u.unitKey()))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Unit 1 DTO not found"));
+                .orElseThrow();
 
-        assertThat(unit1Dto.tier()).isEqualTo(1);
-        assertThat(unit1Dto.faction()).isEqualTo(Faction.ASPECTS);
-        assertThat(unit1Dto.type()).isEqualTo("Infantry");
-        assertThat(unit1Dto.health()).isEqualTo(100);
-        assertThat(unit1Dto.defense()).isEqualTo(10);
-        assertThat(unit1Dto.minDamage()).isEqualTo(5);
-        assertThat(unit1Dto.maxDamage()).isEqualTo(15);
-        assertThat(unit1Dto.movementPoints()).isEqualTo(4);
-        assertThat(unit1Dto.upkeep()).isEqualTo(2);
+        assertThat(dto.displayName()).isEqualTo("Test Unit 1");
+        assertThat(dto.isHero()).isFalse();
+        assertThat(dto.isChosen()).isFalse();
+        assertThat(dto.spawnType()).isEqualTo("Land");
+        assertThat(dto.previousUnitKey()).isNull();
+        assertThat(dto.nextEvolutionUnitKeys()).containsExactly("Unit_Test_1_Upgraded");
+        assertThat(dto.evolutionTierIndex()).isEqualTo(1);
+        assertThat(dto.unitClassKey()).isEqualTo("UnitClass_Infantry");
+        assertThat(dto.attackSkillKey()).isEqualTo("Skill_Attack_1");
+        assertThat(dto.abilityKeys()).containsExactly("UnitAbility_A", "UnitAbility_B");
+        assertThat(dto.descriptionLines()).containsExactly("Line 1", "Line 2");
     }
-
 }

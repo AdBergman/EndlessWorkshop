@@ -22,13 +22,12 @@ public class UnitRepositoryAdapter implements UnitRepository {
     private final UnitJpaRepository unitJpaRepository;
     private final UnitMapper mapper;
 
-    public UnitRepositoryAdapter(UnitJpaRepository unitJpaRepository,
-                                 UnitMapper mapper) {
+    public UnitRepositoryAdapter(UnitJpaRepository unitJpaRepository, UnitMapper mapper) {
         this.unitJpaRepository = unitJpaRepository;
         this.mapper = mapper;
     }
 
-    private enum UpsertOutcome {INSERTED, UPDATED, UNCHANGED}
+    private enum UpsertOutcome { INSERTED, UPDATED, UNCHANGED }
 
     @Override
     @Transactional
@@ -44,13 +43,8 @@ public class UnitRepositoryAdapter implements UnitRepository {
                 .distinct()
                 .toList();
 
-        if (keepKeys.isEmpty()) {
-            throw new IllegalStateException("Refusing to delete all units: keepKeys empty.");
-        }
-
-        Map<String, UnitEntity> existingByKey =
-                unitJpaRepository.findAllByUnitKeyIn(keepKeys).stream()
-                        .collect(Collectors.toMap(UnitEntity::getUnitKey, Function.identity()));
+        Map<String, UnitEntity> existingByKey = unitJpaRepository.findAllByUnitKeyIn(keepKeys).stream()
+                .collect(Collectors.toMap(UnitEntity::getUnitKey, Function.identity()));
 
         List<UnitEntity> toSave = new ArrayList<>();
 
@@ -91,10 +85,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
         return result;
     }
 
-    private static UpsertOutcome applySnapshot(UnitEntity entity,
-                                               UnitImportSnapshot update,
-                                               boolean isInsert) {
-
+    private static UpsertOutcome applySnapshot(UnitEntity entity, UnitImportSnapshot update, boolean isInsert) {
         boolean changed = isInsert;
 
         if (!java.util.Objects.equals(entity.getDisplayName(), update.displayName())) {
@@ -137,41 +128,20 @@ public class UnitRepositoryAdapter implements UnitRepository {
             changed = true;
         }
 
-        List<String> nextEvos = update.nextEvolutionUnitKeys() == null
-                ? List.of()
-                : update.nextEvolutionUnitKeys();
-
-        List<String> curEvos = entity.getNextEvolutionUnitKeys() == null
-                ? List.of()
-                : entity.getNextEvolutionUnitKeys();
-
-        if (!curEvos.equals(nextEvos)) {
+        List<String> nextEvos = update.nextEvolutionUnitKeys() == null ? List.of() : update.nextEvolutionUnitKeys();
+        if (!entity.getNextEvolutionUnitKeys().equals(nextEvos)) {
             entity.setNextEvolutionUnitKeys(new ArrayList<>(nextEvos));
             changed = true;
         }
 
-        List<String> nextAbilities = update.abilityKeys() == null
-                ? List.of()
-                : update.abilityKeys();
-
-        List<String> curAbilities = entity.getAbilityKeys() == null
-                ? List.of()
-                : entity.getAbilityKeys();
-
-        if (!curAbilities.equals(nextAbilities)) {
+        List<String> nextAbilities = update.abilityKeys() == null ? List.of() : update.abilityKeys();
+        if (!entity.getAbilityKeys().equals(nextAbilities)) {
             entity.setAbilityKeys(new ArrayList<>(nextAbilities));
             changed = true;
         }
 
-        List<String> nextLines = update.descriptionLines() == null
-                ? List.of()
-                : update.descriptionLines();
-
-        List<String> curLines = entity.getDescriptionLines() == null
-                ? List.of()
-                : entity.getDescriptionLines();
-
-        if (!curLines.equals(nextLines)) {
+        List<String> nextLines = update.descriptionLines() == null ? List.of() : update.descriptionLines();
+        if (!entity.getDescriptionLines().equals(nextLines)) {
             entity.setDescriptionLines(new ArrayList<>(nextLines));
             changed = true;
         }
@@ -191,9 +161,27 @@ public class UnitRepositoryAdapter implements UnitRepository {
     @Override
     @Transactional
     public Unit save(Unit unit) {
-        UnitEntity entity = mapper.toEntity(unit);
-        UnitEntity saved = unitJpaRepository.save(entity);
-        return mapper.toDomain(saved);
+        UnitEntity entity = unitJpaRepository.findByUnitKey(unit.getUnitKey())
+                .orElseGet(() -> {
+                    UnitEntity e = new UnitEntity();
+                    e.setUnitKey(unit.getUnitKey());
+                    return e;
+                });
+
+        entity.setDisplayName(unit.getDisplayName());
+        entity.setHero(unit.isHero());
+        entity.setChosen(unit.isChosen());
+        entity.setSpawnType(unit.getSpawnType());
+        entity.setPreviousUnitKey(unit.getPreviousUnitKey());
+        entity.setEvolutionTierIndex(unit.getEvolutionTierIndex());
+        entity.setUnitClassKey(unit.getUnitClassKey());
+        entity.setAttackSkillKey(unit.getAttackSkillKey());
+
+        entity.setNextEvolutionUnitKeys(new ArrayList<>(unit.getNextEvolutionUnitKeys()));
+        entity.setAbilityKeys(new ArrayList<>(unit.getAbilityKeys()));
+        entity.setDescriptionLines(new ArrayList<>(unit.getDescriptionLines()));
+
+        return mapper.toDomain(unitJpaRepository.save(entity));
     }
 
     @Override

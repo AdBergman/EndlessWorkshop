@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.model.UnitCost;
+import ewshop.domain.model.UnitCostLegacy;
 import ewshop.domain.model.UnitSkill;
 import ewshop.domain.model.UnitSpecialization;
 import ewshop.domain.model.enums.CostType;
@@ -82,8 +82,8 @@ class UnitSpecializationMapperLegacyTest {
         assertThat(domain.getUpgradesTo()).containsExactly("Lancer");
 
         assertThat(domain.getCosts()).hasSize(2).containsExactlyInAnyOrder(
-                UnitCost.builder().amount(100).type(CostType.INDUSTRY).build(),
-                UnitCost.builder().amount(10).type(CostType.TITANIUM).build()
+                UnitCostLegacy.builder().amount(100).type(CostType.INDUSTRY).build(),
+                UnitCostLegacy.builder().amount(10).type(CostType.TITANIUM).build()
         );
 
         assertThat(domain.getSkills()).hasSize(1);
@@ -111,8 +111,8 @@ class UnitSpecializationMapperLegacyTest {
                 .artId("art_knight")
                 .upgradesTo(Set.of("Lancer"))
                 .cost(List.of(
-                        UnitCost.builder().amount(100).type(CostType.INDUSTRY).build(),
-                        UnitCost.builder().amount(10).type(CostType.TITANIUM).build()
+                        UnitCostLegacy.builder().amount(100).type(CostType.INDUSTRY).build(),
+                        UnitCostLegacy.builder().amount(10).type(CostType.TITANIUM).build()
                 ))
                 .skills(Set.of(skillDomain))
                 .build();

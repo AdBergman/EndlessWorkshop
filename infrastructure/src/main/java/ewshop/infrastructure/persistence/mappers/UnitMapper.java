@@ -4,7 +4,8 @@ import ewshop.domain.model.Unit;
 import ewshop.infrastructure.persistence.entities.UnitEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class UnitMapper {
@@ -26,23 +27,10 @@ public class UnitMapper {
         entity.setUnitClassKey(domain.getUnitClassKey());
         entity.setAttackSkillKey(domain.getAttackSkillKey());
 
-        entity.setNextEvolutionUnitKeys(
-                domain.getNextEvolutionUnitKeys() != null
-                        ? domain.getNextEvolutionUnitKeys()
-                        : Collections.emptyList()
-        );
-
-        entity.setAbilityKeys(
-                domain.getAbilityKeys() != null
-                        ? domain.getAbilityKeys()
-                        : Collections.emptyList()
-        );
-
-        entity.setDescriptionLines(
-                domain.getDescriptionLines() != null
-                        ? domain.getDescriptionLines()
-                        : Collections.emptyList()
-        );
+        // Always assign mutable lists for JPA ordered collections
+        entity.setNextEvolutionUnitKeys(new ArrayList<>(domain.getNextEvolutionUnitKeys()));
+        entity.setAbilityKeys(new ArrayList<>(domain.getAbilityKeys()));
+        entity.setDescriptionLines(new ArrayList<>(domain.getDescriptionLines()));
 
         return entity;
     }
@@ -57,24 +45,12 @@ public class UnitMapper {
                 .isChosen(entity.isChosen())
                 .spawnType(entity.getSpawnType())
                 .previousUnitKey(entity.getPreviousUnitKey())
-                .nextEvolutionUnitKeys(
-                        entity.getNextEvolutionUnitKeys() != null
-                                ? entity.getNextEvolutionUnitKeys()
-                                : Collections.emptyList()
-                )
+                .nextEvolutionUnitKeys(entity.getNextEvolutionUnitKeys())
                 .evolutionTierIndex(entity.getEvolutionTierIndex())
                 .unitClassKey(entity.getUnitClassKey())
                 .attackSkillKey(entity.getAttackSkillKey())
-                .abilityKeys(
-                        entity.getAbilityKeys() != null
-                                ? entity.getAbilityKeys()
-                                : Collections.emptyList()
-                )
-                .descriptionLines(
-                        entity.getDescriptionLines() != null
-                                ? entity.getDescriptionLines()
-                                : Collections.emptyList()
-                )
+                .abilityKeys(entity.getAbilityKeys())
+                .descriptionLines(entity.getDescriptionLines())
                 .build();
     }
 }

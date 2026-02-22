@@ -1,6 +1,6 @@
 package ewshop.infrastructure.persistence.mappers;
 
-import ewshop.domain.model.UnitCost;
+import ewshop.domain.model.UnitCostLegacy;
 import ewshop.domain.model.UnitSkill;
 import ewshop.domain.model.UnitSpecialization;
 import ewshop.domain.model.enums.CostType;
@@ -52,7 +52,7 @@ public class UnitSpecializationMapperLegacy {
 
         try {
             // --- Cost Mapping ---
-            final Set<UnitCost> domainCosts = Optional.ofNullable(entity.getCosts())
+            final Set<UnitCostLegacy> domainCosts = Optional.ofNullable(entity.getCosts())
                     .map(Set::stream)
                     .orElseGet(() -> {
                         logger.debug("unit={} issue='null costs collection', details='Defaulting to empty set.'", entity.getName());
@@ -179,10 +179,10 @@ public class UnitSpecializationMapperLegacy {
     }
 
     /**
-     * Safely converts a {@link UnitCostEmbeddableLegacy} to a domain {@link UnitCost}.
+     * Safely converts a {@link UnitCostEmbeddableLegacy} to a domain {@link UnitCostLegacy}.
      * Logs warnings for invalid data but does not throw exceptions.
      */
-    private UnitCost toDomainCost(final UnitCostEmbeddableLegacy embeddable, final String unitName) {
+    private UnitCostLegacy toDomainCost(final UnitCostEmbeddableLegacy embeddable, final String unitName) {
         if (embeddable == null || (embeddable.getResource() == null && embeddable.getStrategic() == null)) {
             logger.warn("unit={} issue='invalid cost entry', details='resource and strategic types are both null'", unitName);
             return null;
@@ -193,7 +193,7 @@ public class UnitSpecializationMapperLegacy {
                     : CostType.valueOf(embeddable.getStrategic().name());
 
             // Note: Assumes UnitCost has a manual builder, not a Lombok one.
-            return UnitCost.builder()
+            return UnitCostLegacy.builder()
                     .amount(embeddable.getAmount())
                     .type(type)
                     .build();
@@ -224,10 +224,10 @@ public class UnitSpecializationMapperLegacy {
     }
 
     /**
-     * Converts a domain {@link UnitCost} back to a {@link UnitCostEmbeddableLegacy}.
+     * Converts a domain {@link UnitCostLegacy} back to a {@link UnitCostEmbeddableLegacy}.
      * This method is strict and will throw an exception for invalid data.
      */
-    private UnitCostEmbeddableLegacy toEntityCost(final UnitCost domain) {
+    private UnitCostEmbeddableLegacy toEntityCost(final UnitCostLegacy domain) {
         if (domain.getType() == null) {
             throw new IllegalStateException("Cannot save unit cost: CostType is null.");
         }

@@ -6,12 +6,12 @@ import ewshop.domain.model.enums.CostType;
 
 import java.util.Objects;
 
-@JsonDeserialize(builder = UnitCost.Builder.class)
-public class UnitCost {
+@JsonDeserialize(builder = UnitCostLegacy.Builder.class)
+public class UnitCostLegacy {
     private final int amount;
     private final CostType type;
 
-    public UnitCost(Builder builder) {
+    public UnitCostLegacy(Builder builder) {
         this.amount = builder.amount;
         this.type = builder.type;
     }
@@ -31,9 +31,9 @@ public class UnitCost {
         @JsonProperty("type")
         public Builder type(CostType type) { this.type = type; return this; }
 
-        public UnitCost build() {
+        public UnitCostLegacy build() {
             if (type == null) throw new IllegalStateException("CostType must be set");
-            return new UnitCost(this);
+            return new UnitCostLegacy(this);
         }
     }
 
@@ -41,8 +41,8 @@ public class UnitCost {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
-        UnitCost unitCost = (UnitCost) o;
-        return amount == unitCost.amount && type == unitCost.type;
+        UnitCostLegacy unitCostLegacy = (UnitCostLegacy) o;
+        return amount == unitCostLegacy.amount && type == unitCostLegacy.type;
     }
 
     @Override

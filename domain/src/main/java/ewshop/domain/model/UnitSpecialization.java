@@ -20,7 +20,7 @@ public class UnitSpecialization {
     private final int minDamage;
     private final int maxDamage;
     private final int movementPoints;
-    private final Set<UnitCost> costs;
+    private final Set<UnitCostLegacy> costs;
     private final Integer upkeep;
     private final Set<UnitSkill> skills;
     @Enumerated(EnumType.STRING)
@@ -58,7 +58,7 @@ public class UnitSpecialization {
     public int getMinDamage() { return minDamage; }
     public int getMaxDamage() { return maxDamage; }
     public int getMovementPoints() { return movementPoints; }
-    public Set<UnitCost> getCosts() { return costs; }
+    public Set<UnitCostLegacy> getCosts() { return costs; }
     public Integer getUpkeep() { return upkeep; }
     public Set<UnitSkill> getSkills() { return skills; }
     public Faction getFaction() { return faction; }
@@ -79,7 +79,7 @@ public class UnitSpecialization {
         private int minDamage;
         private int maxDamage;
         private int movementPoints;
-        private Set<UnitCost> costs = new HashSet<>();
+        private Set<UnitCostLegacy> costs = new HashSet<>();
         private Integer upkeep;
         private Set<UnitSkill> skills = new HashSet<>();
         private Faction faction;
@@ -97,7 +97,7 @@ public class UnitSpecialization {
         public Builder maxDamage(int maxDamage) { this.maxDamage = maxDamage; return this; }
         public Builder movementPoints(int movementPoints) { this.movementPoints = movementPoints; return this; }
 
-        public Builder cost(List<UnitCost> costs) {
+        public Builder cost(List<UnitCostLegacy> costs) {
             this.costs = (costs != null) ? new HashSet<>(costs) : new HashSet<>();
             return this;
         }

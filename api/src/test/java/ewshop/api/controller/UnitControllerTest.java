@@ -1,7 +1,6 @@
 package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
-import ewshop.domain.model.enums.Faction;
 import ewshop.facade.dto.response.UnitDto;
 import ewshop.facade.interfaces.UnitFacade;
 import org.junit.jupiter.api.Test;
@@ -31,51 +30,63 @@ class UnitControllerTest {
 
     @Test
     void getAllUnits_returnsJson() throws Exception {
-        // Given
-        UnitDto unit1 = UnitDto.builder()
-                .name("Test Unit 1")
-                .faction(Faction.ASPECTS)
-                .tier(1)
-                .skills(List.of("Skill A", "Skill B"))
-                .health(100)
-                .defense(10)
-                .minDamage(5)
-                .maxDamage(15)
-                .build();
+        UnitDto unit1 = new UnitDto(
+                "Unit_Test_1",
+                "Test Unit 1",
+                false,
+                false,
+                "Land",
+                null,
+                List.of("Unit_Test_1_Upgraded"),
+                1,
+                "UnitClass_Infantry",
+                "Skill_Attack_1",
+                List.of("UnitAbility_A", "UnitAbility_B"),
+                List.of("Line 1", "Line 2")
+        );
 
-        UnitDto unit2 = UnitDto.builder()
-                .name("Test Unit 2")
-                .faction(Faction.KIN)
-                .tier(2)
-                .skills(List.of("Skill C"))
-                .health(150)
-                .defense(15)
-                .minDamage(10)
-                .maxDamage(25)
-                .build();
+        UnitDto unit2 = new UnitDto(
+                "Unit_Test_2",
+                "Test Unit 2",
+                false,
+                false,
+                "Land",
+                "Unit_Test_1",
+                List.of(),
+                2,
+                "UnitClass_Cavalry",
+                "Skill_Attack_2",
+                List.of("UnitAbility_C"),
+                List.of("Only line")
+        );
 
         when(unitFacade.getAllUnits()).thenReturn(List.of(unit1, unit2));
 
-        // When & Then
         mockMvc.perform(get("/api/units")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Test Unit 1"))
-                .andExpect(jsonPath("$[0].faction").value("ASPECTS"))
-                .andExpect(jsonPath("$[0].tier").value(1))
-                .andExpect(jsonPath("$[0].skills[0]").value("Skill A"))
-                .andExpect(jsonPath("$[0].skills[1]").value("Skill B"))
-                .andExpect(jsonPath("$[0].health").value(100))
-                .andExpect(jsonPath("$[0].defense").value(10))
-                .andExpect(jsonPath("$[0].minDamage").value(5))
-                .andExpect(jsonPath("$[0].maxDamage").value(15))
-                .andExpect(jsonPath("$[1].name").value("Test Unit 2"))
-                .andExpect(jsonPath("$[1].faction").value("KIN"))
-                .andExpect(jsonPath("$[1].tier").value(2))
-                .andExpect(jsonPath("$[1].skills[0]").value("Skill C"))
-                .andExpect(jsonPath("$[1].health").value(150))
-                .andExpect(jsonPath("$[1].defense").value(15))
-                .andExpect(jsonPath("$[1].minDamage").value(10))
-                .andExpect(jsonPath("$[1].maxDamage").value(25));
+                .andExpect(jsonPath("$[0].unitKey").value("Unit_Test_1"))
+                .andExpect(jsonPath("$[0].displayName").value("Test Unit 1"))
+                .andExpect(jsonPath("$[0].isHero").value(false))
+                .andExpect(jsonPath("$[0].isChosen").value(false))
+                .andExpect(jsonPath("$[0].spawnType").value("Land"))
+                .andExpect(jsonPath("$[0].previousUnitKey").doesNotExist())
+                .andExpect(jsonPath("$[0].nextEvolutionUnitKeys[0]").value("Unit_Test_1_Upgraded"))
+                .andExpect(jsonPath("$[0].evolutionTierIndex").value(1))
+                .andExpect(jsonPath("$[0].unitClassKey").value("UnitClass_Infantry"))
+                .andExpect(jsonPath("$[0].attackSkillKey").value("Skill_Attack_1"))
+                .andExpect(jsonPath("$[0].abilityKeys[0]").value("UnitAbility_A"))
+                .andExpect(jsonPath("$[0].abilityKeys[1]").value("UnitAbility_B"))
+                .andExpect(jsonPath("$[0].descriptionLines[0]").value("Line 1"))
+                .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
+                .andExpect(jsonPath("$[1].unitKey").value("Unit_Test_2"))
+                .andExpect(jsonPath("$[1].displayName").value("Test Unit 2"))
+                .andExpect(jsonPath("$[1].previousUnitKey").value("Unit_Test_1"))
+                .andExpect(jsonPath("$[1].nextEvolutionUnitKeys").isEmpty())
+                .andExpect(jsonPath("$[1].evolutionTierIndex").value(2))
+                .andExpect(jsonPath("$[1].unitClassKey").value("UnitClass_Cavalry"))
+                .andExpect(jsonPath("$[1].attackSkillKey").value("Skill_Attack_2"))
+                .andExpect(jsonPath("$[1].abilityKeys[0]").value("UnitAbility_C"))
+                .andExpect(jsonPath("$[1].descriptionLines[0]").value("Only line"));
     }
 }

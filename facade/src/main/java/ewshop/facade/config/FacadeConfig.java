@@ -3,7 +3,6 @@ package ewshop.facade.config;
 import ewshop.domain.service.*;
 import ewshop.facade.impl.*;
 import ewshop.facade.interfaces.*;
-import ewshop.facade.mapper.UnitDtoPostProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -58,10 +57,9 @@ public class FacadeConfig {
 
     @Bean
     public UnitFacade unitFacade(
-            UnitSpecializationService unitSpecializationService,
-            UnitDtoPostProcessor postProcessor
+            UnitService unitService
     ) {
-        return new UnitFacadeImpl(unitSpecializationService, postProcessor);
+        return new UnitFacadeImpl(unitService);
     }
 
     @Bean
