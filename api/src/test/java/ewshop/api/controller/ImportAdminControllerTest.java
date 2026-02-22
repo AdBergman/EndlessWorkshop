@@ -8,6 +8,7 @@ import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
+import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -43,6 +44,9 @@ class ImportAdminControllerTest {
 
     @MockBean
     private ImprovementImportAdminFacade improvementImportAdminFacade;
+
+    @MockBean
+    private UnitImportAdminFacade unitImportAdminFacade;
 
     @Test
     void importTechs_returnsOk_andCallsFacade_whenPayloadHasTechs() throws Exception {
@@ -101,14 +105,14 @@ class ImportAdminControllerTest {
     void importTechs_returnsBadRequest_andDoesNotCallFacade_whenTechsFieldIsMissing() throws Exception {
 
         String payload = """
-        {
-          "game": "Endless Legend 2",
-          "gameVersion": "0.75",
-          "exporterVersion": "0.1.0",
-          "exportedAtUtc": "2026-02-10T00:00:00Z",
-          "exportKind": "tech"
-        }
-        """;
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.75",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "2026-02-10T00:00:00Z",
+                  "exportKind": "tech"
+                }
+                """;
 
         mockMvc.perform(post("/api/admin/import/techs")
                         .contentType(MediaType.APPLICATION_JSON)

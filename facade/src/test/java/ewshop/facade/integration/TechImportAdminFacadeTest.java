@@ -41,7 +41,7 @@ class TechImportAdminFacadeTest extends BaseIT {
     }
 
     @Test
-    void importTechs_shouldNotOverwriteNameOrCoords_whenTechAlreadyExists_butShouldUpdateBaselineFields() {
+    void importTechs_shouldOverwriteName_butPreserveCoords_whenTechAlreadyExists_andUpdateBaselineFields() {
 
         // given
         TechEntity existing = new TechEntity();
@@ -59,7 +59,7 @@ class TechImportAdminFacadeTest extends BaseIT {
 
         TechImportTechDto dto = new TechImportTechDto(
                 "Technology_X",
-                "Imported Name (should NOT overwrite curated)",
+                "Imported Name (should overwrite curated)",
                 "New lore",
                 false,
                 3,
@@ -90,11 +90,15 @@ class TechImportAdminFacadeTest extends BaseIT {
 
         TechEntity reloaded = techJpaRepository.findByTechKey("Technology_X").orElseThrow();
 
-        assertThat(reloaded.getName()).isEqualTo("Curated Name");
+        // name SHOULD now be overwritten
+        assertThat(reloaded.getName()).isEqualTo("Imported Name (should overwrite curated)");
+
+        // coords SHOULD remain untouched
         assertThat(reloaded.getTechCoords()).isNotNull();
         assertThat(reloaded.getTechCoords().getXPct()).isEqualTo(10.0);
         assertThat(reloaded.getTechCoords().getYPct()).isEqualTo(20.0);
 
+        // baseline fields updated
         assertThat(reloaded.getLore()).isEqualTo("New lore");
         assertThat(reloaded.isHidden()).isFalse();
         assertThat(reloaded.getEra()).isEqualTo(3);

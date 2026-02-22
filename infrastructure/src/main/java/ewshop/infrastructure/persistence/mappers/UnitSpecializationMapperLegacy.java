@@ -7,10 +7,10 @@ import ewshop.domain.model.enums.CostType;
 import ewshop.domain.model.enums.FIDSI;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.StrategicResourceType;
-import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
+import ewshop.infrastructure.persistence.entities.UnitCostEmbeddableLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntityLegacy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -23,14 +23,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Maps between {@link UnitSpecializationEntity} (JPA) and {@link UnitSpecialization} (domain model).
+ * Maps between {@link UnitSpecializationEntityLegacy} (JPA) and {@link UnitSpecialization} (domain model).
  * This mapper is designed to be robust, null-safe, and provides detailed logging for data anomalies
  * without failing on recoverable issues.
  */
 @Component
-public class UnitSpecializationMapper {
+public class UnitSpecializationMapperLegacy {
 
-    private static final Logger logger = LogManager.getLogger(UnitSpecializationMapper.class);
+    private static final Logger logger = LogManager.getLogger(UnitSpecializationMapperLegacy.class);
 
     private static boolean isMajorFaction(String value) {
         if (value == null) return false;
@@ -39,13 +39,13 @@ public class UnitSpecializationMapper {
     }
 
     /**
-     * Maps a {@link UnitSpecializationEntity} to its corresponding {@link UnitSpecialization} domain object.
+     * Maps a {@link UnitSpecializationEntityLegacy} to its corresponding {@link UnitSpecialization} domain object.
      *
      * @param entity The JPA entity from the database.
      * @return A fully-formed domain object. Returns {@code null} if the input entity is {@code null}.
      * @throws IllegalStateException if an unrecoverable error occurs during mapping.
      */
-    public UnitSpecialization toDomain(final UnitSpecializationEntity entity) {
+    public UnitSpecialization toDomain(final UnitSpecializationEntityLegacy entity) {
         if (entity == null) {
             return null;
         }
@@ -116,19 +116,19 @@ public class UnitSpecializationMapper {
     }
 
     /**
-     * Maps a {@link UnitSpecialization} domain object back to a new {@link UnitSpecializationEntity}.
+     * Maps a {@link UnitSpecialization} domain object back to a new {@link UnitSpecializationEntityLegacy}.
      * This method is stricter than {@code toDomain} and expects valid domain objects.
      *
      * @param domain          The domain object to convert.
      * @param persistedSkills A set of existing skill entities to link against.
      * @return A new, un-persisted JPA entity.
      */
-    public UnitSpecializationEntity toEntity(final UnitSpecialization domain, final Set<UnitSkillEntity> persistedSkills) {
+    public UnitSpecializationEntityLegacy toEntity(final UnitSpecialization domain, final Set<UnitSkillEntityLegacy> persistedSkills) {
         if (domain == null) {
             return null;
         }
 
-        final var entity = new UnitSpecializationEntity();
+        final var entity = new UnitSpecializationEntityLegacy();
         entity.setName(domain.getName());
         entity.setDescription(domain.getDescription());
         entity.setType(domain.getType());
@@ -148,20 +148,20 @@ public class UnitSpecializationMapper {
         entity.setUpkeep(domain.getUpkeep());
         entity.setArtId(domain.getArtId());
 
-        final Set<UnitCostEmbeddable> costEmbeddables = Optional.ofNullable(domain.getCosts()).orElse(Collections.emptySet())
+        final Set<UnitCostEmbeddableLegacy> costEmbeddables = Optional.ofNullable(domain.getCosts()).orElse(Collections.emptySet())
                 .stream()
                 .map(this::toEntityCost)
                 .collect(Collectors.toSet());
         entity.setCosts(costEmbeddables);
 
-        final Set<UnitSpecializationSkillEntity> skillJoinEntities = Optional.ofNullable(domain.getSkills()).orElse(Collections.emptySet())
+        final Set<UnitSpecializationSkillEntityLegacy> skillJoinEntities = Optional.ofNullable(domain.getSkills()).orElse(Collections.emptySet())
                 .stream()
                 .map(skill -> {
-                    final UnitSkillEntity skillEntity = persistedSkills.stream()
+                    final UnitSkillEntityLegacy skillEntity = persistedSkills.stream()
                             .filter(s -> s.getName().equals(skill.getName()))
                             .findFirst()
                             .orElseThrow(() -> new IllegalStateException("Cannot save unit: UnitSkill '" + skill.getName() + "' not found in persisted set."));
-                    return new UnitSpecializationSkillEntity(entity, skillEntity, null);
+                    return new UnitSpecializationSkillEntityLegacy(entity, skillEntity, null);
                 })
                 .collect(Collectors.toSet());
         entity.setUnitSkills(skillJoinEntities);
@@ -174,15 +174,15 @@ public class UnitSpecializationMapper {
     /**
      * Overloaded convenience method for {@link #toEntity(UnitSpecialization, Set)}.
      */
-    public UnitSpecializationEntity toEntity(final UnitSpecialization domain) {
+    public UnitSpecializationEntityLegacy toEntity(final UnitSpecialization domain) {
         return toEntity(domain, Collections.emptySet());
     }
 
     /**
-     * Safely converts a {@link UnitCostEmbeddable} to a domain {@link UnitCost}.
+     * Safely converts a {@link UnitCostEmbeddableLegacy} to a domain {@link UnitCost}.
      * Logs warnings for invalid data but does not throw exceptions.
      */
-    private UnitCost toDomainCost(final UnitCostEmbeddable embeddable, final String unitName) {
+    private UnitCost toDomainCost(final UnitCostEmbeddableLegacy embeddable, final String unitName) {
         if (embeddable == null || (embeddable.getResource() == null && embeddable.getStrategic() == null)) {
             logger.warn("unit={} issue='invalid cost entry', details='resource and strategic types are both null'", unitName);
             return null;
@@ -205,15 +205,15 @@ public class UnitSpecializationMapper {
     }
 
     /**
-     * Safely converts a {@link UnitSpecializationSkillEntity} to a domain {@link UnitSkill}.
+     * Safely converts a {@link UnitSpecializationSkillEntityLegacy} to a domain {@link UnitSkill}.
      * Logs a warning if the underlying skill relationship is broken.
      */
-    private UnitSkill toDomainSkill(final UnitSpecializationSkillEntity join, final String unitName) {
+    private UnitSkill toDomainSkill(final UnitSpecializationSkillEntityLegacy join, final String unitName) {
         if (join == null || join.getSkill() == null) {
             logger.warn("unit={} issue='missing skill relationship'", unitName);
             return null;
         }
-        final UnitSkillEntity skillEntity = join.getSkill();
+        final UnitSkillEntityLegacy skillEntity = join.getSkill();
         // Note: Assumes UnitSkill has a manual builder, not a Lombok one.
         return UnitSkill.builder()
                 .name(skillEntity.getName())
@@ -224,10 +224,10 @@ public class UnitSpecializationMapper {
     }
 
     /**
-     * Converts a domain {@link UnitCost} back to a {@link UnitCostEmbeddable}.
+     * Converts a domain {@link UnitCost} back to a {@link UnitCostEmbeddableLegacy}.
      * This method is strict and will throw an exception for invalid data.
      */
-    private UnitCostEmbeddable toEntityCost(final UnitCost domain) {
+    private UnitCostEmbeddableLegacy toEntityCost(final UnitCost domain) {
         if (domain.getType() == null) {
             throw new IllegalStateException("Cannot save unit cost: CostType is null.");
         }
@@ -237,6 +237,6 @@ public class UnitSpecializationMapper {
         if (fid == null && strat == null) {
             throw new IllegalStateException("Unknown CostType: " + domain.getType());
         }
-        return new UnitCostEmbeddable(domain.getAmount(), fid, strat);
+        return new UnitCostEmbeddableLegacy(domain.getAmount(), fid, strat);
     }
 }

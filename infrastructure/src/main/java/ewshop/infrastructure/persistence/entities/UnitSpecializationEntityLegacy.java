@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "unit_specialization")
-public class UnitSpecializationEntity {
+public class UnitSpecializationEntityLegacy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,7 +50,7 @@ public class UnitSpecializationEntity {
     @ElementCollection
     @CollectionTable(name = "unit_specialization_costs", joinColumns = @JoinColumn(name = "unit_id"))
     @Fetch(FetchMode.SUBSELECT)
-    private Set<UnitCostEmbeddable> costs = new HashSet<>();
+    private Set<UnitCostEmbeddableLegacy> costs = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "unit_evolutions_to", joinColumns = @JoinColumn(name = "unit_id"))
@@ -62,14 +62,14 @@ public class UnitSpecializationEntity {
 
     @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true)
     @Fetch(FetchMode.SUBSELECT)
-    private Set<UnitSpecializationSkillEntity> unitSkills = new HashSet<>();
+    private Set<UnitSpecializationSkillEntityLegacy> unitSkills = new HashSet<>();
 
     @Column
     private String faction;
 
 
 
-    public UnitSpecializationEntity() {}
+    public UnitSpecializationEntityLegacy() {}
 
     // --- Getters & Setters ---
 
@@ -149,11 +149,11 @@ public class UnitSpecializationEntity {
         this.tier = tier;
     }
 
-    public Set<UnitCostEmbeddable> getCosts() {
+    public Set<UnitCostEmbeddableLegacy> getCosts() {
         return costs;
     }
 
-    public void setCosts(Set<UnitCostEmbeddable> costs) {
+    public void setCosts(Set<UnitCostEmbeddableLegacy> costs) {
         this.costs = costs;
     }
 
@@ -165,11 +165,11 @@ public class UnitSpecializationEntity {
         this.upkeep = upkeep;
     }
 
-    public Set<UnitSpecializationSkillEntity> getUnitSkills() {
+    public Set<UnitSpecializationSkillEntityLegacy> getUnitSkills() {
         return unitSkills;
     }
 
-    public void setUnitSkills(Set<UnitSpecializationSkillEntity> unitSkills) {
+    public void setUnitSkills(Set<UnitSpecializationSkillEntityLegacy> unitSkills) {
         this.unitSkills = unitSkills;
     }
 
@@ -181,8 +181,8 @@ public class UnitSpecializationEntity {
         this.upgradesTo = upgradesTo;
     }
 
-    public void addSkill(UnitSkillEntity skill, Integer level) {
-        UnitSpecializationSkillEntity uss = new UnitSpecializationSkillEntity(this, skill, level);
+    public void addSkill(UnitSkillEntityLegacy skill, Integer level) {
+        UnitSpecializationSkillEntityLegacy uss = new UnitSpecializationSkillEntityLegacy(this, skill, level);
         this.unitSkills.add(uss);
     }
 

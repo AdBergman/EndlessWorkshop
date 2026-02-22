@@ -2,9 +2,9 @@ package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.model.UnitSpecialization;
 import ewshop.domain.repository.UnitSpecializationRepository;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
-import ewshop.infrastructure.persistence.mappers.UnitSpecializationMapper;
-import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationEntityLegacy;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepositoryLegacy;
+import ewshop.infrastructure.persistence.mappers.UnitSpecializationMapperLegacy;
 import org.springframework.stereotype.Repository;
 
 import org.slf4j.Logger;
@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class UnitSpecializationRepositoryAdapter implements UnitSpecializationRepository {
-    private static final Logger log = LoggerFactory.getLogger(UnitSpecializationRepositoryAdapter.class);
-    private final UnitSpecializationJpaRepository springDataRepository;
-    private final UnitSpecializationMapper mapper;
+public class UnitSpecializationRepositoryAdapterLegacy implements UnitSpecializationRepository {
+    private static final Logger log = LoggerFactory.getLogger(UnitSpecializationRepositoryAdapterLegacy.class);
+    private final UnitSpecializationJpaRepositoryLegacy springDataRepository;
+    private final UnitSpecializationMapperLegacy mapper;
 
-    public UnitSpecializationRepositoryAdapter(UnitSpecializationJpaRepository springDataRepository,
-                                               UnitSpecializationMapper mapper) {
+    public UnitSpecializationRepositoryAdapterLegacy(UnitSpecializationJpaRepositoryLegacy springDataRepository,
+                                                     UnitSpecializationMapperLegacy mapper) {
         this.springDataRepository = springDataRepository;
         this.mapper = mapper;
     }
@@ -44,14 +44,14 @@ public class UnitSpecializationRepositoryAdapter implements UnitSpecializationRe
 
     @Override
     public UnitSpecialization save(UnitSpecialization unitSpecialization) {
-        UnitSpecializationEntity entityToSave = mapper.toEntity(unitSpecialization);
-        UnitSpecializationEntity savedEntity = springDataRepository.save(entityToSave);
+        UnitSpecializationEntityLegacy entityToSave = mapper.toEntity(unitSpecialization);
+        UnitSpecializationEntityLegacy savedEntity = springDataRepository.save(entityToSave);
         return mapper.toDomain(savedEntity);
     }
 
     @Override
     public void saveAll(List<UnitSpecialization> unitSpecializations) {
-        List<UnitSpecializationEntity> entities = unitSpecializations.stream()
+        List<UnitSpecializationEntityLegacy> entities = unitSpecializations.stream()
                 .map(mapper::toEntity)
                 .toList();
         springDataRepository.saveAll(entities);

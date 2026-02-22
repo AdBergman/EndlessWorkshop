@@ -7,10 +7,10 @@ import ewshop.domain.model.enums.CostType;
 import ewshop.domain.model.enums.FIDSI;
 import ewshop.domain.model.enums.Faction;
 import ewshop.domain.model.enums.StrategicResourceType;
-import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
+import ewshop.infrastructure.persistence.entities.UnitCostEmbeddableLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntityLegacy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,25 +21,25 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class UnitSpecializationMapperTest {
+class UnitSpecializationMapperLegacyTest {
 
-    private UnitSpecializationMapper unitSpecializationMapper;
+    private UnitSpecializationMapperLegacy unitSpecializationMapperLegacy;
 
     @BeforeEach
     void setUp() {
-        unitSpecializationMapper = new UnitSpecializationMapper();
+        unitSpecializationMapperLegacy = new UnitSpecializationMapperLegacy();
     }
 
     @Test
     void toDomain_shouldMapAllFields() {
         // Setup
-        UnitSkillEntity skillEntity = new UnitSkillEntity();
+        UnitSkillEntityLegacy skillEntity = new UnitSkillEntityLegacy();
         skillEntity.setName("Charge");
         skillEntity.setType("Combat");
         skillEntity.setTarget("Enemy");
         skillEntity.setAmount(10);
 
-        UnitSpecializationEntity entity = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy entity = new UnitSpecializationEntityLegacy();
         entity.setName("Knight");
         entity.setDescription("A heavy cavalry unit.");
         entity.setType(ewshop.domain.model.enums.UnitType.INFANTRY);
@@ -54,15 +54,15 @@ class UnitSpecializationMapperTest {
         entity.setArtId("art_knight");
         entity.setUpgradesTo(Set.of("Lancer"));
 
-        UnitCostEmbeddable cost1 = new UnitCostEmbeddable(100, FIDSI.INDUSTRY, null);
-        UnitCostEmbeddable cost2 = new UnitCostEmbeddable(10, null, StrategicResourceType.TITANIUM);
+        UnitCostEmbeddableLegacy cost1 = new UnitCostEmbeddableLegacy(100, FIDSI.INDUSTRY, null);
+        UnitCostEmbeddableLegacy cost2 = new UnitCostEmbeddableLegacy(10, null, StrategicResourceType.TITANIUM);
         entity.setCosts(Set.of(cost1, cost2));
 
-        UnitSpecializationSkillEntity skillJoin = new UnitSpecializationSkillEntity(entity, skillEntity, null);
+        UnitSpecializationSkillEntityLegacy skillJoin = new UnitSpecializationSkillEntityLegacy(entity, skillEntity, null);
         entity.setUnitSkills(Set.of(skillJoin));
 
         // Act
-        UnitSpecialization domain = unitSpecializationMapper.toDomain(entity);
+        UnitSpecialization domain = unitSpecializationMapperLegacy.toDomain(entity);
 
         // Assert
         assertThat(domain).isNotNull();
@@ -117,12 +117,12 @@ class UnitSpecializationMapperTest {
                 .skills(Set.of(skillDomain))
                 .build();
 
-        UnitSkillEntity persistedSkill = new UnitSkillEntity();
+        UnitSkillEntityLegacy persistedSkill = new UnitSkillEntityLegacy();
         persistedSkill.setName("Charge");
-        Set<UnitSkillEntity> persistedSkills = Set.of(persistedSkill);
+        Set<UnitSkillEntityLegacy> persistedSkills = Set.of(persistedSkill);
 
         // Act
-        UnitSpecializationEntity entity = unitSpecializationMapper.toEntity(domain, persistedSkills);
+        UnitSpecializationEntityLegacy entity = unitSpecializationMapperLegacy.toEntity(domain, persistedSkills);
 
         // Assert
         assertThat(entity).isNotNull();
@@ -131,26 +131,26 @@ class UnitSpecializationMapperTest {
         assertThat(entity.getUpgradesTo()).containsExactly("Lancer");
 
         assertThat(entity.getCosts()).hasSize(2).containsExactlyInAnyOrder(
-                new UnitCostEmbeddable(100, FIDSI.INDUSTRY, null),
-                new UnitCostEmbeddable(10, null, StrategicResourceType.TITANIUM)
+                new UnitCostEmbeddableLegacy(100, FIDSI.INDUSTRY, null),
+                new UnitCostEmbeddableLegacy(10, null, StrategicResourceType.TITANIUM)
         );
 
         assertThat(entity.getUnitSkills()).hasSize(1);
-        UnitSpecializationSkillEntity mappedSkillJoin = entity.getUnitSkills().iterator().next();
+        UnitSpecializationSkillEntityLegacy mappedSkillJoin = entity.getUnitSkills().iterator().next();
         assertThat(mappedSkillJoin.getSkill().getName()).isEqualTo("Charge");
     }
 
     @Test
     void toDomain_shouldHandleNullCollectionsGracefully() {
         // Setup
-        UnitSpecializationEntity entity = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy entity = new UnitSpecializationEntityLegacy();
         entity.setName("Test Unit");
         entity.setCosts(null);
         entity.setUnitSkills(null);
         entity.setUpgradesTo(null);
 
         // Act
-        UnitSpecialization domain = unitSpecializationMapper.toDomain(entity);
+        UnitSpecialization domain = unitSpecializationMapperLegacy.toDomain(entity);
 
         // Assert
         assertThat(domain).isNotNull();
@@ -162,12 +162,12 @@ class UnitSpecializationMapperTest {
     @Test
     void toDomain_shouldMapMinorFactionCorrectly() {
         // Setup
-        UnitSpecializationEntity entity = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy entity = new UnitSpecializationEntityLegacy();
         entity.setName("Sisters of Mercy");
         entity.setFaction("MinorFaction_Sisters");
 
         // Act
-        UnitSpecialization domain = unitSpecializationMapper.toDomain(entity);
+        UnitSpecialization domain = unitSpecializationMapperLegacy.toDomain(entity);
 
         // Assert
         assertThat(domain).isNotNull();
@@ -184,7 +184,7 @@ class UnitSpecializationMapperTest {
                 .build();
 
         // Act
-        UnitSpecializationEntity entity = unitSpecializationMapper.toEntity(domain);
+        UnitSpecializationEntityLegacy entity = unitSpecializationMapperLegacy.toEntity(domain);
 
         // Assert
         assertThat(entity).isNotNull();
@@ -200,18 +200,18 @@ class UnitSpecializationMapperTest {
                 .build();
 
         // Act & Assert
-        assertThatThrownBy(() -> unitSpecializationMapper.toEntity(domain, Collections.emptySet()))
+        assertThatThrownBy(() -> unitSpecializationMapperLegacy.toEntity(domain, Collections.emptySet()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("UnitSkill 'NonExistentSkill' not found in persisted set");
     }
 
     @Test
     void toDomain_returnsNullWhenEntityIsNull() {
-        assertThat(unitSpecializationMapper.toDomain(null)).isNull();
+        assertThat(unitSpecializationMapperLegacy.toDomain(null)).isNull();
     }
 
     @Test
     void toEntity_returnsNullWhenDomainIsNull() {
-        assertThat(unitSpecializationMapper.toEntity(null)).isNull();
+        assertThat(unitSpecializationMapperLegacy.toEntity(null)).isNull();
     }
 }

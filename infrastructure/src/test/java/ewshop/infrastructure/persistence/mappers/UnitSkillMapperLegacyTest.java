@@ -1,26 +1,26 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.UnitSkill;
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UnitSkillMapperTest {
+class UnitSkillMapperLegacyTest {
 
-    private final UnitSkillMapper unitSkillMapper = new UnitSkillMapper();
+    private final UnitSkillMapperLegacy unitSkillMapperLegacy = new UnitSkillMapperLegacy();
 
     @Test
     void toDomain_shouldMapAllFields() {
         // Setup
-        UnitSkillEntity entity = new UnitSkillEntity();
+        UnitSkillEntityLegacy entity = new UnitSkillEntityLegacy();
         entity.setName("Test Skill");
         entity.setAmount(10);
         entity.setTarget("Enemy");
         entity.setType("Damage");
 
         // Act
-        UnitSkill domain = unitSkillMapper.toDomain(entity);
+        UnitSkill domain = unitSkillMapperLegacy.toDomain(entity);
 
         // Assert
         assertThat(domain).isNotNull();
@@ -41,7 +41,7 @@ class UnitSkillMapperTest {
                 .build();
 
         // Act
-        UnitSkillEntity entity = unitSkillMapper.toEntity(domain);
+        UnitSkillEntityLegacy entity = unitSkillMapperLegacy.toEntity(domain);
 
         // Assert
         assertThat(entity).isNotNull();
@@ -54,14 +54,14 @@ class UnitSkillMapperTest {
     @Test
     void toDomain_shouldHandleNulls() {
         // Setup
-        UnitSkillEntity entity = new UnitSkillEntity();
+        UnitSkillEntityLegacy entity = new UnitSkillEntityLegacy();
         entity.setName("Test Skill");
         entity.setAmount(null);
         entity.setTarget(null);
         entity.setType(null);
 
         // Act
-        UnitSkill domain = unitSkillMapper.toDomain(entity);
+        UnitSkill domain = unitSkillMapperLegacy.toDomain(entity);
 
         // Assert
         assertThat(domain).isNotNull();
@@ -73,11 +73,11 @@ class UnitSkillMapperTest {
 
     @Test
     void toDomain_returnsNullWhenEntityIsNull() {
-        assertThat(unitSkillMapper.toDomain(null)).isNull();
+        assertThat(unitSkillMapperLegacy.toDomain(null)).isNull();
     }
 
     @Test
     void toEntity_returnsNullWhenDomainIsNull() {
-        assertThat(unitSkillMapper.toEntity(null)).isNull();
+        assertThat(unitSkillMapperLegacy.toEntity(null)).isNull();
     }
 }

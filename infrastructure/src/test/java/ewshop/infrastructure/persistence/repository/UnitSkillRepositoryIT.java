@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
-import ewshop.infrastructure.persistence.repositories.UnitSkillJpaRepository;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
+import ewshop.infrastructure.persistence.repositories.UnitSkillJpaRepositoryLegacy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -18,12 +18,12 @@ class UnitSkillRepositoryIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private UnitSkillJpaRepository unitSkillRepository;
+    private UnitSkillJpaRepositoryLegacy unitSkillRepository;
 
     @Test
     void shouldSaveAndFindByName() {
         // Arrange
-        UnitSkillEntity newSkill = new UnitSkillEntity(
+        UnitSkillEntityLegacy newSkill = new UnitSkillEntityLegacy(
                 "Tactical Retreat",
                 "self",
                 1,
@@ -34,11 +34,11 @@ class UnitSkillRepositoryIT {
         entityManager.clear(); // Clear persistence context
 
         // Act
-        Optional<UnitSkillEntity> foundSkill = unitSkillRepository.findByName("Tactical Retreat");
+        Optional<UnitSkillEntityLegacy> foundSkill = unitSkillRepository.findByName("Tactical Retreat");
 
         // Assert
         assertThat(foundSkill).isPresent();
-        UnitSkillEntity result = foundSkill.get();
+        UnitSkillEntityLegacy result = foundSkill.get();
         assertThat(result.getName()).isEqualTo("Tactical Retreat");
         assertThat(result.getTarget()).isEqualTo("self");
         assertThat(result.getAmount()).isEqualTo(1);

@@ -4,6 +4,8 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.units.UnitImportBatchDto;
+import ewshop.facade.interfaces.UnitImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
@@ -17,15 +19,18 @@ public class ImportAdminController {
     private final TechImportAdminFacade techImportAdminFacade;
     private final DistrictImportAdminFacade districtImportAdminFacade;
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
+    private final UnitImportAdminFacade unitImportAdminFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
             DistrictImportAdminFacade districtImportAdminFacade,
-            ImprovementImportAdminFacade improvementImportAdminFacade
+            ImprovementImportAdminFacade improvementImportAdminFacade,
+            UnitImportAdminFacade unitImportAdminFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
+        this.unitImportAdminFacade = unitImportAdminFacade;
     }
 
     @GetMapping("/check-token")
@@ -56,5 +61,13 @@ public class ImportAdminController {
             throw new IllegalArgumentException("Import file is missing improvements[]");
         }
         return improvementImportAdminFacade.importImprovements(dto);
+    }
+
+    @PostMapping(value = "/units", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importUnits(@RequestBody UnitImportBatchDto dto) {
+        if (dto.units() == null || dto.units().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing units[]");
+        }
+        return unitImportAdminFacade.importUnits(dto);
     }
 }

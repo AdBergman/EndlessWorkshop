@@ -6,7 +6,7 @@ import org.hibernate.annotations.NotFoundAction;
 
 @Entity
 @Table(name = "unit_specialization_skills")
-public class UnitSpecializationSkillEntity {
+public class UnitSpecializationSkillEntityLegacy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,21 +14,21 @@ public class UnitSpecializationSkillEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "unit_id", nullable = false)
-    private UnitSpecializationEntity unit;
+    private UnitSpecializationEntityLegacy unit;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "skill_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
-    private UnitSkillEntity skill;
+    private UnitSkillEntityLegacy skill;
 
     // optional metadata, e.g., skill level
     @Column()
     private Integer level;
 
     // --- Constructors ---
-    public UnitSpecializationSkillEntity() {}
+    public UnitSpecializationSkillEntityLegacy() {}
 
-    public UnitSpecializationSkillEntity(UnitSpecializationEntity unit, UnitSkillEntity skill, Integer level) {
+    public UnitSpecializationSkillEntityLegacy(UnitSpecializationEntityLegacy unit, UnitSkillEntityLegacy skill, Integer level) {
         this.unit = unit;
         this.skill = skill;
         this.level = level;
@@ -43,19 +43,19 @@ public class UnitSpecializationSkillEntity {
         this.id = id;
     }
 
-    public UnitSpecializationEntity getUnit() {
+    public UnitSpecializationEntityLegacy getUnit() {
         return unit;
     }
 
-    public void setUnit(UnitSpecializationEntity unit) {
+    public void setUnit(UnitSpecializationEntityLegacy unit) {
         this.unit = unit;
     }
 
-    public UnitSkillEntity getSkill() {
+    public UnitSkillEntityLegacy getSkill() {
         return skill;
     }
 
-    public void setSkill(UnitSkillEntity skill) {
+    public void setSkill(UnitSkillEntityLegacy skill) {
         this.skill = skill;
     }
 

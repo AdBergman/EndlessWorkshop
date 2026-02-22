@@ -1,14 +1,14 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.UnitSkill;
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UnitSkillMapper {
+public class UnitSkillMapperLegacy {
 
     /** Entity -> Domain */
-    public UnitSkill toDomain(UnitSkillEntity entity) {
+    public UnitSkill toDomain(UnitSkillEntityLegacy entity) {
         if (entity == null) return null;
 
         return UnitSkill.builder()
@@ -20,10 +20,10 @@ public class UnitSkillMapper {
     }
 
     /** Domain -> Entity */
-    public UnitSkillEntity toEntity(UnitSkill domain) {
+    public UnitSkillEntityLegacy toEntity(UnitSkill domain) {
         if (domain == null) return null;
 
-        UnitSkillEntity entity = new UnitSkillEntity();
+        UnitSkillEntityLegacy entity = new UnitSkillEntityLegacy();
         entity.setName(domain.getName());
         entity.setAmount(domain.getAmount());
         entity.setTarget(domain.getTarget());

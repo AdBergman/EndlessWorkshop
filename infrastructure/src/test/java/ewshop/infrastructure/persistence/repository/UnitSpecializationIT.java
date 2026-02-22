@@ -3,11 +3,11 @@ package ewshop.infrastructure.persistence.repository;
 import ewshop.domain.model.enums.FIDSI;
 import ewshop.domain.model.enums.StrategicResourceType;
 import ewshop.domain.model.enums.UnitType;
-import ewshop.infrastructure.persistence.entities.UnitCostEmbeddable;
-import ewshop.infrastructure.persistence.entities.UnitSkillEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationEntity;
-import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntity;
-import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepository;
+import ewshop.infrastructure.persistence.entities.UnitCostEmbeddableLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSkillEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationEntityLegacy;
+import ewshop.infrastructure.persistence.entities.UnitSpecializationSkillEntityLegacy;
+import ewshop.infrastructure.persistence.repositories.UnitSpecializationJpaRepositoryLegacy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +29,18 @@ class UnitSpecializationIT {
     private TestEntityManager entityManager;
 
     @Autowired
-    private UnitSpecializationJpaRepository repository;
+    private UnitSpecializationJpaRepositoryLegacy repository;
 
-    private UnitSkillEntity skill1;
-    private UnitSkillEntity skill2;
+    private UnitSkillEntityLegacy skill1;
+    private UnitSkillEntityLegacy skill2;
 
     @BeforeEach
     void setUp() {
         // Pre-populate UnitSkillEntity for relationships
-        skill1 = new UnitSkillEntity(
+        skill1 = new UnitSkillEntityLegacy(
                 "Melee Attack", "target", 10, "damage", 1, 0, 0, 0
         );
-        skill2 = new UnitSkillEntity(
+        skill2 = new UnitSkillEntityLegacy(
                 "Ranged Defense", "self", 5, "defense", 0, 1, 0, 0
         );
         entityManager.persist(skill1);
@@ -51,7 +51,7 @@ class UnitSpecializationIT {
     @Test
     void shouldSaveAndFindUnitSpecializationWithSkillsAndCosts() {
         // Arrange
-        UnitSpecializationEntity newSpecialization = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy newSpecialization = new UnitSpecializationEntityLegacy();
         newSpecialization.setName("Elite Guard");
         newSpecialization.setDescription("Heavily armored frontline unit.");
         newSpecialization.setType(UnitType.INFANTRY);
@@ -66,9 +66,9 @@ class UnitSpecializationIT {
         newSpecialization.setUpkeep(5);
 
         // Add costs
-        Set<UnitCostEmbeddable> costs = new HashSet<>();
-        costs.add(new UnitCostEmbeddable(100, FIDSI.INDUSTRY, null));
-        costs.add(new UnitCostEmbeddable(2, null, StrategicResourceType.TITANIUM));
+        Set<UnitCostEmbeddableLegacy> costs = new HashSet<>();
+        costs.add(new UnitCostEmbeddableLegacy(100, FIDSI.INDUSTRY, null));
+        costs.add(new UnitCostEmbeddableLegacy(2, null, StrategicResourceType.TITANIUM));
         newSpecialization.setCosts(costs);
 
         // Add skills
@@ -79,11 +79,11 @@ class UnitSpecializationIT {
         entityManager.clear(); // Clear persistence context to ensure data is reloaded from DB
 
         // Act
-        Optional<UnitSpecializationEntity> foundSpecialization = repository.findByName("Elite Guard");
+        Optional<UnitSpecializationEntityLegacy> foundSpecialization = repository.findByName("Elite Guard");
 
         // Assert
         assertThat(foundSpecialization).isPresent();
-        UnitSpecializationEntity result = foundSpecialization.get();
+        UnitSpecializationEntityLegacy result = foundSpecialization.get();
 
         assertThat(result.getName()).isEqualTo("Elite Guard");
         assertThat(result.getDescription()).isEqualTo("Heavily armored frontline unit.");
@@ -101,7 +101,7 @@ class UnitSpecializationIT {
         // Assert costs
         assertThat(result.getCosts()).hasSize(2);
         assertThat(result.getCosts())
-                .extracting(UnitCostEmbeddable::getAmount, UnitCostEmbeddable::getResource, UnitCostEmbeddable::getStrategic)
+                .extracting(UnitCostEmbeddableLegacy::getAmount, UnitCostEmbeddableLegacy::getResource, UnitCostEmbeddableLegacy::getStrategic)
                 .containsExactlyInAnyOrder(
                         tuple(100, FIDSI.INDUSTRY, null),
                         tuple(2, null, StrategicResourceType.TITANIUM)
@@ -110,7 +110,7 @@ class UnitSpecializationIT {
         // Assert unit skills
         assertThat(result.getUnitSkills()).hasSize(2);
         assertThat(result.getUnitSkills())
-                .extracting(uss -> uss.getSkill().getName(), UnitSpecializationSkillEntity::getLevel)
+                .extracting(uss -> uss.getSkill().getName(), UnitSpecializationSkillEntityLegacy::getLevel)
                 .containsExactlyInAnyOrder(
                         tuple("Melee Attack", 2),
                         tuple("Ranged Defense", 1)
@@ -120,7 +120,7 @@ class UnitSpecializationIT {
     @Test
     void shouldFindAllUnitSpecializationsAndTraverseGraph() {
         // Arrange
-        UnitSpecializationEntity spec1 = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy spec1 = new UnitSpecializationEntityLegacy();
         spec1.setName("Scout");
         spec1.setHealth(30);
         spec1.setDefense(10);
@@ -129,10 +129,10 @@ class UnitSpecializationIT {
         spec1.setMovementPoints(4);
         spec1.setTier(1);
         spec1.addSkill(skill1, 1);
-        spec1.getCosts().add(new UnitCostEmbeddable(50, FIDSI.DUST, null));
+        spec1.getCosts().add(new UnitCostEmbeddableLegacy(50, FIDSI.DUST, null));
         entityManager.persist(spec1);
 
-        UnitSpecializationEntity spec2 = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy spec2 = new UnitSpecializationEntityLegacy();
         spec2.setName("Heavy Cavalry");
         spec2.setHealth(120);
         spec2.setDefense(60);
@@ -141,24 +141,24 @@ class UnitSpecializationIT {
         spec2.setMovementPoints(3);
         spec2.setTier(3);
         spec2.addSkill(skill2, 2);
-        spec2.getCosts().add(new UnitCostEmbeddable(150, FIDSI.INDUSTRY, null));
-        spec2.getCosts().add(new UnitCostEmbeddable(1, null, StrategicResourceType.TITANIUM));
+        spec2.getCosts().add(new UnitCostEmbeddableLegacy(150, FIDSI.INDUSTRY, null));
+        spec2.getCosts().add(new UnitCostEmbeddableLegacy(1, null, StrategicResourceType.TITANIUM));
         entityManager.persist(spec2);
 
         entityManager.flush();
         entityManager.clear();
 
         // Act
-        List<UnitSpecializationEntity> allSpecializations = repository.findAll();
+        List<UnitSpecializationEntityLegacy> allSpecializations = repository.findAll();
 
         // Assert
         assertThat(allSpecializations).hasSize(2); // Assuming only these two are in the DB
 
-        for (UnitSpecializationEntity specialization : allSpecializations) {
+        for (UnitSpecializationEntityLegacy specialization : allSpecializations) {
             assertThat(specialization.getName()).isNotNull();
             // Access unitSkills and unitSkills.skill
             assertThat(specialization.getUnitSkills()).isNotNull();
-            for (UnitSpecializationSkillEntity uss : specialization.getUnitSkills()) {
+            for (UnitSpecializationSkillEntityLegacy uss : specialization.getUnitSkills()) {
                 assertThat(uss.getLevel()).isNotNull();
                 assertThat(uss.getSkill()).isNotNull(); // Ensure skill is loaded
                 assertThat(uss.getSkill().getName()).isNotNull(); // Access skill's properties
@@ -166,7 +166,7 @@ class UnitSpecializationIT {
 
             // Access costs
             assertThat(specialization.getCosts()).isNotNull();
-            for (UnitCostEmbeddable cost : specialization.getCosts()) {
+            for (UnitCostEmbeddableLegacy cost : specialization.getCosts()) {
                 assertThat(cost.getAmount()).isNotNull();
                 // Access embeddable properties
             }
@@ -176,7 +176,7 @@ class UnitSpecializationIT {
     @Test
     void shouldSaveAndFindByName() {
         // Arrange
-        UnitSpecializationEntity newEntity = new UnitSpecializationEntity();
+        UnitSpecializationEntityLegacy newEntity = new UnitSpecializationEntityLegacy();
         newEntity.setName("Vanguard");
         newEntity.setDescription("A powerful frontline unit.");
         newEntity.setHealth(10); // Add required fields
@@ -188,7 +188,7 @@ class UnitSpecializationIT {
         entityManager.persistAndFlush(newEntity);
 
         // Act
-        Optional<UnitSpecializationEntity> foundEntity = repository.findByName("Vanguard");
+        Optional<UnitSpecializationEntityLegacy> foundEntity = repository.findByName("Vanguard");
 
         // Assert
         assertThat(foundEntity).isPresent();

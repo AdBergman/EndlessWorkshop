@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "unit_skills")
-public class UnitSkillEntity {
+public class UnitSkillEntityLegacy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +36,9 @@ public class UnitSkillEntity {
     private Integer scalingDetermination;
 
     // --- Constructors ---
-    public UnitSkillEntity() {}
+    public UnitSkillEntityLegacy() {}
 
-    public UnitSkillEntity(
+    public UnitSkillEntityLegacy(
             String name,
             String target,
             Integer amount,

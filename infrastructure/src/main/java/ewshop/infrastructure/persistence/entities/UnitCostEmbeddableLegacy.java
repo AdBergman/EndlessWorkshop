@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Embeddable
-public class UnitCostEmbeddable {
+public class UnitCostEmbeddableLegacy {
 
     @Column(nullable = false)
     private int amount;
@@ -20,9 +20,9 @@ public class UnitCostEmbeddable {
     @Column()
     private StrategicResourceType strategic;
 
-    public UnitCostEmbeddable() {}
+    public UnitCostEmbeddableLegacy() {}
 
-    public UnitCostEmbeddable(int amount, FIDSI resource, StrategicResourceType strategic) {
+    public UnitCostEmbeddableLegacy(int amount, FIDSI resource, StrategicResourceType strategic) {
         this.amount = amount;
         this.resource = resource;
         this.strategic = strategic;
@@ -41,7 +41,7 @@ public class UnitCostEmbeddable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UnitCostEmbeddable that = (UnitCostEmbeddable) o;
+        UnitCostEmbeddableLegacy that = (UnitCostEmbeddableLegacy) o;
         return amount == that.amount && resource == that.resource && strategic == that.strategic;
     }
 

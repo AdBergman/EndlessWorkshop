@@ -63,4 +63,12 @@ public class FacadeConfig {
     ) {
         return new UnitFacadeImpl(unitSpecializationService, postProcessor);
     }
+
+    @Bean
+    public UnitImportAdminFacade unitImportAdminFacade(
+            UnitImportService unitImportService,
+            UnitService unitService
+    ) {
+        return new UnitImportAdminFacadeImpl(unitImportService, unitService);
+    }
 }
