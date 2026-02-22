@@ -79,7 +79,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                     ],
                     data: unlockedUnits.map((unit) => ({
                         Era: unit.era ?? "",
-                        Name: unit.name ?? "",
+                        Name: unit.displayName ?? "",
                         Tier: unit.tier ?? "",
                         Type: unit.type ?? "",
                         Health: unit.health ?? "",

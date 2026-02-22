@@ -10,22 +10,24 @@ export type TechUnlockRef = {
 
 export interface Unit {
     unitKey: string;
-    name: string;
-    descriptionLines: string[];
-    type: string;
-    health: number;
-    defense: number;
-    minDamage: number;
-    maxDamage: number;
-    movementPoints: number;
-    costs: string[];
-    skills: string[];
-    faction: Faction | null;
-    minorFaction: string | null;
-    tier: number;
-    upkeep: number;
-    upgradesTo: string[];
+    displayName: string;
     artId: string | null;
+
+    isHero: boolean;
+    isChosen: boolean;
+
+    spawnType: string | null;
+
+    previousUnitKey: string | null;
+    nextEvolutionUnitKeys: string[];
+
+    evolutionTierIndex: number | null;
+
+    unitClassKey: string | null;
+    attackSkillKey: string | null;
+
+    abilityKeys: string[];
+    descriptionLines: string[];
 }
 
 export interface Tech {

@@ -84,7 +84,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                     WebkitTextFillColor: "transparent",
                                 }}
                             >
-                                {unit.name}
+                                {unit.displayName}
                             </div>
 
                             {isMinor && (
@@ -113,11 +113,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                             <motion.img
                                 src={imageUrl}
-                                alt={unit.name}
+                                alt={unit.displayName}
                                 draggable={false}
                                 onError={(e) => {
                                     console.warn(
-                                        `⚠️ Missing art for ${isMinor ? "minor" : "major"} faction unit: ${unit.name}`
+                                        `⚠️ Missing art for ${isMinor ? "minor" : "major"} faction unit: ${unit.displayName}`
                                     );
                                     (e.target as HTMLImageElement).src = DEFAULT_UNIT_IMAGE;
                                 }}

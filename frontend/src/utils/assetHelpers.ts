@@ -9,7 +9,7 @@ export function getUnitImageUrl(unit: Unit): string {
 
     if (isMinor) {
         // Use the faction's UI label or name — both usually map to the minor faction
-        const factionName = (unit.minorFaction || unit.name || "")
+        const factionName = (unit.minorFaction || unit.displayName || "")
             .toLowerCase()
             .replace(/\s+/g, "_")
             .replace(/[^a-z0-9_]/g, "");

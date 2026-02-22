@@ -39,7 +39,7 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({
 
                         return (
                             <motion.div
-                                key={unit.name}
+                                key={unit.displayName}
                                 className={`carouselItem ${isActive ? "active" : "dimmed"}`}
                                 initial={false}
                                 animate={{

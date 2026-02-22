@@ -93,7 +93,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         const fetchUnits = async () => {
             try {
                 const unitData = await apiClient.getUnits();
-                setUnits(toKeyedMap(unitData, (u) => u.name));
+                setUnits(toKeyedMap(unitData, (u) => u.unitKey));
             } catch (err) {
                 console.error("Failed to load units:", err);
                 setUnits(new Map());

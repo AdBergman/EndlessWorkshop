@@ -54,7 +54,7 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
         {tiers.map((tier, i) => (
           <div key={i} className="evoRow">
             {tier.map((unit) => (
-              <div key={unit.name} className="evoNodeWrapper">
+              <div key={unit.displayName} className="evoNodeWrapper">
                 <UnitCard unit={unit} showArtwork disableFlip={false} />
               </div>
             ))}
@@ -70,7 +70,7 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
   return (
     <div className="horizontalEvolution">
       {flatChain.map((unit, i) => (
-        <Fragment key={unit.name}>
+        <Fragment key={unit.displayName}>
           <UnitCard unit={unit} showArtwork disableFlip={false} />
           {i < flatChain.length - 1 && <GlowArrow />}
         </Fragment>
