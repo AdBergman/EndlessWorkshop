@@ -18,7 +18,7 @@ public class UnitSpecializationService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable("units")
+    @Cacheable("legacyUnits")
     public List<UnitSpecialization> getAllUnits() {
         return unitRepository.findAll();
     }

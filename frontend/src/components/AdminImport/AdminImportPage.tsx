@@ -6,6 +6,8 @@ import AdminTokenPanel from "./AdminTokenPanel";
 import ImportModuleRow from "./ImportModuleRow";
 import { ImportModuleDefinition, ModuleMetaKV } from "./adminImportTypes";
 
+type TokenStatus = "missing" | "checking" | "valid" | "invalid";
+
 type TechImportFile = {
     game?: string;
     gameVersion?: string;
@@ -13,8 +15,6 @@ type TechImportFile = {
     exportedAtUtc?: string;
     techs?: unknown[];
 };
-
-type TokenStatus = "missing" | "checking" | "valid" | "invalid";
 
 function metaFromTechFile(json: TechImportFile): ModuleMetaKV[] {
     const techCount = Array.isArray(json.techs) ? json.techs.length : 0;
@@ -89,6 +89,33 @@ function validateImprovementFile(json: ImprovementImportFile): string | null {
     return null;
 }
 
+type UnitImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    units?: unknown[];
+};
+
+function metaFromUnitFile(json: UnitImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.units) ? json.units.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Unit count", value: String(count) },
+    ];
+}
+
+function validateUnitFile(json: UnitImportFile): string | null {
+    if (!json || !Array.isArray(json.units) || json.units.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'units' array.";
+    }
+    return null;
+}
+
 async function checkAdminToken(token: string): Promise<{ ok: boolean; message?: string }> {
     try {
         const res = await fetch("/api/admin/import/check-token", {
@@ -145,7 +172,16 @@ export default function AdminImportPage() {
                 validate: validateImprovementFile,
                 importButtonLabel: "Import improvements",
             },
-            { id: "units", title: "Units", description: "Not implemented yet.", enabled: false },
+            {
+                id: "units",
+                title: "Units",
+                description: "Upload a unit export and import it into the database.",
+                enabled: true,
+                endpoint: "/api/admin/import/units",
+                getMeta: metaFromUnitFile,
+                validate: validateUnitFile,
+                importButtonLabel: "Import units",
+            },
             {
                 id: "techs",
                 title: "Techs",
@@ -241,9 +277,7 @@ export default function AdminImportPage() {
             {!isUnlocked ? null : (
                 <div className="admin-import-section">
                     <div className="admin-import-pipelineTitle">Import pipeline</div>
-                    <div className="admin-import-muted">
-                        Run imports top-to-bottom as modules become available.
-                    </div>
+                    <div className="admin-import-muted">Run imports top-to-bottom as modules become available.</div>
 
                     <div className="admin-import-pipeline">
                         {modules.map((m, idx) => (

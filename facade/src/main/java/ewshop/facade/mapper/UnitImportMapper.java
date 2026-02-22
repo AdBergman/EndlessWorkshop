@@ -6,10 +6,14 @@ import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 
 public class UnitImportMapper {
+
+    private static final Pattern LEADER_PRIORITY_LINE =
+            Pattern.compile("^\\s*\\+\\d+\\s+Leader\\s+Priority\\s*$");
 
     public static UnitImportSnapshot toSnapshot(UnitImportUnitDto dto) {
         if (dto == null) throw new IllegalArgumentException("Row is required");
@@ -37,8 +41,9 @@ public class UnitImportMapper {
 
     private static String req(String v, String field) {
         var t = v == null ? null : v.trim();
-        if (t == null || t.isEmpty())
+        if (t == null || t.isEmpty()) {
             throw new IllegalArgumentException("Missing required field: " + field);
+        }
         return t;
     }
 
@@ -48,11 +53,17 @@ public class UnitImportMapper {
         return t.isEmpty() ? null : t;
     }
 
+    private static boolean isLeaderPriorityLine(String line) {
+        if (line == null) return false;
+        return LEADER_PRIORITY_LINE.matcher(line).matches();
+    }
+
     private static List<String> cleanLines(List<String> lines) {
         if (lines == null) return emptyList();
         return lines.stream()
                 .filter(s -> s != null && !s.trim().isEmpty())
                 .map(String::trim)
+                .filter(s -> !isLeaderPriorityLine(s))
                 .toList();
     }
 
@@ -66,8 +77,21 @@ public class UnitImportMapper {
 
     private static List<String> mergeAbilities(List<String> own, List<String> all) {
         LinkedHashSet<String> merged = new LinkedHashSet<>();
-        if (all != null) all.stream().filter(s -> s != null && !s.trim().isEmpty()).map(String::trim).forEach(merged::add);
-        if (own != null) own.stream().filter(s -> s != null && !s.trim().isEmpty()).map(String::trim).forEach(merged::add);
-        return new ArrayList<>(merged);
+
+        if (all != null) {
+            all.stream()
+                    .filter(s -> s != null && !s.trim().isEmpty())
+                    .map(String::trim)
+                    .forEach(merged::add);
+        }
+
+        if (own != null) {
+            own.stream()
+                    .filter(s -> s != null && !s.trim().isEmpty())
+                    .map(String::trim)
+                    .forEach(merged::add);
+        }
+
+        return merged.isEmpty() ? emptyList() : new ArrayList<>(merged);
     }
 }
