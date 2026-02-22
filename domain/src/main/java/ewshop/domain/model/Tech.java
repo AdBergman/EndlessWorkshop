@@ -1,6 +1,6 @@
 package ewshop.domain.model;
 
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 
 import java.util.*;
@@ -17,7 +17,7 @@ public class Tech {
     private final TechCoords techCoords;
     private Tech prereq;
     private Tech excludes;
-    private final Set<Faction> factions;
+    private final Set<MajorFaction> majorFactions;
 
     private Tech(Builder builder) {
         this.name = builder.name;
@@ -31,7 +31,7 @@ public class Tech {
         this.techCoords = builder.techCoords;
         this.prereq = builder.prereq;
         this.excludes = builder.excludes;
-        this.factions = Set.copyOf(builder.factions);
+        this.majorFactions = Set.copyOf(builder.majorFactions);
     }
 
     public String getName() { return name; }
@@ -45,7 +45,7 @@ public class Tech {
     public TechCoords getTechCoords() { return techCoords; }
     public Tech getPrereq() { return prereq; }
     public Tech getExcludes() { return excludes; }
-    public Set<Faction> getFactions() { return factions; }
+    public Set<MajorFaction> getFactions() { return majorFactions; }
 
     public void setPrereq(Tech prereqTech) { this.prereq = prereqTech; }
     public void setExcludes(Tech excludesTech) { this.excludes = excludesTech; }
@@ -64,7 +64,7 @@ public class Tech {
         private TechCoords techCoords;
         private Tech prereq;
         private Tech excludes;
-        private final Set<Faction> factions = new HashSet<>();
+        private final Set<MajorFaction> majorFactions = new HashSet<>();
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder techKey(String techKey) { this.techKey = techKey; return this; }
@@ -92,12 +92,12 @@ public class Tech {
         public Builder prereq(Tech prereq) { this.prereq = prereq; return this; }
         public Builder excludes(Tech excludes) { this.excludes = excludes; return this; }
 
-        public Builder factions(Set<Faction> factions) {
-            this.factions.clear();
-            if (factions != null) this.factions.addAll(factions);
+        public Builder factions(Set<MajorFaction> majorFactions) {
+            this.majorFactions.clear();
+            if (majorFactions != null) this.majorFactions.addAll(majorFactions);
             return this;
         }
-        public Builder addFaction(Faction faction) { this.factions.add(faction); return this; }
+        public Builder addFaction(MajorFaction majorFaction) { this.majorFactions.add(majorFaction); return this; }
 
         public Tech build() { return new Tech(this); }
     }

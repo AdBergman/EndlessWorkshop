@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.entities;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import jakarta.persistence.*;
 
@@ -54,7 +54,7 @@ public class TechEntity {
     @CollectionTable(name = "tech_faction", joinColumns = @JoinColumn(name = "tech_id"))
     @Column(name = "faction", nullable = false, length = 64)
     @Enumerated(EnumType.STRING)
-    private Set<Faction> factions;
+    private Set<MajorFaction> majorFactions;
 
     @Column(name = "tech_key")
     private String techKey;
@@ -139,12 +139,12 @@ public class TechEntity {
         this.excludes = excludes;
     }
 
-    public Set<Faction> getFactions() {
-        return factions;
+    public Set<MajorFaction> getFactions() {
+        return majorFactions;
     }
 
-    public void setFactions(Set<Faction> factions) {
-        this.factions = factions;
+    public void setFactions(Set<MajorFaction> majorFactions) {
+        this.majorFactions = majorFactions;
     }
 
     public String getTechKey() {

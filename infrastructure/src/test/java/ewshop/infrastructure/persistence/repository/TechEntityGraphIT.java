@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.repository;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
@@ -31,7 +31,7 @@ class TechEntityGraphIT {
         prereq.setEra(1);
         prereq.setTechCoords(new TechCoords(0.0, 0.0));
         prereq.setDescriptionLines(List.of("Prereq line"));
-        prereq.setFactions(Set.of(Faction.ASPECTS));
+        prereq.setFactions(Set.of(MajorFaction.ASPECTS));
 
         // main tech
         TechEntity tech = new TechEntity();
@@ -41,7 +41,7 @@ class TechEntityGraphIT {
         tech.setEra(4);
         tech.setTechCoords(new TechCoords(0.0, 0.0));
         tech.setDescriptionLines(List.of("Unlocks something"));
-        tech.setFactions(Set.of(Faction.ASPECTS));
+        tech.setFactions(Set.of(MajorFaction.ASPECTS));
         tech.setPrereq(prereq);
 
         em.persist(prereq);

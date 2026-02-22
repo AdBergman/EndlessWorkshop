@@ -6,8 +6,12 @@ import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record UnitImportUnitDto(
+
         String unitKey,
         String displayName,
+
+        String faction,
+        Boolean isMajorFaction,
 
         Boolean isHero,
         Boolean isChosen,

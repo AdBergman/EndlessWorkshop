@@ -3,7 +3,7 @@ package ewshop.infrastructure.persistence.adapters;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
@@ -209,12 +209,12 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        EnumSet<Faction> nextFactions = toEnumSet(update.availableFactions());
-        EnumSet<Faction> currentFactions = toEnumSet(entity.getFactions());
+        EnumSet<MajorFaction> nextMajorFactions = toEnumSet(update.availableMajorFactions());
+        EnumSet<MajorFaction> currentMajorFactions = toEnumSet(entity.getFactions());
 
-        if (!currentFactions.equals(nextFactions)) {
+        if (!currentMajorFactions.equals(nextMajorFactions)) {
             // Give Hibernate a mutable collection for dirty-tracking
-            entity.setFactions(nextFactions.isEmpty() ? new HashSet<>() : new HashSet<>(nextFactions));
+            entity.setFactions(nextMajorFactions.isEmpty() ? new HashSet<>() : new HashSet<>(nextMajorFactions));
             changed = true;
         }
 
@@ -222,9 +222,9 @@ public class TechRepositoryAdapter implements TechRepository {
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
 
-    private static EnumSet<Faction> toEnumSet(Set<Faction> in) {
+    private static EnumSet<MajorFaction> toEnumSet(Set<MajorFaction> in) {
         if (in == null || in.isEmpty()) {
-            return EnumSet.noneOf(Faction.class);
+            return EnumSet.noneOf(MajorFaction.class);
         }
         return EnumSet.copyOf(in);
     }

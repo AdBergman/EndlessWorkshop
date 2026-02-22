@@ -1,7 +1,7 @@
 package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.SavedTechBuild;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.infrastructure.persistence.entities.SavedTechBuildEntity;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +23,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuildEntity entity = new SavedTechBuildEntity();
         entity.setUuid(uuid);
         entity.setName("Test Build");
-        entity.setFaction(Faction.ASPECTS);
+        entity.setFaction(MajorFaction.ASPECTS);
         entity.setTechIds(List.of("tech1", "tech2"));
         entity.setCreatedAt(now);
 
@@ -34,7 +34,7 @@ class SavedTechBuildMapperTest {
         assertThat(domain).isNotNull();
         assertThat(domain.getUuid()).isEqualTo(uuid);
         assertThat(domain.getName()).isEqualTo("Test Build");
-        assertThat(domain.getFaction()).isEqualTo(Faction.ASPECTS);
+        assertThat(domain.getFaction()).isEqualTo(MajorFaction.ASPECTS);
         assertThat(domain.getTechIds()).containsExactly("tech1", "tech2");
         assertThat(domain.getCreatedAt()).isEqualTo(now);
     }
@@ -47,7 +47,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuild domain = SavedTechBuild.builder()
                 .uuid(uuid)
                 .name("Test Build")
-                .faction(Faction.ASPECTS)
+                .faction(MajorFaction.ASPECTS)
                 .techIds(List.of("tech1", "tech2"))
                 .createdAt(now)
                 .build();
@@ -59,7 +59,7 @@ class SavedTechBuildMapperTest {
         assertThat(entity).isNotNull();
         assertThat(entity.getUuid()).isEqualTo(uuid);
         assertThat(entity.getName()).isEqualTo("Test Build");
-        assertThat(entity.getFaction()).isEqualTo(Faction.ASPECTS);
+        assertThat(entity.getFaction()).isEqualTo(MajorFaction.ASPECTS);
         assertThat(entity.getTechIds()).containsExactly("tech1", "tech2");
         assertThat(entity.getCreatedAt()).isEqualTo(now);
     }

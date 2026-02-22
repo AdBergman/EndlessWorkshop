@@ -14,6 +14,8 @@ public final class UnitMapper {
                 unit.getUnitKey(),
                 unit.getDisplayName(),
                 unit.getArtId(),
+                unit.getFaction(),
+                unit.isMajorFaction(),
                 unit.isHero(),
                 unit.isChosen(),
                 unit.getSpawnType(),

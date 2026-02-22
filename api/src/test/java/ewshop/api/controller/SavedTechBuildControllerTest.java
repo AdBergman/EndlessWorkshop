@@ -2,7 +2,7 @@ package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.api.TestApplication;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;
@@ -52,7 +52,7 @@ class SavedTechBuildControllerTest {
         SavedTechBuildDto responseDto = SavedTechBuildDto.builder()
                 .uuid(expectedUuid)
                 .name("My Awesome Build")
-                .selectedFaction(Faction.ASPECTS)
+                .selectedFaction(MajorFaction.ASPECTS)
                 .techIds(List.of("tech1", "tech2"))
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -78,7 +78,7 @@ class SavedTechBuildControllerTest {
         SavedTechBuildDto existingBuild = SavedTechBuildDto.builder()
                 .uuid(buildUuid)
                 .name("Existing Build")
-                .selectedFaction(Faction.KIN)
+                .selectedFaction(MajorFaction.KIN)
                 .techIds(List.of("techA", "techB"))
                 .createdAt(LocalDateTime.now())
                 .build();

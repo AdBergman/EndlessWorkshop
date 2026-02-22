@@ -32,10 +32,11 @@ class UnitFacadeTest extends BaseIT {
 
     @Test
     void getAllUnits_integration() {
-
         UnitImportSnapshot unit1 = new UnitImportSnapshot(
                 "Unit_Test_1",
                 "Test Unit 1",
+                "Aspect",
+                true,
                 false,
                 false,
                 "Land",
@@ -51,6 +52,8 @@ class UnitFacadeTest extends BaseIT {
         UnitImportSnapshot unit2 = new UnitImportSnapshot(
                 "Unit_Test_2",
                 "Test Unit 2",
+                "KinOfSheredyn",
+                true,
                 false,
                 false,
                 "Land",
@@ -76,6 +79,9 @@ class UnitFacadeTest extends BaseIT {
                 .orElseThrow();
 
         assertThat(dto.displayName()).isEqualTo("Test Unit 1");
+        assertThat(dto.faction()).isEqualTo("Aspect");
+        assertThat(dto.isMajorFaction()).isTrue();
+
         assertThat(dto.isHero()).isFalse();
         assertThat(dto.isChosen()).isFalse();
         assertThat(dto.spawnType()).isEqualTo("Land");

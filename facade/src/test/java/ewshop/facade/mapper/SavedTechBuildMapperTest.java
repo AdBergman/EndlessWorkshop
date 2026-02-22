@@ -1,7 +1,7 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.model.SavedTechBuild;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuild savedTechBuild = SavedTechBuild.builder()
                 .uuid(uuid)
                 .name("My Awesome Tech Build")
-                .faction(Faction.ASPECTS)
+                .faction(MajorFaction.ASPECTS)
                 .techIds(List.of("tech1", "tech2", "tech3"))
                 .createdAt(createdAt)
                 .build();
@@ -62,7 +62,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuild savedTechBuild = SavedTechBuild.builder()
                 .uuid(uuid)
                 .name("Empty Tech Build")
-                .faction(Faction.KIN)
+                .faction(MajorFaction.KIN)
                 .techIds(List.of())
                 .createdAt(createdAt)
                 .build();
@@ -88,7 +88,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuild savedTechBuild = SavedTechBuild.builder()
                 .uuid(uuid)
                 .name("Null TechIds Build")
-                .faction(Faction.LORDS)
+                .faction(MajorFaction.LORDS)
                 .techIds(null)
                 .createdAt(createdAt)
                 .build();

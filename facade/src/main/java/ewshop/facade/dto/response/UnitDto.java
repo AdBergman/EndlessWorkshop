@@ -6,14 +6,21 @@ public record UnitDto(
         String unitKey,
         String displayName,
         String artId,
+
+        String faction,
+        boolean isMajorFaction,
+
         boolean isHero,
         boolean isChosen,
         String spawnType,
+
         String previousUnitKey,
         List<String> nextEvolutionUnitKeys,
         Integer evolutionTierIndex,
+
         String unitClassKey,
         String attackSkillKey,
+
         List<String> abilityKeys,
         List<String> descriptionLines
 ) {}

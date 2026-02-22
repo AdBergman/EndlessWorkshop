@@ -34,6 +34,8 @@ class UnitControllerTest {
                 "Unit_Test_1",
                 "Test Unit 1",
                 null,
+                "ASPECTS",
+                true,
                 false,
                 false,
                 "Land",
@@ -50,6 +52,8 @@ class UnitControllerTest {
                 "Unit_Test_2",
                 "Test Unit 2",
                 "herald",
+                "KIN",
+                true,
                 false,
                 false,
                 "Land",
@@ -67,13 +71,18 @@ class UnitControllerTest {
         mockMvc.perform(get("/api/units")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+
+                // Unit 1
                 .andExpect(jsonPath("$[0].unitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[0].displayName").value("Test Unit 1"))
-                .andExpect(jsonPath("$[0].artId").doesNotExist())
+                // null fields still exist unless Jackson NON_NULL is configured
+                .andExpect(jsonPath("$[0].artId").isEmpty())
+                .andExpect(jsonPath("$[0].faction").value("ASPECTS"))
+                .andExpect(jsonPath("$[0].isMajorFaction").value(true))
                 .andExpect(jsonPath("$[0].isHero").value(false))
                 .andExpect(jsonPath("$[0].isChosen").value(false))
                 .andExpect(jsonPath("$[0].spawnType").value("Land"))
-                .andExpect(jsonPath("$[0].previousUnitKey").doesNotExist())
+                .andExpect(jsonPath("$[0].previousUnitKey").isEmpty())
                 .andExpect(jsonPath("$[0].nextEvolutionUnitKeys[0]").value("Unit_Test_1_Upgraded"))
                 .andExpect(jsonPath("$[0].evolutionTierIndex").value(1))
                 .andExpect(jsonPath("$[0].unitClassKey").value("UnitClass_Infantry"))
@@ -82,9 +91,13 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[0].abilityKeys[1]").value("UnitAbility_B"))
                 .andExpect(jsonPath("$[0].descriptionLines[0]").value("Line 1"))
                 .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
+
+                // Unit 2
                 .andExpect(jsonPath("$[1].unitKey").value("Unit_Test_2"))
                 .andExpect(jsonPath("$[1].displayName").value("Test Unit 2"))
                 .andExpect(jsonPath("$[1].artId").value("herald"))
+                .andExpect(jsonPath("$[1].faction").value("KIN"))
+                .andExpect(jsonPath("$[1].isMajorFaction").value(true))
                 .andExpect(jsonPath("$[1].previousUnitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[1].nextEvolutionUnitKeys").isEmpty())
                 .andExpect(jsonPath("$[1].evolutionTierIndex").value(2))

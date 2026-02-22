@@ -9,6 +9,9 @@ public class Unit {
     private final String displayName;
     private final String artId;
 
+    private final String faction;
+    private final boolean isMajorFaction;
+
     private final boolean isHero;
     private final boolean isChosen;
 
@@ -29,6 +32,9 @@ public class Unit {
         this.displayName = builder.displayName;
         this.artId = builder.artId;
 
+        this.faction = builder.faction;
+        this.isMajorFaction = builder.isMajorFaction;
+
         this.isHero = builder.isHero;
         this.isChosen = builder.isChosen;
         this.spawnType = builder.spawnType;
@@ -48,6 +54,9 @@ public class Unit {
     public String getDisplayName() { return displayName; }
     public String getArtId() { return artId; }
 
+    public String getFaction() { return faction; }
+    public boolean isMajorFaction() { return isMajorFaction; }
+
     public boolean isHero() { return isHero; }
     public boolean isChosen() { return isChosen; }
 
@@ -65,10 +74,13 @@ public class Unit {
 
     public static Builder builder() { return new Builder(); }
 
-    public static class Builder {
+    public static final class Builder {
         private String unitKey;
         private String displayName;
         private String artId;
+
+        private String faction;
+        private boolean isMajorFaction = true;
 
         private boolean isHero;
         private boolean isChosen;
@@ -89,6 +101,9 @@ public class Unit {
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
         public Builder artId(String artId) { this.artId = artId; return this; }
 
+        public Builder faction(String faction) { this.faction = faction; return this; }
+        public Builder isMajorFaction(boolean isMajorFaction) { this.isMajorFaction = isMajorFaction; return this; }
+
         public Builder isHero(boolean isHero) { this.isHero = isHero; return this; }
         public Builder isChosen(boolean isChosen) { this.isChosen = isChosen; return this; }
 
@@ -102,20 +117,10 @@ public class Unit {
             return this;
         }
 
-        public Builder evolutionTierIndex(Integer evolutionTierIndex) {
-            this.evolutionTierIndex = evolutionTierIndex;
-            return this;
-        }
+        public Builder evolutionTierIndex(Integer evolutionTierIndex) { this.evolutionTierIndex = evolutionTierIndex; return this; }
 
-        public Builder unitClassKey(String unitClassKey) {
-            this.unitClassKey = unitClassKey;
-            return this;
-        }
-
-        public Builder attackSkillKey(String attackSkillKey) {
-            this.attackSkillKey = attackSkillKey;
-            return this;
-        }
+        public Builder unitClassKey(String unitClassKey) { this.unitClassKey = unitClassKey; return this; }
+        public Builder attackSkillKey(String attackSkillKey) { this.attackSkillKey = attackSkillKey; return this; }
 
         public Builder abilityKeys(List<String> abilityKeys) {
             this.abilityKeys.clear();
@@ -129,8 +134,6 @@ public class Unit {
             return this;
         }
 
-        public Unit build() {
-            return new Unit(this);
-        }
+        public Unit build() { return new Unit(this); }
     }
 }

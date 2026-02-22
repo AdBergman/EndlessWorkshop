@@ -33,7 +33,7 @@ public class TechImportService {
 
         List<TechImportSnapshot> publicSnapshots = enrichedSnapshots.stream()
                 .filter(snapshot -> !snapshot.hidden())
-                .filter(snapshot -> snapshot.availableFactions() != null && !snapshot.availableFactions().isEmpty())
+                .filter(snapshot -> snapshot.availableMajorFactions() != null && !snapshot.availableMajorFactions().isEmpty())
                 .toList();
 
         if (!enrichedSnapshots.isEmpty() && publicSnapshots.isEmpty()) {

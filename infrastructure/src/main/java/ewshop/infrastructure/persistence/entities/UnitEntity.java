@@ -25,6 +25,12 @@ public class UnitEntity {
     @Column(name = "art_id", length = 255)
     private String artId;
 
+    @Column(name = "faction", length = 64)
+    private String faction;
+
+    @Column(name = "is_major_faction", nullable = false)
+    private boolean isMajorFaction;
+
     @Column(name = "is_hero", nullable = false)
     private boolean isHero;
 
@@ -85,6 +91,12 @@ public class UnitEntity {
 
     public String getArtId() { return artId; }
     public void setArtId(String artId) { this.artId = artId; }
+
+    public String getFaction() { return faction; }
+    public void setFaction(String faction) { this.faction = faction; }
+
+    public boolean isMajorFaction() { return isMajorFaction; }
+    public void setMajorFaction(boolean majorFaction) { isMajorFaction = majorFaction; }
 
     public boolean isHero() { return isHero; }
     public void setHero(boolean hero) { isHero = hero; }

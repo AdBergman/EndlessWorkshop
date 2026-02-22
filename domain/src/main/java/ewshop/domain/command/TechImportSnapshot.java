@@ -1,7 +1,7 @@
 package ewshop.domain.command;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public record TechImportSnapshot(
         List<TechUnlockTuple> unlocks,
 
         // Derived at import-time (service postprocessor)
-        Set<Faction> availableFactions
+        Set<MajorFaction> availableMajorFactions
 ) {
     private static final TechCoords DEFAULT_COORDS = new TechCoords(0.0, 0.0);
 
@@ -58,12 +58,12 @@ public record TechImportSnapshot(
         descriptionLines = descriptionLines == null ? List.of() : List.copyOf(descriptionLines);
         unlocks = unlocks == null ? List.of() : List.copyOf(unlocks);
 
-        availableFactions = availableFactions == null || availableFactions.isEmpty()
+        availableMajorFactions = availableMajorFactions == null || availableMajorFactions.isEmpty()
                 ? Set.of()
-                : Set.copyOf(availableFactions);
+                : Set.copyOf(availableMajorFactions);
     }
 
-    public TechImportSnapshot withAvailableFactions(Set<Faction> next) {
+    public TechImportSnapshot withAvailableFactions(Set<MajorFaction> next) {
         return new TechImportSnapshot(
                 techKey,
                 displayName,
@@ -102,7 +102,7 @@ public record TechImportSnapshot(
         private List<String> descriptionLines = List.of();
         private List<TechUnlockTuple> unlocks = List.of();
 
-        private Set<Faction> availableFactions = Set.of();
+        private Set<MajorFaction> availableMajorFactions = Set.of();
 
         public Builder techKey(String techKey) { this.techKey = techKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
@@ -120,7 +120,7 @@ public record TechImportSnapshot(
         public Builder descriptionLines(List<String> descriptionLines) { this.descriptionLines = descriptionLines; return this; }
         public Builder unlocks(List<TechUnlockTuple> unlocks) { this.unlocks = unlocks; return this; }
 
-        public Builder availableFactions(Set<Faction> availableFactions) { this.availableFactions = availableFactions; return this; }
+        public Builder availableFactions(Set<MajorFaction> availableMajorFactions) { this.availableMajorFactions = availableMajorFactions; return this; }
 
         public TechImportSnapshot build() {
             return new TechImportSnapshot(
@@ -136,7 +136,7 @@ public record TechImportSnapshot(
                     traitPrereqs,
                     descriptionLines,
                     unlocks,
-                    availableFactions
+                    availableMajorFactions
             );
         }
     }

@@ -5,6 +5,7 @@ import ewshop.infrastructure.persistence.entities.UnitEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class UnitMapper {
@@ -17,6 +18,9 @@ public class UnitMapper {
         entity.setDisplayName(domain.getDisplayName());
         entity.setArtId(domain.getArtId());
 
+        entity.setFaction(domain.getFaction());
+        entity.setMajorFaction(domain.isMajorFaction());
+
         entity.setHero(domain.isHero());
         entity.setChosen(domain.isChosen());
 
@@ -27,9 +31,9 @@ public class UnitMapper {
         entity.setUnitClassKey(domain.getUnitClassKey());
         entity.setAttackSkillKey(domain.getAttackSkillKey());
 
-        entity.setNextEvolutionUnitKeys(new ArrayList<>(domain.getNextEvolutionUnitKeys()));
-        entity.setAbilityKeys(new ArrayList<>(domain.getAbilityKeys()));
-        entity.setDescriptionLines(new ArrayList<>(domain.getDescriptionLines()));
+        entity.setNextEvolutionUnitKeys(copy(domain.getNextEvolutionUnitKeys()));
+        entity.setAbilityKeys(copy(domain.getAbilityKeys()));
+        entity.setDescriptionLines(copy(domain.getDescriptionLines()));
 
         return entity;
     }
@@ -41,16 +45,27 @@ public class UnitMapper {
                 .unitKey(entity.getUnitKey())
                 .displayName(entity.getDisplayName())
                 .artId(entity.getArtId())
+
+                .faction(entity.getFaction())
+                .isMajorFaction(entity.isMajorFaction())
+
                 .isHero(entity.isHero())
                 .isChosen(entity.isChosen())
                 .spawnType(entity.getSpawnType())
+
                 .previousUnitKey(entity.getPreviousUnitKey())
                 .nextEvolutionUnitKeys(entity.getNextEvolutionUnitKeys())
                 .evolutionTierIndex(entity.getEvolutionTierIndex())
+
                 .unitClassKey(entity.getUnitClassKey())
                 .attackSkillKey(entity.getAttackSkillKey())
+
                 .abilityKeys(entity.getAbilityKeys())
                 .descriptionLines(entity.getDescriptionLines())
                 .build();
+    }
+
+    private static List<String> copy(List<String> in) {
+        return in == null ? new ArrayList<>() : new ArrayList<>(in);
     }
 }

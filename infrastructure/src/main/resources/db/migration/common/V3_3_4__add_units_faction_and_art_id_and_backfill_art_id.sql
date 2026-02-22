@@ -1,6 +1,16 @@
 ALTER TABLE units
     ADD COLUMN IF NOT EXISTS art_id VARCHAR(255);
 
+ALTER TABLE units
+    ADD COLUMN IF NOT EXISTS faction VARCHAR(64);
+
+ALTER TABLE units
+    ADD COLUMN IF NOT EXISTS is_major_faction BOOLEAN NOT NULL DEFAULT TRUE;
+
+-- --------------------------------------------------
+-- Backfill art_id (temporary manual mapping)
+-- --------------------------------------------------
+
 UPDATE units SET art_id = 'herald'   WHERE display_name = 'Champion';
 UPDATE units SET art_id = 'herald'   WHERE display_name = 'Clarion';
 UPDATE units SET art_id = 'herald'   WHERE display_name = 'Commander';

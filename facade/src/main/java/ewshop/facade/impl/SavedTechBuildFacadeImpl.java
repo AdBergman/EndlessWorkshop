@@ -27,7 +27,7 @@ public class SavedTechBuildFacadeImpl implements SavedTechBuildFacade {
         SavedTechBuild buildDomain = SavedTechBuildMapper.toDomain(request);
         SavedTechBuild savedBuild = buildService.save(buildDomain);
         SavedTechBuildDto dto = SavedTechBuildMapper.toDto(savedBuild);
-        log.info("Created saved tech build uuid={} for faction={}", dto.uuid(), dto.selectedFaction());
+        log.info("Created saved tech build uuid={} for majorFaction={}", dto.uuid(), dto.selectedFaction());
         return dto;
     }
 

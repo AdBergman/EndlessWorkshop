@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -59,15 +60,13 @@ public class UnitRepositoryAdapter implements UnitRepository {
 
             UpsertOutcome outcome = applySnapshot(entity, snapshot, isInsert);
 
+            if (outcome != UpsertOutcome.UNCHANGED) {
+                toSave.add(entity);
+            }
+
             switch (outcome) {
-                case INSERTED -> {
-                    toSave.add(entity);
-                    result.incrementInserted();
-                }
-                case UPDATED -> {
-                    toSave.add(entity);
-                    result.incrementUpdated();
-                }
+                case INSERTED -> result.incrementInserted();
+                case UPDATED -> result.incrementUpdated();
                 case UNCHANGED -> result.incrementUnchanged();
             }
         }
@@ -88,66 +87,53 @@ public class UnitRepositoryAdapter implements UnitRepository {
     private static UpsertOutcome applySnapshot(UnitEntity entity, UnitImportSnapshot update, boolean isInsert) {
         boolean changed = isInsert;
 
-        if (!java.util.Objects.equals(entity.getDisplayName(), update.displayName())) {
-            entity.setDisplayName(update.displayName());
-            changed = true;
-        }
+        changed |= setIfChanged(entity.getDisplayName(), update.displayName(), entity::setDisplayName);
 
-        if (entity.isHero() != update.isHero()) {
-            entity.setHero(update.isHero());
-            changed = true;
-        }
+        changed |= setIfChanged(entity.getFaction(), update.faction(), entity::setFaction);
+        changed |= setIfChanged(entity.isMajorFaction(), update.isMajorFaction(), entity::setMajorFaction);
 
-        if (entity.isChosen() != update.isChosen()) {
-            entity.setChosen(update.isChosen());
-            changed = true;
-        }
+        // artId is intentionally NOT touched by import snapshots (manual/backfill survives re-imports)
 
-        if (!java.util.Objects.equals(entity.getSpawnType(), update.spawnType())) {
-            entity.setSpawnType(update.spawnType());
-            changed = true;
-        }
+        changed |= setIfChanged(entity.isHero(), update.isHero(), entity::setHero);
+        changed |= setIfChanged(entity.isChosen(), update.isChosen(), entity::setChosen);
 
-        if (!java.util.Objects.equals(entity.getPreviousUnitKey(), update.previousUnitKey())) {
-            entity.setPreviousUnitKey(update.previousUnitKey());
-            changed = true;
-        }
+        changed |= setIfChanged(entity.getSpawnType(), update.spawnType(), entity::setSpawnType);
+        changed |= setIfChanged(entity.getPreviousUnitKey(), update.previousUnitKey(), entity::setPreviousUnitKey);
+        changed |= setIfChanged(entity.getEvolutionTierIndex(), update.evolutionTierIndex(), entity::setEvolutionTierIndex);
 
-        if (!java.util.Objects.equals(entity.getEvolutionTierIndex(), update.evolutionTierIndex())) {
-            entity.setEvolutionTierIndex(update.evolutionTierIndex());
-            changed = true;
-        }
+        changed |= setIfChanged(entity.getUnitClassKey(), update.unitClassKey(), entity::setUnitClassKey);
+        changed |= setIfChanged(entity.getAttackSkillKey(), update.attackSkillKey(), entity::setAttackSkillKey);
 
-        if (!java.util.Objects.equals(entity.getUnitClassKey(), update.unitClassKey())) {
-            entity.setUnitClassKey(update.unitClassKey());
-            changed = true;
-        }
-
-        if (!java.util.Objects.equals(entity.getAttackSkillKey(), update.attackSkillKey())) {
-            entity.setAttackSkillKey(update.attackSkillKey());
-            changed = true;
-        }
-
-        List<String> nextEvos = update.nextEvolutionUnitKeys() == null ? List.of() : update.nextEvolutionUnitKeys();
-        if (!entity.getNextEvolutionUnitKeys().equals(nextEvos)) {
+        List<String> nextEvos = safeList(update.nextEvolutionUnitKeys());
+        if (!Objects.equals(entity.getNextEvolutionUnitKeys(), nextEvos)) {
             entity.setNextEvolutionUnitKeys(new ArrayList<>(nextEvos));
             changed = true;
         }
 
-        List<String> nextAbilities = update.abilityKeys() == null ? List.of() : update.abilityKeys();
-        if (!entity.getAbilityKeys().equals(nextAbilities)) {
+        List<String> nextAbilities = safeList(update.abilityKeys());
+        if (!Objects.equals(entity.getAbilityKeys(), nextAbilities)) {
             entity.setAbilityKeys(new ArrayList<>(nextAbilities));
             changed = true;
         }
 
-        List<String> nextLines = update.descriptionLines() == null ? List.of() : update.descriptionLines();
-        if (!entity.getDescriptionLines().equals(nextLines)) {
+        List<String> nextLines = safeList(update.descriptionLines());
+        if (!Objects.equals(entity.getDescriptionLines(), nextLines)) {
             entity.setDescriptionLines(new ArrayList<>(nextLines));
             changed = true;
         }
 
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
+    }
+
+    private static <T> boolean setIfChanged(T current, T next, java.util.function.Consumer<T> setter) {
+        if (Objects.equals(current, next)) return false;
+        setter.accept(next);
+        return true;
+    }
+
+    private static <T> List<T> safeList(List<T> v) {
+        return v == null ? List.of() : v;
     }
 
     @Override
@@ -169,6 +155,11 @@ public class UnitRepositoryAdapter implements UnitRepository {
                 });
 
         entity.setDisplayName(unit.getDisplayName());
+        entity.setArtId(unit.getArtId());
+
+        entity.setFaction(unit.getFaction());
+        entity.setMajorFaction(unit.isMajorFaction());
+
         entity.setHero(unit.isHero());
         entity.setChosen(unit.isChosen());
         entity.setSpawnType(unit.getSpawnType());
@@ -177,9 +168,9 @@ public class UnitRepositoryAdapter implements UnitRepository {
         entity.setUnitClassKey(unit.getUnitClassKey());
         entity.setAttackSkillKey(unit.getAttackSkillKey());
 
-        entity.setNextEvolutionUnitKeys(new ArrayList<>(unit.getNextEvolutionUnitKeys()));
-        entity.setAbilityKeys(new ArrayList<>(unit.getAbilityKeys()));
-        entity.setDescriptionLines(new ArrayList<>(unit.getDescriptionLines()));
+        entity.setNextEvolutionUnitKeys(new ArrayList<>(safeList(unit.getNextEvolutionUnitKeys())));
+        entity.setAbilityKeys(new ArrayList<>(safeList(unit.getAbilityKeys())));
+        entity.setDescriptionLines(new ArrayList<>(safeList(unit.getDescriptionLines())));
 
         return mapper.toDomain(unitJpaRepository.save(entity));
     }

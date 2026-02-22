@@ -1,7 +1,7 @@
 package ewshop.facade.integration;
 
 import ewshop.domain.model.SavedTechBuild;
-import ewshop.domain.model.enums.Faction;
+import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.repository.SavedTechBuildRepository;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;
@@ -41,7 +41,7 @@ class SavedTechBuildFacadeTest extends  BaseIT {
         SavedTechBuild build = SavedTechBuild.builder()
                 .uuid(uuid)
                 .name("Test Build")
-                .faction(Faction.ASPECTS)
+                .faction(MajorFaction.ASPECTS)
                 .techIds(List.of("tech1", "tech2"))
                 .build();
 

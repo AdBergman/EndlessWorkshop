@@ -6,6 +6,9 @@ public record UnitImportSnapshot(
         String unitKey,
         String displayName,
 
+        String faction,
+        boolean isMajorFaction,
+
         boolean isHero,
         boolean isChosen,
         String spawnType,
@@ -29,14 +32,16 @@ public record UnitImportSnapshot(
         unitKey = trimmedKey;
 
         displayName = displayName == null ? "" : displayName.trim();
+
+        faction = faction == null ? null : faction.trim();
+        if (faction != null && faction.isEmpty()) faction = null;
+
         spawnType = spawnType == null ? null : spawnType.trim();
         previousUnitKey = previousUnitKey == null ? null : previousUnitKey.trim();
         unitClassKey = unitClassKey == null ? null : unitClassKey.trim();
 
         attackSkillKey = attackSkillKey == null ? null : attackSkillKey.trim();
-        if (attackSkillKey != null && attackSkillKey.isEmpty()) {
-            attackSkillKey = null;
-        }
+        if (attackSkillKey != null && attackSkillKey.isEmpty()) attackSkillKey = null;
 
         nextEvolutionUnitKeys = nextEvolutionUnitKeys == null ? List.of() : List.copyOf(nextEvolutionUnitKeys);
         abilityKeys = abilityKeys == null ? List.of() : List.copyOf(abilityKeys);
@@ -47,9 +52,12 @@ public record UnitImportSnapshot(
         return new Builder();
     }
 
-    public static class Builder {
+    public static final class Builder {
         private String unitKey = "";
         private String displayName = "";
+
+        private String faction = null;
+        private boolean isMajorFaction = true;
 
         private boolean isHero = false;
         private boolean isChosen = false;
@@ -67,6 +75,9 @@ public record UnitImportSnapshot(
 
         public Builder unitKey(String unitKey) { this.unitKey = unitKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
+
+        public Builder faction(String faction) { this.faction = faction; return this; }
+        public Builder isMajorFaction(boolean isMajorFaction) { this.isMajorFaction = isMajorFaction; return this; }
 
         public Builder isHero(boolean isHero) { this.isHero = isHero; return this; }
         public Builder isChosen(boolean isChosen) { this.isChosen = isChosen; return this; }
@@ -86,6 +97,8 @@ public record UnitImportSnapshot(
             return new UnitImportSnapshot(
                     unitKey,
                     displayName,
+                    faction,
+                    isMajorFaction,
                     isHero,
                     isChosen,
                     spawnType,
