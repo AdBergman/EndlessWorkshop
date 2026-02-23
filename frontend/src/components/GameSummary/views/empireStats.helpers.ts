@@ -91,7 +91,7 @@ const METRIC_TO_FIELD: Record<EmpireMetricKey, string> = {
     Science: "science",
     Influence: "influence",
     Approval: "approval",
-    Population: "population",
+    Population: "populations",
     Technologies: "technologies",
     Units: "units",
     Cities: "cities",
