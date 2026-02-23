@@ -24,29 +24,22 @@ const TechSheetView: React.FC<TechSheetViewProps> = ({ techs }) => {
                 <tbody>
                 {techs.map((tech) => (
                     <tr key={tech.techKey ?? tech.name}>
-                        <td>{tech.name ?? "--"}</td>
-                        <td>{tech.era ?? "--"}</td>
-                        <td>{tech.type ?? "--"}</td>
+                        <td>{tech.name ?? ""}</td>
+                        <td>{tech.era ?? ""}</td>
+                        <td>{tech.type ?? ""}</td>
 
-                        <td style={{ whiteSpace: "pre-line" }}>
+                        <td>
                             {(tech.unlocks ?? []).map((unlock: TechUnlockRef, index: number) => (
-                                <UnlockLine
-                                    key={`${unlock.unlockType}:${unlock.unlockKey}:${index}`}
-                                    unlock={unlock}
-                                />
+                                <div key={`${unlock.unlockType}:${unlock.unlockKey}:${index}`} style={{ marginBottom: 4 }}>
+                                    <UnlockLine unlock={unlock} />
+                                </div>
                             ))}
                         </td>
 
                         <td>
-                            {(tech.descriptionLines ?? []).length ? (
-                                <div style={{ display: "grid", gap: 2 }}>
-                                    {tech.descriptionLines!.map((line, index) => (
-                                        <div key={index}>{renderDescriptionLine(line)}</div>
-                                    ))}
-                                </div>
-                            ) : (
-                                "--"
-                            )}
+                            {(tech.descriptionLines ?? []).map((line, index) => (
+                                <div key={index}>{renderDescriptionLine(line)}</div>
+                            ))}
                         </td>
                     </tr>
                 ))}

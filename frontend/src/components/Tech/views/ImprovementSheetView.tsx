@@ -8,7 +8,11 @@ interface ImprovementSheetViewProps {
 
 const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvements }) => {
     if (!improvements?.length) {
-        return <div className="empty-sheet-message">No improvements unlocked by current tech selections.</div>;
+        return (
+            <div className="empty-sheet-message">
+                No improvements unlocked by current tech selections.
+            </div>
+        );
     }
 
     return (
@@ -27,23 +31,17 @@ const ImprovementSheetView: React.FC<ImprovementSheetViewProps> = ({ improvement
                 <tbody>
                 {improvements.map((improvement) => (
                     <tr key={improvement.improvementKey ?? improvement.displayName}>
-                        <td>{improvement.displayName ?? "--"}</td>
-                        <td>{improvement.era ?? "--"}</td>
+                        <td>{improvement.displayName ?? ""}</td>
+                        <td>{improvement.era ?? ""}</td>
 
                         <td>
-                            {(improvement.descriptionLines ?? []).length ? (
-                                <div style={{ display: "grid", gap: 2 }}>
-                                    {improvement.descriptionLines!.map((line, index) => (
-                                        <div key={index}>{renderDescriptionLine(line)}</div>
-                                    ))}
-                                </div>
-                            ) : (
-                                "--"
-                            )}
+                            {(improvement.descriptionLines ?? []).map((line, index) => (
+                                <div key={index}>{renderDescriptionLine(line)}</div>
+                            ))}
                         </td>
 
-                        <td>{improvement.unique ?? "--"}</td>
-                        <td>{(improvement.cost ?? []).length ? improvement.cost!.join(", ") : "--"}</td>
+                        <td>{improvement.unique ?? ""}</td>
+                        <td>{(improvement.cost ?? []).join(", ")}</td>
                     </tr>
                 ))}
                 </tbody>

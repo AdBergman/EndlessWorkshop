@@ -8,7 +8,11 @@ interface DistrictSheetViewProps {
 
 const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
     if (!districts?.length) {
-        return <div className="empty-sheet-message">No districts unlocked by current tech selections.</div>;
+        return (
+            <div className="empty-sheet-message">
+                No districts unlocked by current tech selections.
+            </div>
+        );
     }
 
     return (
@@ -27,18 +31,12 @@ const DistrictSheetView: React.FC<DistrictSheetViewProps> = ({ districts }) => {
                     .filter((district) => !!district?.displayName)
                     .map((district) => (
                         <tr key={district.districtKey ?? district.displayName}>
-                            <td>{district.displayName ?? "--"}</td>
-                            <td>{district.era ?? "--"}</td>
+                            <td>{district.displayName ?? ""}</td>
+                            <td>{district.era ?? ""}</td>
                             <td>
-                                {(district.descriptionLines ?? []).length ? (
-                                    <div style={{ display: "grid", gap: 2 }}>
-                                        {district.descriptionLines!.map((line, index) => (
-                                            <div key={index}>{renderDescriptionLine(line)}</div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    "--"
-                                )}
+                                {(district.descriptionLines ?? []).map((line, index) => (
+                                    <div key={index}>{renderDescriptionLine(line)}</div>
+                                ))}
                             </td>
                         </tr>
                     ))}
