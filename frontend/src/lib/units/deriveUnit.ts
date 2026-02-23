@@ -17,19 +17,19 @@ export type DerivedUnit = {
     displayName: string;
     isMinor: boolean;
 
-    tierIndex0: number | null;
-    tierLabel: string | null; // "Tier II"
-    classKey: string | null;  // "UnitClass_Cavalry"
-    classLabel: string | null; // "Cavalry"
-    typeLine: string | null;  // "Cavalry Tier II" (or whatever ordering you want)
+    tierIndex0: number | null;      // raw exporter tier (0-based)
+    tierLabel: string | null;       // UI tier label (Necro special-case)
+    classKey: string | null;
+    classLabel: string | null;
+    typeLine: string | null;
 
-    majorEnumFaction: Faction | null; // only if major + recognized
+    majorEnumFaction: Faction | null;
 
     imageUrl: string | null;
 
     stats: UnitStats;
 
-    abilities: string[]; // cleaned, deterministic
+    abilities: string[];
 };
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
@@ -55,11 +55,11 @@ function mapMajorFactionStringToEnum(faction: string | null): Faction | null {
 
     const norm = faction.trim().toLowerCase();
 
-    if (norm === "kin" || norm.includes("kin")) return (("KIN" as unknown) as Faction);
-    if (norm === "aspect" || norm === "aspects") return (("ASPECTS" as unknown) as Faction);
-    if (norm === "lords" || norm.includes("lord")) return (("LORDS" as unknown) as Faction);
-    if (norm === "necrophage" || norm === "necrophages") return (("NECROPHAGES" as unknown) as Faction);
-    if (norm === "tahuk" || norm === "tahuks" || norm === "mukag") return (("TAHUK" as unknown) as Faction);
+    if (norm === "kin" || norm.includes("kin")) return ("KIN" as unknown) as Faction;
+    if (norm === "aspect" || norm === "aspects") return ("ASPECTS" as unknown) as Faction;
+    if (norm === "lords" || norm.includes("lord")) return ("LORDS" as unknown) as Faction;
+    if (norm === "necrophage" || norm === "necrophages") return ("NECROPHAGES" as unknown) as Faction;
+    if (norm === "tahuk" || norm === "tahuks" || norm === "mukag") return ("TAHUK" as unknown) as Faction;
 
     return null;
 }
@@ -94,6 +94,33 @@ function buildTypeLine(tierLabel: string | null, classLabel: string | null): str
     return classLabel ?? tierLabel ?? null;
 }
 
+/**
+ * Necrophage exception:
+ * - Larvae is the true “Tier 0”
+ * - Its evolutions should start at Tier I (not Tier II)
+ *
+ * Exported evolutionTierIndex is still 0-based, but historically your UI displays tierIndex+1.
+ * For Necro, we display tierIndex (so 0 stays 0, 1 becomes I, 2 becomes II, etc).
+ */
+function isNecrophageMajor(unit: Unit): boolean {
+    if (unit.isMajorFaction !== true) return false;
+    const f = (unit.faction ?? "").trim().toLowerCase();
+    return f === "necrophage" || f === "necrophages";
+}
+
+function getDisplayTierLabel(unit: Unit, tierIndex0: number | null): string | null {
+    if (tierIndex0 == null) return null;
+
+    if (isNecrophageMajor(unit)) {
+        // Tier 0 special-case (Larvae)
+        if (tierIndex0 === 0) return "Tier 0";
+        return `Tier ${toRoman(tierIndex0)}`; // 1 -> I, 2 -> II, ...
+    }
+
+    // Default behavior: 0-based -> Tier I
+    return `Tier ${toRoman(tierIndex0 + 1)}`;
+}
+
 export function deriveUnit(unit: Unit): DerivedUnit {
     const lines = Array.isArray(unit.descriptionLines) ? unit.descriptionLines : [];
 
@@ -102,7 +129,7 @@ export function deriveUnit(unit: Unit): DerivedUnit {
     const displayName = unit.displayName?.trim() || unit.unitKey;
 
     const tierIndex0 = unit.evolutionTierIndex ?? null;
-    const tierLabel = tierIndex0 != null ? `Tier ${toRoman(tierIndex0 + 1)}` : null;
+    const tierLabel = getDisplayTierLabel(unit, tierIndex0);
 
     const classKey = unit.unitClassKey?.trim() || null;
     const classLabel = classKey ? titleCaseWords(stripUnitClassPrefix(classKey)) : null;
