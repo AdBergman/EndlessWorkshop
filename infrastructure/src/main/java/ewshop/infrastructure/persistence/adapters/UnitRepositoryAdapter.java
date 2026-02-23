@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 @Repository
 public class UnitRepositoryAdapter implements UnitRepository {
 
+    private static final String PROTOTYPE_UNIT_CLASS_KEY = "UnitClass_Prototype_LandUnit";
+
     private final UnitJpaRepository unitJpaRepository;
     private final UnitMapper mapper;
 
@@ -39,7 +41,22 @@ public class UnitRepositoryAdapter implements UnitRepository {
             return result;
         }
 
-        List<String> keepKeys = snapshots.stream()
+        // Filter out blocked/invalid rows BEFORE computing keepKeys.
+        // - faction == null => blocked by enum allow-list (Placeholder, Mangrove, etc.)
+        // - prototype class => internal template, never persist
+        List<UnitImportSnapshot> allowed = snapshots.stream()
+                .filter(Objects::nonNull)
+                .filter(s -> s.faction() != null)
+                .filter(s -> !isPrototype(s.unitClassKey()))
+                .toList();
+
+        if (allowed.isEmpty()) {
+            // If the input is all blocked rows, treat as "import nothing" and don't delete everything.
+            // Safer default: do not mutate DB at all.
+            return result;
+        }
+
+        List<String> keepKeys = allowed.stream()
                 .map(UnitImportSnapshot::unitKey)
                 .distinct()
                 .toList();
@@ -49,7 +66,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
 
         List<UnitEntity> toSave = new ArrayList<>();
 
-        for (UnitImportSnapshot snapshot : snapshots) {
+        for (UnitImportSnapshot snapshot : allowed) {
             UnitEntity entity = existingByKey.get(snapshot.unitKey());
             boolean isInsert = (entity == null);
 
@@ -75,6 +92,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
             unitJpaRepository.saveAll(toSave);
         }
 
+        // Delete only units not present in THIS allowed import set.
         List<UnitEntity> obsolete = unitJpaRepository.findAllByUnitKeyNotIn(keepKeys);
         if (!obsolete.isEmpty()) {
             unitJpaRepository.deleteAll(obsolete);
@@ -82,6 +100,10 @@ public class UnitRepositoryAdapter implements UnitRepository {
         }
 
         return result;
+    }
+
+    private static boolean isPrototype(String unitClassKey) {
+        return unitClassKey != null && unitClassKey.trim().equals(PROTOTYPE_UNIT_CLASS_KEY);
     }
 
     private static UpsertOutcome applySnapshot(UnitEntity entity, UnitImportSnapshot update, boolean isInsert) {

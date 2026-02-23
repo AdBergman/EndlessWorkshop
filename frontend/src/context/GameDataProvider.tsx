@@ -1,8 +1,7 @@
-import React, { useState, useEffect, ReactNode, useCallback } from "react";
+import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { District, Improvement, Tech, Unit, Faction, FactionInfo } from "@/types/dataTypes";
+import { District, Faction, FactionInfo, Improvement, Tech, Unit } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
-import { identifyFaction } from "@/utils/factionIdentity";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -17,7 +16,10 @@ const normalizeTechs = (techData: Tech[]) =>
         unlocks: t.unlocks ?? [],
     }));
 
-const toKeyedMap = <T,>(items: T[], getKey: (x: T) => string | null | undefined): Map<string, T> => {
+const toKeyedMap = <T,>(
+    items: T[],
+    getKey: (x: T) => string | null | undefined
+): Map<string, T> => {
     const m = new Map<string, T>();
     for (const item of items) {
         const k = (getKey(item) ?? "").trim();
@@ -27,14 +29,22 @@ const toKeyedMap = <T,>(items: T[], getKey: (x: T) => string | null | undefined)
     return m;
 };
 
+const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
+    isMajor: true,
+    enumFaction: faction,
+    uiLabel: String(faction).toLowerCase(),
+    minorName: null,
+});
+
 const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [districts, setDistricts] = useState<Map<string, District>>(new Map());
     const [improvements, setImprovements] = useState<Map<string, Improvement>>(new Map());
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
     const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
-    const initialFaction = identifyFaction({ faction: Faction.KIN, minorFaction: null });
-    const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(initialFaction);
+    const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
+        toFactionInfoFromEnum(Faction.KIN)
+    );
     const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
 
     const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
@@ -117,12 +127,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
 
-                const factionEnumLookup = Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
+                const factionEnumLookup =
+                    Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
 
-                const loadedFactionInfo = identifyFaction({
-                    faction: factionEnumLookup,
-                    minorFaction: null,
-                });
+                const loadedFactionInfo = toFactionInfoFromEnum(factionEnumLookup);
 
                 setSelectedFaction(loadedFactionInfo);
                 setSelectedTechs(res.techIds);
@@ -152,10 +160,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const getSavedBuild = async (uuid: string): Promise<SavedTechBuild> => {
         const saved = await apiClient.getSavedBuild(uuid);
 
-        const loadedFactionInfo = identifyFaction({
-            faction: Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction],
-            minorFaction: null,
-        });
+        const factionEnum =
+            Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction];
+
+        const loadedFactionInfo = toFactionInfoFromEnum(factionEnum);
 
         setSelectedFaction(loadedFactionInfo);
         setSelectedTechs(saved.techIds);

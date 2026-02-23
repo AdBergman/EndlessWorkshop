@@ -1,38 +1,64 @@
 import { Unit } from "@/types/dataTypes";
 
-export function buildEvolutionLayers(root: Unit, unitsMap: Map<string, Unit>): Unit[][] {
-    const layers: Map<number, Unit[]> = new Map();
-    const depth: Map<string, number> = new Map();
-    const queue: string[] = [];
+export function buildEvolutionLayers(root: Unit, unitsByKey: Map<string, Unit>): Unit[][] {
+    const layers = new Map<number, Unit[]>();
+    const depthByKey = new Map<string, number>();
 
-    depth.set(root.name, 0);
-    queue.push(root.name);
+    const rootKey = root.unitKey;
+    depthByKey.set(rootKey, 0);
 
-    while (queue.length) {
-        const currentName = queue.shift()!;
-        const currentUnit = unitsMap.get(currentName);
-        const currentDepth = depth.get(currentName)!;
+    const queue: string[] = [rootKey];
+    let qi = 0;
 
+    const MAX_VISITS = 5000;
+    let visits = 0;
+
+    while (qi < queue.length) {
+        if (++visits > MAX_VISITS) break;
+
+        const currentKey = queue[qi++];
+        const currentDepth = depthByKey.get(currentKey);
+        if (currentDepth == null) continue;
+
+        const currentUnit = currentKey === rootKey ? root : unitsByKey.get(currentKey);
         if (!currentUnit) continue;
 
-        for (const childName of currentUnit.upgradesTo ?? []) {
-            if (!depth.has(childName)) {
-                depth.set(childName, currentDepth + 1);
-                queue.push(childName);
-            }
+        const childrenKeys = Array.isArray(currentUnit.nextEvolutionUnitKeys)
+            ? currentUnit.nextEvolutionUnitKeys
+            : [];
+
+        for (const childKey of childrenKeys) {
+            if (!childKey) continue;
+            if (depthByKey.has(childKey)) continue;
+
+            depthByKey.set(childKey, currentDepth + 1);
+            queue.push(childKey);
         }
     }
 
-    // Group by depth
-    for (const [name, d] of depth.entries()) {
-        if (d === 0) continue; // skip root in grouping
-        const u = unitsMap.get(name);
+    for (const [unitKey, d] of depthByKey.entries()) {
+        if (d === 0) continue;
+
+        const u = unitsByKey.get(unitKey);
         if (!u) continue;
-        if (!layers.has(d)) layers.set(d, []);
-        layers.get(d)!.push(u);
+
+        const bucket = layers.get(d);
+        if (bucket) bucket.push(u);
+        else layers.set(d, [u]);
     }
+
+    const sortTier = (a: Unit, b: Unit) => {
+        const ta = a.evolutionTierIndex ?? Number.MAX_SAFE_INTEGER;
+        const tb = b.evolutionTierIndex ?? Number.MAX_SAFE_INTEGER;
+        if (ta !== tb) return ta - tb;
+
+        const na = (a.displayName ?? "").localeCompare(b.displayName ?? "");
+        if (na !== 0) return na;
+
+        return a.unitKey.localeCompare(b.unitKey);
+    };
 
     return [...layers.entries()]
         .sort((a, b) => a[0] - b[0])
-        .map(([, units]) => units);
+        .map(([, units]) => units.sort(sortTier));
 }

@@ -35,7 +35,7 @@ public class SavedTechBuildMapper {
         return SavedTechBuild.builder()
                 .uuid(UUID.randomUUID()) // always generate new UUID
                 .name(request.name() != null ? request.name() : "")
-                .faction(MajorFaction.fromString(request.selectedFaction()))
+                .faction(MajorFaction.fromDisplayName(request.selectedFaction()))
                 .techIds(techIds)
                 .build();
     }

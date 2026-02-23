@@ -1,20 +1,22 @@
 import type { Faction, FactionInfo } from "@/types/dataTypes";
 
-export function identifyFaction(unit: {
+/**
+ * Legacy helper used ONLY by SavedTechBuild / build-order flows.
+ */
+export function identifyFactionLegacy(input: {
     faction: Faction | null;
     minorFaction: string | null;
 }): FactionInfo {
-    if (unit.faction) {
+    if (input.faction) {
         return {
             isMajor: true,
-            enumFaction: unit.faction,
-            uiLabel: unit.faction.toLowerCase(),
+            enumFaction: input.faction,
+            uiLabel: String(input.faction).toLowerCase(),
             minorName: null,
         };
     }
 
-    const minor = unit.minorFaction ?? "";
-
+    const minor = input.minorFaction ?? "";
     return {
         isMajor: false,
         enumFaction: null,

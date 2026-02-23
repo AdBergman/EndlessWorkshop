@@ -2,34 +2,47 @@ package ewshop.domain.model.enums;
 
 public enum MinorFaction {
 
-    AMETRINE,
-    BLACKHAMMER,
-    DAUGHTER_OF_BOR,
-    DUNGEON,
-    FOUNDLING,
-    GOROG,
-    GREEN_SCION,
-    GREEN_SCIONS,
-    HOY_AND_LADHRAN,
-    HYDRACORN,
-    NOQUENSII,
-    OCHLING,
-    ONEIROI,
-    SOLLUSK,
-    THE_CONSORTIUM,
-    UNSEEING_SEER,
-    XAVIUS;
+    AMETRINE("Ametrine"),
+    BLACKHAMMERS("Blackhammers"),
+    CONSORTIUM("Consortium"),
+    DAUGHTERS_OF_BOR("Daughters of Bor"),
+    DUNGEON("Dungeon"),
+    FOUNDLINGS("Foundlings"),
+    GOROG("Gorog"),
+    GREEN_SCIONS("Green Scions"),
+    HOY_AND_LADHRAN("Hoy and Ladhran"),
+    HYDRACORN("Hydracorn"),
+    NOQUENSII("Noquensii"),
+    OCHLING("Ochling"),
+    ONEIROI("Oneiroi"),
+    SOLLUSK("Sollusk"),
+    UNSEEING_SEERS("Unseeing Seers"),
+    XAVIUS("Xavius");
 
+    private final String displayName;
+
+    MinorFaction(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /** Canonical in-game name (what you want stored/displayed). */
     public String getDisplayName() {
-        String lower = name().toLowerCase().replace('_', ' ');
-        return Character.toUpperCase(lower.charAt(0)) + lower.substring(1);
+        return displayName;
     }
 
-    public static MinorFaction fromString(String value) {
-        if (value == null) return null;
-        return MinorFaction.valueOf(value.trim().toUpperCase());
+    /** Canonical asset slug (matches your PNG filenames). */
+    public String getSlug() {
+        return displayName
+                .toLowerCase()
+                .trim()
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-z0-9_]", "");
     }
 
+    /**
+     * Maps raw engine/import strings to canonical enum.
+     * Accepts both singular and plural variants where necessary.
+     */
     public static MinorFaction parseImportedMinorFaction(String raw) {
         if (raw == null || raw.isBlank()) return null;
 
@@ -37,21 +50,20 @@ public enum MinorFaction {
 
         return switch (normalized) {
             case "Ametrine" -> AMETRINE;
-            case "Blackhammer" -> BLACKHAMMER;
-            case "DaughterOfBor" -> DAUGHTER_OF_BOR;
+            case "Blackhammer", "Blackhammers" -> BLACKHAMMERS;
+            case "Consortium", "TheConsortium" -> CONSORTIUM;
+            case "DaughterOfBor", "DaughtersOfBor" -> DAUGHTERS_OF_BOR;
             case "Dungeon" -> DUNGEON;
-            case "Foundling" -> FOUNDLING;
-            case "Gorog" -> GOROG;
-            case "GreenScion" -> GREEN_SCION;
-            case "GreenScions" -> GREEN_SCIONS;
+            case "Foundling", "Foundlings" -> FOUNDLINGS;
+            case "Gorog", "Gorogs" -> GOROG;
+            case "GreenScion", "GreenScions" -> GREEN_SCIONS;
             case "HoyAndLadhran" -> HOY_AND_LADHRAN;
-            case "Hydracorn" -> HYDRACORN;
+            case "Hydracorn", "Hydracorns" -> HYDRACORN;
             case "Noquensii" -> NOQUENSII;
-            case "Ochling" -> OCHLING; // handles trimmed version automatically
+            case "Ochling", "Ochlings" -> OCHLING;
             case "Oneiroi" -> ONEIROI;
             case "Sollusk" -> SOLLUSK;
-            case "TheConsortium" -> THE_CONSORTIUM;
-            case "UnseeingSeer" -> UNSEEING_SEER;
+            case "UnseeingSeer", "UnseeingSeers" -> UNSEEING_SEERS;
             case "Xavius" -> XAVIUS;
 
             // explicitly blocked

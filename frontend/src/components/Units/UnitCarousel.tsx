@@ -10,13 +10,15 @@ interface UnitCarouselProps {
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const UnitCarousel: React.FC<UnitCarouselProps> = ({
-                                                              units,
-                                                              selectedIndex,
-                                                              setSelectedIndex,
-                                                          }) => {
+export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units, selectedIndex, setSelectedIndex }) => {
     const total = units.length;
     const spacing = 260; // card(220)+gap(40)
+
+    if (total === 0) {
+        return <div className="unitCarouselContainer" />;
+    }
+
+    const safeIndex = ((selectedIndex % total) + total) % total;
 
     const handlePrev = () => setSelectedIndex((p) => (p - 1 + total) % total);
     const handleNext = () => setSelectedIndex((p) => (p + 1) % total);
@@ -30,7 +32,7 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({
 
                 <motion.div className="carouselTrack">
                     {units.map((unit, index) => {
-                        let rawOffset = index - selectedIndex;
+                        let rawOffset = index - safeIndex;
                         if (rawOffset < -Math.floor(total / 2)) rawOffset += total;
                         if (rawOffset > Math.floor(total / 2)) rawOffset -= total;
 
@@ -39,7 +41,7 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({
 
                         return (
                             <motion.div
-                                key={unit.displayName}
+                                key={unit.unitKey}
                                 className={`carouselItem ${isActive ? "active" : "dimmed"}`}
                                 initial={false}
                                 animate={{

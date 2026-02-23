@@ -13,6 +13,9 @@ export interface Unit {
     displayName: string;
     artId: string | null;
 
+    faction: string | null;
+    isMajorFaction: boolean;
+
     isHero: boolean;
     isChosen: boolean;
 

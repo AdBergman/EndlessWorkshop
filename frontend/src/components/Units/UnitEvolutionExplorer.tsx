@@ -1,217 +1,249 @@
-import React, {
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import GameDataContext from "@/context/GameDataContext";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
-import { FactionInfo, Unit } from "@/types/dataTypes";
-import { identifyFaction } from "@/utils/factionIdentity";
+import type { FactionInfo, Unit } from "@/types/dataTypes";
+import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
 import "./UnitEvolutionExplorer.css";
 
-// --- Utility helpers ---
-const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_");
+const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_").trim();
+const normFaction = (s: string | null | undefined) => normalize(String(s ?? ""));
 
 const toFactionInfo = (f: string): FactionInfo => ({
     isMajor: true,
-    enumFaction: f.toUpperCase() as any,
+    enumFaction: f.toUpperCase() as any, // legacy; toolbar/context still uses this
     minorName: null,
     uiLabel: f.toLowerCase(),
 });
 
+function doesUnitMatchSelectedMajorFaction(unit: Unit, selectedFaction: FactionInfo): boolean {
+    if (unit.isMajorFaction !== true) return false;
+    if (!selectedFaction?.isMajor) return false;
+
+    const uf = normFaction(unit.faction);
+    const label = normFaction(selectedFaction.uiLabel);
+    const enumKey = normFaction(selectedFaction.enumFaction as any);
+
+    const ufSingular = uf.endsWith("s") ? uf.slice(0, -1) : uf;
+    const labelSingular = label.endsWith("s") ? label.slice(0, -1) : label;
+    const enumSingular = enumKey.endsWith("s") ? enumKey.slice(0, -1) : enumKey;
+
+    return uf === label || uf === enumKey || ufSingular === labelSingular || ufSingular === enumSingular;
+}
+
+function isHiddenInUi(u: Unit): boolean {
+    const f = (u.faction ?? "").trim();
+    if (f === "Tormented") return true; // keep in DB, hide in /units for now
+    if (u.isMajorFaction === false && f === "Dungeon") return true; // hide minor "Dungeon" for now
+    return false;
+}
+
+/**
+ * Priority rules (user action wins):
+ * 1) External navigation (paste URL, enter, back/forward, link click) hydrates state from URL.
+ * 2) Toolbar selection updates view and URL, but MUST NOT be overridden by URL hydration.
+ * 3) Minor toggle + carousel updates view and URL, but MUST NOT re-trigger hydration loops.
+ */
 export const UnitEvolutionExplorer: React.FC = () => {
     const gameData = useContext(GameDataContext);
     const [params, setParams] = useSearchParams();
+
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [showMinorUnits, setShowMinorUnits] = useState(false);
 
-    const hydratedFromUrl = useRef(false);
+    // We only want to hydrate from URL on *external* URL changes (paste/back/forward/link).
+    // When we write params ourselves (toolbar/carousel/toggle), we record it and ignore that change for hydration.
+    const lastParamsWritten = useRef<string | null>(null);
+    const hydratedOnceForThisNav = useRef(false);
 
-    // Reset carousel when faction or toggle changes
+    // If the URL changes to something we did NOT write, consider it external navigation -> rehydrate.
     useEffect(() => {
-        // When major faction changes, reset to majors view
+        const cur = params.toString();
+        if (lastParamsWritten.current && cur === lastParamsWritten.current) return;
+
+        // External navigation detected (or first mount)
+        hydratedOnceForThisNav.current = false;
+    }, [params]);
+
+    // Toolbar change should be a user action that wins.
+    // Reset local UI state when faction changes via toolbar.
+    useEffect(() => {
         setShowMinorUnits(false);
         setSelectedIndex(0);
+        // Do NOT mark "hydrated"; we still allow external URL nav to override.
+        // This effect is only reacting to toolbar state.
     }, [gameData?.selectedFaction]);
 
-    // Filter Tier 1 roots based on major/minor toggle
-    const tierOneUnits = useMemo(() => {
+    const allVisibleUnits = useMemo(() => {
         if (!gameData || gameData.units.size === 0) return [];
+        return Array.from(gameData.units.values()).filter((u) => !isHiddenInUi(u));
+    }, [gameData]);
+
+    // Build the *faction-scoped* pool of units (not just roots),
+    // then apply Necro carousel model (pinned larvae + tier-1 roots).
+    const { pinned: pinnedUnit, roots: rootUnits } = useMemo(() => {
+        if (!gameData || allVisibleUnits.length === 0) {
+            return { pinned: null as Unit | null, roots: [] as Unit[] };
+        }
+
         const { selectedFaction } = gameData;
 
-        return Array.from(gameData.units.values()).filter((u) => {
-            if (u.tier !== 1) return false;
-            const unitFaction = identifyFaction(u);
+        if (showMinorUnits) {
+            const minorUnits = allVisibleUnits.filter((u) => u.isMajorFaction === false);
+            return getCarouselModelForFaction(minorUnits, true);
+        }
 
-            if (showMinorUnits) {
-                // All minor faction Tier 1 units
-                return !unitFaction.isMajor;
-            }
+        if (!selectedFaction?.isMajor) return { pinned: null, roots: [] };
 
-            // Major faction Tier 1 units for the selected major faction
-            return (
-                selectedFaction.isMajor &&
-                unitFaction.isMajor &&
-                unitFaction.enumFaction === selectedFaction.enumFaction
-            );
-        });
-    }, [gameData?.units, gameData?.selectedFaction, showMinorUnits]);
+        const factionUnits = allVisibleUnits.filter((u) => doesUnitMatchSelectedMajorFaction(u, selectedFaction));
+        return getCarouselModelForFaction(factionUnits, false);
+    }, [gameData, allVisibleUnits, showMinorUnits]);
 
-    // === URL → State (hydrate once after data ready) ===
+    const carouselUnits = useMemo(() => {
+        return pinnedUnit ? [pinnedUnit, ...rootUnits] : rootUnits;
+    }, [pinnedUnit, rootUnits]);
+
+    // If Necro has a pinned larvae, default selection to first real “root” (index 1),
+    // but only when NOT currently hydrating from an external URL navigation.
     useEffect(() => {
-        if (hydratedFromUrl.current) return;
+        if (!pinnedUnit) return;
+        if (carouselUnits.length <= 1) return;
+
+        // If external URL navigation is about to select something, don't fight it.
+        if (!hydratedOnceForThisNav.current) return;
+
+        setSelectedIndex((idx) => (idx === 0 ? 1 : idx));
+    }, [pinnedUnit, carouselUnits.length]);
+
+    // === URL → State (hydrate once per external navigation) ===
+    useEffect(() => {
         if (!gameData) return;
 
-        const factionParam = params.get("faction");
-        const unitParam = params.get("unit");
-        const originParam = params.get("origin"); // minor faction origin (optional)
+        // Ignore URL changes that we wrote ourselves (carousel/toggle/toolbar sync)
+        const cur = params.toString();
+        if (lastParamsWritten.current && cur === lastParamsWritten.current) return;
 
-        if (!factionParam || !unitParam) {
-            hydratedFromUrl.current = true;
+        if (hydratedOnceForThisNav.current) return;
+
+        const factionParam = params.get("faction");
+        const unitKeyParam = params.get("unitKey");
+        const legacyUnitParam = params.get("unit"); // normalized displayName
+        const originParam = params.get("origin"); // optional minor origin (legacy)
+        const minorParam = params.get("minor"); // optional (explicit)
+
+        // If URL doesn't specify a target unit, we consider hydration done (let UI defaults win)
+        if (!factionParam || (!unitKeyParam && !legacyUnitParam)) {
+            hydratedOnceForThisNav.current = true;
             return;
         }
 
-        // Ensure selectedFaction matches the URL faction
+        // 1) Faction from URL should win over toolbar if it's a real navigation event.
         const fi = toFactionInfo(factionParam);
         const factionMatches =
-            gameData.selectedFaction.isMajor &&
-            gameData.selectedFaction.enumFaction === fi.enumFaction;
+            gameData.selectedFaction?.isMajor && gameData.selectedFaction.enumFaction === fi.enumFaction;
 
         if (!factionMatches) {
             gameData.setSelectedFaction(fi);
-            return; // wait for selectedFaction to update
-        }
-
-        // If origin is present, we want the minor units view
-        const wantsMinor = !!originParam;
-        if (wantsMinor && !showMinorUnits) {
-            setShowMinorUnits(true);
-            return; // wait for tierOneUnits to recompute with minors
-        }
-        if (!wantsMinor && showMinorUnits) {
-            setShowMinorUnits(false);
+            // Wait for toolbar/context to update; we'll hydrate index after carouselUnits recompute.
             return;
         }
 
-        // At this point:
-        // - selectedFaction matches URL
-        // - showMinorUnits matches origin presence
-        // - tierOneUnits is computed accordingly
-        if (tierOneUnits.length === 0) return;
-
-        const normalizedUnit = normalize(unitParam);
-        const normalizedOrigin = originParam ? normalize(originParam) : null;
-
-        let idx = tierOneUnits.findIndex((u) => {
-            if (normalize(u.name) !== normalizedUnit) return false;
-            if (!normalizedOrigin) return true; // major units path
-
-            // For minor: also check that the unit's minor faction matches origin
-            const uf = identifyFaction(u);
-            const label =
-                uf.minorName ||
-                uf.uiLabel ||
-                u.faction ||
-                (u as any).minorFaction ||
-                "";
-            return normalize(label) === normalizedOrigin;
-        });
-
-        if (idx < 0) {
-            // No exact match; keep default index 0
-            idx = 0;
+        // 2) Minor toggle from URL should win
+        const wantsMinor = !!originParam || minorParam === "1";
+        if (wantsMinor !== showMinorUnits) {
+            setShowMinorUnits(wantsMinor);
+            return;
         }
+
+        // 3) Select the unit inside the current carousel model
+        if (carouselUnits.length === 0) return;
+
+        let idx = -1;
+
+        if (unitKeyParam) {
+            idx = carouselUnits.findIndex((u) => u.unitKey === unitKeyParam);
+        }
+
+        if (idx < 0 && legacyUnitParam) {
+            const normalizedUnit = normalize(legacyUnitParam);
+            const normalizedOrigin = originParam ? normalize(originParam) : null;
+
+            idx = carouselUnits.findIndex((u) => {
+                if (normalize(u.displayName) !== normalizedUnit) return false;
+                if (!normalizedOrigin) return true;
+                return normalize(u.faction ?? "") === normalizedOrigin;
+            });
+        }
+
+        if (idx < 0) idx = 0;
 
         setSelectedIndex(idx);
-        hydratedFromUrl.current = true;
-    }, [params, gameData, tierOneUnits, showMinorUnits]);
+        hydratedOnceForThisNav.current = true;
+    }, [params, gameData, carouselUnits, showMinorUnits]);
 
-    // === State → URL (silent sync, keeps origin for minor units) ===
+    // === State → URL (silent sync) ===
     useEffect(() => {
         if (!gameData?.selectedFaction?.isMajor) return;
-        if (tierOneUnits.length === 0) return;
+        if (carouselUnits.length === 0) return;
 
-        const selectedUnit: Unit | null = tierOneUnits[selectedIndex] || null;
+        const selectedUnit: Unit | null = carouselUnits[selectedIndex] || null;
         if (!selectedUnit) return;
 
-        const factionKey = gameData.selectedFaction.enumFaction.toLowerCase();
-        const unitKey = normalize(selectedUnit.name);
+        const factionKey = normFaction(gameData.selectedFaction.uiLabel || (gameData.selectedFaction.enumFaction as any));
+        const unitKey = selectedUnit.unitKey;
 
-        const uf = identifyFaction(selectedUnit);
-        const isMinor = !uf.isMajor;
-        const originLabel =
-            uf.minorName ||
-            uf.uiLabel ||
-            selectedUnit.faction ||
-            (selectedUnit as any).minorFaction ||
-            "";
-        const originKey = isMinor ? normalize(originLabel) : "";
+        const isMinor = selectedUnit.isMajorFaction === false;
+        const originKey = isMinor ? normalize(selectedUnit.faction ?? "") : "";
 
-        const curFaction = params.get("faction") || "";
-        const curUnit = params.get("unit") || "";
-        const curOrigin = params.get("origin") || "";
+        const nextParams: Record<string, string> = { faction: factionKey, unitKey };
 
-        const nextFaction = factionKey;
-        const nextUnit = unitKey;
-        const nextOrigin = originKey;
-
-        // If nothing changed, don't rewrite URL
-        if (
-            curFaction === nextFaction &&
-            curUnit === nextUnit &&
-            curOrigin === nextOrigin
-        ) {
-            return;
+        if (isMinor) {
+            if (originKey) nextParams.origin = originKey;
+            nextParams.minor = "1";
         }
 
-        const nextParams: Record<string, string> = {
-            faction: nextFaction,
-            unit: nextUnit,
-        };
-        if (isMinor && originKey) {
-            nextParams.origin = originKey;
-        }
+        const nextStr = new URLSearchParams(nextParams).toString();
+        const curStr = params.toString();
 
+        if (curStr === nextStr) return;
+
+        lastParamsWritten.current = nextStr;
         setParams(nextParams, { replace: true });
-    }, [gameData?.selectedFaction, selectedIndex, tierOneUnits]);
+
+        // Once the user has interacted (toolbar/toggle/carousel), we're in "UI driven" mode
+        // until an external navigation happens (which resets hydratedOnceForThisNav in the params watcher).
+        hydratedOnceForThisNav.current = true;
+    }, [gameData?.selectedFaction, selectedIndex, carouselUnits, setParams, params]);
 
     if (!gameData || gameData.units.size === 0) {
         return <div>Loading units...</div>;
     }
 
-    const selectedUnit = tierOneUnits[selectedIndex] || null;
+    const selectedUnit = carouselUnits[selectedIndex] || null;
 
     return (
         <div className="unitEvolutionExplorer">
-            {/* --- Header Row (toggle only, aligned right) --- */}
             <div className="unitExplorerHeader">
                 <div className="minorSegmentedToggle single">
                     <span className="toggleLabel">Show Minor Factions:</span>
                     <div
                         className={`togglePill ${showMinorUnits ? "on" : "off"}`}
-                        onClick={() => setShowMinorUnits(!showMinorUnits)}
+                        onClick={() => {
+                            setShowMinorUnits((v) => !v);
+                            setSelectedIndex(0);
+                            hydratedOnceForThisNav.current = true;
+                        }}
                     >
                         <div className="toggleHighlight" />
-                        <span className={`toggleOption ${!showMinorUnits ? "active" : ""}`}>
-                            Off
-                        </span>
-                        <span className={`toggleOption ${showMinorUnits ? "active" : ""}`}>
-                            On
-                        </span>
+                        <span className={`toggleOption ${!showMinorUnits ? "active" : ""}`}>Off</span>
+                        <span className={`toggleOption ${showMinorUnits ? "active" : ""}`}>On</span>
                     </div>
                 </div>
             </div>
 
-            {/* --- Content --- */}
-            <UnitCarousel
-                units={tierOneUnits}
-                selectedIndex={selectedIndex}
-                setSelectedIndex={setSelectedIndex}
-            />
+            <UnitCarousel units={carouselUnits} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+
             <EvolutionTreeViewer rootUnit={selectedUnit} skipRoot />
         </div>
     );

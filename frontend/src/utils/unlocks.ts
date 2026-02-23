@@ -69,5 +69,5 @@ export const getUnlockedUnits = (selectedTechs: Tech[], units: Unit[]): Unlocked
             ...u,
             era: earliestEraByUnlockKey.get(normalizeKey(u.unitKey)) ?? 1,
         }))
-        .sort((a, b) => a.era - b.era || a.name.localeCompare(b.name));
+        .sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
 };

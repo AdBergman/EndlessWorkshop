@@ -24,15 +24,15 @@ public final class UnitImportMapper {
 
         boolean isMajor = Boolean.TRUE.equals(dto.isMajorFaction());
 
-        // Validate + normalize (but store String)
+        // Validate + canonicalize to in-game display name (stored as String)
         String rawFaction = trimToNull(dto.faction());
-        String normalizedFaction = normalizeAndValidateFaction(rawFaction, isMajor);
+        String resolvedFaction = resolveAndValidateFaction(rawFaction, isMajor);
 
         return UnitImportSnapshot.builder()
                 .unitKey(req(dto.unitKey(), "unitKey"))
                 .displayName(req(dto.displayName(), "displayName"))
 
-                .faction(normalizedFaction)
+                .faction(resolvedFaction)
                 .isMajorFaction(isMajor)
 
                 .isHero(Boolean.TRUE.equals(dto.isHero()))
@@ -51,20 +51,31 @@ public final class UnitImportMapper {
                 .build();
     }
 
-    private static String normalizeAndValidateFaction(String rawFaction, boolean isMajor) {
+    /**
+     * Resolves faction into the canonical in-game display name while enforcing the allow-list.
+     *
+     * Major examples:
+     *  - "Mukag" -> "Tahuk"
+     *  - "KinOfSheredyn" -> "Kin"
+     *
+     * Minor examples:
+     *  - "DaughterOfBor" -> "Daughters of Bor"
+     *  - "Blackhammer" -> "Blackhammers"
+     *
+     * Returns null for explicitly blocked values (e.g. Placeholder / MangroveOfHarmony).
+     */
+    private static String resolveAndValidateFaction(String rawFaction, boolean isMajor) {
         if (rawFaction == null) return null;
 
-        // We keep the stored value as the "game string" (trimmed), but only if it is allowed.
-        // This avoids enum creep leaking into DB/domain while still enforcing a whitelist.
         if (isMajor) {
             MajorFaction parsed = MajorFaction.parseImportedMajorFaction(rawFaction);
-            if (parsed == null) return null; // e.g. Placeholder explicitly blocked
-            return rawFaction.trim();
+            if (parsed == null) return null;
+            return parsed.getDisplayName();
         }
 
         MinorFaction parsed = MinorFaction.parseImportedMinorFaction(rawFaction);
-        if (parsed == null) return null; // if you ever choose to block/ignore one
-        return rawFaction.trim();
+        if (parsed == null) return null;
+        return parsed.getDisplayName();
     }
 
     private static String req(String v, String field) {
