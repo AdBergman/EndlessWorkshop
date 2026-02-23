@@ -8,10 +8,6 @@ interface UnitSheetViewProps {
     units: UnlockedUnit[];
 }
 
-function show(n: number | null): React.ReactNode {
-    return n == null ? "—" : n;
-}
-
 const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
     if (!units?.length) {
         return (
@@ -34,7 +30,6 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                     <th>Defense</th>
                     <th>Damage</th>
                     <th>Move</th>
-                    <th>Vision</th>
                     <th>Upkeep</th>
                     <th>Skills</th>
                 </tr>
@@ -48,17 +43,14 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                     return (
                         <tr key={u.unitKey}>
                             <td>{d.displayName}</td>
-                            <td>{u.era ?? "—"}</td>
-                            <td>{d.tierLabel ?? "—"}</td>
-                            <td>{d.classLabel ?? "—"}</td>
-
-                            <td>{show(d.stats.health)}</td>
+                            <td>{u.era}</td>
+                            <td>{d.tierLabel}</td>
+                            <td>{d.classLabel}</td>
+                            <td>{d.stats.health}</td>
                             <td>{def}</td>
-                            <td>{show(d.stats.damage)}</td>
-                            <td>{show(d.stats.movement)}</td>
-                            <td>{show(d.stats.visionRange)}</td>
-                            <td>{show(d.stats.upkeep)}</td>
-
+                            <td>{d.stats.damage}</td>
+                            <td>{d.stats.movement}</td>
+                            <td>{d.stats.upkeep}</td>
                             <td style={{ whiteSpace: "pre-line" }}>—</td>
                         </tr>
                     );
