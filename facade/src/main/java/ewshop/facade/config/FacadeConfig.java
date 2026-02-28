@@ -69,4 +69,17 @@ public class FacadeConfig {
     ) {
         return new UnitImportAdminFacadeImpl(unitImportService, unitService);
     }
+
+    @Bean
+    public CodexFacade codexFacade(CodexService codexService) {
+        return new CodexFacadeImpl(codexService);
+    }
+
+    @Bean
+    public CodexImportAdminFacade codexImportAdminFacade(
+            CodexImportService codexImportService,
+            CodexService codexService
+    ) {
+        return new CodexImportAdminFacadeImpl(codexImportService, codexService);
+    }
 }

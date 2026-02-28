@@ -5,10 +5,7 @@ import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
-import ewshop.facade.interfaces.DistrictImportAdminFacade;
-import ewshop.facade.interfaces.ImprovementImportAdminFacade;
-import ewshop.facade.interfaces.TechImportAdminFacade;
-import ewshop.facade.interfaces.UnitImportAdminFacade;
+import ewshop.facade.interfaces.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,6 +44,9 @@ class ImportAdminControllerTest {
 
     @MockBean
     private UnitImportAdminFacade unitImportAdminFacade;
+
+    @MockBean
+    private CodexImportAdminFacade codexImportAdminFacade;
 
     @Test
     void importTechs_returnsOk_andCallsFacade_whenPayloadHasTechs() throws Exception {

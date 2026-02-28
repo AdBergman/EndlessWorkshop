@@ -1,14 +1,16 @@
 package ewshop.api.controller;
 
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
+import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
-import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
-import ewshop.facade.interfaces.UnitImportAdminFacade;
+import ewshop.facade.interfaces.CodexImportAdminFacade;
+import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
-import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,17 +22,20 @@ public class ImportAdminController {
     private final DistrictImportAdminFacade districtImportAdminFacade;
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
+    private final CodexImportAdminFacade codexImportAdminFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
-            UnitImportAdminFacade unitImportAdminFacade
+            UnitImportAdminFacade unitImportAdminFacade,
+            CodexImportAdminFacade codexImportAdminFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
+        this.codexImportAdminFacade = codexImportAdminFacade;
     }
 
     @GetMapping("/check-token")
@@ -69,5 +74,13 @@ public class ImportAdminController {
             throw new IllegalArgumentException("Import file is missing units[]");
         }
         return unitImportAdminFacade.importUnits(dto);
+    }
+
+    @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importCodex(@RequestBody CodexImportBatchDto dto) {
+        if (dto.entries() == null || dto.entries().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing codexEntries[]");
+        }
+        return codexImportAdminFacade.importCodex(dto);
     }
 }
