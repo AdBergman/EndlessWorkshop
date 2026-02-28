@@ -1,6 +1,7 @@
 import React from "react";
 import type { Unit } from "@/types/dataTypes";
 import { deriveUnit } from "@/lib/units/deriveUnit";
+import { useCodex } from "@/hooks/useCodex";
 
 type UnlockedUnit = Unit & { era?: number };
 
@@ -9,6 +10,8 @@ interface UnitSheetViewProps {
 }
 
 const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
+    const { getVisibleEntry, getTooltipLines } = useCodex();
+
     if (!units?.length) {
         return (
             <div className="empty-sheet-message">
@@ -40,6 +43,16 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                     const d = deriveUnit(u);
                     const def = d.stats.defense ?? 0;
 
+                    const abilityKeys = u.abilityKeys ?? [];
+
+                    // Filter: only show abilities that have a Codex entry with a displayName
+                    const visibleAbilities = abilityKeys
+                        .map((abilityKey) => ({
+                            abilityKey,
+                            codex: getVisibleEntry("abilities", abilityKey),
+                        }))
+                        .filter((x) => !!x.codex);
+
                     return (
                         <tr key={u.unitKey}>
                             <td>{d.displayName}</td>
@@ -51,7 +64,39 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                             <td>{d.stats.damage}</td>
                             <td>{d.stats.movement}</td>
                             <td>{d.stats.upkeep}</td>
-                            <td style={{ whiteSpace: "pre-line" }}>—</td>
+
+                            <td style={{ whiteSpace: "pre-line" }}>
+                                {visibleAbilities.length === 0 ? (
+                                    "—"
+                                ) : (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 2,
+                                        }}
+                                    >
+                                        {visibleAbilities.map(({ abilityKey, codex }) => {
+                                            // codex is guaranteed here
+                                            const label = codex!.displayName.trim();
+                                            const tooltip = getTooltipLines("abilities", abilityKey).join("\n");
+
+                                            return (
+                                                <span
+                                                    key={abilityKey}
+                                                    title={tooltip || undefined}
+                                                    style={{
+                                                        textDecoration: tooltip ? "underline" : "none",
+                                                        cursor: tooltip ? "help" : "default",
+                                                    }}
+                                                >
+                                                        {label}
+                                                    </span>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </td>
                         </tr>
                     );
                 })}
