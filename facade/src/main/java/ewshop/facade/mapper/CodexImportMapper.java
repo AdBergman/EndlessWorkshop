@@ -2,10 +2,11 @@ package ewshop.facade.mapper;
 
 import ewshop.domain.command.CodexImportSnapshot;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
-import ewshop.facade.dto.importing.codex.CodexImportReferenceLineDto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class CodexImportMapper {
 
@@ -24,7 +25,7 @@ public final class CodexImportMapper {
         if (name == null) throw new IllegalArgumentException("displayName is missing for " + key);
 
         List<String> descriptionLines = cleanLines(dto.descriptionLines());
-        List<String> referenceLines = cleanRefKeys(dto.referenceLines());
+        List<String> referenceLines = cleanDistinctLines(dto.referenceLines());
 
         return new CodexImportSnapshot(key, name, kind, descriptionLines, referenceLines);
     }
@@ -48,15 +49,17 @@ public final class CodexImportMapper {
         return out;
     }
 
-    private static List<String> cleanRefKeys(List<CodexImportReferenceLineDto> in) {
+    // Clean + dedupe while preserving order (prevents uq_codex_reference_keys_key collisions)
+    private static List<String> cleanDistinctLines(List<String> in) {
         if (in == null || in.isEmpty()) return List.of();
 
         List<String> out = new ArrayList<>(in.size());
-        for (CodexImportReferenceLineDto r : in) {
-            if (r == null) continue;
-            String key = trimToNull(r.refKey());
-            if (key == null) continue;
-            out.add(key);
+        Set<String> seen = new HashSet<>();
+        for (String line : in) {
+            if (line == null) continue;
+            String t = line.trim();
+            if (t.isBlank()) continue;
+            if (seen.add(t)) out.add(t);
         }
         return out;
     }
