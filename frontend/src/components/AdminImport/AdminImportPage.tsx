@@ -116,6 +116,40 @@ function validateUnitFile(json: UnitImportFile): string | null {
     return null;
 }
 
+type CodexImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    exportKind?: string;
+    entries?: unknown[];
+};
+
+const ALLOWED_CODEX_KINDS = ["abilities"];
+
+function metaFromCodexFile(json: CodexImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.entries) ? json.entries.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Export kind", value: json.exportKind ?? "—" },
+        { label: "Entry count", value: String(count) },
+    ];
+}
+
+function validateCodexFile(json: CodexImportFile): string | null {
+    if (!json || !Array.isArray(json.entries) || json.entries.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'entries' array.";
+    }
+    if (!json.exportKind || !ALLOWED_CODEX_KINDS.includes(json.exportKind.toLowerCase())) {
+        return `Invalid exportKind. Expected one of: [${ALLOWED_CODEX_KINDS.join(", ")}], but found "${json.exportKind ?? 'missing'}".`;
+    }
+    return null;
+}
+
 async function checkAdminToken(token: string): Promise<{ ok: boolean; message?: string }> {
     try {
         const res = await fetch("/api/admin/import/check-token", {
@@ -191,6 +225,16 @@ export default function AdminImportPage() {
                 getMeta: metaFromTechFile,
                 validate: validateTechFile,
                 importButtonLabel: "Import techs",
+            },
+            {
+                id: "codex",
+                title: "Codex",
+                description: "Upload a generic codex export (e.g., abilities) and import it into the database.",
+                enabled: true,
+                endpoint: "/api/admin/import/codex",
+                getMeta: metaFromCodexFile,
+                validate: validateCodexFile,
+                importButtonLabel: "Import codex",
             },
         ];
     }, []);

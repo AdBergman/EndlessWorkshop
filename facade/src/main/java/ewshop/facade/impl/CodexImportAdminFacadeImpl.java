@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
 
-    private static final String EXPECTED_EXPORT_KIND = "codex";
+    private static final String EXPECTED_EXPORT_KIND = "abilities";
     private static final int MAX_ERRORS = 50;
 
     private final CodexImportService codexImportService;
@@ -161,7 +161,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         if (emptyLines > 0) warnings.add(new ImportCountDto("EMPTY_DESCRIPTION_LINES_IN_FILE", (int) emptyLines));
         if (emptyRefs > 0) warnings.add(new ImportCountDto("EMPTY_REFERENCE_LINES_IN_FILE", (int) emptyRefs));
 
-        if (fileDto.sourceVersion() == null || fileDto.sourceVersion().isBlank()) {
+        if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
             warnings.add(new ImportCountDto("MISSING_SOURCE_VERSION", 1));
         }
 
