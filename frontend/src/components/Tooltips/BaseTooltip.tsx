@@ -41,20 +41,19 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnte
         fontFamily: "'Inter', sans-serif",
         fontWeight: 500,
         fontSize: "0.88rem",
-        lineHeight: 1.35,
+        lineHeight: 1.4,
 
         zIndex: 20,
 
-        /* Proper tooltip wrapping */
-        maxWidth: "340px",
+        /* Hug content, but cap width for long lines */
+        width: "max-content",
+        maxWidth: "320px",
+
         whiteSpace: "normal",
         overflowWrap: "anywhere",
-        wordBreak: "break-word",
 
-        /* Clean EW border */
         border: "1px solid rgba(255, 140, 64, 0.35)",
 
-        /* Professional depth */
         boxShadow:
             "0 10px 24px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.45)",
     };
