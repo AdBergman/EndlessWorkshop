@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import type { Unit } from "@/types/dataTypes";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { useCodex } from "@/hooks/useCodex";
+import SkillTooltip, { HoveredSkill } from "@/components/Tooltips/SkillTooltip"; // adjust path to your tooltips folder
 
 type UnlockedUnit = Unit & { era?: number };
 
@@ -10,7 +11,8 @@ interface UnitSheetViewProps {
 }
 
 const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
-    const { getVisibleEntry, getTooltipLines } = useCodex();
+    const { getVisibleEntry } = useCodex();
+    const [hoveredSkill, setHoveredSkill] = useState<HoveredSkill | null>(null);
 
     if (!units?.length) {
         return (
@@ -19,6 +21,23 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
             </div>
         );
     }
+
+    const clearHover = () => setHoveredSkill(null);
+
+    const handleSkillEnter = (e: React.MouseEvent<HTMLSpanElement>, abilityKey: string) => {
+        const codex = getVisibleEntry("abilities", abilityKey);
+        if (!codex) return;
+
+        // Pixel coords for portaled tooltip
+        setHoveredSkill({
+            data: codex,
+            coords: {
+                x: e.clientX + 12,
+                y: e.clientY,
+                mode: "pixel",
+            },
+        });
+    };
 
     return (
         <div className="spreadsheet-container">
@@ -45,13 +64,10 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
 
                     const abilityKeys = u.abilityKeys ?? [];
 
-                    // Filter: only show abilities that have a Codex entry with a displayName
-                    const visibleAbilities = abilityKeys
-                        .map((abilityKey) => ({
-                            abilityKey,
-                            codex: getVisibleEntry("abilities", abilityKey),
-                        }))
-                        .filter((x) => !!x.codex);
+                    // Only show abilities that have a visible codex entry
+                    const visibleAbilityKeys = abilityKeys.filter(
+                        (k) => !!getVisibleEntry("abilities", k)
+                    );
 
                     return (
                         <tr key={u.unitKey}>
@@ -66,7 +82,7 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                             <td>{d.stats.upkeep}</td>
 
                             <td style={{ whiteSpace: "pre-line" }}>
-                                {visibleAbilities.length === 0 ? (
+                                {visibleAbilityKeys.length === 0 ? (
                                     "—"
                                 ) : (
                                     <div
@@ -76,21 +92,22 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                                             gap: 2,
                                         }}
                                     >
-                                        {visibleAbilities.map(({ abilityKey, codex }) => {
-                                            // codex is guaranteed here
-                                            const label = codex!.displayName.trim();
-                                            const tooltip = getTooltipLines("abilities", abilityKey).join("\n");
+                                        {visibleAbilityKeys.map((abilityKey) => {
+                                            const codex = getVisibleEntry("abilities", abilityKey)!;
 
                                             return (
                                                 <span
                                                     key={abilityKey}
-                                                    title={tooltip || undefined}
                                                     style={{
-                                                        textDecoration: tooltip ? "underline" : "none",
-                                                        cursor: tooltip ? "help" : "default",
+                                                        textDecoration: "underline",
+                                                        cursor: "pointer",
                                                     }}
+                                                    onMouseEnter={(e) =>
+                                                        handleSkillEnter(e, abilityKey)
+                                                    }
+                                                    onMouseLeave={clearHover}
                                                 >
-                                                        {label}
+                                                        {codex.displayName}
                                                     </span>
                                             );
                                         })}
@@ -102,6 +119,8 @@ const UnitSheetView: React.FC<UnitSheetViewProps> = ({ units }) => {
                 })}
                 </tbody>
             </table>
+
+            {hoveredSkill && <SkillTooltip hoveredSkill={hoveredSkill} />}
         </div>
     );
 };
