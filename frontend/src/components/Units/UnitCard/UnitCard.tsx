@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
 
@@ -9,11 +9,33 @@ import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import type { Unit } from "@/types/dataTypes";
 import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
 import { deriveUnit } from "@/lib/units/deriveUnit";
+import { useCodex } from "@/hooks/useCodex";
+import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
 
 interface UnitCardProps {
     unit: Unit;
     showArtwork?: boolean;
     disableFlip?: boolean;
+}
+
+function clamp(n: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, n));
+}
+
+// Small heuristic: keep the back title readable as skill count / name length increases.
+function computeBackNameFontSizeRem(name: string, skillCount: number): number {
+    const len = (name ?? "").trim().length;
+
+    let size = 1.15; // baseline (rem)
+
+    if (len > 18) size -= 0.08;
+    if (len > 26) size -= 0.10;
+    if (len > 34) size -= 0.12;
+
+    // If many skills, steal a bit of vertical space back
+    if (skillCount > 6) size -= (skillCount - 6) * 0.02;
+
+    return clamp(size, 0.85, 1.15);
 }
 
 export const UnitCard: React.FC<UnitCardProps> = ({
@@ -23,6 +45,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                                   }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
+
+    const { getVisibleEntry } = useCodex();
 
     const d = useMemo(() => deriveUnit(unit), [unit]);
 
@@ -37,6 +61,62 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         if (disableFlip) return;
         setFlipped((v) => !v);
     };
+
+    // Resolve visible skills once per render
+    const visibleSkills = useMemo(() => {
+        const keys = unit.abilityKeys ?? [];
+        return keys
+            .map((k) => {
+                const codex = getVisibleEntry("abilities", k);
+                if (!codex) return null;
+                return { key: k, codex };
+            })
+            .filter((x): x is { key: string; codex: any } => !!x);
+    }, [unit.abilityKeys, getVisibleEntry]);
+
+    // Tooltip hover handling (sticky)
+    const [hoveredSkill, setHoveredSkill] = useState<HoveredSkill | null>(null);
+    const hoveringTooltipRef = useRef(false);
+    const clearTimerRef = useRef<number | null>(null);
+
+    const clearHoverSoon = () => {
+        if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
+        clearTimerRef.current = window.setTimeout(() => {
+            if (!hoveringTooltipRef.current) setHoveredSkill(null);
+        }, 60);
+    };
+
+    const handleSkillEnter = (e: React.MouseEvent, abilityKey: string) => {
+        const codex = getVisibleEntry("abilities", abilityKey);
+        if (!codex) return;
+
+        if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
+
+        setHoveredSkill({
+            data: codex,
+            coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" },
+        });
+    };
+
+    const handleSkillMove = (e: React.MouseEvent) => {
+        setHoveredSkill((prev) =>
+            prev
+                ? { ...prev, coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" } }
+                : prev
+        );
+    };
+
+    const onTooltipEnter = () => {
+        hoveringTooltipRef.current = true;
+        if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
+    };
+
+    const onTooltipLeave = () => {
+        hoveringTooltipRef.current = false;
+        clearHoverSoon();
+    };
+
+    const backNameSize = computeBackNameFontSizeRem(d.displayName, visibleSkills.length);
 
     return (
         <motion.div
@@ -147,11 +227,50 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                     </div>
                 </div>
 
-                {/* BACK (temporary placeholder) */}
+                {/* BACK: Abilities */}
                 <div className="cardFace cardBack">
-                    <div className="backPlaceholder">Skills coming soon</div>
+                    <div className="cardBackContent">
+                        <div
+                            className="backName"
+                            style={{
+                                fontSize: `${backNameSize}rem`,
+                                background: gradient,
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                            }}
+                            title={d.displayName}
+                        >
+                            {d.displayName}
+                        </div>
+
+                        {visibleSkills.length === 0 ? (
+                            <div className="noSkills">No abilities</div>
+                        ) : (
+                            <div className="skillsList">
+                                {visibleSkills.map(({ key, codex }) => (
+                                    <div
+                                        key={key}
+                                        className="skill"
+                                        onMouseEnter={(e) => handleSkillEnter(e, key)}
+                                        onMouseMove={handleSkillMove}
+                                        onMouseLeave={clearHoverSoon}
+                                    >
+                                        {codex.displayName}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </motion.div>
+
+            {hoveredSkill && (
+                <SkillTooltip
+                    hoveredSkill={hoveredSkill}
+                    onMouseEnter={onTooltipEnter}
+                    onMouseLeave={onTooltipLeave}
+                />
+            )}
         </motion.div>
     );
 };

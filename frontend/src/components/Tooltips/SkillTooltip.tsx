@@ -14,14 +14,20 @@ export type HoveredSkill = {
 
 interface SkillTooltipProps {
     hoveredSkill: HoveredSkill;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
-const SkillTooltip: React.FC<SkillTooltipProps> = ({ hoveredSkill }) => {
+const SkillTooltip: React.FC<SkillTooltipProps> = ({
+                                                       hoveredSkill,
+                                                       onMouseEnter,
+                                                       onMouseLeave,
+                                                   }) => {
     const { data, coords } = hoveredSkill;
     const { displayName, descriptionLines } = data;
 
     return ReactDOM.createPortal(
-        <BaseTooltip coords={coords}>
+        <BaseTooltip coords={coords} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div style={{ minWidth: "220px" }}>
                 <div style={{ fontWeight: 500 }}>{displayName}</div>
 
