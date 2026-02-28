@@ -63,6 +63,14 @@ export interface District {
     descriptionLines: string[];
 }
 
+export interface Codex {
+    exportKind: string;
+    entryKey: string;
+    displayName: string;
+    descriptionLines: string[];
+    referenceKeys: string[];
+}
+
 export const ERA_THRESHOLDS: Record<number, number> = {
     1: 0,
     2: 8,

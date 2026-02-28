@@ -1,4 +1,4 @@
-import { District, Improvement, Tech, Unit } from "@/types/dataTypes";
+import { District, Improvement, Tech, Unit, Codex } from "@/types/dataTypes";
 
 export type SavedTechBuild = {
     uuid: string;
@@ -49,6 +49,7 @@ export const apiClient = {
     getImprovements: () => fetcherJson<Improvement[]>("/improvements"),
     getTechs: () => fetcherJson<Tech[]>("/techs"),
     getUnits: () => fetcherJson<Unit[]>("/units"),
+    getCodex: () => fetcherJson<Codex[]>("/codex"),
 
     getSavedBuild: (uuid: string) => fetcherJson<SavedTechBuild>(`/builds/${uuid}`),
 

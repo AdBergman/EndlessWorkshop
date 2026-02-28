@@ -1,6 +1,14 @@
 import React, { ReactNode, useCallback, useEffect, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { District, Faction, FactionInfo, Improvement, Tech, Unit } from "@/types/dataTypes";
+import {
+    Codex,
+    District,
+    Faction,
+    FactionInfo,
+    Improvement,
+    Tech,
+    Unit,
+} from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +49,11 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [improvements, setImprovements] = useState<Map<string, Improvement>>(new Map());
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
     const [units, setUnits] = useState<Map<string, Unit>>(new Map());
+
+    // NEW: codex grouped by kind, then entryKey
+    const [codexByKindKey, setCodexByKindKey] = useState<Map<string, Map<string, Codex>>>(
+        new Map()
+    );
 
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
         toFactionInfoFromEnum(Faction.KIN)
@@ -113,6 +126,32 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         void fetchUnits();
     }, []);
 
+    // NEW: fetch codex once
+    useEffect(() => {
+        const fetchCodex = async () => {
+            try {
+                const codex = await apiClient.getCodex();
+
+                // Group by exportKind
+                const byKind = toKeyedMap(codex, (c) => c.exportKind);
+
+                // For each kind, create entryKey map
+                const out = new Map<string, Map<string, Codex>>();
+                for (const [kind, _dummy] of byKind.entries()) {
+                    const rowsForKind = codex.filter((c) => (c.exportKind ?? "").trim() === kind);
+                    out.set(kind, toKeyedMap(rowsForKind, (c) => c.entryKey));
+                }
+
+                setCodexByKindKey(out);
+            } catch (err) {
+                console.error("Failed to load codex:", err);
+                setCodexByKindKey(new Map());
+            }
+        };
+
+        void fetchCodex();
+    }, []);
+
     useEffect(() => {
         if (sharedBuildLoaded) return;
 
@@ -178,6 +217,8 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 improvements,
                 techs,
                 units,
+
+                codexByKindKey,
 
                 setTechs,
                 refreshTechs,

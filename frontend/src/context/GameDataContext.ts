@@ -1,13 +1,24 @@
 import { createContext, useContext } from "react";
 import type React from "react";
-import { District, Improvement, Tech, Unit, Faction, FactionInfo } from "@/types/dataTypes";
 import type { SavedTechBuild } from "@/api/apiClient";
+import {
+    Codex,
+    District,
+    Improvement,
+    Tech,
+    Unit,
+    Faction,
+    FactionInfo,
+} from "@/types/dataTypes";
 
 export interface GameDataContextType {
     districts: Map<string, District>;
     improvements: Map<string, Improvement>;
     techs: Map<string, Tech>;
     units: Map<string, Unit>;
+
+    // NEW: codex grouped by kind -> entryKey
+    codexByKindKey: Map<string, Map<string, Codex>>;
 
     setTechs?: React.Dispatch<React.SetStateAction<Map<string, Tech>>>;
     refreshTechs?: () => Promise<void>;
@@ -49,6 +60,8 @@ const GameDataContext = createContext<GameDataContextType>({
     improvements: new Map(),
     techs: new Map(),
     units: new Map(),
+
+    codexByKindKey: new Map(),
 
     setTechs: undefined,
     refreshTechs: undefined,
