@@ -1,13 +1,3 @@
-/* ==========================================================================
-   UnitCard.css — Endless Workshop style (readability + premium card feel)
-   --------------------------------------------------------------------------
-   Fixes in this version:
-   - Front "type/tier" text is no longer dim
-   - Unit name gets a cleaner, stronger shadow (without muddying the gradient)
-   - Back ability pills are readable (no black-on-orange), calmer, smaller
-   - Removes duplicate .skill:hover block (you had two)
-   ========================================================================== */
-
 /* === BASE CARD === */
 .cardContainer {
     position: relative;
@@ -237,43 +227,34 @@
     margin-top: 4px;
 }
 
-/* Ability pill (readable, calm, premium) */
 .skill {
-    /* calm orange tint + border (not neon fill) */
-    background: linear-gradient(
-            135deg,
-            rgba(255, 140, 64, 0.18),
-            rgba(255, 140, 64, 0.10)
-    );
-    border: 1px solid rgba(255, 140, 64, 0.55);
+    background: transparent;
+    border: none;
 
-    /* readable text */
-    color: #ffb07a;
+    color: #ff9b57;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 
-    padding: 4px 7px;
-    border-radius: 7px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1.15;
 
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    padding: 3px 6px;
 
-    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    letter-spacing: 0.02em;
 
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+    /* 👇 allow wrapping */
+    white-space: normal;
+    text-align: center;
 
-    max-width: 92%;
+    max-width: 100%;
     cursor: pointer;
 
-    box-shadow: none;
+    transition: transform 0.15s ease, color 0.15s ease;
 }
 
 .skill:hover {
-    transform: translateY(-1px) scale(1.03);
-    border-color: rgba(255, 140, 64, 0.95);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    transform: translateY(-1px);
+    color: #ffb067;
 }
 
 .noSkills {
