@@ -72,6 +72,10 @@ export default function GameSummaryPage() {
 
     return (
         <div className={pageClassName}>
+            <h1 className="seo-hidden">
+                Endless Legend 2 Save Analysis, Empire Summary, and Tech Order Viewer
+            </h1>
+
             <h2 className="gs-title">Game Summary</h2>
 
             <div className="gs-section">

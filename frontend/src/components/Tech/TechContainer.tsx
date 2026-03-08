@@ -106,6 +106,16 @@ const TechContainer: React.FC = () => {
 
     return (
         <main className={`main-container ${firstEraLoaded ? "loaded" : ""}`}>
+            <h1 className="seo-hidden">
+                Endless Legend 2 Tech Tree Planner, Explorer, and Build Sharing Tool
+            </h1>
+
+            <div className="seo-hidden" aria-hidden="true">
+                {Array.from(techs.values()).map((tech) => (
+                    <span key={tech.techKey}>{tech.name}. </span>
+                ))}
+            </div>
+
             {firstEraLoaded && (
                 <>
                     {importToast ? (

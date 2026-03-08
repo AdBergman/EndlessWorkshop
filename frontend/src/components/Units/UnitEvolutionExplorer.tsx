@@ -224,6 +224,18 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
     return (
         <div className="unitEvolutionExplorer">
+            <h1 className="seo-hidden">
+                EL2 Unit Evolution Explorer – Endless Legend 2 Units
+            </h1>
+
+            <div className="seo-hidden" aria-hidden="true">
+                {allVisibleUnits.map((unit) => (
+                    <span key={unit.unitKey}>
+                         {unit.displayName}. {unit.faction ? `${unit.faction}. ` : ""}
+                    </span>
+                ))}
+            </div>
+
             <div className="unitExplorerHeader">
                 <div className="minorSegmentedToggle single">
                     <span className="toggleLabel">Show Minor Factions:</span>

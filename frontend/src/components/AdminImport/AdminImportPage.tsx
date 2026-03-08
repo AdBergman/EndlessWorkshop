@@ -5,6 +5,7 @@ import "./AdminImportPage.css";
 import AdminTokenPanel from "./AdminTokenPanel";
 import ImportModuleRow from "./ImportModuleRow";
 import { ImportModuleDefinition, ModuleMetaKV } from "./adminImportTypes";
+import { Helmet } from "react-helmet-async";
 
 type TokenStatus = "missing" | "checking" | "valid" | "invalid";
 
@@ -283,7 +284,7 @@ export default function AdminImportPage() {
         // Don’t reveal how to enable admin mode
         return (
             <div className="admin-import-page">
-                <h2 className="admin-import-title">Admin Import</h2>
+                <h1 className="admin-import-title">Admin Import</h1>
 
                 <div className="admin-import-panel admin-import-section">
                     <div style={{ fontWeight: 800, marginBottom: 6 }}>Not available</div>
@@ -296,47 +297,58 @@ export default function AdminImportPage() {
     const isUnlocked = tokenStatus === "valid";
 
     return (
-        <div className="admin-import-page">
-            <h2 className="admin-import-title">Admin Import</h2>
+        <>
+            <Helmet>
+                <title>Admin Import – Endless Workshop</title>
+                <meta name="robots" content="noindex, nofollow" />
+            </Helmet>
 
-            <AdminTokenPanel
-                token={token}
-                status={tokenStatus}
-                errorMessage={tokenError}
-                onTokenChange={(t) => {
-                    const next = t.trim();
-                    setToken(next);
-                    localStorage.setItem("ewshop_admin_token", next);
-                    void runTokenValidation(next);
-                }}
-            />
+            <div className="admin-import-page">
+                <h2 className="admin-import-title">Admin Import</h2>
 
-            {tokenStatus === "checking" ? (
-                <div className="admin-import-panel admin-import-section">
-                    <div style={{ fontWeight: 800 }}>Validating token…</div>
-                    <div className="admin-import-muted">Checking admin access.</div>
-                </div>
-            ) : null}
+                <AdminTokenPanel
+                    token={token}
+                    status={tokenStatus}
+                    errorMessage={tokenError}
+                    onTokenChange={(t) => {
+                        const next = t.trim();
+                        setToken(next);
+                        localStorage.setItem("ewshop_admin_token", next);
+                        void runTokenValidation(next);
+                    }}
+                />
 
-            {!isUnlocked ? null : (
-                <div className="admin-import-section">
-                    <div className="admin-import-pipelineTitle">Import pipeline</div>
-                    <div className="admin-import-muted">Run imports top-to-bottom as modules become available.</div>
-
-                    <div className="admin-import-pipeline">
-                        {modules.map((m, idx) => (
-                            <ImportModuleRow
-                                key={m.id}
-                                index={idx + 1}
-                                token={token}
-                                module={m}
-                                isOpen={openModuleId === m.id}
-                                onToggle={() => setOpenModuleId((cur) => (cur === m.id ? null : m.id))}
-                            />
-                        ))}
+                {tokenStatus === "checking" ? (
+                    <div className="admin-import-panel admin-import-section">
+                        <div style={{ fontWeight: 800 }}>Validating token…</div>
+                        <div className="admin-import-muted">Checking admin access.</div>
                     </div>
-                </div>
-            )}
-        </div>
+                ) : null}
+
+                {!isUnlocked ? null : (
+                    <div className="admin-import-section">
+                        <div className="admin-import-pipelineTitle">Import pipeline</div>
+                        <div className="admin-import-muted">
+                            Run imports top-to-bottom as modules become available.
+                        </div>
+
+                        <div className="admin-import-pipeline">
+                            {modules.map((m, idx) => (
+                                <ImportModuleRow
+                                    key={m.id}
+                                    index={idx + 1}
+                                    token={token}
+                                    module={m}
+                                    isOpen={openModuleId === m.id}
+                                    onToggle={() =>
+                                        setOpenModuleId((cur) => (cur === m.id ? null : m.id))
+                                    }
+                                />
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
     );
 }

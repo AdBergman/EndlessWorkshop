@@ -1,21 +1,29 @@
-import React, {useEffect} from "react";
-import {BrowserRouter as Router, Outlet, Route, Routes, useLocation} from "react-router-dom";
-import TopContainer from './components/TopContainer/TopContainer';
-import TechContainer from './components/Tech/TechContainer';
-import InfoPage from './components/InfoPage/InfoPage';
-import GameDataProvider from './context/GameDataProvider';
-import { useGameData } from './context/GameDataContext';
-import LandscapeWrapper from './components/Layout/LandscapeWrapper';
-import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
+import React, { useEffect } from "react";
+import {
+    BrowserRouter as Router,
+    Outlet,
+    Route,
+    Routes,
+    useLocation,
+} from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 
-import './App.css';
-import {UnitEvolutionExplorer} from "@/components/Units/UnitEvolutionExplorer";
+import TopContainer from "./components/TopContainer/TopContainer";
+import TechContainer from "./components/Tech/TechContainer";
+import InfoPage from "./components/InfoPage/InfoPage";
+import GameDataProvider from "./context/GameDataProvider";
+import { useGameData } from "./context/GameDataContext";
+import LandscapeWrapper from "./components/Layout/LandscapeWrapper";
+import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
+import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
 import AdminImportPage from "@/components/AdminImport/AdminImportPage";
+
+import "./App.css";
 
 // Extend the Window type for Cloudflare beacon
 declare global {
     interface Window {
-        _cf?: any; // Cloudflare beacon object
+        _cf?: any;
     }
 }
 
@@ -31,17 +39,18 @@ const useCloudflareSPA = () => {
 };
 
 const AppLayout: React.FC = () => {
-    const location = useLocation(); // Keep this for CloudflareSPA and logging
+    const location = useLocation();
     console.log("AppLayout rendering. Current path:", location.pathname);
-    useCloudflareSPA(); // Track route changes for SPA
 
-    const { isProcessingSharedBuild } = useGameData(); // Consume the new state
+    useCloudflareSPA();
+
+    const { isProcessingSharedBuild } = useGameData();
 
     return (
         <LandscapeWrapper>
             <div className="app">
                 <TopContainer />
-                {isProcessingSharedBuild ? null : <Outlet />} {/* Conditionally render Outlet */}
+                {isProcessingSharedBuild ? null : <Outlet />}
             </div>
         </LandscapeWrapper>
     );
@@ -50,14 +59,89 @@ const AppLayout: React.FC = () => {
 function App() {
     return (
         <Router>
-            <GameDataProvider> {/* GameDataProvider now wraps the Routes */}
+            <GameDataProvider>
                 <Routes>
                     <Route path="/*" element={<AppLayout />}>
-                        <Route index element={<InfoPage />} />
-                        <Route path="info" element={<InfoPage />} />
-                        <Route path="tech" element={<TechContainer />} />
-                        <Route path="units" element={<UnitEvolutionExplorer />} />
-                        <Route path="summary" element={<GameSummaryPage />} />
+                        <Route
+                            index
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>Endless Workshop – Interactive Endless Legend 2 Tools</title>
+                                        <meta
+                                            name="description"
+                                            content="Endless Workshop provides interactive Endless Legend 2 tools including tech trees, unit exploration, and gameplay system references."
+                                        />
+                                    </Helmet>
+                                    <InfoPage />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="info"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>About Endless Workshop | Endless Legend 2 Tools</title>
+                                        <meta
+                                            name="description"
+                                            content="Learn about Endless Workshop, an interactive Endless Legend 2 reference and planning tool for tech trees, units, and gameplay systems."
+                                        />
+                                    </Helmet>
+                                    <InfoPage />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="tech"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>EL2 Tech Tree Planner | Endless Workshop</title>
+                                        <meta
+                                            name="description"
+                                            content="Explore the Endless Legend 2 technology tree, view unlocks, and plan research paths with the EWShop interactive tech planner."
+                                        />
+                                    </Helmet>
+                                    <TechContainer />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="units"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>EL2 Unit Evolution Explorer | Endless Workshop</title>
+                                        <meta
+                                            name="description"
+                                            content="Explore Endless Legend 2 unit evolution, stats, and progression with the EWShop interactive unit explorer."
+                                        />
+                                    </Helmet>
+                                    <UnitEvolutionExplorer />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="summary"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>Endless Legend 2 Game Summary | Endless Workshop</title>
+                                        <meta
+                                            name="description"
+                                            content="Review Endless Legend 2 game summaries and shared build information in Endless Workshop."
+                                        />
+                                    </Helmet>
+                                    <GameSummaryPage />
+                                </>
+                            }
+                        />
+
                         <Route path="admin/import" element={<AdminImportPage />} />
                     </Route>
                 </Routes>
