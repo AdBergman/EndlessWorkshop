@@ -1,11 +1,11 @@
 // TechContainer.tsx
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useLocation, useNavigate, useSearchParams} from "react-router-dom";
 import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
-import { ERA_THRESHOLDS, Faction, Tech } from "@/types/dataTypes";
-import { useGameData } from "@/context/GameDataContext";
+import {ERA_THRESHOLDS, Faction, Tech} from "@/types/dataTypes";
+import {useGameData} from "@/context/GameDataContext";
 import "./TechContainer.css";
 
 const MAX_ERA = 6;
@@ -84,25 +84,34 @@ const TechContainer: React.FC = () => {
     useEffect(() => {
         if (!selectedFaction) return;
 
+        let cancelled = false;
+        setFirstEraLoaded(false);
+
         const preload = new Image();
         preload.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.webp`;
-        preload.onload = () => setFirstEraLoaded(true);
-        preload.onerror = () => setFirstEraLoaded(true);
+
+        preload.onload = () => {
+            if (!cancelled) setFirstEraLoaded(true);
+        };
+        preload.onerror = () => {
+            if (!cancelled) setFirstEraLoaded(true);
+        };
 
         return () => {
+            cancelled = true;
             preload.onload = null;
             preload.onerror = null;
         };
     }, [selectedFaction]);
 
     useEffect(() => {
-        if (!selectedFaction) return;
+        if (!selectedFaction || !firstEraLoaded) return;
 
-        for (let eraIndex = 1; eraIndex <= MAX_ERA; eraIndex++) {
+        for (let eraIndex = 2; eraIndex <= MAX_ERA; eraIndex++) {
             const img = new Image();
             img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${eraIndex}.webp`;
         }
-    }, [selectedFaction]);
+    }, [selectedFaction, firstEraLoaded]);
 
     return (
         <main className={`main-container ${firstEraLoaded ? "loaded" : ""}`}>

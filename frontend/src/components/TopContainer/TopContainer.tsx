@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./TopContainer.css";
-import { useGameData } from "@/context/GameDataContext"; // Import useGameData
-import { NavLink } from "react-router-dom";
-import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
-import { Faction } from "@/types/dataTypes";
+import {useGameData} from "@/context/GameDataContext";
+import {NavLink} from "react-router-dom";
+import {Faction} from "@/types/dataTypes";
 
 const factions = [
     { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" },
@@ -13,27 +12,15 @@ const factions = [
     { isMajor: true, enumFaction: Faction.NECROPHAGES, minorName: null, uiLabel: "Necrophages" },
 ];
 
-const MAX_ERA = 6;
-
 const routes = [
-    { path: "/info", label: "Info" },
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
     { path: "/summary", label: "Summary" },
+    { path: "/info", label: "Info" },
 ];
 
 const TopContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
-
-    // Preload backgrounds on faction change
-    useEffect(() => {
-        if (!selectedFaction) return;
-
-        for (let era = 1; era <= MAX_ERA; era++) {
-            const img = new Image();
-            img.src = getBackgroundUrl(selectedFaction.uiLabel, era);
-        }
-    }, [selectedFaction]);
 
     return (
         <header className="top-container">

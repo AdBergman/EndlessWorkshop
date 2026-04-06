@@ -5,6 +5,7 @@ import {
     Route,
     Routes,
     useLocation,
+    Navigate,
 } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
@@ -62,37 +63,7 @@ function App() {
             <GameDataProvider>
                 <Routes>
                     <Route path="/*" element={<AppLayout />}>
-                        <Route
-                            index
-                            element={
-                                <>
-                                    <Helmet>
-                                        <title>Endless Workshop – Interactive Endless Legend 2 Tools</title>
-                                        <meta
-                                            name="description"
-                                            content="Endless Workshop provides interactive Endless Legend 2 tools including tech trees, unit exploration, and gameplay system references."
-                                        />
-                                    </Helmet>
-                                    <InfoPage />
-                                </>
-                            }
-                        />
-
-                        <Route
-                            path="info"
-                            element={
-                                <>
-                                    <Helmet>
-                                        <title>About Endless Workshop | Endless Legend 2 Tools</title>
-                                        <meta
-                                            name="description"
-                                            content="Learn about Endless Workshop, an interactive Endless Legend 2 reference and planning tool for tech trees, units, and gameplay systems."
-                                        />
-                                    </Helmet>
-                                    <InfoPage />
-                                </>
-                            }
-                        />
+                        <Route index element={<Navigate to="/tech" replace />} />
 
                         <Route
                             path="tech"
@@ -138,6 +109,22 @@ function App() {
                                         />
                                     </Helmet>
                                     <GameSummaryPage />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="info"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>About Endless Workshop | Endless Legend 2 Tools</title>
+                                        <meta
+                                            name="description"
+                                            content="Learn about Endless Workshop, an interactive Endless Legend 2 reference and planning tool for tech trees, units, and gameplay systems."
+                                        />
+                                    </Helmet>
+                                    <InfoPage />
                                 </>
                             }
                         />
