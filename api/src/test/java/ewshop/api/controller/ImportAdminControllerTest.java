@@ -1,58 +1,68 @@
 package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ewshop.facade.dto.importing.ImportCountsDto;
+import ewshop.facade.dto.importing.ImportDiagnosticsDto;
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
+import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
-import ewshop.facade.interfaces.*;
+import ewshop.facade.dto.importing.units.UnitImportBatchDto;
+import ewshop.facade.interfaces.CodexImportAdminFacade;
+import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.TechImportAdminFacade;
+import ewshop.facade.interfaces.UnitImportAdminFacade;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ImportAdminController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@Import(ApiExceptionHandler.class)
 class ImportAdminControllerTest {
 
-    @Autowired
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private RecordingTechImportAdminFacade techImportAdminFacade;
+    private RecordingDistrictImportAdminFacade districtImportAdminFacade;
+    private RecordingImprovementImportAdminFacade improvementImportAdminFacade;
+    private RecordingUnitImportAdminFacade unitImportAdminFacade;
+    private RecordingCodexImportAdminFacade codexImportAdminFacade;
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @BeforeEach
+    void setUp() {
+        techImportAdminFacade = new RecordingTechImportAdminFacade();
+        districtImportAdminFacade = new RecordingDistrictImportAdminFacade();
+        improvementImportAdminFacade = new RecordingImprovementImportAdminFacade();
+        unitImportAdminFacade = new RecordingUnitImportAdminFacade();
+        codexImportAdminFacade = new RecordingCodexImportAdminFacade();
 
-    @MockBean
-    private TechImportAdminFacade techImportAdminFacade;
+        ImportAdminController controller = new ImportAdminController(
+                techImportAdminFacade,
+                districtImportAdminFacade,
+                improvementImportAdminFacade,
+                unitImportAdminFacade,
+                codexImportAdminFacade
+        );
 
-    @MockBean
-    private DistrictImportAdminFacade districtImportAdminFacade;
-
-    @MockBean
-    private ImprovementImportAdminFacade improvementImportAdminFacade;
-
-    @MockBean
-    private UnitImportAdminFacade unitImportAdminFacade;
-
-    @MockBean
-    private CodexImportAdminFacade codexImportAdminFacade;
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new ApiExceptionHandler())
+                .build();
+    }
 
     @Test
     void importTechs_returnsOk_andCallsFacade_whenPayloadHasTechs() throws Exception {
-
         TechImportTechDto tech = new TechImportTechDto(
                 "Technology_X",
                 "Stonework",
@@ -80,19 +90,18 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        verify(techImportAdminFacade).importTechs(payload);
+        assertEquals(payload, techImportAdminFacade.lastDto);
     }
 
     @Test
     void importTechs_returnsBadRequest_andDoesNotCallFacade_whenTechListIsEmpty() throws Exception {
-
         TechImportBatchDto payload = new TechImportBatchDto(
                 "Endless Legend 2",
                 "0.75",
                 "0.1.0",
                 "2026-02-10T00:00:00Z",
                 "tech",
-                List.<TechImportTechDto>of()
+                List.of()
         );
 
         mockMvc.perform(post("/api/admin/import/techs")
@@ -100,12 +109,11 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(techImportAdminFacade);
+        assertNull(techImportAdminFacade.lastDto);
     }
 
     @Test
     void importTechs_returnsBadRequest_andDoesNotCallFacade_whenTechsFieldIsMissing() throws Exception {
-
         String payload = """
                 {
                   "game": "Endless Legend 2",
@@ -121,12 +129,11 @@ class ImportAdminControllerTest {
                         .content(payload))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(techImportAdminFacade);
+        assertNull(techImportAdminFacade.lastDto);
     }
 
     @Test
     void importDistricts_returnsOk_andCallsFacade_whenPayloadHasDistricts() throws Exception {
-
         DistrictImportDistrictDto dto = new DistrictImportDistrictDto(
                 "Aspect_District_Tier1_Science",
                 "Laboratory",
@@ -148,19 +155,18 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        verify(districtImportAdminFacade).importDistricts(payload);
+        assertEquals(payload, districtImportAdminFacade.lastDto);
     }
 
     @Test
     void importDistricts_returnsBadRequest_andDoesNotCallFacade_whenDistrictListIsEmpty() throws Exception {
-
         DistrictImportBatchDto payload = new DistrictImportBatchDto(
                 "Endless Legend 2",
                 "0.75",
                 "0.1.0",
                 "2026-02-15T00:00:00Z",
                 "district",
-                List.<DistrictImportDistrictDto>of()
+                List.of()
         );
 
         mockMvc.perform(post("/api/admin/import/districts")
@@ -168,12 +174,11 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(districtImportAdminFacade);
+        assertNull(districtImportAdminFacade.lastDto);
     }
 
     @Test
     void importCodex_returnsOk_andCallsFacade_whenPayloadHasEntries() throws Exception {
-
         CodexImportBatchDto payload = new CodexImportBatchDto(
                 "Endless Legend 2",
                 "0.78",
@@ -193,19 +198,18 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
 
-        verify(codexImportAdminFacade).importCodex(payload);
+        assertEquals(payload, codexImportAdminFacade.lastDto);
     }
 
     @Test
     void importCodex_returnsBadRequest_andDoesNotCallFacade_whenEntriesAreEmpty() throws Exception {
-
         CodexImportBatchDto payload = new CodexImportBatchDto(
                 "Endless Legend 2",
                 "0.78",
                 "0.4.0",
                 "2026-05-02T07:42:00Z",
                 "equipment",
-                List.<CodexImportEntryDto>of()
+                List.of()
         );
 
         mockMvc.perform(post("/api/admin/import/codex")
@@ -213,6 +217,60 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
 
-        verifyNoInteractions(codexImportAdminFacade);
+        assertNull(codexImportAdminFacade.lastDto);
+    }
+
+    private static ImportSummaryDto okSummary(String kind) {
+        return new ImportSummaryDto(
+                kind,
+                "2026-05-02T00:00:00Z",
+                new ImportCountsDto(1, 1, 0, 0, 0, 0),
+                new ImportDiagnosticsDto(List.of(), List.of(), null),
+                1L
+        );
+    }
+
+    private static final class RecordingTechImportAdminFacade implements TechImportAdminFacade {
+        private TechImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importTechs(TechImportBatchDto file) {
+            this.lastDto = file;
+            return okSummary("techs");
+        }
+    }
+
+    private static final class RecordingDistrictImportAdminFacade implements DistrictImportAdminFacade {
+        private DistrictImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importDistricts(DistrictImportBatchDto file) {
+            this.lastDto = file;
+            return okSummary("districts");
+        }
+    }
+
+    private static final class RecordingImprovementImportAdminFacade implements ImprovementImportAdminFacade {
+        @Override
+        public ImportSummaryDto importImprovements(ImprovementImportBatchDto dto) {
+            return okSummary("improvements");
+        }
+    }
+
+    private static final class RecordingUnitImportAdminFacade implements UnitImportAdminFacade {
+        @Override
+        public ImportSummaryDto importUnits(UnitImportBatchDto dto) {
+            return okSummary("units");
+        }
+    }
+
+    private static final class RecordingCodexImportAdminFacade implements CodexImportAdminFacade {
+        private CodexImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importCodex(CodexImportBatchDto file) {
+            this.lastDto = file;
+            return okSummary("codex");
+        }
     }
 }
