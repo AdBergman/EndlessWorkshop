@@ -416,6 +416,36 @@
     opacity: 0.85;
 }
 
+.admin-import-inlineStatus {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 11px;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.admin-import-inlineStatus--ready,
+.admin-import-inlineStatus--imported {
+    border-color: rgba(80, 200, 120, 0.35);
+    color: rgba(180, 255, 200, 0.95);
+}
+
+.admin-import-inlineStatus--importing {
+    border-color: rgba(255, 127, 50, 0.35);
+    color: rgba(255, 220, 180, 0.95);
+}
+
+.admin-import-inlineStatus--failed,
+.admin-import-inlineStatus--validation_error {
+    border-color: rgba(255, 80, 80, 0.35);
+    color: rgba(255, 200, 200, 0.95);
+}
+
 /* Raw JSON block: page scrolls, not inner scroll */
 .admin-import-json {
     margin-top: 10px;

@@ -4,6 +4,16 @@ export type DropResult<TJson> = {
     json: TJson;
 };
 
+export type DropErrorResult = {
+    file: File;
+    message: string;
+};
+
+export type DropManyResult<TJson> = {
+    loaded: DropResult<TJson>[];
+    errors: DropErrorResult[];
+};
+
 export type ImportState =
     | { status: "idle" }
     | { status: "importing" }
