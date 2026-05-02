@@ -132,4 +132,64 @@ describe("useCodexStore", () => {
 
         expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
     });
+
+    it("filters invalid display names before store population while keeping valid bracket-prefixed names", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Percent",
+                displayName: " %Placeholder Name",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Tbd",
+                displayName: " TBD Internal",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_BracketTbd",
+                displayName: "   [TBD] Internal",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ValidBracket",
+                displayName: "[LuxuryResource01] Auric Coral",
+                descriptionLines: ["Should remain"],
+                referenceKeys: ["Ability_Percent", "Ability_Resolved"],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Resolved",
+                displayName: "Resolved Ability",
+                descriptionLines: ["Valid target"],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        const state = useCodexStore.getState();
+        expect(state.entries).toHaveLength(2);
+        expect(state.entries.map((entry) => entry.entryKey)).toEqual([
+            "Ability_ValidBracket",
+            "Ability_Resolved",
+        ]);
+        expect(state.getEntryByKey("Ability_Percent")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_Tbd")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_BracketTbd")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_ValidBracket")?.displayName).toBe("[LuxuryResource01] Auric Coral");
+        expect(state.searchEntries("placeholder")).toHaveLength(0);
+        expect(state.searchEntries("tbd")).toHaveLength(0);
+        expect(state.searchEntries("auric")).toHaveLength(1);
+        expect(state.getRelatedEntries(state.getEntryByKey("Ability_ValidBracket")!)).toEqual([
+            state.getEntryByKey("Ability_Resolved"),
+        ]);
+        expect(state.entriesByKind.abilities).toHaveLength(2);
+    });
 });

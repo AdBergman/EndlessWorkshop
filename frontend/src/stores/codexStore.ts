@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import { buildEntriesByKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
+import { isValidDisplayName } from "@/lib/codex/codexValidation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Store = {
@@ -73,7 +74,8 @@ export const useCodexStore = create<Store>((set, get) => ({
                 const rawEntries = await apiClient.getCodex();
                 const entries = rawEntries
                     .map(normalizeEntry)
-                    .filter((entry) => entry.entryKey.length > 0);
+                    .filter((entry) => entry.entryKey.length > 0)
+                    .filter((entry) => isValidDisplayName(entry.displayName));
 
                 set({
                     entries,
