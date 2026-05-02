@@ -5,6 +5,7 @@ export function isValidDisplayName(name: string | null | undefined): boolean {
     return !(
         normalized.startsWith("%") ||
         normalized.startsWith("tbd") ||
-        normalized.startsWith("[tbd]")
+        normalized.startsWith("[tbd]") ||
+        /\d{3}/.test(normalized)
     );
 }

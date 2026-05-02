@@ -165,6 +165,27 @@ describe("useCodexStore", () => {
             },
             {
                 exportKind: "abilities",
+                entryKey: "Ability_ThreeDigitsA",
+                displayName: "Unit 001 Placeholder",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ThreeDigitsB",
+                displayName: "like282this",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ThreeDigitsC",
+                displayName: "Advanced Extractor 123",
+                descriptionLines: ["Should be filtered"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
                 entryKey: "Ability_ValidBracket",
                 displayName: "[LuxuryResource01] Auric Coral",
                 descriptionLines: ["Should remain"],
@@ -177,27 +198,42 @@ describe("useCodexStore", () => {
                 descriptionLines: ["Valid target"],
                 referenceKeys: [],
             },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ValidText",
+                displayName: "Advanced Auric Coral Extractor",
+                descriptionLines: ["Should remain"],
+                referenceKeys: [],
+            },
         ]);
 
         await useCodexStore.getState().loadEntries();
 
         const state = useCodexStore.getState();
-        expect(state.entries).toHaveLength(2);
+        expect(state.entries).toHaveLength(3);
         expect(state.entries.map((entry) => entry.entryKey)).toEqual([
             "Ability_ValidBracket",
             "Ability_Resolved",
+            "Ability_ValidText",
         ]);
         expect(state.getEntryByKey("Ability_Percent")).toBeUndefined();
         expect(state.getEntryByKey("Ability_Tbd")).toBeUndefined();
         expect(state.getEntryByKey("Ability_BracketTbd")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_ThreeDigitsA")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_ThreeDigitsB")).toBeUndefined();
+        expect(state.getEntryByKey("Ability_ThreeDigitsC")).toBeUndefined();
         expect(state.getEntryByKey("Ability_ValidBracket")?.displayName).toBe("[LuxuryResource01] Auric Coral");
+        expect(state.getEntryByKey("Ability_ValidText")?.displayName).toBe("Advanced Auric Coral Extractor");
         expect(state.searchEntries("placeholder")).toHaveLength(0);
         expect(state.searchEntries("tbd")).toHaveLength(0);
-        expect(state.searchEntries("auric")).toHaveLength(1);
+        expect(state.searchEntries("001")).toHaveLength(0);
+        expect(state.searchEntries("282")).toHaveLength(0);
+        expect(state.searchEntries("123")).toHaveLength(0);
+        expect(state.searchEntries("auric")).toHaveLength(2);
         expect(state.getRelatedEntries(state.getEntryByKey("Ability_ValidBracket")!)).toEqual([
             state.getEntryByKey("Ability_Resolved"),
         ]);
-        expect(state.entriesByKind.abilities).toHaveLength(2);
+        expect(state.entriesByKind.abilities).toHaveLength(3);
     });
 
     it("publishes and auto-downloads a dev-only token audit exactly once when explicitly requested", async () => {
