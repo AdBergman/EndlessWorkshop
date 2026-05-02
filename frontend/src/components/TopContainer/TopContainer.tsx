@@ -1,7 +1,7 @@
 import React from "react";
 import "./TopContainer.css";
 import {useGameData} from "@/context/GameDataContext";
-import {NavLink, useLocation} from "react-router-dom";
+import {NavLink} from "react-router-dom";
 import {Faction} from "@/types/dataTypes";
 
 const factions = [
@@ -22,8 +22,7 @@ const routes = [
 
 const TopContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
-    const location = useLocation();
-    const showFactionSelector = !isProcessingSharedBuild && !location.pathname.startsWith("/codex");
+    const showFactionSelector = !isProcessingSharedBuild;
 
     return (
         <header className="top-container">

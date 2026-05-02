@@ -240,9 +240,8 @@ export default function CodexPage() {
 
             <section className="codex-surface" aria-labelledby="codex-page-title">
                 <header className="codex-header">
-                    <div className="codex-header__lead">
+                    <div className="codex-header__row">
                         <div className="codex-header__copy">
-                            <div className="codex-eyebrow">Workshop Codex</div>
                             <h2 className="codex-pageTitle" id="codex-page-title">
                                 Encyclopedia
                             </h2>
@@ -266,15 +265,15 @@ export default function CodexPage() {
                             }}
                         />
                     </div>
-                </header>
 
-                <div className="codex-filterRail">
-                    <KindFilter
-                        options={filterOptions}
-                        activeKind={activeKind}
-                        onSelect={selectKind}
-                    />
-                </div>
+                    <div className="codex-filterRail">
+                        <KindFilter
+                            options={filterOptions}
+                            activeKind={activeKind}
+                            onSelect={selectKind}
+                        />
+                    </div>
+                </header>
 
                 <div className="codex-workspace">
                     <aside className="codex-resultsPane" aria-label="Codex results">
@@ -301,7 +300,7 @@ export default function CodexPage() {
                     </aside>
 
                     <section className="codex-detailPane" aria-label="Selected codex entry">
-                        <div className="codex-detailPane__sticky">
+                        <div className="codex-detailPane__body">
                             {selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}

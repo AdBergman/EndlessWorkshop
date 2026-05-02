@@ -23,6 +23,26 @@ body {
     text-shadow: 0 0 1px rgba(0,0,0,0.5);
 }
 
+.app {
+    min-height: 100vh;
+}
+
+.app--codex {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app--codex .top-container {
+    flex-shrink: 0;
+}
+
+.app--codex > :not(.top-container) {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
 .top-container {
     display: flex;
     justify-content: space-between;
@@ -96,4 +116,12 @@ body {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+@media (max-width: 1024px) {
+    .app--codex {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
 }

@@ -47,10 +47,11 @@ const AppLayout: React.FC = () => {
     useCloudflareSPA();
 
     const { isProcessingSharedBuild } = useGameData();
+    const appClassName = location.pathname.startsWith("/codex") ? "app app--codex" : "app";
 
     return (
         <LandscapeWrapper>
-            <div className="app">
+            <div className={appClassName}>
                 <TopContainer />
                 {isProcessingSharedBuild ? null : <Outlet />}
             </div>
