@@ -22,7 +22,7 @@
 }
 
 .mods-page-header {
-    margin-bottom: 1.1rem;
+    margin-bottom: 0.9rem;
 }
 
 .mods-page-header h1,
@@ -34,23 +34,17 @@
 }
 
 .mods-page-header h1 {
-    font-size: clamp(1.72rem, 3.2vw, 2.5rem);
+    font-size: clamp(1.58rem, 2.8vw, 2.2rem);
     line-height: 0.98;
     margin: 0;
-    color: #f2e2d6;
+    color: rgba(242, 226, 214, 0.88);
 }
 
-.mods-page-header p,
 .mods-section-heading p,
 .mods-row-description,
 .mods-row-detail {
     color: var(--mods-copy-soft);
     line-height: 1.7;
-}
-
-.mods-page-header p {
-    max-width: 40rem;
-    margin-top: 0.55rem;
 }
 
 .mods-requirement-strip {
@@ -160,9 +154,8 @@
 
 .mods-row--interactive:hover,
 .mods-row--interactive:focus-within {
-    transform: translateX(2px);
-    background:
-        linear-gradient(90deg, rgba(255, 127, 50, 0.045), rgba(255, 127, 50, 0.012) 38%, transparent 72%);
+    transform: translateX(1px) translateY(-1px);
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .mods-row--interactive:hover::before,
@@ -294,6 +287,7 @@
 .mods-row-description {
     margin-top: 0.35rem;
     max-width: 72ch;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .mods-row-detail {

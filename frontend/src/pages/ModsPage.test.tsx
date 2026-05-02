@@ -66,7 +66,7 @@ describe("ModsPage", () => {
         );
 
         expect(screen.getByRole("heading", { name: "Mods" })).toBeInTheDocument();
-        expect(screen.getByText("Small open-source Endless Legend 2 mods and tools.")).toBeInTheDocument();
+        expect(screen.queryByText("Small open-source Endless Legend 2 mods and tools.")).not.toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Essentials Mod Pack" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "EL2 Essentials Pack" })).not.toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Support Tools" })).toBeInTheDocument();

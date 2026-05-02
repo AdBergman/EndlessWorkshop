@@ -283,7 +283,6 @@ export default function ModsPage() {
             <section className="mods-shell">
                 <header className="mods-page-header">
                     <h1>Mods</h1>
-                    <p>Small open-source Endless Legend 2 mods and tools.</p>
                 </header>
 
                 <InstallRequirements guide={installGuide} installSectionId={INSTALL_SECTION_ID} />
