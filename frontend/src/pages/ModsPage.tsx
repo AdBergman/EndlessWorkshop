@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { featuredPack, includedMods, installGuide, standaloneMods } from "@/data/modsCatalog";
+import type { ModScreenshot } from "@/data/modsCatalog";
 import { InstallRequirements } from "@/components/Mods";
 import "./ModsPage.css";
 
@@ -13,6 +14,8 @@ interface RowPreview {
     badge: string;
     tone: RowTone;
     caption: string;
+    imageUrl?: string;
+    imageAlt?: string;
 }
 
 interface CatalogRowItem {
@@ -30,26 +33,105 @@ interface ModCatalogRowProps {
     onOpenPreview: (preview: RowPreview) => void;
 }
 
+function getPrimaryScreenshot(title: string, screenshots?: ModScreenshot[]) {
+    const screenshot = screenshots?.find((entry) => typeof entry.src === "string" && entry.src.trim());
+
+    if (!screenshot) {
+        return null;
+    }
+
+    return {
+        imageUrl: screenshot.src.trim(),
+        imageAlt: screenshot.alt?.trim() || `${title} screenshot`,
+        caption: screenshot.caption?.trim(),
+    };
+}
+
+function buildPreview(
+    title: string,
+    badge: string,
+    tone: RowTone,
+    fallbackCaption: string,
+    screenshots?: ModScreenshot[]
+): RowPreview {
+    const screenshot = getPrimaryScreenshot(title, screenshots);
+
+    return {
+        id: title,
+        title,
+        badge,
+        tone,
+        caption: screenshot?.caption || fallbackCaption,
+        imageUrl: screenshot?.imageUrl,
+        imageAlt: screenshot?.imageAlt,
+    };
+}
+
 function ModCatalogRow({ item, onOpenPreview }: ModCatalogRowProps) {
+    const hasPreviewImage = Boolean(item.preview.imageUrl);
+    const isRowClickable = hasPreviewImage || Boolean(item.releaseUrl);
+
+    const handleRowClick = () => {
+        if (item.preview.imageUrl) {
+            onOpenPreview(item.preview);
+            return;
+        }
+
+        if (item.releaseUrl) {
+            window.open(item.releaseUrl, "_blank", "noopener,noreferrer");
+        }
+    };
+
     return (
-        <article className="mods-row">
-            <button
-                type="button"
-                className={`mods-row-thumb mods-row-thumb--${item.preview.tone}`}
-                onClick={() => onOpenPreview(item.preview)}
-                aria-label={`Enlarge ${item.title} preview`}
-            >
-                <span className="mods-row-thumb__label">{item.preview.badge}</span>
-                <strong>{item.title}</strong>
-                <span className="mods-row-thumb__caption">{item.preview.caption}</span>
-            </button>
+        <article
+            className={`mods-row${isRowClickable ? " mods-row--interactive" : ""}`}
+            onClick={isRowClickable ? handleRowClick : undefined}
+        >
+            {hasPreviewImage ? (
+                <button
+                    type="button"
+                    className={`mods-row-thumb mods-row-thumb--${item.preview.tone} mods-row-thumb--clickable mods-row-thumb--with-image`}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onOpenPreview(item.preview);
+                    }}
+                    aria-label={`Enlarge ${item.title} screenshot`}
+                >
+                    <img
+                        className="mods-row-thumb__image"
+                        src={item.preview.imageUrl}
+                        alt={item.preview.imageAlt || `${item.title} screenshot`}
+                        loading="lazy"
+                    />
+                    <div className="mods-row-thumb__content">
+                        <span className="mods-row-thumb__label">{item.preview.badge}</span>
+                        <strong>{item.title}</strong>
+                        <span className="mods-row-thumb__caption">{item.preview.caption}</span>
+                    </div>
+                </button>
+            ) : (
+                <div
+                    className={`mods-row-thumb mods-row-thumb--${item.preview.tone} mods-row-thumb--static`}
+                    onClick={(event) => event.stopPropagation()}
+                    aria-hidden="true"
+                >
+                    <div className="mods-row-thumb__glyph">
+                        <span className="mods-row-thumb__node" />
+                    </div>
+                    <div className="mods-row-thumb__content">
+                        <span className="mods-row-thumb__label">{item.preview.badge}</span>
+                        <strong>{item.title}</strong>
+                        <span className="mods-row-thumb__caption">{item.preview.caption}</span>
+                    </div>
+                </div>
+            )}
 
             <div className="mods-row-copy">
                 <h3>{item.title}</h3>
                 <p className="mods-row-description">{item.description}</p>
                 {item.detail ? <p className="mods-row-detail">{item.detail}</p> : null}
                 {item.releaseUrl && item.actionLabel ? (
-                    <div className="mods-row-actions">
+                    <div className="mods-row-actions" onClick={(event) => event.stopPropagation()}>
                         <a href={item.releaseUrl} target="_blank" rel="noreferrer">
                             {item.actionLabel}
                         </a>
@@ -117,13 +199,7 @@ export default function ModsPage() {
                         detail: mod.detail,
                         releaseUrl: featuredPack.releaseUrl,
                         actionLabel: `Download pack ${featuredPack.version}`,
-                        preview: {
-                            id: mod.name,
-                            title: mod.name,
-                            badge: "Map",
-                            tone: "teal",
-                            caption: "World generation adjustments",
-                        },
+                        preview: buildPreview(mod.name, "Map", "teal", "World generation adjustments", mod.screenshots),
                     };
                 }
 
@@ -135,13 +211,7 @@ export default function ModsPage() {
                         detail: mod.detail,
                         releaseUrl: featuredPack.releaseUrl,
                         actionLabel: `Download pack ${featuredPack.version}`,
-                        preview: {
-                            id: mod.name,
-                            title: mod.name,
-                            badge: "Trade",
-                            tone: "steel",
-                            caption: "Bulk market shortcuts",
-                        },
+                        preview: buildPreview(mod.name, "Trade", "steel", "Bulk market shortcuts", mod.screenshots),
                     };
                 }
 
@@ -152,13 +222,7 @@ export default function ModsPage() {
                     detail: mod.detail,
                     releaseUrl: featuredPack.releaseUrl,
                     actionLabel: `Download pack ${featuredPack.version}`,
-                    preview: {
-                        id: mod.name,
-                        title: mod.name,
-                        badge: "AI",
-                        tone: "slate",
-                        caption: "Approval stabilization",
-                    },
+                    preview: buildPreview(mod.name, "AI", "slate", "Approval stabilization", mod.screenshots),
                 };
             }),
         []
@@ -176,13 +240,13 @@ export default function ModsPage() {
                 detail: mod.detail,
                 releaseUrl: mod.releaseUrl,
                 actionLabel: "Open release",
-                preview: {
-                    id: mod.name,
-                    title: mod.name,
-                    badge: mod.name === "Quest Recovery" ? "Quest" : "Report",
-                    tone: mod.name === "Quest Recovery" ? "steel" : "teal",
-                    caption: mod.name === "Quest Recovery" ? "Recovery utility" : "Summary export tool",
-                },
+                preview: buildPreview(
+                    mod.name,
+                    mod.name === "Quest Recovery" ? "Quest" : "Report",
+                    mod.name === "Quest Recovery" ? "steel" : "teal",
+                    mod.name === "Quest Recovery" ? "Recovery utility" : "Summary export tool",
+                    mod.screenshots
+                ),
             })),
         []
     );
@@ -197,13 +261,7 @@ export default function ModsPage() {
                 detail: installGuide.notes[1],
                 releaseUrl: installGuide.requirementUrl,
                 actionLabel: "BepInEx releases",
-                preview: {
-                    id: "install-bepinex",
-                    title: "1. Install BepInEx",
-                    badge: "Step 1",
-                    tone: "slate",
-                    caption: "Runtime requirement",
-                },
+                preview: buildPreview("1. Install BepInEx", "Step 1", "slate", "Runtime requirement"),
             },
             {
                 id: "install-mods",
@@ -211,13 +269,7 @@ export default function ModsPage() {
                 description:
                     "Extract the mod or modpack zip into the same folder as ENDLESS Legend 2.exe so files land under BepInEx/plugins.",
                 detail: installGuide.notes[0],
-                preview: {
-                    id: "install-mods",
-                    title: "2. Install Mods",
-                    badge: "Step 2",
-                    tone: "steel",
-                    caption: "Plugin placement",
-                },
+                preview: buildPreview("2. Install Mods", "Step 2", "steel", "Plugin placement"),
             },
         ],
         []
@@ -257,12 +309,12 @@ export default function ModsPage() {
                 />
             </section>
 
-            {activePreview ? (
+            {activePreview?.imageUrl ? (
                 <div
                     className="mods-lightbox"
                     role="dialog"
                     aria-modal="true"
-                    aria-label={`${activePreview.title} preview`}
+                    aria-label={`${activePreview.title} screenshot`}
                     onClick={() => setActivePreview(null)}
                 >
                     <div className="mods-lightbox-panel" onClick={(event) => event.stopPropagation()}>
@@ -274,11 +326,14 @@ export default function ModsPage() {
                         >
                             Close
                         </button>
-                        <div className={`mods-lightbox-preview mods-lightbox-preview--${activePreview.tone}`}>
-                            <span>{activePreview.badge}</span>
-                            <strong>{activePreview.title}</strong>
-                            <p>{activePreview.caption}</p>
-                        </div>
+                        <figure className="mods-lightbox-figure">
+                            <img
+                                className="mods-lightbox-image"
+                                src={activePreview.imageUrl}
+                                alt={activePreview.imageAlt || `${activePreview.title} screenshot`}
+                            />
+                            {activePreview.caption ? <figcaption>{activePreview.caption}</figcaption> : null}
+                        </figure>
                     </div>
                 </div>
             ) : null}

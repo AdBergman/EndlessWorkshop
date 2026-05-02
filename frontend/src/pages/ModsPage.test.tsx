@@ -1,10 +1,33 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import GameDataContext from "@/context/GameDataContext";
 import { Faction } from "@/types/dataTypes";
 import ModsPage from "./ModsPage";
+
+vi.mock("@/data/modsCatalog", async () => {
+    const actual = await vi.importActual<typeof import("@/data/modsCatalog")>("@/data/modsCatalog");
+
+    return {
+        ...actual,
+        includedMods: actual.includedMods.map((mod) =>
+            mod.name === "WorldGen"
+                ? {
+                      ...mod,
+                      screenshots: [
+                          {
+                              src: "/test-assets/worldgen-screenshot.webp",
+                              alt: "WorldGen map screenshot",
+                              caption: "World generation adjustments",
+                          },
+                      ],
+                  }
+                : mod
+        ),
+    };
+});
 
 function LocationProbe() {
     const location = useLocation();
@@ -62,10 +85,33 @@ describe("ModsPage", () => {
         ).toBeInTheDocument();
         expect(within(includedMods).getAllByRole("link", { name: "Download pack v1.0.0" })).toHaveLength(3);
 
-        await user.click(screen.getByRole("button", { name: "Enlarge WorldGen preview" }));
+        await user.click(screen.getByRole("button", { name: "Enlarge WorldGen screenshot" }));
 
-        expect(screen.getByRole("dialog", { name: "WorldGen preview" })).toBeInTheDocument();
+        const lightbox = screen.getByRole("dialog", { name: "WorldGen screenshot" });
+
+        expect(lightbox).toBeInTheDocument();
+        expect(within(lightbox).getByRole("img", { name: "WorldGen map screenshot" })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Close preview" })).toBeInTheDocument();
+    });
+
+    it("does not open a fake preview when a mod has no screenshot", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <MemoryRouter initialEntries={["/mods"]}>
+                <Routes>
+                    <Route path="/mods" element={<ModsPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const includedMods = screen.getByLabelText("Included mods");
+        const bulkTradeThumbTitle = within(includedMods).getByText("BulkTrade", { selector: ".mods-row-thumb strong" });
+
+        await user.click(bulkTradeThumbTitle);
+
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Close preview" })).not.toBeInTheDocument();
     });
 
     it("adds a working Mods nav entry in the top container", async () => {
