@@ -89,7 +89,7 @@ describe("useCodexStore", () => {
         expect(entry?.referenceKeys).toEqual([]);
     });
 
-    it("searches across displayName, entryKey, and descriptionLines with optional kind filtering", async () => {
+    it("searches across displayName, entryKey, exportKind, and descriptionLines with optional kind filtering", async () => {
         mockedApiClient.getCodex.mockResolvedValue([
             {
                 exportKind: "abilities",
@@ -113,6 +113,7 @@ describe("useCodexStore", () => {
         expect(state.searchEntries("bloom")).toHaveLength(2);
         expect(state.searchEntries("bloom", "abilities")).toHaveLength(1);
         expect(state.searchEntries("hero_a")).toHaveLength(1);
+        expect(state.searchEntries("units")).toHaveLength(1);
     });
 
     it("avoids duplicate fetches when already loaded", async () => {

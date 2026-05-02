@@ -1,68 +1,143 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import HoverableItem from '@/components/Tech/views/HoverableItem';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import HoverableItem from "@/components/Tech/views/HoverableItem";
+import { useGameData } from "@/context/GameDataContext";
+
+vi.mock("@/context/GameDataContext", () => ({
+    useGameData: vi.fn(),
+}));
 
 // Mock tooltips
-vi.mock('@/components/Tooltips/ImprovementTooltip', () => ({
+vi.mock("@/components/Tooltips/ImprovementTooltip", () => ({
     default: ({ hoveredImprovement }: any) => (
-        <div data-testid="imp-tooltip">{hoveredImprovement.name}</div>
+        <div data-testid="imp-tooltip">{hoveredImprovement.data.displayName}</div>
     ),
 }));
 
-vi.mock('@/components/Tooltips/DistrictTooltip', () => ({
+vi.mock("@/components/Tooltips/DistrictTooltip", () => ({
     default: ({ hoveredDistrict }: any) => (
-        <div data-testid="dist-tooltip">{hoveredDistrict.name}</div>
+        <div data-testid="dist-tooltip">{hoveredDistrict.data.displayName}</div>
     ),
 }));
 
-describe('HoverableItem', () => {
-    it('renders improvement tooltip on hover', async () => {
+const mockedUseGameData = vi.mocked(useGameData);
+
+describe("HoverableItem", () => {
+    beforeEach(() => {
+        mockedUseGameData.mockReturnValue({
+            improvements: new Map([
+                [
+                    "Improvement_Traveler_Shrine",
+                    {
+                        displayName: "Traveler's Shrine",
+                        descriptionLines: ["Gain Dust."],
+                        unique: "City",
+                        cost: [],
+                    },
+                ],
+            ]),
+            districts: new Map([
+                [
+                    "District_Communal_Habitations",
+                    {
+                        displayName: "Communal Habitations",
+                        descriptionLines: ["Housing for the populace."],
+                    },
+                ],
+            ]),
+            units: new Map(),
+        } as any);
+    });
+
+    it("renders improvement tooltip on hover", async () => {
         const user = userEvent.setup();
         const name = "Traveler's Shrine";
-        render(<HoverableItem type="Improvement" name={name} prefix="💎 " />);
+        render(
+            <HoverableItem
+                type="Constructible"
+                name={name}
+                unlockKey="Improvement_Traveler_Shrine"
+                prefix="💎 "
+            />
+        );
 
-        const hoverTarget = screen.getByText(name, { selector: 'span' });
+        const hoverTarget = screen.getByText(name, { selector: "span" });
         await user.hover(hoverTarget);
 
-        const tooltip = await screen.findByTestId('imp-tooltip');
+        const tooltip = await screen.findByTestId("imp-tooltip");
         expect(tooltip).toHaveTextContent(name);
 
         await user.unhover(hoverTarget);
-        expect(screen.queryByTestId('imp-tooltip')).toBeNull();
+        expect(screen.queryByTestId("imp-tooltip")).toBeNull();
     });
 
-    it('renders district tooltip on hover', async () => {
+    it("renders district tooltip on hover", async () => {
         const user = userEvent.setup();
-        const name = 'Communal Habitations';
-        render(<HoverableItem type="District" name={name} prefix="🏘️ " />);
+        const name = "Communal Habitations";
+        render(
+            <HoverableItem
+                type="Constructible"
+                name={name}
+                unlockKey="District_Communal_Habitations"
+                prefix="🏘️ "
+            />
+        );
 
-        const hoverTarget = screen.getByText(name, { selector: 'span' });
+        const hoverTarget = screen.getByText(name, { selector: "span" });
         await user.hover(hoverTarget);
 
-        const tooltip = await screen.findByTestId('dist-tooltip');
+        const tooltip = await screen.findByTestId("dist-tooltip");
         expect(tooltip).toHaveTextContent(name);
 
         await user.unhover(hoverTarget);
-        expect(screen.queryByTestId('dist-tooltip')).toBeNull();
+        expect(screen.queryByTestId("dist-tooltip")).toBeNull();
     });
 
-    it('renders without crashing', () => {
-        render(<HoverableItem type="Improvement" name="Traveler's Shrine" prefix="💎 " />);
-        render(<HoverableItem type="District" name="Communal Habitations" prefix="🏘️ " />);
+    it("renders without crashing", () => {
+        render(
+            <HoverableItem
+                type="Constructible"
+                name="Traveler's Shrine"
+                unlockKey="Improvement_Traveler_Shrine"
+                prefix="💎 "
+            />
+        );
+        render(
+            <HoverableItem
+                type="Constructible"
+                name="Communal Habitations"
+                unlockKey="District_Communal_Habitations"
+                prefix="🏘️ "
+            />
+        );
     });
 
-    it('renders the prefix', () => {
-        const prefix = '💎 ';
+    it("renders the prefix", () => {
+        const prefix = "💎 ";
         const name = "Traveler's Shrine";
-        render(<HoverableItem type="Improvement" name={name} prefix={prefix} />);
+        render(
+            <HoverableItem
+                type="Constructible"
+                name={name}
+                unlockKey="Improvement_Traveler_Shrine"
+                prefix={prefix}
+            />
+        );
 
         // Get the span and check its parent for the prefix
-        const span = screen.getByText(name, { selector: 'span' });
+        const span = screen.getByText(name, { selector: "span" });
         expect(span.parentElement).toHaveTextContent(/^💎 /);
     });
 
-    it('does not show tooltip before hover', () => {
-        render(<HoverableItem type="Improvement" name="Traveler's Shrine" prefix="💎 " />);
-        expect(screen.queryByTestId('imp-tooltip')).toBeNull();
+    it("does not show tooltip before hover", () => {
+        render(
+            <HoverableItem
+                type="Constructible"
+                name="Traveler's Shrine"
+                unlockKey="Improvement_Traveler_Shrine"
+                prefix="💎 "
+            />
+        );
+        expect(screen.queryByTestId("imp-tooltip")).toBeNull();
     });
 });

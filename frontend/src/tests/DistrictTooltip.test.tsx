@@ -1,61 +1,38 @@
-import { render, screen } from '@testing-library/react';
-import DistrictTooltip from '../components/Tooltips/DistrictTooltip';
-import { District } from '@/types/dataTypes';
+import { render, screen } from "@testing-library/react";
+import DistrictTooltip from "../components/Tooltips/DistrictTooltip";
+import type { District } from "@/types/dataTypes";
+import type { HoveredWithCoords } from "@/components/Tooltips/hoverHelpers";
 
-// Helper function to create type-safe mock data, mirroring the pattern from other tests
-const createMockDistrict = (
-    data: District & { coords: { xPct: number; yPct: number } }
-) => data;
+function createMockDistrict(
+    data: District,
+    coords: HoveredWithCoords<District>["coords"] = { xPct: 50, yPct: 50 }
+): HoveredWithCoords<District> {
+    return { data, coords };
+}
 
-describe('DistrictTooltip', () => {
-    it('renders correctly with all optional data present', () => {
-        const mockData = createMockDistrict({
-            displayName: 'Test District',
-            info: ['A special district.'],
-            effect: '+5 Gold',
-            tileBonus: ['+1 Food on Plains'],
-            adjacencyBonus: ['+1 Gold for each adjacent Market'],
-            placementPrereq: 'Must be placed on a hill',
-            coords: { xPct: 50, yPct: 50 },
+describe("DistrictTooltip", () => {
+    it("renders every description line when present", () => {
+        const hoveredDistrict = createMockDistrict({
+            displayName: "Test District",
+            descriptionLines: ["A special district.", "+5 Gold"],
         });
 
-        render(<DistrictTooltip hoveredDistrict={mockData} />);
+        render(<DistrictTooltip hoveredDistrict={hoveredDistrict} />);
 
-        // Assert that all provided data is visible
-        expect(screen.getByText('Test District')).toBeInTheDocument();
-        expect(screen.getByText('A special district.')).toBeInTheDocument();
-        expect(screen.getByText('Effect:')).toBeInTheDocument();
-        expect(screen.getByText('+5 Gold')).toBeInTheDocument();
-        expect(screen.getByText('Tile Bonus:')).toBeInTheDocument();
-        expect(screen.getByText('+1 Food on Plains')).toBeInTheDocument();
-        expect(screen.getByText('Adjacency Bonus:')).toBeInTheDocument();
-        expect(
-            screen.getByText('+1 Gold for each adjacent Market')
-        ).toBeInTheDocument();
-        expect(screen.getByText('Placement:')).toBeInTheDocument();
-        expect(
-            screen.getByText('Must be placed on a hill')
-        ).toBeInTheDocument();
+        expect(screen.getByText("Test District")).toBeInTheDocument();
+        expect(screen.getByText("A special district.")).toBeInTheDocument();
+        expect(screen.getByText("+5 Gold")).toBeInTheDocument();
     });
 
-    it('renders correctly with only required and some optional data', () => {
-        const mockData = createMockDistrict({
-            displayName: 'Simple Farm',
-            effect: '+2 Food',
-            coords: { xPct: 50, yPct: 50 },
+    it("renders correctly with only the district name when no description is available", () => {
+        const hoveredDistrict = createMockDistrict({
+            displayName: "Simple Farm",
+            descriptionLines: [],
         });
 
-        render(<DistrictTooltip hoveredDistrict={mockData} />);
+        render(<DistrictTooltip hoveredDistrict={hoveredDistrict} />);
 
-        // Assert that the provided data is visible
-        expect(screen.getByText('Simple Farm')).toBeInTheDocument();
-        expect(screen.getByText('Effect:')).toBeInTheDocument();
-        expect(screen.getByText('+2 Food')).toBeInTheDocument();
-
-        // Assert that sections for missing data are NOT rendered
-        // `queryBy*` is used to check for absence without throwing an error
-        expect(screen.queryByText('Tile Bonus:')).not.toBeInTheDocument();
-        expect(screen.queryByText('Adjacency Bonus:')).not.toBeInTheDocument();
-        expect(screen.queryByText('Placement:')).not.toBeInTheDocument();
+        expect(screen.getByText("Simple Farm")).toBeInTheDocument();
+        expect(screen.queryByText("A special district.")).not.toBeInTheDocument();
     });
 });

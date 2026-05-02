@@ -1,7 +1,7 @@
 import React from "react";
 import "./TopContainer.css";
 import {useGameData} from "@/context/GameDataContext";
-import {NavLink} from "react-router-dom";
+import {NavLink, useLocation} from "react-router-dom";
 import {Faction} from "@/types/dataTypes";
 
 const factions = [
@@ -15,12 +15,15 @@ const factions = [
 const routes = [
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
+    { path: "/codex", label: "Codex" },
     { path: "/summary", label: "Summary" },
     { path: "/info", label: "Info" },
 ];
 
 const TopContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
+    const location = useLocation();
+    const showFactionSelector = !isProcessingSharedBuild && !location.pathname.startsWith("/codex");
 
     return (
         <header className="top-container">
@@ -42,7 +45,7 @@ const TopContainer: React.FC = () => {
             </div>
 
             {/* Conditionally render faction selector based on isProcessingSharedBuild */}
-            {!isProcessingSharedBuild && (
+            {showFactionSelector && (
                 <div className="faction-selector">
                     {factions.map((f) => (
                         <button

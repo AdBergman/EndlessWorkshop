@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
+import { buildEntriesByKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Store = {
@@ -29,15 +31,6 @@ function normalizeEntry(entry: CodexEntry): CodexEntry {
         descriptionLines: (entry.descriptionLines ?? []).filter((line): line is string => typeof line === "string"),
         referenceKeys: (entry.referenceKeys ?? []).filter((key): key is string => typeof key === "string"),
     };
-}
-
-function buildEntriesByKey(entries: CodexEntry[]): Record<string, CodexEntry> {
-    return entries.reduce<Record<string, CodexEntry>>((acc, entry) => {
-        if (entry.entryKey) {
-            acc[entry.entryKey] = entry;
-        }
-        return acc;
-    }, {});
 }
 
 function buildEntriesByKind(entries: CodexEntry[]): Record<string, CodexEntry[]> {
@@ -129,39 +122,13 @@ export const useCodexStore = create<Store>((set, get) => ({
     },
 
     getRelatedEntries: (entry) => {
-        if (!entry) return [];
-
-        const selfKey = (entry.entryKey ?? "").trim();
-        if (!selfKey) return [];
-
-        const { entriesByKey } = get();
-        return (entry.referenceKeys ?? [])
-            .filter((key) => {
-                const normalizedKey = (key ?? "").trim();
-                return normalizedKey.length > 0 && normalizedKey !== selfKey;
-            })
-            .map((key) => entriesByKey[key])
-            .filter((related): related is CodexEntry => Boolean(related));
+        return resolveRelatedEntries(entry, get().entriesByKey);
     },
 
     searchEntries: (query, kind) => {
-        const normalizedQuery = (query ?? "").trim().toLowerCase();
-        const pool = kind ? get().getEntriesByKind(kind) : get().entries;
-
-        if (!normalizedQuery) {
-            return pool;
-        }
-
-        return pool.filter((entry) => {
-            const displayName = entry.displayName.toLowerCase();
-            const entryKey = entry.entryKey.toLowerCase();
-            const description = entry.descriptionLines.join(" ").toLowerCase();
-
-            return (
-                displayName.includes(normalizedQuery) ||
-                entryKey.includes(normalizedQuery) ||
-                description.includes(normalizedQuery)
-            );
+        return filterCodexEntries(get().entries, {
+            query,
+            kind,
         });
     },
 }));

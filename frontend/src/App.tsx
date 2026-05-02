@@ -18,6 +18,7 @@ import LandscapeWrapper from "./components/Layout/LandscapeWrapper";
 import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
 import AdminImportPage from "@/components/AdminImport/AdminImportPage";
+import CodexPage from "@/pages/CodexPage";
 
 import "./App.css";
 
@@ -93,6 +94,22 @@ function App() {
                                         />
                                     </Helmet>
                                     <UnitEvolutionExplorer />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="codex"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>EL2 Codex Encyclopedia | Endless Workshop</title>
+                                        <meta
+                                            name="description"
+                                            content="Browse the Endless Legend 2 codex, encyclopedia entries, and cross-linked workshop reference data in Endless Workshop."
+                                        />
+                                    </Helmet>
+                                    <CodexPage />
                                 </>
                             }
                         />
