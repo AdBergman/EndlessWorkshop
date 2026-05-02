@@ -125,7 +125,7 @@ public class CodexRepositoryAdapter implements CodexRepository {
             changed = true;
         }
 
-        List<String> newRefs = normalizeKeys(update.referenceLines());
+        List<String> newRefs = normalizeKeys(update.referenceKeys());
         if (!Objects.equals(entity.getReferenceKeys(), newRefs)) {
             entity.setReferenceKeys(newRefs);
             changed = true;

@@ -12,12 +12,24 @@ import ewshop.facade.mapper.CodexImportMapper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
 
-    private static final String EXPECTED_EXPORT_KIND = "abilities";
+    private static final List<String> ALLOWED_EXPORT_KINDS = List.of(
+            "abilities",
+            "councilors",
+            "districts",
+            "equipment",
+            "factions",
+            "heroes",
+            "improvements",
+            "populations",
+            "tech",
+            "units"
+    );
     private static final int MAX_ERRORS = 50;
 
     private final CodexImportService codexImportService;
@@ -120,10 +132,12 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
     }
 
     private static void assertExportKind(String exportKind) {
-        if (!EXPECTED_EXPORT_KIND.equals(exportKind)) {
+        String normalized = exportKind == null ? null : exportKind.trim().toLowerCase();
+        if (normalized == null || !new LinkedHashSet<>(ALLOWED_EXPORT_KINDS).contains(normalized)) {
+            String found = exportKind == null ? "null" : exportKind;
             throw new IllegalArgumentException(
-                    "Wrong import file type: expected exportKind='" + EXPECTED_EXPORT_KIND +
-                            "' but got '" + exportKind + "'"
+                    "Invalid exportKind. Expected one of: " + allowedKindsDisplay() +
+                            " but got '" + found + "'"
             );
         }
     }
@@ -154,7 +168,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
                 .count();
 
         long emptyRefs = snapshots.stream()
-                .filter(s -> s.referenceLines() == null || s.referenceLines().isEmpty())
+                .filter(s -> s.referenceKeys() == null || s.referenceKeys().isEmpty())
                 .count();
 
         List<ImportCountDto> warnings = new ArrayList<>();
@@ -166,5 +180,9 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         }
 
         return warnings;
+    }
+
+    private static String allowedKindsDisplay() {
+        return ALLOWED_EXPORT_KINDS.toString();
     }
 }

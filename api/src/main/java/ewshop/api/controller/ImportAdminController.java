@@ -79,7 +79,7 @@ public class ImportAdminController {
     @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importCodex(@RequestBody CodexImportBatchDto dto) {
         if (dto.entries() == null || dto.entries().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing codexEntries[]");
+            throw new IllegalArgumentException("Import file entries[] must not be empty");
         }
         return codexImportAdminFacade.importCodex(dto);
     }

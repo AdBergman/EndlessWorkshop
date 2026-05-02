@@ -1,6 +1,8 @@
 package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
+import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
@@ -167,5 +169,50 @@ class ImportAdminControllerTest {
                 .andExpect(status().isBadRequest());
 
         verifyNoInteractions(districtImportAdminFacade);
+    }
+
+    @Test
+    void importCodex_returnsOk_andCallsFacade_whenPayloadHasEntries() throws Exception {
+
+        CodexImportBatchDto payload = new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "0.4.0",
+                "2026-05-02T07:42:00Z",
+                "equipment",
+                List.of(new CodexImportEntryDto(
+                        "Equipment_Accessory_03_Definition",
+                        "Crimson Wing Rune",
+                        List.of("Type: Accessory"),
+                        List.of("UnitAbility_Hero_BattleAbility_Equipment_Passive_44")
+                ))
+        );
+
+        mockMvc.perform(post("/api/admin/import/codex")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+
+        verify(codexImportAdminFacade).importCodex(payload);
+    }
+
+    @Test
+    void importCodex_returnsBadRequest_andDoesNotCallFacade_whenEntriesAreEmpty() throws Exception {
+
+        CodexImportBatchDto payload = new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "0.4.0",
+                "2026-05-02T07:42:00Z",
+                "equipment",
+                List.<CodexImportEntryDto>of()
+        );
+
+        mockMvc.perform(post("/api/admin/import/codex")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest());
+
+        verifyNoInteractions(codexImportAdminFacade);
     }
 }

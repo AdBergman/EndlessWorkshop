@@ -126,7 +126,18 @@ type CodexImportFile = {
     entries?: unknown[];
 };
 
-const ALLOWED_CODEX_KINDS = ["abilities"];
+const ALLOWED_CODEX_KINDS = [
+    "abilities",
+    "councilors",
+    "districts",
+    "equipment",
+    "factions",
+    "heroes",
+    "improvements",
+    "populations",
+    "tech",
+    "units",
+];
 
 function metaFromCodexFile(json: CodexImportFile): ModuleMetaKV[] {
     const count = Array.isArray(json.entries) ? json.entries.length : 0;
@@ -230,7 +241,7 @@ export default function AdminImportPage() {
             {
                 id: "codex",
                 title: "Codex",
-                description: "Upload a generic codex export (e.g., abilities) and import it into the database.",
+                description: "Upload a generic codex export and import it into the database.",
                 enabled: true,
                 endpoint: "/api/admin/import/codex",
                 getMeta: metaFromCodexFile,

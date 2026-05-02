@@ -9,5 +9,5 @@ public record CodexImportEntryDto(
         String entryKey,
         String displayName,
         List<String> descriptionLines,
-        List<String> referenceLines
+        List<String> referenceKeys
 ) {}

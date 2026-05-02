@@ -25,9 +25,9 @@ public final class CodexImportMapper {
         if (name == null) throw new IllegalArgumentException("displayName is missing for " + key);
 
         List<String> descriptionLines = cleanLines(dto.descriptionLines());
-        List<String> referenceLines = cleanDistinctLines(dto.referenceLines());
+        List<String> referenceKeys = cleanDistinctLines(dto.referenceKeys());
 
-        return new CodexImportSnapshot(key, name, kind, descriptionLines, referenceLines);
+        return new CodexImportSnapshot(key, name, kind, descriptionLines, referenceKeys);
     }
 
     private static String trimToNull(String s) {
