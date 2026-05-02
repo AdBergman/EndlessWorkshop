@@ -14,6 +14,15 @@ export default defineConfig(({ mode }) => {
             },
         },
         base: isProduction ? './' : '/', // relative paths in production, root in dev
+        build: {
+            rollupOptions: {
+                input: {
+                    main: resolve(__dirname, 'index.html'),
+                    codex: resolve(__dirname, 'codex.html'),
+                    mods: resolve(__dirname, 'mods.html'),
+                },
+            },
+        },
         server: {
             open: true,
             proxy: !isProduction
