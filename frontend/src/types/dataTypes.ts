@@ -71,6 +71,8 @@ export interface Codex {
     referenceKeys: string[];
 }
 
+export type CodexEntry = Codex;
+
 export const ERA_THRESHOLDS: Record<number, number> = {
     1: 0,
     2: 8,

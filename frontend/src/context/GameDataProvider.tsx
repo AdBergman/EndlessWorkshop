@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import GameDataContext from "./GameDataContext";
 import {
     Codex,
@@ -11,6 +11,7 @@ import {
 } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
+import { useCodexStore } from "@/stores/codexStore";
 
 interface Props {
     children: ReactNode;
@@ -50,11 +51,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
     const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
-    // NEW: codex grouped by kind, then entryKey
-    const [codexByKindKey, setCodexByKindKey] = useState<Map<string, Map<string, Codex>>>(
-        new Map()
-    );
-
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
         toFactionInfoFromEnum(Faction.KIN)
     );
@@ -66,6 +62,18 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
     const initialShareUuid = new URLSearchParams(window.location.search).get("share");
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
+    const codexEntriesByKind = useCodexStore((s) => s.entriesByKind);
+    const loadCodexEntries = useCodexStore((s) => s.loadEntries);
+
+    const codexByKindKey = useMemo(() => {
+        const out = new Map<string, Map<string, Codex>>();
+
+        for (const [kind, entries] of Object.entries(codexEntriesByKind)) {
+            out.set(kind, toKeyedMap(entries, (entry) => entry.entryKey));
+        }
+
+        return out;
+    }, [codexEntriesByKind]);
 
     const refreshTechs = useCallback(async () => {
         try {
@@ -126,31 +134,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         void fetchUnits();
     }, []);
 
-    // NEW: fetch codex once
     useEffect(() => {
-        const fetchCodex = async () => {
-            try {
-                const codex = await apiClient.getCodex();
-
-                // Group by exportKind
-                const byKind = toKeyedMap(codex, (c) => c.exportKind);
-
-                // For each kind, create entryKey map
-                const out = new Map<string, Map<string, Codex>>();
-                for (const [kind, _dummy] of byKind.entries()) {
-                    const rowsForKind = codex.filter((c) => (c.exportKind ?? "").trim() === kind);
-                    out.set(kind, toKeyedMap(rowsForKind, (c) => c.entryKey));
-                }
-
-                setCodexByKindKey(out);
-            } catch (err) {
-                console.error("Failed to load codex:", err);
-                setCodexByKindKey(new Map());
-            }
-        };
-
-        void fetchCodex();
-    }, []);
+        void loadCodexEntries();
+    }, [loadCodexEntries]);
 
     useEffect(() => {
         if (sharedBuildLoaded) return;

@@ -1,5 +1,6 @@
 import { useGameData } from "@/context/GameDataContext";
-import type { Codex } from "@/types/dataTypes";
+import { useCodexStore } from "@/stores/codexStore";
+import type { Codex, CodexEntry } from "@/types/dataTypes";
 
 function trimToNull(s: string | null | undefined): string | null {
     const t = (s ?? "").trim();
@@ -8,6 +9,10 @@ function trimToNull(s: string | null | undefined): string | null {
 
 export function useCodex() {
     const { codexByKindKey } = useGameData();
+    const getEntryByKey = useCodexStore((s) => s.getEntryByKey);
+    const getEntriesByKind = useCodexStore((s) => s.getEntriesByKind);
+    const getRelatedEntries = useCodexStore((s) => s.getRelatedEntries);
+    const searchEntries = useCodexStore((s) => s.searchEntries);
 
     // Raw lookup (no filtering)
     const getEntry = (exportKind: string, entryKey: string): Codex | undefined => {
@@ -43,8 +48,12 @@ export function useCodex() {
 
     return {
         getEntry,
+        getEntryByKey,
+        getEntriesByKind,
+        getRelatedEntries: (entry: CodexEntry) => getRelatedEntries(entry),
         getVisibleEntry,
         getVisibleLabel,
         getTooltipLines,
+        searchEntries,
     };
 }
