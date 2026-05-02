@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Explore the Endless Legend 2 technology tree, view unlocks, and plan research paths with the EWShop interactive tech planner." />
+    <meta name="robots" content="index, follow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href="https://endlessworkshop.dev/tech" />
+    <meta property="og:site_name" content="Endless Workshop" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EL2 Tech Tree Planner | Endless Workshop" />
+    <meta property="og:description" content="Explore the Endless Legend 2 technology tree, view unlocks, and plan research paths with the EWShop interactive tech planner." />
+    <meta property="og:url" content="https://endlessworkshop.dev/tech" />
+    <meta property="og:image" content="https://endlessworkshop.dev/logo512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EL2 Tech Tree Planner | Endless Workshop" />
+    <meta name="twitter:description" content="Explore the Endless Legend 2 technology tree, view unlocks, and plan research paths with the EWShop interactive tech planner." />
+    <meta name="twitter:image" content="https://endlessworkshop.dev/logo512.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "EL2 Tech Tree Planner",
+            "description": "Interactive Endless Legend 2 technology tree planner and reference.",
+            "url": "https://endlessworkshop.dev/tech"
+        }
+    </script>
+    <script>
+        const isPhone = window.innerWidth <= 768;
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+
+        if (metaViewport) {
+            if (isPhone) {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+                );
+            } else {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+                );
+            }
+        }
+    </script>
+    <title>EL2 Tech Tree Planner | Endless Workshop</title>
+    <script type="module" src="./src/index.tsx"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0e13;
+            color: #f6f7f9;
+        }
+
+        .seo-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .seo-shell h1,
+        .seo-shell h2 {
+            font-family: Orbitron, Arial, sans-serif;
+        }
+
+        .seo-shell p,
+        .seo-shell li {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<noscript>This page works best with JavaScript enabled so the interactive tech planner can load.</noscript>
+<div id="root">
+    <main class="seo-shell">
+        <header>
+            <h1>Endless Legend 2 Tech Tree Planner</h1>
+            <p>Endless Workshop includes an interactive Endless Legend 2 tech tree planner that helps players inspect research unlocks, compare eras, and share build ideas.</p>
+        </header>
+
+        <section>
+            <h2>What the planner covers</h2>
+            <ul>
+                <li>Browse the technology tree by era and view unlock relationships.</li>
+                <li>Track selected research paths in a companion spreadsheet view.</li>
+                <li>Use shared-build links or imported progress to review a specific tech route.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Interactive data loading</h2>
+            <p>The live planner loads the latest available game data after the app starts, so technology names, unlocks, and build state stay aligned with the current workshop dataset.</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>

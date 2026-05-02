@@ -1,19 +1,18 @@
 package ewshop.app.config;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 public class FrontendController {
 
-    @RequestMapping(value = {"/codex", "/codex/"})
-    public String forwardCodex() {
-        return "forward:/codex.html";
-    }
-
-    @RequestMapping(value = {"/mods", "/mods/"})
-    public String forwardMods() {
-        return "forward:/mods.html";
+    @RequestMapping(value = {
+            "/{page:tech|units|summary|codex|mods|info}",
+            "/{page:tech|units|summary|codex|mods|info}/"
+    })
+    public String forwardStaticEntryDocument(@PathVariable String page) {
+        return "forward:/" + page + ".html";
     }
 
     /**

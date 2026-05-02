@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://endlessworkshop.dev/</loc>
-    </url>
-    <url>
         <loc>https://endlessworkshop.dev/tech</loc>
     </url>
     <url>
@@ -13,10 +10,10 @@
         <loc>https://endlessworkshop.dev/codex</loc>
     </url>
     <url>
-        <loc>https://endlessworkshop.dev/mods</loc>
+        <loc>https://endlessworkshop.dev/summary</loc>
     </url>
     <url>
-        <loc>https://endlessworkshop.dev/summary</loc>
+        <loc>https://endlessworkshop.dev/mods</loc>
     </url>
     <url>
         <loc>https://endlessworkshop.dev/info</loc>

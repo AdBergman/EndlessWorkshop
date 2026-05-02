@@ -18,8 +18,12 @@ export default defineConfig(({ mode }) => {
             rollupOptions: {
                 input: {
                     main: resolve(__dirname, 'index.html'),
+                    tech: resolve(__dirname, 'tech.html'),
+                    units: resolve(__dirname, 'units.html'),
+                    summary: resolve(__dirname, 'summary.html'),
                     codex: resolve(__dirname, 'codex.html'),
                     mods: resolve(__dirname, 'mods.html'),
+                    info: resolve(__dirname, 'info.html'),
                 },
             },
         },

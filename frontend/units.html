@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Explore Endless Legend 2 unit evolution, stats, and progression with the EWShop interactive unit explorer." />
+    <meta name="robots" content="index, follow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href="https://endlessworkshop.dev/units" />
+    <meta property="og:site_name" content="Endless Workshop" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EL2 Unit Evolution Explorer | Endless Workshop" />
+    <meta property="og:description" content="Explore Endless Legend 2 unit evolution, stats, and progression with the EWShop interactive unit explorer." />
+    <meta property="og:url" content="https://endlessworkshop.dev/units" />
+    <meta property="og:image" content="https://endlessworkshop.dev/logo512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EL2 Unit Evolution Explorer | Endless Workshop" />
+    <meta name="twitter:description" content="Explore Endless Legend 2 unit evolution, stats, and progression with the EWShop interactive unit explorer." />
+    <meta name="twitter:image" content="https://endlessworkshop.dev/logo512.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "EL2 Unit Evolution Explorer",
+            "description": "Interactive Endless Legend 2 unit evolution explorer and reference.",
+            "url": "https://endlessworkshop.dev/units"
+        }
+    </script>
+    <script>
+        const isPhone = window.innerWidth <= 768;
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+
+        if (metaViewport) {
+            if (isPhone) {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+                );
+            } else {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+                );
+            }
+        }
+    </script>
+    <title>EL2 Unit Evolution Explorer | Endless Workshop</title>
+    <script type="module" src="./src/index.tsx"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0e13;
+            color: #f6f7f9;
+        }
+
+        .seo-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .seo-shell h1,
+        .seo-shell h2 {
+            font-family: Orbitron, Arial, sans-serif;
+        }
+
+        .seo-shell p,
+        .seo-shell li {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<noscript>This page works best with JavaScript enabled so the interactive unit explorer can load.</noscript>
+<div id="root">
+    <main class="seo-shell">
+        <header>
+            <h1>Endless Legend 2 Unit Evolution Explorer</h1>
+            <p>Endless Workshop provides an Endless Legend 2 unit explorer that lets players inspect faction rosters, compare evolution paths, and review linked unit progression.</p>
+        </header>
+
+        <section>
+            <h2>What the explorer covers</h2>
+            <ul>
+                <li>Browse major-faction unit lines and their evolution branches.</li>
+                <li>Switch into minor-faction mode to review currently surfaced minor units.</li>
+                <li>Use shareable route parameters to jump directly to a specific faction and unit.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Interactive data loading</h2>
+            <p>The live explorer loads unit data after the app starts, which keeps roster details and evolution links aligned with the current Endless Workshop dataset.</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>

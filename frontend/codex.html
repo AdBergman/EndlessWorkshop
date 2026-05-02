@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Browse the Endless Legend 2 codex, encyclopedia entries, and cross-linked workshop reference data in Endless Workshop." />
+    <meta name="robots" content="index, follow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href="https://endlessworkshop.dev/codex" />
+    <meta property="og:site_name" content="Endless Workshop" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EL2 Codex Encyclopedia | Endless Workshop" />
+    <meta property="og:description" content="Browse the Endless Legend 2 codex, encyclopedia entries, and cross-linked workshop reference data in Endless Workshop." />
+    <meta property="og:url" content="https://endlessworkshop.dev/codex" />
+    <meta property="og:image" content="https://endlessworkshop.dev/logo512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EL2 Codex Encyclopedia | Endless Workshop" />
+    <meta name="twitter:description" content="Browse the Endless Legend 2 codex, encyclopedia entries, and cross-linked workshop reference data in Endless Workshop." />
+    <meta name="twitter:image" content="https://endlessworkshop.dev/logo512.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "EL2 Codex Encyclopedia",
+            "description": "Searchable Endless Legend 2 codex and encyclopedia reference.",
+            "url": "https://endlessworkshop.dev/codex",
+            "about": "Endless Legend 2"
+        }
+    </script>
+    <script>
+        const isPhone = window.innerWidth <= 768;
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+
+        if (metaViewport) {
+            if (isPhone) {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+                );
+            } else {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+                );
+            }
+        }
+    </script>
+    <title>EL2 Codex Encyclopedia | Endless Workshop</title>
+    <script type="module" src="./src/index.tsx"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0e13;
+            color: #f6f7f9;
+        }
+
+        .seo-shell {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .seo-shell h1,
+        .seo-shell h2 {
+            font-family: Orbitron, Arial, sans-serif;
+        }
+
+        .seo-shell p,
+        .seo-shell li {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+<noscript>This page works best with JavaScript enabled so the live codex data can load.</noscript>
+<div id="root">
+    <main class="seo-shell">
+        <header>
+            <h1>Endless Legend 2 Codex Encyclopedia</h1>
+            <p>Endless Workshop includes a searchable codex reference for Endless Legend 2, covering abilities, factions, units, technologies, improvements, districts, heroes, populations, equipment, and councilors.</p>
+        </header>
+
+        <section>
+            <h2>What the codex page covers</h2>
+            <ul>
+                <li>Search and filter public codex entries by kind.</li>
+                <li>Browse linked encyclopedia details and related references.</li>
+                <li>Use the codex alongside the tech planner and unit explorer as a connected gameplay reference.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Interactive data loading</h2>
+            <p>The live interface loads current codex entries from the Endless Workshop API after the page starts, so the searchable catalog stays aligned with the app’s latest imported data.</p>
+        </section>
+    </main>
+</div>
+</body>
+</html>
