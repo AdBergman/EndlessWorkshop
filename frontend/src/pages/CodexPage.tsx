@@ -240,29 +240,31 @@ export default function CodexPage() {
 
             <section className="codex-surface" aria-labelledby="codex-page-title">
                 <header className="codex-header">
-                    <CodexSearch
-                        value={query}
-                        onChange={setQuery}
-                        resultCount={filteredEntries.length}
-                        totalCount={entries.length}
-                        suggestions={autocompleteEntries}
-                        onSelectSuggestion={(entry) => {
-                            setQuery(getCodexEntryLabel(entry));
-                            selectEntry(entry);
-                        }}
-                        onConfirmQuery={() => {
-                            const firstVisibleEntry = filteredEntries[0];
-                            if (firstVisibleEntry) {
-                                selectEntry(firstVisibleEntry);
-                            }
-                        }}
-                    />
+                    <div className="codex-header__lead">
+                        <div className="codex-header__copy">
+                            <div className="codex-eyebrow">Workshop Codex</div>
+                            <h2 className="codex-pageTitle" id="codex-page-title">
+                                Encyclopedia
+                            </h2>
+                        </div>
 
-                    <div className="codex-header__copy">
-                        <div className="codex-eyebrow">Workshop Codex</div>
-                        <h2 className="codex-pageTitle" id="codex-page-title">
-                            Encyclopedia
-                        </h2>
+                        <CodexSearch
+                            value={query}
+                            onChange={setQuery}
+                            resultCount={filteredEntries.length}
+                            totalCount={entries.length}
+                            suggestions={autocompleteEntries}
+                            onSelectSuggestion={(entry) => {
+                                setQuery(getCodexEntryLabel(entry));
+                                selectEntry(entry);
+                            }}
+                            onConfirmQuery={() => {
+                                const firstVisibleEntry = filteredEntries[0];
+                                if (firstVisibleEntry) {
+                                    selectEntry(firstVisibleEntry);
+                                }
+                            }}
+                        />
                     </div>
                 </header>
 
