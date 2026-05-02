@@ -10,6 +10,7 @@
     padding: 0.5rem 1rem;
     background-color: #111;
     color: #fff;
+    gap: 1rem;
 }
 
 /* Logo + title */
@@ -36,6 +37,7 @@
 /* View selector (Main Navigation) */
 .view-selector {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.75rem;
     justify-content: center;
 }
@@ -124,4 +126,37 @@
 
 .faction-selector button.disabled:hover {
     background-color: #1c1c1c;
+}
+
+@media (max-width: 1080px) {
+    .top-container {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .logo-container,
+    .view-selector,
+    .faction-selector {
+        justify-content: center;
+    }
+
+    .faction-selector button {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .logo-title {
+        font-size: 1.7rem;
+        text-align: center;
+    }
+
+    .view-selector {
+        gap: 0.5rem;
+    }
+
+    .view-selector a,
+    .faction-selector button {
+        font-size: 0.95rem;
+    }
 }

@@ -17,6 +17,7 @@ const routes = [
     { path: "/units", label: "Units" },
     { path: "/codex", label: "Codex" },
     { path: "/summary", label: "Summary" },
+    { path: "/mods", label: "Mods" },
     { path: "/info", label: "Info" },
 ];
 

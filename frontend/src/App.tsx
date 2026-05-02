@@ -19,6 +19,7 @@ import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
 import AdminImportPage from "@/components/AdminImport/AdminImportPage";
 import CodexPage from "@/pages/CodexPage";
+import ModsPage from "@/pages/ModsPage";
 
 import "./App.css";
 
@@ -127,6 +128,22 @@ function App() {
                                         />
                                     </Helmet>
                                     <GameSummaryPage />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="mods"
+                            element={
+                                <>
+                                    <Helmet>
+                                        <title>EL2 Mods | Essentials Pack & Tools | Endless Workshop</title>
+                                        <meta
+                                            name="description"
+                                            content="Download the EL2 Essentials Pack and supporting Endless Legend 2 mods, with concise install guidance and release links."
+                                        />
+                                    </Helmet>
+                                    <ModsPage />
                                 </>
                             }
                         />
