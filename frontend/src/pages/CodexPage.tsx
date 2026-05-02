@@ -1,6 +1,7 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
+import CodexOverview from "@/components/Codex/CodexOverview";
 import CodexResultList from "@/components/Codex/CodexResultList";
 import CodexSearch from "@/components/Codex/CodexSearch";
 import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
@@ -20,7 +21,6 @@ import {
 } from "@/lib/codex/codexSearch";
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { useCodexStore } from "@/stores/codexStore";
-import type { CodexEntry } from "@/types/dataTypes";
 import "./CodexPage.css";
 
 const PREFERRED_KIND_ORDER = [
@@ -98,6 +98,7 @@ export default function CodexPage() {
         () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatKindLabel(activeKind),
         [activeKind, filterOptions]
     );
+    const hasDeferredQuery = deferredQuery.trim().length > 0;
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
         if (activeKind === ALL_CODEX_KIND) {
@@ -108,17 +109,23 @@ export default function CodexPage() {
     }, [activeKind, activeKindLabel, filteredEntries, query]);
 
     const selectedListItem = useMemo(() => {
-        if (!selectedEntryKey) {
-            return displayEntries[0] ?? null;
-        }
-
-        return displayEntries.find((entry) => entry.entryKey === selectedEntryKey) ?? null;
+        return selectedEntryKey
+            ? displayEntries.find((entry) => entry.entryKey === selectedEntryKey) ?? null
+            : null;
     }, [displayEntries, selectedEntryKey]);
 
     const selectedEntry = useMemo(
         () => (selectedListItem && !isCodexSummaryEntry(selectedListItem) ? selectedListItem : null),
         [selectedListItem]
     );
+    const overviewOptions = useMemo(
+        () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
+        [filterOptions]
+    );
+    const isOverviewState =
+        activeKind === ALL_CODEX_KIND &&
+        !hasDeferredQuery &&
+        (!selectedEntryKey || selectedListItem === null);
 
     const resolvedRelatedEntries = useMemo(
         () => resolveRelatedEntries(selectedEntry, entriesByKey),
@@ -164,12 +171,13 @@ export default function CodexPage() {
     const selectKind = useCallback(
         (kind: string) => {
             setActiveKind(kind);
+            setSelectionIntent("passive");
 
             if (kind === ALL_CODEX_KIND) {
+                updateSelectedEntry(null);
                 return;
             }
 
-            setSelectionIntent("passive");
             updateSelectedEntry(getCodexSummaryEntryKey(kind));
         },
         [updateSelectedEntry]
@@ -191,6 +199,7 @@ export default function CodexPage() {
         const isSelectedVisible = Boolean(
             selectedEntryKey && displayEntries.some((entry) => entry.entryKey === selectedEntryKey)
         );
+        const shouldShowOverview = activeKind === ALL_CODEX_KIND && !hasDeferredQuery && !isSelectedVisible;
 
         if (!firstVisibleEntry) {
             if (selectedEntryKey) {
@@ -199,10 +208,14 @@ export default function CodexPage() {
             return;
         }
 
+        if (shouldShowOverview) {
+            return;
+        }
+
         if (!isSelectedVisible) {
             updateSelectedEntry(firstVisibleEntry.entryKey);
         }
-    }, [displayEntries, loading, selectedEntryKey, updateSelectedEntry]);
+    }, [activeKind, displayEntries, hasDeferredQuery, loading, selectedEntryKey, updateSelectedEntry]);
 
     useEffect(() => {
         if (!selectedListItem) return;
@@ -296,9 +309,14 @@ export default function CodexPage() {
                         />
                     </aside>
 
-                    <section className="codex-detailPane" aria-label="Selected codex entry">
+                    <section
+                        className="codex-detailPane"
+                        aria-label={isOverviewState ? "Codex overview" : "Selected codex entry"}
+                    >
                         <div className="codex-detailPane__body">
-                            {selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
+                            {isOverviewState ? (
+                                <CodexOverview options={overviewOptions} onSelectKind={selectKind} />
+                            ) : selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}
                                     entries={filteredEntries}
