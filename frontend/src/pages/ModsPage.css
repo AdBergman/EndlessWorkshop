@@ -16,13 +16,13 @@
 }
 
 .mods-shell {
-    width: min(1120px, calc(100% - 2rem));
+    width: min(1180px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 2.75rem 0 4.5rem;
 }
 
 .mods-page-header {
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.1rem;
 }
 
 .mods-page-header h1,
@@ -34,9 +34,10 @@
 }
 
 .mods-page-header h1 {
-    font-size: clamp(2rem, 4vw, 3.2rem);
-    line-height: 1;
+    font-size: clamp(1.72rem, 3.2vw, 2.5rem);
+    line-height: 0.98;
     margin: 0;
+    color: #f2e2d6;
 }
 
 .mods-page-header p,
@@ -49,7 +50,7 @@
 
 .mods-page-header p {
     max-width: 40rem;
-    margin-top: 0.65rem;
+    margin-top: 0.55rem;
 }
 
 .mods-requirement-strip {
@@ -91,12 +92,23 @@
 
 .mods-section-heading {
     max-width: 45rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.05rem;
 }
 
 .mods-section-heading h2 {
     font-size: clamp(1.3rem, 2vw, 1.9rem);
     margin: 0 0 0.5rem;
+    color: var(--mods-accent);
+    letter-spacing: 0.01em;
+}
+
+.mods-section-heading h2::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 1px;
+    margin-top: 0.45rem;
+    background: linear-gradient(90deg, var(--mods-accent), transparent);
 }
 
 .mods-rows {
@@ -281,6 +293,14 @@
     margin-top: 0.8rem;
 }
 
+.mods-row-actions a {
+    color: #f6d8c2;
+}
+
+.mods-row-actions a:hover {
+    color: #fff4ea;
+}
+
 .mods-row--interactive:hover .mods-row-copy h3,
 .mods-row--interactive:focus-within .mods-row-copy h3 {
     color: #fff8f1;
@@ -340,6 +360,29 @@
     font-size: 0.92rem;
     line-height: 1.5;
     text-align: center;
+}
+
+body:has(.mods-page) {
+    scrollbar-color: rgba(255, 255, 255, 0.16) rgba(255, 255, 255, 0.04);
+    scrollbar-width: thin;
+}
+
+body:has(.mods-page)::-webkit-scrollbar {
+    width: 10px;
+}
+
+body:has(.mods-page)::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+body:has(.mods-page)::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
+    border: 2px solid #07090b;
+    border-radius: 999px;
+}
+
+body:has(.mods-page)::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 127, 50, 0.16));
 }
 
 @media (max-width: 860px) {

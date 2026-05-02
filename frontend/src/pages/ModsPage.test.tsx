@@ -69,7 +69,7 @@ describe("ModsPage", () => {
         expect(screen.getByText("Small open-source Endless Legend 2 mods and tools.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Essentials Mod Pack" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "EL2 Essentials Pack" })).not.toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Support Tools / Misc" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Support Tools" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Installation" })).toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Get BepInEx" })).toHaveAttribute(
             "href",

@@ -294,7 +294,7 @@ export default function ModsPage() {
                 />
 
                 <ModsSection
-                    title="Support Tools / Misc"
+                    title="Support Tools"
                     rows={supportRows}
                     ariaLabel="Support tools"
                     onOpenPreview={setActivePreview}
