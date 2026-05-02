@@ -1,10 +1,14 @@
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
-import type { CodexEntry } from "@/types/dataTypes";
+import {
+    getCodexEntryLabel,
+    isCodexSummaryEntry,
+    type CodexListItem,
+} from "@/lib/codex/codexPresentation";
 
 type Props = {
-    entry: CodexEntry;
+    entry: CodexListItem;
     isSelected: boolean;
-    onSelect: (entry: CodexEntry) => void;
+    onSelect: (entry: CodexListItem) => void;
 };
 
 function formatKindLabel(kind: string): string {
@@ -16,6 +20,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
     const previewLine = entry.descriptionLines
         .map((line) => stripDescriptionTokens(line))
         .find((line) => line.length > 0);
+    const isSummary = isCodexSummaryEntry(entry);
 
     return (
         <button
@@ -25,10 +30,11 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
             aria-pressed={isSelected}
             onClick={() => onSelect(entry)}
         >
-            <span className="codex-resultRow__title">{entry.displayName || entry.entryKey}</span>
+            <span className="codex-resultRow__title">{getCodexEntryLabel(entry)}</span>
             <span className="codex-resultRow__meta">
-                <span className="codex-resultRow__kind">{formatKindLabel(entry.exportKind)}</span>
-                <span className="codex-resultRow__key">{entry.entryKey}</span>
+                <span className="codex-resultRow__kind">
+                    {isSummary ? "Overview" : formatKindLabel(entry.exportKind)}
+                </span>
             </span>
 
             {previewLine ? <span className="codex-resultRow__preview">{previewLine}</span> : null}

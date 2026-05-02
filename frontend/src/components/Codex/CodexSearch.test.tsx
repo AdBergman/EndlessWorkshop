@@ -13,9 +13,9 @@ const suggestions: CodexEntry[] = [
     },
     {
         exportKind: "units",
-        entryKey: "Unit_Bloom_Knight",
-        displayName: "Bloom Knight",
-        descriptionLines: ["Mounted support unit."],
+        entryKey: "UnitAbility_Bloom_Knight",
+        displayName: "",
+        descriptionLines: [],
         referenceKeys: [],
     },
 ];
@@ -67,5 +67,27 @@ describe("CodexSearch", () => {
         await user.keyboard("{Enter}");
 
         expect(onConfirmQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it("renders fallback labels without exposing internal keys", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <CodexSearch
+                value="bloom"
+                onChange={() => {}}
+                resultCount={2}
+                totalCount={12}
+                suggestions={suggestions}
+                onSelectSuggestion={() => {}}
+                onConfirmQuery={() => {}}
+            />
+        );
+
+        const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.click(input);
+
+        expect(screen.getByText("Bloom Knight")).toBeInTheDocument();
+        expect(screen.queryByText("UnitAbility_Bloom_Knight")).not.toBeInTheDocument();
     });
 });

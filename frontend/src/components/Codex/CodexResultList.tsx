@@ -1,13 +1,13 @@
 import React from "react";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexListItem } from "@/lib/codex/codexPresentation";
 import CodexResultRow from "./CodexResultRow";
 
 type Props = {
-    entries: CodexEntry[];
+    entries: CodexListItem[];
     selectedEntryKey: string | null;
     loading: boolean;
     error: string | null;
-    onSelect: (entry: CodexEntry) => void;
+    onSelect: (entry: CodexListItem) => void;
 };
 
 const CodexResultList = React.forwardRef<HTMLDivElement, Props>(function CodexResultList(

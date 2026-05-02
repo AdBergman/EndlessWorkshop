@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { useEffect, useId, useState } from "react";
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -102,7 +103,7 @@ export default function CodexSearch({
                     onFocus={() => setIsFocused(true)}
                     onBlur={() => window.setTimeout(() => setIsFocused(false), 120)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search by name, description, or key"
+                    placeholder="Search by name or description"
                     autoComplete="off"
                     spellCheck={false}
                     role="combobox"
@@ -138,7 +139,7 @@ export default function CodexSearch({
                                 >
                                     <span className="codex-search__optionTop">
                                         <span className="codex-search__optionName">
-                                            {entry.displayName || entry.entryKey}
+                                            {getCodexEntryLabel(entry)}
                                         </span>
                                         <span className="codex-search__optionKind">
                                             {formatKindLabel(entry.exportKind)}
@@ -147,9 +148,7 @@ export default function CodexSearch({
 
                                     {previewLine ? (
                                         <span className="codex-search__optionPreview">{previewLine}</span>
-                                    ) : (
-                                        <span className="codex-search__optionKey">{entry.entryKey}</span>
-                                    )}
+                                    ) : null}
                                 </button>
                             );
                         })}

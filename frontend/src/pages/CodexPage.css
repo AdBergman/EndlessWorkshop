@@ -1,16 +1,13 @@
 .codex-page {
-    --codex-border: rgba(255, 255, 255, 0.08);
     --codex-border-strong: rgba(255, 255, 255, 0.14);
-    --codex-ink-soft: rgba(255, 244, 235, 0.78);
     --codex-ink-muted: rgba(255, 255, 255, 0.56);
-    --codex-ink-faint: rgba(255, 255, 255, 0.38);
     --codex-accent: #ff7f32;
     --codex-accent-soft: rgba(255, 127, 50, 0.16);
     position: relative;
     width: 100%;
-    max-width: 1560px;
-    margin: 0 auto;
-    padding: 20px clamp(16px, 2.5vw, 36px) 48px;
+    max-width: 1280px;
+    margin: 1.5rem auto 0;
+    padding: 1rem 1rem 3rem;
 }
 
 .codex-page::before {
@@ -46,16 +43,16 @@
 
 .codex-header {
     display: grid;
-    grid-template-columns: minmax(220px, 360px) minmax(320px, 560px);
-    align-items: end;
-    justify-content: space-between;
-    gap: 24px 32px;
-    padding-bottom: 18px;
+    grid-template-columns: minmax(320px, 520px) minmax(220px, 1fr);
+    align-items: start;
+    gap: 20px 28px;
+    padding-bottom: 14px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .codex-header__copy {
     min-width: 0;
+    justify-self: start;
 }
 
 .codex-eyebrow,
@@ -67,17 +64,19 @@
 }
 
 .codex-pageTitle {
-    margin-top: 8px;
+    margin-top: 7px;
     font-family: "Audiowide", sans-serif;
-    font-size: clamp(1.6rem, 2.4vw, 2rem);
-    letter-spacing: 0.08em;
+    font-size: clamp(1.55rem, 2.2vw, 1.95rem);
+    letter-spacing: 0.06em;
     color: #fff3eb;
 }
 
 .codex-search {
     display: grid;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
+    justify-self: start;
+    width: min(100%, 520px);
 }
 
 .codex-search__labelRow {
@@ -100,12 +99,12 @@
 
 .codex-search__input {
     width: 100%;
-    min-height: 54px;
+    min-height: 50px;
     padding: 0 18px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 999px;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
         rgba(7, 8, 10, 0.78);
     color: #fff;
     font-size: 15px;
@@ -139,17 +138,15 @@
 
 .codex-search__dropdown {
     position: absolute;
-    top: calc(100% + 10px);
+    top: calc(100% + 8px);
     left: 0;
-    right: 0;
+    width: 100%;
     z-index: 6;
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018)),
-        rgba(5, 6, 8, 0.96);
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.42);
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    background: rgba(5, 6, 8, 0.93);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
     backdrop-filter: blur(14px);
 }
 
@@ -174,8 +171,8 @@
 
 .codex-search__optionTop {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
+    justify-content: flex-start;
+    gap: 10px;
     align-items: baseline;
 }
 
@@ -200,7 +197,7 @@
 }
 
 .codex-filterRail {
-    padding: 16px 0 8px;
+    padding: 12px 0 4px;
     overflow-x: auto;
 }
 
@@ -245,9 +242,9 @@
 .codex-workspace {
     display: grid;
     grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
-    gap: 36px;
+    gap: 32px;
     min-height: 720px;
-    padding-top: 18px;
+    padding-top: 16px;
 }
 
 .codex-resultsPane {
@@ -274,7 +271,7 @@
     justify-content: space-between;
     align-items: end;
     gap: 16px;
-    padding: 0 0 12px;
+    padding: 0 0 10px;
     margin-bottom: 6px;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0));
 }
@@ -310,9 +307,9 @@
 .codex-resultRow {
     position: relative;
     display: grid;
-    gap: 5px;
+    gap: 4px;
     width: 100%;
-    padding: 12px 10px 13px 16px;
+    padding: 11px 8px 12px 14px;
     border: 0;
     border-left: 2px solid transparent;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -337,29 +334,21 @@
     font-size: 15px;
     font-weight: 600;
     color: #fff5ef;
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .codex-resultRow__meta {
     display: flex;
-    flex-wrap: wrap;
     align-items: baseline;
-    gap: 12px;
+    gap: 8px;
 }
 
 .codex-resultRow__kind,
 .codex-detail__kind {
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #ffb98f;
-}
-
-.codex-resultRow__key,
-.codex-detail__key {
-    font-size: 12px;
-    color: var(--codex-ink-muted);
-    word-break: break-word;
+    color: rgba(255, 185, 143, 0.72);
 }
 
 .codex-resultRow__preview {
@@ -397,7 +386,7 @@
 .codex-detail__metaRow {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
 }
 
@@ -432,6 +421,49 @@
 .codex-detail__placeholder {
     margin-top: 14px;
     color: var(--codex-ink-muted);
+}
+
+.codex-detail__summaryLead {
+    margin-top: 14px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+.codex-summaryList {
+    display: grid;
+    gap: 18px;
+    margin-top: 28px;
+}
+
+.codex-summaryList__item {
+    display: grid;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.codex-summaryList__item:hover .codex-summaryList__name,
+.codex-summaryList__item:focus-visible .codex-summaryList__name {
+    color: #ffb98f;
+}
+
+.codex-summaryList__name {
+    color: #fff5ef;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: color 0.18s ease;
+}
+
+.codex-summaryList__description {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.65;
 }
 
 .codex-related__list {
@@ -470,7 +502,6 @@
 @media (max-width: 1024px) {
     .codex-header {
         grid-template-columns: 1fr;
-        align-items: start;
     }
 
     .codex-workspace {
@@ -503,6 +534,10 @@
 @media (max-width: 720px) {
     .codex-page {
         padding: 14px 12px 28px;
+    }
+
+    .codex-search {
+        width: 100%;
     }
 
     .codex-resultRow {

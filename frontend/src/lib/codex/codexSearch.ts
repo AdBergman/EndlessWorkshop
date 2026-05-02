@@ -1,4 +1,5 @@
 import type { CodexEntry } from "@/types/dataTypes";
+import { getCodexEntryLabel } from "./codexPresentation";
 
 export const ALL_CODEX_KIND = "all";
 const AUTOCOMPLETE_LIMIT = 8;
@@ -14,7 +15,7 @@ function normalize(value: string | null | undefined): string {
 
 export function sortCodexEntries(entries: readonly CodexEntry[]): CodexEntry[] {
     return [...entries].sort((left, right) => {
-        const nameComparison = collator.compare(left.displayName, right.displayName);
+        const nameComparison = collator.compare(getCodexEntryLabel(left), getCodexEntryLabel(right));
         if (nameComparison !== 0) return nameComparison;
         return collator.compare(left.entryKey, right.entryKey);
     });
@@ -36,7 +37,7 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
     const normalizedQuery = normalize(query);
     if (!normalizedQuery) return 0;
 
-    const displayName = normalize(entry.displayName);
+    const displayName = normalize(getCodexEntryLabel(entry));
     const entryKey = normalize(entry.entryKey);
     const description = normalize(entry.descriptionLines.join(" "));
     const exportKind = normalize(entry.exportKind);
@@ -89,7 +90,7 @@ export function compareCodexEntryMatches(left: CodexEntry, right: CodexEntry, qu
         return scoreDelta;
     }
 
-    const nameComparison = collator.compare(left.displayName, right.displayName);
+    const nameComparison = collator.compare(getCodexEntryLabel(left), getCodexEntryLabel(right));
     if (nameComparison !== 0) {
         return nameComparison;
     }

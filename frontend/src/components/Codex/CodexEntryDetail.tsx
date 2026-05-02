@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import RelatedEntries from "./RelatedEntries";
@@ -39,11 +40,10 @@ export default function CodexEntryDetail({
         <article className="codex-detail">
             <div className="codex-detail__metaRow">
                 <span className="codex-detail__kind">{formatKindLabel(entry.exportKind)}</span>
-                <span className="codex-detail__key">{entry.entryKey}</span>
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {entry.displayName || entry.entryKey}
+                {getCodexEntryLabel(entry)}
             </h2>
 
             <section className="codex-detail__section" aria-labelledby="codex-description-heading">

@@ -3,7 +3,15 @@ import { useSearchParams } from "react-router-dom";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
 import CodexResultList from "@/components/Codex/CodexResultList";
 import CodexSearch from "@/components/Codex/CodexSearch";
+import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
 import KindFilter from "@/components/Codex/KindFilter";
+import {
+    createCodexSummaryEntry,
+    getCodexEntryLabel,
+    getCodexSummaryEntryKey,
+    isCodexSummaryEntry,
+    type CodexListItem,
+} from "@/lib/codex/codexPresentation";
 import {
     ALL_CODEX_KIND,
     entryMatchesQuery,
@@ -86,13 +94,31 @@ export default function CodexPage() {
         [entries, query, activeKind]
     );
 
-    const selectedEntry = useMemo(() => {
-        if (!selectedEntryKey) {
-            return filteredEntries[0] ?? null;
+    const activeKindLabel = useMemo(
+        () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatKindLabel(activeKind),
+        [activeKind, filterOptions]
+    );
+
+    const displayEntries = useMemo<CodexListItem[]>(() => {
+        if (activeKind === ALL_CODEX_KIND) {
+            return filteredEntries;
         }
 
-        return filteredEntries.find((entry) => entry.entryKey === selectedEntryKey) ?? null;
-    }, [filteredEntries, selectedEntryKey]);
+        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length, query), ...filteredEntries];
+    }, [activeKind, activeKindLabel, filteredEntries, query]);
+
+    const selectedListItem = useMemo(() => {
+        if (!selectedEntryKey) {
+            return displayEntries[0] ?? null;
+        }
+
+        return displayEntries.find((entry) => entry.entryKey === selectedEntryKey) ?? null;
+    }, [displayEntries, selectedEntryKey]);
+
+    const selectedEntry = useMemo(
+        () => (selectedListItem && !isCodexSummaryEntry(selectedListItem) ? selectedListItem : null),
+        [selectedListItem]
+    );
 
     const resolvedRelatedEntries = useMemo(
         () => resolveRelatedEntries(selectedEntry, entriesByKey),
@@ -120,12 +146,12 @@ export default function CodexPage() {
     );
 
     const selectEntry = useCallback(
-        (entry: CodexEntry, intent: SelectionIntent = "passive") => {
+        (entry: CodexListItem, intent: SelectionIntent = "passive") => {
             if (activeKind !== ALL_CODEX_KIND && entry.exportKind !== activeKind) {
                 setActiveKind(ALL_CODEX_KIND);
             }
 
-            if (query && !entryMatchesQuery(entry, query)) {
+            if (query && !isCodexSummaryEntry(entry) && !entryMatchesQuery(entry, query)) {
                 setQuery("");
             }
 
@@ -133,6 +159,20 @@ export default function CodexPage() {
             updateSelectedEntry(entry.entryKey);
         },
         [activeKind, query, updateSelectedEntry]
+    );
+
+    const selectKind = useCallback(
+        (kind: string) => {
+            setActiveKind(kind);
+
+            if (kind === ALL_CODEX_KIND) {
+                return;
+            }
+
+            setSelectionIntent("passive");
+            updateSelectedEntry(getCodexSummaryEntryKey(kind));
+        },
+        [updateSelectedEntry]
     );
 
     useEffect(() => {
@@ -147,9 +187,9 @@ export default function CodexPage() {
     useEffect(() => {
         if (loading) return;
 
-        const firstVisibleEntry = filteredEntries[0] ?? null;
+        const firstVisibleEntry = displayEntries[0] ?? null;
         const isSelectedVisible = Boolean(
-            selectedEntryKey && filteredEntries.some((entry) => entry.entryKey === selectedEntryKey)
+            selectedEntryKey && displayEntries.some((entry) => entry.entryKey === selectedEntryKey)
         );
 
         if (!firstVisibleEntry) {
@@ -162,21 +202,23 @@ export default function CodexPage() {
         if (!isSelectedVisible) {
             updateSelectedEntry(firstVisibleEntry.entryKey);
         }
-    }, [filteredEntries, loading, selectedEntryKey, updateSelectedEntry]);
+    }, [displayEntries, loading, selectedEntryKey, updateSelectedEntry]);
 
     useEffect(() => {
-        if (!selectedEntry) return;
+        if (!selectedListItem) return;
 
         const rowButtons = Array.from(
             resultListRef.current?.querySelectorAll<HTMLElement>("[data-entry-key]") ?? []
         );
-        const matchingRow = rowButtons.find((row) => row.dataset.entryKey === selectedEntry.entryKey);
+        const matchingRow = rowButtons.find((row) => row.dataset.entryKey === selectedListItem.entryKey);
 
-        matchingRow?.scrollIntoView({
-            block: "nearest",
-            inline: "nearest",
-        });
-    }, [selectedEntry]);
+        if (typeof matchingRow?.scrollIntoView === "function") {
+            matchingRow.scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+            });
+        }
+    }, [selectedListItem]);
 
     useEffect(() => {
         if (selectionIntent !== "related" || !selectedEntry) return;
@@ -198,13 +240,6 @@ export default function CodexPage() {
 
             <section className="codex-surface" aria-labelledby="codex-page-title">
                 <header className="codex-header">
-                    <div className="codex-header__copy">
-                        <div className="codex-eyebrow">Workshop Codex</div>
-                        <h2 className="codex-pageTitle" id="codex-page-title">
-                            Encyclopedia
-                        </h2>
-                    </div>
-
                     <CodexSearch
                         value={query}
                         onChange={setQuery}
@@ -212,7 +247,7 @@ export default function CodexPage() {
                         totalCount={entries.length}
                         suggestions={autocompleteEntries}
                         onSelectSuggestion={(entry) => {
-                            setQuery(entry.displayName || entry.entryKey);
+                            setQuery(getCodexEntryLabel(entry));
                             selectEntry(entry);
                         }}
                         onConfirmQuery={() => {
@@ -222,13 +257,20 @@ export default function CodexPage() {
                             }
                         }}
                     />
+
+                    <div className="codex-header__copy">
+                        <div className="codex-eyebrow">Workshop Codex</div>
+                        <h2 className="codex-pageTitle" id="codex-page-title">
+                            Encyclopedia
+                        </h2>
+                    </div>
                 </header>
 
                 <div className="codex-filterRail">
                     <KindFilter
                         options={filterOptions}
                         activeKind={activeKind}
-                        onSelect={setActiveKind}
+                        onSelect={selectKind}
                     />
                 </div>
 
@@ -240,8 +282,7 @@ export default function CodexPage() {
                                 <div className="codex-resultsPane__title">
                                     {activeKind === ALL_CODEX_KIND
                                         ? "All encyclopedia entries"
-                                        : filterOptions.find((option) => option.kind === activeKind)?.label ??
-                                          "Filtered entries"}
+                                        : activeKindLabel}
                                 </div>
                             </div>
                             <div className="codex-resultsPane__count">{filteredEntries.length}</div>
@@ -249,8 +290,8 @@ export default function CodexPage() {
 
                         <CodexResultList
                             ref={resultListRef}
-                            entries={filteredEntries}
-                            selectedEntryKey={selectedEntry?.entryKey ?? null}
+                            entries={displayEntries}
+                            selectedEntryKey={selectedListItem?.entryKey ?? null}
                             loading={loading}
                             error={error}
                             onSelect={(entry) => selectEntry(entry)}
@@ -259,12 +300,21 @@ export default function CodexPage() {
 
                     <section className="codex-detailPane" aria-label="Selected codex entry">
                         <div className="codex-detailPane__sticky">
-                            <CodexEntryDetail
-                                entry={selectedEntry}
-                                relatedEntries={resolvedRelatedEntries}
-                                titleRef={detailTitleRef}
-                                onSelectRelated={(entry) => selectEntry(entry, "related")}
-                            />
+                            {selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
+                                <CodexSummaryDetail
+                                    summaryEntry={selectedListItem}
+                                    entries={filteredEntries}
+                                    titleRef={detailTitleRef}
+                                    onSelectEntry={(entry) => selectEntry(entry)}
+                                />
+                            ) : (
+                                <CodexEntryDetail
+                                    entry={selectedEntry}
+                                    relatedEntries={resolvedRelatedEntries}
+                                    titleRef={detailTitleRef}
+                                    onSelectRelated={(entry) => selectEntry(entry, "related")}
+                                />
+                            )}
                         </div>
                     </section>
                 </div>
