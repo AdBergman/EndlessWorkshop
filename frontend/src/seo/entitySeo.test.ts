@@ -6,18 +6,28 @@ import {
     validateFeaturedEntities,
 } from "./entitySeo";
 import {
-    FEATURED_ENTITY_ALLOWLIST,
+    ENTITY_GENERATION_REPORT,
     FEATURED_TECH_SNAPSHOTS,
     FEATURED_UNIT_SNAPSHOTS,
 } from "./featuredEntityCatalog";
 
 describe("entitySeo", () => {
-    it("resolves the featured allowlist into safe entity routes", () => {
+    it("resolves the generated entity catalog into safe routes within the scale window", () => {
         const entities = getResolvedFeaturedEntities();
+        const expectedCount = FEATURED_TECH_SNAPSHOTS.length + FEATURED_UNIT_SNAPSHOTS.length;
 
-        expect(entities).toHaveLength(FEATURED_ENTITY_ALLOWLIST.length);
+        expect(entities).toHaveLength(expectedCount);
+        expect(expectedCount).toBeGreaterThanOrEqual(100);
+        expect(expectedCount).toBeLessThanOrEqual(300);
         expect(new Set(entities.map((entity) => entity.routePath)).size).toBe(entities.length);
         expect(entities.every((entity) => entity.routePath.startsWith(entity.collectionPath))).toBe(true);
+    });
+
+    it("keeps the generated corpus below the full local snapshot set and reports skip reasons", () => {
+        expect(ENTITY_GENERATION_REPORT.includedCounts.techs).toBeLessThan(ENTITY_GENERATION_REPORT.rawCounts.techs);
+        expect(ENTITY_GENERATION_REPORT.includedCounts.units).toBeLessThan(ENTITY_GENERATION_REPORT.rawCounts.units);
+        expect(ENTITY_GENERATION_REPORT.excludedCounts.total).toBeGreaterThan(0);
+        expect(Object.keys(ENTITY_GENERATION_REPORT.skippedByReason).length).toBeGreaterThan(0);
     });
 
     it("renders plain static html without React bootstrapping or API fetches", () => {
@@ -32,12 +42,14 @@ describe("entitySeo", () => {
     });
 
     it("rejects duplicate generated routes", () => {
+        const duplicatedTech = FEATURED_TECH_SNAPSHOTS[0];
+
         expect(() =>
             validateFeaturedEntities(
-                [...FEATURED_ENTITY_ALLOWLIST, { kind: "tech", entryKey: "stonework" }],
+                [...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS, { ...duplicatedTech }],
                 { techs: FEATURED_TECH_SNAPSHOTS, units: FEATURED_UNIT_SNAPSHOTS }
             )
-        ).toThrow('Duplicate generated route "/tech/stonework".');
+        ).toThrow(`Duplicate generated route "/tech/${duplicatedTech.entryKey}".`);
     });
 
     it("rejects invalid CTA targets", () => {
@@ -49,7 +61,7 @@ describe("entitySeo", () => {
 
         expect(() =>
             validateFeaturedEntities(
-                FEATURED_ENTITY_ALLOWLIST,
+                [...invalidTechs, ...FEATURED_UNIT_SNAPSHOTS],
                 {
                     techs: invalidTechs,
                     units: FEATURED_UNIT_SNAPSHOTS,
@@ -60,7 +72,7 @@ describe("entitySeo", () => {
 
     it("accepts stable tech CTA links that resolve to the intended featured tech", () => {
         expect(() =>
-            validateFeaturedEntities(FEATURED_ENTITY_ALLOWLIST, {
+            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
                 techs: FEATURED_TECH_SNAPSHOTS,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })
@@ -75,7 +87,7 @@ describe("entitySeo", () => {
         );
 
         expect(() =>
-            validateFeaturedEntities(FEATURED_ENTITY_ALLOWLIST, {
+            validateFeaturedEntities([...staleTechs, ...FEATURED_UNIT_SNAPSHOTS], {
                 techs: staleTechs,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })
@@ -86,7 +98,7 @@ describe("entitySeo", () => {
 
     it("accepts stable unitKey CTA links that resolve to the intended featured unit", () => {
         expect(() =>
-            validateFeaturedEntities(FEATURED_ENTITY_ALLOWLIST, {
+            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
                 techs: FEATURED_TECH_SNAPSHOTS,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })
@@ -101,7 +113,7 @@ describe("entitySeo", () => {
         );
 
         expect(() =>
-            validateFeaturedEntities(FEATURED_ENTITY_ALLOWLIST, {
+            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...legacyUnits], {
                 techs: FEATURED_TECH_SNAPSHOTS,
                 units: legacyUnits,
             })
@@ -120,10 +132,6 @@ describe("entitySeo", () => {
                 ctaPath: "/tech?faction=kin&tech=scientific-charter-copy",
             },
         ];
-        const ambiguousAllowlist = [
-            ...FEATURED_ENTITY_ALLOWLIST,
-            { kind: "tech" as const, entryKey: "scientific-charter-copy" },
-        ];
         const staleScientificCharterTechs = ambiguousTechs.map((snapshot) =>
             snapshot.entryKey === "scientific-charter"
                 ? { ...snapshot, ctaPath: "/tech?faction=kin&tech=scientific_charter" }
@@ -131,7 +139,7 @@ describe("entitySeo", () => {
         );
 
         expect(() =>
-            validateFeaturedEntities(ambiguousAllowlist, {
+            validateFeaturedEntities([...staleScientificCharterTechs, ...FEATURED_UNIT_SNAPSHOTS], {
                 techs: staleScientificCharterTechs,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })

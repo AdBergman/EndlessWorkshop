@@ -6,12 +6,10 @@ import {
     DEFAULT_IMAGE_URL,
 } from "../components/Seo/routeSeo.ts";
 import {
-    FEATURED_ENTITY_ALLOWLIST,
     FEATURED_TECH_SNAPSHOTS,
     FEATURED_UNIT_SNAPSHOTS,
-    type FeaturedEntityAllowlistEntry,
-    type FeaturedEntityKind,
     type FeaturedEntitySnapshot,
+    type FeaturedEntityKind,
     type FeaturedTechSnapshot,
     type FeaturedUnitSnapshot,
 } from "./featuredEntityCatalog.ts";
@@ -28,9 +26,6 @@ type SnapshotCollections = {
     techs: FeaturedTechSnapshot[];
     units: FeaturedUnitSnapshot[];
 };
-
-const MIN_FEATURED_ENTITIES = 10;
-const MAX_FEATURED_ENTITIES = 25;
 
 function escapeHtml(value: string): string {
     return value
@@ -72,48 +67,42 @@ function buildSnapshotMap<T extends FeaturedEntitySnapshot>(snapshots: T[]): Map
 }
 
 export function validateFeaturedEntities(
-    allowlist: FeaturedEntityAllowlistEntry[],
+    entities: FeaturedEntitySnapshot[],
     collections: SnapshotCollections
 ): ResolvedFeaturedEntity[] {
-    if (allowlist.length < MIN_FEATURED_ENTITIES || allowlist.length > MAX_FEATURED_ENTITIES) {
-        throw new Error(
-            `Featured entity allowlist must contain between ${MIN_FEATURED_ENTITIES} and ${MAX_FEATURED_ENTITIES} entries.`
-        );
-    }
-
     const techsByEntryKey = buildSnapshotMap(collections.techs);
     const unitsByEntryKey = buildSnapshotMap(collections.units);
     const routes = new Set<string>();
 
-    return allowlist.map((entry) => {
-        const snapshot =
-            entry.kind === "tech"
-                ? techsByEntryKey.get(entry.entryKey)
-                : unitsByEntryKey.get(entry.entryKey);
+    return entities.map((snapshot) => {
+        const resolvedSnapshot =
+            snapshot.kind === "tech"
+                ? techsByEntryKey.get(snapshot.entryKey)
+                : unitsByEntryKey.get(snapshot.entryKey);
 
-        if (!snapshot) {
-            throw new Error(`Featured ${entry.kind} snapshot is missing for entryKey "${entry.entryKey}".`);
+        if (!resolvedSnapshot) {
+            throw new Error(`Featured ${snapshot.kind} snapshot is missing for entryKey "${snapshot.entryKey}".`);
         }
 
-        if (!SAFE_ENTRY_KEY_PATTERN.test(snapshot.entryKey)) {
-            throw new Error(`Unsafe entryKey "${snapshot.entryKey}" for ${snapshot.kind} page generation.`);
+        if (!SAFE_ENTRY_KEY_PATTERN.test(resolvedSnapshot.entryKey)) {
+            throw new Error(`Unsafe entryKey "${resolvedSnapshot.entryKey}" for ${resolvedSnapshot.kind} page generation.`);
         }
 
-        const collectionPath = getCollectionPath(snapshot.kind);
-        const routePath = `${collectionPath}/${snapshot.entryKey}`;
+        const collectionPath = getCollectionPath(resolvedSnapshot.kind);
+        const routePath = `${collectionPath}/${resolvedSnapshot.entryKey}`;
 
         if (routes.has(routePath)) {
             throw new Error(`Duplicate generated route "${routePath}".`);
         }
         routes.add(routePath);
 
-        validateCtaPath(snapshot, collections);
+        validateCtaPath(resolvedSnapshot, collections);
 
         return {
-            ...snapshot,
+            ...resolvedSnapshot,
             collectionPath,
             routePath,
-            pageTitle: getPageTitle(snapshot),
+            pageTitle: getPageTitle(resolvedSnapshot),
         };
     });
 }
@@ -558,7 +547,7 @@ export function buildSitemapXml(staticPaths: string[], generatedEntityPaths: str
 }
 
 export function getResolvedFeaturedEntities(): ResolvedFeaturedEntity[] {
-    return validateFeaturedEntities(FEATURED_ENTITY_ALLOWLIST, {
+    return validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
         techs: FEATURED_TECH_SNAPSHOTS,
         units: FEATURED_UNIT_SNAPSHOTS,
     });

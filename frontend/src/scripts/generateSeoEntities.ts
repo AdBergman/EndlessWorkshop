@@ -7,6 +7,7 @@ import {
     listGeneratedEntityPaths,
     renderEntityHtml,
 } from "../seo/entitySeo.ts";
+import { ENTITY_GENERATION_REPORT } from "../seo/featuredEntityCatalog.ts";
 
 function cleanGeneratedDirectory(directory: string): void {
     mkdirSync(directory, { recursive: true });
@@ -37,7 +38,18 @@ function main(): void {
     const sitemapXml = buildSitemapXml(INDEXABLE_PUBLIC_ROUTE_PATHS, generatedEntityPaths);
 
     writeFileSync(join(publicRoot, "sitemap.xml"), sitemapXml, "utf8");
-    console.log(`Generated ${generatedEntityPaths.length} SEO entity pages.`);
+    console.log(
+        `Generated ${generatedEntityPaths.length} SEO entity pages (${ENTITY_GENERATION_REPORT.includedCounts.techs} tech, ${ENTITY_GENERATION_REPORT.includedCounts.units} units).`
+    );
+    console.log(
+        `Excluded ${ENTITY_GENERATION_REPORT.excludedCounts.total} snapshot entries (${ENTITY_GENERATION_REPORT.excludedCounts.techs} tech, ${ENTITY_GENERATION_REPORT.excludedCounts.units} units).`
+    );
+    console.log(
+        `Skip reasons: ${Object.entries(ENTITY_GENERATION_REPORT.skippedByReason)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([reason, count]) => `${reason}=${count}`)
+            .join(", ")}`
+    );
 }
 
 main();
