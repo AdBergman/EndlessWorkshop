@@ -1,11 +1,25 @@
 package ewshop.app.config;
 
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class FrontendController {
+
+    private final ResourceLoader resourceLoader;
+
+    public FrontendController(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    @RequestMapping(value = {"", "/", "/admin/import", "/admin/import/"})
+    public String forwardIndexDocument() {
+        return "forward:/index.html";
+    }
 
     @RequestMapping(value = {
             "/{page:tech|units|summary|codex|mods|info}",
@@ -15,12 +29,16 @@ public class FrontendController {
         return "forward:/" + page + ".html";
     }
 
-    /**
-     * Catch-all mapping for React routes.
+    @RequestMapping(value = {
+            "/{page:tech|units}/{entryKey:[a-z0-9-]+}",
+            "/{page:tech|units}/{entryKey:[a-z0-9-]+}/"
+    })
+    public String forwardFeaturedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
+        String resourcePath = "classpath:/static/" + page + "/" + entryKey + "/index.html";
+        if (!resourceLoader.getResource(resourcePath).exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
 
-     */
-    @RequestMapping(value = {"/{path:[^\\.]*}", "/{path:^(?!api).*}/{subPath:[^\\.]*}"})
-    public String forward() {
-        return "forward:/index.html";
+        return "forward:/" + page + "/" + entryKey + "/index.html";
     }
 }

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { getExpectedSitemapPaths, listGeneratedEntityPaths } from "@/seo/entitySeo";
 import {
     INDEXABLE_PUBLIC_ROUTE_PATHS,
     INDEXABLE_PUBLIC_ROUTE_SEO,
@@ -33,12 +34,14 @@ describe("publicRouteSeo", () => {
     });
 
     it("keeps the sitemap aligned with indexable public routes only", () => {
-        const sitemap = readFileSync(resolve(process.cwd(), "public/sitemap.xml"), "utf8");
+        const publicDir = resolve(process.cwd(), "public");
+        const sitemap = readFileSync(resolve(publicDir, "sitemap.xml"), "utf8");
+        const generatedEntityPaths = listGeneratedEntityPaths(publicDir);
         const locs = Array.from(sitemap.matchAll(/<loc>([^<]+)<\/loc>/g), (match) =>
             match[1].replace(SITE_URL, "")
         );
 
-        expect(locs).toEqual(INDEXABLE_PUBLIC_ROUTE_PATHS);
+        expect(locs).toEqual(getExpectedSitemapPaths(generatedEntityPaths));
         expect(locs.some((path) => path.startsWith("/admin"))).toBe(false);
     });
 });
