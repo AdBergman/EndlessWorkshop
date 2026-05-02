@@ -1,11 +1,11 @@
 import React from "react";
 import { getEconomyMetricColor } from "./econColors";
 
-const TOKEN_RE = /\[([^\]]+)\]/g;
+export const TOKEN_RE = /\[([^\]]+)\]/g;
 
-type IconKey = "Food" | "Industry" | "Dust" | "Science" | "Influence" | "Stability";
+export type IconKey = "Food" | "Industry" | "Dust" | "Science" | "Influence" | "Stability";
 
-const ICON_SRC: Record<IconKey, string> = {
+export const ICON_SRC: Record<IconKey, string> = {
     Food: "/graphics/icons/FoodIcon.webp",
     Industry: "/graphics/icons/IndustryIcon.webp",
     Dust: "/graphics/icons/DustIcon.webp",
@@ -16,12 +16,12 @@ const ICON_SRC: Record<IconKey, string> = {
 
 const STABILITY_WORD_COLOR = "#e63969";
 
-type TokenStyle = {
+export type TokenStyle = {
     icon: IconKey;
     wordColor: string;
 };
 
-const TOKEN_STYLE: Record<string, TokenStyle> = {
+export const TOKEN_STYLE: Record<string, TokenStyle> = {
     FoodColored: { icon: "Food", wordColor: getEconomyMetricColor("Food") },
     IndustryColored: { icon: "Industry", wordColor: getEconomyMetricColor("Industry") },
     DustColored: { icon: "Dust", wordColor: getEconomyMetricColor("Dust") },
@@ -31,12 +31,39 @@ const TOKEN_STYLE: Record<string, TokenStyle> = {
     PublicOrderColored: { icon: "Stability", wordColor: STABILITY_WORD_COLOR },
 };
 
-function Icon({ icon, title }: { icon: IconKey; title: string }) {
+export type KnownTokenMetadata = {
+    token: string;
+    icon: IconKey;
+    wordColor: string;
+    hasIcon: true;
+    hasWordColor: true;
+};
+
+export type TokenMatch = {
+    token: string;
+    raw: string;
+    index: number;
+};
+
+type RenderTokenizedTextOptions = {
+    decorativeIcons?: boolean;
+};
+
+function Icon({
+    icon,
+    title,
+    decorative = false,
+}: {
+    icon: IconKey;
+    title: string;
+    decorative?: boolean;
+}) {
     return (
         <img
             src={ICON_SRC[icon]}
-            alt={title}
-            title={title}
+            alt={decorative ? "" : title}
+            title={decorative ? undefined : title}
+            aria-hidden={decorative ? true : undefined}
             style={{
                 width: 14,
                 height: 14,
@@ -54,14 +81,54 @@ function splitWordish(text: string): { leadingSpace: string; word: string; rest:
     return { leadingSpace: match[1] ?? "", word: match[2] ?? "", rest: match[3] ?? "" };
 }
 
+export function extractBracketTokenMatches(value: string): TokenMatch[] {
+    if (!value) return [];
+
+    return Array.from(value.matchAll(TOKEN_RE))
+        .map((match) => {
+            const token = (match[1] ?? "").trim();
+            if (!token) return null;
+
+            return {
+                token,
+                raw: match[0],
+                index: match.index ?? 0,
+            };
+        })
+        .filter((match): match is TokenMatch => match !== null);
+}
+
+export function extractBracketTokens(value: string): string[] {
+    return extractBracketTokenMatches(value).map((match) => match.token);
+}
+
+export function getTokenStyle(token: string): TokenStyle | undefined {
+    return TOKEN_STYLE[token];
+}
+
+export function getKnownTokenMetadata(): KnownTokenMetadata[] {
+    return Object.entries(TOKEN_STYLE)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([token, style]) => ({
+            token,
+            icon: style.icon,
+            wordColor: style.wordColor,
+            hasIcon: true,
+            hasWordColor: true,
+        }));
+}
+
 export function stripDescriptionTokens(line: string): string {
     if (!line) return "";
     // Remove [Token] markers, keep the surrounding text.
     return line.replace(TOKEN_RE, "").replace(/\s+/g, " ").trim();
 }
 
-export function renderDescriptionLine(line: string): React.ReactNode {
-    if (!line) return null;
+export function renderTokenizedText(
+    text: string,
+    options: RenderTokenizedTextOptions = {}
+): React.ReactNode {
+    if (!text) return null;
 
     const parts: React.ReactNode[] = [];
     let lastIndex = 0;
@@ -87,12 +154,12 @@ export function renderDescriptionLine(line: string): React.ReactNode {
         parts.push(<span key={reactKey++}>{text}</span>);
     };
 
-    for (const match of line.matchAll(TOKEN_RE)) {
+    for (const match of text.matchAll(TOKEN_RE)) {
         const full = match[0];
         const token = (match[1] ?? "").trim();
         const matchIndex = match.index ?? 0;
 
-        pushText(line.slice(lastIndex, matchIndex));
+        pushText(text.slice(lastIndex, matchIndex));
 
         const style = TOKEN_STYLE[token];
         if (style) {
@@ -100,7 +167,14 @@ export function renderDescriptionLine(line: string): React.ReactNode {
             seen.set(token, count + 1);
 
             if (count === 0) {
-                parts.push(<Icon key={reactKey++} icon={style.icon} title={token} />);
+                parts.push(
+                    <Icon
+                        key={reactKey++}
+                        icon={style.icon}
+                        title={token}
+                        decorative={options.decorativeIcons ?? false}
+                    />
+                );
             } else {
                 pendingWordColor = style.wordColor;
             }
@@ -109,7 +183,11 @@ export function renderDescriptionLine(line: string): React.ReactNode {
         lastIndex = matchIndex + full.length;
     }
 
-    pushText(line.slice(lastIndex));
+    pushText(text.slice(lastIndex));
 
     return <>{parts}</>;
+}
+
+export function renderDescriptionLine(line: string): React.ReactNode {
+    return renderTokenizedText(line);
 }

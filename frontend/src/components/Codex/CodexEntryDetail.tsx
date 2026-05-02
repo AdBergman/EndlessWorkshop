@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -43,7 +44,7 @@ export default function CodexEntryDetail({
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {getCodexEntryLabel(entry)}
+                {renderCodexLabel(getCodexEntryLabel(entry))}
             </h2>
 
             <section className="codex-detail__section" aria-labelledby="codex-description-heading">

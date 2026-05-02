@@ -1,4 +1,5 @@
 import { apiClient } from "@/api/apiClient";
+import { resetCodexTokenAuditDevFlagsForTests } from "@/lib/codex/codexTokenAudit";
 import { useCodexStore } from "@/stores/codexStore";
 
 vi.mock("@/api/apiClient", () => ({
@@ -8,11 +9,17 @@ vi.mock("@/api/apiClient", () => ({
 }));
 
 const mockedApiClient = vi.mocked(apiClient);
+const auditWindow = window as Window & typeof globalThis & {
+    __downloadCodexTokenAudit?: unknown;
+};
 
 describe("useCodexStore", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         mockedApiClient.getCodex.mockReset();
+        resetCodexTokenAuditDevFlagsForTests();
+        delete auditWindow.__downloadCodexTokenAudit;
+        window.history.replaceState({}, "", "/");
     });
 
     it("groups entries by exportKind and indexes them by entryKey", async () => {
@@ -191,5 +198,59 @@ describe("useCodexStore", () => {
             state.getEntryByKey("Ability_Resolved"),
         ]);
         expect(state.entriesByKind.abilities).toHaveLength(2);
+    });
+
+    it("publishes and auto-downloads a dev-only token audit exactly once when explicitly requested", async () => {
+        window.history.replaceState({}, "", "/codex?codexAudit=1");
+        const downloadClick = vi.fn();
+        const appendSpy = vi.spyOn(document.body, "appendChild");
+        const originalCreateObjectURL = URL.createObjectURL;
+        const originalRevokeObjectURL = URL.revokeObjectURL;
+        URL.createObjectURL = vi.fn(() => "blob:codex-audit");
+        URL.revokeObjectURL = vi.fn(() => {});
+        let createdAnchor: HTMLAnchorElement | null = null;
+        const originalCreateElement = document.createElement.bind(document);
+        const createElementSpy = vi.spyOn(document, "createElement").mockImplementation(((tagName: string) => {
+            if (tagName.toLowerCase() === "a") {
+                const anchor = originalCreateElement("a");
+                anchor.click = downloadClick;
+                createdAnchor = anchor;
+                return anchor;
+            }
+
+            return originalCreateElement(tagName);
+        }) as typeof document.createElement);
+        const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "improvements",
+                entryKey: "Improvement_AuricCoral",
+                displayName: "[LuxuryResource01] Auric Coral",
+                descriptionLines: ["Gain [DustColored] per season."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Improvement_Internal",
+                displayName: "[TBD] Internal",
+                descriptionLines: ["Still includes [LuxuryResource01]."],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+        await useCodexStore.getState().loadEntries({ force: true });
+
+        expect(auditWindow.__downloadCodexTokenAudit).toEqual(expect.any(Function));
+        expect(downloadClick).toHaveBeenCalledTimes(1);
+        expect(infoSpy).toHaveBeenCalledWith("Codex token audit downloaded");
+        expect(createdAnchor?.download).toBe("codex-token-audit.txt");
+
+        createElementSpy.mockRestore();
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+        appendSpy.mockRestore();
+        infoSpy.mockRestore();
     });
 });

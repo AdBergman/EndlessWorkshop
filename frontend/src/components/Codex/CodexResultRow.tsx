@@ -1,3 +1,4 @@
+import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 import {
     getCodexEntryLabel,
@@ -30,7 +31,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
             aria-pressed={isSelected}
             onClick={() => onSelect(entry)}
         >
-            <span className="codex-resultRow__title">{getCodexEntryLabel(entry)}</span>
+            <span className="codex-resultRow__title">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
             <span className="codex-resultRow__meta">
                 <span className="codex-resultRow__kind">
                     {isSummary ? "Overview" : formatKindLabel(entry.exportKind)}

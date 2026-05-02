@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
+import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
 import { buildEntriesByKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
@@ -85,6 +86,8 @@ export const useCodexStore = create<Store>((set, get) => ({
                     error: null,
                     lastLoadedAt: new Date().toISOString(),
                 });
+
+                maybePublishCodexTokenAudit(rawEntries);
             } catch (err) {
                 console.error("Failed to load codex:", err);
                 set({

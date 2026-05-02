@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { getCodexEntryLabel, getCodexEntryPreview, type CodexSummaryEntry } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
@@ -17,7 +18,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {summaryEntry.displayName}
+                {renderCodexLabel(summaryEntry.displayName)}
             </h2>
 
             <p className="codex-detail__summaryLead">{summaryEntry.descriptionLines[0]}</p>
@@ -34,7 +35,9 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                 className="codex-summaryList__item"
                                 onClick={() => onSelectEntry(entry)}
                             >
-                                <span className="codex-summaryList__name">{getCodexEntryLabel(entry)}</span>
+                                <span className="codex-summaryList__name">
+                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                </span>
                                 <span className="codex-summaryList__description">
                                     {preview || "No public description has been added for this entry yet."}
                                 </span>

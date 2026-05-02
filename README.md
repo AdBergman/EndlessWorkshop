@@ -217,6 +217,15 @@ npm run dev
 ```
 Runs at: http://localhost:5173
 
+### Codex Token Audit (Dev Only)
+This audit helps find missing Codex token/icon mappings by scanning raw `displayName` and `descriptionLines` data before the UI hides unknown bracket tokens.
+
+1. Run the frontend in dev mode.
+2. Open: http://localhost:5173/codex?codexAudit=1
+3. The file `codex-token-audit.txt` will download automatically.
+
+This only works in development and has no effect in production.
+
 Environment:
 ```
 VITE_API_BASE_URL=http://localhost:8080/api

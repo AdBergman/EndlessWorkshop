@@ -7,7 +7,7 @@ const suggestions: CodexEntry[] = [
     {
         exportKind: "abilities",
         entryKey: "Ability_Blossom",
-        displayName: "Blossom Burst",
+        displayName: "[DustColored] Blossom Burst",
         descriptionLines: ["Launches a blossom wave."],
         referenceKeys: [],
     },
@@ -89,5 +89,27 @@ describe("CodexSearch", () => {
 
         expect(screen.getByText("Bloom Knight")).toBeInTheDocument();
         expect(screen.queryByText("UnitAbility_Bloom_Knight")).not.toBeInTheDocument();
+    });
+
+    it("renders tokenized display names without leaking bracket text", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <CodexSearch
+                value="blossom"
+                onChange={() => {}}
+                resultCount={2}
+                totalCount={12}
+                suggestions={suggestions}
+                onSelectSuggestion={() => {}}
+                onConfirmQuery={() => {}}
+            />
+        );
+
+        const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.click(input);
+
+        expect(screen.getByText("Blossom Burst")).toBeInTheDocument();
+        expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
     });
 });
