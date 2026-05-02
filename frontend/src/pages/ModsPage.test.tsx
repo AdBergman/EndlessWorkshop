@@ -83,7 +83,19 @@ describe("ModsPage", () => {
                 "More varied map generation, slightly larger worlds, and persistent water after the final monsoon."
             )
         ).toBeInTheDocument();
-        expect(within(includedMods).getAllByRole("link", { name: "Download pack v1.0.0" })).toHaveLength(3);
+        expect(within(includedMods).queryByRole("link", { name: "Download pack v1.0.0" })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Download Essentials Pack v1.0.0" })).toHaveAttribute(
+            "href",
+            "https://github.com/AdBergman/EL2Mods/releases/tag/essentials-pack-v1.0.0"
+        );
+        expect(screen.getByRole("link", { name: "Download Quest Recovery" })).toHaveAttribute(
+            "href",
+            "https://github.com/AdBergman/EL2Mods/releases/tag/v1.1.0"
+        );
+        expect(screen.getByRole("link", { name: "Download End Game Report" })).toHaveAttribute(
+            "href",
+            "https://github.com/AdBergman/EL2StatsMod/releases/tag/v1.1.0"
+        );
 
         await user.click(screen.getByRole("button", { name: "Enlarge WorldGen screenshot" }));
 

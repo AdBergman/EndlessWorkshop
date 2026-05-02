@@ -146,17 +146,26 @@ interface SectionProps {
     sectionId?: string;
     title: string;
     description?: string;
+    actionLabel?: string;
+    actionUrl?: string;
     rows: CatalogRowItem[];
     ariaLabel: string;
     onOpenPreview: (preview: RowPreview) => void;
 }
 
-function ModsSection({ sectionId, title, description, rows, ariaLabel, onOpenPreview }: SectionProps) {
+function ModsSection({ sectionId, title, description, actionLabel, actionUrl, rows, ariaLabel, onOpenPreview }: SectionProps) {
     return (
         <section id={sectionId} className="mods-section" aria-labelledby={`${ariaLabel}-title`}>
             <div className="mods-section-heading">
                 <h2 id={`${ariaLabel}-title`}>{title}</h2>
                 {description ? <p>{description}</p> : null}
+                {actionLabel && actionUrl ? (
+                    <div className="mods-section-action">
+                        <a href={actionUrl} target="_blank" rel="noreferrer">
+                            {actionLabel}
+                        </a>
+                    </div>
+                ) : null}
             </div>
 
             <div className="mods-rows" aria-label={ariaLabel}>
@@ -197,8 +206,6 @@ export default function ModsPage() {
                         description:
                             "More varied map generation, slightly larger worlds, and persistent water after the final monsoon.",
                         detail: mod.detail,
-                        releaseUrl: featuredPack.releaseUrl,
-                        actionLabel: `Download pack ${featuredPack.version}`,
                         preview: buildPreview(mod.name, "Map", "teal", "World generation adjustments", mod.screenshots),
                     };
                 }
@@ -209,8 +216,6 @@ export default function ModsPage() {
                         title: mod.name,
                         description: "Adds bulk trading shortcuts: Shift + Click for 10x and Ctrl + Click for 50x.",
                         detail: mod.detail,
-                        releaseUrl: featuredPack.releaseUrl,
-                        actionLabel: `Download pack ${featuredPack.version}`,
                         preview: buildPreview(mod.name, "Trade", "steel", "Bulk market shortcuts", mod.screenshots),
                     };
                 }
@@ -220,8 +225,6 @@ export default function ModsPage() {
                     title: mod.name,
                     description: "Helps AI factions stay competitive by stabilizing approval over time.",
                     detail: mod.detail,
-                    releaseUrl: featuredPack.releaseUrl,
-                    actionLabel: `Download pack ${featuredPack.version}`,
                     preview: buildPreview(mod.name, "AI", "slate", "Approval stabilization", mod.screenshots),
                 };
             }),
@@ -239,7 +242,7 @@ export default function ModsPage() {
                         : "Exports victory-screen reports for upload to the Game Summary page.",
                 detail: mod.detail,
                 releaseUrl: mod.releaseUrl,
-                actionLabel: "Open release",
+                actionLabel: `Download ${mod.name}`,
                 preview: buildPreview(
                     mod.name,
                     mod.name === "Quest Recovery" ? "Quest" : "Report",
@@ -288,6 +291,8 @@ export default function ModsPage() {
                 <ModsSection
                     title="Essentials Mod Pack"
                     description="A small bundle of mods that smooth out rough edges without changing the game fundamentally."
+                    actionLabel={`Download Essentials Pack ${featuredPack.version}`}
+                    actionUrl={featuredPack.releaseUrl}
                     rows={essentialsRows}
                     ariaLabel="Included mods"
                     onOpenPreview={setActivePreview}

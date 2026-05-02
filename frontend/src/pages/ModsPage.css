@@ -111,6 +111,20 @@
     background: linear-gradient(90deg, var(--mods-accent), transparent);
 }
 
+.mods-section-action {
+    margin-top: 0.8rem;
+}
+
+.mods-section-action a {
+    color: #f6d8c2;
+    text-decoration: none;
+    transition: color 0.18s ease;
+}
+
+.mods-section-action a:hover {
+    color: #fff4ea;
+}
+
 .mods-rows {
     border-top: 1px solid var(--mods-line);
 }
@@ -118,8 +132,8 @@
 .mods-row {
     position: relative;
     display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 1.4rem;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 1.55rem;
     align-items: start;
     padding: 1.15rem 0 1.15rem 0.9rem;
     border-bottom: 1px solid var(--mods-line);
@@ -279,13 +293,13 @@
 
 .mods-row-description {
     margin-top: 0.35rem;
-    max-width: 64ch;
+    max-width: 72ch;
 }
 
 .mods-row-detail {
     margin-top: 0.45rem;
     color: var(--mods-copy-faint);
-    max-width: 70ch;
+    max-width: 78ch;
     font-size: 0.96rem;
 }
 
@@ -363,12 +377,13 @@
 }
 
 body:has(.mods-page) {
-    scrollbar-color: rgba(255, 255, 255, 0.16) rgba(255, 255, 255, 0.04);
+    scrollbar-color: rgba(255, 255, 255, 0.18) rgba(255, 255, 255, 0.03);
     scrollbar-width: thin;
 }
 
 body:has(.mods-page)::-webkit-scrollbar {
     width: 10px;
+    height: 10px;
 }
 
 body:has(.mods-page)::-webkit-scrollbar-track {
@@ -376,13 +391,15 @@ body:has(.mods-page)::-webkit-scrollbar-track {
 }
 
 body:has(.mods-page)::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.1));
-    border: 2px solid #07090b;
+    border: 2px solid rgba(0, 0, 0, 0);
     border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    background-clip: padding-box;
 }
 
 body:has(.mods-page)::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 127, 50, 0.16));
+    background: rgba(255, 255, 255, 0.28);
+    background-clip: padding-box;
 }
 
 @media (max-width: 860px) {
