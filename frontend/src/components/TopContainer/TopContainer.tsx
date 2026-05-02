@@ -1,7 +1,7 @@
 import React from "react";
 import "./TopContainer.css";
 import {useGameData} from "@/context/GameDataContext";
-import {NavLink} from "react-router-dom";
+import {NavLink, useLocation, useNavigate} from "react-router-dom";
 import {Faction} from "@/types/dataTypes";
 
 const factions = [
@@ -21,6 +21,8 @@ const routes = [
 ];
 
 const TopContainer: React.FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
     const showFactionSelector = !isProcessingSharedBuild;
 
@@ -36,6 +38,19 @@ const TopContainer: React.FC = () => {
                     <NavLink
                         key={route.label}
                         to={route.path}
+                        onClick={(event) => {
+                            if (route.path !== "/codex") return;
+
+                            event.preventDefault();
+                            navigate({
+                                pathname: "/codex",
+                                search: "",
+                            }, {
+                                state: {
+                                    codexResetNonce: `${Date.now()}:${location.key}`,
+                                },
+                            });
+                        }}
                         className={({ isActive }) => (isActive ? "active" : "")}
                     >
                         {route.label}

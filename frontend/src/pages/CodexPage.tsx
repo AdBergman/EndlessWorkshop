@@ -1,5 +1,5 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
 import CodexOverview from "@/components/Codex/CodexOverview";
 import CodexResultList from "@/components/Codex/CodexResultList";
@@ -44,6 +44,7 @@ function formatKindLabel(kind: string): string {
 }
 
 export default function CodexPage() {
+    const location = useLocation();
     const entries = useCodexStore((state) => state.entries);
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
     const loading = useCodexStore((state) => state.loading);
@@ -56,9 +57,12 @@ export default function CodexPage() {
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryKey = (searchParams.get("entry") ?? "").trim() || null;
+    const codexResetNonce = (location.state as { codexResetNonce?: string } | null)?.codexResetNonce ?? null;
 
     const resultListRef = useRef<HTMLDivElement>(null);
     const detailTitleRef = useRef<HTMLHeadingElement>(null);
+    const suppressNextPlainRouteResetRef = useRef(false);
+    const lastHandledResetNonceRef = useRef<string | null>(null);
 
     const filterOptions = useMemo(() => {
         const kindCounts = entries.reduce<Map<string, number>>((acc, entry) => {
@@ -126,6 +130,10 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
+    const isPlainRouteReset =
+        location.pathname === "/codex" &&
+        location.search === "" &&
+        Boolean(codexResetNonce);
 
     const resolvedRelatedEntries = useMemo(
         () => resolveRelatedEntries(selectedEntry, entriesByKey),
@@ -133,7 +141,11 @@ export default function CodexPage() {
     );
 
     const updateSelectedEntry = useCallback(
-        (entryKey: string | null) => {
+        (entryKey: string | null, options?: { suppressPlainRouteReset?: boolean }) => {
+            if (!entryKey && options?.suppressPlainRouteReset) {
+                suppressNextPlainRouteResetRef.current = true;
+            }
+
             setSearchParams(
                 (currentParams) => {
                     const nextParams = new URLSearchParams(currentParams);
@@ -174,7 +186,7 @@ export default function CodexPage() {
             setSelectionIntent("passive");
 
             if (kind === ALL_CODEX_KIND) {
-                updateSelectedEntry(null);
+                updateSelectedEntry(null, { suppressPlainRouteReset: true });
                 return;
             }
 
@@ -182,6 +194,28 @@ export default function CodexPage() {
         },
         [updateSelectedEntry]
     );
+
+    useEffect(() => {
+        if (location.pathname !== "/codex" || location.search !== "") return;
+
+        if (suppressNextPlainRouteResetRef.current) {
+            suppressNextPlainRouteResetRef.current = false;
+            return;
+        }
+
+        if (codexResetNonce && lastHandledResetNonceRef.current === codexResetNonce) {
+            return;
+        }
+
+        if (!codexResetNonce && !selectedEntryKey && query.length === 0 && activeKind === ALL_CODEX_KIND) {
+            return;
+        }
+
+        lastHandledResetNonceRef.current = codexResetNonce;
+        setQuery("");
+        setActiveKind(ALL_CODEX_KIND);
+        setSelectionIntent("passive");
+    }, [codexResetNonce, location.pathname, location.search]);
 
     useEffect(() => {
         if (activeKind === ALL_CODEX_KIND) return;
@@ -194,6 +228,7 @@ export default function CodexPage() {
 
     useEffect(() => {
         if (loading) return;
+        if (isPlainRouteReset) return;
 
         const firstVisibleEntry = displayEntries[0] ?? null;
         const isSelectedVisible = Boolean(
@@ -215,7 +250,7 @@ export default function CodexPage() {
         if (!isSelectedVisible) {
             updateSelectedEntry(firstVisibleEntry.entryKey);
         }
-    }, [activeKind, displayEntries, hasDeferredQuery, loading, selectedEntryKey, updateSelectedEntry]);
+    }, [activeKind, displayEntries, hasDeferredQuery, isPlainRouteReset, loading, selectedEntryKey, updateSelectedEntry]);
 
     useEffect(() => {
         if (!selectedListItem) return;

@@ -1,14 +1,35 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import TopContainer from "@/components/TopContainer/TopContainer";
+import GameDataContext from "@/context/GameDataContext";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
+import { Faction } from "@/types/dataTypes";
 
 function LocationProbe() {
     const location = useLocation();
 
     return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
 }
+
+const gameDataContextValue = {
+    districts: new Map(),
+    improvements: new Map(),
+    techs: new Map(),
+    units: new Map(),
+    codexByKindKey: new Map(),
+    selectedFaction: {
+        isMajor: true,
+        enumFaction: Faction.KIN,
+        minorName: null,
+        uiLabel: "Kin",
+    },
+    setSelectedFaction: () => {},
+    selectedTechs: [],
+    setSelectedTechs: () => {},
+    isProcessingSharedBuild: false,
+};
 
 describe("CodexPage", () => {
     beforeEach(() => {
@@ -163,6 +184,60 @@ describe("CodexPage", () => {
         await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
 
         expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+    });
+
+    it("resets query, kind, and selection when navigating back to plain /codex", async () => {
+        const user = userEvent.setup();
+        window.history.replaceState({}, "", "/codex");
+
+        render(
+            <GameDataContext.Provider value={gameDataContextValue}>
+                <BrowserRouter>
+                    <Routes>
+                        <Route
+                            path="/codex"
+                            element={
+                                <>
+                                    <LocationProbe />
+                                    <TopContainer />
+                                    <CodexPage />
+                                </>
+                            }
+                        />
+                    </Routes>
+                </BrowserRouter>
+            </GameDataContext.Provider>
+        );
+
+        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+            name: /districts 2/i,
+        }));
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "market");
+
+        await waitFor(() => {
+            expect(
+                within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+                    name: /districts 2/i,
+                })
+            ).toHaveAttribute("aria-pressed", "true");
+        });
+        expect(screen.getByRole("combobox", { name: /search the encyclopedia/i })).toHaveValue("market");
+        expect(screen.getByTestId("location-probe")).not.toHaveTextContent(/^\/codex$/);
+
+        await user.click(screen.getByRole("link", { name: "Codex" }));
+
+        await waitFor(() => {
+            expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        });
+
+        expect(`${window.location.pathname}${window.location.search}`).toBe("/codex");
+        expect(screen.getByRole("combobox", { name: /search the encyclopedia/i })).toHaveValue("");
+        expect(
+            within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+                name: /all 3/i,
+            })
+        ).toHaveAttribute("aria-pressed", "true");
+        expect(screen.queryByRole("heading", { name: "All Districts" })).not.toBeInTheDocument();
     });
 
     it("keeps valid deep links working", async () => {
