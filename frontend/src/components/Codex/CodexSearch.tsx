@@ -81,17 +81,9 @@ export default function CodexSearch({
 
     return (
         <div className="codex-search">
-            <div className="codex-search__labelRow">
-                <label className="codex-search__label" htmlFor="codex-search-input">
-                    Search the encyclopedia
-                </label>
-
-                <div className="codex-search__meta" aria-live="polite">
-                    {resultCount === totalCount
-                        ? `${totalCount} entries`
-                        : `${resultCount} of ${totalCount} entries`}
-                </div>
-            </div>
+            <label className="seo-hidden" htmlFor="codex-search-input">
+                Search the encyclopedia
+            </label>
 
             <div className="codex-search__fieldWrap">
                 <input
@@ -112,6 +104,12 @@ export default function CodexSearch({
                     aria-controls={showSuggestions ? listboxId : undefined}
                     aria-activedescendant={activeSuggestion ? `codex-suggestion-${activeSuggestion.entryKey}` : undefined}
                 />
+
+                <div className="codex-search__meta" aria-live="polite">
+                    {resultCount === totalCount
+                        ? `${totalCount} entries`
+                        : `${resultCount} / ${totalCount}`}
+                </div>
 
                 {showSuggestions ? (
                     <div className="codex-search__dropdown" role="listbox" id={listboxId}>

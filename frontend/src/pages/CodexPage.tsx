@@ -240,13 +240,13 @@ export default function CodexPage() {
 
             <section className="codex-surface" aria-labelledby="codex-page-title">
                 <header className="codex-header">
-                    <div className="codex-header__row">
-                        <div className="codex-header__copy">
-                            <h2 className="codex-pageTitle" id="codex-page-title">
-                                Encyclopedia
-                            </h2>
-                        </div>
+                    <div className="codex-header__copy">
+                        <h2 className="codex-pageTitle" id="codex-page-title">
+                            Encyclopedia
+                        </h2>
+                    </div>
 
+                    <div className="codex-filterRail">
                         <CodexSearch
                             value={query}
                             onChange={setQuery}
@@ -264,9 +264,6 @@ export default function CodexPage() {
                                 }
                             }}
                         />
-                    </div>
-
-                    <div className="codex-filterRail">
                         <KindFilter
                             options={filterOptions}
                             activeKind={activeKind}
