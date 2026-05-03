@@ -54,18 +54,64 @@ export const includedMods: ModEntry[] = [
         description: "More varied map generation with slightly larger worlds and persistent late-monsoon water.",
         detail:
             "WorldGen adds more map variety, nudges map size upward a bit, and keeps water in play after the final monsoon so the late game remains closer to the world the match built toward.",
+        screenshots: [
+            {
+                src: "/graphics/mods/worldgen-1.webp",
+                alt: "WorldGen map generation screenshot 1",
+                caption: "WorldGen map variety",
+            },
+            {
+                src: "/graphics/mods/worldgen-2.webp",
+                alt: "WorldGen map generation screenshot 2",
+                caption: "Larger, more varied worlds",
+            },
+            {
+                src: "/graphics/mods/worldgen-3.webp",
+                alt: "WorldGen map generation screenshot 3",
+                caption: "Terrain and water generation",
+            },
+            {
+                src: "/graphics/mods/worldgen-4.webp",
+                alt: "WorldGen map generation screenshot 4",
+                caption: "Late-game world shape",
+            },
+            {
+                src: "/graphics/mods/worldgen-5.webp",
+                alt: "WorldGen map generation screenshot 5",
+                caption: "World generation variation",
+            },
+            {
+                src: "/graphics/mods/worldgen-6.webp",
+                alt: "WorldGen map generation screenshot 6",
+                caption: "Persistent water after monsoon",
+            },
+        ],
     },
     {
         name: "BulkTrade",
         description: "Shift + Click trades 10x and Ctrl + Click trades 50x.",
         detail:
             "BulkTrade removes repetitive market clicking by adding higher-volume buy and sell shortcuts, making common trading flows much faster without changing the underlying economy.",
+        screenshots: [
+            {
+                src: "/graphics/mods/mod-bulktrade.webp",
+                alt: "BulkTrade marketplace bulk trading screenshot",
+                caption: "Bulk trading shortcuts",
+            },
+        ],
     },
     {
         name: "SyntheticHarmony",
         description: "Stabilizes approval so AI factions stay more competitive.",
         detail:
             "SyntheticHarmony helps AI factions avoid approval collapse, which keeps them more functional and competitive deeper into the match without rewriting their broader behavior.",
+        screenshots: [
+            {
+                src: "/graphics/mods/mod-syntheticharmony.webp",
+                alt: "SyntheticHarmony approval support screenshot",
+                caption: "Approval stability for AI factions",
+            },
+        ],
     },
 ];
 
@@ -76,6 +122,13 @@ export const standaloneMods: ModEntry[] = [
         detail:
             "A targeted recovery utility for salvaging blocked campaign progress in single-player saves. It is meant as a support tool rather than part of the default Essentials experience.",
         releaseUrl: "https://github.com/AdBergman/EL2Mods/releases/tag/v1.1.0",
+        screenshots: [
+            {
+                src: "/graphics/mods/mod-quest-1.webp",
+                alt: "Quest Recovery panel in the quest journal",
+                caption: "Quest Recovery overlay",
+            },
+        ],
     },
     {
         name: "End Game Report",
@@ -83,6 +136,13 @@ export const standaloneMods: ModEntry[] = [
         detail:
             "Creates a structured end-of-run report you can feed back into Endless Workshop for summary analysis and sharing. Best treated as a companion utility rather than a gameplay mod.",
         releaseUrl: "https://github.com/AdBergman/EL2StatsMod/releases/tag/v1.1.0",
+        screenshots: [
+            {
+                src: "/graphics/mods/mod-summary.webp",
+                alt: "End Game Report displayed in the Endless Workshop summary page",
+                caption: "Summary analysis from an exported report",
+            },
+        ],
     },
 ];
 
