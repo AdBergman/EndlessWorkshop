@@ -33,8 +33,8 @@ public class FrontendController {
     }
 
     @RequestMapping(value = {
-            "/{page:tech|units}/{entryKey:[a-z0-9-]+}",
-            "/{page:tech|units}/{entryKey:[a-z0-9-]+}/"
+            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
+            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
     })
     public String forwardFeaturedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
         if (seoOutputLocator.hasGeneratedFeaturedEntity(page, entryKey)) {

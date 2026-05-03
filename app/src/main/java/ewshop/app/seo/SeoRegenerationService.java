@@ -1,6 +1,5 @@
 package ewshop.app.seo;
 
-import ewshop.domain.model.Codex;
 import ewshop.domain.service.CodexFilterResult;
 import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexService;
@@ -16,6 +15,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -23,8 +23,10 @@ import java.util.stream.Stream;
 public class SeoRegenerationService {
 
     static final String TECH_KIND = "tech";
+    static final String UNITS_KIND = "units";
     static final String WORKSHOP_ENTRY_KEY = "workshop";
 
+    private static final String DUPLICATE_SLUG_REASON = "duplicate-slug";
     private static final String SITE_NAME = "Endless Workshop";
     private static final String SITE_URL = "https://endlessworkshop.dev";
     private static final String DEFAULT_IMAGE_URL = SITE_URL + "/logo512.png";
@@ -54,49 +56,53 @@ public class SeoRegenerationService {
     public SeoRegenerationResult regeneratePrototypePages() {
         List<String> warnings = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        Map<String, Integer> skippedByReason = new LinkedHashMap<>();
-
-        deleteGeneratedTechOutput();
 
         CodexFilterResult filterResult = codexFilterService.filter(codexService.getAllCodexEntries());
-        skippedByReason.putAll(filterResult.skippedByReason());
         addDuplicateSlugWarnings(filterResult, warnings);
 
-        List<TechPageCandidate> candidates = filterResult.entries().stream()
-                .filter(entry -> isTechEntry(entry.entry()))
+        List<PageCandidate> candidates = filterResult.entries().stream()
                 .sorted(Comparator
-                        .comparing(CodexFilterResult.FilteredCodexEntry::normalizedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .comparing(CodexFilterResult.FilteredCodexEntry::normalizedExportKind, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(CodexFilterResult.FilteredCodexEntry::normalizedDisplayName, String.CASE_INSENSITIVE_ORDER)
                         .thenComparing(entry -> trimToEmpty(entry.entry().getEntryKey()), String.CASE_INSENSITIVE_ORDER))
-                .map(this::toTechCandidate)
+                .map(this::toPageCandidate)
                 .toList();
 
-        for (ResolvedTechPage resolved : resolveRoutes(candidates)) {
+        LinkedHashSet<String> kindsToRebuild = new LinkedHashSet<>(listExistingGeneratedKinds());
+        candidates.stream()
+                .map(PageCandidate::kind)
+                .forEach(kindsToRebuild::add);
+        deleteGeneratedOutput(kindsToRebuild);
+
+        for (PageCandidate candidate : candidates) {
             writeUtf8(
-                    seoOutputLocator.getFeaturedEntityFile("tech", resolved.slug()),
-                    renderTechHtml(resolved.candidate(), resolved.route())
+                    seoOutputLocator.getFeaturedEntityFile(candidate.kind(), candidate.slug()),
+                    renderEntityHtml(candidate, routeFor(candidate.kind(), candidate.slug()))
             );
         }
 
-        List<String> generatedRoutes = listGeneratedRoutes("tech");
+        List<String> generatedRoutes = listGeneratedRoutes();
         writeSitemap(generatedRoutes);
+
+        Map<String, SeoRegenerationKindResult> exportKindCounts =
+                buildExportKindCounts(generatedRoutes, filterResult.skippedEntries());
 
         return new SeoRegenerationResult(
                 generatedRoutes.size(),
                 List.copyOf(generatedRoutes),
                 filterResult.filteredOutCount(),
-                Map.copyOf(skippedByReason),
+                filterResult.skippedByReason().getOrDefault(DUPLICATE_SLUG_REASON, 0),
+                Map.copyOf(filterResult.skippedByReason()),
+                Map.copyOf(exportKindCounts),
                 List.copyOf(warnings),
                 List.copyOf(errors),
                 true
         );
     }
 
-    private boolean isTechEntry(Codex entry) {
-        return TECH_KIND.equalsIgnoreCase(trimToEmpty(entry.getExportKind()));
-    }
-
-    private TechPageCandidate toTechCandidate(CodexFilterResult.FilteredCodexEntry entry) {
-        return new TechPageCandidate(
+    private PageCandidate toPageCandidate(CodexFilterResult.FilteredCodexEntry entry) {
+        return new PageCandidate(
+                entry.normalizedExportKind(),
                 trimToEmpty(entry.entry().getEntryKey()),
                 entry.normalizedDisplayName(),
                 entry.meaningfulDescriptionLines(),
@@ -105,32 +111,46 @@ public class SeoRegenerationService {
         );
     }
 
-    private List<ResolvedTechPage> resolveRoutes(List<TechPageCandidate> candidates) {
-        List<ResolvedTechPage> resolvedPages = new ArrayList<>();
-        for (TechPageCandidate candidate : candidates) {
-            resolvedPages.add(new ResolvedTechPage(candidate, candidate.baseSlug(), routeForSlug(candidate.baseSlug())));
-        }
-        return resolvedPages;
-    }
-
     private void addDuplicateSlugWarnings(CodexFilterResult filterResult, List<String> warnings) {
         filterResult.skippedEntries().stream()
-                .filter(skip -> "duplicate-slug".equals(skip.reason()))
+                .filter(skip -> DUPLICATE_SLUG_REASON.equals(skip.reason()))
                 .map(skip -> "Skipped codex entry '" + skip.entryKey() + "' in kind '" + skip.exportKind()
                         + "' because its normalized display-name slug duplicates an earlier entry.")
                 .forEach(warnings::add);
     }
 
-    private void deleteGeneratedTechOutput() {
-        Path techOutputDirectory = seoOutputLocator.getFeaturedEntityDirectory("tech");
-        if (!Files.exists(techOutputDirectory)) {
+    private LinkedHashSet<String> listExistingGeneratedKinds() {
+        Path outputRoot = seoOutputLocator.getOutputRoot();
+        if (!Files.isDirectory(outputRoot)) {
+            return new LinkedHashSet<>();
+        }
+
+        try (Stream<Path> pathStream = Files.list(outputRoot)) {
+            return pathStream
+                    .filter(Files::isDirectory)
+                    .map(path -> path.getFileName().toString())
+                    .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to inspect generated SEO output root: " + outputRoot, exception);
+        }
+    }
+
+    private void deleteGeneratedOutput(LinkedHashSet<String> kindsToRebuild) {
+        for (String kind : kindsToRebuild) {
+            deleteGeneratedKindOutput(kind);
+        }
+    }
+
+    private void deleteGeneratedKindOutput(String kind) {
+        Path kindOutputDirectory = seoOutputLocator.getFeaturedEntityDirectory(kind);
+        if (!Files.exists(kindOutputDirectory)) {
             return;
         }
 
-        try (Stream<Path> pathStream = Files.walk(techOutputDirectory)) {
+        try (Stream<Path> pathStream = Files.walk(kindOutputDirectory)) {
             pathStream.sorted(Comparator.reverseOrder()).forEach(this::deletePath);
         } catch (IOException exception) {
-            throw new UncheckedIOException("Failed to clear generated tech SEO output: " + techOutputDirectory, exception);
+            throw new UncheckedIOException("Failed to clear generated SEO output for kind '" + kind + "'", exception);
         }
     }
 
@@ -142,29 +162,61 @@ public class SeoRegenerationService {
         }
     }
 
-    private List<String> listGeneratedRoutes(String page) {
-        Path pageDirectory = seoOutputLocator.getFeaturedEntityDirectory(page);
-        if (!Files.isDirectory(pageDirectory)) {
+    private List<String> listGeneratedRoutes() {
+        Path outputRoot = seoOutputLocator.getOutputRoot();
+        if (!Files.isDirectory(outputRoot)) {
             return List.of();
         }
 
-        try (Stream<Path> pathStream = Files.walk(pageDirectory, 2)) {
-            return pathStream
+        try (Stream<Path> pathStream = Files.walk(outputRoot, 3)) {
+            LinkedHashSet<String> routes = pathStream
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().equals("index.html"))
-                    .map(pageDirectory::relativize)
-                    .filter(relativePath -> relativePath.getNameCount() == 2)
-                    .map(relativePath -> relativePath.getName(0).toString())
+                    .map(outputRoot::relativize)
+                    .filter(relativePath -> relativePath.getNameCount() == 3)
+                    .map(relativePath -> routeFor(
+                            relativePath.getName(0).toString(),
+                            relativePath.getName(1).toString()
+                    ))
+                    .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll);
+
+            return routes.stream()
                     .sorted()
-                    .map(this::routeForSlug)
                     .toList();
         } catch (IOException exception) {
-            throw new UncheckedIOException("Failed to read generated SEO routes from: " + pageDirectory, exception);
+            throw new UncheckedIOException("Failed to read generated SEO routes from: " + outputRoot, exception);
         }
     }
 
-    private String routeForSlug(String slug) {
-        return "/tech/" + slug;
+    private Map<String, SeoRegenerationKindResult> buildExportKindCounts(
+            List<String> generatedRoutes,
+            List<CodexFilterResult.CodexFilterSkip> skippedEntries
+    ) {
+        Map<String, MutableKindCounts> countsByKind = new LinkedHashMap<>();
+
+        for (String route : generatedRoutes) {
+            String kind = route.substring(1, route.indexOf('/', 1));
+            countsByKind.computeIfAbsent(kind, ignored -> new MutableKindCounts()).generatedCount++;
+        }
+
+        for (CodexFilterResult.CodexFilterSkip skip : skippedEntries) {
+            String kind = trimToEmpty(skip.exportKind());
+            countsByKind.computeIfAbsent(kind, ignored -> new MutableKindCounts()).skippedCount++;
+            if (DUPLICATE_SLUG_REASON.equals(skip.reason())) {
+                countsByKind.get(kind).duplicateCount++;
+            }
+        }
+
+        Map<String, SeoRegenerationKindResult> exportKindCounts = new LinkedHashMap<>();
+        countsByKind.forEach((kind, counts) -> exportKindCounts.put(
+                kind,
+                new SeoRegenerationKindResult(counts.generatedCount, counts.skippedCount, counts.duplicateCount)
+        ));
+        return exportKindCounts;
+    }
+
+    private String routeFor(String kind, String slug) {
+        return "/" + kind + "/" + slug;
     }
 
     private void writeSitemap(List<String> generatedRoutes) {
@@ -193,13 +245,16 @@ public class SeoRegenerationService {
         }
     }
 
-    static String renderTechHtml(TechPageCandidate candidate, String route) {
-        String pageTitle = candidate.displayName() + " Tech Guide | " + SITE_NAME;
-        String seoDescription = buildSeoDescription(candidate);
+    static String renderEntityHtml(PageCandidate candidate, String route) {
+        String kindLabel = kindLabelFor(candidate.kind());
+        String landingRoute = landingRouteForKind(candidate.kind());
+        String landingLabel = landingLabelForKind(candidate.kind());
+        String pageTitle = candidate.displayName() + " " + kindLabel + " Guide | " + SITE_NAME;
+        String seoDescription = buildSeoDescription(candidate, kindLabel);
         String canonicalUrl = SITE_URL + route;
         String summary = candidate.descriptionLines().getFirst();
         String detailsList = renderList(List.of(
-                "Kind: " + TECH_KIND,
+                "Kind: " + kindLabel,
                 "Entry key: " + candidate.entryKey(),
                 "Canonical route: " + route
         ));
@@ -217,11 +272,13 @@ public class SeoRegenerationService {
                 escapeJson(canonicalUrl)
         ).trim();
         String breadcrumbJsonLd = """
-                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Tech","item":"%s/tech"},{"@type":"ListItem","position":3,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
+                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"%s","item":"%s%s"},{"@type":"ListItem","position":3,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
                 """.formatted(
                 escapeJson(SITE_NAME),
                 escapeJson(SITE_URL),
+                escapeJson(landingLabel),
                 escapeJson(SITE_URL),
+                escapeJson(landingRoute),
                 escapeJson(candidate.displayName()),
                 escapeJson(canonicalUrl),
                 escapeJson(canonicalUrl)
@@ -269,7 +326,7 @@ public class SeoRegenerationService {
                         </a>
 
                         <nav class="seo-nav" aria-label="Primary">
-                            <a href="/tech" aria-current="page">Tech</a><a href="/units">Units</a><a href="/codex">Codex</a><a href="/summary">Summary</a><a href="/mods">Mods</a><a href="/info">Info</a>
+                            <a href="/tech">Tech</a><a href="/units">Units</a><a href="/codex">Codex</a><a href="/summary">Summary</a><a href="/mods">Mods</a><a href="/info">Info</a>
                         </nav>
 
                     </div>
@@ -280,7 +337,7 @@ public class SeoRegenerationService {
                     <div class="entity-page__breadcrumbs" aria-label="Breadcrumb">
                         <a href="/">Home</a>
                         <span>/</span>
-                        <a href="/tech">Tech</a>
+                        <a href="%s">%s</a>
                         <span>/</span>
                         <span>%s</span>
                     </div>
@@ -288,7 +345,7 @@ public class SeoRegenerationService {
                     <div class="entity-page__layout">
 
                         <header class="entity-page__header">
-                            <p class="seo-label entity-page__kind">Technology • Codex entry</p>
+                            <p class="seo-label entity-page__kind">%s • Codex entry</p>
                             <h1 class="seo-heading entity-page__title">%s</h1>
                             <p class="seo-text entity-page__summary">%s</p>
                         </header>
@@ -311,7 +368,7 @@ public class SeoRegenerationService {
 
                         <section class="seo-section entity-page__section entity-page__actions" aria-label="Actions">
                             <div class="seo-buttonRow">
-                                <a class="seo-button" href="/tech">Back to Tech</a>
+                                <a class="seo-button" href="%s">Back to %s</a>
                             </div>
                         </section>
 
@@ -327,7 +384,7 @@ public class SeoRegenerationService {
                             <p class="seo-label">Explore</p>
                             <h2 class="seo-heading">Explore</h2>
                             <ul class="seo-list">
-                                <li><a href="/tech">Tech tree</a></li>
+                                <li><a href="%s">%s</a></li>
                                 <li><a href="/codex">Codex</a></li>
                                 <li><a href="/units">Units</a></li>
                                 <li><a href="/mods">Mods</a></li>
@@ -353,18 +410,66 @@ public class SeoRegenerationService {
                 webPageJsonLd,
                 breadcrumbJsonLd,
                 escapeHtml(pageTitle),
+                landingRoute,
+                escapeHtml(landingLabel),
                 escapeHtml(candidate.displayName()),
+                escapeHtml(kindLabel),
                 escapeHtml(candidate.displayName()),
                 escapeHtml(summary),
                 detailsList,
                 descriptionList,
-                referenceChips
+                landingRoute,
+                escapeHtml(landingLabel),
+                referenceChips,
+                landingRoute,
+                escapeHtml(landingLabel)
         );
     }
 
-    private static String buildSeoDescription(TechPageCandidate candidate) {
+    private static String buildSeoDescription(PageCandidate candidate, String kindLabel) {
         String firstDescriptionLine = candidate.descriptionLines().getFirst();
-        return candidate.displayName() + " is a technology entry in the Endless Workshop codex. " + firstDescriptionLine;
+        return candidate.displayName() + " is a " + kindLabel.toLowerCase(Locale.ROOT)
+                + " entry in the Endless Workshop codex. " + firstDescriptionLine;
+    }
+
+    private static String landingRouteForKind(String kind) {
+        if (TECH_KIND.equals(kind)) {
+            return "/tech";
+        }
+        if (UNITS_KIND.equals(kind)) {
+            return "/units";
+        }
+        return "/codex";
+    }
+
+    private static String landingLabelForKind(String kind) {
+        if (TECH_KIND.equals(kind)) {
+            return "Tech";
+        }
+        if (UNITS_KIND.equals(kind)) {
+            return "Units";
+        }
+        return "Codex";
+    }
+
+    private static String kindLabelFor(String kind) {
+        if (TECH_KIND.equals(kind)) {
+            return "Technology";
+        }
+
+        String[] parts = trimToEmpty(kind).split("[-_\\s]+");
+        StringBuilder label = new StringBuilder();
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+            if (!label.isEmpty()) {
+                label.append(' ');
+            }
+            label.append(part.substring(0, 1).toUpperCase(Locale.ROOT))
+                    .append(part.substring(1).toLowerCase(Locale.ROOT));
+        }
+        return label.isEmpty() ? "Codex" : label.toString();
     }
 
     private static String renderReferenceChips(List<String> referenceKeys) {
@@ -408,15 +513,19 @@ public class SeoRegenerationService {
                 .replace("\"", "\\\"");
     }
 
-    record TechPageCandidate(
+    record PageCandidate(
+            String kind,
             String entryKey,
             String displayName,
             List<String> descriptionLines,
             List<String> referenceKeys,
-            String baseSlug
+            String slug
     ) {
     }
 
-    record ResolvedTechPage(TechPageCandidate candidate, String slug, String route) {
+    private static final class MutableKindCounts {
+        private int generatedCount;
+        private int skippedCount;
+        private int duplicateCount;
     }
 }

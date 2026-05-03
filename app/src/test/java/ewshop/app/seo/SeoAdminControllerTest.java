@@ -53,7 +53,9 @@ class SeoAdminControllerTest {
                 1,
                 List.of("/tech/workshop"),
                 0,
+                0,
                 Map.of(),
+                Map.of("tech", new SeoRegenerationKindResult(1, 0, 0)),
                 List.of(),
                 List.of(),
                 true
@@ -67,7 +69,9 @@ class SeoAdminControllerTest {
                 .andExpect(jsonPath("$.generatedCount").value(1))
                 .andExpect(jsonPath("$.generatedRoutes[0]").value("/tech/workshop"))
                 .andExpect(jsonPath("$.skippedCount").value(0))
+                .andExpect(jsonPath("$.duplicateCount").value(0))
                 .andExpect(jsonPath("$.skippedByReason").isMap())
+                .andExpect(jsonPath("$.exportKindCounts.tech.generatedCount").value(1))
                 .andExpect(jsonPath("$.sitemapUpdated").value(true));
 
         verify(seoRegenerationService).regeneratePrototypePages();

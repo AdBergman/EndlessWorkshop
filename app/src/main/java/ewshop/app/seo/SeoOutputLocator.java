@@ -48,7 +48,7 @@ public class SeoOutputLocator {
     }
 
     public boolean isRuntimeOwnedFeaturedEntity(String page, String entryKey) {
-        return "tech".equals(page);
+        return !page.isBlank() && !entryKey.isBlank();
     }
 
     public boolean isClasspathFallbackEnabled() {

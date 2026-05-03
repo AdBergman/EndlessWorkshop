@@ -102,6 +102,29 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void servesGeneratedPagesForNonTechKindsWhenPresent() throws Exception {
+        Path externalSentinel = Path.of("build/test-generated-seo/units/sentinel/index.html");
+        Path externalWorks = Path.of("build/test-generated-seo/districts/works/index.html");
+        Files.createDirectories(externalSentinel.getParent());
+        Files.createDirectories(externalWorks.getParent());
+        Files.writeString(externalSentinel, "<!doctype html><title>external sentinel</title>");
+        Files.writeString(externalWorks, "<!doctype html><title>external works</title>");
+
+        try {
+            mockMvc.perform(get("/units/sentinel"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/units/sentinel/index.html"));
+
+            mockMvc.perform(get("/districts/works"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/districts/works/index.html"));
+        } finally {
+            Files.deleteIfExists(externalSentinel);
+            Files.deleteIfExists(externalWorks);
+        }
+    }
+
+    @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
         mockMvc.perform(get("/tech/stonework"))
                 .andExpect(status().isNotFound());
@@ -115,10 +138,16 @@ class FrontendControllerRouteTest {
         mockMvc.perform(get("/units/missing-entry"))
                 .andExpect(status().isNotFound());
 
+        mockMvc.perform(get("/districts/missing-entry"))
+                .andExpect(status().isNotFound());
+
         mockMvc.perform(get("/tech/stonework/extra"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/units/sentinel/extra"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/districts/works/extra"))
                 .andExpect(status().isNotFound());
     }
 

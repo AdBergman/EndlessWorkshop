@@ -44,6 +44,12 @@ class FrontendControllerProductionFallbackTest {
 
         mockMvc.perform(get("/tech/stonework/"))
                 .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/units/sentinel"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/districts/works"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
