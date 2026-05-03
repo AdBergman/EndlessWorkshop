@@ -335,6 +335,8 @@ export default function AdminImportPage() {
             <Helmet>
                 <title>Admin Import – Endless Workshop</title>
                 <meta name="robots" content="noindex, nofollow" />
+                <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+                <link rel="shortcut icon" href="/favicon.ico" />
             </Helmet>
 
             <div className="admin-import-page">

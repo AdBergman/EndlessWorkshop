@@ -67,6 +67,8 @@ describe("PageSeo", () => {
             "content",
             "EL2 Tech Tree Planner | Endless Workshop"
         );
+        expect(document.head.querySelector('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
+        expect(document.head.querySelector('link[rel="shortcut icon"]')).toHaveAttribute("href", "/favicon.ico");
     });
 
     it("supports one or more JSON-LD payloads", async () => {

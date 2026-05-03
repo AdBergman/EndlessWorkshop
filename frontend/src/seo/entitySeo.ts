@@ -459,7 +459,8 @@ export function renderEntityHtml(entity: ResolvedFeaturedEntity): string {
     <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/seo/seo-shell.css" />
     <link rel="stylesheet" href="/seo/entity-page.css" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtml(entity.pageTitle)}" />

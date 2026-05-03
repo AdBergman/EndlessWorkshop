@@ -58,6 +58,9 @@ export default function PageSeo({
             <meta name="twitter:description" content={description} />
             <meta name="twitter:image" content={imageUrl} />
 
+            <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+            <link rel="shortcut icon" href="/favicon.ico" />
+
             {jsonLdNodes.map((node, index) => (
                 <script key={`${canonicalUrl}-jsonld-${index}`} type="application/ld+json">
                     {JSON.stringify(node)}
