@@ -263,8 +263,10 @@ type EntityTemplateViewModel = {
     displayName: string;
     kindLabel: string;
     summary: string;
-    descriptionLines: string[];
-    factLines: string[];
+    details: string[];
+    unlocks: string[];
+    effects: string[];
+    overviewLines: string[];
     referenceKeys: string[];
     primaryCtaLabel: string;
 };
@@ -297,18 +299,19 @@ function buildEntityTemplateViewModel(entity: ResolvedFeaturedEntity): EntityTem
             displayName: entity.name,
             kindLabel: `Technology • Era ${entity.era} • ${entity.techType}`,
             summary: entity.overview,
-            descriptionLines: [
-                `${entity.name} is indexed here as an era ${entity.era} ${entity.techType.toLowerCase()} technology in Endless Workshop.`,
-                `The current snapshot records ${entity.unlocks.length} unlock${entity.unlocks.length === 1 ? "" : "s"} and ${entity.effects.length} direct effect${entity.effects.length === 1 ? "" : "s"}.`,
-                `Use the static page for a quick reference, then jump back into the interactive tech tree for pathing, faction context, and adjacent nodes.`,
-            ],
-            factLines: [
+            details: [
                 `Era ${entity.era}`,
                 `${entity.techType} technology`,
                 `Factions: ${entity.factions.join(", ")}`,
             ],
+            unlocks: entity.unlocks,
+            effects: entity.effects,
+            overviewLines: [
+                `${entity.name} is listed here as a static reference snapshot for the EWShop tech tree.`,
+                `Use the interactive tree for pathing, faction state, and adjacent-node context.`,
+            ],
             referenceKeys: [...entity.unlocks, ...entity.effects],
-            primaryCtaLabel: "Open in the interactive tech tree",
+            primaryCtaLabel: "Open in tech tree",
         };
     }
 
@@ -320,19 +323,20 @@ function buildEntityTemplateViewModel(entity: ResolvedFeaturedEntity): EntityTem
         displayName: entity.name,
         kindLabel: `Unit • Tier ${entity.tier} • ${entity.unitType}`,
         summary: entity.overview,
-        descriptionLines: [
-            `${entity.name} is indexed here as a ${entity.faction} ${entity.unitType.toLowerCase()} unit with a recorded tier ${entity.tier} profile.`,
-            `The static snapshot keeps the high-level unit profile visible before you switch back to the interactive explorer for comparisons and roster browsing.`,
-            upgradeLabel,
-        ],
-        factLines: [
+        details: [
             `${entity.faction} faction`,
             `Tier ${entity.tier} ${entity.unitType.toLowerCase()} unit`,
             entity.requiredTechnology,
             `Health ${entity.health} • Damage ${entity.damage} • Defense ${entity.defense}`,
         ],
+        unlocks: [upgradeLabel],
+        effects: [],
+        overviewLines: [
+            `${entity.name} is listed here as a static roster reference for EWShop.`,
+            `Use the interactive explorer for comparisons, upgrades, and faction browsing.`,
+        ],
         referenceKeys,
-        primaryCtaLabel: "Open in the interactive unit explorer",
+        primaryCtaLabel: "Open in unit explorer",
     };
 }
 
@@ -351,13 +355,13 @@ function renderReferenceChips(referenceKeys: string[]): string {
 function renderResourceLinks(): string {
     return `
         <section class="seo-section entity-page__section entity-page__explore">
-            <p class="seo-label">Explore More</p>
-            <h2 class="seo-heading">Explore more</h2>
+            <p class="seo-label">Explore</p>
+            <h2 class="seo-heading">Explore</h2>
             <ul class="seo-list">
-                <li><a href="/tech">Browse the full tech tree</a></li>
-                <li><a href="/units">Inspect the unit explorer</a></li>
-                <li><a href="/codex">Search the codex</a></li>
-                <li><a href="/mods">Review mod support</a></li>
+                <li><a href="/tech">Tech tree</a></li>
+                <li><a href="/units">Units</a></li>
+                <li><a href="/codex">Codex</a></li>
+                <li><a href="/mods">Mods</a></li>
             </ul>
         </section>
     `;
@@ -365,6 +369,9 @@ function renderResourceLinks(): string {
 
 function renderEntityPageContent(entity: ResolvedFeaturedEntity): string {
     const viewModel = buildEntityTemplateViewModel(entity);
+    const hasOverview = viewModel.overviewLines.length > 0;
+    const hasUnlocks = viewModel.unlocks.length > 0;
+    const hasEffects = viewModel.effects.length > 0;
 
     return `
         <header class="entity-page__header">
@@ -377,39 +384,57 @@ function renderEntityPageContent(entity: ResolvedFeaturedEntity): string {
             </div>
         </header>
 
-        <div class="entity-page__body">
-            <div class="entity-page__main">
-                <section class="seo-section entity-page__section entity-page__overview">
-                    <p class="seo-label">Overview</p>
-                    <h2 class="seo-heading">Overview</h2>
-                    <ul class="seo-list">
-                        ${renderList(viewModel.descriptionLines)}
-                    </ul>
-                </section>
+        <section class="seo-section entity-page__section entity-page__details">
+            <p class="seo-label">Details</p>
+            <h2 class="seo-heading">Details</h2>
+            <ul class="seo-list">
+                ${renderList(viewModel.details)}
+            </ul>
+        </section>
 
-                <section class="seo-section entity-page__section entity-page__details">
-                    <p class="seo-label">Details</p>
-                    <h2 class="seo-heading">Details</h2>
-                    <ul class="seo-list">
-                        ${renderList(viewModel.factLines)}
-                    </ul>
-                </section>
-
-                ${renderResourceLinks()}
+        <section class="seo-section entity-page__section entity-page__outcomes">
+            <p class="seo-label">Unlocks And Effects</p>
+            <h2 class="seo-heading">Unlocks and effects</h2>
+            <div class="entity-page__columns">
+                <div class="entity-page__column">
+                    <h3 class="entity-page__subheading">Unlocks</h3>
+                    ${
+                        hasUnlocks
+                            ? `<ul class="seo-list">${renderList(viewModel.unlocks)}</ul>`
+                            : '<p class="seo-text entity-page__empty">No unlocks recorded in this prototype snapshot.</p>'
+                    }
+                </div>
+                <div class="entity-page__column">
+                    <h3 class="entity-page__subheading">Effects</h3>
+                    ${
+                        hasEffects
+                            ? `<ul class="seo-list">${renderList(viewModel.effects)}</ul>`
+                            : '<p class="seo-text entity-page__empty">No direct effects recorded in this prototype snapshot.</p>'
+                    }
+                </div>
             </div>
+        </section>
 
-            <aside class="entity-page__side">
-                <section class="seo-section entity-page__section entity-page__references">
-                    <p class="seo-label">Reference Keys</p>
-                    <h2 class="seo-heading">Reference keys</h2>
-                    <div class="seo-panel">
-                        <div class="seo-panel__inner">
-                            ${renderReferenceChips(viewModel.referenceKeys)}
-                        </div>
-                    </div>
-                </section>
-            </aside>
-        </div>
+        ${
+            hasOverview
+                ? `
+        <section class="seo-section entity-page__section entity-page__overview">
+            <p class="seo-label">Overview</p>
+            <h2 class="seo-heading">Overview</h2>
+            <ul class="seo-list">
+                ${renderList(viewModel.overviewLines)}
+            </ul>
+        </section>`
+                : ""
+        }
+
+        <section class="seo-section entity-page__section entity-page__references">
+            <p class="seo-label">Reference Keys</p>
+            <h2 class="seo-heading">Reference keys</h2>
+            ${renderReferenceChips(viewModel.referenceKeys)}
+        </section>
+
+        ${renderResourceLinks()}
     `;
 }
 

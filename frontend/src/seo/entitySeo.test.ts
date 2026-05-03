@@ -53,6 +53,8 @@ describe("entitySeo", () => {
         expect(html).not.toContain("Landing Page Prototype");
         expect(html).not.toContain("Snapshot");
         expect(html).not.toContain("Keep browsing the app");
+        expect(html).not.toContain("Open in the interactive tech tree");
+        expect(html).not.toContain("<style>");
     });
 
     it("rejects duplicate generated routes", () => {
@@ -134,6 +136,10 @@ describe("entitySeo", () => {
         expect(html).not.toContain("Snapshot");
         expect(html).not.toContain("Keep browsing the app");
         expect(html).not.toContain("What this entry covers");
+        expect(html).not.toContain("Open in the interactive tech tree");
+        expect(html).not.toContain("Browse the full tech tree");
+        expect(html).not.toContain("Inspect the unit explorer");
+        expect(html).not.toContain("Search the codex");
 
         expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(canonicalUrl);
         expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("index, follow");
@@ -152,8 +158,9 @@ describe("entitySeo", () => {
         expect(document.querySelector(".entity-page__kind")?.textContent?.trim()).toBe("Technology • Era 1 • Economy");
         expect(document.querySelector(".seo-brand__title")?.textContent?.trim()).toBe("Endless Workshop");
         expect(document.querySelector(".seo-button")?.getAttribute("href")).toBe("/tech?faction=aspects&tech=workshop");
+        expect(document.querySelector(".seo-button")?.textContent?.trim()).toBe("Open in tech tree");
         expect([...document.querySelectorAll(".entity-page__section > .seo-heading")].map((heading) => heading.textContent?.trim())).toEqual(
-            expect.arrayContaining(["Overview", "Details", "Reference keys", "Explore more"])
+            expect.arrayContaining(["Details", "Unlocks and effects", "Overview", "Reference keys", "Explore"])
         );
 
         expect([...document.querySelectorAll(".seo-nav a")].map((link) => link.getAttribute("href"))).toEqual(
@@ -162,6 +169,16 @@ describe("entitySeo", () => {
         expect(document.querySelector('.seo-nav a[aria-current="page"]')?.getAttribute("href")).toBe("/tech");
         expect([...document.querySelectorAll(".seo-chip")].map((chip) => chip.textContent?.trim())).toEqual(
             expect.arrayContaining(["District: Works", "Action: Remove Forest"])
+        );
+        expect(document.querySelectorAll(".entity-page__references a")).toHaveLength(0);
+        expect([...document.querySelectorAll(".entity-page__explore a")].map((link) => link.getAttribute("href"))).toEqual([
+            "/tech",
+            "/units",
+            "/codex",
+            "/mods",
+        ]);
+        expect(document.querySelector(".entity-page__breadcrumbs")?.textContent?.replace(/\s+/g, " ").trim()).toBe(
+            "Home / Tech / Workshop"
         );
 
         const nonLdScripts = [...document.querySelectorAll("script")].filter(
