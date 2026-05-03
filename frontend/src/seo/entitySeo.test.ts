@@ -1,7 +1,11 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
 import {
     buildSitemapXml,
     getResolvedFeaturedEntities,
+    listGeneratedEntityPaths,
     renderEntityHtml,
     validateFeaturedEntities,
 } from "./entitySeo";
@@ -10,6 +14,7 @@ import {
     FEATURED_TECH_SNAPSHOTS,
     FEATURED_UNIT_SNAPSHOTS,
 } from "./featuredEntityCatalog";
+import { SITE_URL } from "../components/Seo/routeSeo";
 
 describe("entitySeo", () => {
     it("resolves the generated entity catalog into safe routes within the scale window", () => {
@@ -159,6 +164,70 @@ describe("entitySeo", () => {
 
         const html = renderEntityHtml(sentinel!);
         expect(html).toContain('/units?faction=kin&unitKey=Unit_Sentinel');
+    });
+
+    it("keeps the generated entity files aligned with the resolved entity catalog", () => {
+        const publicDir = resolve(process.cwd(), "public");
+        const generatedPaths = listGeneratedEntityPaths(publicDir);
+        const resolvedPaths = getResolvedFeaturedEntities()
+            .map((entity) => entity.routePath)
+            .sort();
+
+        expect(generatedPaths).toEqual(resolvedPaths);
+    });
+
+    it("audits every generated entity page for deploy-safe static SEO output", () => {
+        const publicDir = resolve(process.cwd(), "public");
+
+        for (const entity of getResolvedFeaturedEntities()) {
+            const htmlPath = resolve(publicDir, entity.collectionPath.slice(1), entity.entryKey, "index.html");
+            const html = readFileSync(htmlPath, "utf8");
+            const dom = new JSDOM(html);
+            const { document } = dom.window;
+            const canonicalUrl = `${SITE_URL}${entity.routePath}`;
+
+            expect(html).not.toContain("fetch(");
+            expect(html).not.toContain("/api/");
+            expect(html).not.toContain("__NEXT_DATA__");
+            expect(html).not.toContain("src/index.tsx");
+
+            expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(canonicalUrl);
+            expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("index, follow");
+            expect(document.querySelector(".cta-button")?.getAttribute("href")).toBe(entity.ctaPath);
+            expect(document.querySelector('a.back-link')?.getAttribute("href")).toBe(entity.collectionPath);
+            expect(document.title).toBe(entity.pageTitle);
+            expect(document.querySelector("h1")?.textContent?.trim()).toBe(entity.name);
+            expect(document.querySelector('meta[name="description"]')?.getAttribute("content")).toBe(entity.seoDescription);
+            expect(document.querySelector(".hero p")?.textContent?.trim()).toBe(entity.overview);
+            expect(document.body.textContent?.replace(/\s+/g, " ").trim().length ?? 0).toBeGreaterThan(250);
+
+            const nonLdScripts = [...document.querySelectorAll("script")].filter(
+                (script) => script.getAttribute("type") !== "application/ld+json"
+            );
+            expect(nonLdScripts).toHaveLength(0);
+
+            const jsonLdScripts = [...document.querySelectorAll('script[type="application/ld+json"]')];
+            expect(jsonLdScripts).toHaveLength(2);
+
+            const jsonLdNodes = jsonLdScripts.map((script) => JSON.parse(script.textContent ?? ""));
+            const webPageJsonLd = jsonLdNodes.find((node) => node["@type"] === "WebPage");
+            const breadcrumbJsonLd = jsonLdNodes.find((node) => node["@type"] === "BreadcrumbList");
+
+            expect(webPageJsonLd).toBeDefined();
+            expect(webPageJsonLd.url).toBe(canonicalUrl);
+            expect(webPageJsonLd.description).toBe(entity.seoDescription);
+            expect(webPageJsonLd.breadcrumb?.["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
+
+            expect(breadcrumbJsonLd).toBeDefined();
+            expect(breadcrumbJsonLd["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
+            expect(breadcrumbJsonLd.itemListElement).toHaveLength(3);
+            expect(breadcrumbJsonLd.itemListElement[2].name).toBe(entity.name);
+            expect(breadcrumbJsonLd.itemListElement[2].item).toBe(canonicalUrl);
+
+            const sectionHeadings = [...document.querySelectorAll("section h2")].map((node) => node.textContent?.trim());
+            expect(sectionHeadings).toContain("At a glance");
+            expect(document.querySelectorAll("li").length).toBeGreaterThanOrEqual(entity.kind === "tech" ? 5 : 8);
+        }
     });
 
     it("rejects ambiguous normalized tech-name fallback links", () => {

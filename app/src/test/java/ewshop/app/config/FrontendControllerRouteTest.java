@@ -87,6 +87,15 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void doesNotCaptureApiRoutes() throws Exception {
+        mockMvc.perform(get("/api/tech"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/api/units/sentinel"))
+                .andExpect(status().isNotFound());
+    }
+
     @SpringBootConfiguration
     @EnableAutoConfiguration(exclude = {
             DataSourceAutoConfiguration.class,

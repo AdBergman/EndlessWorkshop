@@ -42,6 +42,14 @@ describe("publicRouteSeo", () => {
         );
 
         expect(locs).toEqual(getExpectedSitemapPaths(generatedEntityPaths));
+        expect(new Set(locs).size).toBe(locs.length);
+        expect(locs.every((path) => path.startsWith("/"))).toBe(true);
+        expect(locs.some((path) => path.includes("?"))).toBe(false);
+        expect(locs.some((path) => path.includes("#"))).toBe(false);
         expect(locs.some((path) => path.startsWith("/admin"))).toBe(false);
+        expect(generatedEntityPaths.every((path) => locs.includes(path))).toBe(true);
+        expect(locs.filter((path) => path.startsWith("/tech/") || path.startsWith("/units/")).sort()).toEqual(
+            generatedEntityPaths
+        );
     });
 });
