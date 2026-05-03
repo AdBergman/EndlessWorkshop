@@ -6,6 +6,10 @@ COPY frontend/package*.json ./
 RUN npm install
 
 COPY frontend/ ./
+
+# Needed by src/scripts/generateSeoEntities.ts
+COPY app/src/main/resources/data /app/app/src/main/resources/data
+
 RUN npm run build
 
 # ---------- Stage 2: Build backend ----------
