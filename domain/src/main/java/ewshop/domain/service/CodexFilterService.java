@@ -22,14 +22,15 @@ public class CodexFilterService {
     private static final String WEAK_DESCRIPTION_LINES = "weak-description-lines";
     private static final String DUPLICATE_SLUG = "duplicate-slug";
     private static final String FILTERED_OUT = "filtered-out";
+    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^\\]]+]\\s*");
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
             "(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd\\])",
             Pattern.CASE_INSENSITIVE
     );
-    private static final Pattern DIGIT_CLUSTER_PATTERN = Pattern.compile("\\d{3}");
+    private static final Pattern DIGIT_CLUSTER_PATTERN = Pattern.compile("\\d{3,}");
     private static final Comparator<Codex> DETERMINISTIC_ORDER = Comparator
             .comparing((Codex entry) -> normalizeKey(entry.getExportKind()))
-            .thenComparing(entry -> trimToEmpty(entry.getDisplayName()), String.CASE_INSENSITIVE_ORDER)
+            .thenComparing(entry -> normalizeDisplayName(entry.getDisplayName()), String.CASE_INSENSITIVE_ORDER)
             .thenComparing(entry -> trimToEmpty(entry.getEntryKey()), String.CASE_INSENSITIVE_ORDER);
 
     public CodexFilterResult filter(List<Codex> rawEntries) {
@@ -47,10 +48,11 @@ public class CodexFilterService {
                 .sorted(DETERMINISTIC_ORDER)
                 .forEach(entry -> {
                     String normalizedExportKind = normalizeKey(entry.getExportKind());
-                    String normalizedDisplayName = trimToEmpty(entry.getDisplayName());
+                    String rawDisplayName = trimToEmpty(entry.getDisplayName());
+                    String normalizedDisplayName = normalizeDisplayName(rawDisplayName);
                     String normalizedEntryKey = trimToEmpty(entry.getEntryKey());
 
-                    if (!isValidDisplayName(normalizedDisplayName)) {
+                    if (!isValidDisplayName(rawDisplayName, normalizedDisplayName)) {
                         recordSkip(skippedEntries, skippedByReason, entry, INVALID_DISPLAY_NAME);
                         return;
                     }
@@ -141,11 +143,20 @@ public class CodexFilterService {
                 && hasBalancedFormatting(normalized);
     }
 
-    private static boolean isValidDisplayName(String value) {
-        String normalized = trimToEmpty(value);
+    private static boolean isValidDisplayName(String rawValue, String normalizedValue) {
+        String raw = trimToEmpty(rawValue);
+        String normalized = normalizeDisplayName(normalizedValue);
         return !normalized.isBlank()
+                && isMeaningfulText(raw)
                 && isMeaningfulText(normalized)
-                && !DIGIT_CLUSTER_PATTERN.matcher(normalized.toLowerCase(Locale.ROOT)).find();
+                && !containsUnsafeDisplayNamePattern(raw)
+                && !containsUnsafeDisplayNamePattern(normalized);
+    }
+
+    private static boolean containsUnsafeDisplayNamePattern(String value) {
+        String normalized = trimToEmpty(value);
+        return normalized.contains("%")
+                || DIGIT_CLUSTER_PATTERN.matcher(normalized).find();
     }
 
     private static boolean hasBalancedFormatting(String value) {
@@ -185,6 +196,18 @@ public class CodexFilterService {
 
     private static String normalizeKey(String value) {
         return trimToEmpty(value).toLowerCase(Locale.ROOT);
+    }
+
+    private static String normalizeDisplayName(String value) {
+        String normalized = trimToEmpty(value);
+        while (!normalized.isBlank()) {
+            String stripped = LEADING_BRACKET_PREFIX_PATTERN.matcher(normalized).replaceFirst("");
+            if (stripped.equals(normalized)) {
+                break;
+            }
+            normalized = stripped.trim();
+        }
+        return normalized;
     }
 
     private static String trimToEmpty(String value) {

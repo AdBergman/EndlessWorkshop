@@ -17,6 +17,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Service
@@ -30,6 +32,7 @@ public class SeoRegenerationService {
     private static final String SITE_NAME = "Endless Workshop";
     private static final String SITE_URL = "https://endlessworkshop.dev";
     private static final String DEFAULT_IMAGE_URL = SITE_URL + "/logo512.png";
+    private static final Pattern DETAIL_PATTERN = Pattern.compile("^([A-Za-z][A-Za-z /-]{1,40}):\\s*(.+)$");
     private static final List<String> INDEXABLE_PUBLIC_ROUTE_PATHS = List.of(
             "/tech",
             "/units",
@@ -247,19 +250,10 @@ public class SeoRegenerationService {
 
     static String renderEntityHtml(PageCandidate candidate, String route) {
         String kindLabel = kindLabelFor(candidate.kind());
-        String landingRoute = landingRouteForKind(candidate.kind());
-        String landingLabel = landingLabelForKind(candidate.kind());
-        String pageTitle = candidate.displayName() + " " + kindLabel + " Guide | " + SITE_NAME;
-        String seoDescription = buildSeoDescription(candidate, kindLabel);
+        ParsedDescription description = parseDescription(candidate.descriptionLines());
+        String pageTitle = candidate.displayName() + " " + kindLabel + " Reference | " + SITE_NAME;
+        String seoDescription = buildSeoDescription(candidate.displayName(), kindLabel, description);
         String canonicalUrl = SITE_URL + route;
-        String summary = candidate.descriptionLines().getFirst();
-        String detailsList = renderList(List.of(
-                "Kind: " + kindLabel,
-                "Entry key: " + candidate.entryKey(),
-                "Canonical route: " + route
-        ));
-        String descriptionList = renderList(candidate.descriptionLines());
-        String referenceChips = renderReferenceChips(candidate.referenceKeys());
 
         String webPageJsonLd = """
                 {"@context":"https://schema.org","@type":"WebPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"},"breadcrumb":{"@id":"%s#breadcrumb"}}
@@ -272,13 +266,11 @@ public class SeoRegenerationService {
                 escapeJson(canonicalUrl)
         ).trim();
         String breadcrumbJsonLd = """
-                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"%s","item":"%s%s"},{"@type":"ListItem","position":3,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
+                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Codex","item":"%s/codex"},{"@type":"ListItem","position":3,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
                 """.formatted(
                 escapeJson(SITE_NAME),
                 escapeJson(SITE_URL),
-                escapeJson(landingLabel),
                 escapeJson(SITE_URL),
-                escapeJson(landingRoute),
                 escapeJson(candidate.displayName()),
                 escapeJson(canonicalUrl),
                 escapeJson(canonicalUrl)
@@ -337,60 +329,26 @@ public class SeoRegenerationService {
                     <div class="entity-page__breadcrumbs" aria-label="Breadcrumb">
                         <a href="/">Home</a>
                         <span>/</span>
-                        <a href="%s">%s</a>
+                        <a href="/codex">Codex</a>
                         <span>/</span>
                         <span>%s</span>
                     </div>
 
                     <div class="entity-page__layout">
-
                         <header class="entity-page__header">
-                            <p class="seo-label entity-page__kind">%s • Codex entry</p>
+                            <p class="entity-page__meta">%s</p>
                             <h1 class="seo-heading entity-page__title">%s</h1>
-                            <p class="seo-text entity-page__summary">%s</p>
+                            %s
                         </header>
 
-                        <section class="seo-section entity-page__section entity-page__details">
-                            <p class="seo-label">Details</p>
-                            <h2 class="seo-heading">Details</h2>
-                            <ul class="seo-list">
-                                %s
-                            </ul>
-                        </section>
-
-                        <section class="seo-section entity-page__section entity-page__overview">
-                            <p class="seo-label">Description</p>
-                            <h2 class="seo-heading">Description</h2>
-                            <ul class="seo-list">
-                                %s
-                            </ul>
-                        </section>
+                        %s
+                        %s
 
                         <section class="seo-section entity-page__section entity-page__actions" aria-label="Actions">
                             <div class="seo-buttonRow">
-                                <a class="seo-button" href="%s">Back to %s</a>
+                                %s
                             </div>
                         </section>
-
-                        <section class="seo-section entity-page__section entity-page__references">
-                            <p class="seo-label">Reference Keys</p>
-                            <h2 class="seo-heading">Reference keys</h2>
-
-                            %s
-
-                        </section>
-
-                        <section class="seo-section entity-page__section entity-page__explore">
-                            <p class="seo-label">Explore</p>
-                            <h2 class="seo-heading">Explore</h2>
-                            <ul class="seo-list">
-                                <li><a href="%s">%s</a></li>
-                                <li><a href="/codex">Codex</a></li>
-                                <li><a href="/units">Units</a></li>
-                                <li><a href="/mods">Mods</a></li>
-                            </ul>
-                        </section>
-
                     </div>
                 </main>
                 </body>
@@ -410,54 +368,191 @@ public class SeoRegenerationService {
                 webPageJsonLd,
                 breadcrumbJsonLd,
                 escapeHtml(pageTitle),
-                landingRoute,
-                escapeHtml(landingLabel),
                 escapeHtml(candidate.displayName()),
-                escapeHtml(kindLabel),
+                escapeHtml(buildMetadataLine(kindLabel, description.metadataHighlights())),
                 escapeHtml(candidate.displayName()),
-                escapeHtml(summary),
-                detailsList,
-                descriptionList,
-                landingRoute,
-                escapeHtml(landingLabel),
-                referenceChips,
-                landingRoute,
-                escapeHtml(landingLabel)
+                renderIntro(description.introLine()),
+                renderDescriptionSection(description),
+                renderRelatedSection(candidate.referenceKeys()),
+                renderActionRow(candidate.kind())
         );
     }
 
-    private static String buildSeoDescription(PageCandidate candidate, String kindLabel) {
-        String firstDescriptionLine = candidate.descriptionLines().getFirst();
-        return candidate.displayName() + " is a " + kindLabel.toLowerCase(Locale.ROOT)
-                + " entry in the Endless Workshop codex. " + firstDescriptionLine;
+    private static String renderDescriptionSection(ParsedDescription description) {
+        String content = renderDescriptionContent(description);
+        if (content.isBlank()) {
+            return "";
+        }
+
+        return """
+                        <section class="seo-section entity-page__section entity-page__description">
+                            <h2 class="seo-heading">Description</h2>
+                            %s
+                        </section>
+                """.formatted(content);
     }
 
-    private static String landingRouteForKind(String kind) {
-        if (TECH_KIND.equals(kind)) {
-            return "/tech";
+    private static String renderIntro(String introLine) {
+        if (introLine.isBlank()) {
+            return "";
         }
-        if (UNITS_KIND.equals(kind)) {
-            return "/units";
-        }
-        return "/codex";
+        return "<p class=\"seo-text entity-page__summary\">" + escapeHtml(introLine) + "</p>";
     }
 
-    private static String landingLabelForKind(String kind) {
+    private static String renderRelatedSection(List<String> referenceKeys) {
+        if (referenceKeys == null || referenceKeys.isEmpty()) {
+            return "";
+        }
+
+        return """
+                        <section class="seo-section entity-page__section entity-page__references">
+                            <h2 class="seo-heading">Related</h2>
+                            %s
+                        </section>
+                """.formatted(renderReferenceChips(referenceKeys));
+    }
+
+    private static String renderActionRow(String kind) {
+        List<String> actions = new ArrayList<>();
+        actions.add(renderActionLink("/codex", "Back to Codex"));
+
         if (TECH_KIND.equals(kind)) {
-            return "Tech";
+            actions.add(renderActionLink("/tech", "Browse Tech"));
+        } else if (UNITS_KIND.equals(kind)) {
+            actions.add(renderActionLink("/units", "Browse Units"));
         }
-        if (UNITS_KIND.equals(kind)) {
-            return "Units";
+
+        return String.join("", actions);
+    }
+
+    private static String renderActionLink(String href, String label) {
+        return "<a class=\"seo-linkButton entity-page__actionLink\" href=\""
+                + href
+                + "\">"
+                + escapeHtml(label)
+                + "</a>";
+    }
+
+    private static String buildSeoDescription(String displayName, String kindLabel, ParsedDescription description) {
+        String supportingLine = !description.introLine().isBlank()
+                ? description.introLine()
+                : firstOrBlank(description.descriptionLines());
+        if (supportingLine.isBlank()) {
+            return displayName + " is a " + kindLabel.toLowerCase(Locale.ROOT)
+                    + " entry in the Endless Workshop codex.";
         }
-        return "Codex";
+
+        return displayName + " is a " + kindLabel.toLowerCase(Locale.ROOT)
+                + " entry in the Endless Workshop codex. " + supportingLine;
+    }
+
+    private static ParsedDescription parseDescription(List<String> rawDescriptionLines) {
+        List<String> normalizedLines = rawDescriptionLines.stream()
+                .map(SeoRegenerationService::normalizeContentLine)
+                .filter(line -> !line.isBlank())
+                .filter(line -> !isPrototypeLine(line))
+                .toList();
+
+        int introIndex = -1;
+        for (int index = 0; index < normalizedLines.size(); index++) {
+            if (isLikelyIntroLine(normalizedLines.get(index))) {
+                introIndex = index;
+                break;
+            }
+        }
+
+        String introLine = introIndex >= 0 ? normalizedLines.get(introIndex) : "";
+        List<String> contentLines = new ArrayList<>();
+        for (int index = 0; index < normalizedLines.size(); index++) {
+            if (index != introIndex) {
+                contentLines.add(normalizedLines.get(index));
+            }
+        }
+
+        return new ParsedDescription(
+                introLine,
+                List.copyOf(contentLines),
+                List.copyOf(extractMetadataHighlights(normalizedLines))
+        );
+    }
+
+    private static List<String> extractMetadataHighlights(List<String> lines) {
+        LinkedHashMap<String, String> highlights = new LinkedHashMap<>();
+        List<String> preferredKeys = List.of("Faction", "Category", "Type", "Role", "Slot", "Tier", "Rarity");
+
+        for (String preferredKey : preferredKeys) {
+            for (String line : lines) {
+                DetailLine detailLine = parseDetailLine(line);
+                if (detailLine != null && detailLine.label().equalsIgnoreCase(preferredKey)) {
+                    highlights.putIfAbsent(preferredKey, detailLine.label() + ": " + detailLine.value());
+                    break;
+                }
+            }
+        }
+
+        return highlights.values().stream().limit(3).toList();
+    }
+
+    private static String buildMetadataLine(String kindLabel, List<String> metadataHighlights) {
+        List<String> parts = new ArrayList<>();
+        parts.add(kindLabel);
+        parts.addAll(metadataHighlights);
+        return String.join(" \u2022 ", parts);
+    }
+
+    private static String renderDescriptionContent(ParsedDescription description) {
+        List<String> proseLines = new ArrayList<>();
+        List<String> detailLines = new ArrayList<>();
+
+        for (String line : description.descriptionLines()) {
+            if (isLikelyIntroLine(line)) {
+                proseLines.add(line);
+            } else {
+                detailLines.add(line);
+            }
+        }
+
+        StringBuilder html = new StringBuilder();
+        if (!proseLines.isEmpty()) {
+            html.append("<div class=\"entity-page__prose\">");
+            for (String proseLine : proseLines) {
+                html.append("<p class=\"seo-text entity-page__paragraph\">")
+                        .append(escapeHtml(proseLine))
+                        .append("</p>");
+            }
+            html.append("</div>");
+        }
+
+        if (!detailLines.isEmpty()) {
+            html.append("<ul class=\"seo-list entity-page__detailList\">")
+                    .append(renderList(detailLines))
+                    .append("</ul>");
+        }
+
+        return html.toString();
     }
 
     private static String kindLabelFor(String kind) {
-        if (TECH_KIND.equals(kind)) {
-            return "Technology";
+        Map<String, String> explicitLabels = Map.ofEntries(
+                Map.entry("districts", "District"),
+                Map.entry("improvements", "Improvement"),
+                Map.entry("equipment", "Equipment"),
+                Map.entry("councilors", "Councilor"),
+                Map.entry("heroes", "Hero"),
+                Map.entry("units", "Unit"),
+                Map.entry("abilities", "Ability"),
+                Map.entry("tech", "Technology")
+        );
+
+        String normalizedKind = trimToEmpty(kind).toLowerCase(Locale.ROOT);
+        if (explicitLabels.containsKey(normalizedKind)) {
+            return explicitLabels.get(normalizedKind);
         }
 
-        String[] parts = trimToEmpty(kind).split("[-_\\s]+");
+        String singularKind = normalizedKind.endsWith("s") && normalizedKind.length() > 1
+                ? normalizedKind.substring(0, normalizedKind.length() - 1)
+                : normalizedKind;
+        String[] parts = singularKind.split("[-_\\s]+");
         StringBuilder label = new StringBuilder();
         for (String part : parts) {
             if (part.isBlank()) {
@@ -473,14 +568,12 @@ public class SeoRegenerationService {
     }
 
     private static String renderReferenceChips(List<String> referenceKeys) {
-        if (referenceKeys.isEmpty()) {
-            return "<p class=\"entity-page__referencesEmpty\">No linked reference keys are exposed in this Codex snapshot.</p>";
-        }
-
         StringBuilder chips = new StringBuilder();
         chips.append("<ul class=\"seo-chipList\">");
         for (String referenceKey : referenceKeys) {
-            chips.append("<li class=\"seo-chip\">").append(escapeHtml(referenceKey)).append("</li>");
+            chips.append("<li class=\"seo-chip\">")
+                    .append(escapeHtml(normalizeContentLine(referenceKey)))
+                    .append("</li>");
         }
         chips.append("</ul>");
         return chips.toString();
@@ -513,6 +606,76 @@ public class SeoRegenerationService {
                 .replace("\"", "\\\"");
     }
 
+    private static String normalizeContentLine(String value) {
+        String normalized = trimToEmpty(value)
+                .replaceAll("\\[[^\\]]+]", " ")
+                .replaceAll("([a-z])([A-Z])", "$1 $2")
+                .replaceAll("\\s+", " ")
+                .trim();
+        if (normalized.isBlank()) {
+            return normalized;
+        }
+
+        String deduped = normalized;
+        String previous;
+        do {
+            previous = deduped;
+            deduped = deduped.replaceAll("\\b([A-Za-z]+(?:\\s+[A-Za-z]+){0,2})\\s+\\1\\b", "$1");
+        } while (!deduped.equals(previous));
+
+        List<String> tokens = new ArrayList<>(List.of(deduped.split(" ")));
+        if (tokens.size() >= 2
+                && normalizedToken(tokens.getFirst()).equalsIgnoreCase(normalizedToken(tokens.get(1)))) {
+            tokens.removeFirst();
+        }
+        return String.join(" ", tokens).trim();
+    }
+
+    private static boolean isPrototypeLine(String line) {
+        return line.regionMatches(true, 0, "Prototype:", 0, "Prototype:".length());
+    }
+
+    private static String normalizedToken(String value) {
+        return value.replaceAll("^[^A-Za-z0-9]+|[^A-Za-z0-9]+$", "");
+    }
+
+    private static boolean isLikelyIntroLine(String line) {
+        if (line.isBlank() || parseDetailLine(line) != null) {
+            return false;
+        }
+
+        boolean hasSentencePunctuation = line.contains(".") || line.contains("!") || line.contains("?");
+        long wordCount = List.of(line.split("\\s+")).stream()
+                .map(SeoRegenerationService::normalizedToken)
+                .filter(token -> !token.isBlank())
+                .count();
+        boolean looksStatLike = line.matches(".*\\d.*")
+                || line.contains("+")
+                || line.contains("%")
+                || line.contains("->");
+
+        return hasSentencePunctuation || (wordCount >= 6 && !looksStatLike);
+    }
+
+    private static DetailLine parseDetailLine(String line) {
+        Matcher matcher = DETAIL_PATTERN.matcher(line);
+        if (!matcher.matches()) {
+            return null;
+        }
+
+        String label = trimToEmpty(matcher.group(1));
+        String value = trimToEmpty(matcher.group(2));
+        if (label.isBlank() || value.isBlank()) {
+            return null;
+        }
+
+        return new DetailLine(label, value);
+    }
+
+    private static String firstOrBlank(List<String> values) {
+        return values.isEmpty() ? "" : values.getFirst();
+    }
+
     record PageCandidate(
             String kind,
             String entryKey,
@@ -521,6 +684,16 @@ public class SeoRegenerationService {
             List<String> referenceKeys,
             String slug
     ) {
+    }
+
+    record ParsedDescription(
+            String introLine,
+            List<String> descriptionLines,
+            List<String> metadataHighlights
+    ) {
+    }
+
+    record DetailLine(String label, String value) {
     }
 
     private static final class MutableKindCounts {

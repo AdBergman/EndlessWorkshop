@@ -25,10 +25,28 @@ class CodexFilterServiceTest {
         ));
 
         assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
-                .containsExactly("Ability_ValidBracket", "Ability_ValidText");
+                .containsExactlyInAnyOrder("Ability_ValidBracket", "Ability_ValidText");
         assertThat(result.skippedByReason()).containsEntry("invalid-display-name", 5);
         assertThat(result.skippedByReason()).containsEntry("weak-description-lines", 1);
         assertThat(result.skippedByReason()).containsEntry("filtered-out", 6);
+    }
+
+    @Test
+    void normalizesDisplayNamesBeforeSluggingAndFiltering() {
+        CodexFilterResult result = codexFilterService.filter(List.of(
+                codexEntry("districts", "District_Klax", "[Luxury01] Klax Extractor", List.of("Useful district.")),
+                codexEntry("units", "Unit_InvalidPercent", "%InvalidName", List.of("Should be filtered.")),
+                codexEntry("units", "Unit_InvalidDigits", "Unit_1234_Test", List.of("Should be filtered.")),
+                codexEntry("units", "Unit_Normal", "Sentinel", List.of("Normal unit."))
+        ));
+
+        assertThat(result.entries()).extracting(CodexFilterResult.FilteredCodexEntry::normalizedDisplayName)
+                .containsExactly("Klax Extractor", "Sentinel");
+        assertThat(result.entries()).extracting(CodexFilterResult.FilteredCodexEntry::slug)
+                .containsExactly("klax-extractor", "sentinel");
+        assertThat(result.skippedEntries()).extracting(CodexFilterResult.CodexFilterSkip::entryKey)
+                .containsExactlyInAnyOrder("Unit_InvalidDigits", "Unit_InvalidPercent");
+        assertThat(result.skippedByReason()).containsEntry("invalid-display-name", 2);
     }
 
     @Test

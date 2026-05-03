@@ -28,25 +28,29 @@ class SeoRegenerationServiceTest {
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
                 codexEntry("tech", "Technology_District_Tier1_Industry", "Workshop",
-                        List.of("+2 Industry per District Level", "Unlocks district planning."),
+                        List.of(
+                                "Unlocks district planning through early industry planning.",
+                                "Category: Economy",
+                                "+2 Industry per District Level"
+                        ),
                         List.of("District_Workshop", "Industry")),
                 codexEntry("tech", "Technology_City_Tier3_Defense", "Stonework",
-                        List.of("Improves masonry logistics for defended cities."),
+                        List.of("Improves masonry logistics for defended cities.", "Category: Defense"),
                         List.of("City_Defense")),
                 codexEntry("tech", "Technology_District_Tier1_Defense", "Stonework",
                         List.of("Unlocks fortified district construction."),
                         List.of("District_Rampart")),
                 codexEntry("units", "Unit_Sentinel", "Sentinel",
-                        List.of("A frontline unit that anchors army formations."),
+                        List.of("A frontline unit that anchors army formations.", "Faction: Kin", "Role: Vanguard", "[Health] Health +20", "+3 MovementPoints Movement Points"),
                         List.of("Unit_Sentinel")),
                 codexEntry("units", "Unit_Sentinel_Mk2", "Sentinel",
                         List.of("A second sentinel row that should be skipped."),
                         List.of("Unit_Sentinel_Mk2")),
-                codexEntry("districts", "District_Works", "Works",
-                        List.of("Industrial district used for city specialization."),
+                codexEntry("districts", "District_Klax", "[Luxury01] Klax Extractor",
+                        List.of("Industrial district used for city specialization.", "Type: Infrastructure", "Prototype: District_Prototype_Tier1"),
                         List.of("District_Works")),
                 codexEntry("improvements", "Improvement_Workshop", "Workshop",
-                        List.of("Town improvement that supports early industry."),
+                        List.of("Town improvement that supports early industry.", "Slot: Town", "Tier: 1"),
                         List.of("Improvement_Workshop")),
                 codexEntry("tech", "Technology_Debug_Hidden", "% Debug Tech",
                         List.of("Hidden debug row."),
@@ -69,13 +73,13 @@ class SeoRegenerationServiceTest {
         Path workshopTechFile = tempDir.resolve("tech/workshop/index.html");
         Path stoneworkTechFile = tempDir.resolve("tech/stonework/index.html");
         Path sentinelUnitFile = tempDir.resolve("units/sentinel/index.html");
-        Path worksDistrictFile = tempDir.resolve("districts/works/index.html");
+        Path klaxDistrictFile = tempDir.resolve("districts/klax-extractor/index.html");
         Path workshopImprovementFile = tempDir.resolve("improvements/workshop/index.html");
         Path sitemapFile = tempDir.resolve("sitemap.xml");
 
         assertThat(result.generatedCount()).isEqualTo(5);
         assertThat(result.generatedRoutes()).containsExactly(
-                "/districts/works",
+                "/districts/klax-extractor",
                 "/improvements/workshop",
                 "/tech/stonework",
                 "/tech/workshop",
@@ -104,13 +108,23 @@ class SeoRegenerationServiceTest {
 
         assertThat(workshopTechFile).exists();
         String workshopTechHtml = Files.readString(workshopTechFile);
-        assertThat(workshopTechHtml).contains("Workshop Technology Guide | Endless Workshop");
-        assertThat(workshopTechHtml).contains("Technology • Codex entry");
-        assertThat(workshopTechHtml).contains("Entry key: Technology_District_Tier1_Industry");
+        assertThat(workshopTechHtml).contains("Workshop Technology Reference | Endless Workshop");
+        assertThat(workshopTechHtml).contains("Home");
+        assertThat(workshopTechHtml).contains(">Codex<");
+        assertThat(workshopTechHtml).contains("Technology • Category: Economy");
+        assertThat(workshopTechHtml).contains("<p class=\"seo-text entity-page__summary\">Unlocks district planning through early industry planning.</p>");
+        assertThat(workshopTechHtml).contains("<h2 class=\"seo-heading\">Description</h2>");
+        assertThat(workshopTechHtml).doesNotContain(">Details<");
+        assertThat(workshopTechHtml).doesNotContain("<p class=\"seo-label\">Description</p>");
+        assertThat(workshopTechHtml).doesNotContain(">Explore<");
+        assertThat(workshopTechHtml).doesNotContain("Entry key:");
+        assertThat(workshopTechHtml).doesNotContain("Canonical route:");
+        assertThat(workshopTechHtml).doesNotContain("<li>Unlocks district planning through early industry planning.</li>");
         assertThat(workshopTechHtml).contains("+2 Industry per District Level");
-        assertThat(workshopTechHtml).contains("Unlocks district planning.");
+        assertThat(workshopTechHtml).contains(">Related<");
         assertThat(workshopTechHtml).contains("District_Workshop");
-        assertThat(workshopTechHtml).contains("<a class=\"seo-button\" href=\"/tech\">Back to Tech</a>");
+        assertThat(workshopTechHtml).contains("Back to Codex");
+        assertThat(workshopTechHtml).contains("Browse Tech");
         assertThat(workshopTechHtml).contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/tech/workshop\" />");
         assertThat(workshopTechHtml).contains("\"@type\":\"WebPage\"");
         assertThat(workshopTechHtml).contains("\"@type\":\"BreadcrumbList\"");
@@ -128,19 +142,29 @@ class SeoRegenerationServiceTest {
 
         assertThat(sentinelUnitFile).exists();
         assertThat(Files.readString(sentinelUnitFile))
-                .contains("Sentinel Units Guide | Endless Workshop")
-                .contains("<a class=\"seo-button\" href=\"/units\">Back to Units</a>")
+                .contains("Sentinel Unit Reference | Endless Workshop")
+                .contains("Unit • Faction: Kin • Role: Vanguard")
+                .contains("Health +20")
+                .contains("Movement Points")
+                .doesNotContain("MovementPoints Movement Points")
+                .contains("Browse Units")
                 .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/units/sentinel\" />");
 
-        assertThat(worksDistrictFile).exists();
-        assertThat(Files.readString(worksDistrictFile))
-                .contains("Works Districts Guide | Endless Workshop")
-                .contains("<a class=\"seo-button\" href=\"/codex\">Back to Codex</a>")
-                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/districts/works\" />");
+        assertThat(klaxDistrictFile).exists();
+        assertThat(Files.readString(klaxDistrictFile))
+                .contains("Klax Extractor District Reference | Endless Workshop")
+                .contains("District • Type: Infrastructure")
+                .contains("Back to Codex")
+                .doesNotContain("Luxury01")
+                .doesNotContain("Prototype: District_Prototype_Tier1")
+                .doesNotContain("Prototype •")
+                .doesNotContain("Browse Tech")
+                .doesNotContain("Browse Units")
+                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/districts/klax-extractor\" />");
 
         assertThat(workshopImprovementFile).exists();
         assertThat(Files.readString(workshopImprovementFile))
-                .contains("Workshop Improvements Guide | Endless Workshop")
+                .contains("Workshop Improvement Reference | Endless Workshop")
                 .contains("https://endlessworkshop.dev/improvements/workshop");
 
         assertThat(tempDir.resolve("tech/legacy-page/index.html")).doesNotExist();
@@ -156,7 +180,7 @@ class SeoRegenerationServiceTest {
                 "<loc>https://endlessworkshop.dev/summary</loc>",
                 "<loc>https://endlessworkshop.dev/mods</loc>",
                 "<loc>https://endlessworkshop.dev/info</loc>",
-                "<loc>https://endlessworkshop.dev/districts/works</loc>",
+                "<loc>https://endlessworkshop.dev/districts/klax-extractor</loc>",
                 "<loc>https://endlessworkshop.dev/improvements/workshop</loc>",
                 "<loc>https://endlessworkshop.dev/tech/stonework</loc>",
                 "<loc>https://endlessworkshop.dev/tech/workshop</loc>",
@@ -166,7 +190,7 @@ class SeoRegenerationServiceTest {
     }
 
     @Test
-    void tracksDuplicateSlugsPerExportKindInsteadOfGlobally() {
+    void tracksDuplicateSlugsPerExportKindInsteadOfGlobally() throws Exception {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
         SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
@@ -177,6 +201,7 @@ class SeoRegenerationServiceTest {
         ));
 
         SeoRegenerationResult result = service.regeneratePrototypePages();
+        String workshopUnitHtml = Files.readString(tempDir.resolve("units/workshop/index.html"));
 
         assertThat(result.generatedRoutes()).containsExactly(
                 "/tech/workshop",
@@ -184,6 +209,10 @@ class SeoRegenerationServiceTest {
         );
         assertThat(result.skippedCount()).isZero();
         assertThat(result.duplicateCount()).isZero();
+        assertThat(workshopUnitHtml).doesNotContain(">Related<");
+        assertThat(workshopUnitHtml).doesNotContain(">Explore<");
+        assertThat(workshopUnitHtml).contains("Back to Codex");
+        assertThat(workshopUnitHtml).contains("Browse Units");
         assertThat(result.exportKindCounts()).containsExactlyInAnyOrderEntriesOf(Map.of(
                 "tech", new SeoRegenerationKindResult(1, 0, 0),
                 "units", new SeoRegenerationKindResult(1, 0, 0)
