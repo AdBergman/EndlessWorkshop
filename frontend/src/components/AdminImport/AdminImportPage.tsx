@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "./AdminImportPage.css";
+import { apiClient, SeoRegenerationResult } from "@/api/apiClient";
 
 import AdminTokenPanel from "./AdminTokenPanel";
 import ImportModuleRow from "./ImportModuleRow";
@@ -8,6 +9,11 @@ import { ImportModuleDefinition, ModuleMetaKV } from "./adminImportTypes";
 import { Helmet } from "react-helmet-async";
 
 type TokenStatus = "missing" | "checking" | "valid" | "invalid";
+type SeoActionState =
+    | { status: "idle" }
+    | { status: "running" }
+    | { status: "success"; result: SeoRegenerationResult }
+    | { status: "error"; message: string };
 
 type TechImportFile = {
     game?: string;
@@ -195,6 +201,7 @@ export default function AdminImportPage() {
     const [token, setToken] = useState<string>(() => (localStorage.getItem("ewshop_admin_token") ?? "").trim());
     const [tokenStatus, setTokenStatus] = useState<TokenStatus>(() => (token ? "checking" : "missing"));
     const [tokenError, setTokenError] = useState<string | null>(null);
+    const [seoActionState, setSeoActionState] = useState<SeoActionState>({ status: "idle" });
 
     const modules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
         return [
@@ -281,6 +288,22 @@ export default function AdminImportPage() {
         }
     }, []);
 
+    const runSeoRegeneration = useCallback(async () => {
+        if (!token.trim()) return;
+
+        setSeoActionState({ status: "running" });
+
+        try {
+            const result = await apiClient.regenerateSeoPagesAdmin(token.trim());
+            setSeoActionState({ status: "success", result });
+        } catch (error) {
+            setSeoActionState({
+                status: "error",
+                message: (error as Error)?.message ?? "Failed to regenerate SEO pages.",
+            });
+        }
+    }, [token]);
+
     // Validate stored token once on mount
     useEffect(() => {
         if (token) {
@@ -338,6 +361,58 @@ export default function AdminImportPage() {
 
                 {!isUnlocked ? null : (
                     <div className="admin-import-section">
+                        <div className="admin-import-panel admin-import-section">
+                            <div className="admin-import-row">
+                                <div style={{ flex: "1 1 320px" }}>
+                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>SEO regeneration</div>
+                                    <div className="admin-import-muted">
+                                        Rebuild the current static SEO prototype page from canonical backend data after imports finish.
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="admin-import-btn admin-import-btn--primary"
+                                    disabled={seoActionState.status === "running"}
+                                    onClick={() => void runSeoRegeneration()}
+                                >
+                                    {seoActionState.status === "running" ? "Regenerating…" : "Regenerate SEO pages"}
+                                </button>
+                            </div>
+
+                            {seoActionState.status === "success" ? (
+                                <div className="admin-import-success">
+                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>SEO pages regenerated</div>
+                                    <div>
+                                        Generated {seoActionState.result.generatedCount} page(s), skipped {seoActionState.result.skippedCount}, sitemap updated:{" "}
+                                        {seoActionState.result.sitemapUpdated ? "yes" : "no"}.
+                                    </div>
+                                    {seoActionState.result.generatedRoutes.length > 0 ? (
+                                        <div className="admin-import-seoSummary">
+                                            Routes: {seoActionState.result.generatedRoutes.join(", ")}
+                                        </div>
+                                    ) : null}
+                                    {seoActionState.result.warnings.length > 0 ? (
+                                        <div className="admin-import-seoSummary">
+                                            Warnings: {seoActionState.result.warnings.join(" | ")}
+                                        </div>
+                                    ) : null}
+                                    {seoActionState.result.errors.length > 0 ? (
+                                        <div className="admin-import-seoSummary">
+                                            Errors: {seoActionState.result.errors.join(" | ")}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ) : null}
+
+                            {seoActionState.status === "error" ? (
+                                <div className="admin-import-error">
+                                    <div className="admin-import-errorTitle">SEO regeneration failed</div>
+                                    <div>{seoActionState.message}</div>
+                                </div>
+                            ) : null}
+                        </div>
+
                         <div className="admin-import-pipelineTitle">Import pipeline</div>
                         <div className="admin-import-muted">
                             Run imports top-to-bottom as modules become available.

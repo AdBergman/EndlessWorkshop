@@ -1,7 +1,9 @@
 package ewshop.app.config;
 
+import ewshop.app.seo.SeoOutputLocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
@@ -11,6 +13,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
@@ -61,6 +66,21 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void prefersExternalGeneratedSeoOutputWhenPresent() throws Exception {
+        Path externalWorkshop = Path.of("build/test-generated-seo/tech/workshop/index.html");
+        Files.createDirectories(externalWorkshop.getParent());
+        Files.writeString(externalWorkshop, "<!doctype html><title>external workshop</title>");
+
+        try {
+            mockMvc.perform(get("/tech/workshop"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/tech/workshop/index.html"));
+        } finally {
+            Files.deleteIfExists(externalWorkshop);
+        }
+    }
+
+    @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
         mockMvc.perform(get("/tech/stonework"))
                 .andExpect(status().isNotFound());
@@ -98,5 +118,10 @@ class FrontendControllerRouteTest {
     })
     @Import({FrontendController.class, WebConfig.class})
     static class TestApplication {
+
+        @Bean
+        SeoOutputLocator seoOutputLocator() {
+            return new SeoOutputLocator("build/test-generated-seo");
+        }
     }
 }

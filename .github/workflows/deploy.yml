@@ -51,9 +51,14 @@ jobs:
             TAG=latest
             CONTAINER_NAME=ewshop-app
             BACKUP_CONTAINER=\${CONTAINER_NAME}-backup
+            HOST_SEO_DIR=/var/lib/ewshop/generated-seo
+            CONTAINER_SEO_DIR=/app/generated-seo
 
             echo "Pulling latest image from Docker Hub..."
             docker pull \$IMAGE_NAME:\$TAG
+
+            echo "Ensuring persistent SEO output directory exists..."
+            sudo mkdir -p \$HOST_SEO_DIR
 
             # Backup running container (if any)
             if docker ps -a --format '{{.Names}}' | grep -q "^\$CONTAINER_NAME\$"; then
@@ -67,7 +72,9 @@ jobs:
               --name \$CONTAINER_NAME \
               -p 8080:8080 \
               --restart=unless-stopped \
+              -v \$HOST_SEO_DIR:\$CONTAINER_SEO_DIR \
               -e SPRING_PROFILES_ACTIVE=prod \
+              -e SEO_OUTPUT_DIR=\$CONTAINER_SEO_DIR \
               -e JAVA_OPTS="-Xms256m -Xmx512m -XX:MaxMetaspaceSize=192m" \
               -e DB_HOST=${{ secrets.NEON_DB_HOST }} \
               -e DB_PORT=${{ secrets.NEON_DB_PORT }} \
@@ -86,6 +93,7 @@ jobs:
               echo "✅ New container started successfully!"
               echo "Cleaning up old backup..."
               docker rm \$BACKUP_CONTAINER || true
+              echo "SEO output is persisted at \$HOST_SEO_DIR and mounted to \$CONTAINER_SEO_DIR."
               echo "✅ Deployment complete!"
             else
               echo "❌ Failed to start new container."

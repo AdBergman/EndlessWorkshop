@@ -217,6 +217,11 @@ npm run dev
 ```
 Runs at: http://localhost:5173
 
+### Generated SEO output
+- Local development keeps the default `generated-seo/` directory at the repo root.
+- Production should set `SEO_OUTPUT_DIR=/app/generated-seo` and mount a persistent host path such as `/var/lib/ewshop/generated-seo` into that container path.
+- After using the admin SEO regeneration action, verify persistence by redeploying or restarting the container and then checking that `/tech/workshop/` still serves the generated page and that the host directory still contains `tech/workshop/index.html` and `sitemap.xml`.
+
 ### Codex Token Audit (Dev Only)
 This audit helps find missing Codex token/icon mappings by scanning raw `displayName` and `descriptionLines` data before the UI hides unknown bracket tokens.
 

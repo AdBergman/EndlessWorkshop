@@ -16,6 +16,15 @@ export type TechAdminDto = {
     coords: { xPct: number; yPct: number };
 };
 
+export type SeoRegenerationResult = {
+    generatedCount: number;
+    generatedRoutes: string[];
+    skippedCount: number;
+    warnings: string[];
+    errors: string[];
+    sitemapUpdated: boolean;
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 async function fetcherJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -70,4 +79,12 @@ export const apiClient = {
             body: JSON.stringify(placements),
         });
     },
+
+    regenerateSeoPagesAdmin: (adminToken: string) =>
+        fetcherJson<SeoRegenerationResult>("/admin/seo/regenerate", {
+            method: "POST",
+            headers: {
+                "X-Admin-Token": adminToken,
+            },
+        }),
 };
