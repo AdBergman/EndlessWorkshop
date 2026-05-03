@@ -1,6 +1,8 @@
 package ewshop.app.seo;
 
 import ewshop.domain.model.Codex;
+import ewshop.domain.service.CodexFilterResult;
+import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexService;
 import org.springframework.stereotype.Service;
 
@@ -9,16 +11,12 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 @Service
@@ -30,8 +28,6 @@ public class SeoRegenerationService {
     private static final String SITE_NAME = "Endless Workshop";
     private static final String SITE_URL = "https://endlessworkshop.dev";
     private static final String DEFAULT_IMAGE_URL = SITE_URL + "/logo512.png";
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd\\])", Pattern.CASE_INSENSITIVE);
-    private static final Pattern DIGIT_CLUSTER_PATTERN = Pattern.compile("\\d{3}");
     private static final List<String> INDEXABLE_PUBLIC_ROUTE_PATHS = List.of(
             "/tech",
             "/units",
@@ -42,10 +38,16 @@ public class SeoRegenerationService {
     );
 
     private final CodexService codexService;
+    private final CodexFilterService codexFilterService;
     private final SeoOutputLocator seoOutputLocator;
 
-    public SeoRegenerationService(CodexService codexService, SeoOutputLocator seoOutputLocator) {
+    public SeoRegenerationService(
+            CodexService codexService,
+            CodexFilterService codexFilterService,
+            SeoOutputLocator seoOutputLocator
+    ) {
         this.codexService = codexService;
+        this.codexFilterService = codexFilterService;
         this.seoOutputLocator = seoOutputLocator;
     }
 
@@ -56,16 +58,19 @@ public class SeoRegenerationService {
 
         deleteGeneratedTechOutput();
 
-        List<TechPageCandidate> candidates = codexService.getAllCodexEntries().stream()
-                .filter(this::isTechEntry)
+        CodexFilterResult filterResult = codexFilterService.filter(codexService.getAllCodexEntries());
+        skippedByReason.putAll(filterResult.skippedByReason());
+        addDuplicateSlugWarnings(filterResult, warnings);
+
+        List<TechPageCandidate> candidates = filterResult.entries().stream()
+                .filter(entry -> isTechEntry(entry.entry()))
                 .sorted(Comparator
-                        .comparing((Codex entry) -> trimToEmpty(entry.getDisplayName()), String.CASE_INSENSITIVE_ORDER)
-                        .thenComparing(entry -> trimToEmpty(entry.getEntryKey()), String.CASE_INSENSITIVE_ORDER))
-                .map(entry -> validateTechEntry(entry, skippedByReason))
-                .filter(Objects::nonNull)
+                        .comparing(CodexFilterResult.FilteredCodexEntry::normalizedDisplayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(entry -> trimToEmpty(entry.entry().getEntryKey()), String.CASE_INSENSITIVE_ORDER))
+                .map(this::toTechCandidate)
                 .toList();
 
-        for (ResolvedTechPage resolved : resolveRoutes(candidates, skippedByReason, warnings)) {
+        for (ResolvedTechPage resolved : resolveRoutes(candidates)) {
             writeUtf8(
                     seoOutputLocator.getFeaturedEntityFile("tech", resolved.slug()),
                     renderTechHtml(resolved.candidate(), resolved.route())
@@ -78,7 +83,7 @@ public class SeoRegenerationService {
         return new SeoRegenerationResult(
                 generatedRoutes.size(),
                 List.copyOf(generatedRoutes),
-                skippedByReason.values().stream().mapToInt(Integer::intValue).sum(),
+                filterResult.filteredOutCount(),
                 Map.copyOf(skippedByReason),
                 List.copyOf(warnings),
                 List.copyOf(errors),
@@ -90,88 +95,30 @@ public class SeoRegenerationService {
         return TECH_KIND.equalsIgnoreCase(trimToEmpty(entry.getExportKind()));
     }
 
-    private TechPageCandidate validateTechEntry(Codex entry, Map<String, Integer> skippedByReason) {
-        String entryKey = trimToEmpty(entry.getEntryKey());
-        String displayName = trimToEmpty(entry.getDisplayName());
-
-        if (entryKey.isBlank()) {
-            incrementSkip(skippedByReason, "missing-entry-key");
-            return null;
-        }
-
-        if (!isIndexableDisplayName(displayName)) {
-            incrementSkip(skippedByReason, "invalid-display-name");
-            return null;
-        }
-
-        List<String> descriptionLines = cleanMeaningfulTextList(entry.getDescriptionLines());
-        if (descriptionLines.isEmpty()) {
-            incrementSkip(skippedByReason, "weak-description-lines");
-            return null;
-        }
-
-        String baseSlug = slugify(displayName);
-        if (baseSlug.isBlank()) {
-            incrementSkip(skippedByReason, "invalid-display-name");
-            return null;
-        }
-
-        List<String> referenceKeys = cleanReferenceKeys(entry.getReferenceKeys());
-        return new TechPageCandidate(entryKey, displayName, descriptionLines, referenceKeys, baseSlug);
+    private TechPageCandidate toTechCandidate(CodexFilterResult.FilteredCodexEntry entry) {
+        return new TechPageCandidate(
+                trimToEmpty(entry.entry().getEntryKey()),
+                entry.normalizedDisplayName(),
+                entry.meaningfulDescriptionLines(),
+                entry.cleanedReferenceKeys(),
+                entry.slug()
+        );
     }
 
-    private List<ResolvedTechPage> resolveRoutes(
-            List<TechPageCandidate> candidates,
-            Map<String, Integer> skippedByReason,
-            List<String> warnings
-    ) {
-        Map<String, List<TechPageCandidate>> groupedByBaseSlug = new LinkedHashMap<>();
-        for (TechPageCandidate candidate : candidates) {
-            groupedByBaseSlug.computeIfAbsent(candidate.baseSlug(), ignored -> new ArrayList<>()).add(candidate);
-        }
-
+    private List<ResolvedTechPage> resolveRoutes(List<TechPageCandidate> candidates) {
         List<ResolvedTechPage> resolvedPages = new ArrayList<>();
-        LinkedHashSet<String> usedSlugs = new LinkedHashSet<>();
-
-        for (Map.Entry<String, List<TechPageCandidate>> groupEntry : groupedByBaseSlug.entrySet()) {
-            String baseSlug = groupEntry.getKey();
-            List<TechPageCandidate> group = groupEntry.getValue();
-
-            if (group.size() == 1) {
-                usedSlugs.add(baseSlug);
-                resolvedPages.add(new ResolvedTechPage(group.getFirst(), baseSlug, routeForSlug(baseSlug)));
-                continue;
-            }
-
-            List<TechPageCandidate> sortedGroup = group.stream()
-                    .sorted(Comparator.comparing(TechPageCandidate::entryKey, String.CASE_INSENSITIVE_ORDER))
-                    .toList();
-
-            warnings.add("Duplicate tech slug base '" + baseSlug + "' detected for " + group.size()
-                    + " Codex entries; retaining the base slug for '" + sortedGroup.getFirst().entryKey()
-                    + "' and suffixing the rest with entryKey-derived slugs.");
-
-            TechPageCandidate first = sortedGroup.getFirst();
-            usedSlugs.add(baseSlug);
-            resolvedPages.add(new ResolvedTechPage(first, baseSlug, routeForSlug(baseSlug)));
-
-            for (int index = 1; index < sortedGroup.size(); index++) {
-                TechPageCandidate candidate = sortedGroup.get(index);
-                String suffix = slugify(candidate.entryKey());
-                String disambiguatedSlug = suffix.isBlank() ? "" : baseSlug + "-" + suffix;
-
-                if (suffix.isBlank() || disambiguatedSlug.equals(baseSlug) || !usedSlugs.add(disambiguatedSlug)) {
-                    incrementSkip(skippedByReason, "duplicate-slug");
-                    warnings.add("Skipped tech '" + candidate.entryKey() + "' because duplicate slug base '" + baseSlug
-                            + "' could not be disambiguated safely.");
-                    continue;
-                }
-
-                resolvedPages.add(new ResolvedTechPage(candidate, disambiguatedSlug, routeForSlug(disambiguatedSlug)));
-            }
+        for (TechPageCandidate candidate : candidates) {
+            resolvedPages.add(new ResolvedTechPage(candidate, candidate.baseSlug(), routeForSlug(candidate.baseSlug())));
         }
-
         return resolvedPages;
+    }
+
+    private void addDuplicateSlugWarnings(CodexFilterResult filterResult, List<String> warnings) {
+        filterResult.skippedEntries().stream()
+                .filter(skip -> "duplicate-slug".equals(skip.reason()))
+                .map(skip -> "Skipped codex entry '" + skip.entryKey() + "' in kind '" + skip.exportKind()
+                        + "' because its normalized display-name slug duplicates an earlier entry.")
+                .forEach(warnings::add);
     }
 
     private void deleteGeneratedTechOutput() {
@@ -420,74 +367,6 @@ public class SeoRegenerationService {
         return candidate.displayName() + " is a technology entry in the Endless Workshop codex. " + firstDescriptionLine;
     }
 
-    private static List<String> cleanMeaningfulTextList(List<String> values) {
-        if (values == null || values.isEmpty()) {
-            return List.of();
-        }
-
-        return values.stream()
-                .map(SeoRegenerationService::trimToEmpty)
-                .filter(SeoRegenerationService::isMeaningfulText)
-                .distinct()
-                .toList();
-    }
-
-    private static List<String> cleanReferenceKeys(List<String> referenceKeys) {
-        if (referenceKeys == null || referenceKeys.isEmpty()) {
-            return List.of();
-        }
-
-        return referenceKeys.stream()
-                .map(SeoRegenerationService::trimToEmpty)
-                .filter(value -> !value.isBlank())
-                .distinct()
-                .toList();
-    }
-
-    private static boolean isMeaningfulText(String value) {
-        String normalized = trimToEmpty(value);
-        return normalized.length() >= 3
-                && !PLACEHOLDER_PATTERN.matcher(normalized).find()
-                && hasBalancedFormatting(normalized);
-    }
-
-    private static boolean isIndexableDisplayName(String value) {
-        String normalized = trimToEmpty(value);
-        return !normalized.isBlank()
-                && isMeaningfulText(normalized)
-                && !DIGIT_CLUSTER_PATTERN.matcher(normalized.toLowerCase(Locale.ROOT)).find();
-    }
-
-    private static boolean hasBalancedFormatting(String value) {
-        List<Character> stack = new ArrayList<>();
-
-        for (char character : value.toCharArray()) {
-            if (character == '(' || character == '[' || character == '{') {
-                stack.add(character);
-                continue;
-            }
-
-            if (character == ')' || character == ']' || character == '}') {
-                if (stack.isEmpty()) {
-                    return false;
-                }
-
-                char open = stack.removeLast();
-                if ((character == ')' && open != '(')
-                        || (character == ']' && open != '[')
-                        || (character == '}' && open != '{')) {
-                    return false;
-                }
-            }
-        }
-
-        return stack.isEmpty();
-    }
-
-    private static void incrementSkip(Map<String, Integer> skippedByReason, String reason) {
-        skippedByReason.merge(reason, 1, Integer::sum);
-    }
-
     private static String renderReferenceChips(List<String> referenceKeys) {
         if (referenceKeys.isEmpty()) {
             return "<p class=\"entity-page__referencesEmpty\">No linked reference keys are exposed in this Codex snapshot.</p>";
@@ -508,15 +387,6 @@ public class SeoRegenerationService {
             html.append("<li>").append(escapeHtml(item)).append("</li>");
         }
         return html.toString();
-    }
-
-    private static String slugify(String value) {
-        return Normalizer.normalize(value, Normalizer.Form.NFKD)
-                .replace("'", "")
-                .replace("\u2019", "")
-                .toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-+|-+$", "");
     }
 
     private static String trimToEmpty(String value) {

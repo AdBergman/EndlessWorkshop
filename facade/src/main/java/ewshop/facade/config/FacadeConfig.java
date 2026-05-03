@@ -71,8 +71,8 @@ public class FacadeConfig {
     }
 
     @Bean
-    public CodexFacade codexFacade(CodexService codexService) {
-        return new CodexFacadeImpl(codexService);
+    public CodexFacade codexFacade(CodexService codexService, CodexFilterService codexFilterService) {
+        return new CodexFacadeImpl(codexService, codexFilterService);
     }
 
     @Bean

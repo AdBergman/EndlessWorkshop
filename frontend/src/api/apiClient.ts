@@ -20,6 +20,7 @@ export type SeoRegenerationResult = {
     generatedCount: number;
     generatedRoutes: string[];
     skippedCount: number;
+    skippedByReason: Record<string, number>;
     warnings: string[];
     errors: string[];
     sitemapUpdated: boolean;

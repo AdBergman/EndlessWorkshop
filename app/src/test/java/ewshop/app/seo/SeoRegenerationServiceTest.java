@@ -1,6 +1,7 @@
 package ewshop.app.seo;
 
 import ewshop.domain.model.Codex;
+import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -23,18 +24,18 @@ class SeoRegenerationServiceTest {
     void regeneratesTechPagesFromCanonicalBackendCodexData() throws Exception {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
-        SeoRegenerationService service = new SeoRegenerationService(codexService, outputLocator);
+        SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
                 codexTech("Technology_District_Tier1_Industry", "Workshop",
                         List.of("+2 Industry per District Level", "Unlocks district planning."),
                         List.of("District_Workshop", "Industry")),
-                codexTech("Technology_District_Tier1_Defense", "Stonework",
-                        List.of("Unlocks fortified district construction."),
-                        List.of("District_Rampart")),
                 codexTech("Technology_City_Tier3_Defense", "Stonework",
                         List.of("Improves masonry logistics for defended cities."),
                         List.of("City_Defense")),
+                codexTech("Technology_District_Tier1_Defense", "Stonework",
+                        List.of("Unlocks fortified district construction."),
+                        List.of("District_Rampart")),
                 codexTech("Technology_Debug_Hidden", "% Debug Tech",
                         List.of("Hidden debug row."),
                         List.of("Debug")),
@@ -63,22 +64,22 @@ class SeoRegenerationServiceTest {
 
         Path workshopFile = tempDir.resolve("tech/workshop/index.html");
         Path stoneworkFile = tempDir.resolve("tech/stonework/index.html");
-        Path disambiguatedStoneworkFile = tempDir.resolve("tech/stonework-technology-district-tier1-defense/index.html");
         Path sitemapFile = tempDir.resolve("sitemap.xml");
 
-        assertThat(result.generatedCount()).isEqualTo(3);
+        assertThat(result.generatedCount()).isEqualTo(2);
         assertThat(result.generatedRoutes()).containsExactly(
                 "/tech/stonework",
-                "/tech/stonework-technology-district-tier1-defense",
                 "/tech/workshop"
         );
-        assertThat(result.skippedCount()).isEqualTo(3);
+        assertThat(result.skippedCount()).isEqualTo(4);
         assertThat(result.skippedByReason()).isEqualTo(Map.of(
                 "invalid-display-name", 1,
-                "weak-description-lines", 2
+                "weak-description-lines", 2,
+                "duplicate-slug", 1,
+                "filtered-out", 4
         ));
         assertThat(result.warnings()).anySatisfy(warning ->
-                assertThat(warning).contains("Duplicate tech slug base 'stonework'"));
+                assertThat(warning).contains("Technology_District_Tier1_Defense"));
         assertThat(result.errors()).isEmpty();
         assertThat(result.sitemapUpdated()).isTrue();
 
@@ -102,11 +103,9 @@ class SeoRegenerationServiceTest {
 
         assertThat(stoneworkFile).exists();
         assertThat(Files.readString(stoneworkFile)).contains("https://endlessworkshop.dev/tech/stonework");
-
-        assertThat(disambiguatedStoneworkFile).exists();
-        assertThat(Files.readString(disambiguatedStoneworkFile))
-                .contains("Unlocks fortified district construction.")
-                .contains("https://endlessworkshop.dev/tech/stonework-technology-district-tier1-defense");
+        assertThat(Files.readString(stoneworkFile))
+                .contains("Improves masonry logistics for defended cities.")
+                .doesNotContain("Unlocks fortified district construction.");
 
         assertThat(tempDir.resolve("tech/legacy-page/index.html")).doesNotExist();
         assertThat(tempDir.resolve("units/legacy-unit/index.html")).hasContent("leave me alone");
@@ -122,29 +121,28 @@ class SeoRegenerationServiceTest {
         assertThat(sitemap).contains("<loc>https://endlessworkshop.dev/info</loc>");
         assertThat(sitemap).contains("<loc>https://endlessworkshop.dev/tech/workshop</loc>");
         assertThat(sitemap).contains("<loc>https://endlessworkshop.dev/tech/stonework</loc>");
-        assertThat(sitemap).contains("<loc>https://endlessworkshop.dev/tech/stonework-technology-district-tier1-defense</loc>");
         assertThat(sitemap).doesNotContain("legacy-page");
     }
 
     @Test
-    void skipsTechWhenDuplicateSlugCannotBeDisambiguatedSafely() {
+    void skipsDuplicateTechSlugInsteadOfGeneratingDisambiguatedOverwriteRoute() {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
-        SeoRegenerationService service = new SeoRegenerationService(codexService, outputLocator);
+        SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
-                codexTech("A A", "Stonework", List.of("First description line."), List.of()),
-                codexTech("A-B", "Stonework", List.of("Second description line."), List.of()),
-                codexTech("A B", "Stonework", List.of("Third description line."), List.of())
+                codexTech("Technology_B", "Stonework", List.of("Second description line."), List.of()),
+                codexTech("Technology_A", "Stonework", List.of("First description line."), List.of())
         ));
 
         SeoRegenerationResult result = service.regeneratePrototypePages();
 
-        assertThat(result.generatedRoutes()).containsExactly("/tech/stonework", "/tech/stonework-a-b");
+        assertThat(result.generatedRoutes()).containsExactly("/tech/stonework");
         assertThat(result.skippedCount()).isEqualTo(1);
-        assertThat(result.skippedByReason()).containsEntry("duplicate-slug", 1);
+        assertThat(result.skippedByReason()).containsEntry("duplicate-slug", 1)
+                .containsEntry("filtered-out", 1);
         assertThat(result.warnings()).anySatisfy(warning ->
-                assertThat(warning).contains("could not be disambiguated safely"));
+                assertThat(warning).contains("Technology_B"));
     }
 
     private static Codex codexTech(String entryKey, String displayName, List<String> descriptionLines, List<String> referenceKeys) {
