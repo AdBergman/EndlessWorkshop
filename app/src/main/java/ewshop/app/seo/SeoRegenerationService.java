@@ -1,9 +1,7 @@
 package ewshop.app.seo;
 
-import ewshop.domain.model.Tech;
-import ewshop.domain.model.TechUnlockRef;
-import ewshop.domain.model.enums.MajorFaction;
-import ewshop.domain.service.TechService;
+import ewshop.domain.model.Codex;
+import ewshop.domain.service.CodexService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -11,24 +9,29 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 @Service
 public class SeoRegenerationService {
 
-    static final String WORKSHOP_TECH_KEY = "Technology_District_Tier1_Industry";
+    static final String TECH_KIND = "tech";
     static final String WORKSHOP_ENTRY_KEY = "workshop";
-    static final String WORKSHOP_ROUTE = "/tech/workshop";
 
     private static final String SITE_NAME = "Endless Workshop";
     private static final String SITE_URL = "https://endlessworkshop.dev";
     private static final String DEFAULT_IMAGE_URL = SITE_URL + "/logo512.png";
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd\\])", Pattern.CASE_INSENSITIVE);
+    private static final Pattern DIGIT_CLUSTER_PATTERN = Pattern.compile("\\d{3}");
     private static final List<String> INDEXABLE_PUBLIC_ROUTE_PATHS = List.of(
             "/tech",
             "/units",
@@ -38,49 +41,183 @@ public class SeoRegenerationService {
             "/info"
     );
 
-    private final TechService techService;
+    private final CodexService codexService;
     private final SeoOutputLocator seoOutputLocator;
 
-    public SeoRegenerationService(TechService techService, SeoOutputLocator seoOutputLocator) {
-        this.techService = techService;
+    public SeoRegenerationService(CodexService codexService, SeoOutputLocator seoOutputLocator) {
+        this.codexService = codexService;
         this.seoOutputLocator = seoOutputLocator;
     }
 
     public SeoRegenerationResult regeneratePrototypePages() {
         List<String> warnings = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        List<String> generatedRoutes = new ArrayList<>();
-        List<Tech> techs = techService.getAllTechs();
+        Map<String, Integer> skippedByReason = new LinkedHashMap<>();
 
-        Optional<Tech> workshop = techs.stream()
-                .filter(tech -> WORKSHOP_TECH_KEY.equals(tech.getTechKey()))
-                .findFirst()
-                .or(() -> techs.stream()
-                        .filter(tech -> "Workshop".equalsIgnoreCase(tech.getName()))
-                        .findFirst());
+        deleteGeneratedTechOutput();
 
-        if (workshop.isPresent()) {
-            writeWorkshopPage(workshop.get());
-            generatedRoutes.add(WORKSHOP_ROUTE);
-        } else {
-            warnings.add("Workshop tech was not found in canonical backend data; no SEO entity page was regenerated.");
+        List<TechPageCandidate> candidates = codexService.getAllCodexEntries().stream()
+                .filter(this::isTechEntry)
+                .sorted(Comparator
+                        .comparing((Codex entry) -> trimToEmpty(entry.getDisplayName()), String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(entry -> trimToEmpty(entry.getEntryKey()), String.CASE_INSENSITIVE_ORDER))
+                .map(entry -> validateTechEntry(entry, skippedByReason))
+                .filter(Objects::nonNull)
+                .toList();
+
+        for (ResolvedTechPage resolved : resolveRoutes(candidates, skippedByReason, warnings)) {
+            writeUtf8(
+                    seoOutputLocator.getFeaturedEntityFile("tech", resolved.slug()),
+                    renderTechHtml(resolved.candidate(), resolved.route())
+            );
         }
 
+        List<String> generatedRoutes = listGeneratedRoutes("tech");
         writeSitemap(generatedRoutes);
 
         return new SeoRegenerationResult(
                 generatedRoutes.size(),
                 List.copyOf(generatedRoutes),
-                workshop.isPresent() ? 0 : 1,
+                skippedByReason.values().stream().mapToInt(Integer::intValue).sum(),
+                Map.copyOf(skippedByReason),
                 List.copyOf(warnings),
                 List.copyOf(errors),
                 true
         );
     }
 
-    private void writeWorkshopPage(Tech tech) {
-        Path targetFile = seoOutputLocator.getFeaturedEntityFile("tech", WORKSHOP_ENTRY_KEY);
-        writeUtf8(targetFile, renderWorkshopHtml(tech));
+    private boolean isTechEntry(Codex entry) {
+        return TECH_KIND.equalsIgnoreCase(trimToEmpty(entry.getExportKind()));
+    }
+
+    private TechPageCandidate validateTechEntry(Codex entry, Map<String, Integer> skippedByReason) {
+        String entryKey = trimToEmpty(entry.getEntryKey());
+        String displayName = trimToEmpty(entry.getDisplayName());
+
+        if (entryKey.isBlank()) {
+            incrementSkip(skippedByReason, "missing-entry-key");
+            return null;
+        }
+
+        if (!isIndexableDisplayName(displayName)) {
+            incrementSkip(skippedByReason, "invalid-display-name");
+            return null;
+        }
+
+        List<String> descriptionLines = cleanMeaningfulTextList(entry.getDescriptionLines());
+        if (descriptionLines.isEmpty()) {
+            incrementSkip(skippedByReason, "weak-description-lines");
+            return null;
+        }
+
+        String baseSlug = slugify(displayName);
+        if (baseSlug.isBlank()) {
+            incrementSkip(skippedByReason, "invalid-display-name");
+            return null;
+        }
+
+        List<String> referenceKeys = cleanReferenceKeys(entry.getReferenceKeys());
+        return new TechPageCandidate(entryKey, displayName, descriptionLines, referenceKeys, baseSlug);
+    }
+
+    private List<ResolvedTechPage> resolveRoutes(
+            List<TechPageCandidate> candidates,
+            Map<String, Integer> skippedByReason,
+            List<String> warnings
+    ) {
+        Map<String, List<TechPageCandidate>> groupedByBaseSlug = new LinkedHashMap<>();
+        for (TechPageCandidate candidate : candidates) {
+            groupedByBaseSlug.computeIfAbsent(candidate.baseSlug(), ignored -> new ArrayList<>()).add(candidate);
+        }
+
+        List<ResolvedTechPage> resolvedPages = new ArrayList<>();
+        LinkedHashSet<String> usedSlugs = new LinkedHashSet<>();
+
+        for (Map.Entry<String, List<TechPageCandidate>> groupEntry : groupedByBaseSlug.entrySet()) {
+            String baseSlug = groupEntry.getKey();
+            List<TechPageCandidate> group = groupEntry.getValue();
+
+            if (group.size() == 1) {
+                usedSlugs.add(baseSlug);
+                resolvedPages.add(new ResolvedTechPage(group.getFirst(), baseSlug, routeForSlug(baseSlug)));
+                continue;
+            }
+
+            List<TechPageCandidate> sortedGroup = group.stream()
+                    .sorted(Comparator.comparing(TechPageCandidate::entryKey, String.CASE_INSENSITIVE_ORDER))
+                    .toList();
+
+            warnings.add("Duplicate tech slug base '" + baseSlug + "' detected for " + group.size()
+                    + " Codex entries; retaining the base slug for '" + sortedGroup.getFirst().entryKey()
+                    + "' and suffixing the rest with entryKey-derived slugs.");
+
+            TechPageCandidate first = sortedGroup.getFirst();
+            usedSlugs.add(baseSlug);
+            resolvedPages.add(new ResolvedTechPage(first, baseSlug, routeForSlug(baseSlug)));
+
+            for (int index = 1; index < sortedGroup.size(); index++) {
+                TechPageCandidate candidate = sortedGroup.get(index);
+                String suffix = slugify(candidate.entryKey());
+                String disambiguatedSlug = suffix.isBlank() ? "" : baseSlug + "-" + suffix;
+
+                if (suffix.isBlank() || disambiguatedSlug.equals(baseSlug) || !usedSlugs.add(disambiguatedSlug)) {
+                    incrementSkip(skippedByReason, "duplicate-slug");
+                    warnings.add("Skipped tech '" + candidate.entryKey() + "' because duplicate slug base '" + baseSlug
+                            + "' could not be disambiguated safely.");
+                    continue;
+                }
+
+                resolvedPages.add(new ResolvedTechPage(candidate, disambiguatedSlug, routeForSlug(disambiguatedSlug)));
+            }
+        }
+
+        return resolvedPages;
+    }
+
+    private void deleteGeneratedTechOutput() {
+        Path techOutputDirectory = seoOutputLocator.getFeaturedEntityDirectory("tech");
+        if (!Files.exists(techOutputDirectory)) {
+            return;
+        }
+
+        try (Stream<Path> pathStream = Files.walk(techOutputDirectory)) {
+            pathStream.sorted(Comparator.reverseOrder()).forEach(this::deletePath);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to clear generated tech SEO output: " + techOutputDirectory, exception);
+        }
+    }
+
+    private void deletePath(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to delete generated SEO output: " + path, exception);
+        }
+    }
+
+    private List<String> listGeneratedRoutes(String page) {
+        Path pageDirectory = seoOutputLocator.getFeaturedEntityDirectory(page);
+        if (!Files.isDirectory(pageDirectory)) {
+            return List.of();
+        }
+
+        try (Stream<Path> pathStream = Files.walk(pageDirectory, 2)) {
+            return pathStream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().equals("index.html"))
+                    .map(pageDirectory::relativize)
+                    .filter(relativePath -> relativePath.getNameCount() == 2)
+                    .map(relativePath -> relativePath.getName(0).toString())
+                    .sorted()
+                    .map(this::routeForSlug)
+                    .toList();
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Failed to read generated SEO routes from: " + pageDirectory, exception);
+        }
+    }
+
+    private String routeForSlug(String slug) {
+        return "/tech/" + slug;
     }
 
     private void writeSitemap(List<String> generatedRoutes) {
@@ -109,36 +246,18 @@ public class SeoRegenerationService {
         }
     }
 
-    static String renderWorkshopHtml(Tech tech) {
-        List<String> unlockLabels = tech.getUnlocks().stream()
-                .map(SeoRegenerationService::formatUnlockLabel)
-                .filter(label -> !label.isBlank())
-                .toList();
-        List<String> effectLabels = tech.getDescriptionLines().stream()
-                .map(SeoRegenerationService::trimToEmpty)
-                .filter(line -> !line.isBlank())
-                .toList();
-        List<String> factionLabels = tech.getFactions().stream()
-                .filter(Objects::nonNull)
-                .map(MajorFaction::getDisplayName)
-                .sorted(Comparator.naturalOrder())
-                .toList();
-
-        String pageTitle = tech.getName() + " Tech Guide | " + SITE_NAME;
-        String seoDescription = tech.getName() + " is an Endless Legend 2 era " + tech.getEra() + " "
-                + tech.getType().name().toLowerCase(Locale.ROOT)
-                + " technology that unlocks " + firstUnlockLabel(unlockLabels) + ".";
-        String canonicalUrl = SITE_URL + WORKSHOP_ROUTE;
-        String kindLabel = "Technology \u2022 Era " + tech.getEra() + " \u2022 " + formatTitleCase(tech.getType().name());
-        String summary = firstEffectLabel(effectLabels);
+    static String renderTechHtml(TechPageCandidate candidate, String route) {
+        String pageTitle = candidate.displayName() + " Tech Guide | " + SITE_NAME;
+        String seoDescription = buildSeoDescription(candidate);
+        String canonicalUrl = SITE_URL + route;
+        String summary = candidate.descriptionLines().getFirst();
         String detailsList = renderList(List.of(
-                "Era " + tech.getEra(),
-                formatTitleCase(tech.getType().name()) + " technology",
-                "Factions: " + String.join(", ", factionLabels)
+                "Kind: " + TECH_KIND,
+                "Entry key: " + candidate.entryKey(),
+                "Canonical route: " + route
         ));
-        String unlockList = renderList(unlockLabels);
-        String effectList = renderList(effectLabels);
-        String referenceChips = renderReferenceChips(concatDistinct(unlockLabels, effectLabels));
+        String descriptionList = renderList(candidate.descriptionLines());
+        String referenceChips = renderReferenceChips(candidate.referenceKeys());
 
         String webPageJsonLd = """
                 {"@context":"https://schema.org","@type":"WebPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"},"breadcrumb":{"@id":"%s#breadcrumb"}}
@@ -156,7 +275,7 @@ public class SeoRegenerationService {
                 escapeJson(SITE_NAME),
                 escapeJson(SITE_URL),
                 escapeJson(SITE_URL),
-                escapeJson(tech.getName()),
+                escapeJson(candidate.displayName()),
                 escapeJson(canonicalUrl),
                 escapeJson(canonicalUrl)
         ).trim();
@@ -222,7 +341,7 @@ public class SeoRegenerationService {
                     <div class="entity-page__layout">
 
                         <header class="entity-page__header">
-                            <p class="seo-label entity-page__kind">%s</p>
+                            <p class="seo-label entity-page__kind">Technology • Codex entry</p>
                             <h1 class="seo-heading entity-page__title">%s</h1>
                             <p class="seo-text entity-page__summary">%s</p>
                         </header>
@@ -235,25 +354,17 @@ public class SeoRegenerationService {
                             </ul>
                         </section>
 
-                        <section class="seo-section entity-page__section entity-page__outcomes">
-                            <p class="seo-label">Unlocks And Effects</p>
-                            <h2 class="seo-heading">Unlocks and effects</h2>
-                            <div class="entity-page__columns">
-                                <div class="entity-page__column">
-                                    <h3 class="entity-page__subheading">Unlocks</h3>
-                                    %s
-                                </div>
-                                <div class="entity-page__column">
-                                    <h3 class="entity-page__subheading">Effects</h3>
-                                    %s
-                                </div>
-                            </div>
+                        <section class="seo-section entity-page__section entity-page__overview">
+                            <p class="seo-label">Description</p>
+                            <h2 class="seo-heading">Description</h2>
+                            <ul class="seo-list">
+                                %s
+                            </ul>
                         </section>
 
                         <section class="seo-section entity-page__section entity-page__actions" aria-label="Actions">
                             <div class="seo-buttonRow">
-                                <a class="seo-button" href="/tech?faction=aspects&tech=workshop">Open in tech tree</a>
-                                <a class="seo-linkButton" href="/tech">Back to Tech</a>
+                                <a class="seo-button" href="/tech">Back to Tech</a>
                             </div>
                         </section>
 
@@ -270,12 +381,11 @@ public class SeoRegenerationService {
                             <h2 class="seo-heading">Explore</h2>
                             <ul class="seo-list">
                                 <li><a href="/tech">Tech tree</a></li>
-                                <li><a href="/units">Units</a></li>
                                 <li><a href="/codex">Codex</a></li>
+                                <li><a href="/units">Units</a></li>
                                 <li><a href="/mods">Mods</a></li>
                             </ul>
                         </section>
-
 
                     </div>
                 </main>
@@ -296,30 +406,91 @@ public class SeoRegenerationService {
                 webPageJsonLd,
                 breadcrumbJsonLd,
                 escapeHtml(pageTitle),
-                escapeHtml(tech.getName()),
-                escapeHtml(kindLabel),
-                escapeHtml(tech.getName()),
+                escapeHtml(candidate.displayName()),
+                escapeHtml(candidate.displayName()),
                 escapeHtml(summary),
                 detailsList,
-                renderListOrEmptyParagraph(unlockList, "No unlocks recorded in this prototype snapshot."),
-                renderListOrEmptyParagraph(effectList, "No direct effects recorded in this prototype snapshot."),
+                descriptionList,
                 referenceChips
         );
     }
 
-    private static String firstUnlockLabel(List<String> unlockLabels) {
-        return unlockLabels.isEmpty() ? "no indexed references" : unlockLabels.getFirst();
+    private static String buildSeoDescription(TechPageCandidate candidate) {
+        String firstDescriptionLine = candidate.descriptionLines().getFirst();
+        return candidate.displayName() + " is a technology entry in the Endless Workshop codex. " + firstDescriptionLine;
     }
 
-    private static String firstEffectLabel(List<String> effectLabels) {
-        return effectLabels.isEmpty()
-                ? "Reference snapshot for the Workshop technology in the EWShop tech tree."
-                : effectLabels.getFirst();
+    private static List<String> cleanMeaningfulTextList(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return List.of();
+        }
+
+        return values.stream()
+                .map(SeoRegenerationService::trimToEmpty)
+                .filter(SeoRegenerationService::isMeaningfulText)
+                .distinct()
+                .toList();
+    }
+
+    private static List<String> cleanReferenceKeys(List<String> referenceKeys) {
+        if (referenceKeys == null || referenceKeys.isEmpty()) {
+            return List.of();
+        }
+
+        return referenceKeys.stream()
+                .map(SeoRegenerationService::trimToEmpty)
+                .filter(value -> !value.isBlank())
+                .distinct()
+                .toList();
+    }
+
+    private static boolean isMeaningfulText(String value) {
+        String normalized = trimToEmpty(value);
+        return normalized.length() >= 3
+                && !PLACEHOLDER_PATTERN.matcher(normalized).find()
+                && hasBalancedFormatting(normalized);
+    }
+
+    private static boolean isIndexableDisplayName(String value) {
+        String normalized = trimToEmpty(value);
+        return !normalized.isBlank()
+                && isMeaningfulText(normalized)
+                && !DIGIT_CLUSTER_PATTERN.matcher(normalized.toLowerCase(Locale.ROOT)).find();
+    }
+
+    private static boolean hasBalancedFormatting(String value) {
+        List<Character> stack = new ArrayList<>();
+
+        for (char character : value.toCharArray()) {
+            if (character == '(' || character == '[' || character == '{') {
+                stack.add(character);
+                continue;
+            }
+
+            if (character == ')' || character == ']' || character == '}') {
+                if (stack.isEmpty()) {
+                    return false;
+                }
+
+                char open = stack.removeLast();
+                if ((character == ')' && open != '(')
+                        || (character == ']' && open != '[')
+                        || (character == '}' && open != '{')) {
+                    return false;
+                }
+            }
+        }
+
+        return stack.isEmpty();
+    }
+
+    private static void incrementSkip(Map<String, Integer> skippedByReason, String reason) {
+        skippedByReason.merge(reason, 1, Integer::sum);
     }
 
     private static String renderReferenceChips(List<String> referenceKeys) {
         if (referenceKeys.isEmpty()) {
-            return "<p class=\"entity-page__referencesEmpty\">No linked reference keys are exposed in this prototype snapshot.</p>";
+            return "<p class=\"entity-page__referencesEmpty\">No linked reference keys are exposed in this Codex snapshot.</p>";
         }
 
         StringBuilder chips = new StringBuilder();
@@ -331,20 +502,6 @@ public class SeoRegenerationService {
         return chips.toString();
     }
 
-    private static String renderListOrEmptyParagraph(String listHtml, String emptyMessage) {
-        if (listHtml.isBlank()) {
-            return "<p class=\"seo-text entity-page__empty\">" + escapeHtml(emptyMessage) + "</p>";
-        }
-        return "<ul class=\"seo-list\">" + listHtml + "</ul>";
-    }
-
-    private static List<String> concatDistinct(List<String> first, List<String> second) {
-        LinkedHashSet<String> combined = new LinkedHashSet<>();
-        combined.addAll(first);
-        combined.addAll(second);
-        return List.copyOf(combined);
-    }
-
     private static String renderList(List<String> items) {
         StringBuilder html = new StringBuilder();
         for (String item : items) {
@@ -353,18 +510,13 @@ public class SeoRegenerationService {
         return html.toString();
     }
 
-    private static String formatUnlockLabel(TechUnlockRef unlockRef) {
-        String unlockType = trimToEmpty(unlockRef.unlockType());
-        String unlockKey = trimToEmpty(unlockRef.unlockKey());
-
-        if (unlockType.isEmpty()) return unlockKey;
-        if (unlockKey.isEmpty()) return unlockType;
-        return unlockType + ": " + unlockKey;
-    }
-
-    private static String formatTitleCase(String value) {
-        String normalized = value.toLowerCase(Locale.ROOT);
-        return normalized.substring(0, 1).toUpperCase(Locale.ROOT) + normalized.substring(1);
+    private static String slugify(String value) {
+        return Normalizer.normalize(value, Normalizer.Form.NFKD)
+                .replace("'", "")
+                .replace("\u2019", "")
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
     }
 
     private static String trimToEmpty(String value) {
@@ -384,5 +536,17 @@ public class SeoRegenerationService {
         return value
                 .replace("\\", "\\\\")
                 .replace("\"", "\\\"");
+    }
+
+    record TechPageCandidate(
+            String entryKey,
+            String displayName,
+            List<String> descriptionLines,
+            List<String> referenceKeys,
+            String baseSlug
+    ) {
+    }
+
+    record ResolvedTechPage(TechPageCandidate candidate, String slug, String route) {
     }
 }

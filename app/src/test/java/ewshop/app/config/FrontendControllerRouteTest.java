@@ -83,6 +83,25 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void servesGeneratedTechPageForAnyGeneratedSlug() throws Exception {
+        Path externalStonework = Path.of("build/test-generated-seo/tech/stonework/index.html");
+        Files.createDirectories(externalStonework.getParent());
+        Files.writeString(externalStonework, "<!doctype html><title>external stonework</title>");
+
+        try {
+            mockMvc.perform(get("/tech/stonework"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/tech/stonework/index.html"));
+
+            mockMvc.perform(get("/tech/stonework/"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/tech/stonework/index.html"));
+        } finally {
+            Files.deleteIfExists(externalStonework);
+        }
+    }
+
+    @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
         mockMvc.perform(get("/tech/stonework"))
                 .andExpect(status().isNotFound());

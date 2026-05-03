@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -52,6 +53,7 @@ class SeoAdminControllerTest {
                 1,
                 List.of("/tech/workshop"),
                 0,
+                Map.of(),
                 List.of(),
                 List.of(),
                 true
@@ -65,6 +67,7 @@ class SeoAdminControllerTest {
                 .andExpect(jsonPath("$.generatedCount").value(1))
                 .andExpect(jsonPath("$.generatedRoutes[0]").value("/tech/workshop"))
                 .andExpect(jsonPath("$.skippedCount").value(0))
+                .andExpect(jsonPath("$.skippedByReason").isMap())
                 .andExpect(jsonPath("$.sitemapUpdated").value(true));
 
         verify(seoRegenerationService).regeneratePrototypePages();

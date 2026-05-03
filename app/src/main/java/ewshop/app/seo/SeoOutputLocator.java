@@ -6,12 +6,9 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Set;
 
 @Component
 public class SeoOutputLocator {
-
-    private static final Set<String> RUNTIME_OWNED_FEATURED_ENTITY_KEYS = Set.of("tech/workshop");
 
     private final Path outputRoot;
     private final boolean classpathFallbackEnabled;
@@ -34,6 +31,10 @@ public class SeoOutputLocator {
         return outputRoot.resolve(page).resolve(entryKey).resolve("index.html");
     }
 
+    public Path getFeaturedEntityDirectory(String page) {
+        return outputRoot.resolve(page);
+    }
+
     public boolean hasGeneratedFeaturedEntity(String page, String entryKey) {
         return Files.isRegularFile(getFeaturedEntityFile(page, entryKey));
     }
@@ -47,7 +48,7 @@ public class SeoOutputLocator {
     }
 
     public boolean isRuntimeOwnedFeaturedEntity(String page, String entryKey) {
-        return RUNTIME_OWNED_FEATURED_ENTITY_KEYS.contains(page + "/" + entryKey);
+        return "tech".equals(page);
     }
 
     public boolean isClasspathFallbackEnabled() {
