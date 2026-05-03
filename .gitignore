@@ -62,3 +62,6 @@ yarn-error.log*
 
 # graphic files
 /frontend/public/graphics/tmp/
+
+# SEO
+/generated-seo/
