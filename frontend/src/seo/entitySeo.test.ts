@@ -105,6 +105,20 @@ describe("entitySeo", () => {
         ).not.toThrow();
     });
 
+    it("keeps a human slug while validating against the canonical unitKey CTA target", () => {
+        const sentinel = FEATURED_UNIT_SNAPSHOTS.find((snapshot) => snapshot.entryKey === "sentinel");
+
+        expect(sentinel).toBeDefined();
+        expect(sentinel?.unitKey).toBe("Unit_Sentinel");
+        expect(sentinel?.entryKey).not.toBe(sentinel?.unitKey);
+        expect(() =>
+            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
+                techs: FEATURED_TECH_SNAPSHOTS,
+                units: FEATURED_UNIT_SNAPSHOTS,
+            })
+        ).not.toThrow();
+    });
+
     it("rejects legacy unit display-name CTA links", () => {
         const legacyUnits = FEATURED_UNIT_SNAPSHOTS.map((snapshot) =>
             snapshot.entryKey === "sentinel"
@@ -120,6 +134,31 @@ describe("entitySeo", () => {
         ).toThrow(
             'Invalid CTA link for "sentinel": legacy unit display-name links are not allowed; use unitKey.'
         );
+    });
+
+    it("rejects stale slug-as-unitKey CTA links", () => {
+        const staleUnits = FEATURED_UNIT_SNAPSHOTS.map((snapshot) =>
+            snapshot.entryKey === "sentinel"
+                ? { ...snapshot, ctaPath: "/units?faction=kin&unitKey=sentinel" }
+                : snapshot
+        );
+
+        expect(() =>
+            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...staleUnits], {
+                techs: FEATURED_TECH_SNAPSHOTS,
+                units: staleUnits,
+            })
+        ).toThrow(
+            'Invalid CTA link for "sentinel": unitKey "sentinel" does not match canonical unitKey "Unit_Sentinel".'
+        );
+    });
+
+    it("renders the Sentinel page CTA with the canonical Unit_Sentinel query value", () => {
+        const sentinel = getResolvedFeaturedEntities().find((entity) => entity.kind === "unit" && entity.entryKey === "sentinel");
+        expect(sentinel).toBeDefined();
+
+        const html = renderEntityHtml(sentinel!);
+        expect(html).toContain('/units?faction=kin&unitKey=Unit_Sentinel');
     });
 
     it("rejects ambiguous normalized tech-name fallback links", () => {

@@ -203,9 +203,9 @@ function validateUnitCta(entity: FeaturedUnitSnapshot, params: URLSearchParams, 
         );
     }
 
-    if (unitKeyParam !== entity.entryKey) {
+    if (unitKeyParam !== entity.unitKey) {
         throw new Error(
-            `Invalid CTA link for "${entity.entryKey}": unitKey "${unitKeyParam}" does not match the unit snapshot.`
+            `Invalid CTA link for "${entity.entryKey}": unitKey "${unitKeyParam}" does not match canonical unitKey "${entity.unitKey}".`
         );
     }
 }

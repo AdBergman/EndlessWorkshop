@@ -24,6 +24,7 @@ export type FeaturedTechSnapshot = FeaturedEntityBase & {
 };
 
 export type FeaturedUnitSnapshot = FeaturedEntityBase & {
+    unitKey: string;
     kind: "unit";
     faction: string;
     tier: number;
@@ -189,6 +190,14 @@ function slugify(value: string): string {
         .replace(/^-+|-+$/g, "");
 }
 
+function buildCanonicalUnitKey(name: string): string {
+    return `Unit_${name
+        .normalize("NFKD")
+        .replace(/['’]/g, "")
+        .replace(/[^A-Za-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")}`;
+}
+
 function toNumber(value: unknown): number | null {
     if (typeof value === "number" && Number.isFinite(value)) return value;
     if (typeof value === "string" && value.trim().length > 0) {
@@ -352,6 +361,7 @@ function buildTechCatalog(rawTechs: RawTechSnapshot[], skips: EntityGenerationSk
     for (const raw of rawTechs) {
         const name = trimToNull(raw.name);
         const entryKey = slugify(name ?? "");
+        const unitKey = name ? buildCanonicalUnitKey(name) : "";
 
         if (isHidden(raw.hidden)) {
             pushSkip(skips, "tech", name, entryKey, "hidden");
@@ -432,6 +442,7 @@ function buildUnitCatalog(rawUnits: RawUnitSnapshot[], skips: EntityGenerationSk
     for (const raw of rawUnits) {
         const name = trimToNull(raw.name);
         const entryKey = slugify(name ?? "");
+        const unitKey = name ? buildCanonicalUnitKey(name) : "";
 
         if (isHidden(raw.hidden)) {
             pushSkip(skips, "unit", name, entryKey, "hidden");
@@ -501,6 +512,7 @@ function buildUnitCatalog(rawUnits: RawUnitSnapshot[], skips: EntityGenerationSk
         candidates.push({
             kind: "unit",
             entryKey,
+            unitKey,
             name,
             seoDescription,
             overview,
@@ -516,7 +528,7 @@ function buildUnitCatalog(rawUnits: RawUnitSnapshot[], skips: EntityGenerationSk
             cost,
             upkeep,
             skills,
-            ctaPath: `/units?faction=${faction.toLowerCase()}&unitKey=${entryKey}`,
+            ctaPath: `/units?faction=${faction.toLowerCase()}&unitKey=${encodeURIComponent(unitKey)}`,
             ctaLabel: `Open ${name} in the interactive unit explorer`,
         });
     }
