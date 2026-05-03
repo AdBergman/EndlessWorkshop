@@ -54,4 +54,8 @@ public class SeoOutputLocator {
     public boolean isClasspathFallbackEnabled() {
         return classpathFallbackEnabled;
     }
+
+    public Path getGeneratedSitemapPath() {
+        return outputRoot.resolve("sitemap.xml");
+    }
 }
