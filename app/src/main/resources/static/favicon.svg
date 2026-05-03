@@ -1,0 +1,52 @@
+<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+
+    <defs>
+
+        <!-- main EW alloy gradient -->
+        <linearGradient id="ewAlloy" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"  stop-color="#ffb27a"/>
+            <stop offset="35%" stop-color="#ff8c42"/>
+            <stop offset="65%" stop-color="#ff7f32"/>
+            <stop offset="100%" stop-color="#c94f14"/>
+        </linearGradient>
+
+        <!-- highlight gradient -->
+        <linearGradient id="ewHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        </linearGradient>
+
+        <!-- subtle arcane glow -->
+        <filter id="ewGlow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+
+    </defs>
+
+    <!-- main stroke -->
+    <path
+            d="M31 21L35 18L44 24V34L34 40L24 34V13L13 7L4 13V24L13 30L17 27"
+            stroke="url(#ewAlloy)"
+            stroke-width="5.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            filter="url(#ewGlow)"
+            fill="none"
+    />
+
+    <!-- highlight pass -->
+    <path
+            d="M31 21L35 18L44 24V34L34 40L24 34V13L13 7L4 13V24L13 30L17 27"
+            stroke="url(#ewHighlight)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+            opacity="0.6"
+    />
+
+</svg>

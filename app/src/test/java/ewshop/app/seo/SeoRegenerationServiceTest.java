@@ -25,7 +25,7 @@ class SeoRegenerationServiceTest {
     @Test
     void regeneratesOnlyWorkshopFromCanonicalBackendTechData() throws Exception {
         TechService techService = mock(TechService.class);
-        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
         SeoRegenerationService service = new SeoRegenerationService(techService, outputLocator);
 
         Tech workshop = Tech.builder()
@@ -80,7 +80,16 @@ class SeoRegenerationServiceTest {
         assertThat(html).contains("Technology • Era 1 • Economy");
         assertThat(html).contains("District: Works");
         assertThat(html).contains("Action: Remove Forest");
+        assertThat(html).contains("+2 Industry per District Level");
         assertThat(html).contains("Factions: Aspects, Kin, Lords, Necrophages, Tahuk");
+        assertThat(html).contains("<header class=\"entity-page__header\">");
+        assertThat(html).contains("<section class=\"seo-section entity-page__section entity-page__details\">");
+        assertThat(html).contains("<section class=\"seo-section entity-page__section entity-page__outcomes\">");
+        assertThat(html).contains("<section class=\"seo-section entity-page__section entity-page__actions\" aria-label=\"Actions\">");
+        assertThat(html).contains("<section class=\"seo-section entity-page__section entity-page__references\">");
+        assertThat(html).contains("<section class=\"seo-section entity-page__section entity-page__explore\">");
+        assertThat(html).contains("<a class=\"seo-button\" href=\"/tech?faction=aspects&tech=workshop\">Open in tech tree</a>");
+        assertThat(html).contains("<a class=\"seo-linkButton\" href=\"/tech\">Back to Tech</a>");
         assertThat(html).contains("<link rel=\"stylesheet\" href=\"/seo/seo-shell.css\" />");
         assertThat(html).contains("<link rel=\"stylesheet\" href=\"/seo/entity-page.css\" />");
         assertThat(html).contains("\"@type\":\"WebPage\"");
@@ -89,6 +98,7 @@ class SeoRegenerationServiceTest {
         assertThat(html).doesNotContain("fetch(");
         assertThat(html).doesNotContain("/api/");
         assertThat(html).doesNotContain("type=\"module\"");
+        assertThat(html).doesNotContain("<style");
 
         assertThat(sitemapFile).exists();
         String sitemap = Files.readString(sitemapFile);

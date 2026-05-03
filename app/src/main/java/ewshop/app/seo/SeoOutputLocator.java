@@ -6,16 +6,24 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 @Component
 public class SeoOutputLocator {
 
-    private final Path outputRoot;
+    private static final Set<String> RUNTIME_OWNED_FEATURED_ENTITY_KEYS = Set.of("tech/workshop");
 
-    public SeoOutputLocator(@Value("${seo.output-dir:generated-seo}") String outputDir) {
+    private final Path outputRoot;
+    private final boolean classpathFallbackEnabled;
+
+    public SeoOutputLocator(
+            @Value("${seo.output-dir:generated-seo}") String outputDir,
+            @Value("${seo.classpath-fallback-enabled:true}") boolean classpathFallbackEnabled
+    ) {
         // Local development keeps using the relative generated-seo directory.
         // Production can override this with SEO_OUTPUT_DIR via application-prod.yml.
         this.outputRoot = Paths.get(outputDir).toAbsolutePath().normalize();
+        this.classpathFallbackEnabled = classpathFallbackEnabled;
     }
 
     public Path getOutputRoot() {
@@ -36,5 +44,13 @@ public class SeoOutputLocator {
 
     public Path getSitemapFile() {
         return outputRoot.resolve("sitemap.xml");
+    }
+
+    public boolean isRuntimeOwnedFeaturedEntity(String page, String entryKey) {
+        return RUNTIME_OWNED_FEATURED_ENTITY_KEYS.contains(page + "/" + entryKey);
+    }
+
+    public boolean isClasspathFallbackEnabled() {
+        return classpathFallbackEnabled;
     }
 }

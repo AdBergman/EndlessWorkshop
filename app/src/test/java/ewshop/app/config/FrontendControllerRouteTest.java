@@ -3,7 +3,6 @@ package ewshop.app.config;
 import ewshop.app.seo.SeoOutputLocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
@@ -11,13 +10,16 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -55,7 +57,7 @@ class FrontendControllerRouteTest {
     }
 
     @Test
-    void servesGeneratedFeaturedEntityRoutesWithAndWithoutTrailingSlash() throws Exception {
+    void servesClasspathWorkshopFallbackWhenEnabledAndExternalOutputMissing() throws Exception {
         mockMvc.perform(get("/tech/workshop"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/tech/workshop/index.html"));
@@ -110,6 +112,24 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void servesSeoStaticAssetsFromSpringResources() throws Exception {
+        mockMvc.perform(get("/seo/seo-shell.css"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("--seo-bg")));
+
+        mockMvc.perform(get("/seo/entity-page.css"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString(".entity-page__header")));
+
+        mockMvc.perform(get("/graphics/cog.svg"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<svg")));
+
+        mockMvc.perform(get("/favicon.ico"))
+                .andExpect(status().isOk());
+    }
+
     @SpringBootConfiguration
     @EnableAutoConfiguration(exclude = {
             DataSourceAutoConfiguration.class,
@@ -121,7 +141,7 @@ class FrontendControllerRouteTest {
 
         @Bean
         SeoOutputLocator seoOutputLocator() {
-            return new SeoOutputLocator("build/test-generated-seo");
+            return new SeoOutputLocator("build/test-generated-seo", true);
         }
     }
 }

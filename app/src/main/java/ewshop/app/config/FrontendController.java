@@ -41,6 +41,11 @@ public class FrontendController {
             return "forward:" + seoOutputLocator.getGeneratedForwardPath(page, entryKey);
         }
 
+        if (seoOutputLocator.isRuntimeOwnedFeaturedEntity(page, entryKey)
+                && !seoOutputLocator.isClasspathFallbackEnabled()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
         String resourcePath = "classpath:/static/" + page + "/" + entryKey + "/index.html";
         if (!resourceLoader.getResource(resourcePath).exists()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

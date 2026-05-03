@@ -114,6 +114,10 @@ public class SeoRegenerationService {
                 .map(SeoRegenerationService::formatUnlockLabel)
                 .filter(label -> !label.isBlank())
                 .toList();
+        List<String> effectLabels = tech.getDescriptionLines().stream()
+                .map(SeoRegenerationService::trimToEmpty)
+                .filter(line -> !line.isBlank())
+                .toList();
         List<String> factionLabels = tech.getFactions().stream()
                 .filter(Objects::nonNull)
                 .map(MajorFaction::getDisplayName)
@@ -126,20 +130,15 @@ public class SeoRegenerationService {
                 + " technology that unlocks " + firstUnlockLabel(unlockLabels) + ".";
         String canonicalUrl = SITE_URL + WORKSHOP_ROUTE;
         String kindLabel = "Technology \u2022 Era " + tech.getEra() + " \u2022 " + formatTitleCase(tech.getType().name());
-        String summary = tech.getName() + " gives players a clear economy planning breakpoint with "
-                + unlockLabels.size() + " unlock" + (unlockLabels.size() == 1 ? "" : "s")
-                + " and 0 direct effects.";
+        String summary = firstEffectLabel(effectLabels);
         String detailsList = renderList(List.of(
                 "Era " + tech.getEra(),
                 formatTitleCase(tech.getType().name()) + " technology",
                 "Factions: " + String.join(", ", factionLabels)
         ));
         String unlockList = renderList(unlockLabels);
-        String overviewList = renderList(List.of(
-                tech.getName() + " is listed here as a static reference snapshot for the EWShop tech tree.",
-                "Use the interactive tree for pathing, faction state, and adjacent-node context."
-        ));
-        String referenceChips = renderReferenceChips(unlockLabels);
+        String effectList = renderList(effectLabels);
+        String referenceChips = renderReferenceChips(concatDistinct(unlockLabels, effectLabels));
 
         String webPageJsonLd = """
                 {"@context":"https://schema.org","@type":"WebPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"},"breadcrumb":{"@id":"%s#breadcrumb"}}
@@ -225,10 +224,6 @@ public class SeoRegenerationService {
                             <p class="seo-label entity-page__kind">%s</p>
                             <h1 class="seo-heading entity-page__title">%s</h1>
                             <p class="seo-text entity-page__summary">%s</p>
-                            <div class="seo-buttonRow">
-                                <a class="seo-button" href="/tech?faction=aspects&tech=workshop">Open in tech tree</a>
-                                <a class="seo-linkButton" href="/tech">Back to Tech</a>
-                            </div>
                         </header>
 
                         <section class="seo-section entity-page__section entity-page__details">
@@ -245,21 +240,20 @@ public class SeoRegenerationService {
                             <div class="entity-page__columns">
                                 <div class="entity-page__column">
                                     <h3 class="entity-page__subheading">Unlocks</h3>
-                                    <ul class="seo-list">%s</ul>
+                                    %s
                                 </div>
                                 <div class="entity-page__column">
                                     <h3 class="entity-page__subheading">Effects</h3>
-                                    <p class="seo-text entity-page__empty">No direct effects recorded in this prototype snapshot.</p>
+                                    %s
                                 </div>
                             </div>
                         </section>
 
-                        <section class="seo-section entity-page__section entity-page__overview">
-                            <p class="seo-label">Overview</p>
-                            <h2 class="seo-heading">Overview</h2>
-                            <ul class="seo-list">
-                                %s
-                            </ul>
+                        <section class="seo-section entity-page__section entity-page__actions" aria-label="Actions">
+                            <div class="seo-buttonRow">
+                                <a class="seo-button" href="/tech?faction=aspects&tech=workshop">Open in tech tree</a>
+                                <a class="seo-linkButton" href="/tech">Back to Tech</a>
+                            </div>
                         </section>
 
                         <section class="seo-section entity-page__section entity-page__references">
@@ -306,14 +300,20 @@ public class SeoRegenerationService {
                 escapeHtml(tech.getName()),
                 escapeHtml(summary),
                 detailsList,
-                unlockList,
-                overviewList,
+                renderListOrEmptyParagraph(unlockList, "No unlocks recorded in this prototype snapshot."),
+                renderListOrEmptyParagraph(effectList, "No direct effects recorded in this prototype snapshot."),
                 referenceChips
         );
     }
 
     private static String firstUnlockLabel(List<String> unlockLabels) {
         return unlockLabels.isEmpty() ? "no indexed references" : unlockLabels.getFirst();
+    }
+
+    private static String firstEffectLabel(List<String> effectLabels) {
+        return effectLabels.isEmpty()
+                ? "Reference snapshot for the Workshop technology in the EWShop tech tree."
+                : effectLabels.getFirst();
     }
 
     private static String renderReferenceChips(List<String> referenceKeys) {
@@ -328,6 +328,20 @@ public class SeoRegenerationService {
         }
         chips.append("</ul>");
         return chips.toString();
+    }
+
+    private static String renderListOrEmptyParagraph(String listHtml, String emptyMessage) {
+        if (listHtml.isBlank()) {
+            return "<p class=\"seo-text entity-page__empty\">" + escapeHtml(emptyMessage) + "</p>";
+        }
+        return "<ul class=\"seo-list\">" + listHtml + "</ul>";
+    }
+
+    private static List<String> concatDistinct(List<String> first, List<String> second) {
+        LinkedHashSet<String> combined = new LinkedHashSet<>();
+        combined.addAll(first);
+        combined.addAll(second);
+        return List.copyOf(combined);
     }
 
     private static String renderList(List<String> items) {
