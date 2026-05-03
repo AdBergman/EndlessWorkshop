@@ -40,8 +40,20 @@
 }
 
 .entity-page__section .seo-heading {
-    font-size: 1.04rem;
-    margin-bottom: 0.45rem;
+    display: inline-block;
+    font-size: clamp(1.08rem, 1.8vw, 1.3rem);
+    margin-bottom: 0.5rem;
+    color: var(--seo-accent);
+    letter-spacing: 0.01em;
+}
+
+.entity-page__section .seo-heading::after {
+    content: "";
+    display: block;
+    width: 56px;
+    height: 1px;
+    margin-top: 0.45rem;
+    background: linear-gradient(90deg, var(--seo-accent), transparent);
 }
 
 .entity-page__section .seo-text,
@@ -75,6 +87,10 @@
     font-size: 0.92rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+}
+
+.entity-page__header .seo-heading::after {
+    content: none;
 }
 
 .entity-page__empty {
