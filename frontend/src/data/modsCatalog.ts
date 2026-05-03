@@ -124,7 +124,7 @@ export const standaloneMods: ModEntry[] = [
         releaseUrl: "https://github.com/AdBergman/EL2Mods/releases/tag/v1.1.0",
         screenshots: [
             {
-                src: "/graphics/mods/mod-quest-1.webp",
+                src: "/graphics/mods/mod-quest.webp",
                 alt: "Quest Recovery panel in the quest journal",
                 caption: "Quest Recovery overlay",
             },
