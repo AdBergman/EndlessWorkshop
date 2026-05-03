@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
                 '@': resolve(__dirname, 'src'),
             },
         },
-        base: isProduction ? './' : '/', // relative paths in production, root in dev
+        // base: isProduction ? './' : '/', // relative paths in production, root in dev //this broke in prod
         build: {
             rollupOptions: {
                 input: {
