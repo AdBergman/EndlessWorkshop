@@ -51,10 +51,6 @@ class FrontendControllerRouteTest {
 
     @Test
     void servesGeneratedFeaturedEntityRoutesWithAndWithoutTrailingSlash() throws Exception {
-        mockMvc.perform(get("/tech/stonework"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/tech/stonework/index.html"));
-
         mockMvc.perform(get("/tech/workshop"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/tech/workshop/index.html"));
@@ -62,19 +58,17 @@ class FrontendControllerRouteTest {
         mockMvc.perform(get("/tech/workshop/"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/tech/workshop/index.html"));
-
-        mockMvc.perform(get("/units/sentinel"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/units/sentinel/index.html"));
-
-        mockMvc.perform(get("/units/sentinel/"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/units/sentinel/index.html"));
     }
 
     @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
+        mockMvc.perform(get("/tech/stonework"))
+                .andExpect(status().isNotFound());
+
         mockMvc.perform(get("/tech/missing-entry"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/units/sentinel"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/units/missing-entry"))

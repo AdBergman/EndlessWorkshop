@@ -1,0 +1,89 @@
+.entity-page__breadcrumbs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.75rem;
+    color: var(--seo-text-muted);
+    font-size: 0.92rem;
+}
+
+.entity-page__breadcrumbs a:hover {
+    color: #fff4eb;
+}
+
+.entity-page__layout {
+    display: grid;
+    gap: 0;
+}
+
+.entity-page__header {
+    display: grid;
+    gap: 0.7rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--seo-border);
+}
+
+.entity-page__kind {
+    color: var(--seo-accent);
+}
+
+.entity-page__title {
+    font-size: clamp(1.8rem, 3.4vw, 2.55rem);
+    letter-spacing: 0.05em;
+}
+
+.entity-page__summary {
+    max-width: 56ch;
+    margin: 0;
+    font-size: 1rem;
+}
+
+.entity-page__section .seo-list li + li {
+    margin-top: 0.45rem;
+}
+
+.entity-page__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    gap: 1.5rem;
+    align-items: start;
+    padding-top: 1rem;
+}
+
+.entity-page__main,
+.entity-page__side {
+    min-width: 0;
+    display: grid;
+    gap: 0;
+}
+
+.entity-page__section .seo-heading {
+    font-size: 1.12rem;
+    margin-bottom: 0.55rem;
+}
+
+.entity-page__section .seo-text {
+    margin: 0;
+}
+
+.entity-page__references .seo-panel__inner {
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+}
+
+.entity-page__referencesEmpty {
+    margin: 0;
+    color: var(--seo-text-muted);
+}
+
+.entity-page__references .seo-chipList {
+    margin-top: 0.75rem;
+}
+
+@media (max-width: 920px) {
+    .entity-page__body {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}

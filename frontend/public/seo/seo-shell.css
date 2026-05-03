@@ -1,0 +1,291 @@
+:root {
+    color-scheme: dark;
+    --seo-bg: #050607;
+    --seo-bg-soft: #0a0d11;
+    --seo-surface: rgba(12, 16, 20, 0.94);
+    --seo-border: rgba(255, 255, 255, 0.08);
+    --seo-border-strong: rgba(255, 255, 255, 0.16);
+    --seo-text: #f5efe8;
+    --seo-text-soft: rgba(255, 255, 255, 0.78);
+    --seo-text-muted: rgba(255, 255, 255, 0.58);
+    --seo-accent: #ff7f32;
+    --seo-accent-soft: rgba(255, 127, 50, 0.12);
+    --seo-accent-strong: #ffb07c;
+    --seo-shell-width: min(1180px, calc(100% - 2rem));
+    --seo-content-width: min(1180px, calc(100% - 2rem));
+    --seo-radius: 10px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    background:
+        radial-gradient(circle at top left, rgba(255, 127, 50, 0.07), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.03), transparent 24%),
+        linear-gradient(180deg, #07090b 0%, #050607 54%, #040506 100%);
+}
+
+body.seo-page {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--seo-text);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+    background:
+        linear-gradient(rgba(6, 7, 9, 0.9), rgba(6, 7, 9, 0.9)),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px),
+        linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+    background-size: auto, 160px 160px, 160px 160px;
+}
+
+body.seo-page a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.seo-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.seo-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(8, 10, 12, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.seo-topbar__inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    width: var(--seo-shell-width);
+    margin: 0 auto;
+    padding: 0.75rem 0;
+}
+
+.seo-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.seo-brand__icon {
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+}
+
+.seo-brand__copy {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.seo-brand__eyebrow,
+.seo-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--seo-text-muted);
+}
+
+.seo-brand__title,
+.seo-heading {
+    font-family: "Audiowide", sans-serif;
+    font-weight: 400;
+}
+
+.seo-brand__title {
+    font-size: 1.75rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: transparent;
+    background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: none;
+}
+
+.seo-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.65rem;
+}
+
+.seo-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.98rem;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.seo-nav a:hover,
+.seo-nav a[aria-current="page"] {
+    border-color: rgba(255, 127, 50, 0.24);
+    background: rgba(255, 127, 50, 0.08);
+    color: #fff2e8;
+}
+
+.seo-shell {
+    width: var(--seo-content-width);
+    margin: 0 auto;
+    padding: 1.65rem 0 4rem;
+}
+
+.seo-panel {
+    border: 1px solid var(--seo-border);
+    border-radius: var(--seo-radius);
+    background: rgba(12, 16, 20, 0.74);
+}
+
+.seo-panel__inner {
+    padding: 0.95rem 1rem;
+}
+
+.seo-heading {
+    margin: 0;
+    color: #fff4ec;
+}
+
+.seo-text,
+.seo-list li {
+    color: var(--seo-text-soft);
+    line-height: 1.65;
+}
+
+.seo-buttonRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.seo-button,
+.seo-linkButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0.7rem 0.95rem;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-weight: 600;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.seo-button {
+    background: var(--seo-accent);
+    color: #16110d;
+}
+
+.seo-button:hover {
+    background: #ff934f;
+}
+
+.seo-linkButton {
+    border-color: var(--seo-border-strong);
+    background: rgba(255, 255, 255, 0.02);
+    color: #f3ddd0;
+}
+
+.seo-linkButton:hover {
+    border-color: rgba(255, 127, 50, 0.28);
+    background: var(--seo-accent-soft);
+    color: #fff4eb;
+}
+
+.seo-chipList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.seo-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.seo-list {
+    margin: 0;
+    padding-left: 1.1rem;
+}
+
+.seo-section {
+    padding: 1rem 0 1.05rem;
+    border-top: 1px solid var(--seo-border);
+}
+
+.seo-section:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+@media (max-width: 920px) {
+    .seo-topbar__inner {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .seo-brand {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 640px) {
+    .seo-shell {
+        width: min(100% - 1rem, 1180px);
+        padding-top: 1rem;
+    }
+
+    .seo-topbar__inner {
+        width: min(100% - 1rem, 1180px);
+    }
+
+    .seo-brand__title {
+        font-size: 1.45rem;
+    }
+
+    .seo-nav {
+        gap: 0.45rem;
+    }
+
+    .seo-nav a {
+        font-size: 0.92rem;
+    }
+}

@@ -17,33 +17,42 @@ import {
 import { SITE_URL } from "../components/Seo/routeSeo";
 
 describe("entitySeo", () => {
-    it("resolves the generated entity catalog into safe routes within the scale window", () => {
+    it("keeps workshop as the only generated entity page", () => {
         const entities = getResolvedFeaturedEntities();
-        const expectedCount = FEATURED_TECH_SNAPSHOTS.length + FEATURED_UNIT_SNAPSHOTS.length;
 
-        expect(entities).toHaveLength(expectedCount);
-        expect(expectedCount).toBeGreaterThanOrEqual(100);
-        expect(expectedCount).toBeLessThanOrEqual(300);
-        expect(new Set(entities.map((entity) => entity.routePath)).size).toBe(entities.length);
-        expect(entities.every((entity) => entity.routePath.startsWith(entity.collectionPath))).toBe(true);
+        expect(entities).toHaveLength(1);
+        expect(entities[0].kind).toBe("tech");
+        expect(entities[0].entryKey).toBe("workshop");
+        expect(entities[0].routePath).toBe("/tech/workshop");
+        expect(FEATURED_TECH_SNAPSHOTS.map((entity) => entity.entryKey)).toEqual(["workshop"]);
+        expect(FEATURED_UNIT_SNAPSHOTS).toEqual([]);
     });
 
-    it("keeps the generated corpus below the full local snapshot set and reports skip reasons", () => {
-        expect(ENTITY_GENERATION_REPORT.includedCounts.techs).toBeLessThan(ENTITY_GENERATION_REPORT.rawCounts.techs);
-        expect(ENTITY_GENERATION_REPORT.includedCounts.units).toBeLessThan(ENTITY_GENERATION_REPORT.rawCounts.units);
+    it("reports that the generator is running in single-page prototype mode", () => {
+        expect(ENTITY_GENERATION_REPORT.includedCounts).toEqual({
+            techs: 1,
+            units: 0,
+            total: 1,
+        });
         expect(ENTITY_GENERATION_REPORT.excludedCounts.total).toBeGreaterThan(0);
-        expect(Object.keys(ENTITY_GENERATION_REPORT.skippedByReason).length).toBeGreaterThan(0);
+        expect(ENTITY_GENERATION_REPORT.skippedByReason["prototype-template-only"]).toBeGreaterThan(0);
     });
 
-    it("renders plain static html without React bootstrapping or API fetches", () => {
+    it("renders plain static html with shared css and no runtime bootstrapping", () => {
         const entity = getResolvedFeaturedEntities()[0];
         const html = renderEntityHtml(entity);
 
         expect(html).toContain(`<link rel="canonical" href="https://endlessworkshop.dev${entity.routePath}" />`);
-        expect(html).toContain(entity.ctaLabel);
+        expect(html).toContain('<link rel="stylesheet" href="/seo/seo-shell.css" />');
+        expect(html).toContain('<link rel="stylesheet" href="/seo/entity-page.css" />');
+        expect(html).not.toContain("<style>");
         expect(html).not.toContain("src/index.tsx");
         expect(html).not.toContain("fetch(");
+        expect(html).not.toContain("/api/");
         expect(html).not.toContain('type="module"');
+        expect(html).not.toContain("Landing Page Prototype");
+        expect(html).not.toContain("Snapshot");
+        expect(html).not.toContain("Keep browsing the app");
     });
 
     it("rejects duplicate generated routes", () => {
@@ -51,7 +60,7 @@ describe("entitySeo", () => {
 
         expect(() =>
             validateFeaturedEntities(
-                [...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS, { ...duplicatedTech }],
+                [...FEATURED_TECH_SNAPSHOTS, { ...duplicatedTech }],
                 { techs: FEATURED_TECH_SNAPSHOTS, units: FEATURED_UNIT_SNAPSHOTS }
             )
         ).toThrow(`Duplicate generated route "/tech/${duplicatedTech.entryKey}".`);
@@ -59,208 +68,135 @@ describe("entitySeo", () => {
 
     it("rejects invalid CTA targets", () => {
         const invalidTechs = FEATURED_TECH_SNAPSHOTS.map((snapshot) =>
-            snapshot.entryKey === "stonework"
-                ? { ...snapshot, ctaPath: "/codex?entry=stonework" }
+            snapshot.entryKey === "workshop"
+                ? { ...snapshot, ctaPath: "/codex?entry=workshop" }
                 : snapshot
         );
 
         expect(() =>
-            validateFeaturedEntities(
-                [...invalidTechs, ...FEATURED_UNIT_SNAPSHOTS],
-                {
-                    techs: invalidTechs,
-                    units: FEATURED_UNIT_SNAPSHOTS,
-                }
-            )
-        ).toThrow('Invalid CTA link for "stonework": expected path "/tech" but got "/codex".');
+            validateFeaturedEntities(invalidTechs, {
+                techs: invalidTechs,
+                units: FEATURED_UNIT_SNAPSHOTS,
+            })
+        ).toThrow('Invalid CTA link for "workshop": expected path "/tech" but got "/codex".');
     });
 
-    it("accepts stable tech CTA links that resolve to the intended featured tech", () => {
+    it("accepts the stable workshop CTA link", () => {
         expect(() =>
-            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
+            validateFeaturedEntities(FEATURED_TECH_SNAPSHOTS, {
                 techs: FEATURED_TECH_SNAPSHOTS,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })
         ).not.toThrow();
     });
 
-    it("rejects stale tech CTA values that do not resolve to a featured tech snapshot", () => {
+    it("rejects stale workshop CTA values", () => {
         const staleTechs = FEATURED_TECH_SNAPSHOTS.map((snapshot) =>
-            snapshot.entryKey === "stonework"
-                ? { ...snapshot, ctaPath: "/tech?faction=kin&tech=stoneworks" }
+            snapshot.entryKey === "workshop"
+                ? { ...snapshot, ctaPath: "/tech?faction=aspects&tech=workshops" }
                 : snapshot
         );
 
         expect(() =>
-            validateFeaturedEntities([...staleTechs, ...FEATURED_UNIT_SNAPSHOTS], {
+            validateFeaturedEntities(staleTechs, {
                 techs: staleTechs,
                 units: FEATURED_UNIT_SNAPSHOTS,
             })
         ).toThrow(
-            'Invalid CTA link for "stonework": tech param "stoneworks" does not resolve to a featured tech snapshot.'
+            'Invalid CTA link for "workshop": tech param "workshops" does not resolve to a featured tech snapshot.'
         );
     });
 
-    it("accepts stable unitKey CTA links that resolve to the intended featured unit", () => {
-        expect(() =>
-            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
-                techs: FEATURED_TECH_SNAPSHOTS,
-                units: FEATURED_UNIT_SNAPSHOTS,
-            })
-        ).not.toThrow();
-    });
-
-    it("keeps a human slug while validating against the canonical unitKey CTA target", () => {
-        const sentinel = FEATURED_UNIT_SNAPSHOTS.find((snapshot) => snapshot.entryKey === "sentinel");
-
-        expect(sentinel).toBeDefined();
-        expect(sentinel?.unitKey).toBe("Unit_Sentinel");
-        expect(sentinel?.entryKey).not.toBe(sentinel?.unitKey);
-        expect(() =>
-            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...FEATURED_UNIT_SNAPSHOTS], {
-                techs: FEATURED_TECH_SNAPSHOTS,
-                units: FEATURED_UNIT_SNAPSHOTS,
-            })
-        ).not.toThrow();
-    });
-
-    it("rejects legacy unit display-name CTA links", () => {
-        const legacyUnits = FEATURED_UNIT_SNAPSHOTS.map((snapshot) =>
-            snapshot.entryKey === "sentinel"
-                ? { ...snapshot, ctaPath: "/units?faction=kin&unit=sentinel" }
-                : snapshot
-        );
-
-        expect(() =>
-            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...legacyUnits], {
-                techs: FEATURED_TECH_SNAPSHOTS,
-                units: legacyUnits,
-            })
-        ).toThrow(
-            'Invalid CTA link for "sentinel": legacy unit display-name links are not allowed; use unitKey.'
-        );
-    });
-
-    it("rejects stale slug-as-unitKey CTA links", () => {
-        const staleUnits = FEATURED_UNIT_SNAPSHOTS.map((snapshot) =>
-            snapshot.entryKey === "sentinel"
-                ? { ...snapshot, ctaPath: "/units?faction=kin&unitKey=sentinel" }
-                : snapshot
-        );
-
-        expect(() =>
-            validateFeaturedEntities([...FEATURED_TECH_SNAPSHOTS, ...staleUnits], {
-                techs: FEATURED_TECH_SNAPSHOTS,
-                units: staleUnits,
-            })
-        ).toThrow(
-            'Invalid CTA link for "sentinel": unitKey "sentinel" does not match canonical unitKey "Unit_Sentinel".'
-        );
-    });
-
-    it("renders the Sentinel page CTA with the canonical Unit_Sentinel query value", () => {
-        const sentinel = getResolvedFeaturedEntities().find((entity) => entity.kind === "unit" && entity.entryKey === "sentinel");
-        expect(sentinel).toBeDefined();
-
-        const html = renderEntityHtml(sentinel!);
-        expect(html).toContain('/units?faction=kin&unitKey=Unit_Sentinel');
-    });
-
-    it("keeps the generated entity files aligned with the resolved entity catalog", () => {
+    it("keeps the generated entity files aligned with the single-page catalog", () => {
         const publicDir = resolve(process.cwd(), "public");
         const generatedPaths = listGeneratedEntityPaths(publicDir);
-        const resolvedPaths = getResolvedFeaturedEntities()
-            .map((entity) => entity.routePath)
-            .sort();
 
-        expect(generatedPaths).toEqual(resolvedPaths);
+        expect(generatedPaths).toEqual(["/tech/workshop"]);
     });
 
-    it("audits every generated entity page for deploy-safe static SEO output", () => {
+    it("audits the generated workshop page for static SEO output and shared styling", () => {
         const publicDir = resolve(process.cwd(), "public");
+        const htmlPath = resolve(publicDir, "tech", "workshop", "index.html");
+        const html = readFileSync(htmlPath, "utf8");
+        const dom = new JSDOM(html);
+        const { document } = dom.window;
+        const canonicalUrl = `${SITE_URL}/tech/workshop`;
 
-        for (const entity of getResolvedFeaturedEntities()) {
-            const htmlPath = resolve(publicDir, entity.collectionPath.slice(1), entity.entryKey, "index.html");
-            const html = readFileSync(htmlPath, "utf8");
-            const dom = new JSDOM(html);
-            const { document } = dom.window;
-            const canonicalUrl = `${SITE_URL}${entity.routePath}`;
+        expect(html).toContain('<link rel="stylesheet" href="/seo/seo-shell.css" />');
+        expect(html).toContain('<link rel="stylesheet" href="/seo/entity-page.css" />');
+        expect(html).not.toContain("<style>");
+        expect(html).not.toContain("fetch(");
+        expect(html).not.toContain("/api/");
+        expect(html).not.toContain("__NEXT_DATA__");
+        expect(html).not.toContain("src/index.tsx");
+        expect(html).not.toContain("Landing Page Prototype");
+        expect(html).not.toContain("fonts.googleapis.com/css2?family=Orbitron");
+        expect(html).not.toContain("Snapshot");
+        expect(html).not.toContain("Keep browsing the app");
+        expect(html).not.toContain("What this entry covers");
 
-            expect(html).not.toContain("fetch(");
-            expect(html).not.toContain("/api/");
-            expect(html).not.toContain("__NEXT_DATA__");
-            expect(html).not.toContain("src/index.tsx");
-
-            expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(canonicalUrl);
-            expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("index, follow");
-            expect(document.querySelector(".cta-button")?.getAttribute("href")).toBe(entity.ctaPath);
-            expect(document.querySelector('a.back-link')?.getAttribute("href")).toBe(entity.collectionPath);
-            expect(document.title).toBe(entity.pageTitle);
-            expect(document.querySelector("h1")?.textContent?.trim()).toBe(entity.name);
-            expect(document.querySelector('meta[name="description"]')?.getAttribute("content")).toBe(entity.seoDescription);
-            expect(document.querySelector(".hero p")?.textContent?.trim()).toBe(entity.overview);
-            expect(document.body.textContent?.replace(/\s+/g, " ").trim().length ?? 0).toBeGreaterThan(250);
-
-            const nonLdScripts = [...document.querySelectorAll("script")].filter(
-                (script) => script.getAttribute("type") !== "application/ld+json"
-            );
-            expect(nonLdScripts).toHaveLength(0);
-
-            const jsonLdScripts = [...document.querySelectorAll('script[type="application/ld+json"]')];
-            expect(jsonLdScripts).toHaveLength(2);
-
-            const jsonLdNodes = jsonLdScripts.map((script) => JSON.parse(script.textContent ?? ""));
-            const webPageJsonLd = jsonLdNodes.find((node) => node["@type"] === "WebPage");
-            const breadcrumbJsonLd = jsonLdNodes.find((node) => node["@type"] === "BreadcrumbList");
-
-            expect(webPageJsonLd).toBeDefined();
-            expect(webPageJsonLd.url).toBe(canonicalUrl);
-            expect(webPageJsonLd.description).toBe(entity.seoDescription);
-            expect(webPageJsonLd.breadcrumb?.["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
-
-            expect(breadcrumbJsonLd).toBeDefined();
-            expect(breadcrumbJsonLd["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
-            expect(breadcrumbJsonLd.itemListElement).toHaveLength(3);
-            expect(breadcrumbJsonLd.itemListElement[2].name).toBe(entity.name);
-            expect(breadcrumbJsonLd.itemListElement[2].item).toBe(canonicalUrl);
-
-            const sectionHeadings = [...document.querySelectorAll("section h2")].map((node) => node.textContent?.trim());
-            expect(sectionHeadings).toContain("At a glance");
-            expect(document.querySelectorAll("li").length).toBeGreaterThanOrEqual(entity.kind === "tech" ? 5 : 8);
-        }
-    });
-
-    it("rejects ambiguous normalized tech-name fallback links", () => {
-        const ambiguousTechs = [
-            ...FEATURED_TECH_SNAPSHOTS,
-            {
-                ...FEATURED_TECH_SNAPSHOTS[2],
-                entryKey: "scientific-charter-copy",
-                name: "Scientific Charter",
-                ctaPath: "/tech?faction=kin&tech=scientific-charter-copy",
-            },
-        ];
-        const staleScientificCharterTechs = ambiguousTechs.map((snapshot) =>
-            snapshot.entryKey === "scientific-charter"
-                ? { ...snapshot, ctaPath: "/tech?faction=kin&tech=scientific_charter" }
-                : snapshot
+        expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(canonicalUrl);
+        expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe("index, follow");
+        expect(document.title).toBe("Workshop Tech Guide | Endless Workshop");
+        expect(document.querySelector('meta[name="description"]')?.getAttribute("content")).toBe(
+            "Workshop is an Endless Legend 2 era 1 economy technology that unlocks District: Works."
+        );
+        expect(document.querySelector('meta[property="og:title"]')?.getAttribute("content")).toBe(
+            "Workshop Tech Guide | Endless Workshop"
+        );
+        expect(document.querySelector('meta[name="twitter:title"]')?.getAttribute("content")).toBe(
+            "Workshop Tech Guide | Endless Workshop"
         );
 
-        expect(() =>
-            validateFeaturedEntities([...staleScientificCharterTechs, ...FEATURED_UNIT_SNAPSHOTS], {
-                techs: staleScientificCharterTechs,
-                units: FEATURED_UNIT_SNAPSHOTS,
-            })
-        ).toThrow(
-            'Invalid CTA link for "scientific-charter": tech param "scientific_charter" ambiguously matches multiple featured tech snapshots.'
+        expect(document.querySelector(".entity-page__title")?.textContent?.trim()).toBe("Workshop");
+        expect(document.querySelector(".entity-page__kind")?.textContent?.trim()).toBe("Technology • Era 1 • Economy");
+        expect(document.querySelector(".seo-brand__title")?.textContent?.trim()).toBe("Endless Workshop");
+        expect(document.querySelector(".seo-button")?.getAttribute("href")).toBe("/tech?faction=aspects&tech=workshop");
+        expect([...document.querySelectorAll(".entity-page__section > .seo-heading")].map((heading) => heading.textContent?.trim())).toEqual(
+            expect.arrayContaining(["Overview", "Details", "Reference keys", "Explore more"])
         );
+
+        expect([...document.querySelectorAll(".seo-nav a")].map((link) => link.getAttribute("href"))).toEqual(
+            expect.arrayContaining(["/tech", "/units", "/codex", "/summary", "/mods", "/info"])
+        );
+        expect(document.querySelector('.seo-nav a[aria-current="page"]')?.getAttribute("href")).toBe("/tech");
+        expect([...document.querySelectorAll(".seo-chip")].map((chip) => chip.textContent?.trim())).toEqual(
+            expect.arrayContaining(["District: Works", "Action: Remove Forest"])
+        );
+
+        const nonLdScripts = [...document.querySelectorAll("script")].filter(
+            (script) => script.getAttribute("type") !== "application/ld+json"
+        );
+        expect(nonLdScripts).toHaveLength(0);
+
+        const jsonLdScripts = [...document.querySelectorAll('script[type="application/ld+json"]')];
+        expect(jsonLdScripts).toHaveLength(2);
+
+        const jsonLdNodes = jsonLdScripts.map((script) => JSON.parse(script.textContent ?? ""));
+        const webPageJsonLd = jsonLdNodes.find((node) => node["@type"] === "WebPage");
+        const breadcrumbJsonLd = jsonLdNodes.find((node) => node["@type"] === "BreadcrumbList");
+
+        expect(webPageJsonLd).toBeDefined();
+        expect(webPageJsonLd.url).toBe(canonicalUrl);
+        expect(webPageJsonLd.description).toBe(
+            "Workshop is an Endless Legend 2 era 1 economy technology that unlocks District: Works."
+        );
+        expect(webPageJsonLd.breadcrumb?.["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
+
+        expect(breadcrumbJsonLd).toBeDefined();
+        expect(breadcrumbJsonLd["@id"]).toBe(`${canonicalUrl}#breadcrumb`);
+        expect(breadcrumbJsonLd.itemListElement).toHaveLength(3);
+        expect(breadcrumbJsonLd.itemListElement[2].name).toBe("Workshop");
+        expect(breadcrumbJsonLd.itemListElement[2].item).toBe(canonicalUrl);
+
+        expect(document.body.textContent?.replace(/\s+/g, " ").trim().length ?? 0).toBeGreaterThan(350);
     });
 
     it("builds a sitemap with both static and generated routes", () => {
-        const sitemap = buildSitemapXml(["/tech", "/units"], ["/tech/stonework", "/units/sentinel"]);
+        const sitemap = buildSitemapXml(["/tech", "/units"], ["/tech/workshop"]);
 
         expect(sitemap).toContain("<loc>https://endlessworkshop.dev/tech</loc>");
-        expect(sitemap).toContain("<loc>https://endlessworkshop.dev/tech/stonework</loc>");
-        expect(sitemap).toContain("<loc>https://endlessworkshop.dev/units/sentinel</loc>");
+        expect(sitemap).toContain("<loc>https://endlessworkshop.dev/tech/workshop</loc>");
+        expect(sitemap).toContain("<loc>https://endlessworkshop.dev/units</loc>");
     });
 });

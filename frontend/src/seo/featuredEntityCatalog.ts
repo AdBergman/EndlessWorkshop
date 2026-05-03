@@ -80,6 +80,7 @@ export type EntitySkipReason =
     | "insufficient-unit-content"
     | "minor-faction-unit"
     | "non-buildable-unit"
+    | "prototype-template-only"
     | "missing-required-fields";
 
 export type EntityGenerationSkip = {
@@ -109,10 +110,8 @@ export type EntityGenerationReport = {
     skippedEntries: EntityGenerationSkip[];
 };
 
-const MIN_TOTAL_PAGES = 100;
-const MAX_TOTAL_PAGES = 300;
-const MAX_TECH_PAGES = 140;
-const MAX_UNIT_PAGES = 120;
+const PROTOTYPE_TECH_ENTRY_KEYS = new Set(["workshop"]);
+const PROTOTYPE_UNIT_ENTRY_KEYS = new Set<string>();
 const PLACEHOLDER_PATTERN = /(^%|\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\b|\[tbd\])/i;
 const SAFE_ENTRY_KEY_PATTERN = /^[a-z0-9-]+$/;
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -432,8 +431,14 @@ function buildTechCatalog(rawTechs: RawTechSnapshot[], skips: EntityGenerationSk
             if (a.snapshot.era !== b.snapshot.era) return a.snapshot.era - b.snapshot.era;
             return a.snapshot.name.localeCompare(b.snapshot.name);
         })
-        .slice(0, MAX_TECH_PAGES)
-        .map((candidate) => candidate.snapshot);
+        .flatMap((candidate) => {
+            if (PROTOTYPE_TECH_ENTRY_KEYS.has(candidate.snapshot.entryKey)) {
+                return [candidate.snapshot];
+            }
+
+            pushSkip(skips, "tech", candidate.snapshot.name, candidate.snapshot.entryKey, "prototype-template-only");
+            return [];
+        });
 }
 
 function buildUnitCatalog(rawUnits: RawUnitSnapshot[], skips: EntityGenerationSkip[]): FeaturedUnitSnapshot[] {
@@ -541,8 +546,14 @@ function buildUnitCatalog(rawUnits: RawUnitSnapshot[], skips: EntityGenerationSk
             if (a.tier !== b.tier) return a.tier - b.tier;
             return a.name.localeCompare(b.name);
         })
-        .slice(0, MAX_UNIT_PAGES)
-        .map((candidate) => candidate);
+        .flatMap((candidate) => {
+            if (PROTOTYPE_UNIT_ENTRY_KEYS.has(candidate.entryKey)) {
+                return [candidate];
+            }
+
+            pushSkip(skips, "unit", candidate.name, candidate.entryKey, "prototype-template-only");
+            return [];
+        });
 }
 
 function createGenerationReport(
@@ -578,22 +589,23 @@ function createGenerationReport(
     };
 }
 
-function validateCoverageWindow(report: EntityGenerationReport): void {
-    if (report.includedCounts.techs >= report.rawCounts.techs) {
-        throw new Error("Tech entity selection reached the full tech corpus; tighten filters before generating.");
-    }
-
-    if (report.includedCounts.units >= report.rawCounts.units) {
-        throw new Error("Unit entity selection reached the full unit corpus; tighten filters before generating.");
-    }
-
-    if (
-        report.includedCounts.total < MIN_TOTAL_PAGES ||
-        report.includedCounts.total > MAX_TOTAL_PAGES
-    ) {
+function validatePrototypeSelection(techs: FeaturedTechSnapshot[], units: FeaturedUnitSnapshot[]): void {
+    if (techs.length !== PROTOTYPE_TECH_ENTRY_KEYS.size) {
         throw new Error(
-            `Generated entity count must stay between ${MIN_TOTAL_PAGES} and ${MAX_TOTAL_PAGES}; received ${report.includedCounts.total}.`
+            `Expected ${PROTOTYPE_TECH_ENTRY_KEYS.size} prototype tech page(s), received ${techs.length}.`
         );
+    }
+
+    if (units.length !== PROTOTYPE_UNIT_ENTRY_KEYS.size) {
+        throw new Error(
+            `Expected ${PROTOTYPE_UNIT_ENTRY_KEYS.size} prototype unit page(s), received ${units.length}.`
+        );
+    }
+
+    for (const entryKey of PROTOTYPE_TECH_ENTRY_KEYS) {
+        if (!techs.some((tech) => tech.entryKey === entryKey)) {
+            throw new Error(`Missing required prototype tech page "${entryKey}".`);
+        }
     }
 }
 
@@ -611,4 +623,4 @@ export const ENTITY_GENERATION_REPORT = createGenerationReport(
     skippedEntries
 );
 
-validateCoverageWindow(ENTITY_GENERATION_REPORT);
+validatePrototypeSelection(FEATURED_TECH_SNAPSHOTS, FEATURED_UNIT_SNAPSHOTS);

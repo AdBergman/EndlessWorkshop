@@ -259,60 +259,163 @@ function renderList(items: string[]): string {
     return items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
 }
 
-function renderFacts(entity: ResolvedFeaturedEntity): string {
+type EntityTemplateViewModel = {
+    displayName: string;
+    kindLabel: string;
+    summary: string;
+    descriptionLines: string[];
+    factLines: string[];
+    referenceKeys: string[];
+    primaryCtaLabel: string;
+};
+
+function renderBrandNav(activePath: string): string {
+    const links = [
+        { href: "/tech", label: "Tech" },
+        { href: "/units", label: "Units" },
+        { href: "/codex", label: "Codex" },
+        { href: "/summary", label: "Summary" },
+        { href: "/mods", label: "Mods" },
+        { href: "/info", label: "Info" },
+    ];
+
+    return `
+        <nav class="seo-nav" aria-label="Primary">
+            ${links
+                .map(
+                    (link) =>
+                        `<a href="${link.href}"${link.href === activePath ? ' aria-current="page"' : ""}>${link.label}</a>`
+                )
+                .join("")}
+        </nav>
+    `;
+}
+
+function buildEntityTemplateViewModel(entity: ResolvedFeaturedEntity): EntityTemplateViewModel {
     if (entity.kind === "tech") {
-        return renderList([
-            `Era ${entity.era}`,
-            `${entity.techType} technology`,
-            `Factions: ${entity.factions.join(", ")}`,
-        ]);
+        return {
+            displayName: entity.name,
+            kindLabel: `Technology • Era ${entity.era} • ${entity.techType}`,
+            summary: entity.overview,
+            descriptionLines: [
+                `${entity.name} is indexed here as an era ${entity.era} ${entity.techType.toLowerCase()} technology in Endless Workshop.`,
+                `The current snapshot records ${entity.unlocks.length} unlock${entity.unlocks.length === 1 ? "" : "s"} and ${entity.effects.length} direct effect${entity.effects.length === 1 ? "" : "s"}.`,
+                `Use the static page for a quick reference, then jump back into the interactive tech tree for pathing, faction context, and adjacent nodes.`,
+            ],
+            factLines: [
+                `Era ${entity.era}`,
+                `${entity.techType} technology`,
+                `Factions: ${entity.factions.join(", ")}`,
+            ],
+            referenceKeys: [...entity.unlocks, ...entity.effects],
+            primaryCtaLabel: "Open in the interactive tech tree",
+        };
     }
 
     const upgradeLabel = entity.upgradeFrom ? `Upgrades from ${entity.upgradeFrom}` : "Base roster unit";
+    const referenceKeys = [...entity.skills];
+    if (entity.requiredTechnology !== "Starting roster") referenceKeys.unshift(entity.requiredTechnology);
 
-    return renderList([
-        `${entity.faction} faction`,
-        `Tier ${entity.tier} ${entity.unitType.toLowerCase()} unit`,
-        entity.requiredTechnology,
-        upgradeLabel,
-    ]);
+    return {
+        displayName: entity.name,
+        kindLabel: `Unit • Tier ${entity.tier} • ${entity.unitType}`,
+        summary: entity.overview,
+        descriptionLines: [
+            `${entity.name} is indexed here as a ${entity.faction} ${entity.unitType.toLowerCase()} unit with a recorded tier ${entity.tier} profile.`,
+            `The static snapshot keeps the high-level unit profile visible before you switch back to the interactive explorer for comparisons and roster browsing.`,
+            upgradeLabel,
+        ],
+        factLines: [
+            `${entity.faction} faction`,
+            `Tier ${entity.tier} ${entity.unitType.toLowerCase()} unit`,
+            entity.requiredTechnology,
+            `Health ${entity.health} • Damage ${entity.damage} • Defense ${entity.defense}`,
+        ],
+        referenceKeys,
+        primaryCtaLabel: "Open in the interactive unit explorer",
+    };
 }
 
-function renderHighlights(entity: ResolvedFeaturedEntity): string {
-    if (entity.kind === "tech") {
-        const highlights = [...entity.unlocks, ...entity.effects];
-        return highlights.length > 0
-            ? renderList(highlights)
-            : "<li>This featured page focuses on route visibility and the jump back into the interactive planner.</li>";
-    }
-
-    return renderList([
-        `Health: ${entity.health}`,
-        `Damage: ${entity.damage}`,
-        `Defense: ${entity.defense}`,
-        `Movement: ${entity.movement}`,
-        `Cost: ${entity.cost}`,
-        `Upkeep: ${entity.upkeep}`,
-    ]);
-}
-
-function renderSecondaryHighlights(entity: ResolvedFeaturedEntity): string {
-    if (entity.kind === "tech") {
-        return "";
+function renderReferenceChips(referenceKeys: string[]): string {
+    if (referenceKeys.length === 0) {
+        return `<p class="entity-page__referencesEmpty">No linked reference keys are exposed in this prototype snapshot.</p>`;
     }
 
     return `
-        <section>
-            <h2>Skills</h2>
-            <ul>${renderList(entity.skills)}</ul>
+        <ul class="seo-chipList">
+            ${referenceKeys.map((referenceKey) => `<li class="seo-chip">${escapeHtml(referenceKey)}</li>`).join("")}
+        </ul>
+    `;
+}
+
+function renderResourceLinks(): string {
+    return `
+        <section class="seo-section entity-page__section entity-page__explore">
+            <p class="seo-label">Explore More</p>
+            <h2 class="seo-heading">Explore more</h2>
+            <ul class="seo-list">
+                <li><a href="/tech">Browse the full tech tree</a></li>
+                <li><a href="/units">Inspect the unit explorer</a></li>
+                <li><a href="/codex">Search the codex</a></li>
+                <li><a href="/mods">Review mod support</a></li>
+            </ul>
         </section>
+    `;
+}
+
+function renderEntityPageContent(entity: ResolvedFeaturedEntity): string {
+    const viewModel = buildEntityTemplateViewModel(entity);
+
+    return `
+        <header class="entity-page__header">
+            <p class="seo-label entity-page__kind">${escapeHtml(viewModel.kindLabel)}</p>
+            <h1 class="seo-heading entity-page__title">${escapeHtml(viewModel.displayName)}</h1>
+            <p class="seo-text entity-page__summary">${escapeHtml(viewModel.summary)}</p>
+            <div class="seo-buttonRow">
+                <a class="seo-button" href="${entity.ctaPath}">${escapeHtml(viewModel.primaryCtaLabel)}</a>
+                <a class="seo-linkButton" href="${entity.collectionPath}">Back to ${escapeHtml(getKindLabel(entity.kind))}</a>
+            </div>
+        </header>
+
+        <div class="entity-page__body">
+            <div class="entity-page__main">
+                <section class="seo-section entity-page__section entity-page__overview">
+                    <p class="seo-label">Overview</p>
+                    <h2 class="seo-heading">Overview</h2>
+                    <ul class="seo-list">
+                        ${renderList(viewModel.descriptionLines)}
+                    </ul>
+                </section>
+
+                <section class="seo-section entity-page__section entity-page__details">
+                    <p class="seo-label">Details</p>
+                    <h2 class="seo-heading">Details</h2>
+                    <ul class="seo-list">
+                        ${renderList(viewModel.factLines)}
+                    </ul>
+                </section>
+
+                ${renderResourceLinks()}
+            </div>
+
+            <aside class="entity-page__side">
+                <section class="seo-section entity-page__section entity-page__references">
+                    <p class="seo-label">Reference Keys</p>
+                    <h2 class="seo-heading">Reference keys</h2>
+                    <div class="seo-panel">
+                        <div class="seo-panel__inner">
+                            ${renderReferenceChips(viewModel.referenceKeys)}
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </div>
     `;
 }
 
 export function renderEntityHtml(entity: ResolvedFeaturedEntity): string {
     const canonicalUrl = toAbsoluteUrl(entity.routePath);
     const collectionLabel = getKindLabel(entity.kind);
-    const collectionPageUrl = toAbsoluteUrl(entity.collectionPath);
     const webPageJsonLd = renderWebPageJsonLd(entity);
     const breadcrumbJsonLd = renderBreadcrumbJsonLd(entity);
 
@@ -326,6 +429,11 @@ export function renderEntityHtml(entity: ResolvedFeaturedEntity): string {
     <meta name="description" content="${escapeHtml(entity.seoDescription)}" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${canonicalUrl}" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/seo/seo-shell.css" />
+    <link rel="stylesheet" href="/seo/entity-page.css" />
     <link rel="icon" href="/favicon.ico" />
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
     <meta property="og:type" content="website" />
@@ -342,170 +450,34 @@ export function renderEntityHtml(entity: ResolvedFeaturedEntity): string {
         ...breadcrumbJsonLd,
         "@id": `${canonicalUrl}#breadcrumb`,
     })}</script>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #0b0e13;
-            --panel: rgba(16, 22, 33, 0.9);
-            --panel-border: rgba(112, 173, 255, 0.24);
-            --text: #f3f7fb;
-            --muted: #aec0d8;
-            --accent: #87b9ff;
-            --accent-strong: #d4e5ff;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top, rgba(86, 131, 210, 0.34), transparent 36%),
-                linear-gradient(180deg, #101825 0%, #0b0e13 62%);
-        }
-
-        main {
-            max-width: 940px;
-            margin: 0 auto;
-            padding: 48px 20px 72px;
-        }
-
-        .eyebrow {
-            color: var(--accent);
-            font-size: 0.82rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .hero,
-        section,
-        .cta {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
-        }
-
-        .hero {
-            padding: 28px;
-            margin-bottom: 20px;
-        }
-
-        section,
-        .cta {
-            padding: 24px;
-            margin-top: 20px;
-        }
-
-        h1,
-        h2 {
-            margin: 0 0 14px;
-        }
-
-        p,
-        li {
-            color: var(--muted);
-            line-height: 1.65;
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .breadcrumbs {
-            margin-bottom: 14px;
-            font-size: 0.95rem;
-            color: var(--muted);
-        }
-
-        .breadcrumbs a,
-        .back-link {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .breadcrumbs a:hover,
-        .back-link:hover,
-        .cta a:hover {
-            color: var(--accent-strong);
-        }
-
-        .cta-button {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 12px 18px;
-            border-radius: 999px;
-            background: linear-gradient(135deg, #6ea9ff, #87d1ff);
-            color: #07111d;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
-        .cta-copy {
-            margin-top: 12px;
-        }
-
-        @media (max-width: 640px) {
-            main {
-                padding: 28px 16px 40px;
-            }
-
-            .hero,
-            section,
-            .cta {
-                padding: 20px;
-            }
-        }
-    </style>
 </head>
-<body>
-<main>
-    <div class="breadcrumbs">
-        <a href="/">Home</a> /
-        <a href="${entity.collectionPath}">${collectionLabel}</a> /
+<body class="seo-page">
+<header class="seo-topbar">
+    <div class="seo-topbar__inner">
+        <a class="seo-brand" href="/">
+            <img class="seo-brand__icon" src="/graphics/cog.svg" alt="Endless Workshop icon" />
+            <span class="seo-brand__copy">
+                <span class="seo-brand__eyebrow">EWShop</span>
+                <span class="seo-brand__title">Endless Workshop</span>
+            </span>
+        </a>
+        ${renderBrandNav(entity.collectionPath)}
+    </div>
+</header>
+
+<main class="seo-shell entity-page">
+    <div class="seo-hidden">${escapeHtml(entity.pageTitle)}</div>
+    <div class="entity-page__breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>/</span>
+        <a href="${entity.collectionPath}">${collectionLabel}</a>
+        <span>/</span>
         <span>${escapeHtml(entity.name)}</span>
     </div>
 
-    <header class="hero">
-        <div class="eyebrow">Endless Legend 2 ${collectionLabel}</div>
-        <h1>${escapeHtml(entity.name)}</h1>
-        <p>${escapeHtml(entity.overview)}</p>
-    </header>
-
-    <section>
-        <h2>At a glance</h2>
-        <ul>${renderFacts(entity)}</ul>
-    </section>
-
-    <section>
-        <h2>${entity.kind === "tech" ? "Unlocks and effects" : "Key stats"}</h2>
-        <ul>${renderHighlights(entity)}</ul>
-    </section>
-
-    ${renderSecondaryHighlights(entity)}
-
-    <aside class="cta">
-        <h2>Open the interactive ${entity.kind === "tech" ? "planner" : "explorer"}</h2>
-        <p>
-            This static page is an SEO landing page only. Use the full Endless Workshop app for filters,
-            navigation, share links, and live browsing.
-        </p>
-        <a class="cta-button" href="${entity.ctaPath}">${escapeHtml(entity.ctaLabel)}</a>
-        <p class="cta-copy">
-            Prefer the category view first?
-            <a class="back-link" href="${entity.collectionPath}">Go to ${collectionLabel.toLowerCase()}</a>.
-        </p>
-        <p class="cta-copy">Canonical route: <a href="${canonicalUrl}">${canonicalUrl}</a></p>
-        <p class="cta-copy">Interactive route: <a href="${entity.ctaPath}">${escapeHtml(entity.ctaPath)}</a></p>
-        <p class="cta-copy">Collection page: <a href="${collectionPageUrl}">${collectionPageUrl}</a></p>
-    </aside>
+    <div class="entity-page__layout">
+        ${renderEntityPageContent(entity)}
+    </div>
 </main>
 </body>
 </html>`;
