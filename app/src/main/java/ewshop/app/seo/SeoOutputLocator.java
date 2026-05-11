@@ -11,16 +11,13 @@ import java.nio.file.Paths;
 public class SeoOutputLocator {
 
     private final Path outputRoot;
-    private final boolean classpathFallbackEnabled;
 
     public SeoOutputLocator(
-            @Value("${seo.output-dir:generated-seo}") String outputDir,
-            @Value("${seo.classpath-fallback-enabled:true}") boolean classpathFallbackEnabled
+            @Value("${seo.output-dir:generated-seo}") String outputDir
     ) {
         // Local development keeps using the relative generated-seo directory.
         // Production can override this with SEO_OUTPUT_DIR via application-prod.yml.
         this.outputRoot = Paths.get(outputDir).toAbsolutePath().normalize();
-        this.classpathFallbackEnabled = classpathFallbackEnabled;
     }
 
     public Path getOutputRoot() {
@@ -57,14 +54,6 @@ public class SeoOutputLocator {
 
     public Path getSitemapFile() {
         return outputRoot.resolve("sitemap.xml");
-    }
-
-    public boolean isRuntimeOwnedFeaturedEntity(String page, String entryKey) {
-        return !page.isBlank() && !entryKey.isBlank();
-    }
-
-    public boolean isClasspathFallbackEnabled() {
-        return classpathFallbackEnabled;
     }
 
     public Path getGeneratedSitemapPath() {

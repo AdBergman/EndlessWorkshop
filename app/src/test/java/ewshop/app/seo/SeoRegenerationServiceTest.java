@@ -23,7 +23,7 @@ class SeoRegenerationServiceTest {
     @Test
     void regeneratesSeoPagesAcrossExportKindsFromFilteredCodexData() throws Exception {
         CodexService codexService = mock(CodexService.class);
-        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
         SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
@@ -234,7 +234,7 @@ class SeoRegenerationServiceTest {
     @Test
     void tracksDuplicateSlugsPerExportKindInsteadOfGlobally() throws Exception {
         CodexService codexService = mock(CodexService.class);
-        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString(), true);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
         SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(

@@ -57,14 +57,12 @@ class FrontendControllerRouteTest {
     }
 
     @Test
-    void servesClasspathWorkshopFallbackWhenEnabledAndExternalOutputMissing() throws Exception {
+    void returns404ForGeneratedEntityRoutesWhenExternalOutputIsMissing() throws Exception {
         mockMvc.perform(get("/tech/workshop"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/tech/workshop/index.html"));
+                .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/tech/workshop/"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/tech/workshop/index.html"));
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -216,7 +214,7 @@ class FrontendControllerRouteTest {
 
         @Bean
         SeoOutputLocator seoOutputLocator() {
-            return new SeoOutputLocator("build/test-generated-seo", true);
+            return new SeoOutputLocator("build/test-generated-seo");
         }
     }
 }

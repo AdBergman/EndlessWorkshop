@@ -75,7 +75,6 @@ management:
 
 seo:
   output-dir: ${SEO_OUTPUT_DIR:generated-seo}
-  classpath-fallback-enabled: false
 
 admin:
   token: ${ADMIN_TOKEN:}

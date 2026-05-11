@@ -1,8 +1,6 @@
 package ewshop.app.config;
 
 import ewshop.app.seo.SeoOutputLocator;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,17 +62,7 @@ public class FrontendController {
             return "forward:" + seoOutputLocator.getGeneratedForwardPath(page, entryKey);
         }
 
-        if (seoOutputLocator.isRuntimeOwnedFeaturedEntity(page, entryKey)
-                && !seoOutputLocator.isClasspathFallbackEnabled()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        Resource classpathFallback = new ClassPathResource("static/" + page + "/" + entryKey + "/index.html");
-        if (!classpathFallback.exists()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-        return "forward:/" + page + "/" + entryKey + "/index.html";
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     private static void validateSeoRouteSegment(String value) {

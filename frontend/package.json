@@ -23,9 +23,8 @@
   },
   "scripts": {
     "start": "vite --config vite.config.ts",
-    "generate:seo-entities": "node --loader ts-node/esm src/scripts/generateSeoEntities.ts",
-    "build": "npm run generate:seo-entities && vite build --config vite.config.ts",
-    "test": "npm run generate:seo-entities && node --loader ts-node/esm node_modules/vitest/vitest.mjs"
+    "build": "vite build --config vite.config.ts",
+    "test": "node --loader ts-node/esm node_modules/vitest/vitest.mjs"
   },
   "browserslist": {
     "production": [

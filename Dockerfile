@@ -7,9 +7,6 @@ RUN npm install
 
 COPY frontend/ ./
 
-# Needed by src/scripts/generateSeoEntities.ts
-COPY app/src/main/resources/data /app/app/src/main/resources/data
-
 RUN npm run build
 
 # ---------- Stage 2: Build backend ----------
@@ -35,6 +32,9 @@ COPY infrastructure ./infrastructure
 
 # Frontend build output into Spring Boot static resources
 COPY --from=frontend-build /app/frontend/dist ./app/src/main/resources/static
+
+# Backend-generated SEO pages own these shared styles.
+COPY app/src/main/resources/static/seo ./app/src/main/resources/static/seo
 
 # Build the backend (single runnable jar ends up in app/target/)
 RUN mvn clean package -DskipTests

@@ -16,10 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
         classes = SeoOutputLocatorPropertyTest.TestApplication.class,
-        properties = {
-                "seo.output-dir=build/property-configured-generated-seo",
-                "seo.classpath-fallback-enabled=false"
-        }
+        properties = "seo.output-dir=build/property-configured-generated-seo"
 )
 class SeoOutputLocatorPropertyTest {
 
@@ -30,7 +27,6 @@ class SeoOutputLocatorPropertyTest {
     void resolvesConfiguredSeoOutputDirectory() {
         assertThat(seoOutputLocator.getOutputRoot())
                 .isEqualTo(Path.of("build/property-configured-generated-seo").toAbsolutePath().normalize());
-        assertThat(seoOutputLocator.isClasspathFallbackEnabled()).isFalse();
     }
 
     @SpringBootConfiguration

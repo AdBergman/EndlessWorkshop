@@ -78,7 +78,7 @@ class FrontendControllerProductionFallbackTest {
 
         @Bean
         SeoOutputLocator seoOutputLocator() {
-            return new SeoOutputLocator("build/test-generated-seo-prod", false);
+            return new SeoOutputLocator("build/test-generated-seo-prod");
         }
     }
 }

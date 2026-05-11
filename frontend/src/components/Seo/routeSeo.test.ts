@@ -1,7 +1,4 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getExpectedSitemapPaths, listGeneratedEntityPaths } from "@/seo/entitySeo";
 import {
     INDEXABLE_PUBLIC_ROUTE_PATHS,
     INDEXABLE_PUBLIC_ROUTE_SEO,
@@ -33,23 +30,20 @@ describe("publicRouteSeo", () => {
         expect(INDEXABLE_PUBLIC_ROUTE_PATHS.some((path) => path.startsWith("/admin"))).toBe(false);
     });
 
-    it("keeps the sitemap aligned with indexable public routes only", () => {
-        const publicDir = resolve(process.cwd(), "public");
-        const sitemap = readFileSync(resolve(publicDir, "sitemap.xml"), "utf8");
-        const generatedEntityPaths = listGeneratedEntityPaths(publicDir);
-        const locs = Array.from(sitemap.matchAll(/<loc>([^<]+)<\/loc>/g), (match) =>
-            match[1].replace(SITE_URL, "")
-        );
-
-        expect(locs).toEqual(getExpectedSitemapPaths(generatedEntityPaths));
-        expect(new Set(locs).size).toBe(locs.length);
-        expect(locs.every((path) => path.startsWith("/"))).toBe(true);
-        expect(locs.some((path) => path.includes("?"))).toBe(false);
-        expect(locs.some((path) => path.includes("#"))).toBe(false);
-        expect(locs.some((path) => path.startsWith("/admin"))).toBe(false);
-        expect(generatedEntityPaths.every((path) => locs.includes(path))).toBe(true);
-        expect(locs.filter((path) => path.startsWith("/tech/") || path.startsWith("/units/")).sort()).toEqual(
-            generatedEntityPaths
+    it("keeps frontend route SEO scoped to SPA shell routes", () => {
+        expect(INDEXABLE_PUBLIC_ROUTE_PATHS).toEqual([
+            "/tech",
+            "/units",
+            "/codex",
+            "/summary",
+            "/mods",
+            "/info",
+        ]);
+        expect(INDEXABLE_PUBLIC_ROUTE_PATHS.some((path) => path.split("/").length > 2)).toBe(false);
+        expect(INDEXABLE_PUBLIC_ROUTE_SEO.every((route) => route.path.startsWith("/"))).toBe(true);
+        expect(INDEXABLE_PUBLIC_ROUTE_SEO.every((route) => route.path.startsWith("/admin"))).toBe(false);
+        expect(INDEXABLE_PUBLIC_ROUTE_SEO.every((route) => String(route.jsonLd?.url ?? "").startsWith(SITE_URL))).toBe(
+            true
         );
     });
 });
