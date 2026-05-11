@@ -27,6 +27,7 @@ public class SeoRegenerationService {
     static final String TECH_KIND = "tech";
     static final String UNITS_KIND = "units";
     static final String WORKSHOP_ENTRY_KEY = "workshop";
+    static final String ENCYCLOPEDIA_PAGE = "encyclopedia";
 
     private static final String DUPLICATE_SLUG_REASON = "duplicate-slug";
     private static final String SITE_NAME = "Endless Workshop";
@@ -40,6 +41,18 @@ public class SeoRegenerationService {
             "/summary",
             "/mods",
             "/info"
+    );
+    private static final List<String> PREFERRED_KIND_ORDER = List.of(
+            "abilities",
+            "councilors",
+            "districts",
+            "equipment",
+            "factions",
+            "heroes",
+            "improvements",
+            "populations",
+            "tech",
+            "units"
     );
 
     private final CodexService codexService;
@@ -70,17 +83,33 @@ public class SeoRegenerationService {
                         .thenComparing(entry -> trimToEmpty(entry.entry().getEntryKey()), String.CASE_INSENSITIVE_ORDER))
                 .map(this::toPageCandidate)
                 .toList();
+        Map<String, ReferenceTarget> referenceTargetsByEntryKey = buildReferenceTargets(candidates);
 
         LinkedHashSet<String> kindsToRebuild = new LinkedHashSet<>(listExistingGeneratedKinds());
         candidates.stream()
                 .map(PageCandidate::kind)
                 .forEach(kindsToRebuild::add);
+        kindsToRebuild.add(ENCYCLOPEDIA_PAGE);
         deleteGeneratedOutput(kindsToRebuild);
 
         for (PageCandidate candidate : candidates) {
             writeUtf8(
                     seoOutputLocator.getFeaturedEntityFile(candidate.kind(), candidate.slug()),
-                    renderEntityHtml(candidate, routeFor(candidate.kind(), candidate.slug()))
+                    renderEntityHtml(
+                            candidate,
+                            routeFor(candidate.kind(), candidate.slug()),
+                            referenceTargetsByEntryKey
+                    )
+            );
+        }
+        writeUtf8(
+                seoOutputLocator.getGeneratedIndexFile(ENCYCLOPEDIA_PAGE),
+                renderEncyclopediaRootHtml(candidates)
+        );
+        for (Map.Entry<String, List<PageCandidate>> entry : candidatesByKind(candidates).entrySet()) {
+            writeUtf8(
+                    seoOutputLocator.getFeaturedEntityFile(ENCYCLOPEDIA_PAGE, entry.getKey()),
+                    renderEncyclopediaKindHtml(entry.getKey(), entry.getValue())
             );
         }
 
@@ -112,6 +141,46 @@ public class SeoRegenerationService {
                 entry.cleanedReferenceKeys(),
                 entry.slug()
         );
+    }
+
+    private Map<String, ReferenceTarget> buildReferenceTargets(List<PageCandidate> candidates) {
+        LinkedHashMap<String, ReferenceTarget> targetsByEntryKey = new LinkedHashMap<>();
+        for (PageCandidate candidate : candidates) {
+            String entryKey = trimToEmpty(candidate.entryKey());
+            if (entryKey.isBlank()) {
+                continue;
+            }
+
+            targetsByEntryKey.putIfAbsent(
+                    entryKey,
+                    new ReferenceTarget(
+                            candidate.displayName(),
+                            routeFor(candidate.kind(), candidate.slug())
+                    )
+            );
+        }
+        return Map.copyOf(targetsByEntryKey);
+    }
+
+    private static Map<String, List<PageCandidate>> candidatesByKind(List<PageCandidate> candidates) {
+        LinkedHashMap<String, List<PageCandidate>> candidatesByKind = new LinkedHashMap<>();
+        candidates.stream()
+                .sorted(Comparator
+                        .comparingInt((PageCandidate candidate) -> preferredKindIndex(candidate.kind()))
+                        .thenComparing(PageCandidate::kind, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(PageCandidate::displayName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(PageCandidate::entryKey, String.CASE_INSENSITIVE_ORDER))
+                .forEach(candidate -> candidatesByKind
+                        .computeIfAbsent(candidate.kind(), ignored -> new ArrayList<>())
+                        .add(candidate));
+
+        candidatesByKind.replaceAll((ignored, kindCandidates) -> List.copyOf(kindCandidates));
+        return candidatesByKind;
+    }
+
+    private static int preferredKindIndex(String kind) {
+        int index = PREFERRED_KIND_ORDER.indexOf(trimToEmpty(kind).toLowerCase(Locale.ROOT));
+        return index < 0 ? PREFERRED_KIND_ORDER.size() : index;
     }
 
     private void addDuplicateSlugWarnings(CodexFilterResult filterResult, List<String> warnings) {
@@ -176,11 +245,8 @@ public class SeoRegenerationService {
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().equals("index.html"))
                     .map(outputRoot::relativize)
-                    .filter(relativePath -> relativePath.getNameCount() == 3)
-                    .map(relativePath -> routeFor(
-                            relativePath.getName(0).toString(),
-                            relativePath.getName(1).toString()
-                    ))
+                    .map(SeoRegenerationService::routeForGeneratedIndex)
+                    .filter(route -> !route.isBlank())
                     .collect(LinkedHashSet::new, LinkedHashSet::add, LinkedHashSet::addAll);
 
             return routes.stream()
@@ -191,6 +257,18 @@ public class SeoRegenerationService {
         }
     }
 
+    private static String routeForGeneratedIndex(Path relativePath) {
+        if (relativePath.getNameCount() == 2 && "index.html".equals(relativePath.getName(1).toString())) {
+            return "/" + relativePath.getName(0);
+        }
+
+        if (relativePath.getNameCount() == 3 && "index.html".equals(relativePath.getName(2).toString())) {
+            return routeFor(relativePath.getName(0).toString(), relativePath.getName(1).toString());
+        }
+
+        return "";
+    }
+
     private Map<String, SeoRegenerationKindResult> buildExportKindCounts(
             List<String> generatedRoutes,
             List<CodexFilterResult.CodexFilterSkip> skippedEntries
@@ -198,6 +276,9 @@ public class SeoRegenerationService {
         Map<String, MutableKindCounts> countsByKind = new LinkedHashMap<>();
 
         for (String route : generatedRoutes) {
+            if (route.equals("/" + ENCYCLOPEDIA_PAGE) || route.startsWith("/" + ENCYCLOPEDIA_PAGE + "/")) {
+                continue;
+            }
             String kind = route.substring(1, route.indexOf('/', 1));
             countsByKind.computeIfAbsent(kind, ignored -> new MutableKindCounts()).generatedCount++;
         }
@@ -218,8 +299,12 @@ public class SeoRegenerationService {
         return exportKindCounts;
     }
 
-    private String routeFor(String kind, String slug) {
+    private static String routeFor(String kind, String slug) {
         return "/" + kind + "/" + slug;
+    }
+
+    private static String encyclopediaRouteFor(String kind) {
+        return routeFor(ENCYCLOPEDIA_PAGE, kind);
     }
 
     private void writeSitemap(List<String> generatedRoutes) {
@@ -249,6 +334,14 @@ public class SeoRegenerationService {
     }
 
     static String renderEntityHtml(PageCandidate candidate, String route) {
+        return renderEntityHtml(candidate, route, Map.of());
+    }
+
+    static String renderEntityHtml(
+            PageCandidate candidate,
+            String route,
+            Map<String, ReferenceTarget> referenceTargetsByEntryKey
+    ) {
         String kindLabel = kindLabelFor(candidate.kind());
         ParsedDescription description = parseDescription(candidate.descriptionLines());
         String pageTitle = candidate.displayName() + " " + kindLabel + " Reference | " + SITE_NAME;
@@ -266,11 +359,15 @@ public class SeoRegenerationService {
                 escapeJson(canonicalUrl)
         ).trim();
         String breadcrumbJsonLd = """
-                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Codex","item":"%s/codex"},{"@type":"ListItem","position":3,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
+                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Encyclopedia","item":"%s/%s"},{"@type":"ListItem","position":3,"name":"%s","item":"%s%s"},{"@type":"ListItem","position":4,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
                 """.formatted(
                 escapeJson(SITE_NAME),
                 escapeJson(SITE_URL),
                 escapeJson(SITE_URL),
+                escapeJson(ENCYCLOPEDIA_PAGE),
+                escapeJson(pluralKindLabelFor(candidate.kind())),
+                escapeJson(SITE_URL),
+                escapeJson(encyclopediaRouteFor(candidate.kind())),
                 escapeJson(candidate.displayName()),
                 escapeJson(canonicalUrl),
                 escapeJson(canonicalUrl)
@@ -329,7 +426,9 @@ public class SeoRegenerationService {
                     <div class="entity-page__breadcrumbs" aria-label="Breadcrumb">
                         <a href="/">Home</a>
                         <span>/</span>
-                        <a href="/codex">Codex</a>
+                        <a href="/encyclopedia">Encyclopedia</a>
+                        <span>/</span>
+                        <a href="%s">%s</a>
                         <span>/</span>
                         <span>%s</span>
                     </div>
@@ -368,13 +467,189 @@ public class SeoRegenerationService {
                 webPageJsonLd,
                 breadcrumbJsonLd,
                 escapeHtml(pageTitle),
+                escapeHtml(encyclopediaRouteFor(candidate.kind())),
+                escapeHtml(pluralKindLabelFor(candidate.kind())),
                 escapeHtml(candidate.displayName()),
                 escapeHtml(buildMetadataLine(kindLabel, description.metadataHighlights())),
                 escapeHtml(candidate.displayName()),
                 renderIntro(description.introLine()),
                 renderDescriptionSection(description),
-                renderRelatedSection(candidate.referenceKeys()),
+                renderRelatedSection(candidate.referenceKeys(), referenceTargetsByEntryKey),
                 renderActionRow(candidate.kind())
+        );
+    }
+
+    static String renderEncyclopediaRootHtml(List<PageCandidate> candidates) {
+        Map<String, List<PageCandidate>> groupedCandidates = candidatesByKind(candidates);
+        String pageTitle = "Endless Workshop Encyclopedia | " + SITE_NAME;
+        String seoDescription = "Browse the Endless Workshop encyclopedia by category, including abilities, units, technologies, improvements, equipment, heroes, districts, populations, factions, and councilors.";
+        String canonicalUrl = SITE_URL + "/" + ENCYCLOPEDIA_PAGE;
+
+        StringBuilder categories = new StringBuilder();
+        categories.append("<div class=\"encyclopedia-page__index\" aria-label=\"Codex categories\">");
+        groupedCandidates.forEach((kind, kindCandidates) -> categories
+                .append("<a class=\"encyclopedia-page__categoryRow\" href=\"")
+                .append(escapeHtml(encyclopediaRouteFor(kind)))
+                .append("\">")
+                .append("<span class=\"encyclopedia-page__categoryName\">")
+                .append(escapeHtml(pluralKindLabelFor(kind)))
+                .append("</span>")
+                .append("<span class=\"encyclopedia-page__categoryCount\">")
+                .append(kindCandidates.size())
+                .append("</span>")
+                .append("</a>"));
+        categories.append("</div>");
+
+        return renderEncyclopediaShell(
+                pageTitle,
+                seoDescription,
+                canonicalUrl,
+                "Encyclopedia index",
+                "Codex Overview",
+                "Browse generated Endless Workshop SEO references by category.",
+                categories.toString()
+        );
+    }
+
+    static String renderEncyclopediaKindHtml(String kind, List<PageCandidate> candidates) {
+        String kindLabel = pluralKindLabelFor(kind);
+        String pageTitle = kindLabel + " Encyclopedia | " + SITE_NAME;
+        String seoDescription = "Browse " + kindLabel.toLowerCase(Locale.ROOT)
+                + " in the Endless Workshop encyclopedia, with generated reference pages and descriptions.";
+        String canonicalUrl = SITE_URL + encyclopediaRouteFor(kind);
+
+        StringBuilder entries = new StringBuilder();
+        entries.append("<div class=\"encyclopedia-page__entryList\" aria-label=\"")
+                .append(escapeHtml(kindLabel))
+                .append("\">");
+        for (PageCandidate candidate : candidates) {
+            entries.append("<a class=\"encyclopedia-page__entryRow\" href=\"")
+                    .append(escapeHtml(routeFor(candidate.kind(), candidate.slug())))
+                    .append("\" data-entry-key=\"")
+                    .append(escapeHtml(candidate.entryKey()))
+                    .append("\">")
+                    .append("<span class=\"encyclopedia-page__entryTitle\">")
+                    .append(escapeHtml(candidate.displayName()))
+                    .append("</span>")
+                    .append("<span class=\"encyclopedia-page__entryDescription\">")
+                    .append(escapeHtml(buildEntryPreview(candidate)))
+                    .append("</span>")
+                    .append("</a>");
+        }
+        entries.append("</div>");
+
+        return renderEncyclopediaShell(
+                pageTitle,
+                seoDescription,
+                canonicalUrl,
+                "Encyclopedia category",
+                kindLabel,
+                candidates.size() + " generated " + kindLabel.toLowerCase(Locale.ROOT) + " reference pages.",
+                entries.toString()
+        );
+    }
+
+    private static String renderEncyclopediaShell(
+            String pageTitle,
+            String seoDescription,
+            String canonicalUrl,
+            String eyebrow,
+            String heading,
+            String summary,
+            String content
+    ) {
+        String webPageJsonLd = """
+                {"@context":"https://schema.org","@type":"CollectionPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"}}
+                """.formatted(
+                escapeJson(pageTitle),
+                escapeJson(seoDescription),
+                escapeJson(canonicalUrl),
+                escapeJson(SITE_NAME),
+                escapeJson(SITE_URL)
+        ).trim();
+
+        return """
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8" />
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                    <meta name="theme-color" content="#0b0e13" />
+                    <title>%s</title>
+                    <meta name="description" content="%s" />
+                    <meta name="robots" content="index, follow" />
+                    <link rel="canonical" href="%s" />
+                    <link rel="preconnect" href="https://fonts.googleapis.com" />
+                    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+                    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+                    <link rel="stylesheet" href="/seo/seo-shell.css" />
+                    <link rel="stylesheet" href="/seo/entity-page.css" />
+                    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+                    <link rel="shortcut icon" href="/favicon.ico" />
+                    <meta property="og:site_name" content="%s" />
+                    <meta property="og:type" content="website" />
+                    <meta property="og:title" content="%s" />
+                    <meta property="og:description" content="%s" />
+                    <meta property="og:url" content="%s" />
+                    <meta property="og:image" content="%s" />
+                    <meta name="twitter:card" content="summary_large_image" />
+                    <meta name="twitter:title" content="%s" />
+                    <meta name="twitter:description" content="%s" />
+                    <meta name="twitter:image" content="%s" />
+                    <script type="application/ld+json">%s</script>
+                </head>
+                <body class="seo-page">
+                <header class="seo-topbar">
+                    <div class="seo-topbar__inner">
+                        <a class="seo-brand" href="/">
+                            <img class="seo-brand__icon" src="/graphics/cog.svg" alt="Endless Workshop icon" />
+                            <span class="seo-brand__copy">
+                                <span class="seo-brand__title">Endless Workshop</span>
+                            </span>
+                        </a>
+
+                        <nav class="seo-nav" aria-label="Primary">
+                            <a href="/tech">Tech</a><a href="/units">Units</a><a href="/codex">Codex</a><a href="/summary">Summary</a><a href="/mods">Mods</a><a href="/info">Info</a>
+                        </nav>
+                    </div>
+                </header>
+
+                <main class="seo-shell entity-page encyclopedia-page">
+                    <div class="entity-page__breadcrumbs" aria-label="Breadcrumb">
+                        <a href="/">Home</a>
+                        <span>/</span>
+                        <a href="/encyclopedia">Encyclopedia</a>
+                    </div>
+
+                    <header class="entity-page__header">
+                        <p class="entity-page__meta">%s</p>
+                        <h1 class="seo-heading entity-page__title">%s</h1>
+                        <p class="seo-text entity-page__summary">%s</p>
+                    </header>
+
+                    <section class="seo-section entity-page__section encyclopedia-page__section">
+                        %s
+                    </section>
+                </main>
+                </body>
+                </html>
+                """.formatted(
+                escapeHtml(pageTitle),
+                escapeHtml(seoDescription),
+                canonicalUrl,
+                escapeHtml(SITE_NAME),
+                escapeHtml(pageTitle),
+                escapeHtml(seoDescription),
+                canonicalUrl,
+                DEFAULT_IMAGE_URL,
+                escapeHtml(pageTitle),
+                escapeHtml(seoDescription),
+                DEFAULT_IMAGE_URL,
+                webPageJsonLd,
+                escapeHtml(eyebrow),
+                escapeHtml(heading),
+                escapeHtml(summary),
+                content
         );
     }
 
@@ -399,8 +674,16 @@ public class SeoRegenerationService {
         return "<p class=\"seo-text entity-page__summary\">" + escapeHtml(introLine) + "</p>";
     }
 
-    private static String renderRelatedSection(List<String> referenceKeys) {
+    private static String renderRelatedSection(
+            List<String> referenceKeys,
+            Map<String, ReferenceTarget> referenceTargetsByEntryKey
+    ) {
         if (referenceKeys == null || referenceKeys.isEmpty()) {
+            return "";
+        }
+
+        String referenceChips = renderReferenceChips(referenceKeys, referenceTargetsByEntryKey);
+        if (referenceChips.isBlank()) {
             return "";
         }
 
@@ -409,12 +692,14 @@ public class SeoRegenerationService {
                             <h2 class="seo-heading">Related</h2>
                             %s
                         </section>
-                """.formatted(renderReferenceChips(referenceKeys));
+                """.formatted(referenceChips);
     }
 
     private static String renderActionRow(String kind) {
         List<String> actions = new ArrayList<>();
         actions.add(renderActionLink("/codex", "Back to Codex"));
+        actions.add(renderActionLink("/" + ENCYCLOPEDIA_PAGE, "Encyclopedia"));
+        actions.add(renderActionLink(encyclopediaRouteFor(kind), "Browse " + pluralKindLabelFor(kind)));
 
         if (TECH_KIND.equals(kind)) {
             actions.add(renderActionLink("/tech", "Browse Tech"));
@@ -567,14 +852,72 @@ public class SeoRegenerationService {
         return label.isEmpty() ? "Codex" : label.toString();
     }
 
-    private static String renderReferenceChips(List<String> referenceKeys) {
+    private static String pluralKindLabelFor(String kind) {
+        String normalizedKind = trimToEmpty(kind).toLowerCase(Locale.ROOT);
+        Map<String, String> explicitLabels = Map.ofEntries(
+                Map.entry("abilities", "Abilities"),
+                Map.entry("councilors", "Councilors"),
+                Map.entry("districts", "Districts"),
+                Map.entry("equipment", "Equipment"),
+                Map.entry("factions", "Factions"),
+                Map.entry("heroes", "Heroes"),
+                Map.entry("improvements", "Improvements"),
+                Map.entry("populations", "Populations"),
+                Map.entry("tech", "Technologies"),
+                Map.entry("units", "Units")
+        );
+
+        if (explicitLabels.containsKey(normalizedKind)) {
+            return explicitLabels.get(normalizedKind);
+        }
+
+        String label = kindLabelFor(kind);
+        return label.endsWith("s") ? label : label + "s";
+    }
+
+    private static String buildEntryPreview(PageCandidate candidate) {
+        ParsedDescription description = parseDescription(candidate.descriptionLines());
+        String preview = !description.introLine().isBlank()
+                ? description.introLine()
+                : firstOrBlank(description.descriptionLines());
+        return preview.isBlank() ? candidate.displayName() + " reference entry." : preview;
+    }
+
+    private static String renderReferenceChips(
+            List<String> referenceKeys,
+            Map<String, ReferenceTarget> referenceTargetsByEntryKey
+    ) {
         StringBuilder chips = new StringBuilder();
         chips.append("<ul class=\"seo-chipList\">");
         for (String referenceKey : referenceKeys) {
-            chips.append("<li class=\"seo-chip\">")
-                    .append(escapeHtml(normalizeContentLine(referenceKey)))
+            String key = trimToEmpty(referenceKey);
+            if (key.isBlank()) {
+                continue;
+            }
+
+            ReferenceTarget target = referenceTargetsByEntryKey.get(key);
+            if (target == null || trimToEmpty(target.route()).isBlank()) {
+                continue;
+            }
+
+            String label = trimToEmpty(target.displayName()).isBlank()
+                    ? key
+                    : target.displayName();
+
+            chips.append("<li>")
+                    .append("<a class=\"seo-chip\" href=\"")
+                    .append(escapeHtml(target.route()))
+                    .append("\" data-entry-key=\"")
+                    .append(escapeHtml(key))
+                    .append("\">")
+                    .append(escapeHtml(label))
+                    .append("</a>")
                     .append("</li>");
         }
+        if (chips.length() == "<ul class=\"seo-chipList\">".length()) {
+            return "";
+        }
+
         chips.append("</ul>");
         return chips.toString();
     }
@@ -683,6 +1026,12 @@ public class SeoRegenerationService {
             List<String> descriptionLines,
             List<String> referenceKeys,
             String slug
+    ) {
+    }
+
+    record ReferenceTarget(
+            String displayName,
+            String route
     ) {
     }
 

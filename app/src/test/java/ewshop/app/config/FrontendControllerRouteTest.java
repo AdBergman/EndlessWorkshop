@@ -125,6 +125,33 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void servesGeneratedEncyclopediaRootAndCategoryPagesWhenPresent() throws Exception {
+        Path externalEncyclopedia = Path.of("build/test-generated-seo/encyclopedia/index.html");
+        Path externalAbilities = Path.of("build/test-generated-seo/encyclopedia/abilities/index.html");
+        Files.createDirectories(externalEncyclopedia.getParent());
+        Files.createDirectories(externalAbilities.getParent());
+        Files.writeString(externalEncyclopedia, "<!doctype html><title>encyclopedia root</title>");
+        Files.writeString(externalAbilities, "<!doctype html><title>abilities index</title>");
+
+        try {
+            mockMvc.perform(get("/encyclopedia"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/index.html"));
+
+            mockMvc.perform(get("/encyclopedia/"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/index.html"));
+
+            mockMvc.perform(get("/encyclopedia/abilities"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/abilities/index.html"));
+        } finally {
+            Files.deleteIfExists(externalEncyclopedia);
+            Files.deleteIfExists(externalAbilities);
+        }
+    }
+
+    @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
         mockMvc.perform(get("/tech/stonework"))
                 .andExpect(status().isNotFound());

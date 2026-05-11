@@ -32,6 +32,15 @@ public class FrontendController {
         return "forward:/" + page + ".html";
     }
 
+    @RequestMapping(value = {"/encyclopedia", "/encyclopedia/"})
+    public String forwardGeneratedEncyclopediaIndex() {
+        if (seoOutputLocator.hasGeneratedIndex("encyclopedia")) {
+            return "forward:" + seoOutputLocator.getGeneratedForwardPath("encyclopedia");
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
     @RequestMapping(value = {
             "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
             "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"

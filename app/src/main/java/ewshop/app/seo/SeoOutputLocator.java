@@ -31,12 +31,24 @@ public class SeoOutputLocator {
         return outputRoot.resolve(page).resolve(entryKey).resolve("index.html");
     }
 
+    public Path getGeneratedIndexFile(String page) {
+        return outputRoot.resolve(page).resolve("index.html");
+    }
+
     public Path getFeaturedEntityDirectory(String page) {
         return outputRoot.resolve(page);
     }
 
+    public boolean hasGeneratedIndex(String page) {
+        return Files.isRegularFile(getGeneratedIndexFile(page));
+    }
+
     public boolean hasGeneratedFeaturedEntity(String page, String entryKey) {
         return Files.isRegularFile(getFeaturedEntityFile(page, entryKey));
+    }
+
+    public String getGeneratedForwardPath(String page) {
+        return "/__generated-seo/" + page + "/index.html";
     }
 
     public String getGeneratedForwardPath(String page, String entryKey) {
