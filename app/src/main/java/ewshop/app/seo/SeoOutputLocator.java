@@ -25,15 +25,15 @@ public class SeoOutputLocator {
     }
 
     public Path getFeaturedEntityFile(String page, String entryKey) {
-        return outputRoot.resolve(page).resolve(entryKey).resolve("index.html");
+        return outputRoot.resolve("encyclopedia").resolve(page).resolve(entryKey).resolve("index.html");
+    }
+
+    public Path getEncyclopediaCategoryFile(String page) {
+        return outputRoot.resolve("encyclopedia").resolve(page).resolve("index.html");
     }
 
     public Path getGeneratedIndexFile(String page) {
         return outputRoot.resolve(page).resolve("index.html");
-    }
-
-    public Path getFeaturedEntityDirectory(String page) {
-        return outputRoot.resolve(page);
     }
 
     public boolean hasGeneratedIndex(String page) {
@@ -44,12 +44,20 @@ public class SeoOutputLocator {
         return Files.isRegularFile(getFeaturedEntityFile(page, entryKey));
     }
 
+    public boolean hasGeneratedEncyclopediaCategory(String page) {
+        return Files.isRegularFile(getEncyclopediaCategoryFile(page));
+    }
+
     public String getGeneratedForwardPath(String page) {
         return "/__generated-seo/" + page + "/index.html";
     }
 
     public String getGeneratedForwardPath(String page, String entryKey) {
-        return "/__generated-seo/" + page + "/" + entryKey + "/index.html";
+        return "/__generated-seo/encyclopedia/" + page + "/" + entryKey + "/index.html";
+    }
+
+    public String getGeneratedCategoryForwardPath(String page) {
+        return "/__generated-seo/encyclopedia/" + page + "/index.html";
     }
 
     public Path getSitemapFile() {

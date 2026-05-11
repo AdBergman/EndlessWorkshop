@@ -63,18 +63,24 @@ class FrontendControllerRouteTest {
 
         mockMvc.perform(get("/tech/workshop/"))
                 .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/encyclopedia/tech/workshop"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void prefersExternalGeneratedSeoOutputWhenPresent() throws Exception {
-        Path externalWorkshop = Path.of("build/test-generated-seo/tech/workshop/index.html");
+        Path externalWorkshop = Path.of("build/test-generated-seo/encyclopedia/tech/workshop/index.html");
         Files.createDirectories(externalWorkshop.getParent());
         Files.writeString(externalWorkshop, "<!doctype html><title>external workshop</title>");
 
         try {
-            mockMvc.perform(get("/tech/workshop"))
+            mockMvc.perform(get("/encyclopedia/tech/workshop"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/tech/workshop/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/workshop/index.html"));
+
+            mockMvc.perform(get("/tech/workshop"))
+                    .andExpect(status().isNotFound());
         } finally {
             Files.deleteIfExists(externalWorkshop);
         }
@@ -82,18 +88,18 @@ class FrontendControllerRouteTest {
 
     @Test
     void servesGeneratedTechPageForAnyGeneratedSlug() throws Exception {
-        Path externalStonework = Path.of("build/test-generated-seo/tech/stonework/index.html");
+        Path externalStonework = Path.of("build/test-generated-seo/encyclopedia/tech/stonework/index.html");
         Files.createDirectories(externalStonework.getParent());
         Files.writeString(externalStonework, "<!doctype html><title>external stonework</title>");
 
         try {
-            mockMvc.perform(get("/tech/stonework"))
+            mockMvc.perform(get("/encyclopedia/tech/stonework"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/tech/stonework/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/stonework/index.html"));
 
-            mockMvc.perform(get("/tech/stonework/"))
+            mockMvc.perform(get("/encyclopedia/tech/stonework/"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/tech/stonework/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/stonework/index.html"));
         } finally {
             Files.deleteIfExists(externalStonework);
         }
@@ -101,21 +107,21 @@ class FrontendControllerRouteTest {
 
     @Test
     void servesGeneratedPagesForNonTechKindsWhenPresent() throws Exception {
-        Path externalSentinel = Path.of("build/test-generated-seo/units/sentinel/index.html");
-        Path externalWorks = Path.of("build/test-generated-seo/districts/works/index.html");
+        Path externalSentinel = Path.of("build/test-generated-seo/encyclopedia/units/sentinel/index.html");
+        Path externalWorks = Path.of("build/test-generated-seo/encyclopedia/districts/works/index.html");
         Files.createDirectories(externalSentinel.getParent());
         Files.createDirectories(externalWorks.getParent());
         Files.writeString(externalSentinel, "<!doctype html><title>external sentinel</title>");
         Files.writeString(externalWorks, "<!doctype html><title>external works</title>");
 
         try {
-            mockMvc.perform(get("/units/sentinel"))
+            mockMvc.perform(get("/encyclopedia/units/sentinel"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/units/sentinel/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/units/sentinel/index.html"));
 
-            mockMvc.perform(get("/districts/works"))
+            mockMvc.perform(get("/encyclopedia/districts/works"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/districts/works/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/districts/works/index.html"));
         } finally {
             Files.deleteIfExists(externalSentinel);
             Files.deleteIfExists(externalWorks);

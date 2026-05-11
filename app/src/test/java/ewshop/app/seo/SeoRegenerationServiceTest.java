@@ -70,27 +70,27 @@ class SeoRegenerationServiceTest {
 
         SeoRegenerationResult result = service.regeneratePrototypePages();
 
-        Path workshopTechFile = tempDir.resolve("tech/workshop/index.html");
-        Path stoneworkTechFile = tempDir.resolve("tech/stonework/index.html");
-        Path sentinelUnitFile = tempDir.resolve("units/sentinel/index.html");
-        Path klaxDistrictFile = tempDir.resolve("districts/klax-extractor/index.html");
-        Path workshopImprovementFile = tempDir.resolve("improvements/workshop/index.html");
+        Path workshopTechFile = tempDir.resolve("encyclopedia/tech/workshop/index.html");
+        Path stoneworkTechFile = tempDir.resolve("encyclopedia/tech/stonework/index.html");
+        Path sentinelUnitFile = tempDir.resolve("encyclopedia/units/sentinel/index.html");
+        Path klaxDistrictFile = tempDir.resolve("encyclopedia/districts/klax-extractor/index.html");
+        Path workshopImprovementFile = tempDir.resolve("encyclopedia/improvements/workshop/index.html");
         Path encyclopediaFile = tempDir.resolve("encyclopedia/index.html");
         Path encyclopediaTechFile = tempDir.resolve("encyclopedia/tech/index.html");
         Path sitemapFile = tempDir.resolve("sitemap.xml");
 
         assertThat(result.generatedCount()).isEqualTo(10);
         assertThat(result.generatedRoutes()).containsExactly(
-                "/districts/klax-extractor",
                 "/encyclopedia",
                 "/encyclopedia/districts",
+                "/encyclopedia/districts/klax-extractor",
                 "/encyclopedia/improvements",
+                "/encyclopedia/improvements/workshop",
                 "/encyclopedia/tech",
+                "/encyclopedia/tech/stonework",
+                "/encyclopedia/tech/workshop",
                 "/encyclopedia/units",
-                "/improvements/workshop",
-                "/tech/stonework",
-                "/tech/workshop",
-                "/units/sentinel"
+                "/encyclopedia/units/sentinel"
         );
         assertThat(result.skippedCount()).isEqualTo(4);
         assertThat(result.duplicateCount()).isEqualTo(2);
@@ -135,17 +135,17 @@ class SeoRegenerationServiceTest {
         assertThat(workshopTechHtml).doesNotContain("<li>Unlocks district planning through early industry planning.</li>");
         assertThat(workshopTechHtml).contains("+2 Industry per District Level");
         assertThat(workshopTechHtml).contains(">Related<");
-        assertThat(workshopTechHtml).contains("<a class=\"seo-chip\" href=\"/districts/klax-extractor\" data-entry-key=\"District_Klax\">Klax Extractor</a>");
-        assertThat(workshopTechHtml).contains("<a class=\"seo-chip\" href=\"/improvements/workshop\" data-entry-key=\"Improvement_Workshop\">Workshop</a>");
+        assertThat(workshopTechHtml).contains("<a class=\"seo-chip\" href=\"/encyclopedia/districts/klax-extractor\" data-entry-key=\"District_Klax\">Klax Extractor</a>");
+        assertThat(workshopTechHtml).contains("<a class=\"seo-chip\" href=\"/encyclopedia/improvements/workshop\" data-entry-key=\"Improvement_Workshop\">Workshop</a>");
         assertThat(workshopTechHtml).doesNotContain("data-entry-key=\"District_Workshop\"");
         assertThat(workshopTechHtml).doesNotContain("data-entry-key=\"Industry\"");
         assertThat(workshopTechHtml).doesNotContain(">District_Klax<");
         assertThat(workshopTechHtml).doesNotContain(">Improvement_Workshop<");
         assertThat(workshopTechHtml).contains("Back to Codex");
-        assertThat(workshopTechHtml).contains("<a class=\"seo-linkButton entity-page__actionLink\" href=\"/encyclopedia\">Encyclopedia</a>");
-        assertThat(workshopTechHtml).contains("<a class=\"seo-linkButton entity-page__actionLink\" href=\"/encyclopedia/tech\">Browse Technologies</a>");
+        assertThat(workshopTechHtml).doesNotContain("<a class=\"seo-linkButton entity-page__actionLink\" href=\"/encyclopedia\">Encyclopedia</a>");
+        assertThat(workshopTechHtml).doesNotContain("<a class=\"seo-linkButton entity-page__actionLink\" href=\"/encyclopedia/tech\">Browse Technologies</a>");
         assertThat(workshopTechHtml).contains("Browse Tech");
-        assertThat(workshopTechHtml).contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/tech/workshop\" />");
+        assertThat(workshopTechHtml).contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/encyclopedia/tech/workshop\" />");
         assertThat(workshopTechHtml).contains("\"@type\":\"WebPage\"");
         assertThat(workshopTechHtml).contains("\"@type\":\"BreadcrumbList\"");
         assertThat(workshopTechHtml).contains("\"name\":\"Encyclopedia\",\"item\":\"https://endlessworkshop.dev/encyclopedia\"");
@@ -158,7 +158,7 @@ class SeoRegenerationServiceTest {
 
         assertThat(stoneworkTechFile).exists();
         assertThat(Files.readString(stoneworkTechFile))
-                .contains("https://endlessworkshop.dev/tech/stonework")
+                .contains("https://endlessworkshop.dev/encyclopedia/tech/stonework")
                 .contains("Improves masonry logistics for defended cities.")
                 .doesNotContain("Unlocks fortified district construction.");
 
@@ -170,7 +170,8 @@ class SeoRegenerationServiceTest {
                 .contains("Movement Points")
                 .doesNotContain("MovementPoints Movement Points")
                 .contains("Browse Units")
-                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/units/sentinel\" />");
+                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/encyclopedia/units/sentinel\" />")
+                .doesNotContain("href=\"/encyclopedia/units\">Browse Units</a>");
 
         assertThat(klaxDistrictFile).exists();
         assertThat(Files.readString(klaxDistrictFile))
@@ -182,12 +183,12 @@ class SeoRegenerationServiceTest {
                 .doesNotContain("Prototype •")
                 .doesNotContain("Browse Tech")
                 .doesNotContain("Browse Units")
-                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/districts/klax-extractor\" />");
+                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/encyclopedia/districts/klax-extractor\" />");
 
         assertThat(workshopImprovementFile).exists();
         assertThat(Files.readString(workshopImprovementFile))
                 .contains("Workshop Improvement Reference | Endless Workshop")
-                .contains("https://endlessworkshop.dev/improvements/workshop");
+                .contains("https://endlessworkshop.dev/encyclopedia/improvements/workshop");
 
         assertThat(encyclopediaFile).exists();
         assertThat(Files.readString(encyclopediaFile))
@@ -199,10 +200,10 @@ class SeoRegenerationServiceTest {
         assertThat(encyclopediaTechFile).exists();
         assertThat(Files.readString(encyclopediaTechFile))
                 .contains("Technologies Encyclopedia | Endless Workshop")
-                .contains("<a class=\"encyclopedia-page__entryRow\" href=\"/tech/workshop\" data-entry-key=\"Technology_District_Tier1_Industry\">")
+                .contains("<a class=\"encyclopedia-page__entryRow\" href=\"/encyclopedia/tech/workshop\" data-entry-key=\"Technology_District_Tier1_Industry\">")
                 .contains("<span class=\"encyclopedia-page__entryTitle\">Workshop</span>")
                 .contains("Unlocks district planning through early industry planning.")
-                .contains("<a class=\"encyclopedia-page__entryRow\" href=\"/tech/stonework\" data-entry-key=\"Technology_City_Tier3_Defense\">");
+                .contains("<a class=\"encyclopedia-page__entryRow\" href=\"/encyclopedia/tech/stonework\" data-entry-key=\"Technology_City_Tier3_Defense\">");
 
         assertThat(tempDir.resolve("tech/legacy-page/index.html")).doesNotExist();
         assertThat(tempDir.resolve("units/legacy-unit/index.html")).doesNotExist();
@@ -217,16 +218,16 @@ class SeoRegenerationServiceTest {
                 "<loc>https://endlessworkshop.dev/summary</loc>",
                 "<loc>https://endlessworkshop.dev/mods</loc>",
                 "<loc>https://endlessworkshop.dev/info</loc>",
-                "<loc>https://endlessworkshop.dev/districts/klax-extractor</loc>",
                 "<loc>https://endlessworkshop.dev/encyclopedia</loc>",
                 "<loc>https://endlessworkshop.dev/encyclopedia/districts</loc>",
+                "<loc>https://endlessworkshop.dev/encyclopedia/districts/klax-extractor</loc>",
                 "<loc>https://endlessworkshop.dev/encyclopedia/improvements</loc>",
+                "<loc>https://endlessworkshop.dev/encyclopedia/improvements/workshop</loc>",
                 "<loc>https://endlessworkshop.dev/encyclopedia/tech</loc>",
+                "<loc>https://endlessworkshop.dev/encyclopedia/tech/stonework</loc>",
+                "<loc>https://endlessworkshop.dev/encyclopedia/tech/workshop</loc>",
                 "<loc>https://endlessworkshop.dev/encyclopedia/units</loc>",
-                "<loc>https://endlessworkshop.dev/improvements/workshop</loc>",
-                "<loc>https://endlessworkshop.dev/tech/stonework</loc>",
-                "<loc>https://endlessworkshop.dev/tech/workshop</loc>",
-                "<loc>https://endlessworkshop.dev/units/sentinel</loc>"
+                "<loc>https://endlessworkshop.dev/encyclopedia/units/sentinel</loc>"
         );
         assertThat(Files.readString(sitemapFile)).doesNotContain("legacy-page");
     }
@@ -243,14 +244,14 @@ class SeoRegenerationServiceTest {
         ));
 
         SeoRegenerationResult result = service.regeneratePrototypePages();
-        String workshopUnitHtml = Files.readString(tempDir.resolve("units/workshop/index.html"));
+        String workshopUnitHtml = Files.readString(tempDir.resolve("encyclopedia/units/workshop/index.html"));
 
         assertThat(result.generatedRoutes()).containsExactly(
                 "/encyclopedia",
                 "/encyclopedia/tech",
+                "/encyclopedia/tech/workshop",
                 "/encyclopedia/units",
-                "/tech/workshop",
-                "/units/workshop"
+                "/encyclopedia/units/workshop"
         );
         assertThat(result.skippedCount()).isZero();
         assertThat(result.duplicateCount()).isZero();

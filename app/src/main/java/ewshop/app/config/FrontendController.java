@@ -51,8 +51,22 @@ public class FrontendController {
     }
 
     @RequestMapping(value = {
-            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
-            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
+            "/encyclopedia/{page:[a-z][a-z0-9-]*}",
+            "/encyclopedia/{page:[a-z][a-z0-9-]*}/"
+    })
+    public String forwardGeneratedEncyclopediaCategory(@PathVariable String page) {
+        validateSeoRouteSegment(page);
+
+        if (seoOutputLocator.hasGeneratedEncyclopediaCategory(page)) {
+            return "forward:" + seoOutputLocator.getGeneratedCategoryForwardPath(page);
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = {
+            "/encyclopedia/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
+            "/encyclopedia/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
     })
     public String forwardFeaturedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
         validateSeoRouteSegment(page);
@@ -62,6 +76,16 @@ public class FrontendController {
             return "forward:" + seoOutputLocator.getGeneratedForwardPath(page, entryKey);
         }
 
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    @RequestMapping(value = {
+            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
+            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
+    })
+    public String rejectLegacyGeneratedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
+        validateSeoRouteSegment(page);
+        validateSeoRouteSegment(entryKey);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 

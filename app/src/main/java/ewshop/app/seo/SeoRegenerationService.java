@@ -106,7 +106,7 @@ public class SeoRegenerationService {
         );
         for (Map.Entry<String, List<PageCandidate>> entry : candidatesByKind(candidates).entrySet()) {
             writeUtf8(
-                    seoOutputLocator.getFeaturedEntityFile(ENCYCLOPEDIA_PAGE, entry.getKey()),
+                    seoOutputLocator.getEncyclopediaCategoryFile(entry.getKey()),
                     renderEncyclopediaKindHtml(entry.getKey(), entry.getValue())
             );
         }
@@ -212,7 +212,7 @@ public class SeoRegenerationService {
     }
 
     private void deleteGeneratedKindOutput(String kind) {
-        Path kindOutputDirectory = seoOutputLocator.getFeaturedEntityDirectory(kind);
+        Path kindOutputDirectory = seoOutputLocator.getOutputRoot().resolve(kind);
         if (!Files.exists(kindOutputDirectory)) {
             return;
         }
@@ -238,7 +238,7 @@ public class SeoRegenerationService {
             return List.of();
         }
 
-        try (Stream<Path> pathStream = Files.walk(outputRoot, 3)) {
+        try (Stream<Path> pathStream = Files.walk(outputRoot, 4)) {
             LinkedHashSet<String> routes = pathStream
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().equals("index.html"))
@@ -260,8 +260,20 @@ public class SeoRegenerationService {
             return "/" + relativePath.getName(0);
         }
 
+        if (relativePath.getNameCount() == 3
+                && ENCYCLOPEDIA_PAGE.equals(relativePath.getName(0).toString())
+                && "index.html".equals(relativePath.getName(2).toString())) {
+            return encyclopediaRouteFor(relativePath.getName(1).toString());
+        }
+
         if (relativePath.getNameCount() == 3 && "index.html".equals(relativePath.getName(2).toString())) {
             return routeFor(relativePath.getName(0).toString(), relativePath.getName(1).toString());
+        }
+
+        if (relativePath.getNameCount() == 4
+                && ENCYCLOPEDIA_PAGE.equals(relativePath.getName(0).toString())
+                && "index.html".equals(relativePath.getName(3).toString())) {
+            return routeFor(relativePath.getName(1).toString(), relativePath.getName(2).toString());
         }
 
         return "";
@@ -274,10 +286,11 @@ public class SeoRegenerationService {
         Map<String, MutableKindCounts> countsByKind = new LinkedHashMap<>();
 
         for (String route : generatedRoutes) {
-            if (route.equals("/" + ENCYCLOPEDIA_PAGE) || route.startsWith("/" + ENCYCLOPEDIA_PAGE + "/")) {
+            String[] routeParts = route.split("/");
+            if (routeParts.length < 4 || !ENCYCLOPEDIA_PAGE.equals(routeParts[1])) {
                 continue;
             }
-            String kind = route.substring(1, route.indexOf('/', 1));
+            String kind = routeParts[2];
             countsByKind.computeIfAbsent(kind, ignored -> new MutableKindCounts()).generatedCount++;
         }
 
@@ -298,11 +311,11 @@ public class SeoRegenerationService {
     }
 
     private static String routeFor(String kind, String slug) {
-        return "/" + kind + "/" + slug;
+        return "/" + ENCYCLOPEDIA_PAGE + "/" + kind + "/" + slug;
     }
 
     private static String encyclopediaRouteFor(String kind) {
-        return routeFor(ENCYCLOPEDIA_PAGE, kind);
+        return "/" + ENCYCLOPEDIA_PAGE + "/" + kind;
     }
 
     private void writeSitemap(List<String> generatedRoutes) {
@@ -692,8 +705,6 @@ public class SeoRegenerationService {
     private static String renderActionRow(String kind) {
         List<String> actions = new ArrayList<>();
         actions.add(renderActionLink("/codex", "Back to Codex"));
-        actions.add(renderActionLink("/" + ENCYCLOPEDIA_PAGE, "Encyclopedia"));
-        actions.add(renderActionLink(encyclopediaRouteFor(kind), "Browse " + pluralKindLabelFor(kind)));
 
         if (TECH_KIND.equals(kind)) {
             actions.add(renderActionLink("/tech", "Browse Tech"));

@@ -50,18 +50,24 @@ class FrontendControllerProductionFallbackTest {
 
         mockMvc.perform(get("/districts/works"))
                 .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/encyclopedia/tech/workshop"))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void stillServesExternalWorkshopWhenPresent() throws Exception {
-        Path externalWorkshop = Path.of("build/test-generated-seo-prod/tech/workshop/index.html");
+        Path externalWorkshop = Path.of("build/test-generated-seo-prod/encyclopedia/tech/workshop/index.html");
         Files.createDirectories(externalWorkshop.getParent());
         Files.writeString(externalWorkshop, "<!doctype html><title>external workshop</title>");
 
         try {
-            mockMvc.perform(get("/tech/workshop"))
+            mockMvc.perform(get("/encyclopedia/tech/workshop"))
                     .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/tech/workshop/index.html"));
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/workshop/index.html"));
+
+            mockMvc.perform(get("/tech/workshop"))
+                    .andExpect(status().isNotFound());
         } finally {
             Files.deleteIfExists(externalWorkshop);
         }

@@ -51,7 +51,7 @@ class SeoAdminControllerTest {
     void regenerateSeo_returnsResultDto_whenAuthorized() throws Exception {
         SeoRegenerationResult result = new SeoRegenerationResult(
                 1,
-                List.of("/tech/workshop"),
+                List.of("/encyclopedia/tech/workshop"),
                 0,
                 0,
                 Map.of(),
@@ -67,7 +67,7 @@ class SeoAdminControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.generatedCount").value(1))
-                .andExpect(jsonPath("$.generatedRoutes[0]").value("/tech/workshop"))
+                .andExpect(jsonPath("$.generatedRoutes[0]").value("/encyclopedia/tech/workshop"))
                 .andExpect(jsonPath("$.skippedCount").value(0))
                 .andExpect(jsonPath("$.duplicateCount").value(0))
                 .andExpect(jsonPath("$.skippedByReason").isMap())
