@@ -26,7 +26,6 @@ public class SeoRegenerationService {
 
     static final String TECH_KIND = "tech";
     static final String UNITS_KIND = "units";
-    static final String WORKSHOP_ENTRY_KEY = "workshop";
     static final String ENCYCLOPEDIA_PAGE = "encyclopedia";
 
     private static final String DUPLICATE_SLUG_REASON = "duplicate-slug";
@@ -71,7 +70,6 @@ public class SeoRegenerationService {
 
     public SeoRegenerationResult regeneratePrototypePages() {
         List<String> warnings = new ArrayList<>();
-        List<String> errors = new ArrayList<>();
 
         CodexFilterResult filterResult = codexFilterService.filter(codexService.getAllCodexEntries());
         addDuplicateSlugWarnings(filterResult, warnings);
@@ -127,7 +125,7 @@ public class SeoRegenerationService {
                 Map.copyOf(filterResult.skippedByReason()),
                 Map.copyOf(exportKindCounts),
                 List.copyOf(warnings),
-                List.copyOf(errors),
+                List.of(),
                 true
         );
     }
@@ -331,10 +329,6 @@ public class SeoRegenerationService {
         } catch (IOException exception) {
             throw new UncheckedIOException("Failed to write SEO output: " + targetFile, exception);
         }
-    }
-
-    static String renderEntityHtml(PageCandidate candidate, String route) {
-        return renderEntityHtml(candidate, route, Map.of());
     }
 
     static String renderEntityHtml(
@@ -782,7 +776,7 @@ public class SeoRegenerationService {
         List<String> parts = new ArrayList<>();
         parts.add(kindLabel);
         parts.addAll(metadataHighlights);
-        return String.join(" \u2022 ", parts);
+        return String.join(" • ", parts);
     }
 
     private static String renderDescriptionContent(ParsedDescription description) {
@@ -951,7 +945,7 @@ public class SeoRegenerationService {
 
     private static String normalizeContentLine(String value) {
         String normalized = trimToEmpty(value)
-                .replaceAll("\\[[^\\]]+]", " ")
+                .replaceAll("\\[[^]]+]", " ")
                 .replaceAll("([a-z])([A-Z])", "$1 $2")
                 .replaceAll("\\s+", " ")
                 .trim();
@@ -988,7 +982,7 @@ public class SeoRegenerationService {
         }
 
         boolean hasSentencePunctuation = line.contains(".") || line.contains("!") || line.contains("?");
-        long wordCount = List.of(line.split("\\s+")).stream()
+        long wordCount = Stream.of(line.split("\\s+"))
                 .map(SeoRegenerationService::normalizedToken)
                 .filter(token -> !token.isBlank())
                 .count();
