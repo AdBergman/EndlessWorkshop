@@ -97,10 +97,12 @@ Important codex nuance: `codexStore` already has `entriesByKindKey`, which is th
 
 Recommended sequence:
 
-1. Add pure `entityRef` helpers and tests.
+1. Add pure `entityRef` helpers and tests. Done in `src/lib/entityRef/entityRef.ts`.
 2. Use them in codex related-entry resolution while preserving existing raw-key behavior.
 3. Move tech unlock refs onto entity refs at the UI adapter boundary.
 4. Only then consider a composed `entityGraph` selector/hook.
+
+Implementation note: codex refs keep the base `{ kind, key }` shape, but their key is an encoded `exportKind + entryKey` identity. This preserves `entriesByKindKey` semantics and avoids treating raw codex entry keys as globally unique.
 
 ## Descriptor And Token AST Proposal
 
