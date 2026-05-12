@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
@@ -7,6 +8,7 @@ import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
+import { useTechStore } from "@/stores/techStore";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -36,17 +38,21 @@ const Probe = () => {
                 {improvements.get("Improvement_Public_Library")?.displayName ?? "missing"}
             </div>
             <div data-testid="tech-count">{techs.size}</div>
+            <div data-testid="tech-label">
+                {techs.get("Tech_Kin_Workshop")?.name ?? "missing"}
+            </div>
             <div data-testid="selected-tech-count">{selectedTechs.length}</div>
             <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
         </div>
     );
 };
 
-describe("GameDataProvider district/improvement compatibility adapter", () => {
+describe("GameDataProvider normalized store compatibility adapter", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
+        useTechStore.getState().reset();
         useCodexStore.getState().reset();
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -72,7 +78,20 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
                 cost: ["100 Industry"],
             },
         ]);
-        mockedApiClient.getTechs.mockResolvedValue([]);
+        mockedApiClient.getTechs.mockResolvedValue([
+            {
+                techKey: "Tech_Kin_Workshop",
+                name: "Kin Workshop",
+                era: 1,
+                type: "Industry",
+                unlocks: [],
+                descriptionLines: ["Build better tools."],
+                prereq: null,
+                factions: ["kin"],
+                excludes: null,
+                coords: { xPct: 10, yPct: 20 },
+            },
+        ]);
         mockedApiClient.getUnits.mockResolvedValue([
             {
                 unitKey: "Unit_Kin_Scout",
@@ -112,9 +131,89 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
             expect(screen.getByTestId("improvement-label")).toHaveTextContent("Public Library");
         });
 
-        expect(screen.getByTestId("tech-count")).toHaveTextContent("0");
+        expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
+    });
+
+    it("continues to expose techStore-owned techs through the legacy context Map adapter", async () => {
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("tech-label")).toHaveTextContent("Kin Workshop");
+        });
+
+        expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
+        expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
+        expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
+    });
+
+    it("keeps the legacy setTechs adapter backed by techStore without moving selection state", async () => {
+        const user = userEvent.setup();
+
+        const AdapterProbe = () => {
+            const { techs, setTechs, selectedTechs, selectedFaction } = useGameData();
+
+            return (
+                <div>
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setTechs?.((prev) => {
+                                const next = new Map(prev);
+                                next.set("Tech_Adapter_Insert", {
+                                    techKey: "Tech_Adapter_Insert",
+                                    name: "Adapter Insert",
+                                    era: 1,
+                                    type: "Industry",
+                                    unlocks: [],
+                                    descriptionLines: [],
+                                    prereq: null,
+                                    factions: ["KIN"],
+                                    excludes: null,
+                                    coords: { xPct: 1, yPct: 2 },
+                                });
+                                return next;
+                            })
+                        }
+                    >
+                        Insert tech
+                    </button>
+                    <div data-testid="adapter-tech-label">
+                        {techs.get("Tech_Adapter_Insert")?.name ?? "missing"}
+                    </div>
+                    <div data-testid="adapter-store-label">
+                        {useTechStore.getState().getTechByKey("Tech_Adapter_Insert")?.name ?? "missing"}
+                    </div>
+                    <div data-testid="adapter-selected-tech-count">{selectedTechs.length}</div>
+                    <div data-testid="adapter-selected-faction">{selectedFaction.uiLabel}</div>
+                </div>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <AdapterProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Insert tech" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("adapter-tech-label")).toHaveTextContent("Adapter Insert");
+        });
+
+        expect(screen.getByTestId("adapter-store-label")).toHaveTextContent("Adapter Insert");
+        expect(screen.getByTestId("adapter-selected-tech-count")).toHaveTextContent("0");
+        expect(screen.getByTestId("adapter-selected-faction")).toHaveTextContent("kin");
     });
 
     it("keeps identical district and improvement keys in separate context maps", async () => {

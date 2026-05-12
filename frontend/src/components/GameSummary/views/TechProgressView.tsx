@@ -6,21 +6,20 @@ import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
 import "../TechProgress.css";
 
+import type { Tech } from "@/types/dataTypes";
 import type { TechOrderEntry } from "@/types/endGameReport";
 import { EMPIRE_COLORS } from "./empireStats.helpers";
-import { buildEmpireMeta, groupTechOrderEntries, type EmpireMeta } from "./techProgress.helpers";
+import {
+    buildEmpireMeta,
+    groupTechOrderEntries,
+    resolveTechOrderDisplayLabel,
+    searchableTechOrderText,
+    techKeyOf,
+    type EmpireMeta,
+} from "./techProgress.helpers";
+import { selectTechsByKey, useTechStore } from "@/stores/techStore";
 
 type Mode = "global" | "empire";
-
-function displayLabel(e: TechOrderEntry): string {
-    const dn = e.technologyDisplayName;
-    if (dn && dn.startsWith("%")) return e.technologyDefinitionName;
-    return dn || e.technologyDefinitionName;
-}
-
-function techKeyOf(e: TechOrderEntry): string {
-    return e.technologyDefinitionName;
-}
 
 function empireColor(idx: number): string {
     return EMPIRE_COLORS[idx % EMPIRE_COLORS.length];
@@ -30,15 +29,13 @@ function tokenizeFilter(input: string): string[] {
     return input.toLowerCase().trim().split(/\s+/g).filter(Boolean);
 }
 
-function searchableTechText(e: TechOrderEntry): string {
-    const label = displayLabel(e);
-    const def = e.technologyDefinitionName ?? "";
-    return `${label} ${def}`.toLowerCase();
-}
-
-function matchesTokenFilter(e: TechOrderEntry, tokens: string[]): boolean {
+function matchesTokenFilter(
+    e: TechOrderEntry,
+    tokens: string[],
+    techsByKey: Record<string, Tech>
+): boolean {
     if (tokens.length === 0) return true;
-    const hay = searchableTechText(e);
+    const hay = searchableTechOrderText(e, techsByKey);
     for (const t of tokens) {
         if (!hay.includes(t)) return false;
     }
@@ -47,6 +44,7 @@ function matchesTokenFilter(e: TechOrderEntry, tokens: string[]): boolean {
 
 export default function TechProgressView() {
     const state = useEndGameReportStore((s) => s.state);
+    const techsByKey = useTechStore(selectTechsByKey);
     const navigate = useNavigate();
 
     const [mode, setMode] = useState<Mode>("global");
@@ -119,12 +117,14 @@ export default function TechProgressView() {
 
         for (const turn of turnsSorted) {
             const list = getEntriesForTurn(turn);
-            const filtered = filterTokens.length === 0 ? list : list.filter((e) => matchesTokenFilter(e, filterTokens));
+            const filtered = filterTokens.length === 0
+                ? list
+                : list.filter((e) => matchesTokenFilter(e, filterTokens, techsByKey));
             if (filtered.length > 0) out.push({ turn, entries: filtered });
         }
 
         return out;
-    }, [turnsSorted, filterTokens, mode, selectedEmpire, groupedGlobal, groupedByEmpire]);
+    }, [turnsSorted, filterTokens, mode, selectedEmpire, groupedGlobal, groupedByEmpire, techsByKey]);
 
     const matchCount = useMemo(() => {
         if (filterTokens.length === 0) return 0;
@@ -341,7 +341,7 @@ export default function TechProgressView() {
                                                         E{e.empireIndex}
                                                     </span>
                                                 ) : null}
-                                                {displayLabel(e)}
+                                                {resolveTechOrderDisplayLabel(e, techsByKey)}
                                             </span>
                                         );
                                     })}

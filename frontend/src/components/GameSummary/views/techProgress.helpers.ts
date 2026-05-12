@@ -1,4 +1,5 @@
 import type { AllStats, TechOrderEntry } from "@/types/endGameReport";
+import type { Tech } from "@/types/dataTypes";
 
 export type EmpireMeta = {
     idx: number;
@@ -85,4 +86,29 @@ export function groupTechOrderEntries(entries: TechOrderEntry[]): GroupedTechOrd
 
     // Do NOT sort: preserve exporter order within each turn.
     return { maxTurn, groupedGlobal, groupedByEmpire };
+}
+
+export function techKeyOf(e: TechOrderEntry): string {
+    return e.technologyDefinitionName;
+}
+
+export function resolveTechOrderDisplayLabel(
+    entry: TechOrderEntry,
+    techsByKey: Record<string, Tech>
+): string {
+    const reportDisplayName = cleanString(entry.technologyDisplayName);
+    if (reportDisplayName && !reportDisplayName.startsWith("%")) return reportDisplayName;
+
+    const tech = techsByKey[techKeyOf(entry)];
+    return tech?.name || techKeyOf(entry);
+}
+
+export function searchableTechOrderText(
+    entry: TechOrderEntry,
+    techsByKey: Record<string, Tech>
+): string {
+    const label = resolveTechOrderDisplayLabel(entry, techsByKey);
+    const def = entry.technologyDefinitionName ?? "";
+    const storeName = techsByKey[techKeyOf(entry)]?.name ?? "";
+    return `${label} ${def} ${storeName}`.toLowerCase();
 }

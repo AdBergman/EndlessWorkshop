@@ -7,18 +7,11 @@ import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
+import { useTechStore } from "@/stores/techStore";
 
 interface Props {
     children: ReactNode;
 }
-
-const normalizeTechs = (techData: Tech[]) =>
-    techData.map((t) => ({
-        ...t,
-        factions: (t.factions ?? []).map((f) => f.toUpperCase()),
-        descriptionLines: t.descriptionLines ?? [],
-        unlocks: t.unlocks ?? [],
-    }));
 
 const toKeyedMap = <T,>(
     items: T[],
@@ -41,8 +34,6 @@ const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
 });
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
-    const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
-
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
         toFactionInfoFromEnum(Faction.KIN)
     );
@@ -61,6 +52,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const loadDistricts = useDistrictStore((s) => s.loadDistricts);
     const loadImprovements = useImprovementStore((s) => s.loadImprovements);
     const loadUnits = useUnitStore((s) => s.loadUnits);
+    const techsByKey = useTechStore((s) => s.techsByKey);
+    const loadTechs = useTechStore((s) => s.loadTechs);
+    const refreshTechs = useTechStore((s) => s.refreshTechs);
+    const replaceTechs = useTechStore((s) => s.replaceTechs);
 
     const districts = useMemo(
         () => new Map(Object.entries(districtsByKey)),
@@ -70,6 +65,11 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const improvements = useMemo(
         () => new Map(Object.entries(improvementsByKey)),
         [improvementsByKey]
+    );
+
+    const techs = useMemo(
+        () => new Map(Object.entries(techsByKey)),
+        [techsByKey]
     );
 
     const codexByKindKey = useMemo(() => {
@@ -82,30 +82,20 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         return out;
     }, [codexEntriesByKind]);
 
-    const refreshTechs = useCallback(async () => {
-        try {
-            const techData = await apiClient.getTechs();
-            const normalized = normalizeTechs(techData);
-
-            const missingKey = normalized.some((t) => !t.techKey || !t.techKey.trim());
-            if (missingKey) {
-                setTechs(new Map());
-                return;
-            }
-
-            setTechs(toKeyedMap(normalized, (t) => t.techKey));
-        } catch (err) {
-            console.error("Failed to fetch techs from API.", err);
-            setTechs(new Map());
-        }
-    }, []);
+    const setTechs = useCallback<React.Dispatch<React.SetStateAction<Map<string, Tech>>>>(
+        (nextTechs) => {
+            const nextTechMap = typeof nextTechs === "function" ? nextTechs(techs) : nextTechs;
+            replaceTechs(Array.from(nextTechMap.values()));
+        },
+        [replaceTechs, techs]
+    );
 
     useEffect(() => {
         void loadDistricts();
         void loadImprovements();
         void loadUnits();
-        void refreshTechs();
-    }, [loadDistricts, loadImprovements, loadUnits, refreshTechs]);
+        void loadTechs();
+    }, [loadDistricts, loadImprovements, loadTechs, loadUnits]);
 
     useEffect(() => {
         void loadCodexEntries();

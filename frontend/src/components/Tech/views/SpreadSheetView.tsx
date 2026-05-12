@@ -18,25 +18,26 @@ import "react-toastify/dist/ReactToastify.css";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
+import { getTechsByKeys, selectTechsByKey, useTechStore } from "@/stores/techStore";
 
 const SpreadSheetView: React.FC = () => {
     const {
         selectedTechs,
         setSelectedTechs,
-        techs,
         createSavedTechBuild,
         selectedFaction,
     } = useGameData();
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const unitsByKey = useUnitStore(selectUnitsByKey);
+    const techsByKey = useTechStore(selectTechsByKey);
 
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
 
     const selectedTechObjects = useMemo(
-        () => selectedTechs.map((key) => techs.get(key)).filter((t): t is Tech => !!t),
-        [selectedTechs, techs]
+        () => getTechsByKeys(selectedTechs, techsByKey),
+        [selectedTechs, techsByKey]
     );
 
     useEffect(() => {
