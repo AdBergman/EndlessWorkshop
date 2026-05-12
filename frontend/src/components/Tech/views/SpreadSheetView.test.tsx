@@ -4,6 +4,8 @@ import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useTechStore } from "@/stores/techStore";
+import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { Faction, type Tech } from "@/types/dataTypes";
 
@@ -46,6 +48,8 @@ describe("SpreadSheetView passive tech reads", () => {
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
         useTechStore.getState().reset();
+        useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
 
         useTechStore.getState().replaceTechs([
             tech({
@@ -72,11 +76,22 @@ describe("SpreadSheetView passive tech reads", () => {
                 },
             },
         });
+
+        useTechPlannerStore.getState().setSelectedTechs(["Tech_Store_Selected"]);
     });
 
-    it("resolves selected tech records from techStore while selection stays in context", () => {
+    afterEach(() => {
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
+        useTechStore.getState().reset();
+        useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
+    });
+
+    it("resolves selected tech records from techStore and selected keys from techPlannerStore", () => {
         render(
-            <GameDataContext.Provider value={contextValue({ techs: new Map() })}>
+            <GameDataContext.Provider value={contextValue({ techs: new Map(), selectedTechs: [] })}>
                 <SpreadSheetView />
             </GameDataContext.Provider>
         );

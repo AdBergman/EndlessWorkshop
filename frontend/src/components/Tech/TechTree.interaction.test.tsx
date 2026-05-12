@@ -6,6 +6,9 @@ import GameDataContext, { type GameDataContextType } from "@/context/GameDataCon
 import TechTree from "@/components/Tech/TechTree";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import { Faction, type FactionInfo, type Tech } from "@/types/dataTypes";
+import { useTechStore } from "@/stores/techStore";
+import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 const tech = (overrides: Partial<Tech>): Tech => ({
     techKey: "Tech_Workshop",
@@ -47,6 +50,28 @@ const baseTechs = new Map<string, Tech>([
     ],
 ]);
 
+function seedTechTreeStores(initialSelectedTechs: string[] = []) {
+    useTechStore.getState().reset();
+    useTechPlannerStore.getState().reset();
+    useFactionSelectionStore.getState().reset();
+
+    useTechStore.getState().replaceTechs(Array.from(baseTechs.values()));
+    useFactionSelectionStore.getState().setSelectedFaction(kinFaction);
+    useTechPlannerStore.getState().setSelectedTechs(initialSelectedTechs);
+}
+
+function StoreProbe() {
+    const selectedTechs = useTechPlannerStore((state) => state.selectedTechs);
+    const selectedFaction = useFactionSelectionStore((state) => state.selectedFaction);
+
+    return (
+        <>
+            <div data-testid="selected-techs">{selectedTechs.join(",")}</div>
+            <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
+        </>
+    );
+}
+
 function StatefulGameData({
     children,
     initialSelectedTechs = [],
@@ -80,14 +105,23 @@ function StatefulGameData({
 }
 
 describe("TechTree selected tech interactions", () => {
+    beforeEach(() => {
+        seedTechTreeStores();
+    });
+
+    afterEach(() => {
+        useTechStore.getState().reset();
+        useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
+    });
+
     it("toggles tech selection on click while preserving selected order", async () => {
         const user = userEvent.setup();
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
-                <StatefulGameData>
-                    <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
-                </StatefulGameData>
+                <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
+                <StoreProbe />
             </MemoryRouter>
         );
 
@@ -108,9 +142,8 @@ describe("TechTree selected tech interactions", () => {
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
-                <StatefulGameData>
-                    <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
-                </StatefulGameData>
+                <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
+                <StoreProbe />
             </MemoryRouter>
         );
 
@@ -121,12 +154,12 @@ describe("TechTree selected tech interactions", () => {
 
     it("clears all selected techs", async () => {
         const user = userEvent.setup();
+        seedTechTreeStores(["Tech_First", "Tech_Second"]);
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
-                <StatefulGameData initialSelectedTechs={["Tech_First", "Tech_Second"]}>
-                    <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
-                </StatefulGameData>
+                <TechTree era={1} maxUnlockedEra={1} onEraChange={vi.fn()} />
+                <StoreProbe />
             </MemoryRouter>
         );
 

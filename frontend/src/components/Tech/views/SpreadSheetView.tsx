@@ -19,14 +19,18 @@ import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { getTechsByKeys, selectTechsByKey, useTechStore } from "@/stores/techStore";
+import {
+    selectSelectedTechs,
+    selectSetSelectedTechs,
+    useTechPlannerStore,
+} from "@/stores/techPlannerStore";
+import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 const SpreadSheetView: React.FC = () => {
-    const {
-        selectedTechs,
-        setSelectedTechs,
-        createSavedTechBuild,
-        selectedFaction,
-    } = useGameData();
+    const { createSavedTechBuild } = useGameData();
+    const selectedTechs = useTechPlannerStore(selectSelectedTechs);
+    const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const unitsByKey = useUnitStore(selectUnitsByKey);

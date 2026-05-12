@@ -8,13 +8,18 @@ import TechTooltip from "../Tooltips/TechTooltip";
 import EraProgressPanel from "./EraProgressPanel";
 import SelectAllButton from "@/components/Tech/SelectAllButton";
 import ClearAllButton from "./ClearAllButton";
-import { useGameData } from "@/context/GameDataContext";
 import { useTooltip } from "@/hooks/useTooltips";
 import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
 import { useSearchParams } from "react-router-dom";
 import AdminTechPlacementPanel from "@/components/Tech/adminPanel/AdminTechPlacementPanel";
 import { useTechTreeAdminPlacement } from "@/components/Tech/adminPanel/useTechTreeAdminPlacement";
-import { useTechStore } from "@/stores/techStore";
+import { selectTechs, useTechStore } from "@/stores/techStore";
+import {
+    selectSelectedTechs,
+    selectSetSelectedTechs,
+    useTechPlannerStore,
+} from "@/stores/techPlannerStore";
+import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 interface TechTreeProps {
     era: number;
@@ -26,11 +31,12 @@ const MIN_ERA = 1;
 const MAX_ERA = 6;
 
 const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra }) => {
-    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
+    const selectedTechs = useTechPlannerStore(selectSelectedTechs);
+    const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
+    const allTechs = useTechStore(selectTechs);
     const refreshTechs = useTechStore((s) => s.refreshTechs);
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300);
-
-    const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
 
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";

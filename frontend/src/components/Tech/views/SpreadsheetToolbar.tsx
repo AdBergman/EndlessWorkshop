@@ -2,12 +2,12 @@ import React, { useMemo } from "react";
 import { CSVLink } from "react-csv";
 import "./SpreadsheetToolbar.css";
 import { Tech, Improvement, District, Unit } from "@/types/dataTypes";
-import { useGameData } from "@/context/GameDataContext";
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
+import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
@@ -70,10 +70,10 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    onDeselectAll,
                                                                    generateShareLink,
                                                                    onSort,
-                                                                   activeSheet,
-                                                                   setActiveSheet,
-                                                               }) => {
-    const { selectedFaction } = useGameData();
+                                                               activeSheet,
+                                                               setActiveSheet,
+                                                           }) => {
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const unitsByKey = useUnitStore(selectUnitsByKey);

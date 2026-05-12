@@ -67,16 +67,18 @@ describe("tech data ownership migration scope", () => {
         expect(contextSource).not.toMatch(/refreshTechs/);
     });
 
-    it("keeps TechTree on the context adapter for selection while owning admin refresh locally", () => {
+    it("keeps TechTree on direct stores while owning admin refresh locally", () => {
         const treeSource = readSrc("components/Tech/TechTree.tsx");
         const containerSource = readSrc("components/Tech/TechContainer.tsx");
         const hydrationSource = readSrc("components/Tech/useTechRouteHydration.ts");
 
-        expect(treeSource).toMatch(/useGameData\(\)/);
+        expect(treeSource).not.toMatch(/useGameData\(\)/);
         expect(treeSource).toMatch(/selectedTechs/);
         expect(treeSource).toMatch(/setSelectedTechs/);
         expect(treeSource).toMatch(/refreshTechs/);
         expect(treeSource).toMatch(/useTechStore/);
+        expect(treeSource).toMatch(/useTechPlannerStore/);
+        expect(treeSource).toMatch(/useFactionSelectionStore/);
 
         expect(containerSource).not.toMatch(/useGameData\(\)/);
         expect(containerSource).not.toMatch(/useSharedBuildLoader|useDeepLinkedTech|useImportedTechListLoader/);
