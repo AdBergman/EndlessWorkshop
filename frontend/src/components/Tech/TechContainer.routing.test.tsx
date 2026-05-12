@@ -122,6 +122,28 @@ describe("TechContainer routing regressions", () => {
         window.history.pushState({}, "", "/");
     });
 
+    it("leaves unmatched deep-link URLs untouched while applying no selected tech", async () => {
+        window.history.pushState({}, "", "/tech?faction=kin&tech=missing");
+
+        render(
+            <MemoryRouter initialEntries={["/tech?faction=kin&tech=missing"]}>
+                <GameDataProvider>
+                    <TechContainer />
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
+        });
+
+        expect(screen.getByTestId("selected-techs")).toBeEmptyDOMElement();
+        expect(window.location.pathname + window.location.search).toBe("/tech?faction=kin&tech=missing");
+
+        window.history.pushState({}, "", "/");
+    });
+
     it("hydrates selected techs from summary route state and clears that state", async () => {
         render(
             <MemoryRouter
@@ -155,6 +177,41 @@ describe("TechContainer routing regressions", () => {
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("Kin");
         expect(screen.getByTestId("location")).toHaveTextContent("/tech");
         expect(screen.getByTestId("location-state")).toHaveTextContent("null");
+    });
+
+    it("keeps share hydration on the provider path without calling the removed raw fetch loader", async () => {
+        const fetchSpy = vi.spyOn(globalThis, "fetch");
+        window.history.pushState({}, "", "/tech?share=shared-build-id");
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "shared-build-id",
+            name: "Shared Build",
+            selectedFaction: "Aspects",
+            techIds: ["Tech_Summary_First", "Tech_Summary_Second"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/tech?share=shared-build-id"]}>
+                <GameDataProvider>
+                    <TechContainer />
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-techs")).toHaveTextContent(
+                "Tech_Summary_First,Tech_Summary_Second"
+            );
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("aspects");
+        });
+
+        expect(screen.getByTestId("location")).toHaveTextContent("/tech");
+        expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("shared-build-id");
+        expect(fetchSpy).not.toHaveBeenCalled();
+
+        fetchSpy.mockRestore();
+        window.history.pushState({}, "", "/");
     });
 
     it("keeps /tech faction selection writing through context and clearing selected techs", async () => {

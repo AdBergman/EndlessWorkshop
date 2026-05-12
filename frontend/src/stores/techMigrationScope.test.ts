@@ -44,6 +44,7 @@ describe("tech data ownership migration scope", () => {
             "stores/techStore.ts",
             "context/GameDataProvider.tsx",
             "components/Tech/TechContainer.tsx",
+            "components/Tech/useTechRouteHydration.ts",
             "components/Tech/TechTree.tsx",
             "components/Tech/views/SpreadSheetView.tsx",
             "components/GameSummary/GameSummaryPage.tsx",
@@ -64,9 +65,10 @@ describe("tech data ownership migration scope", () => {
         expect(source).toMatch(/apiClient\.getSavedBuild/);
     });
 
-    it("leaves tech tree interaction, share imports, and deep links on the context adapter", () => {
+    it("keeps TechTree on the context adapter while TechContainer delegates route hydration", () => {
         const treeSource = readSrc("components/Tech/TechTree.tsx");
         const containerSource = readSrc("components/Tech/TechContainer.tsx");
+        const hydrationSource = readSrc("components/Tech/useTechRouteHydration.ts");
 
         expect(treeSource).toMatch(/useGameData\(\)/);
         expect(treeSource).toMatch(/selectedTechs/);
@@ -74,10 +76,14 @@ describe("tech data ownership migration scope", () => {
         expect(treeSource).toMatch(/refreshTechs/);
         expect(treeSource).not.toMatch(/useTechStore/);
 
-        expect(containerSource).toMatch(/useSharedBuildLoader\(setSelectedTechs\)/);
-        expect(containerSource).toMatch(/useDeepLinkedTech/);
-        expect(containerSource).toMatch(/useImportedTechListLoader/);
-        expect(containerSource).toMatch(/techs: Map<string, Tech>/);
+        expect(containerSource).not.toMatch(/useGameData\(\)/);
+        expect(containerSource).not.toMatch(/useSharedBuildLoader|useDeepLinkedTech|useImportedTechListLoader/);
+        expect(containerSource).toMatch(/useTechRouteHydration/);
+
+        expect(hydrationSource).toMatch(/useTechStore/);
+        expect(hydrationSource).toMatch(/useTechPlannerStore/);
+        expect(hydrationSource).toMatch(/useFactionSelectionStore/);
+        expect(hydrationSource).not.toMatch(/useCodexStore|codexStore/);
     });
 
     it("keeps route declarations unchanged for tech and summary pages", () => {
