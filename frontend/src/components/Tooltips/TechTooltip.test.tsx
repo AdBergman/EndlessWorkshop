@@ -77,7 +77,6 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         });
 
         mockedUseGameData.mockReturnValue({
-            units: new Map(),
             selectedFaction: {
                 isMajor: true,
                 enumFaction: Faction.KIN,

@@ -28,8 +28,7 @@ export type ConstructibleUnlockResolution =
 type ConstructibleUnlockDeps = {
     districtsByKey: Record<string, District>;
     improvementsByKey: Record<string, Improvement>;
-    units?: Map<string, Unit>;
-    unitsByKey?: Record<string, Unit>;
+    unitsByKey: Record<string, Unit>;
 };
 
 export type UnlockedConstructibles = {
@@ -68,8 +67,8 @@ const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined)
 const sortUnlockedByEraAndName = <T extends { era: number; displayName: string }>(items: T[]) =>
     items.sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
 
-const resolveUnitByKey = (key: string, deps: Pick<ConstructibleUnlockDeps, "units" | "unitsByKey">) =>
-    deps.unitsByKey?.[key] ?? deps.units?.get(key);
+const resolveUnitByKey = (key: string, unitsByKey: Record<string, Unit>) =>
+    unitsByKey[key];
 
 export const resolveDistrictUnlock = (
     unlock: TechUnlockRef,
@@ -104,11 +103,11 @@ export const resolveConstructibleUnlock = (
     const key = normalizeKey(unlock.unlockKey ?? "");
     if (!key || !isConstructibleLikeUnlock(unlock)) return null;
 
-    const { districtsByKey, improvementsByKey } = deps;
+    const { districtsByKey, improvementsByKey, unitsByKey } = deps;
     const explicitKind = getExplicitConstructibleKind(unlock);
 
     if (explicitKind === "Unit" || normType(unlock.unlockType) === "UNIT") {
-        const unit = resolveUnitByKey(key, deps);
+        const unit = resolveUnitByKey(key, unitsByKey);
         return unit
             ? { kind: "Unit", key, unit, displayName: unit.displayName ?? key }
             : null;
@@ -133,7 +132,7 @@ export const resolveConstructibleUnlock = (
             : null;
     }
 
-    const unit = resolveUnitByKey(key, deps);
+    const unit = resolveUnitByKey(key, unitsByKey);
     if (unit) return { kind: "Unit", key, unit, displayName: unit.displayName ?? key };
 
     // Old/null backend data has no constructible kind metadata. Keep that
@@ -203,7 +202,7 @@ export const getUnlockedConstructiblesByKey = (
         units: sortUnlockedByEraAndName(
             Array.from(earliestUnitEraByKey.entries())
                 .map(([key, era]) => {
-                    const unit = resolveUnitByKey(key, deps);
+                    const unit = resolveUnitByKey(key, deps.unitsByKey);
                     return unit ? { ...unit, era } : null;
                 })
                 .filter((unit): unit is UnlockedUnit => !!unit)

@@ -39,7 +39,6 @@ const gameDataContextValue = {
     districts: new Map(),
     improvements: new Map(),
     techs: new Map(),
-    units: new Map(),
     codexByKindKey: new Map(),
     selectedFaction: {
         isMajor: true,

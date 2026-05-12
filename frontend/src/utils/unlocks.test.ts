@@ -115,33 +115,30 @@ describe("constructible unlock resolution", () => {
             cost: [],
         },
     };
-    const units = new Map<string, Unit>([
-        [
-            "Unit_Scout",
-            {
-                unitKey: "Unit_Scout",
-                displayName: "Scout",
-                artId: null,
-                faction: null,
-                isMajorFaction: true,
-                isHero: false,
-                isChosen: false,
-                spawnType: null,
-                previousUnitKey: null,
-                nextEvolutionUnitKeys: [],
-                evolutionTierIndex: null,
-                unitClassKey: null,
-                attackSkillKey: null,
-                abilityKeys: [],
-                descriptionLines: [],
-            },
-        ],
-    ]);
+    const unitsByKey: Record<string, Unit> = {
+        Unit_Scout: {
+            unitKey: "Unit_Scout",
+            displayName: "Scout",
+            artId: null,
+            faction: null,
+            isMajorFaction: true,
+            isHero: false,
+            isChosen: false,
+            spawnType: null,
+            previousUnitKey: null,
+            nextEvolutionUnitKeys: [],
+            evolutionTierIndex: null,
+            unitClassKey: null,
+            attackSkillKey: null,
+            abilityKeys: [],
+            descriptionLines: [],
+        },
+    };
 
     it("keeps old/null metadata fallback precedence centralized", () => {
         const resolved = resolveConstructibleUnlock(
             { unlockType: "Constructible", unlockKey: "Shared_Key" },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({
@@ -157,7 +154,7 @@ describe("constructible unlock resolution", () => {
                 unlockKey: "Shared_Key",
                 unlockCategory: "District",
             },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({
@@ -173,7 +170,7 @@ describe("constructible unlock resolution", () => {
                 unlockKey: "Shared_Key",
                 unlockCategory: "Improvement",
             },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({
@@ -190,7 +187,7 @@ describe("constructible unlock resolution", () => {
                 unlockCategory: "District",
                 constructibleKind: "Improvement",
             },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({
@@ -206,7 +203,7 @@ describe("constructible unlock resolution", () => {
                 unlockKey: "Shared_Key",
                 constructibleKind: "Improvement",
             },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({
@@ -234,7 +231,7 @@ describe("constructible unlock resolution", () => {
         const unlocked = getUnlockedConstructiblesByKey(selectedTechs, {
             districtsByKey,
             improvementsByKey,
-            units,
+            unitsByKey,
         });
 
         expect(unlocked.districts.map((district) => district.displayName)).toEqual([
@@ -261,10 +258,10 @@ describe("constructible unlock resolution", () => {
         ).toBe("Shared Improvement");
     });
 
-    it("resolves unit unlocks without migrating unit ownership", () => {
+    it("resolves unit unlocks from normalized unit ownership", () => {
         const resolved = resolveConstructibleUnlock(
             { unlockType: "Constructible", unlockKey: "Unit_Scout" },
-            { districtsByKey, improvementsByKey, units }
+            { districtsByKey, improvementsByKey, unitsByKey }
         );
 
         expect(resolved).toMatchObject({

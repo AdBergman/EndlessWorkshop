@@ -36,9 +36,7 @@ describe("UnlockLine district/improvement resolution", () => {
                 },
             },
         });
-        mockedUseGameData.mockReturnValue({
-            units: new Map(),
-        } as any);
+        mockedUseGameData.mockReturnValue({} as any);
     });
 
     it("renders district and improvement unlock lines from their own store domains", () => {

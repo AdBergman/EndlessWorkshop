@@ -78,9 +78,7 @@ describe("HoverableItem", () => {
             },
         });
 
-        mockedUseGameData.mockReturnValue({
-            units: new Map(),
-        } as any);
+        mockedUseGameData.mockReturnValue({} as any);
     });
 
     it("renders improvement tooltip on hover", async () => {

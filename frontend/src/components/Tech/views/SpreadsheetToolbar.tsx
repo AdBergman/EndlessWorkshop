@@ -33,11 +33,10 @@ export function formatTechUnlocks(
     deps: {
         districtsByKey: Record<string, District>;
         improvementsByKey: Record<string, Improvement>;
-        units?: Map<string, Unit>;
-        unitsByKey?: Record<string, Unit>;
+        unitsByKey: Record<string, Unit>;
     }
 ): string {
-    const { districtsByKey, improvementsByKey, units, unitsByKey } = deps;
+    const { districtsByKey, improvementsByKey, unitsByKey } = deps;
 
     return (tech.unlocks ?? [])
         .map((u) => ({
@@ -55,7 +54,7 @@ export function formatTechUnlocks(
                     unlockCategory: u.unlockCategory,
                     constructibleKind: u.constructibleKind,
                 },
-                { districtsByKey, improvementsByKey, units, unitsByKey }
+                { districtsByKey, improvementsByKey, unitsByKey }
             );
             return resolved ? `${resolved.kind}: ${resolved.displayName}` : null;
         })

@@ -32,28 +32,25 @@ describe("formatTechUnlocks", () => {
                 cost: [],
             },
         };
-        const units = new Map<string, Unit>([
-            [
-                "Unit_Scout",
-                {
-                    unitKey: "Unit_Scout",
-                    displayName: "Scout",
-                    artId: null,
-                    faction: null,
-                    isMajorFaction: true,
-                    isHero: false,
-                    isChosen: false,
-                    spawnType: null,
-                    previousUnitKey: null,
-                    nextEvolutionUnitKeys: [],
-                    evolutionTierIndex: null,
-                    unitClassKey: null,
-                    attackSkillKey: null,
-                    abilityKeys: [],
-                    descriptionLines: [],
-                },
-            ],
-        ]);
+        const unitsByKey: Record<string, Unit> = {
+            Unit_Scout: {
+                unitKey: "Unit_Scout",
+                displayName: "Scout",
+                artId: null,
+                faction: null,
+                isMajorFaction: true,
+                isHero: false,
+                isChosen: false,
+                spawnType: null,
+                previousUnitKey: null,
+                nextEvolutionUnitKeys: [],
+                evolutionTierIndex: null,
+                unitClassKey: null,
+                attackSkillKey: null,
+                abilityKeys: [],
+                descriptionLines: [],
+            },
+        };
 
         const tech: Tech = {
             ...baseTech,
@@ -66,7 +63,7 @@ describe("formatTechUnlocks", () => {
             ],
         };
 
-        expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, units })).toBe(
+        expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, unitsByKey })).toBe(
             "Unit: Scout; District: Harbor; Improvement: Market"
         );
     });
@@ -99,7 +96,7 @@ describe("formatTechUnlocks", () => {
             ],
         };
 
-        expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, units: new Map() })).toBe(
+        expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, unitsByKey: {} })).toBe(
             "Improvement: Shared Improvement"
         );
     });
