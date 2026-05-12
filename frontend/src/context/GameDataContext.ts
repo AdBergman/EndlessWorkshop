@@ -2,7 +2,6 @@ import { createContext, useContext } from "react";
 import type React from "react";
 import type { SavedTechBuild } from "@/api/apiClient";
 import {
-    Codex,
     District,
     Improvement,
     Tech,
@@ -14,9 +13,6 @@ export interface GameDataContextType {
     districts: Map<string, District>;
     improvements: Map<string, Improvement>;
     techs: Map<string, Tech>;
-
-    // NEW: codex grouped by kind -> entryKey
-    codexByKindKey: Map<string, Map<string, Codex>>;
 
     selectedFaction: FactionInfo;
     setSelectedFaction: (faction: FactionInfo) => void;
@@ -54,8 +50,6 @@ const GameDataContext = createContext<GameDataContextType>({
     districts: new Map(),
     improvements: new Map(),
     techs: new Map(),
-
-    codexByKindKey: new Map(),
 
     selectedFaction: DEFAULT_FACTION,
     setSelectedFaction: () => {},

@@ -61,7 +61,6 @@ function StatefulGameData({
         districts: new Map(),
         improvements: new Map(),
         techs: baseTechs,
-        codexByKindKey: new Map(),
         selectedFaction,
         setSelectedFaction,
         selectedTechs,

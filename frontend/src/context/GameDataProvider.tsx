@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { Codex, Faction, FactionInfo } from "@/types/dataTypes";
+import { Faction, FactionInfo } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useCodexStore } from "@/stores/codexStore";
@@ -18,19 +18,6 @@ import {
 interface Props {
     children: ReactNode;
 }
-
-const toKeyedMap = <T,>(
-    items: T[],
-    getKey: (x: T) => string | null | undefined
-): Map<string, T> => {
-    const m = new Map<string, T>();
-    for (const item of items) {
-        const k = (getKey(item) ?? "").trim();
-        if (!k) continue;
-        m.set(k, item);
-    }
-    return m;
-};
 
 const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
     isMajor: true,
@@ -51,7 +38,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
     const initialShareUuid = new URLSearchParams(window.location.search).get("share");
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
-    const codexEntriesByKind = useCodexStore((s) => s.entriesByKind);
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
     const districtsByKey = useDistrictStore((s) => s.districtsByKey);
     const improvementsByKey = useImprovementStore((s) => s.improvementsByKey);
@@ -75,16 +61,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         () => new Map(Object.entries(techsByKey)),
         [techsByKey]
     );
-
-    const codexByKindKey = useMemo(() => {
-        const out = new Map<string, Map<string, Codex>>();
-
-        for (const [kind, entries] of Object.entries(codexEntriesByKind)) {
-            out.set(kind, toKeyedMap(entries, (entry) => entry.entryKey));
-        }
-
-        return out;
-    }, [codexEntriesByKind]);
 
     useEffect(() => {
         void loadDistricts();
@@ -161,8 +137,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 districts,
                 improvements,
                 techs,
-
-                codexByKindKey,
 
                 selectedFaction,
                 setSelectedFaction,

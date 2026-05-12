@@ -31,7 +31,6 @@ const contextValue = (overrides: Partial<GameDataContextType> = {}): GameDataCon
             }),
         ],
     ]),
-    codexByKindKey: new Map(),
     selectedFaction: {
         isMajor: true,
         enumFaction: Faction.KIN,
