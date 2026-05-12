@@ -1,4 +1,3 @@
-import { useGameData } from "@/context/GameDataContext";
 import { useCodexStore } from "@/stores/codexStore";
 import type { Codex, CodexEntry } from "@/types/dataTypes";
 
@@ -8,7 +7,7 @@ function trimToNull(s: string | null | undefined): string | null {
 }
 
 export function useCodex() {
-    const { codexByKindKey } = useGameData();
+    const getStoreEntry = useCodexStore((s) => s.getEntry);
     const getEntryByKey = useCodexStore((s) => s.getEntryByKey);
     const getEntriesByKind = useCodexStore((s) => s.getEntriesByKind);
     const getRelatedEntries = useCodexStore((s) => s.getRelatedEntries);
@@ -17,7 +16,7 @@ export function useCodex() {
     // Raw lookup (no filtering)
     const getEntry = (exportKind: string, entryKey: string): Codex | undefined => {
         if (!exportKind || !entryKey) return undefined;
-        return codexByKindKey.get(exportKind)?.get(entryKey);
+        return getStoreEntry(exportKind, entryKey);
     };
 
     // Opinionated lookup: must resolve AND have a non-blank displayName

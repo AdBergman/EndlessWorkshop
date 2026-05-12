@@ -47,6 +47,35 @@ describe("useCodexStore", () => {
         expect(state.entriesByKey.UnitAbility_Blossom_2?.displayName).toBe("Blossom");
         expect(state.entriesByKind.abilities).toHaveLength(1);
         expect(state.entriesByKind.units).toHaveLength(1);
+        expect(state.entriesByKindKey.abilities.UnitAbility_Blossom_2?.displayName).toBe("Blossom");
+        expect(state.getEntry("abilities", "UnitAbility_Blossom_2")?.displayName).toBe("Blossom");
+        expect(state.getEntry("ABILITIES", " UnitAbility_Blossom_2 ")?.displayName).toBe("Blossom");
+    });
+
+    it("keeps kind-scoped entry lookup stable when entry keys collide across kinds", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "districts",
+                entryKey: "Shared_Key",
+                displayName: "District Label",
+                descriptionLines: ["District text"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Shared_Key",
+                displayName: "Improvement Label",
+                descriptionLines: ["Improvement text"],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        const state = useCodexStore.getState();
+        expect(state.getEntry("districts", "Shared_Key")?.displayName).toBe("District Label");
+        expect(state.getEntry("improvements", "Shared_Key")?.displayName).toBe("Improvement Label");
+        expect(state.getEntry("units", "Shared_Key")).toBeUndefined();
     });
 
     it("resolves related entries, ignoring self references and unresolved keys", async () => {

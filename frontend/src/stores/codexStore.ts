@@ -10,6 +10,7 @@ type Store = {
     entries: CodexEntry[];
     entriesByKey: Record<string, CodexEntry>;
     entriesByKind: Record<string, CodexEntry[]>;
+    entriesByKindKey: Record<string, Record<string, CodexEntry>>;
     loading: boolean;
     error: string | null;
     lastLoadedAt?: string;
@@ -17,6 +18,7 @@ type Store = {
     loadEntries: (opts?: { force?: boolean }) => Promise<void>;
     reset: () => void;
 
+    getEntry: (exportKind: string, entryKey: string) => CodexEntry | undefined;
     getEntryByKey: (key: string) => CodexEntry | undefined;
     getEntriesByKind: (kind: string) => CodexEntry[];
     getRelatedEntries: (entry: CodexEntry) => CodexEntry[];
@@ -48,10 +50,26 @@ function buildEntriesByKind(entries: CodexEntry[]): Record<string, CodexEntry[]>
     }, {});
 }
 
+function buildEntriesByKindKey(entries: CodexEntry[]): Record<string, Record<string, CodexEntry>> {
+    return entries.reduce<Record<string, Record<string, CodexEntry>>>((acc, entry) => {
+        const exportKind = (entry.exportKind ?? "").trim().toLowerCase();
+        const entryKey = (entry.entryKey ?? "").trim();
+        if (!exportKind || !entryKey) return acc;
+
+        if (!acc[exportKind]) {
+            acc[exportKind] = {};
+        }
+
+        acc[exportKind][entryKey] = entry;
+        return acc;
+    }, {});
+}
+
 export const useCodexStore = create<Store>((set, get) => ({
     entries: [],
     entriesByKey: {},
     entriesByKind: {},
+    entriesByKindKey: {},
     loading: false,
     error: null,
     lastLoadedAt: undefined,
@@ -82,6 +100,7 @@ export const useCodexStore = create<Store>((set, get) => ({
                     entries,
                     entriesByKey: buildEntriesByKey(entries),
                     entriesByKind: buildEntriesByKind(entries),
+                    entriesByKindKey: buildEntriesByKindKey(entries),
                     loading: false,
                     error: null,
                     lastLoadedAt: new Date().toISOString(),
@@ -108,10 +127,18 @@ export const useCodexStore = create<Store>((set, get) => ({
             entries: [],
             entriesByKey: {},
             entriesByKind: {},
+            entriesByKindKey: {},
             loading: false,
             error: null,
             lastLoadedAt: undefined,
         });
+    },
+
+    getEntry: (exportKind, entryKey) => {
+        const normalizedKind = (exportKind ?? "").trim().toLowerCase();
+        const normalizedKey = (entryKey ?? "").trim();
+        if (!normalizedKind || !normalizedKey) return undefined;
+        return get().entriesByKindKey[normalizedKind]?.[normalizedKey];
     },
 
     getEntryByKey: (key) => {
