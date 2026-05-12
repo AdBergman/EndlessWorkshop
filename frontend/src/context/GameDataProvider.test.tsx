@@ -10,6 +10,7 @@ import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { useTechStore } from "@/stores/techStore";
 import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { Faction } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
@@ -61,6 +62,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         useUnitStore.getState().reset();
         useTechStore.getState().reset();
         useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
         useCodexStore.getState().reset();
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -276,7 +278,31 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         expect(useTechPlannerStore.getState().selectedTechs).toEqual(["Tech_From_Context"]);
     });
 
-    it("keeps selectedFaction context-owned while selectedTechs are store-backed", async () => {
+    it("exposes selectedFaction from factionSelectionStore through the legacy context adapter", async () => {
+        act(() => {
+            useFactionSelectionStore.getState().setSelectedFaction({
+                isMajor: true,
+                enumFaction: Faction.LORDS,
+                minorName: null,
+                uiLabel: "lords",
+            });
+        });
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByTestId("selected-faction")).toHaveTextContent("lords");
+        await waitFor(() => {
+            expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
+        });
+    });
+
+    it("writes setSelectedFaction calls through to factionSelectionStore while selectedTechs stay store-backed", async () => {
         const user = userEvent.setup();
 
         const FactionProbe = () => {
@@ -316,7 +342,9 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
 
         expect(screen.getByTestId("context-faction")).toHaveTextContent("lords");
         expect(screen.getByTestId("context-selected-count")).toHaveTextContent("1");
+        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
         expect("selectedFaction" in useTechPlannerStore.getState()).toBe(false);
+        expect("selectedTechs" in useFactionSelectionStore.getState()).toBe(false);
     });
 
     it("preserves shared-build loading into selected faction and selected techs", async () => {

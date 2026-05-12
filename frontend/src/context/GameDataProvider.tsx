@@ -9,6 +9,11 @@ import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { useTechStore } from "@/stores/techStore";
 import { selectSelectedTechs, selectSetSelectedTechs, useTechPlannerStore } from "@/stores/techPlannerStore";
+import {
+    selectSelectedFaction,
+    selectSetSelectedFaction,
+    useFactionSelectionStore,
+} from "@/stores/factionSelectionStore";
 
 interface Props {
     children: ReactNode;
@@ -35,9 +40,8 @@ const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
 });
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
-    const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
-        toFactionInfoFromEnum(Faction.KIN)
-    );
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
+    const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
     const selectedTechs = useTechPlannerStore(selectSelectedTechs);
     const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
 

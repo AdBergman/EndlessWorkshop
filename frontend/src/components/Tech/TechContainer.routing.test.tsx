@@ -1,6 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import TechContainer from "@/components/Tech/TechContainer";
+import TopContainer from "@/components/TopContainer/TopContainer";
 import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
 import { apiClient } from "@/api/apiClient";
@@ -8,9 +10,10 @@ import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
-import type { Tech } from "@/types/dataTypes";
+import { Faction, type Tech } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -62,6 +65,7 @@ describe("TechContainer routing regressions", () => {
         useUnitStore.getState().reset();
         useTechStore.getState().reset();
         useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
 
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -151,5 +155,28 @@ describe("TechContainer routing regressions", () => {
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("Kin");
         expect(screen.getByTestId("location")).toHaveTextContent("/tech");
         expect(screen.getByTestId("location-state")).toHaveTextContent("null");
+    });
+
+    it("keeps /tech faction selection writing through context and clearing selected techs", async () => {
+        const user = userEvent.setup();
+        act(() => {
+            useTechPlannerStore.getState().setSelectedTechs(["Tech_Workshop"]);
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/tech"]}>
+                <GameDataProvider>
+                    <TopContainer />
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Lords" }));
+
+        expect(screen.getByTestId("selected-faction")).toHaveTextContent("Lords");
+        expect(screen.getByTestId("selected-techs")).toBeEmptyDOMElement();
+        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
+        expect(useTechPlannerStore.getState().selectedTechs).toEqual([]);
     });
 });

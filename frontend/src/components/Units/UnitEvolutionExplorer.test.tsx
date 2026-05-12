@@ -1,13 +1,17 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import GameDataProvider from "@/context/GameDataProvider";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
+import TopContainer from "@/components/TopContainer/TopContainer";
 import { apiClient } from "@/api/apiClient";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
-import type { Unit } from "@/types/dataTypes";
+import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
+import { Faction, type Unit } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -63,6 +67,8 @@ describe("/units smoke behavior", () => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
+        useTechPlannerStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
 
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -219,5 +225,34 @@ describe("/units smoke behavior", () => {
         await waitFor(() => {
             expect(screen.getByText("A precise opening attack.")).toBeInTheDocument();
         });
+    });
+
+    it("keeps /units faction selection writing through context and updating the unit route", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <MemoryRouter initialEntries={["/units?faction=kin&unitKey=Unit_Kin_Root"]}>
+                <GameDataProvider>
+                    <TopContainer />
+                    <UnitEvolutionExplorer />
+                    <LocationProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.queryByText("Loading units...")).not.toBeInTheDocument();
+        });
+
+        await user.click(screen.getByRole("button", { name: "Lords" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location")).toHaveTextContent(
+                "/units?faction=lords&unitKey=Unit_Lords_Root"
+            );
+        });
+
+        expect(screen.getAllByText("Lords Root").length).toBeGreaterThan(0);
+        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
     });
 });

@@ -26,6 +26,16 @@ describe("tech data ownership migration scope", () => {
         );
     });
 
+    it("keeps factionSelectionStore limited to selected faction state", () => {
+        const source = readSrc("stores/factionSelectionStore.ts");
+
+        expect(source).toMatch(/selectedFaction/);
+        expect(source).toMatch(/setSelectedFaction/);
+        expect(source).not.toMatch(
+            /\b(selectedTechs|setSelectedTechs|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore|techStore|useTechStore|apiClient)\b/
+        );
+    });
+
     it("does not add hero import, store, API, or UI plumbing", () => {
         const forbiddenHeroPlumbing =
             /\b(getHeroes|loadHeroes|refreshHeroes|invalidateHeroes|heroesByKey|heroStore|HeroStore)\b|\/heroes\b/;
@@ -42,10 +52,11 @@ describe("tech data ownership migration scope", () => {
         }
     });
 
-    it("leaves faction, share orchestration, and saved builds in GameDataProvider", () => {
+    it("leaves share orchestration and saved builds in GameDataProvider", () => {
         const source = readSrc("context/GameDataProvider.tsx");
 
-        expect(source).toMatch(/const \[selectedFaction, setSelectedFaction\] = useState<FactionInfo>/);
+        expect(source).toMatch(/useFactionSelectionStore\(selectSelectedFaction\)/);
+        expect(source).toMatch(/useFactionSelectionStore\(selectSetSelectedFaction\)/);
         expect(source).toMatch(/useTechPlannerStore\(selectSelectedTechs\)/);
         expect(source).toMatch(/useTechPlannerStore\(selectSetSelectedTechs\)/);
         expect(source).toMatch(/const \[isProcessingSharedBuild, setIsProcessingSharedBuild\] = useState/);
