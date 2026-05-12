@@ -4,7 +4,6 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import TechContainer from "@/components/Tech/TechContainer";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import GameDataProvider from "@/context/GameDataProvider";
-import { useGameData } from "@/context/GameDataContext";
 import { apiClient } from "@/api/apiClient";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
@@ -44,7 +43,8 @@ const tech = (overrides: Partial<Tech>): Tech => ({
 });
 
 const Probe = () => {
-    const { selectedFaction, selectedTechs } = useGameData();
+    const selectedTechs = useTechPlannerStore((state) => state.selectedTechs);
+    const selectedFaction = useFactionSelectionStore((state) => state.selectedFaction);
     const location = useLocation();
 
     return (

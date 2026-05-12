@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import GameDataContext, { type GameDataContextType } from "@/context/GameDataContext";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
@@ -7,7 +6,7 @@ import { useTechStore } from "@/stores/techStore";
 import { useTechPlannerStore } from "@/stores/techPlannerStore";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useUnitStore } from "@/stores/unitStore";
-import { Faction, type Tech } from "@/types/dataTypes";
+import { type Tech } from "@/types/dataTypes";
 
 const tech = (overrides: Partial<Tech>): Tech => ({
     techKey: "Tech_Workshop",
@@ -20,25 +19,6 @@ const tech = (overrides: Partial<Tech>): Tech => ({
     factions: [],
     excludes: null,
     coords: { xPct: 0, yPct: 0 },
-    ...overrides,
-});
-
-const contextValue = (overrides: Partial<GameDataContextType> = {}): GameDataContextType => ({
-    districts: new Map(),
-    improvements: new Map(),
-    techs: new Map(),
-    selectedFaction: {
-        isMajor: true,
-        enumFaction: Faction.KIN,
-        minorName: null,
-        uiLabel: "kin",
-    },
-    setSelectedFaction: vi.fn(),
-    selectedTechs: ["Tech_Store_Selected"],
-    setSelectedTechs: vi.fn(),
-    createSavedTechBuild: vi.fn(),
-    getSavedBuild: vi.fn(),
-    isProcessingSharedBuild: false,
     ...overrides,
 });
 
@@ -90,11 +70,7 @@ describe("SpreadSheetView passive tech reads", () => {
     });
 
     it("resolves selected tech records from techStore and selected keys from techPlannerStore", () => {
-        render(
-            <GameDataContext.Provider value={contextValue({ techs: new Map(), selectedTechs: [] })}>
-                <SpreadSheetView />
-            </GameDataContext.Provider>
-        );
+        render(<SpreadSheetView />);
 
         expect(screen.getByText("Store Selected")).toBeInTheDocument();
         expect(screen.getByText("Improvement:")).toBeInTheDocument();

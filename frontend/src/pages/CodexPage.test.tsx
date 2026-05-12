@@ -5,7 +5,6 @@ import TopContainer from "@/components/TopContainer/TopContainer";
 import GameDataContext from "@/context/GameDataContext";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
-import { Faction } from "@/types/dataTypes";
 
 function LocationProbe() {
     const location = useLocation();
@@ -14,18 +13,6 @@ function LocationProbe() {
 }
 
 const gameDataContextValue = {
-    districts: new Map(),
-    improvements: new Map(),
-    techs: new Map(),
-    selectedFaction: {
-        isMajor: true,
-        enumFaction: Faction.KIN,
-        minorName: null,
-        uiLabel: "Kin",
-    },
-    setSelectedFaction: () => {},
-    selectedTechs: [],
-    setSelectedTechs: () => {},
     isProcessingSharedBuild: false,
 };
 

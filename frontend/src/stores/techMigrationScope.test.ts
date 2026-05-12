@@ -65,6 +65,11 @@ describe("tech data ownership migration scope", () => {
         expect(source).toMatch(/apiClient\.createSavedBuild/);
         expect(source).toMatch(/apiClient\.getSavedBuild/);
         expect(contextSource).not.toMatch(/refreshTechs/);
+        const contextInterface =
+            contextSource.match(/export interface GameDataContextType \{[\s\S]*?\n\}/)?.[0] ?? "";
+        expect(contextInterface).not.toMatch(
+            /^\s+(districts|improvements|techs|selectedFaction|setSelectedFaction|selectedTechs|setSelectedTechs)\??:/m
+        );
     });
 
     it("keeps TechTree on direct stores while owning admin refresh locally", () => {

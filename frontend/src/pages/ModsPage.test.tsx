@@ -4,7 +4,6 @@ import { vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import GameDataContext from "@/context/GameDataContext";
-import { Faction } from "@/types/dataTypes";
 import ModsPage from "./ModsPage";
 
 vi.mock("@/data/modsCatalog", async () => {
@@ -41,18 +40,6 @@ function LocationProbe() {
 }
 
 const gameDataContextValue = {
-    districts: new Map(),
-    improvements: new Map(),
-    techs: new Map(),
-    selectedFaction: {
-        isMajor: true,
-        enumFaction: Faction.KIN,
-        minorName: null,
-        uiLabel: "Kin",
-    },
-    setSelectedFaction: () => {},
-    selectedTechs: [],
-    setSelectedTechs: () => {},
     isProcessingSharedBuild: false,
 };
 

@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import GameDataContext from "./GameDataContext";
 import { Faction, FactionInfo } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
@@ -39,28 +39,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const initialShareUuid = new URLSearchParams(window.location.search).get("share");
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
-    const districtsByKey = useDistrictStore((s) => s.districtsByKey);
-    const improvementsByKey = useImprovementStore((s) => s.improvementsByKey);
     const loadDistricts = useDistrictStore((s) => s.loadDistricts);
     const loadImprovements = useImprovementStore((s) => s.loadImprovements);
     const loadUnits = useUnitStore((s) => s.loadUnits);
-    const techsByKey = useTechStore((s) => s.techsByKey);
     const loadTechs = useTechStore((s) => s.loadTechs);
-
-    const districts = useMemo(
-        () => new Map(Object.entries(districtsByKey)),
-        [districtsByKey]
-    );
-
-    const improvements = useMemo(
-        () => new Map(Object.entries(improvementsByKey)),
-        [improvementsByKey]
-    );
-
-    const techs = useMemo(
-        () => new Map(Object.entries(techsByKey)),
-        [techsByKey]
-    );
 
     useEffect(() => {
         void loadDistricts();
@@ -134,16 +116,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     return (
         <GameDataContext.Provider
             value={{
-                districts,
-                improvements,
-                techs,
-
-                selectedFaction,
-                setSelectedFaction,
-
-                selectedTechs,
-                setSelectedTechs,
-
                 createSavedTechBuild,
                 getSavedBuild,
 

@@ -1,28 +1,11 @@
 import { createContext, useContext } from "react";
-import type React from "react";
 import type { SavedTechBuild } from "@/api/apiClient";
-import {
-    District,
-    Improvement,
-    Tech,
-    Faction,
-    FactionInfo,
-} from "@/types/dataTypes";
+import type { FactionInfo } from "@/types/dataTypes";
 
 export interface GameDataContextType {
-    districts: Map<string, District>;
-    improvements: Map<string, Improvement>;
-    techs: Map<string, Tech>;
-
-    selectedFaction: FactionInfo;
-    setSelectedFaction: (faction: FactionInfo) => void;
-
-    selectedTechs: string[];
-    setSelectedTechs: React.Dispatch<React.SetStateAction<string[]>>;
-
     createSavedTechBuild?: (
         name: string,
-        selectedFaction: FactionInfo,
+        faction: FactionInfo,
         techIds: string[]
     ) => Promise<SavedTechBuild>;
 
@@ -30,13 +13,6 @@ export interface GameDataContextType {
 
     isProcessingSharedBuild: boolean;
 }
-
-const DEFAULT_FACTION: FactionInfo = {
-    isMajor: true,
-    enumFaction: Faction.KIN,
-    minorName: null,
-    uiLabel: "kin",
-};
 
 const EMPTY_SAVED_BUILD: SavedTechBuild = {
     uuid: "",
@@ -47,16 +23,6 @@ const EMPTY_SAVED_BUILD: SavedTechBuild = {
 };
 
 const GameDataContext = createContext<GameDataContextType>({
-    districts: new Map(),
-    improvements: new Map(),
-    techs: new Map(),
-
-    selectedFaction: DEFAULT_FACTION,
-    setSelectedFaction: () => {},
-
-    selectedTechs: [],
-    setSelectedTechs: () => {},
-
     createSavedTechBuild: async () => EMPTY_SAVED_BUILD,
     getSavedBuild: async () => EMPTY_SAVED_BUILD,
 

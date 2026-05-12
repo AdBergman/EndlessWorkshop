@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
+import { useAppOrchestration, useSavedTechBuildCommands } from "@/context/appOrchestration";
 import { apiClient } from "@/api/apiClient";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
@@ -27,25 +28,27 @@ vi.mock("@/api/apiClient", () => ({
 
 const mockedApiClient = vi.mocked(apiClient);
 
-const Probe = () => {
-    const { districts, improvements, techs, selectedTechs, selectedFaction } = useGameData();
+const StoreProbe = () => {
+    const districtsByKey = useDistrictStore((state) => state.districtsByKey);
+    const improvementsByKey = useImprovementStore((state) => state.improvementsByKey);
+    const techsByKey = useTechStore((state) => state.techsByKey);
+    const selectedTechs = useTechPlannerStore((state) => state.selectedTechs);
+    const selectedFaction = useFactionSelectionStore((state) => state.selectedFaction);
+    const { isProcessingSharedBuild } = useAppOrchestration();
 
     return (
         <div>
-            <div data-testid="district-map">{String(districts instanceof Map)}</div>
-            <div data-testid="improvement-map">{String(improvements instanceof Map)}</div>
             <div data-testid="district-label">
-                {districts.get("District_City_Center")?.displayName ?? "missing"}
+                {districtsByKey.District_City_Center?.displayName ?? "missing"}
             </div>
             <div data-testid="improvement-label">
-                {improvements.get("Improvement_Public_Library")?.displayName ?? "missing"}
+                {improvementsByKey.Improvement_Public_Library?.displayName ?? "missing"}
             </div>
-            <div data-testid="tech-count">{techs.size}</div>
-            <div data-testid="tech-label">
-                {techs.get("Tech_Kin_Workshop")?.name ?? "missing"}
-            </div>
+            <div data-testid="tech-count">{Object.keys(techsByKey).length}</div>
+            <div data-testid="tech-label">{techsByKey.Tech_Kin_Workshop?.name ?? "missing"}</div>
             <div data-testid="selected-tech-count">{selectedTechs.length}</div>
             <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
+            <div data-testid="share-processing">{String(isProcessingSharedBuild)}</div>
         </div>
     );
 };
@@ -55,7 +58,7 @@ const LocationProbe = () => {
     return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
 };
 
-describe("GameDataProvider normalized store compatibility adapter", () => {
+describe("GameDataProvider orchestration boundary", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
@@ -124,38 +127,18 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         mockedApiClient.getCodex.mockResolvedValue([]);
     });
 
-    it("continues to expose districts and improvements as keyed Map values without changing unrelated state", async () => {
+    it("keeps startup loads flowing into the normalized stores", async () => {
         render(
             <MemoryRouter>
                 <GameDataProvider>
-                    <Probe />
+                    <StoreProbe />
                 </GameDataProvider>
             </MemoryRouter>
         );
-
-        expect(screen.getByTestId("district-map")).toHaveTextContent("true");
-        expect(screen.getByTestId("improvement-map")).toHaveTextContent("true");
 
         await waitFor(() => {
             expect(screen.getByTestId("district-label")).toHaveTextContent("City Center");
             expect(screen.getByTestId("improvement-label")).toHaveTextContent("Public Library");
-        });
-
-        expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
-        expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
-        expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
-    });
-
-    it("continues to expose techStore-owned techs through the legacy context Map adapter", async () => {
-        render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <Probe />
-                </GameDataProvider>
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
             expect(screen.getByTestId("tech-label")).toHaveTextContent("Kin Workshop");
         });
 
@@ -164,20 +147,22 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });
 
-    it("does not expose the removed legacy setTechs adapter", async () => {
-        const AdapterProbe = () => {
-            const gameData = useGameData();
+    it("keeps the public context surface limited to orchestration commands and share gating", () => {
+        const ContextShapeProbe = () => {
+            const gameData = useGameData() as unknown as Record<string, unknown>;
 
             return (
                 <div>
-                    <div data-testid="set-techs-present">
-                        {String("setTechs" in (gameData as unknown as Record<string, unknown>))}
-                    </div>
-                    <div data-testid="adapter-tech-label">
-                        {gameData.techs.get("Tech_Kin_Workshop")?.name ?? "missing"}
-                    </div>
-                    <div data-testid="adapter-selected-tech-count">{gameData.selectedTechs.length}</div>
-                    <div data-testid="adapter-selected-faction">{gameData.selectedFaction.uiLabel}</div>
+                    <div data-testid="has-districts">{String("districts" in gameData)}</div>
+                    <div data-testid="has-improvements">{String("improvements" in gameData)}</div>
+                    <div data-testid="has-techs">{String("techs" in gameData)}</div>
+                    <div data-testid="has-selected-techs">{String("selectedTechs" in gameData)}</div>
+                    <div data-testid="has-set-selected-techs">{String("setSelectedTechs" in gameData)}</div>
+                    <div data-testid="has-selected-faction">{String("selectedFaction" in gameData)}</div>
+                    <div data-testid="has-set-selected-faction">{String("setSelectedFaction" in gameData)}</div>
+                    <div data-testid="has-create-saved">{String("createSavedTechBuild" in gameData)}</div>
+                    <div data-testid="has-get-saved">{String("getSavedBuild" in gameData)}</div>
+                    <div data-testid="has-share-gate">{String("isProcessingSharedBuild" in gameData)}</div>
                 </div>
             );
         };
@@ -185,139 +170,110 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         render(
             <MemoryRouter>
                 <GameDataProvider>
-                    <AdapterProbe />
+                    <ContextShapeProbe />
                 </GameDataProvider>
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(screen.getByTestId("adapter-tech-label")).toHaveTextContent("Kin Workshop");
-        });
-
-        expect(screen.getByTestId("set-techs-present")).toHaveTextContent("false");
-        expect(screen.getByTestId("adapter-selected-tech-count")).toHaveTextContent("0");
-        expect(screen.getByTestId("adapter-selected-faction")).toHaveTextContent("kin");
+        expect(screen.getByTestId("has-districts")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-improvements")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-techs")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-selected-techs")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-set-selected-techs")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-selected-faction")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-set-selected-faction")).toHaveTextContent("false");
+        expect(screen.getByTestId("has-create-saved")).toHaveTextContent("true");
+        expect(screen.getByTestId("has-get-saved")).toHaveTextContent("true");
+        expect(screen.getByTestId("has-share-gate")).toHaveTextContent("true");
     });
 
-    it("exposes selectedTechs from techPlannerStore through the legacy context adapter", async () => {
-        act(() => {
-            useTechPlannerStore.getState().setSelectedTechs(["Tech_Store_Selected"]);
-        });
-
-        render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <Probe />
-                </GameDataProvider>
-            </MemoryRouter>
-        );
-
-        expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("1");
-        await waitFor(() => {
-            expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
-        });
-    });
-
-    it("writes setSelectedTechs calls through to techPlannerStore", async () => {
+    it("exposes saved-build creation through the narrow command hook", async () => {
         const user = userEvent.setup();
+        mockedApiClient.createSavedBuild.mockResolvedValue({
+            uuid: "saved-build-id",
+            name: "My Build",
+            selectedFaction: "LORDS",
+            techIds: ["Tech_Store_Selected"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
 
-        const SelectionProbe = () => {
-            const { selectedTechs, setSelectedTechs } = useGameData();
+        const CommandProbe = () => {
+            const { createSavedTechBuild } = useSavedTechBuildCommands();
 
             return (
-                <div>
-                    <button
-                        type="button"
-                        onClick={() => setSelectedTechs((prev) => [...prev, "Tech_From_Context"])}
-                    >
-                        Select via adapter
-                    </button>
-                    <div data-testid="context-selected-techs">{selectedTechs.join(",")}</div>
-                </div>
-            );
-        };
-
-        render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <SelectionProbe />
-                </GameDataProvider>
-            </MemoryRouter>
-        );
-
-        await user.click(screen.getByRole("button", { name: "Select via adapter" }));
-
-        expect(screen.getByTestId("context-selected-techs")).toHaveTextContent("Tech_From_Context");
-        expect(useTechPlannerStore.getState().selectedTechs).toEqual(["Tech_From_Context"]);
-    });
-
-    it("exposes selectedFaction from factionSelectionStore through the legacy context adapter", async () => {
-        act(() => {
-            useFactionSelectionStore.getState().setSelectedFaction({
-                isMajor: true,
-                enumFaction: Faction.LORDS,
-                minorName: null,
-                uiLabel: "lords",
-            });
-        });
-
-        render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <Probe />
-                </GameDataProvider>
-            </MemoryRouter>
-        );
-
-        expect(screen.getByTestId("selected-faction")).toHaveTextContent("lords");
-        await waitFor(() => {
-            expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
-        });
-    });
-
-    it("writes setSelectedFaction calls through to factionSelectionStore while selectedTechs stay store-backed", async () => {
-        const user = userEvent.setup();
-
-        const FactionProbe = () => {
-            const { selectedFaction, selectedTechs, setSelectedFaction, setSelectedTechs } = useGameData();
-
-            return (
-                <div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setSelectedTechs(["Tech_Selected"]);
-                            setSelectedFaction({
+                <button
+                    type="button"
+                    onClick={() =>
+                        void createSavedTechBuild?.(
+                            "My Build",
+                            {
                                 isMajor: true,
                                 enumFaction: Faction.LORDS,
                                 minorName: null,
                                 uiLabel: "lords",
-                            });
-                        }}
-                    >
-                        Change faction
-                    </button>
-                    <div data-testid="context-faction">{selectedFaction.uiLabel}</div>
-                    <div data-testid="context-selected-count">{selectedTechs.length}</div>
-                </div>
+                            },
+                            ["Tech_Store_Selected"]
+                        )
+                    }
+                >
+                    Save build
+                </button>
             );
         };
 
         render(
             <MemoryRouter>
                 <GameDataProvider>
-                    <FactionProbe />
+                    <CommandProbe />
                 </GameDataProvider>
             </MemoryRouter>
         );
 
-        await user.click(screen.getByRole("button", { name: "Change faction" }));
+        await user.click(screen.getByRole("button", { name: "Save build" }));
 
-        expect(screen.getByTestId("context-faction")).toHaveTextContent("lords");
-        expect(screen.getByTestId("context-selected-count")).toHaveTextContent("1");
-        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
-        expect("selectedFaction" in useTechPlannerStore.getState()).toBe(false);
-        expect("selectedTechs" in useFactionSelectionStore.getState()).toBe(false);
+        expect(mockedApiClient.createSavedBuild).toHaveBeenCalledWith(
+            "My Build",
+            "LORDS",
+            ["Tech_Store_Selected"]
+        );
+    });
+
+    it("keeps getSavedBuild writing loaded faction and selected techs into stores", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "saved-build-id",
+            name: "Saved Build",
+            selectedFaction: "Aspects",
+            techIds: ["Tech_Shared_First", "Tech_Shared_Second"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
+
+        const CommandProbe = () => {
+            const { getSavedBuild } = useSavedTechBuildCommands();
+
+            return (
+                <button type="button" onClick={() => void getSavedBuild?.("saved-build-id")}>
+                    Load build
+                </button>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <CommandProbe />
+                    <StoreProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Load build" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("2");
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("aspects");
+        });
+        expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("saved-build-id");
     });
 
     it("preserves shared-build loading into selected faction and selected techs", async () => {
@@ -333,7 +289,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         render(
             <MemoryRouter initialEntries={["/tech?share=shared-build-id"]}>
                 <GameDataProvider>
-                    <Probe />
+                    <StoreProbe />
                     <LocationProbe />
                 </GameDataProvider>
             </MemoryRouter>
@@ -342,6 +298,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         await waitFor(() => {
             expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("2");
             expect(screen.getByTestId("selected-faction")).toHaveTextContent("aspects");
+            expect(screen.getByTestId("share-processing")).toHaveTextContent("false");
         });
 
         expect(screen.getByTestId("location")).toHaveTextContent("/tech");
@@ -350,7 +307,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         window.history.pushState({}, "", "/");
     });
 
-    it("keeps identical district and improvement keys in separate context maps", async () => {
+    it("keeps identical district and improvement keys separated in their stores", async () => {
         mockedApiClient.getDistricts.mockResolvedValue([
             {
                 districtKey: "Shared_Constructible_Key",
@@ -369,15 +326,16 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         ]);
 
         const SharedProbe = () => {
-            const { districts, improvements } = useGameData();
+            const districtsByKey = useDistrictStore((state) => state.districtsByKey);
+            const improvementsByKey = useImprovementStore((state) => state.improvementsByKey);
 
             return (
                 <div>
                     <div data-testid="shared-district">
-                        {districts.get("Shared_Constructible_Key")?.displayName ?? "missing"}
+                        {districtsByKey.Shared_Constructible_Key?.displayName ?? "missing"}
                     </div>
                     <div data-testid="shared-improvement">
-                        {improvements.get("Shared_Constructible_Key")?.displayName ?? "missing"}
+                        {improvementsByKey.Shared_Constructible_Key?.displayName ?? "missing"}
                     </div>
                 </div>
             );
@@ -395,5 +353,22 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
             expect(screen.getByTestId("shared-district")).toHaveTextContent("Shared District");
             expect(screen.getByTestId("shared-improvement")).toHaveTextContent("Shared Improvement");
         });
+    });
+
+    it("leaves selected tech and faction state owned by their stores", () => {
+        act(() => {
+            useTechPlannerStore.getState().setSelectedTechs(["Tech_Selected"]);
+            useFactionSelectionStore.getState().setSelectedFaction({
+                isMajor: true,
+                enumFaction: Faction.LORDS,
+                minorName: null,
+                uiLabel: "lords",
+            });
+        });
+
+        expect(useTechPlannerStore.getState().selectedTechs).toEqual(["Tech_Selected"]);
+        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
+        expect("selectedFaction" in useTechPlannerStore.getState()).toBe(false);
+        expect("selectedTechs" in useFactionSelectionStore.getState()).toBe(false);
     });
 });

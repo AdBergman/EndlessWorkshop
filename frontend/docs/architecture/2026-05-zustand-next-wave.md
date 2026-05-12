@@ -165,7 +165,7 @@ The stale `ModsPage.test.tsx` fixture that assumed `BulkTrade` had no screenshot
 
 Current production build emits one large application chunk:
 
-- `dist/assets/index-BcQZr5DN.js`: 931.65 kB minified, 286.01 kB gzip.
+- `dist/assets/index-GHeMKpms.js`: 931.11 kB minified, 285.87 kB gzip.
 - Vite warns because the minified chunk exceeds 500 kB.
 
 Likely contributors:
@@ -187,7 +187,7 @@ Do not combine route-level lazy loading with hydration or deep-link behavior cha
 
 ## Architecture Smells To Track
 
-- `GameDataContextType` still exposes entity maps and selected state that should now be store-native.
+- `GameDataContextType` has been shrunk to orchestration commands and share-processing state; do not re-add entity maps or selected interaction state.
 - `AppLayout` and `TopContainer` now read the share-processing gate through `useShareProcessingGate`; keep app-shell gating on that narrow facade.
 - `SpreadSheetView` now reads saved-build creation through `useSavedTechBuildCommands`; keep saved-build commands behind that narrow facade.
 - `UnitEvolutionExplorer` was extracted to direct `factionSelectionStore` reads; keep it from drifting back into context.
@@ -210,8 +210,14 @@ Completed orchestration facade slice:
 3. Moved `SpreadSheetView` to the narrow saved-build command hook.
 4. Left share hydration, startup ordering, URL replacement, and saved-build semantics unchanged.
 
+Completed context shrink slice:
+
+1. Removed entity map adapters and selected faction/tech fields from `GameDataContextType`.
+2. Kept `GameDataProvider` startup loads, share hydration, URL replacement, and saved-build commands behavior intact.
+3. Updated provider and route tests to read selected/entity state from stores instead of the broad context adapter.
+
 Next bounded slice:
 
-1. Move remaining app-shell probes/tests that only need selected tech/faction state to store-native selectors.
-2. Add a pure `{ kind, key }` entity-reference helper library with tests.
-3. Shrink `GameDataContextType` only after compatibility tests no longer need selected/entity fields.
+1. Add a descriptor/token AST parser behind the existing renderer APIs with tests.
+2. Keep entity refs and descriptor AST unwired until both pure foundations are stable.
+3. Revisit code splitting separately after architecture-boundary cleanup.
