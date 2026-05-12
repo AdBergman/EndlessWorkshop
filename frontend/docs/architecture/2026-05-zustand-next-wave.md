@@ -12,6 +12,11 @@ The Zustand migration has reduced `GameDataContext` from competing application s
 
 `GameDataProvider` still coordinates startup loads, saved-build creation/loading, share hydration, URL replacement after share load, and the global `isProcessingSharedBuild` gate. That remaining role is orchestration, not state ownership.
 
+The first pure convergence foundations are now in place:
+
+- `src/lib/entityRef/entityRef.ts` defines typed `{ kind, key }` identity helpers, including encoded codex identities.
+- `src/lib/descriptionLine/descriptionLineRenderer.tsx` parses description lines into an AST behind the existing rendering, stripping, and token-audit APIs.
+
 ## Recommended Final Role For `GameDataContext`
 
 Keep `GameDataContext` as a temporary compatibility island and converge it toward an `AppOrchestrationProvider`.
@@ -38,11 +43,11 @@ Target API shape:
 type AppOrchestrationContextValue = {
     isProcessingSharedBuild: boolean;
     createSavedTechBuild: (name: string, faction: FactionInfo, techIds: string[]) => Promise<SavedTechBuild>;
-    hydrateSavedTechBuild: (uuid: string) => Promise<SavedTechBuild>;
+    getSavedBuild: (uuid: string) => Promise<SavedTechBuild>;
 };
 ```
 
-Do not rename or reshape this provider in the same slice as share/startup behavior changes. First add narrower hooks over the existing provider; then migrate consumers; then rename once the public surface is already small.
+Do not rename or reshape this provider in the same slice as share/startup behavior changes. The narrow `appOrchestration` facade is already in place; future cleanup should migrate any remaining direct `useGameData` access only when it does not alter lifecycle behavior.
 
 ## Unit Evolution Explorer Decision
 
@@ -73,7 +78,10 @@ type EntityKind =
     | "unit"
     | "district"
     | "improvement"
-    | "codex";
+    | "codex"
+    | "ability"
+    | "hero"
+    | "population";
 
 type EntityRef<K extends EntityKind = EntityKind> = {
     kind: K;
@@ -81,34 +89,36 @@ type EntityRef<K extends EntityKind = EntityKind> = {
 };
 ```
 
-This should start as pure library code, not a new global store. The first version should provide:
+This starts as pure library code, not a new global store. The first version provides:
 
 - `normalizeEntityRef(ref)`.
 - `entityRefId(ref)` for stable map keys.
-- `resolveEntityRef(ref, graph)` where `graph` is assembled from existing store snapshots.
+- `parseEntityRefId(id)` for round-tripping stable IDs.
 - Adapter helpers from current domains:
   - tech: `{ kind: "tech", key: tech.techKey }`
   - unit: `{ kind: "unit", key: unit.unitKey }`
   - district: `{ kind: "district", key: district.districtKey }`
   - improvement: `{ kind: "improvement", key: improvement.improvementKey }`
-  - codex: `{ kind: "codex", key: `${exportKind}:${entryKey}` }` or a nested `{ kind, key }` codex sub-identity if the backend preserves duplicate entry keys across export kinds.
+  - codex: `{ kind: "codex", key: codexEntityKey(exportKind, entryKey) }`
+  - ability, hero, and population string-key adapters.
 
 Important codex nuance: `codexStore` already has `entriesByKindKey`, which is the right semantic model. `entriesByKey` is convenient but ambiguous when different export kinds share an `entryKey`. Long term, codex references should move from raw `referenceKeys: string[]` to typed references or a resolver that can carry kind hints.
 
 Recommended sequence:
 
 1. Add pure `entityRef` helpers and tests. Done in `src/lib/entityRef/entityRef.ts`.
-2. Use them in codex related-entry resolution while preserving existing raw-key behavior.
-3. Move tech unlock refs onto entity refs at the UI adapter boundary.
-4. Only then consider a composed `entityGraph` selector/hook.
+2. Add a pure codex reference resolver adapter that can accept either raw `referenceKeys` or typed codex refs while preserving current raw-key behavior.
+3. Use that adapter in codex related-entry resolution behind tests.
+4. Move tech unlock refs onto entity refs at the UI adapter boundary.
+5. Only then consider a composed `entityGraph` selector/hook.
 
 Implementation note: codex refs keep the base `{ kind, key }` shape, but their key is an encoded `exportKind + entryKey` identity. This preserves `entriesByKindKey` semantics and avoids treating raw codex entry keys as globally unique.
 
 ## Descriptor And Token AST Proposal
 
-The current renderer tokenizes bracket markers during render. That is good enough for today, but descriptor logic is split between rendering, preview stripping, and token audit.
+The renderer now parses bracket markers into an AST before rendering. Descriptor behavior remains split by responsibility, but render, preview stripping, and token audit all have a shared pure parser available.
 
-Move toward a parsed descriptor AST:
+Current parsed descriptor AST:
 
 ```ts
 type DescriptionNode =
@@ -121,18 +131,33 @@ type DescriptionLineAst = {
 };
 ```
 
-First-stage API:
+First-stage API, implemented behind the compatibility helpers:
 
 - `parseDescriptionLine(line): DescriptionLineAst`
 - `stripDescriptionAst(ast): string`
 - `getDescriptionTokens(ast): TokenMatch[]`
 - `renderDescriptionAst(ast, options): ReactNode`
 
-Migration rule: keep `renderDescriptionLine(line)` as the public compatibility API and implement it through the parser. That lets codex detail panes, table views, previews, and token audit converge without touching call sites in one sweep.
+Migration rule: keep `renderDescriptionLine(line)` as the public compatibility API. Codex detail panes, table views, previews, and token audit can now converge on the parser without touching visual rendering in the same slice.
 
 Do not add entity-link rendering in the first parser slice. Token styling and entity resolution should stay separate until the AST contract is stable.
 
 Implementation note: the first parser slice is pure and sits behind the existing description-line helpers. It preserves renderer compatibility by treating unmatched brackets as text, stripping all matched bracket tokens from previews, and exposing token offsets for future descriptor diagnostics.
+
+## Pure Foundation API Audit
+
+`entityRef` findings:
+
+- The `{ kind, key }` shape is stable and intentionally small.
+- `entityRefId` and `parseEntityRefId` encode keys with `encodeURIComponent`, so domain keys can safely contain spaces, slashes, and colons.
+- Codex identity correctly normalizes `exportKind` to lowercase while preserving `entryKey` casing.
+- The main naming risk is `entriesByKey` in codex code, not `entityRef`: raw entry keys are still ambiguous across export kinds.
+
+Description AST findings:
+
+- `DescriptionNode.index` is useful for diagnostics and token audit output; keep it.
+- `DescriptionTokenNode.style` keeps current rendering cheap, but future entity-link resolution should not overload `style`; add a separate semantic field only when a typed resolver exists.
+- `TOKEN_RE` preserves current bracket parsing semantics. Do not broaden it in the same slice as codex/domain convergence.
 
 ## Hydration And Startup Risk Matrix
 
@@ -194,8 +219,8 @@ Do not combine route-level lazy loading with hydration or deep-link behavior cha
 - `SpreadSheetView` now reads saved-build creation through `useSavedTechBuildCommands`; keep saved-build commands behind that narrow facade.
 - `UnitEvolutionExplorer` was extracted to direct `factionSelectionStore` reads; keep it from drifting back into context.
 - Codex raw `referenceKeys` are ambiguous without kind semantics.
-- Description token parsing is repeated conceptually across render, strip, preview, and audit.
-- `frontend/README.md` still describes Create React App even though the app now uses Vite.
+- Description token parsing now has one parser foundation, but runtime UI still treats tokens as presentation markers rather than semantic entity refs.
+- Bundle size remains a future concern, but code splitting should stay separate from hydration and routing cleanup.
 
 ## Recommended Next Bounded Implementation Slice
 
@@ -218,8 +243,15 @@ Completed context shrink slice:
 2. Kept `GameDataProvider` startup loads, share hydration, URL replacement, and saved-build commands behavior intact.
 3. Updated provider and route tests to read selected/entity state from stores instead of the broad context adapter.
 
+Completed pure foundation slices:
+
+1. Added pure `entityRef` helpers and tests without runtime wiring.
+2. Added the descriptor/token AST parser behind existing renderer APIs with tests.
+3. Replaced stale frontend documentation with the current Vite/Zustand architecture snapshot.
+
 Next bounded slice:
 
-1. Add a descriptor/token AST parser behind the existing renderer APIs with tests.
-2. Keep entity refs and descriptor AST unwired until both pure foundations are stable.
-3. Revisit code splitting separately after architecture-boundary cleanup.
+1. Add a pure codex reference adapter in `src/lib/codex` that can build typed codex refs from `{ exportKind, entryKey }` and resolve them against `entriesByKindKey`.
+2. Keep the existing raw `referenceKeys` resolver path as the compatibility fallback.
+3. Add tests for duplicate `entryKey` values across different `exportKind` buckets, self-reference filtering, missing references, and raw-key fallback.
+4. Do not wire entity refs into codex UI rendering, description token rendering, routing, or stores until that pure adapter is stable.

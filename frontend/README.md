@@ -1,46 +1,52 @@
-# Getting Started with Create React App
+# EWShop Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+EWShop's frontend is a Vite, React, TypeScript application. The current post-Zustand architecture keeps interactive state in domain stores and leaves `GameDataProvider` as an orchestration boundary for startup, saved builds, and share hydration.
 
-## Available Scripts
+## Scripts
 
-In the project directory, you can run:
+Run commands from this `frontend` directory.
 
-### `npm start`
+```sh
+npm start
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Starts the Vite dev server.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```sh
+npm test -- --run
+```
 
-### `npm test`
+Runs the Vitest test suite once. Narrow runs can pass file or test-name filters, for example:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```sh
+npm test -- --run entityRef descriptionLine
+```
 
-### `npm run build`
+```sh
+npx tsc --noEmit --project tsconfig.json
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Runs the TypeScript compiler without emitting files.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```sh
+npm run build
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Builds the production app into `dist`.
 
-### `npm run eject`
+## Architecture Snapshot
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Vite owns local development and production bundling.
+- Zustand stores own domain state for techs, planning, faction selection, codex entries, districts, improvements, units, end-game reports, and empire stats views.
+- `GameDataProvider` remains a compatibility provider for app orchestration only: startup loads, saved-build commands, share hydration, URL replacement after share load, and `isProcessingSharedBuild`.
+- `src/context/appOrchestration.ts` exposes narrow hooks over the provider: `useAppOrchestration`, `useShareProcessingGate`, and `useSavedTechBuildCommands`.
+- `src/lib/entityRef/entityRef.ts` contains the pure `{ kind, key }` identity foundation. It is intentionally not wired into runtime UI resolution yet.
+- `src/lib/descriptionLine/descriptionLineRenderer.tsx` contains the pure description-line AST parser behind the existing renderer, stripping, and token-audit APIs.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The active architecture roadmap lives at [docs/architecture/2026-05-zustand-next-wave.md](docs/architecture/2026-05-zustand-next-wave.md).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Guardrails
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Do not move share hydration, startup sequencing, URL replacement, tooltip timing, or route synchronization as part of architecture cleanup.
+- Do not reintroduce broad entity maps or selected interaction state to `GameDataContextType`.
+- Keep entity refs and description AST parsing pure until the codex/domain convergence slice has explicit tests around compatibility behavior.
