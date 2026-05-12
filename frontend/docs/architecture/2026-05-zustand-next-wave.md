@@ -112,8 +112,8 @@ Move toward a parsed descriptor AST:
 
 ```ts
 type DescriptionNode =
-    | { type: "text"; value: string }
-    | { type: "token"; raw: string; token: string; style?: TokenStyle };
+    | { type: "text"; value: string; index: number }
+    | { type: "token"; raw: string; token: string; index: number; style?: TokenStyle };
 
 type DescriptionLineAst = {
     source: string;
@@ -131,6 +131,8 @@ First-stage API:
 Migration rule: keep `renderDescriptionLine(line)` as the public compatibility API and implement it through the parser. That lets codex detail panes, table views, previews, and token audit converge without touching call sites in one sweep.
 
 Do not add entity-link rendering in the first parser slice. Token styling and entity resolution should stay separate until the AST contract is stable.
+
+Implementation note: the first parser slice is pure and sits behind the existing description-line helpers. It preserves renderer compatibility by treating unmatched brackets as text, stripping all matched bracket tokens from previews, and exposing token offsets for future descriptor diagnostics.
 
 ## Hydration And Startup Risk Matrix
 

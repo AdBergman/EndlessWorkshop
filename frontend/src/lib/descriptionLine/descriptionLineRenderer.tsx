@@ -45,6 +45,27 @@ export type TokenMatch = {
     index: number;
 };
 
+export type DescriptionTextNode = {
+    type: "text";
+    value: string;
+    index: number;
+};
+
+export type DescriptionTokenNode = {
+    type: "token";
+    token: string;
+    raw: string;
+    index: number;
+    style?: TokenStyle;
+};
+
+export type DescriptionNode = DescriptionTextNode | DescriptionTokenNode;
+
+export type DescriptionLineAst = {
+    source: string;
+    nodes: DescriptionNode[];
+};
+
 type RenderTokenizedTextOptions = {
     decorativeIcons?: boolean;
 };
@@ -81,21 +102,68 @@ function splitWordish(text: string): { leadingSpace: string; word: string; rest:
     return { leadingSpace: match[1] ?? "", word: match[2] ?? "", rest: match[3] ?? "" };
 }
 
+export function parseDescriptionLine(line: string): DescriptionLineAst {
+    if (!line) return { source: line, nodes: [] };
+
+    const nodes: DescriptionNode[] = [];
+    let lastIndex = 0;
+
+    for (const match of line.matchAll(TOKEN_RE)) {
+        const raw = match[0];
+        const token = (match[1] ?? "").trim();
+        const matchIndex = match.index ?? 0;
+
+        if (matchIndex > lastIndex) {
+            nodes.push({
+                type: "text",
+                value: line.slice(lastIndex, matchIndex),
+                index: lastIndex,
+            });
+        }
+
+        nodes.push({
+            type: "token",
+            token,
+            raw,
+            index: matchIndex,
+            style: TOKEN_STYLE[token],
+        });
+
+        lastIndex = matchIndex + raw.length;
+    }
+
+    if (lastIndex < line.length) {
+        nodes.push({
+            type: "text",
+            value: line.slice(lastIndex),
+            index: lastIndex,
+        });
+    }
+
+    return { source: line, nodes };
+}
+
+export function getDescriptionTokens(ast: DescriptionLineAst): TokenMatch[] {
+    return ast.nodes
+        .filter((node): node is DescriptionTokenNode => node.type === "token" && node.token.length > 0)
+        .map((node) => ({
+            token: node.token,
+            raw: node.raw,
+            index: node.index,
+        }));
+}
+
+export function stripDescriptionAst(ast: DescriptionLineAst): string {
+    return ast.nodes
+        .filter((node): node is DescriptionTextNode => node.type === "text")
+        .map((node) => node.value)
+        .join("")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 export function extractBracketTokenMatches(value: string): TokenMatch[] {
-    if (!value) return [];
-
-    return Array.from(value.matchAll(TOKEN_RE))
-        .map((match) => {
-            const token = (match[1] ?? "").trim();
-            if (!token) return null;
-
-            return {
-                token,
-                raw: match[0],
-                index: match.index ?? 0,
-            };
-        })
-        .filter((match): match is TokenMatch => match !== null);
+    return getDescriptionTokens(parseDescriptionLine(value));
 }
 
 export function extractBracketTokens(value: string): string[] {
@@ -119,19 +187,16 @@ export function getKnownTokenMetadata(): KnownTokenMetadata[] {
 }
 
 export function stripDescriptionTokens(line: string): string {
-    if (!line) return "";
-    // Remove [Token] markers, keep the surrounding text.
-    return line.replace(TOKEN_RE, "").replace(/\s+/g, " ").trim();
+    return stripDescriptionAst(parseDescriptionLine(line));
 }
 
-export function renderTokenizedText(
-    text: string,
+export function renderDescriptionAst(
+    ast: DescriptionLineAst,
     options: RenderTokenizedTextOptions = {}
 ): React.ReactNode {
-    if (!text) return null;
+    if (!ast.source) return null;
 
     const parts: React.ReactNode[] = [];
-    let lastIndex = 0;
     let reactKey = 0;
 
     const seen = new Map<string, number>();
@@ -154,24 +219,23 @@ export function renderTokenizedText(
         parts.push(<span key={reactKey++}>{text}</span>);
     };
 
-    for (const match of text.matchAll(TOKEN_RE)) {
-        const full = match[0];
-        const token = (match[1] ?? "").trim();
-        const matchIndex = match.index ?? 0;
+    for (const node of ast.nodes) {
+        if (node.type === "text") {
+            pushText(node.value);
+            continue;
+        }
 
-        pushText(text.slice(lastIndex, matchIndex));
-
-        const style = TOKEN_STYLE[token];
+        const style = node.style;
         if (style) {
-            const count = seen.get(token) ?? 0;
-            seen.set(token, count + 1);
+            const count = seen.get(node.token) ?? 0;
+            seen.set(node.token, count + 1);
 
             if (count === 0) {
                 parts.push(
                     <Icon
                         key={reactKey++}
                         icon={style.icon}
-                        title={token}
+                        title={node.token}
                         decorative={options.decorativeIcons ?? false}
                     />
                 );
@@ -179,13 +243,16 @@ export function renderTokenizedText(
                 pendingWordColor = style.wordColor;
             }
         }
-
-        lastIndex = matchIndex + full.length;
     }
 
-    pushText(text.slice(lastIndex));
-
     return <>{parts}</>;
+}
+
+export function renderTokenizedText(
+    text: string,
+    options: RenderTokenizedTextOptions = {}
+): React.ReactNode {
+    return renderDescriptionAst(parseDescriptionLine(text), options);
 }
 
 export function renderDescriptionLine(line: string): React.ReactNode {
