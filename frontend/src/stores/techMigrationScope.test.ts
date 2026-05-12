@@ -90,14 +90,36 @@ describe("tech data ownership migration scope", () => {
         expect(hydrationSource).not.toMatch(/useCodexStore|codexStore/);
     });
 
-    it("keeps TopContainer using context only for share-processing gating", () => {
-        const source = readSrc("components/TopContainer/TopContainer.tsx");
+    it("keeps narrow app orchestration hooks over the compatibility provider", () => {
+        const source = readSrc("context/appOrchestration.ts");
 
         expect(source).toMatch(/useGameData\(\)/);
+        expect(source).toMatch(/useShareProcessingGate/);
+        expect(source).toMatch(/useSavedTechBuildCommands/);
+        expect(source).toMatch(/isProcessingSharedBuild/);
+        expect(source).toMatch(/createSavedTechBuild/);
+        expect(source).not.toMatch(/useTechStore|useTechPlannerStore|useFactionSelectionStore|useNavigate/);
+    });
+
+    it("keeps TopContainer using the narrow share-processing gate", () => {
+        const source = readSrc("components/TopContainer/TopContainer.tsx");
+
+        expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
+        expect(source).toMatch(/useShareProcessingGate/);
         expect(source).toMatch(/isProcessingSharedBuild/);
         expect(source).toMatch(/useFactionSelectionStore/);
         expect(source).toMatch(/useTechPlannerStore/);
         expect(source).not.toMatch(/const \{ selectedFaction, setSelectedFaction, setSelectedTechs/);
+    });
+
+    it("keeps SpreadSheetView on the narrow saved-build command hook", () => {
+        const source = readSrc("components/Tech/views/SpreadSheetView.tsx");
+
+        expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
+        expect(source).toMatch(/useSavedTechBuildCommands/);
+        expect(source).toMatch(/createSavedTechBuild/);
+        expect(source).toMatch(/useTechPlannerStore/);
+        expect(source).toMatch(/useFactionSelectionStore/);
     });
 
     it("keeps tooltips reading selected faction from the faction store", () => {

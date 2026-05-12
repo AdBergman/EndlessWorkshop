@@ -11,7 +11,7 @@ import TopContainer from "./components/TopContainer/TopContainer";
 import TechContainer from "./components/Tech/TechContainer";
 import InfoPage from "./components/InfoPage/InfoPage";
 import GameDataProvider from "./context/GameDataProvider";
-import { useGameData } from "./context/GameDataContext";
+import { useShareProcessingGate } from "./context/appOrchestration";
 import LandscapeWrapper from "./components/Layout/LandscapeWrapper";
 import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
@@ -47,7 +47,7 @@ const AppLayout: React.FC = () => {
 
     useCloudflareSPA();
 
-    const { isProcessingSharedBuild } = useGameData();
+    const isProcessingSharedBuild = useShareProcessingGate();
     const appClassName = location.pathname.startsWith("/codex") ? "app app--codex" : "app";
 
     return (

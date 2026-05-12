@@ -5,7 +5,7 @@ import TechSheetView from "./TechSheetView";
 import ImprovementSheetView from "./ImprovementSheetView";
 import DistrictSheetView from "./DistrictSheetView";
 import UnitSheetView from "./UnitSheetView";
-import { useGameData } from "@/context/GameDataContext";
+import { useSavedTechBuildCommands } from "@/context/appOrchestration";
 import { Tech } from "@/types/dataTypes";
 import {
     getUnlockedConstructiblesByKey,
@@ -27,7 +27,7 @@ import {
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 const SpreadSheetView: React.FC = () => {
-    const { createSavedTechBuild } = useGameData();
+    const { createSavedTechBuild } = useSavedTechBuildCommands();
     const selectedTechs = useTechPlannerStore(selectSelectedTechs);
     const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);

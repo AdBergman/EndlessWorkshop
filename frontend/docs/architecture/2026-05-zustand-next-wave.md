@@ -163,7 +163,7 @@ The stale `ModsPage.test.tsx` fixture that assumed `BulkTrade` had no screenshot
 
 Current production build emits one large application chunk:
 
-- `dist/assets/index-C3hB9wrO.js`: 931.44 kB minified, 285.99 kB gzip.
+- `dist/assets/index-BcQZr5DN.js`: 931.65 kB minified, 286.01 kB gzip.
 - Vite warns because the minified chunk exceeds 500 kB.
 
 Likely contributors:
@@ -186,8 +186,8 @@ Do not combine route-level lazy loading with hydration or deep-link behavior cha
 ## Architecture Smells To Track
 
 - `GameDataContextType` still exposes entity maps and selected state that should now be store-native.
-- `TopContainer` imports context only for a global gate; a narrower hook would make intent clearer.
-- `SpreadSheetView` imports context only for saved-build creation; a saved-build command hook would isolate the compatibility layer.
+- `AppLayout` and `TopContainer` now read the share-processing gate through `useShareProcessingGate`; keep app-shell gating on that narrow facade.
+- `SpreadSheetView` now reads saved-build creation through `useSavedTechBuildCommands`; keep saved-build commands behind that narrow facade.
 - `UnitEvolutionExplorer` was extracted to direct `factionSelectionStore` reads; keep it from drifting back into context.
 - Codex raw `referenceKeys` are ambiguous without kind semantics.
 - Description token parsing is repeated conceptually across render, strip, preview, and audit.
@@ -201,8 +201,15 @@ Completed low-risk slice:
 2. Added a migration-scope test asserting `UnitEvolutionExplorer.tsx` no longer imports `GameDataContext`.
 3. Left URL hydration, minor toggle behavior, and router replacement untouched.
 
+Completed orchestration facade slice:
+
+1. Added `useAppOrchestration`, `useShareProcessingGate`, and `useSavedTechBuildCommands` over the existing provider.
+2. Moved `AppLayout` and `TopContainer` to the narrow share-processing gate.
+3. Moved `SpreadSheetView` to the narrow saved-build command hook.
+4. Left share hydration, startup ordering, URL replacement, and saved-build semantics unchanged.
+
 Next bounded slice:
 
-1. Add `useSavedTechBuildCommands` or `useAppOrchestration` over the existing provider.
-2. Move `SpreadSheetView` and `TopContainer` to narrower orchestration hooks.
-3. Shrink `GameDataContextType` only after consumers no longer need compatibility fields.
+1. Move remaining app-shell probes/tests that only need selected tech/faction state to store-native selectors.
+2. Add a pure `{ kind, key }` entity-reference helper library with tests.
+3. Shrink `GameDataContextType` only after compatibility tests no longer need selected/entity fields.

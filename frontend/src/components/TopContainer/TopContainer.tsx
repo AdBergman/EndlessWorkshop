@@ -1,6 +1,6 @@
 import React from "react";
 import "./TopContainer.css";
-import {useGameData} from "@/context/GameDataContext";
+import { useShareProcessingGate } from "@/context/appOrchestration";
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
 import {Faction} from "@/types/dataTypes";
 import {
@@ -30,7 +30,7 @@ const routes = [
 const TopContainer: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { isProcessingSharedBuild } = useGameData();
+    const isProcessingSharedBuild = useShareProcessingGate();
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
     const clearSelectedTechs = useTechPlannerStore((state) => state.clearSelectedTechs);
