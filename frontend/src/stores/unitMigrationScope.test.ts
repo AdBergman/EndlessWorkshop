@@ -41,4 +41,14 @@ describe("unit migration scope", () => {
             expect(source).not.toMatch(/codexStore|useCodexStore/);
         }
     });
+
+    it("keeps UnitEvolutionExplorer on direct store ownership instead of GameDataContext", () => {
+        const source = readFileSync(resolve(srcDir, "components/Units/UnitEvolutionExplorer.tsx"), "utf8");
+
+        expect(source).not.toMatch(/GameDataContext|useGameData|useContext/);
+        expect(source).toMatch(/useUnitStore/);
+        expect(source).toMatch(/useFactionSelectionStore/);
+        expect(source).toMatch(/selectSelectedFaction/);
+        expect(source).toMatch(/selectSetSelectedFaction/);
+    });
 });

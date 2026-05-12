@@ -1,11 +1,15 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import GameDataContext from "@/context/GameDataContext";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import type { FactionInfo, Unit } from "@/types/dataTypes";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
 import { selectUnits, useUnitStore } from "@/stores/unitStore";
+import {
+    selectSelectedFaction,
+    selectSetSelectedFaction,
+    useFactionSelectionStore,
+} from "@/stores/factionSelectionStore";
 import "./UnitEvolutionExplorer.css";
 
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_").trim();
@@ -47,10 +51,11 @@ function isHiddenInUi(u: Unit): boolean {
  * 3) Minor toggle + carousel updates view and URL, but MUST NOT re-trigger hydration loops.
  */
 export const UnitEvolutionExplorer: React.FC = () => {
-    const gameData = useContext(GameDataContext);
     const [params, setParams] = useSearchParams();
     const units = useUnitStore(selectUnits);
     const loadUnits = useUnitStore((s) => s.loadUnits);
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
+    const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [showMinorUnits, setShowMinorUnits] = useState(false);
@@ -80,7 +85,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
         setSelectedIndex(0);
         // Do NOT mark "hydrated"; we still allow external URL nav to override.
         // This effect is only reacting to toolbar state.
-    }, [gameData?.selectedFaction]);
+    }, [selectedFaction]);
 
     const allVisibleUnits = useMemo(() => {
         if (units.length === 0) return [];
@@ -94,8 +99,6 @@ export const UnitEvolutionExplorer: React.FC = () => {
             return { pinned: null as Unit | null, roots: [] as Unit[] };
         }
 
-        const { selectedFaction } = gameData;
-
         if (showMinorUnits) {
             const minorUnits = allVisibleUnits.filter((u) => u.isMajorFaction === false);
             return getCarouselModelForFaction(minorUnits, true);
@@ -105,7 +108,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
         const factionUnits = allVisibleUnits.filter((u) => doesUnitMatchSelectedMajorFaction(u, selectedFaction));
         return getCarouselModelForFaction(factionUnits, false);
-    }, [gameData, allVisibleUnits, showMinorUnits]);
+    }, [allVisibleUnits, selectedFaction, showMinorUnits]);
 
     const carouselUnits = useMemo(() => {
         return pinnedUnit ? [pinnedUnit, ...rootUnits] : rootUnits;
@@ -125,8 +128,6 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
     // === URL → State (hydrate once per external navigation) ===
     useEffect(() => {
-        if (!gameData) return;
-
         // Ignore URL changes that we wrote ourselves (carousel/toggle/toolbar sync)
         const cur = params.toString();
         if (lastParamsWritten.current && cur === lastParamsWritten.current) return;
@@ -148,10 +149,10 @@ export const UnitEvolutionExplorer: React.FC = () => {
         // 1) Faction from URL should win over toolbar if it's a real navigation event.
         const fi = toFactionInfo(factionParam);
         const factionMatches =
-            gameData.selectedFaction?.isMajor && gameData.selectedFaction.enumFaction === fi.enumFaction;
+            selectedFaction?.isMajor && selectedFaction.enumFaction === fi.enumFaction;
 
         if (!factionMatches) {
-            gameData.setSelectedFaction(fi);
+            setSelectedFaction(fi);
             // Wait for toolbar/context to update; we'll hydrate index after carouselUnits recompute.
             return;
         }
@@ -187,17 +188,17 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
         setSelectedIndex(idx);
         hydratedOnceForThisNav.current = true;
-    }, [params, gameData, carouselUnits, showMinorUnits]);
+    }, [params, selectedFaction, setSelectedFaction, carouselUnits, showMinorUnits]);
 
     // === State → URL (silent sync) ===
     useEffect(() => {
-        if (!gameData?.selectedFaction?.isMajor) return;
+        if (!selectedFaction?.isMajor) return;
         if (carouselUnits.length === 0) return;
 
         const selectedUnit: Unit | null = carouselUnits[selectedIndex] || null;
         if (!selectedUnit) return;
 
-        const factionKey = normFaction(gameData.selectedFaction.uiLabel || (gameData.selectedFaction.enumFaction as any));
+        const factionKey = normFaction(selectedFaction.uiLabel || (selectedFaction.enumFaction as any));
         const unitKey = selectedUnit.unitKey;
 
         const isMinor = selectedUnit.isMajorFaction === false;
@@ -221,7 +222,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
         // Once the user has interacted (toolbar/toggle/carousel), we're in "UI driven" mode
         // until an external navigation happens (which resets hydratedOnceForThisNav in the params watcher).
         hydratedOnceForThisNav.current = true;
-    }, [gameData?.selectedFaction, selectedIndex, carouselUnits, setParams, params]);
+    }, [selectedFaction, selectedIndex, carouselUnits, setParams, params]);
 
     if (units.length === 0) {
         return <div>Loading units...</div>;

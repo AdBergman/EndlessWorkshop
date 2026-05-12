@@ -24,6 +24,11 @@ vi.mock("@/data/modsCatalog", async () => {
                           },
                       ],
                   }
+                : mod.name === "BulkTrade"
+                  ? {
+                        ...mod,
+                        screenshots: [],
+                    }
                 : mod
         ),
     };
