@@ -32,7 +32,6 @@ const contextValue = (overrides: Partial<GameDataContextType> = {}): GameDataCon
         ],
     ]),
     codexByKindKey: new Map(),
-    refreshTechs: vi.fn(),
     selectedFaction: {
         isMajor: true,
         enumFaction: Faction.KIN,

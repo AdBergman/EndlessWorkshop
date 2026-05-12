@@ -55,6 +55,7 @@ describe("tech data ownership migration scope", () => {
 
     it("leaves share orchestration and saved builds in GameDataProvider", () => {
         const source = readSrc("context/GameDataProvider.tsx");
+        const contextSource = readSrc("context/GameDataContext.ts");
 
         expect(source).toMatch(/useFactionSelectionStore\(selectSelectedFaction\)/);
         expect(source).toMatch(/useFactionSelectionStore\(selectSetSelectedFaction\)/);
@@ -63,9 +64,10 @@ describe("tech data ownership migration scope", () => {
         expect(source).toMatch(/const \[isProcessingSharedBuild, setIsProcessingSharedBuild\] = useState/);
         expect(source).toMatch(/apiClient\.createSavedBuild/);
         expect(source).toMatch(/apiClient\.getSavedBuild/);
+        expect(contextSource).not.toMatch(/refreshTechs/);
     });
 
-    it("keeps TechTree on the context adapter while TechContainer delegates route hydration", () => {
+    it("keeps TechTree on the context adapter for selection while owning admin refresh locally", () => {
         const treeSource = readSrc("components/Tech/TechTree.tsx");
         const containerSource = readSrc("components/Tech/TechContainer.tsx");
         const hydrationSource = readSrc("components/Tech/useTechRouteHydration.ts");
@@ -74,7 +76,7 @@ describe("tech data ownership migration scope", () => {
         expect(treeSource).toMatch(/selectedTechs/);
         expect(treeSource).toMatch(/setSelectedTechs/);
         expect(treeSource).toMatch(/refreshTechs/);
-        expect(treeSource).not.toMatch(/useTechStore/);
+        expect(treeSource).toMatch(/useTechStore/);
 
         expect(containerSource).not.toMatch(/useGameData\(\)/);
         expect(containerSource).not.toMatch(/useSharedBuildLoader|useDeepLinkedTech|useImportedTechListLoader/);

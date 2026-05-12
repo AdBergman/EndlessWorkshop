@@ -60,7 +60,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const loadUnits = useUnitStore((s) => s.loadUnits);
     const techsByKey = useTechStore((s) => s.techsByKey);
     const loadTechs = useTechStore((s) => s.loadTechs);
-    const refreshTechs = useTechStore((s) => s.refreshTechs);
 
     const districts = useMemo(
         () => new Map(Object.entries(districtsByKey)),
@@ -164,8 +163,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 techs,
 
                 codexByKindKey,
-
-                refreshTechs,
 
                 selectedFaction,
                 setSelectedFaction,

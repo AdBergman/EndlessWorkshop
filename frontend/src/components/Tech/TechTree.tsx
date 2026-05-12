@@ -14,6 +14,7 @@ import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
 import { useSearchParams } from "react-router-dom";
 import AdminTechPlacementPanel from "@/components/Tech/adminPanel/AdminTechPlacementPanel";
 import { useTechTreeAdminPlacement } from "@/components/Tech/adminPanel/useTechTreeAdminPlacement";
+import { useTechStore } from "@/stores/techStore";
 
 interface TechTreeProps {
     era: number;
@@ -25,7 +26,8 @@ const MIN_ERA = 1;
 const MAX_ERA = 6;
 
 const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra }) => {
-    const { selectedFaction, selectedTechs, setSelectedTechs, techs, refreshTechs } = useGameData();
+    const { selectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
+    const refreshTechs = useTechStore((s) => s.refreshTechs);
     const { openTooltips, showTooltip, hideTooltip } = useTooltip(300);
 
     const allTechs = useMemo(() => Array.from(techs.values()), [techs]);
@@ -39,7 +41,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         isAdminMode,
         wrapperRef,
         allTechs,
-        refreshTechs: refreshTechs!,
+        refreshTechs,
     });
 
     const selectedTechObjects = useMemo(() => {

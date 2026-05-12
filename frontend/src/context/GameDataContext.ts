@@ -18,8 +18,6 @@ export interface GameDataContextType {
     // NEW: codex grouped by kind -> entryKey
     codexByKindKey: Map<string, Map<string, Codex>>;
 
-    refreshTechs?: () => Promise<void>;
-
     selectedFaction: FactionInfo;
     setSelectedFaction: (faction: FactionInfo) => void;
 
@@ -58,8 +56,6 @@ const GameDataContext = createContext<GameDataContextType>({
     techs: new Map(),
 
     codexByKindKey: new Map(),
-
-    refreshTechs: undefined,
 
     selectedFaction: DEFAULT_FACTION,
     setSelectedFaction: () => {},
