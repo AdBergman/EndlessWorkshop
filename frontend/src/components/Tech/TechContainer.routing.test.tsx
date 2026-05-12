@@ -214,7 +214,7 @@ describe("TechContainer routing regressions", () => {
         window.history.pushState({}, "", "/");
     });
 
-    it("keeps /tech faction selection writing through context and clearing selected techs", async () => {
+    it("keeps /tech faction selection writing through stores and clearing selected techs", async () => {
         const user = userEvent.setup();
         act(() => {
             useTechPlannerStore.getState().setSelectedTechs(["Tech_Workshop"]);

@@ -3,6 +3,12 @@ import "./TopContainer.css";
 import {useGameData} from "@/context/GameDataContext";
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
 import {Faction} from "@/types/dataTypes";
+import {
+    selectSelectedFaction,
+    selectSetSelectedFaction,
+    useFactionSelectionStore,
+} from "@/stores/factionSelectionStore";
+import {useTechPlannerStore} from "@/stores/techPlannerStore";
 
 const factions = [
     { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" },
@@ -24,7 +30,10 @@ const routes = [
 const TopContainer: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { selectedFaction, setSelectedFaction, setSelectedTechs, isProcessingSharedBuild } = useGameData(); // Consume isProcessingSharedBuild
+    const { isProcessingSharedBuild } = useGameData();
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
+    const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
+    const clearSelectedTechs = useTechPlannerStore((state) => state.clearSelectedTechs);
     const showFactionSelector = !isProcessingSharedBuild;
 
     return (
@@ -59,7 +68,6 @@ const TopContainer: React.FC = () => {
                 ))}
             </div>
 
-            {/* Conditionally render faction selector based on isProcessingSharedBuild */}
             {showFactionSelector && (
                 <div className="faction-selector">
                     {factions.map((f) => (
@@ -74,7 +82,7 @@ const TopContainer: React.FC = () => {
                             }
                             onClick={() => {
                                 setSelectedFaction(f);
-                                setSelectedTechs([]); // clear tech tree selections
+                                clearSelectedTechs();
                             }}
                         >
                             {f.uiLabel}

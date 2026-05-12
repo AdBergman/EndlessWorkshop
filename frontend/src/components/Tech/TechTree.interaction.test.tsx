@@ -1,8 +1,6 @@
-import React, { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import GameDataContext, { type GameDataContextType } from "@/context/GameDataContext";
 import TechTree from "@/components/Tech/TechTree";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import { Faction, type FactionInfo, type Tech } from "@/types/dataTypes";
@@ -72,38 +70,6 @@ function StoreProbe() {
     );
 }
 
-function StatefulGameData({
-    children,
-    initialSelectedTechs = [],
-}: {
-    children: React.ReactNode;
-    initialSelectedTechs?: string[];
-}) {
-    const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(kinFaction);
-    const [selectedTechs, setSelectedTechs] = useState<string[]>(initialSelectedTechs);
-
-    const value: GameDataContextType = {
-        districts: new Map(),
-        improvements: new Map(),
-        techs: baseTechs,
-        selectedFaction,
-        setSelectedFaction,
-        selectedTechs,
-        setSelectedTechs,
-        createSavedTechBuild: vi.fn(),
-        getSavedBuild: vi.fn(),
-        isProcessingSharedBuild: false,
-    };
-
-    return (
-        <GameDataContext.Provider value={value}>
-            {children}
-            <div data-testid="selected-techs">{selectedTechs.join(",")}</div>
-            <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
-        </GameDataContext.Provider>
-    );
-}
-
 describe("TechTree selected tech interactions", () => {
     beforeEach(() => {
         seedTechTreeStores();
@@ -170,12 +136,12 @@ describe("TechTree selected tech interactions", () => {
 
     it("keeps faction switching clearing selected techs", async () => {
         const user = userEvent.setup();
+        seedTechTreeStores(["Tech_First"]);
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
-                <StatefulGameData initialSelectedTechs={["Tech_First"]}>
-                    <TopContainer />
-                </StatefulGameData>
+                <TopContainer />
+                <StoreProbe />
             </MemoryRouter>
         );
 

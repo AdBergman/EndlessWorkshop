@@ -90,6 +90,16 @@ describe("tech data ownership migration scope", () => {
         expect(hydrationSource).not.toMatch(/useCodexStore|codexStore/);
     });
 
+    it("keeps TopContainer using context only for share-processing gating", () => {
+        const source = readSrc("components/TopContainer/TopContainer.tsx");
+
+        expect(source).toMatch(/useGameData\(\)/);
+        expect(source).toMatch(/isProcessingSharedBuild/);
+        expect(source).toMatch(/useFactionSelectionStore/);
+        expect(source).toMatch(/useTechPlannerStore/);
+        expect(source).not.toMatch(/const \{ selectedFaction, setSelectedFaction, setSelectedTechs/);
+    });
+
     it("keeps route declarations unchanged for tech and summary pages", () => {
         const source = readSrc("App.tsx");
 

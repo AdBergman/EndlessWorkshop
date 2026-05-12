@@ -227,7 +227,7 @@ describe("/units smoke behavior", () => {
         });
     });
 
-    it("keeps /units faction selection writing through context and updating the unit route", async () => {
+    it("keeps /units faction selection writing through stores and updating the unit route", async () => {
         const user = userEvent.setup();
 
         render(
