@@ -143,7 +143,10 @@ function resolveEmpireLabel(empireMeta: EmpireMeta[], idx: number): { label: str
         const isPlayer = idx === 0;
         return { label: isPlayer ? `Empire ${idx} (Player)` : `Empire ${idx}`, isPlayer };
     }
-    return { label: em.idx === 0 ? `${em.faction} (Player)` : em.faction, isPlayer: em.idx === 0 };
+    return {
+        label: em.idx === 0 ? `${em.factionLabel} (Player)` : em.factionLabel,
+        isPlayer: em.idx === 0,
+    };
 }
 
 function computeTags(raw: RawCity): CityTag[] {

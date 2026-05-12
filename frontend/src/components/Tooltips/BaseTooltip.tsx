@@ -7,10 +7,14 @@ interface BaseTooltipProps {
     onMouseLeave?: () => void;
 }
 
+const isPixelCoords = (
+    coords: BaseTooltipProps["coords"]
+): coords is { x: number; y: number; mode: "pixel" } => "mode" in coords && coords.mode === "pixel";
+
 const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnter, onMouseLeave }) => {
     // --- Determine styling based on the coordinate system ---
     let positionStyles: React.CSSProperties;
-    if ("mode" in coords && coords.mode === "pixel") {
+    if (isPixelCoords(coords)) {
         // Use absolute pixel coordinates for portaled tooltips (e.g., SpreadsheetView / Unit cards)
         positionStyles = {
             position: "absolute",

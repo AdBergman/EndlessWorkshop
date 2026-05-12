@@ -13,6 +13,7 @@ function createMockImprovement(
 describe("ImprovementTooltip", () => {
     it("renders correctly with description lines and cost", () => {
         const hoveredImprovement = createMockImprovement({
+            improvementKey: "Improvement_Test_Shrine",
             displayName: "Test Shrine",
             unique: "City",
             descriptionLines: ["+1 Faith", "+1 Culture"],
@@ -32,6 +33,7 @@ describe("ImprovementTooltip", () => {
 
     it("renders correctly without an effects section when description lines are empty", () => {
         const hoveredImprovement = createMockImprovement({
+            improvementKey: "Improvement_Basic_Farm",
             displayName: "Basic Farm",
             unique: "District",
             descriptionLines: [],

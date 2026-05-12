@@ -13,6 +13,7 @@ function createMockDistrict(
 describe("DistrictTooltip", () => {
     it("renders every description line when present", () => {
         const hoveredDistrict = createMockDistrict({
+            districtKey: "District_Test",
             displayName: "Test District",
             descriptionLines: ["A special district.", "+5 Gold"],
         });
@@ -26,6 +27,7 @@ describe("DistrictTooltip", () => {
 
     it("renders correctly with only the district name when no description is available", () => {
         const hoveredDistrict = createMockDistrict({
+            districtKey: "District_Simple_Farm",
             displayName: "Simple Farm",
             descriptionLines: [],
         });

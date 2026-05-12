@@ -1,24 +1,24 @@
 import { useEffect } from "react";
-import { FactionInfo } from "@/context/GameDataContext"; // Assuming FactionInfo is exported from GameDataContext
+import type { FactionInfo } from "@/types/dataTypes";
 
 interface Props {
-    selectedFaction: FactionInfo; // Updated type
+    selectedFaction: FactionInfo;
     maxEra: number;
-    getBackgroundUrl: (factionLabel: string, era: number) => string; // Updated signature
+    getBackgroundUrl: (factionLabel: string, era: number) => string;
 }
 
 const preloadedFactions = new Set<string>();
 
 export default function BackgroundPreloader({ selectedFaction, maxEra, getBackgroundUrl }: Props) {
     useEffect(() => {
-        if (!selectedFaction || preloadedFactions.has(selectedFaction.uiLabel)) return; // Use uiLabel
+        if (!selectedFaction || preloadedFactions.has(selectedFaction.uiLabel)) return;
 
         for (let era = 1; era <= maxEra; era++) {
             const img = new Image();
-            img.src = getBackgroundUrl(selectedFaction.uiLabel, era); // Pass uiLabel
+            img.src = getBackgroundUrl(selectedFaction.uiLabel, era);
         }
 
-        preloadedFactions.add(selectedFaction.uiLabel); // Use uiLabel
+        preloadedFactions.add(selectedFaction.uiLabel);
     }, [selectedFaction, maxEra, getBackgroundUrl]);
 
     return null;

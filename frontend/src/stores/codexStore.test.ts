@@ -310,7 +310,9 @@ describe("useCodexStore", () => {
         expect(auditWindow.__downloadCodexTokenAudit).toEqual(expect.any(Function));
         expect(downloadClick).toHaveBeenCalledTimes(1);
         expect(infoSpy).toHaveBeenCalledWith("Codex token audit downloaded");
-        expect(createdAnchor?.download).toBe("codex-token-audit.txt");
+        expect(createdAnchor).not.toBeNull();
+        const downloadedAnchor = createdAnchor as unknown as HTMLAnchorElement;
+        expect(downloadedAnchor.download).toBe("codex-token-audit.txt");
 
         createElementSpy.mockRestore();
         URL.createObjectURL = originalCreateObjectURL;

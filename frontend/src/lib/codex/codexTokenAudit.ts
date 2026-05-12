@@ -1,8 +1,11 @@
 import { extractBracketTokenMatches, getTokenStyle } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 type RawCodexEntry = {
+    exportKind?: unknown;
+    entryKey?: unknown;
     displayName?: unknown;
     descriptionLines?: unknown;
+    referenceKeys?: unknown;
 };
 
 type CodexAuditWindow = Window & typeof globalThis & {
