@@ -1,6 +1,7 @@
-package ewshop.app.seo;
+package ewshop.app.seo.storage;
 
-import org.springframework.beans.factory.annotation.Value;
+import ewshop.app.seo.config.SeoProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
@@ -12,9 +13,12 @@ public class SeoOutputLocator {
 
     private final Path outputRoot;
 
-    public SeoOutputLocator(
-            @Value("${seo.output-dir:generated-seo}") String outputDir
-    ) {
+    @Autowired
+    public SeoOutputLocator(SeoProperties seoProperties) {
+        this(seoProperties.outputDir());
+    }
+
+    public SeoOutputLocator(String outputDir) {
         // Local development keeps using the relative generated-seo directory.
         // Production can override this with SEO_OUTPUT_DIR via application-prod.yml.
         this.outputRoot = Paths.get(outputDir).toAbsolutePath().normalize();
@@ -66,5 +70,13 @@ public class SeoOutputLocator {
 
     public Path getGeneratedSitemapPath() {
         return outputRoot.resolve("sitemap.xml");
+    }
+
+    public Path getMissingReferenceAuditJsonFile() {
+        return outputRoot.resolve("codex-missing-references-audit.json");
+    }
+
+    public Path getMissingReferenceAuditMarkdownFile() {
+        return outputRoot.resolve("codex-missing-references-audit.md");
     }
 }

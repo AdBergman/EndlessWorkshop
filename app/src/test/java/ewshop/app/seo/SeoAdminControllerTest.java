@@ -1,6 +1,7 @@
 package ewshop.app.seo;
 
 import ewshop.api.config.AdminTokenFilter;
+import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -56,6 +57,12 @@ class SeoAdminControllerTest {
                 0,
                 Map.of(),
                 Map.of("tech", new SeoRegenerationKindResult(1, 0, 0)),
+                new CodexMissingReferenceAuditSummary(
+                        "codex-missing-references-audit.json",
+                        2,
+                        75.0,
+                        List.of("District: 2")
+                ),
                 List.of(),
                 List.of(),
                 true
@@ -72,6 +79,9 @@ class SeoAdminControllerTest {
                 .andExpect(jsonPath("$.duplicateCount").value(0))
                 .andExpect(jsonPath("$.skippedByReason").isMap())
                 .andExpect(jsonPath("$.exportKindCounts.tech.generatedCount").value(1))
+                .andExpect(jsonPath("$.missingReferenceAudit.artifact").value("codex-missing-references-audit.json"))
+                .andExpect(jsonPath("$.missingReferenceAudit.unresolvedReferences").value(2))
+                .andExpect(jsonPath("$.missingReferenceAudit.topUnresolvedCategories[0]").value("District: 2"))
                 .andExpect(jsonPath("$.sitemapUpdated").value(true));
 
         verify(seoRegenerationService).regeneratePrototypePages();

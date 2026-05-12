@@ -1,5 +1,12 @@
 package ewshop.app.seo;
 
+import ewshop.app.seo.audit.CodexMissingReferenceAuditService;
+import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
+import ewshop.app.seo.generation.ReferenceTargetBuilder;
+import ewshop.app.seo.generation.SitemapGenerator;
+import ewshop.app.seo.rendering.SeoPageRenderer;
+import ewshop.app.seo.storage.GeneratedSeoWriter;
+import ewshop.app.seo.storage.SeoOutputLocator;
 import ewshop.domain.model.Codex;
 import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexService;
@@ -24,7 +31,7 @@ class SeoRegenerationServiceTest {
     void regeneratesSeoPagesAcrossExportKindsFromFilteredCodexData() throws Exception {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
-        SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
                 codexEntry("tech", "Technology_District_Tier1_Industry", "Workshop",
@@ -78,6 +85,8 @@ class SeoRegenerationServiceTest {
         Path encyclopediaFile = tempDir.resolve("encyclopedia/index.html");
         Path encyclopediaTechFile = tempDir.resolve("encyclopedia/tech/index.html");
         Path sitemapFile = tempDir.resolve("sitemap.xml");
+        Path auditJsonFile = tempDir.resolve("codex-missing-references-audit.json");
+        Path auditMarkdownFile = tempDir.resolve("codex-missing-references-audit.md");
 
         assertThat(result.generatedCount()).isEqualTo(10);
         assertThat(result.generatedRoutes()).containsExactly(
@@ -105,6 +114,12 @@ class SeoRegenerationServiceTest {
                 "units", new SeoRegenerationKindResult(1, 1, 1),
                 "districts", new SeoRegenerationKindResult(1, 1, 0),
                 "improvements", new SeoRegenerationKindResult(1, 0, 0)
+        ));
+        assertThat(result.missingReferenceAudit()).isEqualTo(new CodexMissingReferenceAuditSummary(
+                "codex-missing-references-audit.json",
+                4,
+                50.0,
+                List.of("District: 2", "City: 1", "Unclassified: 1")
         ));
         assertThat(result.warnings()).anySatisfy(warning ->
                 assertThat(warning).contains("Technology_District_Tier1_Defense"));
@@ -230,13 +245,46 @@ class SeoRegenerationServiceTest {
                 "<loc>https://endlessworkshop.dev/encyclopedia/units/sentinel</loc>"
         );
         assertThat(Files.readString(sitemapFile)).doesNotContain("legacy-page");
+        assertThat(Files.readString(sitemapFile)).doesNotContain("<loc>https://endlessworkshop.dev/tech/workshop</loc>");
+        assertThat(Files.readString(sitemapFile)).doesNotContain("<loc>https://endlessworkshop.dev/units/sentinel</loc>");
+        assertThat(Files.readString(sitemapFile)).doesNotContain("codex-missing-references-audit");
+
+        assertThat(auditJsonFile).exists();
+        String auditJson = Files.readString(auditJsonFile);
+        assertThat(auditJson)
+                .contains("\"totalEntriesScanned\": 5")
+                .contains("\"totalReferenceKeysScanned\": 8")
+                .contains("\"totalResolvedReferences\": 4")
+                .contains("\"totalUnresolvedReferences\": 4")
+                .contains("\"resolutionPercentage\": 50.0")
+                .contains("\"categoryPrefix\": \"District\"")
+                .contains("\"unresolvedCount\": 2")
+                .contains("\"percentageOfTotalUnresolved\": 50.0")
+                .contains("\"exampleKeys\": [")
+                .contains("\"District_Workshop\"")
+                .contains("\"District_Works\"")
+                .contains("\"exampleSourcePages\": [")
+                .contains("\"/encyclopedia/districts/klax-extractor\"")
+                .contains("\"/encyclopedia/tech/workshop\"")
+                .contains("\"recommendation\": \"public SEO/indexable pages\"")
+                .contains("\"categoryPrefix\": \"City\"")
+                .contains("\"categoryPrefix\": \"Unclassified\"")
+                .contains("\"hiddenPillboxesUnlockedEstimate\": 2");
+        assertThat(auditJson.indexOf("\"categoryPrefix\": \"District\""))
+                .isLessThan(auditJson.indexOf("\"categoryPrefix\": \"City\""));
+
+        assertThat(auditMarkdownFile).exists();
+        assertThat(Files.readString(auditMarkdownFile))
+                .contains("# Codex Missing References Audit")
+                .contains("- Total unresolved references: 4")
+                .contains("### District");
     }
 
     @Test
     void tracksDuplicateSlugsPerExportKindInsteadOfGlobally() throws Exception {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
-        SeoRegenerationService service = new SeoRegenerationService(codexService, new CodexFilterService(), outputLocator);
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator);
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
                 codexEntry("tech", "Technology_A", "Workshop", List.of("Tech description."), List.of()),
@@ -265,6 +313,58 @@ class SeoRegenerationServiceTest {
         ));
     }
 
+    @Test
+    void missingReferenceAuditGroupsCategoriesAndUsesDeterministicOutput() throws Exception {
+        CodexService codexService = mock(CodexService.class);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator);
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("units", "Unit_A", "Alpha",
+                        List.of("Alpha has multiple unresolved combat links."),
+                        List.of("UnitAbility_Strike", "BattleAbility_Guard", "ActiveSkill_Charge", "Effect_Bleed")),
+                codexEntry("units", "Unit_B", "Beta",
+                        List.of("Beta references the existing alpha unit."),
+                        List.of("Unit_A", "Descriptor_Fast", "Tag_Frontline")),
+                codexEntry("tech", "Technology_A", "Foundry",
+                        List.of("Foundry unlocks production systems."),
+                        List.of("DistrictImprovement_Smelter", "Resource_Iron", "FactionTrait_Industry")),
+                codexEntry("populations", "Population_A", "Worker",
+                        List.of("Worker population supports city economies."),
+                        List.of("PopulationCategory_Worker", "FactionAffinity_Order", "Shape_Cone", "UnitClass_Infantry"))
+        ));
+
+        service.regeneratePrototypePages();
+        String firstJson = Files.readString(tempDir.resolve("codex-missing-references-audit.json"));
+        service.regeneratePrototypePages();
+        String secondJson = Files.readString(tempDir.resolve("codex-missing-references-audit.json"));
+
+        assertThat(secondJson).isEqualTo(firstJson);
+        assertThat(firstJson)
+                .contains("\"totalEntriesScanned\": 4")
+                .contains("\"totalReferenceKeysScanned\": 14")
+                .contains("\"totalResolvedReferences\": 1")
+                .contains("\"totalUnresolvedReferences\": 13")
+                .contains("\"categoryPrefix\": \"ActiveSkill\"")
+                .contains("\"categoryPrefix\": \"BattleAbility\"")
+                .contains("\"categoryPrefix\": \"Descriptor\"")
+                .contains("\"categoryPrefix\": \"DistrictImprovement\"")
+                .contains("\"categoryPrefix\": \"Effect\"")
+                .contains("\"categoryPrefix\": \"FactionAffinity\"")
+                .contains("\"categoryPrefix\": \"FactionTrait\"")
+                .contains("\"categoryPrefix\": \"PopulationCategory\"")
+                .contains("\"categoryPrefix\": \"Resource\"")
+                .contains("\"categoryPrefix\": \"Shape\"")
+                .contains("\"categoryPrefix\": \"Tag\"")
+                .contains("\"categoryPrefix\": \"UnitAbility\"")
+                .contains("\"categoryPrefix\": \"UnitClass\"")
+                .contains("\"recommendation\": \"related-link-only semantic entities\"")
+                .contains("\"recommendation\": \"metadata-only/non-public entities\"")
+                .contains("\"sourceKindAnalysis\": [")
+                .contains("\"kind\": \"units\"")
+                .contains("\"isolatedKindAnalysis\": [");
+    }
+
     private static Codex codexEntry(
             String exportKind,
             String entryKey,
@@ -279,5 +379,21 @@ class SeoRegenerationServiceTest {
                 .descriptionLines(descriptionLines)
                 .referenceKeys(referenceKeys)
                 .build();
+    }
+
+    private static SeoRegenerationService seoRegenerationService(
+            CodexService codexService,
+            SeoOutputLocator outputLocator
+    ) {
+        return new SeoRegenerationService(
+                codexService,
+                new CodexFilterService(),
+                outputLocator,
+                new CodexMissingReferenceAuditService(),
+                new ReferenceTargetBuilder(),
+                new SeoPageRenderer(),
+                new SitemapGenerator(),
+                new GeneratedSeoWriter(outputLocator)
+        );
     }
 }

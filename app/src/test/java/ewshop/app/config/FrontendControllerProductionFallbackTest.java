@@ -1,6 +1,6 @@
 package ewshop.app.config;
 
-import ewshop.app.seo.SeoOutputLocator;
+import ewshop.app.seo.storage.SeoOutputLocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -19,6 +19,7 @@ import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(
@@ -34,19 +35,24 @@ class FrontendControllerProductionFallbackTest {
     @Test
     void returns404ForRuntimeOwnedWorkshopWhenExternalOutputIsMissing() throws Exception {
         mockMvc.perform(get("/tech/workshop"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
 
         mockMvc.perform(get("/tech/workshop/"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
 
         mockMvc.perform(get("/tech/stonework"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/stonework"));
 
         mockMvc.perform(get("/tech/stonework/"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/stonework"));
 
         mockMvc.perform(get("/units/sentinel"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/units/sentinel"));
 
         mockMvc.perform(get("/districts/works"))
                 .andExpect(status().isNotFound());
@@ -67,7 +73,8 @@ class FrontendControllerProductionFallbackTest {
                     .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/workshop/index.html"));
 
             mockMvc.perform(get("/tech/workshop"))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
         } finally {
             Files.deleteIfExists(externalWorkshop);
         }
@@ -79,7 +86,7 @@ class FrontendControllerProductionFallbackTest {
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import({FrontendController.class, WebConfig.class})
+    @Import({FrontendController.class, LegacySeoRedirectController.class, WebConfig.class})
     static class TestApplication {
 
         @Bean

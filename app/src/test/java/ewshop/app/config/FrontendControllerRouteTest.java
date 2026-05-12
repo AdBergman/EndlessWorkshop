@@ -1,6 +1,6 @@
 package ewshop.app.config;
 
-import ewshop.app.seo.SeoOutputLocator;
+import ewshop.app.seo.storage.SeoOutputLocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(
@@ -51,18 +52,44 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/codex.html"));
 
+        mockMvc.perform(get("/mods"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/mods.html"));
+
+        mockMvc.perform(get("/summary"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/summary.html"));
+
+        mockMvc.perform(get("/info"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/info.html"));
+
         mockMvc.perform(get("/admin/import"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/index.html"));
     }
 
     @Test
-    void returns404ForGeneratedEntityRoutesWhenExternalOutputIsMissing() throws Exception {
+    void redirectsLegacyGeneratedEntityRoutesWhenExternalOutputIsMissing() throws Exception {
         mockMvc.perform(get("/tech/workshop"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
 
         mockMvc.perform(get("/tech/workshop/"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
+
+        mockMvc.perform(get("/units/sentinel"))
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/units/sentinel"));
+
+        mockMvc.perform(get("/heroes/hero-name"))
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/heroes/hero-name"));
+
+        mockMvc.perform(get("/abilities/ability-name"))
+                .andExpect(status().isMovedPermanently())
+                .andExpect(header().string("Location", "/encyclopedia/abilities/ability-name"));
 
         mockMvc.perform(get("/encyclopedia/tech/workshop"))
                 .andExpect(status().isNotFound());
@@ -80,7 +107,8 @@ class FrontendControllerRouteTest {
                     .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/workshop/index.html"));
 
             mockMvc.perform(get("/tech/workshop"))
-                    .andExpect(status().isNotFound());
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
         } finally {
             Files.deleteIfExists(externalWorkshop);
         }
@@ -98,8 +126,8 @@ class FrontendControllerRouteTest {
                     .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/stonework/index.html"));
 
             mockMvc.perform(get("/encyclopedia/tech/stonework/"))
-                    .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/stonework/index.html"));
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia/tech/stonework"));
         } finally {
             Files.deleteIfExists(externalStonework);
         }
@@ -143,12 +171,16 @@ class FrontendControllerRouteTest {
                     .andExpect(forwardedUrl("/__generated-seo/encyclopedia/index.html"));
 
             mockMvc.perform(get("/encyclopedia/"))
-                    .andExpect(status().isOk())
-                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/index.html"));
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia"));
 
             mockMvc.perform(get("/encyclopedia/abilities"))
                     .andExpect(status().isOk())
                     .andExpect(forwardedUrl("/__generated-seo/encyclopedia/abilities/index.html"));
+
+            mockMvc.perform(get("/encyclopedia/abilities/"))
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia/abilities"));
         } finally {
             Files.deleteIfExists(externalEncyclopedia);
             Files.deleteIfExists(externalAbilities);
@@ -156,19 +188,45 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void doesNotServeGeneratedAuditArtifactsAsPublicResources() throws Exception {
+        Path auditJson = Path.of("build/test-generated-seo/codex-missing-references-audit.json");
+        Files.createDirectories(auditJson.getParent());
+        Files.writeString(auditJson, "{\"internal\":true}");
+
+        try {
+            mockMvc.perform(get("/__generated-seo/codex-missing-references-audit.json"))
+                    .andExpect(status().isNotFound());
+
+            mockMvc.perform(get("/codex-missing-references-audit.json"))
+                    .andExpect(status().isNotFound());
+        } finally {
+            Files.deleteIfExists(auditJson);
+        }
+    }
+
+    @Test
+    void servesGeneratedEncyclopediaResourcesButNotOutputRootFiles() throws Exception {
+        Path generatedPage = Path.of("build/test-generated-seo/encyclopedia/tech/workshop/index.html");
+        Path rootFile = Path.of("build/test-generated-seo/root-check.txt");
+        Files.createDirectories(generatedPage.getParent());
+        Files.writeString(generatedPage, "<!doctype html><title>resource workshop</title>");
+        Files.writeString(rootFile, "root file");
+
+        try {
+            mockMvc.perform(get("/__generated-seo/encyclopedia/tech/workshop/index.html"))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(containsString("resource workshop")));
+
+            mockMvc.perform(get("/__generated-seo/root-check.txt"))
+                    .andExpect(status().isNotFound());
+        } finally {
+            Files.deleteIfExists(generatedPage);
+            Files.deleteIfExists(rootFile);
+        }
+    }
+
+    @Test
     void returnsReal404ForUnknownOrNestedEntityRoutes() throws Exception {
-        mockMvc.perform(get("/tech/stonework"))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(get("/tech/missing-entry"))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(get("/units/sentinel"))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(get("/units/missing-entry"))
-                .andExpect(status().isNotFound());
-
         mockMvc.perform(get("/districts/missing-entry"))
                 .andExpect(status().isNotFound());
 
@@ -180,6 +238,25 @@ class FrontendControllerRouteTest {
 
         mockMvc.perform(get("/districts/works/extra"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void legacyAndTrailingSlashRedirectsDoNotCreateChainsWhenCanonicalOutputExists() throws Exception {
+        Path externalWorkshop = Path.of("build/test-generated-seo/encyclopedia/tech/workshop/index.html");
+        Files.createDirectories(externalWorkshop.getParent());
+        Files.writeString(externalWorkshop, "<!doctype html><title>external workshop</title>");
+
+        try {
+            mockMvc.perform(get("/tech/workshop/"))
+                    .andExpect(status().isMovedPermanently())
+                    .andExpect(header().string("Location", "/encyclopedia/tech/workshop"));
+
+            mockMvc.perform(get("/encyclopedia/tech/workshop"))
+                    .andExpect(status().isOk())
+                    .andExpect(forwardedUrl("/__generated-seo/encyclopedia/tech/workshop/index.html"));
+        } finally {
+            Files.deleteIfExists(externalWorkshop);
+        }
     }
 
     @Test
@@ -215,7 +292,7 @@ class FrontendControllerRouteTest {
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import({FrontendController.class, WebConfig.class})
+    @Import({FrontendController.class, LegacySeoRedirectController.class, WebConfig.class})
     static class TestApplication {
 
         @Bean

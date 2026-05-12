@@ -1,6 +1,6 @@
 package ewshop.app.config;
 
-import ewshop.app.seo.SeoOutputLocator;
+import ewshop.app.seo.storage.SeoOutputLocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +41,7 @@ public class FrontendController {
         };
     }
 
-    @RequestMapping(value = {"/encyclopedia", "/encyclopedia/"})
+    @RequestMapping(value = "/encyclopedia")
     public String forwardGeneratedEncyclopediaIndex() {
         if (seoOutputLocator.hasGeneratedIndex("encyclopedia")) {
             return "forward:" + seoOutputLocator.getGeneratedForwardPath("encyclopedia");
@@ -50,10 +50,7 @@ public class FrontendController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = {
-            "/encyclopedia/{page:[a-z][a-z0-9-]*}",
-            "/encyclopedia/{page:[a-z][a-z0-9-]*}/"
-    })
+    @RequestMapping(value = "/encyclopedia/{page:[a-z][a-z0-9-]*}")
     public String forwardGeneratedEncyclopediaCategory(@PathVariable String page) {
         validateSeoRouteSegment(page);
 
@@ -64,10 +61,7 @@ public class FrontendController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    @RequestMapping(value = {
-            "/encyclopedia/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
-            "/encyclopedia/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
-    })
+    @RequestMapping(value = "/encyclopedia/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}")
     public String forwardFeaturedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
         validateSeoRouteSegment(page);
         validateSeoRouteSegment(entryKey);
@@ -76,16 +70,6 @@ public class FrontendController {
             return "forward:" + seoOutputLocator.getGeneratedForwardPath(page, entryKey);
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
-
-    @RequestMapping(value = {
-            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}",
-            "/{page:[a-z][a-z0-9-]*}/{entryKey:[a-z0-9-]+}/"
-    })
-    public String rejectLegacyGeneratedEntityDocument(@PathVariable String page, @PathVariable String entryKey) {
-        validateSeoRouteSegment(page);
-        validateSeoRouteSegment(entryKey);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 

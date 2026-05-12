@@ -22,7 +22,7 @@ public class CodexFilterService {
     private static final String WEAK_DESCRIPTION_LINES = "weak-description-lines";
     private static final String DUPLICATE_SLUG = "duplicate-slug";
     private static final String FILTERED_OUT = "filtered-out";
-    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^\\]]+]\\s*");
+    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^]]+\\]\\s*");
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
             "(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd\\])",
             Pattern.CASE_INSENSITIVE

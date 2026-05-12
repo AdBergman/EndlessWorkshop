@@ -22,6 +22,12 @@ export type SeoRegenerationResult = {
     skippedCount: number;
     duplicateCount?: number;
     skippedByReason: Record<string, number>;
+    missingReferenceAudit?: {
+        artifact: string;
+        unresolvedReferences: number;
+        resolutionPercentage: number;
+        topUnresolvedCategories: string[];
+    };
     exportKindCounts?: Record<
         string,
         {

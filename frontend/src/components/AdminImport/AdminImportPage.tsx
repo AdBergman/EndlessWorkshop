@@ -389,6 +389,13 @@ export default function AdminImportPage() {
                                         Generated {seoActionState.result.generatedCount} page(s), skipped {seoActionState.result.skippedCount}, sitemap updated:{" "}
                                         {seoActionState.result.sitemapUpdated ? "yes" : "no"}.
                                     </div>
+                                    {seoActionState.result.missingReferenceAudit ? (
+                                        <div className="admin-import-seoSummary">
+                                            Missing-reference audit: {seoActionState.result.missingReferenceAudit.unresolvedReferences} unresolved,{" "}
+                                            {seoActionState.result.missingReferenceAudit.resolutionPercentage}% resolved. Top categories:{" "}
+                                            {seoActionState.result.missingReferenceAudit.topUnresolvedCategories.join(", ") || "none"}.
+                                        </div>
+                                    ) : null}
                                     {seoActionState.result.generatedRoutes.length > 0 ? (
                                         <div className="admin-import-seoSummary">
                                             Routes: {seoActionState.result.generatedRoutes.join(", ")}

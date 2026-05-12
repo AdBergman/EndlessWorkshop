@@ -1,5 +1,7 @@
 package ewshop.app.seo;
 
+import ewshop.app.seo.storage.SeoOutputLocator;
+import ewshop.app.seo.config.SeoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -35,7 +37,7 @@ class SeoOutputLocatorPropertyTest {
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import(SeoOutputLocator.class)
+    @Import({SeoConfiguration.class, SeoOutputLocator.class})
     static class TestApplication {
     }
 }

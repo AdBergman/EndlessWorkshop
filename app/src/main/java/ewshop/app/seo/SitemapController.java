@@ -1,5 +1,6 @@
 package ewshop.app.seo;
 
+import ewshop.app.seo.storage.SeoOutputLocator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
