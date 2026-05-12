@@ -6,6 +6,7 @@ import { apiClient } from "@/api/apiClient";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useUnitStore } from "@/stores/unitStore";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -36,6 +37,9 @@ const Probe = () => {
             </div>
             <div data-testid="tech-count">{techs.size}</div>
             <div data-testid="unit-count">{units.size}</div>
+            <div data-testid="unit-label">
+                {units.get("Unit_Kin_Scout")?.displayName ?? "missing"}
+            </div>
             <div data-testid="selected-tech-count">{selectedTechs.length}</div>
             <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
         </div>
@@ -46,6 +50,7 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
         useCodexStore.getState().reset();
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -72,7 +77,25 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
             },
         ]);
         mockedApiClient.getTechs.mockResolvedValue([]);
-        mockedApiClient.getUnits.mockResolvedValue([]);
+        mockedApiClient.getUnits.mockResolvedValue([
+            {
+                unitKey: "Unit_Kin_Scout",
+                displayName: "Kin Scout",
+                artId: null,
+                faction: "Kin",
+                isMajorFaction: true,
+                isHero: false,
+                isChosen: false,
+                spawnType: null,
+                previousUnitKey: null,
+                nextEvolutionUnitKeys: [],
+                evolutionTierIndex: 1,
+                unitClassKey: null,
+                attackSkillKey: null,
+                abilityKeys: [],
+                descriptionLines: [],
+            },
+        ]);
         mockedApiClient.getCodex.mockResolvedValue([]);
     });
 
@@ -91,10 +114,11 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
         await waitFor(() => {
             expect(screen.getByTestId("district-label")).toHaveTextContent("City Center");
             expect(screen.getByTestId("improvement-label")).toHaveTextContent("Public Library");
+            expect(screen.getByTestId("unit-label")).toHaveTextContent("Kin Scout");
         });
 
         expect(screen.getByTestId("tech-count")).toHaveTextContent("0");
-        expect(screen.getByTestId("unit-count")).toHaveTextContent("0");
+        expect(screen.getByTestId("unit-count")).toHaveTextContent("1");
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });

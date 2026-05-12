@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import HoverableItem from "./HoverableItem";
 import type { TechUnlockRef } from "@/types/dataTypes";
-import { useGameData } from "@/context/GameDataContext";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 interface UnlockLineProps {
@@ -11,12 +11,11 @@ interface UnlockLineProps {
 }
 
 const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
-    const { units } = useGameData();
-
     const unlockType = (unlock.unlockType ?? "").trim().toUpperCase();
     const unlockKey = (unlock.unlockKey ?? "").trim();
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
+    const unitsByKey = useUnitStore(selectUnitsByKey);
 
     const resolved = useMemo(() => {
         if (!unlockKey || unlockType !== "CONSTRUCTIBLE") return null;
@@ -24,9 +23,9 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
         return resolveConstructibleUnlock(unlock, {
             districtsByKey,
             improvementsByKey,
-            units,
+            unitsByKey,
         });
-    }, [unlock, unlockKey, unlockType, districtsByKey, improvementsByKey, units]);
+    }, [unlock, unlockKey, unlockType, districtsByKey, improvementsByKey, unitsByKey]);
 
     if (!resolved) return null;
 

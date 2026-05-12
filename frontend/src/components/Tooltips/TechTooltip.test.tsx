@@ -4,6 +4,7 @@ import { useGameData } from "@/context/GameDataContext";
 import { Faction, Tech } from "@/types/dataTypes";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useUnitStore } from "@/stores/unitStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -32,6 +33,7 @@ describe("TechTooltip district/improvement unlock resolution", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
         useDistrictStore.setState({
             districtsByKey: {
                 District_Harbor: {
@@ -49,6 +51,27 @@ describe("TechTooltip district/improvement unlock resolution", () => {
                     descriptionLines: [],
                     unique: "City",
                     cost: [],
+                },
+            },
+        });
+        useUnitStore.setState({
+            unitsByKey: {
+                Unit_Scout: {
+                    unitKey: "Unit_Scout",
+                    displayName: "Scout",
+                    artId: null,
+                    faction: "Kin",
+                    isMajorFaction: true,
+                    isHero: false,
+                    isChosen: false,
+                    spawnType: null,
+                    previousUnitKey: null,
+                    nextEvolutionUnitKeys: [],
+                    evolutionTierIndex: 1,
+                    unitClassKey: null,
+                    attackSkillKey: null,
+                    abilityKeys: [],
+                    descriptionLines: [],
                 },
             },
         });
@@ -78,5 +101,27 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.getByText("Improvement:")).toBeInTheDocument();
         expect(screen.getByText("Market")).toBeInTheDocument();
         expect(screen.queryByText("Missing_Key")).not.toBeInTheDocument();
+    });
+
+    it("renders unit unlock labels from the normalized unit store domain", () => {
+        render(
+            <TechTooltip
+                hoveredTech={{
+                    ...hoveredTech,
+                    unlocks: [
+                        {
+                            unlockType: "Constructible",
+                            unlockKey: "Unit_Scout",
+                            unlockCategory: "Unit",
+                        },
+                    ],
+                }}
+                onMouseEnter={() => {}}
+                onMouseLeave={() => {}}
+            />
+        );
+
+        expect(screen.getByText("Unit:")).toBeInTheDocument();
+        expect(screen.getByText("Scout")).toBeInTheDocument();
     });
 });

@@ -1,11 +1,12 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { Codex, Faction, FactionInfo, Tech, Unit } from "@/types/dataTypes";
+import { Codex, Faction, FactionInfo, Tech } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useUnitStore } from "@/stores/unitStore";
 
 interface Props {
     children: ReactNode;
@@ -41,7 +42,6 @@ const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
-    const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
         toFactionInfoFromEnum(Faction.KIN)
@@ -58,8 +58,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
     const districtsByKey = useDistrictStore((s) => s.districtsByKey);
     const improvementsByKey = useImprovementStore((s) => s.improvementsByKey);
+    const unitsByKey = useUnitStore((s) => s.unitsByKey);
     const loadDistricts = useDistrictStore((s) => s.loadDistricts);
     const loadImprovements = useImprovementStore((s) => s.loadImprovements);
+    const loadUnits = useUnitStore((s) => s.loadUnits);
 
     const districts = useMemo(
         () => new Map(Object.entries(districtsByKey)),
@@ -69,6 +71,11 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const improvements = useMemo(
         () => new Map(Object.entries(improvementsByKey)),
         [improvementsByKey]
+    );
+
+    const units = useMemo(
+        () => new Map(Object.entries(unitsByKey)),
+        [unitsByKey]
     );
 
     const codexByKindKey = useMemo(() => {
@@ -102,22 +109,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     useEffect(() => {
         void loadDistricts();
         void loadImprovements();
+        void loadUnits();
         void refreshTechs();
-    }, [loadDistricts, loadImprovements, refreshTechs]);
-
-    useEffect(() => {
-        const fetchUnits = async () => {
-            try {
-                const unitData = await apiClient.getUnits();
-                setUnits(toKeyedMap(unitData, (u) => u.unitKey));
-            } catch (err) {
-                console.error("Failed to load units:", err);
-                setUnits(new Map());
-            }
-        };
-
-        void fetchUnits();
-    }, []);
+    }, [loadDistricts, loadImprovements, loadUnits, refreshTechs]);
 
     useEffect(() => {
         void loadCodexEntries();

@@ -29,6 +29,7 @@ type ConstructibleUnlockDeps = {
     districtsByKey: Record<string, District>;
     improvementsByKey: Record<string, Improvement>;
     units?: Map<string, Unit>;
+    unitsByKey?: Record<string, Unit>;
 };
 
 export type UnlockedConstructibles = {
@@ -67,6 +68,9 @@ const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined)
 const sortUnlockedByEraAndName = <T extends { era: number; displayName: string }>(items: T[]) =>
     items.sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
 
+const resolveUnitByKey = (key: string, deps: Pick<ConstructibleUnlockDeps, "units" | "unitsByKey">) =>
+    deps.unitsByKey?.[key] ?? deps.units?.get(key);
+
 export const resolveDistrictUnlock = (
     unlock: TechUnlockRef,
     districtsByKey: Record<string, District>
@@ -100,11 +104,11 @@ export const resolveConstructibleUnlock = (
     const key = normalizeKey(unlock.unlockKey ?? "");
     if (!key || !isConstructibleLikeUnlock(unlock)) return null;
 
-    const { districtsByKey, improvementsByKey, units } = deps;
+    const { districtsByKey, improvementsByKey } = deps;
     const explicitKind = getExplicitConstructibleKind(unlock);
 
     if (explicitKind === "Unit" || normType(unlock.unlockType) === "UNIT") {
-        const unit = units?.get(key);
+        const unit = resolveUnitByKey(key, deps);
         return unit
             ? { kind: "Unit", key, unit, displayName: unit.displayName ?? key }
             : null;
@@ -129,7 +133,7 @@ export const resolveConstructibleUnlock = (
             : null;
     }
 
-    const unit = units?.get(key);
+    const unit = resolveUnitByKey(key, deps);
     if (unit) return { kind: "Unit", key, unit, displayName: unit.displayName ?? key };
 
     // Old/null backend data has no constructible kind metadata. Keep that
@@ -199,7 +203,7 @@ export const getUnlockedConstructiblesByKey = (
         units: sortUnlockedByEraAndName(
             Array.from(earliestUnitEraByKey.entries())
                 .map(([key, era]) => {
-                    const unit = deps.units?.get(key);
+                    const unit = resolveUnitByKey(key, deps);
                     return unit ? { ...unit, era } : null;
                 })
                 .filter((unit): unit is UnlockedUnit => !!unit)

@@ -7,6 +7,7 @@ import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRen
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
@@ -32,10 +33,11 @@ export function formatTechUnlocks(
     deps: {
         districtsByKey: Record<string, District>;
         improvementsByKey: Record<string, Improvement>;
-        units: Map<string, Unit>;
+        units?: Map<string, Unit>;
+        unitsByKey?: Record<string, Unit>;
     }
 ): string {
-    const { districtsByKey, improvementsByKey, units } = deps;
+    const { districtsByKey, improvementsByKey, units, unitsByKey } = deps;
 
     return (tech.unlocks ?? [])
         .map((u) => ({
@@ -53,7 +55,7 @@ export function formatTechUnlocks(
                     unlockCategory: u.unlockCategory,
                     constructibleKind: u.constructibleKind,
                 },
-                { districtsByKey, improvementsByKey, units }
+                { districtsByKey, improvementsByKey, units, unitsByKey }
             );
             return resolved ? `${resolved.kind}: ${resolved.displayName}` : null;
         })
@@ -72,9 +74,10 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    activeSheet,
                                                                    setActiveSheet,
                                                                }) => {
-    const { selectedFaction, units } = useGameData();
+    const { selectedFaction } = useGameData();
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
+    const unitsByKey = useUnitStore(selectUnitsByKey);
     const factionLabel = selectedFaction?.uiLabel?.toLowerCase() ?? "all-factions";
 
     const { data, headers, filename } = useMemo(() => {
@@ -134,7 +137,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                         Name: tech.name ?? "",
                         Era: tech.era ?? "",
                         Type: tech.type ?? "",
-                        Unlocks: formatTechUnlocks(tech, { districtsByKey, improvementsByKey, units }),
+                        Unlocks: formatTechUnlocks(tech, { districtsByKey, improvementsByKey, unitsByKey }),
                         Description: exportDescriptionLines(tech.descriptionLines),
                     })),
                 };
@@ -148,7 +151,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
         selectedTechs,
         districtsByKey,
         improvementsByKey,
-        units,
+        unitsByKey,
     ]);
 
     return (

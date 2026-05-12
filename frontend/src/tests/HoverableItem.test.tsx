@@ -4,6 +4,7 @@ import HoverableItem from "@/components/Tech/views/HoverableItem";
 import { useGameData } from "@/context/GameDataContext";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useUnitStore } from "@/stores/unitStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -22,12 +23,19 @@ vi.mock("@/components/Tooltips/DistrictTooltip", () => ({
     ),
 }));
 
+vi.mock("@/components/Tooltips/UnitTooltip", () => ({
+    default: ({ hoveredUnit }: any) => (
+        <div data-testid="unit-tooltip">{hoveredUnit.data.displayName}</div>
+    ),
+}));
+
 const mockedUseGameData = vi.mocked(useGameData);
 
 describe("HoverableItem", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
         useImprovementStore.setState({
             improvementsByKey: {
                 Improvement_Traveler_Shrine: {
@@ -45,6 +53,27 @@ describe("HoverableItem", () => {
                     districtKey: "District_Communal_Habitations",
                     displayName: "Communal Habitations",
                     descriptionLines: ["Housing for the populace."],
+                },
+            },
+        });
+        useUnitStore.setState({
+            unitsByKey: {
+                Unit_Scout: {
+                    unitKey: "Unit_Scout",
+                    displayName: "Scout",
+                    artId: null,
+                    faction: "Kin",
+                    isMajorFaction: true,
+                    isHero: false,
+                    isChosen: false,
+                    spawnType: null,
+                    previousUnitKey: null,
+                    nextEvolutionUnitKeys: [],
+                    evolutionTierIndex: 1,
+                    unitClassKey: null,
+                    attackSkillKey: null,
+                    abilityKeys: [],
+                    descriptionLines: [],
                 },
             },
         });
@@ -96,6 +125,22 @@ describe("HoverableItem", () => {
 
         await user.unhover(hoverTarget);
         expect(screen.queryByTestId("dist-tooltip")).toBeNull();
+    });
+
+    it("renders unit tooltip on hover using the normalized unit lookup helper", async () => {
+        const user = userEvent.setup();
+        render(
+            <HoverableItem
+                type="Unit"
+                name="Scout"
+                unlockKey="Unit_Scout"
+            />
+        );
+
+        const hoverTarget = screen.getByText("Scout", { selector: "span" });
+        await user.hover(hoverTarget);
+
+        expect(await screen.findByTestId("unit-tooltip")).toHaveTextContent("Scout");
     });
 
     it("renders without crashing", () => {

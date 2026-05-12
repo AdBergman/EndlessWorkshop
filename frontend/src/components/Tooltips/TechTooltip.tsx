@@ -16,6 +16,7 @@ import "./TechTooltip.css";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 interface TechTooltipProps {
@@ -34,9 +35,10 @@ const isType = (u: TechUnlockRef, t: string) =>
 const keyOf = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
-    const { units, selectedFaction } = useGameData();
+    const { selectedFaction } = useGameData();
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
+    const unitsByKey = useUnitStore(selectUnitsByKey);
 
     const [hoveredImprovement, setHoveredImprovement] = useState<HoveredImprovementState>(null);
     const [hoveredDistrict, setHoveredDistrict] = useState<HoveredDistrictState>(null);
@@ -72,7 +74,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             const resolved = resolveConstructibleUnlock(u, {
                 districtsByKey,
                 improvementsByKey,
-                units,
+                unitsByKey,
             });
             if (!resolved) return null;
 

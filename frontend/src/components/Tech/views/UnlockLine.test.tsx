@@ -3,6 +3,7 @@ import UnlockLine from "@/components/Tech/views/UnlockLine";
 import { useGameData } from "@/context/GameDataContext";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useUnitStore } from "@/stores/unitStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -14,6 +15,7 @@ describe("UnlockLine district/improvement resolution", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
         useDistrictStore.setState({
             districtsByKey: {
                 District_Harbor: {
@@ -98,5 +100,42 @@ describe("UnlockLine district/improvement resolution", () => {
         expect(screen.getByText(/Improvement:/)).toBeInTheDocument();
         expect(screen.getByText("Shared Improvement")).toBeInTheDocument();
         expect(screen.queryByText("Shared District")).not.toBeInTheDocument();
+    });
+
+    it("resolves unit lines from the normalized unit store", () => {
+        useUnitStore.setState({
+            unitsByKey: {
+                Unit_Scout: {
+                    unitKey: "Unit_Scout",
+                    displayName: "Scout",
+                    artId: null,
+                    faction: "Kin",
+                    isMajorFaction: true,
+                    isHero: false,
+                    isChosen: false,
+                    spawnType: null,
+                    previousUnitKey: null,
+                    nextEvolutionUnitKeys: [],
+                    evolutionTierIndex: 1,
+                    unitClassKey: null,
+                    attackSkillKey: null,
+                    abilityKeys: [],
+                    descriptionLines: [],
+                },
+            },
+        });
+
+        render(
+            <UnlockLine
+                unlock={{
+                    unlockType: "Constructible",
+                    unlockKey: "Unit_Scout",
+                    unlockCategory: "Unit",
+                }}
+            />
+        );
+
+        expect(screen.getByText(/Unit:/)).toBeInTheDocument();
+        expect(screen.getByText("Scout")).toBeInTheDocument();
     });
 });

@@ -103,4 +103,42 @@ describe("formatTechUnlocks", () => {
             "Improvement: Shared Improvement"
         );
     });
+
+    it("resolves spreadsheet unit joins from normalized unitsByKey records", () => {
+        const tech: Tech = {
+            ...baseTech,
+            unlocks: [
+                {
+                    unlockType: "Constructible",
+                    unlockKey: "Unit_Scout",
+                    unlockCategory: "Unit",
+                },
+            ],
+        };
+        const unitsByKey: Record<string, Unit> = {
+            Unit_Scout: {
+                unitKey: "Unit_Scout",
+                displayName: "Scout",
+                artId: null,
+                faction: null,
+                isMajorFaction: true,
+                isHero: false,
+                isChosen: false,
+                spawnType: null,
+                previousUnitKey: null,
+                nextEvolutionUnitKeys: [],
+                evolutionTierIndex: null,
+                unitClassKey: null,
+                attackSkillKey: null,
+                abilityKeys: [],
+                descriptionLines: [],
+            },
+        };
+
+        expect(formatTechUnlocks(tech, {
+            districtsByKey: {},
+            improvementsByKey: {},
+            unitsByKey,
+        })).toBe("Unit: Scout");
+    });
 });

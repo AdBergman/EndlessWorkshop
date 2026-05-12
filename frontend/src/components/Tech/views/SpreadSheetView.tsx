@@ -17,18 +17,19 @@ import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 
 const SpreadSheetView: React.FC = () => {
     const {
         selectedTechs,
         setSelectedTechs,
         techs,
-        units,
         createSavedTechBuild,
         selectedFaction,
     } = useGameData();
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
+    const unitsByKey = useUnitStore(selectUnitsByKey);
 
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
@@ -47,9 +48,9 @@ const SpreadSheetView: React.FC = () => {
             getUnlockedConstructiblesByKey(selectedTechObjects, {
                 districtsByKey,
                 improvementsByKey,
-                units,
+                unitsByKey,
             }),
-        [selectedTechObjects, districtsByKey, improvementsByKey, units]
+        [selectedTechObjects, districtsByKey, improvementsByKey, unitsByKey]
     );
     const unlockedImprovements: UnlockedImprovement[] = unlockedConstructibles.improvements;
     const unlockedDistricts: UnlockedDistrict[] = unlockedConstructibles.districts;
