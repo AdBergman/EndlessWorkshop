@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import UnlockLine from "@/components/Tech/views/UnlockLine";
 import { useGameData } from "@/context/GameDataContext";
-import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
+import { useDistrictStore } from "@/stores/districtStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -11,8 +12,9 @@ const mockedUseGameData = vi.mocked(useGameData);
 
 describe("UnlockLine district/improvement resolution", () => {
     beforeEach(() => {
-        useDistrictImprovementStore.getState().reset();
-        useDistrictImprovementStore.setState({
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useDistrictStore.setState({
             districtsByKey: {
                 District_Harbor: {
                     districtKey: "District_Harbor",
@@ -20,6 +22,8 @@ describe("UnlockLine district/improvement resolution", () => {
                     descriptionLines: [],
                 },
             },
+        });
+        useImprovementStore.setState({
             improvementsByKey: {
                 Improvement_Market: {
                     improvementKey: "Improvement_Market",
@@ -58,5 +62,41 @@ describe("UnlockLine district/improvement resolution", () => {
 
         expect(container).toBeEmptyDOMElement();
     });
-});
 
+    it("uses explicit constructible kind metadata when a key exists in both domains", () => {
+        useDistrictStore.setState({
+            districtsByKey: {
+                Shared_Key: {
+                    districtKey: "Shared_Key",
+                    displayName: "Shared District",
+                    descriptionLines: [],
+                },
+            },
+        });
+        useImprovementStore.setState({
+            improvementsByKey: {
+                Shared_Key: {
+                    improvementKey: "Shared_Key",
+                    displayName: "Shared Improvement",
+                    descriptionLines: [],
+                    unique: "City",
+                    cost: [],
+                },
+            },
+        });
+
+        render(
+            <UnlockLine
+                unlock={{
+                    unlockType: "Constructible",
+                    unlockKey: "Shared_Key",
+                    constructibleKind: "Improvement",
+                }}
+            />
+        );
+
+        expect(screen.getByText(/Improvement:/)).toBeInTheDocument();
+        expect(screen.getByText("Shared Improvement")).toBeInTheDocument();
+        expect(screen.queryByText("Shared District")).not.toBeInTheDocument();
+    });
+});

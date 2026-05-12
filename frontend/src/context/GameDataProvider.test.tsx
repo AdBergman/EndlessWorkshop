@@ -4,7 +4,8 @@ import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
 import { apiClient } from "@/api/apiClient";
 import { useCodexStore } from "@/stores/codexStore";
-import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
+import { useDistrictStore } from "@/stores/districtStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -43,7 +44,8 @@ const Probe = () => {
 
 describe("GameDataProvider district/improvement compatibility adapter", () => {
     beforeEach(() => {
-        useDistrictImprovementStore.getState().reset();
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
         useCodexStore.getState().reset();
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -96,5 +98,51 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });
-});
 
+    it("keeps identical district and improvement keys in separate context maps", async () => {
+        mockedApiClient.getDistricts.mockResolvedValue([
+            {
+                districtKey: "Shared_Constructible_Key",
+                displayName: "Shared District",
+                descriptionLines: ["District text"],
+            },
+        ]);
+        mockedApiClient.getImprovements.mockResolvedValue([
+            {
+                improvementKey: "Shared_Constructible_Key",
+                displayName: "Shared Improvement",
+                descriptionLines: ["Improvement text"],
+                unique: "City",
+                cost: [],
+            },
+        ]);
+
+        const SharedProbe = () => {
+            const { districts, improvements } = useGameData();
+
+            return (
+                <div>
+                    <div data-testid="shared-district">
+                        {districts.get("Shared_Constructible_Key")?.displayName ?? "missing"}
+                    </div>
+                    <div data-testid="shared-improvement">
+                        {improvements.get("Shared_Constructible_Key")?.displayName ?? "missing"}
+                    </div>
+                </div>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <SharedProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("shared-district")).toHaveTextContent("Shared District");
+            expect(screen.getByTestId("shared-improvement")).toHaveTextContent("Shared Improvement");
+        });
+    });
+});

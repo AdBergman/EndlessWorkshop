@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import TechTooltip from "@/components/Tooltips/TechTooltip";
 import { useGameData } from "@/context/GameDataContext";
 import { Faction, Tech } from "@/types/dataTypes";
-import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
+import { useDistrictStore } from "@/stores/districtStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -29,8 +30,9 @@ const hoveredTech: Tech = {
 
 describe("TechTooltip district/improvement unlock resolution", () => {
     beforeEach(() => {
-        useDistrictImprovementStore.getState().reset();
-        useDistrictImprovementStore.setState({
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useDistrictStore.setState({
             districtsByKey: {
                 District_Harbor: {
                     districtKey: "District_Harbor",
@@ -38,6 +40,8 @@ describe("TechTooltip district/improvement unlock resolution", () => {
                     descriptionLines: [],
                 },
             },
+        });
+        useImprovementStore.setState({
             improvementsByKey: {
                 Improvement_Market: {
                     improvementKey: "Improvement_Market",
@@ -76,4 +80,3 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.queryByText("Missing_Key")).not.toBeInTheDocument();
     });
 });
-

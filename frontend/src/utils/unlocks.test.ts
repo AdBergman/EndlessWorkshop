@@ -1,8 +1,11 @@
 import {
     getUnlockedDistrictsByKey,
     getUnlockedImprovementsByKey,
+    resolveConstructibleUnlock,
+    resolveDistrictUnlock,
+    resolveImprovementUnlock,
 } from "@/utils/unlocks";
-import type { District, Improvement, Tech } from "@/types/dataTypes";
+import type { District, Improvement, Tech, Unit } from "@/types/dataTypes";
 
 const tech = (techKey: string, era: number, unlockKeys: string[]): Tech => ({
     techKey,
@@ -94,3 +97,98 @@ describe("district and improvement unlock joins", () => {
     });
 });
 
+describe("constructible unlock resolution", () => {
+    const districtsByKey: Record<string, District> = {
+        Shared_Key: {
+            districtKey: "Shared_Key",
+            displayName: "Shared District",
+            descriptionLines: [],
+        },
+    };
+    const improvementsByKey: Record<string, Improvement> = {
+        Shared_Key: {
+            improvementKey: "Shared_Key",
+            displayName: "Shared Improvement",
+            descriptionLines: [],
+            unique: "City",
+            cost: [],
+        },
+    };
+    const units = new Map<string, Unit>([
+        [
+            "Unit_Scout",
+            {
+                unitKey: "Unit_Scout",
+                displayName: "Scout",
+                artId: null,
+                faction: null,
+                isMajorFaction: true,
+                isHero: false,
+                isChosen: false,
+                spawnType: null,
+                previousUnitKey: null,
+                nextEvolutionUnitKeys: [],
+                evolutionTierIndex: null,
+                unitClassKey: null,
+                attackSkillKey: null,
+                abilityKeys: [],
+                descriptionLines: [],
+            },
+        ],
+    ]);
+
+    it("keeps fallback district/improvement precedence centralized", () => {
+        const resolved = resolveConstructibleUnlock(
+            { unlockType: "Constructible", unlockKey: "Shared_Key" },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "District",
+            displayName: "Shared District",
+        });
+    });
+
+    it("uses future constructible kind metadata before fallback precedence", () => {
+        const resolved = resolveConstructibleUnlock(
+            {
+                unlockType: "Constructible",
+                unlockKey: "Shared_Key",
+                unlockCategory: "Improvement",
+            },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "Improvement",
+            displayName: "Shared Improvement",
+        });
+    });
+
+    it("resolves explicit district and improvement APIs independently", () => {
+        expect(
+            resolveDistrictUnlock(
+                { unlockType: "Constructible", unlockKey: "Shared_Key" },
+                districtsByKey
+            )?.displayName
+        ).toBe("Shared District");
+        expect(
+            resolveImprovementUnlock(
+                { unlockType: "Constructible", unlockKey: "Shared_Key" },
+                improvementsByKey
+            )?.displayName
+        ).toBe("Shared Improvement");
+    });
+
+    it("resolves unit unlocks without migrating unit ownership", () => {
+        const resolved = resolveConstructibleUnlock(
+            { unlockType: "Constructible", unlockKey: "Unit_Scout" },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "Unit",
+            displayName: "Scout",
+        });
+    });
+});

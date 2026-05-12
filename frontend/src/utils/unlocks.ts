@@ -3,37 +3,52 @@ import { Tech, Improvement, District, Unit, TechUnlockRef } from "@/types/dataTy
 export type UnlockedImprovement = Improvement & { era: number };
 export type UnlockedDistrict = District & { era: number };
 export type UnlockedUnit = Unit & { era: number };
+export type ConstructibleUnlockKind = "District" | "Improvement" | "Unit";
+
+export type ConstructibleUnlockResolution =
+    | {
+          kind: "District";
+          key: string;
+          district: District;
+          displayName: string;
+      }
+    | {
+          kind: "Improvement";
+          key: string;
+          improvement: Improvement;
+          displayName: string;
+      }
+    | {
+          kind: "Unit";
+          key: string;
+          unit: Unit;
+          displayName: string;
+      };
+
+type ConstructibleUnlockDeps = {
+    districtsByKey: Record<string, District>;
+    improvementsByKey: Record<string, Improvement>;
+    units?: Map<string, Unit>;
+};
 
 const normalizeKey = (k: string) => k.trim();
 
 const normType = (t: string | undefined) => (t ?? "").trim().toUpperCase();
 
-const getTechUnlocksOfType = (tech: Tech, unlockType: string): TechUnlockRef[] => {
-    const t = unlockType.trim().toUpperCase();
-    return (tech.unlocks ?? []).filter(
-        (u) => normType(u.unlockType) === t && !!u.unlockKey?.trim()
-    );
+const normKind = (kind: string | null | undefined): ConstructibleUnlockKind | null => {
+    const normalized = (kind ?? "").trim().toUpperCase();
+    if (normalized === "DISTRICT" || normalized === "DISTRICTS") return "District";
+    if (normalized === "IMPROVEMENT" || normalized === "IMPROVEMENTS") return "Improvement";
+    if (normalized === "UNIT" || normalized === "UNITS") return "Unit";
+    return null;
 };
 
-const buildEarliestEraByUnlockKey = (selectedTechs: Tech[], unlockType: string) => {
-    const earliestEraByKey = new Map<string, number>();
-    const t = unlockType.trim().toUpperCase();
+const getExplicitConstructibleKind = (unlock: TechUnlockRef): ConstructibleUnlockKind | null =>
+    normKind(unlock.constructibleKind) ?? normKind(unlock.unlockCategory);
 
-    for (const tech of selectedTechs) {
-        const era = tech.era ?? 1;
-
-        for (const u of (tech.unlocks ?? [])) {
-            if (normType(u.unlockType) !== t) continue;
-            const key = u.unlockKey?.trim();
-            if (!key) continue;
-
-            const nk = normalizeKey(key);
-            const prev = earliestEraByKey.get(nk);
-            if (prev === undefined || era < prev) earliestEraByKey.set(nk, era);
-        }
-    }
-
-    return earliestEraByKey;
+const isConstructibleLikeUnlock = (unlock: TechUnlockRef) => {
+    const type = normType(unlock.unlockType);
+    return type === "CONSTRUCTIBLE" || type === "UNIT";
 };
 
 const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined) =>
@@ -45,6 +60,92 @@ const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined)
 
 const sortUnlockedByEraAndName = <T extends { era: number; displayName: string }>(items: T[]) =>
     items.sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
+
+export const resolveDistrictUnlock = (
+    unlock: TechUnlockRef,
+    districtsByKey: Record<string, District>
+) => {
+    const key = normalizeKey(unlock.unlockKey ?? "");
+    if (!key || !isConstructibleLikeUnlock(unlock)) return null;
+
+    const explicitKind = getExplicitConstructibleKind(unlock);
+    if (explicitKind && explicitKind !== "District") return null;
+
+    return districtsByKey[key] ?? null;
+};
+
+export const resolveImprovementUnlock = (
+    unlock: TechUnlockRef,
+    improvementsByKey: Record<string, Improvement>
+) => {
+    const key = normalizeKey(unlock.unlockKey ?? "");
+    if (!key || !isConstructibleLikeUnlock(unlock)) return null;
+
+    const explicitKind = getExplicitConstructibleKind(unlock);
+    if (explicitKind && explicitKind !== "Improvement") return null;
+
+    return improvementsByKey[key] ?? null;
+};
+
+export const resolveConstructibleUnlock = (
+    unlock: TechUnlockRef,
+    deps: ConstructibleUnlockDeps
+): ConstructibleUnlockResolution | null => {
+    const key = normalizeKey(unlock.unlockKey ?? "");
+    if (!key || !isConstructibleLikeUnlock(unlock)) return null;
+
+    const { districtsByKey, improvementsByKey, units } = deps;
+    const explicitKind = getExplicitConstructibleKind(unlock);
+
+    if (explicitKind === "Unit" || normType(unlock.unlockType) === "UNIT") {
+        const unit = units?.get(key);
+        return unit
+            ? { kind: "Unit", key, unit, displayName: unit.displayName ?? key }
+            : null;
+    }
+
+    if (explicitKind === "District") {
+        const district = resolveDistrictUnlock(unlock, districtsByKey);
+        return district
+            ? { kind: "District", key, district, displayName: district.displayName ?? key }
+            : null;
+    }
+
+    if (explicitKind === "Improvement") {
+        const improvement = resolveImprovementUnlock(unlock, improvementsByKey);
+        return improvement
+            ? {
+                  kind: "Improvement",
+                  key,
+                  improvement,
+                  displayName: improvement.displayName ?? key,
+              }
+            : null;
+    }
+
+    const unit = units?.get(key);
+    if (unit) return { kind: "Unit", key, unit, displayName: unit.displayName ?? key };
+
+    // Current TechUnlockDto only exposes unlockType + unlockKey. Until the API
+    // preserves constructible kind metadata, bare constructible keys fall back
+    // to district before improvement in this one resolver.
+    const district = resolveDistrictUnlock(unlock, districtsByKey);
+    if (district) {
+        return { kind: "District", key, district, displayName: district.displayName ?? key };
+    }
+
+    const improvement = resolveImprovementUnlock(unlock, improvementsByKey);
+    if (improvement) {
+        return {
+            kind: "Improvement",
+            key,
+            improvement,
+            displayName: improvement.displayName ?? key,
+        };
+    }
+
+    return null;
+};
 
 export const getUnlockedImprovements = (
     selectedTechs: Tech[],
@@ -60,12 +161,25 @@ export const getUnlockedImprovementsByKey = (
     selectedTechs: Tech[],
     improvementsByKey: Record<string, Improvement>
 ): UnlockedImprovement[] => {
-    const earliestEraByUnlockKey = buildEarliestEraByUnlockKey(selectedTechs, "CONSTRUCTIBLE");
+    const earliestEraByUnlockKey = new Map<string, number>();
+
+    for (const tech of selectedTechs) {
+        const era = tech.era ?? 1;
+
+        for (const unlock of tech.unlocks ?? []) {
+            const improvement = resolveImprovementUnlock(unlock, improvementsByKey);
+            if (!improvement) continue;
+
+            const key = normalizeKey(improvement.improvementKey);
+            const prev = earliestEraByUnlockKey.get(key);
+            if (prev === undefined || era < prev) earliestEraByUnlockKey.set(key, era);
+        }
+    }
 
     return sortUnlockedByEraAndName(
         Array.from(earliestEraByUnlockKey.entries())
             .map(([key, era]) => {
-                const improvement = improvementsByKey[normalizeKey(key)];
+                const improvement = improvementsByKey[key];
                 return improvement ? { ...improvement, era } : null;
             })
             .filter((improvement): improvement is UnlockedImprovement => !!improvement)
@@ -86,12 +200,25 @@ export const getUnlockedDistrictsByKey = (
     selectedTechs: Tech[],
     districtsByKey: Record<string, District>
 ): UnlockedDistrict[] => {
-    const earliestEraByUnlockKey = buildEarliestEraByUnlockKey(selectedTechs, "CONSTRUCTIBLE");
+    const earliestEraByUnlockKey = new Map<string, number>();
+
+    for (const tech of selectedTechs) {
+        const era = tech.era ?? 1;
+
+        for (const unlock of tech.unlocks ?? []) {
+            const district = resolveDistrictUnlock(unlock, districtsByKey);
+            if (!district) continue;
+
+            const key = normalizeKey(district.districtKey);
+            const prev = earliestEraByUnlockKey.get(key);
+            if (prev === undefined || era < prev) earliestEraByUnlockKey.set(key, era);
+        }
+    }
 
     return sortUnlockedByEraAndName(
         Array.from(earliestEraByUnlockKey.entries())
             .map(([key, era]) => {
-                const district = districtsByKey[normalizeKey(key)];
+                const district = districtsByKey[key];
                 return district ? { ...district, era } : null;
             })
             .filter((district): district is UnlockedDistrict => !!district)

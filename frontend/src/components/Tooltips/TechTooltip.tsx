@@ -14,11 +14,9 @@ import {
 import { useGameData } from "@/context/GameDataContext";
 import "./TechTooltip.css";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
-import {
-    selectDistrictsByKey,
-    selectImprovementsByKey,
-    useDistrictImprovementStore,
-} from "@/stores/districtImprovementStore";
+import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
+import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 interface TechTooltipProps {
     hoveredTech: Tech;
@@ -37,8 +35,8 @@ const keyOf = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
 const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, onMouseLeave }) => {
     const { units, selectedFaction } = useGameData();
-    const districtsByKey = useDistrictImprovementStore(selectDistrictsByKey);
-    const improvementsByKey = useDistrictImprovementStore(selectImprovementsByKey);
+    const districtsByKey = useDistrictStore(selectDistrictsByKey);
+    const improvementsByKey = useImprovementStore(selectImprovementsByKey);
 
     const [hoveredImprovement, setHoveredImprovement] = useState<HoveredImprovementState>(null);
     const [hoveredDistrict, setHoveredDistrict] = useState<HoveredDistrictState>(null);
@@ -70,10 +68,15 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
         const unlockKey = keyOf(u.unlockKey);
         if (!unlockKey) return null;
 
-        if (isType(u, "Constructible")) {
-            // Exporter encodes Units as Constructible with unlockKey = Unit_...
-            const unit = units.get(unlockKey);
-            if (unit) {
+        if (isType(u, "Constructible") || isType(u, "Unit")) {
+            const resolved = resolveConstructibleUnlock(u, {
+                districtsByKey,
+                improvementsByKey,
+                units,
+            });
+            if (!resolved) return null;
+
+            if (resolved.kind === "Unit") {
                 const faction = selectedFaction?.uiLabel?.toLowerCase() ?? "";
                 const unitParam = encodeURIComponent(unlockKey);
 
@@ -82,18 +85,17 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                         <span>Unit: </span>
                         <span
                             className="hoverable-link unit-link"
-                            onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(unit, e))}
+                            onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(resolved.unit, e))}
                             onMouseLeave={() => setHoveredUnit(null)}
                             onClick={() => window.open(`/units?faction=${faction}&unit=${unitParam}`, "_blank")}
                         >
-                            {unit.displayName ?? unlockKey}
+                            {resolved.displayName}
                         </span>
                     </div>
                 );
             }
 
-            const imp = improvementsByKey[unlockKey];
-            if (imp) {
+            if (resolved.kind === "Improvement") {
                 return (
                     <div key={index} style={{ display: "block" }}>
                         <span>Improvement: </span>
@@ -101,18 +103,17 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                             className="hoverable-link"
                             onMouseEnter={(e) => {
                                 setHoveredDistrict(null);
-                                setHoveredImprovement(createHoveredImprovement(imp, e));
+                                setHoveredImprovement(createHoveredImprovement(resolved.improvement, e));
                             }}
                             onMouseLeave={() => setHoveredImprovement(null)}
                         >
-                            {imp.displayName ?? unlockKey}
+                            {resolved.displayName}
                         </span>
                     </div>
                 );
             }
 
-            const dist = districtsByKey[unlockKey];
-            if (dist) {
+            if (resolved.kind === "District") {
                 return (
                     <div key={index} style={{ display: "block" }}>
                         <span>District: </span>
@@ -120,40 +121,15 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                             className="hoverable-link"
                             onMouseEnter={(e) => {
                                 setHoveredImprovement(null);
-                                setHoveredDistrict(createHoveredDistrict(dist, e));
+                                setHoveredDistrict(createHoveredDistrict(resolved.district, e));
                             }}
                             onMouseLeave={() => setHoveredDistrict(null)}
                         >
-                            {dist.displayName ?? unlockKey}
+                            {resolved.displayName}
                         </span>
                     </div>
                 );
             }
-
-            return null;
-        }
-
-        // Legacy/alternate export where unlockType is already Unit
-        if (isType(u, "Unit")) {
-            const unit = units.get(unlockKey);
-            if (!unit) return null;
-
-            const faction = selectedFaction?.uiLabel?.toLowerCase() ?? "";
-            const unitParam = encodeURIComponent(unlockKey);
-
-            return (
-                <div key={index} style={{ display: "block" }}>
-                    <span>Unit: </span>
-                    <span
-                        className="hoverable-link unit-link"
-                        onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(unit, e))}
-                        onMouseLeave={() => setHoveredUnit(null)}
-                        onClick={() => window.open(`/units?faction=${faction}&unit=${unitParam}`, "_blank")}
-                    >
-                        {unit.displayName ?? unlockKey}
-                    </span>
-                </div>
-            );
         }
 
         return null;

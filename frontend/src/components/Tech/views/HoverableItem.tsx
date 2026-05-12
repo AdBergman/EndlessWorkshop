@@ -10,11 +10,10 @@ import {
 } from "../../Tooltips/hoverHelpers";
 import { useGameData } from "@/context/GameDataContext";
 import type { District, Improvement, Unit } from "@/types/dataTypes";
-import {
-    selectDistrictByKey,
-    selectImprovementByKey,
-    useDistrictImprovementStore,
-} from "@/stores/districtImprovementStore";
+import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
+import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { resolveConstructibleUnlock } from "@/utils/unlocks";
+import type { ConstructibleUnlockKind } from "@/utils/unlocks";
 
 type HoverType = "Constructible" | "Unit";
 
@@ -22,13 +21,20 @@ interface HoverableItemProps {
     type: HoverType;
     name: string;       // display name
     unlockKey: string;  // key used for lookups (districtKey / improvementKey / unitKey)
+    constructibleKind?: Exclude<ConstructibleUnlockKind, "Unit">;
     prefix?: string;
 }
 
-const HoverableItem: React.FC<HoverableItemProps> = ({ type, name, unlockKey, prefix = "" }) => {
+const HoverableItem: React.FC<HoverableItemProps> = ({
+    type,
+    name,
+    unlockKey,
+    constructibleKind,
+    prefix = "",
+}) => {
     const { units } = useGameData();
-    const improvement = useDistrictImprovementStore(selectImprovementByKey(unlockKey));
-    const district = useDistrictImprovementStore(selectDistrictByKey(unlockKey));
+    const districtsByKey = useDistrictStore(selectDistrictsByKey);
+    const improvementsByKey = useImprovementStore(selectImprovementsByKey);
 
     const [hoveredImp, setHoveredImp] = useState<HoveredWithCoords<Improvement> | null>(null);
     const [hoveredDist, setHoveredDist] = useState<HoveredWithCoords<District> | null>(null);
@@ -54,17 +60,26 @@ const HoverableItem: React.FC<HoverableItemProps> = ({ type, name, unlockKey, pr
             return;
         }
 
-        if (improvement) {
+        const resolved = resolveConstructibleUnlock(
+            {
+                unlockType: "Constructible",
+                unlockKey: key,
+                constructibleKind,
+            },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        if (resolved?.kind === "Improvement") {
             setHoveredDist(null);
             setHoveredUnit(null);
-            setHoveredImp(createHoveredImprovement(improvement, e));
+            setHoveredImp(createHoveredImprovement(resolved.improvement, e));
             return;
         }
 
-        if (district) {
+        if (resolved?.kind === "District") {
             setHoveredImp(null);
             setHoveredUnit(null);
-            setHoveredDist(createHoveredDistrict(district, e));
+            setHoveredDist(createHoveredDistrict(resolved.district, e));
         }
     };
 

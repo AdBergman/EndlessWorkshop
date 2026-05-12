@@ -2,7 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HoverableItem from "@/components/Tech/views/HoverableItem";
 import { useGameData } from "@/context/GameDataContext";
-import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
+import { useDistrictStore } from "@/stores/districtStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -25,8 +26,9 @@ const mockedUseGameData = vi.mocked(useGameData);
 
 describe("HoverableItem", () => {
     beforeEach(() => {
-        useDistrictImprovementStore.getState().reset();
-        useDistrictImprovementStore.setState({
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useImprovementStore.setState({
             improvementsByKey: {
                 Improvement_Traveler_Shrine: {
                     improvementKey: "Improvement_Traveler_Shrine",
@@ -36,6 +38,8 @@ describe("HoverableItem", () => {
                     cost: [],
                 },
             },
+        });
+        useDistrictStore.setState({
             districtsByKey: {
                 District_Communal_Habitations: {
                     districtKey: "District_Communal_Habitations",

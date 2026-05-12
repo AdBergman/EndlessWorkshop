@@ -4,7 +4,8 @@ import { Codex, Faction, FactionInfo, Tech, Unit } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useCodexStore } from "@/stores/codexStore";
-import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
+import { useDistrictStore } from "@/stores/districtStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 
 interface Props {
     children: ReactNode;
@@ -55,9 +56,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
     const codexEntriesByKind = useCodexStore((s) => s.entriesByKind);
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
-    const districtsByKey = useDistrictImprovementStore((s) => s.districtsByKey);
-    const improvementsByKey = useDistrictImprovementStore((s) => s.improvementsByKey);
-    const loadDistrictImprovements = useDistrictImprovementStore((s) => s.load);
+    const districtsByKey = useDistrictStore((s) => s.districtsByKey);
+    const improvementsByKey = useImprovementStore((s) => s.improvementsByKey);
+    const loadDistricts = useDistrictStore((s) => s.loadDistricts);
+    const loadImprovements = useImprovementStore((s) => s.loadImprovements);
 
     const districts = useMemo(
         () => new Map(Object.entries(districtsByKey)),
@@ -98,9 +100,10 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        void loadDistrictImprovements();
+        void loadDistricts();
+        void loadImprovements();
         void refreshTechs();
-    }, [loadDistrictImprovements, refreshTechs]);
+    }, [loadDistricts, loadImprovements, refreshTechs]);
 
     useEffect(() => {
         const fetchUnits = async () => {

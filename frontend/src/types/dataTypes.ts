@@ -6,6 +6,8 @@ export type TechCoords = {
 export type TechUnlockRef = {
     unlockType: string;
     unlockKey: string;
+    unlockCategory?: string | null;
+    constructibleKind?: string | null;
 };
 
 export interface Unit {

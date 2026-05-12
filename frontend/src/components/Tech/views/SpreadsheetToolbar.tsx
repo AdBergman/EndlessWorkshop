@@ -5,11 +5,9 @@ import { Tech, Improvement, District, Unit } from "@/types/dataTypes";
 import { useGameData } from "@/context/GameDataContext";
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { deriveUnit } from "@/lib/units/deriveUnit";
-import {
-    selectDistrictsByKey,
-    selectImprovementsByKey,
-    useDistrictImprovementStore,
-} from "@/stores/districtImprovementStore";
+import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
+import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
+import { resolveConstructibleUnlock } from "@/utils/unlocks";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
 
@@ -43,27 +41,21 @@ export function formatTechUnlocks(
         .map((u) => ({
             type: (u.unlockType ?? "").trim().toUpperCase(),
             key: (u.unlockKey ?? "").trim(),
+            unlockCategory: u.unlockCategory,
+            constructibleKind: u.constructibleKind,
         }))
         .filter((u) => u.type === "CONSTRUCTIBLE" && !!u.key)
         .map((u) => {
-            const key = u.key;
-
-            // Units (Unit_* keys)
-            if (key.startsWith("Unit_")) {
-                const unit = units.get(key);
-                return unit ? `Unit: ${unit.displayName ?? key}` : null;
-            }
-
-            // Districts
-            const dist = districtsByKey[key];
-            if (dist) return `District: ${dist.displayName ?? key}`;
-
-            // Improvements
-            const imp = improvementsByKey[key];
-            if (imp) return `Improvement: ${imp.displayName ?? key}`;
-
-            // Only export District/Improvement/Unit unlocks
-            return null;
+            const resolved = resolveConstructibleUnlock(
+                {
+                    unlockType: u.type,
+                    unlockKey: u.key,
+                    unlockCategory: u.unlockCategory,
+                    constructibleKind: u.constructibleKind,
+                },
+                { districtsByKey, improvementsByKey, units }
+            );
+            return resolved ? `${resolved.kind}: ${resolved.displayName}` : null;
         })
         .filter((s): s is string => !!s)
         .join("; ");
@@ -81,8 +73,8 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    setActiveSheet,
                                                                }) => {
     const { selectedFaction, units } = useGameData();
-    const districtsByKey = useDistrictImprovementStore(selectDistrictsByKey);
-    const improvementsByKey = useDistrictImprovementStore(selectImprovementsByKey);
+    const districtsByKey = useDistrictStore(selectDistrictsByKey);
+    const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const factionLabel = selectedFaction?.uiLabel?.toLowerCase() ?? "all-factions";
 
     const { data, headers, filename } = useMemo(() => {

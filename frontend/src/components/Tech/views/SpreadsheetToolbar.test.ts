@@ -70,5 +70,37 @@ describe("formatTechUnlocks", () => {
             "Unit: Scout; District: Harbor; Improvement: Market"
         );
     });
-});
 
+    it("uses explicit constructible kind metadata when formatting same-key exports", () => {
+        const districtsByKey: Record<string, District> = {
+            Shared_Key: {
+                districtKey: "Shared_Key",
+                displayName: "Shared District",
+                descriptionLines: [],
+            },
+        };
+        const improvementsByKey: Record<string, Improvement> = {
+            Shared_Key: {
+                improvementKey: "Shared_Key",
+                displayName: "Shared Improvement",
+                descriptionLines: [],
+                unique: "City",
+                cost: [],
+            },
+        };
+        const tech: Tech = {
+            ...baseTech,
+            unlocks: [
+                {
+                    unlockType: "Constructible",
+                    unlockKey: "Shared_Key",
+                    constructibleKind: "Improvement",
+                },
+            ],
+        };
+
+        expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, units: new Map() })).toBe(
+            "Improvement: Shared Improvement"
+        );
+    });
+});
