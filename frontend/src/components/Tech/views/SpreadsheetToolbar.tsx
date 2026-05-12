@@ -5,6 +5,11 @@ import { Tech, Improvement, District, Unit } from "@/types/dataTypes";
 import { useGameData } from "@/context/GameDataContext";
 import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { deriveUnit } from "@/lib/units/deriveUnit";
+import {
+    selectDistrictsByKey,
+    selectImprovementsByKey,
+    useDistrictImprovementStore,
+} from "@/stores/districtImprovementStore";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
 
@@ -24,15 +29,15 @@ interface SpreadsheetToolbarProps {
 const exportDescriptionLines = (lines: string[] | undefined) =>
     (lines ?? []).map(stripDescriptionTokens).join("; ");
 
-function formatTechUnlocks(
+export function formatTechUnlocks(
     tech: Tech,
     deps: {
-        districts: Map<string, District>;
-        improvements: Map<string, Improvement>;
+        districtsByKey: Record<string, District>;
+        improvementsByKey: Record<string, Improvement>;
         units: Map<string, Unit>;
     }
 ): string {
-    const { districts, improvements, units } = deps;
+    const { districtsByKey, improvementsByKey, units } = deps;
 
     return (tech.unlocks ?? [])
         .map((u) => ({
@@ -50,11 +55,11 @@ function formatTechUnlocks(
             }
 
             // Districts
-            const dist = districts.get(key);
+            const dist = districtsByKey[key];
             if (dist) return `District: ${dist.displayName ?? key}`;
 
             // Improvements
-            const imp = improvements.get(key);
+            const imp = improvementsByKey[key];
             if (imp) return `Improvement: ${imp.displayName ?? key}`;
 
             // Only export District/Improvement/Unit unlocks
@@ -75,7 +80,9 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    activeSheet,
                                                                    setActiveSheet,
                                                                }) => {
-    const { selectedFaction, districts, improvements, units } = useGameData();
+    const { selectedFaction, units } = useGameData();
+    const districtsByKey = useDistrictImprovementStore(selectDistrictsByKey);
+    const improvementsByKey = useDistrictImprovementStore(selectImprovementsByKey);
     const factionLabel = selectedFaction?.uiLabel?.toLowerCase() ?? "all-factions";
 
     const { data, headers, filename } = useMemo(() => {
@@ -135,7 +142,7 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                         Name: tech.name ?? "",
                         Era: tech.era ?? "",
                         Type: tech.type ?? "",
-                        Unlocks: formatTechUnlocks(tech, { districts, improvements, units }),
+                        Unlocks: formatTechUnlocks(tech, { districtsByKey, improvementsByKey, units }),
                         Description: exportDescriptionLines(tech.descriptionLines),
                     })),
                 };
@@ -147,8 +154,8 @@ const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
         unlockedDistricts,
         unlockedUnits,
         selectedTechs,
-        districts,
-        improvements,
+        districtsByKey,
+        improvementsByKey,
         units,
     ]);
 

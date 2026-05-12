@@ -1,17 +1,10 @@
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import {
-    Codex,
-    District,
-    Faction,
-    FactionInfo,
-    Improvement,
-    Tech,
-    Unit,
-} from "@/types/dataTypes";
+import { Codex, Faction, FactionInfo, Tech, Unit } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useCodexStore } from "@/stores/codexStore";
+import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
 
 interface Props {
     children: ReactNode;
@@ -46,8 +39,6 @@ const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
 });
 
 const GameDataProvider: React.FC<Props> = ({ children }) => {
-    const [districts, setDistricts] = useState<Map<string, District>>(new Map());
-    const [improvements, setImprovements] = useState<Map<string, Improvement>>(new Map());
     const [techs, setTechs] = useState<Map<string, Tech>>(new Map());
     const [units, setUnits] = useState<Map<string, Unit>>(new Map());
 
@@ -64,6 +55,19 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
     const codexEntriesByKind = useCodexStore((s) => s.entriesByKind);
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
+    const districtsByKey = useDistrictImprovementStore((s) => s.districtsByKey);
+    const improvementsByKey = useDistrictImprovementStore((s) => s.improvementsByKey);
+    const loadDistrictImprovements = useDistrictImprovementStore((s) => s.load);
+
+    const districts = useMemo(
+        () => new Map(Object.entries(districtsByKey)),
+        [districtsByKey]
+    );
+
+    const improvements = useMemo(
+        () => new Map(Object.entries(improvementsByKey)),
+        [improvementsByKey]
+    );
 
     const codexByKindKey = useMemo(() => {
         const out = new Map<string, Map<string, Codex>>();
@@ -94,31 +98,9 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        const fetchData = async () => {
-            const [districtRes, improvementRes] = await Promise.allSettled([
-                apiClient.getDistricts(),
-                apiClient.getImprovements(),
-            ]);
-
-            if (districtRes.status === "fulfilled") {
-                setDistricts(toKeyedMap(districtRes.value, (d) => d.districtKey));
-            } else {
-                console.error("Failed to fetch districts from API.", districtRes.reason);
-                setDistricts(new Map());
-            }
-
-            if (improvementRes.status === "fulfilled") {
-                setImprovements(toKeyedMap(improvementRes.value, (i) => i.improvementKey));
-            } else {
-                console.error("Failed to fetch improvements from API.", improvementRes.reason);
-                setImprovements(new Map());
-            }
-
-            await refreshTechs();
-        };
-
-        void fetchData();
-    }, [refreshTechs]);
+        void loadDistrictImprovements();
+        void refreshTechs();
+    }, [loadDistrictImprovements, refreshTechs]);
 
     useEffect(() => {
         const fetchUnits = async () => {

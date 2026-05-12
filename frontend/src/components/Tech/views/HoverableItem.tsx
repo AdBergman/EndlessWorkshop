@@ -10,6 +10,11 @@ import {
 } from "../../Tooltips/hoverHelpers";
 import { useGameData } from "@/context/GameDataContext";
 import type { District, Improvement, Unit } from "@/types/dataTypes";
+import {
+    selectDistrictByKey,
+    selectImprovementByKey,
+    useDistrictImprovementStore,
+} from "@/stores/districtImprovementStore";
 
 type HoverType = "Constructible" | "Unit";
 
@@ -21,7 +26,9 @@ interface HoverableItemProps {
 }
 
 const HoverableItem: React.FC<HoverableItemProps> = ({ type, name, unlockKey, prefix = "" }) => {
-    const { improvements, districts, units } = useGameData();
+    const { units } = useGameData();
+    const improvement = useDistrictImprovementStore(selectImprovementByKey(unlockKey));
+    const district = useDistrictImprovementStore(selectDistrictByKey(unlockKey));
 
     const [hoveredImp, setHoveredImp] = useState<HoveredWithCoords<Improvement> | null>(null);
     const [hoveredDist, setHoveredDist] = useState<HoveredWithCoords<District> | null>(null);
@@ -47,19 +54,17 @@ const HoverableItem: React.FC<HoverableItemProps> = ({ type, name, unlockKey, pr
             return;
         }
 
-        const imp = improvements.get(key);
-        if (imp) {
+        if (improvement) {
             setHoveredDist(null);
             setHoveredUnit(null);
-            setHoveredImp(createHoveredImprovement(imp, e));
+            setHoveredImp(createHoveredImprovement(improvement, e));
             return;
         }
 
-        const dist = districts.get(key);
-        if (dist) {
+        if (district) {
             setHoveredImp(null);
             setHoveredUnit(null);
-            setHoveredDist(createHoveredDistrict(dist, e));
+            setHoveredDist(createHoveredDistrict(district, e));
         }
     };
 

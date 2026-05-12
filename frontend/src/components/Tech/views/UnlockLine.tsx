@@ -2,59 +2,58 @@ import React, { useMemo } from "react";
 import HoverableItem from "./HoverableItem";
 import type { TechUnlockRef } from "@/types/dataTypes";
 import { useGameData } from "@/context/GameDataContext";
+import {
+    selectDistrictByKey,
+    selectImprovementByKey,
+    useDistrictImprovementStore,
+} from "@/stores/districtImprovementStore";
 
 interface UnlockLineProps {
     unlock: TechUnlockRef;
 }
 
 const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
-    const { districts, improvements, units } = useGameData();
+    const { units } = useGameData();
 
     const unlockType = (unlock.unlockType ?? "").trim().toUpperCase();
     const unlockKey = (unlock.unlockKey ?? "").trim();
+    const district = useDistrictImprovementStore(selectDistrictByKey(unlockKey));
+    const improvement = useDistrictImprovementStore(selectImprovementByKey(unlockKey));
 
-    if (!unlockKey) return null;
-
-    // We only render District / Improvement / Unit unlocks.
-    // In your model they are all typically CONSTRUCTIBLE, and units have Unit_* keys.
-    if (unlockType !== "CONSTRUCTIBLE") return null;
+    const unit = unlockKey.startsWith("Unit_") ? units.get(unlockKey) : undefined;
 
     const resolved = useMemo(() => {
+        if (!unlockKey || unlockType !== "CONSTRUCTIBLE") return null;
+
         // Units
-        if (unlockKey.startsWith("Unit_")) {
-            const unit = units.get(unlockKey);
-            if (unit) {
-                return {
-                    kind: "Unit" as const,
-                    display: unit.displayName ?? unlockKey,
-                    hoverType: "Unit" as const,
-                };
-            }
-            return null;
+        if (unit) {
+            return {
+                kind: "Unit" as const,
+                display: unit.displayName ?? unlockKey,
+                hoverType: "Unit" as const,
+            };
         }
 
         // Districts
-        const dist = districts.get(unlockKey);
-        if (dist) {
+        if (district) {
             return {
                 kind: "District" as const,
-                display: dist.displayName ?? unlockKey,
+                display: district.displayName ?? unlockKey,
                 hoverType: "Constructible" as const,
             };
         }
 
         // Improvements
-        const imp = improvements.get(unlockKey);
-        if (imp) {
+        if (improvement) {
             return {
                 kind: "Improvement" as const,
-                display: imp.displayName ?? unlockKey,
+                display: improvement.displayName ?? unlockKey,
                 hoverType: "Constructible" as const,
             };
         }
 
         return null;
-    }, [unlockKey, units, districts, improvements]);
+    }, [unlockKey, unlockType, unit, district, improvement]);
 
     if (!resolved) return null;
 

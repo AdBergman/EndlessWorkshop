@@ -36,36 +36,66 @@ const buildEarliestEraByUnlockKey = (selectedTechs: Tech[], unlockType: string) 
     return earliestEraByKey;
 };
 
+const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined) =>
+    items.reduce<Record<string, T>>((acc, item) => {
+        const key = normalizeKey(getKey(item) ?? "");
+        if (key) acc[key] = item;
+        return acc;
+    }, {});
+
+const sortUnlockedByEraAndName = <T extends { era: number; displayName: string }>(items: T[]) =>
+    items.sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
+
 export const getUnlockedImprovements = (
     selectedTechs: Tech[],
     improvements: Improvement[]
 ): UnlockedImprovement[] => {
-    // Improvements unlocked by CONSTRUCTIBLE where unlockKey == improvementKey
+    return getUnlockedImprovementsByKey(
+        selectedTechs,
+        toByKey(improvements, (improvement) => improvement.improvementKey)
+    );
+};
+
+export const getUnlockedImprovementsByKey = (
+    selectedTechs: Tech[],
+    improvementsByKey: Record<string, Improvement>
+): UnlockedImprovement[] => {
     const earliestEraByUnlockKey = buildEarliestEraByUnlockKey(selectedTechs, "CONSTRUCTIBLE");
 
-    return improvements
-        .filter((imp) => !!imp.improvementKey && earliestEraByUnlockKey.has(normalizeKey(imp.improvementKey)))
-        .map((imp) => ({
-            ...imp,
-            era: earliestEraByUnlockKey.get(normalizeKey(imp.improvementKey)) ?? 1,
-        }))
-        .sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
+    return sortUnlockedByEraAndName(
+        Array.from(earliestEraByUnlockKey.entries())
+            .map(([key, era]) => {
+                const improvement = improvementsByKey[normalizeKey(key)];
+                return improvement ? { ...improvement, era } : null;
+            })
+            .filter((improvement): improvement is UnlockedImprovement => !!improvement)
+    );
 };
 
 export const getUnlockedDistricts = (
     selectedTechs: Tech[],
     districts: District[]
 ): UnlockedDistrict[] => {
-    // Districts unlocked by CONSTRUCTIBLE where unlockKey == districtKey
+    return getUnlockedDistrictsByKey(
+        selectedTechs,
+        toByKey(districts, (district) => district.districtKey)
+    );
+};
+
+export const getUnlockedDistrictsByKey = (
+    selectedTechs: Tech[],
+    districtsByKey: Record<string, District>
+): UnlockedDistrict[] => {
     const earliestEraByUnlockKey = buildEarliestEraByUnlockKey(selectedTechs, "CONSTRUCTIBLE");
 
-    return districts
-        .filter((d) => !!d.districtKey && earliestEraByUnlockKey.has(normalizeKey(d.districtKey)))
-        .map((d) => ({
-            ...d,
-            era: earliestEraByUnlockKey.get(normalizeKey(d.districtKey)) ?? 1,
-        }))
-        .sort((a, b) => a.era - b.era || a.displayName.localeCompare(b.displayName));
+    return sortUnlockedByEraAndName(
+        Array.from(earliestEraByUnlockKey.entries())
+            .map(([key, era]) => {
+                const district = districtsByKey[normalizeKey(key)];
+                return district ? { ...district, era } : null;
+            })
+            .filter((district): district is UnlockedDistrict => !!district)
+    );
 };
 
 const buildEarliestEraByUnitUnlockKey = (selectedTechs: Tech[]) => {

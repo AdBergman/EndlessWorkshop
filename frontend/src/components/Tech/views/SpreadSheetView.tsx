@@ -8,8 +8,8 @@ import UnitSheetView from "./UnitSheetView";
 import { useGameData } from "@/context/GameDataContext";
 import { Tech } from "@/types/dataTypes";
 import {
-    getUnlockedDistricts,
-    getUnlockedImprovements,
+    getUnlockedDistrictsByKey,
+    getUnlockedImprovementsByKey,
     getUnlockedUnits,
     UnlockedDistrict,
     UnlockedImprovement,
@@ -17,18 +17,23 @@ import {
 } from "@/utils/unlocks";
 import { Bounce, toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import {
+    selectDistrictsByKey,
+    selectImprovementsByKey,
+    useDistrictImprovementStore,
+} from "@/stores/districtImprovementStore";
 
 const SpreadSheetView: React.FC = () => {
     const {
         selectedTechs,
         setSelectedTechs,
         techs,
-        improvements,
-        districts,
         units,
         createSavedTechBuild,
         selectedFaction,
     } = useGameData();
+    const improvementsByKey = useDistrictImprovementStore(selectImprovementsByKey);
+    const districtsByKey = useDistrictImprovementStore(selectDistrictsByKey);
 
     const [activeSheet, setActiveSheet] = useState<SheetView>("techs");
     const [sortedTechs, setSortedTechs] = useState<Tech[]>([]);
@@ -43,13 +48,13 @@ const SpreadSheetView: React.FC = () => {
     }, [selectedTechObjects]);
 
     const unlockedImprovements: UnlockedImprovement[] = useMemo(
-        () => getUnlockedImprovements(selectedTechObjects, Array.from(improvements.values())),
-        [selectedTechObjects, improvements]
+        () => getUnlockedImprovementsByKey(selectedTechObjects, improvementsByKey),
+        [selectedTechObjects, improvementsByKey]
     );
 
     const unlockedDistricts: UnlockedDistrict[] = useMemo(
-        () => getUnlockedDistricts(selectedTechObjects, Array.from(districts.values())),
-        [selectedTechObjects, districts]
+        () => getUnlockedDistrictsByKey(selectedTechObjects, districtsByKey),
+        [selectedTechObjects, districtsByKey]
     );
 
     const unlockedUnits: UnlockedUnit[] = useMemo(

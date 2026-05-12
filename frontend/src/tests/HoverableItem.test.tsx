@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HoverableItem from "@/components/Tech/views/HoverableItem";
 import { useGameData } from "@/context/GameDataContext";
+import { useDistrictImprovementStore } from "@/stores/districtImprovementStore";
 
 vi.mock("@/context/GameDataContext", () => ({
     useGameData: vi.fn(),
@@ -24,27 +25,27 @@ const mockedUseGameData = vi.mocked(useGameData);
 
 describe("HoverableItem", () => {
     beforeEach(() => {
+        useDistrictImprovementStore.getState().reset();
+        useDistrictImprovementStore.setState({
+            improvementsByKey: {
+                Improvement_Traveler_Shrine: {
+                    improvementKey: "Improvement_Traveler_Shrine",
+                    displayName: "Traveler's Shrine",
+                    descriptionLines: ["Gain Dust."],
+                    unique: "City",
+                    cost: [],
+                },
+            },
+            districtsByKey: {
+                District_Communal_Habitations: {
+                    districtKey: "District_Communal_Habitations",
+                    displayName: "Communal Habitations",
+                    descriptionLines: ["Housing for the populace."],
+                },
+            },
+        });
+
         mockedUseGameData.mockReturnValue({
-            improvements: new Map([
-                [
-                    "Improvement_Traveler_Shrine",
-                    {
-                        displayName: "Traveler's Shrine",
-                        descriptionLines: ["Gain Dust."],
-                        unique: "City",
-                        cost: [],
-                    },
-                ],
-            ]),
-            districts: new Map([
-                [
-                    "District_Communal_Habitations",
-                    {
-                        displayName: "Communal Habitations",
-                        descriptionLines: ["Housing for the populace."],
-                    },
-                ],
-            ]),
             units: new Map(),
         } as any);
     });
