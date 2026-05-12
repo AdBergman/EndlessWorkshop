@@ -8,6 +8,7 @@ import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { useTechStore } from "@/stores/techStore";
+import { selectSelectedTechs, selectSetSelectedTechs, useTechPlannerStore } from "@/stores/techPlannerStore";
 
 interface Props {
     children: ReactNode;
@@ -37,7 +38,8 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const [selectedFaction, setSelectedFaction] = useState<FactionInfo>(
         toFactionInfoFromEnum(Faction.KIN)
     );
-    const [selectedTechs, setSelectedTechs] = useState<string[]>([]);
+    const selectedTechs = useTechPlannerStore(selectSelectedTechs);
+    const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
 
     const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
 

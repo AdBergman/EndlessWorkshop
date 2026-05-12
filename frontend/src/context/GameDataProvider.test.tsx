@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
 import { apiClient } from "@/api/apiClient";
@@ -9,6 +9,8 @@ import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { useTechStore } from "@/stores/techStore";
+import { useTechPlannerStore } from "@/stores/techPlannerStore";
+import { Faction } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -47,12 +49,18 @@ const Probe = () => {
     );
 };
 
+const LocationProbe = () => {
+    const location = useLocation();
+    return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
+};
+
 describe("GameDataProvider normalized store compatibility adapter", () => {
     beforeEach(() => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
         useTechStore.getState().reset();
+        useTechPlannerStore.getState().reset();
         useCodexStore.getState().reset();
         mockedApiClient.getDistricts.mockReset();
         mockedApiClient.getImprovements.mockReset();
@@ -214,6 +222,131 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         expect(screen.getByTestId("adapter-store-label")).toHaveTextContent("Adapter Insert");
         expect(screen.getByTestId("adapter-selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("adapter-selected-faction")).toHaveTextContent("kin");
+    });
+
+    it("exposes selectedTechs from techPlannerStore through the legacy context adapter", async () => {
+        act(() => {
+            useTechPlannerStore.getState().setSelectedTechs(["Tech_Store_Selected"]);
+        });
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("1");
+        await waitFor(() => {
+            expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
+        });
+    });
+
+    it("writes setSelectedTechs calls through to techPlannerStore", async () => {
+        const user = userEvent.setup();
+
+        const SelectionProbe = () => {
+            const { selectedTechs, setSelectedTechs } = useGameData();
+
+            return (
+                <div>
+                    <button
+                        type="button"
+                        onClick={() => setSelectedTechs((prev) => [...prev, "Tech_From_Context"])}
+                    >
+                        Select from context
+                    </button>
+                    <div data-testid="context-selected-techs">{selectedTechs.join(",")}</div>
+                </div>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <SelectionProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Select from context" }));
+
+        expect(screen.getByTestId("context-selected-techs")).toHaveTextContent("Tech_From_Context");
+        expect(useTechPlannerStore.getState().selectedTechs).toEqual(["Tech_From_Context"]);
+    });
+
+    it("keeps selectedFaction context-owned while selectedTechs are store-backed", async () => {
+        const user = userEvent.setup();
+
+        const FactionProbe = () => {
+            const { selectedFaction, selectedTechs, setSelectedFaction, setSelectedTechs } = useGameData();
+
+            return (
+                <div>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSelectedTechs(["Tech_Selected"]);
+                            setSelectedFaction({
+                                isMajor: true,
+                                enumFaction: Faction.LORDS,
+                                minorName: null,
+                                uiLabel: "lords",
+                            });
+                        }}
+                    >
+                        Change faction
+                    </button>
+                    <div data-testid="context-faction">{selectedFaction.uiLabel}</div>
+                    <div data-testid="context-selected-count">{selectedTechs.length}</div>
+                </div>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <FactionProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Change faction" }));
+
+        expect(screen.getByTestId("context-faction")).toHaveTextContent("lords");
+        expect(screen.getByTestId("context-selected-count")).toHaveTextContent("1");
+        expect("selectedFaction" in useTechPlannerStore.getState()).toBe(false);
+    });
+
+    it("preserves shared-build loading into selected faction and selected techs", async () => {
+        window.history.pushState({}, "", "/tech?share=shared-build-id");
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "shared-build-id",
+            name: "Shared Build",
+            selectedFaction: "Aspects",
+            techIds: ["Tech_Shared_First", "Tech_Shared_Second"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/tech?share=shared-build-id"]}>
+                <GameDataProvider>
+                    <Probe />
+                    <LocationProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("2");
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("aspects");
+        });
+
+        expect(screen.getByTestId("location")).toHaveTextContent("/tech");
+        expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("shared-build-id");
+
+        window.history.pushState({}, "", "/");
     });
 
     it("keeps identical district and improvement keys in separate context maps", async () => {
