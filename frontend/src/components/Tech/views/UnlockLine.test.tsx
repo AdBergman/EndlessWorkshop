@@ -63,7 +63,7 @@ describe("UnlockLine district/improvement resolution", () => {
         expect(container).toBeEmptyDOMElement();
     });
 
-    it("uses explicit constructible kind metadata when a key exists in both domains", () => {
+    it("uses backend unlockCategory when a key exists in both domains", () => {
         useDistrictStore.setState({
             districtsByKey: {
                 Shared_Key: {
@@ -90,7 +90,7 @@ describe("UnlockLine district/improvement resolution", () => {
                 unlock={{
                     unlockType: "Constructible",
                     unlockKey: "Shared_Key",
-                    constructibleKind: "Improvement",
+                    unlockCategory: "Improvement",
                 }}
             />
         );

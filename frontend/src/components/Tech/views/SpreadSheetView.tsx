@@ -8,9 +8,7 @@ import UnitSheetView from "./UnitSheetView";
 import { useGameData } from "@/context/GameDataContext";
 import { Tech } from "@/types/dataTypes";
 import {
-    getUnlockedDistrictsByKey,
-    getUnlockedImprovementsByKey,
-    getUnlockedUnits,
+    getUnlockedConstructiblesByKey,
     UnlockedDistrict,
     UnlockedImprovement,
     UnlockedUnit,
@@ -44,20 +42,18 @@ const SpreadSheetView: React.FC = () => {
         setSortedTechs([...selectedTechObjects]);
     }, [selectedTechObjects]);
 
-    const unlockedImprovements: UnlockedImprovement[] = useMemo(
-        () => getUnlockedImprovementsByKey(selectedTechObjects, improvementsByKey),
-        [selectedTechObjects, improvementsByKey]
+    const unlockedConstructibles = useMemo(
+        () =>
+            getUnlockedConstructiblesByKey(selectedTechObjects, {
+                districtsByKey,
+                improvementsByKey,
+                units,
+            }),
+        [selectedTechObjects, districtsByKey, improvementsByKey, units]
     );
-
-    const unlockedDistricts: UnlockedDistrict[] = useMemo(
-        () => getUnlockedDistrictsByKey(selectedTechObjects, districtsByKey),
-        [selectedTechObjects, districtsByKey]
-    );
-
-    const unlockedUnits: UnlockedUnit[] = useMemo(
-        () => getUnlockedUnits(selectedTechObjects, Array.from(units.values())),
-        [selectedTechObjects, units]
-    );
+    const unlockedImprovements: UnlockedImprovement[] = unlockedConstructibles.improvements;
+    const unlockedDistricts: UnlockedDistrict[] = unlockedConstructibles.districts;
+    const unlockedUnits: UnlockedUnit[] = unlockedConstructibles.units;
 
     const handleSort = () => {
         setSortedTechs(

@@ -71,7 +71,7 @@ describe("formatTechUnlocks", () => {
         );
     });
 
-    it("uses explicit constructible kind metadata when formatting same-key exports", () => {
+    it("uses backend unlockCategory when formatting same-key exports", () => {
         const districtsByKey: Record<string, District> = {
             Shared_Key: {
                 districtKey: "Shared_Key",
@@ -94,7 +94,7 @@ describe("formatTechUnlocks", () => {
                 {
                     unlockType: "Constructible",
                     unlockKey: "Shared_Key",
-                    constructibleKind: "Improvement",
+                    unlockCategory: "Improvement",
                 },
             ],
         };

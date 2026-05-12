@@ -1,4 +1,5 @@
 import {
+    getUnlockedConstructiblesByKey,
     getUnlockedDistrictsByKey,
     getUnlockedImprovementsByKey,
     resolveConstructibleUnlock,
@@ -137,7 +138,7 @@ describe("constructible unlock resolution", () => {
         ],
     ]);
 
-    it("keeps fallback district/improvement precedence centralized", () => {
+    it("keeps old/null metadata fallback precedence centralized", () => {
         const resolved = resolveConstructibleUnlock(
             { unlockType: "Constructible", unlockKey: "Shared_Key" },
             { districtsByKey, improvementsByKey, units }
@@ -149,7 +150,23 @@ describe("constructible unlock resolution", () => {
         });
     });
 
-    it("uses future constructible kind metadata before fallback precedence", () => {
+    it("uses unlockCategory=District as the primary resolution path", () => {
+        const resolved = resolveConstructibleUnlock(
+            {
+                unlockType: "Constructible",
+                unlockKey: "Shared_Key",
+                unlockCategory: "District",
+            },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "District",
+            displayName: "Shared District",
+        });
+    });
+
+    it("uses unlockCategory=Improvement as the primary resolution path", () => {
         const resolved = resolveConstructibleUnlock(
             {
                 unlockType: "Constructible",
@@ -165,16 +182,80 @@ describe("constructible unlock resolution", () => {
         });
     });
 
+    it("prefers backend unlockCategory over legacy constructibleKind when both are present", () => {
+        const resolved = resolveConstructibleUnlock(
+            {
+                unlockType: "Constructible",
+                unlockKey: "Shared_Key",
+                unlockCategory: "District",
+                constructibleKind: "Improvement",
+            },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "District",
+            displayName: "Shared District",
+        });
+    });
+
+    it("keeps legacy constructibleKind compatibility when unlockCategory is absent", () => {
+        const resolved = resolveConstructibleUnlock(
+            {
+                unlockType: "Constructible",
+                unlockKey: "Shared_Key",
+                constructibleKind: "Improvement",
+            },
+            { districtsByKey, improvementsByKey, units }
+        );
+
+        expect(resolved).toMatchObject({
+            kind: "Improvement",
+            displayName: "Shared Improvement",
+        });
+    });
+
+    it("classifies selected-tech constructibles through the centralized resolver", () => {
+        const selectedTechs: Tech[] = [
+            {
+                ...tech("Tech_1", 1, []),
+                unlocks: [
+                    { unlockType: "Constructible", unlockKey: "Shared_Key" },
+                    {
+                        unlockType: "Constructible",
+                        unlockKey: "Shared_Key",
+                        unlockCategory: "Improvement",
+                    },
+                    { unlockType: "Constructible", unlockKey: "Unit_Scout" },
+                ],
+            },
+        ];
+
+        const unlocked = getUnlockedConstructiblesByKey(selectedTechs, {
+            districtsByKey,
+            improvementsByKey,
+            units,
+        });
+
+        expect(unlocked.districts.map((district) => district.displayName)).toEqual([
+            "Shared District",
+        ]);
+        expect(unlocked.improvements.map((improvement) => improvement.displayName)).toEqual([
+            "Shared Improvement",
+        ]);
+        expect(unlocked.units.map((unit) => unit.displayName)).toEqual(["Scout"]);
+    });
+
     it("resolves explicit district and improvement APIs independently", () => {
         expect(
             resolveDistrictUnlock(
-                { unlockType: "Constructible", unlockKey: "Shared_Key" },
+                { unlockType: "Constructible", unlockKey: "Shared_Key", unlockCategory: "District" },
                 districtsByKey
             )?.displayName
         ).toBe("Shared District");
         expect(
             resolveImprovementUnlock(
-                { unlockType: "Constructible", unlockKey: "Shared_Key" },
+                { unlockType: "Constructible", unlockKey: "Shared_Key", unlockCategory: "Improvement" },
                 improvementsByKey
             )?.displayName
         ).toBe("Shared Improvement");
