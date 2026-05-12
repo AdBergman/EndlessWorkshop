@@ -4,6 +4,17 @@ export const DEFAULT_IMAGE_URL = `${SITE_URL}/logo512.png`;
 
 type JsonLdNode = Record<string, unknown>;
 
+export type PublicRouteSeoKey =
+    | "home"
+    | "tech"
+    | "units"
+    | "codex"
+    | "summary"
+    | "mods"
+    | "info";
+
+export type AppRouteSeoKey = Exclude<PublicRouteSeoKey, "home">;
+
 export type PublicRouteSeoConfig = {
     path: string;
     title: string;
@@ -15,7 +26,10 @@ export type PublicRouteSeoConfig = {
     jsonLd?: JsonLdNode | JsonLdNode[];
 };
 
-export const publicRouteSeo = {
+// SPA shell metadata only. Generated/legacy SEO routes such as
+// /encyclopedia/units/:slug and /units/:slug are backend-owned and intentionally
+// kept alive for search engines.
+export const publicRouteSeo: Record<PublicRouteSeoKey, PublicRouteSeoConfig> = {
     home: {
         path: "/",
         title: "Endless Workshop | Endless Legend 2 Tools and References",
@@ -111,10 +125,8 @@ export const publicRouteSeo = {
             url: `${SITE_URL}/info`,
         },
     },
-} satisfies Record<string, PublicRouteSeoConfig>;
+};
 
 export const PUBLIC_ROUTE_SEO = Object.values(publicRouteSeo);
 
 export const INDEXABLE_PUBLIC_ROUTE_SEO = PUBLIC_ROUTE_SEO.filter((route) => route.indexable);
-
-export const INDEXABLE_PUBLIC_ROUTE_PATHS = INDEXABLE_PUBLIC_ROUTE_SEO.map((route) => route.path);

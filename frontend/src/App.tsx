@@ -19,7 +19,7 @@ import AdminImportPage from "@/components/AdminImport/AdminImportPage";
 import CodexPage from "@/pages/CodexPage";
 import ModsPage from "@/pages/ModsPage";
 import PageSeo from "@/components/Seo/PageSeo";
-import { publicRouteSeo } from "@/components/Seo/routeSeo";
+import { AppRouteSeoKey, publicRouteSeo } from "@/components/Seo/routeSeo";
 
 import "./App.css";
 
@@ -64,7 +64,7 @@ function SeoRoute({
     routeKey,
     children,
 }: {
-    routeKey: Exclude<keyof typeof publicRouteSeo, "home">;
+    routeKey: AppRouteSeoKey;
     children: React.ReactNode;
 }) {
     const seo = publicRouteSeo[routeKey];
