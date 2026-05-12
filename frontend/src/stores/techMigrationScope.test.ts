@@ -100,6 +100,19 @@ describe("tech data ownership migration scope", () => {
         expect(source).not.toMatch(/const \{ selectedFaction, setSelectedFaction, setSelectedTechs/);
     });
 
+    it("keeps tooltips reading selected faction from the faction store", () => {
+        for (const file of [
+            "components/Tooltips/TechTooltip.tsx",
+            "components/Tooltips/UnitTooltip.tsx",
+        ]) {
+            const source = readSrc(file);
+
+            expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
+            expect(source).toMatch(/useFactionSelectionStore/);
+            expect(source).toMatch(/selectSelectedFaction/);
+        }
+    });
+
     it("keeps route declarations unchanged for tech and summary pages", () => {
         const source = readSrc("App.tsx");
 

@@ -6,9 +6,9 @@ import { Unit } from "@/types/dataTypes";
 import { HoveredWithCoords, createHoveredUnit } from "./hoverHelpers";
 import { FactionIcon } from "@/components/Units/UnitCard/FactionIcon";
 import { FACTION_COLORS } from "@/types/factionColors";
-import { useGameData } from "@/context/GameDataContext";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { normalizeUnitKey, selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
+import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 interface UnitTooltipProps {
     hoveredUnit: HoveredWithCoords<Unit>;
@@ -52,7 +52,7 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
         descriptionLines,
     } = data;
 
-    const { selectedFaction } = useGameData();
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const unitsByKey = useUnitStore(selectUnitsByKey);
     const factionKey = selectedFaction?.enumFaction ?? "PLACEHOLDER";
     const accent = FACTION_COLORS[factionKey]?.accent ?? "#ffb673";

@@ -1,16 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import TechTooltip from "@/components/Tooltips/TechTooltip";
-import { useGameData } from "@/context/GameDataContext";
 import { Faction, Tech } from "@/types/dataTypes";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
-
-vi.mock("@/context/GameDataContext", () => ({
-    useGameData: vi.fn(),
-}));
-
-const mockedUseGameData = vi.mocked(useGameData);
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 const hoveredTech: Tech = {
     techKey: "Tech_Trade",
@@ -34,6 +28,7 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
         useDistrictStore.setState({
             districtsByKey: {
                 District_Harbor: {
@@ -76,14 +71,19 @@ describe("TechTooltip district/improvement unlock resolution", () => {
             },
         });
 
-        mockedUseGameData.mockReturnValue({
-            selectedFaction: {
-                isMajor: true,
-                enumFaction: Faction.KIN,
-                minorName: null,
-                uiLabel: "kin",
-            },
-        } as any);
+        useFactionSelectionStore.getState().setSelectedFaction({
+            isMajor: true,
+            enumFaction: Faction.KIN,
+            minorName: null,
+            uiLabel: "kin",
+        });
+    });
+
+    afterEach(() => {
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
     });
 
     it("renders district and improvement unlock labels from the normalized store domains", () => {

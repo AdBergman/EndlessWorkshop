@@ -1,14 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import UnitTooltip from "@/components/Tooltips/UnitTooltip";
-import { useGameData } from "@/context/GameDataContext";
 import { useUnitStore } from "@/stores/unitStore";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { Faction, Unit } from "@/types/dataTypes";
-
-vi.mock("@/context/GameDataContext", () => ({
-    useGameData: vi.fn(),
-}));
-
-const mockedUseGameData = vi.mocked(useGameData);
 
 const unit = (overrides: Partial<Unit>): Unit => ({
     unitKey: "Unit_Kin_Root",
@@ -32,14 +26,18 @@ const unit = (overrides: Partial<Unit>): Unit => ({
 describe("UnitTooltip", () => {
     beforeEach(() => {
         useUnitStore.getState().reset();
-        mockedUseGameData.mockReturnValue({
-            selectedFaction: {
-                isMajor: true,
-                enumFaction: Faction.KIN,
-                minorName: null,
-                uiLabel: "kin",
-            },
-        } as any);
+        useFactionSelectionStore.getState().reset();
+        useFactionSelectionStore.getState().setSelectedFaction({
+            isMajor: true,
+            enumFaction: Faction.KIN,
+            minorName: null,
+            uiLabel: "kin",
+        });
+    });
+
+    afterEach(() => {
+        useUnitStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
     });
 
     it("resolves evolution labels through the normalized unit store", () => {
