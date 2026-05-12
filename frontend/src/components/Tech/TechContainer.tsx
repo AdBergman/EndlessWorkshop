@@ -6,6 +6,7 @@ import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
 import {ERA_THRESHOLDS, Faction, Tech} from "@/types/dataTypes";
 import {useGameData} from "@/context/GameDataContext";
+import {selectTechs, useTechStore} from "@/stores/techStore";
 import "./TechContainer.css";
 
 const MAX_ERA = 6;
@@ -52,6 +53,7 @@ function resolveFactionFromKeyHint(hint: unknown) {
 
 const TechContainer: React.FC = () => {
     const { selectedFaction, setSelectedFaction, selectedTechs, setSelectedTechs, techs } = useGameData();
+    const allTechData = useTechStore(selectTechs);
 
     const [firstEraLoaded, setFirstEraLoaded] = useState(false);
     const [importToast, setImportToast] = useState<string | null>(null);
@@ -120,7 +122,7 @@ const TechContainer: React.FC = () => {
             </h1>
 
             <div className="seo-hidden" aria-hidden="true">
-                {Array.from(techs.values()).map((tech) => (
+                {allTechData.map((tech) => (
                     <span key={tech.techKey}>{tech.name}. </span>
                 ))}
             </div>
