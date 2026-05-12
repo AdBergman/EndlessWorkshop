@@ -229,15 +229,18 @@ public class TechRepositoryAdapter implements TechRepository {
         return EnumSet.copyOf(in);
     }
 
-    private static List<TechUnlockRefEmbeddable> toUnlockEmbeddables(List<?> unlockTuples) {
+    private static List<TechUnlockRefEmbeddable> toUnlockEmbeddables(List<ewshop.domain.command.TechUnlockTuple> unlockTuples) {
         if (unlockTuples == null || unlockTuples.isEmpty()) {
             return new ArrayList<>();
         }
 
         return unlockTuples.stream()
                 .filter(Objects::nonNull)
-                .map(value -> (ewshop.domain.command.TechUnlockTuple) value)
-                .map(tuple -> new TechUnlockRefEmbeddable(tuple.unlockType(), tuple.unlockElementName()))
+                .map(tuple -> new TechUnlockRefEmbeddable(
+                        tuple.unlockType(),
+                        tuple.unlockElementName(),
+                        tuple.unlockCategory()
+                ))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 }

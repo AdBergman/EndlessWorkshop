@@ -4,6 +4,7 @@ import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
+import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
@@ -67,7 +68,14 @@ class TechImportAdminFacadeTest extends BaseIT {
                 List.of(),
                 List.of(),
                 List.of(),
-                List.of()
+                List.of(new TechImportUnlockDto(
+                        "Constructible",
+                        "Improvement",
+                        "Improvement_Foundry",
+                        List.of(),
+                        List.of(),
+                        List.of()
+                ))
         );
 
         TechImportBatchDto file = new TechImportBatchDto(
@@ -103,6 +111,10 @@ class TechImportAdminFacadeTest extends BaseIT {
         assertThat(reloaded.isHidden()).isFalse();
         assertThat(reloaded.getEra()).isEqualTo(3);
         assertThat(reloaded.getType()).isEqualTo(TechType.ECONOMY);
+        assertThat(reloaded.getUnlocks()).hasSize(1);
+        assertThat(reloaded.getUnlocks().getFirst().getUnlockType()).isEqualTo("Constructible");
+        assertThat(reloaded.getUnlocks().getFirst().getUnlockKey()).isEqualTo("Improvement_Foundry");
+        assertThat(reloaded.getUnlocks().getFirst().getUnlockCategory()).isEqualTo("Improvement");
     }
 
     @Test

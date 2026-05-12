@@ -2,6 +2,7 @@ package ewshop.facade.integration;
 
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.TechUnlockRef;
 import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.domain.repository.TechRepository;
@@ -43,6 +44,7 @@ class TechFacadeTest extends BaseIT {
                 .era(1)
                 .type(TechType.DEFENSE)
                 .descriptionLines(List.of("+100 Fortification on Capital"))
+                .unlocks(List.of(new TechUnlockRef("Constructible", "Improvement_Foundry", "Improvement")))
                 .factions(Set.of(MajorFaction.ASPECTS, MajorFaction.KIN))
                 .techCoords(new TechCoords(10.0, 20.0))
                 .build();
@@ -75,6 +77,10 @@ class TechFacadeTest extends BaseIT {
         assertThat(stoneworkTechDto.type()).isEqualTo("Defense");
         assertThat(stoneworkTechDto.descriptionLines())
                 .containsExactly("+100 Fortification on Capital");
+        assertThat(stoneworkTechDto.unlocks()).hasSize(1);
+        assertThat(stoneworkTechDto.unlocks().getFirst().unlockType()).isEqualTo("Constructible");
+        assertThat(stoneworkTechDto.unlocks().getFirst().unlockKey()).isEqualTo("Improvement_Foundry");
+        assertThat(stoneworkTechDto.unlocks().getFirst().unlockCategory()).isEqualTo("Improvement");
         assertThat(stoneworkTechDto.factions())
                 .containsExactly("Aspects", "Kin");
         assertThat(stoneworkTechDto.coords()).isNotNull();

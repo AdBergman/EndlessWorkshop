@@ -7,13 +7,19 @@ public record TechUnlockTuple(
 ) {
     public TechUnlockTuple {
         unlockType = unlockType == null ? "" : unlockType.trim();
-        unlockCategory = unlockCategory == null ? "" : unlockCategory.trim();
+        unlockCategory = normalizeNullable(unlockCategory);
 
         String trimmedName = unlockElementName == null ? null : unlockElementName.trim();
         if (trimmedName == null || trimmedName.isEmpty()) {
             throw new IllegalArgumentException("TechUnlockTuple.unlockElementName is required");
         }
         unlockElementName = trimmedName;
+    }
+
+    private static String normalizeNullable(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     public static Builder builder() {

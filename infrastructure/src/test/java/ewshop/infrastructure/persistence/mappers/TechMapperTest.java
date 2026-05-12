@@ -38,7 +38,7 @@ class TechMapperTest {
         techEntity.setEra(2);
         techEntity.setDescriptionLines(List.of("Unlocks new buildings"));
         techEntity.setUnlocks(List.of(
-                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry", "District"),
                 new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
         ));
         techEntity.setFactions(Set.of(MajorFaction.ASPECTS));
@@ -55,7 +55,7 @@ class TechMapperTest {
 
         assertThat(tech.getDescriptionLines()).containsExactly("Unlocks new buildings");
         assertThat(tech.getUnlocks()).containsExactly(
-                new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry", "District"),
                 new TechUnlockRef("Action", "ActionTypeCutForest")
         );
 
@@ -86,7 +86,7 @@ class TechMapperTest {
                 .era(2)
                 .descriptionLines(List.of("Unlocks new buildings"))
                 .unlocks(List.of(
-                        new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry"),
+                        new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry", "District"),
                         new TechUnlockRef("Action", "ActionTypeCutForest")
                 ))
                 .factions(Set.of(MajorFaction.ASPECTS))
@@ -104,7 +104,7 @@ class TechMapperTest {
 
         assertThat(techEntity.getDescriptionLines()).containsExactly("Unlocks new buildings");
         assertThat(techEntity.getUnlocks()).containsExactly(
-                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry"),
+                new TechUnlockRefEmbeddable("Constructible", "Aspect_District_Tier1_Industry", "District"),
                 new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
         );
 

@@ -3,6 +3,7 @@ package ewshop.facade.mapper;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
+import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -296,5 +297,46 @@ class TechImportMapperTest {
         assertThat(snap.hidden()).isTrue();
         assertThat(snap.era()).isEqualTo(4);
         assertThat(snap.type()).isEqualTo(TechType.DISCOVERY);
+    }
+
+    @Test
+    void toDomain_shouldPreserveUnlockCategory() {
+        TechImportTechDto dto = new TechImportTechDto(
+                "Technology_X",
+                "Stonework",
+                null,
+                false,
+                2,
+                "Defense",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(
+                        new TechImportUnlockDto(
+                                "Constructible",
+                                "Improvement",
+                                "Improvement_Foundry",
+                                List.of(),
+                                List.of(),
+                                List.of()
+                        ),
+                        new TechImportUnlockDto(
+                                "Constructible",
+                                "   ",
+                                "District_Dust",
+                                List.of(),
+                                List.of(),
+                                List.of()
+                        )
+                )
+        );
+
+        TechImportSnapshot snap = TechImportMapper.toDomain(dto);
+
+        assertThat(snap.unlocks()).hasSize(2);
+        assertThat(snap.unlocks().getFirst().unlockType()).isEqualTo("Constructible");
+        assertThat(snap.unlocks().getFirst().unlockElementName()).isEqualTo("Improvement_Foundry");
+        assertThat(snap.unlocks().getFirst().unlockCategory()).isEqualTo("Improvement");
+        assertThat(snap.unlocks().get(1).unlockCategory()).isNull();
     }
 }

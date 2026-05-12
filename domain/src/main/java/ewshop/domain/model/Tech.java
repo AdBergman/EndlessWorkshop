@@ -87,6 +87,10 @@ public class Tech {
             this.unlocks.add(new TechUnlockRef(unlockType, unlockKey));
             return this;
         }
+        public Builder addUnlock(String unlockType, String unlockKey, String unlockCategory) {
+            this.unlocks.add(new TechUnlockRef(unlockType, unlockKey, unlockCategory));
+            return this;
+        }
 
         public Builder techCoords(TechCoords techCoords) { this.techCoords = techCoords; return this; }
         public Builder prereq(Tech prereq) { this.prereq = prereq; return this; }
