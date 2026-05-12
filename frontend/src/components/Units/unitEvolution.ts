@@ -1,10 +1,20 @@
 import { Unit } from "@/types/dataTypes";
+import { normalizeUnitKey } from "@/stores/unitStore";
 
-export function buildEvolutionLayers(root: Unit, unitsByKey: Map<string, Unit>): Unit[][] {
+export type UnitsByKey = Record<string, Unit>;
+
+const getUnitByKey = (unitsByKey: UnitsByKey, key: string) =>
+    unitsByKey[normalizeUnitKey(key)];
+
+export function buildEvolutionLayers(
+    root: Unit,
+    unitsByKey: UnitsByKey,
+    maxDepth = Number.POSITIVE_INFINITY
+): Unit[][] {
     const layers = new Map<number, Unit[]>();
     const depthByKey = new Map<string, number>();
 
-    const rootKey = root.unitKey;
+    const rootKey = normalizeUnitKey(root.unitKey);
     depthByKey.set(rootKey, 0);
 
     const queue: string[] = [rootKey];
@@ -19,8 +29,9 @@ export function buildEvolutionLayers(root: Unit, unitsByKey: Map<string, Unit>):
         const currentKey = queue[qi++];
         const currentDepth = depthByKey.get(currentKey);
         if (currentDepth == null) continue;
+        if (currentDepth >= maxDepth) continue;
 
-        const currentUnit = currentKey === rootKey ? root : unitsByKey.get(currentKey);
+        const currentUnit = currentKey === rootKey ? root : getUnitByKey(unitsByKey, currentKey);
         if (!currentUnit) continue;
 
         const childrenKeys = Array.isArray(currentUnit.nextEvolutionUnitKeys)
@@ -28,18 +39,19 @@ export function buildEvolutionLayers(root: Unit, unitsByKey: Map<string, Unit>):
             : [];
 
         for (const childKey of childrenKeys) {
-            if (!childKey) continue;
-            if (depthByKey.has(childKey)) continue;
+            const normalizedChildKey = normalizeUnitKey(childKey);
+            if (!normalizedChildKey) continue;
+            if (depthByKey.has(normalizedChildKey)) continue;
 
-            depthByKey.set(childKey, currentDepth + 1);
-            queue.push(childKey);
+            depthByKey.set(normalizedChildKey, currentDepth + 1);
+            queue.push(normalizedChildKey);
         }
     }
 
     for (const [unitKey, d] of depthByKey.entries()) {
         if (d === 0) continue;
 
-        const u = unitsByKey.get(unitKey);
+        const u = getUnitByKey(unitsByKey, unitKey);
         if (!u) continue;
 
         const bucket = layers.get(d);

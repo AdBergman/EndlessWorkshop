@@ -6,7 +6,6 @@ import {
     District,
     Improvement,
     Tech,
-    Unit,
     Faction,
     FactionInfo,
 } from "@/types/dataTypes";
@@ -15,7 +14,6 @@ export interface GameDataContextType {
     districts: Map<string, District>;
     improvements: Map<string, Improvement>;
     techs: Map<string, Tech>;
-    units: Map<string, Unit>;
 
     // NEW: codex grouped by kind -> entryKey
     codexByKindKey: Map<string, Map<string, Codex>>;
@@ -59,7 +57,6 @@ const GameDataContext = createContext<GameDataContextType>({
     districts: new Map(),
     improvements: new Map(),
     techs: new Map(),
-    units: new Map(),
 
     codexByKindKey: new Map(),
 

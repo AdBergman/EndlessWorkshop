@@ -5,6 +5,7 @@ import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import type { FactionInfo, Unit } from "@/types/dataTypes";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
+import { selectUnits, useUnitStore } from "@/stores/unitStore";
 import "./UnitEvolutionExplorer.css";
 
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_").trim();
@@ -48,6 +49,8 @@ function isHiddenInUi(u: Unit): boolean {
 export const UnitEvolutionExplorer: React.FC = () => {
     const gameData = useContext(GameDataContext);
     const [params, setParams] = useSearchParams();
+    const units = useUnitStore(selectUnits);
+    const loadUnits = useUnitStore((s) => s.loadUnits);
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [showMinorUnits, setShowMinorUnits] = useState(false);
@@ -58,6 +61,10 @@ export const UnitEvolutionExplorer: React.FC = () => {
     const hydratedOnceForThisNav = useRef(false);
 
     // If the URL changes to something we did NOT write, consider it external navigation -> rehydrate.
+    useEffect(() => {
+        void loadUnits();
+    }, [loadUnits]);
+
     useEffect(() => {
         const cur = params.toString();
         if (lastParamsWritten.current && cur === lastParamsWritten.current) return;
@@ -76,14 +83,14 @@ export const UnitEvolutionExplorer: React.FC = () => {
     }, [gameData?.selectedFaction]);
 
     const allVisibleUnits = useMemo(() => {
-        if (!gameData || gameData.units.size === 0) return [];
-        return Array.from(gameData.units.values()).filter((u) => !isHiddenInUi(u));
-    }, [gameData]);
+        if (units.length === 0) return [];
+        return units.filter((u) => !isHiddenInUi(u));
+    }, [units]);
 
     // Build the *faction-scoped* pool of units (not just roots),
     // then apply Necro carousel model (pinned larvae + tier-1 roots).
     const { pinned: pinnedUnit, roots: rootUnits } = useMemo(() => {
-        if (!gameData || allVisibleUnits.length === 0) {
+        if (allVisibleUnits.length === 0) {
             return { pinned: null as Unit | null, roots: [] as Unit[] };
         }
 
@@ -216,7 +223,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
         hydratedOnceForThisNav.current = true;
     }, [gameData?.selectedFaction, selectedIndex, carouselUnits, setParams, params]);
 
-    if (!gameData || gameData.units.size === 0) {
+    if (units.length === 0) {
         return <div>Loading units...</div>;
     }
 

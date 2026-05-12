@@ -58,7 +58,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const loadCodexEntries = useCodexStore((s) => s.loadEntries);
     const districtsByKey = useDistrictStore((s) => s.districtsByKey);
     const improvementsByKey = useImprovementStore((s) => s.improvementsByKey);
-    const unitsByKey = useUnitStore((s) => s.unitsByKey);
     const loadDistricts = useDistrictStore((s) => s.loadDistricts);
     const loadImprovements = useImprovementStore((s) => s.loadImprovements);
     const loadUnits = useUnitStore((s) => s.loadUnits);
@@ -71,11 +70,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const improvements = useMemo(
         () => new Map(Object.entries(improvementsByKey)),
         [improvementsByKey]
-    );
-
-    const units = useMemo(
-        () => new Map(Object.entries(unitsByKey)),
-        [unitsByKey]
     );
 
     const codexByKindKey = useMemo(() => {
@@ -181,7 +175,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 districts,
                 improvements,
                 techs,
-                units,
 
                 codexByKindKey,
 

@@ -23,7 +23,7 @@ vi.mock("@/api/apiClient", () => ({
 const mockedApiClient = vi.mocked(apiClient);
 
 const Probe = () => {
-    const { districts, improvements, techs, units, selectedTechs, selectedFaction } = useGameData();
+    const { districts, improvements, techs, selectedTechs, selectedFaction } = useGameData();
 
     return (
         <div>
@@ -36,10 +36,6 @@ const Probe = () => {
                 {improvements.get("Improvement_Public_Library")?.displayName ?? "missing"}
             </div>
             <div data-testid="tech-count">{techs.size}</div>
-            <div data-testid="unit-count">{units.size}</div>
-            <div data-testid="unit-label">
-                {units.get("Unit_Kin_Scout")?.displayName ?? "missing"}
-            </div>
             <div data-testid="selected-tech-count">{selectedTechs.length}</div>
             <div data-testid="selected-faction">{selectedFaction.uiLabel}</div>
         </div>
@@ -114,11 +110,9 @@ describe("GameDataProvider district/improvement compatibility adapter", () => {
         await waitFor(() => {
             expect(screen.getByTestId("district-label")).toHaveTextContent("City Center");
             expect(screen.getByTestId("improvement-label")).toHaveTextContent("Public Library");
-            expect(screen.getByTestId("unit-label")).toHaveTextContent("Kin Scout");
         });
 
         expect(screen.getByTestId("tech-count")).toHaveTextContent("0");
-        expect(screen.getByTestId("unit-count")).toHaveTextContent("1");
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });

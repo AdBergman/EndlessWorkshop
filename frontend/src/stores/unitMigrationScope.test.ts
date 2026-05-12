@@ -15,6 +15,9 @@ const migrationFiles = [
     "components/Tooltips/TechTooltip.tsx",
     "components/Tooltips/UnitTooltip.tsx",
     "utils/unlocks.ts",
+    "components/Units/UnitEvolutionExplorer.tsx",
+    "components/Units/EvolutionTreeViewer.tsx",
+    "components/Units/unitEvolution.ts",
 ];
 
 describe("unit migration scope", () => {
@@ -25,6 +28,17 @@ describe("unit migration scope", () => {
         for (const file of migrationFiles) {
             const source = readFileSync(resolve(srcDir, file), "utf8");
             expect(source).not.toMatch(forbiddenHeroPlumbing);
+        }
+    });
+
+    it("keeps unit page internals decoupled from codexStore", () => {
+        for (const file of [
+            "components/Units/UnitEvolutionExplorer.tsx",
+            "components/Units/EvolutionTreeViewer.tsx",
+            "components/Units/unitEvolution.ts",
+        ]) {
+            const source = readFileSync(resolve(srcDir, file), "utf8");
+            expect(source).not.toMatch(/codexStore|useCodexStore/);
         }
     });
 });
