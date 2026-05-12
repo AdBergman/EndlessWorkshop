@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import JsonDropzone from "./JsonDropzone";
 import { DropManyResult, DropResult, ImportModuleDefinition, ImportState, ModuleMetaKV } from "./adminImportTypes";
+import { refreshStoresAfterAdminImport } from "./adminImportRefresh";
 
 function nowUtcIso() {
     return new Date().toISOString();
@@ -68,7 +69,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
     const [meta, setMeta] = useState<ModuleMetaKV[] | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [importState, setImportState] = useState<ImportState>({ status: "idle" });
-    const [codexNotice, setCodexNotice] = useState<{ tone: "success" | "error"; message: string } | null>(null);
+    const [codexNotice, setCodexNotice] = useState<{ tone: "success" | "warning" | "error"; message: string } | null>(null);
     const [showRaw, setShowRaw] = useState(false);
 
     const hasToken = token.length > 0;
@@ -255,12 +256,14 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
 
             if (res.ok) {
                 const summary = isJson ? await res.json() : null;
+                const refreshResult = await refreshStoresAfterAdminImport(module.id);
 
                 setImportState({
                     status: "success",
                     atUtc: nowUtcIso(),
                     httpStatus: res.status,
                     summary,
+                    refreshError: refreshResult.ok ? undefined : refreshResult.message,
                 });
 
                 clearLoadedFile();
@@ -278,7 +281,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                 message: (e as Error)?.message ?? "Network error while importing.",
             });
         }
-    }, [clearLoadedFile, drop, endpoint, token]);
+    }, [clearLoadedFile, drop, endpoint, module.id, token]);
 
     const doCodexImport = useCallback(async () => {
         if (!endpoint) return;
@@ -357,9 +360,15 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
             }
         }
 
-        setCodexNotice({ tone: "success", message: "All selected Codex files imported successfully." });
+        const refreshResult = await refreshStoresAfterAdminImport(module.id);
+        setCodexNotice({
+            tone: refreshResult.ok ? "success" : "warning",
+            message: refreshResult.ok
+                ? "All selected Codex files imported successfully."
+                : `All selected Codex files imported, but refreshing frontend data failed: ${refreshResult.message}`,
+        });
         setImportState({ status: "idle" });
-    }, [codexFiles, endpoint, token]);
+    }, [codexFiles, endpoint, module.id, token]);
 
     const actionMode = useMemo(
         () => getActionMode({ canImport, isImporting, isEnabled }),
@@ -584,9 +593,16 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                             {!isCodexModule && importState.status === "success" ? (
                                 <div className="admin-import-success">
                                     <div style={{ fontWeight: 900 }}>
-                                        Imported ✓ (HTTP {(importState as any).httpStatus}) — ran at{" "}
-                                        <code>{(importState as any).atUtc}</code>
+                                        Imported ✓ (HTTP {importState.httpStatus}) — ran at{" "}
+                                        <code>{importState.atUtc}</code>
                                     </div>
+
+                                    {importState.refreshError ? (
+                                        <div className="admin-import-error" style={{ marginTop: 10 }}>
+                                            <div className="admin-import-errorTitle">Frontend refresh failed</div>
+                                            <div className="admin-import-muted">{importState.refreshError}</div>
+                                        </div>
+                                    ) : null}
 
                                     {summary ? (
                                         <div style={{ marginTop: 10 }}>

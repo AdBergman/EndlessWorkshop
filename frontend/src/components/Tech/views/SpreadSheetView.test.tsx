@@ -26,7 +26,6 @@ const contextValue = (overrides: Partial<GameDataContextType> = {}): GameDataCon
     improvements: new Map(),
     techs: new Map(),
     codexByKindKey: new Map(),
-    setTechs: vi.fn(),
     refreshTechs: vi.fn(),
     selectedFaction: {
         isMajor: true,

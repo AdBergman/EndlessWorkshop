@@ -62,7 +62,6 @@ function StatefulGameData({
         improvements: new Map(),
         techs: baseTechs,
         codexByKindKey: new Map(),
-        setTechs: vi.fn(),
         refreshTechs: vi.fn(),
         selectedFaction,
         setSelectedFaction,

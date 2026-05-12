@@ -1,6 +1,6 @@
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { Codex, Faction, FactionInfo, Tech } from "@/types/dataTypes";
+import { Codex, Faction, FactionInfo } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
 import { useCodexStore } from "@/stores/codexStore";
@@ -61,7 +61,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const techsByKey = useTechStore((s) => s.techsByKey);
     const loadTechs = useTechStore((s) => s.loadTechs);
     const refreshTechs = useTechStore((s) => s.refreshTechs);
-    const replaceTechs = useTechStore((s) => s.replaceTechs);
 
     const districts = useMemo(
         () => new Map(Object.entries(districtsByKey)),
@@ -87,14 +86,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
         return out;
     }, [codexEntriesByKind]);
-
-    const setTechs = useCallback<React.Dispatch<React.SetStateAction<Map<string, Tech>>>>(
-        (nextTechs) => {
-            const nextTechMap = typeof nextTechs === "function" ? nextTechs(techs) : nextTechs;
-            replaceTechs(Array.from(nextTechMap.values()));
-        },
-        [replaceTechs, techs]
-    );
 
     useEffect(() => {
         void loadDistricts();
@@ -174,7 +165,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
                 codexByKindKey,
 
-                setTechs,
                 refreshTechs,
 
                 selectedFaction,

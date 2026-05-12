@@ -164,45 +164,20 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });
 
-    it("keeps the legacy setTechs adapter backed by techStore without moving selection state", async () => {
-        const user = userEvent.setup();
-
+    it("does not expose the removed legacy setTechs adapter", async () => {
         const AdapterProbe = () => {
-            const { techs, setTechs, selectedTechs, selectedFaction } = useGameData();
+            const gameData = useGameData();
 
             return (
                 <div>
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setTechs?.((prev) => {
-                                const next = new Map(prev);
-                                next.set("Tech_Adapter_Insert", {
-                                    techKey: "Tech_Adapter_Insert",
-                                    name: "Adapter Insert",
-                                    era: 1,
-                                    type: "Industry",
-                                    unlocks: [],
-                                    descriptionLines: [],
-                                    prereq: null,
-                                    factions: ["KIN"],
-                                    excludes: null,
-                                    coords: { xPct: 1, yPct: 2 },
-                                });
-                                return next;
-                            })
-                        }
-                    >
-                        Insert tech
-                    </button>
+                    <div data-testid="set-techs-present">
+                        {String("setTechs" in (gameData as unknown as Record<string, unknown>))}
+                    </div>
                     <div data-testid="adapter-tech-label">
-                        {techs.get("Tech_Adapter_Insert")?.name ?? "missing"}
+                        {gameData.techs.get("Tech_Kin_Workshop")?.name ?? "missing"}
                     </div>
-                    <div data-testid="adapter-store-label">
-                        {useTechStore.getState().getTechByKey("Tech_Adapter_Insert")?.name ?? "missing"}
-                    </div>
-                    <div data-testid="adapter-selected-tech-count">{selectedTechs.length}</div>
-                    <div data-testid="adapter-selected-faction">{selectedFaction.uiLabel}</div>
+                    <div data-testid="adapter-selected-tech-count">{gameData.selectedTechs.length}</div>
+                    <div data-testid="adapter-selected-faction">{gameData.selectedFaction.uiLabel}</div>
                 </div>
             );
         };
@@ -215,13 +190,11 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
             </MemoryRouter>
         );
 
-        await user.click(screen.getByRole("button", { name: "Insert tech" }));
-
         await waitFor(() => {
-            expect(screen.getByTestId("adapter-tech-label")).toHaveTextContent("Adapter Insert");
+            expect(screen.getByTestId("adapter-tech-label")).toHaveTextContent("Kin Workshop");
         });
 
-        expect(screen.getByTestId("adapter-store-label")).toHaveTextContent("Adapter Insert");
+        expect(screen.getByTestId("set-techs-present")).toHaveTextContent("false");
         expect(screen.getByTestId("adapter-selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("adapter-selected-faction")).toHaveTextContent("kin");
     });
@@ -257,7 +230,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
                         type="button"
                         onClick={() => setSelectedTechs((prev) => [...prev, "Tech_From_Context"])}
                     >
-                        Select from context
+                        Select via adapter
                     </button>
                     <div data-testid="context-selected-techs">{selectedTechs.join(",")}</div>
                 </div>
@@ -272,7 +245,7 @@ describe("GameDataProvider normalized store compatibility adapter", () => {
             </MemoryRouter>
         );
 
-        await user.click(screen.getByRole("button", { name: "Select from context" }));
+        await user.click(screen.getByRole("button", { name: "Select via adapter" }));
 
         expect(screen.getByTestId("context-selected-techs")).toHaveTextContent("Tech_From_Context");
         expect(useTechPlannerStore.getState().selectedTechs).toEqual(["Tech_From_Context"]);

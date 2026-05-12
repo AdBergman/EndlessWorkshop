@@ -17,7 +17,7 @@ export type DropManyResult<TJson> = {
 export type ImportState =
     | { status: "idle" }
     | { status: "importing" }
-    | { status: "success"; atUtc: string; httpStatus: number; summary: any | null }
+    | { status: "success"; atUtc: string; httpStatus: number; summary: any | null; refreshError?: string }
     | { status: "error"; message: string; httpStatus?: number };
 
 export type ModuleMetaKV = { label: string; value: string };

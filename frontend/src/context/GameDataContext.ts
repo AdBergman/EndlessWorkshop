@@ -18,7 +18,6 @@ export interface GameDataContextType {
     // NEW: codex grouped by kind -> entryKey
     codexByKindKey: Map<string, Map<string, Codex>>;
 
-    setTechs?: React.Dispatch<React.SetStateAction<Map<string, Tech>>>;
     refreshTechs?: () => Promise<void>;
 
     selectedFaction: FactionInfo;
@@ -60,7 +59,6 @@ const GameDataContext = createContext<GameDataContextType>({
 
     codexByKindKey: new Map(),
 
-    setTechs: undefined,
     refreshTechs: undefined,
 
     selectedFaction: DEFAULT_FACTION,
