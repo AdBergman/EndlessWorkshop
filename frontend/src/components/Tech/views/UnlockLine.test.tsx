@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import UnlockLine from "@/components/Tech/views/UnlockLine";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
@@ -29,6 +29,13 @@ describe("UnlockLine district/improvement resolution", () => {
                 },
             },
         });
+    });
+
+    afterEach(() => {
+        cleanup();
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
     });
 
     it("renders district and improvement unlock lines from their own store domains", () => {

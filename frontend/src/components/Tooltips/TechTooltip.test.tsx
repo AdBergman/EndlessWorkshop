@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import TechTooltip from "@/components/Tooltips/TechTooltip";
 import { Faction, Tech } from "@/types/dataTypes";
 import { useDistrictStore } from "@/stores/districtStore";
@@ -80,6 +80,7 @@ describe("TechTooltip district/improvement unlock resolution", () => {
     });
 
     afterEach(() => {
+        cleanup();
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();

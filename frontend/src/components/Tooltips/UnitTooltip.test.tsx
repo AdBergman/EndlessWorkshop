@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import UnitTooltip from "@/components/Tooltips/UnitTooltip";
 import { useUnitStore } from "@/stores/unitStore";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
@@ -36,6 +36,7 @@ describe("UnitTooltip", () => {
     });
 
     afterEach(() => {
+        cleanup();
         useUnitStore.getState().reset();
         useFactionSelectionStore.getState().reset();
     });

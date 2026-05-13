@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HoverableItem from "@/components/Tech/views/HoverableItem";
 import { useDistrictStore } from "@/stores/districtStore";
@@ -70,6 +70,13 @@ describe("HoverableItem", () => {
                 },
             },
         });
+    });
+
+    afterEach(() => {
+        cleanup();
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
     });
 
     it("renders improvement tooltip on hover", async () => {

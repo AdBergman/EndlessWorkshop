@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import TechTree from "@/components/Tech/TechTree";
@@ -76,13 +76,14 @@ describe("TechTree selected tech interactions", () => {
     });
 
     afterEach(() => {
+        cleanup();
         useTechStore.getState().reset();
         useTechPlannerStore.getState().reset();
         useFactionSelectionStore.getState().reset();
     });
 
     it("toggles tech selection on click while preserving selected order", async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ skipHover: true });
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
@@ -104,7 +105,7 @@ describe("TechTree selected tech interactions", () => {
     });
 
     it("selects all selectable techs in era order", async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ skipHover: true });
 
         render(
             <MemoryRouter initialEntries={["/tech"]}>
@@ -119,7 +120,7 @@ describe("TechTree selected tech interactions", () => {
     });
 
     it("clears all selected techs", async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ skipHover: true });
         seedTechTreeStores(["Tech_First", "Tech_Second"]);
 
         render(
@@ -135,7 +136,7 @@ describe("TechTree selected tech interactions", () => {
     });
 
     it("keeps faction switching clearing selected techs", async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ skipHover: true });
         seedTechTreeStores(["Tech_First"]);
 
         render(

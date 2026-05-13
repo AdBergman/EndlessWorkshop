@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
@@ -94,6 +94,7 @@ describe("CodexPage", () => {
     });
 
     afterEach(() => {
+        cleanup();
         useCodexStore.getState().reset();
     });
 
@@ -114,8 +115,8 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex");
-        expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
+        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
         expect(screen.getByText("Codex is a searchable encyclopedia of game data.")).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
@@ -160,10 +161,10 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const kindIndex = screen.getByLabelText("Codex kinds");
+        const kindIndex = await screen.findByLabelText("Codex kinds");
         await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
 
-        expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
     it("resets query, kind, and selection when navigating back to plain /codex", async () => {
@@ -227,7 +228,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByRole("heading", { name: "Market Square" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Market Square" })).toBeInTheDocument();
     });
 
     it("falls back to the overview for invalid deep links without selecting the first entry", async () => {
@@ -239,7 +240,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 
@@ -252,7 +253,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const relatedSection = screen.getByLabelText(/selected codex entry/i);
+        const relatedSection = await screen.findByLabelText(/selected codex entry/i);
         expect(within(relatedSection).getByRole("button", { name: /auric coral improvements/i })).toBeInTheDocument();
         expect(screen.queryByText("[LuxuryResource01]")).not.toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();

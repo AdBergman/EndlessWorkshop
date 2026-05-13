@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
@@ -61,6 +61,7 @@ describe("SpreadSheetView passive tech reads", () => {
     });
 
     afterEach(() => {
+        cleanup();
         useDistrictStore.getState().reset();
         useImprovementStore.getState().reset();
         useUnitStore.getState().reset();
