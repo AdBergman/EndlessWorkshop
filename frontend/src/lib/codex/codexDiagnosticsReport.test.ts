@@ -63,6 +63,11 @@ describe("codexDiagnosticsReport", () => {
             "malformed-token": 1,
             "unknown-token": 1,
         });
+        expect(report.signalCounts).toEqual({
+            "expected-style-token": 1,
+            "high-signal-warning": 1,
+            other: 9,
+        });
         expect(report.duplicateReferenceCount).toBe(1);
     });
 
@@ -118,6 +123,9 @@ describe("codexDiagnosticsReport", () => {
         expect(text).toContain("CODEX DIAGNOSTICS REPORT");
         expect(text).toContain("- raw-fallback-ref: 1");
         expect(text).toContain("- duplicate references: 1");
+        expect(text).toContain("DIAGNOSTIC SIGNAL SUMMARY");
+        expect(text).toContain("- high-signal warnings: 1");
+        expect(text).toContain("- expected style tokens: 1");
         expect(text).toContain("- abilities:Ability_A ref[0] raw-fallback-ref Shared_Key (raw fallback; ambiguous: heroes, units)");
         expect(text).toContain("- abilities:Ability_A ref[2] resolved-typed-ref codex:heroes%3AHero_A (duplicate of #1)");
         expect(text).toContain("- abilities:Ability_A ref[3] unresolved-imported-domain-ref Unit_MissingImported (imported: unit)");

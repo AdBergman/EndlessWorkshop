@@ -10,6 +10,11 @@ import {
     type CodexReferenceDiagnostic,
     type CodexReferenceDiagnosticKind,
 } from "./codexReferenceDiagnostics";
+import {
+    classifyCodexReferenceDiagnostic,
+    classifyDescriptionTokenDiagnostic,
+    type CodexDiagnosticClassification,
+} from "./codexDiagnosticClassification";
 
 export type DescriptorDiagnosticField = "displayName" | "descriptionLine";
 
@@ -30,12 +35,15 @@ export type CodexEntryDiagnostics = {
 
 export type DiagnosticKindCounts<K extends string> = Partial<Record<K, number>>;
 
+export type DiagnosticSignalBucket = CodexDiagnosticClassification["bucket"];
+
 export type CodexDiagnosticsReport = {
     entries: CodexEntryDiagnostics[];
     referenceCounts: DiagnosticKindCounts<CodexReferenceDiagnosticKind>;
     descriptorCounts: DiagnosticKindCounts<DescriptionDiagnosticKind>;
     referenceCountsByExportKind: Record<string, DiagnosticKindCounts<CodexReferenceDiagnosticKind>>;
     descriptorCountsByExportKind: Record<string, DiagnosticKindCounts<DescriptionDiagnosticKind>>;
+    signalCounts: DiagnosticKindCounts<DiagnosticSignalBucket>;
     duplicateReferenceCount: number;
 };
 
@@ -90,6 +98,7 @@ export function createCodexDiagnosticsReport(entries: readonly CodexEntry[]): Co
     const descriptorCounts: DiagnosticKindCounts<DescriptionDiagnosticKind> = {};
     const referenceCountsByExportKind: Record<string, DiagnosticKindCounts<CodexReferenceDiagnosticKind>> = {};
     const descriptorCountsByExportKind: Record<string, DiagnosticKindCounts<DescriptionDiagnosticKind>> = {};
+    const signalCounts: DiagnosticKindCounts<DiagnosticSignalBucket> = {};
     let duplicateReferenceCount = 0;
 
     const entryReports = entries.map((entry) => {
@@ -100,6 +109,7 @@ export function createCodexDiagnosticsReport(entries: readonly CodexEntry[]): Co
         referenceDiagnostics.forEach((diagnostic) => {
             addCount(referenceCounts, diagnostic.kind);
             addCount(getOrCreateKindCounts(referenceCountsByExportKind, exportKind), diagnostic.kind);
+            addCount(signalCounts, classifyCodexReferenceDiagnostic(diagnostic).bucket);
             if (diagnostic.isDuplicate) {
                 duplicateReferenceCount += 1;
             }
@@ -108,6 +118,7 @@ export function createCodexDiagnosticsReport(entries: readonly CodexEntry[]): Co
         descriptorDiagnostics.forEach(({ diagnostic }) => {
             addCount(descriptorCounts, diagnostic.kind);
             addCount(getOrCreateKindCounts(descriptorCountsByExportKind, exportKind), diagnostic.kind);
+            addCount(signalCounts, classifyDescriptionTokenDiagnostic(diagnostic).bucket);
         });
 
         return {
@@ -125,6 +136,7 @@ export function createCodexDiagnosticsReport(entries: readonly CodexEntry[]): Co
         descriptorCounts,
         referenceCountsByExportKind,
         descriptorCountsByExportKind,
+        signalCounts,
         duplicateReferenceCount,
     };
 }
@@ -146,6 +158,16 @@ function formatGroupedCounts<K extends string>(groupedCounts: Record<string, Dia
         `- ${exportKind}`,
         ...formatCounts(groupedCounts[exportKind]).map((line) => `  ${line}`),
     ]);
+}
+
+function formatSignalSummary(counts: DiagnosticKindCounts<DiagnosticSignalBucket>): string[] {
+    return [
+        `- high-signal warnings: ${counts["high-signal-warning"] ?? 0}`,
+        `- token vocabulary gaps: ${counts["token-vocabulary-gap"] ?? 0}`,
+        `- expected/internal noise: ${counts["expected-internal-noise"] ?? 0}`,
+        `- expected style tokens: ${counts["expected-style-token"] ?? 0}`,
+        `- other diagnostics: ${counts.other ?? 0}`,
+    ];
 }
 
 function formatReferenceDetail(entry: CodexEntryDiagnostics, diagnostic: CodexReferenceDiagnostic): string {
@@ -192,6 +214,10 @@ export function formatCodexDiagnosticsReport(report: CodexDiagnosticsReport): st
         "-----------------",
         ...formatCounts(report.referenceCounts),
         `- duplicate references: ${report.duplicateReferenceCount}`,
+        "",
+        "DIAGNOSTIC SIGNAL SUMMARY",
+        "-------------------------",
+        ...formatSignalSummary(report.signalCounts),
         "",
         "REFERENCE SUMMARY BY EXPORT KIND",
         "--------------------------------",
