@@ -1,4 +1,4 @@
-import { createCodexTokenAuditText } from "./codexTokenAudit";
+import { createCodexDiagnosticsReportText, createCodexTokenAuditText } from "./codexTokenAudit";
 
 describe("codexTokenAudit", () => {
     it("builds a small text audit with unknown and known token counts sorted by occurrences", () => {
@@ -85,5 +85,31 @@ describe("codexTokenAudit", () => {
                 "------------",
             ].join("\n")
         );
+    });
+
+    it("formats the codex diagnostics report from raw codex entries", () => {
+        const text = createCodexDiagnosticsReportText([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Blossom",
+                displayName: "Blossom",
+                descriptionLines: ["Gain [DustColored] near [Unit_Necro_Drone]."],
+                referenceKeys: ["Unit_Necro_Drone", "Unit_Necro_Drone", "Unknown_Key", "Imported:Missing_Domain"],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Necro_Drone",
+                displayName: "[Unit_Necro_Drone] Drone",
+                descriptionLines: ["Broken [DustColored line"],
+                referenceKeys: [],
+            },
+        ]);
+
+        expect(text).toContain("CODEX DIAGNOSTICS REPORT");
+        expect(text).toContain("- duplicate references: 1");
+        expect(text).toContain("duplicate of #0");
+        expect(text).toContain("unresolved-ref Unknown_Key");
+        expect(text).toContain("malformed-token DustColored line");
+        expect(text).toContain("entity-like-token Unit_Necro_Drone");
     });
 });

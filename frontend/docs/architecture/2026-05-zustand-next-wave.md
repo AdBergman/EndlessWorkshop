@@ -269,9 +269,10 @@ Completed pure foundation slices:
 3. Replaced stale frontend documentation with the current Vite/Zustand architecture snapshot.
 4. Added pure codex reference resolving and diagnostics without entity-link rendering.
 5. Added a pure codex diagnostics report layer that combines reference and descriptor/token diagnostics.
+6. Added a dev/admin-only diagnostics report download hook that reuses the existing codex audit export pattern without public UI.
 
 Next bounded slice:
 
-1. Add an opt-in developer export path for the codex diagnostics report, likely reusing the existing dev-only audit-download pattern.
-2. Keep it non-rendering and gated; do not add in-app UI.
-3. Use report output to prioritize exporter/import gaps before any runtime entity-link rendering is designed.
+1. Use diagnostics report output to prioritize exporter/import gaps before any runtime entity-link rendering is designed.
+2. Decide whether unresolved descriptor/icon tokens need their own admin report before introducing any codex/domain link rendering.
+3. Keep the next slice non-rendering unless a separate design pass approves UI exposure.

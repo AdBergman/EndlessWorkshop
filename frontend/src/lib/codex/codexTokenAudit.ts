@@ -1,4 +1,6 @@
 import { diagnoseDescriptionLine } from "@/lib/descriptionLine/descriptionDiagnostics";
+import type { CodexEntry } from "@/types/dataTypes";
+import { createCodexDiagnosticsReport, formatCodexDiagnosticsReport } from "./codexDiagnosticsReport";
 
 type RawCodexEntry = {
     exportKind?: unknown;
@@ -10,9 +12,11 @@ type RawCodexEntry = {
 
 type CodexAuditWindow = Window & typeof globalThis & {
     __downloadCodexTokenAudit?: () => void;
+    __downloadCodexDiagnosticsReport?: () => void;
 };
 
 let hasAutoDownloadedAuditForPageLoad = false;
+let hasAutoDownloadedDiagnosticsReportForPageLoad = false;
 
 function toDisplayName(value: unknown): string {
     return typeof value === "string" ? value : "";
@@ -29,6 +33,15 @@ function shouldRunCodexAuditFromUrl(): boolean {
 
     const params = new URLSearchParams(window.location.search);
     return params.get("codexAudit") === "1";
+}
+
+function shouldRunCodexDiagnosticsReportFromUrl(): boolean {
+    if (!import.meta.env.DEV || typeof window === "undefined") {
+        return false;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    return params.get("admin") === "1" && params.get("codexDiagnostics") === "1";
 }
 
 function countTokens(rawEntries: readonly RawCodexEntry[]) {
@@ -71,29 +84,72 @@ function formatSection(title: string, counts: Map<string, number>): string[] {
     return [title, "-".repeat(title.length), ...sortedLines];
 }
 
-function maybeInstallDownload(auditText: string) {
+function installTextDownload(
+    text: string,
+    {
+        assignDownload,
+        downloadName,
+        warningLabel,
+    }: {
+        assignDownload: (auditWindow: CodexAuditWindow, download: () => void) => void;
+        downloadName: string;
+        warningLabel: string;
+    }
+) {
     if (typeof window === "undefined" || typeof document === "undefined") return;
 
     const auditWindow = window as CodexAuditWindow;
-    auditWindow.__downloadCodexTokenAudit = () => {
-        if (typeof Blob === "undefined" || typeof URL?.createObjectURL !== "function") {
-            console.warn("[codexAudit] Automatic download is not available in this environment.");
+    assignDownload(auditWindow, () => {
+        if (typeof Blob === "undefined" || typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+            console.warn(`[${warningLabel}] Automatic download is not available in this environment.`);
             return;
         }
 
-        const blob = new Blob([auditText], {
+        const blob = new Blob([text], {
             type: "text/plain;charset=utf-8",
         });
         const href = URL.createObjectURL(blob);
         const link = document.createElement("a");
 
         link.href = href;
-        link.download = "codex-token-audit.txt";
+        link.download = downloadName;
         document.body.appendChild(link);
         link.click();
         link.remove();
         URL.revokeObjectURL(href);
-    };
+    });
+}
+
+function maybeInstallTokenAuditDownload(auditText: string) {
+    installTextDownload(auditText, {
+        assignDownload: (auditWindow, download) => {
+            auditWindow.__downloadCodexTokenAudit = download;
+        },
+        downloadName: "codex-token-audit.txt",
+        warningLabel: "codexAudit",
+    });
+}
+
+function maybeInstallDiagnosticsReportDownload(reportText: string) {
+    installTextDownload(reportText, {
+        assignDownload: (auditWindow, download) => {
+            auditWindow.__downloadCodexDiagnosticsReport = download;
+        },
+        downloadName: "codex-diagnostics-report.txt",
+        warningLabel: "codexDiagnostics",
+    });
+}
+
+function toCodexEntries(rawEntries: readonly RawCodexEntry[]): CodexEntry[] {
+    return rawEntries
+        .map((entry) => ({
+            exportKind: toDisplayName(entry.exportKind).trim().toLowerCase(),
+            entryKey: toDisplayName(entry.entryKey).trim(),
+            displayName: toDisplayName(entry.displayName),
+            descriptionLines: toStringArray(entry.descriptionLines),
+            referenceKeys: toStringArray(entry.referenceKeys),
+        }))
+        .filter((entry) => entry.entryKey.length > 0);
 }
 
 export function createCodexTokenAuditText(rawEntries: readonly RawCodexEntry[]): string {
@@ -106,14 +162,36 @@ export function createCodexTokenAuditText(rawEntries: readonly RawCodexEntry[]):
     ].join("\n");
 }
 
-export function maybePublishCodexTokenAudit(rawEntries: readonly RawCodexEntry[]): string | null {
+export function createCodexDiagnosticsReportText(rawEntries: readonly RawCodexEntry[]): string {
+    return formatCodexDiagnosticsReport(createCodexDiagnosticsReport(toCodexEntries(rawEntries)));
+}
+
+function maybePublishCodexDiagnosticsReport(rawEntries: readonly RawCodexEntry[]): string | null {
+    if (!shouldRunCodexDiagnosticsReportFromUrl()) {
+        return null;
+    }
+
+    const reportText = createCodexDiagnosticsReportText(rawEntries);
+    const auditWindow = window as CodexAuditWindow;
+    maybeInstallDiagnosticsReportDownload(reportText);
+
+    if (!hasAutoDownloadedDiagnosticsReportForPageLoad) {
+        hasAutoDownloadedDiagnosticsReportForPageLoad = true;
+        auditWindow.__downloadCodexDiagnosticsReport?.();
+        console.info("Codex diagnostics report downloaded");
+    }
+
+    return reportText;
+}
+
+function maybePublishTokenAudit(rawEntries: readonly RawCodexEntry[]): string | null {
     if (!shouldRunCodexAuditFromUrl()) {
         return null;
     }
 
     const auditText = createCodexTokenAuditText(rawEntries);
     const auditWindow = window as CodexAuditWindow;
-    maybeInstallDownload(auditText);
+    maybeInstallTokenAuditDownload(auditText);
 
     if (!hasAutoDownloadedAuditForPageLoad) {
         hasAutoDownloadedAuditForPageLoad = true;
@@ -124,6 +202,14 @@ export function maybePublishCodexTokenAudit(rawEntries: readonly RawCodexEntry[]
     return auditText;
 }
 
+export function maybePublishCodexTokenAudit(rawEntries: readonly RawCodexEntry[]): string | null {
+    const auditText = maybePublishTokenAudit(rawEntries);
+    const reportText = maybePublishCodexDiagnosticsReport(rawEntries);
+
+    return auditText ?? reportText;
+}
+
 export function resetCodexTokenAuditDevFlagsForTests() {
     hasAutoDownloadedAuditForPageLoad = false;
+    hasAutoDownloadedDiagnosticsReportForPageLoad = false;
 }

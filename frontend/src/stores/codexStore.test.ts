@@ -11,6 +11,7 @@ vi.mock("@/api/apiClient", () => ({
 const mockedApiClient = vi.mocked(apiClient);
 const auditWindow = window as Window & typeof globalThis & {
     __downloadCodexTokenAudit?: unknown;
+    __downloadCodexDiagnosticsReport?: unknown;
 };
 
 describe("useCodexStore", () => {
@@ -19,6 +20,7 @@ describe("useCodexStore", () => {
         mockedApiClient.getCodex.mockReset();
         resetCodexTokenAuditDevFlagsForTests();
         delete auditWindow.__downloadCodexTokenAudit;
+        delete auditWindow.__downloadCodexDiagnosticsReport;
         window.history.replaceState({}, "", "/");
     });
 
@@ -319,5 +321,90 @@ describe("useCodexStore", () => {
         URL.revokeObjectURL = originalRevokeObjectURL;
         appendSpy.mockRestore();
         infoSpy.mockRestore();
+    });
+
+    it("publishes and auto-downloads a dev/admin-only diagnostics report when explicitly requested", async () => {
+        window.history.replaceState({}, "", "/admin/import?admin=1&codexDiagnostics=1");
+        const downloadClick = vi.fn();
+        const appendSpy = vi.spyOn(document.body, "appendChild");
+        const originalCreateObjectURL = URL.createObjectURL;
+        const originalRevokeObjectURL = URL.revokeObjectURL;
+        URL.createObjectURL = vi.fn(() => "blob:codex-diagnostics");
+        URL.revokeObjectURL = vi.fn(() => {});
+        let createdAnchor: HTMLAnchorElement | null = null;
+        const originalCreateElement = document.createElement.bind(document);
+        const createElementSpy = vi.spyOn(document, "createElement").mockImplementation(((tagName: string) => {
+            if (tagName.toLowerCase() === "a") {
+                const anchor = originalCreateElement("a");
+                anchor.click = downloadClick;
+                createdAnchor = anchor;
+                return anchor;
+            }
+
+            return originalCreateElement(tagName);
+        }) as typeof document.createElement);
+        const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Blossom",
+                displayName: "Blossom",
+                descriptionLines: ["Gain [DustColored] near [Unit_Necro_Drone]."],
+                referenceKeys: ["Unit_Necro_Drone", "Unit_Necro_Drone", "Unknown_Key"],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Necro_Drone",
+                displayName: "[Unit_Necro_Drone] Drone",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+        await useCodexStore.getState().loadEntries({ force: true });
+
+        expect(auditWindow.__downloadCodexDiagnosticsReport).toEqual(expect.any(Function));
+        expect(downloadClick).toHaveBeenCalledTimes(1);
+        expect(infoSpy).toHaveBeenCalledWith("Codex diagnostics report downloaded");
+        expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+        expect(createdAnchor).not.toBeNull();
+        const downloadedAnchor = createdAnchor as unknown as HTMLAnchorElement;
+        expect(downloadedAnchor.download).toBe("codex-diagnostics-report.txt");
+
+        createElementSpy.mockRestore();
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
+        appendSpy.mockRestore();
+        infoSpy.mockRestore();
+    });
+
+    it("does not publish diagnostics downloads outside admin mode", async () => {
+        window.history.replaceState({}, "", "/codex?codexDiagnostics=1");
+        const downloadClick = vi.fn();
+        const originalCreateObjectURL = URL.createObjectURL;
+        const originalRevokeObjectURL = URL.revokeObjectURL;
+        URL.createObjectURL = vi.fn(() => "blob:codex-diagnostics");
+        URL.revokeObjectURL = vi.fn(() => {});
+
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "units",
+                entryKey: "Unit_Necro_Drone",
+                displayName: "Drone",
+                descriptionLines: ["Gain [DustColored]."],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        expect(auditWindow.__downloadCodexDiagnosticsReport).toBeUndefined();
+        expect(downloadClick).not.toHaveBeenCalled();
+        expect(URL.createObjectURL).not.toHaveBeenCalled();
+
+        URL.createObjectURL = originalCreateObjectURL;
+        URL.revokeObjectURL = originalRevokeObjectURL;
     });
 });
