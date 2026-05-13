@@ -44,7 +44,7 @@ describe("AdminImportPage", () => {
         vi.unstubAllGlobals();
     });
 
-    it("downloads the codex diagnostics report from the visible dev/admin action", async () => {
+    it("downloads the codex diagnostics report from the visible admin action", async () => {
         const user = userEvent.setup();
         const downloadClick = vi.fn();
         const originalCreateObjectURL = URL.createObjectURL;

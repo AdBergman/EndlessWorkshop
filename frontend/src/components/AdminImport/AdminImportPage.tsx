@@ -361,7 +361,6 @@ export default function AdminImportPage() {
     }
 
     const isUnlocked = tokenStatus === "valid";
-    const canShowCodexDiagnosticsDownload = import.meta.env.DEV;
 
     return (
         <>
@@ -454,27 +453,25 @@ export default function AdminImportPage() {
                                 </div>
                             ) : null}
 
-                            {canShowCodexDiagnosticsDownload ? (
-                                <div className="admin-import-row admin-import-diagnosticsRow">
-                                    <div style={{ flex: "1 1 320px" }}>
-                                        <div style={{ fontWeight: 800, marginBottom: 6 }}>Codex diagnostics</div>
-                                        <div className="admin-import-muted">
-                                            Download the current codex reference and descriptor diagnostics report.
-                                        </div>
+                            <div className="admin-import-row admin-import-diagnosticsRow">
+                                <div style={{ flex: "1 1 320px" }}>
+                                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Codex diagnostics</div>
+                                    <div className="admin-import-muted">
+                                        Download the current codex reference and descriptor diagnostics report.
                                     </div>
-
-                                    <button
-                                        type="button"
-                                        className="admin-import-btn admin-import-btn--ghost"
-                                        disabled={codexDiagnosticsActionState.status === "running"}
-                                        onClick={() => void downloadCodexDiagnosticsReport()}
-                                    >
-                                        {codexDiagnosticsActionState.status === "running"
-                                            ? "Preparing diagnostics…"
-                                            : "Download codex diagnostics"}
-                                    </button>
                                 </div>
-                            ) : null}
+
+                                <button
+                                    type="button"
+                                    className="admin-import-btn admin-import-btn--ghost"
+                                    disabled={codexDiagnosticsActionState.status === "running"}
+                                    onClick={() => void downloadCodexDiagnosticsReport()}
+                                >
+                                    {codexDiagnosticsActionState.status === "running"
+                                        ? "Preparing diagnostics…"
+                                        : "Download codex diagnostics"}
+                                </button>
+                            </div>
 
                             {codexDiagnosticsActionState.status === "success" ? (
                                 <div className="admin-import-success">
