@@ -110,8 +110,9 @@ Recommended sequence:
 2. Add a pure codex reference resolver adapter that can accept either raw `referenceKeys` or typed codex refs while preserving current raw-key behavior. Done in `src/lib/codex/codexRefs.ts`.
 3. Use that adapter in codex related-entry resolution behind tests. Done for codex store and codex page related-entry resolution.
 4. Add pure codex reference diagnostics that classify resolver outcomes without rendering or auto-fixing missing imported domains. Done in `src/lib/codex/codexReferenceDiagnostics.ts`.
-5. Move tech unlock refs onto entity refs at the UI adapter boundary.
-6. Only then consider a composed `entityGraph` selector/hook.
+5. Add a pure developer-facing diagnostics report that combines reference diagnostics and descriptor/token diagnostics. Done in `src/lib/codex/codexDiagnosticsReport.ts`.
+6. Move tech unlock refs onto entity refs at the UI adapter boundary.
+7. Only then consider a composed `entityGraph` selector/hook.
 
 Implementation note: codex refs keep the base `{ kind, key }` shape, but their key is an encoded `exportKind + entryKey` identity. This preserves `entriesByKindKey` semantics and avoids treating raw codex entry keys as globally unique.
 
@@ -124,6 +125,13 @@ Reference diagnostics model:
 - `malformed-ref`: an empty, invalid-shaped, or malformed encoded reference.
 
 Imported-domain gaps and unresolved icon/entity-like descriptor tokens should remain diagnostics-only until exporter support and UI semantics are designed explicitly.
+
+Diagnostics report model:
+
+- `createCodexDiagnosticsReport(entries)` builds grouped reference and descriptor summaries without touching stores or rendering.
+- `formatCodexDiagnosticsReport(report)` emits deterministic developer-facing text.
+- Reports can group diagnostics globally and by `exportKind`, and entry details retain duplicate, raw fallback, imported-domain, and malformed metadata.
+- The report is not an in-app UI surface; it is a tool for exporter/import gap analysis before runtime entity-link semantics exist.
 
 ## Descriptor And Token AST Proposal
 
@@ -260,9 +268,10 @@ Completed pure foundation slices:
 2. Added the descriptor/token AST parser behind existing renderer APIs with tests.
 3. Replaced stale frontend documentation with the current Vite/Zustand architecture snapshot.
 4. Added pure codex reference resolving and diagnostics without entity-link rendering.
+5. Added a pure codex diagnostics report layer that combines reference and descriptor/token diagnostics.
 
 Next bounded slice:
 
-1. Add a developer-only codex diagnostics text report that summarizes reference diagnostic categories and descriptor token diagnostics together.
-2. Keep the report opt-in and non-rendering; do not add in-app UI.
-3. Use the report to identify exporter/import gaps before any runtime entity-link rendering is designed.
+1. Add an opt-in developer export path for the codex diagnostics report, likely reusing the existing dev-only audit-download pattern.
+2. Keep it non-rendering and gated; do not add in-app UI.
+3. Use report output to prioritize exporter/import gaps before any runtime entity-link rendering is designed.
