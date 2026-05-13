@@ -1,4 +1,5 @@
 import {
+    getTechUnlockConstructibleCandidateRefs,
     getUnlockedConstructiblesByKey,
     getUnlockedDistrictsByKey,
     getUnlockedImprovementsByKey,
@@ -268,5 +269,63 @@ describe("constructible unlock resolution", () => {
             kind: "Unit",
             displayName: "Scout",
         });
+    });
+});
+
+describe("tech unlock EntityRef candidates", () => {
+    it("maps explicit backend constructible kinds to one typed candidate ref", () => {
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Constructible",
+                unlockKey: " District_Harbor ",
+                unlockCategory: "District",
+            })
+        ).toEqual([{ kind: "district", key: "District_Harbor" }]);
+
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Constructible",
+                unlockKey: "Improvement_Market",
+                constructibleKind: "Improvement",
+            })
+        ).toEqual([{ kind: "improvement", key: "Improvement_Market" }]);
+    });
+
+    it("keeps unit unlock type strict to unit refs", () => {
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Unit",
+                unlockKey: "Unit_Scout",
+                unlockCategory: "District",
+            })
+        ).toEqual([{ kind: "unit", key: "Unit_Scout" }]);
+    });
+
+    it("preserves legacy constructible fallback order as typed refs", () => {
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Constructible",
+                unlockKey: "Shared_Key",
+            })
+        ).toEqual([
+            { kind: "unit", key: "Shared_Key" },
+            { kind: "district", key: "Shared_Key" },
+            { kind: "improvement", key: "Shared_Key" },
+        ]);
+    });
+
+    it("returns no candidates for blank keys or non-constructible unlocks", () => {
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Constructible",
+                unlockKey: " ",
+            })
+        ).toEqual([]);
+        expect(
+            getTechUnlockConstructibleCandidateRefs({
+                unlockType: "Resource",
+                unlockKey: "Dust",
+            })
+        ).toEqual([]);
     });
 });

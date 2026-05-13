@@ -1,9 +1,11 @@
 import { Tech, Improvement, District, Unit, TechUnlockRef } from "@/types/dataTypes";
+import { normalizeEntityRef, type EntityRef } from "@/lib/entityRef/entityRef";
 
 export type UnlockedImprovement = Improvement & { era: number };
 export type UnlockedDistrict = District & { era: number };
 export type UnlockedUnit = Unit & { era: number };
 export type ConstructibleUnlockKind = "District" | "Improvement" | "Unit";
+export type ConstructibleEntityRef = EntityRef<"district" | "improvement" | "unit">;
 
 export type ConstructibleUnlockResolution =
     | {
@@ -70,6 +72,44 @@ const sortUnlockedByEraAndName = <T extends { era: number; displayName: string }
 const resolveUnitByKey = (key: string, unitsByKey: Record<string, Unit>) =>
     unitsByKey[key];
 
+const constructibleEntityKind = (
+    kind: ConstructibleUnlockKind
+): ConstructibleEntityRef["kind"] => {
+    switch (kind) {
+        case "District":
+            return "district";
+        case "Improvement":
+            return "improvement";
+        case "Unit":
+            return "unit";
+    }
+};
+
+const toConstructibleEntityRef = (
+    kind: ConstructibleEntityRef["kind"],
+    key: string
+): ConstructibleEntityRef | null => normalizeEntityRef({ kind, key }) as ConstructibleEntityRef | null;
+
+export function getTechUnlockConstructibleCandidateRefs(unlock: TechUnlockRef): ConstructibleEntityRef[] {
+    const key = normalizeKey(unlock.unlockKey ?? "");
+    if (!key || !isConstructibleLikeUnlock(unlock)) return [];
+
+    if (normType(unlock.unlockType) === "UNIT") {
+        const ref = toConstructibleEntityRef("unit", key);
+        return ref ? [ref] : [];
+    }
+
+    const explicitKind = getExplicitConstructibleKind(unlock);
+    if (explicitKind) {
+        const ref = toConstructibleEntityRef(constructibleEntityKind(explicitKind), key);
+        return ref ? [ref] : [];
+    }
+
+    return (["unit", "district", "improvement"] as const)
+        .map((kind) => toConstructibleEntityRef(kind, key))
+        .filter((ref): ref is ConstructibleEntityRef => !!ref);
+}
+
 export const resolveDistrictUnlock = (
     unlock: TechUnlockRef,
     districtsByKey: Record<string, District>
@@ -100,56 +140,46 @@ export const resolveConstructibleUnlock = (
     unlock: TechUnlockRef,
     deps: ConstructibleUnlockDeps
 ): ConstructibleUnlockResolution | null => {
-    const key = normalizeKey(unlock.unlockKey ?? "");
-    if (!key || !isConstructibleLikeUnlock(unlock)) return null;
-
     const { districtsByKey, improvementsByKey, unitsByKey } = deps;
-    const explicitKind = getExplicitConstructibleKind(unlock);
+    const candidateRefs = getTechUnlockConstructibleCandidateRefs(unlock);
 
-    if (explicitKind === "Unit" || normType(unlock.unlockType) === "UNIT") {
-        const unit = resolveUnitByKey(key, unitsByKey);
-        return unit
-            ? { kind: "Unit", key, unit, displayName: unit.displayName ?? key }
-            : null;
-    }
+    for (const candidateRef of candidateRefs) {
+        if (candidateRef.kind === "unit") {
+            const unit = resolveUnitByKey(candidateRef.key, unitsByKey);
+            if (unit) {
+                return {
+                    kind: "Unit",
+                    key: candidateRef.key,
+                    unit,
+                    displayName: unit.displayName ?? candidateRef.key,
+                };
+            }
+            continue;
+        }
 
-    if (explicitKind === "District") {
-        const district = resolveDistrictUnlock(unlock, districtsByKey);
-        return district
-            ? { kind: "District", key, district, displayName: district.displayName ?? key }
-            : null;
-    }
+        if (candidateRef.kind === "district") {
+            const district = districtsByKey[candidateRef.key];
+            if (district) {
+                return {
+                    kind: "District",
+                    key: candidateRef.key,
+                    district,
+                    displayName: district.displayName ?? candidateRef.key,
+                };
+            }
+            continue;
+        }
 
-    if (explicitKind === "Improvement") {
-        const improvement = resolveImprovementUnlock(unlock, improvementsByKey);
-        return improvement
-            ? {
-                  kind: "Improvement",
-                  key,
-                  improvement,
-                  displayName: improvement.displayName ?? key,
-              }
-            : null;
-    }
+        const improvement = improvementsByKey[candidateRef.key];
+        if (improvement) {
+            return {
+                kind: "Improvement",
+                key: candidateRef.key,
+                improvement,
+                displayName: improvement.displayName ?? candidateRef.key,
+            };
+        }
 
-    const unit = resolveUnitByKey(key, unitsByKey);
-    if (unit) return { kind: "Unit", key, unit, displayName: unit.displayName ?? key };
-
-    // Old/null backend data has no constructible kind metadata. Keep that
-    // compatibility fallback centralized here: unit, then district, then improvement.
-    const district = resolveDistrictUnlock(unlock, districtsByKey);
-    if (district) {
-        return { kind: "District", key, district, displayName: district.displayName ?? key };
-    }
-
-    const improvement = resolveImprovementUnlock(unlock, improvementsByKey);
-    if (improvement) {
-        return {
-            kind: "Improvement",
-            key,
-            improvement,
-            displayName: improvement.displayName ?? key,
-        };
     }
 
     return null;
