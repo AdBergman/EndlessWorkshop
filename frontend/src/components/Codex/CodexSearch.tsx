@@ -1,8 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { useEffect, useId, useState } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
-import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
+import { getCodexDescriptionPreviewLine, getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -115,9 +114,7 @@ export default function CodexSearch({
                 {showSuggestions ? (
                     <div className="codex-search__dropdown" role="listbox" id={listboxId}>
                         {suggestions.map((entry, index) => {
-                            const previewLine = entry.descriptionLines
-                                .map((line) => stripDescriptionTokens(line))
-                                .find((line) => line.length > 0);
+                            const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
 
                             return (
                                 <button

@@ -1,4 +1,4 @@
-import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { parseDescriptionLine, stripDescriptionAst } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 
 const TECHNICAL_PREFIXES = new Set([
@@ -94,13 +94,25 @@ export function getCodexLabel(displayName: string, entryKey: string): string {
     return humanizeCodexEntryKey(entryKey ?? "");
 }
 
-export function getCodexEntryPreview(entry: Pick<CodexEntry, "descriptionLines">, maxLength = 180): string {
-    const preview = compactWhitespace(
-        (entry.descriptionLines ?? [])
-            .map((line) => stripDescriptionTokens(line))
+export function stripCodexDescriptionLine(line: string): string {
+    return stripDescriptionAst(parseDescriptionLine(line));
+}
+
+export function getCodexDescriptionPreviewLine(lines: readonly string[] | null | undefined): string {
+    return (lines ?? []).map((line) => stripCodexDescriptionLine(line)).find((line) => line.length > 0) ?? "";
+}
+
+export function getCodexDescriptionPreviewText(lines: readonly string[] | null | undefined): string {
+    return compactWhitespace(
+        (lines ?? [])
+            .map((line) => stripCodexDescriptionLine(line))
             .filter((line) => line.length > 0)
             .join(" ")
     );
+}
+
+export function getCodexEntryPreview(entry: Pick<CodexEntry, "descriptionLines">, maxLength = 180): string {
+    const preview = getCodexDescriptionPreviewText(entry.descriptionLines);
 
     if (!preview) return "";
     if (preview.length <= maxLength) return preview;

@@ -1,6 +1,6 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { stripDescriptionTokens } from "@/lib/descriptionLine/descriptionLineRenderer";
 import {
+    getCodexDescriptionPreviewLine,
     getCodexEntryLabel,
     isCodexSummaryEntry,
     type CodexListItem,
@@ -18,9 +18,7 @@ function formatKindLabel(kind: string): string {
 }
 
 export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
-    const previewLine = entry.descriptionLines
-        .map((line) => stripDescriptionTokens(line))
-        .find((line) => line.length > 0);
+    const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
     const isSummary = isCodexSummaryEntry(entry);
 
     return (

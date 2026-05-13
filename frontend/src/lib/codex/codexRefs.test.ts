@@ -137,6 +137,32 @@ describe("resolveRelatedEntries", () => {
 
         expect(related.map((entry) => entry.displayName)).toEqual(["Hero A"]);
     });
+
+    it("de-duplicates repeated raw references after resolution", () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_A",
+                displayName: "Ability A",
+                descriptionLines: [],
+                referenceKeys: ["Hero_A", "Hero_A", "  Hero_A  "],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_A",
+                displayName: "Hero A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        const related = resolveRelatedEntries(entries[0], {
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+        });
+
+        expect(related.map((entry) => entry.displayName)).toEqual(["Hero A"]);
+    });
 });
 
 describe("resolveCodexReference", () => {
@@ -159,5 +185,23 @@ describe("resolveCodexReference", () => {
             "Hero A"
         );
         expect(resolveCodexReference("heroes:Hero%3AWith%20Spaces", indexes)?.displayName).toBe("Hero A");
+    });
+
+    it("falls back to raw keys for malformed encoded reference strings", () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "codex:heroes%3A%E0%A4%A",
+                displayName: "Raw Fallback",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+        const indexes = {
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+        };
+
+        expect(resolveCodexReference("codex:heroes%3A%E0%A4%A", indexes)?.displayName).toBe("Raw Fallback");
     });
 });

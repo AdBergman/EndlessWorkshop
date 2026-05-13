@@ -1,5 +1,7 @@
 import {
     createCodexSummaryEntry,
+    getCodexDescriptionPreviewLine,
+    getCodexDescriptionPreviewText,
     getCodexEntryLabel,
     getCodexEntryPreview,
     humanizeCodexEntryKey,
@@ -34,6 +36,25 @@ describe("codexPresentation", () => {
                 descriptionLines: ["Adds [FoodColored] to the city.", "Improves seasonal output."],
             })
         ).toBe("Adds to the city. Improves seasonal output.");
+    });
+
+    it("builds first-line previews with mixed styled and entity-like tokens stripped", () => {
+        expect(
+            getCodexDescriptionPreviewLine([
+                "[DustColored] [Unit_Necro_Larva] Larva consumes [PopulationCategory_03].",
+                "Fallback line",
+            ])
+        ).toBe("Larva consumes .");
+    });
+
+    it("keeps malformed bracket fragments in previews to preserve strip behavior", () => {
+        expect(getCodexDescriptionPreviewText(["Broken [DustColored line", "Unexpected Dust] marker"])).toBe(
+            "Broken [DustColored line Unexpected Dust] marker"
+        );
+    });
+
+    it("ignores stripped-empty lines when selecting a preview line", () => {
+        expect(getCodexDescriptionPreviewLine(["[DustColored] [Unit_A]", "Visible text"])).toBe("Visible text");
     });
 
     it("creates synthetic summary entries for kind overviews", () => {
