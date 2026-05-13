@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import type { District } from "@/types/dataTypes";
-
-type NormalizedCollection<T> = {
-    items: T[];
-    byKey: Record<string, T>;
-    keys: string[];
-    duplicateKeys: string[];
-};
+import { normalizeCollection } from "@/stores/utils/normalizedCollection";
 
 type LoadOptions = {
     force?: boolean;
@@ -44,39 +38,6 @@ const normalizeDistrict = (district: District): District => ({
         (line): line is string => typeof line === "string"
     ),
 });
-
-const normalizeCollection = <T,>(
-    rawItems: T[],
-    getKey: (item: T) => string | null | undefined
-): NormalizedCollection<T> => {
-    const byKey: Record<string, T> = {};
-    const keys: string[] = [];
-    const duplicateKeys: string[] = [];
-    const duplicateKeySet = new Set<string>();
-
-    for (const item of rawItems) {
-        const key = normalizeDistrictKey(getKey(item));
-        if (!key) continue;
-
-        if (byKey[key]) {
-            if (!duplicateKeySet.has(key)) {
-                duplicateKeys.push(key);
-                duplicateKeySet.add(key);
-            }
-        } else {
-            keys.push(key);
-        }
-
-        byKey[key] = item;
-    }
-
-    return {
-        byKey,
-        keys,
-        duplicateKeys,
-        items: keys.map((key) => byKey[key]).filter((item): item is T => !!item),
-    };
-};
 
 const initialState = {
     districts: [] as District[],
@@ -115,7 +76,8 @@ export const useDistrictStore = create<DistrictStore>((set, get) => ({
                 const normalizedDistricts = (await apiClient.getDistricts()).map(normalizeDistrict);
                 const districts = normalizeCollection(
                     normalizedDistricts,
-                    (district) => district.districtKey
+                    (district) => district.districtKey,
+                    { normalizeKey: normalizeDistrictKey }
                 );
 
                 set({

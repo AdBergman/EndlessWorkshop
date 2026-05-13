@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import type { Unit } from "@/types/dataTypes";
-
-type NormalizedCollection<T> = {
-    items: T[];
-    byKey: Record<string, T>;
-    keys: string[];
-    duplicateKeys: string[];
-};
+import { normalizeCollection } from "@/stores/utils/normalizedCollection";
 
 type LoadOptions = {
     force?: boolean;
@@ -59,39 +53,6 @@ const normalizeUnit = (unit: Unit): Unit => ({
     ),
 });
 
-const normalizeCollection = <T,>(
-    rawItems: T[],
-    getKey: (item: T) => string | null | undefined
-): NormalizedCollection<T> => {
-    const byKey: Record<string, T> = {};
-    const keys: string[] = [];
-    const duplicateKeys: string[] = [];
-    const duplicateKeySet = new Set<string>();
-
-    for (const item of rawItems) {
-        const key = normalizeUnitKey(getKey(item));
-        if (!key) continue;
-
-        if (byKey[key]) {
-            if (!duplicateKeySet.has(key)) {
-                duplicateKeys.push(key);
-                duplicateKeySet.add(key);
-            }
-        } else {
-            keys.push(key);
-        }
-
-        byKey[key] = item;
-    }
-
-    return {
-        byKey,
-        keys,
-        duplicateKeys,
-        items: keys.map((key) => byKey[key]).filter((item): item is T => !!item),
-    };
-};
-
 const initialState = {
     units: [] as Unit[],
     unitsByKey: {} as Record<string, Unit>,
@@ -127,7 +88,9 @@ export const useUnitStore = create<UnitStore>((set, get) => ({
         inflightLoad = (async () => {
             try {
                 const normalizedUnits = (await apiClient.getUnits()).map(normalizeUnit);
-                const units = normalizeCollection(normalizedUnits, (unit) => unit.unitKey);
+                const units = normalizeCollection(normalizedUnits, (unit) => unit.unitKey, {
+                    normalizeKey: normalizeUnitKey,
+                });
 
                 set({
                     units: units.items,
