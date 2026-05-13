@@ -107,12 +107,23 @@ Important codex nuance: `codexStore` already has `entriesByKindKey`, which is th
 Recommended sequence:
 
 1. Add pure `entityRef` helpers and tests. Done in `src/lib/entityRef/entityRef.ts`.
-2. Add a pure codex reference resolver adapter that can accept either raw `referenceKeys` or typed codex refs while preserving current raw-key behavior.
-3. Use that adapter in codex related-entry resolution behind tests.
-4. Move tech unlock refs onto entity refs at the UI adapter boundary.
-5. Only then consider a composed `entityGraph` selector/hook.
+2. Add a pure codex reference resolver adapter that can accept either raw `referenceKeys` or typed codex refs while preserving current raw-key behavior. Done in `src/lib/codex/codexRefs.ts`.
+3. Use that adapter in codex related-entry resolution behind tests. Done for codex store and codex page related-entry resolution.
+4. Add pure codex reference diagnostics that classify resolver outcomes without rendering or auto-fixing missing imported domains. Done in `src/lib/codex/codexReferenceDiagnostics.ts`.
+5. Move tech unlock refs onto entity refs at the UI adapter boundary.
+6. Only then consider a composed `entityGraph` selector/hook.
 
 Implementation note: codex refs keep the base `{ kind, key }` shape, but their key is an encoded `exportKind + entryKey` identity. This preserves `entriesByKindKey` semantics and avoids treating raw codex entry keys as globally unique.
+
+Reference diagnostics model:
+
+- `resolved-typed-ref`: a typed codex reference or encoded codex key resolves through `entriesByKindKey`.
+- `raw-fallback-ref`: a raw `referenceKeys` value resolves through legacy `entriesByKey`; ambiguous raw keys are flagged rather than corrected.
+- `unresolved-ref`: a codex-shaped reference or raw key cannot be resolved.
+- `unresolved-imported-domain-ref`: a reference looks like an imported tech/unit/district/improvement/ability/hero/population domain key, but no codex entry exists for it.
+- `malformed-ref`: an empty, invalid-shaped, or malformed encoded reference.
+
+Imported-domain gaps and unresolved icon/entity-like descriptor tokens should remain diagnostics-only until exporter support and UI semantics are designed explicitly.
 
 ## Descriptor And Token AST Proposal
 
@@ -248,10 +259,10 @@ Completed pure foundation slices:
 1. Added pure `entityRef` helpers and tests without runtime wiring.
 2. Added the descriptor/token AST parser behind existing renderer APIs with tests.
 3. Replaced stale frontend documentation with the current Vite/Zustand architecture snapshot.
+4. Added pure codex reference resolving and diagnostics without entity-link rendering.
 
 Next bounded slice:
 
-1. Add a pure codex reference adapter in `src/lib/codex` that can build typed codex refs from `{ exportKind, entryKey }` and resolve them against `entriesByKindKey`.
-2. Keep the existing raw `referenceKeys` resolver path as the compatibility fallback.
-3. Add tests for duplicate `entryKey` values across different `exportKind` buckets, self-reference filtering, missing references, and raw-key fallback.
-4. Do not wire entity refs into codex UI rendering, description token rendering, routing, or stores until that pure adapter is stable.
+1. Add a developer-only codex diagnostics text report that summarizes reference diagnostic categories and descriptor token diagnostics together.
+2. Keep the report opt-in and non-rendering; do not add in-app UI.
+3. Use the report to identify exporter/import gaps before any runtime entity-link rendering is designed.
