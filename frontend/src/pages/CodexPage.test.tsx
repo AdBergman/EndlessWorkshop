@@ -2,7 +2,6 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
-import GameDataContext from "@/context/GameDataContext";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
 
@@ -11,10 +10,6 @@ function LocationProbe() {
 
     return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
 }
-
-const gameDataContextValue = {
-    isProcessingSharedBuild: false,
-};
 
 describe("CodexPage", () => {
     beforeEach(() => {
@@ -176,22 +171,20 @@ describe("CodexPage", () => {
         window.history.replaceState({}, "", "/codex");
 
         render(
-            <GameDataContext.Provider value={gameDataContextValue}>
-                <BrowserRouter>
-                    <Routes>
-                        <Route
-                            path="/codex"
-                            element={
-                                <>
-                                    <LocationProbe />
-                                    <TopContainer />
-                                    <CodexPage />
-                                </>
-                            }
-                        />
-                    </Routes>
-                </BrowserRouter>
-            </GameDataContext.Provider>
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <TopContainer />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </BrowserRouter>
         );
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {

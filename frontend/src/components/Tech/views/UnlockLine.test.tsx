@@ -1,15 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import UnlockLine from "@/components/Tech/views/UnlockLine";
-import { useGameData } from "@/context/GameDataContext";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
-
-vi.mock("@/context/GameDataContext", () => ({
-    useGameData: vi.fn(),
-}));
-
-const mockedUseGameData = vi.mocked(useGameData);
 
 describe("UnlockLine district/improvement resolution", () => {
     beforeEach(() => {
@@ -36,7 +29,6 @@ describe("UnlockLine district/improvement resolution", () => {
                 },
             },
         });
-        mockedUseGameData.mockReturnValue({} as any);
     });
 
     it("renders district and improvement unlock lines from their own store domains", () => {

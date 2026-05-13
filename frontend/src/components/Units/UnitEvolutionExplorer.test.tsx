@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router-dom";
-import GameDataProvider from "@/context/GameDataProvider";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import { apiClient } from "@/api/apiClient";
@@ -55,10 +54,8 @@ describe("/units smoke behavior", () => {
     const renderExplorer = (initialPath: string) =>
         render(
             <MemoryRouter initialEntries={[initialPath]}>
-                <GameDataProvider>
-                    <UnitEvolutionExplorer />
-                    <LocationProbe />
-                </GameDataProvider>
+                <UnitEvolutionExplorer />
+                <LocationProbe />
             </MemoryRouter>
         );
 
@@ -81,15 +78,30 @@ describe("/units smoke behavior", () => {
         mockedApiClient.getDistricts.mockResolvedValue([]);
         mockedApiClient.getImprovements.mockResolvedValue([]);
         mockedApiClient.getTechs.mockResolvedValue([]);
-        mockedApiClient.getCodex.mockResolvedValue([
-            {
-                exportKind: "abilities",
-                entryKey: "Ability_Cautious_Strike",
-                displayName: "Cautious Strike",
-                descriptionLines: ["A precise opening attack."],
-                referenceKeys: [],
+        const cautiousStrike = {
+            exportKind: "abilities",
+            entryKey: "Ability_Cautious_Strike",
+            displayName: "Cautious Strike",
+            descriptionLines: ["A precise opening attack."],
+            referenceKeys: [],
+        };
+        useCodexStore.setState({
+            entries: [cautiousStrike],
+            entriesByKey: {
+                Ability_Cautious_Strike: cautiousStrike,
             },
-        ]);
+            entriesByKind: {
+                abilities: [cautiousStrike],
+            },
+            entriesByKindKey: {
+                abilities: {
+                    Ability_Cautious_Strike: cautiousStrike,
+                },
+            },
+            loading: false,
+            error: null,
+        });
+        mockedApiClient.getCodex.mockResolvedValue([]);
         mockedApiClient.getUnits.mockResolvedValue([
             unit({
                 unitKey: "Unit_Kin_Root",
@@ -232,11 +244,9 @@ describe("/units smoke behavior", () => {
 
         render(
             <MemoryRouter initialEntries={["/units?faction=kin&unitKey=Unit_Kin_Root"]}>
-                <GameDataProvider>
-                    <TopContainer />
-                    <UnitEvolutionExplorer />
-                    <LocationProbe />
-                </GameDataProvider>
+                <TopContainer />
+                <UnitEvolutionExplorer />
+                <LocationProbe />
             </MemoryRouter>
         );
 

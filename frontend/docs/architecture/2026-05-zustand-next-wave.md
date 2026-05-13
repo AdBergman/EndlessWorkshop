@@ -49,24 +49,19 @@ type AppOrchestrationContextValue = {
 
 Do not rename or reshape this provider in the same slice as share/startup behavior changes. The narrow `appOrchestration` facade is already in place; future cleanup should migrate any remaining direct `useGameData` access only when it does not alter lifecycle behavior.
 
-## Unit Evolution Explorer Decision
+## Completed Unit Evolution Explorer Slice
 
-Extract `UnitEvolutionExplorer` from `GameDataContext`, but do it as a bounded compatibility cleanup, not as a lifecycle rewrite.
+`UnitEvolutionExplorer` has been extracted from `GameDataContext` and now reads `unitStore` and `factionSelectionStore` directly. This was completed as a bounded compatibility cleanup, not a lifecycle rewrite.
 
-Reasoning:
+What changed:
 
-- It already reads units from `unitStore`.
-- Its only context dependency is selected faction and setter access.
-- Its URL hydration loop is feature-local and should remain local to `/units`.
-- Keeping it on `GameDataContext` makes the provider appear to own unit feature state when it no longer does.
+- Selected faction reads and writes moved to `useFactionSelectionStore(selectSelectedFaction)` and `useFactionSelectionStore(selectSetSelectedFaction)`.
+- Unit reads stayed on `unitStore`.
+- URL refs, effect order, `setParams(..., { replace: true })`, minor-unit toggle behavior, and selection defaults stayed local to `/units`.
+- Migration-scope tests now assert `UnitEvolutionExplorer.tsx` does not import `GameDataContext`, `useGameData`, or `useContext`.
+- Component-level `/units` tests no longer need `GameDataProvider` unless they explicitly cover app-shell orchestration.
 
-Safe extraction slice:
-
-- Replace `useContext(GameDataContext)` with `useFactionSelectionStore(selectSelectedFaction)` and `useFactionSelectionStore(selectSetSelectedFaction)`.
-- Preserve the existing URL refs, effect order, `setParams(..., { replace: true })`, minor-unit toggle behavior, and selection defaults.
-- Update tests to wrap the component with only router/store setup, not `GameDataProvider`, unless a test is explicitly covering app-shell share gating.
-
-Do not combine this with changes to `TopContainer`, share hydration, or unit route semantics.
+Keep future changes to unit route semantics separate from architecture cleanup.
 
 ## Canonical Entity Graph Proposal
 
@@ -185,7 +180,7 @@ Description AST findings:
 | Share hydration | `GameDataProvider` | High | Freeze behavior; only wrap behind narrower orchestration hooks. |
 | URL replacement after share load | `GameDataProvider` | High | Do not alter timing or replace semantics in cleanup slices. |
 | Tech deep-link hydration | `useTechRouteHydration` | High | Keep feature-local; avoid merging with share hydration. |
-| Unit URL hydration | `UnitEvolutionExplorer` | Medium | Extract context dependency only; preserve effect order and refs. |
+| Unit URL hydration | `UnitEvolutionExplorer` | Medium | Already store-native; preserve effect order and refs. |
 | Startup data loads | `GameDataProvider` plus store idempotence | Medium | Eventually move to `AppDataBootstrapper`; do not change during share work. |
 | Tooltip hover timing | tooltip components and hover wrappers | High | Keep outside architecture cleanup unless addressing a specific bug. |
 | Route synchronization | React Router hooks and feature effects | High | Avoid global router orchestration abstractions for now. |
@@ -237,6 +232,8 @@ Do not combine route-level lazy loading with hydration or deep-link behavior cha
 - `AppLayout` and `TopContainer` now read the share-processing gate through `useShareProcessingGate`; keep app-shell gating on that narrow facade.
 - `SpreadSheetView` now reads saved-build creation through `useSavedTechBuildCommands`; keep saved-build commands behind that narrow facade.
 - `UnitEvolutionExplorer` was extracted to direct `factionSelectionStore` reads; keep it from drifting back into context.
+- Production `useGameData()` calls should remain limited to `src/context/appOrchestration.ts`.
+- Production `GameDataContext` imports should remain inside context internals.
 - Codex raw `referenceKeys` are ambiguous without kind semantics.
 - Description token parsing now has one parser foundation, but runtime UI still treats tokens as presentation markers rather than semantic entity refs.
 - Bundle size remains a future concern, but code splitting should stay separate from hydration and routing cleanup.
@@ -262,6 +259,12 @@ Completed context shrink slice:
 2. Kept `GameDataProvider` startup loads, share hydration, URL replacement, and saved-build commands behavior intact.
 3. Updated provider and route tests to read selected/entity state from stores instead of the broad context adapter.
 
+Completed migration cleanup slice:
+
+1. Removed dead `useGameData` mocks from tests for components that no longer import context.
+2. Removed unnecessary `GameDataContext.Provider` and `GameDataProvider` wrappers from tests that are not covering orchestration.
+3. Strengthened migration guardrails so production `useGameData()` usage is limited to the `appOrchestration` facade and broad context state cannot be reintroduced silently.
+
 Completed pure foundation slices:
 
 1. Added pure `entityRef` helpers and tests without runtime wiring.
@@ -271,8 +274,8 @@ Completed pure foundation slices:
 5. Added a pure codex diagnostics report layer that combines reference and descriptor/token diagnostics.
 6. Added a dev/admin-only diagnostics report download hook that reuses the existing codex audit export pattern without public UI.
 
-Next bounded slice:
+Post-migration future tracks:
 
-1. Use diagnostics report output to prioritize exporter/import gaps before any runtime entity-link rendering is designed.
-2. Decide whether unresolved descriptor/icon tokens need their own admin report before introducing any codex/domain link rendering.
-3. Keep the next slice non-rendering unless a separate design pass approves UI exposure.
+1. Provider rename or startup extraction, only in a hydration-aware slice with share/startup verification.
+2. Diagnostics/entity/rendering convergence, only as a separate non-migration track and without runtime entity-link rendering until UI semantics are designed.
+3. Route-level lazy loading, only as a bundle-performance slice with explicit deep-link and share-link browser verification.

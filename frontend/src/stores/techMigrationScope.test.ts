@@ -1,11 +1,27 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve } from "node:path";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(currentDir, "..");
 
 const readSrc = (file: string) => readFileSync(resolve(srcDir, file), "utf8");
+
+const listProductionSourceFiles = (dir = srcDir): string[] =>
+    readdirSync(dir).flatMap((entry) => {
+        const fullPath = resolve(dir, entry);
+        const relativePath = relative(srcDir, fullPath);
+        const stat = statSync(fullPath);
+
+        if (stat.isDirectory()) {
+            if (relativePath === "tests") return [];
+            return listProductionSourceFiles(fullPath);
+        }
+
+        if (!/\.(ts|tsx)$/.test(entry)) return [];
+        if (entry.includes(".test.")) return [];
+        return [relativePath];
+    });
 
 describe("tech data ownership migration scope", () => {
     it("keeps techStore limited to tech data ownership", () => {
@@ -68,8 +84,28 @@ describe("tech data ownership migration scope", () => {
         const contextInterface =
             contextSource.match(/export interface GameDataContextType \{[\s\S]*?\n\}/)?.[0] ?? "";
         expect(contextInterface).not.toMatch(
-            /^\s+(districts|improvements|techs|selectedFaction|setSelectedFaction|selectedTechs|setSelectedTechs)\??:/m
+            /^\s+(codex|entries|entriesByKey|entriesByKind|districts|districtsByKey|improvements|improvementsByKey|techs|techsByKey|units|unitsByKey|selectedFaction|setSelectedFaction|selectedTechs|setSelectedTechs)\??:/m
         );
+    });
+
+    it("keeps direct production useGameData calls limited to the orchestration facade", () => {
+        const callSites = listProductionSourceFiles()
+            .filter((file) => readSrc(file).match(/\buseGameData\(\)/))
+            .sort();
+
+        expect(callSites).toEqual(["context/appOrchestration.ts"]);
+    });
+
+    it("keeps production GameDataContext imports inside context internals", () => {
+        const importSites = listProductionSourceFiles()
+            .filter((file) => file !== "context/GameDataContext.ts")
+            .filter((file) => readSrc(file).match(/from ["'].*GameDataContext["']/))
+            .sort();
+
+        expect(importSites).toEqual([
+            "context/GameDataProvider.tsx",
+            "context/appOrchestration.ts",
+        ]);
     });
 
     it("keeps TechTree on direct stores while owning admin refresh locally", () => {

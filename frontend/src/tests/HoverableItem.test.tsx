@@ -1,14 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HoverableItem from "@/components/Tech/views/HoverableItem";
-import { useGameData } from "@/context/GameDataContext";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
-
-vi.mock("@/context/GameDataContext", () => ({
-    useGameData: vi.fn(),
-}));
 
 // Mock tooltips
 vi.mock("@/components/Tooltips/ImprovementTooltip", () => ({
@@ -28,8 +23,6 @@ vi.mock("@/components/Tooltips/UnitTooltip", () => ({
         <div data-testid="unit-tooltip">{hoveredUnit.data.displayName}</div>
     ),
 }));
-
-const mockedUseGameData = vi.mocked(useGameData);
 
 describe("HoverableItem", () => {
     beforeEach(() => {
@@ -77,8 +70,6 @@ describe("HoverableItem", () => {
                 },
             },
         });
-
-        mockedUseGameData.mockReturnValue({} as any);
     });
 
     it("renders improvement tooltip on hover", async () => {

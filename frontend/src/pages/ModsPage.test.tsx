@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
-import GameDataContext from "@/context/GameDataContext";
 import ModsPage from "./ModsPage";
 
 vi.mock("@/data/modsCatalog", async () => {
@@ -38,10 +37,6 @@ function LocationProbe() {
 
     return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
 }
-
-const gameDataContextValue = {
-    isProcessingSharedBuild: false,
-};
 
 describe("ModsPage", () => {
     it("renders a practical mods index with row sections and installation guidance", async () => {
@@ -120,16 +115,14 @@ describe("ModsPage", () => {
         const user = userEvent.setup();
 
         render(
-            <GameDataContext.Provider value={gameDataContextValue}>
-                <MemoryRouter initialEntries={["/tech"]}>
-                    <LocationProbe />
-                    <TopContainer />
-                    <Routes>
-                        <Route path="/tech" element={<div>Tech Page</div>} />
-                        <Route path="/mods" element={<ModsPage />} />
-                    </Routes>
-                </MemoryRouter>
-            </GameDataContext.Provider>
+            <MemoryRouter initialEntries={["/tech"]}>
+                <LocationProbe />
+                <TopContainer />
+                <Routes>
+                    <Route path="/tech" element={<div>Tech Page</div>} />
+                    <Route path="/mods" element={<ModsPage />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/tech");
