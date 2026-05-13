@@ -1,5 +1,6 @@
 import {
     abilityEntityRef,
+    codexEntryEntityRef,
     codexEntityKey,
     codexEntityRef,
     districtEntityRef,
@@ -86,9 +87,18 @@ describe("entityRef", () => {
         });
     });
 
+    it("creates codex refs from entry-like objects", () => {
+        expect(codexEntryEntityRef({ exportKind: " Units ", entryKey: " Unit_A " })).toEqual({
+            kind: "codex",
+            key: "units:Unit_A",
+        });
+    });
+
     it("rejects malformed codex identities", () => {
         expect(codexEntityKey("", "Entry_A")).toBeNull();
         expect(codexEntityKey("units", "   ")).toBeNull();
+        expect(codexEntryEntityRef(null)).toBeNull();
+        expect(codexEntryEntityRef({ exportKind: "units", entryKey: 10 })).toBeNull();
         expect(parseCodexEntityKey("units")).toBeNull();
         expect(parseCodexEntityKey("units:")).toBeNull();
         expect(parseCodexEntityKey("%E0%A4%A:Entry_A")).toBeNull();

@@ -26,6 +26,11 @@ export type CodexIdentity = {
     entryKey: string;
 };
 
+export type CodexEntityRefSource = {
+    exportKind?: unknown;
+    entryKey?: unknown;
+};
+
 const ENTITY_KIND_SET = new Set<string>(ENTITY_KINDS);
 const ENTITY_REF_SEPARATOR = ":";
 const CODEX_KEY_SEPARATOR = ":";
@@ -122,6 +127,12 @@ export function codexEntityRef(exportKind: string, entryKey: string): EntityRef<
         kind: "codex",
         key,
     };
+}
+
+export function codexEntryEntityRef(entry: CodexEntityRefSource | null | undefined): EntityRef<"codex"> | null {
+    if (!entry) return null;
+
+    return codexEntityRef(cleanKey(entry.exportKind), cleanKey(entry.entryKey));
 }
 
 export function parseCodexEntityRef(ref: EntityRef): CodexIdentity | null {

@@ -1,4 +1,4 @@
-import { extractBracketTokenMatches, getTokenStyle } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { diagnoseDescriptionLine } from "@/lib/descriptionLine/descriptionDiagnostics";
 
 type RawCodexEntry = {
     exportKind?: unknown;
@@ -35,19 +35,25 @@ function countTokens(rawEntries: readonly RawCodexEntry[]) {
     const knownCounts = new Map<string, number>();
     const unknownCounts = new Map<string, number>();
 
-    const addToken = (token: string) => {
-        const target = getTokenStyle(token) ? knownCounts : unknownCounts;
+    const addToken = (token: string, isKnown: boolean) => {
+        const target = isKnown ? knownCounts : unknownCounts;
         target.set(token, (target.get(token) ?? 0) + 1);
+    };
+
+    const addLineDiagnostics = (line: string) => {
+        diagnoseDescriptionLine(line).forEach((diagnostic) => {
+            if (diagnostic.kind === "malformed-token" || !diagnostic.token) return;
+
+            addToken(diagnostic.token, diagnostic.kind === "known-style-token");
+        });
     };
 
     rawEntries.forEach((entry) => {
         const displayName = toDisplayName(entry.displayName);
         const descriptionLines = toStringArray(entry.descriptionLines);
 
-        extractBracketTokenMatches(displayName).forEach((match) => addToken(match.token));
-        descriptionLines.forEach((line) => {
-            extractBracketTokenMatches(line).forEach((match) => addToken(match.token));
-        });
+        addLineDiagnostics(displayName);
+        descriptionLines.forEach(addLineDiagnostics);
     });
 
     return { knownCounts, unknownCounts };

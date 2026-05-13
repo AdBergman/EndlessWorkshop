@@ -36,4 +36,54 @@ describe("codexTokenAudit", () => {
             ].join("\n")
         );
     });
+
+    it("keeps entity-like references in the unknown token section", () => {
+        const text = createCodexTokenAuditText([
+            {
+                exportKind: "units",
+                entryKey: "Unit_Necro_Larva",
+                displayName: "[Unit_Necro_Larva] Larva",
+                descriptionLines: [
+                    "Evolves through [Unit_Necro_Drone].",
+                    "Consumes [PopulationCategory_03].",
+                ],
+                referenceKeys: [],
+            },
+        ]);
+
+        expect(text).toBe(
+            [
+                "UNKNOWN TOKENS",
+                "--------------",
+                "PopulationCategory_03 (1)",
+                "Unit_Necro_Drone (1)",
+                "Unit_Necro_Larva (1)",
+                "",
+                "KNOWN TOKENS",
+                "------------",
+            ].join("\n")
+        );
+    });
+
+    it("ignores malformed bracket diagnostics to preserve token audit output", () => {
+        const text = createCodexTokenAuditText([
+            {
+                exportKind: "improvements",
+                entryKey: "Improvement_Malformed",
+                displayName: "[   ] Internal",
+                descriptionLines: ["Broken [DustColored line", "Unexpected Dust] marker"],
+                referenceKeys: [],
+            },
+        ]);
+
+        expect(text).toBe(
+            [
+                "UNKNOWN TOKENS",
+                "--------------",
+                "",
+                "KNOWN TOKENS",
+                "------------",
+            ].join("\n")
+        );
+    });
 });
