@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import {
     BrowserRouter as Router,
     Outlet,
@@ -13,15 +13,20 @@ import InfoPage from "./components/InfoPage/InfoPage";
 import GameDataProvider from "./context/GameDataProvider";
 import { useShareProcessingGate } from "./context/appOrchestration";
 import LandscapeWrapper from "./components/Layout/LandscapeWrapper";
-import GameSummaryPage from "./components/GameSummary/GameSummaryPage";
-import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
-import AdminImportPage from "@/components/AdminImport/AdminImportPage";
-import CodexPage from "@/pages/CodexPage";
-import ModsPage from "@/pages/ModsPage";
 import PageSeo from "@/components/Seo/PageSeo";
 import { AppRouteSeoKey, publicRouteSeo } from "@/components/Seo/routeSeo";
 
 import "./App.css";
+
+const GameSummaryPage = lazy(() => import("./components/GameSummary/GameSummaryPage"));
+const UnitEvolutionExplorer = lazy(() =>
+    import("@/components/Units/UnitEvolutionExplorer").then((module) => ({
+        default: module.UnitEvolutionExplorer,
+    }))
+);
+const AdminImportPage = lazy(() => import("@/components/AdminImport/AdminImportPage"));
+const CodexPage = lazy(() => import("@/pages/CodexPage"));
+const ModsPage = lazy(() => import("@/pages/ModsPage"));
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -43,7 +48,6 @@ const useCloudflareSPA = () => {
 
 const AppLayout: React.FC = () => {
     const location = useLocation();
-    console.log("AppLayout rendering. Current path:", location.pathname);
 
     useCloudflareSPA();
 
@@ -85,71 +89,96 @@ function SeoRoute({
     );
 }
 
+function LazyRoute({ children }: { children: React.ReactNode }) {
+    return <Suspense fallback={null}>{children}</Suspense>;
+}
+
+export function AppRoutes() {
+    return (
+        <Routes>
+            <Route path="/*" element={<AppLayout />}>
+                <Route index element={<Navigate to="/tech" replace />} />
+
+                <Route
+                    path="tech"
+                    element={
+                        <SeoRoute routeKey="tech">
+                            <TechContainer />
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="units"
+                    element={
+                        <SeoRoute routeKey="units">
+                            <LazyRoute>
+                                <UnitEvolutionExplorer />
+                            </LazyRoute>
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="codex"
+                    element={
+                        <SeoRoute routeKey="codex">
+                            <LazyRoute>
+                                <CodexPage />
+                            </LazyRoute>
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="summary"
+                    element={
+                        <SeoRoute routeKey="summary">
+                            <LazyRoute>
+                                <GameSummaryPage />
+                            </LazyRoute>
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="mods"
+                    element={
+                        <SeoRoute routeKey="mods">
+                            <LazyRoute>
+                                <ModsPage />
+                            </LazyRoute>
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="info"
+                    element={
+                        <SeoRoute routeKey="info">
+                            <InfoPage />
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="admin/import"
+                    element={
+                        <LazyRoute>
+                            <AdminImportPage />
+                        </LazyRoute>
+                    }
+                />
+            </Route>
+        </Routes>
+    );
+}
+
 function App() {
     return (
         <Router>
             <GameDataProvider>
-                <Routes>
-                    <Route path="/*" element={<AppLayout />}>
-                        <Route index element={<Navigate to="/tech" replace />} />
-
-                        <Route
-                            path="tech"
-                            element={
-                                <SeoRoute routeKey="tech">
-                                    <TechContainer />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route
-                            path="units"
-                            element={
-                                <SeoRoute routeKey="units">
-                                    <UnitEvolutionExplorer />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route
-                            path="codex"
-                            element={
-                                <SeoRoute routeKey="codex">
-                                    <CodexPage />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route
-                            path="summary"
-                            element={
-                                <SeoRoute routeKey="summary">
-                                    <GameSummaryPage />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route
-                            path="mods"
-                            element={
-                                <SeoRoute routeKey="mods">
-                                    <ModsPage />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route
-                            path="info"
-                            element={
-                                <SeoRoute routeKey="info">
-                                    <InfoPage />
-                                </SeoRoute>
-                            }
-                        />
-
-                        <Route path="admin/import" element={<AdminImportPage />} />
-                    </Route>
-                </Routes>
+                <AppRoutes />
             </GameDataProvider>
         </Router>
     );
