@@ -84,6 +84,30 @@ function formatSection(title: string, counts: Map<string, number>): string[] {
     return [title, "-".repeat(title.length), ...sortedLines];
 }
 
+function downloadTextFile(text: string, downloadName: string, warningLabel: string): boolean {
+    if (typeof document === "undefined") return false;
+
+    if (typeof Blob === "undefined" || typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
+        console.warn(`[${warningLabel}] Automatic download is not available in this environment.`);
+        return false;
+    }
+
+    const blob = new Blob([text], {
+        type: "text/plain;charset=utf-8",
+    });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = href;
+    link.download = downloadName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(href);
+
+    return true;
+}
+
 function installTextDownload(
     text: string,
     {
@@ -100,23 +124,7 @@ function installTextDownload(
 
     const auditWindow = window as CodexAuditWindow;
     assignDownload(auditWindow, () => {
-        if (typeof Blob === "undefined" || typeof URL === "undefined" || typeof URL.createObjectURL !== "function") {
-            console.warn(`[${warningLabel}] Automatic download is not available in this environment.`);
-            return;
-        }
-
-        const blob = new Blob([text], {
-            type: "text/plain;charset=utf-8",
-        });
-        const href = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-
-        link.href = href;
-        link.download = downloadName;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(href);
+        downloadTextFile(text, downloadName, warningLabel);
     });
 }
 
@@ -164,6 +172,10 @@ export function createCodexTokenAuditText(rawEntries: readonly RawCodexEntry[]):
 
 export function createCodexDiagnosticsReportText(rawEntries: readonly RawCodexEntry[]): string {
     return formatCodexDiagnosticsReport(createCodexDiagnosticsReport(toCodexEntries(rawEntries)));
+}
+
+export function downloadCodexDiagnosticsReportText(reportText: string): boolean {
+    return downloadTextFile(reportText, "codex-diagnostics-report.txt", "codexDiagnostics");
 }
 
 function maybePublishCodexDiagnosticsReport(rawEntries: readonly RawCodexEntry[]): string | null {

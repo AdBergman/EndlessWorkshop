@@ -1,7 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "./AdminImportPage.css";
-import { apiClient, SeoRegenerationResult } from "@/api/apiClient";
+import { apiClient, type SeoRegenerationResult } from "@/api/apiClient";
+import {
+    createCodexDiagnosticsReportText,
+    downloadCodexDiagnosticsReportText,
+} from "@/lib/codex/codexTokenAudit";
 
 import AdminTokenPanel from "./AdminTokenPanel";
 import ImportModuleRow from "./ImportModuleRow";
@@ -13,6 +17,11 @@ type SeoActionState =
     | { status: "idle" }
     | { status: "running" }
     | { status: "success"; result: SeoRegenerationResult }
+    | { status: "error"; message: string };
+type CodexDiagnosticsActionState =
+    | { status: "idle" }
+    | { status: "running" }
+    | { status: "success"; entryCount: number }
     | { status: "error"; message: string };
 
 type TechImportFile = {
@@ -202,6 +211,8 @@ export default function AdminImportPage() {
     const [tokenStatus, setTokenStatus] = useState<TokenStatus>(() => (token ? "checking" : "missing"));
     const [tokenError, setTokenError] = useState<string | null>(null);
     const [seoActionState, setSeoActionState] = useState<SeoActionState>({ status: "idle" });
+    const [codexDiagnosticsActionState, setCodexDiagnosticsActionState] =
+        useState<CodexDiagnosticsActionState>({ status: "idle" });
 
     const modules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
         return [
@@ -304,6 +315,27 @@ export default function AdminImportPage() {
         }
     }, [token]);
 
+    const downloadCodexDiagnosticsReport = useCallback(async () => {
+        setCodexDiagnosticsActionState({ status: "running" });
+
+        try {
+            const rawEntries = await apiClient.getCodex();
+            const reportText = createCodexDiagnosticsReportText(rawEntries);
+            const downloaded = downloadCodexDiagnosticsReportText(reportText);
+
+            if (!downloaded) {
+                throw new Error("Codex diagnostics download is not available in this environment.");
+            }
+
+            setCodexDiagnosticsActionState({ status: "success", entryCount: rawEntries.length });
+        } catch (error) {
+            setCodexDiagnosticsActionState({
+                status: "error",
+                message: (error as Error)?.message ?? "Failed to download codex diagnostics report.",
+            });
+        }
+    }, []);
+
     // Validate stored token once on mount
     useEffect(() => {
         if (token) {
@@ -329,6 +361,7 @@ export default function AdminImportPage() {
     }
 
     const isUnlocked = tokenStatus === "valid";
+    const canShowCodexDiagnosticsDownload = import.meta.env.DEV;
 
     return (
         <>
@@ -418,6 +451,43 @@ export default function AdminImportPage() {
                                 <div className="admin-import-error">
                                     <div className="admin-import-errorTitle">SEO regeneration failed</div>
                                     <div>{seoActionState.message}</div>
+                                </div>
+                            ) : null}
+
+                            {canShowCodexDiagnosticsDownload ? (
+                                <div className="admin-import-row admin-import-diagnosticsRow">
+                                    <div style={{ flex: "1 1 320px" }}>
+                                        <div style={{ fontWeight: 800, marginBottom: 6 }}>Codex diagnostics</div>
+                                        <div className="admin-import-muted">
+                                            Download the current codex reference and descriptor diagnostics report.
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="admin-import-btn admin-import-btn--ghost"
+                                        disabled={codexDiagnosticsActionState.status === "running"}
+                                        onClick={() => void downloadCodexDiagnosticsReport()}
+                                    >
+                                        {codexDiagnosticsActionState.status === "running"
+                                            ? "Preparing diagnostics…"
+                                            : "Download codex diagnostics"}
+                                    </button>
+                                </div>
+                            ) : null}
+
+                            {codexDiagnosticsActionState.status === "success" ? (
+                                <div className="admin-import-success">
+                                    {`Codex diagnostics report downloaded for ${codexDiagnosticsActionState.entryCount} ${
+                                        codexDiagnosticsActionState.entryCount === 1 ? "entry" : "entries"
+                                    }.`}
+                                </div>
+                            ) : null}
+
+                            {codexDiagnosticsActionState.status === "error" ? (
+                                <div className="admin-import-error">
+                                    <div className="admin-import-errorTitle">Codex diagnostics download failed</div>
+                                    <div>{codexDiagnosticsActionState.message}</div>
                                 </div>
                             ) : null}
                         </div>
