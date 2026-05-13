@@ -47,6 +47,7 @@ export default function CodexPage() {
     const location = useLocation();
     const entries = useCodexStore((state) => state.entries);
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
+    const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
 
@@ -136,8 +137,8 @@ export default function CodexPage() {
         Boolean(codexResetNonce);
 
     const resolvedRelatedEntries = useMemo(
-        () => resolveRelatedEntries(selectedEntry, entriesByKey),
-        [selectedEntry, entriesByKey]
+        () => resolveRelatedEntries(selectedEntry, { entriesByKey, entriesByKindKey }),
+        [selectedEntry, entriesByKey, entriesByKindKey]
     );
 
     const updateSelectedEntry = useCallback(

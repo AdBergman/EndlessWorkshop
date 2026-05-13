@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
-import { buildEntriesByKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import { buildEntriesByKey, buildEntriesByKindKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -46,21 +46,6 @@ function buildEntriesByKind(entries: CodexEntry[]): Record<string, CodexEntry[]>
         }
 
         acc[entry.exportKind].push(entry);
-        return acc;
-    }, {});
-}
-
-function buildEntriesByKindKey(entries: CodexEntry[]): Record<string, Record<string, CodexEntry>> {
-    return entries.reduce<Record<string, Record<string, CodexEntry>>>((acc, entry) => {
-        const exportKind = (entry.exportKind ?? "").trim().toLowerCase();
-        const entryKey = (entry.entryKey ?? "").trim();
-        if (!exportKind || !entryKey) return acc;
-
-        if (!acc[exportKind]) {
-            acc[exportKind] = {};
-        }
-
-        acc[exportKind][entryKey] = entry;
         return acc;
     }, {});
 }
@@ -154,7 +139,10 @@ export const useCodexStore = create<Store>((set, get) => ({
     },
 
     getRelatedEntries: (entry) => {
-        return resolveRelatedEntries(entry, get().entriesByKey);
+        return resolveRelatedEntries(entry, {
+            entriesByKey: get().entriesByKey,
+            entriesByKindKey: get().entriesByKindKey,
+        });
     },
 
     searchEntries: (query, kind) => {
