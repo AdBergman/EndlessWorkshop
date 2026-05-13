@@ -138,4 +138,41 @@ describe("formatTechUnlocks", () => {
             unitsByKey,
         })).toBe("Unit: Scout");
     });
+
+    it("includes backend Unit unlockType rows in formatted tech exports", () => {
+        const tech: Tech = {
+            ...baseTech,
+            unlocks: [
+                {
+                    unlockType: "Unit",
+                    unlockKey: "Unit_Scout",
+                },
+            ],
+        };
+        const unitsByKey: Record<string, Unit> = {
+            Unit_Scout: {
+                unitKey: "Unit_Scout",
+                displayName: "Scout",
+                artId: null,
+                faction: null,
+                isMajorFaction: true,
+                isHero: false,
+                isChosen: false,
+                spawnType: null,
+                previousUnitKey: null,
+                nextEvolutionUnitKeys: [],
+                evolutionTierIndex: null,
+                unitClassKey: null,
+                attackSkillKey: null,
+                abilityKeys: [],
+                descriptionLines: [],
+            },
+        };
+
+        expect(formatTechUnlocks(tech, {
+            districtsByKey: {},
+            improvementsByKey: {},
+            unitsByKey,
+        })).toBe("Unit: Scout");
+    });
 });

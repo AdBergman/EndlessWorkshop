@@ -40,12 +40,12 @@ export function formatTechUnlocks(
 
     return (tech.unlocks ?? [])
         .map((u) => ({
-            type: (u.unlockType ?? "").trim().toUpperCase(),
+            type: (u.unlockType ?? "").trim(),
             key: (u.unlockKey ?? "").trim(),
             unlockCategory: u.unlockCategory,
             constructibleKind: u.constructibleKind,
         }))
-        .filter((u) => u.type === "CONSTRUCTIBLE" && !!u.key)
+        .filter((u) => !!u.key)
         .map((u) => {
             const resolved = resolveConstructibleUnlock(
                 {

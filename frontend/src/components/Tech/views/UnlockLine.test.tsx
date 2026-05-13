@@ -135,4 +135,40 @@ describe("UnlockLine district/improvement resolution", () => {
         expect(screen.getByText(/Unit:/)).toBeInTheDocument();
         expect(screen.getByText("Scout")).toBeInTheDocument();
     });
+
+    it("renders backend Unit unlockType lines through the centralized resolver", () => {
+        useUnitStore.setState({
+            unitsByKey: {
+                Unit_Scout: {
+                    unitKey: "Unit_Scout",
+                    displayName: "Scout",
+                    artId: null,
+                    faction: "Kin",
+                    isMajorFaction: true,
+                    isHero: false,
+                    isChosen: false,
+                    spawnType: null,
+                    previousUnitKey: null,
+                    nextEvolutionUnitKeys: [],
+                    evolutionTierIndex: 1,
+                    unitClassKey: null,
+                    attackSkillKey: null,
+                    abilityKeys: [],
+                    descriptionLines: [],
+                },
+            },
+        });
+
+        render(
+            <UnlockLine
+                unlock={{
+                    unlockType: "Unit",
+                    unlockKey: "Unit_Scout",
+                }}
+            />
+        );
+
+        expect(screen.getByText(/Unit:/)).toBeInTheDocument();
+        expect(screen.getByText("Scout")).toBeInTheDocument();
+    });
 });

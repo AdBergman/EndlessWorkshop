@@ -11,21 +11,20 @@ interface UnlockLineProps {
 }
 
 const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
-    const unlockType = (unlock.unlockType ?? "").trim().toUpperCase();
     const unlockKey = (unlock.unlockKey ?? "").trim();
     const districtsByKey = useDistrictStore(selectDistrictsByKey);
     const improvementsByKey = useImprovementStore(selectImprovementsByKey);
     const unitsByKey = useUnitStore(selectUnitsByKey);
 
     const resolved = useMemo(() => {
-        if (!unlockKey || unlockType !== "CONSTRUCTIBLE") return null;
+        if (!unlockKey) return null;
 
         return resolveConstructibleUnlock(unlock, {
             districtsByKey,
             improvementsByKey,
             unitsByKey,
         });
-    }, [unlock, unlockKey, unlockType, districtsByKey, improvementsByKey, unitsByKey]);
+    }, [unlock, unlockKey, districtsByKey, improvementsByKey, unitsByKey]);
 
     if (!resolved) return null;
 
