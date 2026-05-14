@@ -65,3 +65,6 @@ yarn-error.log*
 
 # SEO
 /generated-seo/
+
+# Local exporter imports for dev/Codex startup loading
+/local-imports/
