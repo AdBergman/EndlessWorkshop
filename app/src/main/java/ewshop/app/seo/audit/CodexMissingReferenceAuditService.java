@@ -656,7 +656,12 @@ public class CodexMissingReferenceAuditService {
             String key = trimToEmpty(referenceKey);
             CodexFilterResult.CodexFilterSkip filteredEntry = filteredByEntryKey.get(key);
             if (filteredEntry != null) {
-                return new ReferenceOwnership(PRESENT_BUT_FILTERED, filteredEntry.reason(), List.of());
+                String relationTargetEntryKey = trimToEmpty(filteredEntry.relationTargetEntryKey());
+                return new ReferenceOwnership(
+                        PRESENT_BUT_FILTERED,
+                        filteredEntry.reason(),
+                        relationTargetEntryKey.isBlank() ? List.of() : List.of(relationTargetEntryKey)
+                );
             }
 
             if (isInternalNoiseReference(key)) {

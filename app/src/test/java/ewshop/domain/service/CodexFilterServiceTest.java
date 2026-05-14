@@ -63,6 +63,7 @@ class CodexFilterServiceTest {
             assertThat(skip.reason()).isEqualTo("duplicate-slug");
             assertThat(skip.entryKey()).isEqualTo("Technology_District_Tier1_Defense");
             assertThat(skip.exportKind()).isEqualTo("tech");
+            assertThat(skip.relationTargetEntryKey()).isEqualTo("Technology_City_Tier3_Defense");
         });
         assertThat(result.skippedByReason()).containsEntry("duplicate-slug", 1);
         assertThat(result.skippedByReason()).containsEntry("filtered-out", 1);

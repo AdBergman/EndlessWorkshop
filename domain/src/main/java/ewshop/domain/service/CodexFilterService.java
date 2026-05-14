@@ -71,7 +71,13 @@ public class CodexFilterService {
 
                     String duplicateKey = normalizedExportKind + "::" + slug;
                     if (seenByKindAndSlug.containsKey(duplicateKey)) {
-                        recordSkip(skippedEntries, skippedByReason, entry, DUPLICATE_SLUG);
+                        recordSkip(
+                                skippedEntries,
+                                skippedByReason,
+                                entry,
+                                DUPLICATE_SLUG,
+                                trimToEmpty(seenByKindAndSlug.get(duplicateKey).entry().getEntryKey())
+                        );
                         return;
                     }
 
@@ -103,11 +109,22 @@ public class CodexFilterService {
             Codex entry,
             String reason
     ) {
+        recordSkip(skippedEntries, skippedByReason, entry, reason, "");
+    }
+
+    private static void recordSkip(
+            List<CodexFilterSkip> skippedEntries,
+            Map<String, Integer> skippedByReason,
+            Codex entry,
+            String reason,
+            String relationTargetEntryKey
+    ) {
         skippedEntries.add(new CodexFilterSkip(
                 trimToEmpty(entry.getExportKind()),
                 trimToEmpty(entry.getEntryKey()),
                 trimToEmpty(entry.getDisplayName()),
-                reason
+                reason,
+                trimToEmpty(relationTargetEntryKey)
         ));
         skippedByReason.merge(reason, 1, Integer::sum);
     }

@@ -32,7 +32,8 @@ public record CodexFilterResult(
             String exportKind,
             String entryKey,
             String displayName,
-            String reason
+            String reason,
+            String relationTargetEntryKey
     ) {
     }
 }
