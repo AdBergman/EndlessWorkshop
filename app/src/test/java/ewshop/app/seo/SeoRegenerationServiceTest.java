@@ -365,6 +365,56 @@ class SeoRegenerationServiceTest {
                 .contains("\"isolatedKindAnalysis\": [");
     }
 
+    @Test
+    void missingReferenceAuditClassifiesOwnershipOfUnresolvedReferences() throws Exception {
+        CodexService codexService = mock(CodexService.class);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator);
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("abilities", "UnitAbility_FlightBase", "Flight",
+                        List.of("Baseline flight entry kept by duplicate-slug filtering."),
+                        List.of()),
+                codexEntry("abilities", "UnitAbility_Fly", "Flight",
+                        List.of("Duplicate flight entry that remains imported but filtered."),
+                        List.of()),
+                codexEntry("populations", "Population_Minor_Ametrine", "Ametrine",
+                        List.of("Ametrine population exists under a population key."),
+                        List.of()),
+                codexEntry("units", "Unit_A", "Alpha",
+                        List.of("Alpha references filtered, near-match, internal, and absent keys."),
+                        List.of(
+                                "UnitAbility_Fly",
+                                "MinorFaction_Ametrine",
+                                "UnitAbility_LandMovement",
+                                "Missing_Clear"
+                        ))
+        ));
+
+        service.regeneratePrototypePages();
+
+        String json = Files.readString(tempDir.resolve("codex-missing-references-audit.json"));
+        String markdown = Files.readString(tempDir.resolve("codex-missing-references-audit.md"));
+
+        assertThat(json)
+                .contains("\"schemaVersion\": 2")
+                .contains("\"ownershipClassification\": [")
+                .contains("\"classification\": \"absent-from-import\"")
+                .contains("\"referenceKey\": \"Missing_Clear\"")
+                .contains("\"classification\": \"present-but-filtered\"")
+                .contains("\"referenceKey\": \"UnitAbility_Fly\"")
+                .contains("\"filterReasons\": {\n                \"duplicate-slug\": 1")
+                .contains("\"classification\": \"near-match / present-under-other-key\"")
+                .contains("\"referenceKey\": \"MinorFaction_Ametrine\"")
+                .contains("\"nearMatches\": [\n                    \"Population_Minor_Ametrine\"")
+                .contains("\"classification\": \"internal/noise\"")
+                .contains("\"referenceKey\": \"UnitAbility_LandMovement\"");
+        assertThat(markdown)
+                .contains("## Ownership classification")
+                .contains("present-but-filtered: 1 unresolved reference(s)")
+                .contains("Filter reasons: {duplicate-slug=1}");
+    }
+
     private static Codex codexEntry(
             String exportKind,
             String entryKey,

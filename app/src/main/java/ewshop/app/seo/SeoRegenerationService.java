@@ -64,7 +64,7 @@ public class SeoRegenerationService {
         List<PageCandidate> candidates = buildPageCandidates(filterResult);
         Map<String, ReferenceTarget> referenceTargetsByEntryKey = referenceTargetBuilder.buildReferenceTargets(candidates);
         CodexMissingReferenceAuditService.CodexMissingReferenceAudit missingReferenceAudit =
-                missingReferenceAuditService.generate(candidates, referenceTargetsByEntryKey);
+                missingReferenceAuditService.generate(candidates, referenceTargetsByEntryKey, filterResult);
 
         rebuildGeneratedPages(candidates, referenceTargetsByEntryKey);
 
