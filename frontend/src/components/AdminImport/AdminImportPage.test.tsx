@@ -38,6 +38,26 @@ const importSummary = (importKind: string) => ({
     durationMs: 1,
 });
 
+const seoResult = () => ({
+    generatedCount: 3,
+    generatedRoutes: [
+        "/codex/units/Unit_Roving_Clans_Trade_Master_That_Should_Not_Render",
+        "/codex/tech/Technology_Era_01_Workshop_That_Should_Not_Render",
+        "/codex/districts/District_Market_That_Should_Not_Render",
+    ],
+    skippedCount: 1,
+    duplicateCount: 0,
+    skippedByReason: {},
+    exportKindCounts: {
+        units: { generatedCount: 1, skippedCount: 0, duplicateCount: 0 },
+        tech: { generatedCount: 1, skippedCount: 1, duplicateCount: 0 },
+        districts: { generatedCount: 1, skippedCount: 0, duplicateCount: 0 },
+    },
+    warnings: [],
+    errors: [],
+    sitemapUpdated: true,
+});
+
 function jsonResponse(body: unknown, status = 200) {
     return {
         ok: status >= 200 && status < 300,
@@ -217,6 +237,10 @@ describe("AdminImportPage", () => {
         await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
 
         await screen.findByText(/2 supported export file\(s\) imported\. 1 unsupported file\(s\) skipped\./i);
+        expect(screen.queryByText(unsupported.name)).not.toBeInTheDocument();
+        expect(screen.queryByText("Unsupported raw export kind \"battleskills\".")).not.toBeInTheDocument();
+        expect(screen.getByText(units.name)).toBeInTheDocument();
+        expect(screen.getByText(tech.name)).toBeInTheDocument();
 
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
         expect(postCalls.map(([url]) => url)).toEqual([
@@ -271,5 +295,23 @@ describe("AdminImportPage", () => {
         expect(screen.getByText("Units")).toBeInTheDocument();
         expect(screen.getByText("Techs")).toBeInTheDocument();
         expect(screen.getByText("Codex")).toBeInTheDocument();
+    });
+
+    it("renders SEO generation as a concise summary without route key lists", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.regenerateSeoPagesAdmin.mockResolvedValue(seoResult());
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        await user.click(screen.getByRole("button", { name: /Regenerate SEO pages/i }));
+
+        await screen.findByText(/Generated 3 page\(s\), skipped 1, sitemap updated: yes\./i);
+        expect(screen.getByText(/By kind:/i)).toHaveTextContent("districts: 1 generated");
+        expect(screen.getByText(/By kind:/i)).toHaveTextContent("tech: 1 generated, 1 skipped");
+        expect(screen.getByText(/By kind:/i)).toHaveTextContent("units: 1 generated");
+        expect(screen.queryByText(/Unit_Roving_Clans_Trade_Master_That_Should_Not_Render/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/Technology_Era_01_Workshop_That_Should_Not_Render/i)).not.toBeInTheDocument();
+        expect(screen.queryByText(/^Routes:/i)).not.toBeInTheDocument();
     });
 });

@@ -599,6 +599,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                     ? `${importedCount} supported export file(s) imported. ${skippedCount} skipped, ${validationCount} validation issue(s), ${failedCount} import failure(s).${refreshFailures.length > 0 ? ` Refresh warning: ${refreshFailures.join(" | ")}` : ""}`
                     : `${importedCount} supported export file(s) imported. ${skippedCount} unsupported file(s) skipped.`,
         });
+        setBulkExportFiles((prev) => prev.filter((file) => file.status !== "skipped"));
         setImportState({ status: "idle" });
     }, [bulkExportFiles, token]);
 

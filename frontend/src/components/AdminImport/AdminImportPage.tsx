@@ -203,6 +203,27 @@ async function checkAdminToken(token: string): Promise<{ ok: boolean; message?: 
     }
 }
 
+function formatSeoKindCounts(result: SeoRegenerationResult): string | null {
+    const counts = result.exportKindCounts;
+    if (!counts || Object.keys(counts).length === 0) {
+        return null;
+    }
+
+    return Object.entries(counts)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([kind, kindCounts]) => {
+            const parts = [`${kind}: ${kindCounts.generatedCount} generated`];
+            if (kindCounts.skippedCount > 0) {
+                parts.push(`${kindCounts.skippedCount} skipped`);
+            }
+            if (kindCounts.duplicateCount > 0) {
+                parts.push(`${kindCounts.duplicateCount} duplicate`);
+            }
+            return parts.join(", ");
+        })
+        .join(" | ");
+}
+
 export default function AdminImportPage() {
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";
@@ -446,19 +467,20 @@ export default function AdminImportPage() {
                                 <div className="admin-import-success">
                                     <div style={{ fontWeight: 800, marginBottom: 6 }}>SEO pages regenerated</div>
                                     <div>
-                                        Generated {seoActionState.result.generatedCount} page(s), skipped {seoActionState.result.skippedCount}, sitemap updated:{" "}
+                                        Generated {seoActionState.result.generatedCount} page(s), skipped {seoActionState.result.skippedCount}
+                                        {seoActionState.result.duplicateCount ? `, duplicates ${seoActionState.result.duplicateCount}` : ""}, sitemap updated:{" "}
                                         {seoActionState.result.sitemapUpdated ? "yes" : "no"}.
                                     </div>
+                                    {formatSeoKindCounts(seoActionState.result) ? (
+                                        <div className="admin-import-seoSummary">
+                                            By kind: {formatSeoKindCounts(seoActionState.result)}
+                                        </div>
+                                    ) : null}
                                     {seoActionState.result.missingReferenceAudit ? (
                                         <div className="admin-import-seoSummary">
                                             Missing-reference audit: {seoActionState.result.missingReferenceAudit.unresolvedReferences} unresolved,{" "}
                                             {seoActionState.result.missingReferenceAudit.resolutionPercentage}% resolved. Top categories:{" "}
                                             {seoActionState.result.missingReferenceAudit.topUnresolvedCategories.join(", ") || "none"}.
-                                        </div>
-                                    ) : null}
-                                    {seoActionState.result.generatedRoutes.length > 0 ? (
-                                        <div className="admin-import-seoSummary">
-                                            Routes: {seoActionState.result.generatedRoutes.join(", ")}
                                         </div>
                                     ) : null}
                                     {seoActionState.result.warnings.length > 0 ? (
