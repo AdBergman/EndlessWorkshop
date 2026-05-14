@@ -27,6 +27,22 @@ export type SeoRegenerationResult = {
         unresolvedReferences: number;
         resolutionPercentage: number;
         topUnresolvedCategories: string[];
+        ownershipBuckets?: Array<{
+            classification: string;
+            unresolvedCount: number;
+            uniqueReferenceKeys: number;
+            percentageOfTotalUnresolved: number;
+            owner: string;
+        }>;
+        duplicateAliasImpact?: {
+            resolvedReferences: number;
+            uniqueReferenceKeys: number;
+            examples: string[];
+        };
+        presentButFilteredReasons?: Array<{
+            reason: string;
+            unresolvedCount: number;
+        }>;
     };
     exportKindCounts?: Record<
         string,

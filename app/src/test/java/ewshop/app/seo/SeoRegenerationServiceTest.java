@@ -115,12 +115,16 @@ class SeoRegenerationServiceTest {
                 "districts", new SeoRegenerationKindResult(1, 1, 0),
                 "improvements", new SeoRegenerationKindResult(1, 0, 0)
         ));
-        assertThat(result.missingReferenceAudit()).isEqualTo(new CodexMissingReferenceAuditSummary(
-                "codex-missing-references-audit.json",
-                4,
-                50.0,
-                List.of("District: 2", "City: 1", "Unclassified: 1")
-        ));
+        CodexMissingReferenceAuditSummary missingReferenceAudit = result.missingReferenceAudit();
+        assertThat(missingReferenceAudit.artifact()).isEqualTo("codex-missing-references-audit.json");
+        assertThat(missingReferenceAudit.unresolvedReferences()).isEqualTo(4);
+        assertThat(missingReferenceAudit.resolutionPercentage()).isEqualTo(50.0);
+        assertThat(missingReferenceAudit.topUnresolvedCategories())
+                .containsExactly("District: 2", "City: 1", "Unclassified: 1");
+        assertThat(missingReferenceAudit.ownershipBuckets())
+                .extracting(CodexMissingReferenceAuditSummary.CodexMissingReferenceOwnershipSummary::classification)
+                .contains("absent-from-import");
+        assertThat(missingReferenceAudit.duplicateAliasImpact().resolvedReferences()).isZero();
         assertThat(result.warnings()).anySatisfy(warning ->
                 assertThat(warning).contains("Technology_District_Tier1_Defense"));
         assertThat(result.warnings()).anySatisfy(warning ->
@@ -391,10 +395,11 @@ class SeoRegenerationServiceTest {
                         ))
         ));
 
-        service.regeneratePrototypePages();
+        SeoRegenerationResult result = service.regeneratePrototypePages();
 
         String json = Files.readString(tempDir.resolve("codex-missing-references-audit.json"));
         String markdown = Files.readString(tempDir.resolve("codex-missing-references-audit.md"));
+        CodexMissingReferenceAuditSummary summary = result.missingReferenceAudit();
 
         assertThat(json)
                 .contains("\"schemaVersion\": 2")
@@ -413,6 +418,22 @@ class SeoRegenerationServiceTest {
                 .contains("## Ownership classification")
                 .contains("present-but-filtered: 1 unresolved reference(s)")
                 .contains("Filter reasons: {duplicate-slug=1}");
+        assertThat(summary.ownershipBuckets())
+                .extracting(CodexMissingReferenceAuditSummary.CodexMissingReferenceOwnershipSummary::classification)
+                .containsExactly(
+                        "absent-from-import",
+                        "internal/noise",
+                        "near-match / present-under-other-key",
+                        "present-but-filtered"
+                );
+        assertThat(summary.presentButFilteredReasons())
+                .containsExactly(new CodexMissingReferenceAuditSummary.CodexPresentButFilteredReasonSummary(
+                        "duplicate-slug",
+                        1
+                ));
+        assertThat(summary.duplicateAliasImpact().resolvedReferences()).isEqualTo(1);
+        assertThat(summary.duplicateAliasImpact().examples())
+                .containsExactly("UnitAbility_Fly -> UnitAbility_FlightBase: 1");
     }
 
     private static Codex codexEntry(

@@ -2,6 +2,9 @@ package ewshop.app.seo;
 
 import ewshop.api.config.AdminTokenFilter;
 import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
+import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary.CodexDuplicateAliasImpactSummary;
+import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary.CodexMissingReferenceOwnershipSummary;
+import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary.CodexPresentButFilteredReasonSummary;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -61,7 +64,20 @@ class SeoAdminControllerTest {
                         "codex-missing-references-audit.json",
                         2,
                         75.0,
-                        List.of("District: 2")
+                        List.of("District: 2"),
+                        List.of(new CodexMissingReferenceOwnershipSummary(
+                                "present-but-filtered",
+                                2,
+                                1,
+                                100.0,
+                                "EWShop codex diagnostics/filtering"
+                        )),
+                        new CodexDuplicateAliasImpactSummary(
+                                2,
+                                1,
+                                List.of("UnitAbility_Fly -> UnitAbility_FlightBase: 2")
+                        ),
+                        List.of(new CodexPresentButFilteredReasonSummary("duplicate-slug", 2))
                 ),
                 List.of(),
                 List.of(),
@@ -82,6 +98,11 @@ class SeoAdminControllerTest {
                 .andExpect(jsonPath("$.missingReferenceAudit.artifact").value("codex-missing-references-audit.json"))
                 .andExpect(jsonPath("$.missingReferenceAudit.unresolvedReferences").value(2))
                 .andExpect(jsonPath("$.missingReferenceAudit.topUnresolvedCategories[0]").value("District: 2"))
+                .andExpect(jsonPath("$.missingReferenceAudit.ownershipBuckets[0].classification").value("present-but-filtered"))
+                .andExpect(jsonPath("$.missingReferenceAudit.ownershipBuckets[0].owner").value("EWShop codex diagnostics/filtering"))
+                .andExpect(jsonPath("$.missingReferenceAudit.duplicateAliasImpact.resolvedReferences").value(2))
+                .andExpect(jsonPath("$.missingReferenceAudit.duplicateAliasImpact.examples[0]").value("UnitAbility_Fly -> UnitAbility_FlightBase: 2"))
+                .andExpect(jsonPath("$.missingReferenceAudit.presentButFilteredReasons[0].reason").value("duplicate-slug"))
                 .andExpect(jsonPath("$.sitemapUpdated").value(true));
 
         verify(seoRegenerationService).regeneratePrototypePages();

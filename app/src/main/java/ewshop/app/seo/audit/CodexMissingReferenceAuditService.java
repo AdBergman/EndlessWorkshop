@@ -204,8 +204,78 @@ public class CodexMissingReferenceAuditService {
                 audit.unresolvedReferencesByCategory().stream()
                         .limit(5)
                         .map(category -> category.categoryPrefix() + ": " + category.unresolvedCount())
+                        .toList(),
+                ownershipSummaries(audit),
+                duplicateAliasImpact(audit),
+                presentButFilteredReasons(audit)
+        );
+    }
+
+    private List<CodexMissingReferenceAuditSummary.CodexMissingReferenceOwnershipSummary> ownershipSummaries(
+            CodexMissingReferenceAudit audit
+    ) {
+        return audit.ownershipClassification().stream()
+                .map(ownership -> new CodexMissingReferenceAuditSummary.CodexMissingReferenceOwnershipSummary(
+                        ownership.classification(),
+                        ownership.unresolvedCount(),
+                        ownership.uniqueReferenceKeys(),
+                        ownership.percentageOfTotalUnresolved(),
+                        ownerFor(ownership.classification())
+                ))
+                .toList();
+    }
+
+    private CodexMissingReferenceAuditSummary.CodexDuplicateAliasImpactSummary duplicateAliasImpact(
+            CodexMissingReferenceAudit audit
+    ) {
+        List<CodexMissingReferenceOwnershipExample> duplicateAliasExamples = audit.ownershipClassification().stream()
+                .filter(ownership -> "present-but-filtered".equals(ownership.classification()))
+                .flatMap(ownership -> ownership.examples().stream())
+                .filter(example -> "duplicate-slug".equals(example.filterReason()))
+                .filter(example -> !example.nearMatches().isEmpty())
+                .sorted(Comparator
+                        .comparingInt(CodexMissingReferenceOwnershipExample::unresolvedCount).reversed()
+                        .thenComparing(CodexMissingReferenceOwnershipExample::referenceKey, String.CASE_INSENSITIVE_ORDER))
+                .toList();
+
+        int resolvedReferences = duplicateAliasExamples.stream()
+                .mapToInt(CodexMissingReferenceOwnershipExample::unresolvedCount)
+                .sum();
+
+        return new CodexMissingReferenceAuditSummary.CodexDuplicateAliasImpactSummary(
+                resolvedReferences,
+                duplicateAliasExamples.size(),
+                duplicateAliasExamples.stream()
+                        .limit(5)
+                        .map(example -> example.referenceKey() + " -> " + example.nearMatches().get(0)
+                                + ": " + example.unresolvedCount())
                         .toList()
         );
+    }
+
+    private List<CodexMissingReferenceAuditSummary.CodexPresentButFilteredReasonSummary> presentButFilteredReasons(
+            CodexMissingReferenceAudit audit
+    ) {
+        return audit.ownershipClassification().stream()
+                .filter(ownership -> "present-but-filtered".equals(ownership.classification()))
+                .flatMap(ownership -> ownership.filterReasons().entrySet().stream())
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed()
+                        .thenComparing(Map.Entry.comparingByKey(String.CASE_INSENSITIVE_ORDER)))
+                .map(entry -> new CodexMissingReferenceAuditSummary.CodexPresentButFilteredReasonSummary(
+                        entry.getKey(),
+                        entry.getValue()
+                ))
+                .toList();
+    }
+
+    private static String ownerFor(String classification) {
+        return switch (classification) {
+            case "absent-from-import" -> "C# exporter / EL2 mapping";
+            case "present-but-filtered" -> "EWShop codex diagnostics/filtering";
+            case "near-match / present-under-other-key" -> "C# exporter / EL2 mapping";
+            case "internal/noise" -> "C# exporter / EL2 mapping policy";
+            default -> "Needs triage";
+        };
     }
 
     public String renderJson(CodexMissingReferenceAudit audit) {

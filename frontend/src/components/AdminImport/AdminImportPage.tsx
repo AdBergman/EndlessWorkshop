@@ -224,6 +224,38 @@ function formatSeoKindCounts(result: SeoRegenerationResult): string | null {
         .join(" | ");
 }
 
+function formatOwnershipBuckets(audit: NonNullable<SeoRegenerationResult["missingReferenceAudit"]>): string | null {
+    const buckets = audit.ownershipBuckets ?? [];
+    if (buckets.length === 0) {
+        return null;
+    }
+
+    return buckets
+        .map((bucket) => {
+            return `${bucket.classification}: ${bucket.unresolvedCount} unresolved / ${bucket.uniqueReferenceKeys} key(s), owner: ${bucket.owner}`;
+        })
+        .join(" | ");
+}
+
+function formatPresentButFilteredReasons(audit: NonNullable<SeoRegenerationResult["missingReferenceAudit"]>): string | null {
+    const reasons = audit.presentButFilteredReasons ?? [];
+    if (reasons.length === 0) {
+        return null;
+    }
+
+    return reasons.map((reason) => `${reason.reason}: ${reason.unresolvedCount}`).join(" | ");
+}
+
+function formatDuplicateAliasImpact(audit: NonNullable<SeoRegenerationResult["missingReferenceAudit"]>): string | null {
+    const impact = audit.duplicateAliasImpact;
+    if (!impact || impact.resolvedReferences <= 0) {
+        return null;
+    }
+
+    const examples = impact.examples.length > 0 ? ` Examples: ${impact.examples.join(", ")}.` : "";
+    return `${impact.resolvedReferences} in-app reference(s) can resolve through ${impact.uniqueReferenceKeys} duplicate-slug alias target(s).${examples}`;
+}
+
 export default function AdminImportPage() {
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";
@@ -481,6 +513,26 @@ export default function AdminImportPage() {
                                             Missing-reference audit: {seoActionState.result.missingReferenceAudit.unresolvedReferences} unresolved,{" "}
                                             {seoActionState.result.missingReferenceAudit.resolutionPercentage}% resolved. Top categories:{" "}
                                             {seoActionState.result.missingReferenceAudit.topUnresolvedCategories.join(", ") || "none"}.
+                                        </div>
+                                    ) : null}
+                                    {seoActionState.result.missingReferenceAudit &&
+                                    formatOwnershipBuckets(seoActionState.result.missingReferenceAudit) ? (
+                                        <div className="admin-import-seoSummary">
+                                            Ownership buckets: {formatOwnershipBuckets(seoActionState.result.missingReferenceAudit)}
+                                        </div>
+                                    ) : null}
+                                    {seoActionState.result.missingReferenceAudit &&
+                                    formatDuplicateAliasImpact(seoActionState.result.missingReferenceAudit) ? (
+                                        <div className="admin-import-seoSummary">
+                                            Duplicate alias impact:{" "}
+                                            {formatDuplicateAliasImpact(seoActionState.result.missingReferenceAudit)}
+                                        </div>
+                                    ) : null}
+                                    {seoActionState.result.missingReferenceAudit &&
+                                    formatPresentButFilteredReasons(seoActionState.result.missingReferenceAudit) ? (
+                                        <div className="admin-import-seoSummary">
+                                            Present-but-filtered reasons:{" "}
+                                            {formatPresentButFilteredReasons(seoActionState.result.missingReferenceAudit)}
                                         </div>
                                     ) : null}
                                     {seoActionState.result.warnings.length > 0 ? (

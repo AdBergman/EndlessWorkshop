@@ -48,6 +48,41 @@ const seoResult = () => ({
     skippedCount: 1,
     duplicateCount: 0,
     skippedByReason: {},
+    missingReferenceAudit: {
+        artifact: "codex-missing-references-audit.json",
+        unresolvedReferences: 4,
+        resolutionPercentage: 56.4,
+        topUnresolvedCategories: ["UnitAbility: 2", "MinorFaction: 1", "Missing: 1"],
+        ownershipBuckets: [
+            {
+                classification: "internal/noise",
+                unresolvedCount: 2,
+                uniqueReferenceKeys: 2,
+                percentageOfTotalUnresolved: 50.0,
+                owner: "C# exporter / EL2 mapping policy",
+            },
+            {
+                classification: "near-match / present-under-other-key",
+                unresolvedCount: 1,
+                uniqueReferenceKeys: 1,
+                percentageOfTotalUnresolved: 25.0,
+                owner: "C# exporter / EL2 mapping",
+            },
+            {
+                classification: "present-but-filtered",
+                unresolvedCount: 1,
+                uniqueReferenceKeys: 1,
+                percentageOfTotalUnresolved: 25.0,
+                owner: "EWShop codex diagnostics/filtering",
+            },
+        ],
+        duplicateAliasImpact: {
+            resolvedReferences: 1,
+            uniqueReferenceKeys: 1,
+            examples: ["UnitAbility_Fly -> UnitAbility_FlightBase: 1"],
+        },
+        presentButFilteredReasons: [{ reason: "duplicate-slug", unresolvedCount: 1 }],
+    },
     exportKindCounts: {
         units: { generatedCount: 1, skippedCount: 0, duplicateCount: 0 },
         tech: { generatedCount: 1, skippedCount: 1, duplicateCount: 0 },
@@ -310,6 +345,19 @@ describe("AdminImportPage", () => {
         expect(screen.getByText(/By kind:/i)).toHaveTextContent("districts: 1 generated");
         expect(screen.getByText(/By kind:/i)).toHaveTextContent("tech: 1 generated, 1 skipped");
         expect(screen.getByText(/By kind:/i)).toHaveTextContent("units: 1 generated");
+        expect(screen.getByText(/Missing-reference audit:/i)).toHaveTextContent(
+            "4 unresolved, 56.4% resolved"
+        );
+        expect(screen.getByText(/Ownership buckets:/i)).toHaveTextContent(
+            "internal/noise: 2 unresolved / 2 key(s), owner: C# exporter / EL2 mapping policy"
+        );
+        expect(screen.getByText(/Ownership buckets:/i)).toHaveTextContent(
+            "present-but-filtered: 1 unresolved / 1 key(s), owner: EWShop codex diagnostics/filtering"
+        );
+        expect(screen.getByText(/Duplicate alias impact:/i)).toHaveTextContent(
+            "1 in-app reference(s) can resolve through 1 duplicate-slug alias target(s)"
+        );
+        expect(screen.getByText(/Present-but-filtered reasons:/i)).toHaveTextContent("duplicate-slug: 1");
         expect(screen.queryByText(/Unit_Roving_Clans_Trade_Master_That_Should_Not_Render/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/Technology_Era_01_Workshop_That_Should_Not_Render/i)).not.toBeInTheDocument();
         expect(screen.queryByText(/^Routes:/i)).not.toBeInTheDocument();
