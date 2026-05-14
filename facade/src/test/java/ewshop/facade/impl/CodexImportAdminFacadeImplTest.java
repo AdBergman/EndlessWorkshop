@@ -52,6 +52,36 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_acceptsMinorFactionsAndTraitsKinds() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "0.4.0",
+                "2026-05-02T07:42:00Z",
+                "minorFactions",
+                List.of(new CodexImportEntryDto("MinorFaction_A", "Minor Faction A", List.of("Line"), List.of()))
+        ));
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "0.4.0",
+                "2026-05-02T07:42:00Z",
+                "traits",
+                List.of(new CodexImportEntryDto("Trait_A", "Trait A", List.of("Line"), List.of()))
+        ));
+
+        assertEquals(List.of("minorFactions", "traits"), codexImportService.capturedExportKinds);
+        assertEquals(2, codexService.getAllCalls);
+    }
+
+    @Test
     void importCodex_rejectsUnsupportedExportKind() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
         RecordingCodexService codexService = new RecordingCodexService();
@@ -136,6 +166,7 @@ class CodexImportAdminFacadeImplTest {
     private static final class RecordingCodexImportService extends CodexImportService {
         private final ImportResult result;
         private List<CodexImportSnapshot> capturedSnapshots = List.of();
+        private final List<String> capturedExportKinds = new ArrayList<>();
         private boolean called;
 
         private RecordingCodexImportService(ImportResult result) {
@@ -147,6 +178,9 @@ class CodexImportAdminFacadeImplTest {
         public ImportResult importCodex(List<CodexImportSnapshot> snapshots) {
             this.called = true;
             this.capturedSnapshots = new ArrayList<>(snapshots);
+            snapshots.stream()
+                    .map(CodexImportSnapshot::exportKind)
+                    .forEach(capturedExportKinds::add);
             return result;
         }
     }

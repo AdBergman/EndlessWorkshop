@@ -27,7 +27,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -36,7 +40,7 @@ import java.util.stream.Stream;
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);
-    private static final List<String> SUPPORTED_CODEX_EXPORT_KINDS = List.of(
+    private static final List<String> SUPPORTED_CODEX_EXPORT_KIND_LABELS = List.of(
             "abilities",
             "councilors",
             "districts",
@@ -44,10 +48,15 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             "factions",
             "heroes",
             "improvements",
+            "minorFactions",
             "populations",
             "tech",
+            "traits",
             "units"
     );
+    private static final Set<String> SUPPORTED_CODEX_EXPORT_KINDS = SUPPORTED_CODEX_EXPORT_KIND_LABELS.stream()
+            .map(kind -> kind.toLowerCase(Locale.ROOT))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
 
     private final LocalStartupImportProperties properties;
     private final ObjectMapper objectMapper;
@@ -224,7 +233,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                 "Local startup import skipped unsupported codex file {} with exportKind='{}'. Supported codex kinds are: {}.",
                 file.toAbsolutePath().normalize(),
                 exportKind == null ? "missing" : exportKind,
-                SUPPORTED_CODEX_EXPORT_KINDS
+                SUPPORTED_CODEX_EXPORT_KIND_LABELS
         );
         return null;
     }
@@ -238,7 +247,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         if (value == null || !value.isTextual()) {
             return null;
         }
-        String text = value.asText().trim().toLowerCase();
+        String text = value.asText().trim().toLowerCase(Locale.ROOT);
         return text.isEmpty() ? null : text;
     }
 

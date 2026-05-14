@@ -141,7 +141,7 @@ type CodexImportFile = {
     entries?: unknown[];
 };
 
-const ALLOWED_CODEX_KINDS = [
+const CODEX_KIND_LABELS = [
     "abilities",
     "councilors",
     "districts",
@@ -149,10 +149,13 @@ const ALLOWED_CODEX_KINDS = [
     "factions",
     "heroes",
     "improvements",
+    "minorFactions",
     "populations",
     "tech",
+    "traits",
     "units",
 ];
+const ALLOWED_CODEX_KINDS = CODEX_KIND_LABELS.map((kind) => kind.toLowerCase());
 
 function metaFromCodexFile(json: CodexImportFile): ModuleMetaKV[] {
     const count = Array.isArray(json.entries) ? json.entries.length : 0;
@@ -171,8 +174,9 @@ function validateCodexFile(json: CodexImportFile): string | null {
     if (!json || !Array.isArray(json.entries) || json.entries.length === 0) {
         return "File parsed, but it does not contain a non-empty 'entries' array.";
     }
-    if (!json.exportKind || !ALLOWED_CODEX_KINDS.includes(json.exportKind.toLowerCase())) {
-        return `Invalid exportKind. Expected one of: [${ALLOWED_CODEX_KINDS.join(", ")}], but found "${json.exportKind ?? 'missing'}".`;
+    const normalizedExportKind = json.exportKind?.trim().toLowerCase();
+    if (!normalizedExportKind || !ALLOWED_CODEX_KINDS.includes(normalizedExportKind)) {
+        return `Invalid exportKind. Expected one of: [${CODEX_KIND_LABELS.join(", ")}], but found "${json.exportKind ?? 'missing'}".`;
     }
     return null;
 }

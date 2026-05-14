@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,6 +57,12 @@ class LocalStartupImportRunnerTest {
         Files.writeString(tempDir.resolve("codex/ewshop_abilities_codex_export_0.78.json"), """
                 {"exportKind":"abilities","entries":[{"entryKey":"a","displayName":"Ability"}]}
                 """);
+        Files.writeString(tempDir.resolve("codex/ewshop_minor_factions_codex_export_0.78.json"), """
+                {"exportKind":"minorFactions","entries":[{"entryKey":"mf","displayName":"Minor Faction"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/ewshop_traits_codex_export_0.78.json"), """
+                {"exportKind":"traits","entries":[{"entryKey":"trait","displayName":"Trait"}]}
+                """);
 
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
@@ -65,10 +73,10 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.districtCalls).isEqualTo(1);
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
-        assertThat(facades.codexCalls).isEqualTo(1);
+        assertThat(facades.codexCalls).isEqualTo(3);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
-        assertThat(facades.codexDto.exportKind()).isEqualTo("abilities");
+        assertThat(facades.codexKinds).containsExactly("abilities", "minorFactions", "traits");
     }
 
     @Test
@@ -218,6 +226,7 @@ class LocalStartupImportRunnerTest {
         private TechImportBatchDto techDto;
         private UnitImportBatchDto unitDto;
         private CodexImportBatchDto codexDto;
+        private final List<String> codexKinds = new ArrayList<>();
 
         @Override
         public ImportSummaryDto importTechs(TechImportBatchDto file) {
@@ -261,6 +270,7 @@ class LocalStartupImportRunnerTest {
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
             codexCalls++;
             codexDto = file;
+            codexKinds.add(file.exportKind());
             if (file.entries() == null || file.entries().isEmpty()) {
                 throw new IllegalArgumentException("Import file has no entries");
             }

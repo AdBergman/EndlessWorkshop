@@ -317,6 +317,42 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
     });
 
+    it("accepts minorFactions and traits as codex import kinds", async () => {
+        const user = userEvent.setup();
+        const codexMinorFactions = fixtureFile("local-imports/codex/ewshop_minor_factions_codex_export_0.78.json", {
+            exportKind: "minorFactions",
+            entries: [{ entryKey: "MinorFaction_Test", displayName: "Minor Faction Test" }],
+        });
+        const codexTraits = fixtureFile("local-imports/codex/ewshop_traits_codex_export_0.78.json", {
+            exportKind: "traits",
+            entries: [{ entryKey: "Trait_Test", displayName: "Trait Test" }],
+        });
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        await user.click(screen.getByRole("button", { name: /Import codex files/i }));
+        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexMinorFactions, codexTraits]);
+
+        await screen.findByText(codexMinorFactions.name);
+        expect(screen.getByText(codexTraits.name)).toBeInTheDocument();
+        expect(screen.queryByText(/Invalid exportKind/i)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /^Import all codex$/i }));
+        await screen.findByText(/All selected Codex files imported successfully/i);
+
+        const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
+        expect(postCalls.map(([url]) => url)).toEqual([
+            "/api/admin/import/codex",
+            "/api/admin/import/codex",
+        ]);
+        expect(postCalls.map(([, init]) => JSON.parse(String(init?.body)).exportKind)).toEqual([
+            "minorFactions",
+            "traits",
+        ]);
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
+    });
+
     it("keeps individual import rows available in the advanced section", async () => {
         const user = userEvent.setup();
 
