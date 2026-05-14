@@ -10,6 +10,14 @@ Prefer small, bounded changes that follow existing architecture. Do not perform 
 - Backend API DTO changes should verify corresponding frontend type/client/store/rendering usage.
 - Do not deep-audit importer, DB, or Flyway layers unless explicitly requested, the API contract is ambiguous, or a contract mismatch is suspected.
 
+## Local Import Fixtures
+
+- `local-imports/` is gitignored local-only data and must never be committed.
+- Put raw supported exports in `local-imports/exports/`; startup imports currently support `districts`, `improvements`, `units`, and `tech`.
+- Put codex exports in `local-imports/codex/`; supported codex kinds are `abilities`, `councilors`, `districts`, `equipment`, `factions`, `heroes`, `improvements`, `populations`, `tech`, and `units`.
+- Startup imports run only for `dev`, `local`, `ai`, or `codex` profiles when `ewshop.local-import.enabled=true`.
+- Unsupported raw exporter files, such as battle abilities, battle skills, and descriptor evaluations, may coexist locally and are skipped with a log message.
+
 ## High-Risk Systems
 
 Do not casually refactor:
