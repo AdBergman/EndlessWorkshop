@@ -33,7 +33,12 @@ public final class TechMapper {
                 .toList();
 
         List<TechUnlockDto> unlocks = t.getUnlocks().stream()
-                .map(u -> new TechUnlockDto(u.unlockType(), u.unlockKey(), u.unlockCategory()))
+                .map(u -> new TechUnlockDto(
+                        u.unlockType(),
+                        u.unlockKey(),
+                        u.unlockCategory(),
+                        u.fallbackDescriptionLines()
+                ))
                 .toList();
 
         List<String> descriptionLines = t.getDescriptionLines();

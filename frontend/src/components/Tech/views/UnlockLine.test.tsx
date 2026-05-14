@@ -62,6 +62,24 @@ describe("UnlockLine district/improvement resolution", () => {
         expect(container).toBeEmptyDOMElement();
     });
 
+    it("renders unresolved constructible fallback text when descriptor lines are available", () => {
+        render(
+            <UnlockLine
+                unlock={{
+                    unlockType: "Constructible",
+                    unlockKey: "Converter_IndustryToFood",
+                    fallbackDescriptionLines: [
+                        "When placed in the first slot, [IndustryColored] Industry converts to [FoodColored] Food.",
+                    ],
+                }}
+            />
+        );
+
+        expect(screen.getByText(/Constructible:/)).toBeInTheDocument();
+        expect(screen.getByText("Converter_IndustryToFood")).toBeInTheDocument();
+        expect(screen.getByText(/Industry converts to/)).toBeInTheDocument();
+    });
+
     it("uses backend unlockCategory when a key exists in both domains", () => {
         useDistrictStore.setState({
             districtsByKey: {

@@ -17,7 +17,7 @@ import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
-import { resolveConstructibleUnlock } from "@/utils/unlocks";
+import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
 
 interface TechTooltipProps {
     hoveredTech: Tech;
@@ -61,7 +61,8 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             (hoveredTech.unlocks ?? []).filter((u) => {
                 const k = keyOf(u.unlockKey);
                 if (!k) return false;
-                return isType(u, "Constructible") || isType(u, "Unit");
+                if (isType(u, "Constructible") || isType(u, "Unit")) return true;
+                return false;
             }),
         [hoveredTech.unlocks]
     );
@@ -76,7 +77,23 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 improvementsByKey,
                 unitsByKey,
             });
-            if (!resolved) return null;
+            if (!resolved) {
+                const fallback = getFallbackUnlockDescription(u);
+                if (!fallback) return null;
+
+                return (
+                    <div key={index} style={{ display: "block" }}>
+                        <span>{`${fallback.kind}: `}</span>
+                        <span>{fallback.key}</span>
+                        {fallback.descriptionLines.map((line, lineIndex) => (
+                            <span key={`${fallback.key}-${lineIndex}`}>
+                                {lineIndex === 0 ? " - " : "; "}
+                                {renderDescriptionLine(line)}
+                            </span>
+                        ))}
+                    </div>
+                );
+            }
 
             if (resolved.kind === "Unit") {
                 const faction = selectedFaction?.uiLabel?.toLowerCase() ?? "";

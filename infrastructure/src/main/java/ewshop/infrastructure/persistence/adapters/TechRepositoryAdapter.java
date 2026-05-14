@@ -239,7 +239,8 @@ public class TechRepositoryAdapter implements TechRepository {
                 .map(tuple -> new TechUnlockRefEmbeddable(
                         tuple.unlockType(),
                         tuple.unlockElementName(),
-                        tuple.unlockCategory()
+                        tuple.unlockCategory(),
+                        tuple.fallbackDescriptionLines()
                 ))
                 .collect(Collectors.toCollection(ArrayList::new));
     }

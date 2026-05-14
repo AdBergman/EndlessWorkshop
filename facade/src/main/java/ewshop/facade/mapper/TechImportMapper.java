@@ -61,6 +61,7 @@ public final class TechImportMapper {
                         .unlockType(unlockDto.unlockType())
                         .unlockCategory(unlockDto.unlockCategory())
                         .unlockElementName(unlockDto.unlockElementName())
+                        .fallbackDescriptionLines(cleanLines(unlockDto.descriptorLines()))
                         .build())
                 .toList();
 
@@ -120,5 +121,13 @@ public final class TechImportMapper {
 
     private static <T> List<T> emptyIfNull(List<T> list) {
         return list == null ? List.of() : list;
+    }
+
+    private static List<String> cleanLines(List<String> lines) {
+        if (lines == null || lines.isEmpty()) return List.of();
+        return lines.stream()
+                .filter(line -> line != null && !line.trim().isEmpty())
+                .map(String::trim)
+                .toList();
     }
 }

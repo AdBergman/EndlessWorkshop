@@ -36,7 +36,12 @@ class TechControllerTest {
                 "Stonework_X",
                 1,
                 "Defense",
-                List.of(new TechUnlockDto("Constructible", "Aspect_District_Tier1_Food", "District")),
+                List.of(new TechUnlockDto(
+                        "Constructible",
+                        "Aspect_District_Tier1_Food",
+                        "District",
+                        List.of("+2 Food on Capital")
+                )),
                 List.of("+100 Fortification on Capital"),
                 "Masonry",
                 List.of("Aspect", "Kin"),
@@ -60,6 +65,7 @@ class TechControllerTest {
                 .andExpect(jsonPath("$[0].unlocks[0].unlockType").value("Constructible"))
                 .andExpect(jsonPath("$[0].unlocks[0].unlockKey").value("Aspect_District_Tier1_Food"))
                 .andExpect(jsonPath("$[0].unlocks[0].unlockCategory").value("District"))
+                .andExpect(jsonPath("$[0].unlocks[0].fallbackDescriptionLines[0]").value("+2 Food on Capital"))
                 .andExpect(jsonPath("$[0].prereq").value("Masonry"))
                 .andExpect(jsonPath("$[0].coords.xPct").value(10.5));
     }

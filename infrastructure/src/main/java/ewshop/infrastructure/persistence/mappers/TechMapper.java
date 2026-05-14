@@ -30,7 +30,12 @@ public class TechMapper {
         entity.setUnlocks(
                 domain.getUnlocks() != null
                         ? domain.getUnlocks().stream()
-                        .map(u -> new TechUnlockRefEmbeddable(u.unlockType(), u.unlockKey(), u.unlockCategory()))
+                        .map(u -> new TechUnlockRefEmbeddable(
+                                u.unlockType(),
+                                u.unlockKey(),
+                                u.unlockCategory(),
+                                u.fallbackDescriptionLines()
+                        ))
                         .collect(Collectors.toList())
                         : Collections.emptyList()
         );
@@ -103,7 +108,12 @@ public class TechMapper {
         List<TechUnlockRef> unlocks =
                 entity.getUnlocks() != null
                         ? entity.getUnlocks().stream()
-                        .map(u -> new TechUnlockRef(u.getUnlockType(), u.getUnlockKey(), u.getUnlockCategory()))
+                        .map(u -> new TechUnlockRef(
+                                u.getUnlockType(),
+                                u.getUnlockKey(),
+                                u.getUnlockCategory(),
+                                u.getFallbackDescriptionLines()
+                        ))
                         .collect(Collectors.toList())
                         : Collections.emptyList();
 

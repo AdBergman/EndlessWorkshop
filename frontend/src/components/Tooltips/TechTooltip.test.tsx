@@ -103,6 +103,32 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.queryByText("Missing_Key")).not.toBeInTheDocument();
     });
 
+    it("renders unresolved constructible fallback rows without hover links", () => {
+        render(
+            <TechTooltip
+                hoveredTech={{
+                    ...hoveredTech,
+                    unlocks: [
+                        {
+                            unlockType: "Constructible",
+                            unlockKey: "Converter_IndustryToFood",
+                            fallbackDescriptionLines: [
+                                "When placed in the first slot, [IndustryColored] Industry converts to [FoodColored] Food.",
+                            ],
+                        },
+                    ],
+                }}
+                onMouseEnter={() => {}}
+                onMouseLeave={() => {}}
+            />
+        );
+
+        expect(screen.getByText(/Constructible:/)).toBeInTheDocument();
+        expect(screen.getByText("Converter_IndustryToFood")).toBeInTheDocument();
+        expect(screen.getByText(/Industry converts to/)).toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: /Converter_IndustryToFood/ })).not.toBeInTheDocument();
+    });
+
     it("renders unit unlock labels from the normalized unit store domain", () => {
         render(
             <TechTooltip

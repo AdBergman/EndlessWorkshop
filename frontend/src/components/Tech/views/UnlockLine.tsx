@@ -4,7 +4,8 @@ import type { TechUnlockRef } from "@/types/dataTypes";
 import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
-import { resolveConstructibleUnlock } from "@/utils/unlocks";
+import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface UnlockLineProps {
     unlock: TechUnlockRef;
@@ -25,6 +26,28 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
             unitsByKey,
         });
     }, [unlock, unlockKey, districtsByKey, improvementsByKey, unitsByKey]);
+
+    const fallback = useMemo(() => {
+        if (resolved) return null;
+        return getFallbackUnlockDescription(unlock);
+    }, [resolved, unlock]);
+
+    if (!resolved && !fallback) return null;
+
+    if (fallback) {
+        return (
+            <div>
+                <span>{`${fallback.kind}: `}</span>
+                <span>{fallback.key}</span>
+                {fallback.descriptionLines.map((line, index) => (
+                    <span key={`${fallback.key}-${index}`}>
+                        {index === 0 ? " - " : "; "}
+                        {renderDescriptionLine(line)}
+                    </span>
+                ))}
+            </div>
+        );
+    }
 
     if (!resolved) return null;
 

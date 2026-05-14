@@ -58,13 +58,20 @@ describe("formatTechUnlocks", () => {
                 { unlockType: "Constructible", unlockKey: "Unit_Scout" },
                 { unlockType: "Constructible", unlockKey: "District_Harbor" },
                 { unlockType: "Constructible", unlockKey: "Improvement_Market" },
+                {
+                    unlockType: "Constructible",
+                    unlockKey: "Converter_IndustryToFood",
+                    fallbackDescriptionLines: [
+                        "When placed first, [IndustryColored] Industry converts to [FoodColored] Food.",
+                    ],
+                },
                 { unlockType: "Constructible", unlockKey: "Missing_Key" },
                 { unlockType: "Action", unlockKey: "Action_Cut_Forest" },
             ],
         };
 
         expect(formatTechUnlocks(tech, { districtsByKey, improvementsByKey, unitsByKey })).toBe(
-            "Unit: Scout; District: Harbor; Improvement: Market"
+            "Unit: Scout; District: Harbor; Improvement: Market; Constructible: Converter_IndustryToFood - When placed first, Industry converts to Food."
         );
     });
 

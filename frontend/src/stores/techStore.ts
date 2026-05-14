@@ -38,7 +38,14 @@ const normalizeTech = (tech: Tech): Tech => ({
     descriptionLines: (tech.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),
-    unlocks: (tech.unlocks ?? []).filter((unlock): unlock is Tech["unlocks"][number] => !!unlock),
+    unlocks: (tech.unlocks ?? [])
+        .filter((unlock): unlock is Tech["unlocks"][number] => !!unlock)
+        .map((unlock) => ({
+            ...unlock,
+            fallbackDescriptionLines: (unlock.fallbackDescriptionLines ?? []).filter(
+                (line): line is string => typeof line === "string"
+            ),
+        })),
 });
 
 const initialState = {

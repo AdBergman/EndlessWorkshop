@@ -317,7 +317,7 @@ class TechImportMapperTest {
                                 "Improvement",
                                 "Improvement_Foundry",
                                 List.of(),
-                                List.of(),
+                                List.of("  Builds a foundry. ", ""),
                                 List.of()
                         ),
                         new TechImportUnlockDto(
@@ -337,6 +337,8 @@ class TechImportMapperTest {
         assertThat(snap.unlocks().getFirst().unlockType()).isEqualTo("Constructible");
         assertThat(snap.unlocks().getFirst().unlockElementName()).isEqualTo("Improvement_Foundry");
         assertThat(snap.unlocks().getFirst().unlockCategory()).isEqualTo("Improvement");
+        assertThat(snap.unlocks().getFirst().fallbackDescriptionLines()).containsExactly("Builds a foundry.");
         assertThat(snap.unlocks().get(1).unlockCategory()).isNull();
+        assertThat(snap.unlocks().get(1).fallbackDescriptionLines()).isEmpty();
     }
 }

@@ -8,6 +8,7 @@ export type TechUnlockRef = {
     unlockKey: string;
     unlockCategory?: string | null;
     constructibleKind?: string | null;
+    fallbackDescriptionLines?: string[] | null;
 };
 
 export interface Unit {

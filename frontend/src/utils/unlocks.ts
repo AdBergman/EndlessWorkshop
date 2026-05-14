@@ -27,6 +27,12 @@ export type ConstructibleUnlockResolution =
           displayName: string;
       };
 
+export type FallbackUnlockDescription = {
+    kind: ConstructibleUnlockKind | "Constructible";
+    key: string;
+    descriptionLines: string[];
+};
+
 type ConstructibleUnlockDeps = {
     districtsByKey: Record<string, District>;
     improvementsByKey: Record<string, Improvement>;
@@ -58,6 +64,11 @@ const isConstructibleLikeUnlock = (unlock: TechUnlockRef) => {
     const type = normType(unlock.unlockType);
     return type === "CONSTRUCTIBLE" || type === "UNIT";
 };
+
+const cleanDescriptionLines = (lines: string[] | null | undefined) =>
+    (lines ?? [])
+        .map((line) => (line ?? "").trim())
+        .filter((line) => line.length > 0);
 
 const toByKey = <T,>(items: T[], getKey: (item: T) => string | null | undefined) =>
     items.reduce<Record<string, T>>((acc, item) => {
@@ -183,6 +194,20 @@ export const resolveConstructibleUnlock = (
     }
 
     return null;
+};
+
+export const getFallbackUnlockDescription = (unlock: TechUnlockRef): FallbackUnlockDescription | null => {
+    const key = normalizeKey(unlock.unlockKey ?? "");
+    if (!key || !isConstructibleLikeUnlock(unlock)) return null;
+
+    const descriptionLines = cleanDescriptionLines(unlock.fallbackDescriptionLines);
+    if (descriptionLines.length === 0) return null;
+
+    return {
+        kind: getExplicitConstructibleKind(unlock) ?? (normType(unlock.unlockType) === "UNIT" ? "Unit" : "Constructible"),
+        key,
+        descriptionLines,
+    };
 };
 
 export const getUnlockedConstructiblesByKey = (

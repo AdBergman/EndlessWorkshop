@@ -47,7 +47,12 @@ class TechMapperTest {
                 .type(TechType.DISCOVERY)
                 .descriptionLines(List.of("Production +10%", "New Unit Available"))
                 .unlocks(List.of(
-                        new TechUnlockRef("Constructible", "Aspect_District_Tier1_Industry", "District"),
+                        new TechUnlockRef(
+                                "Constructible",
+                                "Aspect_District_Tier1_Industry",
+                                "District",
+                                List.of("Fallback district effect")
+                        ),
                         new TechUnlockRef("Action", "ActionTypeCutForest")
                 ))
                 .techCoords(new TechCoords(0.5, 0.75))
@@ -71,9 +76,11 @@ class TechMapperTest {
         assertThat(techDto.unlocks().get(0).unlockType()).isEqualTo("Constructible");
         assertThat(techDto.unlocks().get(0).unlockKey()).isEqualTo("Aspect_District_Tier1_Industry");
         assertThat(techDto.unlocks().get(0).unlockCategory()).isEqualTo("District");
+        assertThat(techDto.unlocks().get(0).fallbackDescriptionLines()).containsExactly("Fallback district effect");
         assertThat(techDto.unlocks().get(1).unlockType()).isEqualTo("Action");
         assertThat(techDto.unlocks().get(1).unlockKey()).isEqualTo("ActionTypeCutForest");
         assertThat(techDto.unlocks().get(1).unlockCategory()).isNull();
+        assertThat(techDto.unlocks().get(1).fallbackDescriptionLines()).isEmpty();
 
         assertThat(techDto.prereq()).isEqualTo("Tech_Prereq");
         assertThat(techDto.excludes()).isEqualTo("Tech_Excludes");

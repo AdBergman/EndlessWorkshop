@@ -8,7 +8,7 @@ import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
-import { resolveConstructibleUnlock } from "@/utils/unlocks";
+import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
 
@@ -44,6 +44,7 @@ export function formatTechUnlocks(
             key: (u.unlockKey ?? "").trim(),
             unlockCategory: u.unlockCategory,
             constructibleKind: u.constructibleKind,
+            fallbackDescriptionLines: u.fallbackDescriptionLines,
         }))
         .filter((u) => !!u.key)
         .map((u) => {
@@ -53,10 +54,25 @@ export function formatTechUnlocks(
                     unlockKey: u.key,
                     unlockCategory: u.unlockCategory,
                     constructibleKind: u.constructibleKind,
+                    fallbackDescriptionLines: u.fallbackDescriptionLines,
                 },
                 { districtsByKey, improvementsByKey, unitsByKey }
             );
-            return resolved ? `${resolved.kind}: ${resolved.displayName}` : null;
+            if (resolved) return `${resolved.kind}: ${resolved.displayName}`;
+
+            const fallback = getFallbackUnlockDescription({
+                unlockType: u.type,
+                unlockKey: u.key,
+                unlockCategory: u.unlockCategory,
+                constructibleKind: u.constructibleKind,
+                fallbackDescriptionLines: u.fallbackDescriptionLines,
+            });
+            if (!fallback) return null;
+
+            const description = fallback.descriptionLines.map(stripDescriptionTokens).join("; ");
+            return description
+                ? `${fallback.kind}: ${fallback.key} - ${description}`
+                : `${fallback.kind}: ${fallback.key}`;
         })
         .filter((s): s is string => !!s)
         .join("; ");
