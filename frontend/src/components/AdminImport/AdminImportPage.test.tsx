@@ -1,9 +1,13 @@
 import userEvent from "@testing-library/user-event";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { existsSync, readFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { apiClient } from "@/api/apiClient";
 import AdminImportPage from "./AdminImportPage";
+import { refreshStoresAfterAdminImport } from "./adminImportRefresh";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -12,7 +16,79 @@ vi.mock("@/api/apiClient", () => ({
     },
 }));
 
+vi.mock("./adminImportRefresh", () => ({
+    refreshStoresAfterAdminImport: vi.fn(),
+}));
+
 const mockedApiClient = vi.mocked(apiClient);
+const mockedRefreshStoresAfterAdminImport = vi.mocked(refreshStoresAfterAdminImport);
+
+const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
+
+const importSummary = (importKind: string) => ({
+    importKind,
+    counts: {
+        received: 1,
+        inserted: 1,
+        updated: 0,
+        unchanged: 0,
+        deleted: 0,
+        failed: 0,
+    },
+    durationMs: 1,
+});
+
+function jsonResponse(body: unknown, status = 200) {
+    return {
+        ok: status >= 200 && status < 300,
+        status,
+        headers: {
+            get: (name: string) => (name.toLowerCase() === "content-type" ? "application/json" : null),
+        },
+        json: vi.fn().mockResolvedValue(body),
+        text: vi.fn().mockResolvedValue(JSON.stringify(body)),
+    };
+}
+
+function createJsonFile(name: string, text: string) {
+    const file = new File([text], name, { type: "application/json" });
+    Object.defineProperty(file, "text", {
+        value: vi.fn().mockResolvedValue(text),
+    });
+    return file;
+}
+
+function fixtureFile(relativePath: string, fallback: unknown) {
+    const absolutePath = resolve(repoRoot, relativePath);
+    const text = existsSync(absolutePath)
+        ? readFileSync(absolutePath, "utf8")
+        : JSON.stringify(fallback);
+    return createJsonFile(basename(relativePath), text);
+}
+
+async function waitForUnlockedPage() {
+    await screen.findByText(/Use the two bulk rows for the normal local workflow/i);
+}
+
+function dropFiles(dropzoneIndex: number, files: File[]) {
+    const dropzones = screen.getAllByLabelText("Upload JSON by drag and drop");
+    fireEvent.drop(dropzones[dropzoneIndex], {
+        dataTransfer: {
+            files,
+        },
+    });
+}
+
+function dropFilesByTitle(title: RegExp, files: File[]) {
+    const dropzoneTitle = screen.getByText(title);
+    const dropzone = dropzoneTitle.closest("[aria-label='Upload JSON by drag and drop']");
+    expect(dropzone).not.toBeNull();
+    fireEvent.drop(dropzone!, {
+        dataTransfer: {
+            files,
+        },
+    });
+}
 
 function renderAdminImportPage(initialEntry = "/admin/import?admin=1") {
     return render(
@@ -32,10 +108,22 @@ describe("AdminImportPage", () => {
         localStorage.setItem("ewshop_admin_token", "valid-token");
         mockedApiClient.getCodex.mockReset();
         mockedApiClient.regenerateSeoPagesAdmin.mockReset();
+        mockedRefreshStoresAfterAdminImport.mockReset();
+        mockedRefreshStoresAfterAdminImport.mockResolvedValue({ ok: true });
+        window.scrollTo = vi.fn();
         vi.stubGlobal(
             "fetch",
-            vi.fn().mockResolvedValue({
-                status: 204,
+            vi.fn((url: string, init?: RequestInit) => {
+                if (init?.method === "POST") {
+                    return Promise.resolve(jsonResponse(importSummary(url.split("/").at(-1) ?? "import")));
+                }
+                return Promise.resolve({
+                    ok: true,
+                    status: 204,
+                    headers: { get: () => null },
+                    json: vi.fn(),
+                    text: vi.fn().mockResolvedValue(""),
+                });
             })
         );
     });
@@ -90,5 +178,98 @@ describe("AdminImportPage", () => {
         createElementSpy.mockRestore();
         URL.createObjectURL = originalCreateObjectURL;
         URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    it("keeps the admin import UI gated without admin mode", () => {
+        localStorage.clear();
+        renderAdminImportPage("/admin/import");
+
+        expect(screen.getByText("This page is restricted.")).toBeInTheDocument();
+        expect(screen.queryByText(/Use the two bulk rows for the normal local workflow/i)).not.toBeInTheDocument();
+    });
+
+    it("bulk-imports supported raw exporter files and skips unsupported raw exports", async () => {
+        const user = userEvent.setup();
+        const units = fixtureFile("local-imports/exports/ewshop_units_export_0.78.json", {
+            exportKind: "units",
+            units: [{ unitKey: "Unit_Test" }],
+        });
+        const tech = fixtureFile("local-imports/exports/ewshop_tech_export_0.78.json", {
+            exportKind: "tech",
+            techs: [{ techKey: "Tech_Test" }],
+        });
+        const unsupported = fixtureFile("local-imports/exports/ewshop_battle_skills_export_0.78.json", {
+            exportKind: "battleSkills",
+            battleSkills: [{ key: "BattleSkill_Test" }],
+        });
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        dropFiles(0, [units, tech, unsupported]);
+
+        await screen.findByText(units.name);
+        expect(screen.getByText(tech.name)).toBeInTheDocument();
+        expect(screen.getByText(unsupported.name)).toBeInTheDocument();
+        expect(screen.getByText("Unsupported raw export kind \"battleskills\".")).toBeInTheDocument();
+        expect(screen.getByText("skipped")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
+
+        await screen.findByText(/2 supported export file\(s\) imported\. 1 unsupported file\(s\) skipped\./i);
+
+        const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
+        expect(postCalls.map(([url]) => url)).toEqual([
+            "/api/admin/import/units",
+            "/api/admin/import/techs",
+        ]);
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("units");
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");
+    });
+
+    it("preserves codex bulk import behavior", async () => {
+        const user = userEvent.setup();
+        const codexUnits = fixtureFile("local-imports/codex/ewshop_units_codex_export_0.78.json", {
+            exportKind: "units",
+            entries: [{ entryKey: "Unit_Test", displayName: "Unit Test" }],
+        });
+        const codexTech = fixtureFile("local-imports/codex/ewshop_tech_codex_export_0.78.json", {
+            exportKind: "tech",
+            entries: [{ entryKey: "Tech_Test", displayName: "Tech Test" }],
+        });
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        await user.click(screen.getByRole("button", { name: /Import codex files/i }));
+        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexUnits, codexTech]);
+
+        await screen.findByText(codexUnits.name);
+        expect(screen.getByText(codexTech.name)).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /^Import all codex$/i }));
+        await screen.findByText(/All selected Codex files imported successfully/i);
+
+        const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
+        expect(postCalls.map(([url]) => url)).toEqual([
+            "/api/admin/import/codex",
+            "/api/admin/import/codex",
+        ]);
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
+    });
+
+    it("keeps individual import rows available in the advanced section", async () => {
+        const user = userEvent.setup();
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        await user.click(screen.getByRole("button", { name: /Advanced \/ individual imports/i }));
+
+        expect(screen.getByText("Districts")).toBeInTheDocument();
+        expect(screen.getByText("Improvements")).toBeInTheDocument();
+        expect(screen.getByText("Units")).toBeInTheDocument();
+        expect(screen.getByText("Techs")).toBeInTheDocument();
+        expect(screen.getByText("Codex")).toBeInTheDocument();
     });
 });

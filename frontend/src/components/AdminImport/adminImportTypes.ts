@@ -42,4 +42,7 @@ export type ImportModuleDefinition<TJson> = {
 
     // Optional: customize the label of the import action button.
     importButtonLabel?: string;
+
+    // Optional: marks a synthetic row that bulk-imports the listed single-file modules.
+    bulkExportModules?: Array<ImportModuleDefinition<any>>;
 };

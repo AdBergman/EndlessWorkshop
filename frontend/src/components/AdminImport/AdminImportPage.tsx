@@ -213,8 +213,9 @@ export default function AdminImportPage() {
     const [seoActionState, setSeoActionState] = useState<SeoActionState>({ status: "idle" });
     const [codexDiagnosticsActionState, setCodexDiagnosticsActionState] =
         useState<CodexDiagnosticsActionState>({ status: "idle" });
+    const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
-    const modules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
+    const individualModules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
         return [
             {
                 id: "districts",
@@ -269,12 +270,39 @@ export default function AdminImportPage() {
         ];
     }, []);
 
+    const bulkModules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
+        const rawExportModules = individualModules.filter((module) => module.id !== "codex");
+        const codexModule = individualModules.find((module) => module.id === "codex");
+
+        return [
+            {
+                id: "exports",
+                title: "Import supported exports",
+                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements. Other raw exports are skipped.",
+                enabled: true,
+                bulkExportModules: rawExportModules,
+                importButtonLabel: "Import supported exports",
+            },
+            ...(codexModule
+                ? [
+                    {
+                        ...codexModule,
+                        title: "Import codex files",
+                        description: "Drop supported Codex JSON files together.",
+                        importButtonLabel: "Import all codex",
+                    },
+                ]
+                : []),
+        ];
+    }, [individualModules]);
+
     const defaultOpenId = useMemo(() => {
-        const enabled = modules.find((m) => m.enabled);
+        const enabled = bulkModules.find((m) => m.enabled);
         return enabled?.id ?? null;
-    }, [modules]);
+    }, [bulkModules]);
 
     const [openModuleId, setOpenModuleId] = useState<string | null>(defaultOpenId);
+    const [advancedOpenModuleId, setAdvancedOpenModuleId] = useState<string | null>(null);
 
     const runTokenValidation = useCallback(async (t: string) => {
         const trimmed = t.trim();
@@ -491,11 +519,11 @@ export default function AdminImportPage() {
 
                         <div className="admin-import-pipelineTitle">Import pipeline</div>
                         <div className="admin-import-muted">
-                            Run imports top-to-bottom as modules become available.
+                            Use the two bulk rows for the normal local workflow, then open advanced rows only when a single file needs attention.
                         </div>
 
                         <div className="admin-import-pipeline">
-                            {modules.map((m, idx) => (
+                            {bulkModules.map((m, idx) => (
                                 <ImportModuleRow
                                     key={m.id}
                                     index={idx + 1}
@@ -507,6 +535,37 @@ export default function AdminImportPage() {
                                     }
                                 />
                             ))}
+                        </div>
+
+                        <div className="admin-import-advanced">
+                            <button
+                                type="button"
+                                className="admin-import-advancedHeader"
+                                aria-expanded={isAdvancedOpen}
+                                onClick={() => setIsAdvancedOpen((value) => !value)}
+                            >
+                                <span>Advanced / individual imports</span>
+                                <span className="admin-import-muted">
+                                    {isAdvancedOpen ? "Hide rows" : "Show one-by-one rows"}
+                                </span>
+                            </button>
+
+                            {isAdvancedOpen ? (
+                                <div className="admin-import-pipeline admin-import-advancedPipeline">
+                                    {individualModules.map((m, idx) => (
+                                        <ImportModuleRow
+                                            key={m.id}
+                                            index={idx + 1}
+                                            token={token}
+                                            module={m}
+                                            isOpen={advancedOpenModuleId === m.id}
+                                            onToggle={() =>
+                                                setAdvancedOpenModuleId((cur) => (cur === m.id ? null : m.id))
+                                            }
+                                        />
+                                    ))}
+                                </div>
+                            ) : null}
                         </div>
                     </div>
                 )}

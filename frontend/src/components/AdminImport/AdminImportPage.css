@@ -457,6 +457,39 @@
     color: rgba(255, 200, 200, 0.95);
 }
 
+.admin-import-inlineStatus--skipped {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.admin-import-advanced {
+    margin-top: 14px;
+}
+
+.admin-import-advancedHeader {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(0, 0, 0, 0.18);
+    color: inherit;
+    cursor: pointer;
+    font-weight: 900;
+    text-align: left;
+}
+
+.admin-import-advancedHeader:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-import-advancedPipeline {
+    margin-top: 10px;
+}
+
 /* Raw JSON block: page scrolls, not inner scroll */
 .admin-import-json {
     margin-top: 10px;
