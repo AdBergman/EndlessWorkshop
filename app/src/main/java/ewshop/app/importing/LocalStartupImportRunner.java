@@ -36,6 +36,18 @@ import java.util.stream.Stream;
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);
+    private static final List<String> SUPPORTED_CODEX_EXPORT_KINDS = List.of(
+            "abilities",
+            "councilors",
+            "districts",
+            "equipment",
+            "factions",
+            "heroes",
+            "improvements",
+            "populations",
+            "tech",
+            "units"
+    );
 
     private final LocalStartupImportProperties properties;
     private final ObjectMapper objectMapper;
@@ -88,9 +100,9 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             return;
         }
 
-        List<Path> files = new ArrayList<>();
-        files.addAll(jsonFiles(exportsDir));
-        files.addAll(jsonFiles(codexDir));
+        List<LocalImportFile> files = new ArrayList<>();
+        files.addAll(jsonFiles(exportsDir, LocalImportFolder.EXPORTS));
+        files.addAll(jsonFiles(codexDir, LocalImportFolder.CODEX));
 
         if (files.isEmpty()) {
             log.info("No local startup import JSON files found under {}; continuing startup.", root);
@@ -103,7 +115,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         int failed = 0;
         int skipped = 0;
 
-        for (Path file : files) {
+        for (LocalImportFile file : files) {
             try {
                 ImportSummaryDto summary = importFile(file);
                 if (summary == null) {
@@ -111,10 +123,10 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                     continue;
                 }
                 imported++;
-                logImported(file, summary);
+                logImported(file.path(), summary);
             } catch (Exception ex) {
                 failed++;
-                log.error("Local startup import failed for file {}.", file.toAbsolutePath().normalize(), ex);
+                log.error("Local startup import failed for file {}.", file.path().toAbsolutePath().normalize(), ex);
             }
         }
 
@@ -126,7 +138,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         );
     }
 
-    private List<Path> jsonFiles(Path dir) {
+    private List<LocalImportFile> jsonFiles(Path dir, LocalImportFolder folder) {
         if (Files.notExists(dir)) {
             log.info("Local startup import folder {} does not exist; skipping it.", dir.toAbsolutePath().normalize());
             return List.of();
@@ -141,6 +153,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".json"))
                     .sorted(Comparator.comparing(path -> path.getFileName().toString()))
+                    .map(path -> new LocalImportFile(path, folder))
                     .toList();
         } catch (IOException ex) {
             log.error("Unable to list local startup import folder {}.", dir.toAbsolutePath().normalize(), ex);
@@ -167,35 +180,66 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         return direct;
     }
 
-    private ImportSummaryDto importFile(Path file) throws IOException {
-        JsonNode json = objectMapper.readTree(file.toFile());
+    private ImportSummaryDto importFile(LocalImportFile file) throws IOException {
+        JsonNode json = objectMapper.readTree(file.path().toFile());
 
-        if (hasArray(json, "techs")) {
+        return switch (file.folder()) {
+            case EXPORTS -> importExportFile(file.path(), json);
+            case CODEX -> importCodexFile(file.path(), json);
+        };
+    }
+
+    private ImportSummaryDto importExportFile(Path file, JsonNode json) throws IOException {
+        String exportKind = normalizedExportKind(json);
+
+        if ("tech".equals(exportKind) || shouldLetAdminValidationReport(json, "techs", exportKind)) {
             return techImportAdminFacade.importTechs(objectMapper.treeToValue(json, TechImportBatchDto.class));
         }
-        if (hasArray(json, "districts")) {
+        if ("districts".equals(exportKind) || shouldLetAdminValidationReport(json, "districts", exportKind)) {
             return districtImportAdminFacade.importDistricts(objectMapper.treeToValue(json, DistrictImportBatchDto.class));
         }
-        if (hasArray(json, "improvements")) {
+        if ("improvements".equals(exportKind) || shouldLetAdminValidationReport(json, "improvements", exportKind)) {
             return improvementImportAdminFacade.importImprovements(objectMapper.treeToValue(json, ImprovementImportBatchDto.class));
         }
-        if (hasArray(json, "units")) {
+        if ("units".equals(exportKind) || shouldLetAdminValidationReport(json, "units", exportKind)) {
             return unitImportAdminFacade.importUnits(objectMapper.treeToValue(json, UnitImportBatchDto.class));
-        }
-        if (hasArray(json, "entries")) {
-            return codexImportAdminFacade.importCodex(objectMapper.treeToValue(json, CodexImportBatchDto.class));
         }
 
         log.warn(
-                "Local startup import skipped unsupported file {}; expected one of techs[], districts[], improvements[], units[], or entries[].",
-                file.toAbsolutePath().normalize()
+                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech.",
+                file.toAbsolutePath().normalize(),
+                exportKind == null ? "missing" : exportKind
         );
         return null;
     }
 
-    private static boolean hasArray(JsonNode json, String fieldName) {
-        JsonNode value = json == null ? null : json.get(fieldName);
-        return value != null && value.isArray();
+    private ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
+        String exportKind = normalizedExportKind(json);
+
+        if (SUPPORTED_CODEX_EXPORT_KINDS.contains(exportKind) || shouldLetAdminValidationReport(json, "entries", exportKind)) {
+            return codexImportAdminFacade.importCodex(objectMapper.treeToValue(json, CodexImportBatchDto.class));
+        }
+
+        log.warn(
+                "Local startup import skipped unsupported codex file {} with exportKind='{}'. Supported codex kinds are: {}.",
+                file.toAbsolutePath().normalize(),
+                exportKind == null ? "missing" : exportKind,
+                SUPPORTED_CODEX_EXPORT_KINDS
+        );
+        return null;
+    }
+
+    private static boolean shouldLetAdminValidationReport(JsonNode json, String importArrayField, String exportKind) {
+        return exportKind == null && json != null && json.has(importArrayField);
+    }
+
+    private static String normalizedExportKind(JsonNode json) {
+        JsonNode value = json == null ? null : json.get("exportKind");
+        if (value == null || !value.isTextual()) {
+            return null;
+        }
+        String text = value.asText().trim().toLowerCase();
+        return text.isEmpty() ? null : text;
     }
 
     private static void logImported(Path file, ImportSummaryDto summary) {
@@ -212,4 +256,11 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                 counts.failed()
         );
     }
+
+    private enum LocalImportFolder {
+        EXPORTS,
+        CODEX
+    }
+
+    private record LocalImportFile(Path path, LocalImportFolder folder) {}
 }

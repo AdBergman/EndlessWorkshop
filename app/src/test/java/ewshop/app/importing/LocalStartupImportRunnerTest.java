@@ -16,8 +16,11 @@ import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.context.ConfigurationPropertiesAutoConfiguration;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +30,7 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(OutputCaptureExtension.class)
 class LocalStartupImportRunnerTest {
 
     @TempDir
@@ -42,6 +46,12 @@ class LocalStartupImportRunnerTest {
         Files.writeString(tempDir.resolve("exports/ewshop_units_export_0.78.json"), """
                 {"exportKind":"units","units":[{"unitKey":"u","displayName":"Unit"}]}
                 """);
+        Files.writeString(tempDir.resolve("exports/ewshop_districts_export_0.78.json"), """
+                {"exportKind":"districts","districts":[{"districtKey":"d","displayName":"District"}]}
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_improvements_export_0.78.json"), """
+                {"exportKind":"improvements","improvements":[{"constructibleKey":"i","displayName":"Improvement"}]}
+                """);
         Files.writeString(tempDir.resolve("codex/ewshop_abilities_codex_export_0.78.json"), """
                 {"exportKind":"abilities","entries":[{"entryKey":"a","displayName":"Ability"}]}
                 """);
@@ -52,6 +62,8 @@ class LocalStartupImportRunnerTest {
         runner.runStartupImport();
 
         assertThat(facades.techCalls).isEqualTo(1);
+        assertThat(facades.districtCalls).isEqualTo(1);
+        assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
         assertThat(facades.codexCalls).isEqualTo(1);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
@@ -74,6 +86,55 @@ class LocalStartupImportRunnerTest {
 
         assertThat(facades.techCalls).isZero();
         assertThat(facades.totalCalls()).isZero();
+    }
+
+    @Test
+    void unsupportedExporterFilesAreSkippedWithoutCallingImportFacades(CapturedOutput output) throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("exports/ewshop_battle_abilities_export_0.78.json"), """
+                {"exportKind":"battle_abilities","abilities":[{"key":"a"}]}
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_descriptor_evaluations_export_0.78.json"), """
+                {"exportKind":"descriptor_evaluations","entries":[{"key":"d"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/ewshop_battle_abilities_codex_export_0.78.json"), """
+                {"exportKind":"battle_abilities","entries":[{"entryKey":"ba","displayName":"Battle Ability"}]}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        runner.runStartupImport();
+
+        assertThat(facades.totalCalls()).isZero();
+        assertThat(output)
+                .contains("skipped unsupported exports file")
+                .contains("exportKind='battle_abilities'")
+                .contains("exportKind='descriptor_evaluations'")
+                .contains("skipped unsupported codex file")
+                .contains("Local startup import finished: 0 imported, 3 skipped, 0 failed.");
+    }
+
+    @Test
+    void malformedSupportedLookingFileIsReportedAsFailure(CapturedOutput output) throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("exports/ewshop_tech_export_0.78.json"), """
+                {"exportKind":"tech","techs":[]}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        runner.runStartupImport();
+
+        assertThat(facades.techCalls).isEqualTo(1);
+        assertThat(output)
+                .contains("Local startup import failed for file")
+                .contains("ewshop_tech_export_0.78.json")
+                .contains("Import file has no techs")
+                .contains("Local startup import finished: 0 imported, 0 skipped, 1 failed.");
     }
 
     @Test
@@ -162,18 +223,27 @@ class LocalStartupImportRunnerTest {
         public ImportSummaryDto importTechs(TechImportBatchDto file) {
             techCalls++;
             techDto = file;
+            if (file.techs() == null || file.techs().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no techs");
+            }
             return summary("tech", file.techs().size());
         }
 
         @Override
         public ImportSummaryDto importDistricts(DistrictImportBatchDto file) {
             districtCalls++;
+            if (file.districts() == null || file.districts().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no districts");
+            }
             return summary("districts", file.districts().size());
         }
 
         @Override
         public ImportSummaryDto importImprovements(ImprovementImportBatchDto dto) {
             improvementCalls++;
+            if (dto.improvements() == null || dto.improvements().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no improvements");
+            }
             return summary("improvements", dto.improvements().size());
         }
 
@@ -181,6 +251,9 @@ class LocalStartupImportRunnerTest {
         public ImportSummaryDto importUnits(UnitImportBatchDto dto) {
             unitCalls++;
             unitDto = dto;
+            if (dto.units() == null || dto.units().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no units");
+            }
             return summary("units", dto.units().size());
         }
 
@@ -188,6 +261,9 @@ class LocalStartupImportRunnerTest {
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
             codexCalls++;
             codexDto = file;
+            if (file.entries() == null || file.entries().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no entries");
+            }
             return summary("codex", file.entries().size());
         }
 
