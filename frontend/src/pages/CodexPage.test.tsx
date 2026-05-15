@@ -515,4 +515,70 @@ describe("CodexPage", () => {
         const relatedSection = await screen.findByRole("region", { name: /related entries/i });
         expect(within(relatedSection).getByRole("button", { name: /a fresh lead/i })).toBeInTheDocument();
     });
+
+    it("opens numbered questline deep links with alternate context and related labels", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step02",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The alternate questline continues."],
+                referenceKeys: ["FactionQuest_Necrophage02_Chapter06_Step03"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step03",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The next alternate questline step."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=FactionQuest_Necrophage02_Chapter06_Step02"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "A Bitter Truth" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent(
+            "/codex?entry=FactionQuest_Necrophage02_Chapter06_Step02"
+        );
+        const detailPane = screen.getByLabelText("Selected codex entry");
+        expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Alternate questline 2")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Step 2")).toBeInTheDocument();
+
+        const relatedSection = await screen.findByRole("region", { name: /related entries/i });
+        expect(
+            within(relatedSection).getByRole("button", {
+                name: /a bitter truth quest .* necrophage .* chapter 6 .* alternate questline 2 .* step 3/i,
+            })
+        ).toBeInTheDocument();
+    });
 });

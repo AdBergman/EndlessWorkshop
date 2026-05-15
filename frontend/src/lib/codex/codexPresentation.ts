@@ -377,6 +377,7 @@ export function parseCodexQuestContext(
         chapterNumber.padStart(4, "0"),
         (stepNumber ?? "0").padStart(4, "0"),
         ...(choiceNumbers.length > 0 ? choiceNumbers.map((choiceNumber) => choiceNumber.padStart(4, "0")) : ["0000"]),
+        choiceNumbers.length.toString().padStart(4, "0"),
         key,
     ].join(":");
 

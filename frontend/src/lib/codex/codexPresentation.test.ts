@@ -119,6 +119,26 @@ describe("codexPresentation", () => {
         expect(context?.relatedContext).toBe("Quest · Necrophage · Chapter 6 · Alternate questline 2 · Step 1");
     });
 
+    it("builds readable KinOfSheredyn variant context without raw numbered roots", () => {
+        const context = parseCodexQuestContext({
+            exportKind: "quests",
+            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01_Choice02",
+            displayName: "Stirrings",
+            category: "MajorFaction",
+            kind: "Quest",
+        });
+
+        expect(context?.groupContext).toBe("Kin Of Sheredyn · Chapter 1");
+        expect(context?.variantLabel).toBe("Alternate questline 2");
+        expect(context?.nodeLabel).toBe("Step 2 · Choice 1 · Choice 2");
+        expect(context?.detailContextLines).toEqual([
+            "Kin Of Sheredyn · Chapter 1",
+            "Alternate questline 2",
+            "Step 2 · Choice 1 · Choice 2",
+            "Major Faction Quest",
+        ]);
+    });
+
     it("uses entry-key context when source kind is the only discriminator", () => {
         expect(
             getCodexSecondaryContext({
