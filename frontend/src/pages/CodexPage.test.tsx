@@ -471,11 +471,14 @@ describe("CodexPage", () => {
         await waitFor(() => {
             expect(within(results).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
         });
-        expect(within(results).getByText("Necrophage02 · Chapter 6")).toBeInTheDocument();
-        expect(within(results).getAllByText("2 quest nodes")).toHaveLength(2);
+        expect(within(results).getByText("2 questlines")).toBeInTheDocument();
+        expect(within(results).getByText("4 quest nodes")).toBeInTheDocument();
+        expect(within(results).getByText("Main questline")).toBeInTheDocument();
+        expect(within(results).getByText("Alternate questline 2")).toBeInTheDocument();
+        expect(within(results).queryByText("Necrophage alternate questline 2 · Chapter 6")).not.toBeInTheDocument();
 
         const bitterTruthGroups = within(results).getAllByRole("button", { name: /a bitter truth/i });
-        expect(bitterTruthGroups).toHaveLength(2);
+        expect(bitterTruthGroups).toHaveLength(1);
         expect(within(results).getAllByRole("button", { name: /step 1/i }).length).toBeGreaterThan(0);
         expect(within(results).getAllByRole("button", { name: /step 2/i }).length).toBeGreaterThan(0);
         expect(within(results).queryByText(/Chapter 06 Step 01/i)).not.toBeInTheDocument();

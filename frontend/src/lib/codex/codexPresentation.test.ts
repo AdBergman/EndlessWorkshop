@@ -86,7 +86,7 @@ describe("codexPresentation", () => {
                 descriptionLines: [],
                 referenceKeys: [],
             })
-        ).toBe("Necrophage02 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+        ).toBe("Necrophage Alternate Questline 2 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
     });
 
     it("keeps the full nested choice path for branch quest nodes", () => {
@@ -103,6 +103,20 @@ describe("codexPresentation", () => {
         );
         expect(parseCodexQuestContext(entry)?.choiceKeys).toEqual(["01", "02"]);
         expect(parseCodexQuestContext(entry)?.choiceLabels).toEqual(["Choice 1", "Choice 2"]);
+    });
+
+    it("uses readable labels for numbered faction quest roots", () => {
+        const context = parseCodexQuestContext({
+            exportKind: "quests",
+            entryKey: "FactionQuest_Necrophage02_Chapter06_Step01",
+            displayName: "A Bitter Truth",
+            category: "MajorFaction",
+            kind: "Quest",
+        });
+
+        expect(context?.groupContext).toBe("Necrophage · Chapter 6");
+        expect(context?.variantLabel).toBe("Alternate questline 2");
+        expect(context?.relatedContext).toBe("Quest · Necrophage · Chapter 6 · Alternate questline 2 · Step 1");
     });
 
     it("uses entry-key context when source kind is the only discriminator", () => {

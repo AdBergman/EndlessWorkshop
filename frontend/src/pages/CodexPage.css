@@ -377,6 +377,29 @@
     padding: 2px 0 6px 18px;
 }
 
+.codex-questVariant {
+    display: grid;
+}
+
+.codex-questVariant + .codex-questVariant {
+    margin-top: 4px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.codex-questVariant__label {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 7px 8px 5px 14px;
+    color: rgba(255, 185, 143, 0.72);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
 .codex-questNodeRow {
     display: grid;
     gap: 3px;

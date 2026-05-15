@@ -61,6 +61,12 @@ export type CodexSummaryEntry = CodexEntry & {
 export type CodexQuestContext = {
     questlineKey: string;
     questlineLabel: string;
+    baseQuestlineKey: string;
+    baseQuestlineLabel: string;
+    isAlternateQuestline: boolean;
+    variantKey: string;
+    variantLabel: string;
+    variantContext: string;
     chapterKey: string;
     chapterLabel: string;
     stepKey: string | null;
@@ -77,12 +83,23 @@ export type CodexQuestContext = {
     sortKey: string;
 };
 
+export type CodexQuestVariant = {
+    variantKey: string;
+    variantLabel: string;
+    variantContext: string;
+    isAlternate: boolean;
+    nodes: CodexEntry[];
+    nodeCount: number;
+};
+
 export type CodexQuestGroupEntry = CodexEntry & {
     isQuestGroup: true;
     groupKey: string;
     groupContext: string;
     nodeCount: number;
     nodes: CodexEntry[];
+    variants: CodexQuestVariant[];
+    variantCount: number;
     isExpanded: boolean;
 };
 
@@ -230,7 +247,7 @@ function inferFactionContext(entry: Pick<CodexEntry, "entryKey" | "referenceKeys
         if (majorMatch) return humanizeContextToken(readIdentifierToken(majorMatch[1]));
 
         const factionQuestMatch = text.match(/FactionQuest_([A-Za-z0-9]+)_/);
-        if (factionQuestMatch) return humanizeContextToken(readIdentifierToken(factionQuestMatch[1]));
+        if (factionQuestMatch) return formatQuestlineLabel(readIdentifierToken(factionQuestMatch[1]));
 
         const minorMatch = text.match(/MinorFaction_([A-Za-z0-9_]+)/);
         if (minorMatch) return humanizeContextToken(readIdentifierToken(minorMatch[1]));
@@ -262,6 +279,46 @@ function isQuestEntry(entry: Pick<CodexEntry, "exportKind" | "kind">): boolean {
         compactWhitespace(entry.kind ?? "").toLowerCase() === "quest";
 }
 
+function formatQuestlineLabel(questlineKey: string): string {
+    const numberedMatch = questlineKey.match(/^(.+?)([0-9]+)$/);
+    if (!numberedMatch) return humanizeContextToken(questlineKey);
+
+    return `${humanizeContextToken(numberedMatch[1])} alternate questline ${Number(numberedMatch[2])}`;
+}
+
+function parseQuestlineVariant(questlineKey: string): {
+    baseQuestlineKey: string;
+    baseQuestlineLabel: string;
+    isAlternateQuestline: boolean;
+    variantLabel: string;
+    variantContext: string;
+} {
+    const numberedMatch = questlineKey.match(/^(.+?)([0-9]+)$/);
+    if (!numberedMatch) {
+        const baseQuestlineLabel = humanizeContextToken(questlineKey);
+        return {
+            baseQuestlineKey: questlineKey,
+            baseQuestlineLabel,
+            isAlternateQuestline: false,
+            variantLabel: "Main questline",
+            variantContext: baseQuestlineLabel,
+        };
+    }
+
+    const baseQuestlineKey = numberedMatch[1];
+    const baseQuestlineLabel = humanizeContextToken(baseQuestlineKey);
+    const variantNumber = Number(numberedMatch[2]);
+    const variantLabel = `Alternate questline ${variantNumber}`;
+
+    return {
+        baseQuestlineKey,
+        baseQuestlineLabel,
+        isAlternateQuestline: true,
+        variantLabel,
+        variantContext: `${baseQuestlineLabel} ${variantLabel.toLowerCase()}`,
+    };
+}
+
 export function parseCodexQuestContext(
     entry: Pick<CodexEntry, "entryKey" | "displayName" | "exportKind" | "category" | "kind">
 ): CodexQuestContext | null {
@@ -281,7 +338,8 @@ export function parseCodexQuestContext(
     const choiceNumbers = choiceKeys.map(formatQuestOrdinal).filter((choiceNumber): choiceNumber is string => Boolean(choiceNumber));
     if (!chapterNumber) return null;
 
-    const questlineLabel = humanizeContextToken(questlineKey);
+    const questlineVariant = parseQuestlineVariant(questlineKey);
+    const questlineLabel = formatQuestlineLabel(questlineKey);
     const chapterLabel = `Chapter ${chapterNumber}`;
     const stepLabel = stepNumber ? `Step ${stepNumber}` : null;
     const choiceLabels = choiceNumbers.map((choiceNumber) => `Choice ${choiceNumber}`);
@@ -291,18 +349,30 @@ export function parseCodexQuestContext(
     const groupKey = [
         "quest",
         displayNameKey,
-        questlineKey.toLowerCase(),
+        questlineVariant.baseQuestlineKey.toLowerCase(),
         chapterKey.toLowerCase(),
     ].join(":");
-    const groupContext = `${questlineLabel} · ${chapterLabel}`;
-    const relatedContext = ["Quest", questlineLabel, chapterLabel, nodeLabel].filter(Boolean).join(" · ");
+    const groupContext = `${questlineVariant.baseQuestlineLabel} · ${chapterLabel}`;
+    const variantKey = `${groupKey}:${questlineKey.toLowerCase()}`;
+    const relatedContext = [
+        "Quest",
+        questlineVariant.baseQuestlineLabel,
+        chapterLabel,
+        questlineVariant.isAlternateQuestline ? questlineVariant.variantLabel : null,
+        nodeLabel,
+    ].filter(Boolean).join(" · ");
     const categoryLabel = humanizeContextToken(entry.category ?? "");
     const kindLabel = singularKindLabel(entry.kind ?? entry.exportKind ?? "");
     const typeLine = [categoryLabel, kindLabel]
         .filter(Boolean)
         .filter((part, index, parts) => parts.findIndex((candidate) => candidate.toLowerCase() === part.toLowerCase()) === index)
         .join(" ");
-    const detailContextLines = [groupContext, nodeLabel, typeLine].filter(Boolean);
+    const detailContextLines = [
+        groupContext,
+        questlineVariant.isAlternateQuestline ? questlineVariant.variantLabel : null,
+        nodeLabel,
+        typeLine,
+    ].filter((line): line is string => Boolean(line));
     const sortKey = [
         chapterNumber.padStart(4, "0"),
         (stepNumber ?? "0").padStart(4, "0"),
@@ -313,6 +383,12 @@ export function parseCodexQuestContext(
     return {
         questlineKey,
         questlineLabel,
+        baseQuestlineKey: questlineVariant.baseQuestlineKey,
+        baseQuestlineLabel: questlineVariant.baseQuestlineLabel,
+        isAlternateQuestline: questlineVariant.isAlternateQuestline,
+        variantKey,
+        variantLabel: questlineVariant.variantLabel,
+        variantContext: questlineVariant.variantContext,
         chapterKey,
         chapterLabel,
         stepKey,
@@ -351,9 +427,11 @@ export function createCodexQuestGroupEntry(
     groupKey: string,
     displayName: string,
     groupContext: string,
-    nodes: CodexEntry[],
+    variants: CodexQuestVariant[],
     isExpanded: boolean
 ): CodexQuestGroupEntry {
+    const nodes = variants.flatMap((variant) => variant.nodes);
+
     return {
         exportKind: "quests",
         entryKey: `${CODEX_QUEST_GROUP_ENTRY_PREFIX}${groupKey}`,
@@ -367,6 +445,8 @@ export function createCodexQuestGroupEntry(
         groupContext,
         nodeCount: nodes.length,
         nodes,
+        variants,
+        variantCount: variants.length,
         isExpanded,
     };
 }
