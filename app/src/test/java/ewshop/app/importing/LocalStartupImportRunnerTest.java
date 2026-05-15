@@ -60,6 +60,9 @@ class LocalStartupImportRunnerTest {
         Files.writeString(tempDir.resolve("codex/ewshop_minor_factions_codex_export_0.78.json"), """
                 {"exportKind":"minorFactions","entries":[{"entryKey":"mf","displayName":"Minor Faction"}]}
                 """);
+        Files.writeString(tempDir.resolve("codex/ewshop_quests_codex_export_0.78.json"), """
+                {"exportKind":"quests","entries":[{"entryKey":"quest","displayName":"Quest"}]}
+                """);
         Files.writeString(tempDir.resolve("codex/ewshop_traits_codex_export_0.78.json"), """
                 {"exportKind":"traits","entries":[{"entryKey":"trait","displayName":"Trait"}]}
                 """);
@@ -73,10 +76,10 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.districtCalls).isEqualTo(1);
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
-        assertThat(facades.codexCalls).isEqualTo(3);
+        assertThat(facades.codexCalls).isEqualTo(4);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
-        assertThat(facades.codexKinds).containsExactly("abilities", "minorFactions", "traits");
+        assertThat(facades.codexKinds).containsExactly("abilities", "minorFactions", "quests", "traits");
     }
 
     @Test

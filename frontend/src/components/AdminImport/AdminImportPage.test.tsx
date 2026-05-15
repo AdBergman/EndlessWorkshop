@@ -317,11 +317,15 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
     });
 
-    it("accepts minorFactions and traits as codex import kinds", async () => {
+    it("accepts minorFactions, quests, and traits as codex import kinds", async () => {
         const user = userEvent.setup();
         const codexMinorFactions = fixtureFile("local-imports/codex/ewshop_minor_factions_codex_export_0.78.json", {
             exportKind: "minorFactions",
             entries: [{ entryKey: "MinorFaction_Test", displayName: "Minor Faction Test" }],
+        });
+        const codexQuests = fixtureFile("local-imports/codex/ewshop_quests_codex_export_0.78.json", {
+            exportKind: "quests",
+            entries: [{ entryKey: "Quest_Test", displayName: "Quest Test" }],
         });
         const codexTraits = fixtureFile("local-imports/codex/ewshop_traits_codex_export_0.78.json", {
             exportKind: "traits",
@@ -332,9 +336,10 @@ describe("AdminImportPage", () => {
         await waitForUnlockedPage();
 
         await user.click(screen.getByRole("button", { name: /Import codex files/i }));
-        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexMinorFactions, codexTraits]);
+        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexMinorFactions, codexQuests, codexTraits]);
 
         await screen.findByText(codexMinorFactions.name);
+        expect(screen.getByText(codexQuests.name)).toBeInTheDocument();
         expect(screen.getByText(codexTraits.name)).toBeInTheDocument();
         expect(screen.queryByText(/Invalid exportKind/i)).not.toBeInTheDocument();
 
@@ -345,9 +350,11 @@ describe("AdminImportPage", () => {
         expect(postCalls.map(([url]) => url)).toEqual([
             "/api/admin/import/codex",
             "/api/admin/import/codex",
+            "/api/admin/import/codex",
         ]);
         expect(postCalls.map(([, init]) => JSON.parse(String(init?.body)).exportKind)).toEqual([
             "minorFactions",
+            "quests",
             "traits",
         ]);
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");

@@ -151,6 +151,7 @@ const CODEX_KIND_LABELS = [
     "improvements",
     "minorFactions",
     "populations",
+    "quests",
     "tech",
     "traits",
     "units",

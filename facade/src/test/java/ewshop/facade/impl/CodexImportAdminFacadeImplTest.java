@@ -52,7 +52,7 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
-    void importCodex_acceptsMinorFactionsAndTraitsKinds() {
+    void importCodex_acceptsMinorFactionsQuestsAndTraitsKinds() {
         ImportResult result = new ImportResult();
         result.incrementInserted();
 
@@ -73,12 +73,20 @@ class CodexImportAdminFacadeImplTest {
                 "0.78",
                 "0.4.0",
                 "2026-05-02T07:42:00Z",
+                "quests",
+                List.of(new CodexImportEntryDto("Quest_A", "Quest A", List.of("Line"), List.of()))
+        ));
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "0.4.0",
+                "2026-05-02T07:42:00Z",
                 "traits",
                 List.of(new CodexImportEntryDto("Trait_A", "Trait A", List.of("Line"), List.of()))
         ));
 
-        assertEquals(List.of("minorFactions", "traits"), codexImportService.capturedExportKinds);
-        assertEquals(2, codexService.getAllCalls);
+        assertEquals(List.of("minorFactions", "quests", "traits"), codexImportService.capturedExportKinds);
+        assertEquals(3, codexService.getAllCalls);
     }
 
     @Test

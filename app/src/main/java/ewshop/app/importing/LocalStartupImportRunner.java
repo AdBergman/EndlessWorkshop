@@ -50,6 +50,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             "improvements",
             "minorFactions",
             "populations",
+            "quests",
             "tech",
             "traits",
             "units"

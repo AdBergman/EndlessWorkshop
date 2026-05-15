@@ -30,6 +30,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
             "improvements",
             "minorFactions",
             "populations",
+            "quests",
             "tech",
             "traits",
             "units"
