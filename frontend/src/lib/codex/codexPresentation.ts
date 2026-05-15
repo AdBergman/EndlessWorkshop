@@ -13,6 +13,7 @@ const TECHNICAL_PREFIXES = new Set([
     "improvement",
     "population",
     "tech",
+    "technology",
     "unit",
     "unitability",
 ]);
@@ -162,6 +163,114 @@ export function getCodexEntryPreview(entry: Pick<CodexEntry, "descriptionLines">
     return `${preview.slice(0, maxLength).trimEnd()}…`;
 }
 
+function humanizeContextToken(value: string): string {
+    return compactWhitespace(value)
+        .replace(/_/g, " ")
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(formatToken)
+        .join(" ");
+}
+
+function readIdentifierToken(value: string): string {
+    const match = value.match(/^[A-Za-z0-9_]+/);
+    return match?.[0] ?? "";
+}
+
+function inferFactionContext(entry: Pick<CodexEntry, "entryKey" | "referenceKeys" | "descriptionLines">): string | null {
+    const candidates = [
+        entry.entryKey,
+        ...(entry.referenceKeys ?? []),
+        ...(entry.descriptionLines ?? []),
+    ];
+
+    for (const value of candidates) {
+        const text = value ?? "";
+        const majorMatch = text.match(/Faction_([A-Za-z0-9_]+)/);
+        if (majorMatch) return humanizeContextToken(readIdentifierToken(majorMatch[1]));
+
+        const factionQuestMatch = text.match(/FactionQuest_([A-Za-z0-9]+)_/);
+        if (factionQuestMatch) return humanizeContextToken(readIdentifierToken(factionQuestMatch[1]));
+
+        const minorMatch = text.match(/MinorFaction_([A-Za-z0-9_]+)/);
+        if (minorMatch) return humanizeContextToken(readIdentifierToken(minorMatch[1]));
+
+        if (/LastLord|Last Lord/i.test(text)) return "Last Lords";
+    }
+
+    return null;
+}
+
+function inferQuestStepContext(entry: Pick<CodexEntry, "entryKey" | "exportKind">): string | null {
+    if (compactWhitespace(entry.exportKind ?? "").toLowerCase() !== "quests") return null;
+
+    const key = entry.entryKey ?? "";
+    const chapter = key.match(/Chapter([0-9]+[A-Za-z]?)/i)?.[1];
+    const step = key.match(/Step([0-9]+)/i)?.[1];
+    const choice = key.match(/Choice([0-9]+)/i)?.[1];
+
+    const parts: string[] = [];
+    if (chapter) parts.push(`Chapter ${chapter}`);
+    if (step) parts.push(`Step ${step}`);
+    if (choice) parts.push(`Choice ${choice}`);
+
+    return parts.length > 0 ? parts.join(" ") : null;
+}
+
+export function getCodexSecondaryContext(entry: Pick<CodexEntry, "entryKey" | "exportKind" | "category" | "kind" | "referenceKeys" | "descriptionLines">): string {
+    const parts: string[] = [];
+    const add = (value: string | null | undefined) => {
+        const normalized = compactWhitespace(value ?? "");
+        if (!normalized || normalized.toLowerCase() === "none") return;
+        if (parts.some((part) => part.toLowerCase() === normalized.toLowerCase())) return;
+        parts.push(humanizeContextToken(normalized));
+    };
+
+    add(inferFactionContext(entry));
+    add(inferQuestStepContext(entry));
+    add(entry.category);
+    add(entry.kind);
+
+    if (parts.length === 1 && parts[0].toLowerCase() === singularKindLabel(entry.exportKind).toLowerCase()) {
+        return humanizeCodexEntryKey(entry.entryKey);
+    }
+
+    return parts.join(" / ");
+}
+
+function singularKindLabel(kind: string): string {
+    const normalizedKind = compactWhitespace(kind ?? "").toLowerCase();
+    switch (normalizedKind) {
+        case "abilities":
+            return "Ability";
+        case "councilors":
+            return "Councilor";
+        case "districts":
+            return "District";
+        case "factions":
+            return "Faction";
+        case "heroes":
+            return "Hero";
+        case "improvements":
+            return "Improvement";
+        case "minorfactions":
+            return "Minor Faction";
+        case "populations":
+            return "Population";
+        case "quests":
+            return "Quest";
+        case "traits":
+            return "Trait";
+        case "units":
+            return "Unit";
+        case "tech":
+            return "Technology";
+        default:
+            return formatCodexKindLabel(kind).replace(/s$/, "");
+    }
+}
+
 export function isCodexSummaryEntry(item: CodexListItem | CodexEntry | null | undefined): item is CodexSummaryEntry {
     return Boolean(item && item.entryKey.startsWith(CODEX_SUMMARY_ENTRY_PREFIX));
 }
@@ -185,6 +294,8 @@ export function createCodexSummaryEntry(
         exportKind: kind,
         entryKey: getCodexSummaryEntryKey(kind),
         displayName: `All ${label}`,
+        category: null,
+        kind: null,
         descriptionLines: [summaryLine],
         referenceKeys: [],
         isSummary: true,

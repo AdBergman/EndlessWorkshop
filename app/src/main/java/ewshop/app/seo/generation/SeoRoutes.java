@@ -7,6 +7,7 @@ public final class SeoRoutes {
 
     public static final String TECH_KIND = "tech";
     public static final String UNITS_KIND = "units";
+    public static final String QUESTS_KIND = "quests";
     public static final String ENCYCLOPEDIA_PAGE = "encyclopedia";
     public static final String SITE_NAME = "Endless Workshop";
     public static final String SITE_URL = "https://endlessworkshop.dev";
@@ -25,6 +26,14 @@ public final class SeoRoutes {
 
     public static String routeFor(String kind, String slug) {
         return "/" + ENCYCLOPEDIA_PAGE + "/" + kind + "/" + slug;
+    }
+
+    public static String routeFor(String kind, String slug, String entryKeySlug) {
+        String keySlug = entryKeySlug == null ? "" : entryKeySlug.trim();
+        if (keySlug.isBlank()) {
+            return routeFor(kind, slug);
+        }
+        return routeFor(kind, slug) + "/" + keySlug;
     }
 
     public static String encyclopediaRouteFor(String kind) {
@@ -50,6 +59,16 @@ public final class SeoRoutes {
                 && ENCYCLOPEDIA_PAGE.equals(relativePath.getName(0).toString())
                 && "index.html".equals(relativePath.getName(3).toString())) {
             return routeFor(relativePath.getName(1).toString(), relativePath.getName(2).toString());
+        }
+
+        if (relativePath.getNameCount() == 5
+                && ENCYCLOPEDIA_PAGE.equals(relativePath.getName(0).toString())
+                && "index.html".equals(relativePath.getName(4).toString())) {
+            return routeFor(
+                    relativePath.getName(1).toString(),
+                    relativePath.getName(2).toString(),
+                    relativePath.getName(3).toString()
+            );
         }
 
         return "";

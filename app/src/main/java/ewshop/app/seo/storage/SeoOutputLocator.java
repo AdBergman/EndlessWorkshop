@@ -32,6 +32,14 @@ public class SeoOutputLocator {
         return outputRoot.resolve("encyclopedia").resolve(page).resolve(entryKey).resolve("index.html");
     }
 
+    public Path getFeaturedEntityFile(String page, String slug, String entryKeySlug) {
+        String keySlug = entryKeySlug == null ? "" : entryKeySlug.trim();
+        if (keySlug.isBlank()) {
+            return getFeaturedEntityFile(page, slug);
+        }
+        return outputRoot.resolve("encyclopedia").resolve(page).resolve(slug).resolve(keySlug).resolve("index.html");
+    }
+
     public Path getEncyclopediaCategoryFile(String page) {
         return outputRoot.resolve("encyclopedia").resolve(page).resolve("index.html");
     }
@@ -48,6 +56,10 @@ public class SeoOutputLocator {
         return Files.isRegularFile(getFeaturedEntityFile(page, entryKey));
     }
 
+    public boolean hasGeneratedFeaturedEntity(String page, String slug, String entryKeySlug) {
+        return Files.isRegularFile(getFeaturedEntityFile(page, slug, entryKeySlug));
+    }
+
     public boolean hasGeneratedEncyclopediaCategory(String page) {
         return Files.isRegularFile(getEncyclopediaCategoryFile(page));
     }
@@ -58,6 +70,14 @@ public class SeoOutputLocator {
 
     public String getGeneratedForwardPath(String page, String entryKey) {
         return "/__generated-seo/encyclopedia/" + page + "/" + entryKey + "/index.html";
+    }
+
+    public String getGeneratedForwardPath(String page, String slug, String entryKeySlug) {
+        String keySlug = entryKeySlug == null ? "" : entryKeySlug.trim();
+        if (keySlug.isBlank()) {
+            return getGeneratedForwardPath(page, slug);
+        }
+        return "/__generated-seo/encyclopedia/" + page + "/" + slug + "/" + keySlug + "/index.html";
     }
 
     public String getGeneratedCategoryForwardPath(String page) {

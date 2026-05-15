@@ -340,11 +340,21 @@
 }
 
 .codex-resultRow__kind,
-.codex-detail__kind {
+.codex-resultRow__context,
+.codex-detail__kind,
+.codex-detail__context {
     font-size: 10px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: rgba(255, 185, 143, 0.72);
+}
+
+.codex-resultRow__context,
+.codex-detail__context {
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.5);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codex-resultRow__preview {
@@ -511,6 +521,14 @@
     font-weight: 600;
     line-height: 1.4;
     transition: color 0.18s ease;
+}
+
+.codex-summaryList__context {
+    color: rgba(255, 185, 143, 0.7);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    text-transform: uppercase;
 }
 
 .codex-summaryList__description {

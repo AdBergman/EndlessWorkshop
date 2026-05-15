@@ -29,6 +29,8 @@ export function entryMatchesQuery(entry: CodexEntry, query: string): boolean {
         entry.displayName,
         entry.entryKey,
         entry.exportKind,
+        entry.category ?? "",
+        entry.kind ?? "",
         entry.descriptionLines.join(" "),
     ].some((value) => normalize(value).includes(normalizedQuery));
 }
@@ -41,6 +43,8 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
     const entryKey = normalize(entry.entryKey);
     const description = normalize(entry.descriptionLines.join(" "));
     const exportKind = normalize(entry.exportKind);
+    const category = normalize(entry.category);
+    const sourceKind = normalize(entry.kind);
 
     let score = -1;
 
@@ -66,6 +70,10 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
 
     if (exportKind.includes(normalizedQuery)) {
         score = Math.max(score, 180);
+    }
+
+    if (category.includes(normalizedQuery) || sourceKind.includes(normalizedQuery)) {
+        score = Math.max(score, 220);
     }
 
     if (score < 0) {

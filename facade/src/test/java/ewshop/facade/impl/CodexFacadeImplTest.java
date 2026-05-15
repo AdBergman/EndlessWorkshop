@@ -20,7 +20,7 @@ class CodexFacadeImplTest {
         CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
 
         when(codexService.getAllCodexEntries()).thenReturn(List.of(
-                codexEntry("abilities", "Ability_Valid", "Resolved Ability", List.of("Valid description.")),
+                codexEntry("abilities", "Ability_Valid", "Resolved Ability", "Combat", "Ability", List.of("Valid description."), List.of()),
                 codexEntry("abilities", "Ability_Invalid", "% Placeholder", List.of("Should be filtered.")),
                 codexEntry("abilities", "Ability_Weak", "Stone Reader", List.of("TBD"))
         ));
@@ -29,6 +29,8 @@ class CodexFacadeImplTest {
 
         assertThat(result).extracting(CodexDto::entryKey).containsExactly("Ability_Valid");
         assertThat(result.getFirst().displayName()).isEqualTo("Resolved Ability");
+        assertThat(result.getFirst().category()).isEqualTo("Combat");
+        assertThat(result.getFirst().kind()).isEqualTo("Ability");
         assertThat(result.getFirst().descriptionLines()).containsExactly("Valid description.");
     }
 
@@ -104,10 +106,24 @@ class CodexFacadeImplTest {
             List<String> descriptionLines,
             List<String> referenceKeys
     ) {
+        return codexEntry(exportKind, entryKey, displayName, null, null, descriptionLines, referenceKeys);
+    }
+
+    private static Codex codexEntry(
+            String exportKind,
+            String entryKey,
+            String displayName,
+            String category,
+            String kind,
+            List<String> descriptionLines,
+            List<String> referenceKeys
+    ) {
         return Codex.builder()
                 .exportKind(exportKind)
                 .entryKey(entryKey)
                 .displayName(displayName)
+                .category(category)
+                .kind(kind)
                 .descriptionLines(descriptionLines)
                 .referenceKeys(referenceKeys)
                 .build();

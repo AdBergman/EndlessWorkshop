@@ -24,10 +24,12 @@ public final class CodexImportMapper {
         String name = trimToNull(dto.displayName());
         if (name == null) throw new IllegalArgumentException("displayName is missing for " + key);
 
+        String category = trimToNull(dto.category());
+        String sourceKind = trimToNull(dto.kind());
         List<String> descriptionLines = cleanLines(dto.descriptionLines());
         List<String> referenceKeys = cleanDistinctLines(dto.referenceKeys());
 
-        return new CodexImportSnapshot(key, name, kind, descriptionLines, referenceKeys);
+        return new CodexImportSnapshot(key, name, kind, category, sourceKind, descriptionLines, referenceKeys);
     }
 
     private static String trimToNull(String s) {

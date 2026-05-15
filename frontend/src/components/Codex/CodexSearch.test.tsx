@@ -18,6 +18,13 @@ const suggestions: CodexEntry[] = [
         descriptionLines: [],
         referenceKeys: [],
     },
+    {
+        exportKind: "minorfactions",
+        entryKey: "MinorFaction_Ametrine",
+        displayName: "Ametrine",
+        descriptionLines: ["Minor faction."],
+        referenceKeys: [],
+    },
 ];
 
 describe("CodexSearch", () => {
@@ -111,5 +118,27 @@ describe("CodexSearch", () => {
 
         expect(screen.getByText("Blossom Burst")).toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
+    });
+
+    it("renders mapped kind labels in autocomplete options", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <CodexSearch
+                value="ametrine"
+                onChange={() => {}}
+                resultCount={3}
+                totalCount={12}
+                suggestions={suggestions}
+                onSelectSuggestion={() => {}}
+                onConfirmQuery={() => {}}
+            />
+        );
+
+        const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.click(input);
+
+        expect(screen.getByText("Minor Factions")).toBeInTheDocument();
+        expect(screen.queryByText("Minorfactions")).not.toBeInTheDocument();
     });
 });

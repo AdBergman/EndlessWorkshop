@@ -70,6 +70,8 @@ export interface Codex {
     exportKind: string;
     entryKey: string;
     displayName: string;
+    category?: string | null;
+    kind?: string | null;
     descriptionLines: string[];
     referenceKeys: string[];
 }

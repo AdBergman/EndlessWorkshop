@@ -50,7 +50,7 @@ public class GeneratedSeoWriter {
             return List.of();
         }
 
-        try (Stream<Path> pathStream = Files.walk(outputRoot, 4)) {
+        try (Stream<Path> pathStream = Files.walk(outputRoot, 5)) {
             LinkedHashSet<String> routes = pathStream
                     .filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().equals("index.html"))

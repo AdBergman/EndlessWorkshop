@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { getCodexEntryLabel, getCodexEntryPreview, type CodexSummaryEntry } from "@/lib/codex/codexPresentation";
+import { getCodexEntryLabel, getCodexEntryPreview, getCodexSecondaryContext, type CodexSummaryEntry } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -27,6 +27,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                 {entries.length > 0 ? (
                     entries.map((entry) => {
                         const preview = getCodexEntryPreview(entry, 240);
+                        const secondaryContext = getCodexSecondaryContext(entry);
 
                         return (
                             <button
@@ -38,6 +39,9 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                 <span className="codex-summaryList__name">
                                     {renderCodexLabel(getCodexEntryLabel(entry))}
                                 </span>
+                                {secondaryContext ? (
+                                    <span className="codex-summaryList__context">{secondaryContext}</span>
+                                ) : null}
                                 <span className="codex-summaryList__description">
                                     {preview || "No public description has been added for this entry yet."}
                                 </span>

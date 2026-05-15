@@ -32,6 +32,8 @@ function normalizeEntry(entry: CodexEntry): CodexEntry {
         exportKind: (entry.exportKind ?? "").trim().toLowerCase(),
         entryKey: (entry.entryKey ?? "").trim(),
         displayName: entry.displayName ?? "",
+        category: typeof entry.category === "string" ? entry.category.trim() || null : null,
+        kind: typeof entry.kind === "string" ? entry.kind.trim() || null : null,
         descriptionLines: (entry.descriptionLines ?? []).filter((line): line is string => typeof line === "string"),
         referenceKeys: (entry.referenceKeys ?? []).filter((key): key is string => typeof key === "string"),
     };

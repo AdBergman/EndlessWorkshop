@@ -49,7 +49,9 @@ const USER_FACING_REFERENCE_PATTERNS = [
     /^Technology_/i,
     /^MinorFaction_/i,
     /^Faction_/i,
+    /^FactionQuest_/i,
     /^Population_/i,
+    /^Trait_/i,
 ];
 
 const TOKEN_VOCABULARY_GAPS = new Set([

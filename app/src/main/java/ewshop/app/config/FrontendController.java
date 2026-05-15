@@ -73,6 +73,23 @@ public class FrontendController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
+    @RequestMapping(value = "/encyclopedia/{page:[a-z][a-z0-9-]*}/{slug:[a-z0-9-]+}/{entryKeySlug:[a-z0-9-]+}")
+    public String forwardFeaturedEntityVariantDocument(
+            @PathVariable String page,
+            @PathVariable String slug,
+            @PathVariable String entryKeySlug
+    ) {
+        validateSeoRouteSegment(page);
+        validateSeoRouteSegment(slug);
+        validateSeoRouteSegment(entryKeySlug);
+
+        if (seoOutputLocator.hasGeneratedFeaturedEntity(page, slug, entryKeySlug)) {
+            return "forward:" + seoOutputLocator.getGeneratedForwardPath(page, slug, entryKeySlug);
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
     private static void validateSeoRouteSegment(String value) {
         if (!SEO_ROUTE_SEGMENT_PATTERN.matcher(value).matches()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);

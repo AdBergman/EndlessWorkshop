@@ -22,6 +22,8 @@ public class CodexMapper {
                 domain.getExportKind(),
                 domain.getEntryKey(),
                 domain.getDisplayName(),
+                domain.getCategory(),
+                domain.getKind(),
                 lines,
                 refs
         );

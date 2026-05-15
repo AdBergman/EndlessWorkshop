@@ -410,7 +410,7 @@ public class CodexMissingReferenceAuditService {
     }
 
     private static String routeFor(PageCandidate candidate) {
-        return SeoRoutes.routeFor(candidate.kind(), candidate.slug());
+        return candidate.canonicalRoute();
     }
 
     private static double percentage(int numerator, int denominator) {

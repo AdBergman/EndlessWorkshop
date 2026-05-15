@@ -28,6 +28,12 @@ public class CodexEntity {
     @Column(name = "display_name", nullable = false, length = 400)
     private String displayName;
 
+    @Column(name = "category", length = 160)
+    private String category;
+
+    @Column(name = "source_kind", length = 160)
+    private String kind;
+
     @ElementCollection
     @CollectionTable(name = "codex_description_lines", joinColumns = @JoinColumn(name = "codex_id"))
     @OrderColumn(name = "line_index")
@@ -53,6 +59,12 @@ public class CodexEntity {
 
     public String getDisplayName() { return displayName; }
     public void setDisplayName(String displayName) { this.displayName = displayName; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getKind() { return kind; }
+    public void setKind(String kind) { this.kind = kind; }
 
     public List<String> getDescriptionLines() { return descriptionLines; }
     public void setDescriptionLines(List<String> descriptionLines) {

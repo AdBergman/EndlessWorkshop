@@ -21,7 +21,7 @@ public class ReferenceTargetBuilder {
                     entryKey,
                     new ReferenceTarget(
                             candidate.displayName(),
-                            SeoRoutes.routeFor(candidate.kind(), candidate.slug())
+                            candidate.canonicalRoute()
                     )
             );
         }

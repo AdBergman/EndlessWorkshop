@@ -60,19 +60,22 @@ public class SeoPageRenderer {
     ) {
         String kindLabel = kindLabelFor(candidate.kind());
         ParsedDescription description = parseDescription(candidate.descriptionLines());
-        String pageTitle = candidate.displayName() + " " + kindLabel + " Reference | " + SeoRoutes.SITE_NAME;
-        String seoDescription = buildSeoDescription(candidate.displayName(), kindLabel, description);
-        String canonicalUrl = SeoRoutes.SITE_URL + route;
+        String displayTitle = displayTitle(candidate);
+        String pageTitle = displayTitle + " " + kindLabel + " Reference | " + SeoRoutes.SITE_NAME;
+        String seoDescription = buildSeoDescription(displayTitle, kindLabel, description);
+        String canonicalUrl = SeoRoutes.SITE_URL + candidate.canonicalRoute();
+        String pageUrl = SeoRoutes.SITE_URL + route;
+        String robots = candidate.indexable() ? "index, follow" : "noindex, follow";
 
         String webPageJsonLd = """
                 {"@context":"https://schema.org","@type":"WebPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"},"breadcrumb":{"@id":"%s#breadcrumb"}}
                 """.formatted(
                 escapeJson(pageTitle),
                 escapeJson(seoDescription),
-                escapeJson(canonicalUrl),
+                escapeJson(pageUrl),
                 escapeJson(SeoRoutes.SITE_NAME),
                 escapeJson(SeoRoutes.SITE_URL),
-                escapeJson(canonicalUrl)
+                escapeJson(pageUrl)
         ).trim();
         String breadcrumbJsonLd = """
                 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Encyclopedia","item":"%s/%s"},{"@type":"ListItem","position":3,"name":"%s","item":"%s%s"},{"@type":"ListItem","position":4,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
@@ -84,9 +87,9 @@ public class SeoPageRenderer {
                 escapeJson(pluralKindLabelFor(candidate.kind())),
                 escapeJson(SeoRoutes.SITE_URL),
                 escapeJson(SeoRoutes.encyclopediaRouteFor(candidate.kind())),
-                escapeJson(candidate.displayName()),
-                escapeJson(canonicalUrl),
-                escapeJson(canonicalUrl)
+                escapeJson(displayTitle),
+                escapeJson(pageUrl),
+                escapeJson(pageUrl)
         ).trim();
 
         return """
@@ -98,7 +101,7 @@ public class SeoPageRenderer {
                     <meta name="theme-color" content="#0b0e13" />
                     <title>%s</title>
                     <meta name="description" content="%s" />
-                    <meta name="robots" content="index, follow" />
+                    <meta name="robots" content="%s" />
                     <link rel="canonical" href="%s" />
                     <link rel="preconnect" href="https://fonts.googleapis.com" />
                     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -158,6 +161,7 @@ public class SeoPageRenderer {
 
                         %s
                         %s
+                        %s
 
                         <section class="seo-section entity-page__section entity-page__actions" aria-label="Actions">
                             <div class="seo-buttonRow">
@@ -171,11 +175,12 @@ public class SeoPageRenderer {
                 """.formatted(
                 escapeHtml(pageTitle),
                 escapeHtml(seoDescription),
+                escapeHtml(robots),
                 canonicalUrl,
                 escapeHtml(SeoRoutes.SITE_NAME),
                 escapeHtml(pageTitle),
                 escapeHtml(seoDescription),
-                canonicalUrl,
+                pageUrl,
                 SeoRoutes.DEFAULT_IMAGE_URL,
                 escapeHtml(pageTitle),
                 escapeHtml(seoDescription),
@@ -185,11 +190,12 @@ public class SeoPageRenderer {
                 escapeHtml(pageTitle),
                 escapeHtml(SeoRoutes.encyclopediaRouteFor(candidate.kind())),
                 escapeHtml(pluralKindLabelFor(candidate.kind())),
-                escapeHtml(candidate.displayName()),
-                escapeHtml(buildMetadataLine(kindLabel, description.metadataHighlights())),
-                escapeHtml(candidate.displayName()),
+                escapeHtml(displayTitle),
+                escapeHtml(buildMetadataLine(kindLabel, candidate, description.metadataHighlights())),
+                escapeHtml(displayTitle),
                 renderIntro(description.introLine()),
                 renderDescriptionSection(description),
+                renderCanonicalizedVariants(candidate),
                 renderRelatedSection(candidate.referenceKeys(), referenceTargetsByEntryKey),
                 renderActionRow(candidate.kind())
         );
@@ -240,13 +246,14 @@ public class SeoPageRenderer {
                 .append("\">");
         for (PageCandidate candidate : candidates) {
             entries.append("<a class=\"encyclopedia-page__entryRow\" href=\"")
-                    .append(escapeHtml(SeoRoutes.routeFor(candidate.kind(), candidate.slug())))
+                    .append(escapeHtml(candidate.route()))
                     .append("\" data-entry-key=\"")
                     .append(escapeHtml(candidate.entryKey()))
                     .append("\">")
                     .append("<span class=\"encyclopedia-page__entryTitle\">")
-                    .append(escapeHtml(candidate.displayName()))
+                    .append(escapeHtml(displayTitle(candidate)))
                     .append("</span>")
+                    .append(renderEntryContext(candidate))
                     .append("<span class=\"encyclopedia-page__entryDescription\">")
                     .append(escapeHtml(buildEntryPreview(candidate)))
                     .append("</span>")
@@ -383,6 +390,28 @@ public class SeoPageRenderer {
                 """.formatted(content);
     }
 
+    private static String renderCanonicalizedVariants(PageCandidate candidate) {
+        if (candidate.canonicalizedVariants() == null || candidate.canonicalizedVariants().isEmpty()) {
+            return "";
+        }
+
+        StringBuilder variants = new StringBuilder();
+        variants.append("<ul class=\"seo-list entity-page__detailList\">");
+        for (var variant : candidate.canonicalizedVariants()) {
+            variants.append("<li>")
+                    .append(escapeHtml(displayTitle(variant.displayName(), variant.contextLabel())))
+                    .append("</li>");
+        }
+        variants.append("</ul>");
+
+        return """
+                        <section class="seo-section entity-page__section entity-page__variants">
+                            <h2 class="seo-heading">Also Covers</h2>
+                            %s
+                        </section>
+                """.formatted(variants);
+    }
+
     private static String renderIntro(String introLine) {
         if (introLine.isBlank()) {
             return "";
@@ -492,11 +521,19 @@ public class SeoPageRenderer {
         return highlights.values().stream().limit(3).toList();
     }
 
-    private static String buildMetadataLine(String kindLabel, List<String> metadataHighlights) {
+    private static String buildMetadataLine(String kindLabel, PageCandidate candidate, List<String> metadataHighlights) {
         List<String> parts = new ArrayList<>();
         parts.add(kindLabel);
+        if (!trimToEmpty(candidate.category()).isBlank()) {
+            parts.add("Category: " + candidate.category());
+        }
+        if (!trimToEmpty(candidate.sourceKind()).isBlank()
+                && !candidate.sourceKind().equalsIgnoreCase(kindLabel)
+                && parts.stream().noneMatch(part -> part.equalsIgnoreCase(candidate.sourceKind()))) {
+            parts.add("Type: " + candidate.sourceKind());
+        }
         parts.addAll(metadataHighlights);
-        return String.join(" • ", parts);
+        return parts.stream().distinct().limit(4).reduce((left, right) -> left + " • " + right).orElse(kindLabel);
     }
 
     private static String renderDescriptionContent(ParsedDescription description) {
@@ -595,6 +632,30 @@ public class SeoPageRenderer {
                 ? description.introLine()
                 : firstOrBlank(description.descriptionLines());
         return preview.isBlank() ? candidate.displayName() + " reference entry." : preview;
+    }
+
+    private static String renderEntryContext(PageCandidate candidate) {
+        String context = trimToEmpty(candidate.contextLabel());
+        if (context.isBlank() || context.equals(candidate.entryKey())) {
+            return "";
+        }
+        return "<span class=\"encyclopedia-page__entryContext\">" + escapeHtml(context) + "</span>";
+    }
+
+    private static String displayTitle(PageCandidate candidate) {
+        boolean variantRoute = !trimToEmpty(candidate.entryKeySlug()).isBlank();
+        if (!variantRoute) {
+            return candidate.displayName();
+        }
+        return displayTitle(candidate.displayName(), candidate.contextLabel());
+    }
+
+    private static String displayTitle(String displayName, String contextLabel) {
+        String context = trimToEmpty(contextLabel);
+        if (context.isBlank()) {
+            return displayName;
+        }
+        return displayName + " - " + context;
     }
 
     private static String renderReferenceChips(

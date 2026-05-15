@@ -35,6 +35,8 @@ class CodexImportAdminFacadeImplTest {
                 List.of(new CodexImportEntryDto(
                         "Equipment_Accessory_03_Definition",
                         "Crimson Wing Rune",
+                        "Accessory",
+                        "Equipment",
                         List.of("Type: Accessory", "Rarity: Uncommon"),
                         List.of("UnitAbility_Hero_BattleAbility_Equipment_Passive_44")
                 ))
@@ -47,6 +49,8 @@ class CodexImportAdminFacadeImplTest {
         List<CodexImportSnapshot> snapshots = codexImportService.capturedSnapshots;
         assertEquals(1, snapshots.size());
         assertEquals("equipment", snapshots.get(0).exportKind());
+        assertEquals("Accessory", snapshots.get(0).category());
+        assertEquals("Equipment", snapshots.get(0).kind());
         assertEquals(List.of("UnitAbility_Hero_BattleAbility_Equipment_Passive_44"), snapshots.get(0).referenceKeys());
         assertEquals(1, summary.counts().inserted());
     }

@@ -5,6 +5,7 @@ import {
     getCodexDescriptionPreviewText,
     getCodexEntryLabel,
     getCodexEntryPreview,
+    getCodexSecondaryContext,
     humanizeCodexEntryKey,
     isCodexSummaryEntry,
 } from "@/lib/codex/codexPresentation";
@@ -71,5 +72,31 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("population")).toBe("Populations");
         expect(formatCodexKindLabel("minorfactions")).toBe("Minor Factions");
         expect(formatCodexKindLabel("techs")).toBe("Tech");
+    });
+
+    it("adds stable quest step context for duplicate quest titles", () => {
+        expect(
+            getCodexSecondaryContext({
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step03_Choice01",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: [],
+                referenceKeys: [],
+            })
+        ).toBe("Necrophage02 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+    });
+
+    it("uses entry-key context when source kind is the only discriminator", () => {
+        expect(
+            getCodexSecondaryContext({
+                exportKind: "tech",
+                entryKey: "Technology_District_Tier1_Population_ea4",
+                category: null,
+                kind: "Technology",
+                descriptionLines: [],
+                referenceKeys: [],
+            })
+        ).toBe("Tier1 Population Ea4");
     });
 });

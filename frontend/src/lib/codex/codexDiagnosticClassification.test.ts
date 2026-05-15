@@ -27,7 +27,9 @@ describe("codexDiagnosticClassification", () => {
             "Technology_Missing",
             "MinorFaction_Missing",
             "Faction_Missing",
+            "FactionQuest_Missing",
             "Population_Missing",
+            "Trait_Missing",
         ].forEach((raw) => {
             expect(classifyCodexReferenceDiagnostic({ kind: "unresolved-ref", raw })).toMatchObject({
                 bucket: "high-signal-warning",

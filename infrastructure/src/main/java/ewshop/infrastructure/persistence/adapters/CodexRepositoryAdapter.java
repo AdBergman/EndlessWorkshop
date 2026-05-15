@@ -119,6 +119,16 @@ public class CodexRepositoryAdapter implements CodexRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getCategory(), update.category())) {
+            entity.setCategory(update.category());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getKind(), update.kind())) {
+            entity.setKind(update.kind());
+            changed = true;
+        }
+
         List<String> newLines = update.descriptionLines() == null ? List.of() : new ArrayList<>(update.descriptionLines());
         if (!Objects.equals(entity.getDescriptionLines(), newLines)) {
             entity.setDescriptionLines(newLines);

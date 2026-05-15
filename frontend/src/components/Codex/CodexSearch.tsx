@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { useEffect, useId, useState } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { getCodexDescriptionPreviewLine, getCodexEntryLabel } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexDescriptionPreviewLine, getCodexEntryLabel, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -13,11 +13,6 @@ type Props = {
     onSelectSuggestion: (entry: CodexEntry) => void;
     onConfirmQuery: () => void;
 };
-
-function formatKindLabel(kind: string): string {
-    if (!kind) return "Unknown";
-    return kind.charAt(0).toUpperCase() + kind.slice(1);
-}
 
 export default function CodexSearch({
     value,
@@ -115,6 +110,7 @@ export default function CodexSearch({
                     <div className="codex-search__dropdown" role="listbox" id={listboxId}>
                         {suggestions.map((entry, index) => {
                             const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
+                            const secondaryContext = getCodexSecondaryContext(entry);
 
                             return (
                                 <button
@@ -138,7 +134,10 @@ export default function CodexSearch({
                                             {renderCodexLabel(getCodexEntryLabel(entry))}
                                         </span>
                                         <span className="codex-search__optionKind">
-                                            {formatKindLabel(entry.exportKind)}
+                                            <span>{formatCodexKindLabel(entry.exportKind)}</span>
+                                            {secondaryContext ? (
+                                                <span className="codex-search__optionContext"> / {secondaryContext}</span>
+                                            ) : null}
                                         </span>
                                     </span>
 

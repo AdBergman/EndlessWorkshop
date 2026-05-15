@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexEntryLabel, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import RelatedEntries from "./RelatedEntries";
@@ -11,11 +11,6 @@ type Props = {
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectRelated: (entry: CodexEntry) => void;
 };
-
-function formatKindLabel(kind: string): string {
-    if (!kind) return "Unknown";
-    return kind.charAt(0).toUpperCase() + kind.slice(1);
-}
 
 export default function CodexEntryDetail({
     entry,
@@ -36,11 +31,13 @@ export default function CodexEntryDetail({
     }
 
     const hasDescription = entry.descriptionLines.some((line) => line.trim().length > 0);
+    const secondaryContext = getCodexSecondaryContext(entry);
 
     return (
         <article className="codex-detail">
             <div className="codex-detail__metaRow">
-                <span className="codex-detail__kind">{formatKindLabel(entry.exportKind)}</span>
+                <span className="codex-detail__kind">{formatCodexKindLabel(entry.exportKind)}</span>
+                {secondaryContext ? <span className="codex-detail__context">{secondaryContext}</span> : null}
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
