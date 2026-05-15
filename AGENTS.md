@@ -14,7 +14,7 @@ Prefer small, bounded changes that follow existing architecture. Do not perform 
 
 - `local-imports/` is gitignored local-only data and must never be committed.
 - Put raw supported exports in `local-imports/exports/`; startup imports currently support `districts`, `improvements`, `units`, and `tech`.
-- Put codex exports in `local-imports/codex/`; supported codex kinds are `abilities`, `councilors`, `districts`, `equipment`, `factions`, `heroes`, `improvements`, `populations`, `tech`, and `units`.
+- Put codex exports in `local-imports/codex/`; codex exports use the generic `exportKind` plus `entries[]` contract and do not require a fixed kind allow-list.
 - Startup imports run only for `dev`, `local`, `ai`, or `codex` profiles when `ewshop.local-import.enabled=true`.
 - Unsupported raw exporter files, such as battle abilities, battle skills, and descriptor evaluations, may coexist locally and are skipped with a log message.
 

@@ -66,6 +66,9 @@ class LocalStartupImportRunnerTest {
         Files.writeString(tempDir.resolve("codex/ewshop_traits_codex_export_0.78.json"), """
                 {"exportKind":"traits","entries":[{"entryKey":"trait","displayName":"Trait"}]}
                 """);
+        Files.writeString(tempDir.resolve("codex/ewshop_future_kind_codex_export_0.78.json"), """
+                {"exportKind":"futureKind","entries":[{"entryKey":"future","displayName":"Future"}]}
+                """);
 
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
@@ -76,10 +79,10 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.districtCalls).isEqualTo(1);
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
-        assertThat(facades.codexCalls).isEqualTo(4);
+        assertThat(facades.codexCalls).isEqualTo(5);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
-        assertThat(facades.codexKinds).containsExactly("abilities", "minorFactions", "quests", "traits");
+        assertThat(facades.codexKinds).containsExactly("abilities", "futureKind", "minorFactions", "quests", "traits");
     }
 
     @Test
@@ -100,7 +103,7 @@ class LocalStartupImportRunnerTest {
     }
 
     @Test
-    void unsupportedExporterFilesAreSkippedWithoutCallingImportFacades(CapturedOutput output) throws Exception {
+    void unsupportedRawExporterFilesAreSkippedWhileCodexEntriesImport(CapturedOutput output) throws Exception {
         Files.createDirectories(tempDir.resolve("exports"));
         Files.createDirectories(tempDir.resolve("codex"));
         Files.writeString(tempDir.resolve("exports/ewshop_battle_abilities_export_0.78.json"), """
@@ -118,13 +121,14 @@ class LocalStartupImportRunnerTest {
 
         runner.runStartupImport();
 
-        assertThat(facades.totalCalls()).isZero();
+        assertThat(facades.totalCalls()).isEqualTo(1);
+        assertThat(facades.codexKinds).containsExactly("battle_abilities");
         assertThat(output)
                 .contains("skipped unsupported exports file")
                 .contains("exportKind='battle_abilities'")
                 .contains("exportKind='descriptor_evaluations'")
-                .contains("skipped unsupported codex file")
-                .contains("Local startup import finished: 0 imported, 3 skipped, 0 failed.");
+                .doesNotContain("skipped unsupported codex file")
+                .contains("Local startup import finished: 1 imported, 2 skipped, 0 failed.");
     }
 
     @Test

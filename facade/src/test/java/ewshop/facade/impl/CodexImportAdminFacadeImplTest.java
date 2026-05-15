@@ -52,7 +52,7 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
-    void importCodex_acceptsMinorFactionsQuestsAndTraitsKinds() {
+    void importCodex_acceptsArbitraryNonBlankExportKind() {
         ImportResult result = new ImportResult();
         result.incrementInserted();
 
@@ -65,32 +65,16 @@ class CodexImportAdminFacadeImplTest {
                 "0.78",
                 "0.4.0",
                 "2026-05-02T07:42:00Z",
-                "minorFactions",
-                List.of(new CodexImportEntryDto("MinorFaction_A", "Minor Faction A", List.of("Line"), List.of()))
-        ));
-        facade.importCodex(new CodexImportBatchDto(
-                "Endless Legend 2",
-                "0.78",
-                "0.4.0",
-                "2026-05-02T07:42:00Z",
-                "quests",
-                List.of(new CodexImportEntryDto("Quest_A", "Quest A", List.of("Line"), List.of()))
-        ));
-        facade.importCodex(new CodexImportBatchDto(
-                "Endless Legend 2",
-                "0.78",
-                "0.4.0",
-                "2026-05-02T07:42:00Z",
-                "traits",
-                List.of(new CodexImportEntryDto("Trait_A", "Trait A", List.of("Line"), List.of()))
+                "futureKind",
+                List.of(new CodexImportEntryDto("Future_A", "Future A", List.of("Line"), List.of()))
         ));
 
-        assertEquals(List.of("minorFactions", "quests", "traits"), codexImportService.capturedExportKinds);
-        assertEquals(3, codexService.getAllCalls);
+        assertEquals(List.of("futureKind"), codexImportService.capturedExportKinds);
+        assertEquals(1, codexService.getAllCalls);
     }
 
     @Test
-    void importCodex_rejectsUnsupportedExportKind() {
+    void importCodex_rejectsBlankExportKind() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
         RecordingCodexService codexService = new RecordingCodexService();
 
@@ -104,13 +88,12 @@ class CodexImportAdminFacadeImplTest {
                 "0.78",
                 "0.4.0",
                 "2026-05-02T07:42:00Z",
-                "debug",
+                "   ",
                 List.of(new CodexImportEntryDto("Entry_A", "Entry A", List.of("Line"), List.of("Ref_A")))
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> facade.importCodex(dto));
-        assertTrue(ex.getMessage().contains("Invalid exportKind."));
-        assertTrue(ex.getMessage().contains("debug"));
+        assertEquals("exportKind is missing", ex.getMessage());
         assertFalse(codexImportService.called);
         assertEquals(0, codexService.getAllCalls);
     }

@@ -317,30 +317,20 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
     });
 
-    it("accepts minorFactions, quests, and traits as codex import kinds", async () => {
+    it("accepts arbitrary non-empty codex import kinds", async () => {
         const user = userEvent.setup();
-        const codexMinorFactions = fixtureFile("local-imports/codex/ewshop_minor_factions_codex_export_0.78.json", {
-            exportKind: "minorFactions",
-            entries: [{ entryKey: "MinorFaction_Test", displayName: "Minor Faction Test" }],
-        });
-        const codexQuests = fixtureFile("local-imports/codex/ewshop_quests_codex_export_0.78.json", {
-            exportKind: "quests",
-            entries: [{ entryKey: "Quest_Test", displayName: "Quest Test" }],
-        });
-        const codexTraits = fixtureFile("local-imports/codex/ewshop_traits_codex_export_0.78.json", {
-            exportKind: "traits",
-            entries: [{ entryKey: "Trait_Test", displayName: "Trait Test" }],
+        const codexFutureKind = fixtureFile("local-imports/codex/ewshop_future_kind_codex_export_0.78.json", {
+            exportKind: "futureKind",
+            entries: [{ entryKey: "Future_Test", displayName: "Future Test" }],
         });
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
         await user.click(screen.getByRole("button", { name: /Import codex files/i }));
-        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexMinorFactions, codexQuests, codexTraits]);
+        dropFilesByTitle(/Drag & drop your Codex JSON files here/i, [codexFutureKind]);
 
-        await screen.findByText(codexMinorFactions.name);
-        expect(screen.getByText(codexQuests.name)).toBeInTheDocument();
-        expect(screen.getByText(codexTraits.name)).toBeInTheDocument();
+        await screen.findByText(codexFutureKind.name);
         expect(screen.queryByText(/Invalid exportKind/i)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: /^Import all codex$/i }));
@@ -349,13 +339,9 @@ describe("AdminImportPage", () => {
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
         expect(postCalls.map(([url]) => url)).toEqual([
             "/api/admin/import/codex",
-            "/api/admin/import/codex",
-            "/api/admin/import/codex",
         ]);
         expect(postCalls.map(([, init]) => JSON.parse(String(init?.body)).exportKind)).toEqual([
-            "minorFactions",
-            "quests",
-            "traits",
+            "futureKind",
         ]);
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
     });

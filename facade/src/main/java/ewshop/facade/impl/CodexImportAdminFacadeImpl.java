@@ -12,32 +12,11 @@ import ewshop.facade.mapper.CodexImportMapper;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
 
-    private static final List<String> ALLOWED_EXPORT_KIND_LABELS = List.of(
-            "abilities",
-            "councilors",
-            "districts",
-            "equipment",
-            "factions",
-            "heroes",
-            "improvements",
-            "minorFactions",
-            "populations",
-            "quests",
-            "tech",
-            "traits",
-            "units"
-    );
-    private static final Set<String> ALLOWED_EXPORT_KINDS = ALLOWED_EXPORT_KIND_LABELS.stream()
-            .map(kind -> kind.toLowerCase(Locale.ROOT))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
     private static final int MAX_ERRORS = 50;
 
     private final CodexImportService codexImportService;
@@ -140,13 +119,8 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
     }
 
     private static void assertExportKind(String exportKind) {
-        String normalized = exportKind == null ? null : exportKind.trim().toLowerCase(Locale.ROOT);
-        if (normalized == null || !ALLOWED_EXPORT_KINDS.contains(normalized)) {
-            String found = exportKind == null ? "null" : exportKind;
-            throw new IllegalArgumentException(
-                    "Invalid exportKind. Expected one of: " + allowedKindsDisplay() +
-                            " but got '" + found + "'"
-            );
+        if (exportKind == null || exportKind.isBlank()) {
+            throw new IllegalArgumentException("exportKind is missing");
         }
     }
 
@@ -190,7 +164,4 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         return warnings;
     }
 
-    private static String allowedKindsDisplay() {
-        return ALLOWED_EXPORT_KIND_LABELS.toString();
-    }
 }

@@ -27,11 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
@@ -40,25 +37,6 @@ import java.util.stream.Stream;
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);
-    private static final List<String> SUPPORTED_CODEX_EXPORT_KIND_LABELS = List.of(
-            "abilities",
-            "councilors",
-            "districts",
-            "equipment",
-            "factions",
-            "heroes",
-            "improvements",
-            "minorFactions",
-            "populations",
-            "quests",
-            "tech",
-            "traits",
-            "units"
-    );
-    private static final Set<String> SUPPORTED_CODEX_EXPORT_KINDS = SUPPORTED_CODEX_EXPORT_KIND_LABELS.stream()
-            .map(kind -> kind.toLowerCase(Locale.ROOT))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
     private final LocalStartupImportProperties properties;
     private final ObjectMapper objectMapper;
     private final TechImportAdminFacade techImportAdminFacade;
@@ -226,15 +204,14 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
         String exportKind = normalizedExportKind(json);
 
-        if (SUPPORTED_CODEX_EXPORT_KINDS.contains(exportKind) || shouldLetAdminValidationReport(json, "entries", exportKind)) {
+        if (json != null && json.has("entries")) {
             return codexImportAdminFacade.importCodex(objectMapper.treeToValue(json, CodexImportBatchDto.class));
         }
 
         log.warn(
-                "Local startup import skipped unsupported codex file {} with exportKind='{}'. Supported codex kinds are: {}.",
+                "Local startup import skipped unsupported codex file {} with exportKind='{}'. Codex files must use the generic entries[] import shape.",
                 file.toAbsolutePath().normalize(),
-                exportKind == null ? "missing" : exportKind,
-                SUPPORTED_CODEX_EXPORT_KIND_LABELS
+                exportKind == null ? "missing" : exportKind
         );
         return null;
     }
