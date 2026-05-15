@@ -14,7 +14,7 @@ const suggestions: CodexEntry[] = [
     {
         exportKind: "units",
         entryKey: "UnitAbility_Bloom_Knight",
-        displayName: "",
+        displayName: "Bloom Knight",
         descriptionLines: [],
         referenceKeys: [],
     },
@@ -76,16 +76,32 @@ describe("CodexSearch", () => {
         expect(onConfirmQuery).toHaveBeenCalledTimes(1);
     });
 
-    it("renders fallback labels without exposing internal keys", async () => {
+    it("renders exporter display names as primary option labels", async () => {
         const user = userEvent.setup();
+        const questSuggestions: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter01_Step01",
+                displayName: "Brave New World",
+                descriptionLines: ["Opening quest."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter04_Step01",
+                displayName: "A Fresh Lead",
+                descriptionLines: ["Follow-up quest."],
+                referenceKeys: [],
+            },
+        ];
 
         render(
             <CodexSearch
-                value="bloom"
+                value="FactionQuest_Necrophage"
                 onChange={() => {}}
                 resultCount={2}
                 totalCount={12}
-                suggestions={suggestions}
+                suggestions={questSuggestions}
                 onSelectSuggestion={() => {}}
                 onConfirmQuery={() => {}}
             />
@@ -94,8 +110,9 @@ describe("CodexSearch", () => {
         const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
         await user.click(input);
 
-        expect(screen.getByText("Bloom Knight")).toBeInTheDocument();
-        expect(screen.queryByText("UnitAbility_Bloom_Knight")).not.toBeInTheDocument();
+        expect(screen.getByText("Brave New World")).toBeInTheDocument();
+        expect(screen.getByText("A Fresh Lead")).toBeInTheDocument();
+        expect(screen.queryByText("FactionQuest_Necrophage_Chapter04_Step01")).not.toBeInTheDocument();
     });
 
     it("renders tokenized display names without leaking bracket text", async () => {

@@ -5,9 +5,11 @@ import {
     getCodexDescriptionPreviewText,
     getCodexEntryLabel,
     getCodexEntryPreview,
+    getCodexQuestNodeLabel,
     getCodexSecondaryContext,
     humanizeCodexEntryKey,
     isCodexSummaryEntry,
+    parseCodexQuestContext,
 } from "@/lib/codex/codexPresentation";
 
 describe("codexPresentation", () => {
@@ -85,6 +87,22 @@ describe("codexPresentation", () => {
                 referenceKeys: [],
             })
         ).toBe("Necrophage02 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+    });
+
+    it("keeps the full nested choice path for branch quest nodes", () => {
+        const entry = {
+            exportKind: "quests",
+            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01_Choice02",
+            displayName: "Stirrings",
+            category: "MajorFaction",
+            kind: "Quest",
+        };
+
+        expect(getCodexQuestNodeLabel({ ...entry, descriptionLines: [], referenceKeys: [] })).toBe(
+            "Step 2 · Choice 1 · Choice 2"
+        );
+        expect(parseCodexQuestContext(entry)?.choiceKeys).toEqual(["01", "02"]);
+        expect(parseCodexQuestContext(entry)?.choiceLabels).toEqual(["Choice 1", "Choice 2"]);
     });
 
     it("uses entry-key context when source kind is the only discriminator", () => {

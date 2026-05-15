@@ -1,5 +1,5 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexEntryLabel, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexRelatedContext } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -20,7 +20,12 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
 
             <div className="codex-related__list">
                 {entries.map((entry) => {
-                    const secondaryContext = getCodexSecondaryContext(entry);
+                    const relatedContext = getCodexRelatedContext(entry);
+                    const contextLabel = relatedContext.startsWith("Quest ·")
+                        ? relatedContext
+                        : relatedContext
+                            ? `${formatCodexKindLabel(entry.exportKind)} / ${relatedContext}`
+                            : formatCodexKindLabel(entry.exportKind);
 
                     return (
                         <button
@@ -29,12 +34,8 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
                             className="codex-related__chip"
                             onClick={() => onSelect(entry)}
                         >
-                            <span className="codex-related__name">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
-                            <span className="codex-related__kind">
-                                {secondaryContext
-                                    ? `${formatCodexKindLabel(entry.exportKind)} / ${secondaryContext}`
-                                    : formatCodexKindLabel(entry.exportKind)}
-                            </span>
+                            <span className="codex-related__name">{renderCodexLabel(entry.displayName)}</span>
+                            <span className="codex-related__kind">{contextLabel}</span>
                         </button>
                     );
                 })}

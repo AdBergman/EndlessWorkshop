@@ -78,6 +78,42 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_preservesDistinctFactionQuestDisplayNames() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "quests",
+                List.of(
+                        new CodexImportEntryDto("FactionQuest_LastLord_Chapter01_Step01", "A Fragile Dawn", "MajorFaction", "Quest", List.of("Line"), List.of()),
+                        new CodexImportEntryDto("FactionQuest_LastLord_Chapter02_Step01", "A Blighted Resurrection", "MajorFaction", "Quest", List.of("Line"), List.of()),
+                        new CodexImportEntryDto("FactionQuest_LastLord_Chapter03_Step01", "The Fork in the Road", "MajorFaction", "Quest", List.of("Line"), List.of()),
+                        new CodexImportEntryDto("FactionQuest_Necrophage_Chapter01_Step01", "Brave New World", "MajorFaction", "Quest", List.of("Line"), List.of()),
+                        new CodexImportEntryDto("FactionQuest_Necrophage_Chapter04_Step01", "A Fresh Lead", "MajorFaction", "Quest", List.of("Line"), List.of())
+                )
+        ));
+
+        assertEquals(5, codexImportService.capturedSnapshots.size());
+        assertEquals(List.of(
+                "A Fragile Dawn",
+                "A Blighted Resurrection",
+                "The Fork in the Road",
+                "Brave New World",
+                "A Fresh Lead"
+        ), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::displayName)
+                .toList());
+    }
+
+    @Test
     void importCodex_rejectsBlankExportKind() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
         RecordingCodexService codexService = new RecordingCodexService();

@@ -2,7 +2,6 @@ import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
     getCodexDescriptionPreviewLine,
-    getCodexEntryLabel,
     getCodexSecondaryContext,
     isCodexSummaryEntry,
     type CodexListItem,
@@ -27,7 +26,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
             aria-pressed={isSelected}
             onClick={() => onSelect(entry)}
         >
-            <span className="codex-resultRow__title">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
+            <span className="codex-resultRow__title">{renderCodexLabel(entry.displayName)}</span>
             <span className="codex-resultRow__meta">
                 <span className="codex-resultRow__kind">
                     {isSummary ? "Overview" : formatCodexKindLabel(entry.exportKind)}

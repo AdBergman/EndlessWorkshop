@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexEntryLabel, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexDetailContextLines } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import RelatedEntries from "./RelatedEntries";
@@ -31,17 +31,20 @@ export default function CodexEntryDetail({
     }
 
     const hasDescription = entry.descriptionLines.some((line) => line.trim().length > 0);
-    const secondaryContext = getCodexSecondaryContext(entry);
+    const detailContextLines = getCodexDetailContextLines(entry);
+    const showKind = entry.exportKind !== "quests";
 
     return (
         <article className="codex-detail">
             <div className="codex-detail__metaRow">
-                <span className="codex-detail__kind">{formatCodexKindLabel(entry.exportKind)}</span>
-                {secondaryContext ? <span className="codex-detail__context">{secondaryContext}</span> : null}
+                {showKind ? <span className="codex-detail__kind">{formatCodexKindLabel(entry.exportKind)}</span> : null}
+                {detailContextLines.map((line) => (
+                    <span className="codex-detail__context" key={line}>{line}</span>
+                ))}
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {renderCodexLabel(getCodexEntryLabel(entry))}
+                {renderCodexLabel(entry.displayName)}
             </h2>
 
             <section className="codex-detail__section" aria-labelledby="codex-description-heading">

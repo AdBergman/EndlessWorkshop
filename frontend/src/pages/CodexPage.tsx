@@ -9,11 +9,12 @@ import KindFilter from "@/components/Codex/KindFilter";
 import {
     createCodexSummaryEntry,
     formatCodexKindLabel,
-    getCodexEntryLabel,
     getCodexSummaryEntryKey,
+    isCodexQuestGroupEntry,
     isCodexSummaryEntry,
     type CodexListItem,
 } from "@/lib/codex/codexPresentation";
+import { groupQuestListItems } from "@/lib/codex/codexQuestGrouping";
 import {
     ALL_CODEX_KIND,
     entryMatchesQuery,
@@ -54,6 +55,7 @@ export default function CodexPage() {
     const [query, setQuery] = useState("");
     const [activeKind, setActiveKind] = useState(ALL_CODEX_KIND);
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
+    const [expandedQuestGroupKeys, setExpandedQuestGroupKeys] = useState<Set<string>>(() => new Set());
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryKey = (searchParams.get("entry") ?? "").trim() || null;
@@ -105,21 +107,39 @@ export default function CodexPage() {
     const hasDeferredQuery = deferredQuery.trim().length > 0;
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
+        const groupedEntries = groupQuestListItems(filteredEntries, {
+            expandedGroupKeys: expandedQuestGroupKeys,
+            selectedEntryKey,
+            query: deferredQuery,
+        });
+
         if (activeKind === ALL_CODEX_KIND) {
-            return filteredEntries;
+            return groupedEntries;
         }
 
-        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length, query), ...filteredEntries];
-    }, [activeKind, activeKindLabel, filteredEntries, query]);
+        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length, query), ...groupedEntries];
+    }, [activeKind, activeKindLabel, deferredQuery, expandedQuestGroupKeys, filteredEntries, query, selectedEntryKey]);
 
     const selectedListItem = useMemo(() => {
-        return selectedEntryKey
-            ? displayEntries.find((entry) => entry.entryKey === selectedEntryKey) ?? null
-            : null;
+        if (!selectedEntryKey) return null;
+
+        for (const entry of displayEntries) {
+            if (entry.entryKey === selectedEntryKey) return entry;
+            if (isCodexQuestGroupEntry(entry)) {
+                const matchingNode = entry.nodes.find((node) => node.entryKey === selectedEntryKey);
+                if (matchingNode) return matchingNode;
+            }
+        }
+
+        return null;
     }, [displayEntries, selectedEntryKey]);
 
     const selectedEntry = useMemo(
-        () => (selectedListItem && !isCodexSummaryEntry(selectedListItem) ? selectedListItem : null),
+        () => (
+            selectedListItem && !isCodexSummaryEntry(selectedListItem) && !isCodexQuestGroupEntry(selectedListItem)
+                ? selectedListItem
+                : null
+        ),
         [selectedListItem]
     );
     const overviewOptions = useMemo(
@@ -164,8 +184,31 @@ export default function CodexPage() {
         [setSearchParams]
     );
 
+    const getSelectableEntryKey = useCallback((entry: CodexListItem | null): string | null => {
+        if (!entry) return null;
+        if (isCodexQuestGroupEntry(entry)) {
+            return entry.nodes[0]?.entryKey ?? null;
+        }
+        return entry.entryKey;
+    }, []);
+
+    const toggleQuestGroup = useCallback((groupKey: string) => {
+        setExpandedQuestGroupKeys((current) => {
+            const next = new Set(current);
+            if (next.has(groupKey)) {
+                next.delete(groupKey);
+            } else {
+                next.add(groupKey);
+            }
+            return next;
+        });
+    }, []);
+
     const selectEntry = useCallback(
         (entry: CodexListItem, intent: SelectionIntent = "passive") => {
+            const selectableEntryKey = getSelectableEntryKey(entry);
+            if (!selectableEntryKey) return;
+
             if (activeKind !== ALL_CODEX_KIND && entry.exportKind !== activeKind) {
                 setActiveKind(ALL_CODEX_KIND);
             }
@@ -175,9 +218,9 @@ export default function CodexPage() {
             }
 
             setSelectionIntent(intent);
-            updateSelectedEntry(entry.entryKey);
+            updateSelectedEntry(selectableEntryKey);
         },
-        [activeKind, query, updateSelectedEntry]
+        [activeKind, getSelectableEntryKey, query, updateSelectedEntry]
     );
 
     const selectKind = useCallback(
@@ -231,9 +274,7 @@ export default function CodexPage() {
         if (isPlainRouteReset) return;
 
         const firstVisibleEntry = displayEntries[0] ?? null;
-        const isSelectedVisible = Boolean(
-            selectedEntryKey && displayEntries.some((entry) => entry.entryKey === selectedEntryKey)
-        );
+        const isSelectedVisible = Boolean(selectedEntryKey && selectedListItem);
         const shouldShowOverview = activeKind === ALL_CODEX_KIND && !hasDeferredQuery && !isSelectedVisible;
 
         if (!firstVisibleEntry) {
@@ -248,9 +289,19 @@ export default function CodexPage() {
         }
 
         if (!isSelectedVisible) {
-            updateSelectedEntry(firstVisibleEntry.entryKey);
+            updateSelectedEntry(getSelectableEntryKey(firstVisibleEntry));
         }
-    }, [activeKind, displayEntries, hasDeferredQuery, isPlainRouteReset, loading, selectedEntryKey, updateSelectedEntry]);
+    }, [
+        activeKind,
+        displayEntries,
+        getSelectableEntryKey,
+        hasDeferredQuery,
+        isPlainRouteReset,
+        loading,
+        selectedEntryKey,
+        selectedListItem,
+        updateSelectedEntry,
+    ]);
 
     useEffect(() => {
         if (!selectedListItem) return;
@@ -302,7 +353,7 @@ export default function CodexPage() {
                             totalCount={entries.length}
                             suggestions={autocompleteEntries}
                             onSelectSuggestion={(entry) => {
-                                setQuery(getCodexEntryLabel(entry));
+                                setQuery(entry.displayName);
                                 selectEntry(entry);
                             }}
                             onConfirmQuery={() => {
@@ -341,6 +392,7 @@ export default function CodexPage() {
                             loading={loading}
                             error={error}
                             onSelect={(entry) => selectEntry(entry)}
+                            onToggleQuestGroup={toggleQuestGroup}
                         />
                     </aside>
 

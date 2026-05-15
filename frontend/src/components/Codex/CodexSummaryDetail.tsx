@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { getCodexEntryLabel, getCodexEntryPreview, getCodexSecondaryContext, type CodexSummaryEntry } from "@/lib/codex/codexPresentation";
+import { getCodexEntryPreview, getCodexSecondaryContext, type CodexSummaryEntry } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -37,7 +37,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                 onClick={() => onSelectEntry(entry)}
                             >
                                 <span className="codex-summaryList__name">
-                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                    {renderCodexLabel(entry.displayName)}
                                 </span>
                                 {secondaryContext ? (
                                     <span className="codex-summaryList__context">{secondaryContext}</span>

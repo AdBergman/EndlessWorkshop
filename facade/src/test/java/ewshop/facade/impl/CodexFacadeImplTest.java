@@ -95,6 +95,39 @@ class CodexFacadeImplTest {
         assertThat(result.getFirst().referenceKeys()).containsExactly("FactionQuest_LastLord_Chapter01_Step02");
     }
 
+    @Test
+    void preservesDistinctFactionQuestDisplayNamesInCodexApi() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("quests", "FactionQuest_LastLord_Chapter01_Step01", "A Fragile Dawn", "MajorFaction", "Quest", List.of("First Last Lord step."), List.of()),
+                codexEntry("quests", "FactionQuest_LastLord_Chapter02_Step01", "A Blighted Resurrection", "MajorFaction", "Quest", List.of("Second Last Lord step."), List.of()),
+                codexEntry("quests", "FactionQuest_LastLord_Chapter03_Step01", "The Fork in the Road", "MajorFaction", "Quest", List.of("Third Last Lord step."), List.of()),
+                codexEntry("quests", "FactionQuest_Necrophage_Chapter01_Step01", "Brave New World", "MajorFaction", "Quest", List.of("First Necrophage step."), List.of()),
+                codexEntry("quests", "FactionQuest_Necrophage_Chapter04_Step01", "A Fresh Lead", "MajorFaction", "Quest", List.of("Fourth Necrophage step."), List.of())
+        ));
+
+        List<CodexDto> result = facade.getAllCodexEntries();
+
+        assertThat(result).extracting(CodexDto::entryKey).containsExactlyInAnyOrder(
+                "FactionQuest_LastLord_Chapter01_Step01",
+                "FactionQuest_LastLord_Chapter02_Step01",
+                "FactionQuest_LastLord_Chapter03_Step01",
+                "FactionQuest_Necrophage_Chapter01_Step01",
+                "FactionQuest_Necrophage_Chapter04_Step01"
+        );
+        assertThat(result)
+                .extracting(dto -> dto.entryKey() + "=" + dto.displayName())
+                .containsExactlyInAnyOrder(
+                        "FactionQuest_LastLord_Chapter01_Step01=A Fragile Dawn",
+                        "FactionQuest_LastLord_Chapter02_Step01=A Blighted Resurrection",
+                        "FactionQuest_LastLord_Chapter03_Step01=The Fork in the Road",
+                        "FactionQuest_Necrophage_Chapter01_Step01=Brave New World",
+                        "FactionQuest_Necrophage_Chapter04_Step01=A Fresh Lead"
+                );
+    }
+
     private static Codex codexEntry(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {
         return codexEntry(exportKind, entryKey, displayName, descriptionLines, List.of());
     }

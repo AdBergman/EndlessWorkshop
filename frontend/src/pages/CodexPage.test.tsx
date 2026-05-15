@@ -28,7 +28,7 @@ describe("CodexPage", () => {
                 {
                     exportKind: "districts",
                     entryKey: "District_BloomHarbor",
-                    displayName: "",
+                    displayName: "Bloom Harbor",
                     descriptionLines: ["Supports blossom logistics."],
                     referenceKeys: [],
                 },
@@ -51,7 +51,7 @@ describe("CodexPage", () => {
                 District_BloomHarbor: {
                     exportKind: "districts",
                     entryKey: "District_BloomHarbor",
-                    displayName: "",
+                    displayName: "Bloom Harbor",
                     descriptionLines: ["Supports blossom logistics."],
                     referenceKeys: [],
                 },
@@ -75,7 +75,7 @@ describe("CodexPage", () => {
                     {
                         exportKind: "districts",
                         entryKey: "District_BloomHarbor",
-                        displayName: "",
+                        displayName: "Bloom Harbor",
                         descriptionLines: ["Supports blossom logistics."],
                         referenceKeys: [],
                     },
@@ -338,10 +338,178 @@ describe("CodexPage", () => {
 
         const relatedSection = await screen.findByRole("region", { name: /related entries/i });
 
-        expect(within(relatedSection).getAllByRole("button", { name: /a haunted path quests/i })).toHaveLength(1);
+        expect(
+            within(relatedSection).getAllByRole("button", {
+                name: /a haunted path quest .* last lord .* chapter 1 .* step 2/i,
+            })
+        ).toHaveLength(1);
         expect(within(relatedSection).getByRole("button", { name: /last lords factions/i })).toBeInTheDocument();
         expect(within(relatedSection).getByRole("button", { name: /last lord population populations/i })).toBeInTheDocument();
         expect(within(relatedSection).getByRole("button", { name: /ametrine minor factions/i })).toBeInTheDocument();
         expect(within(relatedSection).getByRole("button", { name: /protectorate traits/i })).toBeInTheDocument();
+    });
+
+    it("keeps faction quest display names distinct while showing duplicate-title context separately", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step01",
+                displayName: "A Fragile Dawn",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The Last Lords awaken."],
+                referenceKeys: ["FactionQuest_LastLord_Chapter02_Step01"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter02_Step01",
+                displayName: "A Blighted Resurrection",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The resurrection begins."],
+                referenceKeys: ["FactionQuest_LastLord_Chapter03_Step01"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter03_Step01",
+                displayName: "The Fork in the Road",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["A branch in the quest line."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter01_Step01",
+                displayName: "Brave New World",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The Necrophage opening."],
+                referenceKeys: ["FactionQuest_Necrophage_Chapter04_Step01"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter04_Step01",
+                displayName: "A Fresh Lead",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The Necrophage lead continues."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter06_Step01",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["A Necrophage shared-title branch."],
+                referenceKeys: ["FactionQuest_Necrophage_Chapter06_Step02"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter06_Step02",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["Another Necrophage shared-title branch."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step01",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["A shared-title branch."],
+                referenceKeys: ["FactionQuest_Necrophage02_Chapter06_Step02"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step02",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["Another shared-title branch."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=FactionQuest_Necrophage_Chapter04_Step01"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "A Fresh Lead" })).toBeInTheDocument();
+
+        await user.clear(screen.getByRole("combobox", { name: /search the encyclopedia/i }));
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "A Bitter Truth");
+
+        const results = screen.getByLabelText("Codex results");
+        await waitFor(() => {
+            expect(within(results).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+        });
+        expect(within(results).getByText("Necrophage02 · Chapter 6")).toBeInTheDocument();
+        expect(within(results).getAllByText("2 quest nodes")).toHaveLength(2);
+
+        const bitterTruthGroups = within(results).getAllByRole("button", { name: /a bitter truth/i });
+        expect(bitterTruthGroups).toHaveLength(2);
+        expect(within(results).getAllByRole("button", { name: /step 1/i }).length).toBeGreaterThan(0);
+        expect(within(results).getAllByRole("button", { name: /step 2/i }).length).toBeGreaterThan(0);
+        expect(within(results).queryByText(/Chapter 06 Step 01/i)).not.toBeInTheDocument();
+
+        await user.click(
+            within(results).getByRole("button", {
+                name: /step 2 another necrophage shared-title branch/i,
+            })
+        );
+        expect(screen.getByTestId("location-probe")).toHaveTextContent(
+            "/codex?entry=FactionQuest_Necrophage_Chapter06_Step02"
+        );
+        expect(await screen.findByRole("heading", { name: "A Bitter Truth" })).toBeInTheDocument();
+        const detailPane = screen.getByLabelText("Selected codex entry");
+        expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Step 2")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Major Faction Quest")).toBeInTheDocument();
+
+        await user.click(
+            within(results).getByRole("button", {
+                name: /step 1 a necrophage shared-title branch/i,
+            })
+        );
+        const duplicateRelatedSection = await screen.findByRole("region", { name: /related entries/i });
+        expect(
+            within(duplicateRelatedSection).getByRole("button", {
+                name: /a bitter truth quest .* necrophage .* chapter 6 .* step 2/i,
+            })
+        ).toBeInTheDocument();
+
+        await user.clear(screen.getByRole("combobox", { name: /search the encyclopedia/i }));
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "Brave New World");
+        await user.click(await within(results).findByRole("button", { name: /brave new world/i }));
+        const relatedSection = await screen.findByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /a fresh lead/i })).toBeInTheDocument();
     });
 });

@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { useEffect, useId, useState } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexDescriptionPreviewLine, getCodexEntryLabel, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexDescriptionPreviewLine, getCodexSecondaryContext } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -131,7 +131,7 @@ export default function CodexSearch({
                                 >
                                     <span className="codex-search__optionTop">
                                         <span className="codex-search__optionName">
-                                            {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            {renderCodexLabel(entry.displayName)}
                                         </span>
                                         <span className="codex-search__optionKind">
                                             <span>{formatCodexKindLabel(entry.exportKind)}</span>
