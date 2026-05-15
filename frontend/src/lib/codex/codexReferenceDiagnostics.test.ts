@@ -79,6 +79,21 @@ describe("codexReferenceDiagnostics", () => {
             raw: "unit:Unit_MissingImportedUnit",
             importedKindHint: "unit",
         });
+
+        expect(diagnoseCodexReference("FactionQuest_Missing", indexes)).toMatchObject({
+            kind: "unresolved-imported-domain-ref",
+            raw: "FactionQuest_Missing",
+            importedKindHint: "quest",
+        });
+        expect(diagnoseCodexReference("Trait_Missing", indexes)).toMatchObject({
+            importedKindHint: "trait",
+        });
+        expect(diagnoseCodexReference("MinorFaction_Missing", indexes)).toMatchObject({
+            importedKindHint: "minorFaction",
+        });
+        expect(diagnoseCodexReference("Faction_Missing", indexes)).toMatchObject({
+            importedKindHint: "faction",
+        });
     });
 
     it("classifies unresolved codex refs separately from imported-domain gaps", () => {

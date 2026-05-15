@@ -21,6 +21,34 @@ const TECHNICAL_SUFFIXES = new Set(["data", "definition", "entry", "node"]);
 
 export const CODEX_SUMMARY_ENTRY_PREFIX = "__summary__:";
 
+const CODEX_KIND_LABELS: Record<string, string> = {
+    abilities: "Abilities",
+    ability: "Abilities",
+    councilors: "Councilors",
+    councilor: "Councilors",
+    districts: "Districts",
+    district: "Districts",
+    equipment: "Equipment",
+    factions: "Factions",
+    faction: "Factions",
+    heroes: "Heroes",
+    hero: "Heroes",
+    improvements: "Improvements",
+    improvement: "Improvements",
+    minorfactions: "Minor Factions",
+    minorfaction: "Minor Factions",
+    populations: "Populations",
+    population: "Populations",
+    quests: "Quests",
+    quest: "Quests",
+    tech: "Tech",
+    techs: "Tech",
+    traits: "Traits",
+    trait: "Traits",
+    units: "Units",
+    unit: "Units",
+};
+
 export type CodexSummaryEntry = CodexEntry & {
     isSummary: true;
     summaryKind: string;
@@ -32,6 +60,21 @@ export type CodexListItem = CodexEntry | CodexSummaryEntry;
 
 function compactWhitespace(value: string): string {
     return value.replace(/\s+/g, " ").trim();
+}
+
+export function formatCodexKindLabel(kind: string): string {
+    const normalizedKind = compactWhitespace(kind ?? "").toLowerCase();
+    if (!normalizedKind) return "Unknown";
+
+    const knownLabel = CODEX_KIND_LABELS[normalizedKind];
+    if (knownLabel) return knownLabel;
+
+    return normalizedKind
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .split(/[^a-z0-9]+/i)
+        .filter(Boolean)
+        .map(formatToken)
+        .join(" ");
 }
 
 function isRomanNumeral(token: string): boolean {

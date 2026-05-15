@@ -1,16 +1,11 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
     entries: CodexEntry[];
     onSelect: (entry: CodexEntry) => void;
 };
-
-function formatKindLabel(kind: string): string {
-    if (!kind) return "Unknown";
-    return kind.charAt(0).toUpperCase() + kind.slice(1);
-}
 
 export default function RelatedEntries({ entries, onSelect }: Props) {
     if (entries.length === 0) {
@@ -32,7 +27,7 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
                         onClick={() => onSelect(entry)}
                     >
                         <span className="codex-related__name">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
-                        <span className="codex-related__kind">{formatKindLabel(entry.exportKind)}</span>
+                        <span className="codex-related__kind">{formatCodexKindLabel(entry.exportKind)}</span>
                     </button>
                 ))}
             </div>

@@ -25,7 +25,7 @@ public class CodexFacadeImpl implements CodexFacade {
 
     @Override
     public List<CodexDto> getAllCodexEntries() {
-        CodexFilterResult filterResult = codexFilterService.filter(codexService.getAllCodexEntries());
+        CodexFilterResult filterResult = codexFilterService.filterForCodexApi(codexService.getAllCodexEntries());
         Map<String, String> relationTargetAliases = relationTargetAliases(filterResult);
 
         return filterResult.codexEntries().stream()

@@ -69,6 +69,24 @@ class CodexFilterServiceTest {
         assertThat(result.skippedByReason()).containsEntry("filtered-out", 1);
     }
 
+    @Test
+    void codexApiFilterKeepsDuplicateSlugsSoSameTitleEntriesRemainKeyAddressable() {
+        CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
+                codexEntry("quests", "FactionQuest_LastLord_Chapter01_Step01", "A Haunted Path", List.of("First step.")),
+                codexEntry("quests", "FactionQuest_LastLord_Chapter01_Step02", "A Haunted Path", List.of("Second step.")),
+                codexEntry("quests", "FactionQuest_LastLord_Invalid", "%Placeholder", List.of("Invalid name."))
+        ));
+
+        assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
+                .containsExactly(
+                        "FactionQuest_LastLord_Chapter01_Step01",
+                        "FactionQuest_LastLord_Chapter01_Step02"
+                );
+        assertThat(result.skippedEntries()).extracting(CodexFilterResult.CodexFilterSkip::entryKey)
+                .containsExactly("FactionQuest_LastLord_Invalid");
+        assertThat(result.skippedByReason()).doesNotContainKey("duplicate-slug");
+    }
+
     private static Codex codexEntry(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {
         return Codex.builder()
                 .exportKind(exportKind)

@@ -34,6 +34,14 @@ public class CodexFilterService {
             .thenComparing(entry -> trimToEmpty(entry.getEntryKey()), String.CASE_INSENSITIVE_ORDER);
 
     public CodexFilterResult filter(List<Codex> rawEntries) {
+        return filter(rawEntries, CodexFilterOptions.dedupeDuplicateSlugs());
+    }
+
+    public CodexFilterResult filterForCodexApi(List<Codex> rawEntries) {
+        return filter(rawEntries, CodexFilterOptions.keepDuplicateSlugs());
+    }
+
+    private CodexFilterResult filter(List<Codex> rawEntries, CodexFilterOptions options) {
         if (rawEntries == null || rawEntries.isEmpty()) {
             return new CodexFilterResult(List.of(), List.of(), 0, Map.of(FILTERED_OUT, 0));
         }
@@ -70,7 +78,7 @@ public class CodexFilterService {
                     }
 
                     String duplicateKey = normalizedExportKind + "::" + slug;
-                    if (seenByKindAndSlug.containsKey(duplicateKey)) {
+                    if (options.skipDuplicateSlugs() && seenByKindAndSlug.containsKey(duplicateKey)) {
                         recordSkip(
                                 skippedEntries,
                                 skippedByReason,
@@ -229,5 +237,16 @@ public class CodexFilterService {
 
     private static String trimToEmpty(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private record CodexFilterOptions(boolean skipDuplicateSlugs) {
+
+        private static CodexFilterOptions dedupeDuplicateSlugs() {
+            return new CodexFilterOptions(true);
+        }
+
+        private static CodexFilterOptions keepDuplicateSlugs() {
+            return new CodexFilterOptions(false);
+        }
     }
 }

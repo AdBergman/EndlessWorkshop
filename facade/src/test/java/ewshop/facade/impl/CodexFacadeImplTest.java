@@ -33,7 +33,7 @@ class CodexFacadeImplTest {
     }
 
     @Test
-    void rewritesDuplicateSlugReferencesToKeptRelationTargetWithoutReturningFilteredRows() {
+    void returnsDuplicateSlugEntriesAndPreservesKeyBasedReferencesForCodexApi() {
         CodexService codexService = mock(CodexService.class);
         CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
 
@@ -53,13 +53,44 @@ class CodexFacadeImplTest {
         List<CodexDto> result = facade.getAllCodexEntries();
 
         assertThat(result).extracting(CodexDto::entryKey)
-                .containsExactly("UnitAbility_FlightBase", "Unit_A");
+                .containsExactly("UnitAbility_FlightBase", "UnitAbility_Fly", "Unit_A");
         CodexDto unit = result.stream()
                 .filter(dto -> "Unit_A".equals(dto.entryKey()))
                 .findFirst()
                 .orElseThrow();
         assertThat(unit.referenceKeys())
-                .containsExactly("UnitAbility_FlightBase", "Ability_Invalid", "Missing_Key");
+                .containsExactly("UnitAbility_Fly", "Ability_Invalid", "Missing_Key");
+    }
+
+    @Test
+    void keepsSameTitleQuestStepsAvailableForRelatedEntryResolution() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry(
+                        "quests",
+                        "FactionQuest_LastLord_Chapter01_Step01",
+                        "A Haunted Path",
+                        List.of("First step."),
+                        List.of("FactionQuest_LastLord_Chapter01_Step02")
+                ),
+                codexEntry(
+                        "quests",
+                        "FactionQuest_LastLord_Chapter01_Step02",
+                        "A Haunted Path",
+                        List.of("Second step.")
+                )
+        ));
+
+        List<CodexDto> result = facade.getAllCodexEntries();
+
+        assertThat(result).extracting(CodexDto::entryKey)
+                .containsExactly(
+                        "FactionQuest_LastLord_Chapter01_Step01",
+                        "FactionQuest_LastLord_Chapter01_Step02"
+                );
+        assertThat(result.getFirst().referenceKeys()).containsExactly("FactionQuest_LastLord_Chapter01_Step02");
     }
 
     private static Codex codexEntry(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {

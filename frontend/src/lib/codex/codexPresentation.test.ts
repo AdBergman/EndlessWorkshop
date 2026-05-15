@@ -1,5 +1,6 @@
 import {
     createCodexSummaryEntry,
+    formatCodexKindLabel,
     getCodexDescriptionPreviewLine,
     getCodexDescriptionPreviewText,
     getCodexEntryLabel,
@@ -61,5 +62,14 @@ describe("codexPresentation", () => {
         const summaryEntry = createCodexSummaryEntry("districts", "Districts", 4, "");
         expect(summaryEntry.displayName).toBe("All Districts");
         expect(isCodexSummaryEntry(summaryEntry)).toBe(true);
+    });
+
+    it("formats known singular, plural, and compact codex kind labels", () => {
+        expect(formatCodexKindLabel("quests")).toBe("Quests");
+        expect(formatCodexKindLabel("quest")).toBe("Quests");
+        expect(formatCodexKindLabel("traits")).toBe("Traits");
+        expect(formatCodexKindLabel("population")).toBe("Populations");
+        expect(formatCodexKindLabel("minorfactions")).toBe("Minor Factions");
+        expect(formatCodexKindLabel("techs")).toBe("Tech");
     });
 });

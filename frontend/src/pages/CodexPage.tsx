@@ -8,6 +8,7 @@ import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
 import KindFilter from "@/components/Codex/KindFilter";
 import {
     createCodexSummaryEntry,
+    formatCodexKindLabel,
     getCodexEntryLabel,
     getCodexSummaryEntryKey,
     isCodexSummaryEntry,
@@ -31,17 +32,15 @@ const PREFERRED_KIND_ORDER = [
     "factions",
     "heroes",
     "improvements",
+    "minorfactions",
     "populations",
+    "quests",
     "tech",
+    "traits",
     "units",
 ];
 
 type SelectionIntent = "passive" | "related";
-
-function formatKindLabel(kind: string): string {
-    if (!kind) return "Unknown";
-    return kind.charAt(0).toUpperCase() + kind.slice(1);
-}
 
 export default function CodexPage() {
     const location = useLocation();
@@ -83,7 +82,7 @@ export default function CodexPage() {
             { kind: ALL_CODEX_KIND, label: "All", count: entries.length },
             ...orderedKinds.map((kind) => ({
                 kind,
-                label: formatKindLabel(kind),
+                label: formatCodexKindLabel(kind),
                 count: kindCounts.get(kind) ?? 0,
             })),
         ];
@@ -100,7 +99,7 @@ export default function CodexPage() {
     );
 
     const activeKindLabel = useMemo(
-        () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatKindLabel(activeKind),
+        () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatCodexKindLabel(activeKind),
         [activeKind, filterOptions]
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;

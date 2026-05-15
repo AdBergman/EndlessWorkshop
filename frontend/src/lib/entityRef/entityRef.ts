@@ -7,6 +7,10 @@ export const ENTITY_KINDS = [
     "ability",
     "hero",
     "population",
+    "trait",
+    "quest",
+    "faction",
+    "minorFaction",
 ] as const;
 
 export type EntityKind = (typeof ENTITY_KINDS)[number];

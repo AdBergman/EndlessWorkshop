@@ -4,6 +4,8 @@ import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from "react-r
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
+import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
+import type { CodexEntry } from "@/types/dataTypes";
 
 function LocationProbe() {
     const location = useLocation();
@@ -257,5 +259,89 @@ describe("CodexPage", () => {
         expect(within(relatedSection).getByRole("button", { name: /auric coral improvements/i })).toBeInTheDocument();
         expect(screen.queryByText("[LuxuryResource01]")).not.toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
+    });
+
+    it("renders same-title quest-to-quest related entries with new kind labels", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step01",
+                displayName: "A Haunted Path",
+                descriptionLines: ["The first step."],
+                referenceKeys: [
+                    "FactionQuest_LastLord_Chapter01_Step02",
+                    "Faction_LastLord",
+                    "Population_LastLord",
+                    "MinorFaction_Ametrine",
+                    "Trait_Protectorate",
+                ],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step02",
+                displayName: "A Haunted Path",
+                descriptionLines: ["The second step."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_LastLord",
+                displayName: "Last Lords",
+                descriptionLines: ["Dust-bound nobles."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_LastLord",
+                displayName: "Last Lord Population",
+                descriptionLines: ["Faction population."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: ["Minor faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Protectorate",
+                displayName: "Protectorate",
+                descriptionLines: ["Protectorate trait."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries.filter((entry) => entry.exportKind === "quests"),
+                factions: entries.filter((entry) => entry.exportKind === "factions"),
+                populations: entries.filter((entry) => entry.exportKind === "populations"),
+                minorfactions: entries.filter((entry) => entry.exportKind === "minorfactions"),
+                traits: entries.filter((entry) => entry.exportKind === "traits"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=FactionQuest_LastLord_Chapter01_Step01"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const relatedSection = await screen.findByRole("region", { name: /related entries/i });
+
+        expect(within(relatedSection).getAllByRole("button", { name: /a haunted path quests/i })).toHaveLength(1);
+        expect(within(relatedSection).getByRole("button", { name: /last lords factions/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /last lord population populations/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /ametrine minor factions/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /protectorate traits/i })).toBeInTheDocument();
     });
 });

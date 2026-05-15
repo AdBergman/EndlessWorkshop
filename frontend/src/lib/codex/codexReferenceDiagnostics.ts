@@ -49,6 +49,10 @@ const IMPORTED_DOMAIN_PREFIX_HINTS: Array<[RegExp, ImportedDomainKind]> = [
     [/^(ability|unitability)[_:]/i, "ability"],
     [/^hero[_:]/i, "hero"],
     [/^(population|populationcategory)[_:]/i, "population"],
+    [/^trait[_:]/i, "trait"],
+    [/^factionquest[_:]/i, "quest"],
+    [/^minorfaction[_:]/i, "minorFaction"],
+    [/^faction[_:]/i, "faction"],
 ];
 
 function normalizeReferenceKey(value: unknown): string {

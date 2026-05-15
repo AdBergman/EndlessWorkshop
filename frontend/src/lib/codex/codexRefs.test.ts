@@ -163,6 +163,170 @@ describe("resolveRelatedEntries", () => {
 
         expect(related.map((entry) => entry.displayName)).toEqual(["Hero A"]);
     });
+
+    it("resolves representative links across new codex kinds without same-kind filtering or display-name dedupe", () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step01",
+                displayName: "A Haunted Path",
+                descriptionLines: [],
+                referenceKeys: [
+                    "FactionQuest_LastLord_Chapter01_Step02",
+                    "Faction_LastLord",
+                    "Population_LastLord",
+                ],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step02",
+                displayName: "A Haunted Path",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Protectorate",
+                displayName: "Protectorate",
+                descriptionLines: [],
+                referenceKeys: [
+                    "Trait_Protectorate_Upgraded",
+                    "Technology_Trait",
+                    "Unit_Trait",
+                    "Hero_Trait",
+                    "Ability_Trait",
+                    "MinorFaction_Trait",
+                ],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Protectorate_Upgraded",
+                displayName: "Protectorate",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_LastLord",
+                displayName: "Last Lord Population",
+                descriptionLines: [],
+                referenceKeys: ["Faction_LastLord", "Trait_Protectorate", "MinorFaction_Trait"],
+            },
+            {
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_Trait",
+                displayName: "Minor Faction",
+                descriptionLines: [],
+                referenceKeys: ["FactionQuest_LastLord_Chapter01_Step01", "Hero_Trait", "Population_LastLord"],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Technology_Trait",
+                displayName: "Trait Tech",
+                descriptionLines: [],
+                referenceKeys: ["District_Trait", "Improvement_Trait", "Unit_Trait", "Hero_Trait", "Trait_Protectorate"],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Trait",
+                displayName: "Trait Ability",
+                descriptionLines: [],
+                referenceKeys: ["Unit_Trait", "Hero_Trait", "Ability_Trait_Disabled"],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Trait_Disabled",
+                displayName: "Trait Ability Disabled",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_Trait",
+                displayName: "Trait District",
+                descriptionLines: [],
+                referenceKeys: ["Technology_Trait", "Trait_Protectorate"],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Improvement_Trait",
+                displayName: "Trait Improvement",
+                descriptionLines: [],
+                referenceKeys: ["Technology_Trait", "Trait_Protectorate"],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_LastLord",
+                displayName: "Last Lords",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Trait",
+                displayName: "Trait Unit",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Trait",
+                displayName: "Trait Hero",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+        const indexes = {
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+        };
+
+        expect(resolveRelatedEntries(entries[0], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "quests:FactionQuest_LastLord_Chapter01_Step02",
+                "factions:Faction_LastLord",
+                "populations:Population_LastLord",
+            ]);
+        expect(resolveRelatedEntries(entries[2], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "traits:Trait_Protectorate_Upgraded",
+                "tech:Technology_Trait",
+                "units:Unit_Trait",
+                "heroes:Hero_Trait",
+                "abilities:Ability_Trait",
+                "minorfactions:MinorFaction_Trait",
+            ]);
+        expect(resolveRelatedEntries(entries[4], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "factions:Faction_LastLord",
+                "traits:Trait_Protectorate",
+                "minorfactions:MinorFaction_Trait",
+            ]);
+        expect(resolveRelatedEntries(entries[5], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "quests:FactionQuest_LastLord_Chapter01_Step01",
+                "heroes:Hero_Trait",
+                "populations:Population_LastLord",
+            ]);
+        expect(resolveRelatedEntries(entries[6], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "districts:District_Trait",
+                "improvements:Improvement_Trait",
+                "units:Unit_Trait",
+                "heroes:Hero_Trait",
+                "traits:Trait_Protectorate",
+            ]);
+        expect(resolveRelatedEntries(entries[7], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual([
+                "units:Unit_Trait",
+                "heroes:Hero_Trait",
+                "abilities:Ability_Trait_Disabled",
+            ]);
+        expect(resolveRelatedEntries(entries[9], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual(["tech:Technology_Trait", "traits:Trait_Protectorate"]);
+        expect(resolveRelatedEntries(entries[10], indexes).map((entry) => `${entry.exportKind}:${entry.entryKey}`))
+            .toEqual(["tech:Technology_Trait", "traits:Trait_Protectorate"]);
+    });
 });
 
 describe("resolveCodexReference", () => {
