@@ -9,11 +9,10 @@ type Props = {
     loading: boolean;
     error: string | null;
     onSelect: (entry: CodexListItem) => void;
-    onToggleQuestGroup: (groupKey: string) => void;
 };
 
 const CodexResultList = React.forwardRef<HTMLDivElement, Props>(function CodexResultList(
-    { entries, selectedEntryKey, loading, error, onSelect, onToggleQuestGroup },
+    { entries, selectedEntryKey, loading, error, onSelect },
     ref
 ) {
     let body: React.ReactNode;
@@ -33,7 +32,6 @@ const CodexResultList = React.forwardRef<HTMLDivElement, Props>(function CodexRe
                         group={entry}
                         selectedEntryKey={selectedEntryKey}
                         onSelect={onSelect}
-                        onToggle={onToggleQuestGroup}
                     />
                 );
             }

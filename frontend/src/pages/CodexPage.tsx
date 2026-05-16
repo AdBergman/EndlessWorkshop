@@ -55,7 +55,6 @@ export default function CodexPage() {
     const [query, setQuery] = useState("");
     const [activeKind, setActiveKind] = useState(ALL_CODEX_KIND);
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
-    const [expandedQuestGroupKeys, setExpandedQuestGroupKeys] = useState<Set<string>>(() => new Set());
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryKey = (searchParams.get("entry") ?? "").trim() || null;
@@ -107,18 +106,19 @@ export default function CodexPage() {
     const hasDeferredQuery = deferredQuery.trim().length > 0;
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
-        const groupedEntries = groupQuestListItems(filteredEntries, {
-            expandedGroupKeys: expandedQuestGroupKeys,
-            selectedEntryKey,
-            query: deferredQuery,
-        });
+        const groupedEntries = groupQuestListItems(filteredEntries);
 
         if (activeKind === ALL_CODEX_KIND) {
             return groupedEntries;
         }
 
         return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length, query), ...groupedEntries];
-    }, [activeKind, activeKindLabel, deferredQuery, expandedQuestGroupKeys, filteredEntries, query, selectedEntryKey]);
+    }, [activeKind, activeKindLabel, filteredEntries, query]);
+
+    const groupedFilteredEntries = useMemo(
+        () => groupQuestListItems(filteredEntries),
+        [filteredEntries]
+    );
 
     const selectedListItem = useMemo(() => {
         if (!selectedEntryKey) return null;
@@ -142,6 +142,18 @@ export default function CodexPage() {
         ),
         [selectedListItem]
     );
+    const selectedQuestGroup = useMemo(() => {
+        if (!selectedEntryKey) return null;
+
+        for (const entry of displayEntries) {
+            if (!isCodexQuestGroupEntry(entry)) continue;
+            if (entry.nodes.some((node) => node.entryKey === selectedEntryKey)) {
+                return entry;
+            }
+        }
+
+        return null;
+    }, [displayEntries, selectedEntryKey]);
     const overviewOptions = useMemo(
         () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
         [filterOptions]
@@ -190,18 +202,6 @@ export default function CodexPage() {
             return entry.nodes[0]?.entryKey ?? null;
         }
         return entry.entryKey;
-    }, []);
-
-    const toggleQuestGroup = useCallback((groupKey: string) => {
-        setExpandedQuestGroupKeys((current) => {
-            const next = new Set(current);
-            if (next.has(groupKey)) {
-                next.delete(groupKey);
-            } else {
-                next.add(groupKey);
-            }
-            return next;
-        });
     }, []);
 
     const selectEntry = useCallback(
@@ -306,10 +306,11 @@ export default function CodexPage() {
     useEffect(() => {
         if (!selectedListItem) return;
 
+        const scrollEntryKey = selectedQuestGroup?.entryKey ?? selectedListItem.entryKey;
         const rowButtons = Array.from(
             resultListRef.current?.querySelectorAll<HTMLElement>("[data-entry-key]") ?? []
         );
-        const matchingRow = rowButtons.find((row) => row.dataset.entryKey === selectedListItem.entryKey);
+        const matchingRow = rowButtons.find((row) => row.dataset.entryKey === scrollEntryKey);
 
         if (typeof matchingRow?.scrollIntoView === "function") {
             matchingRow.scrollIntoView({
@@ -317,16 +318,18 @@ export default function CodexPage() {
                 inline: "nearest",
             });
         }
-    }, [selectedListItem]);
+    }, [selectedListItem, selectedQuestGroup]);
 
     useEffect(() => {
         if (selectionIntent !== "related" || !selectedEntry) return;
 
         detailTitleRef.current?.focus({ preventScroll: true });
-        detailTitleRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
+        if (typeof detailTitleRef.current?.scrollIntoView === "function") {
+            detailTitleRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
 
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
@@ -392,7 +395,6 @@ export default function CodexPage() {
                             loading={loading}
                             error={error}
                             onSelect={(entry) => selectEntry(entry)}
-                            onToggleQuestGroup={toggleQuestGroup}
                         />
                     </aside>
 
@@ -406,13 +408,14 @@ export default function CodexPage() {
                             ) : selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}
-                                    entries={filteredEntries}
+                                    entries={groupedFilteredEntries}
                                     titleRef={detailTitleRef}
                                     onSelectEntry={(entry) => selectEntry(entry)}
                                 />
                             ) : (
                                 <CodexEntryDetail
                                     entry={selectedEntry}
+                                    questGroup={selectedQuestGroup}
                                     relatedEntries={resolvedRelatedEntries}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}

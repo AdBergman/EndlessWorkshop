@@ -1,12 +1,19 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexDetailContextLines } from "@/lib/codex/codexPresentation";
+import {
+    formatCodexKindLabel,
+    getCodexDetailContextLines,
+    getCodexQuestGroupDetailContextLines,
+    type CodexQuestGroupEntry,
+} from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
+import CodexQuestProgression from "./CodexQuestProgression";
 import RelatedEntries from "./RelatedEntries";
 
 type Props = {
     entry: CodexEntry | null;
+    questGroup: CodexQuestGroupEntry | null;
     relatedEntries: CodexEntry[];
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectRelated: (entry: CodexEntry) => void;
@@ -14,6 +21,7 @@ type Props = {
 
 export default function CodexEntryDetail({
     entry,
+    questGroup,
     relatedEntries,
     titleRef,
     onSelectRelated,
@@ -31,7 +39,9 @@ export default function CodexEntryDetail({
     }
 
     const hasDescription = entry.descriptionLines.some((line) => line.trim().length > 0);
-    const detailContextLines = getCodexDetailContextLines(entry);
+    const detailContextLines = questGroup
+        ? getCodexQuestGroupDetailContextLines(entry)
+        : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
 
     return (
@@ -46,6 +56,12 @@ export default function CodexEntryDetail({
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
                 {renderCodexLabel(entry.displayName)}
             </h2>
+
+            <CodexQuestProgression
+                group={questGroup}
+                selectedEntryKey={entry.entryKey}
+                onSelectNode={onSelectRelated}
+            />
 
             <section className="codex-detail__section" aria-labelledby="codex-description-heading">
                 <div className="codex-sectionLabel" id="codex-description-heading">

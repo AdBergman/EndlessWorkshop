@@ -424,6 +424,20 @@ export function getCodexDetailContextLines(entry: CodexEntry): string[] {
     return secondaryContext ? [secondaryContext] : [];
 }
 
+export function getCodexQuestGroupDetailContextLines(entry: CodexEntry): string[] {
+    const questContext = parseCodexQuestContext(entry);
+    if (!questContext) return getCodexDetailContextLines(entry);
+
+    const categoryLabel = humanizeContextToken(entry.category ?? "");
+    const kindLabel = singularKindLabel(entry.kind ?? entry.exportKind ?? "");
+    const typeLine = [categoryLabel, kindLabel]
+        .filter(Boolean)
+        .filter((part, index, parts) => parts.findIndex((candidate) => candidate.toLowerCase() === part.toLowerCase()) === index)
+        .join(" ");
+
+    return [questContext.groupContext, typeLine].filter((line): line is string => Boolean(line));
+}
+
 export function createCodexQuestGroupEntry(
     groupKey: string,
     displayName: string,

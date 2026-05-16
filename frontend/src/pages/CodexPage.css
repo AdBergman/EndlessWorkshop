@@ -111,7 +111,7 @@
 .codex-kindFilter__chip:focus-visible,
 .codex-resultRow:focus-visible,
 .codex-questGroup__header:focus-visible,
-.codex-questNodeRow:focus-visible,
+.codex-questPath__node:focus-visible,
 .codex-related__chip:focus-visible,
 .codex-summaryList__item:focus-visible {
     outline: none;
@@ -342,11 +342,11 @@
 }
 
 .codex-questGroup__header:hover,
-.codex-questGroup.is-expanded .codex-questGroup__header {
+.codex-questGroup.is-selected .codex-questGroup__header {
     background: rgba(255, 255, 255, 0.026);
 }
 
-.codex-questGroup.is-expanded .codex-questGroup__header {
+.codex-questGroup.is-selected .codex-questGroup__header {
     border-left-color: rgba(255, 127, 50, 0.48);
 }
 
@@ -529,6 +529,80 @@
     line-height: 1.08;
     letter-spacing: 0.01em;
     color: #fff7f1;
+}
+
+.codex-questPath {
+    margin-top: 22px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.codex-questPath__variants {
+    display: grid;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.codex-questPath__variant {
+    display: grid;
+    gap: 8px;
+}
+
+.codex-questPath__variantLabel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: rgba(255, 185, 143, 0.76);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.45;
+    text-transform: uppercase;
+}
+
+.codex-questPath__nodes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.codex-questPath__nodeWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.codex-questPath__arrow {
+    color: rgba(255, 255, 255, 0.28);
+    font-size: 12px;
+}
+
+.codex-questPath__node {
+    min-height: 28px;
+    padding: 0 9px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+}
+
+.codex-questPath__node:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.045);
+    color: #fff4ed;
+}
+
+.codex-questPath__node.is-selected {
+    border-color: rgba(255, 127, 50, 0.62);
+    background: rgba(255, 127, 50, 0.12);
+    color: #fff6ef;
 }
 
 .codex-detail__section,

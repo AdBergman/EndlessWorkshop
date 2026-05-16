@@ -473,35 +473,39 @@ describe("CodexPage", () => {
         });
         expect(within(results).getByText("2 questlines")).toBeInTheDocument();
         expect(within(results).getByText("4 quest nodes")).toBeInTheDocument();
-        expect(within(results).getByText("Main questline")).toBeInTheDocument();
-        expect(within(results).getByText("Alternate questline 2")).toBeInTheDocument();
+        expect(within(results).queryByText("Main questline")).not.toBeInTheDocument();
+        expect(within(results).queryByText("Alternate questline 2")).not.toBeInTheDocument();
         expect(within(results).queryByText("Necrophage alternate questline 2 · Chapter 6")).not.toBeInTheDocument();
 
         const bitterTruthGroups = within(results).getAllByRole("button", { name: /a bitter truth/i });
         expect(bitterTruthGroups).toHaveLength(1);
-        expect(within(results).getAllByRole("button", { name: /step 1/i }).length).toBeGreaterThan(0);
-        expect(within(results).getAllByRole("button", { name: /step 2/i }).length).toBeGreaterThan(0);
+        expect(within(results).queryByRole("button", { name: /step 1/i })).not.toBeInTheDocument();
+        expect(within(results).queryByRole("button", { name: /step 2/i })).not.toBeInTheDocument();
         expect(within(results).queryByText(/Chapter 06 Step 01/i)).not.toBeInTheDocument();
 
-        await user.click(
-            within(results).getByRole("button", {
-                name: /step 2 another necrophage shared-title branch/i,
-            })
+        const detailPane = screen.getByLabelText("Selected codex entry");
+        expect(within(detailPane).getByText("Quest Progression")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Main questline")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Alternate questline 2")).toBeInTheDocument();
+
+        const mainStepTwo = detailPane.querySelector<HTMLButtonElement>(
+            '[data-entry-key="FactionQuest_Necrophage_Chapter06_Step02"]'
         );
+        expect(mainStepTwo).not.toBeNull();
+        await user.click(mainStepTwo!);
         expect(screen.getByTestId("location-probe")).toHaveTextContent(
             "/codex?entry=FactionQuest_Necrophage_Chapter06_Step02"
         );
         expect(await screen.findByRole("heading", { name: "A Bitter Truth" })).toBeInTheDocument();
-        const detailPane = screen.getByLabelText("Selected codex entry");
         expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
-        expect(within(detailPane).getByText("Step 2")).toBeInTheDocument();
         expect(within(detailPane).getByText("Major Faction Quest")).toBeInTheDocument();
+        expect(mainStepTwo).toHaveAttribute("aria-pressed", "true");
 
-        await user.click(
-            within(results).getByRole("button", {
-                name: /step 1 a necrophage shared-title branch/i,
-            })
+        const mainStepOne = detailPane.querySelector<HTMLButtonElement>(
+            '[data-entry-key="FactionQuest_Necrophage_Chapter06_Step01"]'
         );
+        expect(mainStepOne).not.toBeNull();
+        await user.click(mainStepOne!);
         const duplicateRelatedSection = await screen.findByRole("region", { name: /related entries/i });
         expect(
             within(duplicateRelatedSection).getByRole("button", {
@@ -573,6 +577,10 @@ describe("CodexPage", () => {
         expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
         expect(within(detailPane).getByText("Alternate questline 2")).toBeInTheDocument();
         expect(within(detailPane).getByText("Step 2")).toBeInTheDocument();
+        const selectedPathNode = detailPane.querySelector<HTMLButtonElement>(
+            '[data-entry-key="FactionQuest_Necrophage02_Chapter06_Step02"]'
+        );
+        expect(selectedPathNode).toHaveAttribute("aria-pressed", "true");
 
         const relatedSection = await screen.findByRole("region", { name: /related entries/i });
         expect(
@@ -580,5 +588,79 @@ describe("CodexPage", () => {
                 name: /a bitter truth quest .* necrophage .* chapter 6 .* alternate questline 2 .* step 3/i,
             })
         ).toBeInTheDocument();
+    });
+
+    it("uses grouped quest rows in the summary detail instead of repeated quest nodes", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter06_Step01",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The first main node."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage_Chapter06_Step02",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The second main node."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step01",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The first alternate node."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Necrophage02_Chapter06_Step02",
+                displayName: "A Bitter Truth",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The second alternate node."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await user.click(
+            within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+                name: /quests 4/i,
+            })
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Quests" })).toBeInTheDocument();
+        const summaryList = screen.getByLabelText("Quests overview");
+        expect(within(summaryList).getAllByRole("button", { name: /a bitter truth/i })).toHaveLength(1);
+        expect(within(summaryList).getByText(/Necrophage · Chapter 6 · 2 questlines · 4 quest nodes/i)).toBeInTheDocument();
+        expect(within(summaryList).queryByText("The first main node.")).not.toBeInTheDocument();
+        expect(within(summaryList).queryByText("The second alternate node.")).not.toBeInTheDocument();
     });
 });
