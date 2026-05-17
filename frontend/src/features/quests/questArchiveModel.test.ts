@@ -87,6 +87,8 @@ const buildModel = ({
 const visibleQuestKeys = (model: ReturnType<typeof buildModel>) =>
     model.rail.items.flatMap((item) => item.memberQuestKeys);
 
+const optionLabels = (options: Array<{ label: string }>) => options.map((option) => option.label);
+
 describe("questArchiveModel", () => {
     it("searches quest titles, requirements, rewards, objectives, and outcome quest labels", () => {
         const quests = [
@@ -228,6 +230,155 @@ describe("questArchiveModel", () => {
             { value: "Necrophages", label: "Necrophages", count: 1 },
         ]);
         expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Necrophage_Chapter01_Step01"]);
+    });
+
+    it("narrows branch options when faction is selected", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step01",
+                displayName: "Kin Opening",
+                branchLabel: "Kin Accord",
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspects_Chapter01_Step01",
+                displayName: "Aspect Opening",
+                branchLabel: "Aspect Accord",
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspects",
+                questSequenceIndex: 2,
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests, filters: { faction: "Kin" } });
+
+        expect(optionLabels(model.branchVariantOptions)).toEqual(["Any branch/variant", "Kin Accord"]);
+        expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Kin_Chapter01_Step01"]);
+    });
+
+    it("narrows branch options when chapter is selected inside a faction", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step01",
+                displayName: "Kin First",
+                branchLabel: "First Chapter Path",
+                chapterNumber: 1,
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Kin_Chapter02_Step01",
+                displayName: "Kin Second",
+                branchLabel: "Second Chapter Path",
+                chapterIndex: 1,
+                chapterNumber: 2,
+                questSequenceIndex: 2,
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspects_Chapter01_Step01",
+                displayName: "Aspect First",
+                branchLabel: "Aspect First Path",
+                chapterNumber: 1,
+                questSequenceIndex: 3,
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspects",
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests, filters: { faction: "Kin", chapter: "Chapter 1" } });
+
+        expect(optionLabels(model.branchVariantOptions)).toEqual(["Any branch/variant", "First Chapter Path"]);
+        expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Kin_Chapter01_Step01"]);
+    });
+
+    it("narrows facet counts with search text", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step01",
+                displayName: "Quiet Oath",
+                categoryType: "MajorFaction",
+                branchLabel: "Kin Oath",
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step02",
+                displayName: "Quiet March",
+                categoryType: "Curiosity",
+                branchLabel: "Kin March",
+                questSequenceIndex: 2,
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspects_Chapter01_Step01",
+                displayName: "Aspect Memory",
+                categoryType: "MajorFaction",
+                branchLabel: "Aspect Oath",
+                descriptionLines: ["The oath answers from another archive."],
+                questSequenceIndex: 3,
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspects",
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests, filters: { searchText: "oath" } });
+
+        expect(model.factionOptions).toEqual([
+            { value: "Aspects", label: "Aspects", count: 1 },
+            { value: "Kin", label: "Kin", count: 1 },
+        ]);
+        expect(model.categoryOptions).toEqual([
+            { value: "MajorFaction", label: "MajorFaction", count: 2 },
+        ]);
+        expect(optionLabels(model.branchVariantOptions)).toEqual([
+            "Any branch/variant",
+            "Aspect Oath",
+            "Kin Oath",
+        ]);
+        expect(visibleQuestKeys(model)).toEqual([
+            "FactionQuest_Kin_Chapter01_Step01",
+            "FactionQuest_Aspects_Chapter01_Step01",
+        ]);
+    });
+
+    it("resets an invalid selected facet after another filter changes", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step01",
+                displayName: "Kin Opening",
+                branchLabel: "Kin Accord",
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspects_Chapter01_Step01",
+                displayName: "Aspect Opening",
+                branchLabel: "Aspect Accord",
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspects",
+                questSequenceIndex: 2,
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests, filters: { faction: "Kin", branchVariant: "Aspect Accord" } });
+
+        expect(model.filters.branchVariant).toBe(QUEST_ARCHIVE_ALL);
+        expect(optionLabels(model.branchVariantOptions)).toEqual(["Any branch/variant", "Kin Accord"]);
+        expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Kin_Chapter01_Step01"]);
     });
 
     it("supports branch filters from quest DTO data", () => {

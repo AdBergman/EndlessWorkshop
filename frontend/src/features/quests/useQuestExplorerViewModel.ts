@@ -41,6 +41,13 @@ const clean = (value: string | null | undefined): string | null => {
     return trimmed.length > 0 ? trimmed : null;
 };
 
+const areArchiveFiltersEqual = (left: QuestArchiveFilters, right: QuestArchiveFilters): boolean =>
+    left.searchText === right.searchText &&
+    left.faction === right.faction &&
+    left.category === right.category &&
+    left.chapter === right.chapter &&
+    left.branchVariant === right.branchVariant;
+
 export function useQuestExplorerViewModel(): QuestExplorerViewModel {
     const quests = useQuestStore(selectQuests);
     const dialogBlocksByIdentity = useQuestStore(selectDialogBlocksByIdentity);
@@ -87,6 +94,11 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
             }),
         [archiveFilters, dialogBlocksByIdentity, quests, selectedQuestKey]
     );
+
+    useEffect(() => {
+        if (areArchiveFiltersEqual(archiveFilters, archive.filters)) return;
+        setArchiveFilters(archive.filters);
+    }, [archive.filters, archiveFilters]);
 
     useEffect(() => {
         if (!loaded || content.status !== "ready" || !selectedQuestKey) return;

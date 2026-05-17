@@ -63,6 +63,8 @@ type QuestArchiveRecord = {
     relevanceScore: number;
 };
 
+type QuestArchiveFacetKey = "faction" | "category" | "chapter" | "branchVariant";
+
 export const defaultQuestArchiveFilters: QuestArchiveFilters = {
     searchText: "",
     faction: QUEST_ARCHIVE_ALL,
@@ -93,6 +95,8 @@ const compareString = (left: string | null | undefined, right: string | null | u
 
 const formatCountLabel = (count: number, singular: string): string =>
     `${count} ${singular}${count === 1 ? "" : "s"}`;
+
+const facetKeys: QuestArchiveFacetKey[] = ["faction", "category", "chapter", "branchVariant"];
 
 function getQuestCategoryLabel(quest: QuestDto): string | null {
     return clean(quest.categoryType) || compactEntityLabel(quest.categoryKey) || clean(quest.categoryKey) || null;
@@ -259,6 +263,24 @@ function countOptions(
         .sort((left, right) => compareString(left.label, right.label));
 }
 
+function buildBranchVariantOptions(
+    records: readonly QuestArchiveRecord[]
+): QuestArchiveFilterOption[] {
+    const branchVariantOptions = countOptions(records, (record) => record.branchVariantLabels);
+    const branchVariantRecordCount = records.filter((record) => record.branchVariantLabels.length > 0).length;
+
+    return branchVariantRecordCount > 0
+        ? [
+            {
+                value: QUEST_ARCHIVE_BRANCH_ANY,
+                label: "Any branch/variant",
+                count: branchVariantRecordCount,
+            },
+            ...branchVariantOptions,
+        ]
+        : branchVariantOptions;
+}
+
 function isConstrictiveFilterActive(filters: QuestArchiveFilters): boolean {
     return (
         clean(filters.searchText).length > 0 ||
@@ -271,16 +293,42 @@ function isConstrictiveFilterActive(filters: QuestArchiveFilters): boolean {
 
 function recordMatchesFilters(
     record: QuestArchiveRecord,
-    filters: QuestArchiveFilters
+    filters: QuestArchiveFilters,
+    options: { ignoreFacet?: QuestArchiveFacetKey } = {}
 ): QuestArchiveRecord | null {
     const relevanceScore = computeSearchScore(record, filters.searchText);
     if (relevanceScore === null) return null;
 
-    if (filters.faction !== QUEST_ARCHIVE_ALL && record.factionLabel !== filters.faction) return null;
-    if (filters.category !== QUEST_ARCHIVE_ALL && record.categoryLabel !== filters.category) return null;
-    if (filters.chapter !== QUEST_ARCHIVE_ALL && record.chapterLabel !== filters.chapter) return null;
-    if (filters.branchVariant === QUEST_ARCHIVE_BRANCH_ANY && record.branchVariantLabels.length === 0) return null;
     if (
+        options.ignoreFacet !== "faction" &&
+        filters.faction !== QUEST_ARCHIVE_ALL &&
+        record.factionLabel !== filters.faction
+    ) {
+        return null;
+    }
+    if (
+        options.ignoreFacet !== "category" &&
+        filters.category !== QUEST_ARCHIVE_ALL &&
+        record.categoryLabel !== filters.category
+    ) {
+        return null;
+    }
+    if (
+        options.ignoreFacet !== "chapter" &&
+        filters.chapter !== QUEST_ARCHIVE_ALL &&
+        record.chapterLabel !== filters.chapter
+    ) {
+        return null;
+    }
+    if (
+        options.ignoreFacet !== "branchVariant" &&
+        filters.branchVariant === QUEST_ARCHIVE_BRANCH_ANY &&
+        record.branchVariantLabels.length === 0
+    ) {
+        return null;
+    }
+    if (
+        options.ignoreFacet !== "branchVariant" &&
         filters.branchVariant !== QUEST_ARCHIVE_ALL &&
         filters.branchVariant !== QUEST_ARCHIVE_BRANCH_ANY &&
         !record.branchVariantLabels.includes(filters.branchVariant)
@@ -292,6 +340,69 @@ function recordMatchesFilters(
         ...record,
         relevanceScore,
     };
+}
+
+function filterRecordsForFacet(
+    records: readonly QuestArchiveRecord[],
+    filters: QuestArchiveFilters,
+    facetKey: QuestArchiveFacetKey
+): QuestArchiveRecord[] {
+    return records
+        .map((record) => recordMatchesFilters(record, filters, { ignoreFacet: facetKey }))
+        .filter((record): record is QuestArchiveRecord => Boolean(record));
+}
+
+function buildFacetOptions(
+    records: readonly QuestArchiveRecord[],
+    filters: QuestArchiveFilters,
+    facetKey: QuestArchiveFacetKey
+): QuestArchiveFilterOption[] {
+    const facetRecords = filterRecordsForFacet(records, filters, facetKey);
+
+    if (facetKey === "faction") {
+        return countOptions(facetRecords, (record) => record.factionLabel ? [record.factionLabel] : []);
+    }
+
+    if (facetKey === "category") {
+        return countOptions(facetRecords, (record) => record.categoryLabel ? [record.categoryLabel] : []);
+    }
+
+    if (facetKey === "chapter") {
+        return countOptions(facetRecords, (record) => record.chapterLabel ? [record.chapterLabel] : []);
+    }
+
+    return buildBranchVariantOptions(facetRecords);
+}
+
+function sanitizeArchiveFilters(
+    records: readonly QuestArchiveRecord[],
+    filters: QuestArchiveFilters
+): QuestArchiveFilters {
+    const nextFilters = { ...filters };
+    const validationFilters: QuestArchiveFilters = {
+        ...filters,
+        faction: QUEST_ARCHIVE_ALL,
+        category: QUEST_ARCHIVE_ALL,
+        chapter: QUEST_ARCHIVE_ALL,
+        branchVariant: QUEST_ARCHIVE_ALL,
+    };
+
+    facetKeys.forEach((facetKey) => {
+        const selectedValue = nextFilters[facetKey];
+        if (selectedValue === QUEST_ARCHIVE_ALL) return;
+
+        const availableValues = new Set(
+            buildFacetOptions(records, validationFilters, facetKey).map((option) => option.value)
+        );
+        if (availableValues.has(selectedValue)) {
+            validationFilters[facetKey] = selectedValue;
+            return;
+        }
+
+        nextFilters[facetKey] = QUEST_ARCHIVE_ALL;
+    });
+
+    return nextFilters;
 }
 
 export function buildQuestArchiveModel({
@@ -312,43 +423,33 @@ export function buildQuestArchiveModel({
         return acc;
     }, {});
     const records = orderedQuests.map((quest) => buildQuestArchiveRecord(quest, questsByKey));
+    const sanitizedFilters = sanitizeArchiveFilters(records, filters);
     const visibleRecords = records
-        .map((record) => recordMatchesFilters(record, filters))
+        .map((record) => recordMatchesFilters(record, sanitizedFilters))
         .filter((record): record is QuestArchiveRecord => Boolean(record))
         .sort((left, right) => compareQuestOrder(left.quest, right.quest));
     const rail = buildProgressionRail(visibleRecords.map((record) => record.quest), selectedQuestKey);
     const totalRail = buildProgressionRail(orderedQuests, selectedQuestKey);
     const selectedOutsideFilters = Boolean(
         selectedQuestKey &&
-            isConstrictiveFilterActive(filters) &&
+            isConstrictiveFilterActive(sanitizedFilters) &&
             !visibleRecords.some((record) => record.quest.questKey === selectedQuestKey)
     );
-    const branchVariantOptions = countOptions(records, (record) => record.branchVariantLabels);
-    const branchVariantRecordCount = records.filter((record) => record.branchVariantLabels.length > 0).length;
 
     return {
         rail,
-        filters,
-        factionOptions: countOptions(records, (record) => record.factionLabel ? [record.factionLabel] : []),
-        categoryOptions: countOptions(records, (record) => record.categoryLabel ? [record.categoryLabel] : []),
-        chapterOptions: countOptions(records, (record) => record.chapterLabel ? [record.chapterLabel] : []),
-        branchVariantOptions: branchVariantRecordCount > 0
-            ? [
-                {
-                    value: QUEST_ARCHIVE_BRANCH_ANY,
-                    label: "Any branch/variant",
-                    count: branchVariantRecordCount,
-                },
-                ...branchVariantOptions,
-            ]
-            : branchVariantOptions,
+        filters: sanitizedFilters,
+        factionOptions: buildFacetOptions(records, sanitizedFilters, "faction"),
+        categoryOptions: buildFacetOptions(records, sanitizedFilters, "category"),
+        chapterOptions: buildFacetOptions(records, sanitizedFilters, "chapter"),
+        branchVariantOptions: buildFacetOptions(records, sanitizedFilters, "branchVariant"),
         counts: {
             totalGroups: totalRail.questCount,
             visibleGroups: rail.questCount,
             totalRecords: orderedQuests.length,
             visibleRecords: visibleRecords.length,
         },
-        hasActiveFilters: isConstrictiveFilterActive(filters),
+        hasActiveFilters: isConstrictiveFilterActive(sanitizedFilters),
         selectedOutsideFilters,
     };
 }
