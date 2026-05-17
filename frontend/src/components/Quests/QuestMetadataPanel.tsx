@@ -23,14 +23,23 @@ function QuestLinkList({
         <div className="questExplorer-metadataLinks">
             <div className="questExplorer-metadataLinks__label">{label}</div>
             <div className="questExplorer-metadataLinks__items">
-                {links.map((link) => (
+                {links.map((link, index) => (
                     <button
                         type="button"
                         className="questExplorer-linkButton"
-                        key={link.questKey}
+                        key={`${link.provenance}:${link.questKey}:${index}`}
                         onClick={() => onSelectQuest(link.questKey)}
                     >
-                        {link.label}
+                        <span className="questExplorer-linkButton__main">
+                            <span className="questExplorer-linkButton__label">{link.label}</span>
+                            <span className="questExplorer-provenanceBadge">{link.provenanceLabel}</span>
+                        </span>
+                        {link.contextLabel ? (
+                            <span className="questExplorer-linkButton__context">{link.contextLabel}</span>
+                        ) : null}
+                        {link.debugLabel ? (
+                            <span className="questExplorer-linkButton__debug">{link.debugLabel}</span>
+                        ) : null}
                     </button>
                 ))}
             </div>
@@ -73,24 +82,37 @@ export default function QuestMetadataPanel({ metadata, onSelectQuest }: QuestMet
             ))}
 
             <QuestLinkList
-                label="Previous"
+                label="Listed previous"
                 links={metadata.previousQuestLinks}
                 onSelectQuest={onSelectQuest}
             />
             <QuestLinkList
-                label="Next"
+                label="Quest graph next"
                 links={metadata.nextQuestLinks}
                 onSelectQuest={onSelectQuest}
             />
             {convergesIntoQuestLink ? (
                 <div className="questExplorer-metadataLinks">
-                    <div className="questExplorer-metadataLinks__label">Converges</div>
+                    <div className="questExplorer-metadataLinks__label">Converges into</div>
                     <button
                         type="button"
                         className="questExplorer-linkButton"
                         onClick={() => onSelectQuest(convergesIntoQuestLink.questKey)}
                     >
-                        {convergesIntoQuestLink.label}
+                        <span className="questExplorer-linkButton__main">
+                            <span className="questExplorer-linkButton__label">{convergesIntoQuestLink.label}</span>
+                            <span className="questExplorer-provenanceBadge">
+                                {convergesIntoQuestLink.provenanceLabel}
+                            </span>
+                        </span>
+                        {convergesIntoQuestLink.contextLabel ? (
+                            <span className="questExplorer-linkButton__context">
+                                {convergesIntoQuestLink.contextLabel}
+                            </span>
+                        ) : null}
+                        {convergesIntoQuestLink.debugLabel ? (
+                            <span className="questExplorer-linkButton__debug">{convergesIntoQuestLink.debugLabel}</span>
+                        ) : null}
                     </button>
                 </div>
             ) : null}

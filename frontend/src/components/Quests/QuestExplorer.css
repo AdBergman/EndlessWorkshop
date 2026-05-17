@@ -478,10 +478,46 @@
 }
 
 .questExplorer-linkButton {
+    display: grid;
+    gap: 4px;
     width: 100%;
     padding: 9px 10px;
     color: var(--quest-text-soft);
     text-align: left;
+}
+
+.questExplorer-linkButton__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.questExplorer-linkButton__label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.questExplorer-linkButton__context,
+.questExplorer-linkButton__debug {
+    color: var(--quest-text-muted);
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+.questExplorer-linkButton__context {
+    color: rgba(216, 183, 105, 0.82);
+}
+
+.questExplorer-provenanceBadge {
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border: 1px solid rgba(120, 214, 199, 0.22);
+    color: rgba(184, 246, 238, 0.86);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .questExplorer-state {

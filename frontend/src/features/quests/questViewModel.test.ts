@@ -195,12 +195,23 @@ describe("questViewModel", () => {
         expect(model.chronicle?.choices.map((item) => item.choiceKey)).toEqual(["Choice_A", "Choice_B"]);
         expect(model.chronicle?.selectedChoice?.requirementGroups[0]?.lines).toEqual(["Hold the archive."]);
         expect(model.chronicle?.selectedChoice?.nextQuestLinks).toEqual([
-            { questKey: "Quest_B", label: "Follow Up" },
+            {
+                questKey: "Quest_B",
+                label: "Follow Up",
+                contextLabel: null,
+                debugLabel: null,
+                provenance: "choiceNext",
+                provenanceLabel: "Choice",
+            },
         ]);
         expect(model.chronicle?.selectedStep?.requirementGroups[0]?.label).toBe("Selection");
         expect(model.chronicle?.selectedStep?.nextQuestLink).toEqual({
             questKey: "Quest_B",
             label: "Follow Up",
+            contextLabel: null,
+            debugLabel: null,
+            provenance: "stepNext",
+            provenanceLabel: "Step",
         });
         expect(model.chronicle?.transcriptBlocks.map((block) => block.identity)).toEqual([
             "Root_Block",
@@ -215,7 +226,104 @@ describe("questViewModel", () => {
             label: "Archive ID",
             value: "Quest A",
         });
-        expect(model.metadata?.nextQuestLinks).toEqual([{ questKey: "Quest_B", label: "Follow Up" }]);
+        expect(model.metadata?.nextQuestLinks).toEqual([
+            {
+                questKey: "Quest_B",
+                label: "Follow Up",
+                contextLabel: null,
+                debugLabel: null,
+                provenance: "questNext",
+                provenanceLabel: "Quest graph",
+            },
+        ]);
+    });
+
+    it("disambiguates repeated quest titles and preserves graph link provenance", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Archive Start",
+                    previousQuestKeys: ["Quest_Previous"],
+                    nextQuestKeys: ["Quest_Target_A"],
+                    convergesIntoQuestKey: "Quest_Target_B",
+                    choices: [
+                        choice({
+                            nextQuestKeys: ["Quest_Target_B"],
+                            steps: [
+                                step({
+                                    nextQuestKey: "Quest_Target_A",
+                                    failQuestKey: "Quest_Target_B",
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({
+                    questKey: "Quest_Previous",
+                    displayName: "Before",
+                }),
+                quest({
+                    questKey: "Quest_Target_A",
+                    displayName: "A Bitter Truth",
+                    chapterNumber: 2,
+                    questSequenceIndex: 4,
+                    branchLabel: "Branch A",
+                    inferredFactionKey: "Faction_Kin",
+                }),
+                quest({
+                    questKey: "Quest_Target_B",
+                    displayName: "A Bitter Truth",
+                    chapterNumber: 2,
+                    questSequenceIndex: 5,
+                    branchLabel: "Branch B",
+                    inferredFactionKey: "Faction_Kin",
+                }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "Quest_A",
+                choiceKey: "Choice_A",
+                stepIndex: 0,
+            },
+        });
+
+        expect(model.metadata?.previousQuestLinks[0]).toMatchObject({
+            label: "Before",
+            contextLabel: null,
+            provenance: "questPrevious",
+            provenanceLabel: "Quest previous",
+        });
+        expect(model.metadata?.nextQuestLinks[0]).toMatchObject({
+            label: "A Bitter Truth",
+            contextLabel: "Chapter 2 · Seq 4 · Branch A",
+            provenance: "questNext",
+            provenanceLabel: "Quest graph",
+        });
+        expect(model.metadata?.convergesIntoQuestLink).toMatchObject({
+            label: "A Bitter Truth",
+            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            provenance: "converges",
+            provenanceLabel: "Converges",
+        });
+        expect(model.chronicle?.selectedChoice?.nextQuestLinks[0]).toMatchObject({
+            label: "A Bitter Truth",
+            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            provenance: "choiceNext",
+            provenanceLabel: "Choice",
+        });
+        expect(model.chronicle?.selectedStep?.nextQuestLink).toMatchObject({
+            label: "A Bitter Truth",
+            contextLabel: "Chapter 2 · Seq 4 · Branch A",
+            provenance: "stepNext",
+            provenanceLabel: "Step",
+        });
+        expect(model.chronicle?.selectedStep?.failQuestLink).toMatchObject({
+            label: "A Bitter Truth",
+            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            provenance: "stepFailure",
+            provenanceLabel: "Failure",
+        });
     });
 
     it("returns an empty model when no quests are available", () => {

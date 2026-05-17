@@ -10,6 +10,7 @@ import type {
     QuestChoiceSummaryModel,
     QuestExplorerContentModel,
     QuestExplorerSelection,
+    QuestGraphLinkProvenance,
     QuestLineGroupModel,
     QuestLinkModel,
     QuestMetadataModel,
@@ -23,6 +24,11 @@ type BuildQuestExplorerViewModelArgs = {
     quests: QuestDto[];
     dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>;
     selection: QuestExplorerSelection;
+};
+
+type QuestLinkBuildContext = {
+    questsByKey: Record<string, QuestDto>;
+    titleCounts: Record<string, number>;
 };
 
 const clean = (value: string | null | undefined): string => (value ?? "").trim();
@@ -125,27 +131,84 @@ function buildQuestMap(quests: readonly QuestDto[]): Record<string, QuestDto> {
     }, {});
 }
 
-function buildQuestLinks(questKeys: readonly string[], questsByKey: Record<string, QuestDto>): QuestLinkModel[] {
+function buildQuestTitleCounts(quests: readonly QuestDto[]): Record<string, number> {
+    return quests.reduce<Record<string, number>>((acc, quest) => {
+        const title = getQuestTitle(quest);
+        acc[title] = (acc[title] ?? 0) + 1;
+        return acc;
+    }, {});
+}
+
+function compactEntityLabel(value: string | null | undefined): string | null {
+    const label = clean(value);
+    if (!label) return null;
+
+    return humanizeQuestKey(label)
+        .replace(/^Faction /, "")
+        .replace(/^Quest Line /, "")
+        .trim();
+}
+
+function buildQuestDisambiguator(quest: QuestDto, titleCounts: Record<string, number>): string | null {
+    if ((titleCounts[getQuestTitle(quest)] ?? 0) <= 1) return null;
+
+    const parts = [
+        formatChapterLabel(quest),
+        typeof quest.questSequenceIndex === "number" ? `Seq ${quest.questSequenceIndex}` : null,
+        clean(quest.branchLabel) || compactEntityLabel(quest.branchGroupKey),
+        compactEntityLabel(quest.inferredFactionKey) || compactEntityLabel(quest.inferredQuestLineKey),
+    ].filter((part): part is string => Boolean(part));
+    const uniqueParts = parts.filter((part, index) => parts.indexOf(part) === index);
+
+    return uniqueParts.slice(0, 3).join(" · ") || humanizeQuestKey(quest.questKey);
+}
+
+const questLinkProvenanceLabels: Record<QuestGraphLinkProvenance, string> = {
+    questPrevious: "Quest previous",
+    questNext: "Quest graph",
+    choiceNext: "Choice",
+    stepNext: "Step",
+    stepFailure: "Failure",
+    converges: "Converges",
+};
+
+function buildQuestLinkModel(
+    questKey: string,
+    context: QuestLinkBuildContext,
+    provenance: QuestGraphLinkProvenance
+): QuestLinkModel {
+    const quest = context.questsByKey[questKey] ?? null;
+
+    return {
+        questKey,
+        label: quest ? getQuestTitle(quest) : humanizeQuestKey(questKey),
+        contextLabel: quest ? buildQuestDisambiguator(quest, context.titleCounts) : null,
+        debugLabel: quest ? null : humanizeQuestKey(questKey),
+        provenance,
+        provenanceLabel: questLinkProvenanceLabels[provenance],
+    };
+}
+
+function buildQuestLinks(
+    questKeys: readonly string[],
+    context: QuestLinkBuildContext,
+    provenance: QuestGraphLinkProvenance
+): QuestLinkModel[] {
     return questKeys
         .map(clean)
         .filter((questKey) => questKey.length > 0)
-        .map((questKey) => ({
-            questKey,
-            label: questsByKey[questKey] ? getQuestTitle(questsByKey[questKey]) : humanizeQuestKey(questKey),
-        }));
+        .map((questKey) => buildQuestLinkModel(questKey, context, provenance));
 }
 
 function buildQuestLink(
     questKey: string | null | undefined,
-    questsByKey: Record<string, QuestDto>
+    context: QuestLinkBuildContext,
+    provenance: QuestGraphLinkProvenance
 ): QuestLinkModel | null {
     const normalizedKey = clean(questKey);
     if (!normalizedKey) return null;
 
-    return {
-        questKey: normalizedKey,
-        label: questsByKey[normalizedKey] ? getQuestTitle(questsByKey[normalizedKey]) : humanizeQuestKey(normalizedKey),
-    };
+    return buildQuestLinkModel(normalizedKey, context, provenance);
 }
 
 function buildRequirementGroups(
@@ -194,7 +257,7 @@ function buildChoiceModel(
     choice: QuestChoiceDto,
     index: number,
     selectedChoiceKey: string | null,
-    questsByKey: Record<string, QuestDto>
+    linkContext: QuestLinkBuildContext
 ): QuestChoiceSummaryModel {
     return {
         choiceKey: choice.choiceKey,
@@ -205,7 +268,7 @@ function buildChoiceModel(
             { label: "Failure", lines: choice.failurePrerequisiteLines },
         ]),
         rewardLines: cleanLines(choice.rewardDisplayLines),
-        nextQuestLinks: buildQuestLinks(choice.nextQuestKeys, questsByKey),
+        nextQuestLinks: buildQuestLinks(choice.nextQuestKeys, linkContext, "choiceNext"),
         isSelected: choice.choiceKey === selectedChoiceKey,
     };
 }
@@ -213,7 +276,7 @@ function buildChoiceModel(
 function buildStepModel(
     step: QuestStepDto,
     selectedStepIndex: number | null,
-    questsByKey: Record<string, QuestDto>
+    linkContext: QuestLinkBuildContext
 ): QuestStepSummaryModel {
     return {
         stepIndex: step.stepIndex,
@@ -227,8 +290,8 @@ function buildStepModel(
             { label: "Forbidden", lines: step.forbiddenPrerequisiteLines },
         ]),
         rewardLines: cleanLines(step.rewardDisplayLines),
-        nextQuestLink: buildQuestLink(step.nextQuestKey, questsByKey),
-        failQuestLink: buildQuestLink(step.failQuestKey, questsByKey),
+        nextQuestLink: buildQuestLink(step.nextQuestKey, linkContext, "stepNext"),
+        failQuestLink: buildQuestLink(step.failQuestKey, linkContext, "stepFailure"),
         isSelected: step.stepIndex === selectedStepIndex,
     };
 }
@@ -305,7 +368,7 @@ function buildTranscriptBlocks(
 
 function buildMetadata(
     quest: QuestDto,
-    questsByKey: Record<string, QuestDto>
+    linkContext: QuestLinkBuildContext
 ): QuestMetadataModel {
     const branchLabel = clean(quest.branchLabel);
     const branchGroupKey = clean(quest.branchGroupKey);
@@ -341,9 +404,9 @@ function buildMetadata(
             { id: "overview", label: "Overview", items: overviewItems },
             { id: "archive", label: "Archive Index", items: archiveItems },
         ].filter((section) => section.items.length > 0),
-        previousQuestLinks: buildQuestLinks(quest.previousQuestKeys, questsByKey),
-        nextQuestLinks: buildQuestLinks(quest.nextQuestKeys, questsByKey),
-        convergesIntoQuestLink: buildQuestLink(quest.convergesIntoQuestKey, questsByKey),
+        previousQuestLinks: buildQuestLinks(quest.previousQuestKeys, linkContext, "questPrevious"),
+        nextQuestLinks: buildQuestLinks(quest.nextQuestKeys, linkContext, "questNext"),
+        convergesIntoQuestLink: buildQuestLink(quest.convergesIntoQuestKey, linkContext, "converges"),
     };
 }
 
@@ -388,6 +451,10 @@ export function buildQuestExplorerViewModel({
 }: BuildQuestExplorerViewModelArgs): QuestExplorerContentModel {
     const orderedQuests = sortQuests(quests);
     const questsByKey = buildQuestMap(orderedQuests);
+    const linkContext = {
+        questsByKey,
+        titleCounts: buildQuestTitleCounts(orderedQuests),
+    };
     const resolved = resolveSelection(orderedQuests, selection);
     const rail = buildProgressionRail(orderedQuests, resolved.selection.questKey);
 
@@ -402,10 +469,10 @@ export function buildQuestExplorerViewModel({
     }
 
     const choiceModels = resolved.choices.map((choice, index) =>
-        buildChoiceModel(choice, index, resolved.selection.choiceKey, questsByKey)
+        buildChoiceModel(choice, index, resolved.selection.choiceKey, linkContext)
     );
     const stepModels = resolved.steps.map((step) =>
-        buildStepModel(step, resolved.selection.stepIndex, questsByKey)
+        buildStepModel(step, resolved.selection.stepIndex, linkContext)
     );
     const selectedChoice = choiceModels.find((choice) => choice.isSelected) ?? null;
     const selectedStep = stepModels.find((step) => step.isSelected) ?? null;
@@ -431,6 +498,6 @@ export function buildQuestExplorerViewModel({
         selection: resolved.selection,
         rail,
         chronicle,
-        metadata: buildMetadata(resolved.quest, questsByKey),
+        metadata: buildMetadata(resolved.quest, linkContext),
     };
 }

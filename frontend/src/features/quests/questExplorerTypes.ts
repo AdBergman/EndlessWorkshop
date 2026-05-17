@@ -14,9 +14,21 @@ export type QuestLineGroupModel = {
     lines: string[];
 };
 
+export type QuestGraphLinkProvenance =
+    | "questPrevious"
+    | "questNext"
+    | "choiceNext"
+    | "stepNext"
+    | "stepFailure"
+    | "converges";
+
 export type QuestLinkModel = {
     questKey: string;
     label: string;
+    contextLabel: string | null;
+    debugLabel: string | null;
+    provenance: QuestGraphLinkProvenance;
+    provenanceLabel: string;
 };
 
 export type QuestProgressionRailItemModel = {

@@ -269,4 +269,61 @@ describe("QuestExplorerPage", () => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("/quests?quest=Quest_A");
         });
     });
+
+    it("renders provenance and compact disambiguators for duplicate quest link titles", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Archive Start",
+                    nextQuestKeys: ["Quest_Target_A"],
+                    convergesIntoQuestKey: "Quest_Target_B",
+                    choices: [
+                        choice({
+                            nextQuestKeys: ["Quest_Target_B"],
+                            steps: [
+                                step({
+                                    nextQuestKey: "Quest_Target_A",
+                                    failQuestKey: "Quest_Target_B",
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({
+                    questKey: "Quest_Target_A",
+                    displayName: "A Bitter Truth",
+                    chapterNumber: 2,
+                    questSequenceIndex: 4,
+                    branchLabel: "Branch A",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+                quest({
+                    questKey: "Quest_Target_B",
+                    displayName: "A Bitter Truth",
+                    chapterNumber: 2,
+                    questSequenceIndex: 5,
+                    branchLabel: "Branch B",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "Archive Start" })).toBeInTheDocument();
+        expect(screen.getByText("Quest graph next")).toBeInTheDocument();
+        expect(screen.getByText("Converges into")).toBeInTheDocument();
+        expect(screen.getAllByText("A Bitter Truth").length).toBeGreaterThanOrEqual(4);
+        expect(screen.getAllByText("Chapter 2 · Seq 4 · Branch A").length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText("Chapter 2 · Seq 5 · Branch B").length).toBeGreaterThanOrEqual(3);
+        expect(screen.getByText("Quest graph")).toBeInTheDocument();
+        expect(screen.getByText("Choice")).toBeInTheDocument();
+        expect(screen.getByText("Step")).toBeInTheDocument();
+        expect(screen.getByText("Failure")).toBeInTheDocument();
+        expect(screen.getByText("Converges")).toBeInTheDocument();
+    });
 });

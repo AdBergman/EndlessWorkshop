@@ -1,6 +1,8 @@
 import type {
     QuestChronicleModel,
+    QuestChoiceSummaryModel,
     QuestLineGroupModel,
+    QuestLinkModel,
     QuestStepSummaryModel,
 } from "@/features/quests/questExplorerTypes";
 import QuestTranscript from "./QuestTranscript";
@@ -9,6 +11,7 @@ type QuestChroniclePanelProps = {
     chronicle: QuestChronicleModel;
     onSelectChoice: (choiceKey: string) => void;
     onSelectStep: (stepIndex: number) => void;
+    onSelectQuest: (questKey: string) => void;
 };
 
 function TextLines({ lines, emptyLabel }: { lines: string[]; emptyLabel: string }) {
@@ -42,7 +45,63 @@ function LineGroups({ groups }: { groups: QuestLineGroupModel[] }) {
     );
 }
 
-function StepBranches({ step }: { step: QuestStepSummaryModel | null }) {
+function QuestBranchLink({
+    link,
+    onSelectQuest,
+}: {
+    link: QuestLinkModel;
+    onSelectQuest: (questKey: string) => void;
+}) {
+    return (
+        <button
+            type="button"
+            className="questExplorer-linkButton"
+            onClick={() => onSelectQuest(link.questKey)}
+        >
+            <span className="questExplorer-linkButton__main">
+                <span className="questExplorer-linkButton__label">{link.label}</span>
+                <span className="questExplorer-provenanceBadge">{link.provenanceLabel}</span>
+            </span>
+            {link.contextLabel ? (
+                <span className="questExplorer-linkButton__context">{link.contextLabel}</span>
+            ) : null}
+            {link.debugLabel ? <span className="questExplorer-linkButton__debug">{link.debugLabel}</span> : null}
+        </button>
+    );
+}
+
+function ChoiceBranches({
+    choice,
+    onSelectQuest,
+}: {
+    choice: QuestChoiceSummaryModel | null;
+    onSelectQuest: (questKey: string) => void;
+}) {
+    if (!choice || choice.nextQuestLinks.length === 0) {
+        return <p className="questExplorer-muted">No branch target recorded for this choice.</p>;
+    }
+
+    return (
+        <dl className="questExplorer-branchList">
+            {choice.nextQuestLinks.map((link, index) => (
+                <div key={`${link.provenance}:${link.questKey}:${index}`}>
+                    <dt>Choice outcome</dt>
+                    <dd>
+                        <QuestBranchLink link={link} onSelectQuest={onSelectQuest} />
+                    </dd>
+                </div>
+            ))}
+        </dl>
+    );
+}
+
+function StepBranches({
+    step,
+    onSelectQuest,
+}: {
+    step: QuestStepSummaryModel | null;
+    onSelectQuest: (questKey: string) => void;
+}) {
     if (!step?.nextQuestLink && !step?.failQuestLink) {
         return <p className="questExplorer-muted">No branch target recorded for this step.</p>;
     }
@@ -51,14 +110,18 @@ function StepBranches({ step }: { step: QuestStepSummaryModel | null }) {
         <dl className="questExplorer-branchList">
             {step.nextQuestLink ? (
                 <div>
-                    <dt>Next</dt>
-                    <dd>{step.nextQuestLink.label}</dd>
+                    <dt>Step success</dt>
+                    <dd>
+                        <QuestBranchLink link={step.nextQuestLink} onSelectQuest={onSelectQuest} />
+                    </dd>
                 </div>
             ) : null}
             {step.failQuestLink ? (
                 <div>
-                    <dt>Failure</dt>
-                    <dd>{step.failQuestLink.label}</dd>
+                    <dt>Step failure</dt>
+                    <dd>
+                        <QuestBranchLink link={step.failQuestLink} onSelectQuest={onSelectQuest} />
+                    </dd>
                 </div>
             ) : null}
         </dl>
@@ -69,6 +132,7 @@ export default function QuestChroniclePanel({
     chronicle,
     onSelectChoice,
     onSelectStep,
+    onSelectQuest,
 }: QuestChroniclePanelProps) {
     return (
         <article className="questExplorer-chronicle" aria-labelledby="quest-chronicle-title">
@@ -145,6 +209,7 @@ export default function QuestChroniclePanel({
                                 lines={chronicle.selectedChoice.rewardLines}
                                 emptyLabel="No choice rewards recorded."
                             />
+                            <ChoiceBranches choice={chronicle.selectedChoice} onSelectQuest={onSelectQuest} />
                         </>
                     ) : (
                         <p className="questExplorer-muted">No choice selected.</p>
@@ -167,7 +232,7 @@ export default function QuestChroniclePanel({
                                 lines={chronicle.selectedStep.rewardLines}
                                 emptyLabel="No step rewards recorded."
                             />
-                            <StepBranches step={chronicle.selectedStep} />
+                            <StepBranches step={chronicle.selectedStep} onSelectQuest={onSelectQuest} />
                         </>
                     ) : (
                         <p className="questExplorer-muted">No objective selected.</p>
