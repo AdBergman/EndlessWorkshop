@@ -172,6 +172,303 @@ def equivalent_dialog_signature(step: dict[str, Any]) -> tuple[str, ...]:
     return tuple(signatures)
 
 
+def normalize_text(value: str) -> str:
+    return re.sub(r"\s+", " ", clean(value).lower()).strip()
+
+
+def line_signature(lines: list[str]) -> str:
+    return "||".join(normalize_text(line) for line in string_list(lines))
+
+
+def step_title(step: dict[str, Any]) -> str:
+    return clean(step["objectiveText"]) or f"Step {step['stepIndex'] + 1}"
+
+
+def normalize_requirement_family(line: str) -> str:
+    text = normalize_text(line).replace("’", "'")
+    label = text.split(":", 1)[0].strip()
+    label = re.sub(r"\bdungeons\b", "dungeon", label)
+    label = re.sub(r"\s+", " ", label)
+
+    if ":" in text:
+        return f"{label}:*"
+
+    text = re.sub(r"\b\d+\b", "#", text)
+    return re.sub(r"\b(?:my|target|candidate|quest|c\d+)[a-z0-9]*dungeon\b", "dungeon", text)
+
+
+def requirement_family_signature(step: dict[str, Any]) -> str:
+    return "::".join(
+        [
+            "||".join(normalize_requirement_family(line) for line in step["selectionPrerequisiteLines"]),
+            "||".join(normalize_requirement_family(line) for line in step["completionPrerequisiteLines"]),
+            "||".join(normalize_requirement_family(line) for line in step["failurePrerequisiteLines"]),
+            "||".join(normalize_requirement_family(line) for line in step["forbiddenPrerequisiteLines"]),
+        ]
+    )
+
+
+def requirement_exact_signature(step: dict[str, Any]) -> str:
+    return "::".join(
+        [
+            line_signature(step["selectionPrerequisiteLines"]),
+            line_signature(step["completionPrerequisiteLines"]),
+            line_signature(step["failurePrerequisiteLines"]),
+            line_signature(step["forbiddenPrerequisiteLines"]),
+        ]
+    )
+
+
+def semantic_group_key(step: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        normalize_text(step_title(step)),
+        clean(step["nextQuestKey"]),
+        clean(step["failQuestKey"]),
+        equivalent_dialog_signature(step),
+    )
+
+
+def objective_variant_cluster_key(step: dict[str, Any]) -> tuple[str, str, str]:
+    return (
+        line_signature(step["descriptionLines"]),
+        line_signature(step["rewardDisplayLines"]),
+        requirement_family_signature(step),
+    )
+
+
+def raw_placeholder_patterns(line: str) -> list[str]:
+    patterns = [
+        *re.findall(r"\{[^}]+\}", line),
+        *re.findall(r"\b[A-Za-z0-9_]*_[A-Za-z0-9_]+\b", line),
+        *re.findall(r"\b[A-Z][a-z]+[A-Z][A-Za-z0-9]*\b", line),
+        *re.findall(r"\b(?:My|Target|Candidate|Quest|C\d+)[A-Za-z0-9]*\b", line),
+        *re.findall(r"\b[A-Za-z0-9]+Definition\b", line),
+    ]
+
+    return unique(patterns)
+
+
+def has_internal_placeholder(line: str) -> bool:
+    return bool(raw_placeholder_patterns(line))
+
+
+def has_resolved_count(line: str) -> bool:
+    return bool(re.search(r":\s*\d+\b", line))
+
+
+def step_display_quality(step: dict[str, Any]) -> float:
+    score = 0.0
+    for line in step_condition_lines(step):
+        raw_penalty = 20 if has_internal_placeholder(line) else 0
+        resolved_bonus = 8 if has_resolved_count(line) else 0
+        score += raw_penalty - resolved_bonus + (len(clean(line)) / 100)
+    return score
+
+
+def select_display_representative(steps: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not steps:
+        return None
+
+    return sorted(steps, key=lambda step: (step_display_quality(step), step["stepIndex"]))[0]
+
+
+def has_display_variant_evidence(steps: list[dict[str, Any]]) -> bool:
+    exact_requirement_signatures = {requirement_exact_signature(step) for step in steps}
+    if len(exact_requirement_signatures) <= 1:
+        return True
+
+    lines = [line for step in steps for line in step_condition_lines(step)]
+    return any(has_internal_placeholder(line) for line in lines) and any(has_resolved_count(line) for line in lines)
+
+
+def build_step_semantic_groups(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    buckets: dict[tuple[Any, ...], list[dict[str, Any]]] = {}
+    for step in steps:
+        buckets.setdefault(semantic_group_key(step), []).append(step)
+
+    groups: list[dict[str, Any]] = []
+
+    for group_steps in buckets.values():
+        representative = group_steps[0] if group_steps else None
+        if representative is None:
+            continue
+
+        is_progress_gate = (
+            len(group_steps) > 1
+            and all(clean(step["objectiveText"]) == clean(representative["objectiveText"]) for step in group_steps)
+            and any(threshold_like_line(line) for step in group_steps for line in step_condition_lines(step))
+        )
+
+        if is_progress_gate:
+            groups.append(
+                {
+                    "kind": "progressGate",
+                    "title": step_title(representative),
+                    "representativeStepIndex": representative["stepIndex"],
+                    "stepIndexes": [step["stepIndex"] for step in group_steps],
+                }
+            )
+            continue
+
+        clusters: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for step in group_steps:
+            clusters.setdefault(objective_variant_cluster_key(step), []).append(step)
+
+        for cluster_steps in clusters.values():
+            if len(cluster_steps) > 1 and has_display_variant_evidence(cluster_steps):
+                display_step = select_display_representative(cluster_steps)
+                if display_step is None:
+                    continue
+                groups.append(
+                    {
+                        "kind": "objective",
+                        "title": step_title(display_step),
+                        "representativeStepIndex": display_step["stepIndex"],
+                        "stepIndexes": [step["stepIndex"] for step in cluster_steps],
+                    }
+                )
+                continue
+
+            for step in cluster_steps:
+                groups.append(
+                    {
+                        "kind": "objective",
+                        "title": step_title(step),
+                        "representativeStepIndex": step["stepIndex"],
+                        "stepIndexes": [step["stepIndex"]],
+                    }
+                )
+
+    return groups
+
+
+def step_reward_signature(step: dict[str, Any]) -> str:
+    return line_signature(step["rewardDisplayLines"])
+
+
+def step_outcome_signature(step: dict[str, Any]) -> tuple[str, str]:
+    return clean(step["nextQuestKey"]), clean(step["failQuestKey"])
+
+
+def step_example(step: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "stepIndex": step["stepIndex"],
+        "completionLines": step["completionPrerequisiteLines"],
+        "rewardLines": step["rewardDisplayLines"],
+        "nextQuestKey": step["nextQuestKey"],
+        "failQuestKey": step["failQuestKey"],
+    }
+
+
+def kept_separate_same_title_examples(quests: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    examples: list[dict[str, Any]] = []
+
+    for quest in quests:
+        for choice in quest["choices"]:
+            steps_by_title: dict[str, list[dict[str, Any]]] = {}
+            for step in choice["steps"]:
+                steps_by_title.setdefault(step_title(step), []).append(step)
+
+            for objective_text, steps in steps_by_title.items():
+                if len(steps) <= 1:
+                    continue
+
+                reward_differs = len({step_reward_signature(step) for step in steps}) > 1
+                outcome_differs = len({step_outcome_signature(step) for step in steps}) > 1
+                if not reward_differs and not outcome_differs:
+                    continue
+
+                examples.append(
+                    {
+                        "questKey": quest["questKey"],
+                        "title": quest_title(quest),
+                        "choiceKey": choice["choiceKey"],
+                        "objectiveText": objective_text,
+                        "reason": (
+                            "differentRewardAndOutcome"
+                            if reward_differs and outcome_differs
+                            else "differentReward"
+                            if reward_differs
+                            else "differentOutcome"
+                        ),
+                        "steps": [step_example(step) for step in steps],
+                    }
+                )
+
+    return examples[:10]
+
+
+def common_raw_placeholder_patterns(quests: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    counts: dict[str, dict[str, Any]] = {}
+
+    for quest in quests:
+        for choice in quest["choices"]:
+            for step in choice["steps"]:
+                for line in step_condition_lines(step):
+                    for pattern in raw_placeholder_patterns(line):
+                        current = counts.setdefault(pattern, {"count": 0, "examples": []})
+                        current["count"] += 1
+                        if line not in current["examples"] and len(current["examples"]) < 3:
+                            current["examples"].append(line)
+
+    return [
+        {"pattern": pattern, "count": value["count"], "examples": value["examples"]}
+        for pattern, value in sorted(counts.items(), key=lambda item: (-item[1]["count"], item[0]))[:10]
+    ]
+
+
+def objective_variant_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    total_step_groups_analyzed = 0
+    collapsed_group_count = 0
+    hidden_raw_step_count = 0
+    affected_examples: list[dict[str, Any]] = []
+
+    for quest in quests:
+        for choice in quest["choices"]:
+            steps_by_index = {step["stepIndex"]: step for step in choice["steps"]}
+            semantic_groups = build_step_semantic_groups(choice["steps"])
+            total_step_groups_analyzed += len(semantic_groups)
+
+            for group in semantic_groups:
+                if group["kind"] != "objective" or len(group["stepIndexes"]) <= 1:
+                    continue
+
+                representative_step = steps_by_index.get(group["representativeStepIndex"])
+                raw_steps = [steps_by_index[index] for index in group["stepIndexes"] if index in steps_by_index]
+                collapsed_group_count += 1
+                hidden_raw_step_count += len(group["stepIndexes"]) - 1
+
+                if representative_step is None or len(affected_examples) >= 10:
+                    continue
+
+                affected_examples.append(
+                    {
+                        "questKey": quest["questKey"],
+                        "title": quest_title(quest),
+                        "choiceKey": choice["choiceKey"],
+                        "objectiveText": group["title"],
+                        "representativeStepIndex": group["representativeStepIndex"],
+                        "stepIndexes": group["stepIndexes"],
+                        "hiddenStepIndexes": [
+                            index for index in group["stepIndexes"] if index != group["representativeStepIndex"]
+                        ],
+                        "displayedCompletionLines": representative_step["completionPrerequisiteLines"],
+                        "rawCompletionLines": unique(
+                            [line for step in raw_steps for line in step["completionPrerequisiteLines"]]
+                        ),
+                    }
+                )
+
+    return {
+        "totalStepGroupsAnalyzed": total_step_groups_analyzed,
+        "collapsedDuplicateObjectiveVariantGroupCount": collapsed_group_count,
+        "hiddenRawStepCount": hidden_raw_step_count,
+        "affectedQuestExamples": affected_examples,
+        "keptSeparateSameTitleExamples": kept_separate_same_title_examples(quests),
+        "rawPlaceholderPatterns": common_raw_placeholder_patterns(quests),
+    }
+
+
 def repeated_objective_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
     repeated_groups = []
 
@@ -271,6 +568,7 @@ def collect_edges(quests: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], d
 def diagnose(quests: list[dict[str, Any]]) -> dict[str, Any]:
     edges, title_groups = collect_edges(quests)
     repeated_objectives = repeated_objective_diagnostics(quests)
+    objective_variants = objective_variant_diagnostics(quests)
     quest_next_edges = [edge for edge in edges if edge["field"] == "nextQuestKeys"]
     previous_edges = [edge for edge in edges if edge["field"] == "previousQuestKeys"]
     previous_reverse = {
@@ -348,6 +646,7 @@ def diagnose(quests: list[dict[str, Any]]) -> dict[str, Any]:
             ]
         ),
         **repeated_objectives,
+        "objectiveVariantDiagnostics": objective_variants,
         "duplicateTitleExamples": [
             {"title": title, "count": len(quest_keys)}
             for title, quest_keys in sorted(
