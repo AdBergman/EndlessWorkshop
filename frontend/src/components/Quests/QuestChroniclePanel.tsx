@@ -5,7 +5,7 @@ import type {
 import {
     QuestLineGroups as LineGroups,
     QuestOutcomeBranches as OutcomeBranches,
-    QuestProgressGateRows as ProgressGateRows,
+    QuestStepVariantGroups as StepVariantGroups,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 import QuestTranscript from "./QuestTranscript";
@@ -70,54 +70,13 @@ function ObjectiveGroupSection({
     );
 }
 
-function ProgressRequirementsSection({
-    groups,
-    onSelectQuest,
-}: {
-    groups: QuestObjectiveGroupModel[];
-    onSelectQuest: (questKey: string) => void;
-}) {
-    if (groups.length === 0) return null;
-
-    return (
-        <section className="questExplorer-chronicleSection" aria-labelledby="quest-progress-requirements-heading">
-            <div className="questExplorer-sectionLabel" id="quest-progress-requirements-heading">
-                Progress Gates
-            </div>
-            <div className="questExplorer-progressRequirementList">
-                {groups.map((group) => (
-                    <div className="questExplorer-progressRequirement" key={group.id}>
-                        <header>
-                            <h3>{group.title}</h3>
-                            {group.summaryLabel ? <span>{group.summaryLabel}</span> : null}
-                        </header>
-                        <TextLines
-                            lines={group.descriptionLines}
-                            emptyLabel="No progress requirement description recorded."
-                        />
-                        <ProgressGateRows rows={group.gateRows} />
-                        <TextLines
-                            lines={group.rewardLines}
-                            emptyLabel="No rewards recorded."
-                        />
-                        <OutcomeBranches
-                            nextQuestLink={group.nextQuestLink}
-                            failQuestLink={group.failQuestLink}
-                            onSelectQuest={onSelectQuest}
-                        />
-                    </div>
-                ))}
-            </div>
-        </section>
-    );
-}
-
 export default function QuestChroniclePanel({
     chronicle,
     onSelectStep,
     onSelectQuest,
 }: QuestChroniclePanelProps) {
     const progressGateGroups = chronicle.objectiveGroups.filter((group) => group.kind === "progressGate");
+    const completionOptionGroups = chronicle.objectiveGroups.filter((group) => group.kind === "completionOption");
     const objectiveGroups = chronicle.objectiveGroups.filter((group) => group.kind === "objective");
     const selectedObjectiveGroup = chronicle.selectedObjectiveGroup;
     const shouldShowObjectivePicker = objectiveGroups.length > 1;
@@ -138,12 +97,20 @@ export default function QuestChroniclePanel({
                     <div className="questExplorer-sectionLabel" id="quest-objectives-heading">
                         Objectives
                     </div>
-                    <p className="questExplorer-muted">No objectives or progress gates are attached to this branch.</p>
+                    <p className="questExplorer-muted">No objectives or step variants are attached to this branch.</p>
                 </section>
             ) : null}
 
-            <ProgressRequirementsSection
+            <StepVariantGroups
+                kind="progressGate"
                 groups={progressGateGroups}
+                headingId="quest-progressGate-heading"
+                onSelectQuest={onSelectQuest}
+            />
+            <StepVariantGroups
+                kind="completionOption"
+                groups={completionOptionGroups}
+                headingId="quest-completionOption-heading"
                 onSelectQuest={onSelectQuest}
             />
 

@@ -1,6 +1,6 @@
 import type { QuestStepDto } from "@/types/questTypes";
 
-export type QuestStepSemanticKind = "objective" | "progressGate";
+export type QuestStepSemanticKind = "objective" | "progressGate" | "completionOption";
 
 export type QuestStepGateVariant = {
     stepIndex: number;
@@ -47,6 +47,51 @@ function hasThresholdLikeLines(step: QuestStepDto): boolean {
         ...cleanLines(step.failurePrerequisiteLines),
         ...cleanLines(step.forbiddenPrerequisiteLines),
     ].some(isThresholdLikeLine);
+}
+
+type NumericThresholdPoint = {
+    family: string;
+    value: number;
+};
+
+function parseNumericThresholdPoint(line: string): NumericThresholdPoint | null {
+    const text = clean(line);
+    const percentageMatch = text.match(/^(.+?):\s*(\d+(?:\.\d+)?)%$/);
+    if (percentageMatch?.[1] && percentageMatch[2]) {
+        return {
+            family: `${normalizeText(percentageMatch[1])}:%`,
+            value: Number.parseFloat(percentageMatch[2]),
+        };
+    }
+
+    const propertyMatch = text.match(/^property requirement:\s*(.+?)\s*=\s*(\d+(?:\.\d+)?)$/i);
+    if (propertyMatch?.[1] && propertyMatch[2]) {
+        return {
+            family: `property requirement:${normalizeText(propertyMatch[1])}`,
+            value: Number.parseFloat(propertyMatch[2]),
+        };
+    }
+
+    const greaterOrEqualMatch = text.match(/^(.+?):\s*greaterorequal\s+(\d+(?:\.\d+)?)$/i);
+    if (greaterOrEqualMatch?.[1] && greaterOrEqualMatch[2]) {
+        return {
+            family: `${normalizeText(greaterOrEqualMatch[1])}:greaterorequal`,
+            value: Number.parseFloat(greaterOrEqualMatch[2]),
+        };
+    }
+
+    return null;
+}
+
+function thresholdPoints(step: QuestStepDto): NumericThresholdPoint[] {
+    return [
+        ...cleanLines(step.selectionPrerequisiteLines),
+        ...cleanLines(step.completionPrerequisiteLines),
+        ...cleanLines(step.failurePrerequisiteLines),
+        ...cleanLines(step.forbiddenPrerequisiteLines),
+    ]
+        .map(parseNumericThresholdPoint)
+        .filter((point): point is NumericThresholdPoint => Boolean(point));
 }
 
 function equivalentDialogSignature(step: QuestStepDto): string {
@@ -100,6 +145,10 @@ function requirementExactSignature(step: QuestStepDto): string {
         lineSignature(step.failurePrerequisiteLines),
         lineSignature(step.forbiddenPrerequisiteLines),
     ].join("::");
+}
+
+function rewardSignature(step: QuestStepDto): string {
+    return lineSignature(step.rewardDisplayLines);
 }
 
 function semanticGroupKey(step: QuestStepDto): string {
@@ -181,6 +230,39 @@ function hasDisplayVariantEvidence(steps: readonly QuestStepDto[]): boolean {
     return requirementLines.some(hasInternalPlaceholder) && requirementLines.some(hasResolvedCount);
 }
 
+function hasSharedRewardSignature(steps: readonly QuestStepDto[]): boolean {
+    return new Set(steps.map(rewardSignature)).size <= 1;
+}
+
+function isSameObjectiveGroup(steps: readonly QuestStepDto[], representative: QuestStepDto): boolean {
+    return steps.every((step) => clean(step.objectiveText) === clean(representative.objectiveText));
+}
+
+function hasOrderedNumericThresholdLadder(steps: readonly QuestStepDto[]): boolean {
+    const stepPoints = steps.map(thresholdPoints);
+    if (stepPoints.some((points) => points.length === 0)) return false;
+
+    const firstStepFamilies = new Set(stepPoints[0]?.map((point) => point.family) ?? []);
+
+    return [...firstStepFamilies].some((family) => {
+        const values = stepPoints.map((points) => {
+            const familyValues = points
+                .filter((point) => point.family === family)
+                .map((point) => point.value);
+
+            return familyValues.length > 0 ? Math.max(...familyValues) : null;
+        });
+
+        if (values.some((value) => value === null)) return false;
+
+        return values.every((value, index) => {
+            if (value === null) return false;
+            const previousValue = values[index - 1];
+            return index === 0 || (previousValue !== null && previousValue !== undefined && value > previousValue);
+        });
+    });
+}
+
 function buildObjectiveGroup(steps: readonly QuestStepDto[]): QuestStepSemanticGroup | null {
     const representative = selectDisplayRepresentative(steps);
     if (!representative) return null;
@@ -189,6 +271,25 @@ function buildObjectiveGroup(steps: readonly QuestStepDto[]): QuestStepSemanticG
     return {
         id: `objective:${stepIndexes.join("-")}`,
         kind: "objective" as const,
+        title: stepTitle(representative),
+        representativeStepIndex: representative.stepIndex,
+        stepIndexes,
+        nextQuestKey: clean(representative.nextQuestKey) || null,
+        failQuestKey: clean(representative.failQuestKey) || null,
+        variants: steps.map(gateVariant),
+    };
+}
+
+function buildStepVariantGroup(
+    kind: Exclude<QuestStepSemanticKind, "objective">,
+    steps: readonly QuestStepDto[],
+    representative: QuestStepDto
+): QuestStepSemanticGroup {
+    const stepIndexes = steps.map((step) => step.stepIndex);
+
+    return {
+        id: `${kind}:${stepIndexes.join("-")}`,
+        kind,
         title: stepTitle(representative),
         representativeStepIndex: representative.stepIndex,
         stepIndexes,
@@ -210,12 +311,20 @@ export function buildQuestStepSemanticGroups(steps: readonly QuestStepDto[]): Qu
         const representative = groupSteps[0];
         if (!representative) return [];
 
-        const isProgressGate =
+        const isRepeatedSameObjective =
             groupSteps.length > 1 &&
-            groupSteps.every((step) => clean(step.objectiveText) === clean(representative.objectiveText)) &&
-            groupSteps.some(hasThresholdLikeLines);
+            isSameObjectiveGroup(groupSteps, representative);
+        const isProgressGate =
+            isRepeatedSameObjective &&
+            groupSteps.some(hasThresholdLikeLines) &&
+            hasOrderedNumericThresholdLadder(groupSteps);
+        const isCompletionOption =
+            isRepeatedSameObjective &&
+            !isProgressGate &&
+            hasSharedRewardSignature(groupSteps) &&
+            !hasDisplayVariantEvidence(groupSteps);
 
-        if (!isProgressGate) {
+        if (!isProgressGate && !isCompletionOption) {
             const objectiveClusters = new Map<string, QuestStepDto[]>();
 
             groupSteps.forEach((step) => {
@@ -235,17 +344,6 @@ export function buildQuestStepSemanticGroups(steps: readonly QuestStepDto[]): Qu
             });
         }
 
-        return [
-            {
-                id: `progressGate:${groupSteps.map((step) => step.stepIndex).join("-")}`,
-                kind: "progressGate" as const,
-                title: stepTitle(representative),
-                representativeStepIndex: representative.stepIndex,
-                stepIndexes: groupSteps.map((step) => step.stepIndex),
-                nextQuestKey: clean(representative.nextQuestKey) || null,
-                failQuestKey: clean(representative.failQuestKey) || null,
-                variants: groupSteps.map(gateVariant),
-            },
-        ];
+        return [buildStepVariantGroup(isProgressGate ? "progressGate" : "completionOption", groupSteps, representative)];
     });
 }

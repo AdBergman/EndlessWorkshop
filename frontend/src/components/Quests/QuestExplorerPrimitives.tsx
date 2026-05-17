@@ -3,6 +3,7 @@ import type {
     QuestLineGroupModel,
     QuestLinkModel,
     QuestMetadataModel,
+    QuestObjectiveGroupModel,
     QuestProgressGateRowModel,
 } from "@/features/quests/questExplorerTypes";
 
@@ -115,7 +116,17 @@ function QuestLineSummary({
     return <span>{lines.length > 0 ? lines.join(" / ") : emptyLabel}</span>;
 }
 
-export function QuestProgressGateRows({ rows }: { rows: QuestProgressGateRowModel[] }) {
+export function QuestProgressGateRows({
+    rows,
+    rowLabelPrefix = "Threshold",
+    completionEmptyLabel = "No completion threshold",
+    failureEmptyLabel = "No failure threshold",
+}: {
+    rows: QuestProgressGateRowModel[];
+    rowLabelPrefix?: string;
+    completionEmptyLabel?: string;
+    failureEmptyLabel?: string;
+}) {
     if (rows.length === 0) {
         return <p className="questExplorer-muted">No progress gates recorded.</p>;
     }
@@ -124,7 +135,7 @@ export function QuestProgressGateRows({ rows }: { rows: QuestProgressGateRowMode
         <div className="questExplorer-progressGateRows">
             {rows.map((row, index) => (
                 <div className="questExplorer-progressGateRow" key={row.id}>
-                    <div className="questExplorer-progressGateRow__index">{`Threshold ${index + 1}`}</div>
+                    <div className="questExplorer-progressGateRow__index">{`${rowLabelPrefix} ${index + 1}`}</div>
                     <dl>
                         <div>
                             <dt>Available</dt>
@@ -137,7 +148,7 @@ export function QuestProgressGateRows({ rows }: { rows: QuestProgressGateRowMode
                             <dd>
                                 <QuestLineSummary
                                     lines={row.completionLines}
-                                    emptyLabel="No completion threshold"
+                                    emptyLabel={completionEmptyLabel}
                                 />
                             </dd>
                         </div>
@@ -155,7 +166,7 @@ export function QuestProgressGateRows({ rows }: { rows: QuestProgressGateRowMode
                                 <dd>
                                     <QuestLineSummary
                                         lines={row.failureLines}
-                                        emptyLabel="No failure threshold"
+                                        emptyLabel={failureEmptyLabel}
                                     />
                                 </dd>
                             </div>
@@ -172,6 +183,85 @@ export function QuestProgressGateRows({ rows }: { rows: QuestProgressGateRowMode
                 </div>
             ))}
         </div>
+    );
+}
+
+type QuestStepVariantKind = Exclude<QuestObjectiveGroupModel["kind"], "objective">;
+
+const stepVariantLabels: Record<QuestStepVariantKind, {
+    section: string;
+    row: string;
+    descriptionEmpty: string;
+    completionEmpty: string;
+    failureEmpty: string;
+}> = {
+    progressGate: {
+        section: "Progress Gates",
+        row: "Threshold",
+        descriptionEmpty: "No progress requirement description recorded.",
+        completionEmpty: "No completion threshold",
+        failureEmpty: "No failure threshold",
+    },
+    completionOption: {
+        section: "Completion Options",
+        row: "Option",
+        descriptionEmpty: "No completion option description recorded.",
+        completionEmpty: "No completion option",
+        failureEmpty: "No failure option",
+    },
+};
+
+export function QuestStepVariantGroups({
+    kind,
+    groups,
+    headingId,
+    onSelectQuest,
+}: {
+    kind: QuestStepVariantKind;
+    groups: QuestObjectiveGroupModel[];
+    headingId: string;
+    onSelectQuest: (questKey: string) => void;
+}) {
+    if (groups.length === 0) return null;
+    const labels = stepVariantLabels[kind];
+
+    return (
+        <section className="questExplorer-chronicleSection" aria-labelledby={headingId}>
+            <div className="questExplorer-sectionLabel" id={headingId}>
+                {labels.section}
+            </div>
+            <div className="questExplorer-progressRequirementList">
+                {groups.map((group) => (
+                    <div className="questExplorer-progressRequirement" key={group.id}>
+                        <header>
+                            <h3>{group.title}</h3>
+                            {group.summaryLabel ? <span>{group.summaryLabel}</span> : null}
+                        </header>
+                        <QuestTextLines
+                            lines={group.descriptionLines}
+                            emptyLabel={labels.descriptionEmpty}
+                        />
+                        <QuestProgressGateRows
+                            rows={group.gateRows}
+                            rowLabelPrefix={labels.row}
+                            completionEmptyLabel={labels.completionEmpty}
+                            failureEmptyLabel={labels.failureEmpty}
+                        />
+                        {group.rewardLines.length > 0 ? (
+                            <QuestTextLines
+                                lines={group.rewardLines}
+                                emptyLabel="No rewards recorded."
+                            />
+                        ) : null}
+                        <QuestOutcomeBranches
+                            nextQuestLink={group.nextQuestLink}
+                            failQuestLink={group.failQuestLink}
+                            onSelectQuest={onSelectQuest}
+                        />
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }
 

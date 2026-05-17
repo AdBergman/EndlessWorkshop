@@ -346,6 +346,7 @@ describe("questViewModel", () => {
                                     selectionPrerequisiteLines: ["Explore world: 1%"],
                                     completionPrerequisiteLines: ["Explore world: 20%"],
                                     forbiddenPrerequisiteLines: ["Explore world: 20%"],
+                                    rewardDisplayLines: ["Science reward: 10"],
                                     nextQuestKey: "Quest_B",
                                     dialogBlockIdentities: [
                                         "Quest_A|Choice_A|0|Dialog_Start|start",
@@ -358,6 +359,7 @@ describe("questViewModel", () => {
                                     selectionPrerequisiteLines: ["Explore world: 21%"],
                                     completionPrerequisiteLines: ["Explore world: 30%"],
                                     forbiddenPrerequisiteLines: ["Explore world: 30%"],
+                                    rewardDisplayLines: ["Science reward: 10"],
                                     nextQuestKey: "Quest_B",
                                     dialogBlockIdentities: [
                                         "Quest_A|Choice_A|1|Dialog_Start|start",
@@ -387,6 +389,7 @@ describe("questViewModel", () => {
             stepIndexes: [0, 1],
             representativeStepIndex: 0,
             summaryLabel: "2 thresholds",
+            rewardLines: ["Science reward: 10"],
             isSelected: false,
         });
         expect(model.chronicle?.objectiveGroups[0]?.gateRows).toEqual([
@@ -395,12 +398,92 @@ describe("questViewModel", () => {
                 selectionLines: ["Explore world: 1%"],
                 completionLines: ["Explore world: 20%"],
                 forbiddenLines: ["Explore world: 20%"],
+                rewardLines: [],
             }),
             expect.objectContaining({
                 stepIndex: 1,
                 selectionLines: ["Explore world: 21%"],
                 completionLines: ["Explore world: 30%"],
                 forbiddenLines: ["Explore world: 30%"],
+                rewardLines: [],
+            }),
+        ]);
+    });
+
+    it("classifies Brave New World-style mixed variants as completion options", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Brave New World",
+                    choices: [
+                        choice({
+                            choiceKey: "Choice_A",
+                            displayName: "Brave New World",
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    selectionPrerequisiteLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                                    completionPrerequisiteLines: ["Evolve unit: Spitter x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                    failQuestKey: "Quest_Previous",
+                                }),
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    selectionPrerequisiteLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                                    completionPrerequisiteLines: ["Evolve unit: Necrodrone x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                }),
+                                step({
+                                    stepIndex: 2,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    completionPrerequisiteLines: ["Evolve unit: Feeder x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({ questKey: "Quest_Previous", displayName: "Brave New World" }),
+                quest({ questKey: "Quest_B", displayName: "You Scratch My Back" }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "Quest_A",
+                choiceKey: "Choice_A",
+                stepIndex: null,
+            },
+        });
+
+        expect(model.chronicle?.objectiveGroups).toHaveLength(2);
+        expect(model.chronicle?.objectiveGroups[0]).toMatchObject({
+            kind: "objective",
+            stepIndexes: [0],
+        });
+        expect(model.chronicle?.objectiveGroups[1]).toMatchObject({
+            kind: "completionOption",
+            title: "With the Kin routed, strengthen the swarm's weakest.",
+            stepIndexes: [1, 2],
+            summaryLabel: "2 options",
+            rewardLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+        });
+        expect(model.chronicle?.objectiveGroups[1]?.gateRows).toEqual([
+            expect.objectContaining({
+                stepIndex: 1,
+                selectionLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                completionLines: ["Evolve unit: Necrodrone x2"],
+                rewardLines: [],
+            }),
+            expect.objectContaining({
+                stepIndex: 2,
+                selectionLines: [],
+                completionLines: ["Evolve unit: Feeder x2"],
+                rewardLines: [],
             }),
         ]);
     });

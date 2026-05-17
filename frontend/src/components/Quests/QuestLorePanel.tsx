@@ -8,8 +8,8 @@ import {
     QuestOutcomeBranches as OutcomeBranches,
     QuestPathBranches as PathBranches,
     QuestPathSelector as PathSelector,
-    QuestProgressGateRows as ProgressGateRows,
     QuestReferenceTrail,
+    QuestStepVariantGroups as StepVariantGroups,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 import QuestTranscript from "./QuestTranscript";
@@ -90,6 +90,7 @@ export default function QuestLorePanel({
     onSelectStep,
 }: QuestLorePanelProps) {
     const progressGateGroups = chronicle.objectiveGroups.filter((group) => group.kind === "progressGate");
+    const completionOptionGroups = chronicle.objectiveGroups.filter((group) => group.kind === "completionOption");
     const objectiveGroups = chronicle.objectiveGroups.filter((group) => group.kind === "objective");
     const selectedObjectiveGroup = chronicle.selectedObjectiveGroup;
     const shouldShowObjectivePicker = objectiveGroups.length > 1;
@@ -135,37 +136,18 @@ export default function QuestLorePanel({
             <details className="questExplorer-loreSecondary">
                 <summary>Strategy Notes</summary>
 
-                {progressGateGroups.length > 0 ? (
-                    <section className="questExplorer-chronicleSection" aria-labelledby="quest-lore-gates-heading">
-                        <div className="questExplorer-sectionLabel" id="quest-lore-gates-heading">
-                            Progress Gates
-                        </div>
-                        <div className="questExplorer-progressRequirementList">
-                            {progressGateGroups.map((group) => (
-                                <div className="questExplorer-progressRequirement" key={group.id}>
-                                    <header>
-                                        <h3>{group.title}</h3>
-                                        {group.summaryLabel ? <span>{group.summaryLabel}</span> : null}
-                                    </header>
-                                    <TextLines
-                                        lines={group.descriptionLines}
-                                        emptyLabel="No progress requirement description recorded."
-                                    />
-                                    <ProgressGateRows rows={group.gateRows} />
-                                    <TextLines
-                                        lines={group.rewardLines}
-                                        emptyLabel="No rewards recorded."
-                                    />
-                                    <OutcomeBranches
-                                        nextQuestLink={group.nextQuestLink}
-                                        failQuestLink={group.failQuestLink}
-                                        onSelectQuest={onSelectQuest}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                ) : null}
+                <StepVariantGroups
+                    kind="progressGate"
+                    groups={progressGateGroups}
+                    headingId="quest-lore-progressGate-heading"
+                    onSelectQuest={onSelectQuest}
+                />
+                <StepVariantGroups
+                    kind="completionOption"
+                    groups={completionOptionGroups}
+                    headingId="quest-lore-completionOption-heading"
+                    onSelectQuest={onSelectQuest}
+                />
 
                 <section className="questExplorer-chronicleSection" aria-labelledby="quest-lore-objectives-heading">
                     <div className="questExplorer-sectionLabel" id="quest-lore-objectives-heading">

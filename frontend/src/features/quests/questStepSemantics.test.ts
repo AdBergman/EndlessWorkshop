@@ -125,6 +125,33 @@ describe("questStepSemantics", () => {
         });
     });
 
+    it("classifies mixed same-objective completion variants as completion options", () => {
+        const groups = buildQuestStepSemanticGroups([
+            step({
+                stepIndex: 1,
+                objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                selectionPrerequisiteLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                completionPrerequisiteLines: ["Evolve unit: Necrodrone x2"],
+                rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+            }),
+            step({
+                stepIndex: 2,
+                objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                selectionPrerequisiteLines: [],
+                completionPrerequisiteLines: ["Evolve unit: Feeder x2"],
+                rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+            }),
+        ]);
+
+        expect(groups).toHaveLength(1);
+        expect(groups[0]).toMatchObject({
+            id: "completionOption:1-2",
+            kind: "completionOption",
+            title: "With the Kin routed, strengthen the swarm's weakest.",
+            stepIndexes: [1, 2],
+        });
+    });
+
     it("keeps repeated objectives separate when transitions differ", () => {
         const groups = buildQuestStepSemanticGroups([
             step({ stepIndex: 0, completionPrerequisiteLines: ["Explore world: 20%"], nextQuestKey: "Quest_A" }),

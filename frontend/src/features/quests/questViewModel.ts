@@ -641,6 +641,12 @@ function uniqueLines(lines: string[]): string[] {
     return lines.filter((line, index) => lines.indexOf(line) === index);
 }
 
+function sharedVariantRewardLines(variants: readonly { rewardLines: readonly string[] }[]): string[] {
+    const rewardLines = uniqueLines(variants.flatMap((variant) => cleanLines(variant.rewardLines)));
+
+    return rewardLines.filter((line) => variants.every((variant) => cleanLines(variant.rewardLines).includes(line)));
+}
+
 function buildObjectiveGroupModels(
     steps: readonly QuestStepDto[],
     selectedStepIndex: number | null,
@@ -653,12 +659,10 @@ function buildObjectiveGroupModels(
 
     return buildQuestStepSemanticGroups(steps).map((group) => {
         const representativeStep = stepsByIndex[group.representativeStepIndex] ?? steps[0] ?? null;
-        const sourceSteps = group.stepIndexes
-            .map((stepIndex) => stepsByIndex[stepIndex])
-            .filter((step): step is QuestStepDto => Boolean(step));
-        const isProgressGate = group.kind === "progressGate";
-        const rewardLines = isProgressGate
-            ? uniqueLines(sourceSteps.flatMap((step) => cleanLines(step.rewardDisplayLines)))
+        const isStepVariantGroup = group.kind !== "objective";
+        const sharedRewardLines = isStepVariantGroup ? sharedVariantRewardLines(group.variants) : [];
+        const rewardLines = isStepVariantGroup
+            ? sharedRewardLines
             : cleanLines(representativeStep?.rewardDisplayLines);
 
         return {
@@ -668,7 +672,7 @@ function buildObjectiveGroupModels(
             stepIndexes: group.stepIndexes,
             representativeStepIndex: group.representativeStepIndex,
             descriptionLines: cleanLines(representativeStep?.descriptionLines),
-            requirementGroups: isProgressGate || !representativeStep
+            requirementGroups: isStepVariantGroup || !representativeStep
                 ? []
                 : buildRequirementGroups(`objective:${representativeStep.stepIndex}`, [
                     { label: "Selection", lines: representativeStep.selectionPrerequisiteLines },
@@ -679,17 +683,23 @@ function buildObjectiveGroupModels(
             rewardLines,
             nextQuestLink: buildQuestLink(group.nextQuestKey, linkContext, "stepNext"),
             failQuestLink: buildQuestLink(group.failQuestKey, linkContext, "stepFailure"),
-            gateRows: group.variants.map((variant) => ({
-                id: `${group.id}:${variant.stepIndex}`,
-                stepIndex: variant.stepIndex,
-                selectionLines: variant.selectionLines,
-                completionLines: variant.completionLines,
-                failureLines: variant.failureLines,
-                forbiddenLines: variant.forbiddenLines,
-                rewardLines: variant.rewardLines,
-            })),
-            summaryLabel: isProgressGate ? `${group.stepIndexes.length} thresholds` : null,
-            isSelected: !isProgressGate && group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
+            gateRows: group.variants.map((variant) => {
+                const rowRewardLines = variant.rewardLines.filter((line) => !sharedRewardLines.includes(line));
+
+                return {
+                    id: `${group.id}:${variant.stepIndex}`,
+                    stepIndex: variant.stepIndex,
+                    selectionLines: variant.selectionLines,
+                    completionLines: variant.completionLines,
+                    failureLines: variant.failureLines,
+                    forbiddenLines: variant.forbiddenLines,
+                    rewardLines: rowRewardLines,
+                };
+            }),
+            summaryLabel: group.kind === "progressGate"
+                ? `${group.stepIndexes.length} thresholds`
+                : group.kind === "completionOption" ? `${group.stepIndexes.length} options` : null,
+            isSelected: !isStepVariantGroup && group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
         };
     });
 }

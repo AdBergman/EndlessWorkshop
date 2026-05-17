@@ -600,6 +600,80 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Explore world: 30%").length).toBeGreaterThanOrEqual(1);
     });
 
+    it("renders same-objective completion variants as completion options", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Brave New World",
+                    choices: [
+                        choice({
+                            choiceKey: "Choice_A",
+                            displayName: "Brave New World",
+                            completionPrerequisiteLines: [
+                                "Evolve unit: Spitter x2",
+                                "Evolve unit: Necrodrone x2",
+                                "Evolve unit: Feeder x2",
+                            ],
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    selectionPrerequisiteLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                                    completionPrerequisiteLines: ["Evolve unit: Spitter x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                    failQuestKey: "Quest_Previous",
+                                    dialogBlockIdentities: [],
+                                }),
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    selectionPrerequisiteLines: ["Descriptor requirement: GreaterOrEqual 2"],
+                                    completionPrerequisiteLines: ["Evolve unit: Necrodrone x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                    dialogBlockIdentities: [],
+                                }),
+                                step({
+                                    stepIndex: 2,
+                                    objectiveText: "With the Kin routed, strengthen the swarm's weakest.",
+                                    selectionPrerequisiteLines: [],
+                                    completionPrerequisiteLines: ["Evolve unit: Feeder x2"],
+                                    rewardDisplayLines: ["Cadaver reward: 20 + 10 * Technology Era"],
+                                    nextQuestKey: "Quest_B",
+                                    dialogBlockIdentities: [],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({ questKey: "Quest_Previous", displayName: "Brave New World" }),
+                quest({ questKey: "Quest_B", displayName: "You Scratch My Back" }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "Brave New World" })).toBeInTheDocument();
+        expect(screen.queryByText("Progress Gates")).not.toBeInTheDocument();
+        expect(screen.getByText("Completion Options")).toBeInTheDocument();
+        expect(screen.getByText("2 options")).toBeInTheDocument();
+        expect(screen.getByText("Option 1")).toBeInTheDocument();
+        expect(screen.getByText("Option 2")).toBeInTheDocument();
+        expect(screen.queryByText("Threshold 1")).not.toBeInTheDocument();
+        expect(screen.queryByText("Threshold 2")).not.toBeInTheDocument();
+        expect(screen.getAllByText("Descriptor requirement: GreaterOrEqual 2").length).toBeGreaterThanOrEqual(1);
+
+        const completionOptionsSection = screen.getByText("Completion Options").closest("section");
+        expect(completionOptionsSection).not.toBeNull();
+        if (!completionOptionsSection) throw new Error("Expected completion options section");
+        expect(
+            within(completionOptionsSection).getAllByText("Cadaver reward: 20 + 10 * Technology Era")
+        ).toHaveLength(1);
+    });
+
     it("does not render internal effect choices as primary paths or fallback objectives", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue({
             quests: [

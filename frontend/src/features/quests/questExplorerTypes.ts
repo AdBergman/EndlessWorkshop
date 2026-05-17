@@ -84,7 +84,7 @@ export type QuestProgressGateRowModel = {
 
 export type QuestObjectiveGroupModel = {
     id: string;
-    kind: "objective" | "progressGate";
+    kind: "objective" | "progressGate" | "completionOption";
     title: string;
     stepIndexes: number[];
     representativeStepIndex: number;
