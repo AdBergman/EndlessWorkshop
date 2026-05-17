@@ -1,9 +1,11 @@
+import type { QuestExplorerMode } from "@/features/quests/questExplorerMode";
 import type { QuestExplorerViewModel } from "@/features/quests/useQuestExplorerViewModel";
-import QuestChroniclePanel from "./QuestChroniclePanel";
-import QuestMetadataPanel from "./QuestMetadataPanel";
+import QuestLorePanel from "./QuestLorePanel";
 import QuestProgressionRail from "./QuestProgressionRail";
+import QuestStrategyLayout from "./QuestStrategyLayout";
 
 type QuestExplorerLayoutProps = {
+    mode: QuestExplorerMode;
     viewModel: QuestExplorerViewModel;
 };
 
@@ -23,7 +25,7 @@ function QuestExplorerState({
     );
 }
 
-export default function QuestExplorerLayout({ viewModel }: QuestExplorerLayoutProps) {
+export default function QuestExplorerLayout({ mode, viewModel }: QuestExplorerLayoutProps) {
     if (viewModel.status === "loading") {
         return (
             <QuestExplorerState
@@ -52,24 +54,33 @@ export default function QuestExplorerLayout({ viewModel }: QuestExplorerLayoutPr
     }
 
     return (
-        <section className="questExplorer-workspace" aria-label="Quest Explorer workspace">
+        <section
+            className={`questExplorer-workspace questExplorer-workspace--${mode}`}
+            aria-label="Quest Explorer workspace"
+        >
             <QuestProgressionRail
                 rail={viewModel.rail}
                 onSelectQuest={viewModel.actions.selectQuest}
             />
 
-            <div className="questExplorer-mainPane">
-                <QuestChroniclePanel
-                    chronicle={viewModel.chronicle}
-                    onSelectStep={viewModel.actions.selectStep}
-                    onSelectQuest={viewModel.actions.selectQuest}
-                />
-                <QuestMetadataPanel
-                    chronicle={viewModel.chronicle}
-                    metadata={viewModel.metadata}
-                    onSelectChoice={viewModel.actions.selectChoice}
-                    onSelectQuest={viewModel.actions.selectQuest}
-                />
+            <div className={`questExplorer-mainPane questExplorer-mainPane--${mode}`}>
+                {mode === "lore" ? (
+                    <QuestLorePanel
+                        chronicle={viewModel.chronicle}
+                        metadata={viewModel.metadata}
+                        onSelectChoice={viewModel.actions.selectChoice}
+                        onSelectQuest={viewModel.actions.selectQuest}
+                        onSelectStep={viewModel.actions.selectStep}
+                    />
+                ) : (
+                    <QuestStrategyLayout
+                        chronicle={viewModel.chronicle}
+                        metadata={viewModel.metadata}
+                        onSelectChoice={viewModel.actions.selectChoice}
+                        onSelectQuest={viewModel.actions.selectQuest}
+                        onSelectStep={viewModel.actions.selectStep}
+                    />
+                )}
             </div>
         </section>
     );

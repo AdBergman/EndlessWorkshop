@@ -81,6 +81,37 @@
     font-size: 1.55rem;
 }
 
+.questExplorer-modeSwitch {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px;
+    border: 1px solid var(--quest-border);
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.questExplorer-modeSwitch button {
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--quest-text-soft);
+    cursor: pointer;
+}
+
+.questExplorer-modeSwitch button:hover,
+.questExplorer-modeSwitch button.is-selected {
+    border-color: rgba(216, 183, 105, 0.34);
+    background: var(--quest-gold-soft);
+    color: var(--quest-text);
+}
+
+.questExplorer-modeSwitch button:focus-visible {
+    outline: none;
+    border-color: rgba(216, 183, 105, 0.76);
+    box-shadow: 0 0 0 3px rgba(216, 183, 105, 0.16);
+}
+
 .questExplorer-workspace {
     display: grid;
     grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
@@ -235,6 +266,10 @@
     overflow: hidden;
 }
 
+.questExplorer-mainPane--lore {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .questExplorer-chronicle {
     min-width: 0;
     min-height: 0;
@@ -253,6 +288,10 @@
 
 .questExplorer-chronicle__header h2 {
     font-size: 1.5rem;
+}
+
+.questExplorer-chronicle--lore {
+    justify-self: stretch;
 }
 
 .questExplorer-lines {
@@ -484,6 +523,11 @@
     margin-bottom: 14px;
 }
 
+.questExplorer-transcriptShell--flow .questExplorer-transcript {
+    border-top: 0;
+    border-bottom: 1px solid var(--quest-border);
+}
+
 .questExplorer-transcriptBlocks {
     display: grid;
     gap: 12px;
@@ -559,6 +603,14 @@
     gap: 14px;
 }
 
+.questExplorer-loreSelectedPath {
+    display: grid;
+    gap: 10px;
+    padding: 13px 14px;
+    border: 1px solid var(--quest-border);
+    background: rgba(255, 255, 255, 0.018);
+}
+
 .questExplorer-metadata header {
     display: grid;
     gap: 5px;
@@ -584,20 +636,23 @@
 }
 
 .questExplorer-recordContext,
-.questExplorer-referenceTrail {
+.questExplorer-referenceTrail,
+.questExplorer-loreSecondary {
     padding: 15px 0;
     border-bottom: 1px solid var(--quest-border);
 }
 
 .questExplorer-recordContext summary,
-.questExplorer-referenceTrail summary {
+.questExplorer-referenceTrail summary,
+.questExplorer-loreSecondary summary {
     color: var(--quest-text-soft);
     cursor: pointer;
     font-weight: 700;
 }
 
 .questExplorer-recordContext[open] summary,
-.questExplorer-referenceTrail[open] summary {
+.questExplorer-referenceTrail[open] summary,
+.questExplorer-loreSecondary[open] summary {
     padding-bottom: 8px;
 }
 
@@ -605,6 +660,19 @@
 .questExplorer-referenceTrail .questExplorer-metadataLinks {
     padding: 10px 0;
     border-bottom: 0;
+}
+
+.questExplorer-loreSecondary {
+    padding: 18px 22px;
+}
+
+.questExplorer-chronicle > .questExplorer-recordContext,
+.questExplorer-chronicle > .questExplorer-referenceTrail {
+    padding: 18px 22px;
+}
+
+.questExplorer-loreSecondary .questExplorer-chronicleSection {
+    padding-inline: 0;
 }
 
 .questExplorer-referenceLink {
@@ -665,6 +733,10 @@
     .questExplorer-mainPane {
         grid-template-columns: 1fr;
         grid-template-rows: minmax(0, 1fr) minmax(170px, 24vh);
+    }
+
+    .questExplorer-mainPane--lore {
+        grid-template-rows: minmax(0, 1fr);
     }
 
     .questExplorer-transcriptRow {

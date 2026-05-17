@@ -1,10 +1,13 @@
 import type {
     QuestChronicleModel,
-    QuestLineGroupModel,
-    QuestLinkModel,
     QuestObjectiveGroupModel,
-    QuestProgressGateRowModel,
 } from "@/features/quests/questExplorerTypes";
+import {
+    QuestLineGroups as LineGroups,
+    QuestOutcomeBranches as OutcomeBranches,
+    QuestProgressGateRows as ProgressGateRows,
+    QuestTextLines as TextLines,
+} from "./QuestExplorerPrimitives";
 import QuestTranscript from "./QuestTranscript";
 
 type QuestChroniclePanelProps = {
@@ -12,153 +15,6 @@ type QuestChroniclePanelProps = {
     onSelectStep: (stepIndex: number) => void;
     onSelectQuest: (questKey: string) => void;
 };
-
-function TextLines({ lines, emptyLabel }: { lines: string[]; emptyLabel: string }) {
-    if (lines.length === 0) {
-        return <p className="questExplorer-muted">{emptyLabel}</p>;
-    }
-
-    return (
-        <div className="questExplorer-lines">
-            {lines.map((line, index) => (
-                <p key={`${line}:${index}`}>{line}</p>
-            ))}
-        </div>
-    );
-}
-
-function LineGroups({ groups }: { groups: QuestLineGroupModel[] }) {
-    if (groups.length === 0) {
-        return <p className="questExplorer-muted">No requirements recorded.</p>;
-    }
-
-    return (
-        <div className="questExplorer-lineGroups">
-            {groups.map((group) => (
-                <section className="questExplorer-lineGroup" key={group.id}>
-                    <h5>{group.label}</h5>
-                    <TextLines lines={group.lines} emptyLabel="No lines recorded." />
-                </section>
-            ))}
-        </div>
-    );
-}
-
-function QuestReferenceLink({
-    link,
-    onSelectQuest,
-}: {
-    link: QuestLinkModel;
-    onSelectQuest: (questKey: string) => void;
-}) {
-    return (
-        <button
-            type="button"
-            className="questExplorer-referenceLink"
-            onClick={() => onSelectQuest(link.questKey)}
-        >
-            <span className="questExplorer-referenceLink__main">
-                <span className="questExplorer-referenceLink__label">{link.label}</span>
-            </span>
-            {link.contextLabel ? (
-                <span className="questExplorer-referenceLink__context">{link.contextLabel}</span>
-            ) : null}
-        </button>
-    );
-}
-
-function OutcomeBranches({
-    nextQuestLink,
-    failQuestLink,
-    onSelectQuest,
-}: {
-    nextQuestLink: QuestLinkModel | null;
-    failQuestLink: QuestLinkModel | null;
-    onSelectQuest: (questKey: string) => void;
-}) {
-    if (!nextQuestLink && !failQuestLink) {
-        return <p className="questExplorer-muted">No outcome recorded.</p>;
-    }
-
-    return (
-        <dl className="questExplorer-branchList">
-            {nextQuestLink ? (
-                <div>
-                    <dt>Continues to</dt>
-                    <dd>
-                        <QuestReferenceLink link={nextQuestLink} onSelectQuest={onSelectQuest} />
-                    </dd>
-                </div>
-            ) : null}
-            {failQuestLink ? (
-                <div>
-                    <dt>Failure leads to</dt>
-                    <dd>
-                        <QuestReferenceLink link={failQuestLink} onSelectQuest={onSelectQuest} />
-                    </dd>
-                </div>
-            ) : null}
-        </dl>
-    );
-}
-
-function LineSummary({ lines, emptyLabel }: { lines: string[]; emptyLabel: string }) {
-    return <span>{lines.length > 0 ? lines.join(" / ") : emptyLabel}</span>;
-}
-
-function ProgressGateRows({ rows }: { rows: QuestProgressGateRowModel[] }) {
-    if (rows.length === 0) {
-        return <p className="questExplorer-muted">No progress gates recorded.</p>;
-    }
-
-    return (
-        <div className="questExplorer-progressGateRows">
-            {rows.map((row, index) => (
-                <div className="questExplorer-progressGateRow" key={row.id}>
-                    <div className="questExplorer-progressGateRow__index">{`Threshold ${index + 1}`}</div>
-                    <dl>
-                        <div>
-                            <dt>Available</dt>
-                            <dd>
-                                <LineSummary lines={row.selectionLines} emptyLabel="Start" />
-                            </dd>
-                        </div>
-                        <div>
-                            <dt>Completes</dt>
-                            <dd>
-                                <LineSummary lines={row.completionLines} emptyLabel="No completion threshold" />
-                            </dd>
-                        </div>
-                        {row.forbiddenLines.length > 0 ? (
-                            <div>
-                                <dt>Blocked</dt>
-                                <dd>
-                                    <LineSummary lines={row.forbiddenLines} emptyLabel="No limit" />
-                                </dd>
-                            </div>
-                        ) : null}
-                        {row.failureLines.length > 0 ? (
-                            <div>
-                                <dt>Fails</dt>
-                                <dd>
-                                    <LineSummary lines={row.failureLines} emptyLabel="No failure threshold" />
-                                </dd>
-                            </div>
-                        ) : null}
-                        {row.rewardLines.length > 0 ? (
-                            <div>
-                                <dt>Reward</dt>
-                                <dd>
-                                    <LineSummary lines={row.rewardLines} emptyLabel="No reward" />
-                                </dd>
-                            </div>
-                        ) : null}
-                    </dl>
-                </div>
-            ))}
-        </div>
-    );
-}
 
 function ObjectiveGroupButton({
     group,

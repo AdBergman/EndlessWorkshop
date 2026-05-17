@@ -243,6 +243,55 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Step_Block_A")).not.toBeInTheDocument();
     });
 
+    it("defaults to strategy mode and switches mode in route-local query state", async () => {
+        const user = userEvent.setup();
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
+
+        const modeSwitch = screen.getByLabelText("Quest Explorer mode");
+        expect(within(modeSwitch).getByRole("button", { name: "Strategy" })).toHaveAttribute(
+            "aria-pressed",
+            "true"
+        );
+
+        await user.click(within(modeSwitch).getByRole("button", { name: "Lore" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("quest=Quest_A");
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("mode=lore");
+        });
+
+        const loreChronicle = screen.getByRole("article", { name: "First Quest" });
+        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(within(loreChronicle).getByText("Lore Chronicle")).toBeInTheDocument();
+        expect(within(loreChronicle).getByLabelText("Lore transcript")).toBeInTheDocument();
+        expect(within(loreChronicle).getByText("Story Paths")).toBeInTheDocument();
+        expect(within(loreChronicle).getByText("Strategy Notes")).toBeInTheDocument();
+
+        await user.click(within(modeSwitch).getByRole("button", { name: "Strategy" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("mode=strategy");
+        });
+        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
+    });
+
+    it("reads lore mode from the URL while preserving canonical quest selection", async () => {
+        await renderQuestExplorer("/quests?mode=lore");
+
+        expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("mode=lore");
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("quest=Quest_A");
+        });
+        expect(screen.getByLabelText("Quest progression")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(screen.getByLabelText("Lore transcript")).toBeInTheDocument();
+    });
+
     it("updates the selected quest URL param from the progression rail", async () => {
         const user = userEvent.setup();
 
