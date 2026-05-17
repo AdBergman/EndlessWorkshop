@@ -3,6 +3,7 @@ import {
     buildQuestArchiveModel,
     defaultQuestArchiveFilters,
     QUEST_ARCHIVE_ALL,
+    QUEST_ARCHIVE_MINOR_FACTIONS,
     type QuestArchiveFilters,
 } from "./questArchiveModel";
 
@@ -204,6 +205,14 @@ describe("questArchiveModel", () => {
     it("builds faction options and filters by selected faction", () => {
         const quests = [
             quest({
+                questKey: "MinorQuest_A",
+                displayName: "Minor Pact",
+                categoryType: "MinorFaction",
+                inferredFactionKey: "Faction_Ametrine",
+                inferredQuestLineKey: "MinorFactionQuest_Ametrine",
+                choices: [],
+            }),
+            quest({
                 questKey: "FactionQuest_Necrophage_Chapter01_Step01",
                 displayName: "Hive Memory",
                 inferredFactionKey: "Faction_Necrophage",
@@ -228,8 +237,55 @@ describe("questArchiveModel", () => {
         expect(model.factionOptions).toEqual([
             { value: "Kin", label: "Kin", count: 1 },
             { value: "Necrophages", label: "Necrophages", count: 1 },
+            { value: QUEST_ARCHIVE_MINOR_FACTIONS, label: QUEST_ARCHIVE_MINOR_FACTIONS, count: 1 },
         ]);
         expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Necrophage_Chapter01_Step01"]);
+    });
+
+    it("orders major faction options alphabetically and keeps minor factions last", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Tahuk_Chapter01_Step01",
+                displayName: "Tahuk Path",
+                inferredFactionKey: "Faction_Tahuk",
+                inferredQuestLineKey: "FactionQuest_Tahuk",
+                choices: [],
+            }),
+            quest({
+                questKey: "MinorQuest_A",
+                displayName: "Ametrine Pact",
+                categoryType: "MinorFaction",
+                inferredFactionKey: "Faction_Ametrine",
+                inferredQuestLineKey: "MinorFactionQuest_Ametrine",
+                questSequenceIndex: 2,
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspects_Chapter01_Step01",
+                displayName: "Aspects Path",
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspects",
+                questSequenceIndex: 3,
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Kin_Chapter01_Step01",
+                displayName: "Kin Path",
+                inferredFactionKey: "Faction_Kin",
+                inferredQuestLineKey: "FactionQuest_Kin",
+                questSequenceIndex: 4,
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests });
+
+        expect(optionLabels(model.factionOptions)).toEqual([
+            "Aspects",
+            "Kin",
+            "Tahuk",
+            QUEST_ARCHIVE_MINOR_FACTIONS,
+        ]);
     });
 
     it("narrows branch options when faction is selected", () => {

@@ -85,7 +85,7 @@ export default function QuestProgressionRail({
                     <FilterSelect
                         label="Faction"
                         value={filters.faction}
-                        allLabel="All factions"
+                        allLabel="All"
                         options={archive.factionOptions}
                         onChange={(faction) => onUpdateFilters({ faction })}
                     />

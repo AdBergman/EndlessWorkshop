@@ -386,7 +386,7 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         const rail = screen.getByLabelText("Quest archive");
-        expect(within(rail).getByRole("option", { name: "All factions" })).toBeInTheDocument();
+        expect(within(rail).getByRole("option", { name: "All" })).toBeInTheDocument();
         expect(within(rail).getByRole("option", { name: "Kin (1)" })).toBeInTheDocument();
         expect(within(rail).getByRole("option", { name: "Lords (1)" })).toBeInTheDocument();
 

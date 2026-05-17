@@ -12,6 +12,7 @@ import type { QuestProgressionRailModel } from "./questExplorerTypes";
 
 export const QUEST_ARCHIVE_ALL = "__all__";
 export const QUEST_ARCHIVE_BRANCH_ANY = "__branch_any__";
+export const QUEST_ARCHIVE_MINOR_FACTIONS = "Minor Factions";
 
 export type QuestArchiveFilters = {
     searchText: string;
@@ -97,9 +98,28 @@ const formatCountLabel = (count: number, singular: string): string =>
     `${count} ${singular}${count === 1 ? "" : "s"}`;
 
 const facetKeys: QuestArchiveFacetKey[] = ["faction", "category", "chapter", "branchVariant"];
+const knownMajorFactionAliases: Array<{ label: string; tokens: string[] }> = [
+    { label: "Aspects", tokens: ["aspects", "aspect"] },
+    { label: "Kin", tokens: ["kin of sheredyn", "kin"] },
+    { label: "Lords", tokens: ["lords", "lord"] },
+    { label: "Necrophages", tokens: ["necrophage", "necrophages"] },
+    { label: "Tahuk", tokens: ["tahuk"] },
+];
 
 function getQuestCategoryLabel(quest: QuestDto): string | null {
     return clean(quest.categoryType) || compactEntityLabel(quest.categoryKey) || clean(quest.categoryKey) || null;
+}
+
+function isMajorFactionQuest(quest: QuestDto): boolean {
+    const categoryText = normalizeSearch([quest.categoryType, quest.categoryKey].join(" "));
+    return categoryText.includes("major faction") || normalizeSearch(quest.questKey).startsWith("faction quest");
+}
+
+function isMinorFactionQuest(quest: QuestDto): boolean {
+    const categoryText = normalizeSearch([quest.categoryType, quest.categoryKey].join(" "));
+    const inferredText = normalizeSearch([quest.inferredFactionKey, quest.inferredQuestLineKey, quest.questKey].join(" "));
+
+    return categoryText.includes("minor faction") || inferredText.includes("minor faction");
 }
 
 function getQuestFactionLabel(quest: QuestDto): string | null {
@@ -109,13 +129,18 @@ function getQuestFactionLabel(quest: QuestDto): string | null {
         quest.questKey,
     ].filter((value): value is string => Boolean(clean(value))).join(" "));
 
-    if (searchableFactionText.includes("necrophage")) return "Necrophages";
-    if (searchableFactionText.includes("kin of sheredyn") || searchableFactionText.includes("kin")) return "Kin";
-    if (searchableFactionText.includes("lords")) return "Lords";
-    if (searchableFactionText.includes("tahuk")) return "Tahuk";
-    if (searchableFactionText.includes("aspects")) return "Aspects";
+    const knownMajorLabel = knownMajorFactionAliases.find((faction) =>
+        faction.tokens.some((token) => searchableFactionText.includes(token))
+    )?.label;
+    if (knownMajorLabel) return knownMajorLabel;
 
-    return compactEntityLabel(quest.inferredFactionKey);
+    if (isMinorFactionQuest(quest)) return QUEST_ARCHIVE_MINOR_FACTIONS;
+
+    const inferredFactionLabel = compactEntityLabel(quest.inferredFactionKey);
+    if (inferredFactionLabel && isMajorFactionQuest(quest)) return inferredFactionLabel;
+    if (inferredFactionLabel) return QUEST_ARCHIVE_MINOR_FACTIONS;
+
+    return null;
 }
 
 function getQuestlineVariantLabel(questlineKey: string | null | undefined): string | null {
@@ -281,6 +306,16 @@ function buildBranchVariantOptions(
         : branchVariantOptions;
 }
 
+function buildFactionOptions(records: readonly QuestArchiveRecord[]): QuestArchiveFilterOption[] {
+    const options = countOptions(records, (record) => record.factionLabel ? [record.factionLabel] : []);
+    const majorOptions = options
+        .filter((option) => option.value !== QUEST_ARCHIVE_MINOR_FACTIONS)
+        .sort((left, right) => compareString(left.label, right.label));
+    const minorOption = options.find((option) => option.value === QUEST_ARCHIVE_MINOR_FACTIONS);
+
+    return minorOption ? [...majorOptions, minorOption] : majorOptions;
+}
+
 function isConstrictiveFilterActive(filters: QuestArchiveFilters): boolean {
     return (
         clean(filters.searchText).length > 0 ||
@@ -360,7 +395,7 @@ function buildFacetOptions(
     const facetRecords = filterRecordsForFacet(records, filters, facetKey);
 
     if (facetKey === "faction") {
-        return countOptions(facetRecords, (record) => record.factionLabel ? [record.factionLabel] : []);
+        return buildFactionOptions(facetRecords);
     }
 
     if (facetKey === "category") {
