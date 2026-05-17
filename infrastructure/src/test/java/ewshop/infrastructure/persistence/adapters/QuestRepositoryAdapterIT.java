@@ -2,6 +2,7 @@ package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.command.QuestImportSnapshot;
 import ewshop.domain.command.QuestImportSnapshot.*;
+import ewshop.domain.model.quest.QuestExplorer;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.QuestRepository;
 import ewshop.infrastructure.persistence.entities.QuestEntity;
@@ -107,6 +108,40 @@ class QuestRepositoryAdapterIT {
                 .containsExactly("Changed line", "Second line");
     }
 
+    @Test
+    void findQuestExplorer_returnsComposedGraphAndDialogBlocksInStableOrder() {
+        questRepository.importQuestSnapshot(snapshot(questWithRootAndStepDialog()));
+        entityManager.flush();
+        entityManager.clear();
+
+        QuestExplorer explorer = questRepository.findQuestExplorer();
+
+        assertThat(explorer.quests()).hasSize(1);
+        assertThat(explorer.dialogBlocks())
+                .extracting(QuestExplorer.QuestDialogBlock::identity)
+                .containsExactly(
+                        "Quest_A|||Dialog_Root|start",
+                        "Quest_A|Choice_A|0|Dialog_A|start",
+                        "Quest_A|Choice_A|0|Dialog_A|success"
+                );
+
+        QuestExplorer.Quest quest = explorer.quests().getFirst();
+        assertThat(quest.rootDialogBlockIdentities())
+                .containsExactly("Quest_A|||Dialog_Root|start");
+
+        QuestExplorer.QuestStep step = quest.choices().getFirst().steps().getFirst();
+        assertThat(step.dialogBlockIdentities())
+                .containsExactly(
+                        "Quest_A|Choice_A|0|Dialog_A|start",
+                        "Quest_A|Choice_A|0|Dialog_A|success"
+                );
+
+        QuestExplorer.QuestDialogBlock startDialog = explorer.dialogBlocks().get(1);
+        assertThat(startDialog.lines())
+                .extracting(QuestExplorer.QuestDialogLine::text)
+                .containsExactly("Start line 0", "Start line 1");
+    }
+
     private static QuestImportSnapshot snapshot(QuestSnapshot... quests) {
         return new QuestImportSnapshot(List.of(quests));
     }
@@ -181,6 +216,103 @@ class QuestRepositoryAdapterIT {
                 List.of(questKey),
                 List.of(choice),
                 List.of()
+        );
+    }
+
+    private static QuestSnapshot questWithRootAndStepDialog() {
+        DialogBlockSnapshot rootDialog = new DialogBlockSnapshot(
+                "Quest_A|||Dialog_Root|start",
+                "Quest_A",
+                null,
+                null,
+                "Dialog_Root",
+                "start",
+                1,
+                0,
+                List.of(new DialogLineSnapshot(0, 0, "narrator", null, "Root line"))
+        );
+
+        DialogBlockSnapshot startDialog = new DialogBlockSnapshot(
+                "Quest_A|Choice_A|0|Dialog_A|start",
+                "Quest_A",
+                "Choice_A",
+                0,
+                "Dialog_A",
+                "start",
+                2,
+                0,
+                List.of(
+                        new DialogLineSnapshot(0, 0, "narrator", null, "Start line 0"),
+                        new DialogLineSnapshot(1, 1, "character", "Leader", "Start line 1")
+                )
+        );
+
+        DialogBlockSnapshot successDialog = new DialogBlockSnapshot(
+                "Quest_A|Choice_A|0|Dialog_A|success",
+                "Quest_A",
+                "Choice_A",
+                0,
+                "Dialog_A",
+                "success",
+                1,
+                1,
+                List.of(new DialogLineSnapshot(0, 2, "character", "Advisor", "Success line"))
+        );
+
+        StepSnapshot step = new StepSnapshot(
+                0,
+                0,
+                "Find the trail.",
+                "Quest_Next",
+                null,
+                List.of("Step description"),
+                List.of("Complete it"),
+                List.of(),
+                List.of(),
+                List.of("Selection"),
+                List.of("Reward"),
+                List.of("Dialog_A"),
+                List.of(startDialog, successDialog)
+        );
+
+        ChoiceSnapshot choice = new ChoiceSnapshot(
+                "Choice_A",
+                "Choice A",
+                0,
+                List.of("Choice description"),
+                List.of("Complete it"),
+                List.of(),
+                List.of("Reward"),
+                List.of("Quest_Next"),
+                List.of("Choice_A"),
+                List.of(step)
+        );
+
+        return new QuestSnapshot(
+                "Quest_A",
+                "A Quest",
+                List.of("Quest description"),
+                "QuestCategory_Test",
+                "Curiosity",
+                true,
+                false,
+                true,
+                false,
+                false,
+                "Chapter_A",
+                0,
+                1,
+                2,
+                "Branch_A",
+                "Branch label",
+                "Faction_A",
+                "QuestLine_A",
+                "Quest_Final",
+                List.of("Quest_Prev"),
+                List.of("Quest_Next"),
+                List.of("Quest_A"),
+                List.of(choice),
+                List.of(rootDialog)
         );
     }
 

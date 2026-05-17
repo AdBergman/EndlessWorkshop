@@ -26,8 +26,9 @@ public class CachePreloader {
         CompletableFuture<Void> techsFuture = preloadService.preloadTechs();
         CompletableFuture<Void> improvementsFuture = preloadService.preloadImprovements();
         CompletableFuture<Void> unitsFuture = preloadService.preloadUnits();
+        CompletableFuture<Void> questsFuture = preloadService.preloadQuests();
 
-        CompletableFuture.allOf(districtsFuture, techsFuture, improvementsFuture, unitsFuture)
+        CompletableFuture.allOf(districtsFuture, techsFuture, improvementsFuture, unitsFuture, questsFuture)
                 .thenRun(() -> log.info("All caches preloaded successfully"))
                 .exceptionally(ex -> {
                     log.warn("Some cache preloads did not complete: {}", ex.getMessage());

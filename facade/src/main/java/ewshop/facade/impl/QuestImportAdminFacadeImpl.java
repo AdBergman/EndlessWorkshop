@@ -3,6 +3,7 @@ package ewshop.facade.impl;
 import ewshop.domain.command.QuestImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.QuestImportService;
+import ewshop.domain.service.QuestService;
 import ewshop.facade.dto.importing.*;
 import ewshop.facade.dto.importing.quests.QuestImportBatchDto;
 import ewshop.facade.interfaces.QuestImportAdminFacade;
@@ -14,9 +15,11 @@ import java.util.List;
 public class QuestImportAdminFacadeImpl implements QuestImportAdminFacade {
 
     private final QuestImportService questImportService;
+    private final QuestService questService;
 
-    public QuestImportAdminFacadeImpl(QuestImportService questImportService) {
+    public QuestImportAdminFacadeImpl(QuestImportService questImportService, QuestService questService) {
         this.questImportService = questImportService;
+        this.questService = questService;
     }
 
     @Override
@@ -44,6 +47,8 @@ public class QuestImportAdminFacadeImpl implements QuestImportAdminFacade {
                 List.of(),
                 new ImportDetailsDto(received, 0)
         );
+
+        questService.getQuestExplorer();
 
         return ImportSummaryDto.of("quests", counts, diagnostics, durationMs);
     }

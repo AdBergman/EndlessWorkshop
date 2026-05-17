@@ -54,6 +54,12 @@ type BulkExportSelectedFile = {
     summary?: any | null;
 };
 
+const QUEST_GRAPH_EXPORT_KIND = "quest_graph";
+const QUEST_DIALOG_EXPORT_KIND = "quest_dialog";
+const QUEST_PAIR_EXPORT_LABEL = "quest_graph + quest_dialog";
+const QUEST_IMPORT_MODULE_ID = "quests";
+const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests";
+
 const BULK_EXPORT_KIND_BY_MODULE_ID: Record<string, string> = {
     districts: "districts",
     improvements: "improvements",
@@ -71,6 +77,60 @@ const BULK_EXPORT_ARRAY_FIELD_BY_MODULE_ID: Record<string, string> = {
 function normalizedExportKind(json: any): string | undefined {
     const value = typeof json?.exportKind === "string" ? json.exportKind.trim().toLowerCase() : "";
     return value || undefined;
+}
+
+function isQuestExportKind(exportKind: string | undefined) {
+    return exportKind === QUEST_GRAPH_EXPORT_KIND || exportKind === QUEST_DIALOG_EXPORT_KIND;
+}
+
+type QuestBulkEntry = {
+    fileName: string;
+    rawText: string;
+    json: any;
+    exportKind: string;
+};
+
+function questPairValidationError(graphCount: number, dialogCount: number) {
+    if (graphCount === 0) {
+        return "Quest import requires both quest_graph and quest_dialog files. Missing quest_graph file.";
+    }
+    if (dialogCount === 0) {
+        return "Quest import requires both quest_graph and quest_dialog files. Missing quest_dialog file.";
+    }
+    return `Quest import requires exactly one quest_graph and one quest_dialog file; found ${graphCount} graph file(s) and ${dialogCount} dialog file(s).`;
+}
+
+function createQuestBulkRows(entries: QuestBulkEntry[]): BulkExportSelectedFile[] {
+    if (entries.length === 0) return [];
+
+    const graphEntries = entries.filter((entry) => entry.exportKind === QUEST_GRAPH_EXPORT_KIND);
+    const dialogEntries = entries.filter((entry) => entry.exportKind === QUEST_DIALOG_EXPORT_KIND);
+
+    if (graphEntries.length === 1 && dialogEntries.length === 1) {
+        const graph = graphEntries[0];
+        const dialog = dialogEntries[0];
+
+        return [
+            {
+                fileName: `${graph.fileName} + ${dialog.fileName}`,
+                exportKind: QUEST_PAIR_EXPORT_LABEL,
+                moduleId: QUEST_IMPORT_MODULE_ID,
+                moduleTitle: "Quests",
+                endpoint: QUEST_IMPORT_ENDPOINT,
+                rawText: JSON.stringify({ graph: graph.json, dialog: dialog.json }),
+                status: "ready",
+            },
+        ];
+    }
+
+    const error = questPairValidationError(graphEntries.length, dialogEntries.length);
+    return entries.map((entry) => ({
+        fileName: entry.fileName,
+        exportKind: entry.exportKind,
+        rawText: entry.rawText,
+        status: "validation_error",
+        error,
+    }));
 }
 
 function findBulkExportModule(
@@ -186,13 +246,36 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
             if (isBulkExportsModule) {
                 const modules = module.bulkExportModules ?? [];
 
-                const loadedFiles = result.loaded.map((entry) => {
+                const loadedEntries = result.loaded.map((entry) => ({
+                    entry,
+                    exportKind: normalizedExportKind(entry.json),
+                }));
+                const questEntries = loadedEntries
+                    .filter((loadedEntry) => isQuestExportKind(loadedEntry.exportKind))
+                    .map((loadedEntry) => ({
+                        fileName: loadedEntry.entry.file.name,
+                        rawText: loadedEntry.entry.rawText,
+                        json: loadedEntry.entry.json as any,
+                        exportKind: loadedEntry.exportKind!,
+                    }));
+                const questRows = createQuestBulkRows(questEntries);
+                let questRowsInserted = false;
+
+                const loadedFiles = loadedEntries.flatMap((loadedEntry) => {
+                    const entry = loadedEntry.entry;
                     const json = entry.json as any;
-                    const exportKind = normalizedExportKind(json);
+                    const exportKind = loadedEntry.exportKind;
+
+                    if (isQuestExportKind(exportKind)) {
+                        if (questRowsInserted) return [];
+                        questRowsInserted = true;
+                        return questRows;
+                    }
+
                     const importModule = findBulkExportModule(json, modules);
 
                     if (!importModule) {
-                        return {
+                        return [{
                             fileName: entry.file.name,
                             exportKind,
                             rawText: entry.rawText,
@@ -200,14 +283,14 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                             error: exportKind
                                 ? `Unsupported raw export kind "${exportKind}".`
                                 : "Unsupported raw export file.",
-                        } satisfies BulkExportSelectedFile;
+                        } satisfies BulkExportSelectedFile];
                     }
 
                     const nextMeta = importModule.getMeta ? importModule.getMeta(entry.json) : undefined;
                     const err = importModule.validate ? importModule.validate(entry.json) : null;
                     const supportedKind = BULK_EXPORT_KIND_BY_MODULE_ID[importModule.id];
 
-                    return {
+                    return [{
                         fileName: entry.file.name,
                         exportKind: exportKind ?? supportedKind,
                         moduleId: importModule.id,
@@ -217,7 +300,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
                         meta: nextMeta,
                         status: err ? "validation_error" : "ready",
                         error: err ?? undefined,
-                    } satisfies BulkExportSelectedFile;
+                    } satisfies BulkExportSelectedFile];
                 });
 
                 const parseErrors = result.errors.map((entry) => ({
@@ -625,7 +708,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
         if (isBulkExportsModule) {
             if (!isEnabled) return "Not implemented yet.";
             if (!hasToken) return "Set admin token first.";
-            if (bulkExportFiles.length === 0) return "Load raw exporter JSON files to import supported kinds.";
+            if (bulkExportFiles.length === 0) return "Load raw exporter JSON files to import supported kinds, including paired Quest graph/dialog files.";
             if (bulkExportFiles.some((file) => file.status === "ready")) return null;
             return "No supported export files are ready to import.";
         }

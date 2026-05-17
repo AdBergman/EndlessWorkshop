@@ -105,7 +105,7 @@ class LocalStartupImportRunnerTest {
     }
 
     @Test
-    void importsQuestGraphAndDialogAsPairedStartupImport() throws Exception {
+    void importsQuestGraphAndDialogAsPairedStartupImport(CapturedOutput output) throws Exception {
         Files.createDirectories(tempDir.resolve("exports"));
         Files.createDirectories(tempDir.resolve("codex"));
         Files.writeString(tempDir.resolve("exports/ewshop_quest_graph_export_0.80.json"), """
@@ -157,6 +157,11 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.questDto.graph().exportKind()).isEqualTo("quest_graph");
         assertThat(facades.questDto.dialog().exportKind()).isEqualTo("quest_dialog");
         assertThat(facades.totalCalls()).isEqualTo(1);
+        assertThat(output)
+                .contains("Local startup import loaded paired quest graph/dialog files")
+                .contains("ewshop_quest_graph_export_0.80.json")
+                .contains("ewshop_quest_dialog_export_0.80.json")
+                .contains("as quests");
     }
 
     @Test

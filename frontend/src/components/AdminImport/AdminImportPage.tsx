@@ -318,7 +318,7 @@ export default function AdminImportPage() {
             {
                 id: "exports",
                 title: "Import supported exports",
-                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements. Other raw exports are skipped.",
+                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and paired Quest graph/dialog files. Other raw exports are skipped.",
                 enabled: true,
                 bulkExportModules: rawExportModules,
                 importButtonLabel: "Import supported exports",

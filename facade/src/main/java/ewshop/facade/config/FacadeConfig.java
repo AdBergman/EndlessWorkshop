@@ -71,6 +71,11 @@ public class FacadeConfig {
     }
 
     @Bean
+    public QuestFacade questFacade(QuestService questService) {
+        return new QuestFacadeImpl(questService);
+    }
+
+    @Bean
     public CodexFacade codexFacade(CodexService codexService, CodexFilterService codexFilterService) {
         return new CodexFacadeImpl(codexService, codexFilterService);
     }
@@ -84,7 +89,10 @@ public class FacadeConfig {
     }
 
     @Bean
-    public QuestImportAdminFacade questImportAdminFacade(QuestImportService questImportService) {
-        return new QuestImportAdminFacadeImpl(questImportService);
+    public QuestImportAdminFacade questImportAdminFacade(
+            QuestImportService questImportService,
+            QuestService questService
+    ) {
+        return new QuestImportAdminFacadeImpl(questImportService, questService);
     }
 }

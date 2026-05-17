@@ -119,7 +119,11 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             try {
                 ImportSummaryDto summary = importQuestFiles(questImportFiles);
                 imported++;
-                logImported(questImportFiles.graphFiles().get(0).path(), summary);
+                logImportedQuestFiles(
+                        questImportFiles.graphFiles().get(0).path(),
+                        questImportFiles.dialogFiles().get(0).path(),
+                        summary
+                );
             } catch (Exception ex) {
                 failed++;
                 log.error("Local startup import failed for paired quest graph/dialog files.", ex);
@@ -301,6 +305,22 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         log.info(
                 "Local startup import loaded {} as {}: received={}, inserted={}, updated={}, unchanged={}, deleted={}, failed={}.",
                 file.toAbsolutePath().normalize(),
+                summary.importKind(),
+                counts.received(),
+                counts.inserted(),
+                counts.updated(),
+                counts.unchanged(),
+                counts.deleted(),
+                counts.failed()
+        );
+    }
+
+    private static void logImportedQuestFiles(Path graphFile, Path dialogFile, ImportSummaryDto summary) {
+        ImportCountsDto counts = summary.counts();
+        log.info(
+                "Local startup import loaded paired quest graph/dialog files graph={} dialog={} as {}: received={}, inserted={}, updated={}, unchanged={}, deleted={}, failed={}.",
+                graphFile.toAbsolutePath().normalize(),
+                dialogFile.toAbsolutePath().normalize(),
                 summary.importKind(),
                 counts.received(),
                 counts.inserted(),
