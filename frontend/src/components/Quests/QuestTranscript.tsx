@@ -20,7 +20,7 @@ export default function QuestTranscript({ blocks }: QuestTranscriptProps) {
                             <header className="questExplorer-transcriptBlock__header">
                                 <div>
                                     <h4>{block.title}</h4>
-                                    <span>{block.identity}</span>
+                                    {block.archiveLabel ? <span>{block.archiveLabel}</span> : null}
                                 </div>
                                 {block.phaseLabel ? (
                                     <span className="questExplorer-pill">{block.phaseLabel}</span>

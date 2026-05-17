@@ -283,13 +283,16 @@ function buildTranscriptBlocks(
         .filter((block): block is QuestDialogBlockDto => Boolean(block));
 
     return sortDialogBlocks(blocks).map((block) => {
-        const scopeLabel = clean(block.parentScope) || null;
-        const phaseLabel = clean(block.phase) || null;
+        const parentScope = clean(block.parentScope);
+        const phase = clean(block.phase);
+        const scopeLabel = parentScope ? titleCaseToken(parentScope.toLowerCase()) : null;
+        const phaseLabel = phase ? humanizeQuestKey(phase) : null;
         const titleParts = [scopeLabel, phaseLabel].filter((part): part is string => Boolean(part));
 
         return {
             identity: block.identity,
             title: titleParts.length > 0 ? titleParts.join(" / ") : humanizeQuestKey(block.identity),
+            archiveLabel: clean(block.dialogKey) ? humanizeQuestKey(block.dialogKey ?? "") : null,
             scopeLabel,
             phaseLabel,
             source: block,
@@ -304,6 +307,8 @@ function buildMetadata(
     quest: QuestDto,
     questsByKey: Record<string, QuestDto>
 ): QuestMetadataModel {
+    const branchLabel = clean(quest.branchLabel);
+    const branchGroupKey = clean(quest.branchGroupKey);
     const overviewItems = [
         { label: "Chapter", value: formatChapterLabel(quest) },
         {
@@ -314,10 +319,19 @@ function buildMetadata(
     ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
     const archiveItems = [
-        { label: "Quest key", value: clean(quest.questKey) },
-        { label: "Quest line", value: clean(quest.inferredQuestLineKey) },
-        { label: "Faction", value: clean(quest.inferredFactionKey) },
-        { label: "Branch", value: clean(quest.branchLabel) || clean(quest.branchGroupKey) },
+        { label: "Archive ID", value: clean(quest.questKey) ? humanizeQuestKey(quest.questKey) : null },
+        {
+            label: "Quest line",
+            value: clean(quest.inferredQuestLineKey) ? humanizeQuestKey(quest.inferredQuestLineKey ?? "") : null,
+        },
+        {
+            label: "Faction",
+            value: clean(quest.inferredFactionKey) ? humanizeQuestKey(quest.inferredFactionKey ?? "") : null,
+        },
+        {
+            label: "Branch",
+            value: branchLabel || (branchGroupKey ? humanizeQuestKey(branchGroupKey) : null),
+        },
     ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
     return {

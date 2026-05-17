@@ -68,6 +68,7 @@ export type QuestTranscriptLineModel = {
 export type QuestTranscriptBlockModel = {
     identity: string;
     title: string;
+    archiveLabel: string | null;
     scopeLabel: string | null;
     phaseLabel: string | null;
     source: QuestDialogBlockDto;

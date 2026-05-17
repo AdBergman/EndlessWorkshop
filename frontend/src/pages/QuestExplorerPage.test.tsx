@@ -239,6 +239,8 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("The archive opens.")).toBeInTheDocument();
         expect(screen.getByText("The first record is restored.")).toBeInTheDocument();
         expect(screen.getByText("The trail is readable.")).toBeInTheDocument();
+        expect(screen.queryByText("Root_Block_A")).not.toBeInTheDocument();
+        expect(screen.queryByText("Step_Block_A")).not.toBeInTheDocument();
     });
 
     it("updates the selected quest URL param from the progression rail", async () => {

@@ -53,7 +53,15 @@ const AppLayout: React.FC = () => {
     useCloudflareSPA();
 
     const isProcessingSharedBuild = useShareProcessingGate();
-    const appClassName = location.pathname.startsWith("/codex") ? "app app--codex" : "app";
+    const isCodexRoute = location.pathname.startsWith("/codex");
+    const isQuestExplorerRoute = location.pathname.startsWith("/quests");
+    let appClassName = "app";
+
+    if (isCodexRoute) {
+        appClassName = "app app--codex";
+    } else if (isQuestExplorerRoute) {
+        appClassName = "app app--quests";
+    }
 
     return (
         <LandscapeWrapper>

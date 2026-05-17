@@ -1,22 +1,40 @@
 .questExplorer-page {
-    --quest-bg: #07090c;
-    --quest-surface: rgba(13, 15, 19, 0.94);
+    --quest-bg: #05070a;
+    --quest-surface: rgba(11, 14, 18, 0.95);
+    --quest-surface-raised: rgba(18, 22, 27, 0.82);
     --quest-surface-soft: rgba(255, 255, 255, 0.035);
-    --quest-border: rgba(255, 255, 255, 0.09);
-    --quest-border-strong: rgba(255, 255, 255, 0.16);
-    --quest-text: #fff5ec;
-    --quest-text-soft: rgba(255, 255, 255, 0.74);
-    --quest-text-muted: rgba(255, 255, 255, 0.52);
-    --quest-accent: #ff7f32;
-    --quest-accent-soft: rgba(255, 127, 50, 0.11);
-    --quest-signal: #79d7c8;
+    --quest-border: rgba(220, 235, 232, 0.1);
+    --quest-border-strong: rgba(230, 214, 168, 0.24);
+    --quest-text: #f7efe5;
+    --quest-text-soft: rgba(247, 239, 229, 0.75);
+    --quest-text-muted: rgba(247, 239, 229, 0.48);
+    --quest-gold: #d8b769;
+    --quest-gold-soft: rgba(216, 183, 105, 0.12);
+    --quest-teal: #78d6c7;
     position: relative;
-    min-height: calc(100vh - 72px);
-    padding: 0 1.5rem 1.5rem;
+    display: flex;
+    min-height: 0;
+    height: 100%;
+    padding: 0 1.25rem 1.25rem;
+    overflow: hidden;
     color: var(--quest-text);
     background:
-        linear-gradient(180deg, rgba(13, 15, 19, 0.96), rgba(5, 6, 8, 0.99)),
+        linear-gradient(180deg, rgba(11, 15, 19, 0.98), rgba(4, 6, 8, 0.99)),
+        linear-gradient(90deg, rgba(120, 214, 199, 0.03), transparent 28%, rgba(216, 183, 105, 0.025)),
         var(--quest-bg);
+}
+
+.questExplorer-page::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 112px 112px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.34), transparent 80%);
+    opacity: 0.28;
+    pointer-events: none;
 }
 
 .questExplorer-page button {
@@ -24,16 +42,20 @@
 }
 
 .questExplorer-surface {
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
-    min-height: calc(100vh - 112px);
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
 }
 
 .questExplorer-header {
     display: flex;
     align-items: end;
     justify-content: space-between;
-    padding: 14px 0 12px;
+    padding: 13px 0 11px;
     border-bottom: 1px solid var(--quest-border);
 }
 
@@ -56,15 +78,16 @@
 }
 
 .questExplorer-header h2 {
-    font-size: 1.7rem;
+    font-size: 1.55rem;
 }
 
 .questExplorer-workspace {
     display: grid;
-    grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
-    gap: 22px;
+    grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+    gap: 18px;
     min-height: 0;
-    padding-top: 18px;
+    padding-top: 16px;
+    overflow: hidden;
 }
 
 .questExplorer-rail,
@@ -72,7 +95,10 @@
 .questExplorer-metadata,
 .questExplorer-state {
     border: 1px solid var(--quest-border);
-    background: var(--quest-surface);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 120px),
+        var(--quest-surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .questExplorer-rail {
@@ -88,7 +114,7 @@
     align-items: start;
     justify-content: space-between;
     gap: 16px;
-    padding: 16px;
+    padding: 16px 16px 14px;
     border-bottom: 1px solid var(--quest-border);
 }
 
@@ -100,28 +126,32 @@
 .questExplorer-count {
     min-width: 36px;
     padding: 5px 8px;
-    border: 1px solid var(--quest-border);
-    color: var(--quest-accent);
+    border: 1px solid rgba(216, 183, 105, 0.3);
+    color: var(--quest-gold);
     text-align: center;
 }
 
 .questExplorer-rail__list {
     min-height: 0;
-    overflow: auto;
-    padding: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+    scrollbar-color: rgba(216, 183, 105, 0.34) rgba(255, 255, 255, 0.04);
 }
 
 .questExplorer-railItem {
     display: grid;
-    gap: 5px;
+    gap: 7px;
     width: 100%;
-    min-height: 92px;
-    padding: 12px;
+    min-height: 100px;
+    padding: 13px 14px;
     border: 1px solid transparent;
-    background: transparent;
+    border-left-color: rgba(120, 214, 199, 0.14);
+    background: rgba(255, 255, 255, 0.012);
     color: inherit;
     text-align: left;
     cursor: pointer;
+    transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .questExplorer-railItem:hover,
@@ -135,8 +165,9 @@
 .questExplorer-railItem.is-selected,
 .questExplorer-choiceButton.is-selected,
 .questExplorer-stepButton.is-selected {
-    border-color: rgba(255, 127, 50, 0.34);
-    background: var(--quest-accent-soft);
+    border-color: rgba(216, 183, 105, 0.36);
+    background: var(--quest-gold-soft);
+    box-shadow: inset 2px 0 0 var(--quest-gold);
 }
 
 .questExplorer-railItem:focus-visible,
@@ -144,8 +175,8 @@
 .questExplorer-stepButton:focus-visible,
 .questExplorer-linkButton:focus-visible {
     outline: none;
-    border-color: rgba(255, 127, 50, 0.76);
-    box-shadow: 0 0 0 3px rgba(255, 127, 50, 0.16);
+    border-color: rgba(216, 183, 105, 0.76);
+    box-shadow: 0 0 0 3px rgba(216, 183, 105, 0.16);
 }
 
 .questExplorer-railItem__topline,
@@ -188,8 +219,9 @@
     align-items: center;
     min-height: 22px;
     padding: 0 7px;
-    border: 1px solid rgba(121, 215, 200, 0.22);
-    color: rgba(177, 244, 235, 0.88);
+    border: 1px solid rgba(120, 214, 199, 0.22);
+    background: rgba(120, 214, 199, 0.055);
+    color: rgba(184, 246, 238, 0.9);
     font-size: 11px;
     line-height: 1;
 }
@@ -198,27 +230,29 @@
     min-width: 0;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 315px);
+    gap: 16px;
     overflow: hidden;
 }
 
 .questExplorer-chronicle {
     min-width: 0;
     min-height: 0;
-    overflow: auto;
-    padding: 18px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0;
+    scrollbar-color: rgba(216, 183, 105, 0.34) rgba(255, 255, 255, 0.04);
 }
 
 .questExplorer-chronicle__header {
     display: grid;
-    gap: 10px;
-    padding-bottom: 18px;
+    gap: 12px;
+    padding: 20px 22px 18px;
     border-bottom: 1px solid var(--quest-border);
 }
 
 .questExplorer-chronicle__header h2 {
-    font-size: 1.45rem;
+    font-size: 1.5rem;
 }
 
 .questExplorer-lines {
@@ -232,13 +266,13 @@
 .questExplorer-transcriptRow p {
     margin: 0;
     color: var(--quest-text-soft);
-    line-height: 1.55;
+    line-height: 1.62;
 }
 
 .questExplorer-chronicleSection {
     display: grid;
-    gap: 10px;
-    padding: 16px 0;
+    gap: 12px;
+    padding: 18px 22px;
     border-bottom: 1px solid var(--quest-border);
 }
 
@@ -254,17 +288,18 @@
 .questExplorer-linkButton {
     min-height: 38px;
     border: 1px solid var(--quest-border);
-    background: rgba(255, 255, 255, 0.018);
+    background: rgba(255, 255, 255, 0.02);
     color: var(--quest-text-soft);
     cursor: pointer;
+    transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .questExplorer-choiceButton,
 .questExplorer-stepButton {
     display: inline-grid;
-    gap: 2px;
+    gap: 3px;
     min-width: 140px;
-    padding: 8px 10px;
+    padding: 9px 11px;
     text-align: left;
 }
 
@@ -277,18 +312,18 @@
 .questExplorer-detailGrid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    padding: 16px 0;
+    gap: 16px;
+    padding: 20px 22px;
 }
 
 .questExplorer-detailBlock {
     display: grid;
     align-content: start;
-    gap: 12px;
+    gap: 14px;
     min-width: 0;
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--quest-border);
-    background: rgba(255, 255, 255, 0.018);
+    background: var(--quest-surface-raised);
 }
 
 .questExplorer-detailBlock h3,
@@ -301,7 +336,9 @@
 }
 
 .questExplorer-objective {
-    color: #ffe0ca;
+    padding-left: 12px;
+    border-left: 2px solid rgba(216, 183, 105, 0.58);
+    color: #f3ddb5;
     font-weight: 700;
 }
 
@@ -316,7 +353,7 @@
 }
 
 .questExplorer-lineGroup h5 {
-    color: var(--quest-signal);
+    color: var(--quest-teal);
     font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -332,8 +369,7 @@
 .questExplorer-branchList div,
 .questExplorer-metadataSection dl div {
     display: grid;
-    grid-template-columns: 96px minmax(0, 1fr);
-    gap: 10px;
+    gap: 4px;
 }
 
 .questExplorer-branchList dt,
@@ -351,8 +387,8 @@
 
 .questExplorer-transcript {
     display: grid;
-    gap: 12px;
-    padding-top: 16px;
+    gap: 14px;
+    padding: 20px 22px 24px;
     border-top: 1px solid var(--quest-border);
 }
 
@@ -363,7 +399,7 @@
 
 .questExplorer-transcriptBlock {
     border: 1px solid var(--quest-border);
-    background: rgba(0, 0, 0, 0.16);
+    background: rgba(0, 0, 0, 0.18);
 }
 
 .questExplorer-transcriptBlock__header {
@@ -371,7 +407,7 @@
     align-items: start;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px;
+    padding: 13px 14px;
     border-bottom: 1px solid var(--quest-border);
 }
 
@@ -385,9 +421,9 @@
 
 .questExplorer-transcriptRow {
     display: grid;
-    grid-template-columns: minmax(120px, 170px) minmax(0, 1fr);
-    gap: 14px;
-    padding: 12px;
+    grid-template-columns: minmax(118px, 160px) minmax(0, 1fr);
+    gap: 16px;
+    padding: 13px 14px;
     border-top: 1px solid rgba(255, 255, 255, 0.055);
 }
 
@@ -404,15 +440,17 @@
 }
 
 .questExplorer-transcriptRow__meta span:first-child {
-    color: var(--quest-signal);
+    color: var(--quest-teal);
     font-weight: 700;
 }
 
 .questExplorer-metadata {
     min-width: 0;
     min-height: 0;
-    overflow: auto;
-    padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 15px;
+    scrollbar-color: rgba(216, 183, 105, 0.34) rgba(255, 255, 255, 0.04);
 }
 
 .questExplorer-metadata header {
@@ -429,8 +467,8 @@
 .questExplorer-metadataSection,
 .questExplorer-metadataLinks {
     display: grid;
-    gap: 10px;
-    padding: 14px 0;
+    gap: 11px;
+    padding: 15px 0;
     border-bottom: 1px solid var(--quest-border);
 }
 
@@ -441,7 +479,7 @@
 
 .questExplorer-linkButton {
     width: 100%;
-    padding: 8px 10px;
+    padding: 9px 10px;
     color: var(--quest-text-soft);
     text-align: left;
 }
@@ -455,19 +493,21 @@
 }
 
 @media (max-width: 1180px) {
-    .questExplorer-workspace,
-    .questExplorer-mainPane,
     .questExplorer-detailGrid {
         grid-template-columns: 1fr;
     }
 
-    .questExplorer-mainPane {
-        overflow: visible;
+    .questExplorer-workspace {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(190px, 28vh) minmax(0, 1fr);
     }
 
-    .questExplorer-rail,
-    .questExplorer-chronicle,
-    .questExplorer-metadata {
-        overflow: visible;
+    .questExplorer-mainPane {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) minmax(170px, 24vh);
+    }
+
+    .questExplorer-transcriptRow {
+        grid-template-columns: 1fr;
     }
 }

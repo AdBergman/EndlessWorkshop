@@ -27,18 +27,21 @@ body {
     min-height: 100vh;
 }
 
-.app--codex {
+.app--codex,
+.app--quests {
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
 }
 
-.app--codex .top-container {
+.app--codex .top-container,
+.app--quests .top-container {
     flex-shrink: 0;
 }
 
-.app--codex > :not(.top-container) {
+.app--codex > :not(.top-container),
+.app--quests > :not(.top-container) {
     flex: 1 1 auto;
     min-height: 0;
 }

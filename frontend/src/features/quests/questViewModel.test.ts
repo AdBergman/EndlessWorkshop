@@ -211,6 +211,10 @@ describe("questViewModel", () => {
             text: "The ruin answers.",
         });
         expect(model.metadata?.flags).toEqual(["Mandatory"]);
+        expect(model.metadata?.sections.find((section) => section.id === "archive")?.items).toContainEqual({
+            label: "Archive ID",
+            value: "Quest A",
+        });
         expect(model.metadata?.nextQuestLinks).toEqual([{ questKey: "Quest_B", label: "Follow Up" }]);
     });
 
