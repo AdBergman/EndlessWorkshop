@@ -9,7 +9,6 @@ import {
     QuestPathBranches as PathBranches,
     QuestPathSelector as PathSelector,
     QuestProgressGateRows as ProgressGateRows,
-    QuestRecordContext,
     QuestReferenceTrail,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
@@ -37,7 +36,7 @@ function ObjectiveNotes({
     onSelectStep: (stepIndex: number) => void;
 }) {
     if (objectiveGroups.length === 0 && !selectedObjectiveGroup) {
-        return <p className="questExplorer-muted">No objectives are attached to this path.</p>;
+        return <p className="questExplorer-muted">No objectives are attached to this branch.</p>;
     }
 
     return (
@@ -117,7 +116,7 @@ export default function QuestLorePanel({
 
             <section className="questExplorer-chronicleSection" aria-labelledby="quest-lore-paths-heading">
                 <div className="questExplorer-sectionLabel" id="quest-lore-paths-heading">
-                    Story Paths
+                    Story Branches
                 </div>
                 <PathSelector choices={chronicle.choices} onSelectChoice={onSelectChoice} />
                 {chronicle.selectedChoice ? (
@@ -181,7 +180,7 @@ export default function QuestLorePanel({
 
                 <section className="questExplorer-chronicleSection" aria-labelledby="quest-lore-path-notes-heading">
                     <div className="questExplorer-sectionLabel" id="quest-lore-path-notes-heading">
-                        Path Notes
+                        Branch Notes
                     </div>
                     {chronicle.selectedChoice ? (
                         <div className="questExplorer-pathPanel__selectedPath">
@@ -194,12 +193,10 @@ export default function QuestLorePanel({
                             <PathBranches choice={chronicle.selectedChoice} onSelectQuest={onSelectQuest} />
                         </div>
                     ) : (
-                        <p className="questExplorer-muted">No path selected.</p>
+                        <p className="questExplorer-muted">No branch selected.</p>
                     )}
                 </section>
             </details>
-
-            <QuestRecordContext metadata={metadata} />
 
             <QuestReferenceTrail metadata={metadata} onSelectQuest={onSelectQuest} />
         </article>

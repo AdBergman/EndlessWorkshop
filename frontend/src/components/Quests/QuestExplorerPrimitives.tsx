@@ -183,7 +183,7 @@ export function QuestPathBranches({
     onSelectQuest: (questKey: string) => void;
 }) {
     if (!choice || choice.nextQuestLinks.length === 0) {
-        return <p className="questExplorer-muted">No outcome recorded for this path.</p>;
+        return <p className="questExplorer-muted">No outcome recorded for this branch.</p>;
     }
 
     return (
@@ -208,7 +208,7 @@ export function QuestPathSelector({
     onSelectChoice: (choiceKey: string) => void;
 }) {
     if (choices.length === 0) {
-        return <p className="questExplorer-muted">No paths are attached to this quest.</p>;
+        return <p className="questExplorer-muted">No branches are attached to this quest.</p>;
     }
 
     return (
@@ -254,37 +254,6 @@ function QuestLinkList({
                 ))}
             </div>
         </div>
-    );
-}
-
-export function QuestRecordContext({ metadata }: { metadata: QuestMetadataModel }) {
-    return (
-        <details className="questExplorer-recordContext">
-            <summary>Record Context</summary>
-            {metadata.flags.length > 0 ? (
-                <div className="questExplorer-metadata__flags" aria-label="Quest flags">
-                    {metadata.flags.map((flag) => (
-                        <span className="questExplorer-pill" key={flag}>
-                            {flag}
-                        </span>
-                    ))}
-                </div>
-            ) : null}
-
-            {metadata.sections.map((section) => (
-                <section className="questExplorer-metadataSection" key={section.id}>
-                    <h4>{section.label}</h4>
-                    <dl>
-                        {section.items.map((item) => (
-                            <div key={`${section.id}:${item.label}`}>
-                                <dt>{item.label}</dt>
-                                <dd>{item.value}</dd>
-                            </div>
-                        ))}
-                    </dl>
-                </section>
-            ))}
-        </details>
     );
 }
 

@@ -1,38 +1,42 @@
 import type {
     QuestChronicleModel,
+    QuestMetadataModel,
 } from "@/features/quests/questExplorerTypes";
 import {
     QuestLineGroups as LineGroups,
     QuestPathBranches as PathBranches,
     QuestPathSelector as PathSelector,
+    QuestReferenceTrail,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 
 type QuestMetadataPanelProps = {
     chronicle: QuestChronicleModel;
+    metadata: QuestMetadataModel;
     onSelectChoice: (choiceKey: string) => void;
     onSelectQuest: (questKey: string) => void;
 };
 
 export default function QuestMetadataPanel({
     chronicle,
+    metadata,
     onSelectChoice,
     onSelectQuest,
 }: QuestMetadataPanelProps) {
     return (
-        <aside className="questExplorer-metadata questExplorer-pathPanel" aria-label="Path and outcomes">
+        <aside className="questExplorer-metadata questExplorer-pathPanel" aria-label="Quest branches">
             <header>
                 <div className="questExplorer-sectionLabel">Selected Quest</div>
-                <h3>Path & Outcomes</h3>
+                <h3>Quest Branches</h3>
             </header>
 
-            <section className="questExplorer-metadataSection" aria-labelledby="quest-paths-heading">
-                <h4 id="quest-paths-heading">Paths</h4>
+            <section className="questExplorer-metadataSection" aria-labelledby="quest-branches-heading">
+                <h4 id="quest-branches-heading">Branches</h4>
                 <PathSelector choices={chronicle.choices} onSelectChoice={onSelectChoice} />
             </section>
 
-            <section className="questExplorer-metadataSection" aria-labelledby="quest-selected-path-heading">
-                <h4 id="quest-selected-path-heading">Selected Path</h4>
+            <section className="questExplorer-metadataSection" aria-labelledby="quest-selected-branch-heading">
+                <h4 id="quest-selected-branch-heading">Selected Branch</h4>
                 {chronicle.selectedChoice ? (
                     <div className="questExplorer-pathPanel__selectedPath">
                         <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
@@ -48,9 +52,11 @@ export default function QuestMetadataPanel({
                         <PathBranches choice={chronicle.selectedChoice} onSelectQuest={onSelectQuest} />
                     </div>
                 ) : (
-                    <p className="questExplorer-muted">No path selected.</p>
+                    <p className="questExplorer-muted">No branch selected.</p>
                 )}
             </section>
+
+            <QuestReferenceTrail metadata={metadata} onSelectQuest={onSelectQuest} />
         </aside>
     );
 }

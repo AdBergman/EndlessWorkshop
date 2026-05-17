@@ -1,21 +1,17 @@
 import type {
     QuestChronicleModel,
-    QuestMetadataModel,
     QuestObjectiveGroupModel,
 } from "@/features/quests/questExplorerTypes";
 import {
     QuestLineGroups as LineGroups,
     QuestOutcomeBranches as OutcomeBranches,
     QuestProgressGateRows as ProgressGateRows,
-    QuestRecordContext,
-    QuestReferenceTrail,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 import QuestTranscript from "./QuestTranscript";
 
 type QuestChroniclePanelProps = {
     chronicle: QuestChronicleModel;
-    metadata: QuestMetadataModel;
     onSelectStep: (stepIndex: number) => void;
     onSelectQuest: (questKey: string) => void;
 };
@@ -118,7 +114,6 @@ function ProgressRequirementsSection({
 
 export default function QuestChroniclePanel({
     chronicle,
-    metadata,
     onSelectStep,
     onSelectQuest,
 }: QuestChroniclePanelProps) {
@@ -143,7 +138,7 @@ export default function QuestChroniclePanel({
                     <div className="questExplorer-sectionLabel" id="quest-objectives-heading">
                         Objectives
                     </div>
-                    <p className="questExplorer-muted">No objectives or progress gates are attached to this path.</p>
+                    <p className="questExplorer-muted">No objectives or progress gates are attached to this branch.</p>
                 </section>
             ) : null}
 
@@ -156,7 +151,7 @@ export default function QuestChroniclePanel({
                 <ObjectiveGroupSection
                     label="Objectives"
                     groups={objectiveGroups}
-                    emptyLabel="No objectives are attached to this path."
+                    emptyLabel="No objectives are attached to this branch."
                     onSelectStep={onSelectStep}
                 />
             ) : null}
@@ -185,10 +180,6 @@ export default function QuestChroniclePanel({
             ) : null}
 
             <QuestTranscript blocks={chronicle.transcriptBlocks} />
-
-            <QuestRecordContext metadata={metadata} />
-
-            <QuestReferenceTrail metadata={metadata} onSelectQuest={onSelectQuest} />
         </article>
     );
 }

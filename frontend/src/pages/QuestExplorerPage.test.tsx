@@ -235,7 +235,7 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         expect(mockedApiClient.getQuestExplorer).toHaveBeenCalledTimes(1);
         expect(screen.getByLabelText("Quest archive")).toBeInTheDocument();
-        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
+        expect(screen.getByLabelText("Quest branches")).toBeInTheDocument();
         expect(screen.getByText("The archive opens.")).toBeInTheDocument();
         expect(screen.getByText("The first record is restored.")).toBeInTheDocument();
         expect(screen.getByText("The trail is readable.")).toBeInTheDocument();
@@ -249,7 +249,7 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer("/quests?quest=Quest_A");
 
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
-        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
+        expect(screen.getByLabelText("Quest branches")).toBeInTheDocument();
 
         const modeSwitch = screen.getByLabelText("Quest Explorer mode");
         expect(within(modeSwitch).getByRole("button", { name: "Strategy" })).toHaveAttribute(
@@ -265,10 +265,10 @@ describe("QuestExplorerPage", () => {
         });
 
         const loreChronicle = screen.getByRole("article", { name: "First Quest" });
-        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Quest branches")).not.toBeInTheDocument();
         expect(within(loreChronicle).getByText("Lore Chronicle")).toBeInTheDocument();
         expect(within(loreChronicle).getByLabelText("Lore transcript")).toBeInTheDocument();
-        expect(within(loreChronicle).getByText("Story Paths")).toBeInTheDocument();
+        expect(within(loreChronicle).getByText("Story Branches")).toBeInTheDocument();
         expect(within(loreChronicle).getByText("Strategy Notes")).toBeInTheDocument();
 
         await user.click(within(modeSwitch).getByRole("button", { name: "Strategy" }));
@@ -276,7 +276,7 @@ describe("QuestExplorerPage", () => {
         await waitFor(() => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("mode=strategy");
         });
-        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
+        expect(screen.getByLabelText("Quest branches")).toBeInTheDocument();
     });
 
     it("reads lore mode from the URL while preserving canonical quest selection", async () => {
@@ -288,7 +288,7 @@ describe("QuestExplorerPage", () => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("quest=Quest_A");
         });
         expect(screen.getByLabelText("Quest archive")).toBeInTheDocument();
-        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Quest branches")).not.toBeInTheDocument();
         expect(screen.getByLabelText("Lore transcript")).toBeInTheDocument();
     });
 
@@ -300,21 +300,21 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         const archiveRail = screen.getByLabelText("Quest archive");
         const chronicle = screen.getByRole("article", { name: "First Quest" });
-        const pathPanel = screen.getByLabelText("Path and outcomes");
+        const pathPanel = screen.getByLabelText("Quest branches");
 
         expect(within(archiveRail).getByLabelText("Search quest archive")).toBeInTheDocument();
         expect(within(chronicle).getByText("Strategic Chronicle")).toBeInTheDocument();
-        expect(within(chronicle).getByText("Record Context")).toBeInTheDocument();
-        expect(within(chronicle).getByText("Reference Trail")).toBeInTheDocument();
-        expect(within(pathPanel).getByText("Paths")).toBeInTheDocument();
-        expect(within(pathPanel).getByText("Selected Path")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Record Context")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Reference Trail")).not.toBeInTheDocument();
+        expect(within(pathPanel).getByText("Branches")).toBeInTheDocument();
+        expect(within(pathPanel).getByText("Selected Branch")).toBeInTheDocument();
         expect(within(pathPanel).queryByText("Record Context")).not.toBeInTheDocument();
-        expect(within(pathPanel).queryByText("Reference Trail")).not.toBeInTheDocument();
+        expect(within(pathPanel).getByText("Reference Trail")).toBeInTheDocument();
 
         await user.click(within(screen.getByLabelText("Quest Explorer mode")).getByRole("button", { name: "Lore" }));
 
         const loreChronicle = await screen.findByRole("article", { name: "First Quest" });
-        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Quest branches")).not.toBeInTheDocument();
         expect(within(loreChronicle).getByText("Lore Chronicle")).toBeInTheDocument();
         expect(within(loreChronicle).getByLabelText("Lore transcript")).toBeInTheDocument();
     });
@@ -519,9 +519,9 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Archive Start" })).toBeInTheDocument();
         const chronicle = screen.getByRole("article", { name: "Archive Start" });
-        const pathPanel = screen.getByLabelText("Path and outcomes");
-        expect(within(chronicle).getByText("Reference Trail")).toBeInTheDocument();
-        expect(within(pathPanel).queryByText("Reference Trail")).not.toBeInTheDocument();
+        const pathPanel = screen.getByLabelText("Quest branches");
+        expect(within(chronicle).queryByText("Reference Trail")).not.toBeInTheDocument();
+        expect(within(pathPanel).getByText("Reference Trail")).toBeInTheDocument();
         expect(screen.queryByText("Quest graph next")).not.toBeInTheDocument();
         expect(screen.queryByText("Converges into")).not.toBeInTheDocument();
         expect(screen.getAllByText("A Bitter Truth").length).toBeGreaterThanOrEqual(4);
@@ -577,12 +577,12 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer("/quests?quest=Quest_A");
 
         expect(await screen.findByRole("heading", { name: "Not of the Chorus" })).toBeInTheDocument();
-        const pathPanel = screen.getByLabelText("Path and outcomes");
+        const pathPanel = screen.getByLabelText("Quest branches");
         const chronicle = screen.getByRole("article", { name: "Not of the Chorus" });
-        expect(within(pathPanel).getByText("Paths")).toBeInTheDocument();
-        expect(within(pathPanel).getByText("Selected Path")).toBeInTheDocument();
-        expect(within(chronicle).queryByText("Paths")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Selected Path")).not.toBeInTheDocument();
+        expect(within(pathPanel).getByText("Branches")).toBeInTheDocument();
+        expect(within(pathPanel).getByText("Selected Branch")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Branches")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Selected Branch")).not.toBeInTheDocument();
         expect(screen.getByText("Progress Gates")).toBeInTheDocument();
         expect(screen.queryByText("Progress Requirements")).not.toBeInTheDocument();
         expect(screen.queryByText("Selected Progress Gate")).not.toBeInTheDocument();
@@ -687,7 +687,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Step 1")).not.toBeInTheDocument();
         expect(screen.getAllByText("Use the Holy Oculum to observe its abilities.").length).toBeGreaterThanOrEqual(1);
 
-        const pathsSection = within(screen.getByLabelText("Path and outcomes")).getByText("Paths").closest("section");
+        const pathsSection = within(screen.getByLabelText("Quest branches")).getByText("Branches").closest("section");
         expect(pathsSection).not.toBeNull();
         expect(within(pathsSection!).queryByRole("button", { name: /Forgotten Power/i })).not.toBeInTheDocument();
         expect(within(pathsSection!).getByRole("button", { name: /^Pious$/i })).toBeInTheDocument();

@@ -24,12 +24,12 @@ export default function QuestStrategyLayout({
         <>
             <QuestChroniclePanel
                 chronicle={chronicle}
-                metadata={metadata}
                 onSelectStep={onSelectStep}
                 onSelectQuest={onSelectQuest}
             />
             <QuestMetadataPanel
                 chronicle={chronicle}
+                metadata={metadata}
                 onSelectChoice={onSelectChoice}
                 onSelectQuest={onSelectQuest}
             />
