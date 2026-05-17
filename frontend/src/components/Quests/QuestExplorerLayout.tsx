@@ -61,12 +61,13 @@ export default function QuestExplorerLayout({ viewModel }: QuestExplorerLayoutPr
             <div className="questExplorer-mainPane">
                 <QuestChroniclePanel
                     chronicle={viewModel.chronicle}
-                    onSelectChoice={viewModel.actions.selectChoice}
                     onSelectStep={viewModel.actions.selectStep}
                     onSelectQuest={viewModel.actions.selectQuest}
                 />
                 <QuestMetadataPanel
+                    chronicle={viewModel.chronicle}
                     metadata={viewModel.metadata}
+                    onSelectChoice={viewModel.actions.selectChoice}
                     onSelectQuest={viewModel.actions.selectQuest}
                 />
             </div>

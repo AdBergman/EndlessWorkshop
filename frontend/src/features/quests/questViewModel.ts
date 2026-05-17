@@ -34,10 +34,29 @@ type QuestLinkBuildContext = {
     titleCounts: Record<string, number>;
 };
 
+type QuestRailGroupContext = {
+    groupKey: string;
+    baseQuestlineLabel: string;
+    variantLabel: string;
+    isAlternateVariant: boolean;
+    choiceDepth: number;
+};
+
+type QuestRailGroup = {
+    groupKey: string;
+    context: QuestRailGroupContext | null;
+    quests: QuestDto[];
+    variantLabels: Set<string>;
+};
+
+const PLAYER_STANCE_LABELS = ["Pious", "Open", "Bold"] as const;
+
 const clean = (value: string | null | undefined): string => (value ?? "").trim();
 
 const cleanLines = (lines: readonly string[] | null | undefined): string[] =>
     (lines ?? []).map(clean).filter((line) => line.length > 0);
+
+const normalizeLabel = (value: string | null | undefined): string => clean(value).toLowerCase();
 
 const compareNumber = (left: number | null | undefined, right: number | null | undefined): number => {
     const leftValue = typeof left === "number" && Number.isFinite(left) ? left : Number.MAX_SAFE_INTEGER;
@@ -80,18 +99,20 @@ function getStepTitle(step: Pick<QuestStepDto, "stepIndex" | "objectiveText">): 
     return clean(step.objectiveText) || `Step ${step.stepIndex + 1}`;
 }
 
+function compareQuestOrder(left: QuestDto, right: QuestDto): number {
+    return (
+        compareNumber(left.chapterIndex, right.chapterIndex) ||
+        compareNumber(left.chapterNumber, right.chapterNumber) ||
+        compareNumber(left.questSequenceIndex, right.questSequenceIndex) ||
+        compareString(left.inferredQuestLineKey, right.inferredQuestLineKey) ||
+        compareString(left.branchGroupKey, right.branchGroupKey) ||
+        compareString(getQuestTitle(left), getQuestTitle(right)) ||
+        compareString(left.questKey, right.questKey)
+    );
+}
+
 function sortQuests(quests: readonly QuestDto[]): QuestDto[] {
-    return [...quests].sort((left, right) => {
-        return (
-            compareNumber(left.chapterIndex, right.chapterIndex) ||
-            compareNumber(left.chapterNumber, right.chapterNumber) ||
-            compareNumber(left.questSequenceIndex, right.questSequenceIndex) ||
-            compareString(left.inferredQuestLineKey, right.inferredQuestLineKey) ||
-            compareString(left.branchGroupKey, right.branchGroupKey) ||
-            compareString(getQuestTitle(left), getQuestTitle(right)) ||
-            compareString(left.questKey, right.questKey)
-        );
-    });
+    return [...quests].sort(compareQuestOrder);
 }
 
 function sortChoices(choices: readonly QuestChoiceDto[]): QuestChoiceDto[] {
@@ -148,8 +169,125 @@ function compactEntityLabel(value: string | null | undefined): string | null {
 
     return humanizeQuestKey(label)
         .replace(/^Faction /, "")
+        .replace(/^Faction Quest /, "")
         .replace(/^Quest Line /, "")
         .trim();
+}
+
+function parseQuestlineVariant(questlineKey: string): {
+    baseQuestlineKey: string;
+    baseQuestlineLabel: string;
+    variantLabel: string;
+    isAlternateVariant: boolean;
+} {
+    const numberedMatch = clean(questlineKey).match(/^(.+?)([0-9]+)$/);
+    if (!numberedMatch) {
+        return {
+            baseQuestlineKey: questlineKey,
+            baseQuestlineLabel: humanizeQuestKey(questlineKey),
+            variantLabel: "Main questline",
+            isAlternateVariant: false,
+        };
+    }
+
+    const baseQuestlineKey = numberedMatch[1] ?? questlineKey;
+    const variantNumber = Number.parseInt(numberedMatch[2] ?? "", 10);
+    const variantLabel = Number.isFinite(variantNumber)
+        ? `Alternate questline ${variantNumber}`
+        : "Alternate questline";
+
+    return {
+        baseQuestlineKey,
+        baseQuestlineLabel: humanizeQuestKey(baseQuestlineKey),
+        variantLabel,
+        isAlternateVariant: true,
+    };
+}
+
+function parseMajorFactionRailContext(quest: QuestDto): QuestRailGroupContext | null {
+    const match = clean(quest.questKey).match(/^FactionQuest_([^_]+)_Chapter([0-9]+[A-Za-z]?)(?:_(.+))?$/i);
+    if (!match) return null;
+
+    const questlineKey = match[1];
+    const chapterKey = match[2];
+    if (!questlineKey || !chapterKey) return null;
+
+    const titleKey = normalizeLabel(getQuestTitle(quest));
+    if (!titleKey) return null;
+
+    const variant = parseQuestlineVariant(questlineKey);
+    const nodeKey = match[3] ?? "";
+    const choiceDepth = Array.from(nodeKey.matchAll(/Choice[0-9]+/gi)).length;
+    const groupKey = [
+        "majorFaction",
+        variant.baseQuestlineKey.toLowerCase(),
+        chapterKey.toLowerCase(),
+        titleKey,
+    ].join(":");
+
+    return {
+        groupKey,
+        baseQuestlineLabel: variant.baseQuestlineLabel,
+        variantLabel: variant.variantLabel,
+        isAlternateVariant: variant.isAlternateVariant,
+        choiceDepth,
+    };
+}
+
+function isGenericPathLabel(label: string): boolean {
+    return /^(?:choice|branch|path)\s+[0-9a-z]+$/i.test(clean(label));
+}
+
+function formatGenericPathLabel(label: string): string | null {
+    const match = clean(label).match(/^(?:choice|branch|path)\s+([0-9a-z]+)$/i);
+    if (!match) return null;
+
+    const suffix = match[1];
+    if (!suffix) return null;
+    if (/^[0-9]+$/.test(suffix)) return `Path ${Number.parseInt(suffix, 10)}`;
+
+    return `Path ${suffix.toUpperCase()}`;
+}
+
+function isRedundantLabel(label: string, compareWith: string | null | undefined): boolean {
+    const normalizedLabel = normalizeLabel(label);
+    const normalizedCompare = normalizeLabel(compareWith);
+
+    return Boolean(normalizedLabel && normalizedCompare && normalizedLabel === normalizedCompare);
+}
+
+function getStanceLabel(value: string | null | undefined): string | null {
+    const text = clean(value);
+    if (!text) return null;
+
+    const lowerText = text.toLowerCase();
+    return PLAYER_STANCE_LABELS.find((label) =>
+        new RegExp(`\\b${label.toLowerCase()}\\b`).test(lowerText)
+    ) ?? null;
+}
+
+function getQuestPathContextLabel(quest: QuestDto, options: { allowGeneric?: boolean } = {}): string | null {
+    const title = getQuestTitle(quest);
+    const branchLabel = clean(quest.branchLabel);
+
+    if (branchLabel && !isGenericPathLabel(branchLabel) && !isRedundantLabel(branchLabel, title)) {
+        return branchLabel;
+    }
+
+    if (branchLabel && options.allowGeneric) {
+        return formatGenericPathLabel(branchLabel);
+    }
+
+    const branchGroupLabel = compactEntityLabel(quest.branchGroupKey);
+    if (branchGroupLabel && !isGenericPathLabel(branchGroupLabel) && !isRedundantLabel(branchGroupLabel, title)) {
+        return branchGroupLabel;
+    }
+
+    if (branchGroupLabel && options.allowGeneric) {
+        return formatGenericPathLabel(branchGroupLabel);
+    }
+
+    return null;
 }
 
 function buildQuestDisambiguator(quest: QuestDto, titleCounts: Record<string, number>): string | null {
@@ -157,20 +295,19 @@ function buildQuestDisambiguator(quest: QuestDto, titleCounts: Record<string, nu
 
     const parts = [
         formatChapterLabel(quest),
-        typeof quest.questSequenceIndex === "number" ? `Seq ${quest.questSequenceIndex}` : null,
-        clean(quest.branchLabel) || compactEntityLabel(quest.branchGroupKey),
+        getQuestPathContextLabel(quest, { allowGeneric: true }),
         compactEntityLabel(quest.inferredFactionKey) || compactEntityLabel(quest.inferredQuestLineKey),
     ].filter((part): part is string => Boolean(part));
     const uniqueParts = parts.filter((part, index) => parts.indexOf(part) === index);
 
-    return uniqueParts.slice(0, 3).join(" · ") || humanizeQuestKey(quest.questKey);
+    return uniqueParts.slice(0, 3).join(" · ") || formatChapterLabel(quest) || null;
 }
 
 const questLinkProvenanceLabels: Record<QuestGraphLinkProvenance, string> = {
-    questPrevious: "Quest previous",
-    questNext: "Quest graph",
-    choiceNext: "Path",
-    stepNext: "Step",
+    questPrevious: "Previous",
+    questNext: "Continues",
+    choiceNext: "Leads to",
+    stepNext: "Continues",
     stepFailure: "Failure",
     converges: "Converges",
 };
@@ -229,42 +366,217 @@ function buildRequirementGroups(
 
 function buildQuestFlags(quest: QuestDto): string[] {
     return [
-        quest.mandatory ? "Mandatory" : null,
-        quest.branchStart ? "Branch start" : null,
-        quest.branchEnd ? "Branch end" : null,
+        quest.mandatory ? "Required" : null,
         quest.keyNarrativeBeat ? "Key beat" : null,
         quest.narrativeVictoryPathChoice ? "Victory path" : null,
     ].filter((flag): flag is string => Boolean(flag));
+}
+
+function buildQuestGroupFlags(quests: readonly QuestDto[]): string[] {
+    return [
+        quests.some((quest) => quest.mandatory) ? "Required" : null,
+        quests.some((quest) => quest.keyNarrativeBeat) ? "Key beat" : null,
+        quests.some((quest) => quest.narrativeVictoryPathChoice) ? "Victory path" : null,
+    ].filter((flag): flag is string => Boolean(flag));
+}
+
+function buildRailGroups(quests: readonly QuestDto[]): QuestRailGroup[] {
+    const groupsByKey = new Map<string, QuestRailGroup>();
+    const orderedGroupKeys: string[] = [];
+
+    quests.forEach((quest) => {
+        const context = parseMajorFactionRailContext(quest);
+        const groupKey = context?.groupKey ?? `quest:${quest.questKey}`;
+        const existingGroup = groupsByKey.get(groupKey);
+
+        if (!existingGroup) {
+            orderedGroupKeys.push(groupKey);
+            groupsByKey.set(groupKey, {
+                groupKey,
+                context,
+                quests: [quest],
+                variantLabels: new Set(context ? [context.variantLabel] : []),
+            });
+            return;
+        }
+
+        existingGroup.quests.push(quest);
+        if (context) existingGroup.variantLabels.add(context.variantLabel);
+    });
+
+    return orderedGroupKeys
+        .map((groupKey) => groupsByKey.get(groupKey))
+        .filter((group): group is QuestRailGroup => Boolean(group));
+}
+
+function compareRailRepresentative(left: QuestDto, right: QuestDto): number {
+    const leftContext = parseMajorFactionRailContext(left);
+    const rightContext = parseMajorFactionRailContext(right);
+    const leftBranchDepth = clean(left.branchGroupKey) ? 1 : 0;
+    const rightBranchDepth = clean(right.branchGroupKey) ? 1 : 0;
+
+    return (
+        Number(right.mandatory) - Number(left.mandatory) ||
+        Number(leftContext?.isAlternateVariant ?? false) - Number(rightContext?.isAlternateVariant ?? false) ||
+        compareNumber(leftContext?.choiceDepth ?? 0, rightContext?.choiceDepth ?? 0) ||
+        compareNumber(leftBranchDepth, rightBranchDepth) ||
+        compareQuestOrder(left, right)
+    );
+}
+
+function selectRailRepresentative(group: QuestRailGroup): QuestDto {
+    return [...group.quests].sort(compareRailRepresentative)[0] ?? group.quests[0];
+}
+
+function buildRailSubtitle(group: QuestRailGroup, representative: QuestDto): string | null {
+    const parts = [
+        group.context?.baseQuestlineLabel ||
+            compactEntityLabel(representative.inferredQuestLineKey) ||
+            compactEntityLabel(representative.inferredFactionKey) ||
+            clean(representative.categoryType) ||
+            null,
+        group.quests.length > 1 ? `${group.quests.length} records` : null,
+    ].filter((part): part is string => Boolean(part));
+
+    return parts.join(" · ") || null;
 }
 
 function buildProgressionRail(
     quests: readonly QuestDto[],
     selectedQuestKey: string | null
 ): QuestProgressionRailModel {
+    const groups = buildRailGroups(quests);
+    const items = groups.map((group) => {
+        const representative = selectRailRepresentative(group);
+        const memberQuestKeys = group.quests.map((quest) => quest.questKey);
+
+        return {
+            questKey: representative.questKey,
+            memberQuestKeys,
+            memberCount: memberQuestKeys.length,
+            title: getQuestTitle(representative),
+            chapterLabel: formatChapterLabel(representative),
+            subtitle: buildRailSubtitle(group, representative),
+            branchLabel: group.variantLabels.size > 1 ? `${group.variantLabels.size} variants` : null,
+            flags: group.quests.length > 1 ? buildQuestGroupFlags(group.quests) : buildQuestFlags(representative),
+            isSelected: selectedQuestKey ? memberQuestKeys.includes(selectedQuestKey) : false,
+        };
+    });
+
     return {
         selectedQuestKey,
-        questCount: quests.length,
-        items: quests.map((quest) => ({
-            questKey: quest.questKey,
-            title: getQuestTitle(quest),
-            chapterLabel: formatChapterLabel(quest),
-            subtitle: clean(quest.inferredQuestLineKey) || clean(quest.categoryType) || null,
-            branchLabel: clean(quest.branchLabel) || clean(quest.branchGroupKey) || null,
-            flags: buildQuestFlags(quest),
-            isSelected: quest.questKey === selectedQuestKey,
-        })),
+        questCount: items.length,
+        items,
     };
+}
+
+function extractChoiceNumber(choiceKey: string | null | undefined): number | null {
+    const match = clean(choiceKey).match(/Choice0*([0-9]+)/i);
+    if (!match) return null;
+
+    const value = Number.parseInt(match[1], 10);
+    return Number.isFinite(value) ? value : null;
+}
+
+function buildEffectChoicePathLabels(
+    choices: readonly QuestChoiceDto[],
+    linkContext: QuestLinkBuildContext,
+    questTitle: string
+): Map<number, string> {
+    return choices.reduce<Map<number, string>>((acc, choice) => {
+        if (!/EffectChoiceDefinition$/i.test(clean(choice.choiceKey))) return acc;
+
+        const choiceNumber = extractChoiceNumber(choice.choiceKey);
+        if (choiceNumber === null || acc.has(choiceNumber)) return acc;
+
+        const targetLabels = choice.nextQuestKeys
+            .map(clean)
+            .map((questKey) => linkContext.questsByKey[questKey])
+            .filter((quest): quest is QuestDto => Boolean(quest))
+            .map((quest) => getStanceLabel(getQuestTitle(quest)) ?? getQuestTitle(quest))
+            .filter((label) => label && !isRedundantLabel(label, questTitle) && !isGenericPathLabel(label));
+
+        const semanticLabel = targetLabels.find((label) => getStanceLabel(label)) ?? targetLabels[0] ?? null;
+        if (semanticLabel) acc.set(choiceNumber, semanticLabel);
+
+        return acc;
+    }, new Map<number, string>());
+}
+
+function buildDistinctNextQuestLabels(
+    choice: QuestChoiceDto,
+    linkContext: QuestLinkBuildContext,
+    questTitle: string
+): string[] {
+    const labels = choice.nextQuestKeys
+        .map(clean)
+        .map((questKey) => linkContext.questsByKey[questKey])
+        .filter((quest): quest is QuestDto => Boolean(quest))
+        .map((quest) => getQuestTitle(quest))
+        .filter((label) => label && !isRedundantLabel(label, questTitle) && !isGenericPathLabel(label));
+
+    return labels.filter((label, index) => labels.indexOf(label) === index);
+}
+
+function formatPathFallback(index: number): string {
+    const letter = String.fromCharCode("A".charCodeAt(0) + index);
+    return index >= 0 && index < 26 ? `Path ${letter}` : `Path ${index + 1}`;
+}
+
+function buildPathTitle(
+    choice: QuestChoiceDto,
+    index: number,
+    quest: QuestDto,
+    linkContext: QuestLinkBuildContext,
+    effectPathLabels: ReadonlyMap<number, string>
+): string {
+    const questTitle = getQuestTitle(quest);
+    const rawChoiceTitle = getChoiceTitle(choice, index);
+    const stanceLabel = getStanceLabel(rawChoiceTitle);
+    if (stanceLabel) return stanceLabel;
+
+    if (!isRedundantLabel(rawChoiceTitle, questTitle) && !isGenericPathLabel(rawChoiceTitle)) {
+        return rawChoiceTitle;
+    }
+
+    const choiceNumber = extractChoiceNumber(choice.choiceKey);
+    const effectPathLabel = choiceNumber === null ? null : effectPathLabels.get(choiceNumber) ?? null;
+    if (effectPathLabel) return effectPathLabel;
+
+    const nextQuestLabels = buildDistinctNextQuestLabels(choice, linkContext, questTitle);
+    if (nextQuestLabels.length === 1) return nextQuestLabels[0] ?? formatPathFallback(index);
+
+    return formatPathFallback(index);
+}
+
+function buildPathSubtitle(choice: QuestChoiceDto, linkContext: QuestLinkBuildContext, questTitle: string): string | null {
+    const objectiveTitle = choice.steps
+        .map(getStepTitle)
+        .map(clean)
+        .find((title) => title.length > 0 && !/^Step\s+\d+$/i.test(title));
+    if (objectiveTitle) return objectiveTitle;
+
+    const nextQuestLabels = buildDistinctNextQuestLabels(choice, linkContext, questTitle);
+    if (nextQuestLabels.length === 1) return `Leads to ${nextQuestLabels[0]}`;
+    if (nextQuestLabels.length > 1) return `${nextQuestLabels.length} outcomes`;
+
+    return null;
 }
 
 function buildChoiceModel(
     choice: QuestChoiceDto,
     index: number,
+    quest: QuestDto,
     selectedChoiceKey: string | null,
-    linkContext: QuestLinkBuildContext
+    linkContext: QuestLinkBuildContext,
+    effectPathLabels: ReadonlyMap<number, string>
 ): QuestChoiceSummaryModel {
+    const questTitle = getQuestTitle(quest);
+
     return {
         choiceKey: choice.choiceKey,
-        title: getChoiceTitle(choice, index),
+        title: buildPathTitle(choice, index, quest, linkContext, effectPathLabels),
+        subtitle: buildPathSubtitle(choice, linkContext, questTitle),
         descriptionLines: cleanLines(choice.descriptionLines),
         requirementGroups: buildRequirementGroups(choice.choiceKey, [
             { label: "Completion", lines: choice.completionPrerequisiteLines },
@@ -350,7 +662,7 @@ function buildObjectiveGroupModels(
                 forbiddenLines: variant.forbiddenLines,
                 rewardLines: variant.rewardLines,
             })),
-            debugLabel: isProgressGate ? `${group.stepIndexes.length} gate variants` : null,
+            summaryLabel: isProgressGate ? `${group.stepIndexes.length} thresholds` : null,
             isSelected: !isProgressGate && group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
         };
     });
@@ -430,30 +742,24 @@ function buildMetadata(
     quest: QuestDto,
     linkContext: QuestLinkBuildContext
 ): QuestMetadataModel {
-    const branchLabel = clean(quest.branchLabel);
-    const branchGroupKey = clean(quest.branchGroupKey);
+    const pathLabel = getQuestPathContextLabel(quest);
     const overviewItems = [
         { label: "Chapter", value: formatChapterLabel(quest) },
-        {
-            label: "Sequence",
-            value: typeof quest.questSequenceIndex === "number" ? String(quest.questSequenceIndex) : null,
-        },
         { label: "Category", value: clean(quest.categoryType) || clean(quest.categoryKey) || null },
     ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
     const archiveItems = [
-        { label: "Archive ID", value: clean(quest.questKey) ? humanizeQuestKey(quest.questKey) : null },
-        {
-            label: "Quest line",
-            value: clean(quest.inferredQuestLineKey) ? humanizeQuestKey(quest.inferredQuestLineKey ?? "") : null,
-        },
         {
             label: "Faction",
-            value: clean(quest.inferredFactionKey) ? humanizeQuestKey(quest.inferredFactionKey ?? "") : null,
+            value: compactEntityLabel(quest.inferredFactionKey),
         },
         {
-            label: "Branch",
-            value: branchLabel || (branchGroupKey ? humanizeQuestKey(branchGroupKey) : null),
+            label: "Quest line",
+            value: compactEntityLabel(quest.inferredQuestLineKey),
+        },
+        {
+            label: "Path",
+            value: pathLabel,
         },
     ].filter((item): item is { label: string; value: string } => Boolean(item.value));
 
@@ -528,8 +834,21 @@ export function buildQuestExplorerViewModel({
         };
     }
 
+    const selectedQuest = resolved.quest;
+    const effectPathLabels = buildEffectChoicePathLabels(
+        selectedQuest.choices,
+        linkContext,
+        getQuestTitle(selectedQuest)
+    );
     const choiceModels = resolved.choices.map((choice, index) =>
-        buildChoiceModel(choice, index, resolved.selection.choiceKey, linkContext)
+        buildChoiceModel(
+            choice,
+            index,
+            selectedQuest,
+            resolved.selection.choiceKey,
+            linkContext,
+            effectPathLabels
+        )
     );
     const stepModels = resolved.steps.map((step) =>
         buildStepModel(step, resolved.selection.stepIndex, linkContext)
@@ -546,13 +865,13 @@ export function buildQuestExplorerViewModel({
         objectiveGroups.find((group) => group.kind === "objective") ??
         null;
     const transcriptIdentities = [
-        ...resolved.quest.rootDialogBlockIdentities,
+        ...selectedQuest.rootDialogBlockIdentities,
         ...(resolved.step?.dialogBlockIdentities ?? []),
     ];
     const chronicle: QuestChronicleModel = {
-        questKey: resolved.quest.questKey,
-        title: getQuestTitle(resolved.quest),
-        descriptionLines: cleanLines(resolved.quest.descriptionLines),
+        questKey: selectedQuest.questKey,
+        title: getQuestTitle(selectedQuest),
+        descriptionLines: cleanLines(selectedQuest.descriptionLines),
         selectedChoiceKey: resolved.selection.choiceKey,
         selectedStepIndex: resolved.selection.stepIndex,
         choices: choiceModels,
@@ -569,6 +888,6 @@ export function buildQuestExplorerViewModel({
         selection: resolved.selection,
         rail,
         chronicle,
-        metadata: buildMetadata(resolved.quest, linkContext),
+        metadata: buildMetadata(selectedQuest, linkContext),
     };
 }

@@ -33,6 +33,8 @@ export type QuestLinkModel = {
 
 export type QuestProgressionRailItemModel = {
     questKey: string;
+    memberQuestKeys: string[];
+    memberCount: number;
     title: string;
     chapterLabel: string | null;
     subtitle: string | null;
@@ -50,6 +52,7 @@ export type QuestProgressionRailModel = {
 export type QuestChoiceSummaryModel = {
     choiceKey: string;
     title: string;
+    subtitle: string | null;
     descriptionLines: string[];
     requirementGroups: QuestLineGroupModel[];
     rewardLines: string[];
@@ -91,7 +94,7 @@ export type QuestObjectiveGroupModel = {
     nextQuestLink: QuestLinkModel | null;
     failQuestLink: QuestLinkModel | null;
     gateRows: QuestProgressGateRowModel[];
-    debugLabel: string | null;
+    summaryLabel: string | null;
     isSelected: boolean;
 };
 

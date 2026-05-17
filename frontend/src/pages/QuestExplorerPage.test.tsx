@@ -235,7 +235,7 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         expect(mockedApiClient.getQuestExplorer).toHaveBeenCalledTimes(1);
         expect(screen.getByLabelText("Quest progression")).toBeInTheDocument();
-        expect(screen.getByLabelText("Quest metadata")).toBeInTheDocument();
+        expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
         expect(screen.getByText("The archive opens.")).toBeInTheDocument();
         expect(screen.getByText("The first record is restored.")).toBeInTheDocument();
         expect(screen.getByText("The trail is readable.")).toBeInTheDocument();
@@ -268,6 +268,73 @@ describe("QuestExplorerPage", () => {
         await waitFor(() => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("/quests?quest=Quest_A");
         });
+    });
+
+    it("groups major faction rail rows while preserving hidden member deep links", async () => {
+        const hiddenMemberQuestKey = "FactionQuest_Necrophage_Chapter06_Step03_Choice01";
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "FactionQuest_Necrophage_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    descriptionLines: ["Canonical entry."],
+                    categoryType: "MajorFaction",
+                    mandatory: true,
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_Necrophage",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+                quest({
+                    questKey: hiddenMemberQuestKey,
+                    displayName: "A Bitter Truth",
+                    descriptionLines: ["Hidden member entry."],
+                    categoryType: "MajorFaction",
+                    mandatory: true,
+                    chapterNumber: 6,
+                    branchGroupKey: "FactionQuest_Necrophage_Chapter06_Step03",
+                    inferredQuestLineKey: "FactionQuest_Necrophage",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+                quest({
+                    questKey: "FactionQuest_Necrophage02_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    descriptionLines: ["Alternate entry."],
+                    categoryType: "MajorFaction",
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_Necrophage02",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+                quest({
+                    questKey: "FactionQuest_KinOfSheredyn_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "MajorFaction",
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_KinOfSheredyn",
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+                quest({
+                    questKey: "Quest_Curiosity_A_Branch01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "Curiosity",
+                    chapterNumber: 6,
+                    choices: [],
+                    rootDialogBlockIdentities: [],
+                }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer(`/quests?quest=${hiddenMemberQuestKey}`);
+
+        expect(await screen.findByText("Hidden member entry.")).toBeInTheDocument();
+        const rail = screen.getByLabelText("Quest progression");
+        expect(within(rail).getAllByRole("button", { name: /A Bitter Truth/i })).toHaveLength(3);
+        expect(within(rail).getByText("Necrophage · 3 records")).toBeInTheDocument();
+        expect(within(rail).getByText("2 variants")).toBeInTheDocument();
     });
 
     it("renders provenance and compact disambiguators for duplicate quest link titles", async () => {
@@ -315,16 +382,15 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer("/quests?quest=Quest_A");
 
         expect(await screen.findByRole("heading", { name: "Archive Start" })).toBeInTheDocument();
-        expect(screen.getByText("Quest graph next")).toBeInTheDocument();
-        expect(screen.getByText("Converges into")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Path and outcomes")).getByText("Reference Trail")).toBeInTheDocument();
+        expect(screen.queryByText("Quest graph next")).not.toBeInTheDocument();
+        expect(screen.queryByText("Converges into")).not.toBeInTheDocument();
         expect(screen.getAllByText("A Bitter Truth").length).toBeGreaterThanOrEqual(4);
-        expect(screen.getAllByText("Chapter 2 · Seq 4 · Branch A").length).toBeGreaterThanOrEqual(2);
-        expect(screen.getAllByText("Chapter 2 · Seq 5 · Branch B").length).toBeGreaterThanOrEqual(3);
-        expect(screen.getByText("Quest graph")).toBeInTheDocument();
-        expect(screen.getByText("Path")).toBeInTheDocument();
-        expect(screen.getByText("Step")).toBeInTheDocument();
-        expect(screen.getByText("Failure")).toBeInTheDocument();
-        expect(screen.getByText("Converges")).toBeInTheDocument();
+        expect(screen.getAllByText("Chapter 2 · Path A · Kin").length).toBeGreaterThanOrEqual(2);
+        expect(screen.getAllByText("Chapter 2 · Path B · Kin").length).toBeGreaterThanOrEqual(3);
+        expect(screen.queryByText("Quest graph")).not.toBeInTheDocument();
+        expect(screen.queryByText("Step")).not.toBeInTheDocument();
+        expect(screen.queryByText("Converges")).not.toBeInTheDocument();
     });
 
     it("renders repeated threshold steps as one progress gate ladder", async () => {
@@ -372,16 +438,23 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer("/quests?quest=Quest_A");
 
         expect(await screen.findByRole("heading", { name: "Not of the Chorus" })).toBeInTheDocument();
-        expect(screen.getByText("Paths")).toBeInTheDocument();
-        expect(screen.getByText("Selected Path")).toBeInTheDocument();
-        expect(screen.getByText("Progress Requirements")).toBeInTheDocument();
-        expect(screen.queryByText("Progress Gates")).not.toBeInTheDocument();
+        const pathPanel = screen.getByLabelText("Path and outcomes");
+        const chronicle = screen.getByRole("article", { name: "Not of the Chorus" });
+        expect(within(pathPanel).getByText("Paths")).toBeInTheDocument();
+        expect(within(pathPanel).getByText("Selected Path")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Paths")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Selected Path")).not.toBeInTheDocument();
+        expect(screen.getByText("Progress Gates")).toBeInTheDocument();
+        expect(screen.queryByText("Progress Requirements")).not.toBeInTheDocument();
         expect(screen.queryByText("Selected Progress Gate")).not.toBeInTheDocument();
-        expect(screen.getAllByText("Attempt to dislodge Xenos' memories.")).toHaveLength(1);
+        expect(screen.getAllByText("Attempt to dislodge Xenos' memories.").length).toBeGreaterThanOrEqual(1);
         expect(screen.queryByRole("button", { name: /Attempt to dislodge Xenos' memories/i })).not.toBeInTheDocument();
-        expect(screen.getByText("2 gate variants")).toBeInTheDocument();
-        expect(screen.getByText("Gate 1")).toBeInTheDocument();
-        expect(screen.getByText("Gate 2")).toBeInTheDocument();
+        expect(screen.getByText("2 thresholds")).toBeInTheDocument();
+        expect(screen.queryByText("2 gate variants")).not.toBeInTheDocument();
+        expect(screen.getByText("Threshold 1")).toBeInTheDocument();
+        expect(screen.getByText("Threshold 2")).toBeInTheDocument();
+        expect(screen.queryByText("Gate 1")).not.toBeInTheDocument();
+        expect(screen.queryByText("Gate 2")).not.toBeInTheDocument();
         expect(screen.getByText("Explore world: 1%")).toBeInTheDocument();
         expect(screen.getAllByText("Explore world: 20%").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText("Explore world: 21%")).toBeInTheDocument();
@@ -399,7 +472,7 @@ describe("QuestExplorerPage", () => {
                             choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01EffectChoiceDefinition",
                             displayName: "Forgotten Power",
                             choiceOrder: 0,
-                            nextQuestKeys: ["Quest_Internal"],
+                            nextQuestKeys: ["Quest_Pious"],
                             steps: [
                                 step({
                                     stepIndex: 0,
@@ -407,7 +480,7 @@ describe("QuestExplorerPage", () => {
                                     descriptionLines: [],
                                     completionPrerequisiteLines: [],
                                     selectionPrerequisiteLines: [],
-                                    nextQuestKey: "Quest_Internal",
+                                    nextQuestKey: "Quest_Pious",
                                     dialogBlockIdentities: [],
                                 }),
                             ],
@@ -446,14 +519,14 @@ describe("QuestExplorerPage", () => {
                         }),
                         choice({
                             choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice02ChoiceDefinition",
-                            displayName: "Pious Interpretation",
+                            displayName: "Open Interpretation",
                             choiceOrder: 3,
                             nextQuestKeys: ["Quest_Other"],
                             steps: [
                                 step({
                                     stepIndex: 2,
-                                    objectiveText: "Choose the pious interpretation.",
-                                    descriptionLines: ["Choose the pious interpretation."],
+                                    objectiveText: "Choose the open interpretation.",
+                                    descriptionLines: ["Choose the open interpretation."],
                                     completionPrerequisiteLines: ["Property requirement: Faith = 2"],
                                     nextQuestKey: "Quest_Other",
                                     dialogBlockIdentities: [],
@@ -462,6 +535,7 @@ describe("QuestExplorerPage", () => {
                         }),
                     ],
                 }),
+                quest({ questKey: "Quest_Pious", displayName: "Pious", choices: [], rootDialogBlockIdentities: [] }),
                 quest({ questKey: "Quest_Next", displayName: "Next Target", choices: [], rootDialogBlockIdentities: [] }),
                 quest({ questKey: "Quest_Other", displayName: "Other Target", choices: [], rootDialogBlockIdentities: [] }),
             ],
@@ -474,9 +548,10 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Step 1")).not.toBeInTheDocument();
         expect(screen.getAllByText("Use the Holy Oculum to observe its abilities.").length).toBeGreaterThanOrEqual(1);
 
-        const pathsSection = screen.getByText("Paths").closest("section");
+        const pathsSection = within(screen.getByLabelText("Path and outcomes")).getByText("Paths").closest("section");
         expect(pathsSection).not.toBeNull();
-        expect(within(pathsSection!).getAllByRole("button", { name: /Forgotten Power/i })).toHaveLength(1);
-        expect(within(pathsSection!).getByRole("button", { name: /Pious Interpretation/i })).toBeInTheDocument();
+        expect(within(pathsSection!).queryByRole("button", { name: /Forgotten Power/i })).not.toBeInTheDocument();
+        expect(within(pathsSection!).getByRole("button", { name: /^Pious$/i })).toBeInTheDocument();
+        expect(within(pathsSection!).getByRole("button", { name: /^Open$/i })).toBeInTheDocument();
     });
 });

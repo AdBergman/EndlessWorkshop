@@ -141,10 +141,10 @@
 
 .questExplorer-railItem {
     display: grid;
-    gap: 7px;
+    gap: 5px;
     width: 100%;
-    min-height: 100px;
-    padding: 13px 14px;
+    min-height: 76px;
+    padding: 10px 12px;
     border: 1px solid transparent;
     border-left-color: rgba(120, 214, 199, 0.14);
     background: rgba(255, 255, 255, 0.012);
@@ -157,7 +157,7 @@
 .questExplorer-railItem:hover,
 .questExplorer-choiceButton:hover,
 .questExplorer-stepButton:hover,
-.questExplorer-linkButton:hover {
+.questExplorer-referenceLink:hover {
     border-color: var(--quest-border-strong);
     background: var(--quest-surface-soft);
 }
@@ -173,7 +173,7 @@
 .questExplorer-railItem:focus-visible,
 .questExplorer-choiceButton:focus-visible,
 .questExplorer-stepButton:focus-visible,
-.questExplorer-linkButton:focus-visible {
+.questExplorer-referenceLink:focus-visible {
     outline: none;
     border-color: rgba(216, 183, 105, 0.76);
     box-shadow: 0 0 0 3px rgba(216, 183, 105, 0.16);
@@ -319,7 +319,7 @@
 
 .questExplorer-choiceButton,
 .questExplorer-stepButton,
-.questExplorer-linkButton {
+.questExplorer-referenceLink {
     min-height: 38px;
     border: 1px solid var(--quest-border);
     background: rgba(255, 255, 255, 0.02);
@@ -345,7 +345,7 @@
 
 .questExplorer-detailGrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
     padding: 20px 22px;
 }
@@ -373,6 +373,13 @@
     padding-left: 12px;
     border-left: 2px solid rgba(216, 183, 105, 0.58);
     color: #f3ddb5;
+    font-weight: 700;
+}
+
+.questExplorer-pathTitle {
+    margin: 0;
+    color: #f3ddb5;
+    font-size: 0.96rem;
     font-weight: 700;
 }
 
@@ -468,6 +475,15 @@
     border-top: 1px solid var(--quest-border);
 }
 
+.questExplorer-transcript summary {
+    cursor: pointer;
+    list-style-position: inside;
+}
+
+.questExplorer-transcript[open] summary {
+    margin-bottom: 14px;
+}
+
 .questExplorer-transcriptBlocks {
     display: grid;
     gap: 12px;
@@ -529,6 +545,20 @@
     scrollbar-color: rgba(216, 183, 105, 0.34) rgba(255, 255, 255, 0.04);
 }
 
+.questExplorer-pathPanel .questExplorer-choiceList {
+    display: grid;
+}
+
+.questExplorer-pathPanel .questExplorer-choiceButton {
+    width: 100%;
+    min-width: 0;
+}
+
+.questExplorer-pathPanel__selectedPath {
+    display: grid;
+    gap: 14px;
+}
+
 .questExplorer-metadata header {
     display: grid;
     gap: 5px;
@@ -553,7 +583,31 @@
     gap: 8px;
 }
 
-.questExplorer-linkButton {
+.questExplorer-recordContext,
+.questExplorer-referenceTrail {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--quest-border);
+}
+
+.questExplorer-recordContext summary,
+.questExplorer-referenceTrail summary {
+    color: var(--quest-text-soft);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.questExplorer-recordContext[open] summary,
+.questExplorer-referenceTrail[open] summary {
+    padding-bottom: 8px;
+}
+
+.questExplorer-recordContext .questExplorer-metadataSection,
+.questExplorer-referenceTrail .questExplorer-metadataLinks {
+    padding: 10px 0;
+    border-bottom: 0;
+}
+
+.questExplorer-referenceLink {
     display: grid;
     gap: 4px;
     width: 100%;
@@ -562,12 +616,12 @@
     text-align: left;
 }
 
-.questExplorer-linkButton--reference {
+.questExplorer-referenceLink--quiet {
     background: rgba(255, 255, 255, 0.012);
     color: rgba(247, 239, 229, 0.68);
 }
 
-.questExplorer-linkButton__main {
+.questExplorer-referenceLink__main {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -575,30 +629,19 @@
     min-width: 0;
 }
 
-.questExplorer-linkButton__label {
+.questExplorer-referenceLink__label {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
-.questExplorer-linkButton__context,
-.questExplorer-linkButton__debug {
+.questExplorer-referenceLink__context {
     color: var(--quest-text-muted);
     font-size: 11px;
     line-height: 1.35;
 }
 
-.questExplorer-linkButton__context {
+.questExplorer-referenceLink__context {
     color: rgba(216, 183, 105, 0.82);
-}
-
-.questExplorer-provenanceBadge {
-    flex: 0 0 auto;
-    padding: 2px 6px;
-    border: 1px solid rgba(120, 214, 199, 0.22);
-    color: rgba(184, 246, 238, 0.86);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
 }
 
 .questExplorer-state {

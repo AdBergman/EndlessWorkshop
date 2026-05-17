@@ -201,7 +201,7 @@ describe("questViewModel", () => {
                 contextLabel: null,
                 debugLabel: null,
                 provenance: "choiceNext",
-                provenanceLabel: "Path",
+                provenanceLabel: "Leads to",
             },
         ]);
         expect(model.chronicle?.selectedStep?.requirementGroups[0]?.label).toBe("Selection");
@@ -211,7 +211,7 @@ describe("questViewModel", () => {
             contextLabel: null,
             debugLabel: null,
             provenance: "stepNext",
-            provenanceLabel: "Step",
+            provenanceLabel: "Continues",
         });
         expect(model.chronicle?.transcriptBlocks.map((block) => block.identity)).toEqual([
             "Root_Block",
@@ -221,11 +221,14 @@ describe("questViewModel", () => {
             speakerLabel: "Archivist",
             text: "The ruin answers.",
         });
-        expect(model.metadata?.flags).toEqual(["Mandatory"]);
+        expect(model.metadata?.flags).toEqual(["Required"]);
         expect(model.metadata?.sections.find((section) => section.id === "archive")?.items).toContainEqual({
-            label: "Archive ID",
-            value: "Quest A",
+            label: "Faction",
+            value: "Kin",
         });
+        expect(model.metadata?.sections.find((section) => section.id === "archive")?.items).not.toContainEqual(
+            expect.objectContaining({ label: "Archive ID" })
+        );
         expect(model.metadata?.nextQuestLinks).toEqual([
             {
                 questKey: "Quest_B",
@@ -233,12 +236,12 @@ describe("questViewModel", () => {
                 contextLabel: null,
                 debugLabel: null,
                 provenance: "questNext",
-                provenanceLabel: "Quest graph",
+                provenanceLabel: "Continues",
             },
         ]);
     });
 
-    it("disambiguates repeated quest titles and preserves graph link provenance", () => {
+    it("disambiguates repeated quest titles without raw sequence labels", () => {
         const model = buildQuestExplorerViewModel({
             quests: [
                 quest({
@@ -292,35 +295,35 @@ describe("questViewModel", () => {
             label: "Before",
             contextLabel: null,
             provenance: "questPrevious",
-            provenanceLabel: "Quest previous",
+            provenanceLabel: "Previous",
         });
         expect(model.metadata?.nextQuestLinks[0]).toMatchObject({
             label: "A Bitter Truth",
-            contextLabel: "Chapter 2 · Seq 4 · Branch A",
+            contextLabel: "Chapter 2 · Path A · Kin",
             provenance: "questNext",
-            provenanceLabel: "Quest graph",
+            provenanceLabel: "Continues",
         });
         expect(model.metadata?.convergesIntoQuestLink).toMatchObject({
             label: "A Bitter Truth",
-            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            contextLabel: "Chapter 2 · Path B · Kin",
             provenance: "converges",
             provenanceLabel: "Converges",
         });
         expect(model.chronicle?.selectedChoice?.nextQuestLinks[0]).toMatchObject({
             label: "A Bitter Truth",
-            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            contextLabel: "Chapter 2 · Path B · Kin",
             provenance: "choiceNext",
-            provenanceLabel: "Path",
+            provenanceLabel: "Leads to",
         });
         expect(model.chronicle?.selectedStep?.nextQuestLink).toMatchObject({
             label: "A Bitter Truth",
-            contextLabel: "Chapter 2 · Seq 4 · Branch A",
+            contextLabel: "Chapter 2 · Path A · Kin",
             provenance: "stepNext",
-            provenanceLabel: "Step",
+            provenanceLabel: "Continues",
         });
         expect(model.chronicle?.selectedStep?.failQuestLink).toMatchObject({
             label: "A Bitter Truth",
-            contextLabel: "Chapter 2 · Seq 5 · Branch B",
+            contextLabel: "Chapter 2 · Path B · Kin",
             provenance: "stepFailure",
             provenanceLabel: "Failure",
         });
@@ -383,7 +386,7 @@ describe("questViewModel", () => {
             title: "Attempt to dislodge Xenos' memories.",
             stepIndexes: [0, 1],
             representativeStepIndex: 0,
-            debugLabel: "2 gate variants",
+            summaryLabel: "2 thresholds",
             isSelected: false,
         });
         expect(model.chronicle?.objectiveGroups[0]?.gateRows).toEqual([
@@ -417,7 +420,7 @@ describe("questViewModel", () => {
                             choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01EffectChoiceDefinition",
                             displayName: "Forgotten Power",
                             choiceOrder: 0,
-                            nextQuestKeys: ["Quest_Internal"],
+                            nextQuestKeys: ["Quest_Pious"],
                             steps: [
                                 step({
                                     stepIndex: 0,
@@ -425,7 +428,7 @@ describe("questViewModel", () => {
                                     descriptionLines: [],
                                     completionPrerequisiteLines: [],
                                     selectionPrerequisiteLines: [],
-                                    nextQuestKey: "Quest_Internal",
+                                    nextQuestKey: "Quest_Pious",
                                 }),
                             ],
                         }),
@@ -462,14 +465,14 @@ describe("questViewModel", () => {
                         }),
                         choice({
                             choiceKey: otherChoiceKey,
-                            displayName: "Pious Interpretation",
+                            displayName: "Open Interpretation",
                             choiceOrder: 3,
                             nextQuestKeys: ["Quest_Other"],
                             steps: [
                                 step({
                                     stepIndex: 2,
-                                    objectiveText: "Choose the pious interpretation.",
-                                    descriptionLines: ["Choose the pious interpretation."],
+                                    objectiveText: "Choose the open interpretation.",
+                                    descriptionLines: ["Choose the open interpretation."],
                                     completionPrerequisiteLines: ["Property requirement: Faith = 2"],
                                     nextQuestKey: "Quest_Other",
                                 }),
@@ -477,7 +480,7 @@ describe("questViewModel", () => {
                         }),
                     ],
                 }),
-                quest({ questKey: "Quest_Internal", displayName: "Internal Target" }),
+                quest({ questKey: "Quest_Pious", displayName: "Pious" }),
                 quest({ questKey: "Quest_Next", displayName: "Next Target" }),
                 quest({ questKey: "Quest_Other", displayName: "Other Target" }),
             ],
@@ -498,12 +501,83 @@ describe("questViewModel", () => {
             visibleChoiceKey,
             otherChoiceKey,
         ]);
+        expect(model.chronicle?.choices.map((item) => item.title)).toEqual(["Pious", "Open"]);
         expect(model.chronicle?.choices.map((item) => item.choiceKey)).not.toContain(duplicateChoiceKey);
         expect(model.chronicle?.selectedObjectiveGroup?.title).toBe(
             "Use the Holy Oculum to observe its abilities."
         );
         expect(model.chronicle?.selectedObjectiveGroup?.title).not.toBe("Step 1");
         expect(model.chronicle?.selectedChoice?.nextQuestLinks.map((link) => link.questKey)).toEqual(["Quest_Next"]);
+    });
+
+    it("groups major faction rail entries without breaking member quest deep links", () => {
+        const hiddenMemberQuestKey = "FactionQuest_Necrophage_Chapter06_Step03_Choice01";
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "FactionQuest_Necrophage_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "MajorFaction",
+                    mandatory: true,
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_Necrophage",
+                }),
+                quest({
+                    questKey: hiddenMemberQuestKey,
+                    displayName: "A Bitter Truth",
+                    categoryType: "MajorFaction",
+                    mandatory: true,
+                    chapterNumber: 6,
+                    branchGroupKey: "FactionQuest_Necrophage_Chapter06_Step03",
+                    inferredQuestLineKey: "FactionQuest_Necrophage",
+                }),
+                quest({
+                    questKey: "FactionQuest_Necrophage02_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "MajorFaction",
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_Necrophage02",
+                }),
+                quest({
+                    questKey: "FactionQuest_KinOfSheredyn_Chapter06_Step01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "MajorFaction",
+                    chapterNumber: 6,
+                    inferredQuestLineKey: "FactionQuest_KinOfSheredyn",
+                }),
+                quest({
+                    questKey: "Quest_Curiosity_A_Branch01",
+                    displayName: "A Bitter Truth",
+                    categoryType: "Curiosity",
+                    chapterNumber: 6,
+                }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: hiddenMemberQuestKey,
+                choiceKey: null,
+                stepIndex: null,
+            },
+        });
+
+        const groupedRailItem = model.rail.items.find((item) =>
+            item.memberQuestKeys.includes(hiddenMemberQuestKey)
+        );
+
+        expect(model.selection.questKey).toBe(hiddenMemberQuestKey);
+        expect(model.chronicle?.questKey).toBe(hiddenMemberQuestKey);
+        expect(model.rail.questCount).toBe(3);
+        expect(model.rail.items.some((item) => item.questKey === hiddenMemberQuestKey)).toBe(false);
+        expect(groupedRailItem).toMatchObject({
+            questKey: "FactionQuest_Necrophage_Chapter06_Step01",
+            memberCount: 3,
+            title: "A Bitter Truth",
+            chapterLabel: "Chapter 6",
+            subtitle: "Necrophage · 3 records",
+            branchLabel: "2 variants",
+            flags: ["Required"],
+            isSelected: true,
+        });
     });
 
     it("returns an empty model when no quests are available", () => {
