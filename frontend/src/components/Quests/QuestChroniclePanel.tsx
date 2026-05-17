@@ -1,17 +1,21 @@
 import type {
     QuestChronicleModel,
+    QuestMetadataModel,
     QuestObjectiveGroupModel,
 } from "@/features/quests/questExplorerTypes";
 import {
     QuestLineGroups as LineGroups,
     QuestOutcomeBranches as OutcomeBranches,
     QuestProgressGateRows as ProgressGateRows,
+    QuestRecordContext,
+    QuestReferenceTrail,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 import QuestTranscript from "./QuestTranscript";
 
 type QuestChroniclePanelProps = {
     chronicle: QuestChronicleModel;
+    metadata: QuestMetadataModel;
     onSelectStep: (stepIndex: number) => void;
     onSelectQuest: (questKey: string) => void;
 };
@@ -114,6 +118,7 @@ function ProgressRequirementsSection({
 
 export default function QuestChroniclePanel({
     chronicle,
+    metadata,
     onSelectStep,
     onSelectQuest,
 }: QuestChroniclePanelProps) {
@@ -180,6 +185,10 @@ export default function QuestChroniclePanel({
             ) : null}
 
             <QuestTranscript blocks={chronicle.transcriptBlocks} />
+
+            <QuestRecordContext metadata={metadata} />
+
+            <QuestReferenceTrail metadata={metadata} onSelectQuest={onSelectQuest} />
         </article>
     );
 }

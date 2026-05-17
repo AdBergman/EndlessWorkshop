@@ -1,22 +1,177 @@
-import type { QuestProgressionRailModel } from "@/features/quests/questExplorerTypes";
+import {
+    formatQuestArchiveCountSummary,
+    QUEST_ARCHIVE_ALL,
+    type QuestArchiveFilterOption,
+    type QuestArchiveFilters,
+    type QuestArchiveModel,
+} from "@/features/quests/questArchiveModel";
 
 type QuestProgressionRailProps = {
-    rail: QuestProgressionRailModel;
+    archive: QuestArchiveModel;
     onSelectQuest: (questKey: string) => void;
+    onUpdateFilters: (filters: Partial<QuestArchiveFilters>) => void;
+    onClearFilters: () => void;
 };
 
-export default function QuestProgressionRail({ rail, onSelectQuest }: QuestProgressionRailProps) {
+function pluralize(count: number, singular: string): string {
+    return `${count} ${singular}${count === 1 ? "" : "s"}`;
+}
+
+function optionLabel(option: QuestArchiveFilterOption): string {
+    return `${option.label} (${option.count})`;
+}
+
+function FilterSelect({
+    label,
+    value,
+    allLabel,
+    options,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    allLabel: string;
+    options: QuestArchiveFilterOption[];
+    onChange: (value: string) => void;
+}) {
     return (
-        <aside className="questExplorer-rail" aria-label="Quest progression">
+        <label className="questExplorer-filterField">
+            <span>{label}</span>
+            <select value={value} onChange={(event) => onChange(event.currentTarget.value)}>
+                <option value={QUEST_ARCHIVE_ALL}>{allLabel}</option>
+                {options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                        {optionLabel(option)}
+                    </option>
+                ))}
+            </select>
+        </label>
+    );
+}
+
+export default function QuestProgressionRail({
+    archive,
+    onSelectQuest,
+    onUpdateFilters,
+    onClearFilters,
+}: QuestProgressionRailProps) {
+    const rail = archive.rail;
+    const filters = archive.filters;
+    const currentFactionLabel = archive.currentFactionLabel ?? "current faction";
+
+    return (
+        <aside className="questExplorer-rail" aria-label="Quest archive">
             <header className="questExplorer-rail__header">
                 <div>
-                    <div className="questExplorer-sectionLabel">Progression</div>
+                    <div className="questExplorer-sectionLabel">Archive</div>
                     <h2>Quest Archive</h2>
+                    <p>{formatQuestArchiveCountSummary(archive.counts)}</p>
                 </div>
-                <span className="questExplorer-count">{rail.questCount}</span>
+                <span className="questExplorer-count">{`${archive.counts.visibleGroups}/${archive.counts.totalGroups}`}</span>
             </header>
 
+            <div className="questExplorer-archiveControls" aria-label="Archive filters">
+                <label className="questExplorer-filterField questExplorer-filterField--search">
+                    <span>Search</span>
+                    <input
+                        type="search"
+                        value={filters.searchText}
+                        placeholder="Title, key, objectives, rewards..."
+                        aria-label="Search quest archive"
+                        onChange={(event) => onUpdateFilters({ searchText: event.currentTarget.value })}
+                    />
+                </label>
+
+                <label className="questExplorer-filterToggle">
+                    <input
+                        type="checkbox"
+                        checked={filters.currentFactionOnly}
+                        onChange={(event) => onUpdateFilters({ currentFactionOnly: event.currentTarget.checked })}
+                    />
+                    <span>{`Current faction: ${currentFactionLabel}`}</span>
+                </label>
+
+                <div className="questExplorer-filterGrid">
+                    <FilterSelect
+                        label="Type"
+                        value={filters.category}
+                        allLabel="All types"
+                        options={archive.categoryOptions}
+                        onChange={(category) => onUpdateFilters({ category })}
+                    />
+                    <FilterSelect
+                        label="Chapter"
+                        value={filters.chapter}
+                        allLabel="All chapters"
+                        options={archive.chapterOptions}
+                        onChange={(chapter) => onUpdateFilters({ chapter })}
+                    />
+                    <FilterSelect
+                        label="Branch"
+                        value={filters.branchVariant}
+                        allLabel="All branches"
+                        options={archive.branchVariantOptions}
+                        onChange={(branchVariant) => onUpdateFilters({ branchVariant })}
+                    />
+                    <label className="questExplorer-filterField">
+                        <span>Transcript</span>
+                        <select
+                            value={filters.transcript}
+                            onChange={(event) => onUpdateFilters({ transcript: event.currentTarget.value as QuestArchiveFilters["transcript"] })}
+                        >
+                            <option value="all">Any transcript</option>
+                            <option value="has">Has transcript</option>
+                            <option value="missing">No transcript</option>
+                        </select>
+                    </label>
+                    <label className="questExplorer-filterField">
+                        <span>Requirement</span>
+                        <select
+                            value={filters.requirement}
+                            onChange={(event) => onUpdateFilters({ requirement: event.currentTarget.value as QuestArchiveFilters["requirement"] })}
+                        >
+                            <option value="all">Required or optional</option>
+                            <option value="required">Required</option>
+                            <option value="optional">Optional</option>
+                        </select>
+                    </label>
+                    <label className="questExplorer-filterField">
+                        <span>Sort</span>
+                        <select
+                            value={filters.sort}
+                            onChange={(event) => onUpdateFilters({ sort: event.currentTarget.value as QuestArchiveFilters["sort"] })}
+                            aria-label="Archive sort"
+                        >
+                            <option value="canonical">Canonical</option>
+                            <option value="relevance">Relevance</option>
+                            <option value="title">Title</option>
+                            <option value="factionChapter">Faction / chapter</option>
+                        </select>
+                    </label>
+                </div>
+
+                {archive.hasActiveFilters ? (
+                    <button
+                        type="button"
+                        className="questExplorer-clearFilters"
+                        onClick={onClearFilters}
+                    >
+                        Clear filters
+                    </button>
+                ) : null}
+            </div>
+
+            {archive.selectedOutsideFilters ? (
+                <div className="questExplorer-filterNotice" role="status">
+                    <p>Selected quest is outside the current archive filters.</p>
+                    <button type="button" onClick={onClearFilters}>Clear filters</button>
+                </div>
+            ) : null}
+
             <div className="questExplorer-rail__list">
+                {rail.items.length === 0 ? (
+                    <p className="questExplorer-muted questExplorer-railEmpty">No archive records match these filters.</p>
+                ) : null}
                 {rail.items.map((item) => (
                     <button
                         type="button"
@@ -28,6 +183,7 @@ export default function QuestProgressionRail({ rail, onSelectQuest }: QuestProgr
                         <span className="questExplorer-railItem__topline">
                             {item.chapterLabel ? <span>{item.chapterLabel}</span> : null}
                             {item.branchLabel ? <span>{item.branchLabel}</span> : null}
+                            <span>{pluralize(item.memberCount, "record")}</span>
                         </span>
                         <span className="questExplorer-railItem__title">{item.title}</span>
                         {item.subtitle ? (

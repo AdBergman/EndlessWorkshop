@@ -2,7 +2,9 @@ import { act, cleanup, render, screen, waitFor, within } from "@testing-library/
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { apiClient } from "@/api/apiClient";
+import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useQuestStore } from "@/stores/questStore";
+import { Faction } from "@/types/dataTypes";
 import type {
     QuestChoiceDto,
     QuestDialogBlockDto,
@@ -219,6 +221,7 @@ async function renderQuestExplorer(initialEntry = "/quests") {
 
 describe("QuestExplorerPage", () => {
     beforeEach(() => {
+        useFactionSelectionStore.getState().reset();
         useQuestStore.getState().reset();
         mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getQuestExplorer.mockResolvedValue(explorerFixture());
@@ -226,6 +229,7 @@ describe("QuestExplorerPage", () => {
 
     afterEach(() => {
         cleanup();
+        useFactionSelectionStore.getState().reset();
         useQuestStore.getState().reset();
     });
 
@@ -234,7 +238,7 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         expect(mockedApiClient.getQuestExplorer).toHaveBeenCalledTimes(1);
-        expect(screen.getByLabelText("Quest progression")).toBeInTheDocument();
+        expect(screen.getByLabelText("Quest archive")).toBeInTheDocument();
         expect(screen.getByLabelText("Path and outcomes")).toBeInTheDocument();
         expect(screen.getByText("The archive opens.")).toBeInTheDocument();
         expect(screen.getByText("The first record is restored.")).toBeInTheDocument();
@@ -287,9 +291,36 @@ describe("QuestExplorerPage", () => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("mode=lore");
             expect(screen.getByTestId("location-probe")).toHaveTextContent("quest=Quest_A");
         });
-        expect(screen.getByLabelText("Quest progression")).toBeInTheDocument();
+        expect(screen.getByLabelText("Quest archive")).toBeInTheDocument();
         expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
         expect(screen.getByLabelText("Lore transcript")).toBeInTheDocument();
+    });
+
+    it("keeps archive, selected content, and strategy outcome panels scoped to their responsibilities", async () => {
+        const user = userEvent.setup();
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        const archiveRail = screen.getByLabelText("Quest archive");
+        const chronicle = screen.getByRole("article", { name: "First Quest" });
+        const pathPanel = screen.getByLabelText("Path and outcomes");
+
+        expect(within(archiveRail).getByLabelText("Search quest archive")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Strategic Chronicle")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Record Context")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Reference Trail")).toBeInTheDocument();
+        expect(within(pathPanel).getByText("Paths")).toBeInTheDocument();
+        expect(within(pathPanel).getByText("Selected Path")).toBeInTheDocument();
+        expect(within(pathPanel).queryByText("Record Context")).not.toBeInTheDocument();
+        expect(within(pathPanel).queryByText("Reference Trail")).not.toBeInTheDocument();
+
+        await user.click(within(screen.getByLabelText("Quest Explorer mode")).getByRole("button", { name: "Lore" }));
+
+        const loreChronicle = await screen.findByRole("article", { name: "First Quest" });
+        expect(screen.queryByLabelText("Path and outcomes")).not.toBeInTheDocument();
+        expect(within(loreChronicle).getByText("Lore Chronicle")).toBeInTheDocument();
+        expect(within(loreChronicle).getByLabelText("Lore transcript")).toBeInTheDocument();
     });
 
     it("updates the selected quest URL param from the progression rail", async () => {
@@ -299,7 +330,7 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
 
-        await user.click(within(screen.getByLabelText("Quest progression")).getByRole("button", {
+        await user.click(within(screen.getByLabelText("Quest archive")).getByRole("button", {
             name: /Second Quest/i,
         }));
 
@@ -308,6 +339,69 @@ describe("QuestExplorerPage", () => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("/quests?quest=Quest_B");
         });
         expect(screen.getByText("The second branch is active.")).toBeInTheDocument();
+    });
+
+    it("searches the archive rail while leaving hidden selected content visible", async () => {
+        const user = userEvent.setup();
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        const rail = screen.getByLabelText("Quest archive");
+
+        await user.type(within(rail).getByLabelText("Search quest archive"), "Quest_B");
+
+        expect(within(rail).getByText("1 group / 1 record")).toBeInTheDocument();
+        expect(within(rail).getByRole("button", { name: /Second Quest/i })).toBeInTheDocument();
+        expect(within(rail).queryByRole("button", { name: /First Quest/i })).not.toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        expect(within(rail).getByText("Selected quest is outside the current archive filters.")).toBeInTheDocument();
+
+        const notice = within(rail).getByText("Selected quest is outside the current archive filters.").closest("div");
+        expect(notice).not.toBeNull();
+        await user.click(within(notice!).getByRole("button", { name: "Clear filters" }));
+
+        expect(within(rail).getByRole("button", { name: /First Quest/i })).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("filters the archive by the current top-nav faction", async () => {
+        const user = userEvent.setup();
+        useFactionSelectionStore.getState().setSelectedFaction({
+            isMajor: true,
+            enumFaction: Faction.LORDS,
+            uiLabel: "Lords",
+            minorName: null,
+        });
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "First Quest",
+                    inferredFactionKey: "Faction_Kin",
+                    inferredQuestLineKey: "FactionQuest_Kin",
+                }),
+                quest({
+                    questKey: "Quest_B",
+                    displayName: "Second Quest",
+                    inferredFactionKey: "Faction_Lords",
+                    inferredQuestLineKey: "FactionQuest_Lords",
+                    questSequenceIndex: 2,
+                    rootDialogBlockIdentities: [],
+                    choices: [],
+                }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
+        const rail = screen.getByLabelText("Quest archive");
+        await user.click(within(rail).getByLabelText("Current faction: Lords"));
+
+        expect(within(rail).getByRole("button", { name: /Second Quest/i })).toBeInTheDocument();
+        expect(within(rail).queryByRole("button", { name: /First Quest/i })).not.toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "First Quest" })).toBeInTheDocument();
     });
 
     it("falls back safely when the quest URL param does not resolve", async () => {
@@ -380,7 +474,7 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer(`/quests?quest=${hiddenMemberQuestKey}`);
 
         expect(await screen.findByText("Hidden member entry.")).toBeInTheDocument();
-        const rail = screen.getByLabelText("Quest progression");
+        const rail = screen.getByLabelText("Quest archive");
         expect(within(rail).getAllByRole("button", { name: /A Bitter Truth/i })).toHaveLength(3);
         expect(within(rail).getByText("Necrophage · 3 records")).toBeInTheDocument();
         expect(within(rail).getByText("2 variants")).toBeInTheDocument();
@@ -431,7 +525,10 @@ describe("QuestExplorerPage", () => {
         await renderQuestExplorer("/quests?quest=Quest_A");
 
         expect(await screen.findByRole("heading", { name: "Archive Start" })).toBeInTheDocument();
-        expect(within(screen.getByLabelText("Path and outcomes")).getByText("Reference Trail")).toBeInTheDocument();
+        const chronicle = screen.getByRole("article", { name: "Archive Start" });
+        const pathPanel = screen.getByLabelText("Path and outcomes");
+        expect(within(chronicle).getByText("Reference Trail")).toBeInTheDocument();
+        expect(within(pathPanel).queryByText("Reference Trail")).not.toBeInTheDocument();
         expect(screen.queryByText("Quest graph next")).not.toBeInTheDocument();
         expect(screen.queryByText("Converges into")).not.toBeInTheDocument();
         expect(screen.getAllByText("A Bitter Truth").length).toBeGreaterThanOrEqual(4);

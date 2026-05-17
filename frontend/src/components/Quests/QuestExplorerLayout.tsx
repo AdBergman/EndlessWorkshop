@@ -59,8 +59,10 @@ export default function QuestExplorerLayout({ mode, viewModel }: QuestExplorerLa
             aria-label="Quest Explorer workspace"
         >
             <QuestProgressionRail
-                rail={viewModel.rail}
+                archive={viewModel.archive}
                 onSelectQuest={viewModel.actions.selectQuest}
+                onUpdateFilters={viewModel.actions.updateArchiveFilters}
+                onClearFilters={viewModel.actions.clearArchiveFilters}
             />
 
             <div className={`questExplorer-mainPane questExplorer-mainPane--${mode}`}>

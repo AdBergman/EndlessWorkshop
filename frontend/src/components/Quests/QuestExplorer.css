@@ -154,6 +154,12 @@
     font-size: 1.15rem;
 }
 
+.questExplorer-rail__header p {
+    margin: 6px 0 0;
+    color: var(--quest-text-muted);
+    font-size: 12px;
+}
+
 .questExplorer-count {
     min-width: 36px;
     padding: 5px 8px;
@@ -162,12 +168,115 @@
     text-align: center;
 }
 
+.questExplorer-archiveControls {
+    display: grid;
+    gap: 10px;
+    padding: 12px 12px 13px;
+    border-bottom: 1px solid var(--quest-border);
+    background: rgba(255, 255, 255, 0.012);
+}
+
+.questExplorer-filterGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.questExplorer-filterField {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    color: var(--quest-text-muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.questExplorer-filterField--search {
+    grid-template-columns: 1fr;
+}
+
+.questExplorer-filterField input,
+.questExplorer-filterField select {
+    min-width: 0;
+    min-height: 32px;
+    border: 1px solid var(--quest-border);
+    background: rgba(0, 0, 0, 0.18);
+    color: var(--quest-text-soft);
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.questExplorer-filterField input {
+    padding: 6px 9px;
+}
+
+.questExplorer-filterField select {
+    padding: 5px 7px;
+}
+
+.questExplorer-filterField input:focus,
+.questExplorer-filterField select:focus {
+    outline: none;
+    border-color: rgba(216, 183, 105, 0.76);
+    box-shadow: 0 0 0 3px rgba(216, 183, 105, 0.16);
+}
+
+.questExplorer-filterToggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--quest-text-soft);
+    font-size: 12px;
+}
+
+.questExplorer-filterToggle input {
+    accent-color: var(--quest-gold);
+}
+
+.questExplorer-clearFilters,
+.questExplorer-filterNotice button {
+    min-height: 30px;
+    border: 1px solid rgba(216, 183, 105, 0.3);
+    background: var(--quest-gold-soft);
+    color: var(--quest-text);
+    cursor: pointer;
+}
+
+.questExplorer-clearFilters:hover,
+.questExplorer-filterNotice button:hover {
+    border-color: rgba(216, 183, 105, 0.56);
+    background: rgba(216, 183, 105, 0.18);
+}
+
+.questExplorer-filterNotice {
+    display: grid;
+    gap: 8px;
+    margin: 10px 10px 0;
+    padding: 11px 12px;
+    border: 1px solid rgba(216, 183, 105, 0.3);
+    background: rgba(216, 183, 105, 0.08);
+}
+
+.questExplorer-filterNotice p {
+    margin: 0;
+    color: var(--quest-text-soft);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .questExplorer-rail__list {
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 10px;
     scrollbar-color: rgba(216, 183, 105, 0.34) rgba(255, 255, 255, 0.04);
+}
+
+.questExplorer-railEmpty {
+    padding: 10px 2px;
 }
 
 .questExplorer-railItem {

@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
+    selectSelectedFaction,
+    useFactionSelectionStore,
+} from "@/stores/factionSelectionStore";
+import {
+    buildQuestArchiveModel,
+    defaultQuestArchiveFilters,
+    type QuestArchiveFilters,
+    type QuestArchiveModel,
+} from "./questArchiveModel";
+import {
     selectDialogBlocksByIdentity,
     selectQuestError,
     selectQuestLoaded,
@@ -19,11 +29,14 @@ type QuestExplorerActions = {
     selectQuest: (questKey: string) => void;
     selectChoice: (choiceKey: string) => void;
     selectStep: (stepIndex: number) => void;
+    updateArchiveFilters: (filters: Partial<QuestArchiveFilters>) => void;
+    clearArchiveFilters: () => void;
 };
 
 export type QuestExplorerViewModel = Omit<QuestExplorerContentModel, "status"> & {
     status: QuestExplorerStatus;
     error: string | null;
+    archive: QuestArchiveModel;
     actions: QuestExplorerActions;
 };
 
@@ -39,11 +52,15 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
     const loaded = useQuestStore(selectQuestLoaded);
     const error = useQuestStore(selectQuestError);
     const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const [searchParams, setSearchParams] = useSearchParams();
     const requestedQuestKey = clean(searchParams.get("quest"));
     const [localSelection, setLocalSelection] = useState<Omit<QuestExplorerSelection, "questKey">>({
         choiceKey: null,
         stepIndex: null,
+    });
+    const [archiveFilters, setArchiveFilters] = useState<QuestArchiveFilters>({
+        ...defaultQuestArchiveFilters,
     });
 
     useEffect(() => {
@@ -65,6 +82,17 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
     );
 
     const selectedQuestKey = content.selection.questKey;
+    const archive = useMemo(
+        () =>
+            buildQuestArchiveModel({
+                quests,
+                dialogBlocksByIdentity,
+                selectedQuestKey,
+                filters: archiveFilters,
+                currentFaction: selectedFaction,
+            }),
+        [archiveFilters, dialogBlocksByIdentity, quests, selectedFaction, selectedQuestKey]
+    );
 
     useEffect(() => {
         if (!loaded || content.status !== "ready" || !selectedQuestKey) return;
@@ -120,6 +148,17 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
         }));
     }, []);
 
+    const updateArchiveFilters = useCallback((filters: Partial<QuestArchiveFilters>) => {
+        setArchiveFilters((currentFilters) => ({
+            ...currentFilters,
+            ...filters,
+        }));
+    }, []);
+
+    const clearArchiveFilters = useCallback(() => {
+        setArchiveFilters({ ...defaultQuestArchiveFilters });
+    }, []);
+
     const status: QuestExplorerStatus = (() => {
         if (error) return "error";
         if (!loaded) return "loading";
@@ -129,12 +168,16 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
 
     return {
         ...content,
+        rail: archive.rail,
         status,
         error,
+        archive,
         actions: {
             selectQuest,
             selectChoice,
             selectStep,
+            updateArchiveFilters,
+            clearArchiveFilters,
         },
     };
 }

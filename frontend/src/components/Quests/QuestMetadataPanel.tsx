@@ -1,26 +1,21 @@
 import type {
     QuestChronicleModel,
-    QuestMetadataModel,
 } from "@/features/quests/questExplorerTypes";
 import {
     QuestLineGroups as LineGroups,
     QuestPathBranches as PathBranches,
     QuestPathSelector as PathSelector,
-    QuestRecordContext,
-    QuestReferenceTrail,
     QuestTextLines as TextLines,
 } from "./QuestExplorerPrimitives";
 
 type QuestMetadataPanelProps = {
     chronicle: QuestChronicleModel;
-    metadata: QuestMetadataModel;
     onSelectChoice: (choiceKey: string) => void;
     onSelectQuest: (questKey: string) => void;
 };
 
 export default function QuestMetadataPanel({
     chronicle,
-    metadata,
     onSelectChoice,
     onSelectQuest,
 }: QuestMetadataPanelProps) {
@@ -56,10 +51,6 @@ export default function QuestMetadataPanel({
                     <p className="questExplorer-muted">No path selected.</p>
                 )}
             </section>
-
-            <QuestRecordContext metadata={metadata} />
-
-            <QuestReferenceTrail metadata={metadata} onSelectQuest={onSelectQuest} />
         </aside>
     );
 }

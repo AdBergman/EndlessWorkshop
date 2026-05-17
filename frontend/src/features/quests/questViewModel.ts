@@ -99,7 +99,7 @@ function getStepTitle(step: Pick<QuestStepDto, "stepIndex" | "objectiveText">): 
     return clean(step.objectiveText) || `Step ${step.stepIndex + 1}`;
 }
 
-function compareQuestOrder(left: QuestDto, right: QuestDto): number {
+export function compareQuestOrder(left: QuestDto, right: QuestDto): number {
     return (
         compareNumber(left.chapterIndex, right.chapterIndex) ||
         compareNumber(left.chapterNumber, right.chapterNumber) ||
@@ -135,7 +135,7 @@ function sortSteps(steps: readonly QuestStepDto[]): QuestStepDto[] {
     });
 }
 
-function formatChapterLabel(quest: QuestDto): string | null {
+export function formatChapterLabel(quest: QuestDto): string | null {
     if (typeof quest.chapterNumber === "number") {
         return `Chapter ${quest.chapterNumber}`;
     }
@@ -163,7 +163,7 @@ function buildQuestTitleCounts(quests: readonly QuestDto[]): Record<string, numb
     }, {});
 }
 
-function compactEntityLabel(value: string | null | undefined): string | null {
+export function compactEntityLabel(value: string | null | undefined): string | null {
     const label = clean(value);
     if (!label) return null;
 
@@ -266,7 +266,7 @@ function getStanceLabel(value: string | null | undefined): string | null {
     ) ?? null;
 }
 
-function getQuestPathContextLabel(quest: QuestDto, options: { allowGeneric?: boolean } = {}): string | null {
+export function getQuestPathContextLabel(quest: QuestDto, options: { allowGeneric?: boolean } = {}): string | null {
     const title = getQuestTitle(quest);
     const branchLabel = clean(quest.branchLabel);
 
@@ -441,7 +441,7 @@ function buildRailSubtitle(group: QuestRailGroup, representative: QuestDto): str
     return parts.join(" · ") || null;
 }
 
-function buildProgressionRail(
+export function buildProgressionRail(
     quests: readonly QuestDto[],
     selectedQuestKey: string | null
 ): QuestProgressionRailModel {
