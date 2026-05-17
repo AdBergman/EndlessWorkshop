@@ -7,11 +7,13 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.QuestImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
@@ -100,6 +102,80 @@ class LocalStartupImportRunnerTest {
 
         assertThat(facades.techCalls).isZero();
         assertThat(facades.totalCalls()).isZero();
+    }
+
+    @Test
+    void importsQuestGraphAndDialogAsPairedStartupImport() throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_graph_export_0.80.json"), """
+                {
+                  "exportKind":"quest_graph",
+                  "quests":[
+                    {
+                      "entryKey":"Quest_A",
+                      "displayName":"A Quest",
+                      "choices":[
+                        {
+                          "choiceKey":"Choice_A",
+                          "steps":[
+                            {
+                              "index":0,
+                              "dialogBlockRefs":[
+                                {"questKey":"Quest_A","choiceKey":"Choice_A","stepIndex":0,"dialogKey":"Dialog_A","phase":"start","lineCount":1}
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_dialog_export_0.80.json"), """
+                {
+                  "exportKind":"quest_dialog",
+                  "dialogs":[
+                    {
+                      "questKey":"Quest_A",
+                      "choiceKey":"Choice_A",
+                      "stepIndex":0,
+                      "dialogKey":"Dialog_A",
+                      "phase":"start",
+                      "lines":[{"lineIndex":0,"role":"narrator","text":"Line"}]
+                    }
+                  ]
+                }
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        runner.runStartupImport();
+
+        assertThat(facades.questCalls).isEqualTo(1);
+        assertThat(facades.questDto.graph().exportKind()).isEqualTo("quest_graph");
+        assertThat(facades.questDto.dialog().exportKind()).isEqualTo("quest_dialog");
+        assertThat(facades.totalCalls()).isEqualTo(1);
+    }
+
+    @Test
+    void questStartupImportFailsWhenPairIsIncomplete(CapturedOutput output) throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_graph_export_0.80.json"), """
+                {"exportKind":"quest_graph","quests":[{"entryKey":"Quest_A"}]}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        runner.runStartupImport();
+
+        assertThat(facades.totalCalls()).isZero();
+        assertThat(output)
+                .contains("Local startup import failed for paired quest graph/dialog files")
+                .contains("requires exactly one quest_graph and one quest_dialog file")
+                .contains("Local startup import finished: 0 imported, 0 skipped, 1 failed.");
     }
 
     @Test
@@ -206,6 +282,7 @@ class LocalStartupImportRunnerTest {
                 facades,
                 facades,
                 facades,
+                facades,
                 facades
         );
     }
@@ -223,16 +300,19 @@ class LocalStartupImportRunnerTest {
             DistrictImportAdminFacade,
             ImprovementImportAdminFacade,
             UnitImportAdminFacade,
-            CodexImportAdminFacade {
+            CodexImportAdminFacade,
+            QuestImportAdminFacade {
 
         private int techCalls;
         private int districtCalls;
         private int improvementCalls;
         private int unitCalls;
         private int codexCalls;
+        private int questCalls;
         private TechImportBatchDto techDto;
         private UnitImportBatchDto unitDto;
         private CodexImportBatchDto codexDto;
+        private QuestImportBatchDto questDto;
         private final List<String> codexKinds = new ArrayList<>();
 
         @Override
@@ -284,8 +364,21 @@ class LocalStartupImportRunnerTest {
             return summary("codex", file.entries().size());
         }
 
+        @Override
+        public ImportSummaryDto importQuests(QuestImportBatchDto file) {
+            questCalls++;
+            questDto = file;
+            if (file.graph() == null || file.graph().quests() == null || file.graph().quests().isEmpty()) {
+                throw new IllegalArgumentException("Quest import has no graph quests");
+            }
+            if (file.dialog() == null || file.dialog().dialogs() == null || file.dialog().dialogs().isEmpty()) {
+                throw new IllegalArgumentException("Quest import has no dialogs");
+            }
+            return summary("quests", file.graph().quests().size());
+        }
+
         private int totalCalls() {
-            return techCalls + districtCalls + improvementCalls + unitCalls + codexCalls;
+            return techCalls + districtCalls + improvementCalls + unitCalls + codexCalls + questCalls;
         }
     }
 
@@ -325,6 +418,11 @@ class LocalStartupImportRunnerTest {
         @Bean
         CodexImportAdminFacade codexImportAdminFacade() {
             return file -> summary("codex", file.entries().size());
+        }
+
+        @Bean
+        QuestImportAdminFacade questImportAdminFacade() {
+            return file -> summary("quests", file.graph().quests().size());
         }
 
     }

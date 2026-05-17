@@ -9,12 +9,14 @@ import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
+import ewshop.facade.dto.importing.quests.*;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.QuestImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +40,7 @@ class ImportAdminControllerTest {
     private RecordingImprovementImportAdminFacade improvementImportAdminFacade;
     private RecordingUnitImportAdminFacade unitImportAdminFacade;
     private RecordingCodexImportAdminFacade codexImportAdminFacade;
+    private RecordingQuestImportAdminFacade questImportAdminFacade;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -47,13 +50,15 @@ class ImportAdminControllerTest {
         improvementImportAdminFacade = new RecordingImprovementImportAdminFacade();
         unitImportAdminFacade = new RecordingUnitImportAdminFacade();
         codexImportAdminFacade = new RecordingCodexImportAdminFacade();
+        questImportAdminFacade = new RecordingQuestImportAdminFacade();
 
         ImportAdminController controller = new ImportAdminController(
                 techImportAdminFacade,
                 districtImportAdminFacade,
                 improvementImportAdminFacade,
                 unitImportAdminFacade,
-                codexImportAdminFacade
+                codexImportAdminFacade,
+                questImportAdminFacade
         );
 
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -220,6 +225,30 @@ class ImportAdminControllerTest {
         assertNull(codexImportAdminFacade.lastDto);
     }
 
+    @Test
+    void importQuests_returnsOk_andCallsFacade_whenPayloadHasGraphAndDialog() throws Exception {
+        QuestImportBatchDto payload = questPayload();
+
+        mockMvc.perform(post("/api/admin/import/quests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isOk());
+
+        assertEquals(payload, questImportAdminFacade.lastDto);
+    }
+
+    @Test
+    void importQuests_returnsBadRequest_andDoesNotCallFacade_whenDialogIsMissing() throws Exception {
+        QuestImportBatchDto payload = new QuestImportBatchDto(questPayload().graph(), null);
+
+        mockMvc.perform(post("/api/admin/import/quests")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest());
+
+        assertNull(questImportAdminFacade.lastDto);
+    }
+
     private static ImportSummaryDto okSummary(String kind) {
         return new ImportSummaryDto(
                 kind,
@@ -272,5 +301,90 @@ class ImportAdminControllerTest {
             this.lastDto = file;
             return okSummary("codex");
         }
+    }
+
+    private static final class RecordingQuestImportAdminFacade implements QuestImportAdminFacade {
+        private QuestImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importQuests(QuestImportBatchDto file) {
+            this.lastDto = file;
+            return okSummary("quests");
+        }
+    }
+
+    private static QuestImportBatchDto questPayload() {
+        QuestDialogBlockRefDto ref = new QuestDialogBlockRefDto(
+                "Quest_A",
+                "Choice_A",
+                0,
+                "Dialog_A",
+                "start",
+                1
+        );
+        QuestGraphStepDto step = new QuestGraphStepDto(
+                0,
+                null,
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of("Dialog_A"),
+                List.of(ref)
+        );
+        QuestGraphChoiceDto choice = new QuestGraphChoiceDto(
+                "Choice_A",
+                "Choice A",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of("Choice_A"),
+                List.of(step)
+        );
+        QuestGraphQuestDto quest = new QuestGraphQuestDto(
+                "Quest_A",
+                "A Quest",
+                List.of(),
+                "QuestCategory_Test",
+                "Curiosity",
+                false,
+                false,
+                true,
+                false,
+                false,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                List.of(),
+                List.of(),
+                List.of("Quest_A"),
+                List.of(choice),
+                List.of()
+        );
+        QuestDialogBlockDto dialogBlock = new QuestDialogBlockDto(
+                "Quest_A",
+                "Choice_A",
+                0,
+                "Dialog_A",
+                "start",
+                List.of(new QuestDialogLineDto(0, "narrator", null, "Line"))
+        );
+
+        return new QuestImportBatchDto(
+                new QuestGraphImportBatchDto("Endless Legend 2", "0.80", "0.1.0", "now", "quest_graph", List.of(quest)),
+                new QuestDialogImportBatchDto("Endless Legend 2", "0.80", "0.1.0", "now", "quest_dialog", List.of(dialogBlock))
+        );
     }
 }

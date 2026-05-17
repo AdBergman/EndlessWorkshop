@@ -82,4 +82,9 @@ public class FacadeConfig {
     ) {
         return new CodexImportAdminFacadeImpl(codexImportService, codexService);
     }
+
+    @Bean
+    public QuestImportAdminFacade questImportAdminFacade(QuestImportService questImportService) {
+        return new QuestImportAdminFacadeImpl(questImportService);
+    }
 }

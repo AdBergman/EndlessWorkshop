@@ -7,11 +7,15 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestDialogImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestGraphImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.QuestImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.slf4j.Logger;
@@ -27,8 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Component
@@ -44,6 +50,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
+    private final QuestImportAdminFacade questImportAdminFacade;
 
     public LocalStartupImportRunner(
             LocalStartupImportProperties properties,
@@ -52,7 +59,8 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
-            CodexImportAdminFacade codexImportAdminFacade
+            CodexImportAdminFacade codexImportAdminFacade,
+            QuestImportAdminFacade questImportAdminFacade
     ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
@@ -61,6 +69,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
+        this.questImportAdminFacade = questImportAdminFacade;
     }
 
     @Override
@@ -102,8 +111,25 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         int imported = 0;
         int failed = 0;
         int skipped = 0;
+        Set<Path> pairedQuestPaths = new HashSet<>();
+
+        QuestImportFiles questImportFiles = findQuestImportFiles(files);
+        if (questImportFiles.hasAny()) {
+            pairedQuestPaths.addAll(questImportFiles.paths());
+            try {
+                ImportSummaryDto summary = importQuestFiles(questImportFiles);
+                imported++;
+                logImported(questImportFiles.graphFiles().get(0).path(), summary);
+            } catch (Exception ex) {
+                failed++;
+                log.error("Local startup import failed for paired quest graph/dialog files.", ex);
+            }
+        }
 
         for (LocalImportFile file : files) {
+            if (pairedQuestPaths.contains(file.path())) {
+                continue;
+            }
             try {
                 ImportSummaryDto summary = importFile(file);
                 if (summary == null) {
@@ -194,11 +220,52 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         }
 
         log.warn(
-                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech.",
+                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech, and paired quest_graph + quest_dialog.",
                 file.toAbsolutePath().normalize(),
                 exportKind == null ? "missing" : exportKind
         );
         return null;
+    }
+
+    private QuestImportFiles findQuestImportFiles(List<LocalImportFile> files) {
+        List<LocalImportFile> graphFiles = new ArrayList<>();
+        List<LocalImportFile> dialogFiles = new ArrayList<>();
+
+        for (LocalImportFile file : files) {
+            if (file.folder() != LocalImportFolder.EXPORTS) continue;
+
+            try {
+                JsonNode json = objectMapper.readTree(file.path().toFile());
+                String exportKind = normalizedExportKind(json);
+                if ("quest_graph".equals(exportKind)) {
+                    graphFiles.add(file);
+                } else if ("quest_dialog".equals(exportKind)) {
+                    dialogFiles.add(file);
+                }
+            } catch (IOException ignored) {
+                // Let the normal per-file import path report malformed files.
+            }
+        }
+
+        return new QuestImportFiles(graphFiles, dialogFiles);
+    }
+
+    private ImportSummaryDto importQuestFiles(QuestImportFiles files) throws IOException {
+        if (files.graphFiles().size() != 1 || files.dialogFiles().size() != 1) {
+            throw new IllegalArgumentException(
+                    "Quest startup import requires exactly one quest_graph and one quest_dialog file; found " +
+                            files.graphFiles().size() + " graph file(s) and " +
+                            files.dialogFiles().size() + " dialog file(s)."
+            );
+        }
+
+        JsonNode graphJson = objectMapper.readTree(files.graphFiles().get(0).path().toFile());
+        JsonNode dialogJson = objectMapper.readTree(files.dialogFiles().get(0).path().toFile());
+
+        return questImportAdminFacade.importQuests(new QuestImportBatchDto(
+                objectMapper.treeToValue(graphJson, QuestGraphImportBatchDto.class),
+                objectMapper.treeToValue(dialogJson, QuestDialogImportBatchDto.class)
+        ));
     }
 
     private ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
@@ -250,4 +317,17 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     }
 
     private record LocalImportFile(Path path, LocalImportFolder folder) {}
+
+    private record QuestImportFiles(List<LocalImportFile> graphFiles, List<LocalImportFile> dialogFiles) {
+        private boolean hasAny() {
+            return !graphFiles.isEmpty() || !dialogFiles.isEmpty();
+        }
+
+        private Set<Path> paths() {
+            Set<Path> paths = new HashSet<>();
+            graphFiles.forEach(file -> paths.add(file.path()));
+            dialogFiles.forEach(file -> paths.add(file.path()));
+            return paths;
+        }
+    }
 }

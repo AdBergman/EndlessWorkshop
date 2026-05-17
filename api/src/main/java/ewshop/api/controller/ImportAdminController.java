@@ -4,11 +4,13 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.QuestImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.springframework.http.HttpStatus;
@@ -23,19 +25,22 @@ public class ImportAdminController {
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
+    private final QuestImportAdminFacade questImportAdminFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
-            CodexImportAdminFacade codexImportAdminFacade
+            CodexImportAdminFacade codexImportAdminFacade,
+            QuestImportAdminFacade questImportAdminFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
+        this.questImportAdminFacade = questImportAdminFacade;
     }
 
     @GetMapping("/check-token")
@@ -82,5 +87,25 @@ public class ImportAdminController {
             throw new IllegalArgumentException("Import file entries[] must not be empty");
         }
         return codexImportAdminFacade.importCodex(dto);
+    }
+
+    @PostMapping(value = "/quests", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importQuests(@RequestBody QuestImportBatchDto dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("Quest import file is required");
+        }
+        if (dto.graph() == null) {
+            throw new IllegalArgumentException("Quest import is missing graph");
+        }
+        if (dto.dialog() == null) {
+            throw new IllegalArgumentException("Quest import is missing dialog");
+        }
+        if (dto.graph().quests() == null || dto.graph().quests().isEmpty()) {
+            throw new IllegalArgumentException("Quest graph file is missing quests[]");
+        }
+        if (dto.dialog().dialogs() == null || dto.dialog().dialogs().isEmpty()) {
+            throw new IllegalArgumentException("Quest dialog file is missing dialogs[]");
+        }
+        return questImportAdminFacade.importQuests(dto);
     }
 }

@@ -31,7 +31,7 @@ class TechUnlockCategoryMigrationTest {
                 .dataSource(url, "sa", "")
                 .locations("classpath:db/migration/common")
                 .baselineOnMigrate(true)
-                .baselineVersion("3.3.5")
+                .baselineVersion("3.3.4")
                 .load()
                 .migrate();
 
