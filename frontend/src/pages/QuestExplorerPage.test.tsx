@@ -347,7 +347,7 @@ describe("QuestExplorerPage", () => {
 
         await user.type(within(rail).getByLabelText("Search quest archive"), "Quest_B");
 
-        expect(within(rail).getByText("1 group / 1 record")).toBeInTheDocument();
+        expect(within(rail).getByText("1 group / 1 entry")).toBeInTheDocument();
         expect(within(rail).getByRole("button", { name: /Second Quest/i })).toBeInTheDocument();
         expect(within(rail).queryByRole("button", { name: /First Quest/i })).not.toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "First Quest" })).toBeInTheDocument();
@@ -469,7 +469,7 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByText("Hidden member entry.")).toBeInTheDocument();
         const rail = screen.getByLabelText("Quest archive");
         expect(within(rail).getAllByRole("button", { name: /A Bitter Truth/i })).toHaveLength(3);
-        expect(within(rail).getByText("Necrophage · 3 records")).toBeInTheDocument();
+        expect(within(rail).getByText("Necrophage · 3 entries")).toBeInTheDocument();
         expect(within(rail).getByText("2 variants")).toBeInTheDocument();
     });
 

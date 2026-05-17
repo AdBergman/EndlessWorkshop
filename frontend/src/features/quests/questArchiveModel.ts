@@ -155,7 +155,7 @@ function getQuestBranchVariantLabels(quest: QuestDto): string[] {
     const labels = [
         getQuestPathContextLabel(quest, { allowGeneric: true }),
         getQuestlineVariantLabel(quest.inferredQuestLineKey),
-        quest.branchStart || quest.branchEnd || clean(quest.branchGroupKey) ? "Branching records" : null,
+        quest.branchStart || quest.branchEnd || clean(quest.branchGroupKey) ? "Branching entries" : null,
     ].filter((label): label is string => Boolean(label));
 
     return unique(labels);
@@ -490,5 +490,5 @@ export function buildQuestArchiveModel({
 }
 
 export function formatQuestArchiveCountSummary(counts: QuestArchiveCounts): string {
-    return `${formatCountLabel(counts.visibleGroups, "group")} / ${formatCountLabel(counts.visibleRecords, "record")}`;
+    return `${formatCountLabel(counts.visibleGroups, "group")} / ${formatCountLabel(counts.visibleRecords, "entry")}`;
 }

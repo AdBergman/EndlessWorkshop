@@ -48,7 +48,7 @@ export default function QuestExplorerLayout({ mode, viewModel }: QuestExplorerLa
         return (
             <QuestExplorerState
                 title="No quests available"
-                message="No quest records are available for the explorer yet."
+                message="No quest entries are available for the explorer yet."
             />
         );
     }

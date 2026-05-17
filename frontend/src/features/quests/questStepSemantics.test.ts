@@ -134,4 +134,57 @@ describe("questStepSemantics", () => {
         expect(groups.map((group) => group.kind)).toEqual(["objective", "objective"]);
         expect(groups.map((group) => group.stepIndexes)).toEqual([[0], [1]]);
     });
+
+    it("collapses unresolved and resolved requirement display variants into one objective", () => {
+        const groups = buildQuestStepSemanticGroups([
+            step({
+                stepIndex: 0,
+                objectiveText: "Start seeking answers to the Lords' curse.",
+                completionPrerequisiteLines: ["Clear dungeon: MyTargetDungeon"],
+                rewardDisplayLines: ["Equipment reward: The Adjudicator"],
+                nextQuestKey: "Quest_FollowUp",
+            }),
+            step({
+                stepIndex: 1,
+                objectiveText: "Start seeking answers to the Lords' curse.",
+                completionPrerequisiteLines: ["Clear dungeons: 1"],
+                rewardDisplayLines: ["Equipment reward: The Adjudicator"],
+                nextQuestKey: "Quest_FollowUp",
+                dialogBlockIdentities: [
+                    "Quest_A|Choice_A|1|Dialog_Start|start",
+                    "Quest_A|Choice_A|1|Dialog_End|success",
+                ],
+            }),
+        ]);
+
+        expect(groups).toHaveLength(1);
+        expect(groups[0]).toMatchObject({
+            id: "objective:0-1",
+            kind: "objective",
+            representativeStepIndex: 1,
+            stepIndexes: [0, 1],
+            nextQuestKey: "Quest_FollowUp",
+        });
+    });
+
+    it("keeps same-title objectives separate when rewards differ", () => {
+        const groups = buildQuestStepSemanticGroups([
+            step({
+                stepIndex: 0,
+                completionPrerequisiteLines: ["Clear dungeon: MyTargetDungeon"],
+                rewardDisplayLines: ["Equipment reward: The Adjudicator"],
+            }),
+            step({
+                stepIndex: 1,
+                completionPrerequisiteLines: ["Clear dungeons: 1"],
+                rewardDisplayLines: ["Equipment reward: Vane of the Noble"],
+                dialogBlockIdentities: [
+                    "Quest_A|Choice_A|1|Dialog_Start|start",
+                    "Quest_A|Choice_A|1|Dialog_End|success",
+                ],
+            }),
+        ]);
+
+        expect(groups.map((group) => group.stepIndexes)).toEqual([[0], [1]]);
+    });
 });

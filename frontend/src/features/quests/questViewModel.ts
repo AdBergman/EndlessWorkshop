@@ -435,7 +435,7 @@ function buildRailSubtitle(group: QuestRailGroup, representative: QuestDto): str
             compactEntityLabel(representative.inferredFactionKey) ||
             clean(representative.categoryType) ||
             null,
-        group.quests.length > 1 ? `${group.quests.length} records` : null,
+        group.quests.length > 1 ? `${group.quests.length} entries` : null,
     ].filter((part): part is string => Boolean(part));
 
     return parts.join(" · ") || null;

@@ -125,7 +125,7 @@ export default function QuestProgressionRail({
 
             <div className="questExplorer-rail__list">
                 {rail.items.length === 0 ? (
-                    <p className="questExplorer-muted questExplorer-railEmpty">No archive records match these filters.</p>
+                    <p className="questExplorer-muted questExplorer-railEmpty">No archive entries match these filters.</p>
                 ) : null}
                 {rail.items.map((item) => (
                     <button
@@ -138,7 +138,7 @@ export default function QuestProgressionRail({
                         <span className="questExplorer-railItem__topline">
                             {item.chapterLabel ? <span>{item.chapterLabel}</span> : null}
                             {item.branchLabel ? <span>{item.branchLabel}</span> : null}
-                            <span>{pluralize(item.memberCount, "record")}</span>
+                            <span>{pluralize(item.memberCount, "entry")}</span>
                         </span>
                         <span className="questExplorer-railItem__title">{item.title}</span>
                         {item.subtitle ? (

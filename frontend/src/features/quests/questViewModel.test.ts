@@ -510,6 +510,74 @@ describe("questViewModel", () => {
         expect(model.chronicle?.selectedChoice?.nextQuestLinks.map((link) => link.questKey)).toEqual(["Quest_Next"]);
     });
 
+    it("collapses objective display variants and shows the cleaner requirement line", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "FactionQuest_LastLord_Chapter03_Step01",
+                    displayName: "The Fork in the Road",
+                    choices: [
+                        choice({
+                            choiceKey: "FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition",
+                            displayName: "The Fork in the Road",
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: "Start seeking answers to the Lords' curse.",
+                                    descriptionLines: ["Start seeking answers to the Lords' curse."],
+                                    completionPrerequisiteLines: ["Clear dungeon: MyTargetDungeon"],
+                                    rewardDisplayLines: ["Equipment reward: The Adjudicator"],
+                                    nextQuestKey: "FactionQuest_LastLord_Chapter03A_Step02",
+                                    dialogBlockIdentities: [
+                                        "FactionQuest_LastLord_Chapter03_Step01|FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition|0|Start|start",
+                                        "FactionQuest_LastLord_Chapter03_Step01|FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition|0|End|success",
+                                    ],
+                                }),
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Start seeking answers to the Lords' curse.",
+                                    descriptionLines: ["Start seeking answers to the Lords' curse."],
+                                    completionPrerequisiteLines: ["Clear dungeons: 1"],
+                                    rewardDisplayLines: ["Equipment reward: The Adjudicator"],
+                                    nextQuestKey: "FactionQuest_LastLord_Chapter03A_Step02",
+                                    dialogBlockIdentities: [
+                                        "FactionQuest_LastLord_Chapter03_Step01|FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition|1|Start|start",
+                                        "FactionQuest_LastLord_Chapter03_Step01|FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition|1|End|success",
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({
+                    questKey: "FactionQuest_LastLord_Chapter03A_Step02",
+                    displayName: "A Fruitful Alliance",
+                }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "FactionQuest_LastLord_Chapter03_Step01",
+                choiceKey: null,
+                stepIndex: null,
+            },
+        });
+
+        expect(model.chronicle?.objectiveGroups).toHaveLength(1);
+        expect(model.chronicle?.selectedObjectiveGroup).toMatchObject({
+            kind: "objective",
+            representativeStepIndex: 1,
+            stepIndexes: [0, 1],
+            rewardLines: ["Equipment reward: The Adjudicator"],
+        });
+        expect(model.chronicle?.selectedObjectiveGroup?.requirementGroups).toEqual([
+            {
+                id: "objective:1:completion",
+                label: "Completion",
+                lines: ["Clear dungeons: 1"],
+            },
+        ]);
+    });
+
     it("groups major faction rail entries without breaking member quest deep links", () => {
         const hiddenMemberQuestKey = "FactionQuest_Necrophage_Chapter06_Step03_Choice01";
         const model = buildQuestExplorerViewModel({
@@ -573,7 +641,7 @@ describe("questViewModel", () => {
             memberCount: 3,
             title: "A Bitter Truth",
             chapterLabel: "Chapter 6",
-            subtitle: "Necrophage · 3 records",
+            subtitle: "Necrophage · 3 entries",
             branchLabel: "2 variants",
             flags: ["Required"],
             isSelected: true,
