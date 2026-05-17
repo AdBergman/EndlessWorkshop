@@ -39,7 +39,9 @@ export default function QuestMetadataPanel({
                 <h4 id="quest-selected-branch-heading">Selected Branch</h4>
                 {chronicle.selectedChoice ? (
                     <div className="questExplorer-pathPanel__selectedPath">
-                        <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                        {chronicle.selectedChoice.title ? (
+                            <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                        ) : null}
                         <TextLines
                             lines={chronicle.selectedChoice.descriptionLines}
                             emptyLabel="No choice description recorded."

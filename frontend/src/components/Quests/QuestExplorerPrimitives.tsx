@@ -211,9 +211,12 @@ export function QuestPathSelector({
         return <p className="questExplorer-muted">No branches are attached to this quest.</p>;
     }
 
+    const selectorChoices = choices.filter((choice) => choice.title);
+    if (selectorChoices.length <= 1) return null;
+
     return (
         <div className="questExplorer-choiceList">
-            {choices.map((choice) => (
+            {selectorChoices.map((choice) => (
                 <button
                     type="button"
                     className={`questExplorer-choiceButton${choice.isSelected ? " is-selected" : ""}`}

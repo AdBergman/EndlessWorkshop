@@ -1,4 +1,5 @@
 import type { QuestChoiceDto, QuestDto, QuestStepDto } from "@/types/questTypes";
+import { buildUserFacingQuestChoices } from "./questPathSemantics";
 import { buildQuestStepSemanticGroups } from "./questStepSemantics";
 
 export type QuestGraphEdgeScope = "quest" | "choice" | "step";
@@ -92,6 +93,63 @@ export type QuestObjectiveVariantDiagnostics = {
     rawPlaceholderPatterns: QuestRawPlaceholderPattern[];
 };
 
+export type QuestRawDisplayNameDiagnostics = {
+    questDisplayNameCount: number;
+    choiceDisplayNameCount: number;
+    questExamples: Array<{ questKey: string; displayName: string }>;
+    choiceExamples: Array<{ questKey: string; choiceKey: string; displayName: string }>;
+};
+
+export type QuestObjectiveTextDiagnostics = {
+    blankObjectiveCount: number;
+    spacingCorruptObjectiveCount: number;
+    examples: Array<{
+        questKey: string;
+        title: string;
+        choiceKey: string;
+        stepIndex: number;
+        objectiveText: string | null;
+        issue: "blank" | "spacing";
+    }>;
+};
+
+export type QuestDialogCoverageDiagnostics = {
+    rootDialogReferenceCount: number;
+    stepDialogReferenceCount: number;
+    questsWithRootDialogCount: number;
+    questsWithoutRootDialogCount: number;
+    questsWithAnyDialogCount: number;
+    questsWithoutAnyDialogCount: number;
+    stepsWithDialogCount: number;
+    stepsWithoutDialogCount: number;
+};
+
+export type QuestNoOutcomeDiagnostics = {
+    questCount: number;
+    byCategory: Array<{ category: string; count: number }>;
+    examples: Array<{ questKey: string; title: string; category: string }>;
+};
+
+export type QuestNoisyBranchFacetDiagnostics = {
+    labelCount: number;
+    labels: Array<{ label: string; count: number; examples: string[] }>;
+};
+
+export type QuestChoiceTitleDiagnostics = {
+    visibleChoiceCount: number;
+    rewrittenTitleCount: number;
+    fallbackTitleCount: number;
+    suppressedSinglePathTitleCount: number;
+    reasonCounts: Array<{ reason: string; count: number }>;
+    examples: Array<{
+        questKey: string;
+        choiceKey: string;
+        rawTitle: string;
+        projectedTitle: string | null;
+        reason: string;
+    }>;
+};
+
 export type QuestGraphDiagnostics = {
     questCount: number;
     edgeCount: number;
@@ -105,6 +163,12 @@ export type QuestGraphDiagnostics = {
     questNextMismatches: QuestGraphNextMismatch[];
     convergeOverlaps: QuestGraphEdgeDiagnostic[];
     objectiveVariantDiagnostics: QuestObjectiveVariantDiagnostics;
+    rawDisplayNameDiagnostics: QuestRawDisplayNameDiagnostics;
+    objectiveTextDiagnostics: QuestObjectiveTextDiagnostics;
+    dialogCoverageDiagnostics: QuestDialogCoverageDiagnostics;
+    noOutcomeDiagnostics: QuestNoOutcomeDiagnostics;
+    noisyBranchFacetDiagnostics: QuestNoisyBranchFacetDiagnostics;
+    choiceTitleDiagnostics: QuestChoiceTitleDiagnostics;
     edges: QuestGraphEdgeDiagnostic[];
 };
 
@@ -499,6 +563,387 @@ function buildObjectiveVariantDiagnostics(quests: readonly QuestDto[]): QuestObj
     };
 }
 
+function isRawInternalLabel(label: string, key: string | null | undefined): boolean {
+    const text = clean(label);
+    if (!text) return false;
+
+    return (
+        text === clean(key) ||
+        /[_{}]/.test(text) ||
+        /\b[A-Za-z0-9]+Definition\b/.test(text)
+    );
+}
+
+function buildRawDisplayNameDiagnostics(quests: readonly QuestDto[]): QuestRawDisplayNameDiagnostics {
+    const questExamples: QuestRawDisplayNameDiagnostics["questExamples"] = [];
+    const choiceExamples: QuestRawDisplayNameDiagnostics["choiceExamples"] = [];
+    let questDisplayNameCount = 0;
+    let choiceDisplayNameCount = 0;
+
+    quests.forEach((quest) => {
+        const displayName = clean(quest.displayName);
+        if (displayName && isRawInternalLabel(displayName, quest.questKey)) {
+            questDisplayNameCount += 1;
+            if (questExamples.length < 10) questExamples.push({ questKey: quest.questKey, displayName });
+        }
+
+        quest.choices.forEach((choice) => {
+            const choiceDisplayName = clean(choice.displayName);
+            if (!choiceDisplayName || !isRawInternalLabel(choiceDisplayName, choice.choiceKey)) return;
+
+            choiceDisplayNameCount += 1;
+            if (choiceExamples.length < 10) {
+                choiceExamples.push({
+                    questKey: quest.questKey,
+                    choiceKey: choice.choiceKey,
+                    displayName: choiceDisplayName,
+                });
+            }
+        });
+    });
+
+    return {
+        questDisplayNameCount,
+        choiceDisplayNameCount,
+        questExamples,
+        choiceExamples,
+    };
+}
+
+function buildObjectiveTextDiagnostics(quests: readonly QuestDto[]): QuestObjectiveTextDiagnostics {
+    let blankObjectiveCount = 0;
+    let spacingCorruptObjectiveCount = 0;
+    const examples: QuestObjectiveTextDiagnostics["examples"] = [];
+
+    quests.forEach((quest) => {
+        quest.choices.forEach((choice) => {
+            choice.steps.forEach((step) => {
+                const objectiveText = clean(step.objectiveText);
+                const issue = !objectiveText ? "blank" : /\s{2,}/.test(step.objectiveText ?? "") ? "spacing" : null;
+                if (!issue) return;
+
+                if (issue === "blank") blankObjectiveCount += 1;
+                if (issue === "spacing") spacingCorruptObjectiveCount += 1;
+                if (examples.length < 10) {
+                    examples.push({
+                        questKey: quest.questKey,
+                        title: getQuestTitle(quest),
+                        choiceKey: choice.choiceKey,
+                        stepIndex: step.stepIndex,
+                        objectiveText: objectiveText || null,
+                        issue,
+                    });
+                }
+            });
+        });
+    });
+
+    return {
+        blankObjectiveCount,
+        spacingCorruptObjectiveCount,
+        examples,
+    };
+}
+
+function buildDialogCoverageDiagnostics(quests: readonly QuestDto[]): QuestDialogCoverageDiagnostics {
+    let rootDialogReferenceCount = 0;
+    let stepDialogReferenceCount = 0;
+    let questsWithRootDialogCount = 0;
+    let questsWithAnyDialogCount = 0;
+    let stepsWithDialogCount = 0;
+    let stepsWithoutDialogCount = 0;
+
+    quests.forEach((quest) => {
+        const rootDialogCount = cleanLines(quest.rootDialogBlockIdentities).length;
+        rootDialogReferenceCount += rootDialogCount;
+        if (rootDialogCount > 0) questsWithRootDialogCount += 1;
+
+        let questHasAnyDialog = rootDialogCount > 0;
+        quest.choices.forEach((choice) => {
+            choice.steps.forEach((step) => {
+                const stepDialogCount = cleanLines(step.dialogBlockIdentities).length;
+                stepDialogReferenceCount += stepDialogCount;
+                if (stepDialogCount > 0) {
+                    stepsWithDialogCount += 1;
+                    questHasAnyDialog = true;
+                } else {
+                    stepsWithoutDialogCount += 1;
+                }
+            });
+        });
+        if (questHasAnyDialog) questsWithAnyDialogCount += 1;
+    });
+
+    return {
+        rootDialogReferenceCount,
+        stepDialogReferenceCount,
+        questsWithRootDialogCount,
+        questsWithoutRootDialogCount: quests.length - questsWithRootDialogCount,
+        questsWithAnyDialogCount,
+        questsWithoutAnyDialogCount: quests.length - questsWithAnyDialogCount,
+        stepsWithDialogCount,
+        stepsWithoutDialogCount,
+    };
+}
+
+function collectOutcomeQuestKeys(quest: QuestDto): string[] {
+    return unique([
+        ...quest.nextQuestKeys,
+        quest.convergesIntoQuestKey ?? "",
+        ...quest.choices.flatMap((choice) => [
+            ...choice.nextQuestKeys,
+            ...choice.steps.flatMap((step) => [step.nextQuestKey ?? "", step.failQuestKey ?? ""]),
+        ]),
+    ]);
+}
+
+function getCategoryLabel(quest: QuestDto): string {
+    return clean(quest.categoryType) || humanizeQuestKey(clean(quest.categoryKey) || "Uncategorized");
+}
+
+function buildNoOutcomeDiagnostics(quests: readonly QuestDto[]): QuestNoOutcomeDiagnostics {
+    const noOutcomeQuests = quests.filter((quest) => collectOutcomeQuestKeys(quest).length === 0);
+    const categoryCounts = noOutcomeQuests.reduce<Record<string, number>>((acc, quest) => {
+        const category = getCategoryLabel(quest);
+        acc[category] = (acc[category] ?? 0) + 1;
+        return acc;
+    }, {});
+
+    return {
+        questCount: noOutcomeQuests.length,
+        byCategory: Object.entries(categoryCounts)
+            .map(([category, count]) => ({ category, count }))
+            .sort((left, right) => right.count - left.count || left.category.localeCompare(right.category)),
+        examples: noOutcomeQuests.slice(0, 10).map((quest) => ({
+            questKey: quest.questKey,
+            title: getQuestTitle(quest),
+            category: getCategoryLabel(quest),
+        })),
+    };
+}
+
+function compactEntityLabel(value: string | null | undefined): string | null {
+    const label = clean(value);
+    if (!label) return null;
+
+    return humanizeQuestKey(label)
+        .replace(/^Faction /, "")
+        .replace(/^Faction Quest /, "")
+        .replace(/^Quest Line /, "")
+        .trim();
+}
+
+function isGenericPathLabel(label: string): boolean {
+    return /^(?:choice|branch|path)\s+[0-9a-z]+$/i.test(clean(label));
+}
+
+function isRedundantLabel(label: string, compareWith: string | null | undefined): boolean {
+    const normalizedLabel = normalizeText(label);
+    const normalizedCompare = normalizeText(compareWith ?? "");
+
+    return Boolean(normalizedLabel && normalizedCompare && normalizedLabel === normalizedCompare);
+}
+
+function getRawBranchContextLabel(quest: QuestDto): string | null {
+    const branchLabel = clean(quest.branchLabel);
+    if (branchLabel && !isGenericPathLabel(branchLabel) && !isRedundantLabel(branchLabel, getQuestTitle(quest))) {
+        return branchLabel;
+    }
+
+    const branchGroupLabel = compactEntityLabel(quest.branchGroupKey);
+    if (branchGroupLabel && !isGenericPathLabel(branchGroupLabel) && !isRedundantLabel(branchGroupLabel, getQuestTitle(quest))) {
+        return branchGroupLabel;
+    }
+
+    return null;
+}
+
+function isNoisyBranchFacetLabel(label: string): boolean {
+    const normalized = normalizeText(label).replace(/[^a-z0-9]+/g, " ").trim();
+
+    return (
+        /^path \d+[a-z]?$/.test(normalized) ||
+        /^quest .*\bchapter ?\d+[a-z]?\b/.test(normalized) ||
+        /^quest .*\bstep ?\d+\b/.test(normalized) ||
+        /^quest .*\bchoice ?\d+\b/.test(normalized)
+    );
+}
+
+function buildNoisyBranchFacetDiagnostics(quests: readonly QuestDto[]): QuestNoisyBranchFacetDiagnostics {
+    const labels = new Map<string, { count: number; examples: string[] }>();
+
+    quests.forEach((quest) => {
+        const label = getRawBranchContextLabel(quest);
+        if (!label || !isNoisyBranchFacetLabel(label)) return;
+
+        const current = labels.get(label) ?? { count: 0, examples: [] };
+        labels.set(label, {
+            count: current.count + 1,
+            examples: current.examples.includes(quest.questKey) || current.examples.length >= 3
+                ? current.examples
+                : [...current.examples, quest.questKey],
+        });
+    });
+
+    const sortedLabels = [...labels.entries()]
+        .map(([label, value]) => ({ label, count: value.count, examples: value.examples }))
+        .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label));
+
+    return {
+        labelCount: sortedLabels.length,
+        labels: sortedLabels.slice(0, 10),
+    };
+}
+
+const PLAYER_STANCE_LABELS = ["Pious", "Open", "Bold"] as const;
+
+function getStanceLabel(value: string | null | undefined): string | null {
+    const text = clean(value);
+    if (!text) return null;
+
+    const lowerText = text.toLowerCase();
+    return PLAYER_STANCE_LABELS.find((label) =>
+        new RegExp(`\\b${label.toLowerCase()}\\b`).test(lowerText)
+    ) ?? null;
+}
+
+function getChoiceTitle(choice: Pick<QuestChoiceDto, "choiceKey" | "displayName">, index: number): string {
+    const keyLabel = clean(choice.choiceKey) ? humanizeQuestKey(choice.choiceKey) : "";
+
+    return clean(choice.displayName) || keyLabel || `Choice ${index + 1}`;
+}
+
+function extractChoiceNumber(choiceKey: string | null | undefined): number | null {
+    const match = clean(choiceKey).match(/Choice0*([0-9]+)/i);
+    if (!match) return null;
+
+    const value = Number.parseInt(match[1] ?? "", 10);
+    return Number.isFinite(value) ? value : null;
+}
+
+function buildEffectChoicePathLabels(
+    quest: QuestDto,
+    questsByKey: Record<string, QuestDto>
+): Map<number, string> {
+    return quest.choices.reduce<Map<number, string>>((acc, choice) => {
+        if (!/EffectChoiceDefinition$/i.test(clean(choice.choiceKey))) return acc;
+
+        const choiceNumber = extractChoiceNumber(choice.choiceKey);
+        if (choiceNumber === null || acc.has(choiceNumber)) return acc;
+
+        const targetLabels = choice.nextQuestKeys
+            .map(clean)
+            .map((questKey) => questsByKey[questKey])
+            .filter((target): target is QuestDto => Boolean(target))
+            .map((target) => getStanceLabel(getQuestTitle(target)) ?? getQuestTitle(target))
+            .filter((label) => label && !isRedundantLabel(label, getQuestTitle(quest)) && !isGenericPathLabel(label));
+
+        const semanticLabel = targetLabels.find((label) => getStanceLabel(label)) ?? targetLabels[0] ?? null;
+        if (semanticLabel) acc.set(choiceNumber, semanticLabel);
+
+        return acc;
+    }, new Map<number, string>());
+}
+
+function buildDistinctNextQuestLabels(
+    choice: QuestChoiceDto,
+    questTitle: string,
+    questsByKey: Record<string, QuestDto>
+): string[] {
+    return unique(choice.nextQuestKeys
+        .map(clean)
+        .map((questKey) => questsByKey[questKey])
+        .filter((target): target is QuestDto => Boolean(target))
+        .map((target) => getQuestTitle(target))
+        .filter((label) => label && !isRedundantLabel(label, questTitle) && !isGenericPathLabel(label)));
+}
+
+function classifyChoiceTitle(
+    quest: QuestDto,
+    choice: QuestChoiceDto,
+    index: number,
+    visibleChoiceCount: number,
+    questsByKey: Record<string, QuestDto>,
+    effectPathLabels: ReadonlyMap<number, string>
+): { rawTitle: string; projectedTitle: string | null; reason: string } {
+    const questTitle = getQuestTitle(quest);
+    const rawTitle = getChoiceTitle(choice, index);
+    const stanceLabel = getStanceLabel(rawTitle);
+    if (stanceLabel) return { rawTitle, projectedTitle: stanceLabel, reason: "stance" };
+
+    if (!isRedundantLabel(rawTitle, questTitle) && !isGenericPathLabel(rawTitle) && !isRawInternalLabel(rawTitle, choice.choiceKey)) {
+        return { rawTitle, projectedTitle: rawTitle, reason: "sourceTitle" };
+    }
+
+    const choiceNumber = extractChoiceNumber(choice.choiceKey);
+    const effectPathLabel = choiceNumber === null ? null : effectPathLabels.get(choiceNumber) ?? null;
+    if (effectPathLabel) return { rawTitle, projectedTitle: effectPathLabel, reason: "effectOutcome" };
+
+    const nextQuestLabels = buildDistinctNextQuestLabels(choice, questTitle, questsByKey);
+    if (nextQuestLabels.length === 1) {
+        return { rawTitle, projectedTitle: nextQuestLabels[0] ?? null, reason: "nextOutcome" };
+    }
+
+    return {
+        rawTitle,
+        projectedTitle: visibleChoiceCount === 1 ? null : `Path ${String.fromCharCode("A".charCodeAt(0) + index)}`,
+        reason: visibleChoiceCount === 1 ? "suppressedSinglePathFallback" : "fallback",
+    };
+}
+
+function buildChoiceTitleDiagnostics(
+    quests: readonly QuestDto[],
+    questsByKey: Record<string, QuestDto>
+): QuestChoiceTitleDiagnostics {
+    const reasonCounts = new Map<string, number>();
+    const examples: QuestChoiceTitleDiagnostics["examples"] = [];
+    let visibleChoiceCount = 0;
+    let rewrittenTitleCount = 0;
+    let fallbackTitleCount = 0;
+    let suppressedSinglePathTitleCount = 0;
+
+    quests.forEach((quest) => {
+        const visibleChoices = buildUserFacingQuestChoices(quest.choices);
+        const effectPathLabels = buildEffectChoicePathLabels(quest, questsByKey);
+        visibleChoiceCount += visibleChoices.length;
+
+        visibleChoices.forEach((choice, index) => {
+            const decision = classifyChoiceTitle(
+                quest,
+                choice,
+                index,
+                visibleChoices.length,
+                questsByKey,
+                effectPathLabels
+            );
+            reasonCounts.set(decision.reason, (reasonCounts.get(decision.reason) ?? 0) + 1);
+            if (decision.projectedTitle !== decision.rawTitle) rewrittenTitleCount += 1;
+            if (decision.reason === "fallback") fallbackTitleCount += 1;
+            if (decision.reason === "suppressedSinglePathFallback") suppressedSinglePathTitleCount += 1;
+            if (decision.projectedTitle !== decision.rawTitle && examples.length < 10) {
+                examples.push({
+                    questKey: quest.questKey,
+                    choiceKey: choice.choiceKey,
+                    rawTitle: decision.rawTitle,
+                    projectedTitle: decision.projectedTitle,
+                    reason: decision.reason,
+                });
+            }
+        });
+    });
+
+    return {
+        visibleChoiceCount,
+        rewrittenTitleCount,
+        fallbackTitleCount,
+        suppressedSinglePathTitleCount,
+        reasonCounts: [...reasonCounts.entries()]
+            .map(([reason, count]) => ({ reason, count }))
+            .sort((left, right) => right.count - left.count || left.reason.localeCompare(right.reason)),
+        examples,
+    };
+}
+
 export function diagnoseQuestGraph(quests: readonly QuestDto[]): QuestGraphDiagnostics {
     const questsByKey = buildQuestMap(quests);
     const titleGroups = buildTitleGroups(quests);
@@ -534,6 +979,12 @@ export function diagnoseQuestGraph(quests: readonly QuestDto[]): QuestGraphDiagn
             (edge) => edge.kind === "converges" && questNextEdgeKeys.has(asEdgeKey(edge.sourceQuestKey, edge.targetQuestKey))
         ),
         objectiveVariantDiagnostics: buildObjectiveVariantDiagnostics(quests),
+        rawDisplayNameDiagnostics: buildRawDisplayNameDiagnostics(quests),
+        objectiveTextDiagnostics: buildObjectiveTextDiagnostics(quests),
+        dialogCoverageDiagnostics: buildDialogCoverageDiagnostics(quests),
+        noOutcomeDiagnostics: buildNoOutcomeDiagnostics(quests),
+        noisyBranchFacetDiagnostics: buildNoisyBranchFacetDiagnostics(quests),
+        choiceTitleDiagnostics: buildChoiceTitleDiagnostics(quests, questsByKey),
         edges,
     };
 }

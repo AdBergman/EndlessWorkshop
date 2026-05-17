@@ -49,6 +49,13 @@ type QuestRailGroup = {
     variantLabels: Set<string>;
 };
 
+type QuestPathTitleKind = "stance" | "source" | "effectOutcome" | "nextOutcome" | "fallback";
+
+type QuestPathTitleResult = {
+    title: string;
+    kind: QuestPathTitleKind;
+};
+
 const PLAYER_STANCE_LABELS = ["Pious", "Open", "Bold"] as const;
 
 const clean = (value: string | null | undefined): string => (value ?? "").trim();
@@ -236,6 +243,17 @@ function parseMajorFactionRailContext(quest: QuestDto): QuestRailGroupContext | 
 
 function isGenericPathLabel(label: string): boolean {
     return /^(?:choice|branch|path)\s+[0-9a-z]+$/i.test(clean(label));
+}
+
+function isInternalChoiceLabel(label: string, choiceKey: string | null | undefined): boolean {
+    const text = clean(label);
+    if (!text) return false;
+
+    return (
+        text === clean(choiceKey) ||
+        /[_{}]/.test(text) ||
+        /\b[A-Za-z0-9]+Definition\b/.test(text)
+    );
 }
 
 function formatGenericPathLabel(label: string): string | null {
@@ -529,24 +547,30 @@ function buildPathTitle(
     quest: QuestDto,
     linkContext: QuestLinkBuildContext,
     effectPathLabels: ReadonlyMap<number, string>
-): string {
+): QuestPathTitleResult {
     const questTitle = getQuestTitle(quest);
     const rawChoiceTitle = getChoiceTitle(choice, index);
     const stanceLabel = getStanceLabel(rawChoiceTitle);
-    if (stanceLabel) return stanceLabel;
+    if (stanceLabel) return { title: stanceLabel, kind: "stance" };
 
-    if (!isRedundantLabel(rawChoiceTitle, questTitle) && !isGenericPathLabel(rawChoiceTitle)) {
-        return rawChoiceTitle;
+    if (
+        !isRedundantLabel(rawChoiceTitle, questTitle) &&
+        !isGenericPathLabel(rawChoiceTitle) &&
+        !isInternalChoiceLabel(rawChoiceTitle, choice.choiceKey)
+    ) {
+        return { title: rawChoiceTitle, kind: "source" };
     }
 
     const choiceNumber = extractChoiceNumber(choice.choiceKey);
     const effectPathLabel = choiceNumber === null ? null : effectPathLabels.get(choiceNumber) ?? null;
-    if (effectPathLabel) return effectPathLabel;
+    if (effectPathLabel) return { title: effectPathLabel, kind: "effectOutcome" };
 
     const nextQuestLabels = buildDistinctNextQuestLabels(choice, linkContext, questTitle);
-    if (nextQuestLabels.length === 1) return nextQuestLabels[0] ?? formatPathFallback(index);
+    if (nextQuestLabels.length === 1) {
+        return { title: nextQuestLabels[0] ?? formatPathFallback(index), kind: "nextOutcome" };
+    }
 
-    return formatPathFallback(index);
+    return { title: formatPathFallback(index), kind: "fallback" };
 }
 
 function buildPathSubtitle(choice: QuestChoiceDto, linkContext: QuestLinkBuildContext, questTitle: string): string | null {
@@ -569,13 +593,15 @@ function buildChoiceModel(
     quest: QuestDto,
     selectedChoiceKey: string | null,
     linkContext: QuestLinkBuildContext,
-    effectPathLabels: ReadonlyMap<number, string>
+    effectPathLabels: ReadonlyMap<number, string>,
+    options: { suppressSyntheticSinglePathTitle: boolean }
 ): QuestChoiceSummaryModel {
     const questTitle = getQuestTitle(quest);
+    const title = buildPathTitle(choice, index, quest, linkContext, effectPathLabels);
 
     return {
         choiceKey: choice.choiceKey,
-        title: buildPathTitle(choice, index, quest, linkContext, effectPathLabels),
+        title: options.suppressSyntheticSinglePathTitle && title.kind === "fallback" ? null : title.title,
         subtitle: buildPathSubtitle(choice, linkContext, questTitle),
         descriptionLines: cleanLines(choice.descriptionLines),
         requirementGroups: buildRequirementGroups(choice.choiceKey, [
@@ -847,7 +873,8 @@ export function buildQuestExplorerViewModel({
             selectedQuest,
             resolved.selection.choiceKey,
             linkContext,
-            effectPathLabels
+            effectPathLabels,
+            { suppressSyntheticSinglePathTitle: resolved.choices.length === 1 }
         )
     );
     const stepModels = resolved.steps.map((step) =>

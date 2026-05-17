@@ -264,4 +264,68 @@ describe("questGraphDiagnostics", () => {
             examples: ["Clear dungeon: MyTargetDungeon"],
         });
     });
+
+    it("reports frontend data-quality projection diagnostics", () => {
+        const diagnostics = diagnoseQuestGraph([
+            quest({
+                questKey: "Quest_Raw_Chapter02_Step01",
+                displayName: "Quest_Raw_Chapter02_Step01",
+                categoryType: "Curiosity",
+                branchGroupKey: "Quest_Raw_Chapter02_Step01",
+                rootDialogBlockIdentities: ["Root_Dialog"],
+                choices: [
+                    choice({
+                        choiceKey: "Quest_Raw_ChoiceDefinition",
+                        displayName: "Quest_Raw_ChoiceDefinition",
+                        steps: [
+                            step({
+                                stepIndex: 0,
+                                objectiveText: null,
+                                dialogBlockIdentities: ["Step_Dialog"],
+                            }),
+                            step({
+                                stepIndex: 1,
+                                objectiveText: "Return to  base.",
+                            }),
+                        ],
+                    }),
+                ],
+            }),
+        ]);
+
+        expect(diagnostics.rawDisplayNameDiagnostics).toMatchObject({
+            questDisplayNameCount: 1,
+            choiceDisplayNameCount: 1,
+        });
+        expect(diagnostics.objectiveTextDiagnostics).toMatchObject({
+            blankObjectiveCount: 1,
+            spacingCorruptObjectiveCount: 1,
+        });
+        expect(diagnostics.dialogCoverageDiagnostics).toMatchObject({
+            rootDialogReferenceCount: 1,
+            stepDialogReferenceCount: 1,
+            questsWithRootDialogCount: 1,
+            questsWithAnyDialogCount: 1,
+            stepsWithDialogCount: 1,
+            stepsWithoutDialogCount: 1,
+        });
+        expect(diagnostics.noOutcomeDiagnostics).toMatchObject({
+            questCount: 1,
+            byCategory: [{ category: "Curiosity", count: 1 }],
+        });
+        expect(diagnostics.noisyBranchFacetDiagnostics.labels[0]).toMatchObject({
+            label: "Quest Raw Chapter02 Step01",
+            count: 1,
+        });
+        expect(diagnostics.choiceTitleDiagnostics).toMatchObject({
+            visibleChoiceCount: 1,
+            rewrittenTitleCount: 1,
+            fallbackTitleCount: 0,
+            suppressedSinglePathTitleCount: 1,
+        });
+        expect(diagnostics.choiceTitleDiagnostics.reasonCounts).toContainEqual({
+            reason: "suppressedSinglePathFallback",
+            count: 1,
+        });
+    });
 });

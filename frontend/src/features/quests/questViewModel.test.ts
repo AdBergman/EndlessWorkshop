@@ -510,6 +510,69 @@ describe("questViewModel", () => {
         expect(model.chronicle?.selectedChoice?.nextQuestLinks.map((link) => link.questKey)).toEqual(["Quest_Next"]);
     });
 
+    it("suppresses synthetic titles for single-path quests with redundant or raw choice labels", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "Collectible_Quest_001",
+                    displayName: "A Bloody Trail",
+                    choices: [
+                        choice({
+                            choiceKey: "Collectible_Quest_001_ChoiceDefinition",
+                            displayName: "A Bloody Trail",
+                            steps: [
+                                step({
+                                    objectiveText: "Follow the tracks of the assailants.",
+                                    descriptionLines: ["Follow the tracks of the assailants."],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "Collectible_Quest_001",
+                choiceKey: null,
+                stepIndex: null,
+            },
+        });
+
+        expect(model.chronicle?.choices).toHaveLength(1);
+        expect(model.chronicle?.choices[0]).toMatchObject({
+            choiceKey: "Collectible_Quest_001_ChoiceDefinition",
+            title: null,
+            subtitle: "Follow the tracks of the assailants.",
+        });
+        expect(model.chronicle?.selectedChoice?.title).toBeNull();
+    });
+
+    it("keeps meaningful single-path choice titles available for selected branch context", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "The Oath",
+                    choices: [
+                        choice({
+                            choiceKey: "Quest_A_Choice01ChoiceDefinition",
+                            displayName: "Scholar Variant",
+                        }),
+                    ],
+                }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "Quest_A",
+                choiceKey: null,
+                stepIndex: null,
+            },
+        });
+
+        expect(model.chronicle?.choices[0]?.title).toBe("Scholar Variant");
+        expect(model.chronicle?.selectedChoice?.title).toBe("Scholar Variant");
+    });
+
     it("collapses objective display variants and shows the cleaner requirement line", () => {
         const model = buildQuestExplorerViewModel({
             quests: [

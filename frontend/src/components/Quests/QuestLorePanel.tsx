@@ -121,7 +121,9 @@ export default function QuestLorePanel({
                 <PathSelector choices={chronicle.choices} onSelectChoice={onSelectChoice} />
                 {chronicle.selectedChoice ? (
                     <div className="questExplorer-loreSelectedPath">
-                        <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                        {chronicle.selectedChoice.title ? (
+                            <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                        ) : null}
                         <TextLines
                             lines={chronicle.selectedChoice.descriptionLines}
                             emptyLabel="No choice description recorded."
@@ -184,7 +186,9 @@ export default function QuestLorePanel({
                     </div>
                     {chronicle.selectedChoice ? (
                         <div className="questExplorer-pathPanel__selectedPath">
-                            <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                            {chronicle.selectedChoice.title ? (
+                                <p className="questExplorer-pathTitle">{chronicle.selectedChoice.title}</p>
+                            ) : null}
                             <LineGroups groups={chronicle.selectedChoice.requirementGroups} />
                             <TextLines
                                 lines={chronicle.selectedChoice.rewardLines}

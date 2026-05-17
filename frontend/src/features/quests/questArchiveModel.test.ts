@@ -437,6 +437,49 @@ describe("questArchiveModel", () => {
         expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Kin_Chapter01_Step01"]);
     });
 
+    it("omits raw-humanized and generic path labels from branch variant facets", () => {
+        const quests = [
+            quest({
+                questKey: "FactionQuest_Aspect_Chapter02_Step02",
+                displayName: "Aspect Trial",
+                branchGroupKey: "FactionQuest_Aspect_Chapter02_Step02",
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspect02",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspect_Chapter02_Step02_Choice01",
+                displayName: "Aspect Trial",
+                branchLabel: "Choice 1",
+                branchGroupKey: "FactionQuest_Aspect_Chapter02_Step02",
+                questSequenceIndex: 2,
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspect",
+                choices: [],
+            }),
+            quest({
+                questKey: "FactionQuest_Aspect_Chapter02_Step02_Choice02",
+                displayName: "Aspect Trial",
+                branchLabel: "Scholar Variant",
+                questSequenceIndex: 3,
+                inferredFactionKey: "Faction_Aspects",
+                inferredQuestLineKey: "FactionQuest_Aspect",
+                choices: [],
+            }),
+        ];
+
+        const model = buildModel({ quests });
+
+        expect(optionLabels(model.branchVariantOptions)).toEqual([
+            "Any branch/variant",
+            "Alternate questline 2",
+            "Branching entries",
+            "Scholar Variant",
+        ]);
+        expect(optionLabels(model.branchVariantOptions)).not.toContain("Path 1");
+        expect(optionLabels(model.branchVariantOptions)).not.toContain("Quest Aspect Chapter02 Step02");
+    });
+
     it("supports branch filters from quest DTO data", () => {
         const quests = [
             quest({

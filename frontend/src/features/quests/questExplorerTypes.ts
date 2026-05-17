@@ -51,7 +51,7 @@ export type QuestProgressionRailModel = {
 
 export type QuestChoiceSummaryModel = {
     choiceKey: string;
-    title: string;
+    title: string | null;
     subtitle: string | null;
     descriptionLines: string[];
     requirementGroups: QuestLineGroupModel[];

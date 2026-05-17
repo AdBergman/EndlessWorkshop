@@ -83,6 +83,22 @@ def normalize_choice(choice: dict[str, Any], index: int) -> dict[str, Any]:
 
 def normalize_quest(quest: dict[str, Any], index: int) -> dict[str, Any]:
     choices = quest.get("choices")
+    root_dialog_block_identities = string_list(quest.get("rootDialogBlockIdentities"))
+    dialog_block_refs = quest.get("dialogBlockRefs")
+    if not root_dialog_block_identities and isinstance(dialog_block_refs, list):
+        root_dialog_block_identities = [
+            "|".join(
+                [
+                    clean(ref.get("questKey")),
+                    "",
+                    "",
+                    clean(ref.get("dialogKey")),
+                    clean(ref.get("phase")),
+                ]
+            )
+            for ref in dialog_block_refs
+            if isinstance(ref, dict)
+        ]
 
     return {
         "questKey": clean(quest.get("questKey") or quest.get("entryKey")) or f"Quest_{index}",
@@ -111,7 +127,7 @@ def normalize_quest(quest: dict[str, Any], index: int) -> dict[str, Any]:
         "previousQuestKeys": string_list(quest.get("previousQuestKeys")),
         "nextQuestKeys": string_list(quest.get("nextQuestKeys")),
         "referenceKeys": string_list(quest.get("referenceKeys")),
-        "rootDialogBlockIdentities": string_list(quest.get("rootDialogBlockIdentities")),
+        "rootDialogBlockIdentities": root_dialog_block_identities,
         "choices": [
             normalize_choice(choice, choice_index)
             for choice_index, choice in enumerate(choices if isinstance(choices, list) else [])
@@ -518,6 +534,448 @@ def repeated_objective_diagnostics(quests: list[dict[str, Any]]) -> dict[str, An
     }
 
 
+def humanize_key(key: str) -> str:
+    words = re.sub(r"([a-z0-9])([A-Z])", r"\1 \2", clean(key))
+    tokens = [token for token in re.split(r"[^A-Za-z0-9]+", words) if token]
+    return " ".join(token if token.isupper() and len(token) <= 4 else token[:1].upper() + token[1:].lower() for token in tokens)
+
+
+def raw_internal_label(label: str, key: str | None = None) -> bool:
+    text = clean(label)
+    return bool(
+        text
+        and (
+            text == clean(key)
+            or re.search(r"[_{}]", text)
+            or re.search(r"\b[A-Za-z0-9]+Definition\b", text)
+        )
+    )
+
+
+def raw_display_name_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    quest_examples = []
+    choice_examples = []
+    quest_count = 0
+    choice_count = 0
+
+    for quest in quests:
+        display_name = clean(quest.get("displayName"))
+        if raw_internal_label(display_name, quest["questKey"]):
+            quest_count += 1
+            if len(quest_examples) < 10:
+                quest_examples.append({"questKey": quest["questKey"], "displayName": display_name})
+
+        for choice in quest["choices"]:
+            choice_display_name = clean(choice.get("displayName"))
+            if raw_internal_label(choice_display_name, choice["choiceKey"]):
+                choice_count += 1
+                if len(choice_examples) < 10:
+                    choice_examples.append(
+                        {
+                            "questKey": quest["questKey"],
+                            "choiceKey": choice["choiceKey"],
+                            "displayName": choice_display_name,
+                        }
+                    )
+
+    return {
+        "questDisplayNameCount": quest_count,
+        "choiceDisplayNameCount": choice_count,
+        "questExamples": quest_examples,
+        "choiceExamples": choice_examples,
+    }
+
+
+def objective_text_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    blank_count = 0
+    spacing_count = 0
+    examples = []
+
+    for quest in quests:
+        for choice in quest["choices"]:
+            for step in choice["steps"]:
+                objective = clean(step.get("objectiveText"))
+                issue = "blank" if not objective else "spacing" if re.search(r"\s{2,}", step.get("objectiveText") or "") else None
+                if issue is None:
+                    continue
+
+                if issue == "blank":
+                    blank_count += 1
+                else:
+                    spacing_count += 1
+                if len(examples) < 10:
+                    examples.append(
+                        {
+                            "questKey": quest["questKey"],
+                            "title": quest_title(quest),
+                            "choiceKey": choice["choiceKey"],
+                            "stepIndex": step["stepIndex"],
+                            "objectiveText": objective or None,
+                            "issue": issue,
+                        }
+                    )
+
+    return {
+        "blankObjectiveCount": blank_count,
+        "spacingCorruptObjectiveCount": spacing_count,
+        "examples": examples,
+    }
+
+
+def dialog_coverage_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    root_refs = 0
+    step_refs = 0
+    quests_with_root = 0
+    quests_with_any = 0
+    steps_with_dialog = 0
+    steps_without_dialog = 0
+
+    for quest in quests:
+        root_count = len(quest.get("rootDialogBlockIdentities", []))
+        root_refs += root_count
+        if root_count:
+            quests_with_root += 1
+
+        has_any = root_count > 0
+        for choice in quest["choices"]:
+            for step in choice["steps"]:
+                step_count = len(step.get("dialogBlockIdentities", []))
+                step_refs += step_count
+                if step_count:
+                    steps_with_dialog += 1
+                    has_any = True
+                else:
+                    steps_without_dialog += 1
+        if has_any:
+            quests_with_any += 1
+
+    return {
+        "rootDialogReferenceCount": root_refs,
+        "stepDialogReferenceCount": step_refs,
+        "questsWithRootDialogCount": quests_with_root,
+        "questsWithoutRootDialogCount": len(quests) - quests_with_root,
+        "questsWithAnyDialogCount": quests_with_any,
+        "questsWithoutAnyDialogCount": len(quests) - quests_with_any,
+        "stepsWithDialogCount": steps_with_dialog,
+        "stepsWithoutDialogCount": steps_without_dialog,
+    }
+
+
+def outcome_keys(quest: dict[str, Any]) -> list[str]:
+    return unique(
+        [
+            *quest["nextQuestKeys"],
+            quest["convergesIntoQuestKey"],
+            *[
+                target
+                for choice in quest["choices"]
+                for target in [
+                    *choice["nextQuestKeys"],
+                    *[step["nextQuestKey"] for step in choice["steps"]],
+                    *[step["failQuestKey"] for step in choice["steps"]],
+                ]
+            ],
+        ]
+    )
+
+
+def category_label(quest: dict[str, Any]) -> str:
+    return clean(quest.get("categoryType")) or humanize_key(clean(quest.get("categoryKey")) or "Uncategorized")
+
+
+def no_outcome_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    no_outcome_quests = [quest for quest in quests if not outcome_keys(quest)]
+    counts: dict[str, int] = {}
+    for quest in no_outcome_quests:
+        counts[category_label(quest)] = counts.get(category_label(quest), 0) + 1
+
+    return {
+        "questCount": len(no_outcome_quests),
+        "byCategory": [
+            {"category": category, "count": count}
+            for category, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        ],
+        "examples": [
+            {"questKey": quest["questKey"], "title": quest_title(quest), "category": category_label(quest)}
+            for quest in no_outcome_quests[:10]
+        ],
+    }
+
+
+def compact_entity_label(value: Any) -> str | None:
+    label = clean(value)
+    if not label:
+        return None
+    return (
+        humanize_key(label)
+        .removeprefix("Faction ")
+        .removeprefix("Faction Quest ")
+        .removeprefix("Quest Line ")
+        .strip()
+    )
+
+
+def generic_path_label(label: str) -> bool:
+    return bool(re.match(r"^(?:choice|branch|path)\s+[0-9a-z]+$", clean(label), re.IGNORECASE))
+
+
+def redundant_label(label: str, compare_with: str | None) -> bool:
+    return bool(normalize_text(label) and normalize_text(label) == normalize_text(compare_with or ""))
+
+
+def raw_branch_context_label(quest: dict[str, Any]) -> str | None:
+    branch_label = clean(quest.get("branchLabel"))
+    if branch_label and not generic_path_label(branch_label) and not redundant_label(branch_label, quest_title(quest)):
+        return branch_label
+
+    branch_group_label = compact_entity_label(quest.get("branchGroupKey"))
+    if branch_group_label and not generic_path_label(branch_group_label) and not redundant_label(branch_group_label, quest_title(quest)):
+        return branch_group_label
+
+    return None
+
+
+def noisy_branch_facet_label(label: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9]+", " ", normalize_text(label)).strip()
+    return bool(
+        re.match(r"^path \d+[a-z]?$", normalized)
+        or re.match(r"^quest .*\bchapter ?\d+[a-z]?\b", normalized)
+        or re.match(r"^quest .*\bstep ?\d+\b", normalized)
+        or re.match(r"^quest .*\bchoice ?\d+\b", normalized)
+    )
+
+
+def noisy_branch_facet_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    labels: dict[str, dict[str, Any]] = {}
+    for quest in quests:
+        label = raw_branch_context_label(quest)
+        if not label or not noisy_branch_facet_label(label):
+            continue
+        current = labels.setdefault(label, {"count": 0, "examples": []})
+        current["count"] += 1
+        if quest["questKey"] not in current["examples"] and len(current["examples"]) < 3:
+            current["examples"].append(quest["questKey"])
+
+    sorted_labels = [
+        {"label": label, "count": value["count"], "examples": value["examples"]}
+        for label, value in sorted(labels.items(), key=lambda item: (-item[1]["count"], item[0]))
+    ]
+    return {"labelCount": len(sorted_labels), "labels": sorted_labels[:10]}
+
+
+PLAYER_STANCE_LABELS = ["Pious", "Open", "Bold"]
+
+
+def stance_label(value: str | None) -> str | None:
+    text = clean(value).lower()
+    return next((label for label in PLAYER_STANCE_LABELS if re.search(rf"\b{label.lower()}\b", text)), None)
+
+
+def choice_title(choice: dict[str, Any], index: int) -> str:
+    return clean(choice.get("displayName")) or humanize_key(choice["choiceKey"]) or f"Choice {index + 1}"
+
+
+def effect_choice(choice: dict[str, Any]) -> bool:
+    return bool(re.search(r"EffectChoiceDefinition$", clean(choice["choiceKey"]), re.IGNORECASE))
+
+
+def user_facing_choice_signature(choice: dict[str, Any]) -> str:
+    def step_signature(step: dict[str, Any]) -> str:
+        return "::".join(
+            [
+                normalize_text(step["objectiveText"]),
+                line_signature(step["descriptionLines"]),
+                line_signature(step["selectionPrerequisiteLines"]),
+                line_signature(step["completionPrerequisiteLines"]),
+                line_signature(step["failurePrerequisiteLines"]),
+                line_signature(step["forbiddenPrerequisiteLines"]),
+                line_signature(step["rewardDisplayLines"]),
+                clean(step["nextQuestKey"]),
+                clean(step["failQuestKey"]),
+            ]
+        )
+
+    return "::".join(
+        [
+            normalize_text(choice.get("displayName")),
+            line_signature(choice["descriptionLines"]),
+            line_signature(choice["completionPrerequisiteLines"]),
+            line_signature(choice["failurePrerequisiteLines"]),
+            line_signature(choice["rewardDisplayLines"]),
+            "|".join(choice["nextQuestKeys"]),
+            "||".join(step_signature(step) for step in choice["steps"]),
+        ]
+    )
+
+
+def user_facing_choice_score(choice: dict[str, Any]) -> int:
+    def has_objective(step: dict[str, Any]) -> bool:
+        return bool(clean(step["objectiveText"]) or step["descriptionLines"])
+
+    def has_requirements(step: dict[str, Any]) -> bool:
+        return bool(step_condition_lines(step))
+
+    def has_dialog(step: dict[str, Any]) -> bool:
+        return bool(step.get("dialogBlockIdentities"))
+
+    return (
+        len([step for step in choice["steps"] if has_objective(step)]) * 20
+        + len([step for step in choice["steps"] if has_requirements(step)]) * 8
+        + len([step for step in choice["steps"] if has_dialog(step)]) * 30
+        + len(choice["rewardDisplayLines"]) * 6
+    )
+
+
+def user_facing_choices(choices: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_signature: dict[str, dict[str, Any]] = {}
+    ordered_signatures: list[str] = []
+
+    for choice in choices:
+        if effect_choice(choice):
+            continue
+
+        signature = user_facing_choice_signature(choice)
+        score = user_facing_choice_score(choice)
+        existing = by_signature.get(signature)
+        if existing is None:
+            ordered_signatures.append(signature)
+            by_signature[signature] = {"choice": choice, "score": score}
+            continue
+        if score > existing["score"]:
+            by_signature[signature] = {"choice": choice, "score": score}
+
+    return [by_signature[signature]["choice"] for signature in ordered_signatures]
+
+
+def choice_number(choice_key: str) -> int | None:
+    match = re.search(r"Choice0*([0-9]+)", clean(choice_key), re.IGNORECASE)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def quests_by_key(quests: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {quest["questKey"]: quest for quest in quests}
+
+
+def effect_choice_path_labels(quest: dict[str, Any], quest_lookup: dict[str, dict[str, Any]]) -> dict[int, str]:
+    labels: dict[int, str] = {}
+    for choice in quest["choices"]:
+        if not effect_choice(choice):
+            continue
+        number = choice_number(choice["choiceKey"])
+        if number is None or number in labels:
+            continue
+        target_labels = [
+            stance_label(quest_title(target)) or quest_title(target)
+            for target in [quest_lookup.get(clean(key)) for key in choice["nextQuestKeys"]]
+            if target
+        ]
+        target_labels = [
+            label
+            for label in target_labels
+            if label and not redundant_label(label, quest_title(quest)) and not generic_path_label(label)
+        ]
+        semantic_label = next((label for label in target_labels if stance_label(label)), None) or (
+            target_labels[0] if target_labels else None
+        )
+        if semantic_label:
+            labels[number] = semantic_label
+    return labels
+
+
+def next_quest_labels(choice: dict[str, Any], quest: dict[str, Any], quest_lookup: dict[str, dict[str, Any]]) -> list[str]:
+    return unique(
+        [
+            quest_title(target)
+            for target in [quest_lookup.get(clean(key)) for key in choice["nextQuestKeys"]]
+            if target
+            and not redundant_label(quest_title(target), quest_title(quest))
+            and not generic_path_label(quest_title(target))
+        ]
+    )
+
+
+def classify_choice_title(
+    quest: dict[str, Any],
+    choice: dict[str, Any],
+    index: int,
+    visible_choice_count: int,
+    quest_lookup: dict[str, dict[str, Any]],
+    effect_labels: dict[int, str],
+) -> dict[str, Any]:
+    raw_title = choice_title(choice, index)
+    stance = stance_label(raw_title)
+    if stance:
+        return {"rawTitle": raw_title, "projectedTitle": stance, "reason": "stance"}
+
+    if (
+        not redundant_label(raw_title, quest_title(quest))
+        and not generic_path_label(raw_title)
+        and not raw_internal_label(raw_title, choice["choiceKey"])
+    ):
+        return {"rawTitle": raw_title, "projectedTitle": raw_title, "reason": "sourceTitle"}
+
+    number = choice_number(choice["choiceKey"])
+    if number is not None and number in effect_labels:
+        return {"rawTitle": raw_title, "projectedTitle": effect_labels[number], "reason": "effectOutcome"}
+
+    targets = next_quest_labels(choice, quest, quest_lookup)
+    if len(targets) == 1:
+        return {"rawTitle": raw_title, "projectedTitle": targets[0], "reason": "nextOutcome"}
+
+    return {
+        "rawTitle": raw_title,
+        "projectedTitle": None if visible_choice_count == 1 else f"Path {chr(ord('A') + index)}",
+        "reason": "suppressedSinglePathFallback" if visible_choice_count == 1 else "fallback",
+    }
+
+
+def choice_title_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    lookup = quests_by_key(quests)
+    visible_count = 0
+    rewritten_count = 0
+    fallback_count = 0
+    suppressed_count = 0
+    reasons: dict[str, int] = {}
+    examples = []
+
+    for quest in quests:
+        visible_choices = user_facing_choices(quest["choices"])
+        effect_labels = effect_choice_path_labels(quest, lookup)
+        visible_count += len(visible_choices)
+
+        for index, choice in enumerate(visible_choices):
+            decision = classify_choice_title(quest, choice, index, len(visible_choices), lookup, effect_labels)
+            reasons[decision["reason"]] = reasons.get(decision["reason"], 0) + 1
+            if decision["projectedTitle"] != decision["rawTitle"]:
+                rewritten_count += 1
+                if len(examples) < 10:
+                    examples.append(
+                        {
+                            "questKey": quest["questKey"],
+                            "choiceKey": choice["choiceKey"],
+                            **decision,
+                        }
+                    )
+            if decision["reason"] == "fallback":
+                fallback_count += 1
+            if decision["reason"] == "suppressedSinglePathFallback":
+                suppressed_count += 1
+
+    return {
+        "visibleChoiceCount": visible_count,
+        "rewrittenTitleCount": rewritten_count,
+        "fallbackTitleCount": fallback_count,
+        "suppressedSinglePathTitleCount": suppressed_count,
+        "reasonCounts": [
+            {"reason": reason, "count": count}
+            for reason, count in sorted(reasons.items(), key=lambda item: (-item[1], item[0]))
+        ],
+        "examples": examples,
+    }
+
+
 def collect_edges(quests: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, list[str]]]:
     quest_keys = {quest["questKey"] for quest in quests}
     quests_by_key = {quest["questKey"]: quest for quest in quests}
@@ -647,6 +1105,12 @@ def diagnose(quests: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         **repeated_objectives,
         "objectiveVariantDiagnostics": objective_variants,
+        "rawDisplayNameDiagnostics": raw_display_name_diagnostics(quests),
+        "objectiveTextDiagnostics": objective_text_diagnostics(quests),
+        "dialogCoverageDiagnostics": dialog_coverage_diagnostics(quests),
+        "noOutcomeDiagnostics": no_outcome_diagnostics(quests),
+        "noisyBranchFacetDiagnostics": noisy_branch_facet_diagnostics(quests),
+        "choiceTitleDiagnostics": choice_title_diagnostics(quests),
         "duplicateTitleExamples": [
             {"title": title, "count": len(quest_keys)}
             for title, quest_keys in sorted(

@@ -151,9 +151,21 @@ function getQuestlineVariantLabel(questlineKey: string | null | undefined): stri
     return Number.isFinite(variantNumber) ? `Alternate questline ${variantNumber}` : "Alternate questline";
 }
 
+function isNoisyBranchVariantLabel(label: string): boolean {
+    const normalized = normalizeSearch(label);
+
+    return (
+        /^path \d+[a-z]?$/.test(normalized) ||
+        /^quest .*\bchapter ?\d+[a-z]?\b/.test(normalized) ||
+        /^quest .*\bstep ?\d+\b/.test(normalized) ||
+        /^quest .*\bchoice ?\d+\b/.test(normalized)
+    );
+}
+
 function getQuestBranchVariantLabels(quest: QuestDto): string[] {
+    const pathContextLabel = getQuestPathContextLabel(quest, { allowGeneric: false });
     const labels = [
-        getQuestPathContextLabel(quest, { allowGeneric: true }),
+        pathContextLabel && !isNoisyBranchVariantLabel(pathContextLabel) ? pathContextLabel : null,
         getQuestlineVariantLabel(quest.inferredQuestLineKey),
         quest.branchStart || quest.branchEnd || clean(quest.branchGroupKey) ? "Branching entries" : null,
     ].filter((label): label is string => Boolean(label));
