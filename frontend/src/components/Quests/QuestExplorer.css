@@ -224,20 +224,7 @@
     box-shadow: 0 0 0 3px rgba(216, 183, 105, 0.16);
 }
 
-.questExplorer-filterToggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--quest-text-soft);
-    font-size: 12px;
-}
-
-.questExplorer-filterToggle input {
-    accent-color: var(--quest-gold);
-}
-
-.questExplorer-clearFilters,
-.questExplorer-filterNotice button {
+.questExplorer-clearFilters {
     min-height: 30px;
     border: 1px solid rgba(216, 183, 105, 0.3);
     background: var(--quest-gold-soft);
@@ -245,26 +232,9 @@
     cursor: pointer;
 }
 
-.questExplorer-clearFilters:hover,
-.questExplorer-filterNotice button:hover {
+.questExplorer-clearFilters:hover {
     border-color: rgba(216, 183, 105, 0.56);
     background: rgba(216, 183, 105, 0.18);
-}
-
-.questExplorer-filterNotice {
-    display: grid;
-    gap: 8px;
-    margin: 10px 10px 0;
-    padding: 11px 12px;
-    border: 1px solid rgba(216, 183, 105, 0.3);
-    background: rgba(216, 183, 105, 0.08);
-}
-
-.questExplorer-filterNotice p {
-    margin: 0;
-    color: var(--quest-text-soft);
-    font-size: 12px;
-    line-height: 1.45;
 }
 
 .questExplorer-rail__list {

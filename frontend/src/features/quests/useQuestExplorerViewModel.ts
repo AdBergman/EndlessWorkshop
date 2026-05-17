@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-    selectSelectedFaction,
-    useFactionSelectionStore,
-} from "@/stores/factionSelectionStore";
-import {
     buildQuestArchiveModel,
     defaultQuestArchiveFilters,
     type QuestArchiveFilters,
@@ -52,7 +48,6 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
     const loaded = useQuestStore(selectQuestLoaded);
     const error = useQuestStore(selectQuestError);
     const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
-    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const [searchParams, setSearchParams] = useSearchParams();
     const requestedQuestKey = clean(searchParams.get("quest"));
     const [localSelection, setLocalSelection] = useState<Omit<QuestExplorerSelection, "questKey">>({
@@ -89,9 +84,8 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
                 dialogBlocksByIdentity,
                 selectedQuestKey,
                 filters: archiveFilters,
-                currentFaction: selectedFaction,
             }),
-        [archiveFilters, dialogBlocksByIdentity, quests, selectedFaction, selectedQuestKey]
+        [archiveFilters, dialogBlocksByIdentity, quests, selectedQuestKey]
     );
 
     useEffect(() => {

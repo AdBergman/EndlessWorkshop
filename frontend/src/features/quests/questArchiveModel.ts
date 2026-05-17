@@ -1,4 +1,3 @@
-import type { FactionInfo } from "@/types/dataTypes";
 import type { QuestDialogBlockDto, QuestDto } from "@/types/questTypes";
 import {
     buildProgressionRail,
@@ -14,19 +13,12 @@ import type { QuestProgressionRailModel } from "./questExplorerTypes";
 export const QUEST_ARCHIVE_ALL = "__all__";
 export const QUEST_ARCHIVE_BRANCH_ANY = "__branch_any__";
 
-export type QuestArchiveSortOption = "canonical" | "relevance" | "title" | "factionChapter";
-export type QuestArchiveTranscriptFilter = "all" | "has" | "missing";
-export type QuestArchiveRequirementFilter = "all" | "required" | "optional";
-
 export type QuestArchiveFilters = {
     searchText: string;
-    currentFactionOnly: boolean;
+    faction: string;
     category: string;
     chapter: string;
     branchVariant: string;
-    transcript: QuestArchiveTranscriptFilter;
-    requirement: QuestArchiveRequirementFilter;
-    sort: QuestArchiveSortOption;
 };
 
 export type QuestArchiveFilterOption = {
@@ -45,13 +37,13 @@ export type QuestArchiveCounts = {
 export type QuestArchiveModel = {
     rail: QuestProgressionRailModel;
     filters: QuestArchiveFilters;
+    factionOptions: QuestArchiveFilterOption[];
     categoryOptions: QuestArchiveFilterOption[];
     chapterOptions: QuestArchiveFilterOption[];
     branchVariantOptions: QuestArchiveFilterOption[];
     counts: QuestArchiveCounts;
     hasActiveFilters: boolean;
     selectedOutsideFilters: boolean;
-    currentFactionLabel: string | null;
 };
 
 type SearchField = {
@@ -68,19 +60,15 @@ type QuestArchiveRecord = {
     factionLabel: string | null;
     questlineLabel: string | null;
     branchVariantLabels: string[];
-    hasTranscript: boolean;
     relevanceScore: number;
 };
 
 export const defaultQuestArchiveFilters: QuestArchiveFilters = {
     searchText: "",
-    currentFactionOnly: false,
+    faction: QUEST_ARCHIVE_ALL,
     category: QUEST_ARCHIVE_ALL,
     chapter: QUEST_ARCHIVE_ALL,
     branchVariant: QUEST_ARCHIVE_ALL,
-    transcript: "all",
-    requirement: "all",
-    sort: "canonical",
 };
 
 const clean = (value: string | null | undefined): string => (value ?? "").trim();
@@ -106,15 +94,24 @@ const compareString = (left: string | null | undefined, right: string | null | u
 const formatCountLabel = (count: number, singular: string): string =>
     `${count} ${singular}${count === 1 ? "" : "s"}`;
 
-const formatDisplayLabel = (value: string | null | undefined): string | null => {
-    const normalized = clean(value);
-    if (!normalized) return null;
-
-    return humanizeQuestKey(normalized);
-};
-
 function getQuestCategoryLabel(quest: QuestDto): string | null {
     return clean(quest.categoryType) || compactEntityLabel(quest.categoryKey) || clean(quest.categoryKey) || null;
+}
+
+function getQuestFactionLabel(quest: QuestDto): string | null {
+    const searchableFactionText = normalizeSearch([
+        quest.inferredFactionKey,
+        quest.inferredQuestLineKey,
+        quest.questKey,
+    ].filter((value): value is string => Boolean(clean(value))).join(" "));
+
+    if (searchableFactionText.includes("necrophage")) return "Necrophages";
+    if (searchableFactionText.includes("kin of sheredyn") || searchableFactionText.includes("kin")) return "Kin";
+    if (searchableFactionText.includes("lords")) return "Lords";
+    if (searchableFactionText.includes("tahuk")) return "Tahuk";
+    if (searchableFactionText.includes("aspects")) return "Aspects";
+
+    return compactEntityLabel(quest.inferredFactionKey);
 }
 
 function getQuestlineVariantLabel(questlineKey: string | null | undefined): string | null {
@@ -148,49 +145,6 @@ function collectOutcomeQuestKeys(quest: QuestDto): string[] {
     return unique(keys.map(clean));
 }
 
-function collectDialogIdentities(quest: QuestDto): string[] {
-    return unique([
-        ...quest.rootDialogBlockIdentities,
-        ...quest.choices.flatMap((choice) => choice.steps.flatMap((step) => step.dialogBlockIdentities)),
-    ].map(clean));
-}
-
-function blockHasTranscript(block: QuestDialogBlockDto | undefined): boolean {
-    return Boolean(block?.lines.some((line) => clean(line.text).length > 0));
-}
-
-function questHasTranscript(
-    quest: QuestDto,
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>
-): boolean {
-    return collectDialogIdentities(quest).some((identity) => blockHasTranscript(dialogBlocksByIdentity[identity]));
-}
-
-function buildCurrentFactionAliases(faction: FactionInfo | null | undefined): string[] {
-    const aliases = [faction?.uiLabel, faction?.enumFaction].map((value) => normalizeSearch(String(value ?? "")));
-    const expanded = aliases.flatMap((alias) => {
-        if (!alias.endsWith("s")) return [alias];
-        return [alias, alias.slice(0, -1)];
-    });
-
-    return unique(expanded.filter((alias) => alias.length > 0));
-}
-
-function questMatchesCurrentFaction(quest: QuestDto, faction: FactionInfo | null | undefined): boolean {
-    const aliases = buildCurrentFactionAliases(faction);
-    if (aliases.length === 0) return false;
-
-    const searchableFactionText = normalizeSearch([
-        quest.inferredFactionKey,
-        quest.inferredQuestLineKey,
-        quest.questKey,
-        compactEntityLabel(quest.inferredFactionKey),
-        compactEntityLabel(quest.inferredQuestLineKey),
-    ].filter((value): value is string => Boolean(clean(value))).join(" "));
-
-    return aliases.some((alias) => searchableFactionText.includes(alias));
-}
-
 function buildOutcomeLabels(quest: QuestDto, questsByKey: Record<string, QuestDto>): string[] {
     return collectOutcomeQuestKeys(quest).map((questKey) => {
         const outcomeQuest = questsByKey[questKey] ?? null;
@@ -200,13 +154,12 @@ function buildOutcomeLabels(quest: QuestDto, questsByKey: Record<string, QuestDt
 
 function buildQuestArchiveRecord(
     quest: QuestDto,
-    questsByKey: Record<string, QuestDto>,
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>
+    questsByKey: Record<string, QuestDto>
 ): QuestArchiveRecord {
     const title = getQuestTitle(quest);
     const categoryLabel = getQuestCategoryLabel(quest);
     const chapterLabel = formatChapterLabel(quest);
-    const factionLabel = compactEntityLabel(quest.inferredFactionKey);
+    const factionLabel = getQuestFactionLabel(quest);
     const questlineLabel = compactEntityLabel(quest.inferredQuestLineKey);
     const branchVariantLabels = getQuestBranchVariantLabels(quest);
     const choices = quest.choices;
@@ -258,7 +211,6 @@ function buildQuestArchiveRecord(
         factionLabel,
         questlineLabel,
         branchVariantLabels,
-        hasTranscript: questHasTranscript(quest, dialogBlocksByIdentity),
         relevanceScore: 0,
     };
 }
@@ -310,24 +262,21 @@ function countOptions(
 function isConstrictiveFilterActive(filters: QuestArchiveFilters): boolean {
     return (
         clean(filters.searchText).length > 0 ||
-        filters.currentFactionOnly ||
+        filters.faction !== QUEST_ARCHIVE_ALL ||
         filters.category !== QUEST_ARCHIVE_ALL ||
         filters.chapter !== QUEST_ARCHIVE_ALL ||
-        filters.branchVariant !== QUEST_ARCHIVE_ALL ||
-        filters.transcript !== "all" ||
-        filters.requirement !== "all"
+        filters.branchVariant !== QUEST_ARCHIVE_ALL
     );
 }
 
 function recordMatchesFilters(
     record: QuestArchiveRecord,
-    filters: QuestArchiveFilters,
-    currentFaction: FactionInfo | null | undefined
+    filters: QuestArchiveFilters
 ): QuestArchiveRecord | null {
     const relevanceScore = computeSearchScore(record, filters.searchText);
     if (relevanceScore === null) return null;
 
-    if (filters.currentFactionOnly && !questMatchesCurrentFaction(record.quest, currentFaction)) return null;
+    if (filters.faction !== QUEST_ARCHIVE_ALL && record.factionLabel !== filters.faction) return null;
     if (filters.category !== QUEST_ARCHIVE_ALL && record.categoryLabel !== filters.category) return null;
     if (filters.chapter !== QUEST_ARCHIVE_ALL && record.chapterLabel !== filters.chapter) return null;
     if (filters.branchVariant === QUEST_ARCHIVE_BRANCH_ANY && record.branchVariantLabels.length === 0) return null;
@@ -338,10 +287,6 @@ function recordMatchesFilters(
     ) {
         return null;
     }
-    if (filters.transcript === "has" && !record.hasTranscript) return null;
-    if (filters.transcript === "missing" && record.hasTranscript) return null;
-    if (filters.requirement === "required" && !record.quest.mandatory) return null;
-    if (filters.requirement === "optional" && record.quest.mandatory) return null;
 
     return {
         ...record,
@@ -349,56 +294,28 @@ function recordMatchesFilters(
     };
 }
 
-function compareArchiveRecords(
-    left: QuestArchiveRecord,
-    right: QuestArchiveRecord,
-    sort: QuestArchiveSortOption,
-    hasSearch: boolean
-): number {
-    if (sort === "relevance" && hasSearch) {
-        return right.relevanceScore - left.relevanceScore || compareQuestOrder(left.quest, right.quest);
-    }
-
-    if (sort === "title") {
-        return compareString(getQuestTitle(left.quest), getQuestTitle(right.quest)) || compareQuestOrder(left.quest, right.quest);
-    }
-
-    if (sort === "factionChapter") {
-        return (
-            compareString(left.factionLabel, right.factionLabel) ||
-            compareString(left.chapterLabel, right.chapterLabel) ||
-            compareString(left.questlineLabel, right.questlineLabel) ||
-            compareQuestOrder(left.quest, right.quest)
-        );
-    }
-
-    return compareQuestOrder(left.quest, right.quest);
-}
-
 export function buildQuestArchiveModel({
     quests,
     dialogBlocksByIdentity,
     selectedQuestKey,
     filters,
-    currentFaction,
 }: {
     quests: QuestDto[];
     dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>;
     selectedQuestKey: string | null;
     filters: QuestArchiveFilters;
-    currentFaction: FactionInfo | null | undefined;
 }): QuestArchiveModel {
+    void dialogBlocksByIdentity;
     const orderedQuests = [...quests].sort(compareQuestOrder);
     const questsByKey = orderedQuests.reduce<Record<string, QuestDto>>((acc, quest) => {
         acc[quest.questKey] = quest;
         return acc;
     }, {});
-    const records = orderedQuests.map((quest) => buildQuestArchiveRecord(quest, questsByKey, dialogBlocksByIdentity));
-    const hasSearch = clean(filters.searchText).length > 0;
+    const records = orderedQuests.map((quest) => buildQuestArchiveRecord(quest, questsByKey));
     const visibleRecords = records
-        .map((record) => recordMatchesFilters(record, filters, currentFaction))
+        .map((record) => recordMatchesFilters(record, filters))
         .filter((record): record is QuestArchiveRecord => Boolean(record))
-        .sort((left, right) => compareArchiveRecords(left, right, filters.sort, hasSearch));
+        .sort((left, right) => compareQuestOrder(left.quest, right.quest));
     const rail = buildProgressionRail(visibleRecords.map((record) => record.quest), selectedQuestKey);
     const totalRail = buildProgressionRail(orderedQuests, selectedQuestKey);
     const selectedOutsideFilters = Boolean(
@@ -412,6 +329,7 @@ export function buildQuestArchiveModel({
     return {
         rail,
         filters,
+        factionOptions: countOptions(records, (record) => record.factionLabel ? [record.factionLabel] : []),
         categoryOptions: countOptions(records, (record) => record.categoryLabel ? [record.categoryLabel] : []),
         chapterOptions: countOptions(records, (record) => record.chapterLabel ? [record.chapterLabel] : []),
         branchVariantOptions: branchVariantRecordCount > 0
@@ -432,7 +350,6 @@ export function buildQuestArchiveModel({
         },
         hasActiveFilters: isConstrictiveFilterActive(filters),
         selectedOutsideFilters,
-        currentFactionLabel: formatDisplayLabel(clean(currentFaction?.uiLabel) || clean(currentFaction?.enumFaction)),
     };
 }
 

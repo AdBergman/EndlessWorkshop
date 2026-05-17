@@ -1,5 +1,4 @@
-import { Faction, type FactionInfo } from "@/types/dataTypes";
-import type { QuestChoiceDto, QuestDialogBlockDto, QuestDto, QuestStepDto } from "@/types/questTypes";
+import type { QuestChoiceDto, QuestDto, QuestStepDto } from "@/types/questTypes";
 import {
     buildQuestArchiveModel,
     defaultQuestArchiveFilters,
@@ -66,60 +65,19 @@ const quest = (overrides: Partial<QuestDto> = {}): QuestDto => ({
     ...overrides,
 });
 
-const dialogBlock = (overrides: Partial<QuestDialogBlockDto> = {}): QuestDialogBlockDto => ({
-    identity: "Root_A",
-    questKey: "Quest_A",
-    choiceKey: null,
-    stepIndex: null,
-    parentScope: "QUEST",
-    dialogKey: "Dialog_A",
-    phase: "intro",
-    expectedLineCount: 1,
-    blockOrder: 0,
-    lines: [
-        {
-            lineOrder: 0,
-            sourceLineIndex: 1,
-            role: "narrator",
-            speakerLabel: null,
-            text: "The archive speaks.",
-        },
-    ],
-    ...overrides,
-});
-
-const kinFaction: FactionInfo = {
-    isMajor: true,
-    enumFaction: Faction.KIN,
-    uiLabel: "Kin",
-    minorName: null,
-};
-
-const necrophageFaction: FactionInfo = {
-    isMajor: true,
-    enumFaction: Faction.NECROPHAGES,
-    uiLabel: "Necrophages",
-    minorName: null,
-};
-
 const buildModel = ({
     quests,
-    dialogBlocksByIdentity = {},
     selectedQuestKey = null,
     filters = {},
-    currentFaction = kinFaction,
 }: {
     quests: QuestDto[];
-    dialogBlocksByIdentity?: Record<string, QuestDialogBlockDto>;
     selectedQuestKey?: string | null;
     filters?: Partial<QuestArchiveFilters>;
-    currentFaction?: FactionInfo;
 }) =>
     buildQuestArchiveModel({
         quests,
-        dialogBlocksByIdentity,
+        dialogBlocksByIdentity: {},
         selectedQuestKey,
-        currentFaction,
         filters: {
             ...defaultQuestArchiveFilters,
             ...filters,
@@ -168,7 +126,7 @@ describe("questArchiveModel", () => {
         expect(visibleQuestKeys(buildModel({ quests, filters: { searchText: "build archive" } }))).toEqual(["Quest_A"]);
         expect(visibleQuestKeys(buildModel({ quests, filters: { searchText: "relic cache" } }))).toEqual(["Quest_A"]);
         expect(visibleQuestKeys(buildModel({ quests, filters: { searchText: "sky map" } }))).toEqual(["Quest_A"]);
-        expect(visibleQuestKeys(buildModel({ quests, filters: { searchText: "sapphire accord", sort: "relevance" } }))).toContain("Quest_A");
+        expect(visibleQuestKeys(buildModel({ quests, filters: { searchText: "sapphire accord" } }))).toContain("Quest_A");
     });
 
     it("reports grouped visible counts and record counts after filters", () => {
@@ -241,7 +199,7 @@ describe("questArchiveModel", () => {
         expect(visibleQuestKeys(model)).toEqual(["Quest_A"]);
     });
 
-    it("filters against the current top-nav faction with singular and plural faction labels", () => {
+    it("builds faction options and filters by selected faction", () => {
         const quests = [
             quest({
                 questKey: "FactionQuest_Necrophage_Chapter01_Step01",
@@ -262,18 +220,20 @@ describe("questArchiveModel", () => {
 
         const model = buildModel({
             quests,
-            currentFaction: necrophageFaction,
-            filters: { currentFactionOnly: true },
+            filters: { faction: "Necrophages" },
         });
 
+        expect(model.factionOptions).toEqual([
+            { value: "Kin", label: "Kin", count: 1 },
+            { value: "Necrophages", label: "Necrophages", count: 1 },
+        ]);
         expect(visibleQuestKeys(model)).toEqual(["FactionQuest_Necrophage_Chapter01_Step01"]);
     });
 
-    it("supports transcript, requirement, and branch filters from quest DTO data", () => {
+    it("supports branch filters from quest DTO data", () => {
         const quests = [
             quest({
                 questKey: "Quest_A",
-                rootDialogBlockIdentities: ["Root_A"],
                 mandatory: true,
                 branchLabel: "Scholar Variant",
             }),
@@ -285,13 +245,8 @@ describe("questArchiveModel", () => {
                 choices: [],
             }),
         ];
-        const dialogBlocksByIdentity = {
-            Root_A: dialogBlock(),
-        };
 
-        expect(visibleQuestKeys(buildModel({ quests, dialogBlocksByIdentity, filters: { transcript: "has" } }))).toEqual(["Quest_A"]);
-        expect(visibleQuestKeys(buildModel({ quests, dialogBlocksByIdentity, filters: { requirement: "required" } }))).toEqual(["Quest_A"]);
-        expect(visibleQuestKeys(buildModel({ quests, dialogBlocksByIdentity, filters: { branchVariant: "Scholar Variant" } }))).toEqual(["Quest_A"]);
-        expect(visibleQuestKeys(buildModel({ quests, dialogBlocksByIdentity, filters: { branchVariant: QUEST_ARCHIVE_ALL } }))).toEqual(["Quest_A", "Quest_B"]);
+        expect(visibleQuestKeys(buildModel({ quests, filters: { branchVariant: "Scholar Variant" } }))).toEqual(["Quest_A"]);
+        expect(visibleQuestKeys(buildModel({ quests, filters: { branchVariant: QUEST_ARCHIVE_ALL } }))).toEqual(["Quest_A", "Quest_B"]);
     });
 });

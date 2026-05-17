@@ -2,9 +2,7 @@ import { act, cleanup, render, screen, waitFor, within } from "@testing-library/
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { apiClient } from "@/api/apiClient";
-import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useQuestStore } from "@/stores/questStore";
-import { Faction } from "@/types/dataTypes";
 import type {
     QuestChoiceDto,
     QuestDialogBlockDto,
@@ -221,7 +219,6 @@ async function renderQuestExplorer(initialEntry = "/quests") {
 
 describe("QuestExplorerPage", () => {
     beforeEach(() => {
-        useFactionSelectionStore.getState().reset();
         useQuestStore.getState().reset();
         mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getQuestExplorer.mockResolvedValue(explorerFixture());
@@ -229,7 +226,6 @@ describe("QuestExplorerPage", () => {
 
     afterEach(() => {
         cleanup();
-        useFactionSelectionStore.getState().reset();
         useQuestStore.getState().reset();
     });
 
@@ -355,23 +351,16 @@ describe("QuestExplorerPage", () => {
         expect(within(rail).getByRole("button", { name: /Second Quest/i })).toBeInTheDocument();
         expect(within(rail).queryByRole("button", { name: /First Quest/i })).not.toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "First Quest" })).toBeInTheDocument();
-        expect(within(rail).getByText("Selected quest is outside the current archive filters.")).toBeInTheDocument();
+        expect(within(rail).queryByText("Selected quest is outside the current archive filters.")).not.toBeInTheDocument();
+        expect(within(rail).getAllByRole("button", { name: "Clear filters" })).toHaveLength(1);
 
-        const notice = within(rail).getByText("Selected quest is outside the current archive filters.").closest("div");
-        expect(notice).not.toBeNull();
-        await user.click(within(notice!).getByRole("button", { name: "Clear filters" }));
+        await user.click(within(rail).getByRole("button", { name: "Clear filters" }));
 
         expect(within(rail).getByRole("button", { name: /First Quest/i })).toHaveAttribute("aria-pressed", "true");
     });
 
-    it("filters the archive by the current top-nav faction", async () => {
+    it("filters the archive by the selected faction dropdown", async () => {
         const user = userEvent.setup();
-        useFactionSelectionStore.getState().setSelectedFaction({
-            isMajor: true,
-            enumFaction: Faction.LORDS,
-            uiLabel: "Lords",
-            minorName: null,
-        });
         mockedApiClient.getQuestExplorer.mockResolvedValue({
             quests: [
                 quest({
@@ -397,7 +386,11 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "First Quest" })).toBeInTheDocument();
         const rail = screen.getByLabelText("Quest archive");
-        await user.click(within(rail).getByLabelText("Current faction: Lords"));
+        expect(within(rail).getByRole("option", { name: "All factions" })).toBeInTheDocument();
+        expect(within(rail).getByRole("option", { name: "Kin (1)" })).toBeInTheDocument();
+        expect(within(rail).getByRole("option", { name: "Lords (1)" })).toBeInTheDocument();
+
+        await user.selectOptions(within(rail).getByLabelText("Faction"), "Lords");
 
         expect(within(rail).getByRole("button", { name: /Second Quest/i })).toBeInTheDocument();
         expect(within(rail).queryByRole("button", { name: /First Quest/i })).not.toBeInTheDocument();
