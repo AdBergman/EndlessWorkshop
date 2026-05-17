@@ -20,6 +20,7 @@ import type {
     QuestTranscriptBlockModel,
     QuestTranscriptLineModel,
 } from "./questExplorerTypes";
+import { buildUserFacingQuestChoices } from "./questPathSemantics";
 import { buildQuestStepSemanticGroups } from "./questStepSemantics";
 
 type BuildQuestExplorerViewModelArgs = {
@@ -168,7 +169,7 @@ function buildQuestDisambiguator(quest: QuestDto, titleCounts: Record<string, nu
 const questLinkProvenanceLabels: Record<QuestGraphLinkProvenance, string> = {
     questPrevious: "Quest previous",
     questNext: "Quest graph",
-    choiceNext: "Choice",
+    choiceNext: "Path",
     stepNext: "Step",
     stepFailure: "Failure",
     converges: "Converges",
@@ -350,7 +351,7 @@ function buildObjectiveGroupModels(
                 rewardLines: variant.rewardLines,
             })),
             debugLabel: isProgressGate ? `${group.stepIndexes.length} gate variants` : null,
-            isSelected: group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
+            isSelected: !isProgressGate && group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
         };
     });
 }
@@ -482,7 +483,7 @@ function resolveSelection(
 } {
     const requestedQuestKey = clean(selection.questKey);
     const quest = quests.find((candidate) => candidate.questKey === requestedQuestKey) ?? quests[0] ?? null;
-    const choices = quest ? sortChoices(quest.choices) : [];
+    const choices = quest ? buildUserFacingQuestChoices(sortChoices(quest.choices)) : [];
     const requestedChoiceKey = clean(selection.choiceKey);
     const choice = choices.find((candidate) => candidate.choiceKey === requestedChoiceKey) ?? choices[0] ?? null;
     const steps = choice ? sortSteps(choice.steps) : [];
@@ -541,7 +542,9 @@ export function buildQuestExplorerViewModel({
     const selectedChoice = choiceModels.find((choice) => choice.isSelected) ?? null;
     const selectedStep = stepModels.find((step) => step.isSelected) ?? null;
     const selectedObjectiveGroup =
-        objectiveGroups.find((group) => group.isSelected) ?? objectiveGroups[0] ?? null;
+        objectiveGroups.find((group) => group.kind === "objective" && group.isSelected) ??
+        objectiveGroups.find((group) => group.kind === "objective") ??
+        null;
     const transcriptIdentities = [
         ...resolved.quest.rootDialogBlockIdentities,
         ...(resolved.step?.dialogBlockIdentities ?? []),

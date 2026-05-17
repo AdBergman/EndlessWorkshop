@@ -201,7 +201,7 @@ describe("questViewModel", () => {
                 contextLabel: null,
                 debugLabel: null,
                 provenance: "choiceNext",
-                provenanceLabel: "Choice",
+                provenanceLabel: "Path",
             },
         ]);
         expect(model.chronicle?.selectedStep?.requirementGroups[0]?.label).toBe("Selection");
@@ -310,7 +310,7 @@ describe("questViewModel", () => {
             label: "A Bitter Truth",
             contextLabel: "Chapter 2 · Seq 5 · Branch B",
             provenance: "choiceNext",
-            provenanceLabel: "Choice",
+            provenanceLabel: "Path",
         });
         expect(model.chronicle?.selectedStep?.nextQuestLink).toMatchObject({
             label: "A Bitter Truth",
@@ -377,14 +377,16 @@ describe("questViewModel", () => {
 
         expect(model.chronicle?.steps).toHaveLength(2);
         expect(model.chronicle?.objectiveGroups).toHaveLength(1);
-        expect(model.chronicle?.selectedObjectiveGroup).toMatchObject({
+        expect(model.chronicle?.selectedObjectiveGroup).toBeNull();
+        expect(model.chronicle?.objectiveGroups[0]).toMatchObject({
             kind: "progressGate",
             title: "Attempt to dislodge Xenos' memories.",
             stepIndexes: [0, 1],
             representativeStepIndex: 0,
             debugLabel: "2 gate variants",
+            isSelected: false,
         });
-        expect(model.chronicle?.selectedObjectiveGroup?.gateRows).toEqual([
+        expect(model.chronicle?.objectiveGroups[0]?.gateRows).toEqual([
             expect.objectContaining({
                 stepIndex: 0,
                 selectionLines: ["Explore world: 1%"],
@@ -398,6 +400,110 @@ describe("questViewModel", () => {
                 forbiddenLines: ["Explore world: 30%"],
             }),
         ]);
+    });
+
+    it("filters internal effect choices and deduplicates visible paths before resolving selection", () => {
+        const visibleChoiceKey = "FactionQuest_Mukag_Chapter02_Step02_Choice01ChoiceDefinition";
+        const duplicateChoiceKey = "FactionQuest_Mukag_Chapter02_Step02_Choice1ChoiceDefinition";
+        const otherChoiceKey = "FactionQuest_Mukag_Chapter02_Step02_Choice02ChoiceDefinition";
+
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "FactionQuest_Mukag_Chapter02_Step02",
+                    displayName: "Forgotten Power",
+                    choices: [
+                        choice({
+                            choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01EffectChoiceDefinition",
+                            displayName: "Forgotten Power",
+                            choiceOrder: 0,
+                            nextQuestKeys: ["Quest_Internal"],
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: null,
+                                    descriptionLines: [],
+                                    completionPrerequisiteLines: [],
+                                    selectionPrerequisiteLines: [],
+                                    nextQuestKey: "Quest_Internal",
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: duplicateChoiceKey,
+                            displayName: "Forgotten Power",
+                            choiceOrder: 1,
+                            nextQuestKeys: ["Quest_Next"],
+                            steps: [
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Use the Holy Oculum to observe its abilities.",
+                                    descriptionLines: ["Use the Holy Oculum to observe its abilities."],
+                                    completionPrerequisiteLines: ["Use faction action: Mukag Monsoon Festival x2"],
+                                    nextQuestKey: "Quest_Next",
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: visibleChoiceKey,
+                            displayName: "Forgotten Power",
+                            choiceOrder: 2,
+                            nextQuestKeys: ["Quest_Next"],
+                            steps: [
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Use the Holy Oculum to observe its abilities.",
+                                    descriptionLines: ["Use the Holy Oculum to observe its abilities."],
+                                    completionPrerequisiteLines: ["Use faction action: Mukag Monsoon Festival x2"],
+                                    nextQuestKey: "Quest_Next",
+                                    dialogBlockIdentities: ["Forgotten_Path_Dialog"],
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: otherChoiceKey,
+                            displayName: "Pious Interpretation",
+                            choiceOrder: 3,
+                            nextQuestKeys: ["Quest_Other"],
+                            steps: [
+                                step({
+                                    stepIndex: 2,
+                                    objectiveText: "Choose the pious interpretation.",
+                                    descriptionLines: ["Choose the pious interpretation."],
+                                    completionPrerequisiteLines: ["Property requirement: Faith = 2"],
+                                    nextQuestKey: "Quest_Other",
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({ questKey: "Quest_Internal", displayName: "Internal Target" }),
+                quest({ questKey: "Quest_Next", displayName: "Next Target" }),
+                quest({ questKey: "Quest_Other", displayName: "Other Target" }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "FactionQuest_Mukag_Chapter02_Step02",
+                choiceKey: null,
+                stepIndex: null,
+            },
+        });
+
+        expect(model.selection).toEqual({
+            questKey: "FactionQuest_Mukag_Chapter02_Step02",
+            choiceKey: visibleChoiceKey,
+            stepIndex: 1,
+        });
+        expect(model.chronicle?.choices.map((item) => item.choiceKey)).toEqual([
+            visibleChoiceKey,
+            otherChoiceKey,
+        ]);
+        expect(model.chronicle?.choices.map((item) => item.choiceKey)).not.toContain(duplicateChoiceKey);
+        expect(model.chronicle?.selectedObjectiveGroup?.title).toBe(
+            "Use the Holy Oculum to observe its abilities."
+        );
+        expect(model.chronicle?.selectedObjectiveGroup?.title).not.toBe("Step 1");
+        expect(model.chronicle?.selectedChoice?.nextQuestLinks.map((link) => link.questKey)).toEqual(["Quest_Next"]);
     });
 
     it("returns an empty model when no quests are available", () => {

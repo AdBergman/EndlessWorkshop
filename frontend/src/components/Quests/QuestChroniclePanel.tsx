@@ -243,6 +243,48 @@ function ObjectiveGroupSection({
     );
 }
 
+function ProgressRequirementsSection({
+    groups,
+    onSelectQuest,
+}: {
+    groups: QuestObjectiveGroupModel[];
+    onSelectQuest: (questKey: string) => void;
+}) {
+    if (groups.length === 0) return null;
+
+    return (
+        <section className="questExplorer-chronicleSection" aria-labelledby="quest-progress-requirements-heading">
+            <div className="questExplorer-sectionLabel" id="quest-progress-requirements-heading">
+                Progress Requirements
+            </div>
+            <div className="questExplorer-progressRequirementList">
+                {groups.map((group) => (
+                    <div className="questExplorer-progressRequirement" key={group.id}>
+                        <header>
+                            <h3>{group.title}</h3>
+                            {group.debugLabel ? <span>{group.debugLabel}</span> : null}
+                        </header>
+                        <TextLines
+                            lines={group.descriptionLines}
+                            emptyLabel="No progress requirement description recorded."
+                        />
+                        <ProgressGateRows rows={group.gateRows} />
+                        <TextLines
+                            lines={group.rewardLines}
+                            emptyLabel="No rewards recorded."
+                        />
+                        <OutcomeBranches
+                            nextQuestLink={group.nextQuestLink}
+                            failQuestLink={group.failQuestLink}
+                            onSelectQuest={onSelectQuest}
+                        />
+                    </div>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 export default function QuestChroniclePanel({
     chronicle,
     onSelectChoice,
@@ -252,6 +294,7 @@ export default function QuestChroniclePanel({
     const progressGateGroups = chronicle.objectiveGroups.filter((group) => group.kind === "progressGate");
     const objectiveGroups = chronicle.objectiveGroups.filter((group) => group.kind === "objective");
     const selectedObjectiveGroup = chronicle.selectedObjectiveGroup;
+    const shouldShowObjectivePicker = objectiveGroups.length > 1;
 
     return (
         <article className="questExplorer-chronicle" aria-labelledby="quest-chronicle-title">
@@ -299,16 +342,12 @@ export default function QuestChroniclePanel({
                 </section>
             ) : null}
 
-            {progressGateGroups.length > 0 ? (
-                <ObjectiveGroupSection
-                    label="Progress Gates"
-                    groups={progressGateGroups}
-                    emptyLabel="No progress gates are attached to this path."
-                    onSelectStep={onSelectStep}
-                />
-            ) : null}
+            <ProgressRequirementsSection
+                groups={progressGateGroups}
+                onSelectQuest={onSelectQuest}
+            />
 
-            {objectiveGroups.length > 0 ? (
+            {shouldShowObjectivePicker ? (
                 <ObjectiveGroupSection
                     label="Objectives"
                     groups={objectiveGroups}
@@ -338,34 +377,26 @@ export default function QuestChroniclePanel({
                     )}
                 </div>
 
-                <div className="questExplorer-detailBlock">
-                    <h3>{selectedObjectiveGroup?.kind === "progressGate" ? "Selected Progress Gate" : "Selected Objective"}</h3>
-                    {selectedObjectiveGroup ? (
-                        <>
-                            <p className="questExplorer-objective">{selectedObjectiveGroup.title}</p>
-                            <TextLines
-                                lines={selectedObjectiveGroup.descriptionLines}
-                                emptyLabel="No objective description recorded."
-                            />
-                            {selectedObjectiveGroup.kind === "progressGate" ? (
-                                <ProgressGateRows rows={selectedObjectiveGroup.gateRows} />
-                            ) : (
-                                <LineGroups groups={selectedObjectiveGroup.requirementGroups} />
-                            )}
-                            <TextLines
-                                lines={selectedObjectiveGroup.rewardLines}
-                                emptyLabel="No rewards recorded."
-                            />
-                            <OutcomeBranches
-                                nextQuestLink={selectedObjectiveGroup.nextQuestLink}
-                                failQuestLink={selectedObjectiveGroup.failQuestLink}
-                                onSelectQuest={onSelectQuest}
-                            />
-                        </>
-                    ) : (
-                        <p className="questExplorer-muted">No objective selected.</p>
-                    )}
-                </div>
+                {selectedObjectiveGroup ? (
+                    <div className="questExplorer-detailBlock">
+                        <h3>{shouldShowObjectivePicker ? "Selected Objective" : "Objective"}</h3>
+                        <p className="questExplorer-objective">{selectedObjectiveGroup.title}</p>
+                        <TextLines
+                            lines={selectedObjectiveGroup.descriptionLines}
+                            emptyLabel="No objective description recorded."
+                        />
+                        <LineGroups groups={selectedObjectiveGroup.requirementGroups} />
+                        <TextLines
+                            lines={selectedObjectiveGroup.rewardLines}
+                            emptyLabel="No rewards recorded."
+                        />
+                        <OutcomeBranches
+                            nextQuestLink={selectedObjectiveGroup.nextQuestLink}
+                            failQuestLink={selectedObjectiveGroup.failQuestLink}
+                            onSelectQuest={onSelectQuest}
+                        />
+                    </div>
+                ) : null}
             </section>
 
             <QuestTranscript blocks={chronicle.transcriptBlocks} />

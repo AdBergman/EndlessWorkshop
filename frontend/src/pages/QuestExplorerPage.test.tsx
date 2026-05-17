@@ -321,7 +321,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Chapter 2 · Seq 4 · Branch A").length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText("Chapter 2 · Seq 5 · Branch B").length).toBeGreaterThanOrEqual(3);
         expect(screen.getByText("Quest graph")).toBeInTheDocument();
-        expect(screen.getByText("Choice")).toBeInTheDocument();
+        expect(screen.getByText("Path")).toBeInTheDocument();
         expect(screen.getByText("Step")).toBeInTheDocument();
         expect(screen.getByText("Failure")).toBeInTheDocument();
         expect(screen.getByText("Converges")).toBeInTheDocument();
@@ -374,9 +374,11 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "Not of the Chorus" })).toBeInTheDocument();
         expect(screen.getByText("Paths")).toBeInTheDocument();
         expect(screen.getByText("Selected Path")).toBeInTheDocument();
-        expect(screen.getByText("Progress Gates")).toBeInTheDocument();
-        expect(screen.getByText("Selected Progress Gate")).toBeInTheDocument();
-        expect(screen.getAllByText("Attempt to dislodge Xenos' memories.")).toHaveLength(2);
+        expect(screen.getByText("Progress Requirements")).toBeInTheDocument();
+        expect(screen.queryByText("Progress Gates")).not.toBeInTheDocument();
+        expect(screen.queryByText("Selected Progress Gate")).not.toBeInTheDocument();
+        expect(screen.getAllByText("Attempt to dislodge Xenos' memories.")).toHaveLength(1);
+        expect(screen.queryByRole("button", { name: /Attempt to dislodge Xenos' memories/i })).not.toBeInTheDocument();
         expect(screen.getByText("2 gate variants")).toBeInTheDocument();
         expect(screen.getByText("Gate 1")).toBeInTheDocument();
         expect(screen.getByText("Gate 2")).toBeInTheDocument();
@@ -384,5 +386,97 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Explore world: 20%").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText("Explore world: 21%")).toBeInTheDocument();
         expect(screen.getAllByText("Explore world: 30%").length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("does not render internal effect choices as primary paths or fallback objectives", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "FactionQuest_Mukag_Chapter02_Step02",
+                    displayName: "Forgotten Power",
+                    choices: [
+                        choice({
+                            choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01EffectChoiceDefinition",
+                            displayName: "Forgotten Power",
+                            choiceOrder: 0,
+                            nextQuestKeys: ["Quest_Internal"],
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: null,
+                                    descriptionLines: [],
+                                    completionPrerequisiteLines: [],
+                                    selectionPrerequisiteLines: [],
+                                    nextQuestKey: "Quest_Internal",
+                                    dialogBlockIdentities: [],
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice1ChoiceDefinition",
+                            displayName: "Forgotten Power",
+                            choiceOrder: 1,
+                            nextQuestKeys: ["Quest_Next"],
+                            steps: [
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Use the Holy Oculum to observe its abilities.",
+                                    descriptionLines: ["Use the Holy Oculum to observe its abilities."],
+                                    completionPrerequisiteLines: ["Use faction action: Mukag Monsoon Festival x2"],
+                                    nextQuestKey: "Quest_Next",
+                                    dialogBlockIdentities: [],
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01ChoiceDefinition",
+                            displayName: "Forgotten Power",
+                            choiceOrder: 2,
+                            nextQuestKeys: ["Quest_Next"],
+                            steps: [
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Use the Holy Oculum to observe its abilities.",
+                                    descriptionLines: ["Use the Holy Oculum to observe its abilities."],
+                                    completionPrerequisiteLines: ["Use faction action: Mukag Monsoon Festival x2"],
+                                    nextQuestKey: "Quest_Next",
+                                    dialogBlockIdentities: ["Forgotten_Path_Dialog"],
+                                }),
+                            ],
+                        }),
+                        choice({
+                            choiceKey: "FactionQuest_Mukag_Chapter02_Step02_Choice02ChoiceDefinition",
+                            displayName: "Pious Interpretation",
+                            choiceOrder: 3,
+                            nextQuestKeys: ["Quest_Other"],
+                            steps: [
+                                step({
+                                    stepIndex: 2,
+                                    objectiveText: "Choose the pious interpretation.",
+                                    descriptionLines: ["Choose the pious interpretation."],
+                                    completionPrerequisiteLines: ["Property requirement: Faith = 2"],
+                                    nextQuestKey: "Quest_Other",
+                                    dialogBlockIdentities: [],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({ questKey: "Quest_Next", displayName: "Next Target", choices: [], rootDialogBlockIdentities: [] }),
+                quest({ questKey: "Quest_Other", displayName: "Other Target", choices: [], rootDialogBlockIdentities: [] }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer("/quests?quest=FactionQuest_Mukag_Chapter02_Step02");
+
+        expect(await screen.findByRole("heading", { name: "Forgotten Power" })).toBeInTheDocument();
+        expect(screen.queryByText("Step 1")).not.toBeInTheDocument();
+        expect(screen.getAllByText("Use the Holy Oculum to observe its abilities.").length).toBeGreaterThanOrEqual(1);
+
+        const pathsSection = screen.getByText("Paths").closest("section");
+        expect(pathsSection).not.toBeNull();
+        expect(within(pathsSection!).getAllByRole("button", { name: /Forgotten Power/i })).toHaveLength(1);
+        expect(within(pathsSection!).getByRole("button", { name: /Pious Interpretation/i })).toBeInTheDocument();
     });
 });

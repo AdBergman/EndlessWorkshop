@@ -26,7 +26,7 @@ function QuestLinkList({
                 {links.map((link, index) => (
                     <button
                         type="button"
-                        className="questExplorer-linkButton"
+                        className="questExplorer-linkButton questExplorer-linkButton--reference"
                         key={`${link.provenance}:${link.questKey}:${index}`}
                         onClick={() => onSelectQuest(link.questKey)}
                     >
@@ -96,7 +96,7 @@ export default function QuestMetadataPanel({ metadata, onSelectQuest }: QuestMet
                     <div className="questExplorer-metadataLinks__label">Converges into</div>
                     <button
                         type="button"
-                        className="questExplorer-linkButton"
+                        className="questExplorer-linkButton questExplorer-linkButton--reference"
                         onClick={() => onSelectQuest(convergesIntoQuestLink.questKey)}
                     >
                         <span className="questExplorer-linkButton__main">

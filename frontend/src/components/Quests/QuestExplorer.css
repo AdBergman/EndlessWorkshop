@@ -283,6 +283,40 @@
     gap: 8px;
 }
 
+.questExplorer-progressRequirementList {
+    display: grid;
+    gap: 12px;
+}
+
+.questExplorer-progressRequirement {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(120, 214, 199, 0.14);
+    background: rgba(120, 214, 199, 0.026);
+}
+
+.questExplorer-progressRequirement header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.questExplorer-progressRequirement h3 {
+    margin: 0;
+    color: var(--quest-text);
+    font-size: 0.98rem;
+}
+
+.questExplorer-progressRequirement header span {
+    flex: 0 0 auto;
+    color: var(--quest-text-muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .questExplorer-choiceButton,
 .questExplorer-stepButton,
 .questExplorer-linkButton {
@@ -526,6 +560,11 @@
     padding: 9px 10px;
     color: var(--quest-text-soft);
     text-align: left;
+}
+
+.questExplorer-linkButton--reference {
+    background: rgba(255, 255, 255, 0.012);
+    color: rgba(247, 239, 229, 0.68);
 }
 
 .questExplorer-linkButton__main {
