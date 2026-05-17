@@ -21,6 +21,7 @@ vi.mock("@/api/apiClient", () => ({
         getTechs: vi.fn(),
         getUnits: vi.fn(),
         getCodex: vi.fn(),
+        getQuestExplorer: vi.fn(),
         getSavedBuild: vi.fn(),
         createSavedBuild: vi.fn(),
     },
@@ -72,6 +73,7 @@ describe("GameDataProvider orchestration boundary", () => {
         mockedApiClient.getTechs.mockReset();
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getSavedBuild.mockReset();
         mockedApiClient.createSavedBuild.mockReset();
 
@@ -145,6 +147,26 @@ describe("GameDataProvider orchestration boundary", () => {
         expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
+    });
+
+    it("does not load Quest Explorer data during app startup", async () => {
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <StoreProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(mockedApiClient.getDistricts).toHaveBeenCalled();
+            expect(mockedApiClient.getImprovements).toHaveBeenCalled();
+            expect(mockedApiClient.getUnits).toHaveBeenCalled();
+            expect(mockedApiClient.getTechs).toHaveBeenCalled();
+            expect(mockedApiClient.getCodex).toHaveBeenCalled();
+        });
+
+        expect(mockedApiClient.getQuestExplorer).not.toHaveBeenCalled();
     });
 
     it("keeps the public context surface limited to orchestration commands and share gating", () => {

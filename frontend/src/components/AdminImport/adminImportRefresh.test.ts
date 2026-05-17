@@ -2,6 +2,7 @@ import { refreshStoresAfterAdminImport } from "./adminImportRefresh";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
+import { useQuestStore } from "@/stores/questStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 
@@ -25,6 +26,10 @@ vi.mock("@/stores/codexStore", () => ({
     useCodexStore: { getState: vi.fn() },
 }));
 
+vi.mock("@/stores/questStore", () => ({
+    useQuestStore: { getState: vi.fn() },
+}));
+
 type MockedStoreHook = {
     getState: ReturnType<typeof vi.fn>;
 };
@@ -34,6 +39,7 @@ const mockedImprovementGetState = (useImprovementStore as unknown as MockedStore
 const mockedUnitGetState = (useUnitStore as unknown as MockedStoreHook).getState;
 const mockedTechGetState = (useTechStore as unknown as MockedStoreHook).getState;
 const mockedCodexGetState = (useCodexStore as unknown as MockedStoreHook).getState;
+const mockedQuestGetState = (useQuestStore as unknown as MockedStoreHook).getState;
 
 describe("refreshStoresAfterAdminImport", () => {
     const refreshDistricts = vi.fn();
@@ -41,6 +47,7 @@ describe("refreshStoresAfterAdminImport", () => {
     const refreshUnits = vi.fn();
     const refreshTechs = vi.fn();
     const loadEntries = vi.fn();
+    const refreshQuestExplorer = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -50,12 +57,14 @@ describe("refreshStoresAfterAdminImport", () => {
         mockedUnitGetState.mockReturnValue({ refreshUnits });
         mockedTechGetState.mockReturnValue({ refreshTechs });
         mockedCodexGetState.mockReturnValue({ loadEntries });
+        mockedQuestGetState.mockReturnValue({ refreshQuestExplorer });
 
         refreshDistricts.mockResolvedValue(undefined);
         refreshImprovements.mockResolvedValue(undefined);
         refreshUnits.mockResolvedValue(undefined);
         refreshTechs.mockResolvedValue(undefined);
         loadEntries.mockResolvedValue(undefined);
+        refreshQuestExplorer.mockResolvedValue(undefined);
     });
 
     it.each([
@@ -63,6 +72,7 @@ describe("refreshStoresAfterAdminImport", () => {
         ["improvements", refreshImprovements],
         ["units", refreshUnits],
         ["techs", refreshTechs],
+        ["quests", refreshQuestExplorer],
     ])("refreshes the %s store after a successful admin import", async (moduleId, refresh) => {
         await expect(refreshStoresAfterAdminImport(moduleId)).resolves.toEqual({ ok: true });
 
@@ -92,5 +102,6 @@ describe("refreshStoresAfterAdminImport", () => {
         expect(refreshUnits).not.toHaveBeenCalled();
         expect(refreshTechs).not.toHaveBeenCalled();
         expect(loadEntries).not.toHaveBeenCalled();
+        expect(refreshQuestExplorer).not.toHaveBeenCalled();
     });
 });

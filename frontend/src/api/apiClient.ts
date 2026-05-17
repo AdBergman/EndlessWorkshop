@@ -1,4 +1,5 @@
 import { District, Improvement, Tech, Unit, Codex } from "@/types/dataTypes";
+import type { QuestExplorerDto } from "@/types/questTypes";
 
 export type SavedTechBuild = {
     uuid: string;
@@ -91,6 +92,7 @@ export const apiClient = {
     getTechs: () => fetcherJson<Tech[]>("/techs"),
     getUnits: () => fetcherJson<Unit[]>("/units"),
     getCodex: () => fetcherJson<Codex[]>("/codex"),
+    getQuestExplorer: () => fetcherJson<QuestExplorerDto>("/quests"),
 
     getSavedBuild: (uuid: string) => fetcherJson<SavedTechBuild>(`/builds/${uuid}`),
 
