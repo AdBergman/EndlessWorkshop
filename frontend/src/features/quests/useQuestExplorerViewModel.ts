@@ -1,0 +1,140 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import {
+    selectDialogBlocksByIdentity,
+    selectQuestError,
+    selectQuestLoaded,
+    selectQuestLoading,
+    selectQuests,
+    useQuestStore,
+} from "@/stores/questStore";
+import { buildQuestExplorerViewModel } from "./questViewModel";
+import type {
+    QuestExplorerContentModel,
+    QuestExplorerSelection,
+    QuestExplorerStatus,
+} from "./questExplorerTypes";
+
+type QuestExplorerActions = {
+    selectQuest: (questKey: string) => void;
+    selectChoice: (choiceKey: string) => void;
+    selectStep: (stepIndex: number) => void;
+};
+
+export type QuestExplorerViewModel = Omit<QuestExplorerContentModel, "status"> & {
+    status: QuestExplorerStatus;
+    error: string | null;
+    actions: QuestExplorerActions;
+};
+
+const clean = (value: string | null | undefined): string | null => {
+    const trimmed = (value ?? "").trim();
+    return trimmed.length > 0 ? trimmed : null;
+};
+
+export function useQuestExplorerViewModel(): QuestExplorerViewModel {
+    const quests = useQuestStore(selectQuests);
+    const dialogBlocksByIdentity = useQuestStore(selectDialogBlocksByIdentity);
+    const loading = useQuestStore(selectQuestLoading);
+    const loaded = useQuestStore(selectQuestLoaded);
+    const error = useQuestStore(selectQuestError);
+    const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedQuestKey = clean(searchParams.get("quest"));
+    const [localSelection, setLocalSelection] = useState<Omit<QuestExplorerSelection, "questKey">>({
+        choiceKey: null,
+        stepIndex: null,
+    });
+
+    useEffect(() => {
+        void loadQuestExplorer();
+    }, [loadQuestExplorer]);
+
+    const content = useMemo(
+        () =>
+            buildQuestExplorerViewModel({
+                quests,
+                dialogBlocksByIdentity,
+                selection: {
+                    questKey: requestedQuestKey,
+                    choiceKey: localSelection.choiceKey,
+                    stepIndex: localSelection.stepIndex,
+                },
+            }),
+        [dialogBlocksByIdentity, localSelection.choiceKey, localSelection.stepIndex, quests, requestedQuestKey]
+    );
+
+    const selectedQuestKey = content.selection.questKey;
+
+    useEffect(() => {
+        if (!loaded || content.status !== "ready" || !selectedQuestKey) return;
+        if (requestedQuestKey === selectedQuestKey) return;
+
+        setSearchParams(
+            (currentParams) => {
+                const nextParams = new URLSearchParams(currentParams);
+                nextParams.set("quest", selectedQuestKey);
+                return nextParams;
+            },
+            { replace: true }
+        );
+    }, [content.status, loaded, requestedQuestKey, selectedQuestKey, setSearchParams]);
+
+    const selectQuest = useCallback(
+        (questKey: string) => {
+            const normalizedQuestKey = clean(questKey);
+            if (!normalizedQuestKey) return;
+
+            setLocalSelection({
+                choiceKey: null,
+                stepIndex: null,
+            });
+            setSearchParams(
+                (currentParams) => {
+                    const nextParams = new URLSearchParams(currentParams);
+                    nextParams.set("quest", normalizedQuestKey);
+                    return nextParams;
+                },
+                { replace: false }
+            );
+        },
+        [setSearchParams]
+    );
+
+    const selectChoice = useCallback((choiceKey: string) => {
+        const normalizedChoiceKey = clean(choiceKey);
+        if (!normalizedChoiceKey) return;
+
+        setLocalSelection({
+            choiceKey: normalizedChoiceKey,
+            stepIndex: null,
+        });
+    }, []);
+
+    const selectStep = useCallback((stepIndex: number) => {
+        if (!Number.isFinite(stepIndex)) return;
+
+        setLocalSelection((currentSelection) => ({
+            ...currentSelection,
+            stepIndex,
+        }));
+    }, []);
+
+    const status: QuestExplorerStatus = (() => {
+        if (error) return "error";
+        if (!loaded) return "loading";
+        if (loading && content.status === "empty") return "loading";
+        return content.status;
+    })();
+
+    return {
+        ...content,
+        status,
+        error,
+        actions: {
+            selectQuest,
+            selectChoice,
+            selectStep,
+        },
+    };
+}

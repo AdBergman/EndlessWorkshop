@@ -26,8 +26,8 @@ public class FrontendController {
     }
 
     @RequestMapping(value = {
-            "/{page:tech|units|summary|codex|mods|info}",
-            "/{page:tech|units|summary|codex|mods|info}/"
+            "/{page:tech|units|summary|codex|quests|mods|info}",
+            "/{page:tech|units|summary|codex|quests|mods|info}/"
     })
     public String forwardStaticEntryDocument(@PathVariable String page) {
         return switch (page) {
@@ -35,6 +35,7 @@ public class FrontendController {
             case "units" -> "forward:/units.html";
             case "summary" -> "forward:/summary.html";
             case "codex" -> "forward:/codex.html";
+            case "quests" -> "forward:/quests.html";
             case "mods" -> "forward:/mods.html";
             case "info" -> "forward:/info.html";
             default -> throw new ResponseStatusException(HttpStatus.NOT_FOUND);

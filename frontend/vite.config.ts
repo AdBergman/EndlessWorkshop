@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => {
                     units: resolve(__dirname, 'units.html'),
                     summary: resolve(__dirname, 'summary.html'),
                     codex: resolve(__dirname, 'codex.html'),
+                    quests: resolve(__dirname, 'quests.html'),
                     mods: resolve(__dirname, 'mods.html'),
                     info: resolve(__dirname, 'info.html'),
                 },

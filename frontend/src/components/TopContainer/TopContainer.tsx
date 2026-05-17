@@ -22,6 +22,7 @@ const routes = [
     { path: "/tech", label: "Tech" },
     { path: "/units", label: "Units" },
     { path: "/codex", label: "Codex" },
+    { path: "/quests", label: "Quests" },
     { path: "/summary", label: "Summary" },
     { path: "/mods", label: "Mods" },
     { path: "/info", label: "Info" },

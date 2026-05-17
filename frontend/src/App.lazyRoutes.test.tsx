@@ -70,6 +70,17 @@ vi.mock("@/pages/ModsPage", async () => {
     };
 });
 
+vi.mock("@/pages/QuestExplorerPage", async () => {
+    const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+
+    return {
+        default: () => {
+            const location = useLocation();
+            return <main data-testid="route-quests">{`${location.pathname}${location.search}`}</main>;
+        },
+    };
+});
+
 vi.mock("@/components/AdminImport/AdminImportPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
@@ -94,6 +105,7 @@ describe("App lazy route bundle isolation", () => {
         ["/tech", "route-tech"],
         ["/units?faction=kin&unitKey=Unit_Kin_Root", "route-units"],
         ["/codex?entry=District_MarketSquare", "route-codex"],
+        ["/quests?quest=Quest_A", "route-quests"],
         ["/summary", "route-summary"],
         ["/mods", "route-mods"],
         ["/admin/import?admin=1", "route-admin-import"],

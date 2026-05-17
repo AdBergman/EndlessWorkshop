@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Browse Endless Legend 2 quests, objectives, requirements, rewards, branches, and archive transcripts in Endless Workshop." />
+    <meta name="robots" content="index, follow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href="https://endlessworkshop.dev/quests" />
+    <meta property="og:site_name" content="Endless Workshop" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="EL2 Quest Explorer | Endless Workshop" />
+    <meta property="og:description" content="Browse Endless Legend 2 quests, objectives, requirements, rewards, branches, and archive transcripts in Endless Workshop." />
+    <meta property="og:url" content="https://endlessworkshop.dev/quests" />
+    <meta property="og:image" content="https://endlessworkshop.dev/logo512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EL2 Quest Explorer | Endless Workshop" />
+    <meta name="twitter:description" content="Browse Endless Legend 2 quests, objectives, requirements, rewards, branches, and archive transcripts in Endless Workshop." />
+    <meta name="twitter:image" content="https://endlessworkshop.dev/logo512.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script>
+        const isPhone = window.innerWidth <= 768;
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+
+        if (metaViewport) {
+            if (isPhone) {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'
+                );
+            } else {
+                metaViewport.setAttribute(
+                    'content',
+                    'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+                );
+            }
+        }
+    </script>
+    <title>EL2 Quest Explorer | Endless Workshop</title>
+    <script type="module" src="./src/index.tsx"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
+</head>
+<body>
+<noscript>Enable JavaScript to open the Endless Workshop Quest Explorer.</noscript>
+<div id="root"></div>
+</body>
+</html>

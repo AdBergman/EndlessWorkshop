@@ -16,6 +16,7 @@ public final class SeoRoutes {
             "/tech",
             "/units",
             "/codex",
+            "/quests",
             "/summary",
             "/mods",
             "/info"

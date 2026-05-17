@@ -247,6 +247,7 @@ class SeoRegenerationServiceTest {
                 "<loc>https://endlessworkshop.dev/tech</loc>",
                 "<loc>https://endlessworkshop.dev/units</loc>",
                 "<loc>https://endlessworkshop.dev/codex</loc>",
+                "<loc>https://endlessworkshop.dev/quests</loc>",
                 "<loc>https://endlessworkshop.dev/summary</loc>",
                 "<loc>https://endlessworkshop.dev/mods</loc>",
                 "<loc>https://endlessworkshop.dev/info</loc>",

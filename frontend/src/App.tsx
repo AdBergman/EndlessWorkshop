@@ -27,6 +27,7 @@ const UnitEvolutionExplorer = lazy(() =>
 const AdminImportPage = lazy(() => import("@/components/AdminImport/AdminImportPage"));
 const CodexPage = lazy(() => import("@/pages/CodexPage"));
 const ModsPage = lazy(() => import("@/pages/ModsPage"));
+const QuestExplorerPage = lazy(() => import("@/pages/QuestExplorerPage"));
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -125,6 +126,17 @@ export function AppRoutes() {
                         <SeoRoute routeKey="codex">
                             <LazyRoute>
                                 <CodexPage />
+                            </LazyRoute>
+                        </SeoRoute>
+                    }
+                />
+
+                <Route
+                    path="quests"
+                    element={
+                        <SeoRoute routeKey="quests">
+                            <LazyRoute>
+                                <QuestExplorerPage />
                             </LazyRoute>
                         </SeoRoute>
                     }

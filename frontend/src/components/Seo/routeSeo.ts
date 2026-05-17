@@ -9,6 +9,7 @@ export type PublicRouteSeoKey =
     | "tech"
     | "units"
     | "codex"
+    | "quests"
     | "summary"
     | "mods"
     | "info";
@@ -79,6 +80,21 @@ export const publicRouteSeo: Record<PublicRouteSeoKey, PublicRouteSeoConfig> = {
             description: "Searchable Endless Legend 2 codex and encyclopedia reference.",
             url: `${SITE_URL}/codex`,
             about: "Endless Legend 2",
+        },
+    },
+    quests: {
+        path: "/quests",
+        title: "EL2 Quest Explorer | Endless Workshop",
+        description:
+            "Browse Endless Legend 2 quests, objectives, requirements, rewards, branches, and archive transcripts in Endless Workshop.",
+        indexable: true,
+        jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "EL2 Quest Explorer",
+            description: "Endless Legend 2 quest archive, objectives, and transcript explorer.",
+            url: `${SITE_URL}/quests`,
+            about: "Endless Legend 2 quests",
         },
     },
     summary: {
