@@ -385,6 +385,48 @@
     overflow-wrap: anywhere;
 }
 
+.questExplorer-progressGateRows {
+    display: grid;
+    gap: 10px;
+}
+
+.questExplorer-progressGateRow {
+    display: grid;
+    gap: 8px;
+    padding: 11px 12px;
+    border: 1px solid var(--quest-border);
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.questExplorer-progressGateRow__index {
+    color: var(--quest-gold);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.questExplorer-progressGateRow dl {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+}
+
+.questExplorer-progressGateRow dl div {
+    display: grid;
+    grid-template-columns: minmax(96px, 0.32fr) minmax(0, 1fr);
+    gap: 10px;
+}
+
+.questExplorer-progressGateRow dt {
+    color: var(--quest-text-muted);
+}
+
+.questExplorer-progressGateRow dd {
+    margin: 0;
+    color: var(--quest-text-soft);
+    overflow-wrap: anywhere;
+}
+
 .questExplorer-transcript {
     display: grid;
     gap: 14px;

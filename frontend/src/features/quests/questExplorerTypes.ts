@@ -69,6 +69,32 @@ export type QuestStepSummaryModel = {
     isSelected: boolean;
 };
 
+export type QuestProgressGateRowModel = {
+    id: string;
+    stepIndex: number;
+    selectionLines: string[];
+    completionLines: string[];
+    failureLines: string[];
+    forbiddenLines: string[];
+    rewardLines: string[];
+};
+
+export type QuestObjectiveGroupModel = {
+    id: string;
+    kind: "objective" | "progressGate";
+    title: string;
+    stepIndexes: number[];
+    representativeStepIndex: number;
+    descriptionLines: string[];
+    requirementGroups: QuestLineGroupModel[];
+    rewardLines: string[];
+    nextQuestLink: QuestLinkModel | null;
+    failQuestLink: QuestLinkModel | null;
+    gateRows: QuestProgressGateRowModel[];
+    debugLabel: string | null;
+    isSelected: boolean;
+};
+
 export type QuestTranscriptLineModel = {
     id: string;
     role: string | null;
@@ -95,8 +121,10 @@ export type QuestChronicleModel = {
     selectedStepIndex: number | null;
     choices: QuestChoiceSummaryModel[];
     steps: QuestStepSummaryModel[];
+    objectiveGroups: QuestObjectiveGroupModel[];
     selectedChoice: QuestChoiceSummaryModel | null;
     selectedStep: QuestStepSummaryModel | null;
+    selectedObjectiveGroup: QuestObjectiveGroupModel | null;
     transcriptBlocks: QuestTranscriptBlockModel[];
 };
 

@@ -326,6 +326,80 @@ describe("questViewModel", () => {
         });
     });
 
+    it("groups repeated threshold steps into one progress gate model", () => {
+        const model = buildQuestExplorerViewModel({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Not of the Chorus",
+                    choices: [
+                        choice({
+                            choiceKey: "Choice_A",
+                            displayName: "Dislodge Memories",
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: "Attempt to dislodge Xenos' memories.",
+                                    selectionPrerequisiteLines: ["Explore world: 1%"],
+                                    completionPrerequisiteLines: ["Explore world: 20%"],
+                                    forbiddenPrerequisiteLines: ["Explore world: 20%"],
+                                    nextQuestKey: "Quest_B",
+                                    dialogBlockIdentities: [
+                                        "Quest_A|Choice_A|0|Dialog_Start|start",
+                                        "Quest_A|Choice_A|0|Dialog_End|success",
+                                    ],
+                                }),
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Attempt to dislodge Xenos' memories.",
+                                    selectionPrerequisiteLines: ["Explore world: 21%"],
+                                    completionPrerequisiteLines: ["Explore world: 30%"],
+                                    forbiddenPrerequisiteLines: ["Explore world: 30%"],
+                                    nextQuestKey: "Quest_B",
+                                    dialogBlockIdentities: [
+                                        "Quest_A|Choice_A|1|Dialog_Start|start",
+                                        "Quest_A|Choice_A|1|Dialog_End|success",
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                quest({ questKey: "Quest_B", displayName: "Follow Up" }),
+            ],
+            dialogBlocksByIdentity: {},
+            selection: {
+                questKey: "Quest_A",
+                choiceKey: "Choice_A",
+                stepIndex: null,
+            },
+        });
+
+        expect(model.chronicle?.steps).toHaveLength(2);
+        expect(model.chronicle?.objectiveGroups).toHaveLength(1);
+        expect(model.chronicle?.selectedObjectiveGroup).toMatchObject({
+            kind: "progressGate",
+            title: "Attempt to dislodge Xenos' memories.",
+            stepIndexes: [0, 1],
+            representativeStepIndex: 0,
+            debugLabel: "2 gate variants",
+        });
+        expect(model.chronicle?.selectedObjectiveGroup?.gateRows).toEqual([
+            expect.objectContaining({
+                stepIndex: 0,
+                selectionLines: ["Explore world: 1%"],
+                completionLines: ["Explore world: 20%"],
+                forbiddenLines: ["Explore world: 20%"],
+            }),
+            expect.objectContaining({
+                stepIndex: 1,
+                selectionLines: ["Explore world: 21%"],
+                completionLines: ["Explore world: 30%"],
+                forbiddenLines: ["Explore world: 30%"],
+            }),
+        ]);
+    });
+
     it("returns an empty model when no quests are available", () => {
         const model = buildQuestExplorerViewModel({
             quests: [],

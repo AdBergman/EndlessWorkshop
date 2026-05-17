@@ -14,11 +14,13 @@ import type {
     QuestLineGroupModel,
     QuestLinkModel,
     QuestMetadataModel,
+    QuestObjectiveGroupModel,
     QuestProgressionRailModel,
     QuestStepSummaryModel,
     QuestTranscriptBlockModel,
     QuestTranscriptLineModel,
 } from "./questExplorerTypes";
+import { buildQuestStepSemanticGroups } from "./questStepSemantics";
 
 type BuildQuestExplorerViewModelArgs = {
     quests: QuestDto[];
@@ -296,6 +298,63 @@ function buildStepModel(
     };
 }
 
+function uniqueLines(lines: string[]): string[] {
+    return lines.filter((line, index) => lines.indexOf(line) === index);
+}
+
+function buildObjectiveGroupModels(
+    steps: readonly QuestStepDto[],
+    selectedStepIndex: number | null,
+    linkContext: QuestLinkBuildContext
+): QuestObjectiveGroupModel[] {
+    const stepsByIndex = steps.reduce<Record<number, QuestStepDto>>((acc, step) => {
+        acc[step.stepIndex] = step;
+        return acc;
+    }, {});
+
+    return buildQuestStepSemanticGroups(steps).map((group) => {
+        const representativeStep = stepsByIndex[group.representativeStepIndex] ?? steps[0] ?? null;
+        const sourceSteps = group.stepIndexes
+            .map((stepIndex) => stepsByIndex[stepIndex])
+            .filter((step): step is QuestStepDto => Boolean(step));
+        const isProgressGate = group.kind === "progressGate";
+        const rewardLines = isProgressGate
+            ? uniqueLines(sourceSteps.flatMap((step) => cleanLines(step.rewardDisplayLines)))
+            : cleanLines(representativeStep?.rewardDisplayLines);
+
+        return {
+            id: group.id,
+            kind: group.kind,
+            title: group.title,
+            stepIndexes: group.stepIndexes,
+            representativeStepIndex: group.representativeStepIndex,
+            descriptionLines: cleanLines(representativeStep?.descriptionLines),
+            requirementGroups: isProgressGate || !representativeStep
+                ? []
+                : buildRequirementGroups(`objective:${representativeStep.stepIndex}`, [
+                    { label: "Selection", lines: representativeStep.selectionPrerequisiteLines },
+                    { label: "Completion", lines: representativeStep.completionPrerequisiteLines },
+                    { label: "Failure", lines: representativeStep.failurePrerequisiteLines },
+                    { label: "Forbidden", lines: representativeStep.forbiddenPrerequisiteLines },
+                ]),
+            rewardLines,
+            nextQuestLink: buildQuestLink(group.nextQuestKey, linkContext, "stepNext"),
+            failQuestLink: buildQuestLink(group.failQuestKey, linkContext, "stepFailure"),
+            gateRows: group.variants.map((variant) => ({
+                id: `${group.id}:${variant.stepIndex}`,
+                stepIndex: variant.stepIndex,
+                selectionLines: variant.selectionLines,
+                completionLines: variant.completionLines,
+                failureLines: variant.failureLines,
+                forbiddenLines: variant.forbiddenLines,
+                rewardLines: variant.rewardLines,
+            })),
+            debugLabel: isProgressGate ? `${group.stepIndexes.length} gate variants` : null,
+            isSelected: group.stepIndexes.includes(selectedStepIndex ?? group.representativeStepIndex),
+        };
+    });
+}
+
 function sortDialogBlocks(blocks: readonly QuestDialogBlockDto[]): QuestDialogBlockDto[] {
     return [...blocks].sort((left, right) => {
         return (
@@ -474,8 +533,15 @@ export function buildQuestExplorerViewModel({
     const stepModels = resolved.steps.map((step) =>
         buildStepModel(step, resolved.selection.stepIndex, linkContext)
     );
+    const objectiveGroups = buildObjectiveGroupModels(
+        resolved.steps,
+        resolved.selection.stepIndex,
+        linkContext
+    );
     const selectedChoice = choiceModels.find((choice) => choice.isSelected) ?? null;
     const selectedStep = stepModels.find((step) => step.isSelected) ?? null;
+    const selectedObjectiveGroup =
+        objectiveGroups.find((group) => group.isSelected) ?? objectiveGroups[0] ?? null;
     const transcriptIdentities = [
         ...resolved.quest.rootDialogBlockIdentities,
         ...(resolved.step?.dialogBlockIdentities ?? []),
@@ -488,8 +554,10 @@ export function buildQuestExplorerViewModel({
         selectedStepIndex: resolved.selection.stepIndex,
         choices: choiceModels,
         steps: stepModels,
+        objectiveGroups,
         selectedChoice,
         selectedStep,
+        selectedObjectiveGroup,
         transcriptBlocks: buildTranscriptBlocks(transcriptIdentities, dialogBlocksByIdentity),
     };
 

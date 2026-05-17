@@ -3,7 +3,8 @@ import type {
     QuestChoiceSummaryModel,
     QuestLineGroupModel,
     QuestLinkModel,
-    QuestStepSummaryModel,
+    QuestObjectiveGroupModel,
+    QuestProgressGateRowModel,
 } from "@/features/quests/questExplorerTypes";
 import QuestTranscript from "./QuestTranscript";
 
@@ -70,7 +71,7 @@ function QuestBranchLink({
     );
 }
 
-function ChoiceBranches({
+function PathBranches({
     choice,
     onSelectQuest,
 }: {
@@ -85,7 +86,7 @@ function ChoiceBranches({
         <dl className="questExplorer-branchList">
             {choice.nextQuestLinks.map((link, index) => (
                 <div key={`${link.provenance}:${link.questKey}:${index}`}>
-                    <dt>Choice outcome</dt>
+                    <dt>Path outcome</dt>
                     <dd>
                         <QuestBranchLink link={link} onSelectQuest={onSelectQuest} />
                     </dd>
@@ -95,36 +96,150 @@ function ChoiceBranches({
     );
 }
 
-function StepBranches({
-    step,
+function OutcomeBranches({
+    nextQuestLink,
+    failQuestLink,
     onSelectQuest,
 }: {
-    step: QuestStepSummaryModel | null;
+    nextQuestLink: QuestLinkModel | null;
+    failQuestLink: QuestLinkModel | null;
     onSelectQuest: (questKey: string) => void;
 }) {
-    if (!step?.nextQuestLink && !step?.failQuestLink) {
-        return <p className="questExplorer-muted">No branch target recorded for this step.</p>;
+    if (!nextQuestLink && !failQuestLink) {
+        return <p className="questExplorer-muted">No outcome target recorded.</p>;
     }
 
     return (
         <dl className="questExplorer-branchList">
-            {step.nextQuestLink ? (
+            {nextQuestLink ? (
                 <div>
-                    <dt>Step success</dt>
+                    <dt>Success outcome</dt>
                     <dd>
-                        <QuestBranchLink link={step.nextQuestLink} onSelectQuest={onSelectQuest} />
+                        <QuestBranchLink link={nextQuestLink} onSelectQuest={onSelectQuest} />
                     </dd>
                 </div>
             ) : null}
-            {step.failQuestLink ? (
+            {failQuestLink ? (
                 <div>
-                    <dt>Step failure</dt>
+                    <dt>Failure outcome</dt>
                     <dd>
-                        <QuestBranchLink link={step.failQuestLink} onSelectQuest={onSelectQuest} />
+                        <QuestBranchLink link={failQuestLink} onSelectQuest={onSelectQuest} />
                     </dd>
                 </div>
             ) : null}
         </dl>
+    );
+}
+
+function LineSummary({ lines, emptyLabel }: { lines: string[]; emptyLabel: string }) {
+    return <span>{lines.length > 0 ? lines.join(" / ") : emptyLabel}</span>;
+}
+
+function ProgressGateRows({ rows }: { rows: QuestProgressGateRowModel[] }) {
+    if (rows.length === 0) {
+        return <p className="questExplorer-muted">No progress gates recorded.</p>;
+    }
+
+    return (
+        <div className="questExplorer-progressGateRows">
+            {rows.map((row, index) => (
+                <div className="questExplorer-progressGateRow" key={row.id}>
+                    <div className="questExplorer-progressGateRow__index">{`Gate ${index + 1}`}</div>
+                    <dl>
+                        <div>
+                            <dt>Available from</dt>
+                            <dd>
+                                <LineSummary lines={row.selectionLines} emptyLabel="Start" />
+                            </dd>
+                        </div>
+                        <div>
+                            <dt>Completes at</dt>
+                            <dd>
+                                <LineSummary lines={row.completionLines} emptyLabel="No completion threshold" />
+                            </dd>
+                        </div>
+                        {row.forbiddenLines.length > 0 ? (
+                            <div>
+                                <dt>Blocked at</dt>
+                                <dd>
+                                    <LineSummary lines={row.forbiddenLines} emptyLabel="No limit" />
+                                </dd>
+                            </div>
+                        ) : null}
+                        {row.failureLines.length > 0 ? (
+                            <div>
+                                <dt>Failure</dt>
+                                <dd>
+                                    <LineSummary lines={row.failureLines} emptyLabel="No failure threshold" />
+                                </dd>
+                            </div>
+                        ) : null}
+                        {row.rewardLines.length > 0 ? (
+                            <div>
+                                <dt>Reward</dt>
+                                <dd>
+                                    <LineSummary lines={row.rewardLines} emptyLabel="No reward" />
+                                </dd>
+                            </div>
+                        ) : null}
+                    </dl>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+function ObjectiveGroupButton({
+    group,
+    onSelectStep,
+}: {
+    group: QuestObjectiveGroupModel;
+    onSelectStep: (stepIndex: number) => void;
+}) {
+    return (
+        <button
+            type="button"
+            className={`questExplorer-stepButton${group.isSelected ? " is-selected" : ""}`}
+            key={group.id}
+            aria-pressed={group.isSelected}
+            onClick={() => onSelectStep(group.representativeStepIndex)}
+        >
+            <span>{group.title}</span>
+            <small>{group.debugLabel ?? `Objective ${group.representativeStepIndex}`}</small>
+        </button>
+    );
+}
+
+function ObjectiveGroupSection({
+    label,
+    groups,
+    emptyLabel,
+    onSelectStep,
+}: {
+    label: string;
+    groups: QuestObjectiveGroupModel[];
+    emptyLabel: string;
+    onSelectStep: (stepIndex: number) => void;
+}) {
+    if (groups.length === 0) {
+        return <p className="questExplorer-muted">{emptyLabel}</p>;
+    }
+
+    return (
+        <section className="questExplorer-chronicleSection" aria-labelledby={`quest-${label.toLowerCase().replace(/\s+/g, "-")}-heading`}>
+            <div className="questExplorer-sectionLabel" id={`quest-${label.toLowerCase().replace(/\s+/g, "-")}-heading`}>
+                {label}
+            </div>
+            <div className="questExplorer-stepList">
+                {groups.map((group) => (
+                    <ObjectiveGroupButton
+                        group={group}
+                        key={group.id}
+                        onSelectStep={onSelectStep}
+                    />
+                ))}
+            </div>
+        </section>
     );
 }
 
@@ -134,6 +249,10 @@ export default function QuestChroniclePanel({
     onSelectStep,
     onSelectQuest,
 }: QuestChroniclePanelProps) {
+    const progressGateGroups = chronicle.objectiveGroups.filter((group) => group.kind === "progressGate");
+    const objectiveGroups = chronicle.objectiveGroups.filter((group) => group.kind === "objective");
+    const selectedObjectiveGroup = chronicle.selectedObjectiveGroup;
+
     return (
         <article className="questExplorer-chronicle" aria-labelledby="quest-chronicle-title">
             <header className="questExplorer-chronicle__header">
@@ -147,10 +266,10 @@ export default function QuestChroniclePanel({
 
             <section className="questExplorer-chronicleSection" aria-labelledby="quest-choice-heading">
                 <div className="questExplorer-sectionLabel" id="quest-choice-heading">
-                    Choices
+                    Paths
                 </div>
                 {chronicle.choices.length === 0 ? (
-                    <p className="questExplorer-muted">No choices are attached to this quest.</p>
+                    <p className="questExplorer-muted">No paths are attached to this quest.</p>
                 ) : (
                     <div className="questExplorer-choiceList">
                         {chronicle.choices.map((choice) => (
@@ -171,33 +290,36 @@ export default function QuestChroniclePanel({
                 )}
             </section>
 
-            <section className="questExplorer-chronicleSection" aria-labelledby="quest-step-heading">
-                <div className="questExplorer-sectionLabel" id="quest-step-heading">
-                    Objectives
-                </div>
-                {chronicle.steps.length === 0 ? (
-                    <p className="questExplorer-muted">No steps are attached to this choice.</p>
-                ) : (
-                    <div className="questExplorer-stepList">
-                        {chronicle.steps.map((step) => (
-                            <button
-                                type="button"
-                                className={`questExplorer-stepButton${step.isSelected ? " is-selected" : ""}`}
-                                key={step.stepIndex}
-                                aria-pressed={step.isSelected}
-                                onClick={() => onSelectStep(step.stepIndex)}
-                            >
-                                <span>{step.title}</span>
-                                <small>{`Step ${step.stepIndex}`}</small>
-                            </button>
-                        ))}
+            {chronicle.objectiveGroups.length === 0 ? (
+                <section className="questExplorer-chronicleSection" aria-labelledby="quest-objectives-heading">
+                    <div className="questExplorer-sectionLabel" id="quest-objectives-heading">
+                        Objectives
                     </div>
-                )}
-            </section>
+                    <p className="questExplorer-muted">No objectives or progress gates are attached to this path.</p>
+                </section>
+            ) : null}
+
+            {progressGateGroups.length > 0 ? (
+                <ObjectiveGroupSection
+                    label="Progress Gates"
+                    groups={progressGateGroups}
+                    emptyLabel="No progress gates are attached to this path."
+                    onSelectStep={onSelectStep}
+                />
+            ) : null}
+
+            {objectiveGroups.length > 0 ? (
+                <ObjectiveGroupSection
+                    label="Objectives"
+                    groups={objectiveGroups}
+                    emptyLabel="No objectives are attached to this path."
+                    onSelectStep={onSelectStep}
+                />
+            ) : null}
 
             <section className="questExplorer-detailGrid" aria-label="Selected quest details">
                 <div className="questExplorer-detailBlock">
-                    <h3>Selected Choice</h3>
+                    <h3>Selected Path</h3>
                     {chronicle.selectedChoice ? (
                         <>
                             <TextLines
@@ -209,30 +331,36 @@ export default function QuestChroniclePanel({
                                 lines={chronicle.selectedChoice.rewardLines}
                                 emptyLabel="No choice rewards recorded."
                             />
-                            <ChoiceBranches choice={chronicle.selectedChoice} onSelectQuest={onSelectQuest} />
+                            <PathBranches choice={chronicle.selectedChoice} onSelectQuest={onSelectQuest} />
                         </>
                     ) : (
-                        <p className="questExplorer-muted">No choice selected.</p>
+                        <p className="questExplorer-muted">No path selected.</p>
                     )}
                 </div>
 
                 <div className="questExplorer-detailBlock">
-                    <h3>Selected Objective</h3>
-                    {chronicle.selectedStep ? (
+                    <h3>{selectedObjectiveGroup?.kind === "progressGate" ? "Selected Progress Gate" : "Selected Objective"}</h3>
+                    {selectedObjectiveGroup ? (
                         <>
-                            {chronicle.selectedStep.objectiveText ? (
-                                <p className="questExplorer-objective">{chronicle.selectedStep.objectiveText}</p>
-                            ) : null}
+                            <p className="questExplorer-objective">{selectedObjectiveGroup.title}</p>
                             <TextLines
-                                lines={chronicle.selectedStep.descriptionLines}
-                                emptyLabel="No step description recorded."
+                                lines={selectedObjectiveGroup.descriptionLines}
+                                emptyLabel="No objective description recorded."
                             />
-                            <LineGroups groups={chronicle.selectedStep.requirementGroups} />
+                            {selectedObjectiveGroup.kind === "progressGate" ? (
+                                <ProgressGateRows rows={selectedObjectiveGroup.gateRows} />
+                            ) : (
+                                <LineGroups groups={selectedObjectiveGroup.requirementGroups} />
+                            )}
                             <TextLines
-                                lines={chronicle.selectedStep.rewardLines}
-                                emptyLabel="No step rewards recorded."
+                                lines={selectedObjectiveGroup.rewardLines}
+                                emptyLabel="No rewards recorded."
                             />
-                            <StepBranches step={chronicle.selectedStep} onSelectQuest={onSelectQuest} />
+                            <OutcomeBranches
+                                nextQuestLink={selectedObjectiveGroup.nextQuestLink}
+                                failQuestLink={selectedObjectiveGroup.failQuestLink}
+                                onSelectQuest={onSelectQuest}
+                            />
                         </>
                     ) : (
                         <p className="questExplorer-muted">No objective selected.</p>

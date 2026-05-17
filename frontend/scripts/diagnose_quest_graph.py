@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import urllib.request
 from pathlib import Path
@@ -25,6 +26,23 @@ def finite_number(value: Any) -> bool:
 
 
 def normalize_step(step: dict[str, Any], index: int) -> dict[str, Any]:
+    dialog_block_identities = string_list(step.get("dialogBlockIdentities"))
+    dialog_block_refs = step.get("dialogBlockRefs")
+    if not dialog_block_identities and isinstance(dialog_block_refs, list):
+        dialog_block_identities = [
+            "|".join(
+                [
+                    clean(ref.get("questKey")),
+                    clean(ref.get("choiceKey")),
+                    clean(ref.get("stepIndex")),
+                    clean(ref.get("dialogKey")),
+                    clean(ref.get("phase")),
+                ]
+            )
+            for ref in dialog_block_refs
+            if isinstance(ref, dict)
+        ]
+
     return {
         "stepIndex": step.get("stepIndex") if finite_number(step.get("stepIndex")) else step.get("index", index),
         "stepOrder": step.get("stepOrder") if finite_number(step.get("stepOrder")) else index,
@@ -38,7 +56,7 @@ def normalize_step(step: dict[str, Any], index: int) -> dict[str, Any]:
         "selectionPrerequisiteLines": string_list(step.get("selectionPrerequisiteLines")),
         "rewardDisplayLines": string_list(step.get("rewardDisplayLines")),
         "referenceKeys": string_list(step.get("referenceKeys")),
-        "dialogBlockIdentities": string_list(step.get("dialogBlockIdentities")),
+        "dialogBlockIdentities": dialog_block_identities,
     }
 
 
@@ -120,6 +138,89 @@ def unique(values: list[Any]) -> list[str]:
     return result
 
 
+THRESHOLD_PATTERNS = [
+    re.compile(r":\s*\d+%"),
+    re.compile(r"property requirement:\s*.+?=\s*\d+", re.IGNORECASE),
+    re.compile(r"greaterorequal\s+\d+", re.IGNORECASE),
+    re.compile(r"\{0\}"),
+]
+
+
+def threshold_like_line(line: str) -> bool:
+    return any(pattern.search(line) for pattern in THRESHOLD_PATTERNS)
+
+
+def step_condition_lines(step: dict[str, Any]) -> list[str]:
+    return [
+        *step["selectionPrerequisiteLines"],
+        *step["completionPrerequisiteLines"],
+        *step["failurePrerequisiteLines"],
+        *step["forbiddenPrerequisiteLines"],
+    ]
+
+
+def equivalent_dialog_signature(step: dict[str, Any]) -> tuple[str, ...]:
+    signatures = []
+
+    for identity in step["dialogBlockIdentities"]:
+        parts = identity.split("|")
+        if len(parts) == 5:
+            signatures.append("|".join([parts[0], parts[1], parts[3], parts[4]]))
+        else:
+            signatures.append(identity)
+
+    return tuple(signatures)
+
+
+def repeated_objective_diagnostics(quests: list[dict[str, Any]]) -> dict[str, Any]:
+    repeated_groups = []
+
+    for quest in quests:
+        for choice in quest["choices"]:
+            by_objective: dict[str, list[dict[str, Any]]] = {}
+
+            for step in choice["steps"]:
+                by_objective.setdefault(clean(step["objectiveText"]) or f"Step {step['stepIndex']}", []).append(step)
+
+            for objective, steps in by_objective.items():
+                if len(steps) <= 1:
+                    continue
+
+                same_next = len({(step["nextQuestKey"], step["failQuestKey"]) for step in steps}) == 1
+                same_dialog = len({equivalent_dialog_signature(step) for step in steps}) == 1
+                threshold_like = any(
+                    threshold_like_line(line)
+                    for step in steps
+                    for line in step_condition_lines(step)
+                )
+
+                repeated_groups.append(
+                    {
+                        "questKey": quest["questKey"],
+                        "choiceKey": choice["choiceKey"],
+                        "objectiveText": objective,
+                        "stepCount": len(steps),
+                        "sameNext": same_next,
+                        "sameDialog": same_dialog,
+                        "thresholdLike": threshold_like,
+                    }
+                )
+
+    return {
+        "repeatedObjectiveGroupCount": len(repeated_groups),
+        "thresholdLikeRepeatedObjectiveGroupCount": len(
+            [group for group in repeated_groups if group["thresholdLike"]]
+        ),
+        "sameNextAndDialogRepeatedObjectiveGroupCount": len(
+            [group for group in repeated_groups if group["sameNext"] and group["sameDialog"]]
+        ),
+        "repeatedObjectiveExamples": sorted(
+            repeated_groups,
+            key=lambda group: (-group["stepCount"], group["questKey"], group["choiceKey"]),
+        )[:10],
+    }
+
+
 def collect_edges(quests: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, list[str]]]:
     quest_keys = {quest["questKey"] for quest in quests}
     quests_by_key = {quest["questKey"]: quest for quest in quests}
@@ -169,6 +270,7 @@ def collect_edges(quests: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], d
 
 def diagnose(quests: list[dict[str, Any]]) -> dict[str, Any]:
     edges, title_groups = collect_edges(quests)
+    repeated_objectives = repeated_objective_diagnostics(quests)
     quest_next_edges = [edge for edge in edges if edge["field"] == "nextQuestKeys"]
     previous_edges = [edge for edge in edges if edge["field"] == "previousQuestKeys"]
     previous_reverse = {
@@ -245,6 +347,7 @@ def diagnose(quests: list[dict[str, Any]]) -> dict[str, Any]:
                 and f"{edge['sourceQuestKey']} -> {edge['targetQuestKey']}" in quest_next_pairs
             ]
         ),
+        **repeated_objectives,
         "duplicateTitleExamples": [
             {"title": title, "count": len(quest_keys)}
             for title, quest_keys in sorted(

@@ -326,4 +326,63 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("Failure")).toBeInTheDocument();
         expect(screen.getByText("Converges")).toBeInTheDocument();
     });
+
+    it("renders repeated threshold steps as one progress gate ladder", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            quests: [
+                quest({
+                    questKey: "Quest_A",
+                    displayName: "Not of the Chorus",
+                    choices: [
+                        choice({
+                            choiceKey: "Choice_A",
+                            displayName: "Dislodge Memories",
+                            completionPrerequisiteLines: ["Explore world: 20%", "Explore world: 30%"],
+                            steps: [
+                                step({
+                                    stepIndex: 0,
+                                    objectiveText: "Attempt to dislodge Xenos' memories.",
+                                    selectionPrerequisiteLines: ["Explore world: 1%"],
+                                    completionPrerequisiteLines: ["Explore world: 20%"],
+                                    forbiddenPrerequisiteLines: ["Explore world: 20%"],
+                                    dialogBlockIdentities: [
+                                        "Quest_A|Choice_A|0|Dialog_Start|start",
+                                        "Quest_A|Choice_A|0|Dialog_End|success",
+                                    ],
+                                }),
+                                step({
+                                    stepIndex: 1,
+                                    objectiveText: "Attempt to dislodge Xenos' memories.",
+                                    selectionPrerequisiteLines: ["Explore world: 21%"],
+                                    completionPrerequisiteLines: ["Explore world: 30%"],
+                                    forbiddenPrerequisiteLines: ["Explore world: 30%"],
+                                    dialogBlockIdentities: [
+                                        "Quest_A|Choice_A|1|Dialog_Start|start",
+                                        "Quest_A|Choice_A|1|Dialog_End|success",
+                                    ],
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+            ],
+            dialogBlocks: [],
+        });
+
+        await renderQuestExplorer("/quests?quest=Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "Not of the Chorus" })).toBeInTheDocument();
+        expect(screen.getByText("Paths")).toBeInTheDocument();
+        expect(screen.getByText("Selected Path")).toBeInTheDocument();
+        expect(screen.getByText("Progress Gates")).toBeInTheDocument();
+        expect(screen.getByText("Selected Progress Gate")).toBeInTheDocument();
+        expect(screen.getAllByText("Attempt to dislodge Xenos' memories.")).toHaveLength(2);
+        expect(screen.getByText("2 gate variants")).toBeInTheDocument();
+        expect(screen.getByText("Gate 1")).toBeInTheDocument();
+        expect(screen.getByText("Gate 2")).toBeInTheDocument();
+        expect(screen.getByText("Explore world: 1%")).toBeInTheDocument();
+        expect(screen.getAllByText("Explore world: 20%").length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText("Explore world: 21%")).toBeInTheDocument();
+        expect(screen.getAllByText("Explore world: 30%").length).toBeGreaterThanOrEqual(1);
+    });
 });
