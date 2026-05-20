@@ -2,12 +2,14 @@ import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import { normalizeCollection } from "@/stores/utils/normalizedCollection";
 import type {
-    QuestChoiceDto,
-    QuestDialogBlockDto,
-    QuestDialogLineDto,
-    QuestDto,
-    QuestExplorerDto,
-    QuestStepDto,
+    QuestChronicleDto,
+    QuestChronicleEntryDto,
+    QuestChronicleObjectiveDto,
+    QuestChroniclePathDto,
+    QuestChronicleRequirementDto,
+    QuestChronicleRewardDto,
+    QuestChronicleTranscriptBlockDto,
+    QuestChronicleTranscriptLineDto,
 } from "@/types/questTypes";
 
 type LoadOptions = {
@@ -15,15 +17,11 @@ type LoadOptions = {
 };
 
 type QuestStore = {
-    quests: QuestDto[];
-    questsByKey: Record<string, QuestDto>;
-    questKeys: string[];
-    duplicateQuestKeys: string[];
-
-    dialogBlocks: QuestDialogBlockDto[];
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>;
-    dialogBlockIdentities: string[];
-    duplicateDialogBlockIdentities: string[];
+    chronicle: QuestChronicleDto | null;
+    entries: QuestChronicleEntryDto[];
+    entriesByKey: Record<string, QuestChronicleEntryDto>;
+    entryKeys: string[];
+    duplicateEntryKeys: string[];
 
     loading: boolean;
     loaded: boolean;
@@ -35,133 +33,163 @@ type QuestStore = {
     invalidateQuestExplorer: () => void;
     reset: () => void;
 
-    getQuestByKey: (key: string) => QuestDto | undefined;
-    getDialogBlockByIdentity: (identity: string) => QuestDialogBlockDto | undefined;
-    getDialogBlocksByIdentities: (identities: string[]) => QuestDialogBlockDto[];
+    getQuestByKey: (key: string) => QuestChronicleEntryDto | undefined;
 };
 
 let inflightLoad: Promise<void> | null = null;
 
 export const normalizeQuestKey = (key: string | null | undefined) => (key ?? "").trim();
-export const normalizeDialogBlockIdentity = (identity: string | null | undefined) =>
-    (identity ?? "").trim();
 export const normalizeQuestChoiceKey = (key: string | null | undefined) => (key ?? "").trim();
 
 const cleanStringList = (values: readonly unknown[] | null | undefined): string[] =>
-    (values ?? []).filter((value): value is string => typeof value === "string");
+    (values ?? []).filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean);
 
-const cleanNullableString = (value: unknown): string | null =>
-    typeof value === "string" ? value : null;
-
-const cleanNumber = (value: unknown): number =>
-    typeof value === "number" && Number.isFinite(value) ? value : 0;
+const cleanNullableString = (value: unknown): string | null => {
+    const text = typeof value === "string" ? value.trim() : "";
+    return text || null;
+};
 
 const cleanNullableNumber = (value: unknown): number | null =>
     typeof value === "number" && Number.isFinite(value) ? value : null;
 
-const normalizeDialogLine = (line: QuestDialogLineDto): QuestDialogLineDto => ({
-    lineOrder: cleanNumber(line.lineOrder),
-    sourceLineIndex: cleanNullableNumber(line.sourceLineIndex),
+const normalizeRequirement = (requirement: QuestChronicleRequirementDto): QuestChronicleRequirementDto => ({
+    requirementKey: cleanNullableString(requirement.requirementKey),
+    kind: cleanNullableString(requirement.kind),
+    phase: cleanNullableString(requirement.phase),
+    polarity: cleanNullableString(requirement.polarity),
+    displayText: cleanNullableString(requirement.displayText),
+    referenceKey: cleanNullableString(requirement.referenceKey),
+    referenceKind: cleanNullableString(requirement.referenceKind),
+    referenceDisplayName: cleanNullableString(requirement.referenceDisplayName),
+    targetRole: cleanNullableString(requirement.targetRole),
+    targetLabel: cleanNullableString(requirement.targetLabel),
+    state: cleanNullableString(requirement.state),
+    requiredCount: cleanNullableNumber(requirement.requiredCount),
+    durationTurns: cleanNullableNumber(requirement.durationTurns),
+});
+
+const normalizeReward = (reward: QuestChronicleRewardDto): QuestChronicleRewardDto => ({
+    rewardKey: cleanNullableString(reward.rewardKey),
+    sourceRewardKeys: cleanStringList(reward.sourceRewardKeys),
+    kind: cleanNullableString(reward.kind),
+    displayText: cleanNullableString(reward.displayText),
+    formulaText: cleanNullableString(reward.formulaText),
+    amount: cleanNullableNumber(reward.amount),
+    assetKind: cleanNullableString(reward.assetKind),
+    assetKey: cleanNullableString(reward.assetKey),
+    assetDisplayName: cleanNullableString(reward.assetDisplayName),
+    targetScopeLabel: cleanNullableString(reward.targetScopeLabel),
+});
+
+const normalizeObjective = (objective: QuestChronicleObjectiveDto): QuestChronicleObjectiveDto => ({
+    objectiveText: cleanNullableString(objective.objectiveText),
+    sourceQuestKey: cleanNullableString(objective.sourceQuestKey),
+    choiceKey: normalizeQuestChoiceKey(objective.choiceKey),
+    stepIndex: cleanNullableNumber(objective.stepIndex),
+    descriptionLines: cleanStringList(objective.descriptionLines),
+    completionLines: cleanStringList(objective.completionLines),
+    failureLines: cleanStringList(objective.failureLines),
+    forbiddenLines: cleanStringList(objective.forbiddenLines),
+    selectionLines: cleanStringList(objective.selectionLines),
+    rewardLines: cleanStringList(objective.rewardLines),
+    completionRequirements: (objective.completionRequirements ?? []).map(normalizeRequirement),
+    failureRequirements: (objective.failureRequirements ?? []).map(normalizeRequirement),
+    forbiddenRequirements: (objective.forbiddenRequirements ?? []).map(normalizeRequirement),
+    selectionRequirements: (objective.selectionRequirements ?? []).map(normalizeRequirement),
+    rewards: (objective.rewards ?? []).map(normalizeReward),
+});
+
+const normalizePath = (path: QuestChroniclePathDto): QuestChroniclePathDto => ({
+    pathKey: normalizeQuestChoiceKey(path.pathKey),
+    label: cleanNullableString(path.label),
+    labelSource: cleanNullableString(path.labelSource),
+    choiceOrdinal: cleanNullableNumber(path.choiceOrdinal),
+    sourceQuestKey: cleanNullableString(path.sourceQuestKey),
+    choiceKey: normalizeQuestChoiceKey(path.choiceKey),
+    conditionLines: cleanStringList(path.conditionLines),
+    rewardLines: cleanStringList(path.rewardLines),
+    nextEntryKeys: cleanStringList(path.nextEntryKeys).map(normalizeQuestKey),
+    failureEntryKeys: cleanStringList(path.failureEntryKeys).map(normalizeQuestKey),
+    requirements: (path.requirements ?? []).map(normalizeRequirement),
+    rewards: (path.rewards ?? []).map(normalizeReward),
+});
+
+const normalizeTranscriptLine = (line: QuestChronicleTranscriptLineDto): QuestChronicleTranscriptLineDto => ({
+    lineIndex: cleanNullableNumber(line.lineIndex),
     role: cleanNullableString(line.role),
     speakerLabel: cleanNullableString(line.speakerLabel),
     text: cleanNullableString(line.text),
 });
 
-const normalizeDialogBlock = (block: QuestDialogBlockDto): QuestDialogBlockDto => ({
-    identity: normalizeDialogBlockIdentity(block.identity),
-    questKey: cleanNullableString(block.questKey),
-    choiceKey: cleanNullableString(block.choiceKey),
-    stepIndex: cleanNullableNumber(block.stepIndex),
-    parentScope: cleanNullableString(block.parentScope),
+const normalizeTranscriptBlock = (block: QuestChronicleTranscriptBlockDto): QuestChronicleTranscriptBlockDto => ({
     dialogKey: cleanNullableString(block.dialogKey),
     phase: cleanNullableString(block.phase),
-    expectedLineCount: cleanNumber(block.expectedLineCount),
-    blockOrder: cleanNumber(block.blockOrder),
-    lines: (block.lines ?? []).map(normalizeDialogLine),
+    sourceQuestKey: cleanNullableString(block.sourceQuestKey),
+    choiceKey: normalizeQuestChoiceKey(block.choiceKey),
+    stepIndex: cleanNullableNumber(block.stepIndex),
+    lines: (block.lines ?? []).map(normalizeTranscriptLine),
 });
 
-const normalizeStep = (step: QuestStepDto): QuestStepDto => ({
-    stepIndex: cleanNumber(step.stepIndex),
-    stepOrder: cleanNumber(step.stepOrder),
-    objectiveText: cleanNullableString(step.objectiveText),
-    nextQuestKey: cleanNullableString(step.nextQuestKey),
-    failQuestKey: cleanNullableString(step.failQuestKey),
-    descriptionLines: cleanStringList(step.descriptionLines),
-    completionPrerequisiteLines: cleanStringList(step.completionPrerequisiteLines),
-    failurePrerequisiteLines: cleanStringList(step.failurePrerequisiteLines),
-    forbiddenPrerequisiteLines: cleanStringList(step.forbiddenPrerequisiteLines),
-    selectionPrerequisiteLines: cleanStringList(step.selectionPrerequisiteLines),
-    rewardDisplayLines: cleanStringList(step.rewardDisplayLines),
-    referenceKeys: cleanStringList(step.referenceKeys),
-    dialogBlockIdentities: cleanStringList(step.dialogBlockIdentities).map(normalizeDialogBlockIdentity),
+const normalizeEntry = (entry: QuestChronicleEntryDto): QuestChronicleEntryDto => ({
+    entryKey: normalizeQuestKey(entry.entryKey),
+    primaryQuestKey: cleanNullableString(entry.primaryQuestKey),
+    sourceQuestKeys: cleanStringList(entry.sourceQuestKeys).map(normalizeQuestKey),
+    groupingKey: cleanNullableString(entry.groupingKey),
+    groupingReason: cleanNullableString(entry.groupingReason),
+    title: cleanNullableString(entry.title),
+    summaryLines: cleanStringList(entry.summaryLines),
+    questType: cleanNullableString(entry.questType),
+    mandatory: Boolean(entry.mandatory),
+    keyNarrativeBeat: Boolean(entry.keyNarrativeBeat),
+    factionKey: cleanNullableString(entry.factionKey),
+    questLineKey: cleanNullableString(entry.questLineKey),
+    chapter: cleanNullableNumber(entry.chapter),
+    chapterLabel: cleanNullableString(entry.chapterLabel),
+    step: cleanNullableNumber(entry.step),
+    stepLabel: cleanNullableString(entry.stepLabel),
+    branchKey: cleanNullableString(entry.branchKey),
+    branchLabel: cleanNullableString(entry.branchLabel),
+    nextEntryKeys: cleanStringList(entry.nextEntryKeys).map(normalizeQuestKey),
+    failureEntryKeys: cleanStringList(entry.failureEntryKeys).map(normalizeQuestKey),
+    convergesIntoEntryKeys: cleanStringList(entry.convergesIntoEntryKeys).map(normalizeQuestKey),
+    objectives: (entry.objectives ?? []).map(normalizeObjective),
+    paths: (entry.paths ?? []).map(normalizePath),
+    transcriptBlocks: (entry.transcriptBlocks ?? []).map(normalizeTranscriptBlock),
 });
 
-const normalizeChoice = (choice: QuestChoiceDto): QuestChoiceDto => ({
-    choiceKey: normalizeQuestChoiceKey(choice.choiceKey),
-    displayName: cleanNullableString(choice.displayName),
-    choiceOrder: cleanNumber(choice.choiceOrder),
-    descriptionLines: cleanStringList(choice.descriptionLines),
-    completionPrerequisiteLines: cleanStringList(choice.completionPrerequisiteLines),
-    failurePrerequisiteLines: cleanStringList(choice.failurePrerequisiteLines),
-    rewardDisplayLines: cleanStringList(choice.rewardDisplayLines),
-    nextQuestKeys: cleanStringList(choice.nextQuestKeys).map(normalizeQuestKey),
-    referenceKeys: cleanStringList(choice.referenceKeys),
-    steps: (choice.steps ?? []).map(normalizeStep),
-});
-
-const normalizeQuest = (quest: QuestDto): QuestDto => ({
-    questKey: normalizeQuestKey(quest.questKey),
-    displayName: cleanNullableString(quest.displayName),
-    descriptionLines: cleanStringList(quest.descriptionLines),
-    categoryKey: cleanNullableString(quest.categoryKey),
-    categoryType: cleanNullableString(quest.categoryType),
-    branchStart: Boolean(quest.branchStart),
-    branchEnd: Boolean(quest.branchEnd),
-    mandatory: Boolean(quest.mandatory),
-    keyNarrativeBeat: Boolean(quest.keyNarrativeBeat),
-    narrativeVictoryPathChoice: Boolean(quest.narrativeVictoryPathChoice),
-    chapterKey: cleanNullableString(quest.chapterKey),
-    chapterIndex: cleanNullableNumber(quest.chapterIndex),
-    chapterNumber: cleanNullableNumber(quest.chapterNumber),
-    questSequenceIndex: cleanNullableNumber(quest.questSequenceIndex),
-    branchGroupKey: cleanNullableString(quest.branchGroupKey),
-    branchLabel: cleanNullableString(quest.branchLabel),
-    inferredFactionKey: cleanNullableString(quest.inferredFactionKey),
-    inferredQuestLineKey: cleanNullableString(quest.inferredQuestLineKey),
-    convergesIntoQuestKey: cleanNullableString(quest.convergesIntoQuestKey),
-    previousQuestKeys: cleanStringList(quest.previousQuestKeys).map(normalizeQuestKey),
-    nextQuestKeys: cleanStringList(quest.nextQuestKeys).map(normalizeQuestKey),
-    referenceKeys: cleanStringList(quest.referenceKeys),
-    rootDialogBlockIdentities: cleanStringList(quest.rootDialogBlockIdentities).map(
-        normalizeDialogBlockIdentity
-    ),
-    choices: (quest.choices ?? []).map(normalizeChoice),
-});
-
-const normalizeQuestExplorer = (explorer: QuestExplorerDto) => {
-    const quests = normalizeCollection((explorer.quests ?? []).map(normalizeQuest), (quest) => quest.questKey, {
+const normalizeChronicle = (chronicle: QuestChronicleDto) => {
+    const entries = normalizeCollection((chronicle.entries ?? []).map(normalizeEntry), (entry) => entry.entryKey, {
         normalizeKey: normalizeQuestKey,
     });
-    const dialogBlocks = normalizeCollection(
-        (explorer.dialogBlocks ?? []).map(normalizeDialogBlock),
-        (block) => block.identity,
-        { normalizeKey: normalizeDialogBlockIdentity }
-    );
+    const entriesByKey = { ...entries.byKey };
 
-    return { quests, dialogBlocks };
+    for (const entry of entries.items) {
+        for (const sourceQuestKey of entry.sourceQuestKeys) {
+            const key = normalizeQuestKey(sourceQuestKey);
+            if (key && !entriesByKey[key]) entriesByKey[key] = entry;
+        }
+        if (entry.primaryQuestKey) {
+            const key = normalizeQuestKey(entry.primaryQuestKey);
+            if (key && !entriesByKey[key]) entriesByKey[key] = entry;
+        }
+    }
+
+    return {
+        chronicle: {
+            ...chronicle,
+            entries: entries.items,
+        },
+        entries,
+        entriesByKey,
+    };
 };
 
 const initialState = {
-    quests: [] as QuestDto[],
-    questsByKey: {} as Record<string, QuestDto>,
-    questKeys: [] as string[],
-    duplicateQuestKeys: [] as string[],
-
-    dialogBlocks: [] as QuestDialogBlockDto[],
-    dialogBlocksByIdentity: {} as Record<string, QuestDialogBlockDto>,
-    dialogBlockIdentities: [] as string[],
-    duplicateDialogBlockIdentities: [] as string[],
-
+    chronicle: null as QuestChronicleDto | null,
+    entries: [] as QuestChronicleEntryDto[],
+    entriesByKey: {} as Record<string, QuestChronicleEntryDto>,
+    entryKeys: [] as string[],
+    duplicateEntryKeys: [] as string[],
     loading: false,
     loaded: false,
     error: null as string | null,
@@ -171,43 +199,6 @@ const initialState = {
 const formatLoadError = (reason: unknown) =>
     `Failed to load quests: ${(reason as Error)?.message ?? String(reason)}`;
 
-export const getDialogBlocksByIdentities = (
-    identities: string[],
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>
-): QuestDialogBlockDto[] =>
-    identities
-        .map((identity) => dialogBlocksByIdentity[normalizeDialogBlockIdentity(identity)])
-        .filter((block): block is QuestDialogBlockDto => !!block);
-
-export const getRootDialogBlocksForQuest = (
-    quest: QuestDto | null | undefined,
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>
-): QuestDialogBlockDto[] =>
-    quest ? getDialogBlocksByIdentities(quest.rootDialogBlockIdentities, dialogBlocksByIdentity) : [];
-
-export const getQuestChoiceByKey = (
-    quest: QuestDto | null | undefined,
-    choiceKey: string
-): QuestChoiceDto | undefined => {
-    const normalizedChoiceKey = normalizeQuestChoiceKey(choiceKey);
-    if (!quest || !normalizedChoiceKey) return undefined;
-    return quest.choices.find((choice) => normalizeQuestChoiceKey(choice.choiceKey) === normalizedChoiceKey);
-};
-
-export const getQuestStepByIndex = (
-    choice: QuestChoiceDto | null | undefined,
-    stepIndex: number
-): QuestStepDto | undefined => {
-    if (!choice) return undefined;
-    return choice.steps.find((step) => step.stepIndex === stepIndex);
-};
-
-export const getDialogBlocksForStep = (
-    step: QuestStepDto | null | undefined,
-    dialogBlocksByIdentity: Record<string, QuestDialogBlockDto>
-): QuestDialogBlockDto[] =>
-    step ? getDialogBlocksByIdentities(step.dialogBlockIdentities, dialogBlocksByIdentity) : [];
-
 export const useQuestStore = create<QuestStore>((set, get) => ({
     ...initialState,
 
@@ -215,36 +206,27 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
         const force = opts?.force ?? false;
         const state = get();
 
-        if (!force && state.loading && inflightLoad) {
-            return inflightLoad;
-        }
-
-        if (!force && state.loaded) {
-            return;
-        }
+        if (!force && state.loading && inflightLoad) return inflightLoad;
+        if (!force && state.loaded) return;
 
         set({ loading: true, error: null });
 
         inflightLoad = (async () => {
             try {
-                const explorer = normalizeQuestExplorer(await apiClient.getQuestExplorer());
-
+                const normalized = normalizeChronicle(await apiClient.getQuestChronicle());
                 set({
-                    quests: explorer.quests.items,
-                    questsByKey: explorer.quests.byKey,
-                    questKeys: explorer.quests.keys,
-                    duplicateQuestKeys: explorer.quests.duplicateKeys,
-                    dialogBlocks: explorer.dialogBlocks.items,
-                    dialogBlocksByIdentity: explorer.dialogBlocks.byKey,
-                    dialogBlockIdentities: explorer.dialogBlocks.keys,
-                    duplicateDialogBlockIdentities: explorer.dialogBlocks.duplicateKeys,
+                    chronicle: normalized.chronicle,
+                    entries: normalized.entries.items,
+                    entriesByKey: normalized.entriesByKey,
+                    entryKeys: normalized.entries.keys,
+                    duplicateEntryKeys: normalized.entries.duplicateKeys,
                     loading: false,
                     loaded: true,
                     error: null,
                     lastLoadedAt: new Date().toISOString(),
                 });
             } catch (err) {
-                console.error("Failed to fetch quests from API.", err);
+                console.error("Failed to fetch quest chronicle from API.", err);
                 set({
                     ...initialState,
                     loaded: false,
@@ -275,45 +257,15 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
     getQuestByKey: (key) => {
         const normalizedKey = normalizeQuestKey(key);
         if (!normalizedKey) return undefined;
-        return get().questsByKey[normalizedKey];
+        return get().entriesByKey[normalizedKey];
     },
-
-    getDialogBlockByIdentity: (identity) => {
-        const normalizedIdentity = normalizeDialogBlockIdentity(identity);
-        if (!normalizedIdentity) return undefined;
-        return get().dialogBlocksByIdentity[normalizedIdentity];
-    },
-
-    getDialogBlocksByIdentities: (identities) =>
-        getDialogBlocksByIdentities(identities, get().dialogBlocksByIdentity),
 }));
 
-export const selectQuests = (state: QuestStore) => state.quests;
-export const selectQuestsByKey = (state: QuestStore) => state.questsByKey;
-export const selectQuestKeys = (state: QuestStore) => state.questKeys;
-export const selectQuestDialogBlocks = (state: QuestStore) => state.dialogBlocks;
-export const selectDialogBlocksByIdentity = (state: QuestStore) => state.dialogBlocksByIdentity;
+export const selectQuests = (state: QuestStore) => state.entries;
+export const selectQuestsByKey = (state: QuestStore) => state.entriesByKey;
+export const selectQuestKeys = (state: QuestStore) => state.entryKeys;
 export const selectQuestLoading = (state: QuestStore) => state.loading;
 export const selectQuestLoaded = (state: QuestStore) => state.loaded;
 export const selectQuestError = (state: QuestStore) => state.error;
-
 export const selectQuestByKey = (key: string) => (state: QuestStore) =>
-    state.questsByKey[normalizeQuestKey(key)];
-
-export const selectDialogBlockByIdentity = (identity: string) => (state: QuestStore) =>
-    state.dialogBlocksByIdentity[normalizeDialogBlockIdentity(identity)];
-
-export const selectDialogBlocksByIdentities = (identities: string[]) => (state: QuestStore) =>
-    getDialogBlocksByIdentities(identities, state.dialogBlocksByIdentity);
-
-export const selectRootDialogBlocksForQuest = (questKey: string) => (state: QuestStore) =>
-    getRootDialogBlocksForQuest(state.questsByKey[normalizeQuestKey(questKey)], state.dialogBlocksByIdentity);
-
-export const selectDialogBlocksForStep =
-    (questKey: string, choiceKey: string, stepIndex: number) => (state: QuestStore) => {
-        const quest = state.questsByKey[normalizeQuestKey(questKey)];
-        const choice = getQuestChoiceByKey(quest, choiceKey);
-        const step = getQuestStepByIndex(choice, stepIndex);
-
-        return getDialogBlocksForStep(step, state.dialogBlocksByIdentity);
-    };
+    state.entriesByKey[normalizeQuestKey(key)];

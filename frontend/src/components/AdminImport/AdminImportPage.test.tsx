@@ -121,41 +121,22 @@ function fixtureFile(relativePath: string, fallback: unknown) {
     return createJsonFile(basename(relativePath), text);
 }
 
-function questGraphPayload() {
+function questChroniclePayload() {
     return {
-        exportKind: "quest_graph",
-        quests: [
+        exportKind: "quest_chronicle",
+        entries: [
             {
                 entryKey: "Quest_A",
-                displayName: "A Quest",
-                choices: [],
+                primaryQuestKey: "Quest_A",
+                sourceQuestKeys: ["Quest_A"],
+                title: "A Quest",
             },
         ],
     };
 }
 
-function questDialogPayload() {
-    return {
-        exportKind: "quest_dialog",
-        dialogs: [
-            {
-                questKey: "Quest_A",
-                choiceKey: null,
-                stepIndex: null,
-                dialogKey: "Dialog_A",
-                phase: "start",
-                lines: [{ lineIndex: 0, role: "narrator", text: "Line" }],
-            },
-        ],
-    };
-}
-
-function questGraphFile() {
-    return createJsonFile("ewshop_quest_graph_export_0.80.json", JSON.stringify(questGraphPayload()));
-}
-
-function questDialogFile() {
-    return createJsonFile("ewshop_quest_dialog_export_0.80.json", JSON.stringify(questDialogPayload()));
+function questChronicleFile() {
+    return createJsonFile("ewshop_quest_chronicle_export_0.80.json", JSON.stringify(questChroniclePayload()));
 }
 
 async function waitForUnlockedPage() {
@@ -323,63 +304,44 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");
     });
 
-    it("bulk-imports paired quest graph and dialog as one supported raw export", async () => {
+    it("bulk-imports quest chronicle as one supported raw export", async () => {
         const user = userEvent.setup();
-        const graph = questGraphFile();
-        const dialog = questDialogFile();
+        const chronicle = questChronicleFile();
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
-        dropFiles(0, [graph, dialog]);
+        dropFiles(0, [chronicle]);
 
-        await screen.findByText(`${graph.name} + ${dialog.name}`);
-        expect(screen.getByText("quest_graph + quest_dialog")).toBeInTheDocument();
-        expect(screen.queryByText("Unsupported raw export kind \"quest_graph\".")).not.toBeInTheDocument();
-        expect(screen.queryByText("Unsupported raw export kind \"quest_dialog\".")).not.toBeInTheDocument();
+        await screen.findByText(chronicle.name);
+        expect(screen.getByText("quest_chronicle")).toBeInTheDocument();
+        expect(screen.queryByText("Unsupported raw export kind \"quest_chronicle\".")).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
 
         await screen.findByText(/1 supported export file\(s\) imported\. 0 unsupported file\(s\) skipped\./i);
 
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
-        expect(postCalls.map(([url]) => url)).toEqual(["/api/admin/import/quests"]);
-        expect(JSON.parse(String(postCalls[0][1]?.body))).toEqual({
-            graph: questGraphPayload(),
-            dialog: questDialogPayload(),
-        });
+        expect(postCalls.map(([url]) => url)).toEqual(["/api/admin/import/quests/chronicle"]);
+        expect(JSON.parse(String(postCalls[0][1]?.body))).toEqual(questChroniclePayload());
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("quests");
     });
 
-    it("shows a missing dialog error when only quest graph is dropped", async () => {
-        const graph = questGraphFile();
+    it("shows an error when multiple quest chronicle files are dropped", async () => {
+        const first = questChronicleFile();
+        const second = createJsonFile("ewshop_quest_chronicle_export_copy.json", JSON.stringify(questChroniclePayload()));
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
-        dropFiles(0, [graph]);
+        dropFiles(0, [first, second]);
 
-        await screen.findByText(graph.name);
-        expect(screen.getByText("Quest import requires both quest_graph and quest_dialog files. Missing quest_dialog file.")).toBeInTheDocument();
-        expect(screen.queryByText("Unsupported raw export kind \"quest_graph\".")).not.toBeInTheDocument();
+        await screen.findByText(first.name);
+        expect(screen.getAllByText("Quest import requires exactly one quest_chronicle file; found 2 file(s).").length).toBeGreaterThan(0);
         expect(screen.queryByRole("button", { name: /^Import supported exports$/i })).not.toBeInTheDocument();
     });
 
-    it("shows a missing graph error when only quest dialog is dropped", async () => {
-        const dialog = questDialogFile();
-
-        renderAdminImportPage();
-        await waitForUnlockedPage();
-
-        dropFiles(0, [dialog]);
-
-        await screen.findByText(dialog.name);
-        expect(screen.getByText("Quest import requires both quest_graph and quest_dialog files. Missing quest_graph file.")).toBeInTheDocument();
-        expect(screen.queryByText("Unsupported raw export kind \"quest_dialog\".")).not.toBeInTheDocument();
-        expect(screen.queryByRole("button", { name: /^Import supported exports$/i })).not.toBeInTheDocument();
-    });
-
-    it("bulk-imports a quest pair alongside normal supported raw exports", async () => {
+    it("bulk-imports quest chronicle alongside normal supported raw exports", async () => {
         const user = userEvent.setup();
         const units = createJsonFile("ewshop_units_export_0.80.json", JSON.stringify({
             exportKind: "units",
@@ -389,15 +351,14 @@ describe("AdminImportPage", () => {
             exportKind: "tech",
             techs: [{ techKey: "Tech_Test" }],
         }));
-        const graph = questGraphFile();
-        const dialog = questDialogFile();
+        const chronicle = questChronicleFile();
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
-        dropFiles(0, [units, graph, dialog, tech]);
+        dropFiles(0, [units, chronicle, tech]);
 
-        await screen.findByText(`${graph.name} + ${dialog.name}`);
+        await screen.findByText(chronicle.name);
 
         await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
 
@@ -406,13 +367,10 @@ describe("AdminImportPage", () => {
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
         expect(postCalls.map(([url]) => url)).toEqual([
             "/api/admin/import/units",
-            "/api/admin/import/quests",
+            "/api/admin/import/quests/chronicle",
             "/api/admin/import/techs",
         ]);
-        expect(JSON.parse(String(postCalls[1][1]?.body))).toEqual({
-            graph: questGraphPayload(),
-            dialog: questDialogPayload(),
-        });
+        expect(JSON.parse(String(postCalls[1][1]?.body))).toEqual(questChroniclePayload());
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("units");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("quests");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");

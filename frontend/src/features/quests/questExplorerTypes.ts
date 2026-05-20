@@ -1,4 +1,4 @@
-import type { QuestDialogBlockDto } from "@/types/questTypes";
+import type { QuestChronicleTranscriptBlockDto } from "@/types/questTypes";
 
 export type QuestExplorerStatus = "loading" | "error" | "empty" | "ready";
 
@@ -14,7 +14,7 @@ export type QuestLineGroupModel = {
     lines: string[];
 };
 
-export type QuestGraphLinkProvenance =
+export type QuestLinkProvenance =
     | "questPrevious"
     | "questNext"
     | "choiceNext"
@@ -27,7 +27,7 @@ export type QuestLinkModel = {
     label: string;
     contextLabel: string | null;
     debugLabel: string | null;
-    provenance: QuestGraphLinkProvenance;
+    provenance: QuestLinkProvenance;
     provenanceLabel: string;
 };
 
@@ -112,7 +112,7 @@ export type QuestTranscriptBlockModel = {
     archiveLabel: string | null;
     scopeLabel: string | null;
     phaseLabel: string | null;
-    source: QuestDialogBlockDto;
+    source: QuestChronicleTranscriptBlockDto;
     lines: QuestTranscriptLineModel[];
 };
 

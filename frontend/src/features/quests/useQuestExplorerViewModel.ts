@@ -7,7 +7,6 @@ import {
     type QuestArchiveModel,
 } from "./questArchiveModel";
 import {
-    selectDialogBlocksByIdentity,
     selectQuestError,
     selectQuestLoaded,
     selectQuestLoading,
@@ -50,7 +49,6 @@ const areArchiveFiltersEqual = (left: QuestArchiveFilters, right: QuestArchiveFi
 
 export function useQuestExplorerViewModel(): QuestExplorerViewModel {
     const quests = useQuestStore(selectQuests);
-    const dialogBlocksByIdentity = useQuestStore(selectDialogBlocksByIdentity);
     const loading = useQuestStore(selectQuestLoading);
     const loaded = useQuestStore(selectQuestLoaded);
     const error = useQuestStore(selectQuestError);
@@ -73,14 +71,13 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
         () =>
             buildQuestExplorerViewModel({
                 quests,
-                dialogBlocksByIdentity,
                 selection: {
                     questKey: requestedQuestKey,
                     choiceKey: localSelection.choiceKey,
                     stepIndex: localSelection.stepIndex,
                 },
             }),
-        [dialogBlocksByIdentity, localSelection.choiceKey, localSelection.stepIndex, quests, requestedQuestKey]
+        [localSelection.choiceKey, localSelection.stepIndex, quests, requestedQuestKey]
     );
 
     const selectedQuestKey = content.selection.questKey;
@@ -88,11 +85,10 @@ export function useQuestExplorerViewModel(): QuestExplorerViewModel {
         () =>
             buildQuestArchiveModel({
                 quests,
-                dialogBlocksByIdentity,
                 selectedQuestKey,
                 filters: archiveFilters,
             }),
-        [archiveFilters, dialogBlocksByIdentity, quests, selectedQuestKey]
+        [archiveFilters, quests, selectedQuestKey]
     );
 
     useEffect(() => {

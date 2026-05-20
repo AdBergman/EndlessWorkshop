@@ -3,12 +3,13 @@ import "./LandscapeWrapper.css";
 
 interface Props {
     children: React.ReactNode;
+    disableScaling?: boolean;
 }
 
 // Design reference width
 const DESIGN_WIDTH = 1920;
 
-const LandscapeWrapper: React.FC<Props> = ({ children }) => {
+const LandscapeWrapper: React.FC<Props> = ({ children, disableScaling = false }) => {
     const [isPortrait, setIsPortrait] = useState(false);
     const [isRotatableDevice, setIsRotatableDevice] = useState(false);
     const [scale, setScale] = useState(1);
@@ -41,13 +42,17 @@ const LandscapeWrapper: React.FC<Props> = ({ children }) => {
         };
     }, []);
 
-    const showOverlay = isRotatableDevice && isPortrait;
+    const showOverlay = !disableScaling && isRotatableDevice && isPortrait;
 
     return (
-        <div className="landscape-wrapper">
+        <div className={`landscape-wrapper${disableScaling ? " landscape-wrapper--fluid" : ""}`}>
             {showOverlay ? (
                 <div className="rotate-overlay">
                     <p>Please rotate your device to landscape</p>
+                </div>
+            ) : disableScaling ? (
+                <div className="landscape-content landscape-content--fluid">
+                    {children}
                 </div>
             ) : (
                 <div

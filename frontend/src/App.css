@@ -122,7 +122,8 @@ body {
 }
 
 @media (max-width: 1024px) {
-    .app--codex {
+    .app--codex,
+    .app--quests {
         height: auto;
         min-height: 100vh;
         overflow: visible;

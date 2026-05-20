@@ -1,21 +1,21 @@
 package ewshop.api.controller;
 
-import ewshop.facade.dto.response.quests.QuestExplorerDto;
-import ewshop.facade.interfaces.QuestFacade;
+import ewshop.facade.dto.response.quests.QuestChronicleDto;
+import ewshop.facade.interfaces.QuestChronicleFacade;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class QuestController {
 
-    private final QuestFacade questFacade;
+    private final QuestChronicleFacade questChronicleFacade;
 
-    public QuestController(QuestFacade questFacade) {
-        this.questFacade = questFacade;
+    public QuestController(QuestChronicleFacade questChronicleFacade) {
+        this.questChronicleFacade = questChronicleFacade;
     }
 
-    @GetMapping("/api/quests")
-    public QuestExplorerDto getQuestExplorer() {
-        return questFacade.getQuestExplorer();
+    @GetMapping("/api/quests/chronicle")
+    public QuestChronicleDto getQuestChronicle() {
+        return questChronicleFacade.getQuestChronicle();
     }
 }

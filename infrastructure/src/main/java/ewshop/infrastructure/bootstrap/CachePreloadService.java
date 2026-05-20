@@ -2,7 +2,7 @@ package ewshop.infrastructure.bootstrap;
 
 import ewshop.domain.service.DistrictService;
 import ewshop.domain.service.ImprovementService;
-import ewshop.domain.service.QuestService;
+import ewshop.domain.service.QuestChronicleReadService;
 import ewshop.domain.service.TechService;
 import ewshop.domain.service.UnitService;
 import org.slf4j.Logger;
@@ -22,20 +22,20 @@ public class CachePreloadService {
     private final TechService techService;
     private final ImprovementService improvementService;
     private final UnitService unitService;
-    private final QuestService questService;
+    private final QuestChronicleReadService questChronicleReadService;
 
     public CachePreloadService(
             DistrictService districtService,
             TechService techService,
             ImprovementService improvementService,
             UnitService unitService,
-            QuestService questService
+            QuestChronicleReadService questChronicleReadService
     ) {
         this.districtService = districtService;
         this.techService = techService;
         this.improvementService = improvementService;
         this.unitService = unitService;
-        this.questService = questService;
+        this.questChronicleReadService = questChronicleReadService;
     }
 
     @Async
@@ -65,7 +65,7 @@ public class CachePreloadService {
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadQuests() {
-        return preload("Quests", questService::getQuestExplorer);
+        return preload("Quest chronicle", questChronicleReadService::getQuestChronicle);
     }
 
     private CompletableFuture<Void> preload(String name, Runnable loader) {

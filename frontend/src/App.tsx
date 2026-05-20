@@ -64,7 +64,7 @@ const AppLayout: React.FC = () => {
     }
 
     return (
-        <LandscapeWrapper>
+        <LandscapeWrapper disableScaling={isQuestExplorerRoute}>
             <div className={appClassName}>
                 <TopContainer />
                 {isProcessingSharedBuild ? null : <Outlet />}

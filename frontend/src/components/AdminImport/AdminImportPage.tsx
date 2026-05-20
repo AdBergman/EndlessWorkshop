@@ -141,6 +141,15 @@ type CodexImportFile = {
     entries?: unknown[];
 };
 
+type QuestChronicleImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    exportKind?: string;
+    entries?: unknown[];
+};
+
 function metaFromCodexFile(json: CodexImportFile): ModuleMetaKV[] {
     const count = Array.isArray(json.entries) ? json.entries.length : 0;
 
@@ -160,6 +169,28 @@ function validateCodexFile(json: CodexImportFile): string | null {
     }
     if (!json.exportKind?.trim()) {
         return "File parsed, but it does not contain a non-empty 'exportKind'.";
+    }
+    return null;
+}
+
+function metaFromQuestChronicleFile(json: QuestChronicleImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.entries) ? json.entries.length : 0;
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Export kind", value: json.exportKind ?? "—" },
+        { label: "Entry count", value: String(count) },
+    ];
+}
+
+function validateQuestChronicleFile(json: QuestChronicleImportFile): string | null {
+    if (json?.exportKind !== "quest_chronicle") {
+        return "File parsed, but it is not a quest_chronicle export.";
+    }
+    if (!Array.isArray(json.entries) || json.entries.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'entries' array.";
     }
     return null;
 }
@@ -307,18 +338,28 @@ export default function AdminImportPage() {
                 validate: validateCodexFile,
                 importButtonLabel: "Import codex",
             },
+            {
+                id: "quests",
+                title: "Quests",
+                description: "Upload a quest_chronicle export and import it into the database.",
+                enabled: true,
+                endpoint: "/api/admin/import/quests/chronicle",
+                getMeta: metaFromQuestChronicleFile,
+                validate: validateQuestChronicleFile,
+                importButtonLabel: "Import quest chronicle",
+            },
         ];
     }, []);
 
     const bulkModules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
-        const rawExportModules = individualModules.filter((module) => module.id !== "codex");
+        const rawExportModules = individualModules.filter((module) => module.id !== "codex" && module.id !== "quests");
         const codexModule = individualModules.find((module) => module.id === "codex");
 
         return [
             {
                 id: "exports",
                 title: "Import supported exports",
-                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and paired Quest graph/dialog files. Other raw exports are skipped.",
+                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and quest_chronicle. Other raw exports are skipped.",
                 enabled: true,
                 bulkExportModules: rawExportModules,
                 importButtonLabel: "Import supported exports",

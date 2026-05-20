@@ -2,6 +2,7 @@ package ewshop.infrastructure.bootstrap;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component
+@ConditionalOnProperty(prefix = "ewshop.cache-preload", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CachePreloader {
 
     private static final Logger log = LoggerFactory.getLogger(CachePreloader.class);

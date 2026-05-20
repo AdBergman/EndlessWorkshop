@@ -54,11 +54,9 @@ type BulkExportSelectedFile = {
     summary?: any | null;
 };
 
-const QUEST_GRAPH_EXPORT_KIND = "quest_graph";
-const QUEST_DIALOG_EXPORT_KIND = "quest_dialog";
-const QUEST_PAIR_EXPORT_LABEL = "quest_graph + quest_dialog";
+const QUEST_CHRONICLE_EXPORT_KIND = "quest_chronicle";
 const QUEST_IMPORT_MODULE_ID = "quests";
-const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests";
+const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests/chronicle";
 
 const BULK_EXPORT_KIND_BY_MODULE_ID: Record<string, string> = {
     districts: "districts",
@@ -80,7 +78,7 @@ function normalizedExportKind(json: any): string | undefined {
 }
 
 function isQuestExportKind(exportKind: string | undefined) {
-    return exportKind === QUEST_GRAPH_EXPORT_KIND || exportKind === QUEST_DIALOG_EXPORT_KIND;
+    return exportKind === QUEST_CHRONICLE_EXPORT_KIND;
 }
 
 type QuestBulkEntry = {
@@ -90,46 +88,31 @@ type QuestBulkEntry = {
     exportKind: string;
 };
 
-function questPairValidationError(graphCount: number, dialogCount: number) {
-    if (graphCount === 0) {
-        return "Quest import requires both quest_graph and quest_dialog files. Missing quest_graph file.";
-    }
-    if (dialogCount === 0) {
-        return "Quest import requires both quest_graph and quest_dialog files. Missing quest_dialog file.";
-    }
-    return `Quest import requires exactly one quest_graph and one quest_dialog file; found ${graphCount} graph file(s) and ${dialogCount} dialog file(s).`;
-}
-
 function createQuestBulkRows(entries: QuestBulkEntry[]): BulkExportSelectedFile[] {
     if (entries.length === 0) return [];
 
-    const graphEntries = entries.filter((entry) => entry.exportKind === QUEST_GRAPH_EXPORT_KIND);
-    const dialogEntries = entries.filter((entry) => entry.exportKind === QUEST_DIALOG_EXPORT_KIND);
-
-    if (graphEntries.length === 1 && dialogEntries.length === 1) {
-        const graph = graphEntries[0];
-        const dialog = dialogEntries[0];
+    if (entries.length === 1) {
+        const chronicle = entries[0];
 
         return [
             {
-                fileName: `${graph.fileName} + ${dialog.fileName}`,
-                exportKind: QUEST_PAIR_EXPORT_LABEL,
+                fileName: chronicle.fileName,
+                exportKind: QUEST_CHRONICLE_EXPORT_KIND,
                 moduleId: QUEST_IMPORT_MODULE_ID,
                 moduleTitle: "Quests",
                 endpoint: QUEST_IMPORT_ENDPOINT,
-                rawText: JSON.stringify({ graph: graph.json, dialog: dialog.json }),
+                rawText: chronicle.rawText,
                 status: "ready",
             },
         ];
     }
 
-    const error = questPairValidationError(graphEntries.length, dialogEntries.length);
     return entries.map((entry) => ({
         fileName: entry.fileName,
         exportKind: entry.exportKind,
         rawText: entry.rawText,
         status: "validation_error",
-        error,
+        error: `Quest import requires exactly one quest_chronicle file; found ${entries.length} file(s).`,
     }));
 }
 
