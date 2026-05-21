@@ -12,7 +12,6 @@ import TechContainer from "./components/Tech/TechContainer";
 import InfoPage from "./components/InfoPage/InfoPage";
 import GameDataProvider from "./context/GameDataProvider";
 import { useShareProcessingGate } from "./context/appOrchestration";
-import LandscapeWrapper from "./components/Layout/LandscapeWrapper";
 import PageSeo from "@/components/Seo/PageSeo";
 import { AppRouteSeoKey, publicRouteSeo } from "@/components/Seo/routeSeo";
 
@@ -64,12 +63,10 @@ const AppLayout: React.FC = () => {
     }
 
     return (
-        <LandscapeWrapper disableScaling={isQuestExplorerRoute}>
-            <div className={appClassName}>
-                <TopContainer />
-                {isProcessingSharedBuild ? null : <Outlet />}
-            </div>
-        </LandscapeWrapper>
+        <div className={appClassName}>
+            <TopContainer />
+            {isProcessingSharedBuild ? null : <Outlet />}
+        </div>
     );
 };
 

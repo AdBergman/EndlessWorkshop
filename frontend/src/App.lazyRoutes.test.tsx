@@ -1,14 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import type React from "react";
 import { MemoryRouter } from "react-router-dom";
 import { AppRoutes } from "./App";
 
 vi.mock("./components/TopContainer/TopContainer", () => ({
     default: () => <nav aria-label="top navigation">Top navigation</nav>,
-}));
-
-vi.mock("./components/Layout/LandscapeWrapper", () => ({
-    default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock("./components/Seo/PageSeo", () => ({
