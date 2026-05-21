@@ -18,6 +18,18 @@ public class QuestExplorerReadService {
     @Transactional(readOnly = true)
     @Cacheable("questExplorer")
     public QuestExplorer getQuestExplorer() {
-        return questExplorerRepository.findQuestExplorer();
+        QuestExplorer explorer = questExplorerRepository.findQuestExplorer();
+        if (explorer == null) {
+            return null;
+        }
+        return new QuestExplorer(
+                explorer.gameVersion(),
+                explorer.exporterVersion(),
+                explorer.exportedAtUtc(),
+                explorer.exportKind(),
+                explorer.schemaVersion(),
+                explorer.entries(),
+                QuestExplorerProgressionProjector.project(explorer)
+        );
     }
 }

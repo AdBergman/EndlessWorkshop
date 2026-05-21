@@ -9,8 +9,130 @@ public record QuestExplorerDto(
         String exportedAtUtc,
         String exportKind,
         String schemaVersion,
-        List<EntryDto> entries
+        List<EntryDto> entries,
+        ProgressionDto progression
 ) {
+    public QuestExplorerDto(
+            String gameVersion,
+            String exporterVersion,
+            String exportedAtUtc,
+            String exportKind,
+            String schemaVersion,
+            List<EntryDto> entries
+    ) {
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, entries, null);
+    }
+
+    public record ProgressionDto(
+            List<QuestlineDto> questlines,
+            ProgressionDebugSummaryDto debugSummary
+    ) {}
+
+    public record QuestlineDto(
+            String questLineKey,
+            String questLineFamilyKey,
+            String questLineName,
+            String factionKey,
+            String factionFamilyKey,
+            String factionName,
+            List<String> sourceQuestLineKeys,
+            List<String> sourceFactionKeys,
+            List<ChapterDto> chapters
+    ) {}
+
+    public record ChapterDto(
+            Integer chapterNumber,
+            Integer chapterOrder,
+            String title,
+            List<StepDto> steps
+    ) {}
+
+    public record StepDto(
+            String stepKey,
+            Integer stepNumber,
+            Integer stepOrder,
+            String title,
+            String projectionKind,
+            String detailEntryKey,
+            List<String> sourceEntryKeys,
+            List<String> aliasEntryKeys,
+            List<VariantDto> variants
+    ) {}
+
+    public record VariantDto(
+            String entryKey,
+            String title,
+            String variantKind,
+            String branchGroupKey,
+            String branchLabel,
+            Integer branchOrder,
+            List<String> previousEntryKeys,
+            List<String> nextEntryKeys,
+            List<String> failureEntryKeys,
+            List<String> convergesIntoEntryKeys
+    ) {}
+
+    public record ProgressionDebugSummaryDto(
+            int totalEntries,
+            List<String> questlineFamiliesFound,
+            List<QuestlineDebugSummaryDto> questlines,
+            List<MissingMajorFactionChaptersDto> missingMajorFactionChapters,
+            List<ChapterWithOneStepDto> chaptersWithOnlyOneStep,
+            List<NumericQuestlineVariantCollapseDto> numericQuestlineVariantsCollapsed,
+            List<String> entriesWithMissingChapterOrStepOrder,
+            List<String> suspiciousBranchVariantsWithoutParentStep,
+            List<String> tutorialEntriesPlaced
+    ) {}
+
+    public record QuestlineDebugSummaryDto(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            List<String> sourceQuestLineKeys,
+            List<ChapterDebugSummaryDto> chapters
+    ) {}
+
+    public record ChapterDebugSummaryDto(
+            Integer chapterOrder,
+            Integer chapterNumber,
+            String title,
+            int stepCount,
+            List<StepDebugSummaryDto> steps
+    ) {}
+
+    public record StepDebugSummaryDto(
+            String stepKey,
+            Integer stepOrder,
+            Integer stepNumber,
+            String projectionKind,
+            String detailEntryKey,
+            List<String> sourceEntryKeys,
+            List<String> aliasEntryKeys,
+            int variantCount,
+            int branchVariantCount
+    ) {}
+
+    public record MissingMajorFactionChaptersDto(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            List<Integer> missingChapterNumbers
+    ) {}
+
+    public record ChapterWithOneStepDto(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            Integer chapterOrder,
+            String title
+    ) {}
+
+    public record NumericQuestlineVariantCollapseDto(
+            String sourceQuestLineKey,
+            String sourceFactionKey,
+            String targetQuestLineFamilyKey,
+            String targetFactionFamilyKey,
+            int entryCount,
+            String reason
+    ) {}
+
     public record EntryDto(
             String entryKey,
             String title,

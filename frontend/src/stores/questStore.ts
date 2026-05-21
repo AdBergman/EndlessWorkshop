@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
-import type { QuestExplorerEntry, QuestExplorerResponse } from "@/types/questTypes";
+import type {
+    QuestExplorerEntry,
+    QuestExplorerProgression,
+    QuestExplorerResponse,
+    QuestProgressionChapter,
+    QuestProgressionQuestline,
+    QuestProgressionStep,
+    QuestProgressionVariant,
+} from "@/types/questTypes";
 import type { QuestExplorerMode } from "@/features/quests/questExplorerMode";
 import {
     DEFAULT_QUEST_CATEGORY,
@@ -187,6 +195,112 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
     quality: entry?.quality ? { warnings: cleanStringList(entry.quality.warnings) } : null,
 });
 
+const normalizeProgressionVariant = (variant: any): QuestProgressionVariant => ({
+    entryKey: cleanRequiredString(variant?.entryKey),
+    title: cleanRequiredString(variant?.title),
+    variantKind: cleanRequiredString(variant?.variantKind),
+    branchGroupKey: cleanString(variant?.branchGroupKey),
+    branchLabel: cleanString(variant?.branchLabel),
+    branchOrder: cleanNumber(variant?.branchOrder),
+    previousEntryKeys: cleanStringList(variant?.previousEntryKeys),
+    nextEntryKeys: cleanStringList(variant?.nextEntryKeys),
+    failureEntryKeys: cleanStringList(variant?.failureEntryKeys),
+    convergesIntoEntryKeys: cleanStringList(variant?.convergesIntoEntryKeys),
+});
+
+const normalizeProgressionStep = (step: any): QuestProgressionStep => ({
+    stepKey: cleanRequiredString(step?.stepKey),
+    stepNumber: cleanNumber(step?.stepNumber),
+    stepOrder: cleanNumber(step?.stepOrder),
+    title: cleanRequiredString(step?.title),
+    projectionKind: cleanRequiredString(step?.projectionKind),
+    detailEntryKey: cleanRequiredString(step?.detailEntryKey),
+    sourceEntryKeys: cleanStringList(step?.sourceEntryKeys),
+    aliasEntryKeys: cleanStringList(step?.aliasEntryKeys),
+    variants: (step?.variants ?? []).map(normalizeProgressionVariant).filter((variant: QuestProgressionVariant) => variant.entryKey),
+});
+
+const normalizeProgressionChapter = (chapter: any): QuestProgressionChapter => ({
+    chapterNumber: cleanNumber(chapter?.chapterNumber),
+    chapterOrder: cleanNumber(chapter?.chapterOrder),
+    title: cleanRequiredString(chapter?.title),
+    steps: (chapter?.steps ?? []).map(normalizeProgressionStep).filter((step: QuestProgressionStep) => step.stepKey && step.detailEntryKey),
+});
+
+const normalizeProgressionQuestline = (questline: any): QuestProgressionQuestline => ({
+    questLineKey: cleanString(questline?.questLineKey),
+    questLineFamilyKey: cleanString(questline?.questLineFamilyKey),
+    questLineName: cleanString(questline?.questLineName),
+    factionKey: cleanString(questline?.factionKey),
+    factionFamilyKey: cleanString(questline?.factionFamilyKey),
+    factionName: cleanString(questline?.factionName),
+    sourceQuestLineKeys: cleanStringList(questline?.sourceQuestLineKeys),
+    sourceFactionKeys: cleanStringList(questline?.sourceFactionKeys),
+    chapters: (questline?.chapters ?? []).map(normalizeProgressionChapter),
+});
+
+const normalizeProgressionDebugSummary = (debugSummary: any): QuestExplorerProgression["debugSummary"] => (
+    debugSummary
+        ? {
+            totalEntries: cleanNumber(debugSummary?.totalEntries) ?? 0,
+            questlineFamiliesFound: cleanStringList(debugSummary?.questlineFamiliesFound),
+            questlines: (debugSummary?.questlines ?? []).map((questline: any) => ({
+                questLineFamilyKey: cleanString(questline?.questLineFamilyKey),
+                factionFamilyKey: cleanString(questline?.factionFamilyKey),
+                sourceQuestLineKeys: cleanStringList(questline?.sourceQuestLineKeys),
+                chapters: (questline?.chapters ?? []).map((chapter: any) => ({
+                    chapterOrder: cleanNumber(chapter?.chapterOrder),
+                    chapterNumber: cleanNumber(chapter?.chapterNumber),
+                    title: cleanRequiredString(chapter?.title),
+                    stepCount: cleanNumber(chapter?.stepCount) ?? 0,
+                    steps: (chapter?.steps ?? []).map((step: any) => ({
+                        stepKey: cleanRequiredString(step?.stepKey),
+                        stepOrder: cleanNumber(step?.stepOrder),
+                        stepNumber: cleanNumber(step?.stepNumber),
+                        projectionKind: cleanRequiredString(step?.projectionKind),
+                        detailEntryKey: cleanRequiredString(step?.detailEntryKey),
+                        sourceEntryKeys: cleanStringList(step?.sourceEntryKeys),
+                        aliasEntryKeys: cleanStringList(step?.aliasEntryKeys),
+                        variantCount: cleanNumber(step?.variantCount) ?? 0,
+                        branchVariantCount: cleanNumber(step?.branchVariantCount) ?? 0,
+                    })),
+                })),
+            })),
+            missingMajorFactionChapters: (debugSummary?.missingMajorFactionChapters ?? []).map((item: any) => ({
+                questLineFamilyKey: cleanString(item?.questLineFamilyKey),
+                factionFamilyKey: cleanString(item?.factionFamilyKey),
+                missingChapterNumbers: (item?.missingChapterNumbers ?? []).filter((value: unknown): value is number => typeof value === "number" && Number.isFinite(value)),
+            })),
+            chaptersWithOnlyOneStep: (debugSummary?.chaptersWithOnlyOneStep ?? []).map((item: any) => ({
+                questLineFamilyKey: cleanString(item?.questLineFamilyKey),
+                factionFamilyKey: cleanString(item?.factionFamilyKey),
+                chapterOrder: cleanNumber(item?.chapterOrder),
+                title: cleanRequiredString(item?.title),
+            })),
+            numericQuestlineVariantsCollapsed: (debugSummary?.numericQuestlineVariantsCollapsed ?? []).map((item: any) => ({
+                sourceQuestLineKey: cleanString(item?.sourceQuestLineKey),
+                sourceFactionKey: cleanString(item?.sourceFactionKey),
+                targetQuestLineFamilyKey: cleanString(item?.targetQuestLineFamilyKey),
+                targetFactionFamilyKey: cleanString(item?.targetFactionFamilyKey),
+                entryCount: cleanNumber(item?.entryCount) ?? 0,
+                reason: cleanRequiredString(item?.reason),
+            })),
+            entriesWithMissingChapterOrStepOrder: cleanStringList(debugSummary?.entriesWithMissingChapterOrStepOrder),
+            suspiciousBranchVariantsWithoutParentStep: cleanStringList(debugSummary?.suspiciousBranchVariantsWithoutParentStep),
+            tutorialEntriesPlaced: cleanStringList(debugSummary?.tutorialEntriesPlaced),
+        }
+        : null
+);
+
+const normalizeProgression = (progression: any): QuestExplorerProgression | null => (
+    progression
+        ? {
+            questlines: (progression?.questlines ?? []).map(normalizeProgressionQuestline),
+            debugSummary: normalizeProgressionDebugSummary(progression?.debugSummary),
+        }
+        : null
+);
+
 const sortEntries = (entries: QuestExplorerEntry[]) =>
     [...entries].sort((left, right) => {
         const sequenceDelta = left.navigation.sequenceIndex - right.navigation.sequenceIndex;
@@ -227,6 +341,7 @@ const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => {
             exportKind: "quest_explorer" as const,
             schemaVersion: "quest_explorer.v3" as const,
             entries,
+            progression: normalizeProgression(questExplorer.progression),
         },
         entries,
         entriesByKey,

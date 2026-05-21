@@ -284,7 +284,7 @@
 .questExplorer-listItem {
     position: relative;
     display: grid;
-    gap: 7px;
+    gap: 8px;
     width: 100%;
     min-height: 76px;
     border: 1px solid transparent;
@@ -332,26 +332,27 @@
 .questExplorer-listItemTitle {
     color: var(--quest-ink);
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.02rem;
+    font-size: 1.08rem;
     font-weight: 700;
     line-height: 1.18;
     overflow-wrap: anywhere;
 }
 
 .questExplorer-listItemMeta {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
+    display: grid;
+    gap: 2px;
     color: var(--quest-ink-muted);
-    font-size: 0.82rem;
     line-height: 1.35;
 }
 
+.questExplorer-listItemMeta span {
+    font-size: 0.86rem;
+    font-weight: 700;
+}
+
 .questExplorer-listItemMeta small {
-    flex: 0 0 auto;
     color: rgba(210, 181, 105, 0.72);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -412,6 +413,196 @@
     margin-top: 4px;
     font-size: 1.48rem;
     line-height: 1.15;
+}
+
+.questExplorer-detailPrelude {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.questExplorer-progressionChronicle {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+    border: 1px solid var(--quest-line);
+    border-radius: 6px;
+    padding: 13px;
+    background: rgba(10, 15, 15, 0.66);
+}
+
+.questExplorer-progressionChronicle > header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.questExplorer-progressionChronicle > header > div {
+    min-width: 0;
+}
+
+.questExplorer-progressionChronicle > header span,
+.questExplorer-progressionStep header span,
+.questExplorer-progressionVariant span {
+    color: var(--quest-gold);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+.questExplorer-progressionTitle,
+.questExplorer-progressionStep header strong {
+    display: block;
+    margin: 3px 0 0;
+    color: var(--quest-ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+.questExplorer-progressionTitle {
+    font-size: 1.04rem;
+    line-height: 1.2;
+}
+
+.questExplorer-progressionChronicle p {
+    margin: 5px 0 0;
+    color: var(--quest-ink-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.questExplorer-progressionCount {
+    flex: 0 0 auto;
+    color: var(--quest-teal);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.questExplorer-progressionChronicle ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.questExplorer-progressionStep {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 9px;
+    min-width: 0;
+    border: 1px solid var(--quest-line);
+    border-radius: 5px;
+    padding: 9px;
+    background: rgba(255, 255, 255, 0.026);
+}
+
+.questExplorer-progressionStep.is-active {
+    border-color: rgba(119, 205, 187, 0.5);
+    background: linear-gradient(180deg, rgba(119, 205, 187, 0.095), rgba(255, 255, 255, 0.026));
+}
+
+.questExplorer-progressionStepMarker {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--quest-line-strong);
+    border-radius: 50%;
+    color: var(--quest-gold);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.questExplorer-progressionStepBody {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.questExplorer-progressionStep header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.questExplorer-progressionStep header > div {
+    min-width: 0;
+}
+
+.questExplorer-progressionStep header strong {
+    font-size: 0.96rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+.questExplorer-progressionStep header small {
+    flex: 0 0 auto;
+    max-width: 112px;
+    color: var(--quest-teal);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: right;
+    text-transform: uppercase;
+}
+
+.questExplorer-progressionStepMeta,
+.questExplorer-progressionVariants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+}
+
+.questExplorer-progressionStepMeta span {
+    border: 1px solid var(--quest-line);
+    border-radius: 4px;
+    padding: 3px 7px;
+    color: var(--quest-ink-muted);
+    font-size: 0.7rem;
+    overflow-wrap: anywhere;
+}
+
+.questExplorer-progressionVariant {
+    display: grid;
+    gap: 2px;
+    min-width: 118px;
+    max-width: 100%;
+    border: 1px solid rgba(210, 181, 105, 0.28);
+    border-radius: 5px;
+    padding: 7px 8px;
+    background: rgba(210, 181, 105, 0.06);
+    color: var(--quest-ink);
+    text-align: left;
+}
+
+.questExplorer-progressionVariant.is-active {
+    border-color: rgba(119, 205, 187, 0.62);
+    background: rgba(119, 205, 187, 0.12);
+}
+
+.questExplorer-progressionVariant:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
+
+.questExplorer-progressionVariant strong {
+    font-size: 0.8rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.questExplorer-progressionVariant small {
+    color: var(--quest-ink-muted);
+    font-size: 0.7rem;
+    overflow-wrap: anywhere;
 }
 
 .questExplorer-headerCard p,
@@ -646,6 +837,10 @@
 @media (max-width: 640px) {
     .questExplorer-headerCard {
         display: grid;
+    }
+
+    .questExplorer-progressionChronicle ol {
+        grid-template-columns: 1fr;
     }
 
     .questExplorer-modeSwitch {

@@ -5,6 +5,117 @@ export type QuestExplorerResponse = {
     exportKind: "quest_explorer";
     schemaVersion: "quest_explorer.v3";
     entries: QuestExplorerEntry[];
+    progression: QuestExplorerProgression | null;
+};
+
+export type QuestExplorerProgression = {
+    questlines: QuestProgressionQuestline[];
+    debugSummary: QuestProgressionDebugSummary | null;
+};
+
+export type QuestProgressionQuestline = {
+    questLineKey: string | null;
+    questLineFamilyKey: string | null;
+    questLineName: string | null;
+    factionKey: string | null;
+    factionFamilyKey: string | null;
+    factionName: string | null;
+    sourceQuestLineKeys: string[];
+    sourceFactionKeys: string[];
+    chapters: QuestProgressionChapter[];
+};
+
+export type QuestProgressionChapter = {
+    chapterNumber: number | null;
+    chapterOrder: number | null;
+    title: string;
+    steps: QuestProgressionStep[];
+};
+
+export type QuestProgressionStep = {
+    stepKey: string;
+    stepNumber: number | null;
+    stepOrder: number | null;
+    title: string;
+    projectionKind: string;
+    detailEntryKey: string;
+    sourceEntryKeys: string[];
+    aliasEntryKeys: string[];
+    variants: QuestProgressionVariant[];
+};
+
+export type QuestProgressionVariant = {
+    entryKey: string;
+    title: string;
+    variantKind: string;
+    branchGroupKey: string | null;
+    branchLabel: string | null;
+    branchOrder: number | null;
+    previousEntryKeys: string[];
+    nextEntryKeys: string[];
+    failureEntryKeys: string[];
+    convergesIntoEntryKeys: string[];
+};
+
+export type QuestProgressionDebugSummary = {
+    totalEntries: number;
+    questlineFamiliesFound: string[];
+    questlines: QuestlineDebugSummary[];
+    missingMajorFactionChapters: MissingMajorFactionChapters[];
+    chaptersWithOnlyOneStep: ChapterWithOneStep[];
+    numericQuestlineVariantsCollapsed: NumericQuestlineVariantCollapse[];
+    entriesWithMissingChapterOrStepOrder: string[];
+    suspiciousBranchVariantsWithoutParentStep: string[];
+    tutorialEntriesPlaced: string[];
+};
+
+export type QuestlineDebugSummary = {
+    questLineFamilyKey: string | null;
+    factionFamilyKey: string | null;
+    sourceQuestLineKeys: string[];
+    chapters: ChapterDebugSummary[];
+};
+
+export type ChapterDebugSummary = {
+    chapterOrder: number | null;
+    chapterNumber: number | null;
+    title: string;
+    stepCount: number;
+    steps: StepDebugSummary[];
+};
+
+export type StepDebugSummary = {
+    stepKey: string;
+    stepOrder: number | null;
+    stepNumber: number | null;
+    projectionKind: string;
+    detailEntryKey: string;
+    sourceEntryKeys: string[];
+    aliasEntryKeys: string[];
+    variantCount: number;
+    branchVariantCount: number;
+};
+
+export type MissingMajorFactionChapters = {
+    questLineFamilyKey: string | null;
+    factionFamilyKey: string | null;
+    missingChapterNumbers: number[];
+};
+
+export type ChapterWithOneStep = {
+    questLineFamilyKey: string | null;
+    factionFamilyKey: string | null;
+    chapterOrder: number | null;
+    title: string;
+};
+
+export type NumericQuestlineVariantCollapse = {
+    sourceQuestLineKey: string | null;
+    sourceFactionKey: string | null;
+    targetQuestLineFamilyKey: string | null;
+    targetFactionFamilyKey: string | null;
+    entryCount: number;
+    reason: string;
 };
 
 export type QuestExplorerEntry = {

@@ -9,11 +9,189 @@ public record QuestExplorer(
         String exportedAtUtc,
         String exportKind,
         String schemaVersion,
-        List<Entry> entries
+        List<Entry> entries,
+        Progression progression
 ) {
+    public QuestExplorer(
+            String gameVersion,
+            String exporterVersion,
+            String exportedAtUtc,
+            String exportKind,
+            String schemaVersion,
+            List<Entry> entries
+    ) {
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, entries, null);
+    }
+
     public QuestExplorer {
         entries = safeList(entries);
     }
+
+    public record Progression(
+            List<Questline> questlines,
+            ProgressionDebugSummary debugSummary
+    ) {
+        public Progression {
+            questlines = safeList(questlines);
+        }
+    }
+
+    public record Questline(
+            String questLineKey,
+            String questLineFamilyKey,
+            String questLineName,
+            String factionKey,
+            String factionFamilyKey,
+            String factionName,
+            List<String> sourceQuestLineKeys,
+            List<String> sourceFactionKeys,
+            List<Chapter> chapters
+    ) {
+        public Questline {
+            sourceQuestLineKeys = safeList(sourceQuestLineKeys);
+            sourceFactionKeys = safeList(sourceFactionKeys);
+            chapters = safeList(chapters);
+        }
+    }
+
+    public record Chapter(
+            Integer chapterNumber,
+            Integer chapterOrder,
+            String title,
+            List<Step> steps
+    ) {
+        public Chapter {
+            steps = safeList(steps);
+        }
+    }
+
+    public record Step(
+            String stepKey,
+            Integer stepNumber,
+            Integer stepOrder,
+            String title,
+            String projectionKind,
+            String detailEntryKey,
+            List<String> sourceEntryKeys,
+            List<String> aliasEntryKeys,
+            List<Variant> variants
+    ) {
+        public Step {
+            sourceEntryKeys = safeList(sourceEntryKeys);
+            aliasEntryKeys = safeList(aliasEntryKeys);
+            variants = safeList(variants);
+        }
+    }
+
+    public record Variant(
+            String entryKey,
+            String title,
+            String variantKind,
+            String branchGroupKey,
+            String branchLabel,
+            Integer branchOrder,
+            List<String> previousEntryKeys,
+            List<String> nextEntryKeys,
+            List<String> failureEntryKeys,
+            List<String> convergesIntoEntryKeys
+    ) {
+        public Variant {
+            previousEntryKeys = safeList(previousEntryKeys);
+            nextEntryKeys = safeList(nextEntryKeys);
+            failureEntryKeys = safeList(failureEntryKeys);
+            convergesIntoEntryKeys = safeList(convergesIntoEntryKeys);
+        }
+    }
+
+    public record ProgressionDebugSummary(
+            int totalEntries,
+            List<String> questlineFamiliesFound,
+            List<QuestlineDebugSummary> questlines,
+            List<MissingMajorFactionChapters> missingMajorFactionChapters,
+            List<ChapterWithOneStep> chaptersWithOnlyOneStep,
+            List<NumericQuestlineVariantCollapse> numericQuestlineVariantsCollapsed,
+            List<String> entriesWithMissingChapterOrStepOrder,
+            List<String> suspiciousBranchVariantsWithoutParentStep,
+            List<String> tutorialEntriesPlaced
+    ) {
+        public ProgressionDebugSummary {
+            questlineFamiliesFound = safeList(questlineFamiliesFound);
+            questlines = safeList(questlines);
+            missingMajorFactionChapters = safeList(missingMajorFactionChapters);
+            chaptersWithOnlyOneStep = safeList(chaptersWithOnlyOneStep);
+            numericQuestlineVariantsCollapsed = safeList(numericQuestlineVariantsCollapsed);
+            entriesWithMissingChapterOrStepOrder = safeList(entriesWithMissingChapterOrStepOrder);
+            suspiciousBranchVariantsWithoutParentStep = safeList(suspiciousBranchVariantsWithoutParentStep);
+            tutorialEntriesPlaced = safeList(tutorialEntriesPlaced);
+        }
+    }
+
+    public record QuestlineDebugSummary(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            List<String> sourceQuestLineKeys,
+            List<ChapterDebugSummary> chapters
+    ) {
+        public QuestlineDebugSummary {
+            sourceQuestLineKeys = safeList(sourceQuestLineKeys);
+            chapters = safeList(chapters);
+        }
+    }
+
+    public record ChapterDebugSummary(
+            Integer chapterOrder,
+            Integer chapterNumber,
+            String title,
+            int stepCount,
+            List<StepDebugSummary> steps
+    ) {
+        public ChapterDebugSummary {
+            steps = safeList(steps);
+        }
+    }
+
+    public record StepDebugSummary(
+            String stepKey,
+            Integer stepOrder,
+            Integer stepNumber,
+            String projectionKind,
+            String detailEntryKey,
+            List<String> sourceEntryKeys,
+            List<String> aliasEntryKeys,
+            int variantCount,
+            int branchVariantCount
+    ) {
+        public StepDebugSummary {
+            sourceEntryKeys = safeList(sourceEntryKeys);
+            aliasEntryKeys = safeList(aliasEntryKeys);
+        }
+    }
+
+    public record MissingMajorFactionChapters(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            List<Integer> missingChapterNumbers
+    ) {
+        public MissingMajorFactionChapters {
+            missingChapterNumbers = safeList(missingChapterNumbers);
+        }
+    }
+
+    public record ChapterWithOneStep(
+            String questLineFamilyKey,
+            String factionFamilyKey,
+            Integer chapterOrder,
+            String title
+    ) {}
+
+    public record NumericQuestlineVariantCollapse(
+            String sourceQuestLineKey,
+            String sourceFactionKey,
+            String targetQuestLineFamilyKey,
+            String targetFactionFamilyKey,
+            int entryCount,
+            String reason
+    ) {}
 
     public record Entry(
             String entryKey,

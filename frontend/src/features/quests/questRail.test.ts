@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { QuestExplorerEntry } from "@/types/questTypes";
+import type { QuestExplorerEntry, QuestExplorerProgression } from "@/types/questTypes";
 import {
     buildQuestRailGroups,
     getRailProgressionEntries,
@@ -45,11 +45,11 @@ const entry = (overrides: Partial<QuestExplorerEntry> = {}): QuestExplorerEntry 
         questLineName: "Tahuks",
         chapter: 2,
         chapterLabel: "Chapter 2",
-        step: 0,
-        stepLabel: "Step 0",
+        step: 1,
+        stepLabel: "Step 1",
         sequenceIndex: 1,
         chapterOrder: 2,
-        stepOrder: 0,
+        stepOrder: 1,
         branchGroupKey: null,
         branchLabel: null,
         branchOrder: null,
@@ -67,21 +67,91 @@ const entry = (overrides: Partial<QuestExplorerEntry> = {}): QuestExplorerEntry 
     ...overrides,
 });
 
+const testProgression = ({
+    questLineKey = "FactionQuest_Mukag",
+    questLineFamilyKey = "FactionQuest_Mukag",
+    questLineName = "Tahuks",
+    factionKey = "Faction_Mukag",
+    factionFamilyKey = "Faction_Mukag",
+    factionName = "Tahuks",
+    chapterNumber = 2,
+    chapterOrder = 2,
+    title = "Forgotten Power",
+    steps,
+}: {
+    questLineKey?: string;
+    questLineFamilyKey?: string;
+    questLineName?: string;
+    factionKey?: string;
+    factionFamilyKey?: string;
+    factionName?: string;
+    chapterNumber?: number;
+    chapterOrder?: number;
+    title?: string;
+    steps: Array<{
+        stepNumber: number;
+        stepOrder: number;
+        title: string;
+        detailEntryKey: string;
+        variantEntryKeys?: string[];
+    }>;
+}): QuestExplorerProgression => ({
+    questlines: [
+        {
+            questLineKey,
+            questLineFamilyKey,
+            questLineName,
+            factionKey,
+            factionFamilyKey,
+            factionName,
+            sourceQuestLineKeys: [questLineKey],
+            sourceFactionKeys: [factionKey],
+            chapters: [
+                {
+                    chapterNumber,
+                    chapterOrder,
+                    title,
+                    steps: steps.map((step) => ({
+                        stepKey: `${questLineFamilyKey}:${factionFamilyKey}:chapter-${chapterOrder}:step-${step.stepOrder}`,
+                        stepNumber: step.stepNumber,
+                        stepOrder: step.stepOrder,
+                        title: step.title,
+                        projectionKind: step.variantEntryKeys?.length ? "virtual_alias_expanded" : "real_entry_backed",
+                        detailEntryKey: step.detailEntryKey,
+                        sourceEntryKeys: [step.detailEntryKey, ...(step.variantEntryKeys ?? [])],
+                        aliasEntryKeys: step.variantEntryKeys?.length ? [`${step.detailEntryKey}:alias`] : [],
+                        variants: [step.detailEntryKey, ...(step.variantEntryKeys ?? [])].map((entryKey, index) => ({
+                            entryKey,
+                            title: index === 0 ? step.title : entryKey,
+                            variantKind: index === 0 ? "entry" : "branch_variant",
+                            branchGroupKey: index === 0 ? null : step.detailEntryKey,
+                            branchLabel: index === 0 ? null : title,
+                            branchOrder: index === 0 ? null : index,
+                            previousEntryKeys: [],
+                            nextEntryKeys: [],
+                            failureEntryKeys: [],
+                            convergesIntoEntryKeys: [],
+                        })),
+                    })),
+                },
+            ],
+        },
+    ],
+    debugSummary: null,
+});
+
 describe("quest rail projection", () => {
-    it("hides clear branch entries and choice permutations from the left rail", () => {
+    it("hides backend branch variants from the left rail without choice-key inference", () => {
         const canonical = entry();
         const branchOutcome = entry({
             entryKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01",
             title: "Pious",
             navigation: {
                 ...entry().navigation,
-                step: 2,
-                stepLabel: "Step 2",
                 sequenceIndex: 2,
-                branchGroupKey: "FactionQuest_Mukag_Chapter02_Step02",
+                branchGroupKey: "FactionQuest_Mukag_Chapter02_Step01",
                 branchLabel: "Forgotten Power",
                 branchOrder: 1,
-                previousEntryKeys: ["FactionQuest_Mukag_Chapter02_Step01"],
             },
         });
         const choicePermutation = entry({
@@ -89,74 +159,98 @@ describe("quest rail projection", () => {
             title: "Use the Holy Oculum to observe its abilities.",
             navigation: {
                 ...entry().navigation,
-                chapter: null,
-                chapterLabel: null,
-                step: null,
-                stepLabel: null,
                 sequenceIndex: 3,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
             },
         });
-        const factionEntryWithoutChapter = entry({
-            entryKey: "FactionQuest_KinOfSheredyn_Chapter00_Step00",
-            title: "Pryzja, a Kin youth, is missing.",
-            navigation: {
-                ...entry().navigation,
-                chapter: null,
-                chapterLabel: null,
-                step: null,
-                stepLabel: null,
-                sequenceIndex: 4,
-            },
+        const progression = testProgression({
+            steps: [
+                {
+                    stepNumber: 1,
+                    stepOrder: 1,
+                    title: "Forgotten Power",
+                    detailEntryKey: canonical.entryKey,
+                    variantEntryKeys: [branchOutcome.entryKey, choicePermutation.entryKey],
+                },
+            ],
         });
 
-        expect(isBranchRailEntry(branchOutcome)).toBe(true);
-        expect(isBranchRailEntry(choicePermutation)).toBe(true);
+        expect(isBranchRailEntry(branchOutcome, progression)).toBe(true);
+        expect(isBranchRailEntry(choicePermutation, progression)).toBe(true);
         expect(getVisibleRailEntries([
             canonical,
             branchOutcome,
             choicePermutation,
-            factionEntryWithoutChapter,
-        ])).toEqual([canonical]);
+        ], progression)).toEqual([canonical]);
         expect(getRailProgressionEntries([
             canonical,
             branchOutcome,
             choicePermutation,
-            factionEntryWithoutChapter,
-        ])).toEqual([canonical]);
+        ], progression)).toEqual([canonical]);
     });
 
-    it("uses objective and branch counts as rail metadata instead of synthetic steps", () => {
-        const groups = buildQuestRailGroups([
-            entry({
-                strategyView: {
-                    objectives: [
-                        objective("Objective_A"),
-                        objective("Objective_B"),
-                        objective("Objective_C"),
-                    ],
+    it("uses backend progression step counts instead of objectives, branches, or entry step orders", () => {
+        const first = entry({
+            strategyView: {
+                objectives: [
+                    objective("Objective_A"),
+                    objective("Objective_B"),
+                    objective("Objective_C"),
+                ],
+            },
+            branches: [branch("Branch_A"), branch("Branch_B")],
+        });
+        const branchVariant = entry({
+            entryKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01",
+            title: "Pious",
+            navigation: {
+                ...entry().navigation,
+                sequenceIndex: 2,
+                stepOrder: 99,
+                branchGroupKey: first.entryKey,
+                branchLabel: "Forgotten Power",
+                branchOrder: 1,
+            },
+        });
+        const later = entry({
+            entryKey: "FactionQuest_Mukag_Chapter02_Step04",
+            title: "Forgotten Power",
+            navigation: {
+                ...entry().navigation,
+                sequenceIndex: 3,
+                step: 4,
+                stepOrder: 400,
+            },
+        });
+        const progression = testProgression({
+            steps: [
+                {
+                    stepNumber: 1,
+                    stepOrder: 1,
+                    title: "Forgotten Power",
+                    detailEntryKey: first.entryKey,
+                    variantEntryKeys: [branchVariant.entryKey],
                 },
-                branches: [branch("Branch_A"), branch("Branch_B")],
-            }),
-            entry({
-                entryKey: "FactionQuest_Mukag_Chapter03_Step01",
-                title: "Precious Find",
-                navigation: {
-                    ...entry().navigation,
-                    chapter: 3,
-                    chapterLabel: "Chapter 3",
-                    sequenceIndex: 2,
+                {
+                    stepNumber: 2,
+                    stepOrder: 2,
+                    title: "Forgotten Power",
+                    detailEntryKey: later.entryKey,
                 },
-                strategyView: { objectives: [objective("Objective_D")] },
-            }),
-        ]);
+            ],
+        });
 
-        expect(groups[0].items.map((item) => item.metaLabel)).toEqual([
-            "3 objectives · 2 branches",
-            "1 objective",
-        ]);
+        const groups = buildQuestRailGroups([first, branchVariant, later], progression);
+
+        expect(groups[0].items).toHaveLength(1);
+        expect(groups[0].items[0].title).toBe("Forgotten Power");
+        expect(groups[0].items[0].chapterLabel).toBe("Chapter 2");
+        expect(groups[0].items[0].metaLabel).toBe("2 steps");
     });
 
-    it("collapses Necrophage numeric questline variants that represent the same titled chapter", () => {
+    it("does not collapse numeric questline variants unless the backend progression already did", () => {
         const base = entry({
             entryKey: "FactionQuest_Necrophage_Chapter03_Step01",
             title: "Virgin Lands",
@@ -183,166 +277,73 @@ describe("quest rail projection", () => {
                 sequenceIndex: 11,
             },
         });
+        const progression: QuestExplorerProgression = {
+            questlines: [
+                testProgression({
+                    questLineKey: "FactionQuest_Necrophage",
+                    questLineFamilyKey: "FactionQuest_Necrophage",
+                    questLineName: "Necrophages",
+                    factionKey: "Faction_Necrophage",
+                    factionFamilyKey: "Faction_Necrophage",
+                    factionName: "Necrophages",
+                    chapterNumber: 3,
+                    chapterOrder: 3,
+                    title: "Virgin Lands",
+                    steps: [{ stepNumber: 1, stepOrder: 1, title: "Virgin Lands", detailEntryKey: base.entryKey }],
+                }).questlines[0],
+                testProgression({
+                    questLineKey: "FactionQuest_Necrophage02",
+                    questLineFamilyKey: "FactionQuest_Necrophage02",
+                    questLineName: "Necrophages",
+                    factionKey: "Faction_Necrophage02",
+                    factionFamilyKey: "Faction_Necrophage02",
+                    factionName: "Necrophages",
+                    chapterNumber: 3,
+                    chapterOrder: 3,
+                    title: "Virgin Lands",
+                    steps: [{ stepNumber: 1, stepOrder: 1, title: "Virgin Lands", detailEntryKey: variant.entryKey }],
+                }).questlines[0],
+            ],
+            debugSummary: null,
+        };
 
-        const groups = buildQuestRailGroups([base, variant]);
+        const groups = buildQuestRailGroups([base, variant], progression);
 
-        expect(groups[0].items).toHaveLength(1);
-        expect(groups[0].items[0].entry.entryKey).toBe(base.entryKey);
-        expect(groups[0].items[0].canonicalEntryKeys).toEqual([
+        expect(groups[0].items).toHaveLength(2);
+        expect(groups[0].items.map((item) => item.entry.entryKey)).toEqual([
             base.entryKey,
             variant.entryKey,
         ]);
     });
 
-    it("collapses Kin swapped-order variants by questline family and title while preferring the base questline entry", () => {
-        const missingYouth = entry({
-            entryKey: "FactionQuest_KinOfSheredyn_Chapter01_Step01",
-            title: "The Missing Youth",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_KinOfSheredyn",
-                questLineKey: "FactionQuest_KinOfSheredyn",
-                chapter: 1,
-                chapterLabel: "Chapter 1",
-                chapterOrder: 1,
-                sequenceIndex: 1,
-            },
-        });
-        const stirringsVariant = entry({
-            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step01",
-            title: "Stirrings",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_KinOfSheredyn02",
-                questLineKey: "FactionQuest_KinOfSheredyn02",
-                chapter: 1,
-                chapterLabel: "Chapter 1",
-                chapterOrder: 1,
-                sequenceIndex: 2,
-            },
-        });
-        const stirringsBase = entry({
-            entryKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01",
-            title: "Stirrings",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_KinOfSheredyn",
-                questLineKey: "FactionQuest_KinOfSheredyn",
-                chapter: 2,
-                chapterLabel: "Chapter 2",
-                chapterOrder: 2,
-                sequenceIndex: 3,
-            },
-        });
-        const missingYouthVariant = entry({
-            entryKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01",
-            title: "The Missing Youth",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_KinOfSheredyn02",
-                questLineKey: "FactionQuest_KinOfSheredyn02",
-                chapter: 2,
-                chapterLabel: "Chapter 2",
-                chapterOrder: 2,
-                sequenceIndex: 4,
-            },
-        });
-
-        const groups = buildQuestRailGroups([
-            missingYouth,
-            stirringsVariant,
-            stirringsBase,
-            missingYouthVariant,
-        ]);
-
-        expect(groups[0].items.map((item) => item.entry.entryKey)).toEqual([
-            missingYouth.entryKey,
-            stirringsBase.entryKey,
-        ]);
-        expect(groups[0].items.map((item) => item.title)).toEqual([
-            "The Missing Youth",
-            "Stirrings",
-        ]);
-        expect(groups[0].items[0].canonicalEntryKeys).toContain(missingYouthVariant.entryKey);
-        expect(groups[0].items[1].canonicalEntryKeys).toContain(stirringsVariant.entryKey);
-    });
-
-    it("respects questline family boundaries when titles match", () => {
-        const necrophage = entry({
-            entryKey: "FactionQuest_Necrophage_Chapter06_Step01",
-            title: "A Bitter Truth",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_Necrophage",
-                questLineKey: "FactionQuest_Necrophage",
-                chapter: 6,
-                chapterLabel: "Chapter 6",
-                sequenceIndex: 1,
-            },
-        });
-        const otherQuestline = entry({
-            entryKey: "FactionQuest_Other_Chapter06_Step01",
-            title: "A Bitter Truth",
-            navigation: {
-                ...entry().navigation,
-                factionKey: "Faction_Other",
-                questLineKey: "FactionQuest_Other",
-                chapter: 6,
-                chapterLabel: "Chapter 6",
-                sequenceIndex: 2,
-            },
-        });
-
-        const groups = buildQuestRailGroups([necrophage, otherQuestline]);
-
-        expect(groups[0].items.map((item) => item.entry.entryKey)).toEqual([
-            necrophage.entryKey,
-            otherQuestline.entryKey,
-        ]);
-    });
-
-    it("does not let _Choice fallback collapse unrelated questlines", () => {
-        const first = entry({
-            entryKey: "FactionQuest_A_Chapter02_Step01",
-            title: "Shared Choice Title",
-            navigation: {
-                ...entry().navigation,
-                questLineKey: "FactionQuest_A",
-                sequenceIndex: 1,
-            },
-        });
-        const second = entry({
-            entryKey: "FactionQuest_B_Chapter02_Step01",
-            title: "Shared Choice Title",
-            navigation: {
-                ...entry().navigation,
-                questLineKey: "FactionQuest_B",
-                sequenceIndex: 2,
-            },
-        });
-
-        expect(buildQuestRailGroups([first, second])[0].items).toHaveLength(2);
-    });
-
-    it("maps a selected hidden branch entry back to its visible rail parent through entry aliases", () => {
-        const parent = entry({
-            aliases: ["FactionQuest_Mukag_Chapter02_Step02"],
-        });
+    it("maps a selected hidden branch entry back through backend step variants", () => {
+        const parent = entry();
         const hiddenBranch = entry({
             entryKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01",
             title: "Pious",
             navigation: {
                 ...entry().navigation,
-                branchGroupKey: "FactionQuest_Mukag_Chapter02_Step02",
+                sequenceIndex: 2,
+                branchGroupKey: parent.entryKey,
+                branchLabel: "Forgotten Power",
                 branchOrder: 1,
-                previousEntryKeys: [parent.entryKey],
             },
         });
-        const groups = buildQuestRailGroups([parent, hiddenBranch]);
+        const progression = testProgression({
+            steps: [
+                {
+                    stepNumber: 1,
+                    stepOrder: 1,
+                    title: "Forgotten Power",
+                    detailEntryKey: parent.entryKey,
+                    variantEntryKeys: [hiddenBranch.entryKey],
+                },
+            ],
+        });
+        const groups = buildQuestRailGroups([parent, hiddenBranch], progression, new Set([hiddenBranch.entryKey]));
 
-        expect(resolveRailSelectionKey(hiddenBranch, groups, {
-            [parent.entryKey]: parent,
-            [hiddenBranch.entryKey]: hiddenBranch,
-        })).toBe(parent.entryKey);
+        expect(groups[0].items).toHaveLength(1);
+        expect(groups[0].items[0].entry.entryKey).toBe(parent.entryKey);
+        expect(resolveRailSelectionKey(hiddenBranch, groups)).toBe(parent.entryKey);
     });
 });

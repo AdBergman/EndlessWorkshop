@@ -23,7 +23,142 @@ public final class QuestExplorerMapper {
                 model.exportedAtUtc(),
                 model.exportKind(),
                 model.schemaVersion(),
-                safeList(model.entries()).stream().map(QuestExplorerMapper::toDto).toList()
+                safeList(model.entries()).stream().map(QuestExplorerMapper::toDto).toList(),
+                toDto(model.progression())
+        );
+    }
+
+    private static QuestExplorerDto.ProgressionDto toDto(QuestExplorer.Progression model) {
+        return model == null ? null : new QuestExplorerDto.ProgressionDto(
+                model.questlines().stream().map(QuestExplorerMapper::toDto).toList(),
+                toDto(model.debugSummary())
+        );
+    }
+
+    private static QuestExplorerDto.QuestlineDto toDto(QuestExplorer.Questline model) {
+        return new QuestExplorerDto.QuestlineDto(
+                model.questLineKey(),
+                model.questLineFamilyKey(),
+                model.questLineName(),
+                model.factionKey(),
+                model.factionFamilyKey(),
+                model.factionName(),
+                model.sourceQuestLineKeys(),
+                model.sourceFactionKeys(),
+                model.chapters().stream().map(QuestExplorerMapper::toDto).toList()
+        );
+    }
+
+    private static QuestExplorerDto.ChapterDto toDto(QuestExplorer.Chapter model) {
+        return new QuestExplorerDto.ChapterDto(
+                model.chapterNumber(),
+                model.chapterOrder(),
+                model.title(),
+                model.steps().stream().map(QuestExplorerMapper::toDto).toList()
+        );
+    }
+
+    private static QuestExplorerDto.StepDto toDto(QuestExplorer.Step model) {
+        return new QuestExplorerDto.StepDto(
+                model.stepKey(),
+                model.stepNumber(),
+                model.stepOrder(),
+                model.title(),
+                model.projectionKind(),
+                model.detailEntryKey(),
+                model.sourceEntryKeys(),
+                model.aliasEntryKeys(),
+                model.variants().stream().map(QuestExplorerMapper::toDto).toList()
+        );
+    }
+
+    private static QuestExplorerDto.VariantDto toDto(QuestExplorer.Variant model) {
+        return new QuestExplorerDto.VariantDto(
+                model.entryKey(),
+                model.title(),
+                model.variantKind(),
+                model.branchGroupKey(),
+                model.branchLabel(),
+                model.branchOrder(),
+                model.previousEntryKeys(),
+                model.nextEntryKeys(),
+                model.failureEntryKeys(),
+                model.convergesIntoEntryKeys()
+        );
+    }
+
+    private static QuestExplorerDto.ProgressionDebugSummaryDto toDto(QuestExplorer.ProgressionDebugSummary model) {
+        return model == null ? null : new QuestExplorerDto.ProgressionDebugSummaryDto(
+                model.totalEntries(),
+                model.questlineFamiliesFound(),
+                model.questlines().stream().map(QuestExplorerMapper::toDto).toList(),
+                model.missingMajorFactionChapters().stream().map(QuestExplorerMapper::toDto).toList(),
+                model.chaptersWithOnlyOneStep().stream().map(QuestExplorerMapper::toDto).toList(),
+                model.numericQuestlineVariantsCollapsed().stream().map(QuestExplorerMapper::toDto).toList(),
+                model.entriesWithMissingChapterOrStepOrder(),
+                model.suspiciousBranchVariantsWithoutParentStep(),
+                model.tutorialEntriesPlaced()
+        );
+    }
+
+    private static QuestExplorerDto.QuestlineDebugSummaryDto toDto(QuestExplorer.QuestlineDebugSummary model) {
+        return new QuestExplorerDto.QuestlineDebugSummaryDto(
+                model.questLineFamilyKey(),
+                model.factionFamilyKey(),
+                model.sourceQuestLineKeys(),
+                model.chapters().stream().map(QuestExplorerMapper::toDto).toList()
+        );
+    }
+
+    private static QuestExplorerDto.ChapterDebugSummaryDto toDto(QuestExplorer.ChapterDebugSummary model) {
+        return new QuestExplorerDto.ChapterDebugSummaryDto(
+                model.chapterOrder(),
+                model.chapterNumber(),
+                model.title(),
+                model.stepCount(),
+                model.steps().stream().map(QuestExplorerMapper::toDto).toList()
+        );
+    }
+
+    private static QuestExplorerDto.StepDebugSummaryDto toDto(QuestExplorer.StepDebugSummary model) {
+        return new QuestExplorerDto.StepDebugSummaryDto(
+                model.stepKey(),
+                model.stepOrder(),
+                model.stepNumber(),
+                model.projectionKind(),
+                model.detailEntryKey(),
+                model.sourceEntryKeys(),
+                model.aliasEntryKeys(),
+                model.variantCount(),
+                model.branchVariantCount()
+        );
+    }
+
+    private static QuestExplorerDto.MissingMajorFactionChaptersDto toDto(QuestExplorer.MissingMajorFactionChapters model) {
+        return new QuestExplorerDto.MissingMajorFactionChaptersDto(
+                model.questLineFamilyKey(),
+                model.factionFamilyKey(),
+                model.missingChapterNumbers()
+        );
+    }
+
+    private static QuestExplorerDto.ChapterWithOneStepDto toDto(QuestExplorer.ChapterWithOneStep model) {
+        return new QuestExplorerDto.ChapterWithOneStepDto(
+                model.questLineFamilyKey(),
+                model.factionFamilyKey(),
+                model.chapterOrder(),
+                model.title()
+        );
+    }
+
+    private static QuestExplorerDto.NumericQuestlineVariantCollapseDto toDto(QuestExplorer.NumericQuestlineVariantCollapse model) {
+        return new QuestExplorerDto.NumericQuestlineVariantCollapseDto(
+                model.sourceQuestLineKey(),
+                model.sourceFactionKey(),
+                model.targetQuestLineFamilyKey(),
+                model.targetFactionFamilyKey(),
+                model.entryCount(),
+                model.reason()
         );
     }
 

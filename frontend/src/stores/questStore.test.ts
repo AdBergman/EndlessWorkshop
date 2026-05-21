@@ -134,6 +134,54 @@ const explorer = (): QuestExplorerResponse => ({
             },
         }),
     ],
+    progression: {
+        questlines: [
+            {
+                questLineKey: "Line_A",
+                questLineFamilyKey: "Line_A",
+                questLineName: "Line A",
+                factionKey: "Faction_A",
+                factionFamilyKey: "Faction_A",
+                factionName: "Faction A",
+                sourceQuestLineKeys: ["Line_A"],
+                sourceFactionKeys: ["Faction_A"],
+                chapters: [
+                    {
+                        chapterNumber: 1,
+                        chapterOrder: 1,
+                        title: "First Quest",
+                        steps: [
+                            {
+                                stepKey: "Line_A:Faction_A:chapter-1:step-1",
+                                stepNumber: 1,
+                                stepOrder: 1,
+                                title: "First Quest",
+                                projectionKind: "real_entry_backed",
+                                detailEntryKey: "Quest_A",
+                                sourceEntryKeys: ["Quest_A"],
+                                aliasEntryKeys: [],
+                                variants: [
+                                    {
+                                        entryKey: "Quest_A",
+                                        title: "First Quest",
+                                        variantKind: "entry",
+                                        branchGroupKey: null,
+                                        branchLabel: null,
+                                        branchOrder: null,
+                                        previousEntryKeys: [],
+                                        nextEntryKeys: ["Quest_B"],
+                                        failureEntryKeys: [],
+                                        convergesIntoEntryKeys: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+        debugSummary: null,
+    },
 });
 
 describe("questStore quest explorer loading", () => {
@@ -153,6 +201,7 @@ describe("questStore quest explorer loading", () => {
         expect(state.getQuestByKey("Quest_A")?.title).toBe("First Quest");
         expect(state.getQuestByKey("Legacy_A")?.entryKey).toBe("Quest_A");
         expect(state.aliasToEntryKey.FactionQuest_A).toBe("Quest_A");
+        expect(state.questExplorer?.progression?.questlines[0].chapters[0].steps[0].detailEntryKey).toBe("Quest_A");
     });
 
     it("filters by search and user-facing category", async () => {
