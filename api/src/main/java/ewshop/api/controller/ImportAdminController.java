@@ -4,13 +4,13 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
-import ewshop.facade.dto.importing.quests.QuestChronicleImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
-import ewshop.facade.interfaces.QuestChronicleImportAdminFacade;
+import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ public class ImportAdminController {
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
-    private final QuestChronicleImportAdminFacade questChronicleImportAdminFacade;
+    private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
@@ -33,14 +33,14 @@ public class ImportAdminController {
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
-            QuestChronicleImportAdminFacade questChronicleImportAdminFacade
+            QuestExplorerImportAdminFacade questExplorerImportAdminFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
-        this.questChronicleImportAdminFacade = questChronicleImportAdminFacade;
+        this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
     }
 
     @GetMapping("/check-token")
@@ -89,14 +89,14 @@ public class ImportAdminController {
         return codexImportAdminFacade.importCodex(dto);
     }
 
-    @PostMapping(value = "/quests/chronicle", consumes = "application/json", produces = "application/json")
-    public ImportSummaryDto importQuestChronicle(@RequestBody QuestChronicleImportBatchDto dto) {
+    @PostMapping(value = "/quests/explorer", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importQuestExplorer(@RequestBody QuestExplorerImportBatchDto dto) {
         if (dto == null) {
-            throw new IllegalArgumentException("Quest chronicle import file is required");
+            throw new IllegalArgumentException("Quest explorer import file is required");
         }
         if (dto.entries() == null || dto.entries().isEmpty()) {
-            throw new IllegalArgumentException("Quest chronicle file entries[] must not be empty");
+            throw new IllegalArgumentException("Quest explorer file entries[] must not be empty");
         }
-        return questChronicleImportAdminFacade.importQuestChronicle(dto);
+        return questExplorerImportAdminFacade.importQuestExplorer(dto);
     }
 }

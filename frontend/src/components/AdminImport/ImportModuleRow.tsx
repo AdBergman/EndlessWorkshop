@@ -54,9 +54,9 @@ type BulkExportSelectedFile = {
     summary?: any | null;
 };
 
-const QUEST_CHRONICLE_EXPORT_KIND = "quest_chronicle";
+const QUEST_EXPLORER_EXPORT_KIND = "quest_explorer";
 const QUEST_IMPORT_MODULE_ID = "quests";
-const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests/chronicle";
+const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests/explorer";
 
 const BULK_EXPORT_KIND_BY_MODULE_ID: Record<string, string> = {
     districts: "districts",
@@ -78,7 +78,7 @@ function normalizedExportKind(json: any): string | undefined {
 }
 
 function isQuestExportKind(exportKind: string | undefined) {
-    return exportKind === QUEST_CHRONICLE_EXPORT_KIND;
+    return exportKind === QUEST_EXPLORER_EXPORT_KIND;
 }
 
 type QuestBulkEntry = {
@@ -92,16 +92,16 @@ function createQuestBulkRows(entries: QuestBulkEntry[]): BulkExportSelectedFile[
     if (entries.length === 0) return [];
 
     if (entries.length === 1) {
-        const chronicle = entries[0];
+        const explorer = entries[0];
 
         return [
             {
-                fileName: chronicle.fileName,
-                exportKind: QUEST_CHRONICLE_EXPORT_KIND,
+                fileName: explorer.fileName,
+                exportKind: QUEST_EXPLORER_EXPORT_KIND,
                 moduleId: QUEST_IMPORT_MODULE_ID,
                 moduleTitle: "Quests",
                 endpoint: QUEST_IMPORT_ENDPOINT,
-                rawText: chronicle.rawText,
+                rawText: explorer.rawText,
                 status: "ready",
             },
         ];
@@ -112,7 +112,7 @@ function createQuestBulkRows(entries: QuestBulkEntry[]): BulkExportSelectedFile[
         exportKind: entry.exportKind,
         rawText: entry.rawText,
         status: "validation_error",
-        error: `Quest import requires exactly one quest_chronicle file; found ${entries.length} file(s).`,
+        error: `Quest import requires exactly one quest_explorer file; found ${entries.length} file(s).`,
     }));
 }
 

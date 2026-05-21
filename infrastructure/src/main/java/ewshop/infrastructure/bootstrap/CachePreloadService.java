@@ -2,11 +2,12 @@ package ewshop.infrastructure.bootstrap;
 
 import ewshop.domain.service.DistrictService;
 import ewshop.domain.service.ImprovementService;
-import ewshop.domain.service.QuestChronicleReadService;
+import ewshop.domain.service.QuestExplorerReadService;
 import ewshop.domain.service.TechService;
 import ewshop.domain.service.UnitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@ConditionalOnProperty(prefix = "ewshop.cache-preload", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class CachePreloadService {
 
     private static final Logger log = LoggerFactory.getLogger(CachePreloadService.class);
@@ -22,20 +24,20 @@ public class CachePreloadService {
     private final TechService techService;
     private final ImprovementService improvementService;
     private final UnitService unitService;
-    private final QuestChronicleReadService questChronicleReadService;
+    private final QuestExplorerReadService questExplorerReadService;
 
     public CachePreloadService(
             DistrictService districtService,
             TechService techService,
             ImprovementService improvementService,
             UnitService unitService,
-            QuestChronicleReadService questChronicleReadService
+            QuestExplorerReadService questExplorerReadService
     ) {
         this.districtService = districtService;
         this.techService = techService;
         this.improvementService = improvementService;
         this.unitService = unitService;
-        this.questChronicleReadService = questChronicleReadService;
+        this.questExplorerReadService = questExplorerReadService;
     }
 
     @Async
@@ -65,7 +67,7 @@ public class CachePreloadService {
     @Async
     @Transactional(readOnly = true)
     public CompletableFuture<Void> preloadQuests() {
-        return preload("Quest chronicle", questChronicleReadService::getQuestChronicle);
+        return preload("Quest explorer", questExplorerReadService::getQuestExplorer);
     }
 
     private CompletableFuture<Void> preload(String name, Runnable loader) {

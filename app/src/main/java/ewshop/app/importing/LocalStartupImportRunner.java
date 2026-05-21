@@ -7,13 +7,13 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
-import ewshop.facade.dto.importing.quests.QuestChronicleImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
-import ewshop.facade.interfaces.QuestChronicleImportAdminFacade;
+import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
-    private final QuestChronicleImportAdminFacade questChronicleImportAdminFacade;
+    private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
 
     public LocalStartupImportRunner(
             LocalStartupImportProperties properties,
@@ -58,7 +58,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
-            QuestChronicleImportAdminFacade questChronicleImportAdminFacade
+            QuestExplorerImportAdminFacade questExplorerImportAdminFacade
     ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
@@ -67,7 +67,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
-        this.questChronicleImportAdminFacade = questChronicleImportAdminFacade;
+        this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
     }
 
     @Override
@@ -109,23 +109,23 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         int imported = 0;
         int failed = 0;
         int skipped = 0;
-        Set<Path> questChroniclePaths = new HashSet<>();
+        Set<Path> questExplorerPaths = new HashSet<>();
 
-        List<LocalImportFile> questChronicleFiles = findQuestChronicleFiles(files);
-        if (!questChronicleFiles.isEmpty()) {
-            questChronicleFiles.forEach(file -> questChroniclePaths.add(file.path()));
+        List<LocalImportFile> questExplorerFiles = findQuestExplorerFiles(files);
+        if (!questExplorerFiles.isEmpty()) {
+            questExplorerFiles.forEach(file -> questExplorerPaths.add(file.path()));
             try {
-                ImportSummaryDto summary = importQuestChronicleFile(questChronicleFiles);
+                ImportSummaryDto summary = importQuestExplorerFile(questExplorerFiles);
                 imported++;
-                logImported(questChronicleFiles.get(0).path(), summary);
+                logImported(questExplorerFiles.get(0).path(), summary);
             } catch (Exception ex) {
                 failed++;
-                log.error("Local startup import failed for quest_chronicle file.", ex);
+                log.error("Local startup import failed for quest_explorer file.", ex);
             }
         }
 
         for (LocalImportFile file : files) {
-            if (questChroniclePaths.contains(file.path())) {
+            if (questExplorerPaths.contains(file.path())) {
                 continue;
             }
             try {
@@ -216,20 +216,20 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         if ("units".equals(exportKind) || shouldLetAdminValidationReport(json, "units", exportKind)) {
             return unitImportAdminFacade.importUnits(objectMapper.treeToValue(json, UnitImportBatchDto.class));
         }
-        if ("quest_chronicle".equals(exportKind)) {
-            return questChronicleImportAdminFacade.importQuestChronicle(objectMapper.treeToValue(json, QuestChronicleImportBatchDto.class));
+        if ("quest_explorer".equals(exportKind)) {
+            return questExplorerImportAdminFacade.importQuestExplorer(objectMapper.treeToValue(json, QuestExplorerImportBatchDto.class));
         }
 
         log.warn(
-                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech, and quest_chronicle.",
+                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech, and quest_explorer.",
                 file.toAbsolutePath().normalize(),
                 exportKind == null ? "missing" : exportKind
         );
         return null;
     }
 
-    private List<LocalImportFile> findQuestChronicleFiles(List<LocalImportFile> files) {
-        List<LocalImportFile> chronicleFiles = new ArrayList<>();
+    private List<LocalImportFile> findQuestExplorerFiles(List<LocalImportFile> files) {
+        List<LocalImportFile> explorerFiles = new ArrayList<>();
 
         for (LocalImportFile file : files) {
             if (file.folder() != LocalImportFolder.EXPORTS) continue;
@@ -237,27 +237,27 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             try {
                 JsonNode json = objectMapper.readTree(file.path().toFile());
                 String exportKind = normalizedExportKind(json);
-                if ("quest_chronicle".equals(exportKind)) {
-                    chronicleFiles.add(file);
+                if ("quest_explorer".equals(exportKind)) {
+                    explorerFiles.add(file);
                 }
             } catch (IOException ignored) {
                 // Let the normal per-file import path report malformed files.
             }
         }
 
-        return chronicleFiles;
+        return explorerFiles;
     }
 
-    private ImportSummaryDto importQuestChronicleFile(List<LocalImportFile> files) throws IOException {
+    private ImportSummaryDto importQuestExplorerFile(List<LocalImportFile> files) throws IOException {
         if (files.size() != 1) {
             throw new IllegalArgumentException(
-                    "Quest startup import requires exactly one quest_chronicle file; found " + files.size() + " file(s)."
+                    "Quest startup import requires exactly one quest_explorer file; found " + files.size() + " file(s)."
             );
         }
 
         JsonNode json = objectMapper.readTree(files.get(0).path().toFile());
-        return questChronicleImportAdminFacade.importQuestChronicle(
-                objectMapper.treeToValue(json, QuestChronicleImportBatchDto.class)
+        return questExplorerImportAdminFacade.importQuestExplorer(
+                objectMapper.treeToValue(json, QuestExplorerImportBatchDto.class)
         );
     }
 

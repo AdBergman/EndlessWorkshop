@@ -71,8 +71,8 @@ public class FacadeConfig {
     }
 
     @Bean
-    public QuestChronicleFacade questChronicleFacade(QuestChronicleReadService questChronicleReadService) {
-        return new QuestChronicleFacadeImpl(questChronicleReadService);
+    public QuestExplorerFacade questExplorerFacade(QuestExplorerReadService questExplorerReadService) {
+        return new QuestExplorerFacadeImpl(questExplorerReadService);
     }
 
     @Bean
@@ -89,10 +89,10 @@ public class FacadeConfig {
     }
 
     @Bean
-    public QuestChronicleImportAdminFacade questChronicleImportAdminFacade(
-            QuestChronicleImportService questChronicleImportService,
-            QuestChronicleReadService questChronicleReadService
+    public QuestExplorerImportAdminFacade questExplorerImportAdminFacade(
+            QuestExplorerImportService questExplorerImportService,
+            QuestExplorerReadService questExplorerReadService
     ) {
-        return new QuestChronicleImportAdminFacadeImpl(questChronicleImportService, questChronicleReadService);
+        return new QuestExplorerImportAdminFacadeImpl(questExplorerImportService, questExplorerReadService);
     }
 }

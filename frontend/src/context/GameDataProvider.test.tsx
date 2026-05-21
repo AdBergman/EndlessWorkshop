@@ -21,7 +21,7 @@ vi.mock("@/api/apiClient", () => ({
         getTechs: vi.fn(),
         getUnits: vi.fn(),
         getCodex: vi.fn(),
-        getQuestChronicle: vi.fn(),
+        getQuestExplorer: vi.fn(),
         getSavedBuild: vi.fn(),
         createSavedBuild: vi.fn(),
     },
@@ -73,7 +73,7 @@ describe("GameDataProvider orchestration boundary", () => {
         mockedApiClient.getTechs.mockReset();
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
-        mockedApiClient.getQuestChronicle.mockReset();
+        mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getSavedBuild.mockReset();
         mockedApiClient.createSavedBuild.mockReset();
 
@@ -166,7 +166,7 @@ describe("GameDataProvider orchestration boundary", () => {
             expect(mockedApiClient.getCodex).toHaveBeenCalled();
         });
 
-        expect(mockedApiClient.getQuestChronicle).not.toHaveBeenCalled();
+        expect(mockedApiClient.getQuestExplorer).not.toHaveBeenCalled();
     });
 
     it("keeps the public context surface limited to orchestration commands and share gating", () => {

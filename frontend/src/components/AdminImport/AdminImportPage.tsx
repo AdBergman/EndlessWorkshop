@@ -141,7 +141,7 @@ type CodexImportFile = {
     entries?: unknown[];
 };
 
-type QuestChronicleImportFile = {
+type QuestExplorerImportFile = {
     game?: string;
     gameVersion?: string;
     exporterVersion?: string;
@@ -173,7 +173,7 @@ function validateCodexFile(json: CodexImportFile): string | null {
     return null;
 }
 
-function metaFromQuestChronicleFile(json: QuestChronicleImportFile): ModuleMetaKV[] {
+function metaFromQuestExplorerFile(json: QuestExplorerImportFile): ModuleMetaKV[] {
     const count = Array.isArray(json.entries) ? json.entries.length : 0;
     return [
         { label: "Game", value: json.game ?? "—" },
@@ -185,9 +185,9 @@ function metaFromQuestChronicleFile(json: QuestChronicleImportFile): ModuleMetaK
     ];
 }
 
-function validateQuestChronicleFile(json: QuestChronicleImportFile): string | null {
-    if (json?.exportKind !== "quest_chronicle") {
-        return "File parsed, but it is not a quest_chronicle export.";
+function validateQuestExplorerFile(json: QuestExplorerImportFile): string | null {
+    if (json?.exportKind !== "quest_explorer") {
+        return "File parsed, but it is not a quest_explorer export.";
     }
     if (!Array.isArray(json.entries) || json.entries.length === 0) {
         return "File parsed, but it does not contain a non-empty 'entries' array.";
@@ -341,12 +341,12 @@ export default function AdminImportPage() {
             {
                 id: "quests",
                 title: "Quests",
-                description: "Upload a quest_chronicle export and import it into the database.",
+                description: "Upload a quest_explorer export and import it into the database.",
                 enabled: true,
-                endpoint: "/api/admin/import/quests/chronicle",
-                getMeta: metaFromQuestChronicleFile,
-                validate: validateQuestChronicleFile,
-                importButtonLabel: "Import quest chronicle",
+                endpoint: "/api/admin/import/quests/explorer",
+                getMeta: metaFromQuestExplorerFile,
+                validate: validateQuestExplorerFile,
+                importButtonLabel: "Import quest explorer",
             },
         ];
     }, []);
@@ -359,7 +359,7 @@ export default function AdminImportPage() {
             {
                 id: "exports",
                 title: "Import supported exports",
-                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and quest_chronicle. Other raw exports are skipped.",
+                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and quest_explorer. Other raw exports are skipped.",
                 enabled: true,
                 bulkExportModules: rawExportModules,
                 importButtonLabel: "Import supported exports",

@@ -1,7 +1,7 @@
 package ewshop.api.controller;
 
-import ewshop.facade.dto.response.quests.QuestChronicleDto;
-import ewshop.facade.interfaces.QuestChronicleFacade;
+import ewshop.facade.dto.response.quests.QuestExplorerDto;
+import ewshop.facade.interfaces.QuestExplorerFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -17,59 +17,67 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class QuestControllerTest {
 
     @Test
-    void getQuestChronicle_returnsChronicleJson() throws Exception {
-        QuestChronicleFacade facade = mock(QuestChronicleFacade.class);
-        QuestChronicleDto dto = new QuestChronicleDto(
-                "Endless Legend 2",
+    void getQuestExplorer_returnsExplorerJson() throws Exception {
+        QuestExplorerFacade facade = mock(QuestExplorerFacade.class);
+        QuestExplorerDto dto = new QuestExplorerDto(
                 "0.80",
                 "0.1.0",
                 "now",
-                "quest_chronicle",
-                "1",
-                "questChronicle",
-                List.of(new QuestChronicleDto.EntryDto(
+                "quest_explorer",
+                "quest_explorer.v3",
+                List.of(new QuestExplorerDto.EntryDto(
                         "Quest_A",
-                        "Source_A",
-                        List.of("Source_A"),
-                        null,
-                        null,
                         "First Quest",
                         List.of("Summary"),
                         "Curiosity",
                         true,
                         false,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
+                        List.of("Source_A"),
+                        new QuestExplorerDto.NavigationDto(
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                1,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                List.of(),
+                                List.of(),
+                                List.of(),
+                                List.of()
+                        ),
+                        new QuestExplorerDto.LoreViewDto(List.of()),
+                        new QuestExplorerDto.StrategyViewDto(List.of()),
                         List.of(),
-                        List.of(),
-                        List.of(),
-                        List.of(),
-                        List.of(),
-                        List.of()
+                        null
                 ))
         );
-        when(facade.getQuestChronicle()).thenReturn(dto);
+        when(facade.getQuestExplorer()).thenReturn(dto);
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new QuestController(facade)).build();
 
-        mockMvc.perform(get("/api/quests/chronicle"))
+        mockMvc.perform(get("/api/quests/explorer"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.exportKind").value("quest_chronicle"))
+                .andExpect(jsonPath("$.exportKind").value("quest_explorer"))
+                .andExpect(jsonPath("$.schemaVersion").value("quest_explorer.v3"))
                 .andExpect(jsonPath("$.entries[0].entryKey").value("Quest_A"))
-                .andExpect(jsonPath("$.entries[0].sourceQuestKeys[0]").value("Source_A"));
+                .andExpect(jsonPath("$.entries[0].aliases[0]").value("Source_A"));
     }
 
     @Test
-    void getLegacyRawQuestEndpoint_isNotMapped() throws Exception {
-        QuestChronicleFacade facade = mock(QuestChronicleFacade.class);
+    void getTemporaryChronicleEndpoint_isNotMapped() throws Exception {
+        QuestExplorerFacade facade = mock(QuestExplorerFacade.class);
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new QuestController(facade)).build();
 
-        mockMvc.perform(get("/api/quests"))
+        mockMvc.perform(get("/api/quests/chronicle"))
                 .andExpect(status().isNotFound());
     }
 }

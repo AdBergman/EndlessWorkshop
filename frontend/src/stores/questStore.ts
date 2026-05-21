@@ -1,27 +1,33 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
-import { normalizeCollection } from "@/stores/utils/normalizedCollection";
-import type {
-    QuestChronicleDto,
-    QuestChronicleEntryDto,
-    QuestChronicleObjectiveDto,
-    QuestChroniclePathDto,
-    QuestChronicleRequirementDto,
-    QuestChronicleRewardDto,
-    QuestChronicleTranscriptBlockDto,
-    QuestChronicleTranscriptLineDto,
-} from "@/types/questTypes";
+import type { QuestExplorerEntry, QuestExplorerResponse } from "@/types/questTypes";
+import type { QuestExplorerMode } from "@/features/quests/questExplorerMode";
 
 type LoadOptions = {
     force?: boolean;
 };
 
+export const QUEST_FILTER_ALL = "__all__";
+
+export type QuestExplorerFilters = {
+    searchText: string;
+    faction: string;
+    questLine: string;
+    questType: string;
+};
+
 type QuestStore = {
-    chronicle: QuestChronicleDto | null;
-    entries: QuestChronicleEntryDto[];
-    entriesByKey: Record<string, QuestChronicleEntryDto>;
-    entryKeys: string[];
+    questExplorer: QuestExplorerResponse | null;
+    entries: QuestExplorerEntry[];
+    entriesByKey: Record<string, QuestExplorerEntry>;
+    orderedEntryKeys: string[];
+    aliasToEntryKey: Record<string, string>;
     duplicateEntryKeys: string[];
+    duplicateAliases: string[];
+
+    selectedEntryKey: string | null;
+    mode: QuestExplorerMode;
+    filters: QuestExplorerFilters;
 
     loading: boolean;
     loaded: boolean;
@@ -33,163 +39,218 @@ type QuestStore = {
     invalidateQuestExplorer: () => void;
     reset: () => void;
 
-    getQuestByKey: (key: string) => QuestChronicleEntryDto | undefined;
+    setSelectedEntryKey: (key: string | null) => void;
+    setMode: (mode: QuestExplorerMode) => void;
+    setFilters: (filters: Partial<QuestExplorerFilters>) => void;
+    clearFilters: () => void;
+
+    resolveEntryKey: (keyOrAlias: string | null | undefined) => string | null;
+    getQuestByKey: (keyOrAlias: string | null | undefined) => QuestExplorerEntry | undefined;
 };
 
 let inflightLoad: Promise<void> | null = null;
 
 export const normalizeQuestKey = (key: string | null | undefined) => (key ?? "").trim();
-export const normalizeQuestChoiceKey = (key: string | null | undefined) => (key ?? "").trim();
 
-const cleanStringList = (values: readonly unknown[] | null | undefined): string[] =>
-    (values ?? []).filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean);
-
-const cleanNullableString = (value: unknown): string | null => {
+const cleanString = (value: unknown): string | null => {
     const text = typeof value === "string" ? value.trim() : "";
     return text || null;
 };
 
-const cleanNullableNumber = (value: unknown): number | null =>
+const cleanRequiredString = (value: unknown): string => cleanString(value) ?? "";
+
+const cleanNumber = (value: unknown): number | null =>
     typeof value === "number" && Number.isFinite(value) ? value : null;
 
-const normalizeRequirement = (requirement: QuestChronicleRequirementDto): QuestChronicleRequirementDto => ({
-    requirementKey: cleanNullableString(requirement.requirementKey),
-    kind: cleanNullableString(requirement.kind),
-    phase: cleanNullableString(requirement.phase),
-    polarity: cleanNullableString(requirement.polarity),
-    displayText: cleanNullableString(requirement.displayText),
-    referenceKey: cleanNullableString(requirement.referenceKey),
-    referenceKind: cleanNullableString(requirement.referenceKind),
-    referenceDisplayName: cleanNullableString(requirement.referenceDisplayName),
-    targetRole: cleanNullableString(requirement.targetRole),
-    targetLabel: cleanNullableString(requirement.targetLabel),
-    state: cleanNullableString(requirement.state),
-    requiredCount: cleanNullableNumber(requirement.requiredCount),
-    durationTurns: cleanNullableNumber(requirement.durationTurns),
+const cleanBoolean = (value: unknown): boolean | null =>
+    typeof value === "boolean" ? value : null;
+
+const cleanStringList = (values: readonly unknown[] | null | undefined): string[] =>
+    (values ?? [])
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean);
+
+const normalizeRequirement = (requirement: any) => ({
+    requirementKey: cleanRequiredString(requirement?.requirementKey),
+    kind: cleanRequiredString(requirement?.kind),
+    displayText: cleanRequiredString(requirement?.displayText),
+    polarity: cleanString(requirement?.polarity),
+    groupLabel: cleanString(requirement?.groupLabel),
+    groupOrder: cleanNumber(requirement?.groupOrder),
+    targetRole: cleanString(requirement?.targetRole),
+    targetLabel: cleanString(requirement?.targetLabel),
+    requiredCount: cleanNumber(requirement?.requiredCount),
+    durationTurns: cleanNumber(requirement?.durationTurns),
+    state: cleanString(requirement?.state),
+    referenceKind: cleanString(requirement?.referenceKind),
+    referenceKey: cleanString(requirement?.referenceKey),
+    referenceDisplayName: cleanString(requirement?.referenceDisplayName),
+    codexEntryKey: cleanString(requirement?.codexEntryKey),
 });
 
-const normalizeReward = (reward: QuestChronicleRewardDto): QuestChronicleRewardDto => ({
-    rewardKey: cleanNullableString(reward.rewardKey),
-    sourceRewardKeys: cleanStringList(reward.sourceRewardKeys),
-    kind: cleanNullableString(reward.kind),
-    displayText: cleanNullableString(reward.displayText),
-    formulaText: cleanNullableString(reward.formulaText),
-    amount: cleanNullableNumber(reward.amount),
-    assetKind: cleanNullableString(reward.assetKind),
-    assetKey: cleanNullableString(reward.assetKey),
-    assetDisplayName: cleanNullableString(reward.assetDisplayName),
-    targetScopeLabel: cleanNullableString(reward.targetScopeLabel),
+const normalizeReward = (reward: any) => ({
+    rewardKey: cleanRequiredString(reward?.rewardKey),
+    kind: cleanRequiredString(reward?.kind),
+    displayText: cleanRequiredString(reward?.displayText),
+    amount: cleanNumber(reward?.amount),
+    groupLabel: cleanString(reward?.groupLabel),
+    groupOrder: cleanNumber(reward?.groupOrder),
+    formulaText: cleanString(reward?.formulaText),
+    assetKind: cleanString(reward?.assetKind),
+    assetKey: cleanString(reward?.assetKey),
+    assetDisplayName: cleanString(reward?.assetDisplayName),
+    referenceKind: cleanString(reward?.referenceKind),
+    referenceKey: cleanString(reward?.referenceKey),
+    referenceDisplayName: cleanString(reward?.referenceDisplayName),
+    codexEntryKey: cleanString(reward?.codexEntryKey),
+    targetScopeLabel: cleanString(reward?.targetScopeLabel),
 });
 
-const normalizeObjective = (objective: QuestChronicleObjectiveDto): QuestChronicleObjectiveDto => ({
-    objectiveText: cleanNullableString(objective.objectiveText),
-    sourceQuestKey: cleanNullableString(objective.sourceQuestKey),
-    choiceKey: normalizeQuestChoiceKey(objective.choiceKey),
-    stepIndex: cleanNullableNumber(objective.stepIndex),
-    descriptionLines: cleanStringList(objective.descriptionLines),
-    completionLines: cleanStringList(objective.completionLines),
-    failureLines: cleanStringList(objective.failureLines),
-    forbiddenLines: cleanStringList(objective.forbiddenLines),
-    selectionLines: cleanStringList(objective.selectionLines),
-    rewardLines: cleanStringList(objective.rewardLines),
-    completionRequirements: (objective.completionRequirements ?? []).map(normalizeRequirement),
-    failureRequirements: (objective.failureRequirements ?? []).map(normalizeRequirement),
-    forbiddenRequirements: (objective.forbiddenRequirements ?? []).map(normalizeRequirement),
-    selectionRequirements: (objective.selectionRequirements ?? []).map(normalizeRequirement),
-    rewards: (objective.rewards ?? []).map(normalizeReward),
+const normalizeEntry = (entry: any): QuestExplorerEntry => ({
+    entryKey: normalizeQuestKey(entry?.entryKey),
+    title: cleanRequiredString(entry?.title),
+    summaryLines: cleanStringList(entry?.summaryLines),
+    questType: cleanString(entry?.questType),
+    isMandatory: cleanBoolean(entry?.isMandatory),
+    isKeyNarrativeBeat: cleanBoolean(entry?.isKeyNarrativeBeat),
+    aliases: cleanStringList(entry?.aliases),
+    navigation: {
+        factionKey: cleanString(entry?.navigation?.factionKey),
+        factionName: cleanString(entry?.navigation?.factionName),
+        questLineKey: cleanString(entry?.navigation?.questLineKey),
+        questLineName: cleanString(entry?.navigation?.questLineName),
+        chapter: cleanNumber(entry?.navigation?.chapter),
+        chapterLabel: cleanString(entry?.navigation?.chapterLabel),
+        step: cleanNumber(entry?.navigation?.step),
+        stepLabel: cleanString(entry?.navigation?.stepLabel),
+        sequenceIndex: cleanNumber(entry?.navigation?.sequenceIndex) ?? Number.MAX_SAFE_INTEGER,
+        chapterOrder: cleanNumber(entry?.navigation?.chapterOrder),
+        stepOrder: cleanNumber(entry?.navigation?.stepOrder),
+        branchGroupKey: cleanString(entry?.navigation?.branchGroupKey),
+        branchLabel: cleanString(entry?.navigation?.branchLabel),
+        branchOrder: cleanNumber(entry?.navigation?.branchOrder),
+        isBranchStart: cleanBoolean(entry?.navigation?.isBranchStart),
+        isBranchEnd: cleanBoolean(entry?.navigation?.isBranchEnd),
+        previousEntryKeys: cleanStringList(entry?.navigation?.previousEntryKeys),
+        nextEntryKeys: cleanStringList(entry?.navigation?.nextEntryKeys),
+        failureEntryKeys: cleanStringList(entry?.navigation?.failureEntryKeys),
+        convergesIntoEntryKeys: cleanStringList(entry?.navigation?.convergesIntoEntryKeys),
+    },
+    loreView: {
+        sections: (entry?.loreView?.sections ?? []).map((section: any) => ({
+            sectionKey: cleanRequiredString(section?.sectionKey),
+            phase: cleanRequiredString(section?.phase),
+            choiceKey: cleanString(section?.choiceKey),
+            stepIndex: cleanNumber(section?.stepIndex),
+            objectiveKey: cleanString(section?.objectiveKey),
+            lines: (section?.lines ?? []).map((line: any) => ({
+                speakerLabel: cleanString(line?.speakerLabel),
+                role: cleanRequiredString(line?.role),
+                text: cleanRequiredString(line?.text),
+            })),
+        })),
+    },
+    strategyView: {
+        objectives: (entry?.strategyView?.objectives ?? []).map((objective: any) => ({
+            objectiveKey: cleanString(objective?.objectiveKey),
+            text: cleanRequiredString(objective?.text),
+            phase: cleanString(objective?.phase),
+            requirements: (objective?.requirements ?? []).map(normalizeRequirement),
+            rewards: (objective?.rewards ?? []).map(normalizeReward),
+        })),
+    },
+    branches: (entry?.branches ?? []).map((branch: any) => ({
+        branchKey: cleanRequiredString(branch?.branchKey),
+        choiceKey: cleanString(branch?.choiceKey),
+        label: cleanRequiredString(branch?.label),
+        orderIndex: cleanNumber(branch?.orderIndex),
+        groupKey: cleanString(branch?.groupKey),
+        groupLabel: cleanString(branch?.groupLabel),
+        nextEntryKeys: cleanStringList(branch?.nextEntryKeys),
+        failureEntryKeys: cleanStringList(branch?.failureEntryKeys),
+        convergesIntoEntryKeys: cleanStringList(branch?.convergesIntoEntryKeys),
+        lore: branch?.lore
+            ? { outcomePreviewLines: cleanStringList(branch.lore.outcomePreviewLines) }
+            : null,
+        strategy: branch?.strategy
+            ? {
+                conditions: cleanStringList(branch.strategy.conditions),
+                requirements: (branch.strategy.requirements ?? []).map(normalizeRequirement),
+                rewards: (branch.strategy.rewards ?? []).map(normalizeReward),
+            }
+            : null,
+    })),
+    quality: entry?.quality ? { warnings: cleanStringList(entry.quality.warnings) } : null,
 });
 
-const normalizePath = (path: QuestChroniclePathDto): QuestChroniclePathDto => ({
-    pathKey: normalizeQuestChoiceKey(path.pathKey),
-    label: cleanNullableString(path.label),
-    labelSource: cleanNullableString(path.labelSource),
-    choiceOrdinal: cleanNullableNumber(path.choiceOrdinal),
-    sourceQuestKey: cleanNullableString(path.sourceQuestKey),
-    choiceKey: normalizeQuestChoiceKey(path.choiceKey),
-    conditionLines: cleanStringList(path.conditionLines),
-    rewardLines: cleanStringList(path.rewardLines),
-    nextEntryKeys: cleanStringList(path.nextEntryKeys).map(normalizeQuestKey),
-    failureEntryKeys: cleanStringList(path.failureEntryKeys).map(normalizeQuestKey),
-    requirements: (path.requirements ?? []).map(normalizeRequirement),
-    rewards: (path.rewards ?? []).map(normalizeReward),
-});
-
-const normalizeTranscriptLine = (line: QuestChronicleTranscriptLineDto): QuestChronicleTranscriptLineDto => ({
-    lineIndex: cleanNullableNumber(line.lineIndex),
-    role: cleanNullableString(line.role),
-    speakerLabel: cleanNullableString(line.speakerLabel),
-    text: cleanNullableString(line.text),
-});
-
-const normalizeTranscriptBlock = (block: QuestChronicleTranscriptBlockDto): QuestChronicleTranscriptBlockDto => ({
-    dialogKey: cleanNullableString(block.dialogKey),
-    phase: cleanNullableString(block.phase),
-    sourceQuestKey: cleanNullableString(block.sourceQuestKey),
-    choiceKey: normalizeQuestChoiceKey(block.choiceKey),
-    stepIndex: cleanNullableNumber(block.stepIndex),
-    lines: (block.lines ?? []).map(normalizeTranscriptLine),
-});
-
-const normalizeEntry = (entry: QuestChronicleEntryDto): QuestChronicleEntryDto => ({
-    entryKey: normalizeQuestKey(entry.entryKey),
-    primaryQuestKey: cleanNullableString(entry.primaryQuestKey),
-    sourceQuestKeys: cleanStringList(entry.sourceQuestKeys).map(normalizeQuestKey),
-    groupingKey: cleanNullableString(entry.groupingKey),
-    groupingReason: cleanNullableString(entry.groupingReason),
-    title: cleanNullableString(entry.title),
-    summaryLines: cleanStringList(entry.summaryLines),
-    questType: cleanNullableString(entry.questType),
-    mandatory: Boolean(entry.mandatory),
-    keyNarrativeBeat: Boolean(entry.keyNarrativeBeat),
-    factionKey: cleanNullableString(entry.factionKey),
-    questLineKey: cleanNullableString(entry.questLineKey),
-    chapter: cleanNullableNumber(entry.chapter),
-    chapterLabel: cleanNullableString(entry.chapterLabel),
-    step: cleanNullableNumber(entry.step),
-    stepLabel: cleanNullableString(entry.stepLabel),
-    branchKey: cleanNullableString(entry.branchKey),
-    branchLabel: cleanNullableString(entry.branchLabel),
-    nextEntryKeys: cleanStringList(entry.nextEntryKeys).map(normalizeQuestKey),
-    failureEntryKeys: cleanStringList(entry.failureEntryKeys).map(normalizeQuestKey),
-    convergesIntoEntryKeys: cleanStringList(entry.convergesIntoEntryKeys).map(normalizeQuestKey),
-    objectives: (entry.objectives ?? []).map(normalizeObjective),
-    paths: (entry.paths ?? []).map(normalizePath),
-    transcriptBlocks: (entry.transcriptBlocks ?? []).map(normalizeTranscriptBlock),
-});
-
-const normalizeChronicle = (chronicle: QuestChronicleDto) => {
-    const entries = normalizeCollection((chronicle.entries ?? []).map(normalizeEntry), (entry) => entry.entryKey, {
-        normalizeKey: normalizeQuestKey,
+const sortEntries = (entries: QuestExplorerEntry[]) =>
+    [...entries].sort((left, right) => {
+        const sequenceDelta = left.navigation.sequenceIndex - right.navigation.sequenceIndex;
+        if (sequenceDelta !== 0) return sequenceDelta;
+        return left.entryKey.localeCompare(right.entryKey);
     });
-    const entriesByKey = { ...entries.byKey };
 
-    for (const entry of entries.items) {
-        for (const sourceQuestKey of entry.sourceQuestKeys) {
-            const key = normalizeQuestKey(sourceQuestKey);
-            if (key && !entriesByKey[key]) entriesByKey[key] = entry;
+const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => {
+    const entries = sortEntries((questExplorer.entries ?? []).map(normalizeEntry).filter((entry) => entry.entryKey));
+    const entriesByKey: Record<string, QuestExplorerEntry> = {};
+    const aliasToEntryKey: Record<string, string> = {};
+    const duplicateEntryKeys: string[] = [];
+    const duplicateAliases: string[] = [];
+
+    for (const entry of entries) {
+        if (entriesByKey[entry.entryKey]) {
+            duplicateEntryKeys.push(entry.entryKey);
+            continue;
         }
-        if (entry.primaryQuestKey) {
-            const key = normalizeQuestKey(entry.primaryQuestKey);
-            if (key && !entriesByKey[key]) entriesByKey[key] = entry;
+        entriesByKey[entry.entryKey] = entry;
+    }
+
+    for (const entry of entries) {
+        for (const alias of entry.aliases) {
+            const normalizedAlias = normalizeQuestKey(alias);
+            if (!normalizedAlias || normalizedAlias === entry.entryKey) continue;
+            if (aliasToEntryKey[normalizedAlias] && aliasToEntryKey[normalizedAlias] !== entry.entryKey) {
+                duplicateAliases.push(normalizedAlias);
+                continue;
+            }
+            aliasToEntryKey[normalizedAlias] = entry.entryKey;
         }
     }
 
     return {
-        chronicle: {
-            ...chronicle,
-            entries: entries.items,
+        questExplorer: {
+            ...questExplorer,
+            exportKind: "quest_explorer" as const,
+            schemaVersion: "quest_explorer.v3" as const,
+            entries,
         },
         entries,
         entriesByKey,
+        aliasToEntryKey,
+        duplicateEntryKeys,
+        duplicateAliases,
     };
 };
 
+const initialFilters: QuestExplorerFilters = {
+    searchText: "",
+    faction: QUEST_FILTER_ALL,
+    questLine: QUEST_FILTER_ALL,
+    questType: QUEST_FILTER_ALL,
+};
+
 const initialState = {
-    chronicle: null as QuestChronicleDto | null,
-    entries: [] as QuestChronicleEntryDto[],
-    entriesByKey: {} as Record<string, QuestChronicleEntryDto>,
-    entryKeys: [] as string[],
+    questExplorer: null as QuestExplorerResponse | null,
+    entries: [] as QuestExplorerEntry[],
+    entriesByKey: {} as Record<string, QuestExplorerEntry>,
+    orderedEntryKeys: [] as string[],
+    aliasToEntryKey: {} as Record<string, string>,
     duplicateEntryKeys: [] as string[],
+    duplicateAliases: [] as string[],
+    selectedEntryKey: null as string | null,
+    mode: "lore" as QuestExplorerMode,
+    filters: initialFilters,
     loading: false,
     loaded: false,
     error: null as string | null,
@@ -197,7 +258,7 @@ const initialState = {
 };
 
 const formatLoadError = (reason: unknown) =>
-    `Failed to load quests: ${(reason as Error)?.message ?? String(reason)}`;
+    `Failed to load quest explorer: ${(reason as Error)?.message ?? String(reason)}`;
 
 export const useQuestStore = create<QuestStore>((set, get) => ({
     ...initialState,
@@ -213,20 +274,29 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
 
         inflightLoad = (async () => {
             try {
-                const normalized = normalizeChronicle(await apiClient.getQuestChronicle());
-                set({
-                    chronicle: normalized.chronicle,
-                    entries: normalized.entries.items,
-                    entriesByKey: normalized.entriesByKey,
-                    entryKeys: normalized.entries.keys,
-                    duplicateEntryKeys: normalized.entries.duplicateKeys,
-                    loading: false,
-                    loaded: true,
-                    error: null,
-                    lastLoadedAt: new Date().toISOString(),
+                const normalized = normalizeQuestExplorer(await apiClient.getQuestExplorer());
+                set((current) => {
+                    const selectedEntryKey = current.selectedEntryKey && normalized.entriesByKey[current.selectedEntryKey]
+                        ? current.selectedEntryKey
+                        : normalized.entries[0]?.entryKey ?? null;
+
+                    return {
+                        questExplorer: normalized.questExplorer,
+                        entries: normalized.entries,
+                        entriesByKey: normalized.entriesByKey,
+                        orderedEntryKeys: normalized.entries.map((entry) => entry.entryKey),
+                        aliasToEntryKey: normalized.aliasToEntryKey,
+                        duplicateEntryKeys: normalized.duplicateEntryKeys,
+                        duplicateAliases: normalized.duplicateAliases,
+                        selectedEntryKey,
+                        loading: false,
+                        loaded: true,
+                        error: null,
+                        lastLoadedAt: new Date().toISOString(),
+                    };
                 });
             } catch (err) {
-                console.error("Failed to fetch quest chronicle from API.", err);
+                console.error("Failed to fetch quest explorer from API.", err);
                 set({
                     ...initialState,
                     loaded: false,
@@ -254,18 +324,89 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
         set(initialState);
     },
 
-    getQuestByKey: (key) => {
-        const normalizedKey = normalizeQuestKey(key);
-        if (!normalizedKey) return undefined;
-        return get().entriesByKey[normalizedKey];
+    setSelectedEntryKey: (key) => {
+        const resolved = get().resolveEntryKey(key);
+        set({ selectedEntryKey: resolved });
+    },
+
+    setMode: (mode) => set({ mode }),
+
+    setFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
+
+    clearFilters: () => set({ filters: initialFilters }),
+
+    resolveEntryKey: (keyOrAlias) => {
+        const key = normalizeQuestKey(keyOrAlias);
+        if (!key) return null;
+        const state = get();
+        if (state.entriesByKey[key]) return key;
+        return state.aliasToEntryKey[key] ?? null;
+    },
+
+    getQuestByKey: (keyOrAlias) => {
+        const resolved = get().resolveEntryKey(keyOrAlias);
+        return resolved ? get().entriesByKey[resolved] : undefined;
     },
 }));
 
+const searchableText = (entry: QuestExplorerEntry): string => [
+    entry.entryKey,
+    entry.title,
+    entry.questType,
+    entry.navigation.factionKey,
+    entry.navigation.factionName,
+    entry.navigation.questLineKey,
+    entry.navigation.questLineName,
+    entry.navigation.chapterLabel,
+    entry.navigation.stepLabel,
+    entry.navigation.branchLabel,
+    ...entry.aliases,
+    ...entry.summaryLines,
+    ...entry.loreView.sections.flatMap((section) => [
+        section.phase,
+        section.choiceKey,
+        ...section.lines.flatMap((line) => [line.speakerLabel, line.role, line.text]),
+    ]),
+    ...entry.strategyView.objectives.flatMap((objective) => [
+        objective.text,
+        objective.phase,
+        ...objective.requirements.map((requirement) => requirement.displayText),
+        ...objective.rewards.map((reward) => reward.displayText),
+    ]),
+].filter(Boolean).join(" ").toLowerCase();
+
+export const selectQuestExplorer = (state: QuestStore) => state.questExplorer;
 export const selectQuests = (state: QuestStore) => state.entries;
 export const selectQuestsByKey = (state: QuestStore) => state.entriesByKey;
-export const selectQuestKeys = (state: QuestStore) => state.entryKeys;
+export const selectQuestKeys = (state: QuestStore) => state.orderedEntryKeys;
 export const selectQuestLoading = (state: QuestStore) => state.loading;
 export const selectQuestLoaded = (state: QuestStore) => state.loaded;
 export const selectQuestError = (state: QuestStore) => state.error;
-export const selectQuestByKey = (key: string) => (state: QuestStore) =>
-    state.entriesByKey[normalizeQuestKey(key)];
+export const selectSelectedQuest = (state: QuestStore) =>
+    state.selectedEntryKey ? state.entriesByKey[state.selectedEntryKey] : null;
+export const selectQuestByKey = (key: string) => (state: QuestStore) => state.getQuestByKey(key);
+
+export const filterQuestEntries = (
+    entries: QuestExplorerEntry[],
+    filters: QuestExplorerFilters
+) => {
+    const search = filters.searchText.trim().toLowerCase();
+
+    return entries.filter((entry) => {
+        if (filters.faction !== QUEST_FILTER_ALL) {
+            const faction = entry.navigation.factionKey ?? entry.navigation.factionName ?? "";
+            if (faction !== filters.faction) return false;
+        }
+        if (filters.questLine !== QUEST_FILTER_ALL) {
+            const questLine = entry.navigation.questLineKey ?? entry.navigation.questLineName ?? "";
+            if (questLine !== filters.questLine) return false;
+        }
+        if (filters.questType !== QUEST_FILTER_ALL && entry.questType !== filters.questType) {
+            return false;
+        }
+        return !search || searchableText(entry).includes(search);
+    });
+};
+
+export const selectVisibleQuestEntries = (state: QuestStore) =>
+    filterQuestEntries(state.entries, state.filters);

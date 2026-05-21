@@ -1,14 +1,17 @@
 package ewshop.api.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ewshop.facade.dto.importing.*;
+import ewshop.facade.dto.importing.ImportCountsDto;
+import ewshop.facade.dto.importing.ImportDiagnosticsDto;
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
-import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
-import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
-import ewshop.facade.dto.importing.quests.QuestChronicleImportBatchDto;
-import ewshop.facade.dto.importing.tech.TechImportBatchDto;
-import ewshop.facade.dto.importing.units.UnitImportBatchDto;
-import ewshop.facade.interfaces.*;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportEntryDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportLoreViewDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportNavigationDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportStrategyViewDto;
+import ewshop.facade.interfaces.CodexImportAdminFacade;
+import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -25,13 +28,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class ImportAdminControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private RecordingQuestChronicleImportAdminFacade questFacade;
+    private RecordingQuestExplorerImportAdminFacade questFacade;
     private RecordingCodexImportAdminFacade codexFacade;
     private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
-        questFacade = new RecordingQuestChronicleImportAdminFacade();
+        questFacade = new RecordingQuestExplorerImportAdminFacade();
         codexFacade = new RecordingCodexImportAdminFacade();
         ImportAdminController controller = new ImportAdminController(
                 file -> okSummary("techs"),
@@ -47,10 +50,10 @@ class ImportAdminControllerTest {
     }
 
     @Test
-    void importQuestChronicle_returnsOk_andCallsFacade_whenPayloadHasEntries() throws Exception {
-        QuestChronicleImportBatchDto payload = questPayload(List.of(questEntry()));
+    void importQuestExplorer_returnsOk_andCallsFacade_whenPayloadHasEntries() throws Exception {
+        QuestExplorerImportBatchDto payload = questPayload(List.of(questEntry()));
 
-        mockMvc.perform(post("/api/admin/import/quests/chronicle")
+        mockMvc.perform(post("/api/admin/import/quests/explorer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isOk());
@@ -59,10 +62,10 @@ class ImportAdminControllerTest {
     }
 
     @Test
-    void importQuestChronicle_returnsBadRequest_andDoesNotCallFacade_whenEntriesAreEmpty() throws Exception {
-        QuestChronicleImportBatchDto payload = questPayload(List.of());
+    void importQuestExplorer_returnsBadRequest_andDoesNotCallFacade_whenEntriesAreEmpty() throws Exception {
+        QuestExplorerImportBatchDto payload = questPayload(List.of());
 
-        mockMvc.perform(post("/api/admin/import/quests/chronicle")
+        mockMvc.perform(post("/api/admin/import/quests/explorer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest());
@@ -71,8 +74,8 @@ class ImportAdminControllerTest {
     }
 
     @Test
-    void importLegacyPairedQuestEndpoint_isNotMapped() throws Exception {
-        mockMvc.perform(post("/api/admin/import/quests")
+    void importTemporaryChronicleEndpoint_isNotMapped() throws Exception {
+        mockMvc.perform(post("/api/admin/import/quests/chronicle")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isNotFound());
@@ -92,39 +95,52 @@ class ImportAdminControllerTest {
         assertNull(codexFacade.lastDto);
     }
 
-    private static QuestChronicleImportBatchDto questPayload(List<QuestChronicleImportBatchDto.EntryDto> entries) {
-        return new QuestChronicleImportBatchDto(
-                "Endless Legend 2", "0.80", "0.1.0", "now", "quest_chronicle", "1", "questChronicle",
+    private static QuestExplorerImportBatchDto questPayload(List<QuestExplorerImportEntryDto> entries) {
+        return new QuestExplorerImportBatchDto(
+                "0.80",
+                "0.1.0",
+                "now",
+                "quest_explorer",
+                "quest_explorer.v3",
                 entries
         );
     }
 
-    private static QuestChronicleImportBatchDto.EntryDto questEntry() {
-        return new QuestChronicleImportBatchDto.EntryDto(
+    private static QuestExplorerImportEntryDto questEntry() {
+        return new QuestExplorerImportEntryDto(
                 "Quest_A",
-                "Quest_A",
-                List.of("Quest_A"),
-                null,
-                null,
                 "A Quest",
                 List.of("Summary"),
                 "Curiosity",
                 true,
                 false,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
+                List.of("Source_A"),
+                new QuestExplorerImportNavigationDto(
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        1,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                ),
+                new QuestExplorerImportLoreViewDto(List.of()),
+                new QuestExplorerImportStrategyViewDto(List.of()),
                 List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of()
+                null
         );
     }
 
@@ -138,13 +154,13 @@ class ImportAdminControllerTest {
         );
     }
 
-    private static final class RecordingQuestChronicleImportAdminFacade implements QuestChronicleImportAdminFacade {
-        private QuestChronicleImportBatchDto lastDto;
+    private static final class RecordingQuestExplorerImportAdminFacade implements QuestExplorerImportAdminFacade {
+        private QuestExplorerImportBatchDto lastDto;
 
         @Override
-        public ImportSummaryDto importQuestChronicle(QuestChronicleImportBatchDto file) {
+        public ImportSummaryDto importQuestExplorer(QuestExplorerImportBatchDto file) {
             lastDto = file;
-            return okSummary("quest_chronicle");
+            return okSummary("quest_explorer");
         }
     }
 

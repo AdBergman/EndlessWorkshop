@@ -140,7 +140,7 @@ export function AppRoutes() {
                 />
 
                 <Route
-                    path="quests"
+                    path="quests/*"
                     element={
                         <SeoRoute routeKey="quests">
                             <LazyRoute>

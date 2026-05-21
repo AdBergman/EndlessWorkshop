@@ -121,22 +121,21 @@ function fixtureFile(relativePath: string, fallback: unknown) {
     return createJsonFile(basename(relativePath), text);
 }
 
-function questChroniclePayload() {
+function questExplorerPayload() {
     return {
-        exportKind: "quest_chronicle",
+        exportKind: "quest_explorer",
+        schemaVersion: "quest_explorer.v3",
         entries: [
             {
                 entryKey: "Quest_A",
-                primaryQuestKey: "Quest_A",
-                sourceQuestKeys: ["Quest_A"],
                 title: "A Quest",
             },
         ],
     };
 }
 
-function questChronicleFile() {
-    return createJsonFile("ewshop_quest_chronicle_export_0.80.json", JSON.stringify(questChroniclePayload()));
+function questExplorerFile() {
+    return createJsonFile("ewshop_quest_explorer_export_0.80.json", JSON.stringify(questExplorerPayload()));
 }
 
 async function waitForUnlockedPage() {
@@ -304,32 +303,32 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");
     });
 
-    it("bulk-imports quest chronicle as one supported raw export", async () => {
+    it("bulk-imports quest explorer as one supported raw export", async () => {
         const user = userEvent.setup();
-        const chronicle = questChronicleFile();
+        const explorer = questExplorerFile();
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
-        dropFiles(0, [chronicle]);
+        dropFiles(0, [explorer]);
 
-        await screen.findByText(chronicle.name);
-        expect(screen.getByText("quest_chronicle")).toBeInTheDocument();
-        expect(screen.queryByText("Unsupported raw export kind \"quest_chronicle\".")).not.toBeInTheDocument();
+        await screen.findByText(explorer.name);
+        expect(screen.getByText("quest_explorer")).toBeInTheDocument();
+        expect(screen.queryByText("Unsupported raw export kind \"quest_explorer\".")).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
 
         await screen.findByText(/1 supported export file\(s\) imported\. 0 unsupported file\(s\) skipped\./i);
 
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
-        expect(postCalls.map(([url]) => url)).toEqual(["/api/admin/import/quests/chronicle"]);
-        expect(JSON.parse(String(postCalls[0][1]?.body))).toEqual(questChroniclePayload());
+        expect(postCalls.map(([url]) => url)).toEqual(["/api/admin/import/quests/explorer"]);
+        expect(JSON.parse(String(postCalls[0][1]?.body))).toEqual(questExplorerPayload());
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("quests");
     });
 
-    it("shows an error when multiple quest chronicle files are dropped", async () => {
-        const first = questChronicleFile();
-        const second = createJsonFile("ewshop_quest_chronicle_export_copy.json", JSON.stringify(questChroniclePayload()));
+    it("shows an error when multiple quest explorer files are dropped", async () => {
+        const first = questExplorerFile();
+        const second = createJsonFile("ewshop_quest_explorer_export_copy.json", JSON.stringify(questExplorerPayload()));
 
         renderAdminImportPage();
         await waitForUnlockedPage();
@@ -337,11 +336,11 @@ describe("AdminImportPage", () => {
         dropFiles(0, [first, second]);
 
         await screen.findByText(first.name);
-        expect(screen.getAllByText("Quest import requires exactly one quest_chronicle file; found 2 file(s).").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Quest import requires exactly one quest_explorer file; found 2 file(s).").length).toBeGreaterThan(0);
         expect(screen.queryByRole("button", { name: /^Import supported exports$/i })).not.toBeInTheDocument();
     });
 
-    it("bulk-imports quest chronicle alongside normal supported raw exports", async () => {
+    it("bulk-imports quest explorer alongside normal supported raw exports", async () => {
         const user = userEvent.setup();
         const units = createJsonFile("ewshop_units_export_0.80.json", JSON.stringify({
             exportKind: "units",
@@ -351,14 +350,14 @@ describe("AdminImportPage", () => {
             exportKind: "tech",
             techs: [{ techKey: "Tech_Test" }],
         }));
-        const chronicle = questChronicleFile();
+        const explorer = questExplorerFile();
 
         renderAdminImportPage();
         await waitForUnlockedPage();
 
-        dropFiles(0, [units, chronicle, tech]);
+        dropFiles(0, [units, explorer, tech]);
 
-        await screen.findByText(chronicle.name);
+        await screen.findByText(explorer.name);
 
         await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
 
@@ -367,10 +366,10 @@ describe("AdminImportPage", () => {
         const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
         expect(postCalls.map(([url]) => url)).toEqual([
             "/api/admin/import/units",
-            "/api/admin/import/quests/chronicle",
+            "/api/admin/import/quests/explorer",
             "/api/admin/import/techs",
         ]);
-        expect(JSON.parse(String(postCalls[1][1]?.body))).toEqual(questChroniclePayload());
+        expect(JSON.parse(String(postCalls[1][1]?.body))).toEqual(questExplorerPayload());
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("units");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("quests");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");

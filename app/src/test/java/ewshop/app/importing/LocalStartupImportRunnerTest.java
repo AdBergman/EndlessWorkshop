@@ -7,13 +7,13 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
-import ewshop.facade.dto.importing.quests.QuestChronicleImportBatchDto;
+import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
-import ewshop.facade.interfaces.QuestChronicleImportAdminFacade;
+import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
@@ -105,25 +105,23 @@ class LocalStartupImportRunnerTest {
     }
 
     @Test
-    void importsQuestChronicleAsSingleStartupImport(CapturedOutput output) throws Exception {
+    void importsQuestExplorerAsSingleStartupImport(CapturedOutput output) throws Exception {
         Files.createDirectories(tempDir.resolve("exports"));
         Files.createDirectories(tempDir.resolve("codex"));
-        Files.writeString(tempDir.resolve("exports/ewshop_quest_chronicle_export_0.80.json"), """
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_explorer_export_0.80.json"), """
                 {
-                  "exportKind":"quest_chronicle",
+                  "exportKind":"quest_explorer",
+                  "schemaVersion":"quest_explorer.v3",
                   "entries":[
                     {
                       "entryKey":"Quest_A",
                       "title":"A Quest",
-                      "sourceQuestKeys":["Source_Quest_A"],
-                      "objectives":[{"objectiveText":"Do the thing"}],
-                      "transcriptBlocks":[
-                        {
-                          "dialogKey":"Dialog_A",
-                          "phase":"start",
-                          "lines":[{"lineIndex":0,"role":"narrator","text":"Line"}]
-                        }
-                      ]
+                      "summaryLines":["Summary"],
+                      "aliases":["Source_Quest_A"],
+                      "navigation":{"sequenceIndex":1,"previousEntryKeys":[],"nextEntryKeys":[],"failureEntryKeys":[],"convergesIntoEntryKeys":[]},
+                      "loreView":{"sections":[]},
+                      "strategyView":{"objectives":[]},
+                      "branches":[]
                     }
                   ]
                 }
@@ -135,23 +133,23 @@ class LocalStartupImportRunnerTest {
         runner.runStartupImport();
 
         assertThat(facades.questCalls).isEqualTo(1);
-        assertThat(facades.questDto.exportKind()).isEqualTo("quest_chronicle");
+        assertThat(facades.questDto.exportKind()).isEqualTo("quest_explorer");
         assertThat(facades.questDto.entries()).hasSize(1);
         assertThat(facades.totalCalls()).isEqualTo(1);
         assertThat(output)
                 .contains("Local startup import loaded")
-                .contains("ewshop_quest_chronicle_export_0.80.json")
-                .contains("as quests");
+                .contains("ewshop_quest_explorer_export_0.80.json")
+                .contains("as quest_explorer");
     }
 
     @Test
-    void questStartupImportFailsWhenMultipleChronicleFilesArePresent(CapturedOutput output) throws Exception {
+    void questStartupImportFailsWhenMultipleExplorerFilesArePresent(CapturedOutput output) throws Exception {
         Files.createDirectories(tempDir.resolve("exports"));
-        Files.writeString(tempDir.resolve("exports/ewshop_quest_chronicle_export_0.80.json"), """
-                {"exportKind":"quest_chronicle","entries":[{"entryKey":"Quest_A"}]}
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_explorer_export_0.80.json"), """
+                {"exportKind":"quest_explorer","schemaVersion":"quest_explorer.v3","entries":[{"entryKey":"Quest_A"}]}
                 """);
-        Files.writeString(tempDir.resolve("exports/ewshop_quest_chronicle_export_0.81.json"), """
-                {"exportKind":"quest_chronicle","entries":[{"entryKey":"Quest_B"}]}
+        Files.writeString(tempDir.resolve("exports/ewshop_quest_explorer_export_0.81.json"), """
+                {"exportKind":"quest_explorer","schemaVersion":"quest_explorer.v3","entries":[{"entryKey":"Quest_B"}]}
                 """);
 
         RecordingFacades facades = new RecordingFacades();
@@ -161,8 +159,8 @@ class LocalStartupImportRunnerTest {
 
         assertThat(facades.totalCalls()).isZero();
         assertThat(output)
-                .contains("Local startup import failed for quest_chronicle file")
-                .contains("requires exactly one quest_chronicle file")
+                .contains("Local startup import failed for quest_explorer file")
+                .contains("requires exactly one quest_explorer file")
                 .contains("Local startup import finished: 0 imported, 0 skipped, 1 failed.");
     }
 
@@ -289,7 +287,7 @@ class LocalStartupImportRunnerTest {
             ImprovementImportAdminFacade,
             UnitImportAdminFacade,
             CodexImportAdminFacade,
-            QuestChronicleImportAdminFacade {
+            QuestExplorerImportAdminFacade {
 
         private int techCalls;
         private int districtCalls;
@@ -300,7 +298,7 @@ class LocalStartupImportRunnerTest {
         private TechImportBatchDto techDto;
         private UnitImportBatchDto unitDto;
         private CodexImportBatchDto codexDto;
-        private QuestChronicleImportBatchDto questDto;
+        private QuestExplorerImportBatchDto questDto;
         private final List<String> codexKinds = new ArrayList<>();
 
         @Override
@@ -353,13 +351,13 @@ class LocalStartupImportRunnerTest {
         }
 
         @Override
-        public ImportSummaryDto importQuestChronicle(QuestChronicleImportBatchDto file) {
+        public ImportSummaryDto importQuestExplorer(QuestExplorerImportBatchDto file) {
             questCalls++;
             questDto = file;
             if (file.entries() == null || file.entries().isEmpty()) {
-                throw new IllegalArgumentException("Quest chronicle import has no entries");
+                throw new IllegalArgumentException("Quest explorer import has no entries");
             }
-            return summary("quests", file.entries().size());
+            return summary("quest_explorer", file.entries().size());
         }
 
         private int totalCalls() {
@@ -406,8 +404,8 @@ class LocalStartupImportRunnerTest {
         }
 
         @Bean
-        QuestChronicleImportAdminFacade questImportAdminFacade() {
-            return file -> summary("quests", file.entries().size());
+        QuestExplorerImportAdminFacade questImportAdminFacade() {
+            return file -> summary("quest_explorer", file.entries().size());
         }
 
     }
