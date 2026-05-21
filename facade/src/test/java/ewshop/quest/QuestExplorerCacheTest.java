@@ -23,6 +23,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QuestExplorerCacheTest {
 
     @Test
+    void readEnrichesQuestExplorerFactionDisplayNamesFromKnownKeys() {
+        QuestExplorer explorer = explorer(List.of(
+                entry(
+                        "FactionQuest_KinOfSheredyn_Chapter01_Step01",
+                        "The Missing Youth",
+                        "Faction Quest",
+                        "Faction_KinOfSheredyn",
+                        "FactionQuest_KinOfSheredyn",
+                        1,
+                        0,
+                        1
+                ),
+                entry(
+                        "MinorFaction_SpecificQuest_Noquensii01",
+                        "Artistic License",
+                        "Minor Faction Quest",
+                        "MinorFaction_Noquensii",
+                        "MinorFaction_SpecificQuest_Noquensii",
+                        null,
+                        null,
+                        2
+                )
+        ));
+        QuestExplorerReadService readService = new QuestExplorerReadService(new InMemoryQuestExplorerRepository(explorer));
+
+        QuestExplorer result = readService.getQuestExplorer();
+
+        assertThat(result.entries().getFirst().navigation().factionName()).isEqualTo("Kin");
+        assertThat(result.entries().getFirst().navigation().questLineName()).isEqualTo("Kin");
+        assertThat(result.entries().get(1).navigation().factionName()).isEqualTo("Noquensii");
+        assertThat(result.entries().get(1).navigation().questLineName()).isEqualTo("Noquensii");
+        assertThat(result.progression().questlines().getFirst().factionName()).isEqualTo("Kin");
+    }
+
+    @Test
     void importEvictsQuestExplorerReadCache() {
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(TestConfig.class)) {
             QuestExplorerReadService readService = context.getBean(QuestExplorerReadService.class);
@@ -115,47 +150,73 @@ class QuestExplorerCacheTest {
     }
 
     private static QuestExplorer explorer(String entryKey, int sequenceIndex) {
+        return explorer(List.of(entry(
+                entryKey,
+                entryKey + " Title",
+                null,
+                null,
+                null,
+                null,
+                null,
+                sequenceIndex
+        )));
+    }
+
+    private static QuestExplorer explorer(List<QuestExplorer.Entry> entries) {
         return new QuestExplorer(
                 "0.80",
                 "0.1.0",
                 "2026-05-19T00:00:00Z",
                 "quest_explorer",
                 "quest_explorer.v3",
-                List.of(new QuestExplorer.Entry(
-                        entryKey,
-                        entryKey + " Title",
-                        List.of("Summary"),
+                entries
+        );
+    }
+
+    private static QuestExplorer.Entry entry(
+            String entryKey,
+            String title,
+            String questType,
+            String factionKey,
+            String questLineKey,
+            Integer chapter,
+            Integer stepOrder,
+            int sequenceIndex
+    ) {
+        return new QuestExplorer.Entry(
+                entryKey,
+                title,
+                List.of("Summary"),
+                questType,
+                null,
+                null,
+                List.of(),
+                new QuestExplorer.Navigation(
+                        factionKey,
+                        null,
+                        questLineKey,
+                        null,
+                        chapter,
+                        chapter == null ? null : "Chapter " + chapter,
+                        stepOrder == null ? null : stepOrder + 1,
+                        stepOrder == null ? null : "Step " + (stepOrder + 1),
+                        sequenceIndex,
+                        chapter,
+                        stepOrder,
+                        null,
+                        null,
                         null,
                         null,
                         null,
                         List.of(),
-                        new QuestExplorer.Navigation(
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                sequenceIndex,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                null,
-                                List.of(),
-                                List.of(),
-                                List.of(),
-                                List.of()
-                        ),
-                        new QuestExplorer.LoreView(List.of()),
-                        new QuestExplorer.StrategyView(List.of()),
                         List.of(),
-                        null
-                ))
+                        List.of(),
+                        List.of()
+                ),
+                new QuestExplorer.LoreView(List.of()),
+                new QuestExplorer.StrategyView(List.of()),
+                List.of(),
+                null
         );
     }
 }

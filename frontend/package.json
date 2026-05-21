@@ -24,7 +24,8 @@
   "scripts": {
     "start": "vite --config vite.config.ts",
     "build": "vite build --config vite.config.ts",
-    "test": "node --loader ts-node/esm node_modules/vitest/vitest.mjs"
+    "test": "node --loader ts-node/esm node_modules/vitest/vitest.mjs",
+    "diagnostics:quests": "vite-node --config vite.config.ts scripts/quest-explorer-diagnostic.ts"
   },
   "browserslist": {
     "production": [

@@ -250,6 +250,111 @@ describe("quest rail projection", () => {
         expect(groups[0].items[0].metaLabel).toBe("2 steps");
     });
 
+    it("renders major faction progression cards with quest title and chapter metadata", () => {
+        const first = entry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter01_Step01",
+            title: "A Bitter Truth",
+            navigation: {
+                ...entry().navigation,
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                chapter: 1,
+                chapterLabel: "Chapter 1",
+                chapterOrder: 1,
+                stepOrder: 0,
+            },
+        });
+        const later = entry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter01_Step02",
+            title: "A Bitter Truth",
+            navigation: {
+                ...first.navigation,
+                sequenceIndex: 2,
+                step: 2,
+                stepOrder: 1,
+            },
+        });
+        const progression = testProgression({
+            questLineKey: "FactionQuest_KinOfSheredyn",
+            questLineFamilyKey: "FactionQuest_KinOfSheredyn",
+            questLineName: "Kin",
+            factionKey: "Faction_KinOfSheredyn",
+            factionFamilyKey: "Faction_KinOfSheredyn",
+            factionName: "Kin",
+            chapterNumber: 1,
+            chapterOrder: 1,
+            title: "Chapter 1",
+            steps: [
+                { stepNumber: 1, stepOrder: 0, title: "A Bitter Truth", detailEntryKey: first.entryKey },
+                { stepNumber: 2, stepOrder: 1, title: "A Bitter Truth", detailEntryKey: later.entryKey },
+            ],
+        });
+
+        const groups = buildQuestRailGroups([first, later], progression);
+
+        expect(groups[0].items[0].title).toBe("A Bitter Truth");
+        expect(groups[0].items[0].chapterLabel).toBe("Chapter 1");
+        expect(groups[0].items[0].metaLabel).toBe("2 steps");
+        expect(groups[0].items[0].title).not.toBe(groups[0].items[0].chapterLabel);
+    });
+
+    it("uses minor faction display names as fallback rail subtitles when available", () => {
+        const minor = entry({
+            entryKey: "MinorFaction_SpecificQuest_Noquensii01",
+            title: "Night Terrors",
+            questType: "Minor Faction Quest",
+            navigation: {
+                ...entry().navigation,
+                factionKey: "MinorFaction_Noquensii",
+                factionName: "Noquensii",
+                questLineKey: "MinorFaction_SpecificQuest_Noquensii",
+                questLineName: "Noquensii",
+                chapter: null,
+                chapterLabel: null,
+                chapterOrder: null,
+                step: null,
+                stepLabel: null,
+                stepOrder: null,
+            },
+        });
+
+        const groups = buildQuestRailGroups([minor], null);
+
+        expect(groups[0].items[0].title).toBe("Night Terrors");
+        expect(groups[0].items[0].chapterLabel).toBe("Noquensii");
+        expect(groups[0].items[0].chapterLabel).not.toBe("Minor Faction Quests");
+        expect(groups[0].items[0].metaLabel).toBe("1 step");
+    });
+
+    it("keeps world quest fallback rail subtitles on the world quest grouping", () => {
+        const world = entry({
+            entryKey: "Quest_World_Nightfall",
+            title: "A Strange Signal",
+            questType: "Curiosity",
+            navigation: {
+                ...entry().navigation,
+                factionKey: null,
+                factionName: null,
+                questLineKey: null,
+                questLineName: null,
+                chapter: null,
+                chapterLabel: null,
+                chapterOrder: null,
+                step: null,
+                stepLabel: null,
+                stepOrder: null,
+            },
+        });
+
+        const groups = buildQuestRailGroups([world], null);
+
+        expect(groups[0].items[0].title).toBe("A Strange Signal");
+        expect(groups[0].items[0].chapterLabel).toBe("World Quests");
+        expect(groups[0].items[0].metaLabel).toBe("1 step");
+    });
+
     it("does not collapse numeric questline variants unless the backend progression already did", () => {
         const base = entry({
             entryKey: "FactionQuest_Necrophage_Chapter03_Step01",

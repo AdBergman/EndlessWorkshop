@@ -308,7 +308,7 @@ const sortEntries = (entries: QuestExplorerEntry[]) =>
         return left.entryKey.localeCompare(right.entryKey);
     });
 
-const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => {
+export const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => {
     const entries = sortEntries((questExplorer.entries ?? []).map(normalizeEntry).filter((entry) => entry.entryKey));
     const entriesByKey: Record<string, QuestExplorerEntry> = {};
     const aliasToEntryKey: Record<string, string> = {};

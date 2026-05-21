@@ -43,12 +43,21 @@ function railTitle(entry: QuestExplorerEntry): string {
     return questTitle(entry);
 }
 
+function cleanLabel(value: string | null | undefined): string | null {
+    const trimmed = (value ?? "").trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+
 function questLineLabel(entry: QuestExplorerEntry): string {
     return entry.navigation.questLineName || entry.navigation.questLineKey || getQuestCategoryLabel(entry.questType);
 }
 
 function progressionQuestLineLabel(questline: QuestProgressionQuestline, entry: QuestExplorerEntry): string {
     return questline.questLineName || questline.questLineKey || questLineLabel(entry);
+}
+
+function isChapterOnlyLabel(value: string | null | undefined): boolean {
+    return /^chapter(?:\s+\d+)?$/i.test((value ?? "").trim());
 }
 
 function normalizeRailKey(value: string): string {
@@ -212,6 +221,36 @@ function chapterTitle(chapter: QuestProgressionChapter, entry: QuestExplorerEntr
     return chapter.title || questTitle(entry);
 }
 
+function progressionItemTitle(
+    questline: QuestProgressionQuestline,
+    chapter: QuestProgressionChapter,
+    entry: QuestExplorerEntry
+): string {
+    if (getQuestCategoryKey(entry.questType) === "faction") {
+        return cleanLabel(entry.title)
+            || cleanLabel(questline.questLineName)
+            || (isChapterOnlyLabel(chapter.title) ? null : cleanLabel(chapter.title))
+            || progressionQuestLineLabel(questline, entry);
+    }
+
+    return chapterTitle(chapter, entry);
+}
+
+function fallbackChapterLabel(entry: QuestExplorerEntry): string {
+    const categoryKey = getQuestCategoryKey(entry.questType);
+    if (categoryKey === "minorFaction") {
+        return cleanLabel(entry.navigation.factionName)
+            || cleanLabel(entry.navigation.questLineName)
+            || "Minor Faction Quest";
+    }
+    if (categoryKey === "world") {
+        return questLineLabel(entry);
+    }
+    return hasChapterProgression(entry)
+        ? entry.navigation.chapterLabel || `Chapter ${entry.navigation.chapter ?? 1}`
+        : questLineLabel(entry);
+}
+
 function representativeEntryForChapter(
     chapter: QuestProgressionChapter,
     byIdentity: Map<string, QuestExplorerEntry>
@@ -291,7 +330,7 @@ export function buildQuestRailGroups(
                 key: railProgressionItemKey(questline, chapter, representativeEntry),
                 entry: representativeEntry,
                 progression: { questline, chapter },
-                title: chapterTitle(chapter, representativeEntry),
+                title: progressionItemTitle(questline, chapter, representativeEntry),
                 chapterLabel: chapterLabel(chapter, representativeEntry),
                 metaLabel: stepCountLabel(chapter.steps.length),
                 selectionEntryKeys,
@@ -320,7 +359,7 @@ export function buildQuestRailGroups(
             entry,
             progression: null,
             title: railTitle(entry),
-            chapterLabel: hasChapterProgression(entry) ? entry.navigation.chapterLabel || `Chapter ${entry.navigation.chapter ?? 1}` : questLineLabel(entry),
+            chapterLabel: fallbackChapterLabel(entry),
             metaLabel: stepCountLabel(1),
             selectionEntryKeys: entryIdentityKeys(entry),
             order: entry.navigation.sequenceIndex,

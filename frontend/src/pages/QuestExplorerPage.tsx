@@ -234,13 +234,24 @@ function CategorySelector({
                             checked={option.key === value}
                             onChange={() => onChange(option.key)}
                         />
-                        <span>{option.label}</span>
+                        <span className="questExplorer-categoryGlyph" aria-hidden="true" />
+                        <span className="questExplorer-categoryOptionText">{option.label}</span>
                         <small>{option.count}</small>
                     </label>
                 ))}
             </div>
         </fieldset>
     );
+}
+
+function railIndexLabel(item: QuestRailGroup["items"][number], index: number): string {
+    const chapterNumber = item.progression?.chapter.chapterNumber ?? item.progression?.chapter.chapterOrder;
+    return String(chapterNumber ?? index + 1);
+}
+
+function railStepCountParts(metaLabel: string): { count: string; label: string } {
+    const match = metaLabel.match(/^(\d+)\s+(.+)$/);
+    return match ? { count: match[1], label: match[2] } : { count: metaLabel, label: "" };
 }
 
 function QuestList({
@@ -260,21 +271,34 @@ function QuestList({
         <div className="questExplorer-list">
             {groups.map((group) => (
                 <div className="questExplorer-listGroup" key={group.key}>
-                    {group.items.map((item) => (
-                        <button
-                            type="button"
-                            className={`questExplorer-listItem${item.entry.entryKey === selectedRailEntryKey ? " is-selected" : ""}`}
-                            aria-current={item.entry.entryKey === selectedRailEntryKey ? "page" : undefined}
-                            onClick={() => onSelectEntry(item.entry.entryKey)}
-                            key={item.key}
-                        >
-                            <span className="questExplorer-listItemTitle">{item.title}</span>
-                            <span className="questExplorer-listItemMeta">
-                                <span>{item.chapterLabel}</span>
-                                <small>{item.metaLabel}</small>
-                            </span>
-                        </button>
-                    ))}
+                    <div className="questExplorer-listGroupLabel">
+                        <span>{group.title}</span>
+                        <small>{group.items.length} {group.items.length === 1 ? "record" : "records"}</small>
+                    </div>
+                    {group.items.map((item, index) => {
+                        const stepCount = railStepCountParts(item.metaLabel);
+                        return (
+                            <button
+                                type="button"
+                                className={`questExplorer-listItem${item.entry.entryKey === selectedRailEntryKey ? " is-selected" : ""}`}
+                                aria-current={item.entry.entryKey === selectedRailEntryKey ? "page" : undefined}
+                                aria-label={`${item.title} ${item.chapterLabel} ${item.metaLabel}`}
+                                onClick={() => onSelectEntry(item.entry.entryKey)}
+                                key={item.key}
+                            >
+                                <span className="questExplorer-listItemBadge" aria-hidden="true">{railIndexLabel(item, index)}</span>
+                                <span className="questExplorer-listItemCopy">
+                                    <span className="questExplorer-listItemTitle">{item.title}</span>
+                                    <span className="questExplorer-listItemSubtitle">{item.chapterLabel}</span>
+                                </span>
+                                <span className="questExplorer-listItemSteps" aria-hidden="true">
+                                    <strong>{stepCount.count}</strong>
+                                    {stepCount.label ? <small>{stepCount.label}</small> : null}
+                                </span>
+                                <span className="questExplorer-listItemStepText">{item.metaLabel}</span>
+                            </button>
+                        );
+                    })}
                 </div>
             ))}
         </div>
@@ -758,7 +782,10 @@ export default function QuestExplorerPage() {
                             <span>Quest Archive</span>
                             <h2>Progression</h2>
                         </div>
-                        <strong>{railEntryCount}/{entries.length}</strong>
+                        <div className="questExplorer-sidebarCount">
+                            <strong>{railEntryCount} / {entries.length}</strong>
+                            <small>Quests</small>
+                        </div>
                     </header>
 
                     <div className="questExplorer-filters">
