@@ -2,7 +2,6 @@ import { useEffect, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch";
 import {
-    QUEST_FILTER_ALL,
     filterQuestEntries,
     selectQuestError,
     selectQuestLoaded,
@@ -15,6 +14,20 @@ import {
     normalizeQuestExplorerMode,
     type QuestExplorerMode,
 } from "@/features/quests/questExplorerMode";
+import {
+    getQuestCategoryLabel,
+    QUEST_CATEGORY_OPTIONS,
+    type QuestCategoryKey,
+} from "@/features/quests/questCategories";
+import {
+    buildQuestRailGroups,
+    resolveRailSelectionKey,
+    type QuestRailGroup,
+} from "@/features/quests/questRail";
+import {
+    selectSelectedFaction,
+    useFactionSelectionStore,
+} from "@/stores/factionSelectionStore";
 import type {
     QuestBranch,
     QuestExplorerEntry,
@@ -22,12 +35,6 @@ import type {
     Reward,
 } from "@/types/questTypes";
 import "@/components/Quests/QuestExplorer.css";
-
-type Option = {
-    value: string;
-    label: string;
-    count: number;
-};
 
 type Group<T> = {
     id: string;
@@ -71,26 +78,6 @@ function compactMeta(entry: QuestExplorerEntry): string {
     ].filter(Boolean).join(" / ");
 }
 
-function optionList(
-    entries: QuestExplorerEntry[],
-    getValue: (entry: QuestExplorerEntry) => string | null,
-    getLabel: (entry: QuestExplorerEntry) => string | null
-): Option[] {
-    const counts = new Map<string, { label: string; count: number }>();
-    for (const entry of entries) {
-        const value = getValue(entry);
-        if (!value) continue;
-        const current = counts.get(value);
-        counts.set(value, {
-            label: current?.label ?? getLabel(entry) ?? value,
-            count: (current?.count ?? 0) + 1,
-        });
-    }
-    return [...counts.entries()]
-        .map(([value, option]) => ({ value, label: option.label, count: option.count }))
-        .sort((left, right) => left.label.localeCompare(right.label));
-}
-
 function groupByLabel<T>(
     values: T[],
     getLabel: (value: T) => string | null,
@@ -115,85 +102,74 @@ function groupByLabel<T>(
     return [...groups.values()].sort((left, right) => left.order - right.order || left.label.localeCompare(right.label));
 }
 
-function FilterSelect({
-    label,
+function CategorySelector({
     value,
-    allLabel,
     options,
     onChange,
 }: {
-    label: string;
-    value: string;
-    allLabel: string;
-    options: Option[];
-    onChange: (value: string) => void;
+    value: QuestCategoryKey;
+    options: Array<{ key: QuestCategoryKey; label: string; count: number }>;
+    onChange: (value: QuestCategoryKey) => void;
 }) {
     return (
-        <label className="questExplorer-filterField">
-            <span>{label}</span>
-            <select value={value} onChange={(event) => onChange(event.currentTarget.value)}>
-                <option value={QUEST_FILTER_ALL}>{allLabel}</option>
+        <fieldset className="questExplorer-categorySelector">
+            <legend>Category</legend>
+            <div className="questExplorer-categoryOptions">
                 {options.map((option) => (
-                    <option key={option.value} value={option.value}>
-                        {option.label} ({option.count})
-                    </option>
+                    <label
+                        className={`questExplorer-categoryOption${option.key === value ? " is-selected" : ""}`}
+                        key={option.key}
+                    >
+                        <input
+                            type="radio"
+                            name="quest-category"
+                            value={option.key}
+                            checked={option.key === value}
+                            onChange={() => onChange(option.key)}
+                        />
+                        <span>{option.label}</span>
+                        <small>{option.count}</small>
+                    </label>
                 ))}
-            </select>
-        </label>
+            </div>
+        </fieldset>
     );
 }
 
 function QuestList({
-    entries,
-    selectedEntryKey,
-    mode,
+    groups,
+    selectedRailEntryKey,
     onSelectEntry,
 }: {
-    entries: QuestExplorerEntry[];
-    selectedEntryKey: string | null;
-    mode: QuestExplorerMode;
+    groups: QuestRailGroup[];
+    selectedRailEntryKey: string | null;
     onSelectEntry: (entryKey: string) => void;
 }) {
-    let previousGroup = "";
-
-    if (entries.length === 0) {
+    if (groups.length === 0) {
         return <p className="questExplorer-emptyList">No quests match these filters.</p>;
     }
 
     return (
         <div className="questExplorer-list">
-            {entries.map((entry) => {
-                const group = [
-                    fallbackLabel(entry.navigation.questLineName, entry.navigation.questLineKey, "Ungrouped"),
-                    entry.navigation.chapterLabel ?? (entry.navigation.chapter == null ? null : `Chapter ${entry.navigation.chapter}`),
-                ].filter(Boolean).join(" / ");
-                const showGroup = group !== previousGroup;
-                previousGroup = group;
-
-                return (
-                    <div className="questExplorer-listGroup" key={entry.entryKey}>
-                        {showGroup ? <div className="questExplorer-listGroupLabel">{group}</div> : null}
+            {groups.map((group) => (
+                <div className="questExplorer-listGroup" key={group.key}>
+                    {group.items.map((item) => (
                         <button
                             type="button"
-                            className={`questExplorer-listItem${entry.entryKey === selectedEntryKey ? " is-selected" : ""}`}
-                            aria-current={entry.entryKey === selectedEntryKey ? "page" : undefined}
-                            onClick={() => onSelectEntry(entry.entryKey)}
+                            className={`questExplorer-listItem${item.entry.entryKey === selectedRailEntryKey ? " is-selected" : ""}`}
+                            aria-current={item.entry.entryKey === selectedRailEntryKey ? "page" : undefined}
+                            onClick={() => onSelectEntry(item.entry.entryKey)}
+                            key={item.key}
                         >
-                            <span className="questExplorer-listItemTitle">{entry.title}</span>
+                            <span className="questExplorer-listItemTitle">{item.title}</span>
                             <span className="questExplorer-listItemMeta">
-                                {[
-                                    entry.navigation.stepLabel,
-                                    entry.navigation.branchLabel,
-                                    entry.questType,
-                                ].filter(Boolean).join(" / ")}
-                            </span>
-                            <span className="questExplorer-listItemRail">
-                                <span style={{ width: `${Math.min(100, Math.max(4, (entry.navigation.sequenceIndex + 1) * 3))}%` }} />
+                                <span>{item.chapterLabel}</span>
+                                <small>{item.metaLabel}</small>
                             </span>
                         </button>
-                    </div>
-                );
-            })}
+                    ))}
+                </div>
+            ))}
         </div>
     );
 }
@@ -437,16 +413,32 @@ export default function QuestExplorerPage() {
     const selectedEntryKey = useQuestStore((state) => state.selectedEntryKey);
     const filters = useQuestStore((state) => state.filters);
     const mode = useQuestStore((state) => state.mode);
+    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
     const setSelectedEntryKey = useQuestStore((state) => state.setSelectedEntryKey);
     const setMode = useQuestStore((state) => state.setMode);
     const setFilters = useQuestStore((state) => state.setFilters);
-    const clearFilters = useQuestStore((state) => state.clearFilters);
     const resolveEntryKey = useQuestStore((state) => state.resolveEntryKey);
 
     const requestedEntryKey = routeEntryKey(location.pathname) ?? searchParams.get("quest");
     const requestedMode = normalizeQuestExplorerMode(searchParams.get("mode"));
-    const visibleEntries = useMemo(() => filterQuestEntries(entries, filters), [entries, filters]);
+    const visibleEntries = useMemo(
+        () => filterQuestEntries(entries, filters, selectedFaction),
+        [entries, filters, selectedFaction]
+    );
+    const visibleEntryKeys = useMemo(
+        () => new Set(visibleEntries.map((entry) => entry.entryKey)),
+        [visibleEntries]
+    );
+    const railGroups = useMemo(() => buildQuestRailGroups(visibleEntries), [visibleEntries]);
+    const railEntryCount = useMemo(
+        () => railGroups.reduce((total, group) => total + group.items.length, 0),
+        [railGroups]
+    );
+    const selectedRailEntryKey = useMemo(
+        () => resolveRailSelectionKey(selectedEntry, railGroups, entriesByKey),
+        [entriesByKey, railGroups, selectedEntry]
+    );
 
     useEffect(() => {
         void loadQuestExplorer();
@@ -461,8 +453,21 @@ export default function QuestExplorerPage() {
 
         if (requestedEntryKey) {
             const resolved = resolveEntryKey(requestedEntryKey);
-            if (resolved && resolved !== selectedEntryKey) {
-                setSelectedEntryKey(resolved);
+            if (resolved && visibleEntryKeys.has(resolved)) {
+                if (resolved !== selectedEntryKey) {
+                    setSelectedEntryKey(resolved);
+                }
+                return;
+            }
+            if (resolved && !visibleEntryKeys.has(resolved)) {
+                const fallbackEntryKey = visibleEntries[0]?.entryKey ?? null;
+                if (fallbackEntryKey !== selectedEntryKey) {
+                    setSelectedEntryKey(fallbackEntryKey);
+                }
+                if (fallbackEntryKey) {
+                    navigate(questPath(fallbackEntryKey, mode), { replace: true });
+                }
+                return;
             }
             if (!resolved && selectedEntryKey) {
                 setSelectedEntryKey(null);
@@ -470,16 +475,22 @@ export default function QuestExplorerPage() {
             return;
         }
 
-        if (!selectedEntryKey && entries[0]) {
-            setSelectedEntryKey(entries[0].entryKey);
+        if (!selectedEntryKey || !visibleEntryKeys.has(selectedEntryKey)) {
+            setSelectedEntryKey(visibleEntries[0]?.entryKey ?? null);
         }
-    }, [entries, loaded, requestedEntryKey, resolveEntryKey, selectedEntryKey, setSelectedEntryKey]);
+    }, [loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, setSelectedEntryKey, visibleEntries, visibleEntryKeys]);
 
-    const filterOptions = useMemo(() => ({
-        factions: optionList(entries, (entry) => entry.navigation.factionKey ?? entry.navigation.factionName, (entry) => fallbackLabel(entry.navigation.factionName, entry.navigation.factionKey)),
-        questLines: optionList(entries, (entry) => entry.navigation.questLineKey ?? entry.navigation.questLineName, (entry) => fallbackLabel(entry.navigation.questLineName, entry.navigation.questLineKey)),
-        questTypes: optionList(entries, (entry) => entry.questType, (entry) => entry.questType),
-    }), [entries]);
+    const categoryOptions = useMemo(() => (
+        QUEST_CATEGORY_OPTIONS.map((option) => ({
+            ...option,
+            count: buildQuestRailGroups(filterQuestEntries(
+                    entries,
+                    { searchText: filters.searchText, category: option.key },
+                    selectedFaction
+                ))
+                .reduce((total, group) => total + group.items.length, 0),
+        }))
+    ), [entries, filters.searchText, selectedFaction]);
 
     const selectEntry = (entryKey: string) => {
         setSelectedEntryKey(entryKey);
@@ -510,7 +521,7 @@ export default function QuestExplorerPage() {
                             <span>Quest Archive</span>
                             <h2>Progression</h2>
                         </div>
-                        <strong>{visibleEntries.length}/{entries.length}</strong>
+                        <strong>{railEntryCount}/{entries.length}</strong>
                     </header>
 
                     <div className="questExplorer-filters">
@@ -523,38 +534,16 @@ export default function QuestExplorerPage() {
                                 onChange={(event) => setFilters({ searchText: event.currentTarget.value })}
                             />
                         </label>
-                        <FilterSelect
-                            label="Faction"
-                            value={filters.faction}
-                            allLabel="All factions"
-                            options={filterOptions.factions}
-                            onChange={(faction) => setFilters({ faction })}
+                        <CategorySelector
+                            value={filters.category}
+                            options={categoryOptions}
+                            onChange={(category) => setFilters({ category })}
                         />
-                        <FilterSelect
-                            label="Questline"
-                            value={filters.questLine}
-                            allLabel="All questlines"
-                            options={filterOptions.questLines}
-                            onChange={(questLine) => setFilters({ questLine })}
-                        />
-                        <FilterSelect
-                            label="Type"
-                            value={filters.questType}
-                            allLabel="All types"
-                            options={filterOptions.questTypes}
-                            onChange={(questType) => setFilters({ questType })}
-                        />
-                        {Object.values(filters).some((value) => value && value !== QUEST_FILTER_ALL) ? (
-                            <button type="button" className="questExplorer-clearFilters" onClick={clearFilters}>
-                                Clear filters
-                            </button>
-                        ) : null}
                     </div>
 
                     <QuestList
-                        entries={visibleEntries}
-                        selectedEntryKey={selectedEntryKey}
-                        mode={mode}
+                        groups={railGroups}
+                        selectedRailEntryKey={selectedRailEntryKey}
                         onSelectEntry={selectEntry}
                     />
                 </aside>
@@ -568,14 +557,16 @@ export default function QuestExplorerPage() {
                         </div>
                     ) : null}
                     {!loading && !error && !selectedEntry ? (
-                        <div className="questExplorer-state">No quest explorer entries are available.</div>
+                        <div className="questExplorer-state">
+                            {entries.length === 0 ? "No quest explorer entries are available." : "No quest matches the current filters."}
+                        </div>
                     ) : null}
 
                     {selectedEntry ? (
                         <>
                             <header className="questExplorer-headerCard">
                                 <div>
-                                    <span>{selectedEntry.questType || "Quest"}</span>
+                                    <span>{getQuestCategoryLabel(selectedEntry.questType)}</span>
                                     <h2>{selectedEntry.title}</h2>
                                     <p>{compactMeta(selectedEntry)}</p>
                                 </div>

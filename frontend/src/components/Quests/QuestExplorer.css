@@ -52,8 +52,9 @@
     min-height: 0;
     border-right: 1px solid var(--quest-line);
     background:
-        linear-gradient(180deg, rgba(119, 205, 187, 0.035), transparent 260px),
-        rgba(7, 12, 12, 0.92);
+        linear-gradient(180deg, rgba(210, 181, 105, 0.055), transparent 230px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025), transparent 46%),
+        rgba(7, 11, 11, 0.94);
 }
 
 .questExplorer-sidebar > header {
@@ -102,8 +103,8 @@
 
 .questExplorer-filters {
     display: grid;
-    gap: 10px;
-    padding: 14px;
+    gap: 12px;
+    padding: 14px 14px 16px;
     border-bottom: 1px solid var(--quest-line);
 }
 
@@ -118,12 +119,104 @@
 .questExplorer-filterField input,
 .questExplorer-filterField select {
     width: 100%;
-    min-height: 34px;
+    min-height: 36px;
     border: 1px solid var(--quest-line);
     border-radius: 4px;
-    padding: 6px 9px;
+    padding: 7px 10px;
     color: var(--quest-ink);
-    background: rgba(255, 255, 255, 0.035);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.018)),
+        rgba(0, 0, 0, 0.15);
+}
+
+.questExplorer-filterField input:focus-visible {
+    outline: 1px solid rgba(210, 181, 105, 0.65);
+    outline-offset: 2px;
+    border-color: var(--quest-line-strong);
+}
+
+.questExplorer-categorySelector {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.questExplorer-categorySelector legend {
+    padding: 0;
+    color: var(--quest-ink-muted);
+    font-size: 0.77rem;
+}
+
+.questExplorer-categoryOptions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--quest-line);
+    border-radius: 5px;
+    padding: 2px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.014)),
+        rgba(0, 0, 0, 0.16);
+}
+
+.questExplorer-categoryOption {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 7px 8px;
+    color: var(--quest-ink-soft);
+    background: transparent;
+    cursor: pointer;
+    transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.questExplorer-categoryOption input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.questExplorer-categoryOption span {
+    min-width: 0;
+    color: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.questExplorer-categoryOption small {
+    color: var(--quest-teal);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.questExplorer-categoryOption:hover,
+.questExplorer-categoryOption:focus-within {
+    border-color: rgba(210, 181, 105, 0.24);
+    background: rgba(210, 181, 105, 0.07);
+    color: var(--quest-ink);
+}
+
+.questExplorer-categoryOption.is-selected {
+    border-color: var(--quest-line-strong);
+    background:
+        linear-gradient(90deg, rgba(210, 181, 105, 0.18), rgba(119, 205, 187, 0.045)),
+        rgba(210, 181, 105, 0.065);
+    box-shadow: inset 0 0 0 1px rgba(210, 181, 105, 0.09);
+    color: var(--quest-ink);
 }
 
 .questExplorer-clearFilters,
@@ -160,63 +253,107 @@
 .questExplorer-list {
     min-height: 0;
     overflow: auto;
-    padding: 12px 10px 18px;
+    padding: 10px 12px 18px;
     scrollbar-color: rgba(210, 181, 105, 0.45) rgba(255, 255, 255, 0.04);
 }
 
 .questExplorer-listGroup + .questExplorer-listGroup {
-    margin-top: 3px;
+    margin-top: 12px;
 }
 
 .questExplorer-listGroupLabel {
-    margin: 13px 6px 6px;
-    color: var(--quest-teal);
+    display: grid;
+    gap: 2px;
+    margin: 14px 4px 7px;
+    color: rgba(119, 205, 187, 0.78);
+}
+
+.questExplorer-listGroupLabel span,
+.questExplorer-listGroupLabel small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.questExplorer-listGroupLabel small {
+    color: var(--quest-ink-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: none;
 }
 
 .questExplorer-listItem {
+    position: relative;
     display: grid;
-    gap: 5px;
+    gap: 7px;
     width: 100%;
-    min-height: 70px;
+    min-height: 76px;
     border: 1px solid transparent;
-    border-radius: 5px;
-    padding: 10px;
+    border-bottom-color: rgba(255, 255, 255, 0.065);
+    border-radius: 3px;
+    padding: 12px 12px 12px 15px;
     text-align: left;
     color: var(--quest-ink-soft);
     background: transparent;
     cursor: pointer;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
-.questExplorer-listItem:hover,
-.questExplorer-listItem.is-selected {
-    border-color: var(--quest-line-strong);
-    background: linear-gradient(90deg, rgba(210, 181, 105, 0.15), rgba(119, 205, 187, 0.06));
+.questExplorer-listItem::before {
+    content: "";
+    position: absolute;
+    inset: 10px auto 10px 0;
+    width: 2px;
+    border-radius: 999px;
+    background: transparent;
+    transition: background 150ms ease, box-shadow 150ms ease;
+}
+
+.questExplorer-listItem:hover {
+    border-color: rgba(210, 181, 105, 0.18);
+    background: linear-gradient(90deg, rgba(210, 181, 105, 0.075), rgba(119, 205, 187, 0.028), transparent);
     color: var(--quest-ink);
+}
+
+.questExplorer-listItem.is-selected {
+    border-color: rgba(210, 181, 105, 0.26);
+    background:
+        linear-gradient(90deg, rgba(210, 181, 105, 0.18), rgba(119, 205, 187, 0.055), transparent 86%),
+        rgba(255, 255, 255, 0.018);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 8px 22px rgba(0, 0, 0, 0.16);
+    color: var(--quest-ink);
+}
+
+.questExplorer-listItem:hover::before,
+.questExplorer-listItem.is-selected::before {
+    background: var(--quest-gold);
+    box-shadow: 0 0 14px rgba(210, 181, 105, 0.58);
 }
 
 .questExplorer-listItemTitle {
     color: var(--quest-ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.02rem;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
 }
 
 .questExplorer-listItemMeta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
     color: var(--quest-ink-muted);
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     line-height: 1.35;
 }
 
-.questExplorer-listItemRail {
-    display: block;
-    height: 2px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.questExplorer-listItemRail span {
-    display: block;
-    height: 100%;
-    background: var(--quest-gold);
+.questExplorer-listItemMeta small {
+    flex: 0 0 auto;
+    color: rgba(210, 181, 105, 0.72);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .questExplorer-emptyList,
@@ -517,6 +654,10 @@
 
     .questExplorer-modeSwitch button {
         flex: 1 1 0;
+    }
+
+    .questExplorer-categoryOptions {
+        grid-template-columns: 1fr;
     }
 
     .questExplorer-loreLine {

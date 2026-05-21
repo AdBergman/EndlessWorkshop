@@ -2,18 +2,21 @@ import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import type { QuestExplorerEntry, QuestExplorerResponse } from "@/types/questTypes";
 import type { QuestExplorerMode } from "@/features/quests/questExplorerMode";
+import {
+    DEFAULT_QUEST_CATEGORY,
+    getQuestCategoryKey,
+    questMatchesSelectedMajorFaction,
+    type QuestCategoryKey,
+} from "@/features/quests/questCategories";
+import type { FactionInfo } from "@/types/dataTypes";
 
 type LoadOptions = {
     force?: boolean;
 };
 
-export const QUEST_FILTER_ALL = "__all__";
-
 export type QuestExplorerFilters = {
     searchText: string;
-    faction: string;
-    questLine: string;
-    questType: string;
+    category: QuestCategoryKey;
 };
 
 type QuestStore = {
@@ -235,9 +238,7 @@ const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => {
 
 const initialFilters: QuestExplorerFilters = {
     searchText: "",
-    faction: QUEST_FILTER_ALL,
-    questLine: QUEST_FILTER_ALL,
-    questType: QUEST_FILTER_ALL,
+    category: DEFAULT_QUEST_CATEGORY,
 };
 
 const initialState = {
@@ -352,7 +353,7 @@ export const useQuestStore = create<QuestStore>((set, get) => ({
 const searchableText = (entry: QuestExplorerEntry): string => [
     entry.entryKey,
     entry.title,
-    entry.questType,
+    getQuestCategoryKey(entry.questType),
     entry.navigation.factionKey,
     entry.navigation.factionName,
     entry.navigation.questLineKey,
@@ -388,20 +389,16 @@ export const selectQuestByKey = (key: string) => (state: QuestStore) => state.ge
 
 export const filterQuestEntries = (
     entries: QuestExplorerEntry[],
-    filters: QuestExplorerFilters
+    filters: QuestExplorerFilters,
+    selectedFaction?: FactionInfo | null
 ) => {
     const search = filters.searchText.trim().toLowerCase();
 
     return entries.filter((entry) => {
-        if (filters.faction !== QUEST_FILTER_ALL) {
-            const faction = entry.navigation.factionKey ?? entry.navigation.factionName ?? "";
-            if (faction !== filters.faction) return false;
+        if (getQuestCategoryKey(entry.questType) !== filters.category) {
+            return false;
         }
-        if (filters.questLine !== QUEST_FILTER_ALL) {
-            const questLine = entry.navigation.questLineKey ?? entry.navigation.questLineName ?? "";
-            if (questLine !== filters.questLine) return false;
-        }
-        if (filters.questType !== QUEST_FILTER_ALL && entry.questType !== filters.questType) {
+        if (!questMatchesSelectedMajorFaction(entry, selectedFaction)) {
             return false;
         }
         return !search || searchableText(entry).includes(search);

@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/api/apiClient";
 import {
-    QUEST_FILTER_ALL,
+    filterQuestEntries,
     selectVisibleQuestEntries,
     useQuestStore,
 } from "./questStore";
 import type { QuestExplorerResponse } from "@/types/questTypes";
+import { Faction } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -19,7 +20,7 @@ const entry = (overrides: Partial<QuestExplorerResponse["entries"][number]> = {}
     entryKey: "Quest_A",
     title: "First Quest",
     summaryLines: ["The archive opens."],
-    questType: "Faction",
+    questType: "Faction Quest",
     isMandatory: true,
     isKeyNarrativeBeat: false,
     aliases: ["Legacy_A", "FactionQuest_A"],
@@ -154,24 +155,80 @@ describe("questStore quest explorer loading", () => {
         expect(state.aliasToEntryKey.FactionQuest_A).toBe("Quest_A");
     });
 
-    it("filters by search, faction, questline, and type", async () => {
+    it("filters by search and user-facing category", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(explorer());
         await useQuestStore.getState().loadQuestExplorer();
 
         useQuestStore.getState().setFilters({
-            searchText: "dust",
-            faction: "Faction_A",
-            questLine: "Line_A",
-            questType: "Faction",
+            searchText: "first quest",
+            category: "faction",
         });
 
         expect(selectVisibleQuestEntries(useQuestStore.getState()).map((item) => item.entryKey)).toEqual(["Quest_A"]);
 
-        useQuestStore.getState().setFilters({ questType: "Curiosity" });
+        useQuestStore.getState().setFilters({ category: "world" });
         expect(selectVisibleQuestEntries(useQuestStore.getState())).toEqual([]);
 
         useQuestStore.getState().clearFilters();
-        expect(useQuestStore.getState().filters.faction).toBe(QUEST_FILTER_ALL);
+        expect(useQuestStore.getState().filters.category).toBe("faction");
+    });
+
+    it("applies global faction scope only to faction quest categories", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            ...explorer(),
+            entries: [
+                entry({
+                    entryKey: "Quest_Kin",
+                    questType: "Faction Quest",
+                    navigation: {
+                        ...entry().navigation,
+                        factionKey: "Faction_KinOfSheredyn",
+                        factionName: "Kin of Sheredyn",
+                        sequenceIndex: 0,
+                    },
+                }),
+                entry({
+                    entryKey: "Quest_Lords",
+                    questType: "Major Faction",
+                    navigation: {
+                        ...entry().navigation,
+                        factionKey: "Faction_LastLord",
+                        factionName: "Last Lords",
+                        sequenceIndex: 1,
+                    },
+                }),
+                entry({
+                    entryKey: "Quest_Curiosity",
+                    questType: "Curiosity",
+                    navigation: {
+                        ...entry().navigation,
+                        factionKey: null,
+                        factionName: null,
+                        sequenceIndex: 2,
+                    },
+                }),
+            ],
+        });
+        await useQuestStore.getState().loadQuestExplorer();
+
+        const selectedFaction = {
+            isMajor: true,
+            enumFaction: Faction.KIN,
+            uiLabel: "Kin",
+            minorName: null,
+        };
+
+        expect(filterQuestEntries(
+            useQuestStore.getState().entries,
+            { searchText: "", category: "faction" },
+            selectedFaction
+        ).map((item) => item.entryKey)).toEqual(["Quest_Kin"]);
+
+        expect(filterQuestEntries(
+            useQuestStore.getState().entries,
+            { searchText: "", category: "world" },
+            selectedFaction
+        ).map((item) => item.entryKey)).toEqual(["Quest_Curiosity"]);
     });
 
     it("stores load errors without keeping stale entries", async () => {
