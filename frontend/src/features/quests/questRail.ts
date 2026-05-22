@@ -241,7 +241,7 @@ function fallbackChapterLabel(entry: QuestExplorerEntry): string {
     if (categoryKey === "minorFaction") {
         return cleanLabel(entry.navigation.factionName)
             || cleanLabel(entry.navigation.questLineName)
-            || "Minor Faction Quest";
+            || "Generic Quest";
     }
     if (categoryKey === "world") {
         return questLineLabel(entry);
@@ -249,6 +249,33 @@ function fallbackChapterLabel(entry: QuestExplorerEntry): string {
     return hasChapterProgression(entry)
         ? entry.navigation.chapterLabel || `Chapter ${entry.navigation.chapter ?? 1}`
         : questLineLabel(entry);
+}
+
+function minorFactionRailLabel(entry: QuestExplorerEntry): string | null {
+    return cleanLabel(entry.navigation.factionName) || cleanLabel(entry.navigation.questLineName);
+}
+
+function compareRailItems(groupKey: string, left: QuestRailItem, right: QuestRailItem): number {
+    if (groupKey === "minorFaction") {
+        const leftMinorLabel = minorFactionRailLabel(left.entry);
+        const rightMinorLabel = minorFactionRailLabel(right.entry);
+
+        if (leftMinorLabel && rightMinorLabel) {
+            return leftMinorLabel.localeCompare(rightMinorLabel)
+                || left.title.localeCompare(right.title)
+                || left.order - right.order;
+        }
+
+        if (leftMinorLabel || rightMinorLabel) {
+            return leftMinorLabel ? -1 : 1;
+        }
+
+        return left.title.localeCompare(right.title)
+            || left.order - right.order
+            || left.key.localeCompare(right.key);
+    }
+
+    return left.order - right.order || left.title.localeCompare(right.title);
 }
 
 function representativeEntryForChapter(
@@ -369,7 +396,7 @@ export function buildQuestRailGroups(
     return [...groups.values()]
         .map((group) => ({
             ...group,
-            items: [...group.items].sort((left, right) => left.order - right.order || left.title.localeCompare(right.title)),
+            items: [...group.items].sort((left, right) => compareRailItems(group.key, left, right)),
         }))
         .sort((left, right) => left.order - right.order || left.title.localeCompare(right.title));
 }

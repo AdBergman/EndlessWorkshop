@@ -328,6 +328,83 @@ describe("quest rail projection", () => {
         expect(groups[0].items[0].metaLabel).toBe("1 step");
     });
 
+    it("sorts named minor faction quests before generic minor quests", () => {
+        const genericLateAlphabetically = entry({
+            entryKey: "MinorFaction_GenericQuest_16",
+            title: "Zebra Trouble",
+            questType: "Minor Faction",
+            navigation: {
+                ...entry().navigation,
+                factionKey: null,
+                factionName: null,
+                questLineKey: null,
+                questLineName: null,
+                sequenceIndex: 1,
+                chapter: null,
+                chapterLabel: null,
+                chapterOrder: null,
+                step: null,
+                stepLabel: null,
+                stepOrder: null,
+            },
+        });
+        const namedNoquensii = entry({
+            entryKey: "MinorFaction_SpecificQuest_Noquensii01",
+            title: "Artistic License",
+            questType: "Minor Faction Quest",
+            navigation: {
+                ...genericLateAlphabetically.navigation,
+                factionKey: "MinorFaction_Noquensii",
+                factionName: "Noquensii",
+                questLineKey: "MinorFaction_SpecificQuest_Noquensii",
+                questLineName: "Noquensii",
+                sequenceIndex: 2,
+            },
+        });
+        const genericEarlyAlphabetically = entry({
+            entryKey: "MinorFaction_GenericQuest_03",
+            title: "A Fine Feast",
+            questType: "Minor Faction",
+            navigation: {
+                ...genericLateAlphabetically.navigation,
+                sequenceIndex: 3,
+            },
+        });
+        const namedAmetrine = entry({
+            entryKey: "MinorFaction_SpecificQuest_Ametrine01",
+            title: "Ancient Graveyard",
+            questType: "Minor Faction Quest",
+            navigation: {
+                ...genericLateAlphabetically.navigation,
+                factionKey: "MinorFaction_Ametrine",
+                factionName: "Ametrine",
+                questLineKey: "MinorFaction_SpecificQuest_Ametrine",
+                questLineName: "Ametrine",
+                sequenceIndex: 4,
+            },
+        });
+
+        const groups = buildQuestRailGroups([
+            genericLateAlphabetically,
+            namedNoquensii,
+            genericEarlyAlphabetically,
+            namedAmetrine,
+        ], null);
+
+        expect(groups[0].items.map((item) => item.title)).toEqual([
+            "Ancient Graveyard",
+            "Artistic License",
+            "A Fine Feast",
+            "Zebra Trouble",
+        ]);
+        expect(groups[0].items.map((item) => item.chapterLabel)).toEqual([
+            "Ametrine",
+            "Noquensii",
+            "Generic Quest",
+            "Generic Quest",
+        ]);
+    });
+
     it("keeps world quest fallback rail subtitles on the world quest grouping", () => {
         const world = entry({
             entryKey: "Quest_World_Nightfall",
