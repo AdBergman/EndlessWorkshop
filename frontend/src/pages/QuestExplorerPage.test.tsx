@@ -770,6 +770,86 @@ const nextChapterPayload: QuestExplorerResponse = {
     },
 };
 
+const unresolvedChoicePayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Archive of the First Tide",
+            summaryLines: ["A recovered strategic record."],
+            loreView: payload.entries[0].loreView,
+            strategyView: payload.entries[0].strategyView,
+            branches: [
+                {
+                    ...testBranch("Branch_Unknown", "Take the unknown road"),
+                    groupLabel: "First Tide",
+                    lore: { outcomePreviewLines: ["The archive does not know where this road lands."] },
+                    strategy: { conditions: ["Choose the road."], requirements: [], rewards: [] },
+                },
+            ],
+        }),
+        questEntry({
+            entryKey: "Quest_B",
+            title: "Second Tide",
+            summaryLines: ["This should not be revealed without an explicit continuation."],
+            strategyView: { objectives: [testObjective("Objective_B", "Hidden objective.")] },
+            branches: [],
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: ["Quest_A"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Archive of the First Tide", detailEntryKey: "Quest_A" },
+                    { stepNumber: 2, stepOrder: 2, title: "Second Tide", detailEntryKey: "Quest_B" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const choiceResetWithWorldPayload: QuestExplorerResponse = {
+    ...choiceResetPayload,
+    entries: [
+        ...choiceResetPayload.entries,
+        questEntry({
+            entryKey: "Quest_World",
+            title: "Lost Curiosity",
+            questType: "Curiosity",
+            navigation: {
+                factionKey: null,
+                factionName: null,
+                questLineKey: "WorldQuest_Curiosity",
+                questLineName: "World",
+                chapter: null,
+                chapterLabel: null,
+                step: null,
+                stepLabel: null,
+                sequenceIndex: 3,
+                chapterOrder: null,
+                stepOrder: null,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: [],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+};
+
 function renderPage(initialEntry = "/quests") {
     return render(
         <MemoryRouter initialEntries={[initialEntry]}>
@@ -787,6 +867,19 @@ function MissingRouteHarness() {
         <>
             <button type="button" onClick={() => navigate("/quests/MissingAlias")}>
                 Missing route
+            </button>
+            <QuestExplorerPage />
+        </>
+    );
+}
+
+function QuestRouteHarness() {
+    const navigate = useNavigate();
+
+    return (
+        <>
+            <button type="button" onClick={() => navigate("/quests/Quest_B")}>
+                Open second tide
             </button>
             <QuestExplorerPage />
         </>
@@ -857,6 +950,90 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("Read the shore signs.")).toBeInTheDocument();
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("preserves the selected progression path when switching strategy and lore modes", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        const markerChoice = screen.getByRole("button", { name: /Follow the marker/ });
+        await user.click(markerChoice);
+        expect(markerChoice).toHaveAttribute("aria-current", "true");
+        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+    });
+
+    it("clears an incompatible choice path when navigation changes to another quest in the same chapter", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+
+        render(
+            <MemoryRouter initialEntries={["/quests/Quest_A"]}>
+                <Routes>
+                    <Route path="/quests/*" element={<QuestRouteHarness />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+        await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Open second tide" }));
+
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_B"));
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current");
+        expect(screen.getByText("The marker path opens.")).toBeInTheDocument();
+    });
+
+    it("clears an incompatible choice path after category changes away and back", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetWithWorldPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+        await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
+        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+
+        await user.click(screen.getByLabelText(/World Quests/));
+        expect(await screen.findByRole("heading", { name: "Lost Curiosity" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("radio", { name: /^Faction Quests\s+\d+$/ }));
+        expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
+        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+    });
+
+    it("stops gracefully when a modeled choice lacks explicit continuation keys", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(unresolvedChoicePayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
+
+        expect(screen.getByText("Path Continues")).toBeInTheDocument();
+        expect(screen.getByText(/does not identify the next progression segment/)).toBeInTheDocument();
+        expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
     });
 
     it("updates the active rail chapter when a modeled choice reaches the next chapter", async () => {

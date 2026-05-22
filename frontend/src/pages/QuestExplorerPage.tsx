@@ -204,7 +204,7 @@ function findDetailProgression(
                     activeStepKeys.add(step.stepKey);
                 }
                 for (const variant of step.variants) {
-                    if (selectedIdentityKeys.has(variant.entryKey)) {
+                    if (normalizedKind(variant.variantKind) === "branch_variant" && selectedIdentityKeys.has(variant.entryKey)) {
                         activeVariantEntryKeys.add(variant.entryKey);
                     }
                 }
@@ -547,8 +547,13 @@ function buildAdventureFlow(
             ?? entriesByKey[step.detailEntryKey]
             ?? null;
         const choices = choicesForStep(step, displayEntry, entriesByKey);
-        const selectedChoice = selectedByStep.get(step.stepKey)
-            ?? implicitActiveChoice(choices, progression.activeVariantEntryKeys);
+        const storedSelection = selectedByStep.get(step.stepKey);
+        const storedChoice = storedSelection
+            ? choices.find((choice) => choice.id === storedSelection.choiceId) ?? null
+            : null;
+        const selectedChoice = storedSelection
+            ? storedChoice ? selectionForChoice(step.stepKey, storedChoice) : null
+            : implicitActiveChoice(choices, progression.activeVariantEntryKeys);
         const sharesDetailEntry = (counts.get(step.detailEntryKey) ?? 0) > 1;
         const rendersSharedAlias = sharesDetailEntry && renderedDetailKeys.has(step.detailEntryKey);
 
@@ -989,6 +994,7 @@ export default function QuestExplorerPage() {
         () => progressionContextKey(selectedProgression, selectedEntryKey),
         [selectedEntryKey, selectedProgression]
     );
+    const choicePathResetKey = `${selectedEntryKey ?? "none"}:${selectedProgressionKey}`;
     const adventureFlow = useMemo(
         () => selectedProgression
             ? buildAdventureFlow(selectedProgression, entriesByKey, choicePath, progression)
@@ -1013,7 +1019,7 @@ export default function QuestExplorerPage() {
 
     useEffect(() => {
         setChoicePath([]);
-    }, [selectedProgressionKey]);
+    }, [choicePathResetKey]);
 
     useEffect(() => {
         if (!loaded) return;
