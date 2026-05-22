@@ -29,6 +29,7 @@ import {
     selectSelectedFaction,
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
+import { getEmpireLabel } from "@/lib/labels/empireLabels";
 import type {
     QuestBranch,
     QuestExplorerEntry,
@@ -250,27 +251,38 @@ function CategorySelector({
     options: Array<{ key: QuestCategoryKey; label: string; count: number }>;
     onChange: (value: QuestCategoryKey) => void;
 }) {
+    const scopeLabels: Record<QuestCategoryKey, string> = {
+        faction: "Main",
+        minorFaction: "Minor",
+        world: "World",
+        other: "Other",
+    };
+
     return (
-        <fieldset className="questExplorer-categorySelector">
-            <legend>Category</legend>
+        <fieldset className="questExplorer-categorySelector" aria-label="Category">
+            <legend>Scope</legend>
             <div className="questExplorer-categoryOptions">
-                {options.map((option) => (
-                    <label
-                        className={`questExplorer-categoryOption${option.key === value ? " is-selected" : ""}`}
-                        key={option.key}
-                    >
-                        <input
-                            type="radio"
-                            name="quest-category"
-                            value={option.key}
-                            checked={option.key === value}
-                            onChange={() => onChange(option.key)}
-                        />
-                        <span className="questExplorer-categoryGlyph" aria-hidden="true" />
-                        <span className="questExplorer-categoryOptionText">{option.label}</span>
-                        <small>{option.count}</small>
-                    </label>
-                ))}
+                {options.map((option) => {
+                    const label = scopeLabels[option.key] ?? option.label;
+                    return (
+                        <label
+                            className={`questExplorer-categoryOption${option.key === value ? " is-selected" : ""}`}
+                            key={option.key}
+                        >
+                            <input
+                                aria-label={`${option.label} ${option.count}`}
+                                type="radio"
+                                name="quest-category"
+                                value={option.key}
+                                checked={option.key === value}
+                                onChange={() => onChange(option.key)}
+                            />
+                            <span className="questExplorer-categoryGlyph" aria-hidden="true" />
+                            <span className="questExplorer-categoryOptionText">{label}</span>
+                            <small>{option.count}</small>
+                        </label>
+                    );
+                })}
             </div>
         </fieldset>
     );
@@ -284,6 +296,35 @@ function railIndexLabel(item: QuestRailGroup["items"][number], index: number): s
 function railStepCountParts(metaLabel: string): { count: string; label: string } {
     const match = metaLabel.match(/^(\d+)\s+(.+)$/);
     return match ? { count: match[1], label: match[2] } : { count: metaLabel, label: "" };
+}
+
+function cleanRailDisplayLabel(value: string | null | undefined): string | null {
+    const trimmed = (value ?? "").trim();
+    return trimmed.length > 0 ? trimmed : null;
+}
+
+function railFactionLabel(...keys: Array<string | null | undefined>): string | null {
+    for (const key of keys) {
+        const label = getEmpireLabel(key);
+        if (label !== "Unknown" && label !== key) return label;
+    }
+    return null;
+}
+
+function railGroupDisplayTitle(group: QuestRailGroup): string {
+    const firstItem = group.items[0] ?? null;
+    const questline = firstItem?.progression?.questline ?? null;
+
+    return cleanRailDisplayLabel(questline?.questLineName)
+        ?? cleanRailDisplayLabel(firstItem?.entry.navigation.questLineName)
+        ?? railFactionLabel(
+            questline?.factionFamilyKey,
+            questline?.factionKey,
+            firstItem?.entry.navigation.factionKey
+        )
+        ?? cleanRailDisplayLabel(questline?.factionName)
+        ?? cleanRailDisplayLabel(firstItem?.entry.navigation.factionName)
+        ?? group.title;
 }
 
 function QuestList({
@@ -304,7 +345,7 @@ function QuestList({
             {groups.map((group) => (
                 <div className="questExplorer-listGroup" key={group.key}>
                     <div className="questExplorer-listGroupLabel">
-                        <span>{group.title}</span>
+                        <span>{railGroupDisplayTitle(group)}</span>
                         <small>{group.items.length} {group.items.length === 1 ? "record" : "records"}</small>
                     </div>
                     {group.items.map((item, index) => {
@@ -1589,8 +1630,7 @@ export default function QuestExplorerPage() {
                 <aside className="questExplorer-sidebar">
                     <header>
                         <div>
-                            <span>Quest Archive</span>
-                            <h2>Progression</h2>
+                            <h2>Quest Archive</h2>
                         </div>
                         <div className="questExplorer-sidebarCount">
                             <strong>{railEntryCount} / {entries.length}</strong>
