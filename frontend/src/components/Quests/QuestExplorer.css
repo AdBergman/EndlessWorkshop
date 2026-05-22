@@ -604,12 +604,12 @@
 }
 
 .questExplorer-detail::after {
-    right: clamp(104px, 8vw, 152px);
-    bottom: clamp(76px, 10vh, 120px);
-    width: clamp(176px, 14vw, 246px);
-    height: clamp(176px, 14vw, 246px);
-    opacity: 0.14;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 246 246' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M28 204C74 158 132 126 220 102' opacity='.18'/%3E%3Cpath d='M46 222C94 194 150 184 210 198' opacity='.12'/%3E%3Cpath d='M62 186A106 106 0 0 1 210 72' opacity='.26'/%3E%3Cpath d='M88 206A78 78 0 0 1 190 118' opacity='.16'/%3E%3Cpath d='M136 54v38M136 186v34M62 150h34M184 150h38' opacity='.18'/%3E%3Cpath d='M86 186l50-54 56-38' opacity='.17'/%3E%3Cpath d='M112 204l24-72 38 58' opacity='.1'/%3E%3Ccircle cx='136' cy='150' r='52' opacity='.12'/%3E%3Ccircle cx='136' cy='150' r='24' opacity='.1'/%3E%3Cg opacity='.62'%3E%3Cpath d='M86 178l7 8-7 8-7-8z'/%3E%3Ccircle cx='86' cy='186' r='2.5' opacity='.5'/%3E%3C/g%3E%3Cg opacity='.72'%3E%3Cpath d='M136 124l7 8-7 8-7-8z'/%3E%3Ccircle cx='136' cy='132' r='2.5' opacity='.52'/%3E%3C/g%3E%3Cg opacity='.48'%3E%3Cpath d='M192 86l6 8-6 8-6-8z'/%3E%3Ccircle cx='192' cy='94' r='2.5' opacity='.4'/%3E%3C/g%3E%3Cg opacity='.34'%3E%3Cpath d='M174 182l6 8-6 8-6-8z'/%3E%3Ccircle cx='174' cy='190' r='2' opacity='.32'/%3E%3C/g%3E%3Cpath d='M28 220h30M184 220h38M204 148h24' opacity='.16'/%3E%3C/g%3E%3C/svg%3E");
+    right: clamp(74px, 7vw, 118px);
+    bottom: clamp(-56px, -5vh, -34px);
+    width: clamp(208px, 16vw, 286px);
+    height: clamp(208px, 16vw, 286px);
+    opacity: 0.26;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 268 268' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M34 222C82 176 148 141 236 116' opacity='.18'/%3E%3Cpath d='M50 242C104 207 166 196 232 214' opacity='.1'/%3E%3Cpath d='M68 205A118 118 0 0 1 230 78' opacity='.24'/%3E%3Cpath d='M98 223A86 86 0 0 1 206 130' opacity='.15'/%3E%3Ccircle cx='148' cy='164' r='58' opacity='.11'/%3E%3Ccircle cx='148' cy='164' r='26' opacity='.09'/%3E%3Cpath d='M148 60v42M148 202v38M68 164h38M202 164h40' opacity='.17'/%3E%3Cpath d='M94 202l54-60 62-42' opacity='.14'/%3E%3Cpath d='M34 240h32M202 240h42M226 162h28' opacity='.15'/%3E%3Cg opacity='.48'%3E%3Ccircle cx='94' cy='202' r='3'/%3E%3Cpath d='M84 202h20M94 192v20' opacity='.22'/%3E%3C/g%3E%3Cg opacity='.52'%3E%3Ccircle cx='148' cy='143' r='3'/%3E%3Cpath d='M138 143h20M148 133v20' opacity='.24'/%3E%3C/g%3E%3Cg opacity='.34'%3E%3Ccircle cx='210' cy='100' r='2.6'/%3E%3Cpath d='M201 100h18M210 91v18' opacity='.22'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -653,18 +653,6 @@
     background:
         linear-gradient(90deg, transparent 0, rgba(208, 162, 74, 0.5) 9%, rgba(208, 162, 74, 0.18) 41%, transparent 50%),
         linear-gradient(270deg, transparent 0, rgba(208, 162, 74, 0.5) 9%, rgba(208, 162, 74, 0.18) 41%, transparent 50%);
-}
-
-.questExplorer-questPathHeader::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: -7px;
-    width: 13px;
-    height: 13px;
-    border: 1px solid rgba(208, 162, 74, 0.48);
-    background: #071b1c;
-    transform: translateX(-50%) rotate(45deg);
 }
 
 .questExplorer-questPathHeaderCopy {
@@ -828,12 +816,12 @@
 }
 
 .questExplorer-content--lore::before {
-    top: 136px;
-    right: clamp(190px, 17vw, 280px);
-    width: clamp(136px, 12vw, 188px);
-    height: clamp(70px, 6.6vw, 92px);
-    opacity: 0.12;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 188 92' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M18 64l54-36 60 24 38-34' opacity='.36'/%3E%3Cpath d='M28 78c42-18 92-16 132 4' opacity='.18'/%3E%3Cg opacity='.68'%3E%3Cpath d='M18 56l6 8-6 8-6-8z'/%3E%3Ccircle cx='18' cy='64' r='2.5' opacity='.48'/%3E%3C/g%3E%3Cg opacity='.78'%3E%3Cpath d='M72 19l7 9-7 9-7-9z'/%3E%3Ccircle cx='72' cy='28' r='2.5' opacity='.52'/%3E%3C/g%3E%3Cg opacity='.58'%3E%3Cpath d='M132 44l6 8-6 8-6-8z'/%3E%3Ccircle cx='132' cy='52' r='2.5' opacity='.45'/%3E%3C/g%3E%3Cpath d='M160 18h20M170 8v20' opacity='.24'/%3E%3C/g%3E%3C/svg%3E");
+    top: 150px;
+    right: clamp(178px, 16vw, 264px);
+    width: clamp(144px, 12vw, 194px);
+    height: clamp(78px, 6.8vw, 104px);
+    opacity: 0.105;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 194 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M10 80C48 46 99 31 178 38' opacity='.22'/%3E%3Cpath d='M28 92C72 70 124 67 172 86' opacity='.14'/%3E%3Cpath d='M56 76A58 58 0 0 1 150 26' opacity='.22'/%3E%3Cpath d='M104 14v22M104 74v24M54 58h22M140 58h30' opacity='.18'/%3E%3Ccircle cx='104' cy='58' r='32' opacity='.1'/%3E%3Cpath d='M54 78l50-36 46 22' opacity='.13'/%3E%3Cg opacity='.42'%3E%3Ccircle cx='54' cy='78' r='2.6'/%3E%3Cpath d='M45 78h18M54 69v18' opacity='.24'/%3E%3C/g%3E%3Cg opacity='.38'%3E%3Ccircle cx='150' cy='64' r='2.4'/%3E%3Cpath d='M142 64h16M150 56v16' opacity='.22'/%3E%3C/g%3E%3Cpath d='M160 22h22M171 11v22' opacity='.18'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .questExplorer-strategyOverview {
@@ -846,26 +834,6 @@
     background:
         linear-gradient(90deg, rgba(184, 137, 53, 0.04), transparent 18%, transparent 78%, rgba(81, 205, 189, 0.02)),
         var(--quest-reader);
-}
-
-.questExplorer-strategyOverview::before,
-.questExplorer-strategyOverview::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    width: 11px;
-    height: 11px;
-    border: 1px solid rgba(208, 162, 74, 0.48);
-    background: #071b1c;
-    transform: translateX(-50%) rotate(45deg);
-}
-
-.questExplorer-strategyOverview::before {
-    top: -6px;
-}
-
-.questExplorer-strategyOverview::after {
-    bottom: -6px;
 }
 
 .questExplorer-overviewColumn {
@@ -962,15 +930,16 @@
 }
 
 .questExplorer-questPathChronicle {
-    padding-left: 30px;
+    padding-left: 42px;
 }
 
 .questExplorer-questPathChronicle::before {
     content: "";
     position: absolute;
+    z-index: 0;
     top: 16px;
     bottom: 28px;
-    left: 6px;
+    left: 14px;
     width: 1px;
     background: linear-gradient(180deg, rgba(208, 162, 74, 0.36), rgba(208, 162, 74, 0.14) 48%, transparent);
 }
@@ -980,13 +949,13 @@
     content: "";
     position: absolute;
     z-index: 0;
-    top: clamp(86px, 16vh, 160px);
-    right: clamp(190px, 19vw, 320px);
-    width: clamp(280px, 27vw, 390px);
-    height: clamp(180px, 18vw, 252px);
-    opacity: 0.16;
+    top: clamp(104px, 18vh, 178px);
+    right: clamp(210px, 22vw, 370px);
+    width: clamp(250px, 23vw, 350px);
+    height: clamp(166px, 16vw, 226px);
+    opacity: 0.115;
     pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 390 252' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M26 202C104 124 246 106 364 184' opacity='.34'/%3E%3Cpath d='M62 224C142 168 263 158 344 216' opacity='.24'/%3E%3Ccircle cx='204' cy='164' r='92' opacity='.2'/%3E%3Ccircle cx='204' cy='164' r='54' opacity='.14'/%3E%3Cpath d='M204 72v24M204 232v-24M112 164h24M272 164h24' opacity='.32'/%3E%3Cpath d='M88 56l116 108 128-78' opacity='.38'/%3E%3Cpath d='M142 34c54 30 98 78 132 150' opacity='.18'/%3E%3Cg opacity='.76'%3E%3Cpath d='M88 45l8 11-8 11-8-11z'/%3E%3Cpath d='M88 35v42M67 56h42' opacity='.26'/%3E%3Ccircle cx='88' cy='56' r='3' opacity='.55'/%3E%3C/g%3E%3Cg opacity='.82'%3E%3Cpath d='M204 153l9 11-9 11-9-11z'/%3E%3Cpath d='M204 142v44M182 164h44' opacity='.28'/%3E%3Ccircle cx='204' cy='164' r='3' opacity='.58'/%3E%3C/g%3E%3Cg opacity='.66'%3E%3Cpath d='M332 75l8 11-8 11-8-11z'/%3E%3Cpath d='M332 65v42M311 86h42' opacity='.24'/%3E%3Ccircle cx='332' cy='86' r='3' opacity='.5'/%3E%3C/g%3E%3Cpath d='M42 230h48M292 232h62M52 176h28M314 146h30' opacity='.22'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 350 226' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M22 178C94 112 222 92 326 160' opacity='.3'/%3E%3Cpath d='M58 200C132 150 238 142 312 192' opacity='.18'/%3E%3Ccircle cx='184' cy='146' r='78' opacity='.17'/%3E%3Ccircle cx='184' cy='146' r='46' opacity='.11'/%3E%3Cpath d='M184 68v24M184 206v-24M106 146h24M248 146h24' opacity='.28'/%3E%3Cpath d='M86 54l98 92 112-70' opacity='.27'/%3E%3Cpath d='M136 36c48 28 86 70 116 130' opacity='.14'/%3E%3Cg opacity='.5'%3E%3Ccircle cx='86' cy='54' r='3'/%3E%3Cpath d='M66 54h40M86 34v40' opacity='.22'/%3E%3C/g%3E%3Cg opacity='.54'%3E%3Ccircle cx='184' cy='146' r='3.2'/%3E%3Cpath d='M164 146h40M184 126v40' opacity='.24'/%3E%3C/g%3E%3Cg opacity='.38'%3E%3Ccircle cx='296' cy='76' r='2.8'/%3E%3Cpath d='M276 76h40M296 56v40' opacity='.2'/%3E%3C/g%3E%3Cpath d='M38 206h42M264 208h56M48 156h26M282 128h28' opacity='.18'/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -999,6 +968,7 @@
 
 .questExplorer-questPathStep {
     position: relative;
+    z-index: 1;
     display: grid;
     gap: 22px;
     min-width: 0;
@@ -1008,7 +978,8 @@
 .questExplorer-questPathStep::before {
     content: "";
     position: absolute;
-    left: -30px;
+    z-index: 2;
+    left: -35px;
     top: 4px;
     width: 13px;
     height: 13px;
@@ -1045,18 +1016,6 @@
     border-top: 1px solid rgba(184, 137, 53, 0.22);
     border-bottom: 1px solid rgba(184, 137, 53, 0.16);
     transform: translateY(-50%);
-}
-
-.questExplorer-stepRule::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 12px;
-    height: 12px;
-    border: 1px solid rgba(208, 162, 74, 0.5);
-    transform: translate(-50%, -50%) rotate(45deg);
-    background: #071b1c;
 }
 
 .questExplorer-stepHeader {
@@ -1231,8 +1190,8 @@
     width: 74px;
     height: 18px;
     margin-top: 4px;
-    opacity: 0.42;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 74 18' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 9h24l5-5 5 5h40'/%3E%3Cpath d='M29 4l5 5-5 5-5-5z'/%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.32;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 74 18' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 9h28M38 9h36' opacity='.78'/%3E%3Cpath d='M33 5v8M48 6h18' opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -1460,18 +1419,6 @@
     border-top: 1px solid rgba(208, 162, 74, 0.2);
 }
 
-.questExplorer-loreBranchMoment::before {
-    content: "";
-    position: absolute;
-    top: -7px;
-    right: 12%;
-    width: 13px;
-    height: 13px;
-    border: 1px solid rgba(184, 137, 53, 0.32);
-    background: #071b1c;
-    transform: rotate(45deg);
-}
-
 .questExplorer-loreBranchMoment h3 {
     margin: 0;
     color: var(--quest-gold-bright);
@@ -1589,8 +1536,8 @@
     bottom: -5px;
     width: 54px;
     height: 9px;
-    opacity: 0.36;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 54 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 4.5h18l4-4 4 4h28'/%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.28;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 54 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 4.5h20M30 4.5h24'/%3E%3Cpath d='M25 1.5v6' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-size: contain;
 }
@@ -1766,15 +1713,15 @@
     }
 
     .questExplorer-questPathChronicle {
-        padding-left: 22px;
+        padding-left: 34px;
     }
 
     .questExplorer-questPathChronicle::before {
-        left: 4px;
+        left: 12px;
     }
 
     .questExplorer-questPathStep::before {
-        left: -24px;
+        left: -28px;
     }
 
     .questExplorer-stepObjectiveMetaGrid {
