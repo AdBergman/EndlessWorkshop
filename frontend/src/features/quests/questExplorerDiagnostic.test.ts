@@ -48,7 +48,7 @@ const diagnosticPayload: QuestExplorerResponse = {
     entries: [
         entry("Quest_Shared", "Shared Chronicle", {
             aliases: ["Quest_Shared_Alias_Step02"],
-            summaryLines: ["The same chronicle page carries both beats."],
+            summaryLines: ["The same chronicle page carries both steps."],
         }),
         entry("Quest_Branch", "Branch Choice", {
             navigation: {
@@ -197,7 +197,7 @@ describe("quest explorer frontend diagnostic", () => {
         expect(diagnostic.reportText).toContain("Shared Line: Shared Chronicle | Chapter 4 | 2 steps");
         expect(diagnostic.reportText).toContain("blocker (0):");
         expect(diagnostic.reportText).toContain("Branch variants stay in detail/chronicle context, not rail rows (1 variant(s)).");
-        expect(diagnostic.reportText).toContain("Repeated detailEntryKey Quest_Shared is represented as shared content / alias beat across 2 step DTOs.");
+        expect(diagnostic.reportText).toContain("Repeated detailEntryKey Quest_Shared is represented as repeated detail content / virtual alias-expanded step across 2 step DTOs.");
         expect(diagnostic.reportText).toContain("Frontend progression inference symbols are absent");
     });
 

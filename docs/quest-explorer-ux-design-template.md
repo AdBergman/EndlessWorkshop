@@ -93,7 +93,7 @@ Lore View is:
 
 - a chronicle reader
 - a transcript explorer
-- a choose-your-own-adventure flow
+- a branching progression flow
 - a narrative progression mode
 
 The user should feel like:
@@ -368,7 +368,7 @@ Faction
 
 ## Rail UX Rules
 
-### Current node
+### Current step
 
 - strongest contrast
 - brightest emphasis
@@ -378,7 +378,7 @@ Faction
 
 - muted illuminated state
 
-### Future nodes
+### Future steps
 
 - subdued
 - atmospheric fade
@@ -567,4 +567,3 @@ The target experience is:
 - narratively immersive
 - premium
 - enduring
-

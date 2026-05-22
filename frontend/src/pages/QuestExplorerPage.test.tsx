@@ -499,7 +499,7 @@ const repeatedDetailPayload: QuestExplorerResponse = {
         questEntry({
             entryKey: "Quest_Shared",
             title: "Shared Chronicle",
-            summaryLines: ["The same chronicle page carries both beats."],
+            summaryLines: ["The same chronicle page carries both steps."],
             aliases: ["Quest_Shared_Alias_Step02"],
             navigation: {
                 factionKey: "Faction_Kin",
@@ -901,6 +901,10 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("The tide record begins.")).toBeInTheDocument();
         expect(screen.getByText("We follow the old marker.")).toBeInTheDocument();
         expect(screen.getByText("Follow the marker")).toBeInTheDocument();
+        expect(screen.queryByText("Objectives")).not.toBeInTheDocument();
+        expect(screen.queryByText("Requirements")).not.toBeInTheDocument();
+        expect(screen.queryByText("Rewards")).not.toBeInTheDocument();
+        expect(screen.queryByText("Visit the first marker.")).not.toBeInTheDocument();
     });
 
     it("hydrates the quest query parameter for legacy links", async () => {
@@ -910,7 +914,43 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("renders strategy mode and reveals the next beat after a modeled choice", async () => {
+    it("keeps progression debug hidden by default", async () => {
+        renderPage("/quests/Quest_A");
+
+        expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Quest progression debug" })).not.toBeInTheDocument();
+        expect(screen.queryByText("stepKey")).not.toBeInTheDocument();
+    });
+
+    it("renders progression debug from the URL param without changing choice behavior", async () => {
+        const user = userEvent.setup();
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
+
+        expect(within(debugPanel).getByText("Debug progression")).toBeInTheDocument();
+        expect(within(debugPanel).getAllByText("stepKey").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getByText("Line_First_Tide:Faction_Kin:chapter-1:step-1")).toBeInTheDocument();
+        expect(within(debugPanel).getAllByText("detailEntryKey").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getAllByText("projectionKind").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getAllByText("sourceEntryKeys").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getAllByText("aliasEntryKeys").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getAllByText("variant keys").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getAllByText("continuation keys").length).toBeGreaterThan(0);
+        expect(within(debugPanel).getByText("selected choice path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("unresolved continuation")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
+
+        await waitFor(() => {
+            expect(within(debugPanel).getAllByText(/choiceId=branch:Branch_A/).length).toBeGreaterThan(0);
+        });
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("renders strategy mode and reveals the next step after a modeled choice", async () => {
         const user = userEvent.setup();
         renderPage("/quests/Quest_A");
 
@@ -920,13 +960,15 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Reach the marker.").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Gain Dust.").length).toBeGreaterThan(0);
+        expect(screen.queryByText("The tide record begins.")).not.toBeInTheDocument();
+        expect(screen.queryByText("We follow the old marker.")).not.toBeInTheDocument();
         expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
 
         const choice = screen.getByRole("button", { name: /Follow the marker/ });
         await user.click(choice);
 
         expect(choice).toHaveAttribute("aria-current", "true");
-        expect(screen.getByText("No strategy objectives are attached to this beat.")).toBeInTheDocument();
+        expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
@@ -976,6 +1018,26 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
     });
 
+    it("uses one choice path for lore branch moments and strategy choice cards", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        const shoreChoice = screen.getByRole("button", { name: /Study the shore/ });
+        await user.click(shoreChoice);
+
+        expect(shoreChoice).toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByText("Read the shore signs.")).toBeInTheDocument();
+        expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
+    });
+
     it("clears an incompatible choice path when navigation changes to another quest in the same chapter", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
@@ -997,7 +1059,7 @@ describe("QuestExplorerPage", () => {
 
         await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_B"));
         expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current");
-        expect(screen.getByText("The marker path opens.")).toBeInTheDocument();
+        expect(screen.getAllByText("The marker path opens.").length).toBeGreaterThan(0);
     });
 
     it("clears an incompatible choice path after category changes away and back", async () => {
@@ -1031,7 +1093,7 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
 
         expect(screen.getByText("Path Continues")).toBeInTheDocument();
-        expect(screen.getByText(/does not identify the next progression segment/)).toBeInTheDocument();
+        expect(screen.getByText(/does not identify the next continuation step/)).toBeInTheDocument();
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
     });
@@ -1168,12 +1230,13 @@ describe("QuestExplorerPage", () => {
         expect(within(rail).getByRole("button", { name: /Forgotten Power\s+Chapter 2\s+3 steps/ })).toHaveAttribute("aria-current", "page");
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         expect(within(chronicle).getByText("Step 2")).toBeInTheDocument();
-        expect(within(chronicle).getByText("Alias beat")).toBeInTheDocument();
-        expect(within(chronicle).getByRole("button", { name: /Branch variant\s+Pious/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle).queryByText("virtual_alias_expanded")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("branch_variant")).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Pious/ })).toHaveAttribute("aria-current", "true");
         expect(useQuestStore.getState().selectedEntryKey).toBe("FactionQuest_Mukag_Chapter02_Step02_Choice01");
     });
 
-    it("renders repeated detailEntryKey virtual steps as shared progression beats without duplicate content", async () => {
+    it("renders repeated detailEntryKey virtual steps without parser labels", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(repeatedDetailPayload);
         renderPage("/quests/Quest_Shared_Alias_Step02");
 
@@ -1182,9 +1245,10 @@ describe("QuestExplorerPage", () => {
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
         expect(within(chronicle).getByText("Step 2")).toBeInTheDocument();
-        expect(within(chronicle).getByText("Alias beat")).toBeInTheDocument();
-        expect(within(chronicle).getAllByText("Shared content")).toHaveLength(2);
-        expect(screen.getAllByText("The same chronicle page carries both beats.")).toHaveLength(1);
+        expect(within(chronicle).queryByText("virtual_alias_expanded")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("repeated detail content")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Entry-backed")).not.toBeInTheDocument();
+        expect(screen.getAllByText("The same chronicle page carries both steps.")).toHaveLength(1);
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Shared");
     });
 

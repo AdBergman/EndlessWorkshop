@@ -124,6 +124,7 @@ export type QuestExplorerEntry = {
     summaryLines: string[];
     questType: string | null;
     isMandatory: boolean | null;
+    // Legacy exporter/import compatibility field; normal Quest Explorer UI must not read or display it.
     isKeyNarrativeBeat: boolean | null;
     aliases: string[];
     navigation: QuestNavigation;

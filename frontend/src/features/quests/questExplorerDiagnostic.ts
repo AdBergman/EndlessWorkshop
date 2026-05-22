@@ -163,12 +163,12 @@ function addRepeatedDetailEntryKeyFindings(
     }
 
     for (const [detailEntryKey, steps] of repeated) {
-        const hasAliasBeat = steps.some((step) => step.projectionKind === "virtual_alias_expanded" || step.aliasEntryKeys.length > 0);
+        const hasVirtualAliasExpandedStep = steps.some((step) => step.projectionKind === "virtual_alias_expanded" || step.aliasEntryKeys.length > 0);
         findings.push({
-            classification: hasAliasBeat ? "accepted modeled artifact" : "warning",
-            message: hasAliasBeat
-                ? `Repeated detailEntryKey ${detailEntryKey} is represented as shared content / alias beat across ${steps.length} step DTOs.`
-                : `Repeated detailEntryKey ${detailEntryKey} lacks an explicit alias-beat DTO marker across ${steps.length} step DTOs.`,
+            classification: hasVirtualAliasExpandedStep ? "accepted modeled artifact" : "warning",
+            message: hasVirtualAliasExpandedStep
+                ? `Repeated detailEntryKey ${detailEntryKey} is represented as repeated detail content / virtual alias-expanded step across ${steps.length} step DTOs.`
+                : `Repeated detailEntryKey ${detailEntryKey} lacks an explicit virtual alias-expanded step marker across ${steps.length} step DTOs.`,
         });
     }
 }

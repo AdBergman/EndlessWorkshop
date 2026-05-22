@@ -19,7 +19,7 @@ const samplePayload: QuestExplorerResponse = {
         {
             entryKey: "Quest_Shared",
             title: "Shared Chronicle",
-            summaryLines: ["The same chronicle page carries both beats."],
+            summaryLines: ["The same chronicle page carries both steps."],
             questType: "Faction Quest",
             isMandatory: true,
             isKeyNarrativeBeat: false,

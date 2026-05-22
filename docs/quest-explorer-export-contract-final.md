@@ -73,6 +73,7 @@ QuestExplorerEntry {
 Notes:
 - `entryKey` is the stable canonical quest explorer entry identifier.
 - `title` and `summaryLines` must always be display-grade.
+- `isKeyNarrativeBeat` is retained only as a legacy exporter/import compatibility field. Normal Quest Explorer UI must not display it or derive behavior from it.
 - `aliases` are lookup-only compatibility identifiers.
 - Frontend should never display aliases directly.
 
@@ -315,7 +316,7 @@ Field semantics:
   - display-grade branch family label
 
 - `outcomePreviewLines`
-  - lightweight choose-your-own-adventure preview text
+  - lightweight branch choice preview text
   - intended for lore mode previews
 
 ---

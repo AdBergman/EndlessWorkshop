@@ -124,6 +124,7 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
     summaryLines: cleanStringList(entry?.summaryLines),
     questType: cleanString(entry?.questType),
     isMandatory: cleanBoolean(entry?.isMandatory),
+    // Legacy exporter/import compatibility field; preserved in the DTO but ignored by normal UI.
     isKeyNarrativeBeat: cleanBoolean(entry?.isKeyNarrativeBeat),
     aliases: cleanStringList(entry?.aliases),
     navigation: {
