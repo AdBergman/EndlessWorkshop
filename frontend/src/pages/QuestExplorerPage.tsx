@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch";
 import {
@@ -37,23 +37,57 @@ import type {
     QuestProgressionQuestline,
     QuestProgressionStep,
     QuestProgressionVariant,
-    Requirement,
-    Reward,
 } from "@/types/questTypes";
 import "@/components/Quests/QuestExplorer.css";
-
-type Group<T> = {
-    id: string;
-    label: string;
-    order: number;
-    items: T[];
-};
 
 type QuestDetailProgression = {
     questline: QuestProgressionQuestline;
     chapter: QuestProgressionChapter;
     activeStepKeys: Set<string>;
     activeVariantEntryKeys: Set<string>;
+};
+
+type QuestProgressionLocation = {
+    questline: QuestProgressionQuestline;
+    chapter: QuestProgressionChapter;
+    step: QuestProgressionStep;
+    stepIndex: number;
+};
+
+type AdventureChoice = {
+    id: string;
+    label: string;
+    eyebrow: string;
+    descriptionLines: string[];
+    targetEntryKey: string | null;
+    nextEntryKeys: string[];
+    accent: "gold" | "teal";
+};
+
+type AdventureChoiceSelection = {
+    stepKey: string;
+    choiceId: string;
+    label: string;
+    targetEntryKey: string | null;
+    nextEntryKeys: string[];
+};
+
+type AdventureSegment = {
+    step: QuestProgressionStep;
+    stepIndex: number;
+    displayEntry: QuestExplorerEntry | null;
+    choices: AdventureChoice[];
+    selectedChoice: AdventureChoiceSelection | null;
+    isActive: boolean;
+    sharesDetailEntry: boolean;
+    rendersSharedAlias: boolean;
+};
+
+type AdventureFlow = {
+    segments: AdventureSegment[];
+    lockedSteps: QuestProgressionStep[];
+    unresolvedChoice: AdventureChoiceSelection | null;
+    reachedEntryKey: string | null;
 };
 
 const PROJECTION_LABELS: Record<string, string> = {
@@ -185,30 +219,6 @@ function findDetailProgression(
     return null;
 }
 
-function groupByLabel<T>(
-    values: T[],
-    getLabel: (value: T) => string | null,
-    getOrder: (value: T) => number | null
-): Group<T>[] {
-    const groups = new Map<string, Group<T>>();
-    values.forEach((value, index) => {
-        const label = getLabel(value) || "General";
-        const id = `${label}:${getOrder(value) ?? index}`;
-        const current = groups.get(id);
-        if (current) {
-            current.items.push(value);
-        } else {
-            groups.set(id, {
-                id,
-                label,
-                order: getOrder(value) ?? Number.MAX_SAFE_INTEGER,
-                items: [value],
-            });
-        }
-    });
-    return [...groups.values()].sort((left, right) => left.order - right.order || left.label.localeCompare(right.label));
-}
-
 function CategorySelector({
     value,
     options,
@@ -305,346 +315,627 @@ function QuestList({
     );
 }
 
-function ProgressionVariantButton({
-    variant,
-    entriesByKey,
-    isActive,
-    onSelectEntry,
-}: {
-    variant: QuestProgressionVariant;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    isActive: boolean;
-    onSelectEntry: (entryKey: string) => void;
-}) {
-    const target = entriesByKey[variant.entryKey];
-    const label = target?.title || variant.title || variant.entryKey;
+function uniqueStrings(values: Array<string | null | undefined>): string[] {
+    return [...new Set(values.filter((value): value is string => Boolean(value)))];
+}
 
+function branchTargetKeys(branch: QuestBranch): string[] {
+    return uniqueStrings([
+        ...branch.nextEntryKeys,
+        ...branch.failureEntryKeys,
+        ...branch.convergesIntoEntryKeys,
+    ]);
+}
+
+function variantTargetKeys(variant: QuestProgressionVariant): string[] {
+    return uniqueStrings([
+        ...variant.nextEntryKeys,
+        ...variant.failureEntryKeys,
+        ...variant.convergesIntoEntryKeys,
+    ]);
+}
+
+function continuationKeys(entry: QuestExplorerEntry | null): string[] {
+    if (!entry) return [];
+    return uniqueStrings([
+        ...entry.navigation.nextEntryKeys,
+        ...entry.navigation.failureEntryKeys,
+        ...entry.navigation.convergesIntoEntryKeys,
+    ]);
+}
+
+function entryKeysWithAliases(entryKey: string | null | undefined, entriesByKey: Record<string, QuestExplorerEntry>): string[] {
+    if (!entryKey) return [];
+    const entry = entriesByKey[entryKey];
+    return entry ? entryIdentityKeys(entry) : [entryKey];
+}
+
+function knownEntryKey(keys: string[], entriesByKey: Record<string, QuestExplorerEntry>): string | null {
+    return keys.find((key) => Boolean(entriesByKey[key])) ?? null;
+}
+
+function stepMatchesKeys(
+    step: QuestProgressionStep,
+    keys: string[],
+    entriesByKey: Record<string, QuestExplorerEntry>
+): boolean {
+    const identities = new Set(keys.flatMap((key) => entryKeysWithAliases(key, entriesByKey)));
+    return stepIdentityKeys(step).some((key) => identities.has(key));
+}
+
+function stepIndexForKeys(
+    steps: QuestProgressionStep[],
+    keys: string[],
+    entriesByKey: Record<string, QuestExplorerEntry>,
+    startIndex = 0
+): number | null {
+    if (keys.length === 0) return null;
+    const index = steps.findIndex((step, candidateIndex) => (
+        candidateIndex >= startIndex && stepMatchesKeys(step, keys, entriesByKey)
+    ));
+    return index >= 0 ? index : null;
+}
+
+function progressionLocationForKeys(
+    progression: QuestExplorerProgression | null,
+    keys: string[],
+    entriesByKey: Record<string, QuestExplorerEntry>
+): QuestProgressionLocation | null {
+    if (!progression || keys.length === 0) return null;
+
+    for (const questline of progression.questlines) {
+        for (const chapter of questline.chapters) {
+            const stepIndex = stepIndexForKeys(chapter.steps, keys, entriesByKey);
+            if (stepIndex != null) {
+                return { questline, chapter, step: chapter.steps[stepIndex], stepIndex };
+            }
+        }
+    }
+
+    return null;
+}
+
+function progressionContextKey(progression: QuestDetailProgression | null, fallback: string | null): string {
+    if (!progression) return fallback ?? "none";
+    return [
+        progression.questline.questLineFamilyKey ?? progression.questline.questLineKey ?? "questline",
+        progression.questline.factionFamilyKey ?? progression.questline.factionKey ?? "faction",
+        progression.chapter.chapterOrder ?? progression.chapter.chapterNumber ?? "chapter",
+        progression.chapter.title,
+    ].join(":");
+}
+
+function isSameProgressionChapter(
+    left: QuestDetailProgression,
+    right: QuestProgressionLocation
+): boolean {
     return (
-        <button
-            type="button"
-            className={`questExplorer-progressionVariant${isActive ? " is-active" : ""}`}
-            aria-current={isActive ? "true" : undefined}
-            onClick={() => target && onSelectEntry(target.entryKey)}
-            disabled={!target}
-        >
-            <span>{variantKindLabel(variant.variantKind)}</span>
-            <strong>{label}</strong>
-            {variant.branchLabel ? <small>{variant.branchLabel}</small> : null}
-        </button>
+        (left.questline.questLineFamilyKey ?? left.questline.questLineKey) === (right.questline.questLineFamilyKey ?? right.questline.questLineKey)
+        && (left.questline.factionFamilyKey ?? left.questline.factionKey) === (right.questline.factionFamilyKey ?? right.questline.factionKey)
+        && (left.chapter.chapterOrder ?? left.chapter.chapterNumber ?? left.chapter.title) === (right.chapter.chapterOrder ?? right.chapter.chapterNumber ?? right.chapter.title)
     );
 }
 
-function ProgressionChronicle({
-    progression,
-    entriesByKey,
-    onSelectEntry,
-}: {
-    progression: QuestDetailProgression | null;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    onSelectEntry: (entryKey: string) => void;
-}) {
-    if (!progression) return null;
-
-    const detailEntryCounts = progression.chapter.steps.reduce((counts, step) => {
+function detailEntryCounts(chapter: QuestProgressionChapter): Map<string, number> {
+    return chapter.steps.reduce((counts, step) => {
         counts.set(step.detailEntryKey, (counts.get(step.detailEntryKey) ?? 0) + 1);
         return counts;
     }, new Map<string, number>());
-    const chapterLabel = chapterPositionLabel(progression.chapter);
-    const questlineLabel = fallbackLabel(
-        progression.questline.questLineName,
-        progression.questline.questLineKey,
-        null
-    );
-    const factionLabel = fallbackLabel(
-        progression.questline.factionName,
-        progression.questline.factionKey,
-        null
-    );
+}
+
+function choiceDescription(lines: Array<string | null | undefined>, fallback: string | null): string[] {
+    const cleanLines = uniqueStrings(lines.map((line) => line?.trim()).filter(Boolean));
+    return cleanLines.length > 0 ? cleanLines : fallback ? [fallback] : [];
+}
+
+function choicesForStep(
+    step: QuestProgressionStep,
+    detailEntry: QuestExplorerEntry | null,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): AdventureChoice[] {
+    const variantChoices = visibleStepVariants(step).map((variant): AdventureChoice => {
+        const target = entriesByKey[variant.entryKey] ?? null;
+        const explicitTargets = variantTargetKeys(variant);
+        const label = target?.title || variant.title || variant.entryKey;
+
+        return {
+            id: `variant:${variant.entryKey}`,
+            label,
+            eyebrow: variantKindLabel(variant.variantKind),
+            descriptionLines: choiceDescription([variant.branchLabel, target?.summaryLines[0]], null),
+            targetEntryKey: target?.entryKey ?? knownEntryKey(explicitTargets, entriesByKey),
+            nextEntryKeys: uniqueStrings([variant.entryKey, ...explicitTargets]),
+            accent: "teal",
+        };
+    });
+
+    const branchChoices = [...(detailEntry?.branches ?? [])]
+        .sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER))
+        .map((branch): AdventureChoice => {
+            const explicitTargets = branchTargetKeys(branch);
+            const targetEntryKey = knownEntryKey(explicitTargets, entriesByKey);
+            const target = targetEntryKey ? entriesByKey[targetEntryKey] : null;
+
+            return {
+                id: `branch:${branch.branchKey}`,
+                label: branch.label || target?.title || "Choice",
+                eyebrow: branch.groupLabel || branch.groupKey || branch.choiceKey || "Choice",
+                descriptionLines: choiceDescription([
+                    ...(branch.lore?.outcomePreviewLines ?? []),
+                    ...(branch.strategy?.conditions ?? []),
+                    target?.summaryLines[0],
+                ], target?.title ?? null),
+                targetEntryKey,
+                nextEntryKeys: explicitTargets,
+                accent: "gold",
+            };
+        });
+
+    const seen = new Set<string>();
+    return [...variantChoices, ...branchChoices].filter((choice) => {
+        if (seen.has(choice.id)) return false;
+        seen.add(choice.id);
+        return true;
+    });
+}
+
+function selectionForChoice(stepKey: string, choice: AdventureChoice): AdventureChoiceSelection {
+    return {
+        stepKey,
+        choiceId: choice.id,
+        label: choice.label,
+        targetEntryKey: choice.targetEntryKey,
+        nextEntryKeys: choice.nextEntryKeys,
+    };
+}
+
+function selectedChoiceTargetKeys(selection: AdventureChoiceSelection): string[] {
+    return uniqueStrings([selection.targetEntryKey, ...selection.nextEntryKeys]);
+}
+
+function selectedChoiceContinuationKeys(
+    selection: AdventureChoiceSelection,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): string[] {
+    const target = selection.targetEntryKey ? entriesByKey[selection.targetEntryKey] ?? null : null;
+    return uniqueStrings([
+        ...selection.nextEntryKeys,
+        ...continuationKeys(target),
+    ]);
+}
+
+function implicitActiveChoice(
+    choices: AdventureChoice[],
+    activeVariantEntryKeys: Set<string>
+): AdventureChoiceSelection | null {
+    const choice = choices.find((candidate) => (
+        candidate.targetEntryKey ? activeVariantEntryKeys.has(candidate.targetEntryKey) : false
+    ) || candidate.nextEntryKeys.some((entryKey) => activeVariantEntryKeys.has(entryKey)));
+
+    return choice ? selectionForChoice("", choice) : null;
+}
+
+function buildAdventureFlow(
+    progression: QuestDetailProgression,
+    entriesByKey: Record<string, QuestExplorerEntry>,
+    choicePath: AdventureChoiceSelection[],
+    fullProgression: QuestExplorerProgression | null
+): AdventureFlow {
+    const steps = progression.chapter.steps;
+    const selectedByStep = new Map(choicePath.map((selection) => [selection.stepKey, selection]));
+    const counts = detailEntryCounts(progression.chapter);
+    const renderedDetailKeys = new Set<string>();
+    const displayEntryOverrides = new Map<string, string>();
+    const activeIndexes = steps
+        .map((step, index) => progression.activeStepKeys.has(step.stepKey) ? index : -1)
+        .filter((index) => index >= 0);
+    let visibleUntil = Math.max(0, activeIndexes.length ? Math.max(...activeIndexes) : 0);
+    let unresolvedChoice: AdventureChoiceSelection | null = null;
+    let reachedEntryKey: string | null = null;
+    let lockedFromIndex: number | null = null;
+    const segments: AdventureSegment[] = [];
+
+    for (let index = 0; index < steps.length; index += 1) {
+        if (index > visibleUntil) {
+            lockedFromIndex = index;
+            break;
+        }
+
+        const step = steps[index];
+        const overrideEntryKey = displayEntryOverrides.get(step.stepKey);
+        const displayEntry = (overrideEntryKey ? entriesByKey[overrideEntryKey] : null)
+            ?? entriesByKey[step.detailEntryKey]
+            ?? null;
+        const choices = choicesForStep(step, displayEntry, entriesByKey);
+        const selectedChoice = selectedByStep.get(step.stepKey)
+            ?? implicitActiveChoice(choices, progression.activeVariantEntryKeys);
+        const sharesDetailEntry = (counts.get(step.detailEntryKey) ?? 0) > 1;
+        const rendersSharedAlias = sharesDetailEntry && renderedDetailKeys.has(step.detailEntryKey);
+
+        segments.push({
+            step,
+            stepIndex: index,
+            displayEntry,
+            choices,
+            selectedChoice,
+            isActive: progression.activeStepKeys.has(step.stepKey),
+            sharesDetailEntry,
+            rendersSharedAlias,
+        });
+
+        if (!rendersSharedAlias) {
+            renderedDetailKeys.add(step.detailEntryKey);
+        }
+
+        if (choices.length > 0) {
+            if (!selectedChoice) {
+                if (index < visibleUntil) {
+                    continue;
+                }
+                lockedFromIndex = index + 1;
+                break;
+            }
+
+            const targetKeys = selectedChoiceTargetKeys(selectedChoice);
+            const targetStepIndex = stepIndexForKeys(steps, targetKeys, entriesByKey, index);
+            if (targetStepIndex != null) {
+                if (selectedChoice.targetEntryKey) {
+                    displayEntryOverrides.set(steps[targetStepIndex].stepKey, selectedChoice.targetEntryKey);
+                }
+                visibleUntil = Math.max(visibleUntil, targetStepIndex);
+            }
+
+            const continuationStepIndex = stepIndexForKeys(
+                steps,
+                selectedChoiceContinuationKeys(selectedChoice, entriesByKey),
+                entriesByKey,
+                index + 1
+            );
+            if (continuationStepIndex != null) {
+                visibleUntil = Math.max(visibleUntil, continuationStepIndex);
+                continue;
+            }
+
+            const nextLocation = progressionLocationForKeys(fullProgression, selectedChoiceContinuationKeys(selectedChoice, entriesByKey), entriesByKey)
+                ?? progressionLocationForKeys(fullProgression, targetKeys, entriesByKey);
+            if (nextLocation && !isSameProgressionChapter(progression, nextLocation)) {
+                reachedEntryKey = entriesByKey[nextLocation.step.detailEntryKey]?.entryKey
+                    ?? selectedChoice.targetEntryKey
+                    ?? null;
+                break;
+            }
+
+            if (targetStepIndex != null && targetStepIndex <= index && selectedChoice.stepKey === "") {
+                continue;
+            }
+
+            if (targetStepIndex == null || targetStepIndex <= index) {
+                unresolvedChoice = selectedChoice;
+                break;
+            }
+        } else if (index === visibleUntil && index < steps.length - 1) {
+            visibleUntil = index + 1;
+        }
+    }
+
+    return {
+        segments,
+        lockedSteps: lockedFromIndex == null ? [] : steps.slice(lockedFromIndex),
+        unresolvedChoice,
+        reachedEntryKey,
+    };
+}
+
+function StrategyOverview({ entry }: { entry: QuestExplorerEntry }) {
+    const objectives = entry.strategyView.objectives;
+    const requirements = objectives.flatMap((objective) => objective.requirements);
+    const rewards = objectives.flatMap((objective) => objective.rewards);
 
     return (
-        <section className="questExplorer-progressionChronicle" aria-label="Selected progression">
-            <header>
-                <div>
-                    <span>Progression</span>
-                    <strong className="questExplorer-progressionTitle">{progression.chapter.title || chapterLabel}</strong>
-                    <p>{[factionLabel, questlineLabel, chapterLabel].filter(Boolean).join(" / ")}</p>
-                </div>
-                <strong className="questExplorer-progressionCount">{progression.chapter.steps.length} {progression.chapter.steps.length === 1 ? "beat" : "beats"}</strong>
-            </header>
-
-            <ol>
-                {progression.chapter.steps.map((step) => {
-                    const isActiveStep = progression.activeStepKeys.has(step.stepKey);
-                    const variants = visibleStepVariants(step);
-                    const sharesDetailEntry = (detailEntryCounts.get(step.detailEntryKey) ?? 0) > 1;
-
-                    return (
-                        <li
-                            className={`questExplorer-progressionStep${isActiveStep ? " is-active" : ""}`}
-                            aria-current={isActiveStep ? "step" : undefined}
-                            key={step.stepKey}
-                        >
-                            <div className="questExplorer-progressionStepMarker">
-                                {step.stepNumber ?? step.stepOrder ?? "-"}
-                            </div>
-                            <div className="questExplorer-progressionStepBody">
-                                <header>
-                                    <div>
-                                        <span>{stepPositionLabel(step)}</span>
-                                        <strong>{step.title || entriesByKey[step.detailEntryKey]?.title || "Untitled beat"}</strong>
-                                    </div>
-                                    <small>{projectionLabel(step.projectionKind)}</small>
-                                </header>
-                                {(sharesDetailEntry || isVirtualAliasStep(step)) ? (
-                                    <div className="questExplorer-progressionStepMeta">
-                                        {sharesDetailEntry ? <span>Shared content</span> : null}
-                                        {isVirtualAliasStep(step) ? <span>{step.detailEntryKey}</span> : null}
-                                    </div>
-                                ) : null}
-                                {variants.length > 0 ? (
-                                    <div className="questExplorer-progressionVariants" aria-label={`${stepPositionLabel(step)} variants`}>
-                                        {variants.map((variant) => (
-                                            <ProgressionVariantButton
-                                                key={`${step.stepKey}:${variant.entryKey}`}
-                                                variant={variant}
-                                                entriesByKey={entriesByKey}
-                                                isActive={progression.activeVariantEntryKeys.has(variant.entryKey)}
-                                                onSelectEntry={onSelectEntry}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : null}
-                            </div>
-                        </li>
-                    );
-                })}
-            </ol>
+        <section className="questExplorer-strategyOverview" aria-label="Strategy overview">
+            <OverviewColumn
+                title="Objectives"
+                items={objectives.map((objective) => objective.text)}
+                emptyLabel="No objectives recorded"
+                tone="objective"
+            />
+            <OverviewColumn
+                title="Requirements"
+                items={requirements.map((requirement) => requirement.displayText)}
+                emptyLabel="No requirements recorded"
+                tone="requirement"
+            />
+            <OverviewColumn
+                title="Rewards"
+                items={rewards.map((reward) => reward.displayText)}
+                emptyLabel="No rewards recorded"
+                tone="reward"
+            />
         </section>
     );
 }
 
-function LoreMode({ entry }: { entry: QuestExplorerEntry }) {
-    const sections = entry.loreView.sections;
-
-    if (sections.length === 0) {
-        return <p className="questExplorer-emptyState">No lore sections are attached to this quest.</p>;
-    }
+function OverviewColumn({
+    title,
+    items,
+    emptyLabel,
+    tone,
+}: {
+    title: string;
+    items: string[];
+    emptyLabel: string;
+    tone: "objective" | "requirement" | "reward";
+}) {
+    const visibleItems = items.filter(Boolean).slice(0, 5);
 
     return (
-        <div className="questExplorer-loreFlow">
-            {sections.map((section) => (
-                <section className="questExplorer-loreSection" key={section.sectionKey} aria-label={section.phase}>
-                    <header>
-                        <span>{section.phase}</span>
-                        {[section.choiceKey, section.objectiveKey].filter(Boolean).map((value) => (
-                            <code key={value}>{value}</code>
-                        ))}
-                    </header>
-
-                    <div className="questExplorer-loreLines">
-                        {section.lines.map((line, index) => (
-                            <article
-                                className={`questExplorer-loreLine questExplorer-loreLine--${line.role || "narrator"}`}
-                                key={`${section.sectionKey}:${index}`}
-                            >
-                                <div>{line.speakerLabel || line.role || "Narrator"}</div>
-                                <p>{line.text}</p>
-                            </article>
-                        ))}
-                    </div>
-                </section>
-            ))}
-        </div>
+        <section className={`questExplorer-overviewColumn questExplorer-overviewColumn--${tone}`}>
+            <h3>{title}</h3>
+            <ul>
+                {visibleItems.length > 0 ? visibleItems.map((item, index) => (
+                    <li key={`${title}:${index}`}>{item}</li>
+                )) : <li className="is-empty">{emptyLabel}</li>}
+            </ul>
+        </section>
     );
 }
 
-function RequirementGroups({ requirements }: { requirements: Requirement[] }) {
-    const groups = groupByLabel(requirements, (item) => item.groupLabel || item.kind, (item) => item.groupOrder);
-
-    if (groups.length === 0) return null;
+function LorePrelude({ entry }: { entry: QuestExplorerEntry }) {
+    const quoteLine = entry.loreView.sections
+        .flatMap((section) => section.lines)
+        .find((line) => line.text.length > 48 && line.role !== "narrator")
+        ?? entry.loreView.sections.flatMap((section) => section.lines).find((line) => line.text.length > 64);
 
     return (
-        <div className="questExplorer-strategyGroups">
-            {groups.map((group) => (
-                <section className="questExplorer-strategyGroup" key={group.id}>
-                    <h4>{group.label}</h4>
-                    <ul>
-                        {group.items.map((requirement) => (
-                            <li key={requirement.requirementKey}>
-                                <span>{requirement.displayText}</span>
-                                {[requirement.referenceDisplayName, requirement.targetLabel, requirement.state].filter(Boolean).length > 0 ? (
-                                    <small>
-                                        {[requirement.referenceDisplayName, requirement.targetLabel, requirement.state].filter(Boolean).join(" / ")}
-                                    </small>
-                                ) : null}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            ))}
-        </div>
+        <section className="questExplorer-lorePrelude" aria-label="Lore prelude">
+            <div className="questExplorer-loreHero" aria-hidden="true" />
+            {quoteLine ? (
+                <blockquote className="questExplorer-loreQuote">
+                    <p>{quoteLine.text}</p>
+                    <footer>{quoteLine.speakerLabel || quoteLine.role || "Archive"}</footer>
+                </blockquote>
+            ) : null}
+        </section>
     );
 }
 
-function RewardGroups({ rewards }: { rewards: Reward[] }) {
-    const groups = groupByLabel(rewards, (item) => item.groupLabel || item.kind, (item) => item.groupOrder);
-
-    if (groups.length === 0) return null;
-
-    return (
-        <div className="questExplorer-strategyGroups">
-            {groups.map((group) => (
-                <section className="questExplorer-strategyGroup questExplorer-strategyGroup--reward" key={group.id}>
-                    <h4>{group.label}</h4>
-                    <ul>
-                        {group.items.map((reward) => (
-                            <li key={reward.rewardKey}>
-                                <span>{reward.displayText}</span>
-                                {[reward.amount == null ? null : String(reward.amount), reward.formulaText, reward.assetDisplayName, reward.referenceDisplayName, reward.targetScopeLabel].filter(Boolean).length > 0 ? (
-                                    <small>
-                                        {[reward.amount == null ? null : String(reward.amount), reward.formulaText, reward.assetDisplayName, reward.referenceDisplayName, reward.targetScopeLabel].filter(Boolean).join(" / ")}
-                                    </small>
-                                ) : null}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            ))}
-        </div>
-    );
-}
-
-function StrategyMode({ entry }: { entry: QuestExplorerEntry }) {
+function EntryStrategyContent({ entry }: { entry: QuestExplorerEntry }) {
     const objectives = entry.strategyView.objectives;
 
     if (objectives.length === 0) {
-        return <p className="questExplorer-emptyState">No strategy objectives are attached to this quest.</p>;
+        return <p className="questExplorer-emptyState">No strategy objectives are attached to this beat.</p>;
     }
 
     return (
-        <div className="questExplorer-strategyFlow">
+        <div className="questExplorer-stepStrategy">
             {objectives.map((objective, index) => (
-                <article className="questExplorer-objective" key={objective.objectiveKey ?? `${entry.entryKey}:objective:${index}`}>
-                    <header>
-                        <span>{objective.phase || "Objective"}</span>
-                        {objective.objectiveKey ? <code>{objective.objectiveKey}</code> : null}
-                    </header>
+                <section className="questExplorer-stepObjective" key={objective.objectiveKey ?? `${entry.entryKey}:objective:${index}`}>
+                    <span>{objective.phase || "Objective"}</span>
                     <p>{objective.text}</p>
-                    <RequirementGroups requirements={objective.requirements} />
-                    <RewardGroups rewards={objective.rewards} />
-                </article>
+                    <InlineMetaList label="Requirements" values={objective.requirements.map((requirement) => requirement.displayText)} />
+                    <InlineMetaList label="Rewards" values={objective.rewards.map((reward) => reward.displayText)} />
+                </section>
             ))}
         </div>
     );
 }
 
-function LinkButtons({
-    label,
-    entryKeys,
-    entriesByKey,
-    onSelectEntry,
-}: {
-    label: string;
-    entryKeys: string[];
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    onSelectEntry: (entryKey: string) => void;
-}) {
-    if (entryKeys.length === 0) return null;
+function InlineMetaList({ label, values }: { label: string; values: string[] }) {
+    const cleanValues = values.filter(Boolean);
+    if (cleanValues.length === 0) return null;
 
     return (
-        <section className="questExplorer-linkGroup" aria-label={label}>
-            <h4>{label}</h4>
+        <div className="questExplorer-inlineMeta">
+            <strong>{label}</strong>
+            <ul>
+                {cleanValues.map((value, index) => (
+                    <li key={`${label}:${index}`}>{value}</li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function EntryLoreContent({ entry, compact = false }: { entry: QuestExplorerEntry; compact?: boolean }) {
+    const sections = entry.loreView.sections;
+
+    if (sections.length === 0) {
+        return entry.summaryLines.length > 0 ? (
+            <div className="questExplorer-stepSummary">
+                {entry.summaryLines.map((line, index) => (
+                    <p key={`${entry.entryKey}:summary:${index}`}>{line}</p>
+                ))}
+            </div>
+        ) : <p className="questExplorer-emptyState">No lore sections are attached to this beat.</p>;
+    }
+
+    return (
+        <div className={`questExplorer-stepLore${compact ? " questExplorer-stepLore--compact" : ""}`}>
+            {sections.map((section) => (
+                <section className="questExplorer-stepLoreSection" key={section.sectionKey}>
+                    <h4>{section.phase || "Chronicle"}</h4>
+                    {section.lines.map((line, index) => (
+                        <p className={`questExplorer-stepLoreLine questExplorer-stepLoreLine--${line.role || "narrator"}`} key={`${section.sectionKey}:${index}`}>
+                            {line.speakerLabel ? <strong>{line.speakerLabel}: </strong> : null}
+                            {line.text}
+                        </p>
+                    ))}
+                </section>
+            ))}
+        </div>
+    );
+}
+
+function AdventureChoiceCards({
+    step,
+    choices,
+    selectedChoice,
+    onChoose,
+}: {
+    step: QuestProgressionStep;
+    choices: AdventureChoice[];
+    selectedChoice: AdventureChoiceSelection | null;
+    onChoose: (step: QuestProgressionStep, choice: AdventureChoice) => void;
+}) {
+    if (choices.length === 0) return null;
+
+    return (
+        <section className="questExplorer-choiceGate" aria-label={`${stepPositionLabel(step)} choices`}>
+            <h3>Make a Choice</h3>
             <div>
-                {entryKeys.map((entryKey) => {
-                    const target = entriesByKey[entryKey];
+                {choices.map((choice) => {
+                    const isSelected = selectedChoice?.choiceId === choice.id;
                     return (
                         <button
                             type="button"
-                            key={entryKey}
-                            onClick={() => target && onSelectEntry(target.entryKey)}
-                            disabled={!target}
+                            className={`questExplorer-choiceCard questExplorer-choiceCard--${choice.accent}${isSelected ? " is-selected" : ""}`}
+                            aria-pressed={isSelected}
+                            aria-current={isSelected ? "true" : undefined}
+                            onClick={() => onChoose(step, choice)}
+                            key={`${step.stepKey}:${choice.id}`}
                         >
-                            {target?.title ?? entryKey}
+                            <span className="questExplorer-choiceCardMark" aria-hidden="true" />
+                            <span className="questExplorer-choiceCardGlyph" aria-hidden="true" />
+                            <span className="questExplorer-choiceCardCopy">
+                                <small>{choice.eyebrow}</small>
+                                <strong>{choice.label}</strong>
+                                {choice.descriptionLines.length > 0 ? <span>{choice.descriptionLines.join(" ")}</span> : null}
+                            </span>
                         </button>
                     );
                 })}
             </div>
+            {!selectedChoice ? (
+                <p className="questExplorer-choiceHint">Your choice will shape the path ahead.</p>
+            ) : null}
         </section>
     );
 }
 
-function BranchCard({
-    branch,
-    entriesByKey,
-    onSelectEntry,
-}: {
-    branch: QuestBranch;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    onSelectEntry: (entryKey: string) => void;
-}) {
+function ProgressionPips({ total, activeIndex }: { total: number; activeIndex: number }) {
     return (
-        <article className="questExplorer-branch">
-            <header>
-                <div>
-                    <span>{branch.groupLabel || branch.groupKey || "Choice"}</span>
-                    <h4>{branch.label}</h4>
-                </div>
-                {branch.choiceKey ? <code>{branch.choiceKey}</code> : null}
-            </header>
-            {branch.lore?.outcomePreviewLines.length ? (
-                <p>{branch.lore.outcomePreviewLines.join(" ")}</p>
-            ) : null}
-            {branch.strategy?.conditions.length ? (
-                <ul className="questExplorer-branchConditions">
-                    {branch.strategy.conditions.map((condition, index) => (
-                        <li key={`${branch.branchKey}:condition:${index}`}>{condition}</li>
-                    ))}
-                </ul>
-            ) : null}
-            <LinkButtons
-                label="Next"
-                entryKeys={branch.nextEntryKeys}
-                entriesByKey={entriesByKey}
-                onSelectEntry={onSelectEntry}
-            />
-        </article>
+        <span className="questExplorer-stepPips" aria-hidden="true">
+            {Array.from({ length: Math.max(total, 1) }).map((_, index) => (
+                <span className={index <= activeIndex ? "is-lit" : ""} key={index} />
+            ))}
+        </span>
     );
 }
 
-function BranchNavigation({
-    entry,
+function AdventureChronicle({
+    progression,
+    flow,
+    mode,
     entriesByKey,
-    onSelectEntry,
+    onChoose,
 }: {
-    entry: QuestExplorerEntry;
+    progression: QuestDetailProgression | null;
+    flow: AdventureFlow | null;
+    mode: QuestExplorerMode;
     entriesByKey: Record<string, QuestExplorerEntry>;
-    onSelectEntry: (entryKey: string) => void;
+    onChoose: (step: QuestProgressionStep, choice: AdventureChoice) => void;
 }) {
+    if (!progression || !flow) return null;
+
+    const totalSteps = progression.chapter.steps.length;
+
     return (
-        <footer className="questExplorer-bottom">
-            {entry.branches.length > 0 ? (
-                <section className="questExplorer-branches" aria-label="Branches and choices">
-                    <h3>Branches</h3>
-                    <div>
-                        {entry.branches.map((branch) => (
-                            <BranchCard
-                                key={branch.branchKey}
-                                branch={branch}
-                                entriesByKey={entriesByKey}
-                                onSelectEntry={onSelectEntry}
-                            />
-                        ))}
-                    </div>
+        <section className={`questExplorer-adventureChronicle questExplorer-adventureChronicle--${mode}`} aria-label="Selected progression">
+            {flow.segments.map((segment) => {
+                const title = segment.displayEntry?.title || segment.step.title || entriesByKey[segment.step.detailEntryKey]?.title || "Unknown Horizons";
+
+                return (
+                    <article
+                        className={`questExplorer-adventureStep${segment.isActive ? " is-active" : ""}`}
+                        aria-current={segment.isActive ? "step" : undefined}
+                        key={segment.step.stepKey}
+                    >
+                        <div className="questExplorer-stepRule" aria-hidden="true" />
+                        <header className="questExplorer-stepHeader">
+                            <div>
+                                <span className="questExplorer-stepLabel">
+                                    <span>{stepPositionLabel(segment.step)}</span>
+                                    <span>of {totalSteps}</span>
+                                </span>
+                                <ProgressionPips total={totalSteps} activeIndex={segment.stepIndex} />
+                            </div>
+                            <strong className="questExplorer-stepTitle">{title}</strong>
+                            <small>{projectionLabel(segment.step.projectionKind)}</small>
+                        </header>
+
+                        {(segment.sharesDetailEntry || isVirtualAliasStep(segment.step)) ? (
+                            <div className="questExplorer-progressionStepMeta">
+                                {segment.sharesDetailEntry ? <span>Shared content</span> : null}
+                                {isVirtualAliasStep(segment.step) ? <span>{segment.step.detailEntryKey}</span> : null}
+                            </div>
+                        ) : null}
+
+                        {segment.rendersSharedAlias ? (
+                            <div className="questExplorer-sharedAlias">
+                                <strong>Shared chronicle page</strong>
+                                <p>This beat aliases the same content record, so the archive keeps it as shared content instead of duplicating the full page.</p>
+                            </div>
+                        ) : segment.displayEntry ? (
+                            mode === "lore"
+                                ? <EntryLoreContent entry={segment.displayEntry} />
+                                : (
+                                    <>
+                                        {segment.displayEntry.summaryLines.length > 0 ? (
+                                            <div className="questExplorer-stepSummary">
+                                                {segment.displayEntry.summaryLines.map((line, index) => (
+                                                    <p key={`${segment.displayEntry?.entryKey}:summary:${index}`}>{line}</p>
+                                                ))}
+                                            </div>
+                                        ) : null}
+                                        <EntryStrategyContent entry={segment.displayEntry} />
+                                        <EntryLoreContent entry={segment.displayEntry} compact />
+                                    </>
+                                )
+                        ) : (
+                            <p className="questExplorer-emptyState">This progression beat has no entry-backed content in the current DTO.</p>
+                        )}
+
+                        <AdventureChoiceCards
+                            step={segment.step}
+                            choices={segment.choices}
+                            selectedChoice={segment.selectedChoice}
+                            onChoose={onChoose}
+                        />
+                    </article>
+                );
+            })}
+
+            {flow.unresolvedChoice ? (
+                <section className="questExplorer-pathState questExplorer-pathState--unresolved">
+                    <span>Path Continues</span>
+                    <p>The choice "{flow.unresolvedChoice.label}" is modeled, but this payload does not identify the next progression segment. The chronicle stops here rather than guessing.</p>
                 </section>
             ) : null}
 
-            <div className="questExplorer-navGroups">
-                <LinkButtons label="Previous" entryKeys={entry.navigation.previousEntryKeys} entriesByKey={entriesByKey} onSelectEntry={onSelectEntry} />
-                <LinkButtons label="Next" entryKeys={entry.navigation.nextEntryKeys} entriesByKey={entriesByKey} onSelectEntry={onSelectEntry} />
-                <LinkButtons label="Failure" entryKeys={entry.navigation.failureEntryKeys} entriesByKey={entriesByKey} onSelectEntry={onSelectEntry} />
-                <LinkButtons label="Converges Into" entryKeys={entry.navigation.convergesIntoEntryKeys} entriesByKey={entriesByKey} onSelectEntry={onSelectEntry} />
-            </div>
-        </footer>
+            {flow.reachedEntryKey ? (
+                <section className="questExplorer-pathState questExplorer-pathState--chapter">
+                    <span>Next Chapter Reached</span>
+                    <p>{entriesByKey[flow.reachedEntryKey]?.title ?? "The next chapter"} is now the active rail context.</p>
+                </section>
+            ) : null}
+
+            {flow.lockedSteps.map((step, index) => (
+                <article className="questExplorer-adventureStep questExplorer-adventureStep--locked" key={`locked:${step.stepKey}`}>
+                    <div className="questExplorer-stepRule" aria-hidden="true" />
+                    <header className="questExplorer-stepHeader">
+                        <div>
+                            <span className="questExplorer-stepLabel">
+                                <span>{stepPositionLabel(step)}</span>
+                                <span>of {totalSteps}</span>
+                            </span>
+                            <ProgressionPips total={totalSteps} activeIndex={-1} />
+                        </div>
+                        <strong className="questExplorer-stepTitle">{step.title || entriesByKey[step.detailEntryKey]?.title || "Unknown Horizons"}</strong>
+                    </header>
+                    <p>This step will be revealed after you make your choice.</p>
+                </article>
+            ))}
+        </section>
     );
 }
 
@@ -669,6 +960,7 @@ export default function QuestExplorerPage() {
     const setMode = useQuestStore((state) => state.setMode);
     const setFilters = useQuestStore((state) => state.setFilters);
     const resolveEntryKey = useQuestStore((state) => state.resolveEntryKey);
+    const [choicePath, setChoicePath] = useState<AdventureChoiceSelection[]>([]);
 
     const requestedEntryKey = routeEntryKey(location.pathname) ?? searchParams.get("quest");
     const requestedMode = normalizeQuestExplorerMode(searchParams.get("mode"));
@@ -689,13 +981,26 @@ export default function QuestExplorerPage() {
         () => railGroups.reduce((total, group) => total + group.items.length, 0),
         [railGroups]
     );
-    const selectedRailEntryKey = useMemo(
-        () => resolveRailSelectionKey(selectedEntry, railGroups),
-        [railGroups, selectedEntry]
-    );
     const selectedProgression = useMemo(
         () => findDetailProgression(progression, selectedEntry),
         [progression, selectedEntry]
+    );
+    const selectedProgressionKey = useMemo(
+        () => progressionContextKey(selectedProgression, selectedEntryKey),
+        [selectedEntryKey, selectedProgression]
+    );
+    const adventureFlow = useMemo(
+        () => selectedProgression
+            ? buildAdventureFlow(selectedProgression, entriesByKey, choicePath, progression)
+            : null,
+        [choicePath, entriesByKey, progression, selectedProgression]
+    );
+    const activeRailEntry = adventureFlow?.reachedEntryKey
+        ? entriesByKey[adventureFlow.reachedEntryKey] ?? selectedEntry
+        : selectedEntry;
+    const selectedRailEntryKey = useMemo(
+        () => resolveRailSelectionKey(activeRailEntry, railGroups),
+        [activeRailEntry, railGroups]
     );
 
     useEffect(() => {
@@ -705,6 +1010,10 @@ export default function QuestExplorerPage() {
     useEffect(() => {
         if (mode !== requestedMode) setMode(requestedMode);
     }, [mode, requestedMode, setMode]);
+
+    useEffect(() => {
+        setChoicePath([]);
+    }, [selectedProgressionKey]);
 
     useEffect(() => {
         if (!loaded) return;
@@ -758,6 +1067,20 @@ export default function QuestExplorerPage() {
         navigate(questPath(entryKey, mode));
     };
 
+    const chooseAdventureChoice = (step: QuestProgressionStep, choice: AdventureChoice) => {
+        if (!selectedProgression) return;
+        const stepIndex = selectedProgression.chapter.steps.findIndex((candidate) => candidate.stepKey === step.stepKey);
+        if (stepIndex < 0) return;
+
+        setChoicePath((current) => {
+            const retained = current.filter((selection) => {
+                const selectionIndex = selectedProgression.chapter.steps.findIndex((candidate) => candidate.stepKey === selection.stepKey);
+                return selectionIndex >= 0 && selectionIndex < stepIndex;
+            });
+            return [...retained, selectionForChoice(step.stepKey, choice)];
+        });
+    };
+
     const changeMode = (nextMode: QuestExplorerMode) => {
         setMode(nextMode);
         const nextParams = new URLSearchParams(searchParams);
@@ -770,6 +1093,17 @@ export default function QuestExplorerPage() {
     };
 
     const missingRequestedEntry = loaded && requestedEntryKey && !resolveEntryKey(requestedEntryKey);
+    const detailBreadcrumb = selectedEntry
+        ? [
+            getQuestCategoryLabel(selectedEntry.questType),
+            selectedProgression ? chapterPositionLabel(selectedProgression.chapter) : selectedEntry.navigation.chapterLabel,
+        ].filter(Boolean)
+        : [];
+    const headerSummary = selectedEntry
+        ? selectedProgression
+            ? compactMeta(selectedEntry)
+            : selectedEntry.summaryLines[0] ?? compactMeta(selectedEntry)
+        : null;
 
     return (
         <main className="questExplorer-page">
@@ -794,7 +1128,7 @@ export default function QuestExplorerPage() {
                             <input
                                 type="search"
                                 value={filters.searchText}
-                                placeholder="Title, alias, objective, reward..."
+                                placeholder="Search quests..."
                                 onChange={(event) => setFilters({ searchText: event.currentTarget.value })}
                             />
                         </label>
@@ -828,42 +1162,40 @@ export default function QuestExplorerPage() {
 
                     {selectedEntry ? (
                         <>
-                            <header className="questExplorer-headerCard">
-                                <div>
-                                    <span>{getQuestCategoryLabel(selectedEntry.questType)}</span>
+                            <header className="questExplorer-adventureHeader">
+                                <div className="questExplorer-adventureHeaderCopy">
+                                    <nav className="questExplorer-breadcrumb" aria-label="Quest context">
+                                        {detailBreadcrumb.map((part, index) => (
+                                            <span key={`${part}:${index}`}>{part}</span>
+                                        ))}
+                                    </nav>
                                     <h2>{selectedEntry.title}</h2>
-                                    <p>{compactMeta(selectedEntry)}</p>
+                                    {headerSummary ? <p>{headerSummary}</p> : null}
                                 </div>
                                 <QuestExplorerModeSwitch mode={mode} onModeChange={changeMode} />
                             </header>
 
-                            {selectedProgression || selectedEntry.summaryLines.length > 0 ? (
-                                <div className="questExplorer-detailPrelude">
-                                    <ProgressionChronicle
+                            <section className={`questExplorer-content questExplorer-content--${mode}`}>
+                                {mode === "strategy" ? (
+                                    <StrategyOverview entry={selectedEntry} />
+                                ) : (
+                                    <LorePrelude entry={selectedEntry} />
+                                )}
+
+                                {selectedProgression ? (
+                                    <AdventureChronicle
                                         progression={selectedProgression}
+                                        flow={adventureFlow}
+                                        mode={mode}
                                         entriesByKey={entriesByKey}
-                                        onSelectEntry={selectEntry}
+                                        onChoose={chooseAdventureChoice}
                                     />
-
-                                    {selectedEntry.summaryLines.length > 0 ? (
-                                        <section className="questExplorer-summary" aria-label="Summary">
-                                            {selectedEntry.summaryLines.map((line, index) => (
-                                                <p key={`${selectedEntry.entryKey}:summary:${index}`}>{line}</p>
-                                            ))}
-                                        </section>
-                                    ) : null}
-                                </div>
-                            ) : null}
-
-                            <section className="questExplorer-content">
-                                {mode === "lore" ? <LoreMode entry={selectedEntry} /> : <StrategyMode entry={selectedEntry} />}
+                                ) : (
+                                    <section className="questExplorer-adventureFallback" aria-label="Selected progression">
+                                        {mode === "lore" ? <EntryLoreContent entry={selectedEntry} /> : <EntryStrategyContent entry={selectedEntry} />}
+                                    </section>
+                                )}
                             </section>
-
-                            <BranchNavigation
-                                entry={selectedEntry}
-                                entriesByKey={entriesByKey}
-                                onSelectEntry={selectEntry}
-                            />
                         </>
                     ) : null}
                 </section>

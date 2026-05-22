@@ -595,6 +595,181 @@ const repeatedDetailPayload: QuestExplorerResponse = {
     },
 };
 
+const choiceResetPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Archive of the First Tide",
+            summaryLines: ["A recovered strategic record."],
+            aliases: ["FactionQuest_Alias"],
+            loreView: payload.entries[0].loreView,
+            strategyView: payload.entries[0].strategyView,
+            branches: [
+                {
+                    ...testBranch("Branch_Marker", "Follow the marker"),
+                    groupLabel: "First Tide",
+                    nextEntryKeys: ["Quest_B"],
+                    lore: { outcomePreviewLines: ["The marker path opens."] },
+                    strategy: { conditions: ["Secure the old marker."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Shore", "Study the shore"),
+                    groupLabel: "First Tide",
+                    nextEntryKeys: ["Quest_C"],
+                    lore: { outcomePreviewLines: ["The shore path opens."] },
+                    strategy: { conditions: ["Read the shore signs."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                nextEntryKeys: ["Quest_B", "Quest_C"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_B",
+            title: "Second Tide",
+            summaryLines: ["The marker path opens."],
+            strategyView: { objectives: [testObjective("Objective_B", "Secure the marker path.")] },
+            branches: [],
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: ["Quest_A"],
+                nextEntryKeys: [],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_C",
+            title: "Shore Reading",
+            summaryLines: ["The shore path opens."],
+            strategyView: { objectives: [testObjective("Objective_C", "Read the shore signs.")] },
+            branches: [],
+            navigation: {
+                sequenceIndex: 2,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: "Quest_B",
+                branchLabel: "First Tide",
+                branchOrder: 2,
+                previousEntryKeys: ["Quest_A"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Archive of the First Tide", detailEntryKey: "Quest_A" },
+                    { stepNumber: 2, stepOrder: 2, title: "Second Tide", detailEntryKey: "Quest_B", variantEntryKeys: ["Quest_C"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const nextChapterQuestline = progressionQuestline({
+    title: "Opening the Tide",
+    steps: [
+        { stepNumber: 1, stepOrder: 1, title: "Archive of the First Tide", detailEntryKey: "Quest_A" },
+    ],
+});
+
+const nextChapterPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Archive of the First Tide",
+            summaryLines: ["A recovered strategic record."],
+            loreView: payload.entries[0].loreView,
+            strategyView: payload.entries[0].strategyView,
+            branches: [
+                {
+                    ...testBranch("Branch_NextChapter", "Continue to chapter two"),
+                    groupLabel: "First Tide",
+                    nextEntryKeys: ["Quest_Next"],
+                    lore: { outcomePreviewLines: ["A new chapter opens."] },
+                    strategy: { conditions: ["Commit to the next chapter."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                nextEntryKeys: ["Quest_Next"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_Next",
+            title: "Chapter Two Rising",
+            questType: "Faction Quest",
+            summaryLines: ["The next chapter answers."],
+            branches: [],
+            navigation: {
+                sequenceIndex: 1,
+                chapter: 2,
+                chapterLabel: "Chapter 2",
+                chapterOrder: 2,
+                step: 1,
+                stepLabel: "Step 1",
+                stepOrder: 1,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: ["Quest_A"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            {
+                ...nextChapterQuestline,
+                chapters: [
+                    nextChapterQuestline.chapters[0],
+                    {
+                        chapterNumber: 2,
+                        chapterOrder: 2,
+                        title: "Chapter Two Rising",
+                        steps: [
+                            {
+                                stepKey: "Line_First_Tide:Faction_Kin:chapter-2:step-1",
+                                stepNumber: 1,
+                                stepOrder: 1,
+                                title: "Chapter Two Rising",
+                                projectionKind: "real_entry_backed",
+                                detailEntryKey: "Quest_Next",
+                                sourceEntryKeys: ["Quest_Next"],
+                                aliasEntryKeys: [],
+                                variants: [
+                                    {
+                                        entryKey: "Quest_Next",
+                                        title: "Chapter Two Rising",
+                                        variantKind: "entry",
+                                        branchGroupKey: null,
+                                        branchLabel: null,
+                                        branchOrder: null,
+                                        previousEntryKeys: [],
+                                        nextEntryKeys: [],
+                                        failureEntryKeys: [],
+                                        convergesIntoEntryKeys: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+        debugSummary: null,
+    },
+};
+
 function renderPage(initialEntry = "/quests") {
     return render(
         <MemoryRouter initialEntries={[initialEntry]}>
@@ -642,19 +817,61 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("renders strategy mode and branch navigation from backend arrays", async () => {
+    it("renders strategy mode and reveals the next beat after a modeled choice", async () => {
         const user = userEvent.setup();
         renderPage("/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
-        expect(screen.getByText("Reach the marker.")).toBeInTheDocument();
-        expect(screen.getByText("Visit the first marker.")).toBeInTheDocument();
-        expect(screen.getByText("Gain Dust.")).toBeInTheDocument();
+        expect(screen.getAllByText("Reach the marker.").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Gain Dust.").length).toBeGreaterThan(0);
+        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
 
-        await user.click(screen.getAllByRole("button", { name: "Second Tide" })[0]);
-        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_B"));
+        const choice = screen.getByRole("button", { name: /Follow the marker/ });
+        await user.click(choice);
+
+        expect(choice).toHaveAttribute("aria-current", "true");
+        expect(screen.getByText("No strategy objectives are attached to this beat.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("changing an earlier choice resets downstream revealed content", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
+        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+        expect(screen.queryByText("Read the shore signs.")).not.toBeInTheDocument();
+
+        const shoreChoice = screen.getByRole("button", { name: /Study the shore/ });
+        await user.click(shoreChoice);
+
+        expect(shoreChoice).toHaveAttribute("aria-current", "true");
+        expect(screen.getByText("Read the shore signs.")).toBeInTheDocument();
+        expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("updates the active rail chapter when a modeled choice reaches the next chapter", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(nextChapterPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: /Continue to chapter two/ }));
+
+        const rail = screen.getByRole("complementary");
+        expect(within(rail).getByRole("button", { name: /Chapter Two Rising\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
+        expect(screen.getByText("Next Chapter Reached")).toBeInTheDocument();
+        expect(screen.getByText("Chapter Two Rising is now the active rail context.")).toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
     it("clears the selected entry when navigation lands on a missing alias", async () => {
