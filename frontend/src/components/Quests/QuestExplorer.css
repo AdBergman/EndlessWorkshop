@@ -584,6 +584,36 @@
         #020b0f;
 }
 
+.questExplorer-detail::before,
+.questExplorer-detail::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.questExplorer-detail::before {
+    top: 28px;
+    right: 30px;
+    width: 292px;
+    height: 178px;
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 292 178' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M291 1H168l-18 18h-50'/%3E%3Cpath d='M291 34h-72l-12 12h-58' opacity='.8'/%3E%3Cpath d='M291 66h-38l-14 14h-62' opacity='.45'/%3E%3Cpath d='M1 177v-65l18-18V28'/%3E%3Cpath d='M42 177v-44l13-13V88' opacity='.7'/%3E%3Cpath d='M84 177v-31l12-12v-23' opacity='.42'/%3E%3Ccircle cx='146' cy='19' r='5'/%3E%3Cpath d='M146 7v24M134 19h24'/%3E%3Cpath d='M215 112v50M235 96v66M255 128v34' opacity='.3'/%3E%3Cpath d='M196 162h76' opacity='.24'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.questExplorer-detail::after {
+    right: clamp(104px, 8vw, 152px);
+    bottom: clamp(76px, 10vh, 120px);
+    width: clamp(176px, 14vw, 246px);
+    height: clamp(176px, 14vw, 246px);
+    opacity: 0.14;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 246 246' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M28 204C74 158 132 126 220 102' opacity='.18'/%3E%3Cpath d='M46 222C94 194 150 184 210 198' opacity='.12'/%3E%3Cpath d='M62 186A106 106 0 0 1 210 72' opacity='.26'/%3E%3Cpath d='M88 206A78 78 0 0 1 190 118' opacity='.16'/%3E%3Cpath d='M136 54v38M136 186v34M62 150h34M184 150h38' opacity='.18'/%3E%3Cpath d='M86 186l50-54 56-38' opacity='.17'/%3E%3Cpath d='M112 204l24-72 38 58' opacity='.1'/%3E%3Ccircle cx='136' cy='150' r='52' opacity='.12'/%3E%3Ccircle cx='136' cy='150' r='24' opacity='.1'/%3E%3Cg opacity='.62'%3E%3Cpath d='M86 178l7 8-7 8-7-8z'/%3E%3Ccircle cx='86' cy='186' r='2.5' opacity='.5'/%3E%3C/g%3E%3Cg opacity='.72'%3E%3Cpath d='M136 124l7 8-7 8-7-8z'/%3E%3Ccircle cx='136' cy='132' r='2.5' opacity='.52'/%3E%3C/g%3E%3Cg opacity='.48'%3E%3Cpath d='M192 86l6 8-6 8-6-8z'/%3E%3Ccircle cx='192' cy='94' r='2.5' opacity='.4'/%3E%3C/g%3E%3Cg opacity='.34'%3E%3Cpath d='M174 182l6 8-6 8-6-8z'/%3E%3Ccircle cx='174' cy='190' r='2' opacity='.32'/%3E%3C/g%3E%3Cpath d='M28 220h30M184 220h38M204 148h24' opacity='.16'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
 .questExplorer-state {
     position: relative;
     z-index: 1;
@@ -779,8 +809,31 @@
     scrollbar-color: rgba(208, 162, 74, 0.45) rgba(255, 255, 255, 0.04);
 }
 
+.questExplorer-content::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.questExplorer-content > * {
+    position: relative;
+    z-index: 1;
+}
+
 .questExplorer-content--lore {
     gap: 46px;
+}
+
+.questExplorer-content--lore::before {
+    top: 136px;
+    right: clamp(190px, 17vw, 280px);
+    width: clamp(136px, 12vw, 188px);
+    height: clamp(70px, 6.6vw, 92px);
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 188 92' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M18 64l54-36 60 24 38-34' opacity='.36'/%3E%3Cpath d='M28 78c42-18 92-16 132 4' opacity='.18'/%3E%3Cg opacity='.68'%3E%3Cpath d='M18 56l6 8-6 8-6-8z'/%3E%3Ccircle cx='18' cy='64' r='2.5' opacity='.48'/%3E%3C/g%3E%3Cg opacity='.78'%3E%3Cpath d='M72 19l7 9-7 9-7-9z'/%3E%3Ccircle cx='72' cy='28' r='2.5' opacity='.52'/%3E%3C/g%3E%3Cg opacity='.58'%3E%3Cpath d='M132 44l6 8-6 8-6-8z'/%3E%3Ccircle cx='132' cy='52' r='2.5' opacity='.45'/%3E%3C/g%3E%3Cpath d='M160 18h20M170 8v20' opacity='.24'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .questExplorer-strategyOverview {
@@ -903,8 +956,12 @@
     min-width: 0;
 }
 
-.questExplorer-questPathChronicle {
+.questExplorer-questPathChronicle,
+.questExplorer-strategyFallback {
     position: relative;
+}
+
+.questExplorer-questPathChronicle {
     padding-left: 30px;
 }
 
@@ -916,6 +973,28 @@
     left: 6px;
     width: 1px;
     background: linear-gradient(180deg, rgba(208, 162, 74, 0.36), rgba(208, 162, 74, 0.14) 48%, transparent);
+}
+
+.questExplorer-strategyChronicle:has(.questExplorer-emptyState)::after,
+.questExplorer-strategyFallback:has(.questExplorer-emptyState)::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: clamp(86px, 16vh, 160px);
+    right: clamp(190px, 19vw, 320px);
+    width: clamp(280px, 27vw, 390px);
+    height: clamp(180px, 18vw, 252px);
+    opacity: 0.16;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 390 252' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M26 202C104 124 246 106 364 184' opacity='.34'/%3E%3Cpath d='M62 224C142 168 263 158 344 216' opacity='.24'/%3E%3Ccircle cx='204' cy='164' r='92' opacity='.2'/%3E%3Ccircle cx='204' cy='164' r='54' opacity='.14'/%3E%3Cpath d='M204 72v24M204 232v-24M112 164h24M272 164h24' opacity='.32'/%3E%3Cpath d='M88 56l116 108 128-78' opacity='.38'/%3E%3Cpath d='M142 34c54 30 98 78 132 150' opacity='.18'/%3E%3Cg opacity='.76'%3E%3Cpath d='M88 45l8 11-8 11-8-11z'/%3E%3Cpath d='M88 35v42M67 56h42' opacity='.26'/%3E%3Ccircle cx='88' cy='56' r='3' opacity='.55'/%3E%3C/g%3E%3Cg opacity='.82'%3E%3Cpath d='M204 153l9 11-9 11-9-11z'/%3E%3Cpath d='M204 142v44M182 164h44' opacity='.28'/%3E%3Ccircle cx='204' cy='164' r='3' opacity='.58'/%3E%3C/g%3E%3Cg opacity='.66'%3E%3Cpath d='M332 75l8 11-8 11-8-11z'/%3E%3Cpath d='M332 65v42M311 86h42' opacity='.24'/%3E%3Ccircle cx='332' cy='86' r='3' opacity='.5'/%3E%3C/g%3E%3Cpath d='M42 230h48M292 232h62M52 176h28M314 146h30' opacity='.22'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.questExplorer-strategyChronicle:has(.questExplorer-emptyState) > *,
+.questExplorer-strategyFallback:has(.questExplorer-emptyState) > * {
+    position: relative;
+    z-index: 1;
 }
 
 .questExplorer-questPathStep {
@@ -954,6 +1033,18 @@
     background:
         linear-gradient(90deg, transparent 0, rgba(208, 162, 74, 0.5) 7%, rgba(208, 162, 74, 0.18) 46%, transparent 52%),
         linear-gradient(270deg, transparent 0, rgba(208, 162, 74, 0.32) 7%, transparent 30%);
+}
+
+.questExplorer-stepRule::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 12%;
+    width: 36px;
+    height: 10px;
+    border-top: 1px solid rgba(184, 137, 53, 0.22);
+    border-bottom: 1px solid rgba(184, 137, 53, 0.16);
+    transform: translateY(-50%);
 }
 
 .questExplorer-stepRule::after {
@@ -1127,10 +1218,23 @@
 }
 
 .questExplorer-loreOpening {
+    position: relative;
     display: grid;
     gap: 16px;
     max-width: 72ch;
     padding: 2px 0 8px;
+}
+
+.questExplorer-loreOpening::after {
+    content: "";
+    justify-self: end;
+    width: 74px;
+    height: 18px;
+    margin-top: 4px;
+    opacity: 0.42;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 74 18' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 9h24l5-5 5 5h40'/%3E%3Cpath d='M29 4l5 5-5 5-5-5z'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
 .questExplorer-loreOpening p {
@@ -1347,12 +1451,25 @@
 }
 
 .questExplorer-loreBranchMoment {
+    position: relative;
     display: grid;
     gap: 17px;
     margin-top: 18px;
     max-width: 74ch;
     padding: 22px 0 4px;
     border-top: 1px solid rgba(208, 162, 74, 0.2);
+}
+
+.questExplorer-loreBranchMoment::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    right: 12%;
+    width: 13px;
+    height: 13px;
+    border: 1px solid rgba(184, 137, 53, 0.32);
+    background: #071b1c;
+    transform: rotate(45deg);
 }
 
 .questExplorer-loreBranchMoment h3 {
@@ -1455,6 +1572,7 @@
 }
 
 .questExplorer-pathState {
+    position: relative;
     display: grid;
     gap: 8px;
     max-width: 78ch;
@@ -1462,6 +1580,19 @@
     border-bottom: 1px solid rgba(208, 162, 74, 0.16);
     padding: 20px 0;
     background: linear-gradient(90deg, rgba(81, 205, 189, 0.028), transparent 58%);
+}
+
+.questExplorer-pathState::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    width: 54px;
+    height: 9px;
+    opacity: 0.36;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 54 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 4.5h18l4-4 4 4h28'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
 }
 
 .questExplorer-pathState--chapter span {
@@ -1545,6 +1676,15 @@
     font-size: 0.86rem;
 }
 
+@media (max-width: 1100px) {
+    .questExplorer-detail::after,
+    .questExplorer-content::before,
+    .questExplorer-strategyChronicle:has(.questExplorer-emptyState)::after,
+    .questExplorer-strategyFallback:has(.questExplorer-emptyState)::after {
+        display: none;
+    }
+}
+
 @media (max-width: 920px) {
     .questExplorer-page {
         height: auto;
@@ -1567,6 +1707,11 @@
     .questExplorer-detail {
         overflow: visible;
         padding: 30px 28px;
+    }
+
+    .questExplorer-detail::before,
+    .questExplorer-detail::after {
+        display: none;
     }
 
     .questExplorer-content {
