@@ -16,6 +16,7 @@ import {
     type QuestExplorerMode,
 } from "@/features/quests/questExplorerMode";
 import {
+    getQuestCategoryKey,
     getQuestCategoryLabel,
     QUEST_CATEGORY_OPTIONS,
     type QuestCategoryKey,
@@ -34,10 +35,12 @@ import type {
     QuestBranch,
     QuestExplorerEntry,
     QuestExplorerProgression,
+    LoreSection,
     QuestProgressionChapter,
     QuestProgressionQuestline,
     QuestProgressionStep,
     QuestProgressionVariant,
+    StrategyObjective,
 } from "@/types/questTypes";
 import "@/components/Quests/QuestExplorer.css";
 
@@ -94,6 +97,11 @@ type QuestPathFlow = {
     lockedSteps: QuestProgressionStep[];
     unresolvedContinuation: QuestPathChoiceSelection | null;
     reachedContinuationEntryKey: string | null;
+};
+
+type QuestObjectivePath = {
+    objective: StrategyObjective;
+    sections: LoreSection[];
 };
 
 function routeEntryKey(pathname: string): string | null {
@@ -325,6 +333,32 @@ function railGroupDisplayTitle(group: QuestRailGroup): string {
         ?? cleanRailDisplayLabel(questline?.factionName)
         ?? cleanRailDisplayLabel(firstItem?.entry.navigation.factionName)
         ?? group.title;
+}
+
+function isMinorFactionVariantQuest(entry: QuestExplorerEntry): boolean {
+    return getQuestCategoryKey(entry.questType) === "minorFaction"
+        && entry.strategyView.objectives.length > 1;
+}
+
+function lorePhaseKey(phase: string | null | undefined): string {
+    return (phase ?? "").trim().toLowerCase();
+}
+
+function isResolutionLoreSection(section: LoreSection): boolean {
+    return lorePhaseKey(section.phase) === "success" || lorePhaseKey(section.phase) === "resolution";
+}
+
+function objectivePathLabel(index: number): string {
+    return `Path ${index + 1}`;
+}
+
+function objectivePaths(entry: QuestExplorerEntry): QuestObjectivePath[] {
+    return entry.strategyView.objectives.map((objective) => ({
+        objective,
+        sections: entry.loreView.sections.filter((section) => (
+            section.objectiveKey === objective.objectiveKey && !isResolutionLoreSection(section)
+        )),
+    }));
 }
 
 function QuestList({
@@ -780,6 +814,8 @@ function LoreHeader({
 }
 
 function StrategyOverview({ entry }: { entry: QuestExplorerEntry }) {
+    if (isMinorFactionVariantQuest(entry)) return null;
+
     const objectives = entry.strategyView.objectives;
     const requirements = objectives.flatMap((objective) => objective.requirements);
     const rewards = objectives.flatMap((objective) => objective.rewards);
@@ -865,6 +901,7 @@ function StepSummary({ entry }: { entry: QuestExplorerEntry }) {
 
 function EntryStrategyContent({ entry }: { entry: QuestExplorerEntry }) {
     const objectives = entry.strategyView.objectives;
+    const usesObjectivePaths = isMinorFactionVariantQuest(entry);
 
     if (objectives.length === 0) {
         return <p className="questExplorer-emptyState">No strategy objectives are attached to this step.</p>;
@@ -875,8 +912,8 @@ function EntryStrategyContent({ entry }: { entry: QuestExplorerEntry }) {
             {objectives.map((objective, index) => (
                 <section className="questExplorer-stepObjective" key={objective.objectiveKey ?? `${entry.entryKey}:objective:${index}`}>
                     <header className="questExplorer-stepObjectiveHeader">
-                        <span>{phaseDisplayLabel(objective.phase)}</span>
-                        <strong>{`Objective ${index + 1}`}</strong>
+                        <span>{usesObjectivePaths ? "Pacification Path" : phaseDisplayLabel(objective.phase)}</span>
+                        <strong>{usesObjectivePaths ? objectivePathLabel(index) : `Objective ${index + 1}`}</strong>
                     </header>
                     <p>{objective.text}</p>
                     <div className="questExplorer-stepObjectiveMetaGrid">
@@ -930,20 +967,73 @@ function LoreSectionList({ entry }: { entry: QuestExplorerEntry }) {
             : <p className="questExplorer-emptyState">No lore sections are attached to this step.</p>;
     }
 
+    if (isMinorFactionVariantQuest(entry)) {
+        const paths = objectivePaths(entry);
+        const sharedSections = sections.filter((section) => !section.objectiveKey && !isResolutionLoreSection(section));
+        const resolutionSections = sections.filter(isResolutionLoreSection);
+
+        return (
+            <div className="questExplorer-loreSectionList questExplorer-loreSectionList--paths">
+                {sharedSections.map((section) => (
+                    <LoreSectionArticle section={section} key={section.sectionKey} />
+                ))}
+                <div className="questExplorer-lorePathList">
+                    {paths.map((path, index) => (
+                        <section
+                            className="questExplorer-lorePath"
+                            key={path.objective.objectiveKey ?? `${entry.entryKey}:path:${index}`}
+                        >
+                            <header className="questExplorer-lorePathHeader">
+                                <span>{objectivePathLabel(index)}</span>
+                                <strong>{path.objective.text}</strong>
+                            </header>
+                            {path.sections.length > 0 ? (
+                                <div className="questExplorer-lorePathSections">
+                                    {path.sections.map((section) => (
+                                        <LoreSectionLines section={section} key={section.sectionKey} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="questExplorer-emptyState">No lore section is attached to this path.</p>
+                            )}
+                        </section>
+                    ))}
+                </div>
+                {resolutionSections.map((section) => (
+                    <LoreSectionArticle section={section} key={section.sectionKey} title="Resolution" />
+                ))}
+            </div>
+        );
+    }
+
     return (
         <div className="questExplorer-loreSectionList">
             {sections.map((section) => (
-                <section className="questExplorer-loreSection" key={section.sectionKey}>
-                    <h4>{phaseDisplayLabel(section.phase, "Chronicle")}</h4>
-                    {section.lines.map((line, index) => (
-                        <p className={`questExplorer-loreLine questExplorer-loreLine--${line.role || "narrator"}`} key={`${section.sectionKey}:${index}`}>
-                            {line.speakerLabel ? <strong className="questExplorer-loreSpeaker">{line.speakerLabel}:</strong> : null}
-                            <span>{line.text}</span>
-                        </p>
-                    ))}
-                </section>
+                <LoreSectionArticle section={section} key={section.sectionKey} />
             ))}
         </div>
+    );
+}
+
+function LoreSectionArticle({ section, title }: { section: LoreSection; title?: string }) {
+    return (
+        <section className="questExplorer-loreSection">
+            <h4>{title ?? phaseDisplayLabel(section.phase, "Chronicle")}</h4>
+            <LoreSectionLines section={section} />
+        </section>
+    );
+}
+
+function LoreSectionLines({ section }: { section: LoreSection }) {
+    return (
+        <>
+            {section.lines.map((line, index) => (
+                <p className={`questExplorer-loreLine questExplorer-loreLine--${line.role || "narrator"}`} key={`${section.sectionKey}:${index}`}>
+                    {line.speakerLabel ? <strong className="questExplorer-loreSpeaker">{line.speakerLabel}:</strong> : null}
+                    <span>{line.text}</span>
+                </p>
+            ))}
+        </>
     );
 }
 

@@ -375,6 +375,115 @@ const mixedPayload: QuestExplorerResponse = {
     },
 };
 
+const minorVariantPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "MinorFaction_SpecificQuest_Ametrine01",
+            title: "Ancient Graveyard",
+            questType: "Minor Faction Quest",
+            summaryLines: ["The Ametrine seek their lost reliquaries."],
+            navigation: {
+                factionKey: "MinorFaction_Ametrine",
+                factionName: "Ametrine",
+                questLineKey: "MinorFaction_SpecificQuest_Ametrine",
+                questLineName: "Ametrine",
+                chapter: null,
+                chapterLabel: null,
+                step: null,
+                stepLabel: null,
+                sequenceIndex: 0,
+                chapterOrder: null,
+                stepOrder: null,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: [],
+                nextEntryKeys: [],
+            },
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "ametrine:lore:setup",
+                        phase: "start",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: null, role: "narrator", text: "A somber atmosphere hangs over the settlement." }],
+                    },
+                    {
+                        sectionKey: "ametrine:lore:path-1",
+                        phase: "start",
+                        choiceKey: "AmetrineChoice",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Ametrine_1",
+                        lines: [{ speakerLabel: null, role: "character", text: "The ground speaks, but we cannot hear it." }],
+                    },
+                    {
+                        sectionKey: "ametrine:lore:success",
+                        phase: "success",
+                        choiceKey: "AmetrineChoice",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Ametrine_1",
+                        lines: [{ speakerLabel: null, role: "character", text: "Thanks to your help, we know the way back." }],
+                    },
+                    {
+                        sectionKey: "ametrine:lore:path-2",
+                        phase: "start",
+                        choiceKey: "AmetrineChoice",
+                        stepIndex: 1,
+                        objectiveKey: "Objective_Ametrine_2",
+                        lines: [{ speakerLabel: null, role: "character", text: "A trading post is certain to bring us news." }],
+                    },
+                ],
+            },
+            strategyView: {
+                objectives: [
+                    {
+                        ...payload.entries[0].strategyView.objectives[0],
+                        objectiveKey: "Objective_Ametrine_1",
+                        text: "The divining ritual depends on a rare material.",
+                        requirements: [
+                            {
+                                ...payload.entries[0].strategyView.objectives[0].requirements[0],
+                                requirementKey: "Requirement_Ametrine_1",
+                                displayText: "Maintain the required empire value.",
+                            },
+                        ],
+                        rewards: [
+                            {
+                                ...payload.entries[0].strategyView.objectives[0].rewards[0],
+                                rewardKey: "Reward_Ametrine_1",
+                                displayText: "Gain Archite Plate.",
+                            },
+                        ],
+                    },
+                    {
+                        ...payload.entries[0].strategyView.objectives[0],
+                        objectiveKey: "Objective_Ametrine_2",
+                        text: "Travelers can contain useful clues.",
+                        requirements: [
+                            {
+                                ...payload.entries[0].strategyView.objectives[0].requirements[0],
+                                requirementKey: "Requirement_Ametrine_2",
+                                displayText: "Have 1 trading post for 5 turns.",
+                            },
+                        ],
+                        rewards: [
+                            {
+                                ...payload.entries[0].strategyView.objectives[0].rewards[0],
+                                rewardKey: "Reward_Ametrine_2",
+                                displayText: "Gain Glassteel.",
+                            },
+                        ],
+                    },
+                ],
+            },
+        }),
+    ],
+    progression: { questlines: [], debugSummary: null },
+};
+
 const branchPayload: QuestExplorerResponse = {
     ...payload,
     entries: [
@@ -971,6 +1080,43 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("renders minor faction objective variants as strategy paths without aggregate overview", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(minorVariantPayload);
+        renderPage("/quests");
+
+        await user.click(await screen.findByRole("radio", { name: /^Minor Faction Quests\s+\d+$/ }));
+        expect(await screen.findByRole("heading", { name: "Ancient Graveyard" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.queryByLabelText("Strategy overview")).not.toBeInTheDocument();
+        expect(screen.getByText("Path 1")).toBeInTheDocument();
+        expect(screen.getByText("Path 2")).toBeInTheDocument();
+        expect(screen.getByText("The divining ritual depends on a rare material.")).toBeInTheDocument();
+        expect(screen.getByText("Travelers can contain useful clues.")).toBeInTheDocument();
+        expect(screen.getByText("Maintain the required empire value.")).toBeInTheDocument();
+        expect(screen.getByText("Gain Glassteel.")).toBeInTheDocument();
+    });
+
+    it("groups minor faction lore by shared opening, objective paths, and shared resolution", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(minorVariantPayload);
+        renderPage("/quests");
+
+        await user.click(await screen.findByRole("radio", { name: /^Minor Faction Quests\s+\d+$/ }));
+        expect(await screen.findByRole("heading", { name: "Ancient Graveyard" })).toBeInTheDocument();
+
+        expect(screen.getAllByRole("heading", { name: "Opening" })).toHaveLength(1);
+        expect(screen.getByText("A somber atmosphere hangs over the settlement.")).toBeInTheDocument();
+        expect(screen.getByText("Path 1")).toBeInTheDocument();
+        expect(screen.getByText("Path 2")).toBeInTheDocument();
+        expect(screen.getByText("The ground speaks, but we cannot hear it.")).toBeInTheDocument();
+        expect(screen.getByText("A trading post is certain to bring us news.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Resolution" })).toBeInTheDocument();
+        expect(screen.getByText("Thanks to your help, we know the way back.")).toBeInTheDocument();
     });
 
     it("changing an earlier choice resets downstream revealed content", async () => {

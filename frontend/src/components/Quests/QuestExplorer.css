@@ -649,6 +649,10 @@
     padding: 0 0 31px;
 }
 
+.questExplorer-loreHeader {
+    padding-bottom: 22px;
+}
+
 .questExplorer-questPathHeader::after {
     content: "";
     position: absolute;
@@ -818,7 +822,7 @@
 }
 
 .questExplorer-content--lore {
-    gap: 46px;
+    gap: 34px;
 }
 
 .questExplorer-content--lore::before {
@@ -943,7 +947,7 @@
     content: "";
     position: absolute;
     z-index: 0;
-    top: 16px;
+    top: 10px;
     bottom: 28px;
     left: 14px;
     width: 1px;
@@ -986,7 +990,7 @@
     position: absolute;
     z-index: 2;
     left: -35px;
-    top: 4px;
+    top: -3px;
     width: 13px;
     height: 13px;
     border: 1px solid rgba(208, 162, 74, 0.48);
@@ -1187,19 +1191,11 @@
     display: grid;
     gap: 16px;
     max-width: 72ch;
-    padding: 2px 0 8px;
+    padding: 0 0 4px;
 }
 
 .questExplorer-loreOpening::after {
-    content: "";
-    justify-self: end;
-    width: 74px;
-    height: 18px;
-    margin-top: 4px;
-    opacity: 0.32;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 74 18' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 9h28M38 9h36' opacity='.78'/%3E%3Cpath d='M33 5v8M48 6h18' opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-size: contain;
+    content: none;
 }
 
 .questExplorer-loreOpening p {
@@ -1228,6 +1224,49 @@
 .questExplorer-loreSection {
     display: grid;
     gap: 13px;
+}
+
+.questExplorer-loreSectionList--paths {
+    gap: 30px;
+}
+
+.questExplorer-lorePathList {
+    display: grid;
+    gap: 18px;
+}
+
+.questExplorer-lorePath {
+    display: grid;
+    gap: 13px;
+    padding: 16px 0 14px 22px;
+    border-left: 1px solid rgba(208, 162, 74, 0.38);
+    background: transparent;
+}
+
+.questExplorer-lorePathHeader {
+    display: grid;
+    gap: 7px;
+}
+
+.questExplorer-lorePathHeader span {
+    color: var(--quest-gold-bright);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.questExplorer-lorePathHeader strong {
+    color: rgba(232, 204, 158, 0.9);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.48;
+}
+
+.questExplorer-lorePathSections {
+    display: grid;
+    gap: 12px;
 }
 
 .questExplorer-loreSection h4 {
