@@ -120,6 +120,8 @@ describe("CodexPage", () => {
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
         expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
         expect(screen.getByText("Browse the archive by record family, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Progression" })).toBeInTheDocument();
+        expect(screen.getByText("Technologies, districts, improvements, and city-building unlocks.")).toBeInTheDocument();
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
@@ -145,6 +147,7 @@ describe("CodexPage", () => {
             expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
         });
 
+        expect(screen.getByLabelText("2 records in view")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /all districts/i })).toBeInTheDocument();
         const summaryList = screen.getByLabelText("Districts overview");
         expect(within(summaryList).getByRole("button", { name: /market square/i })).toBeInTheDocument();

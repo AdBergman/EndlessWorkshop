@@ -9,6 +9,13 @@ type Props = {
     onSelectKind: (kind: string) => void;
 };
 
+type OverviewShelf = {
+    id: string;
+    title: string;
+    description: string;
+    kinds: string[];
+};
+
 const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
     councilors: "Governors, advisors, and political specialists.",
@@ -25,12 +32,58 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
     units: "Military units, heroes, and evolution lines.",
 };
 
+const OVERVIEW_SHELVES: OverviewShelf[] = [
+    {
+        id: "world",
+        title: "World & Factions",
+        description: "Empires, peoples, quest records, and settlement identities.",
+        kinds: ["factions", "minorfactions", "populations", "quests"],
+    },
+    {
+        id: "progression",
+        title: "Progression",
+        description: "Technologies, districts, improvements, and city-building unlocks.",
+        kinds: ["tech", "districts", "improvements"],
+    },
+    {
+        id: "people",
+        title: "People & Forces",
+        description: "Commanders, units, councilors, and battlefield rosters.",
+        kinds: ["heroes", "units", "councilors"],
+    },
+    {
+        id: "systems",
+        title: "Systems & Items",
+        description: "Rules, equipment, traits, abilities, and modifiers.",
+        kinds: ["abilities", "traits", "equipment"],
+    },
+];
+
 function descriptionFor(kind: string): string {
     return KIND_DESCRIPTIONS[kind] ?? "Indexed game-data records.";
 }
 
 export default function CodexOverview({ options, onSelectKind }: Props) {
     const totalCount = options.reduce((sum, option) => sum + option.count, 0);
+    const optionsByKind = new Map(options.map((option) => [option.kind, option]));
+    const shelvedKinds = new Set(OVERVIEW_SHELVES.flatMap((shelf) => shelf.kinds));
+    const shelves = OVERVIEW_SHELVES
+        .map((shelf) => ({
+            ...shelf,
+            options: shelf.kinds.map((kind) => optionsByKind.get(kind)).filter((option): option is CodexOverviewOption => Boolean(option)),
+        }))
+        .filter((shelf) => shelf.options.length > 0);
+    const additionalOptions = options.filter((option) => !shelvedKinds.has(option.kind));
+
+    if (additionalOptions.length > 0) {
+        shelves.push({
+            id: "additional",
+            title: "Additional Records",
+            description: "Imported record families that do not yet have a dedicated archive shelf.",
+            kinds: additionalOptions.map((option) => option.kind),
+            options: additionalOptions,
+        });
+    }
 
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
@@ -50,21 +103,40 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                 Browse the archive by record family, then inspect descriptions and resolved related links.
             </p>
 
-            <div className="codex-overview__index" aria-label="Codex kinds">
-                {options.map((option) => (
-                    <button
-                        key={option.kind}
-                        type="button"
-                        className="codex-overview__row"
-                        onClick={() => onSelectKind(option.kind)}
-                    >
-                        <span className="codex-overview__rowTop">
-                            <span className="codex-overview__kind">{option.label}</span>
-                            <span className="codex-overview__count">{option.count}</span>
-                        </span>
-                        <span className="codex-overview__description">{descriptionFor(option.kind)}</span>
-                    </button>
-                ))}
+            <div className="codex-overview__shelves" aria-label="Codex kinds">
+                {shelves.map((shelf) => {
+                    const shelfCount = shelf.options.reduce((sum, option) => sum + option.count, 0);
+                    const headingId = `codex-overview-shelf-${shelf.id}`;
+
+                    return (
+                        <section className="codex-overview__shelf" aria-labelledby={headingId} key={shelf.id}>
+                            <div className="codex-overview__shelfHeader">
+                                <div>
+                                    <h3 id={headingId}>{shelf.title}</h3>
+                                    <p>{shelf.description}</p>
+                                </div>
+                                <span>{shelfCount}</span>
+                            </div>
+
+                            <div className="codex-overview__index">
+                                {shelf.options.map((option) => (
+                                    <button
+                                        key={option.kind}
+                                        type="button"
+                                        className="codex-overview__row"
+                                        onClick={() => onSelectKind(option.kind)}
+                                    >
+                                        <span className="codex-overview__rowTop">
+                                            <span className="codex-overview__kind">{option.label}</span>
+                                            <span className="codex-overview__count">{option.count}</span>
+                                        </span>
+                                        <span className="codex-overview__description">{descriptionFor(option.kind)}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })}
             </div>
         </section>
     );

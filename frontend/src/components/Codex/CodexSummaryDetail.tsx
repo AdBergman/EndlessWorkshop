@@ -18,15 +18,29 @@ type Props = {
 export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, onSelectEntry }: Props) {
     return (
         <article className="codex-detail codex-detail--summary">
-            <div className="codex-detail__metaRow">
-                <span className="codex-detail__kind">{summaryEntry.summaryLabel}</span>
+            <div className="codex-summaryDossier">
+                <div className="codex-detail__metaRow">
+                    <span className="codex-detail__kind">{summaryEntry.summaryLabel}</span>
+                    <span className="codex-detail__context">Archive dossier</span>
+                </div>
+
+                <div className="codex-summaryDossier__hero">
+                    <div>
+                        <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
+                            {renderCodexLabel(summaryEntry.displayName)}
+                        </h2>
+                        <p className="codex-detail__summaryLead">{summaryEntry.descriptionLines[0]}</p>
+                    </div>
+
+                    <div
+                        className="codex-summaryDossier__count"
+                        aria-label={`${summaryEntry.summaryCount} records in view`}
+                    >
+                        <strong>{summaryEntry.summaryCount}</strong>
+                        <span>records</span>
+                    </div>
+                </div>
             </div>
-
-            <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {renderCodexLabel(summaryEntry.displayName)}
-            </h2>
-
-            <p className="codex-detail__summaryLead">{summaryEntry.descriptionLines[0]}</p>
 
             <div className="codex-summaryList" aria-label={`${summaryEntry.summaryLabel} overview`}>
                 {entries.length > 0 ? (
