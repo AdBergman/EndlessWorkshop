@@ -40,9 +40,9 @@
 }
 
 .gs-cityGroup {
-    background: rgba(255, 255, 255, 0.03); /* lifted section surface */
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 10px;
+    background: var(--ew-bg-panel-muted, rgba(255, 255, 255, 0.035));
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
     padding: 10px;
 }
 
@@ -68,11 +68,10 @@
     text-align: left;
     cursor: pointer;
 
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
 
-    /* lifted card surface */
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
 
     /* empire accent (set via --empire-color inline) */
     border-left: 3px solid var(--empire-color, rgba(255, 255, 255, 0.12));
@@ -86,8 +85,8 @@
 }
 
 .gs-cityCard:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--ew-border-strong, rgba(255, 255, 255, 0.16));
     box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 }
 
@@ -96,10 +95,10 @@
 }
 
 .gs-cityCard--selected {
-    background: rgba(255, 255, 255, 0.10);
-    border-color: rgba(255, 127, 50, 0.65);
+    background: var(--ew-active-accent-soft, rgba(255, 127, 50, 0.12));
+    border-color: var(--ew-active-accent-border, rgba(255, 127, 50, 0.42));
     box-shadow:
-            0 0 0 2px rgba(255, 127, 50, 0.14),
+            0 0 0 2px var(--ew-focus, rgba(255, 127, 50, 0.22)),
             0 8px 22px rgba(0, 0, 0, 0.40);
 }
 
@@ -154,8 +153,8 @@
     padding: 2px 8px;
     border-radius: 999px;
 
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
     color: rgba(255, 255, 255, 0.85);
 }
 
@@ -171,8 +170,8 @@
 }
 
 .gs-cityStat {
-    background: rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: color-mix(in srgb, var(--ew-bg-panel, #101316) 78%, black);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
     border-radius: 8px;
     padding: 7px 8px;
 }

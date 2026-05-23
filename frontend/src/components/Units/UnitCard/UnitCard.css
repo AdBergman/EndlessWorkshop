@@ -3,7 +3,7 @@
     position: relative;
     width: 220px;
     background-color: transparent;
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: visible;
 
     display: flex;
@@ -27,12 +27,12 @@
     min-height: 340px;
 
     transform-style: preserve-3d;
-    border-radius: 12px;
+    border-radius: 8px;
 
-    border: 2px solid var(--card-border, #248aff);
-    background: #111;
+    border: 1px solid var(--card-border, #248aff);
+    background: #0f1113;
 
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.44);
     transition: box-shadow 0.3s ease;
 }
 
@@ -41,9 +41,9 @@
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 12px;
+    border-radius: 8px;
 
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.07), transparent 60%);
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.045), transparent 62%);
     transform: translateZ(1px);
     pointer-events: none;
 }
@@ -58,7 +58,7 @@
     height: 100%;
 
     backface-visibility: hidden;
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
 
     display: flex;
@@ -68,12 +68,12 @@
 }
 
 .cardFront {
-    background: #111;
+    background: #0f1113;
     z-index: 2;
 }
 
 .cardBack {
-    background: #111;
+    background: #0f1113;
     transform: rotateY(180deg);
 }
 
@@ -115,7 +115,7 @@
     font-weight: 700;
 
     /* brighter, readable */
-    color: #ff9b57 !important;
+    color: #eaa06b !important;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.78);
     opacity: 1;
 }
@@ -138,7 +138,7 @@
     justify-content: center;
     align-items: center;
 
-    background-color: #111;
+    background-color: #0f1113;
     position: relative;
 }
 
@@ -155,7 +155,7 @@
 .artPlaceholder {
     width: 100%;
     height: 120px;
-    background: #222;
+    background: var(--ew-bg-panel-raised, #15191d);
     border-radius: 0;
 }
 
@@ -183,7 +183,7 @@
     font-size: 0.9rem;
     font-weight: 600;
 
-    color: #ff8c40;
+    color: #f19a62;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75);
 }
 
@@ -231,7 +231,7 @@
     background: transparent;
     border: none;
 
-    color: #ff9b57;
+    color: #eaa06b;
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 
     font-weight: 800;
@@ -254,7 +254,7 @@
 
 .skill:hover {
     transform: translateY(-1px);
-    color: #ffb067;
+    color: #f2b584;
 }
 
 .noSkills {
@@ -269,14 +269,14 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(135deg, rgba(255, 127, 50, 0.05), transparent);
-    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(255, 127, 50, 0.035), transparent);
+    border-radius: 8px;
 }
 
 .cardBorderAndGlow {
     position: absolute;
     inset: 0;
-    border-radius: 12px;
+    border-radius: 8px;
     pointer-events: none;
 
     z-index: 1;

@@ -1,18 +1,18 @@
 .mods-page {
-    --mods-accent: #ff7f32;
-    --mods-accent-soft: rgba(255, 127, 50, 0.1);
-    --mods-copy: rgba(255, 255, 255, 0.9);
-    --mods-copy-soft: rgba(255, 255, 255, 0.64);
-    --mods-copy-faint: rgba(255, 255, 255, 0.44);
-    --mods-line: rgba(255, 255, 255, 0.08);
-    --mods-line-strong: rgba(255, 255, 255, 0.18);
-    --mods-surface: #0c1014;
-    --mods-surface-strong: #11161b;
+    --mods-accent: var(--ew-active-accent, #ff7f32);
+    --mods-accent-soft: var(--ew-active-accent-soft, rgba(255, 127, 50, 0.1));
+    --mods-copy: var(--ew-text, rgba(255, 255, 255, 0.9));
+    --mods-copy-soft: var(--ew-text-soft, rgba(255, 255, 255, 0.64));
+    --mods-copy-faint: var(--ew-text-muted, rgba(255, 255, 255, 0.44));
+    --mods-line: var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    --mods-line-strong: var(--ew-border-strong, rgba(255, 255, 255, 0.18));
+    --mods-surface: var(--ew-bg-panel, #101316);
+    --mods-surface-strong: var(--ew-bg-panel-raised, #15191d);
     min-height: calc(100vh - 64px);
     color: #fff;
     background:
-        radial-gradient(circle at top center, rgba(255, 255, 255, 0.035), transparent 34%),
-        linear-gradient(180deg, #050607 0%, #07090b 48%, #040506 100%);
+        radial-gradient(circle at top center, color-mix(in srgb, var(--mods-accent) 5%, transparent), transparent 34%),
+        linear-gradient(180deg, #0d1012 0%, #080a0c 48%, #050607 100%);
 }
 
 .mods-shell {
@@ -37,7 +37,7 @@
     font-size: clamp(1.58rem, 2.8vw, 2.2rem);
     line-height: 0.98;
     margin: 0;
-    color: rgba(242, 226, 214, 0.88);
+    color: rgba(242, 226, 214, 0.9);
 }
 
 .mods-section-heading p,
@@ -70,7 +70,7 @@
 
 .mods-requirement-actions a,
 .mods-row-actions a {
-    color: var(--mods-copy);
+    color: #f1d6c3;
     text-decoration: none;
     transition: color 0.18s ease;
 }
@@ -155,7 +155,7 @@
 .mods-row--interactive:hover,
 .mods-row--interactive:focus-within {
     transform: translateX(1px) translateY(-1px);
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.024);
 }
 
 .mods-row--interactive:hover::before,
@@ -172,7 +172,7 @@
     min-height: 132px;
     padding: 0.9rem 0.95rem;
     border: 1px solid var(--mods-line-strong);
-    border-radius: 8px;
+    border-radius: 7px;
     color: #fff;
     text-align: left;
     background: var(--mods-surface);

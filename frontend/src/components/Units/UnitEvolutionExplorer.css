@@ -2,11 +2,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;                /* ↓ tighter spacing between header & carousel */
+    gap: 12px;
     min-height: calc(100vh - 80px);
-    padding: 16px 0 32px;     /* ↓ less top padding, keep bottom breathing */
-    color: white;
+    padding: 16px 0 32px;
+    color: var(--ew-text, white);
     overflow-x: hidden;
+    background:
+            radial-gradient(circle at 50% 0, color-mix(in srgb, var(--ew-active-accent, #20b897) 5%, transparent), transparent 360px),
+            #020303;
 }
 .evolutionTreeWrapper {
     display: flex;
@@ -27,8 +30,8 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    height: 0;           /* no visual height */
-    margin: 6px 0;       /* space to pull lines nicely from above */
+    height: 0;
+    margin: 6px 0;
 }
 
 .rootAnchorPoint {
@@ -40,7 +43,7 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 28px; /* your doubled spacing */
+    gap: 28px;
 }
 
 .evoNodeWrapper {
@@ -67,13 +70,14 @@
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    margin-right: 10rem; /* ✅ back in alignment with carousel edge */
-    font-size: 0.9rem;   /* ✅ slightly larger for readability */
+    margin-left: auto;
+    margin-right: clamp(1rem, 8vw, 8rem);
+    font-size: 0.9rem;
     font-weight: 500;
 }
 
 .toggleLabel {
-    color: #ff944d; /* ✅ warmer tone in line with navbar accent */
+    color: var(--ew-active-accent, #20b897);
 }
 
 /* ============================
@@ -87,15 +91,14 @@
     width: 92px;
     height: 28px;
     border-radius: 999px;
-    border: 1px solid #e67328;
-    background: #1a1a1a;
+    border: 1px solid var(--ew-active-accent-border, rgba(32, 184, 151, 0.42));
+    background: var(--ew-bg-panel, #101316);
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 0 4px rgba(230, 115, 40, 0.25);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
     transition: all 0.25s ease;
 }
 
-/* Glowing highlight with brand orange */
 .toggleHighlight {
     position: absolute;
     top: 0;
@@ -103,8 +106,8 @@
     width: 50%;
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #e67328, #ff7f32);
-    box-shadow: 0 0 8px rgba(255, 127, 50, 0.35);
+    background: linear-gradient(90deg, var(--ew-active-accent, #20b897), color-mix(in srgb, var(--ew-active-accent, #20b897) 78%, white));
+    box-shadow: none;
     transform: translateX(0%);
     transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     z-index: 1;
@@ -120,18 +123,18 @@
     z-index: 2;
     flex: 1;
     text-align: center;
-    color: #ff944d;
+    color: var(--ew-text-soft, rgba(255, 255, 255, 0.72));
     user-select: none;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
 .toggleOption.active {
-    color: #000;
+    color: #03110f;
     font-weight: 600;
 }
 
-/* Hover glow for whole toggle */
 .togglePill:hover {
-    box-shadow: 0 0 6px rgba(255, 127, 50, 0.45);
+    border-color: color-mix(in srgb, var(--ew-active-accent, #20b897) 58%, transparent);
+    background: color-mix(in srgb, var(--ew-bg-panel, #101316) 86%, var(--ew-active-accent, #20b897));
 }

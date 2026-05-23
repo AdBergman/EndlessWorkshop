@@ -55,15 +55,20 @@ const AppLayout: React.FC = () => {
     const isCodexRoute = location.pathname.startsWith("/codex");
     const isQuestExplorerRoute = location.pathname.startsWith("/quests");
     let appClassName = "app";
+    let appHue: "orange" | "gold" | "teal" | "neutral" = "orange";
 
     if (isCodexRoute) {
         appClassName = "app app--codex";
+        appHue = "neutral";
     } else if (isQuestExplorerRoute) {
         appClassName = "app app--quests";
+        appHue = "gold";
+    } else if (location.pathname.startsWith("/units")) {
+        appHue = "teal";
     }
 
     return (
-        <div className={appClassName}>
+        <div className={appClassName} data-ew-hue={appHue}>
             <TopContainer />
             {isProcessingSharedBuild ? null : <Outlet />}
         </div>

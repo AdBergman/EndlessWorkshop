@@ -4,7 +4,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 20px 0;
+    padding: 16px 0 20px;
 }
 
 /* One merged stage that defines size + positioning context */
@@ -14,13 +14,13 @@
 
     position: relative;
     width: var(--stage-w);
-    height: auto; /* ✅ shrink-wrap to visible content */
-    min-height: 300px; /* optional safety if cards vary in height */
+    height: auto;
+    min-height: 300px;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* ✅ anchor cards at top instead of centering */
+    align-items: flex-start;
     overflow: visible;
-    padding-bottom: 20px; /* ✅ gives subtle breathing space below */
+    padding-bottom: 20px;
 }
 
 /* Animated track (unchanged) */
@@ -44,7 +44,7 @@
 }
 
 .carouselItem.dimmed {
-    filter: brightness(0.6) contrast(0.9);
+    filter: brightness(0.68) contrast(0.92) saturate(0.92);
 }
 
 .carouselItem.active {
@@ -59,7 +59,7 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #ff8c40;
+    color: var(--ew-active-accent, #20b897);
     font-size: 2.4rem;
     cursor: pointer;
     z-index: 10;
@@ -69,7 +69,7 @@
 }
 
 .carouselArrow:hover {
-    color: #ffa866;
+    color: color-mix(in srgb, var(--ew-active-accent, #20b897) 74%, white);
     transform: translateY(-50%) scale(1.15);
 }
 

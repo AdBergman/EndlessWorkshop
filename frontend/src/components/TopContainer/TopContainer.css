@@ -11,13 +11,13 @@
     align-items: center;
     min-height: 58px;
     padding: 0.54rem 1rem 0.58rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.065);
-    color: #fff;
+    border-bottom: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.065));
+    color: var(--ew-text, #fff);
     background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012) 52%, rgba(0, 0, 0, 0.08)),
-        #101316;
+        var(--ew-bg-panel, #101316);
     box-shadow:
-        inset 0 -1px 0 rgba(255, 127, 50, 0.045),
+        inset 0 -1px 0 color-mix(in srgb, var(--ew-accent, #ff7f32) 12%, transparent),
         0 12px 26px rgba(0, 0, 0, 0.26);
     gap: 1rem;
 }
@@ -30,7 +30,7 @@
     bottom: -1px;
     z-index: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 127, 50, 0.12) 18%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 127, 50, 0.08) 82%, transparent);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--ew-accent, #ff7f32) 18%, transparent) 18%, rgba(255, 255, 255, 0.05) 50%, color-mix(in srgb, var(--ew-accent, #ff7f32) 12%, transparent) 82%, transparent);
     pointer-events: none;
 }
 
@@ -54,7 +54,7 @@
 .logo-title {
     font-family: 'Audiowide', sans-serif;
     font-size: 2.1rem;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -75,9 +75,9 @@
     font-size: 1.05rem;
     font-weight: 500;
     border-radius: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.055);
-    background: rgba(255, 255, 255, 0.052);
-    color: rgba(255, 255, 255, 0.78);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.055));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.052));
+    color: var(--ew-text-soft, rgba(255, 255, 255, 0.78));
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     line-height: 1.2;
@@ -86,15 +86,15 @@
 }
 
 .view-selector a:not(.disabled):hover {
-    border-color: rgba(255, 255, 255, 0.09);
+    border-color: var(--ew-border-strong, rgba(255, 255, 255, 0.09));
     background: rgba(255, 255, 255, 0.08);
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--ew-text, rgba(255, 255, 255, 0.92));
 }
 
 .view-selector a.active {
-    border-color: rgba(255, 127, 50, 0.2);
-    background: rgba(255, 127, 50, 0.12);
-    color: #ff7f32;
+    border-color: var(--ew-accent-border, rgba(255, 127, 50, 0.2));
+    background: var(--ew-accent-soft, rgba(255, 127, 50, 0.12));
+    color: var(--ew-accent, #ff7f32);
     font-weight: 600;
 }
 
@@ -130,8 +130,8 @@
     padding: 0.4rem 0.8rem;
     border: 1px solid rgba(255, 255, 255, 0.055);
     border-radius: 5px;
-    background: rgba(255, 255, 255, 0.052); /* Dark background for inactive */
-    color: #ff7f32; /* Orange text for inactive */
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.052));
+    color: var(--ew-accent, #ff7f32);
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     font-weight: 500;
@@ -139,15 +139,15 @@
 }
 
 .faction-selector button:hover {
-    border-color: rgba(255, 127, 50, 0.16);
+    border-color: var(--ew-accent-border, rgba(255, 127, 50, 0.16));
     background: rgba(255, 255, 255, 0.08);
 }
 
 /* Active faction button is bright orange */
 .faction-selector button.active {
-    background-color: #ff7f32; /* Bright orange background */
-    border-color: rgba(255, 127, 50, 0.82);
-    color: #000; /* Black text */
+    background-color: var(--ew-accent, #ff7f32);
+    border-color: var(--ew-accent-border, rgba(255, 127, 50, 0.82));
+    color: #070707;
     font-weight: 600;
     box-shadow: none;
 }
@@ -160,6 +160,43 @@
 
 .faction-selector button.disabled:hover {
     background: rgba(255, 255, 255, 0.025);
+}
+
+@media (max-width: 1400px) {
+    .top-container {
+        gap: 0.65rem;
+        padding-left: 0.7rem;
+        padding-right: 0.7rem;
+    }
+
+    .top-bar-icon {
+        width: 28px;
+        height: 28px;
+        margin-right: 0.4rem;
+    }
+
+    .logo-title {
+        font-size: 1.78rem;
+        letter-spacing: 1px;
+    }
+
+    .view-selector {
+        gap: 0.46rem;
+    }
+
+    .view-selector a {
+        padding: 0.36rem 0.5rem;
+        font-size: 0.98rem;
+    }
+
+    .faction-selector {
+        gap: 0.38rem;
+    }
+
+    .faction-selector button {
+        padding: 0.36rem 0.58rem;
+        font-size: 0.88rem;
+    }
 }
 
 @media (max-width: 1080px) {

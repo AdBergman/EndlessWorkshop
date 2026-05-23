@@ -2,7 +2,7 @@
 .spreadsheet-container {
     width: 100%;
     display: flex;
-    justify-content: center;     /* centers the inner block */
+    justify-content: center;
     margin-top: 1rem;
 }
 
@@ -11,7 +11,7 @@
     max-width: 1400px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;                   /* space between toolbar and table */
+    gap: 0.85rem;
 }
 
 /* ===== Toolbar ===== */
@@ -25,43 +25,44 @@
 .spreadsheet-toolbar .csv-button {
     text-decoration: none;
     padding: 0.4rem 0.8rem;
-    border: 1px solid #555;
-    border-radius: 4px;
-    background: #1b1b1b;
-    color: #ffcc00;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 5px;
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
+    color: var(--ew-active-accent, #ff7f32);
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .spreadsheet-toolbar button:hover,
 .spreadsheet-toolbar .csv-button:hover {
-    background: #2a2a2a;
+    border-color: var(--ew-active-accent-border, rgba(255, 127, 50, 0.42));
+    background: rgba(255, 255, 255, 0.075);
 }
 
 /* ===== Table ===== */
 .spreadsheet-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto;               /* 👈 let columns size dynamically */
+    table-layout: auto;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
-    background-color: #000;
+    background-color: var(--ew-bg-panel, #101316);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
 }
 
-/* optional — prevent insane stretching on big screens */
 .spreadsheet-table th,
 .spreadsheet-table td {
-    max-width: 280px;                 /* 👈 cap column width */
-    min-width: 60px;                  /* 👈 ensures it doesn’t collapse */
-    white-space: normal;              /* 👈 allow wrapping */
+    max-width: 280px;
+    min-width: 60px;
+    white-space: normal;
     word-wrap: break-word;
 }
 
 /* Cell styling */
 .spreadsheet-table th,
 .spreadsheet-table td {
-    border: 1px solid #333;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
     padding: 8px 12px;
     white-space: pre-line;
     overflow: hidden;
@@ -77,8 +78,8 @@
 /* Header specific styling */
 .spreadsheet-table th {
     font-weight: bold;
-    color: #ffcc00;
-    background-color: rgba(17,17,17,0.9);
+    color: var(--ew-active-accent, #ff7f32);
+    background-color: var(--ew-bg-panel-raised, #15191d);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -86,8 +87,8 @@
 
 /* Row styling */
 .spreadsheet-table tr:nth-child(even) {
-    background-color: #111;
+    background-color: rgba(255, 255, 255, 0.025);
 }
 .spreadsheet-table tr:hover {
-    background-color: #222;
+    background-color: rgba(255, 255, 255, 0.06);
 }

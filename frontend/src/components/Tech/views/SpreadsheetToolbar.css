@@ -2,11 +2,13 @@
 .spreadsheet-toolbar {
     display: flex;
     padding: 0.25rem 0.5rem;
-    border-bottom: 1px solid #333;
-    background-color: #111;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 6px;
+    background-color: var(--ew-bg-panel, #101316);
     align-items: center;
     font-family: 'Inter', sans-serif;
-    justify-content: space-between; /* Pushes the two button groups apart */
+    justify-content: space-between;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .action-buttons,
@@ -20,38 +22,37 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.85rem;
     font-weight: 500;
-    border-radius: 3px;
-    border: 1px solid transparent; /* Use border for consistent sizing */
-    background-color: #222;
-    color: #ccc; /* Default color for non-active buttons */
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background-color: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
+    color: var(--ew-text-soft, rgba(255, 255, 255, 0.72));
     cursor: pointer;
     transition: all 0.2s ease;
     line-height: 1.1;
 }
 
 .spreadsheet-toolbar button:hover {
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 0.075);
+    color: var(--ew-text, rgba(255, 255, 255, 0.92));
 }
 
-/* Style for the active view-toggle button */
 .view-toggle-buttons button.active {
-    background-color: #3a3a3a;
-    color: #ff7f32; /* Highlight color for active text */
+    border-color: var(--ew-active-accent-border, rgba(255, 127, 50, 0.42));
+    background-color: var(--ew-active-accent-soft, rgba(255, 127, 50, 0.12));
+    color: var(--ew-active-accent, #ff7f32);
     font-weight: 600;
 }
 
-/* Style for disabled buttons */
 .spreadsheet-toolbar button.disabled {
-    color: #666;
+    color: var(--ew-text-muted, rgba(255, 255, 255, 0.52));
     cursor: not-allowed;
-    background-color: #1c1c1c;
+    background-color: rgba(255, 255, 255, 0.025);
 }
 
 .spreadsheet-toolbar button.disabled:hover {
-    background-color: #1c1c1c; /* No hover effect for disabled buttons */
+    background-color: rgba(255, 255, 255, 0.025);
 }
 
-/* Action buttons use the primary color */
 .action-buttons button {
-    color: #ff7f32;
+    color: var(--ew-active-accent, #ff7f32);
 }

@@ -6,6 +6,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
+:root {
+    --ew-bg-page: #080a0c;
+    --ew-bg-page-soft: #0b0e11;
+    --ew-bg-panel: #101316;
+    --ew-bg-panel-raised: #15191d;
+    --ew-bg-panel-muted: rgba(255, 255, 255, 0.035);
+    --ew-bg-input: rgba(255, 255, 255, 0.045);
+    --ew-border-soft: rgba(255, 255, 255, 0.08);
+    --ew-border-strong: rgba(255, 255, 255, 0.16);
+    --ew-text: rgba(255, 255, 255, 0.92);
+    --ew-text-soft: rgba(255, 255, 255, 0.72);
+    --ew-text-muted: rgba(255, 255, 255, 0.52);
+    --ew-accent: #ff7f32;
+    --ew-accent-soft: rgba(255, 127, 50, 0.12);
+    --ew-accent-border: rgba(255, 127, 50, 0.42);
+    --ew-focus: rgba(255, 127, 50, 0.22);
+    --ew-shadow-panel: 0 18px 46px rgba(0, 0, 0, 0.34);
+}
+
 /* Reset */
 * {
     margin: 0;
@@ -14,8 +33,10 @@
 }
 
 body {
-    background-color: #000;
-    color: #fff;
+    background:
+        radial-gradient(circle at 16% 0%, rgba(255, 127, 50, 0.035), transparent 28%),
+        linear-gradient(180deg, var(--ew-bg-page-soft), #050607 58%, #020303);
+    color: var(--ew-text);
     font-family: 'Inter', sans-serif;
     font-weight: 500;
     -webkit-font-smoothing: antialiased;
@@ -25,6 +46,32 @@ body {
 
 .app {
     min-height: 100vh;
+    --ew-active-accent: var(--ew-accent);
+    --ew-active-accent-soft: var(--ew-accent-soft);
+    --ew-active-accent-border: var(--ew-accent-border);
+    background:
+        radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--ew-active-accent) 6%, transparent), transparent 30%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 180px),
+        var(--ew-bg-page);
+    color: var(--ew-text);
+}
+
+.app[data-ew-hue="gold"] {
+    --ew-active-accent: #c79a4a;
+    --ew-active-accent-soft: rgba(199, 154, 74, 0.12);
+    --ew-active-accent-border: rgba(199, 154, 74, 0.44);
+}
+
+.app[data-ew-hue="teal"] {
+    --ew-active-accent: #20b897;
+    --ew-active-accent-soft: rgba(32, 184, 151, 0.12);
+    --ew-active-accent-border: rgba(32, 184, 151, 0.42);
+}
+
+.app[data-ew-hue="neutral"] {
+    --ew-active-accent: #d69060;
+    --ew-active-accent-soft: rgba(214, 144, 96, 0.1);
+    --ew-active-accent-border: rgba(214, 144, 96, 0.34);
 }
 
 .app--codex,

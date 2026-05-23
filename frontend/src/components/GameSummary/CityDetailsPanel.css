@@ -35,8 +35,8 @@
     font-size: 11px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
     color: rgba(255, 255, 255, 0.88);
     white-space: nowrap;
 }
@@ -76,9 +76,9 @@
 }
 
 .gs-cityDetailsMetric {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 10px;
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
     padding: 10px 10px;
 }
 
@@ -115,9 +115,9 @@
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
 }
 
 .gs-cityNotice--warn {

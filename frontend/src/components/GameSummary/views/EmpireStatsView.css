@@ -32,14 +32,12 @@
     margin-top: 0.35rem;
 }
 
-/* --- Mode toggle (UI purple, not Influence purple) --- */
-
 .gs-esModeToggle {
     display: inline-flex;
-    border: 1px solid rgba(123, 44, 191, 0.45);
+    border: 1px solid var(--ew-active-accent-border, rgba(255, 127, 50, 0.42));
     border-radius: 999px;
     overflow: hidden;
-    background: rgba(0, 0, 0, 0.22);
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
 }
 
 .gs-esModeBtn {
@@ -54,21 +52,22 @@
 }
 
 .gs-esModeBtn:hover {
-    background: rgba(255, 255, 255, 0.035);
+    background: rgba(255, 255, 255, 0.055);
     color: rgba(255, 255, 255, 0.85);
 }
 
 .gs-esModeBtn.is-active {
-    background: rgba(123, 44, 191, 0.28);
-    color: rgba(255, 255, 255, 0.94);
+    background: var(--ew-active-accent-soft, rgba(255, 127, 50, 0.12));
+    color: var(--ew-active-accent, #ff7f32);
+    font-weight: 700;
 }
 
 .gs-esModeBtn.is-active:hover {
-    background: rgba(123, 44, 191, 0.34);
+    background: color-mix(in srgb, var(--ew-active-accent, #ff7f32) 18%, transparent);
 }
 
 .gs-esModeBtn:focus-visible {
-    outline: 2px solid rgba(123, 44, 191, 0.60);
+    outline: 2px solid var(--ew-focus, rgba(255, 127, 50, 0.22));
     outline-offset: 2px;
 }
 
@@ -101,7 +100,7 @@
 }
 
 .gs-empireCheck:focus-within {
-    outline: 2px solid rgba(123, 44, 191, 0.45);
+    outline: 2px solid var(--ew-focus, rgba(255, 127, 50, 0.22));
     outline-offset: 2px;
 }
 
@@ -147,7 +146,7 @@
 .gs-chartWrap {
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
 }
 
 @media (max-width: 560px) {

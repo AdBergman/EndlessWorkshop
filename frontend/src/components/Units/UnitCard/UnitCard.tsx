@@ -121,7 +121,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     return (
         <motion.div
             className="cardContainer"
-            whileHover={{ scale: 1.06, y: -3 }}
+            whileHover={{ scale: 1.04, y: -2 }}
             onClick={onCardClick}
         >
             <motion.div
@@ -133,8 +133,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                 <div
                     className={`cardBorderAndGlow ${d.isMinor ? "minorBorderGlow" : ""}`}
                     style={{
-                        border: `2px solid ${colors.border}`,
-                        boxShadow: `0 5px 15px rgba(0,0,0,0.5), 0 0 10px ${colors.accent}55`,
+                        border: `1px solid ${colors.border}`,
+                        boxShadow: `0 12px 28px rgba(0,0,0,0.42), 0 0 8px ${colors.accent}33`,
                     }}
                 />
 

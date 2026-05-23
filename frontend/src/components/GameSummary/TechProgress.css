@@ -5,7 +5,7 @@
     gap: 10px;
     align-items: flex-start;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
 }
 
 .gs-turnBadge {
@@ -26,10 +26,10 @@
 .gs-pill {
     padding: 5px 8px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
     font-size: 13px;
     line-height: 18px;
-    background: rgba(0, 0, 0, 0.25);
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
 }
 
 .gs-pillPrefix {
@@ -70,9 +70,9 @@
 /* Chart tooltip (dark, readable) */
 
 .gs-tooltip {
-    background: rgba(10, 10, 10, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 10px;
+    background: color-mix(in srgb, var(--ew-bg-panel, #101316) 94%, black);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    border-radius: 8px;
     padding: 10px 12px;
     color: #fff;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
@@ -81,7 +81,7 @@
 .gs-tooltip__title {
     font-weight: 700;
     margin-bottom: 6px;
-    color: #ffcc99;
+    color: var(--ew-active-accent, #ff7f32);
 }
 
 .gs-tooltip__rows {
@@ -116,10 +116,10 @@
 .gs-input {
     height: 32px;
     padding: 0 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(0, 0, 0, 0.25);
-    color: #fff;
+    border-radius: 6px;
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
+    color: var(--ew-text, #fff);
     font-size: 13px;
     outline: none;
 }
@@ -178,8 +178,8 @@
     height: 22px;
     width: 22px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.08));
+    background: var(--ew-bg-input, rgba(255, 255, 255, 0.045));
     color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     display: inline-flex;
@@ -191,6 +191,6 @@
 
 .gs-filterClear:hover {
     color: rgba(255, 255, 255, 0.95);
-    border-color: rgba(255, 255, 255, 0.22);
-    background: rgba(0, 0, 0, 0.35); /* optional: makes it feel less “buttony” */
+    border-color: var(--ew-border-strong, rgba(255, 255, 255, 0.16));
+    background: rgba(255, 255, 255, 0.075);
 }
