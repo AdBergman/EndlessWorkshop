@@ -51,4 +51,30 @@ describe("unit migration scope", () => {
         expect(source).toMatch(/selectSelectedFaction/);
         expect(source).toMatch(/selectSetSelectedFaction/);
     });
+
+    it("keeps the units page chrome on the orange app accent rather than the old teal theme", () => {
+        const appSource = readFileSync(resolve(srcDir, "App.tsx"), "utf8");
+        const unitChromeSources = [
+            "components/Units/UnitEvolutionExplorer.css",
+            "components/Units/UnitCarousel.css",
+        ].map((file) => readFileSync(resolve(srcDir, file), "utf8"));
+
+        expect(appSource).not.toMatch(/pathname\.startsWith\(["']\/units["']\)[\s\S]{0,120}appHue\s*=\s*["']teal["']/);
+
+        for (const source of unitChromeSources) {
+            expect(source).not.toMatch(/#20b897|rgba\(\s*32\s*,\s*184\s*,\s*151/i);
+        }
+    });
+
+    it("keeps unit card faction icons pinned and colored by the card faction token", () => {
+        const cardSource = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.tsx"), "utf8");
+        const cardCss = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.css"), "utf8");
+        const iconSource = readFileSync(resolve(srcDir, "components/Units/UnitCard/FactionIcon.tsx"), "utf8");
+        const factionColors = readFileSync(resolve(srcDir, "types/factionColors.ts"), "utf8");
+
+        expect(cardSource).toMatch(/<FactionIcon\s+faction=\{d\.majorEnumFaction\}\s+color=\{colors\.border\}/);
+        expect(cardCss).toMatch(/\.fortIcon\s*\{[\s\S]*position:\s*absolute;[\s\S]*top:\s*8px;[\s\S]*right:\s*10px;/);
+        expect(iconSource).toMatch(/color\s*=\s*"currentColor"/);
+        expect(factionColors).toMatch(/NECROPHAGES:\s*\{[\s\S]*border:\s*"#8BC34A"/);
+    });
 });

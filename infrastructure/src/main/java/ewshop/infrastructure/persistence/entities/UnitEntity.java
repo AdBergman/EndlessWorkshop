@@ -49,6 +49,9 @@ public class UnitEntity {
     @Column(name = "unit_class_key", length = 255)
     private String unitClassKey;
 
+    @Column(name = "unit_class_display_name", length = 255)
+    private String unitClassDisplayName;
+
     @Column(name = "attack_skill_key", length = 255)
     private String attackSkillKey;
 
@@ -115,6 +118,9 @@ public class UnitEntity {
 
     public String getUnitClassKey() { return unitClassKey; }
     public void setUnitClassKey(String unitClassKey) { this.unitClassKey = unitClassKey; }
+
+    public String getUnitClassDisplayName() { return unitClassDisplayName; }
+    public void setUnitClassDisplayName(String unitClassDisplayName) { this.unitClassDisplayName = unitClassDisplayName; }
 
     public String getAttackSkillKey() { return attackSkillKey; }
     public void setAttackSkillKey(String attackSkillKey) { this.attackSkillKey = attackSkillKey; }

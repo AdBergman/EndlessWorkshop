@@ -28,6 +28,7 @@ public final class UnitImportMapper {
         // Validate + canonicalize to in-game display name (stored as String)
         String rawFaction = trimToNull(dto.faction());
         String resolvedFaction = resolveAndValidateFaction(rawFaction, isMajor, unitKey);
+        String unitClassKey = trimToNull(dto.unitClassKey());
 
         return UnitImportSnapshot.builder()
                 .unitKey(unitKey)
@@ -44,7 +45,8 @@ public final class UnitImportMapper {
                 .nextEvolutionUnitKeys(cleanList(dto.nextEvolutionUnitKeys()))
                 .evolutionTierIndex(dto.evolutionTierIndex())
 
-                .unitClassKey(trimToNull(dto.unitClassKey()))
+                .unitClassKey(unitClassKey)
+                .unitClassDisplayName(UnitClassDisplayNameNormalizer.normalize(unitClassKey))
                 .attackSkillKey(trimToNull(dto.attackSkillKey()))
 
                 .abilityKeys(mergeAbilities(dto.ownAbilityKeys(), dto.abilityKeys()))

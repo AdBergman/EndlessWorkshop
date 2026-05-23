@@ -35,7 +35,35 @@ class UnitImportMapperTest {
         assertThat(snapshot.unitKey()).isEqualTo("Unit_MinorFaction_Xavius");
         assertThat(snapshot.faction()).isEqualTo("Xavius");
         assertThat(snapshot.isMajorFaction()).isFalse();
+        assertThat(snapshot.unitClassKey()).isEqualTo("UnitClass_Juggernaught");
+        assertThat(snapshot.unitClassDisplayName()).isEqualTo("Juggernaught");
         assertThat(snapshot.nextEvolutionUnitKeys()).containsExactly("Unit_MinorFaction_Xavius_Upgraded");
+    }
+
+    @Test
+    void storesUnitClassDisplayNameWhileKeepingRawClassKey() {
+        UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                "Unit_LastLord_DustBishopChariot_Upgrade01",
+                "Leeching Palanquin",
+                "LastLord",
+                true,
+                false,
+                false,
+                "Land",
+                "Unit_LastLord_DustBishopChariot",
+                List.of(),
+                1,
+                "UnitClass_JuggernaughtRanged",
+                null,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        ));
+
+        assertThat(snapshot.unitClassKey()).isEqualTo("UnitClass_JuggernaughtRanged");
+        assertThat(snapshot.unitClassDisplayName()).isEqualTo("Juggernaught Ranged");
     }
 
     @Test

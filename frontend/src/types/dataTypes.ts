@@ -30,6 +30,7 @@ export interface Unit {
     evolutionTierIndex: number | null;
 
     unitClassKey: string | null;
+    unitClassDisplayName?: string | null;
     attackSkillKey: string | null;
 
     abilityKeys: string[];

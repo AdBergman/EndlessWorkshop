@@ -46,6 +46,7 @@ const normalizeUnit = (unit: Unit): Unit => ({
     ),
     evolutionTierIndex: unit.evolutionTierIndex ?? null,
     unitClassKey: unit.unitClassKey ?? null,
+    unitClassDisplayName: unit.unitClassDisplayName ?? null,
     attackSkillKey: unit.attackSkillKey ?? null,
     abilityKeys: (unit.abilityKeys ?? []).filter((key): key is string => typeof key === "string"),
     descriptionLines: (unit.descriptionLines ?? []).filter(

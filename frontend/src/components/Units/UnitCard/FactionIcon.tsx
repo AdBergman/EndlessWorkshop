@@ -26,7 +26,7 @@ const factionIcons: Record<Faction, React.ElementType> = {
 export const FactionIcon: React.FC<FactionIconProps> = ({
   faction,
   size = 20,
-  color = "#4faaff",
+  color = "currentColor",
 }) => {
   const IconComponent = factionIcons[faction] ?? FaFortAwesomeAlt;
   return <IconComponent size={size} color={color} />;

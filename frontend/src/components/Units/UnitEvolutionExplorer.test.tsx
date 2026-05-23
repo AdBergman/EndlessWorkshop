@@ -289,6 +289,36 @@ describe("/units smoke behavior", () => {
         });
     });
 
+    it("renders unit class display labels without collapsing camel-case words", async () => {
+        mockedApiClient.getUnits.mockResolvedValue([
+            unit({
+                unitKey: "Unit_LastLord_DustBishopChariot_Upgrade01",
+                displayName: "Leeching Palanquin",
+                faction: "Lords",
+                isMajorFaction: true,
+                previousUnitKey: "Unit_LastLord_DustBishopChariot",
+                unitClassKey: "UnitClass_JuggernaughtRanged",
+                unitClassDisplayName: "Juggernaught Ranged",
+                evolutionTierIndex: 1,
+            }),
+            unit({
+                unitKey: "Unit_LastLord_DustBishopChariot",
+                displayName: "Palanquin of the Profane",
+                faction: "Lords",
+                isMajorFaction: true,
+                nextEvolutionUnitKeys: ["Unit_LastLord_DustBishopChariot_Upgrade01"],
+                unitClassKey: "UnitClass_JuggernaughtRanged",
+                unitClassDisplayName: "Juggernaught Ranged",
+                evolutionTierIndex: 0,
+            }),
+        ]);
+
+        renderExplorer("/units?faction=lords&unitKey=Unit_LastLord_DustBishopChariot_Upgrade01");
+
+        expect(await screen.findByText("Juggernaught Ranged Tier II")).toBeInTheDocument();
+        expect(screen.queryByText(/Juggernaughtranged/i)).not.toBeInTheDocument();
+    });
+
     it("keeps /units faction selection writing through stores and updating the unit route", async () => {
         const user = userEvent.setup();
 

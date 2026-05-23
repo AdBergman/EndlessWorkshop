@@ -79,13 +79,18 @@
 
 /* === HEADER === */
 .header {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 
     padding: 8px 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+}
+
+.headerWithIcon {
+    padding-right: 34px;
 }
 
 /* Unit name (gradient is applied inline in TSX) */
@@ -285,15 +290,18 @@
 
 /* Fort icon / faction area */
 .fortIcon {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
 
-    font-size: 0.85rem;
-    padding-left: 6px;
-
-    min-width: 70px;
-    max-width: 50%;
+    width: 20px;
+    height: 20px;
+    color: var(--card-border, #ff7f32);
+    pointer-events: none;
 }
 
 /* === NAME BLOCK (unit + minor faction) === */
@@ -316,10 +324,10 @@
 
 /* Minor faction text — brighter, crisp */
 .minorFactionName {
-    color: #d7e6ee;
+    color: #f0ddd0;
     text-shadow:
             0 2px 8px rgba(0, 0, 0, 0.78),
-            0 0 2px rgba(120, 180, 200, 0.25);
+            0 0 2px rgba(255, 151, 82, 0.18);
     opacity: 0.96;
 }
 

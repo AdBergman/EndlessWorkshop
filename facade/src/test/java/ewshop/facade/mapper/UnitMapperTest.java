@@ -42,9 +42,24 @@ class UnitMapperTest {
         assertThat(dto.nextEvolutionUnitKeys()).containsExactly("Unit_Royal_Griffin");
         assertThat(dto.evolutionTierIndex()).isEqualTo(3);
         assertThat(dto.unitClassKey()).isEqualTo("UnitClass_Cavalry");
+        assertThat(dto.unitClassDisplayName()).isEqualTo("Cavalry");
         assertThat(dto.attackSkillKey()).isEqualTo("Skill_Attack_Griffin");
         assertThat(dto.abilityKeys()).containsExactly("UnitAbility_Flying", "UnitAbility_Charge");
         assertThat(dto.descriptionLines()).containsExactly("Strong aerial unit", "High mobility");
+    }
+
+    @Test
+    void toDto_shouldSplitCamelCaseUnitClassDisplayNameWithoutChangingRawClassKey() {
+        Unit domainUnit = Unit.builder()
+                .unitKey("Unit_LastLord_DustBishopChariot_Upgrade01")
+                .displayName("Leeching Palanquin")
+                .unitClassKey("UnitClass_JuggernaughtRanged")
+                .build();
+
+        UnitDto dto = UnitMapper.toDto(domainUnit);
+
+        assertThat(dto.unitClassKey()).isEqualTo("UnitClass_JuggernaughtRanged");
+        assertThat(dto.unitClassDisplayName()).isEqualTo("Juggernaught Ranged");
     }
 
     @Test

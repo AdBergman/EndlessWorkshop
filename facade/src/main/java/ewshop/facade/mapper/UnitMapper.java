@@ -23,9 +23,16 @@ public final class UnitMapper {
                 unit.getNextEvolutionUnitKeys(),
                 unit.getEvolutionTierIndex(),
                 unit.getUnitClassKey(),
+                displayUnitClassName(unit),
                 unit.getAttackSkillKey(),
                 unit.getAbilityKeys(),
                 unit.getDescriptionLines()
         );
+    }
+
+    private static String displayUnitClassName(Unit unit) {
+        String stored = unit.getUnitClassDisplayName();
+        if (stored != null && !stored.isBlank()) return stored;
+        return UnitClassDisplayNameNormalizer.normalize(unit.getUnitClassKey());
     }
 }

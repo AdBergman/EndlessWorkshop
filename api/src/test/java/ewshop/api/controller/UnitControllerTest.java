@@ -43,6 +43,7 @@ class UnitControllerTest {
                 List.of("Unit_Test_1_Upgraded"),
                 1,
                 "UnitClass_Infantry",
+                "Infantry",
                 "Skill_Attack_1",
                 List.of("UnitAbility_A", "UnitAbility_B"),
                 List.of("Line 1", "Line 2")
@@ -61,6 +62,7 @@ class UnitControllerTest {
                 List.of(),
                 2,
                 "UnitClass_Cavalry",
+                "Cavalry",
                 "Skill_Attack_2",
                 List.of("UnitAbility_C"),
                 List.of("Only line")
@@ -86,6 +88,7 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[0].nextEvolutionUnitKeys[0]").value("Unit_Test_1_Upgraded"))
                 .andExpect(jsonPath("$[0].evolutionTierIndex").value(1))
                 .andExpect(jsonPath("$[0].unitClassKey").value("UnitClass_Infantry"))
+                .andExpect(jsonPath("$[0].unitClassDisplayName").value("Infantry"))
                 .andExpect(jsonPath("$[0].attackSkillKey").value("Skill_Attack_1"))
                 .andExpect(jsonPath("$[0].abilityKeys[0]").value("UnitAbility_A"))
                 .andExpect(jsonPath("$[0].abilityKeys[1]").value("UnitAbility_B"))
@@ -102,6 +105,7 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[1].nextEvolutionUnitKeys").isEmpty())
                 .andExpect(jsonPath("$[1].evolutionTierIndex").value(2))
                 .andExpect(jsonPath("$[1].unitClassKey").value("UnitClass_Cavalry"))
+                .andExpect(jsonPath("$[1].unitClassDisplayName").value("Cavalry"))
                 .andExpect(jsonPath("$[1].attackSkillKey").value("Skill_Attack_2"))
                 .andExpect(jsonPath("$[1].abilityKeys[0]").value("UnitAbility_C"))
                 .andExpect(jsonPath("$[1].descriptionLines[0]").value("Only line"));

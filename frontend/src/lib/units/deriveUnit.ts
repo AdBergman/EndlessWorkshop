@@ -39,8 +39,11 @@ function toRoman(n: number): string {
 }
 
 function titleCaseWords(input: string): string {
-    return input
-        .split(/[\s_]+/g)
+    return stripUnitClassPrefix(input)
+        .replace(/[_-]+/g, " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
+        .split(/\s+/g)
         .filter(Boolean)
         .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(" ");
@@ -132,7 +135,7 @@ export function deriveUnit(unit: Unit): DerivedUnit {
     const tierLabel = getDisplayTierLabel(unit, tierIndex0);
 
     const classKey = unit.unitClassKey?.trim() || null;
-    const classLabel = classKey ? titleCaseWords(stripUnitClassPrefix(classKey)) : null;
+    const classLabel = unit.unitClassDisplayName?.trim() || (classKey ? titleCaseWords(classKey) : null);
 
     const typeLine = buildTypeLine(tierLabel, classLabel);
 

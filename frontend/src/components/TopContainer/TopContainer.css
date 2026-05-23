@@ -91,6 +91,12 @@
     color: var(--ew-text, rgba(255, 255, 255, 0.92));
 }
 
+.view-selector a:focus-visible,
+.faction-selector button:focus-visible {
+    outline: 2px solid var(--ew-focus, rgba(255, 127, 50, 0.45));
+    outline-offset: 2px;
+}
+
 .view-selector a.active {
     border-color: var(--ew-accent-border, rgba(255, 127, 50, 0.2));
     background: var(--ew-accent-soft, rgba(255, 127, 50, 0.12));

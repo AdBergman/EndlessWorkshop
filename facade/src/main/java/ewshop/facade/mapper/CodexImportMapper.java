@@ -14,6 +14,8 @@ public final class CodexImportMapper {
     private static final String EXTRACTORS_EXPORT_KIND = "extractors";
     private static final String EXTRACTOR_ENTRY_KEY_PREFIX = "Extractor_";
     private static final String EXTRACTORS_CATEGORY = "Extractors";
+    private static final String UNIT_CLASS_PREFIX = "UnitClass_";
+    private static final String CLASS_LINE_PREFIX = "Class:";
 
     private CodexImportMapper() {}
 
@@ -33,7 +35,7 @@ public final class CodexImportMapper {
         String publicExportKind = extractor ? EXTRACTORS_EXPORT_KIND : kind;
         String category = extractor ? EXTRACTORS_CATEGORY : trimToNull(dto.category());
         String sourceKind = trimToNull(dto.kind());
-        List<String> descriptionLines = cleanLines(dto.descriptionLines());
+        List<String> descriptionLines = cleanDescriptionLines(dto.descriptionLines());
         List<String> referenceKeys = cleanDistinctLines(dto.referenceKeys());
 
         return new CodexImportSnapshot(key, name, publicExportKind, category, sourceKind, descriptionLines, referenceKeys);
@@ -54,7 +56,7 @@ public final class CodexImportMapper {
         return s == null ? "" : s.trim();
     }
 
-    private static List<String> cleanLines(List<String> in) {
+    private static List<String> cleanDescriptionLines(List<String> in) {
         if (in == null || in.isEmpty()) return List.of();
 
         List<String> out = new ArrayList<>(in.size());
@@ -62,9 +64,20 @@ public final class CodexImportMapper {
             if (line == null) continue;
             String t = line.trim();
             if (t.isBlank()) continue;
-            out.add(t);
+            out.add(normalizeDescriptionLine(t));
         }
         return out;
+    }
+
+    private static String normalizeDescriptionLine(String line) {
+        if (!line.startsWith(CLASS_LINE_PREFIX)) return line;
+
+        String rawClassKey = line.substring(CLASS_LINE_PREFIX.length()).trim();
+        if (!rawClassKey.startsWith(UNIT_CLASS_PREFIX)) return line;
+
+        String displayClassName = UnitClassDisplayNameNormalizer.normalize(rawClassKey);
+        if (displayClassName == null) return line;
+        return CLASS_LINE_PREFIX + " " + displayClassName;
     }
 
     // Clean + dedupe while preserving order (prevents uq_codex_reference_keys_key collisions)

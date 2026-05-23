@@ -221,6 +221,37 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_normalizesUnitClassDescriptionLinesWithoutChangingRawKeys() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "heroes",
+                List.of(new CodexImportEntryDto(
+                        "Hero_LastLord_02",
+                        "Dust Bishop",
+                        "LastLord",
+                        "Hero",
+                        List.of("Class: UnitClass_JuggernaughtRanged_Hero", "Spawn type: Land"),
+                        List.of("UnitClass_JuggernaughtRanged_Hero", "Faction_LastLord")
+                ))
+        ));
+
+        CodexImportSnapshot snapshot = codexImportService.capturedSnapshots.getFirst();
+        assertEquals("Hero_LastLord_02", snapshot.entryKey());
+        assertEquals(List.of("Class: Juggernaught Ranged Hero", "Spawn type: Land"), snapshot.descriptionLines());
+        assertEquals(List.of("UnitClass_JuggernaughtRanged_Hero", "Faction_LastLord"), snapshot.referenceKeys());
+    }
+
+    @Test
     void importCodex_promotesExtractorDistrictRowsToExtractorExportKind() {
         ImportResult result = new ImportResult();
         result.incrementInserted();

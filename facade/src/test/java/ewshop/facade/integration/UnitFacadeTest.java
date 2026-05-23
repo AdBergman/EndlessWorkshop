@@ -44,6 +44,7 @@ class UnitFacadeTest extends BaseIT {
                 List.of("Unit_Test_1_Upgraded"),
                 1,
                 "UnitClass_Infantry",
+                "Infantry",
                 "Skill_Attack_1",
                 List.of("UnitAbility_A", "UnitAbility_B"),
                 List.of("Line 1", "Line 2")
@@ -61,6 +62,7 @@ class UnitFacadeTest extends BaseIT {
                 List.of(),
                 2,
                 "UnitClass_Cavalry",
+                "Cavalry",
                 "Skill_Attack_2",
                 List.of("UnitAbility_C"),
                 List.of("Only line")
@@ -89,6 +91,7 @@ class UnitFacadeTest extends BaseIT {
         assertThat(dto.nextEvolutionUnitKeys()).containsExactly("Unit_Test_1_Upgraded");
         assertThat(dto.evolutionTierIndex()).isEqualTo(1);
         assertThat(dto.unitClassKey()).isEqualTo("UnitClass_Infantry");
+        assertThat(dto.unitClassDisplayName()).isEqualTo("Infantry");
         assertThat(dto.attackSkillKey()).isEqualTo("Skill_Attack_1");
         assertThat(dto.abilityKeys()).containsExactly("UnitAbility_A", "UnitAbility_B");
         assertThat(dto.descriptionLines()).containsExactly("Line 1", "Line 2");

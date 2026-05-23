@@ -22,6 +22,7 @@ public class Unit {
     private final Integer evolutionTierIndex;
 
     private final String unitClassKey;
+    private final String unitClassDisplayName;
     private final String attackSkillKey;
 
     private final List<String> abilityKeys;
@@ -44,6 +45,7 @@ public class Unit {
         this.evolutionTierIndex = builder.evolutionTierIndex;
 
         this.unitClassKey = builder.unitClassKey;
+        this.unitClassDisplayName = builder.unitClassDisplayName;
         this.attackSkillKey = builder.attackSkillKey;
 
         this.abilityKeys = List.copyOf(builder.abilityKeys);
@@ -67,6 +69,7 @@ public class Unit {
     public Integer getEvolutionTierIndex() { return evolutionTierIndex; }
 
     public String getUnitClassKey() { return unitClassKey; }
+    public String getUnitClassDisplayName() { return unitClassDisplayName; }
     public String getAttackSkillKey() { return attackSkillKey; }
 
     public List<String> getAbilityKeys() { return abilityKeys; }
@@ -92,6 +95,7 @@ public class Unit {
         private Integer evolutionTierIndex;
 
         private String unitClassKey;
+        private String unitClassDisplayName;
         private String attackSkillKey;
 
         private final List<String> abilityKeys = new ArrayList<>();
@@ -120,6 +124,7 @@ public class Unit {
         public Builder evolutionTierIndex(Integer evolutionTierIndex) { this.evolutionTierIndex = evolutionTierIndex; return this; }
 
         public Builder unitClassKey(String unitClassKey) { this.unitClassKey = unitClassKey; return this; }
+        public Builder unitClassDisplayName(String unitClassDisplayName) { this.unitClassDisplayName = unitClassDisplayName; return this; }
         public Builder attackSkillKey(String attackSkillKey) { this.attackSkillKey = attackSkillKey; return this; }
 
         public Builder abilityKeys(List<String> abilityKeys) {

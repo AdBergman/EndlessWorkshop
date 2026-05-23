@@ -124,6 +124,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
         changed |= setIfChanged(entity.getEvolutionTierIndex(), update.evolutionTierIndex(), entity::setEvolutionTierIndex);
 
         changed |= setIfChanged(entity.getUnitClassKey(), update.unitClassKey(), entity::setUnitClassKey);
+        changed |= setIfChanged(entity.getUnitClassDisplayName(), update.unitClassDisplayName(), entity::setUnitClassDisplayName);
         changed |= setIfChanged(entity.getAttackSkillKey(), update.attackSkillKey(), entity::setAttackSkillKey);
 
         List<String> nextEvos = safeList(update.nextEvolutionUnitKeys());
@@ -188,6 +189,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
         entity.setPreviousUnitKey(unit.getPreviousUnitKey());
         entity.setEvolutionTierIndex(unit.getEvolutionTierIndex());
         entity.setUnitClassKey(unit.getUnitClassKey());
+        entity.setUnitClassDisplayName(unit.getUnitClassDisplayName());
         entity.setAttackSkillKey(unit.getAttackSkillKey());
 
         entity.setNextEvolutionUnitKeys(new ArrayList<>(safeList(unit.getNextEvolutionUnitKeys())));

@@ -19,6 +19,7 @@ public record UnitDto(
         Integer evolutionTierIndex,
 
         String unitClassKey,
+        String unitClassDisplayName,
         String attackSkillKey,
 
         List<String> abilityKeys,

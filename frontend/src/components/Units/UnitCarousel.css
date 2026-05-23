@@ -11,8 +11,10 @@
 .carouselStage {
     --stage-w: 820px;
     --arrow-gap: 40px;
+    --units-accent: var(--ew-active-accent, #ff7f32);
 
     position: relative;
+    isolation: isolate;
     width: var(--stage-w);
     height: auto;
     min-height: 300px;
@@ -23,9 +25,22 @@
     padding-bottom: 20px;
 }
 
+.carouselStage::before {
+    content: "";
+    position: absolute;
+    inset: -70px -120px -40px;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 50% 24%, rgba(255, 127, 50, 0.075), transparent 42%),
+        radial-gradient(ellipse at 50% 70%, rgba(145, 72, 24, 0.055), transparent 54%);
+    filter: blur(2px);
+}
+
 /* Animated track (unchanged) */
 .carouselTrack {
     position: relative;
+    z-index: 1;
     width: 100%;
     height: 100%;
     perspective: 1200px;
@@ -44,7 +59,7 @@
 }
 
 .carouselItem.dimmed {
-    filter: brightness(0.68) contrast(0.92) saturate(0.92);
+    filter: brightness(0.74) contrast(0.96) saturate(0.95);
 }
 
 .carouselItem.active {
@@ -59,7 +74,7 @@
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: var(--ew-active-accent, #20b897);
+    color: var(--units-accent);
     font-size: 2.4rem;
     cursor: pointer;
     z-index: 10;
@@ -69,8 +84,14 @@
 }
 
 .carouselArrow:hover {
-    color: color-mix(in srgb, var(--ew-active-accent, #20b897) 74%, white);
+    color: color-mix(in srgb, var(--units-accent) 74%, white);
     transform: translateY(-50%) scale(1.15);
+}
+
+.carouselArrow:focus-visible {
+    outline: 2px solid var(--ew-focus, rgba(255, 127, 50, 0.45));
+    outline-offset: 6px;
+    border-radius: 4px;
 }
 
 .carouselArrow.left  { left:  calc(-1 * var(--arrow-gap)); }

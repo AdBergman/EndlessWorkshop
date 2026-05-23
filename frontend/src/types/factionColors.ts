@@ -8,8 +8,8 @@ export const FACTION_COLORS = {
         accent: "#F87171",
     },
     NECROPHAGES: {
-        border: "#10B981",      // green-500 — toxic, organic
-        accent: "#34D399",
+        border: "#8BC34A",      // toxic green — closer to the Necrophage title treatment
+        accent: "#A4D168",
     },
     ASPECTS: {
         border: "#8B5CF6",      // violet-500 — mystical, crystalline

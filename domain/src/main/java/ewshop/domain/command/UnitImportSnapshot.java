@@ -18,6 +18,7 @@ public record UnitImportSnapshot(
         Integer evolutionTierIndex,
 
         String unitClassKey,
+        String unitClassDisplayName,
         String attackSkillKey,
 
         List<String> abilityKeys,
@@ -39,6 +40,8 @@ public record UnitImportSnapshot(
         spawnType = spawnType == null ? null : spawnType.trim();
         previousUnitKey = previousUnitKey == null ? null : previousUnitKey.trim();
         unitClassKey = unitClassKey == null ? null : unitClassKey.trim();
+        unitClassDisplayName = unitClassDisplayName == null ? null : unitClassDisplayName.trim();
+        if (unitClassDisplayName != null && unitClassDisplayName.isEmpty()) unitClassDisplayName = null;
 
         attackSkillKey = attackSkillKey == null ? null : attackSkillKey.trim();
         if (attackSkillKey != null && attackSkillKey.isEmpty()) attackSkillKey = null;
@@ -68,6 +71,7 @@ public record UnitImportSnapshot(
         private Integer evolutionTierIndex = null;
 
         private String unitClassKey = null;
+        private String unitClassDisplayName = null;
         private String attackSkillKey = null;
 
         private List<String> abilityKeys = List.of();
@@ -88,6 +92,7 @@ public record UnitImportSnapshot(
         public Builder evolutionTierIndex(Integer evolutionTierIndex) { this.evolutionTierIndex = evolutionTierIndex; return this; }
 
         public Builder unitClassKey(String unitClassKey) { this.unitClassKey = unitClassKey; return this; }
+        public Builder unitClassDisplayName(String unitClassDisplayName) { this.unitClassDisplayName = unitClassDisplayName; return this; }
         public Builder attackSkillKey(String attackSkillKey) { this.attackSkillKey = attackSkillKey; return this; }
 
         public Builder abilityKeys(List<String> abilityKeys) { this.abilityKeys = abilityKeys; return this; }
@@ -106,6 +111,7 @@ public record UnitImportSnapshot(
                     nextEvolutionUnitKeys,
                     evolutionTierIndex,
                     unitClassKey,
+                    unitClassDisplayName,
                     attackSkillKey,
                     abilityKeys,
                     descriptionLines

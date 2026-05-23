@@ -29,6 +29,7 @@ public class UnitMapper {
         entity.setEvolutionTierIndex(domain.getEvolutionTierIndex());
 
         entity.setUnitClassKey(domain.getUnitClassKey());
+        entity.setUnitClassDisplayName(domain.getUnitClassDisplayName());
         entity.setAttackSkillKey(domain.getAttackSkillKey());
 
         entity.setNextEvolutionUnitKeys(copy(domain.getNextEvolutionUnitKeys()));
@@ -58,6 +59,7 @@ public class UnitMapper {
                 .evolutionTierIndex(entity.getEvolutionTierIndex())
 
                 .unitClassKey(entity.getUnitClassKey())
+                .unitClassDisplayName(entity.getUnitClassDisplayName())
                 .attackSkillKey(entity.getAttackSkillKey())
 
                 .abilityKeys(entity.getAbilityKeys())

@@ -140,7 +140,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                 {/* FRONT */}
                 <div className={`cardFace cardFront ${d.isMinor ? "minorCardFace" : ""}`}>
-                    <div className={`header ${d.isMinor ? "minorHeader" : ""}`}>
+                    <div className={`header ${d.isMinor ? "minorHeader" : ""} ${!d.isMinor && d.majorEnumFaction ? "headerWithIcon" : ""}`}>
                         <div className="nameBlock">
                             <div
                                 className="name"
@@ -163,7 +163,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                         {!d.isMinor && d.majorEnumFaction && (
                             <div className="fortIcon" title={d.unit.faction ?? undefined}>
-                                <FactionIcon faction={d.majorEnumFaction} />
+                                <FactionIcon faction={d.majorEnumFaction} color={colors.border} />
                             </div>
                         )}
                     </div>

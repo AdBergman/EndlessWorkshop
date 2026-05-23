@@ -63,8 +63,6 @@ const AppLayout: React.FC = () => {
     } else if (isQuestExplorerRoute) {
         appClassName = "app app--quests";
         appHue = "gold";
-    } else if (location.pathname.startsWith("/units")) {
-        appHue = "teal";
     }
 
     return (
