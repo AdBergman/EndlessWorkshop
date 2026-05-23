@@ -1045,6 +1045,12 @@
     text-transform: uppercase;
 }
 
+.questExplorer-stepLabel {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
 .questExplorer-stepTitle {
     display: block;
     margin: 0;
@@ -1114,14 +1120,13 @@
 
 .questExplorer-strategyStepBody {
     display: grid;
-    grid-template-columns: minmax(220px, 0.78fr) minmax(0, 1.22fr);
     align-items: start;
-    gap: 28px;
-    max-width: 1040px;
+    gap: 24px;
+    max-width: 86ch;
 }
 
 .questExplorer-strategyStepBody .questExplorer-stepSummary {
-    max-width: 44ch;
+    max-width: 70ch;
     padding-top: 2px;
 }
 
@@ -1435,6 +1440,16 @@
     display: block;
     color: rgba(199, 189, 171, 0.78);
     font-size: 0.82rem;
+}
+
+.questExplorer-choiceCardCopy .questExplorer-choiceDebugMeta,
+.questExplorer-loreChoiceCopy .questExplorer-choiceDebugMeta {
+    display: block;
+    margin-top: 3px;
+    color: var(--quest-teal);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.72rem;
+    line-height: 1.45;
 }
 
 .questExplorer-choiceCardMeta b {

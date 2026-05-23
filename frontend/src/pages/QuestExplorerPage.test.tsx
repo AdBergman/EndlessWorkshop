@@ -704,6 +704,23 @@ const repeatedDetailPayload: QuestExplorerResponse = {
     },
 };
 
+const repeatedChoicePayload: QuestExplorerResponse = {
+    ...repeatedDetailPayload,
+    entries: [
+        {
+            ...repeatedDetailPayload.entries[0],
+            branches: [
+                {
+                    ...testBranch("Branch_Shared", "Open the sealed page"),
+                    groupLabel: "Shared Line",
+                    lore: { outcomePreviewLines: ["The shared page opens."] },
+                    strategy: { conditions: ["Commit to the shared page."], requirements: [], rewards: [] },
+                },
+            ],
+        },
+    ],
+};
+
 const choiceResetPayload: QuestExplorerResponse = {
     ...payload,
     entries: [
@@ -1049,6 +1066,7 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getAllByText("continuation keys").length).toBeGreaterThan(0);
         expect(within(debugPanel).getByText("selected choice path")).toBeInTheDocument();
         expect(within(debugPanel).getByText("unresolved continuation")).toBeInTheDocument();
+        expect(screen.getByText(/shown at Chapter 1 Step 1; owner Chapter 1 Step 1 .* branch -> Chapter 1 Step 2/)).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
 
@@ -1082,7 +1100,7 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("renders minor faction objective variants as strategy paths without aggregate overview", async () => {
+    it("renders minor faction objective variants without aggregate overview", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(minorVariantPayload);
         renderPage("/quests");
@@ -1093,15 +1111,15 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         expect(screen.queryByLabelText("Strategy overview")).not.toBeInTheDocument();
-        expect(screen.getByText("Path 1")).toBeInTheDocument();
-        expect(screen.getByText("Path 2")).toBeInTheDocument();
+        expect(screen.getByText("Objective 1")).toBeInTheDocument();
+        expect(screen.getByText("Objective 2")).toBeInTheDocument();
         expect(screen.getByText("The divining ritual depends on a rare material.")).toBeInTheDocument();
         expect(screen.getByText("Travelers can contain useful clues.")).toBeInTheDocument();
         expect(screen.getByText("Maintain the required empire value.")).toBeInTheDocument();
         expect(screen.getByText("Gain Glassteel.")).toBeInTheDocument();
     });
 
-    it("groups minor faction lore by shared opening, objective paths, and shared resolution", async () => {
+    it("groups minor faction lore by shared opening, objective variants, and shared resolution", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(minorVariantPayload);
         renderPage("/quests");
@@ -1111,8 +1129,8 @@ describe("QuestExplorerPage", () => {
 
         expect(screen.getAllByRole("heading", { name: "Opening" })).toHaveLength(1);
         expect(screen.getByText("A somber atmosphere hangs over the settlement.")).toBeInTheDocument();
-        expect(screen.getByText("Path 1")).toBeInTheDocument();
-        expect(screen.getByText("Path 2")).toBeInTheDocument();
+        expect(screen.getByText("Objective 1")).toBeInTheDocument();
+        expect(screen.getByText("Objective 2")).toBeInTheDocument();
         expect(screen.getByText("The ground speaks, but we cannot hear it.")).toBeInTheDocument();
         expect(screen.getByText("A trading post is certain to bring us news.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Resolution" })).toBeInTheDocument();
@@ -1227,7 +1245,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
     });
 
-    it("stops gracefully when a modeled choice lacks explicit continuation keys", async () => {
+    it("hides unresolved non-final main faction choices outside debug mode", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(unresolvedChoicePayload);
         renderPage("/quests/Quest_A");
@@ -1235,7 +1253,21 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
+        expect(screen.queryByRole("button", { name: /Take the unknown road/ })).not.toBeInTheDocument();
         expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
+    });
+
+    it("stops gracefully in debug mode when a modeled choice lacks explicit continuation keys", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(unresolvedChoicePayload);
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
 
         expect(screen.getByText("Path Continues")).toBeInTheDocument();
@@ -1396,6 +1428,17 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Entry-backed")).not.toBeInTheDocument();
         expect(screen.getAllByText("The same chronicle page carries both steps.")).toHaveLength(1);
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Shared");
+    });
+
+    it("does not repeat branch choices for repeated detailEntryKey projection steps", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(repeatedChoicePayload);
+        renderPage("/quests/Quest_Shared?debugQuestProgression=true");
+
+        expect(await screen.findByRole("heading", { name: "Shared Chronicle" })).toBeInTheDocument();
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getAllByRole("button", { name: /Open the sealed page/ })).toHaveLength(1);
+        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
     });
 
     it("keeps a later canonical step selected in content while illuminating its chapter record", async () => {

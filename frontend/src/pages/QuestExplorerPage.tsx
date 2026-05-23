@@ -62,6 +62,7 @@ type QuestPathChoice = {
     id: string;
     label: string;
     eyebrow: string;
+    sourceEntryKey: string | null;
     descriptionLines: string[];
     strategyLines: string[];
     loreLines: string[];
@@ -348,8 +349,8 @@ function isResolutionLoreSection(section: LoreSection): boolean {
     return lorePhaseKey(section.phase) === "success" || lorePhaseKey(section.phase) === "resolution";
 }
 
-function objectivePathLabel(index: number): string {
-    return `Path ${index + 1}`;
+function objectiveVariantLabel(index: number): string {
+    return `Objective ${index + 1}`;
 }
 
 function objectivePaths(entry: QuestExplorerEntry): QuestObjectivePath[] {
@@ -541,6 +542,7 @@ function choicesForStep(
             id: `variant:${variant.entryKey}`,
             label,
             eyebrow: variant.branchLabel || "Choice",
+            sourceEntryKey: target?.entryKey ?? variant.entryKey,
             descriptionLines,
             strategyLines: choiceDescription([targetSummary], null),
             loreLines: descriptionLines,
@@ -569,11 +571,13 @@ function choicesForStep(
             ], target?.title ?? null);
             const requirementLines = (branch.strategy?.requirements ?? []).map((requirement) => requirement.displayText);
             const rewardLines = (branch.strategy?.rewards ?? []).map((reward) => reward.displayText);
+            const repeatedEntryTitle = branch.label && detailEntry?.title && branch.label === detailEntry.title;
 
             return {
                 id: `branch:${branch.branchKey}`,
-                label: branch.label || target?.title || "Choice",
+                label: repeatedEntryTitle ? strategyLines[0] ?? target?.title ?? branch.label ?? "Choice" : branch.label || target?.title || "Choice",
                 eyebrow: branch.groupLabel || "Choice",
+                sourceEntryKey: detailEntry?.entryKey ?? null,
                 descriptionLines: uniqueStrings([...strategyLines, ...loreLines]),
                 strategyLines,
                 loreLines,
@@ -630,11 +634,153 @@ function implicitActiveChoice(
     return choice ? selectionForChoice("", choice) : null;
 }
 
+function locationLabel(location: QuestProgressionLocation | null, entriesByKey: Record<string, QuestExplorerEntry>): string | null {
+    if (!location) return null;
+    const title = entriesByKey[location.step.detailEntryKey]?.title ?? location.step.title;
+    return [
+        chapterPositionLabel(location.chapter),
+        stepPositionLabel(location.step),
+        title ? `(${title})` : null,
+    ].filter(Boolean).join(" ");
+}
+
+function choiceKindLabel(choice: QuestPathChoice): string {
+    return choice.id.startsWith("variant:") ? "variant" : "branch";
+}
+
+function isMainFactionEntry(entry: QuestExplorerEntry | null): boolean {
+    return Boolean(entry && getQuestCategoryKey(entry.questType) === "faction");
+}
+
+function isTerminalChoiceChapter(progression: QuestDetailProgression): boolean {
+    const chapterNumber = progression.chapter.chapterNumber ?? progression.chapter.chapterOrder;
+    return chapterNumber != null && chapterNumber >= 6;
+}
+
+function hasModeledChoiceContinuation(choice: QuestPathChoice): boolean {
+    return Boolean(choice.targetEntryKey || choice.nextEntryKeys.length > 0);
+}
+
+function isHiddenNormalChoice(
+    choice: QuestPathChoice,
+    displayEntry: QuestExplorerEntry | null,
+    progression: QuestDetailProgression
+): boolean {
+    return isMainFactionEntry(displayEntry)
+        && !isTerminalChoiceChapter(progression)
+        && !hasModeledChoiceContinuation(choice);
+}
+
+function visibleChoicesForMode(
+    choices: QuestPathChoice[],
+    displayEntry: QuestExplorerEntry | null,
+    progression: QuestDetailProgression,
+    debugQuestProgression: boolean
+): QuestPathChoice[] {
+    if (debugQuestProgression) return choices;
+    return choices.filter((choice) => !isHiddenNormalChoice(choice, displayEntry, progression));
+}
+
+function entryNavigationLocationLabel(entry: QuestExplorerEntry | null): string | null {
+    if (!entry) return null;
+    const chapter = entry.navigation.chapterLabel
+        ?? (entry.navigation.chapter != null ? `Chapter ${entry.navigation.chapter}` : null);
+    const step = entry.navigation.stepLabel
+        ?? (entry.navigation.step != null ? `Step ${entry.navigation.step}` : null);
+    const location = [chapter, step].filter(Boolean).join(" ");
+    return location ? `${location} (${entry.entryKey})` : entry.entryKey;
+}
+
+function choiceOriginLabel(
+    step: QuestProgressionStep,
+    choice: QuestPathChoice,
+    progression: QuestDetailProgression,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): string {
+    const renderedAt = `${chapterPositionLabel(progression.chapter)} ${stepPositionLabel(step)}`;
+    const owner = entryNavigationLocationLabel(choice.sourceEntryKey ? entriesByKey[choice.sourceEntryKey] ?? null : null);
+    return owner ? `shown at ${renderedAt}; owner ${owner}` : `shown at ${renderedAt}; owner unknown`;
+}
+
+function choiceDebugDestination(
+    step: QuestProgressionStep,
+    choice: QuestPathChoice,
+    progression: QuestDetailProgression,
+    fullProgression: QuestExplorerProgression | null,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): string {
+    const sourceEntry = choice.sourceEntryKey ? entriesByKey[choice.sourceEntryKey] ?? null : null;
+    const currentStepIndex = progression.chapter.steps.findIndex((candidate) => candidate.stepKey === step.stepKey);
+    const selection = selectionForChoice(step.stepKey, choice);
+    const targetKeys = selectedChoiceTargetKeys(selection);
+    const continuationKeysForChoice = selectedChoiceContinuationKeys(selection, entriesByKey);
+    const continuationOnlyKeys = continuationKeysForChoice.filter((key) => !targetKeys.includes(key));
+    const continuationLookupKeys = continuationOnlyKeys.length > 0 ? continuationOnlyKeys : continuationKeysForChoice;
+    const targetStepIndex = stepIndexForKeys(progression.chapter.steps, targetKeys, entriesByKey, currentStepIndex);
+    const continuationStepIndex = stepIndexForKeys(
+        progression.chapter.steps,
+        continuationLookupKeys,
+        entriesByKey,
+        currentStepIndex < 0 ? 0 : currentStepIndex + 1
+    );
+    const kind = choiceKindLabel(choice);
+    const origin = choiceOriginLabel(step, choice, progression, entriesByKey);
+    const hiddenNormal = isHiddenNormalChoice(choice, sourceEntry, progression)
+        ? "; hidden in normal UI: no modeled continuation before final chapter"
+        : "";
+
+    if (kind === "variant" && targetStepIndex === currentStepIndex) {
+        const continuationLocation = progressionLocationForKeys(fullProgression, continuationLookupKeys, entriesByKey);
+        const continuationLabel = continuationStepIndex != null
+            ? `${chapterPositionLabel(progression.chapter)} ${stepPositionLabel(progression.chapter.steps[continuationStepIndex])}`
+            : locationLabel(continuationLocation, entriesByKey);
+        return continuationLabel
+            ? `Debug: ${origin}; variant -> current step variant; then ${continuationLabel}${hiddenNormal}`
+            : `Debug: ${origin}; variant -> current step variant; continuation unresolved${hiddenNormal}`;
+    }
+
+    if (continuationStepIndex != null) {
+        return `Debug: ${origin}; ${kind} -> ${chapterPositionLabel(progression.chapter)} ${stepPositionLabel(progression.chapter.steps[continuationStepIndex])}${hiddenNormal}`;
+    }
+
+    const continuationLocation = progressionLocationForKeys(fullProgression, continuationLookupKeys, entriesByKey);
+    if (continuationLocation) {
+        return `Debug: ${origin}; ${kind} -> ${locationLabel(continuationLocation, entriesByKey)}${hiddenNormal}`;
+    }
+
+    if (targetStepIndex != null) {
+        const targetStep = progression.chapter.steps[targetStepIndex];
+        const sameStepNote = targetStep.stepKey === step.stepKey ? "current step" : stepPositionLabel(targetStep);
+        return `Debug: ${origin}; ${kind} -> ${chapterPositionLabel(progression.chapter)} ${sameStepNote}${hiddenNormal}`;
+    }
+
+    const targetLocation = progressionLocationForKeys(fullProgression, targetKeys, entriesByKey);
+    if (targetLocation) {
+        return `Debug: ${origin}; ${kind} -> ${locationLabel(targetLocation, entriesByKey)}${hiddenNormal}`;
+    }
+
+    return `Debug: ${origin}; ${kind} -> unresolved, no modeled continuation${hiddenNormal}`;
+}
+
+function choiceDebugDetailsForStep(
+    step: QuestProgressionStep,
+    choices: QuestPathChoice[],
+    progression: QuestDetailProgression,
+    fullProgression: QuestExplorerProgression | null,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): Map<string, string> {
+    return new Map(choices.map((choice) => [
+        choice.id,
+        choiceDebugDestination(step, choice, progression, fullProgression, entriesByKey),
+    ]));
+}
+
 function buildQuestPathFlow(
     progression: QuestDetailProgression,
     entriesByKey: Record<string, QuestExplorerEntry>,
     choicePath: QuestPathChoiceSelection[],
-    fullProgression: QuestExplorerProgression | null
+    fullProgression: QuestExplorerProgression | null,
+    debugQuestProgression: boolean
 ): QuestPathFlow {
     const steps = progression.chapter.steps;
     const selectedByStep = new Map(choicePath.map((selection) => [selection.stepKey, selection]));
@@ -661,7 +807,10 @@ function buildQuestPathFlow(
         const displayEntry = (overrideEntryKey ? entriesByKey[overrideEntryKey] : null)
             ?? entriesByKey[step.detailEntryKey]
             ?? null;
-        const choices = choicesForStep(step, displayEntry, entriesByKey);
+        const repeatsDetailEntry = (counts.get(step.detailEntryKey) ?? 0) > 1;
+        const rendersRepeatedDetailContent = repeatsDetailEntry && renderedDetailKeys.has(step.detailEntryKey);
+        const allChoices = rendersRepeatedDetailContent ? [] : choicesForStep(step, displayEntry, entriesByKey);
+        const choices = visibleChoicesForMode(allChoices, displayEntry, progression, debugQuestProgression);
         const storedSelection = selectedByStep.get(step.stepKey);
         const storedChoice = storedSelection
             ? choices.find((choice) => choice.id === storedSelection.choiceId) ?? null
@@ -669,8 +818,6 @@ function buildQuestPathFlow(
         const selectedChoice = storedSelection
             ? storedChoice ? selectionForChoice(step.stepKey, storedChoice) : null
             : implicitActiveChoice(choices, progression.activeVariantEntryKeys);
-        const repeatsDetailEntry = (counts.get(step.detailEntryKey) ?? 0) > 1;
-        const rendersRepeatedDetailContent = repeatsDetailEntry && renderedDetailKeys.has(step.detailEntryKey);
 
         renderedSteps.push({
             step,
@@ -687,9 +834,17 @@ function buildQuestPathFlow(
             renderedDetailKeys.add(step.detailEntryKey);
         }
 
+        if (allChoices.length > 0 && choices.length === 0) {
+            if (index < visibleUntil && progression.activeVariantEntryKeys.size > 0) {
+                continue;
+            }
+            lockedFromIndex = index + 1;
+            break;
+        }
+
         if (choices.length > 0) {
             if (!selectedChoice) {
-                if (index < visibleUntil) {
+                if (index < visibleUntil && progression.activeVariantEntryKeys.size > 0) {
                     continue;
                 }
                 lockedFromIndex = index + 1;
@@ -738,9 +893,13 @@ function buildQuestPathFlow(
         }
     }
 
+    const lockedSteps = lockedFromIndex == null
+        ? []
+        : steps.slice(lockedFromIndex).filter((step) => !renderedDetailKeys.has(step.detailEntryKey));
+
     return {
         renderedSteps,
-        lockedSteps: lockedFromIndex == null ? [] : steps.slice(lockedFromIndex),
+        lockedSteps,
         unresolvedContinuation,
         reachedContinuationEntryKey,
     };
@@ -814,7 +973,7 @@ function LoreHeader({
 }
 
 function StrategyOverview({ entry }: { entry: QuestExplorerEntry }) {
-    if (isMinorFactionVariantQuest(entry)) return null;
+    if (isMinorFactionVariantQuest(entry) || entry.branches.length > 0) return null;
 
     const objectives = entry.strategyView.objectives;
     const requirements = objectives.flatMap((objective) => objective.requirements);
@@ -912,8 +1071,8 @@ function EntryStrategyContent({ entry }: { entry: QuestExplorerEntry }) {
             {objectives.map((objective, index) => (
                 <section className="questExplorer-stepObjective" key={objective.objectiveKey ?? `${entry.entryKey}:objective:${index}`}>
                     <header className="questExplorer-stepObjectiveHeader">
-                        <span>{usesObjectivePaths ? "Pacification Path" : phaseDisplayLabel(objective.phase)}</span>
-                        <strong>{usesObjectivePaths ? objectivePathLabel(index) : `Objective ${index + 1}`}</strong>
+                        <span>{usesObjectivePaths ? "Pacification Objective" : phaseDisplayLabel(objective.phase)}</span>
+                        <strong>{usesObjectivePaths ? objectiveVariantLabel(index) : `Objective ${index + 1}`}</strong>
                     </header>
                     <p>{objective.text}</p>
                     <div className="questExplorer-stepObjectiveMetaGrid">
@@ -984,7 +1143,7 @@ function LoreSectionList({ entry }: { entry: QuestExplorerEntry }) {
                             key={path.objective.objectiveKey ?? `${entry.entryKey}:path:${index}`}
                         >
                             <header className="questExplorer-lorePathHeader">
-                                <span>{objectivePathLabel(index)}</span>
+                                <span>{objectiveVariantLabel(index)}</span>
                                 <strong>{path.objective.text}</strong>
                             </header>
                             {path.sections.length > 0 ? (
@@ -994,7 +1153,7 @@ function LoreSectionList({ entry }: { entry: QuestExplorerEntry }) {
                                     ))}
                                 </div>
                             ) : (
-                                <p className="questExplorer-emptyState">No lore section is attached to this path.</p>
+                                <p className="questExplorer-emptyState">No lore section is attached to this objective.</p>
                             )}
                         </section>
                     ))}
@@ -1059,11 +1218,13 @@ function StrategyChoiceGate({
     step,
     choices,
     selectedChoice,
+    debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
     choices: QuestPathChoice[];
     selectedChoice: QuestPathChoiceSelection | null;
+    debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (choices.length === 0) return null;
@@ -1093,6 +1254,9 @@ function StrategyChoiceGate({
                                 <InlineChoiceMeta label="Requires" values={choice.requirementLines} />
                                 <InlineChoiceMeta label="Rewards" values={choice.rewardLines} />
                                 <InlineChoiceMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
+                                {debugChoiceDetails?.get(choice.id) ? (
+                                    <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
+                                ) : null}
                             </span>
                         </button>
                     );
@@ -1120,11 +1284,13 @@ function LoreBranchMoment({
     step,
     choices,
     selectedChoice,
+    debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
     choices: QuestPathChoice[];
     selectedChoice: QuestPathChoiceSelection | null;
+    debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (choices.length === 0) return null;
@@ -1150,6 +1316,9 @@ function LoreBranchMoment({
                                 <small>{choice.eyebrow}</small>
                                 <strong>{choice.label}</strong>
                                 {previewLines.length > 0 ? <span>{previewLines.join(" ")}</span> : null}
+                                {debugChoiceDetails?.get(choice.id) ? (
+                                    <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
+                                ) : null}
                             </span>
                         </button>
                     );
@@ -1166,11 +1335,13 @@ function StrategyStep({
     renderedStep,
     totalSteps,
     entriesByKey,
+    debugChoiceDetails,
     onChoose,
 }: {
     renderedStep: RenderedPathStep;
     totalSteps: number;
     entriesByKey: Record<string, QuestExplorerEntry>;
+    debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const title = stepTitle(renderedStep.step, renderedStep.displayEntry, entriesByKey);
@@ -1207,6 +1378,7 @@ function StrategyStep({
                 step={renderedStep.step}
                 choices={renderedStep.choices}
                 selectedChoice={renderedStep.selectedChoice}
+                debugChoiceDetails={debugChoiceDetails}
                 onChoose={onChoose}
             />
         </article>
@@ -1216,10 +1388,12 @@ function StrategyStep({
 function LoreStep({
     renderedStep,
     entriesByKey,
+    debugChoiceDetails,
     onChoose,
 }: {
     renderedStep: RenderedPathStep;
     entriesByKey: Record<string, QuestExplorerEntry>;
+    debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const title = stepTitle(renderedStep.step, renderedStep.displayEntry, entriesByKey);
@@ -1249,6 +1423,7 @@ function LoreStep({
                 step={renderedStep.step}
                 choices={renderedStep.choices}
                 selectedChoice={renderedStep.selectedChoice}
+                debugChoiceDetails={debugChoiceDetails}
                 onChoose={onChoose}
             />
         </article>
@@ -1357,13 +1532,17 @@ function LoreLockedStep({
 
 function StrategyProgression({
     progression,
+    fullProgression,
     flow,
     entriesByKey,
+    debugQuestProgression,
     onChoose,
 }: {
     progression: QuestDetailProgression | null;
+    fullProgression: QuestExplorerProgression | null;
     flow: QuestPathFlow | null;
     entriesByKey: Record<string, QuestExplorerEntry>;
+    debugQuestProgression: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (!progression || !flow) return null;
@@ -1377,6 +1556,9 @@ function StrategyProgression({
                     renderedStep={renderedStep}
                     totalSteps={totalSteps}
                     entriesByKey={entriesByKey}
+                    debugChoiceDetails={debugQuestProgression
+                        ? choiceDebugDetailsForStep(renderedStep.step, renderedStep.choices, progression, fullProgression, entriesByKey)
+                        : undefined}
                     onChoose={onChoose}
                     key={renderedStep.step.stepKey}
                 />
@@ -1396,13 +1578,17 @@ function StrategyProgression({
 
 function LoreProgression({
     progression,
+    fullProgression,
     flow,
     entriesByKey,
+    debugQuestProgression,
     onChoose,
 }: {
     progression: QuestDetailProgression | null;
+    fullProgression: QuestExplorerProgression | null;
     flow: QuestPathFlow | null;
     entriesByKey: Record<string, QuestExplorerEntry>;
+    debugQuestProgression: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (!progression || !flow) return null;
@@ -1413,6 +1599,9 @@ function LoreProgression({
                 <LoreStep
                     renderedStep={renderedStep}
                     entriesByKey={entriesByKey}
+                    debugChoiceDetails={debugQuestProgression
+                        ? choiceDebugDetailsForStep(renderedStep.step, renderedStep.choices, progression, fullProgression, entriesByKey)
+                        : undefined}
                     onChoose={onChoose}
                     key={renderedStep.step.stepKey}
                 />
@@ -1600,9 +1789,9 @@ export default function QuestExplorerPage() {
     const choicePathResetKey = `${selectedEntryKey ?? "none"}:${selectedProgressionKey}`;
     const questPathFlow = useMemo(
         () => selectedProgression
-            ? buildQuestPathFlow(selectedProgression, entriesByKey, choicePath, progression)
+            ? buildQuestPathFlow(selectedProgression, entriesByKey, choicePath, progression, debugQuestProgression)
             : null,
-        [choicePath, entriesByKey, progression, selectedProgression]
+        [choicePath, debugQuestProgression, entriesByKey, progression, selectedProgression]
     );
     const activeRailEntry = questPathFlow?.reachedContinuationEntryKey
         ? entriesByKey[questPathFlow.reachedContinuationEntryKey] ?? selectedEntry
@@ -1794,8 +1983,10 @@ export default function QuestExplorerPage() {
                                         {selectedProgression ? (
                                             <StrategyProgression
                                                 progression={selectedProgression}
+                                                fullProgression={progression}
                                                 flow={questPathFlow}
                                                 entriesByKey={entriesByKey}
+                                                debugQuestProgression={debugQuestProgression}
                                                 onChoose={chooseQuestPathChoice}
                                             />
                                         ) : (
@@ -1810,8 +2001,10 @@ export default function QuestExplorerPage() {
                                         {selectedProgression ? (
                                             <LoreProgression
                                                 progression={selectedProgression}
+                                                fullProgression={progression}
                                                 flow={questPathFlow}
                                                 entriesByKey={entriesByKey}
+                                                debugQuestProgression={debugQuestProgression}
                                                 onChoose={chooseQuestPathChoice}
                                             />
                                         ) : (
