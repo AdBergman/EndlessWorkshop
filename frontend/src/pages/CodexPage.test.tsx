@@ -1,6 +1,6 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { BrowserRouter, MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
@@ -11,6 +11,12 @@ function LocationProbe() {
     const location = useLocation();
 
     return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
+}
+
+function BackButton() {
+    const navigate = useNavigate();
+
+    return <button type="button" onClick={() => navigate(-1)}>Back</button>;
 }
 
 describe("CodexPage", () => {
@@ -121,8 +127,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
         expect(screen.getByText("categories")).toBeInTheDocument();
         expect(screen.getByText("Browse the archive by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Progression" })).toBeInTheDocument();
-        expect(screen.getByText("Technologies, districts, extractors, improvements, and city-building unlocks.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Categories" })).toBeInTheDocument();
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
@@ -221,6 +226,57 @@ describe("CodexPage", () => {
         await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
 
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+    });
+
+    it("pushes category and entry states so browser back returns to category then index", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <BackButton />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const kindIndex = await screen.findByLabelText("Codex kinds");
+        await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=districts");
+        });
+        expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+
+        const summaryList = screen.getByLabelText("Districts overview");
+        await user.click(within(summaryList).getByRole("button", { name: /market square/i }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent(
+                "/codex?category=districts&entry=District_MarketSquare"
+            );
+        });
+        expect(screen.getByRole("heading", { name: "Market Square" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Back" }));
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=districts");
+        });
+        expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Back" }));
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex");
+        });
+        expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
     });
 
     it("resets query, kind, and selection when navigating back to plain /codex", async () => {

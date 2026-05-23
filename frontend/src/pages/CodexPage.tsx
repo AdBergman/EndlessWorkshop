@@ -54,11 +54,14 @@ export default function CodexPage() {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
-    const [activeKind, setActiveKind] = useState(ALL_CODEX_KIND);
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
 
     const deferredQuery = useDeferredValue(query);
-    const selectedEntryKey = (searchParams.get("entry") ?? "").trim() || null;
+    const selectedEntryParam = (searchParams.get("entry") ?? "").trim() || null;
+    const activeKind = (searchParams.get("category") ?? "").trim().toLowerCase() || ALL_CODEX_KIND;
+    const selectedEntryKey = selectedEntryParam ?? (
+        activeKind === ALL_CODEX_KIND ? null : getCodexSummaryEntryKey(activeKind)
+    );
     const codexResetNonce = (location.state as { codexResetNonce?: string } | null)?.codexResetNonce ?? null;
 
     const resultListRef = useRef<HTMLDivElement>(null);
@@ -174,7 +177,7 @@ export default function CodexPage() {
     );
 
     const updateSelectedEntry = useCallback(
-        (entryKey: string | null, options?: { suppressPlainRouteReset?: boolean }) => {
+        (entryKey: string | null, options?: { category?: string | null; replace?: boolean; suppressPlainRouteReset?: boolean }) => {
             if (!entryKey && options?.suppressPlainRouteReset) {
                 suppressNextPlainRouteResetRef.current = true;
             }
@@ -183,7 +186,13 @@ export default function CodexPage() {
                 (currentParams) => {
                     const nextParams = new URLSearchParams(currentParams);
 
-                    if (entryKey) {
+                    if (options?.category === null) {
+                        nextParams.delete("category");
+                    } else if (options?.category) {
+                        nextParams.set("category", options.category);
+                    }
+
+                    if (entryKey && !entryKey.startsWith("__summary__:")) {
                         nextParams.set("entry", entryKey);
                     } else {
                         nextParams.delete("entry");
@@ -191,7 +200,7 @@ export default function CodexPage() {
 
                     return nextParams;
                 },
-                { replace: true }
+                { replace: options?.replace ?? false }
             );
         },
         [setSearchParams]
@@ -205,13 +214,36 @@ export default function CodexPage() {
         return entry.entryKey;
     }, []);
 
+    const selectKind = useCallback(
+        (kind: string) => {
+            setSelectionIntent("passive");
+
+            if (kind === ALL_CODEX_KIND) {
+                updateSelectedEntry(null, { category: null, suppressPlainRouteReset: true });
+                return;
+            }
+
+            updateSelectedEntry(null, { category: kind });
+        },
+        [updateSelectedEntry]
+    );
+
     const selectEntry = useCallback(
         (entry: CodexListItem, intent: SelectionIntent = "passive") => {
             const selectableEntryKey = getSelectableEntryKey(entry);
             if (!selectableEntryKey) return;
 
+            if (isCodexSummaryEntry(entry)) {
+                selectKind(entry.summaryKind);
+                return;
+            }
+
+            const nextCategory = activeKind !== ALL_CODEX_KIND && entry.exportKind === activeKind
+                ? activeKind
+                : null;
+
             if (activeKind !== ALL_CODEX_KIND && entry.exportKind !== activeKind) {
-                setActiveKind(ALL_CODEX_KIND);
+                setSelectionIntent("passive");
             }
 
             if (query && !isCodexSummaryEntry(entry) && !entryMatchesQuery(entry, query)) {
@@ -219,24 +251,9 @@ export default function CodexPage() {
             }
 
             setSelectionIntent(intent);
-            updateSelectedEntry(selectableEntryKey);
+            updateSelectedEntry(selectableEntryKey, { category: nextCategory });
         },
-        [activeKind, getSelectableEntryKey, query, updateSelectedEntry]
-    );
-
-    const selectKind = useCallback(
-        (kind: string) => {
-            setActiveKind(kind);
-            setSelectionIntent("passive");
-
-            if (kind === ALL_CODEX_KIND) {
-                updateSelectedEntry(null, { suppressPlainRouteReset: true });
-                return;
-            }
-
-            updateSelectedEntry(getCodexSummaryEntryKey(kind));
-        },
-        [updateSelectedEntry]
+        [activeKind, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
     );
 
     useEffect(() => {
@@ -257,18 +274,18 @@ export default function CodexPage() {
 
         lastHandledResetNonceRef.current = codexResetNonce;
         setQuery("");
-        setActiveKind(ALL_CODEX_KIND);
         setSelectionIntent("passive");
-    }, [codexResetNonce, location.pathname, location.search]);
+    }, [activeKind, codexResetNonce, location.pathname, location.search, query.length, selectedEntryKey]);
 
     useEffect(() => {
+        if (loading) return;
         if (activeKind === ALL_CODEX_KIND) return;
 
         const filterStillExists = filterOptions.some((option) => option.kind === activeKind);
         if (!filterStillExists) {
-            setActiveKind(ALL_CODEX_KIND);
+            updateSelectedEntry(null, { category: null, replace: true });
         }
-    }, [activeKind, filterOptions]);
+    }, [activeKind, filterOptions, loading, updateSelectedEntry]);
 
     useEffect(() => {
         if (loading) return;
@@ -280,7 +297,7 @@ export default function CodexPage() {
 
         if (!firstVisibleEntry) {
             if (selectedEntryKey) {
-                updateSelectedEntry(null);
+                updateSelectedEntry(null, { replace: true });
             }
             return;
         }
@@ -290,7 +307,12 @@ export default function CodexPage() {
         }
 
         if (!isSelectedVisible) {
-            updateSelectedEntry(getSelectableEntryKey(firstVisibleEntry));
+            if (activeKind !== ALL_CODEX_KIND && selectedEntryParam) {
+                updateSelectedEntry(null, { category: activeKind, replace: true });
+                return;
+            }
+
+            updateSelectedEntry(getSelectableEntryKey(firstVisibleEntry), { replace: true });
         }
     }, [
         activeKind,
@@ -299,6 +321,7 @@ export default function CodexPage() {
         hasDeferredQuery,
         isPlainRouteReset,
         loading,
+        selectedEntryParam,
         selectedEntryKey,
         selectedListItem,
         updateSelectedEntry,
