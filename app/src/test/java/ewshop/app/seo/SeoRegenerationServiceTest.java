@@ -431,6 +431,52 @@ class SeoRegenerationServiceTest {
     }
 
     @Test
+    void rendersExtractorCategoryPagesWithNormalizedDisplayNames() throws Exception {
+        CodexService codexService = mock(CodexService.class);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator);
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                Codex.builder()
+                        .exportKind("extractors")
+                        .entryKey("Extractor_Luxury01")
+                        .displayName("[Luxury01] Klax Extractor")
+                        .category("Extractors")
+                        .kind("District")
+                        .descriptionLines(List.of("Extracts Klax from worked territory.", "Type: Infrastructure"))
+                        .referenceKeys(List.of("District_CityCenter"))
+                        .build()
+        ));
+
+        SeoRegenerationResult result = service.regeneratePrototypePages();
+
+        assertThat(result.generatedRoutes()).containsExactly(
+                "/encyclopedia",
+                "/encyclopedia/extractors",
+                "/encyclopedia/extractors/klax-extractor"
+        );
+        assertThat(result.exportKindCounts()).containsEntry(
+                "extractors",
+                new SeoRegenerationKindResult(1, 0, 0)
+        );
+
+        String entityHtml = Files.readString(tempDir.resolve("encyclopedia/extractors/klax-extractor/index.html"));
+        assertThat(entityHtml)
+                .contains("Klax Extractor Extractor Reference | Endless Workshop")
+                .contains("<a href=\"/encyclopedia/extractors\">Extractors</a>")
+                .contains("Extractor • Category: Extractors")
+                .contains("<link rel=\"canonical\" href=\"https://endlessworkshop.dev/encyclopedia/extractors/klax-extractor\" />")
+                .doesNotContain("[Luxury01]");
+
+        String categoryHtml = Files.readString(tempDir.resolve("encyclopedia/extractors/index.html"));
+        assertThat(categoryHtml)
+                .contains("Extractors Encyclopedia | Endless Workshop")
+                .contains("<a class=\"encyclopedia-page__entryRow\" href=\"/encyclopedia/extractors/klax-extractor\" data-entry-key=\"Extractor_Luxury01\">")
+                .contains("<span class=\"encyclopedia-page__entryTitle\">Klax Extractor</span>")
+                .doesNotContain("[Luxury01]");
+    }
+
+    @Test
     void missingReferenceAuditGroupsCategoriesAndUsesDeterministicOutput() throws Exception {
         CodexService codexService = mock(CodexService.class);
         SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());

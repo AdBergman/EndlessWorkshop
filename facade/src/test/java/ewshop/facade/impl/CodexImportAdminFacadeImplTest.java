@@ -114,6 +114,163 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_normalizesTechnicalMajorFactionDisplayNamesBeforeSaving() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "factions",
+                List.of(
+                        new CodexImportEntryDto("Faction_Aspect", "Faction_Aspect", List.of("Affinity: Aspects"), List.of("Faction_Mukag")),
+                        new CodexImportEntryDto("Faction_KinOfSheredyn", "Faction_KinOfSheredyn", List.of("Affinity: Kin of Sheredyn"), List.of()),
+                        new CodexImportEntryDto("Faction_LastLord", "Faction_LastLord", List.of("Affinity: Last Lords"), List.of()),
+                        new CodexImportEntryDto("Faction_Mukag", "Faction_Mukag", List.of("Affinity: Tahuks"), List.of()),
+                        new CodexImportEntryDto("Faction_Necrophage", "Faction_Necrophage", List.of("Affinity: Necrophage"), List.of())
+                )
+        ));
+
+        assertEquals(List.of(
+                "Aspects",
+                "Kin of Sheredyn",
+                "Last Lords",
+                "Tahuk",
+                "Necrophages"
+        ), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::displayName)
+                .toList());
+
+        assertEquals(List.of(
+                "Faction_Aspect",
+                "Faction_KinOfSheredyn",
+                "Faction_LastLord",
+                "Faction_Mukag",
+                "Faction_Necrophage"
+        ), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::entryKey)
+                .toList());
+
+        assertEquals(List.of("Faction_Mukag"), codexImportService.capturedSnapshots.getFirst().referenceKeys());
+    }
+
+    @Test
+    void importCodex_preservesNonTechnicalDisplayNames() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "quests",
+                List.of(new CodexImportEntryDto(
+                        "FactionQuest_Mukag_Chapter01_Step01",
+                        "New Dawn",
+                        "MajorFaction",
+                        "Quest",
+                        List.of("Line"),
+                        List.of("Faction_Mukag")
+                ))
+        ));
+
+        assertEquals("New Dawn", codexImportService.capturedSnapshots.getFirst().displayName());
+        assertEquals(List.of("Faction_Mukag"), codexImportService.capturedSnapshots.getFirst().referenceKeys());
+    }
+
+    @Test
+    void importCodex_stripsLeadingBracketTokensFromDisplayNameBeforeSaving() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "districts",
+                List.of(new CodexImportEntryDto(
+                        "District_Klax",
+                        "[Luxury01] [Klax] Klax Extractor",
+                        "Resource",
+                        "District",
+                        List.of("Line"),
+                        List.of("Extractor_Luxury01", "District_Klax")
+                ))
+        ));
+
+        CodexImportSnapshot snapshot = codexImportService.capturedSnapshots.getFirst();
+        assertEquals("Klax Extractor", snapshot.displayName());
+        assertEquals("District_Klax", snapshot.entryKey());
+        assertEquals(List.of("Extractor_Luxury01", "District_Klax"), snapshot.referenceKeys());
+    }
+
+    @Test
+    void importCodex_promotesExtractorDistrictRowsToExtractorExportKind() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-05-15T07:42:00Z",
+                "districts",
+                List.of(
+                        new CodexImportEntryDto(
+                                "Extractor_Luxury01",
+                                "[Luxury01] Klax Extractor",
+                                "Resource",
+                                "District",
+                                List.of("Line"),
+                                List.of("District_CityCenter")
+                        ),
+                        new CodexImportEntryDto(
+                                "District_CityCenter",
+                                "City Center",
+                                "Core",
+                                "District",
+                                List.of("Line"),
+                                List.of("Extractor_Luxury01")
+                        )
+                )
+        ));
+
+        assertEquals(List.of("extractors", "districts"), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::exportKind)
+                .toList());
+        assertEquals(List.of("Extractors", "Core"), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::category)
+                .toList());
+        assertEquals(List.of("District", "District"), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::kind)
+                .toList());
+        assertEquals(List.of("Extractor_Luxury01", "District_CityCenter"), codexImportService.capturedSnapshots.stream()
+                .map(CodexImportSnapshot::entryKey)
+                .toList());
+        assertEquals(List.of("District_CityCenter"), codexImportService.capturedSnapshots.getFirst().referenceKeys());
+    }
+
+    @Test
     void importCodex_rejectsBlankExportKind() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
         RecordingCodexService codexService = new RecordingCodexService();

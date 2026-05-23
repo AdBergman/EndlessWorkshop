@@ -16,6 +16,8 @@ describe("codexPresentation", () => {
     it("humanizes technical entry keys for UI fallbacks", () => {
         expect(humanizeCodexEntryKey("UnitAbility_Blossom_2")).toBe("Blossom 2");
         expect(humanizeCodexEntryKey("Equipment_Accessory_03_Definition")).toBe("Accessory 03");
+        expect(humanizeCodexEntryKey("Faction_Mukag")).toBe("Tahuk");
+        expect(humanizeCodexEntryKey("Faction_KinOfSheredyn")).toBe("Kin of Sheredyn");
     });
 
     it("prefers display names unless they look technical", () => {
@@ -32,6 +34,21 @@ describe("codexPresentation", () => {
                 entryKey: "UnitAbility_Blossom_2",
             })
         ).toBe("Blossom 2");
+
+        expect(
+            getCodexEntryLabel({
+                displayName: "Necrophage",
+                entryKey: "Faction_Necrophage",
+            })
+        ).toBe("Necrophages");
+    });
+
+    it("normalizes public major faction labels in codex-only description text", () => {
+        expect(getCodexDescriptionPreviewLine(["Faction: Mukag"])).toBe("Faction: Tahuk");
+        expect(getCodexDescriptionPreviewLine(["Affinity: Necrophage"])).toBe("Affinity: Necrophages");
+        expect(getCodexDescriptionPreviewText(["KinOfSheredyn can expand.", "Affinity: Tahuks"])).toBe(
+            "Kin of Sheredyn can expand. Affinity: Tahuk"
+        );
     });
 
     it("builds compact summary previews from description lines", () => {
@@ -73,6 +90,7 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("traits")).toBe("Traits");
         expect(formatCodexKindLabel("population")).toBe("Populations");
         expect(formatCodexKindLabel("minorfactions")).toBe("Minor Factions");
+        expect(formatCodexKindLabel("extractors")).toBe("Extractors");
         expect(formatCodexKindLabel("techs")).toBe("Tech");
     });
 
@@ -86,7 +104,20 @@ describe("codexPresentation", () => {
                 descriptionLines: [],
                 referenceKeys: [],
             })
-        ).toBe("Necrophage Alternate Questline 2 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+        ).toBe("Necrophages Alternate Questline 2 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+    });
+
+    it("normalizes inferred major faction context from codex keys and descriptions", () => {
+        expect(
+            getCodexSecondaryContext({
+                exportKind: "units",
+                entryKey: "Unit_Devotee",
+                category: "Mukag",
+                kind: "Unit",
+                descriptionLines: ["Faction: Mukag"],
+                referenceKeys: ["Faction_Mukag"],
+            })
+        ).toBe("Tahuk / Unit");
     });
 
     it("keeps the full nested choice path for branch quest nodes", () => {
@@ -114,9 +145,9 @@ describe("codexPresentation", () => {
             kind: "Quest",
         });
 
-        expect(context?.groupContext).toBe("Necrophage · Chapter 6");
+        expect(context?.groupContext).toBe("Necrophages · Chapter 6");
         expect(context?.variantLabel).toBe("Alternate questline 2");
-        expect(context?.relatedContext).toBe("Quest · Necrophage · Chapter 6 · Alternate questline 2 · Step 1");
+        expect(context?.relatedContext).toBe("Quest · Necrophages · Chapter 6 · Alternate questline 2 · Step 1");
     });
 
     it("builds readable KinOfSheredyn variant context without raw numbered roots", () => {
@@ -128,15 +159,31 @@ describe("codexPresentation", () => {
             kind: "Quest",
         });
 
-        expect(context?.groupContext).toBe("Kin Of Sheredyn · Chapter 1");
+        expect(context?.groupContext).toBe("Kin of Sheredyn · Chapter 1");
         expect(context?.variantLabel).toBe("Alternate questline 2");
         expect(context?.nodeLabel).toBe("Step 2 · Choice 1 · Choice 2");
         expect(context?.detailContextLines).toEqual([
-            "Kin Of Sheredyn · Chapter 1",
+            "Kin of Sheredyn · Chapter 1",
             "Alternate questline 2",
             "Step 2 · Choice 1 · Choice 2",
             "Major Faction Quest",
         ]);
+    });
+
+    it("keeps quest keys raw while normalizing only public context labels", () => {
+        const context = parseCodexQuestContext({
+            exportKind: "quests",
+            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01",
+            displayName: "Stirrings",
+            category: "MajorFaction",
+            kind: "Quest",
+        });
+
+        expect(context?.questlineKey).toBe("KinOfSheredyn02");
+        expect(context?.baseQuestlineKey).toBe("KinOfSheredyn");
+        expect(context?.variantKey).toBe("quest:stirrings:kinofsheredyn:01:kinofsheredyn02");
+        expect(context?.groupKey).toBe("quest:stirrings:kinofsheredyn:01");
+        expect(context?.groupContext).toBe("Kin of Sheredyn · Chapter 1");
     });
 
     it("uses entry-key context when source kind is the only discriminator", () => {

@@ -30,6 +30,8 @@ const CODEX_KIND_LABELS: Record<string, string> = {
     councilor: "Councilors",
     districts: "Districts",
     district: "Districts",
+    extractors: "Extractors",
+    extractor: "Extractors",
     equipment: "Equipment",
     factions: "Factions",
     faction: "Factions",
@@ -49,6 +51,22 @@ const CODEX_KIND_LABELS: Record<string, string> = {
     trait: "Traits",
     units: "Units",
     unit: "Units",
+};
+
+const CODEX_MAJOR_FACTION_LABELS: Record<string, string> = {
+    aspect: "Aspects",
+    aspects: "Aspects",
+    kin: "Kin of Sheredyn",
+    kinofsheredyn: "Kin of Sheredyn",
+    lastlord: "Last Lords",
+    lastlords: "Last Lords",
+    lord: "Last Lords",
+    lords: "Last Lords",
+    mukag: "Tahuk",
+    necrophage: "Necrophages",
+    necrophages: "Necrophages",
+    tahuk: "Tahuk",
+    tahuks: "Tahuk",
 };
 
 export type CodexSummaryEntry = CodexEntry & {
@@ -107,6 +125,37 @@ export type CodexListItem = CodexEntry | CodexSummaryEntry | CodexQuestGroupEntr
 
 function compactWhitespace(value: string): string {
     return value.replace(/\s+/g, " ").trim();
+}
+
+function majorFactionLookupKey(value: string): string {
+    return compactWhitespace(value)
+        .replace(/^Faction_/i, "")
+        .replace(/\d+$/g, "")
+        .replace(/[^A-Za-z]/g, "")
+        .toLowerCase();
+}
+
+export function formatCodexMajorFactionLabel(value: string | null | undefined): string | null {
+    const key = majorFactionLookupKey(value ?? "");
+    return key ? CODEX_MAJOR_FACTION_LABELS[key] ?? null : null;
+}
+
+export function formatCodexMajorFactionText(value: string): string {
+    if (!value) return value;
+
+    return value
+        .replace(/\bFaction_(Aspect|Aspects|KinOfSheredyn|Kin|LastLord|LastLords|Mukag|Tahuk|Tahuks|Necrophage|Necrophages)\d*\b/g, (match) =>
+            formatCodexMajorFactionLabel(match) ?? match
+        )
+        .replace(/\bKinOfSheredyn\d*\b/g, "Kin of Sheredyn")
+        .replace(/\bKin\s+Of\s+Sheredyn\d*\b/g, "Kin of Sheredyn")
+        .replace(/\bLastLord(?:s)?\d*\b/g, "Last Lords")
+        .replace(/\bLast\s+Lord(?:s)?\d*\b/g, "Last Lords")
+        .replace(/\bMukag\d*\b/g, "Tahuk")
+        .replace(/\bTahuks\d*\b/g, "Tahuk")
+        .replace(/\b(Faction|Affinity):\s*Necrophage\b/g, "$1: Necrophages")
+        .replace(/(^|[.!?]\s+)Necrophage\b/g, "$1Necrophages")
+        .replace(/\bAffinity:\s*Aspect\b/g, "Affinity: Aspects");
 }
 
 export function formatCodexKindLabel(kind: string): string {
@@ -168,7 +217,8 @@ export function humanizeCodexEntryKey(entryKey: string): string {
         tokens.pop();
     }
 
-    return tokens.map(formatToken).join(" ");
+    const label = tokens.map(formatToken).join(" ");
+    return formatCodexMajorFactionLabel(label) ?? formatCodexMajorFactionText(label);
 }
 
 export function getCodexEntryLabel(entry: Pick<CodexEntry, "displayName" | "entryKey">): string {
@@ -178,14 +228,14 @@ export function getCodexEntryLabel(entry: Pick<CodexEntry, "displayName" | "entr
 export function getCodexLabel(displayName: string, entryKey: string): string {
     const normalizedName = compactWhitespace(displayName ?? "");
     if (!looksTechnicalDisplayName(normalizedName, entryKey ?? "")) {
-        return normalizedName;
+        return formatCodexMajorFactionLabel(normalizedName) ?? normalizedName;
     }
 
     return humanizeCodexEntryKey(entryKey ?? "");
 }
 
 export function stripCodexDescriptionLine(line: string): string {
-    return stripDescriptionAst(parseDescriptionLine(line));
+    return formatCodexMajorFactionText(stripDescriptionAst(parseDescriptionLine(line)));
 }
 
 export function getCodexDescriptionPreviewLine(lines: readonly string[] | null | undefined): string {
@@ -210,13 +260,16 @@ export function getCodexEntryPreview(entry: Pick<CodexEntry, "descriptionLines">
 }
 
 function humanizeContextToken(value: string): string {
-    return compactWhitespace(value)
+    const majorFactionLabel = formatCodexMajorFactionLabel(value);
+    if (majorFactionLabel) return majorFactionLabel;
+
+    return formatCodexMajorFactionText(compactWhitespace(value)
         .replace(/_/g, " ")
         .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
         .split(/\s+/)
         .filter(Boolean)
         .map(formatToken)
-        .join(" ");
+        .join(" "));
 }
 
 function formatQuestOrdinal(value: string | null | undefined): string | null {
@@ -244,7 +297,7 @@ function inferFactionContext(entry: Pick<CodexEntry, "entryKey" | "referenceKeys
     for (const value of candidates) {
         const text = value ?? "";
         const majorMatch = text.match(/Faction_([A-Za-z0-9_]+)/);
-        if (majorMatch) return humanizeContextToken(readIdentifierToken(majorMatch[1]));
+        if (majorMatch) return formatCodexMajorFactionLabel(majorMatch[1]) ?? humanizeContextToken(readIdentifierToken(majorMatch[1]));
 
         const factionQuestMatch = text.match(/FactionQuest_([A-Za-z0-9]+)_/);
         if (factionQuestMatch) return formatQuestlineLabel(readIdentifierToken(factionQuestMatch[1]));
@@ -471,8 +524,9 @@ export function getCodexSecondaryContext(entry: Pick<CodexEntry, "entryKey" | "e
     const add = (value: string | null | undefined) => {
         const normalized = compactWhitespace(value ?? "");
         if (!normalized || normalized.toLowerCase() === "none") return;
-        if (parts.some((part) => part.toLowerCase() === normalized.toLowerCase())) return;
-        parts.push(humanizeContextToken(normalized));
+        const displayValue = humanizeContextToken(normalized);
+        if (parts.some((part) => part.toLowerCase() === displayValue.toLowerCase())) return;
+        parts.push(displayValue);
     };
 
     add(inferFactionContext(entry));
@@ -496,6 +550,8 @@ function singularKindLabel(kind: string): string {
             return "Councilor";
         case "districts":
             return "District";
+        case "extractors":
+            return "Extractor";
         case "factions":
             return "Faction";
         case "heroes":

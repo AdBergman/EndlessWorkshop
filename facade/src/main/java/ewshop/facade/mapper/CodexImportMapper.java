@@ -10,6 +10,11 @@ import java.util.Set;
 
 public final class CodexImportMapper {
 
+    private static final String DISTRICTS_EXPORT_KIND = "districts";
+    private static final String EXTRACTORS_EXPORT_KIND = "extractors";
+    private static final String EXTRACTOR_ENTRY_KEY_PREFIX = "Extractor_";
+    private static final String EXTRACTORS_CATEGORY = "Extractors";
+
     private CodexImportMapper() {}
 
     public static CodexImportSnapshot toSnapshot(String exportKind, CodexImportEntryDto dto) {
@@ -21,21 +26,32 @@ public final class CodexImportMapper {
         String key = trimToNull(dto.entryKey());
         if (key == null) throw new IllegalArgumentException("entryKey is missing");
 
-        String name = trimToNull(dto.displayName());
+        String name = CodexDisplayNameNormalizer.normalize(key, dto.displayName());
         if (name == null) throw new IllegalArgumentException("displayName is missing for " + key);
 
-        String category = trimToNull(dto.category());
+        boolean extractor = isExtractorDistrict(kind, key);
+        String publicExportKind = extractor ? EXTRACTORS_EXPORT_KIND : kind;
+        String category = extractor ? EXTRACTORS_CATEGORY : trimToNull(dto.category());
         String sourceKind = trimToNull(dto.kind());
         List<String> descriptionLines = cleanLines(dto.descriptionLines());
         List<String> referenceKeys = cleanDistinctLines(dto.referenceKeys());
 
-        return new CodexImportSnapshot(key, name, kind, category, sourceKind, descriptionLines, referenceKeys);
+        return new CodexImportSnapshot(key, name, publicExportKind, category, sourceKind, descriptionLines, referenceKeys);
+    }
+
+    private static boolean isExtractorDistrict(String exportKind, String entryKey) {
+        return DISTRICTS_EXPORT_KIND.equalsIgnoreCase(trimToNull(exportKind))
+                && trimToEmpty(entryKey).startsWith(EXTRACTOR_ENTRY_KEY_PREFIX);
     }
 
     private static String trimToNull(String s) {
         if (s == null) return null;
         String t = s.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    private static String trimToEmpty(String s) {
+        return s == null ? "" : s.trim();
     }
 
     private static List<String> cleanLines(List<String> in) {

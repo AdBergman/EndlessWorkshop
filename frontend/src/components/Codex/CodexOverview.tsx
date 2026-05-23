@@ -20,6 +20,7 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
     councilors: "Governors, advisors, and political specialists.",
     districts: "City tiles, exploitations, and terrain infrastructure.",
+    extractors: "Resource extraction districts and upgrades.",
     equipment: "Hero gear, relics, and battlefield artifacts.",
     factions: "Major empires and their defining systems.",
     heroes: "Named leaders, commanders, and recruitable champions.",
@@ -42,8 +43,8 @@ const OVERVIEW_SHELVES: OverviewShelf[] = [
     {
         id: "progression",
         title: "Progression",
-        description: "Technologies, districts, improvements, and city-building unlocks.",
-        kinds: ["tech", "districts", "improvements"],
+        description: "Technologies, districts, extractors, improvements, and city-building unlocks.",
+        kinds: ["tech", "districts", "extractors", "improvements"],
     },
     {
         id: "people",
@@ -79,7 +80,7 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
         shelves.push({
             id: "additional",
             title: "Additional Records",
-            description: "Imported record families that do not yet have a dedicated archive shelf.",
+            description: "Imported categories that do not yet have a dedicated archive shelf.",
             kinds: additionalOptions.map((option) => option.kind),
             options: additionalOptions,
         });
@@ -100,7 +101,7 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                 </div>
             </div>
             <p className="codex-overview__intro">
-                Browse the archive by record family, then inspect descriptions and resolved related links.
+                Browse the archive by category, then inspect descriptions and resolved related links.
             </p>
 
             <div className="codex-overview__shelves" aria-label="Codex kinds">

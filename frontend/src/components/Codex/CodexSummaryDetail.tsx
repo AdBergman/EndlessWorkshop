@@ -2,6 +2,7 @@ import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     getCodexEntryPreview,
+    getCodexEntryLabel,
     getCodexSecondaryContext,
     isCodexQuestGroupEntry,
     type CodexListItem,
@@ -60,7 +61,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                     onClick={() => onSelectEntry(entry)}
                                 >
                                     <span className="codex-summaryList__name">
-                                        {renderCodexLabel(entry.displayName)}
+                                        {renderCodexLabel(getCodexEntryLabel(entry))}
                                     </span>
                                     <span className="codex-summaryList__context">
                                         {[entry.groupContext, variantMeta, `${entry.nodeCount} quest nodes`]
@@ -85,7 +86,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                 onClick={() => onSelectEntry(entry)}
                             >
                                 <span className="codex-summaryList__name">
-                                    {renderCodexLabel(entry.displayName)}
+                                    {renderCodexLabel(getCodexEntryLabel(entry))}
                                 </span>
                                 {secondaryContext ? (
                                     <span className="codex-summaryList__context">{secondaryContext}</span>

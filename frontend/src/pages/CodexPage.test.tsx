@@ -119,11 +119,61 @@ describe("CodexPage", () => {
 
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
         expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
-        expect(screen.getByText("Browse the archive by record family, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        expect(screen.getByText("categories")).toBeInTheDocument();
+        expect(screen.getByText("Browse the archive by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Progression" })).toBeInTheDocument();
-        expect(screen.getByText("Technologies, districts, improvements, and city-building unlocks.")).toBeInTheDocument();
+        expect(screen.getByText("Technologies, districts, extractors, improvements, and city-building unlocks.")).toBeInTheDocument();
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
+    });
+
+    it("treats extractors as their own codex category instead of counting them as districts", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "districts",
+                entryKey: "District_BloomHarbor",
+                displayName: "Bloom Harbor",
+                descriptionLines: ["Supports blossom logistics."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Luxury01",
+                displayName: "Klax Extractor",
+                category: "Extractors",
+                kind: "District",
+                descriptionLines: ["Extracts Klax from worked territory."],
+                referenceKeys: ["District_BloomHarbor"],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                districts: entries.filter((entry) => entry.exportKind === "districts"),
+                extractors: entries.filter((entry) => entry.exportKind === "extractors"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const toolbar = await screen.findByRole("toolbar", { name: /filter codex by kind/i });
+        expect(within(toolbar).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
+        expect(within(toolbar).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
+
+        const kindIndex = await screen.findByLabelText("Codex kinds");
+        expect(within(kindIndex).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
+        expect(screen.getByText("Resource extraction districts and upgrades.")).toBeInTheDocument();
     });
 
     it("shows a synthetic kind summary row and summary detail when filtering by kind", async () => {
@@ -347,7 +397,7 @@ describe("CodexPage", () => {
 
         expect(
             within(relatedSection).getAllByRole("button", {
-                name: /a haunted path quest .* last lord .* chapter 1 .* step 2/i,
+                name: /a haunted path quest .* last lords .* chapter 1 .* step 2/i,
             })
         ).toHaveLength(1);
         expect(within(relatedSection).getByRole("button", { name: /last lords factions/i })).toBeInTheDocument();
@@ -476,13 +526,13 @@ describe("CodexPage", () => {
 
         const results = screen.getByLabelText("Codex results");
         await waitFor(() => {
-            expect(within(results).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+            expect(within(results).getByText("Necrophages · Chapter 6")).toBeInTheDocument();
         });
         expect(within(results).getByText("2 questlines")).toBeInTheDocument();
         expect(within(results).getByText("4 quest nodes")).toBeInTheDocument();
         expect(within(results).queryByText("Main questline")).not.toBeInTheDocument();
         expect(within(results).queryByText("Alternate questline 2")).not.toBeInTheDocument();
-        expect(within(results).queryByText("Necrophage alternate questline 2 · Chapter 6")).not.toBeInTheDocument();
+        expect(within(results).queryByText("Necrophages alternate questline 2 · Chapter 6")).not.toBeInTheDocument();
 
         const bitterTruthGroups = within(results).getAllByRole("button", { name: /a bitter truth/i });
         expect(bitterTruthGroups).toHaveLength(1);
@@ -504,7 +554,7 @@ describe("CodexPage", () => {
             "/codex?entry=FactionQuest_Necrophage_Chapter06_Step02"
         );
         expect(await screen.findByRole("heading", { name: "A Bitter Truth" })).toBeInTheDocument();
-        expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Necrophages · Chapter 6")).toBeInTheDocument();
         expect(within(detailPane).getByText("Major Faction Quest")).toBeInTheDocument();
         expect(mainStepTwo).toHaveAttribute("aria-pressed", "true");
 
@@ -516,7 +566,7 @@ describe("CodexPage", () => {
         const duplicateRelatedSection = await screen.findByRole("region", { name: /related entries/i });
         expect(
             within(duplicateRelatedSection).getByRole("button", {
-                name: /a bitter truth quest .* necrophage .* chapter 6 .* step 2/i,
+                name: /a bitter truth quest .* necrophages .* chapter 6 .* step 2/i,
             })
         ).toBeInTheDocument();
 
@@ -581,7 +631,7 @@ describe("CodexPage", () => {
             "/codex?entry=FactionQuest_Necrophage02_Chapter06_Step02"
         );
         const detailPane = screen.getByLabelText("Selected codex entry");
-        expect(within(detailPane).getByText("Necrophage · Chapter 6")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Necrophages · Chapter 6")).toBeInTheDocument();
         expect(within(detailPane).getByText("Alternate questline 2")).toBeInTheDocument();
         expect(within(detailPane).getByText("Step 2")).toBeInTheDocument();
         const selectedPathNode = detailPane.querySelector<HTMLButtonElement>(
@@ -592,7 +642,7 @@ describe("CodexPage", () => {
         const relatedSection = await screen.findByRole("region", { name: /related entries/i });
         expect(
             within(relatedSection).getByRole("button", {
-                name: /a bitter truth quest .* necrophage .* chapter 6 .* alternate questline 2 .* step 3/i,
+                name: /a bitter truth quest .* necrophages .* chapter 6 .* alternate questline 2 .* step 3/i,
             })
         ).toBeInTheDocument();
     });
@@ -666,7 +716,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Quests" })).toBeInTheDocument();
         const summaryList = screen.getByLabelText("Quests overview");
         expect(within(summaryList).getAllByRole("button", { name: /a bitter truth/i })).toHaveLength(1);
-        expect(within(summaryList).getByText(/Necrophage · Chapter 6 · 2 questlines · 4 quest nodes/i)).toBeInTheDocument();
+        expect(within(summaryList).getByText(/Necrophages · Chapter 6 · 2 questlines · 4 quest nodes/i)).toBeInTheDocument();
         expect(within(summaryList).queryByText("The first main node.")).not.toBeInTheDocument();
         expect(within(summaryList).queryByText("The second alternate node.")).not.toBeInTheDocument();
     });

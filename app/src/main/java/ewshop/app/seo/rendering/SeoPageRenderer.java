@@ -23,6 +23,7 @@ public class SeoPageRenderer {
             "abilities",
             "councilors",
             "districts",
+            "extractors",
             "equipment",
             "factions",
             "heroes",
@@ -204,7 +205,7 @@ public class SeoPageRenderer {
     public String renderEncyclopediaRootHtml(List<PageCandidate> candidates) {
         Map<String, List<PageCandidate>> groupedCandidates = candidatesByKind(candidates);
         String pageTitle = "Endless Workshop Encyclopedia | " + SeoRoutes.SITE_NAME;
-        String seoDescription = "Browse the Endless Workshop encyclopedia by category, including abilities, units, technologies, improvements, equipment, heroes, districts, populations, factions, and councilors.";
+        String seoDescription = "Browse the Endless Workshop encyclopedia by category, including abilities, units, technologies, improvements, equipment, heroes, districts, extractors, populations, factions, and councilors.";
         String canonicalUrl = SeoRoutes.SITE_URL + "/" + SeoRoutes.ENCYCLOPEDIA_PAGE;
 
         StringBuilder categories = new StringBuilder();
@@ -571,6 +572,7 @@ public class SeoPageRenderer {
     private static String kindLabelFor(String kind) {
         Map<String, String> explicitLabels = Map.ofEntries(
                 Map.entry("districts", "District"),
+                Map.entry("extractors", "Extractor"),
                 Map.entry("improvements", "Improvement"),
                 Map.entry("equipment", "Equipment"),
                 Map.entry("councilors", "Councilor"),
@@ -609,6 +611,7 @@ public class SeoPageRenderer {
                 Map.entry("abilities", "Abilities"),
                 Map.entry("councilors", "Councilors"),
                 Map.entry("districts", "Districts"),
+                Map.entry("extractors", "Extractors"),
                 Map.entry("equipment", "Equipment"),
                 Map.entry("factions", "Factions"),
                 Map.entry("heroes", "Heroes"),

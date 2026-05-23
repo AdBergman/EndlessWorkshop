@@ -1,5 +1,5 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexRelatedContext } from "@/lib/codex/codexPresentation";
+import { formatCodexKindLabel, getCodexEntryLabel, getCodexRelatedContext } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -72,7 +72,7 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
                                         className="codex-related__chip"
                                         onClick={() => onSelect(entry)}
                                     >
-                                        <span className="codex-related__name">{renderCodexLabel(entry.displayName)}</span>
+                                        <span className="codex-related__name">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
                                         <span className="codex-related__kind">{contextLabel}</span>
                                     </button>
                                 );

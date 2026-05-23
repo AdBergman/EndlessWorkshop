@@ -13,14 +13,24 @@ function isRootUnit(u: Unit): boolean {
     return u.previousUnitKey == null && u.evolutionTierIndex === 0;
 }
 
+function isVisibleMinorRoot(u: Unit, unitsByKey: Map<string, Unit>): boolean {
+    if (u.isMajorFaction !== false) return false;
+    if (isRootUnit(u)) return true;
+
+    const previousKey = (u.previousUnitKey ?? "").trim();
+    return !previousKey || !unitsByKey.has(previousKey);
+}
+
 export function getCarouselModelForFaction(
     factionUnits: Unit[],
     showMinorUnits: boolean
 ): { pinned: Unit | null; roots: Unit[] } {
     if (showMinorUnits) {
+        const byKey = new Map(factionUnits.map((u) => [u.unitKey, u] as const));
+
         return {
             pinned: null,
-            roots: factionUnits.filter((u) => u.isMajorFaction === false && isRootUnit(u)),
+            roots: factionUnits.filter((u) => isVisibleMinorRoot(u, byKey)),
         };
     }
 

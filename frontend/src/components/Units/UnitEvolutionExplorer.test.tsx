@@ -213,6 +213,56 @@ describe("/units smoke behavior", () => {
         });
     });
 
+    it("shows minor faction chains whose base unit is absent from the visible unit set", async () => {
+        mockedApiClient.getUnits.mockResolvedValue([
+            unit({
+                unitKey: "Unit_Minor_Root",
+                displayName: "Ametrine Root",
+                faction: "Ametrine",
+                isMajorFaction: false,
+                nextEvolutionUnitKeys: ["Unit_Minor_Evolved"],
+            }),
+            unit({
+                unitKey: "Unit_Minor_Evolved",
+                displayName: "Ametrine Evolved",
+                faction: "Ametrine",
+                isMajorFaction: false,
+                previousUnitKey: "Unit_Minor_Root",
+                evolutionTierIndex: 1,
+            }),
+            unit({
+                unitKey: "Unit_MinorFaction_Xavius_Upgraded",
+                displayName: "Mighty Pantinel",
+                faction: "Xavius",
+                isMajorFaction: false,
+                previousUnitKey: "Unit_MinorFaction_Xavius",
+                nextEvolutionUnitKeys: ["Unit_MinorFaction_Xavius_Final"],
+                evolutionTierIndex: 1,
+            }),
+            unit({
+                unitKey: "Unit_MinorFaction_Xavius_Final",
+                displayName: "Elite Pantinel",
+                faction: "Xavius",
+                isMajorFaction: false,
+                previousUnitKey: "Unit_MinorFaction_Xavius_Upgraded",
+                evolutionTierIndex: 2,
+            }),
+        ]);
+
+        const { container } = renderExplorer(
+            "/units?faction=kin&unitKey=Unit_MinorFaction_Xavius_Upgraded&origin=xavius&minor=1"
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location")).toHaveTextContent(
+                "/units?faction=kin&unitKey=Unit_MinorFaction_Xavius_Upgraded&origin=xavius&minor=1"
+            );
+            expect(container.querySelector(".horizontalEvolution")).toHaveTextContent("Elite Pantinel");
+        });
+
+        expect(screen.getAllByText("Mighty Pantinel").length).toBeGreaterThan(0);
+    });
+
     it("keeps chosen units on the horizontal evolution layout", async () => {
         const { container } = renderExplorer("/units?faction=kin&unitKey=Unit_Chosen_Root");
 

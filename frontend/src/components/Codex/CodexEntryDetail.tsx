@@ -2,7 +2,9 @@ import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
+    formatCodexMajorFactionText,
     getCodexDetailContextLines,
+    getCodexEntryLabel,
     getCodexQuestGroupDetailContextLines,
     type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
@@ -54,7 +56,7 @@ export default function CodexEntryDetail({
             </div>
 
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
-                {renderCodexLabel(entry.displayName)}
+                {renderCodexLabel(getCodexEntryLabel(entry))}
             </h2>
 
             <CodexQuestProgression
@@ -72,7 +74,7 @@ export default function CodexEntryDetail({
                     <div className="codex-detail__description">
                         {entry.descriptionLines.map((line, index) => (
                             <p key={`${entry.entryKey}-${index}`} className="codex-detail__line">
-                                {renderDescriptionLine(line)}
+                                {renderDescriptionLine(formatCodexMajorFactionText(line))}
                             </p>
                         ))}
                     </div>

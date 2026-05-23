@@ -40,6 +40,33 @@ describe("resolveRelatedEntries", () => {
         expect(related.map((entry) => entry.entryKey)).toEqual(["Hero_A", "Unit_A"]);
     });
 
+    it("resolves major faction references by raw keys, not public labels", () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_Devotee",
+                displayName: "Devotee",
+                descriptionLines: ["Faction: Mukag"],
+                referenceKeys: ["Faction_Mukag"],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Faction_Mukag",
+                descriptionLines: ["Affinity: Tahuks"],
+                referenceKeys: [],
+            },
+        ];
+
+        const related = resolveRelatedEntries(entries[0], {
+            entriesByKey: buildEntriesByKey(entries),
+        });
+
+        expect(entries[0].referenceKeys).toEqual(["Faction_Mukag"]);
+        expect(related.map((entry) => entry.entryKey)).toEqual(["Faction_Mukag"]);
+        expect(related.map((entry) => entry.displayName)).toEqual(["Faction_Mukag"]);
+    });
+
     it("preserves raw reference fallback behavior when entry keys are ambiguous", () => {
         const entries: CodexEntry[] = [
             {

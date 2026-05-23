@@ -29,6 +29,7 @@ const PREFERRED_KIND_ORDER = [
     "abilities",
     "councilors",
     "districts",
+    "extractors",
     "equipment",
     "factions",
     "heroes",
@@ -357,7 +358,7 @@ export default function CodexPage() {
                             </span>
                             <span className="codex-header__stat">
                                 <strong>{filterOptions.length - 1}</strong>
-                                <span>families</span>
+                                <span>categories</span>
                             </span>
                         </div>
                     </div>

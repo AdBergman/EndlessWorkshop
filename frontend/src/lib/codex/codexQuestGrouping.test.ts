@@ -40,7 +40,7 @@ describe("groupQuestListItems", () => {
         if (!isCodexQuestGroupEntry(grouped[0])) return;
 
         expect(grouped[0].displayName).toBe("A Bitter Truth");
-        expect(grouped[0].groupContext).toBe("Necrophage · Chapter 6");
+        expect(grouped[0].groupContext).toBe("Necrophages · Chapter 6");
         expect(grouped[0].nodeCount).toBe(3);
         expect(grouped[0].variantCount).toBe(1);
         expect(grouped[0].variants[0].variantLabel).toBe("Alternate questline 2");
@@ -63,7 +63,7 @@ describe("groupQuestListItems", () => {
         expect(isCodexQuestGroupEntry(grouped[0])).toBe(true);
         if (!isCodexQuestGroupEntry(grouped[0])) return;
 
-        expect(grouped[0].groupContext).toBe("Necrophage · Chapter 6");
+        expect(grouped[0].groupContext).toBe("Necrophages · Chapter 6");
         expect(grouped[0].nodeCount).toBe(4);
         expect(grouped[0].variants.map((variant) => variant.variantLabel)).toEqual([
             "Main questline",
@@ -82,7 +82,7 @@ describe("groupQuestListItems", () => {
         if (!isCodexQuestGroupEntry(grouped[0])) return;
 
         expect(grouped[0].displayName).toBe("A Bitter Truth");
-        expect(grouped[0].groupContext).toBe("Necrophage · Chapter 6");
+        expect(grouped[0].groupContext).toBe("Necrophages · Chapter 6");
         expect(grouped[0].nodeCount).toBe(18);
         expect(grouped[0].variantCount).toBe(2);
         expect(grouped[0].variants.map((variant) => [variant.variantLabel, variant.nodeCount])).toEqual([
@@ -102,7 +102,7 @@ describe("groupQuestListItems", () => {
         expect(isCodexQuestGroupEntry(grouped[0])).toBe(true);
         if (!isCodexQuestGroupEntry(grouped[0])) return;
 
-        expect(grouped[0].groupContext).toBe("Kin Of Sheredyn · Chapter 1");
+        expect(grouped[0].groupContext).toBe("Kin of Sheredyn · Chapter 1");
         expect(grouped[0].variants.map((variant) => variant.variantLabel)).toEqual([
             "Main questline",
             "Alternate questline 2",
@@ -141,8 +141,8 @@ describe("groupQuestListItems", () => {
 
         expect(grouped).toHaveLength(2);
         expect(grouped.filter(isCodexQuestGroupEntry).map((group) => group.groupContext)).toEqual([
-            "Necrophage · Chapter 6",
-            "Kin Of Sheredyn · Chapter 6",
+            "Necrophages · Chapter 6",
+            "Kin of Sheredyn · Chapter 6",
         ]);
     });
 

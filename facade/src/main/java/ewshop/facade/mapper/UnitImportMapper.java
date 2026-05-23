@@ -23,13 +23,14 @@ public final class UnitImportMapper {
         if (dto == null) throw new IllegalArgumentException("Row is required");
 
         boolean isMajor = Boolean.TRUE.equals(dto.isMajorFaction());
+        String unitKey = req(dto.unitKey(), "unitKey");
 
         // Validate + canonicalize to in-game display name (stored as String)
         String rawFaction = trimToNull(dto.faction());
-        String resolvedFaction = resolveAndValidateFaction(rawFaction, isMajor);
+        String resolvedFaction = resolveAndValidateFaction(rawFaction, isMajor, unitKey);
 
         return UnitImportSnapshot.builder()
-                .unitKey(req(dto.unitKey(), "unitKey"))
+                .unitKey(unitKey)
                 .displayName(req(dto.displayName(), "displayName"))
 
                 .faction(resolvedFaction)
@@ -64,13 +65,17 @@ public final class UnitImportMapper {
      *
      * Returns null for explicitly blocked values (e.g. Placeholder / MangroveOfHarmony).
      */
-    private static String resolveAndValidateFaction(String rawFaction, boolean isMajor) {
+    private static String resolveAndValidateFaction(String rawFaction, boolean isMajor, String unitKey) {
         if (rawFaction == null) return null;
 
         if (isMajor) {
             MajorFaction parsed = MajorFaction.parseImportedMajorFaction(rawFaction);
             if (parsed == null) return null;
             return parsed.getDisplayName();
+        }
+
+        if ("MangroveOfHarmony".equals(rawFaction) && trimToEmpty(unitKey).startsWith("Unit_MinorFaction_Xavius")) {
+            return MinorFaction.XAVIUS.getDisplayName();
         }
 
         MinorFaction parsed = MinorFaction.parseImportedMinorFaction(rawFaction);
@@ -90,6 +95,10 @@ public final class UnitImportMapper {
         if (v == null) return null;
         String t = v.trim();
         return t.isEmpty() ? null : t;
+    }
+
+    private static String trimToEmpty(String v) {
+        return v == null ? "" : v.trim();
     }
 
     private static List<String> cleanLines(List<String> lines) {
