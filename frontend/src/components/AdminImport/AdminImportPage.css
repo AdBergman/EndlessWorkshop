@@ -45,6 +45,30 @@
     border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
 
+.admin-import-auditLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.admin-import-auditLinks a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid rgba(255, 127, 50, 0.28);
+    border-radius: 6px;
+    color: #ff9a5f;
+    text-decoration: none;
+    background: rgba(255, 127, 50, 0.06);
+}
+
+.admin-import-auditLinks a:hover {
+    border-color: rgba(255, 127, 50, 0.46);
+    background: rgba(255, 127, 50, 0.1);
+}
+
 .admin-import-muted {
     opacity: 0.75;
     line-height: 1.5;

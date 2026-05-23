@@ -24,6 +24,9 @@ type CodexDiagnosticsActionState =
     | { status: "success"; entryCount: number }
     | { status: "error"; message: string };
 
+const CODEX_MISSING_REFERENCE_AUDIT_JSON_PATH = "/__generated-seo/codex-missing-references-audit.json";
+const CODEX_MISSING_REFERENCE_AUDIT_MARKDOWN_PATH = "/__generated-seo/codex-missing-references-audit.md";
+
 type TechImportFile = {
     game?: string;
     gameVersion?: string;
@@ -587,7 +590,16 @@ export default function AdminImportPage() {
                                 <div style={{ flex: "1 1 320px" }}>
                                     <div style={{ fontWeight: 800, marginBottom: 6 }}>Codex diagnostics</div>
                                     <div className="admin-import-muted">
-                                        Download the current codex reference and descriptor diagnostics report.
+                                        Download resolver/descriptor diagnostics, or inspect the generated missing-reference
+                                        audit to see which unresolved keys are hiding related-link pillboxes.
+                                    </div>
+                                    <div className="admin-import-auditLinks" aria-label="Generated codex missing-reference audit links">
+                                        <a href={CODEX_MISSING_REFERENCE_AUDIT_JSON_PATH} target="_blank" rel="noreferrer">
+                                            Missing-link JSON
+                                        </a>
+                                        <a href={CODEX_MISSING_REFERENCE_AUDIT_MARKDOWN_PATH} target="_blank" rel="noreferrer">
+                                            Missing-link Markdown
+                                        </a>
                                     </div>
                                 </div>
 

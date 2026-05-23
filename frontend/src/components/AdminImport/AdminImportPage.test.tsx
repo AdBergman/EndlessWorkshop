@@ -236,6 +236,11 @@ describe("AdminImportPage", () => {
 
         renderAdminImportPage();
 
+        const jsonAuditLink = await screen.findByRole("link", { name: /missing-link json/i });
+        const markdownAuditLink = screen.getByRole("link", { name: /missing-link markdown/i });
+        expect(jsonAuditLink).toHaveAttribute("href", "/__generated-seo/codex-missing-references-audit.json");
+        expect(markdownAuditLink).toHaveAttribute("href", "/__generated-seo/codex-missing-references-audit.md");
+
         const button = await screen.findByRole("button", { name: /download codex diagnostics/i });
         await user.click(button);
 

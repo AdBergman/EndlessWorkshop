@@ -342,13 +342,27 @@ export default function CodexPage() {
 
             <section className="codex-surface" aria-labelledby="codex-page-title">
                 <header className="codex-header">
-                    <div className="codex-header__copy">
-                        <h2 className="codex-pageTitle" id="codex-page-title">
-                            Encyclopedia
-                        </h2>
+                    <div className="codex-header__top">
+                        <div className="codex-header__copy">
+                            <div className="codex-eyebrow">Endless Workshop archive</div>
+                            <h2 className="codex-pageTitle" id="codex-page-title">
+                                Encyclopedia
+                            </h2>
+                        </div>
+
+                        <div className="codex-header__stats" aria-label="Codex archive statistics">
+                            <span className="codex-header__stat">
+                                <strong>{entries.length}</strong>
+                                <span>records</span>
+                            </span>
+                            <span className="codex-header__stat">
+                                <strong>{filterOptions.length - 1}</strong>
+                                <span>families</span>
+                            </span>
+                        </div>
                     </div>
 
-                    <div className="codex-filterRail">
+                    <div className="codex-controlBand">
                         <CodexSearch
                             value={query}
                             onChange={setQuery}

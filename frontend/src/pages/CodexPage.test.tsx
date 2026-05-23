@@ -119,7 +119,8 @@ describe("CodexPage", () => {
 
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
         expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
-        expect(screen.getByText("Codex is a searchable encyclopedia of game data.")).toBeInTheDocument();
+        expect(screen.getByText("Browse the archive by record family, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 
@@ -337,6 +338,9 @@ describe("CodexPage", () => {
         );
 
         const relatedSection = await screen.findByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByText("Quests")).toBeInTheDocument();
+        expect(within(relatedSection).getByText("Factions")).toBeInTheDocument();
+        expect(within(relatedSection).getByText("Minor Factions")).toBeInTheDocument();
 
         expect(
             within(relatedSection).getAllByRole("button", {
