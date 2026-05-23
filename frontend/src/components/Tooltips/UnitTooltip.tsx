@@ -17,7 +17,15 @@ interface UnitTooltipProps {
 const prettyClassKey = (key: string | null | undefined) => {
     const k = (key ?? "").trim();
     if (!k) return null;
-    return k.replace(/^UnitClass_/, "").replace(/_/g, " ");
+    return k
+        .replace(/^UnitClass_/, "")
+        .replace(/[_-]+/g, " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2")
+        .split(/\s+/g)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(" ");
 };
 
 const toRoman = (n: number) => {
@@ -48,6 +56,7 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
         isChosen,
         evolutionTierIndex,
         unitClassKey,
+        unitClassDisplayName,
         nextEvolutionUnitKeys,
         descriptionLines,
     } = data;
@@ -57,7 +66,7 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
     const factionKey = selectedFaction?.enumFaction ?? "PLACEHOLDER";
     const accent = FACTION_COLORS[factionKey]?.accent ?? "#ffb673";
 
-    const classLabel = prettyClassKey(unitClassKey);
+    const classLabel = unitClassDisplayName?.trim() || prettyClassKey(unitClassKey);
     const tierLabel = typeof evolutionTierIndex === "number" ? `Tier ${toRoman(evolutionTierIndex)}` : null;
 
     const subtitleParts = [tierLabel, classLabel].filter(Boolean);

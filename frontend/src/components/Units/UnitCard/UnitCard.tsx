@@ -38,6 +38,19 @@ function computeBackNameFontSizeRem(name: string, skillCount: number): number {
     return clamp(size, 0.85, 1.15);
 }
 
+function getTypeDisplayLines(classLabel: string | null, tierLabel: string | null): string[] {
+    const classWords = (classLabel ?? "").split(/\s+/g).filter(Boolean);
+
+    if (classWords.length > 1) {
+        return tierLabel ? [...classWords, tierLabel] : classWords;
+    }
+
+    if (classLabel && tierLabel) return [`${classLabel} ${tierLabel}`];
+    if (classLabel) return [classLabel];
+    if (tierLabel) return [tierLabel];
+    return [];
+}
+
 export const UnitCard: React.FC<UnitCardProps> = ({
                                                       unit,
                                                       showArtwork = true,
@@ -56,6 +69,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
     const gradient = FACTION_GRADIENT[factionKey] || FACTION_GRADIENT.PLACEHOLDER;
+    const typeDisplayLines = getTypeDisplayLines(d.classLabel, d.tierLabel);
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -170,7 +184,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                     {d.typeLine && (
                         <div className="typeTier" style={{ color: colors.border }}>
-                            <span className="type">{d.typeLine}</span>
+                            <span className="type" aria-label={d.typeLine} title={d.typeLine}>
+                                {typeDisplayLines.map((line, index) => (
+                                    <React.Fragment key={`${line}-${index}`}>
+                                        <span className="typeLineSegment">{line}</span>
+                                        {index < typeDisplayLines.length - 1 ? " " : null}
+                                    </React.Fragment>
+                                ))}
+                            </span>
                         </div>
                     )}
 

@@ -17,6 +17,7 @@ const unit = (overrides: Partial<Unit>): Unit => ({
     nextEvolutionUnitKeys: [],
     evolutionTierIndex: 0,
     unitClassKey: null,
+    unitClassDisplayName: null,
     attackSkillKey: null,
     abilityKeys: [],
     descriptionLines: [],
@@ -81,5 +82,39 @@ describe("UnitTooltip", () => {
         );
 
         expect(screen.getByText("Unit_Missing")).toBeInTheDocument();
+    });
+
+    it("uses stored class display labels before falling back to raw class keys", () => {
+        render(
+            <UnitTooltip
+                hoveredUnit={{
+                    data: unit({
+                        evolutionTierIndex: 2,
+                        unitClassKey: "UnitClass_JuggernaughtRanged",
+                        unitClassDisplayName: "Juggernaught Ranged",
+                    }),
+                    coords: { x: 10, y: 10, mode: "pixel" },
+                }}
+            />
+        );
+
+        expect(screen.getByText("Tier II Juggernaught Ranged")).toBeInTheDocument();
+        expect(screen.queryByText(/JuggernaughtRanged/)).not.toBeInTheDocument();
+    });
+
+    it("splits camel-case fallback class keys when display labels are absent", () => {
+        render(
+            <UnitTooltip
+                hoveredUnit={{
+                    data: unit({
+                        evolutionTierIndex: 2,
+                        unitClassKey: "UnitClass_CavalryRanged_Hero",
+                    }),
+                    coords: { x: 10, y: 10, mode: "pixel" },
+                }}
+            />
+        );
+
+        expect(screen.getByText("Tier II Cavalry Ranged Hero")).toBeInTheDocument();
     });
 });
