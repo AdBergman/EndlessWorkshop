@@ -257,6 +257,37 @@ class QuestExplorerMapperTest {
         assertThat(snapshots)
                 .extracting(entry -> entry.navigation().sequenceIndex())
                 .doesNotHaveDuplicates();
+
+        var kinChapter2Projected = snapshots.stream()
+                .filter(entry -> entry.entryKey().equals("FactionQuest_KinOfSheredyn02_Chapter02_Step01"))
+                .findFirst()
+                .orElseThrow();
+        assertThat(kinChapter2Projected.branches())
+                .filteredOn(branch -> !branch.revealedByBranchKeys().isEmpty())
+                .hasSize(2)
+                .allSatisfy(branch -> {
+                    assertThat(branch.revealedByBranchKeys())
+                            .containsExactly(
+                                    "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1",
+                                    "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2"
+                            );
+                    assertThat(branch.revealedByChoiceKeys())
+                            .containsExactly(
+                                    "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                                    "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition"
+                            );
+                    assertThat(branch.revealedByBranchPathAlternatives())
+                            .containsExactly(
+                                    List.of("FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1"),
+                                    List.of("FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2")
+                            );
+                });
+        assertThat(kinChapter2Projected.objectives())
+                .filteredOn(objective -> !objective.revealedByBranchKeys().isEmpty())
+                .hasSize(2);
+        assertThat(kinChapter2Projected.loreSections())
+                .filteredOn(section -> !section.revealedByBranchKeys().isEmpty())
+                .hasSize(4);
     }
 
     private static List<QuestExplorerEntryImportSnapshot> toValidatedSnapshots(QuestExplorerImportBatchDto batch) {

@@ -14,6 +14,9 @@ public record QuestExplorerBranchImportSnapshot(
         String parentChoiceKey,
         List<String> prerequisiteBranchKeys,
         List<String> prerequisiteBranchPath,
+        List<String> revealedByBranchKeys,
+        List<String> revealedByChoiceKeys,
+        List<List<String>> revealedByBranchPathAlternatives,
         String choiceGroupKey,
         String convergenceGroupKey,
         String sectionRole,
@@ -52,6 +55,9 @@ public record QuestExplorerBranchImportSnapshot(
                 null,
                 List.of(),
                 List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
                 null,
                 null,
                 null,
@@ -65,9 +71,63 @@ public record QuestExplorerBranchImportSnapshot(
         );
     }
 
+    public QuestExplorerBranchImportSnapshot(
+            String branchKey,
+            String choiceKey,
+            String label,
+            Integer orderIndex,
+            String groupKey,
+            String groupLabel,
+            Integer branchStepOrder,
+            String parentBranchKey,
+            String parentChoiceKey,
+            List<String> prerequisiteBranchKeys,
+            List<String> prerequisiteBranchPath,
+            String choiceGroupKey,
+            String convergenceGroupKey,
+            String sectionRole,
+            List<String> nextEntryKeys,
+            List<String> failureEntryKeys,
+            List<String> convergesIntoEntryKeys,
+            List<String> outcomePreviewLines,
+            List<String> conditions,
+            List<QuestExplorerRequirementImportSnapshot> requirements,
+            List<QuestExplorerRewardImportSnapshot> rewards
+    ) {
+        this(
+                branchKey,
+                choiceKey,
+                label,
+                orderIndex,
+                groupKey,
+                groupLabel,
+                branchStepOrder,
+                parentBranchKey,
+                parentChoiceKey,
+                prerequisiteBranchKeys,
+                prerequisiteBranchPath,
+                List.of(),
+                List.of(),
+                List.of(),
+                choiceGroupKey,
+                convergenceGroupKey,
+                sectionRole,
+                nextEntryKeys,
+                failureEntryKeys,
+                convergesIntoEntryKeys,
+                outcomePreviewLines,
+                conditions,
+                requirements,
+                rewards
+        );
+    }
+
     public QuestExplorerBranchImportSnapshot {
         prerequisiteBranchKeys = safeList(prerequisiteBranchKeys);
         prerequisiteBranchPath = safeList(prerequisiteBranchPath);
+        revealedByBranchKeys = safeList(revealedByBranchKeys);
+        revealedByChoiceKeys = safeList(revealedByChoiceKeys);
+        revealedByBranchPathAlternatives = safeNestedList(revealedByBranchPathAlternatives);
         nextEntryKeys = safeList(nextEntryKeys);
         failureEntryKeys = safeList(failureEntryKeys);
         convergesIntoEntryKeys = safeList(convergesIntoEntryKeys);
@@ -79,5 +139,9 @@ public record QuestExplorerBranchImportSnapshot(
 
     private static <T> List<T> safeList(List<T> values) {
         return values == null ? List.of() : List.copyOf(values);
+    }
+
+    private static List<List<String>> safeNestedList(List<List<String>> values) {
+        return values == null ? List.of() : values.stream().map(QuestExplorerBranchImportSnapshot::safeList).toList();
     }
 }

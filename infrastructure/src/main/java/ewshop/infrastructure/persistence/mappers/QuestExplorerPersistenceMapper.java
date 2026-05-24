@@ -112,6 +112,9 @@ public class QuestExplorerPersistenceMapper {
         entity.choiceKey = model.choiceKey();
         entity.stepIndex = model.stepIndex();
         entity.objectiveKey = model.objectiveKey();
+        entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
+        entity.revealedByChoiceKeys = mutable(model.revealedByChoiceKeys());
+        entity.revealedByBranchPathAlternatives = mutableNested(model.revealedByBranchPathAlternatives());
         model.lines().forEach(line -> entity.lines.add(toLoreLineEntity(entity, line)));
         return entity;
     }
@@ -137,6 +140,9 @@ public class QuestExplorerPersistenceMapper {
         entity.objectiveKey = model.objectiveKey();
         entity.text = model.text();
         entity.phase = model.phase();
+        entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
+        entity.revealedByChoiceKeys = mutable(model.revealedByChoiceKeys());
+        entity.revealedByBranchPathAlternatives = mutableNested(model.revealedByBranchPathAlternatives());
         model.requirements().forEach(requirement -> entity.requirements.add(toObjectiveRequirementEntity(entity, requirement)));
         model.rewards().forEach(reward -> entity.rewards.add(toObjectiveRewardEntity(entity, reward)));
         return entity;
@@ -159,6 +165,9 @@ public class QuestExplorerPersistenceMapper {
         entity.parentChoiceKey = model.parentChoiceKey();
         entity.prerequisiteBranchKeys = mutable(model.prerequisiteBranchKeys());
         entity.prerequisiteBranchPath = mutable(model.prerequisiteBranchPath());
+        entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
+        entity.revealedByChoiceKeys = mutable(model.revealedByChoiceKeys());
+        entity.revealedByBranchPathAlternatives = mutableNested(model.revealedByBranchPathAlternatives());
         entity.choiceGroupKey = model.choiceGroupKey();
         entity.convergenceGroupKey = model.convergenceGroupKey();
         entity.sectionRole = model.sectionRole();
@@ -297,6 +306,9 @@ public class QuestExplorerPersistenceMapper {
                 snapshot.choiceKey(),
                 snapshot.stepIndex(),
                 snapshot.objectiveKey(),
+                snapshot.revealedByBranchKeys(),
+                snapshot.revealedByChoiceKeys(),
+                snapshot.revealedByBranchPathAlternatives(),
                 snapshot.lines().stream().map(this::toModel).toList()
         );
     }
@@ -310,6 +322,9 @@ public class QuestExplorerPersistenceMapper {
                 snapshot.objectiveKey(),
                 snapshot.text(),
                 snapshot.phase(),
+                snapshot.revealedByBranchKeys(),
+                snapshot.revealedByChoiceKeys(),
+                snapshot.revealedByBranchPathAlternatives(),
                 snapshot.requirements().stream().map(this::toModel).toList(),
                 snapshot.rewards().stream().map(this::toModel).toList()
         );
@@ -340,6 +355,9 @@ public class QuestExplorerPersistenceMapper {
                 snapshot.parentChoiceKey(),
                 snapshot.prerequisiteBranchKeys(),
                 snapshot.prerequisiteBranchPath(),
+                snapshot.revealedByBranchKeys(),
+                snapshot.revealedByChoiceKeys(),
+                snapshot.revealedByBranchPathAlternatives(),
                 snapshot.choiceGroupKey(),
                 snapshot.convergenceGroupKey(),
                 snapshot.sectionRole(),
@@ -440,6 +458,9 @@ public class QuestExplorerPersistenceMapper {
                 entity.choiceKey,
                 entity.stepIndex,
                 entity.objectiveKey,
+                List.copyOf(entity.revealedByBranchKeys),
+                List.copyOf(entity.revealedByChoiceKeys),
+                immutableNested(entity.revealedByBranchPathAlternatives),
                 entity.lines.stream().map(this::toModel).toList()
         );
     }
@@ -453,6 +474,9 @@ public class QuestExplorerPersistenceMapper {
                 entity.objectiveKey,
                 entity.text,
                 entity.phase,
+                List.copyOf(entity.revealedByBranchKeys),
+                List.copyOf(entity.revealedByChoiceKeys),
+                immutableNested(entity.revealedByBranchPathAlternatives),
                 entity.requirements.stream().map(this::toModel).toList(),
                 entity.rewards.stream().map(this::toModel).toList()
         );
@@ -481,6 +505,9 @@ public class QuestExplorerPersistenceMapper {
                 entity.parentChoiceKey,
                 List.copyOf(entity.prerequisiteBranchKeys),
                 List.copyOf(entity.prerequisiteBranchPath),
+                List.copyOf(entity.revealedByBranchKeys),
+                List.copyOf(entity.revealedByChoiceKeys),
+                immutableNested(entity.revealedByBranchPathAlternatives),
                 entity.choiceGroupKey,
                 entity.convergenceGroupKey,
                 entity.sectionRole,
@@ -556,6 +583,9 @@ public class QuestExplorerPersistenceMapper {
                 section.choiceKey(),
                 section.stepIndex(),
                 section.objectiveKey(),
+                section.revealedByBranchKeys(),
+                section.revealedByChoiceKeys(),
+                section.revealedByBranchPathAlternatives(),
                 section.lines()
         );
     }
@@ -565,6 +595,9 @@ public class QuestExplorerPersistenceMapper {
                 objective.objectiveKey(),
                 objective.text(),
                 objective.phase(),
+                objective.revealedByBranchKeys(),
+                objective.revealedByChoiceKeys(),
+                objective.revealedByBranchPathAlternatives(),
                 objective.requirements(),
                 objective.rewards().stream().map(this::normalizeForComparison).toList()
         );
@@ -590,6 +623,9 @@ public class QuestExplorerPersistenceMapper {
                 branch.parentChoiceKey(),
                 branch.prerequisiteBranchKeys(),
                 branch.prerequisiteBranchPath(),
+                branch.revealedByBranchKeys(),
+                branch.revealedByChoiceKeys(),
+                branch.revealedByBranchPathAlternatives(),
                 branch.choiceGroupKey(),
                 branch.convergenceGroupKey(),
                 branch.sectionRole(),
@@ -623,5 +659,17 @@ public class QuestExplorerPersistenceMapper {
 
     private static <T> ArrayList<T> mutable(List<T> values) {
         return values == null ? new ArrayList<>() : new ArrayList<>(values);
+    }
+
+    private static ArrayList<List<String>> mutableNested(List<List<String>> values) {
+        if (values == null) return new ArrayList<>();
+        return values.stream()
+                .map(QuestExplorerPersistenceMapper::mutable)
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    }
+
+    private static List<List<String>> immutableNested(List<List<String>> values) {
+        if (values == null) return List.of();
+        return values.stream().map(List::copyOf).toList();
     }
 }

@@ -163,6 +163,18 @@ public class QuestExplorerEntryEntity {
         @Column(name = "objective_key", length = 360)
         public String objectiveKey;
 
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_branch_keys", columnDefinition = "TEXT")
+        public List<String> revealedByBranchKeys = new ArrayList<>();
+
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_choice_keys", columnDefinition = "TEXT")
+        public List<String> revealedByChoiceKeys = new ArrayList<>();
+
+        @Convert(converter = StringMatrixJsonConverter.class)
+        @Column(name = "revealed_by_branch_path_alternatives", columnDefinition = "TEXT")
+        public List<List<String>> revealedByBranchPathAlternatives = new ArrayList<>();
+
         @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
         @OrderColumn(name = "line_order")
         public List<LoreLineEntity> lines = new ArrayList<>();
@@ -211,6 +223,18 @@ public class QuestExplorerEntryEntity {
         @Column(name = "phase", length = 120)
         public String phase;
 
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_branch_keys", columnDefinition = "TEXT")
+        public List<String> revealedByBranchKeys = new ArrayList<>();
+
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_choice_keys", columnDefinition = "TEXT")
+        public List<String> revealedByChoiceKeys = new ArrayList<>();
+
+        @Convert(converter = StringMatrixJsonConverter.class)
+        @Column(name = "revealed_by_branch_path_alternatives", columnDefinition = "TEXT")
+        public List<List<String>> revealedByBranchPathAlternatives = new ArrayList<>();
+
         @OneToMany(mappedBy = "objective", cascade = CascadeType.ALL, orphanRemoval = true)
         @OrderColumn(name = "requirement_order")
         public List<ObjectiveRequirementEntity> requirements = new ArrayList<>();
@@ -258,6 +282,18 @@ public class QuestExplorerEntryEntity {
         public String convergenceGroupKey;
         @Column(name = "section_role", length = 80)
         public String sectionRole;
+
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_branch_keys", columnDefinition = "TEXT")
+        public List<String> revealedByBranchKeys = new ArrayList<>();
+
+        @Convert(converter = StringListJsonConverter.class)
+        @Column(name = "revealed_by_choice_keys", columnDefinition = "TEXT")
+        public List<String> revealedByChoiceKeys = new ArrayList<>();
+
+        @Convert(converter = StringMatrixJsonConverter.class)
+        @Column(name = "revealed_by_branch_path_alternatives", columnDefinition = "TEXT")
+        public List<List<String>> revealedByBranchPathAlternatives = new ArrayList<>();
 
         @ElementCollection
         @CollectionTable(name = "quest_explorer_branch_prerequisite_keys", joinColumns = @JoinColumn(name = "branch_id"))

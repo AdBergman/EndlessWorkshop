@@ -196,6 +196,7 @@ public final class QuestExplorerMapper {
     private static QuestExplorerDto.LoreSectionDto toDto(QuestExplorer.LoreSection model) {
         return new QuestExplorerDto.LoreSectionDto(
                 model.sectionKey(), model.phase(), model.choiceKey(), model.stepIndex(), model.objectiveKey(),
+                model.revealedByBranchKeys(), model.revealedByChoiceKeys(), model.revealedByBranchPathAlternatives(),
                 model.lines().stream().map(QuestExplorerMapper::toDto).toList()
         );
     }
@@ -211,6 +212,7 @@ public final class QuestExplorerMapper {
     private static QuestExplorerDto.ObjectiveDto toDto(QuestExplorer.Objective model) {
         return new QuestExplorerDto.ObjectiveDto(
                 model.objectiveKey(), model.text(), model.phase(),
+                model.revealedByBranchKeys(), model.revealedByChoiceKeys(), model.revealedByBranchPathAlternatives(),
                 model.requirements().stream().map(QuestExplorerMapper::toDto).toList(),
                 model.rewards().stream().map(QuestExplorerMapper::toDto).toList()
         );
@@ -220,7 +222,9 @@ public final class QuestExplorerMapper {
         return new QuestExplorerDto.BranchDto(
                 model.branchKey(), model.choiceKey(), model.label(), model.orderIndex(), model.groupKey(),
                 model.groupLabel(), model.branchStepOrder(), model.parentBranchKey(), model.parentChoiceKey(),
-                model.prerequisiteBranchKeys(), model.prerequisiteBranchPath(), model.choiceGroupKey(),
+                model.prerequisiteBranchKeys(), model.prerequisiteBranchPath(),
+                model.revealedByBranchKeys(), model.revealedByChoiceKeys(), model.revealedByBranchPathAlternatives(),
+                model.choiceGroupKey(),
                 model.convergenceGroupKey(), model.sectionRole(), model.nextEntryKeys(), model.failureEntryKeys(), model.convergesIntoEntryKeys(),
                 toDto(model.lore()), toDto(model.strategy())
         );

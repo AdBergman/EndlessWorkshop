@@ -1,5 +1,7 @@
 package ewshop.domain.model.quest;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -256,9 +258,26 @@ public record QuestExplorer(
             String choiceKey,
             Integer stepIndex,
             String objectiveKey,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             List<LoreLine> lines
     ) {
+        public LoreSection(
+                String sectionKey,
+                String phase,
+                String choiceKey,
+                Integer stepIndex,
+                String objectiveKey,
+                List<LoreLine> lines
+        ) {
+            this(sectionKey, phase, choiceKey, stepIndex, objectiveKey, List.of(), List.of(), List.of(), lines);
+        }
+
         public LoreSection {
+            revealedByBranchKeys = safeList(revealedByBranchKeys);
+            revealedByChoiceKeys = safeList(revealedByChoiceKeys);
+            revealedByBranchPathAlternatives = safeNestedStringList(revealedByBranchPathAlternatives);
             lines = safeList(lines);
         }
     }
@@ -275,14 +294,31 @@ public record QuestExplorer(
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Objective(
             String objectiveKey,
             String text,
             String phase,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             List<Requirement> requirements,
             List<Reward> rewards
     ) {
+        public Objective(
+                String objectiveKey,
+                String text,
+                String phase,
+                List<Requirement> requirements,
+                List<Reward> rewards
+        ) {
+            this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+        }
+
         public Objective {
+            revealedByBranchKeys = safeList(revealedByBranchKeys);
+            revealedByChoiceKeys = safeList(revealedByChoiceKeys);
+            revealedByBranchPathAlternatives = safeNestedStringList(revealedByBranchPathAlternatives);
             requirements = safeList(requirements);
             rewards = safeList(rewards);
         }
@@ -300,6 +336,9 @@ public record QuestExplorer(
             String parentChoiceKey,
             List<String> prerequisiteBranchKeys,
             List<String> prerequisiteBranchPath,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             String choiceGroupKey,
             String convergenceGroupKey,
             String sectionRole,
@@ -334,6 +373,9 @@ public record QuestExplorer(
                     null,
                     List.of(),
                     List.of(),
+                    List.of(),
+                    List.of(),
+                    List.of(),
                     null,
                     null,
                     null,
@@ -345,9 +387,59 @@ public record QuestExplorer(
             );
         }
 
+        public Branch(
+                String branchKey,
+                String choiceKey,
+                String label,
+                Integer orderIndex,
+                String groupKey,
+                String groupLabel,
+                Integer branchStepOrder,
+                String parentBranchKey,
+                String parentChoiceKey,
+                List<String> prerequisiteBranchKeys,
+                List<String> prerequisiteBranchPath,
+                String choiceGroupKey,
+                String convergenceGroupKey,
+                String sectionRole,
+                List<String> nextEntryKeys,
+                List<String> failureEntryKeys,
+                List<String> convergesIntoEntryKeys,
+                BranchLore lore,
+                BranchStrategy strategy
+        ) {
+            this(
+                    branchKey,
+                    choiceKey,
+                    label,
+                    orderIndex,
+                    groupKey,
+                    groupLabel,
+                    branchStepOrder,
+                    parentBranchKey,
+                    parentChoiceKey,
+                    prerequisiteBranchKeys,
+                    prerequisiteBranchPath,
+                    List.of(),
+                    List.of(),
+                    List.of(),
+                    choiceGroupKey,
+                    convergenceGroupKey,
+                    sectionRole,
+                    nextEntryKeys,
+                    failureEntryKeys,
+                    convergesIntoEntryKeys,
+                    lore,
+                    strategy
+            );
+        }
+
         public Branch {
             prerequisiteBranchKeys = safeList(prerequisiteBranchKeys);
             prerequisiteBranchPath = safeList(prerequisiteBranchPath);
+            revealedByBranchKeys = safeList(revealedByBranchKeys);
+            revealedByChoiceKeys = safeList(revealedByChoiceKeys);
+            revealedByBranchPathAlternatives = safeNestedStringList(revealedByBranchPathAlternatives);
             nextEntryKeys = safeList(nextEntryKeys);
             failureEntryKeys = safeList(failureEntryKeys);
             convergesIntoEntryKeys = safeList(convergesIntoEntryKeys);
@@ -418,5 +510,9 @@ public record QuestExplorer(
 
     private static <T> List<T> safeList(List<T> values) {
         return values == null ? List.of() : List.copyOf(values);
+    }
+
+    private static List<List<String>> safeNestedStringList(List<List<String>> values) {
+        return values == null ? List.of() : values.stream().map(QuestExplorer::safeList).toList();
     }
 }

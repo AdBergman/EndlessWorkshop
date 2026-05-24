@@ -801,6 +801,583 @@ const choiceResetPayload: QuestExplorerResponse = {
     },
 };
 
+const scopedReaderPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_Scoped",
+            title: "Forked Chronicle",
+            summaryLines: ["The first decision belongs to this moment."],
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Scoped:lore:opening",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Shared opening belongs before the choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Scoped:lore:step-1",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: 0,
+                        objectiveKey: "Scoped_Objective_1",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Step one lore belongs before the choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Scoped:lore:future-untagged",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Future untagged lore must wait for the path." }],
+                    },
+                    {
+                        sectionKey: "Quest_Scoped:lore:step-2",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: 1,
+                        objectiveKey: "Scoped_Objective_2",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Step two lore must wait for a selected path." }],
+                    },
+                    {
+                        sectionKey: "Quest_Scoped:lore:step-3",
+                        phase: "success",
+                        choiceKey: null,
+                        stepIndex: 2,
+                        objectiveKey: "Scoped_Objective_3",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Step three lore must not pre-render." }],
+                    },
+                ],
+            },
+            strategyView: {
+                objectives: [
+                    testObjective("Scoped_Objective_1", "Hold the first line."),
+                    testObjective("Scoped_Objective_2", "Secure the ash road."),
+                    testObjective("Scoped_Objective_3", "Negotiate the coral road."),
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Ash", "Take the ash road"),
+                    nextEntryKeys: ["Quest_Ash"],
+                    lore: { outcomePreviewLines: ["The ash road opens."] },
+                    strategy: { conditions: ["Choose the ash road."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Coral", "Take the coral road"),
+                    nextEntryKeys: ["Quest_Coral"],
+                    lore: { outcomePreviewLines: ["The coral road opens."] },
+                    strategy: { conditions: ["Choose the coral road."], requirements: [], rewards: [] },
+                },
+            ],
+        }),
+        questEntry({
+            entryKey: "Quest_Ash",
+            title: "Ash Road",
+            summaryLines: ["Only the ash road is now being read."],
+            strategyView: {
+                objectives: [
+                    testObjective("Objective_Ash", "Ash road outcome."),
+                    testObjective("Objective_Ash_Later", "Ash road later objective must wait."),
+                ],
+            },
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Ash:lore",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: 1,
+                        objectiveKey: "Objective_Ash",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Only ash road lore is revealed." }],
+                    },
+                    {
+                        sectionKey: "Quest_Ash:lore:later",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: 2,
+                        objectiveKey: "Objective_Ash_Later",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Ash road later lore remains hidden." }],
+                    },
+                ],
+            },
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                previousEntryKeys: ["Quest_Scoped"],
+                nextEntryKeys: [],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_Coral",
+            title: "Coral Road",
+            summaryLines: ["The coral road remains unselected."],
+            strategyView: { objectives: [testObjective("Objective_Coral", "Coral road outcome.")] },
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Coral:lore",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: 1,
+                        objectiveKey: "Objective_Coral",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Coral road lore remains hidden." }],
+                    },
+                ],
+            },
+            navigation: {
+                sequenceIndex: 2,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: "Quest_Ash",
+                branchLabel: "Forked Chronicle",
+                branchOrder: 2,
+                previousEntryKeys: ["Quest_Scoped"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Forked Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Forked Chronicle", detailEntryKey: "Quest_Scoped" },
+                    { stepNumber: 2, stepOrder: 2, title: "Ash Road", detailEntryKey: "Quest_Ash", variantEntryKeys: ["Quest_Coral"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const choiceKeyScopedPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_Keyed",
+            title: "Keyed Chronicle",
+            summaryLines: ["The current beat should not read the whole chapter."],
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Keyed:lore:opening",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The shared setup belongs before the first choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Keyed:lore:current",
+                        phase: "intro",
+                        choiceKey: "Choice_Current",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Current",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The current beat belongs before the first choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Keyed:lore:current-resolution",
+                        phase: "success",
+                        choiceKey: "Choice_Current",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Current",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The current resolution belongs before the first choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Keyed:lore:next",
+                        phase: "intro",
+                        choiceKey: "Choice_Next",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Next",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The next beat waits for the selected path." }],
+                    },
+                    {
+                        sectionKey: "Quest_Keyed:lore:future",
+                        phase: "intro",
+                        choiceKey: "Choice_Future",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Future",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The future beat must not leak." }],
+                    },
+                ],
+            },
+            strategyView: {
+                objectives: [
+                    testObjective("Objective_Current", "Resolve the current beat."),
+                    testObjective("Objective_Next", "Resolve the next beat."),
+                    testObjective("Objective_Future", "Resolve the future beat."),
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Current", "Find Pryzja"),
+                    choiceKey: "Choice_Current",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Find Pryzja."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Next", "Eliminate the threat"),
+                    choiceKey: "Choice_Next",
+                    sectionRole: "continuation",
+                    branchStepOrder: 2,
+                    parentBranchKey: "Branch_Current",
+                    prerequisiteBranchKeys: ["Branch_Current"],
+                    strategy: { conditions: ["Eliminate the threat."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Future", "Rebuild the city"),
+                    choiceKey: "Choice_Future",
+                    sectionRole: "continuation",
+                    branchStepOrder: 3,
+                    parentBranchKey: "Branch_Next",
+                    prerequisiteBranchKeys: ["Branch_Current", "Branch_Next"],
+                    strategy: { conditions: ["Rebuild the city."], requirements: [], rewards: [] },
+                },
+            ],
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Keyed Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Keyed Chronicle", detailEntryKey: "Quest_Keyed" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const serializedContinuationPayload: QuestExplorerResponse = {
+    ...choiceKeyScopedPayload,
+    entries: choiceKeyScopedPayload.entries.map((entry) => (
+        entry.entryKey === "Quest_Keyed"
+            ? {
+                ...entry,
+                branches: entry.branches.map((branch) => (
+                    branch.branchKey === "Branch_Future"
+                        ? { ...branch, nextEntryKeys: ["Quest_Complete"] }
+                        : branch
+                )),
+            }
+            : entry
+    )),
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Keyed Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Keyed Chronicle", detailEntryKey: "Quest_Keyed" },
+                    { stepNumber: 2, stepOrder: 2, title: "Keyed Chronicle", detailEntryKey: "Quest_Keyed" },
+                    { stepNumber: 3, stepOrder: 3, title: "Keyed Chronicle", detailEntryKey: "Quest_Keyed" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const projectedLocalContinuationQuestline = progressionQuestline({
+    questLineKey: "Line_Projected_Local",
+    questLineFamilyKey: "Line_Projected_Local",
+    questLineName: "Projected Local",
+    chapterNumber: 2,
+    chapterOrder: 2,
+    title: "Projected Setup",
+    steps: [
+        { stepNumber: 1, stepOrder: 1, title: "Projected Setup", detailEntryKey: "Quest_Projector" },
+        { stepNumber: 2, stepOrder: 2, title: "Carried Chronicle", detailEntryKey: "Quest_Carried" },
+        { stepNumber: 3, stepOrder: 3, title: "Carried Chronicle", detailEntryKey: "Quest_Carried" },
+    ],
+});
+
+const projectedLocalContinuationPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_Projector",
+            title: "Projected Setup",
+            summaryLines: ["The first choice points onward, but local projected beats remain."],
+            strategyView: { objectives: [testObjective("Objective_Projector", "Choose the projected path.")] },
+            branches: [
+                {
+                    ...testBranch("Branch_Search", "Search"),
+                    choiceKey: "Choice_Search",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_Projector:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_NextChapter"],
+                    convergesIntoEntryKeys: ["Quest_NextChapter"],
+                    strategy: { conditions: ["Search for Garin."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Build", "Build"),
+                    choiceKey: "Choice_Build",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_Projector:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_NextChapter"],
+                    convergesIntoEntryKeys: ["Quest_NextChapter"],
+                    strategy: { conditions: ["Build the settlement."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                questLineKey: "Line_Projected_Local",
+                questLineName: "Projected Local",
+                chapter: 2,
+                chapterLabel: "Chapter 2",
+                chapterOrder: 2,
+                stepOrder: 1,
+                nextEntryKeys: ["Quest_NextChapter"],
+                convergesIntoEntryKeys: ["Quest_NextChapter"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_Carried",
+            title: "Carried Chronicle",
+            summaryLines: ["A projected local beat follows the first choice."],
+            strategyView: {
+                objectives: [
+                    testObjective("Objective_Carry_Current", "Resolve the carried current beat."),
+                    {
+                        ...testObjective("Objective_Carry_Next", "Resolve the carried next beat."),
+                        revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                        revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    },
+                    {
+                        ...testObjective("Objective_Carry_Future", "Resolve the carried future beat."),
+                        revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                        revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    },
+                ],
+            },
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Carried:lore:current",
+                        phase: "intro",
+                        choiceKey: "Choice_Carry_Current",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Carry_Current",
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The carried current beat is now readable." }],
+                    },
+                    {
+                        sectionKey: "Quest_Carried:lore:next",
+                        phase: "intro",
+                        choiceKey: "Choice_Carry_Next",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Carry_Next",
+                        revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                        revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The carried next beat is now readable." }],
+                    },
+                    {
+                        sectionKey: "Quest_Carried:lore:future",
+                        phase: "intro",
+                        choiceKey: "Choice_Carry_Future",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Carry_Future",
+                        revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                        revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The carried future beat resolves the local chapter." }],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Carry_Current", "Inspect the signal"),
+                    choiceKey: "Choice_Carry_Current",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Inspect the signal."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Carry_Next", "Secure the signal"),
+                    choiceKey: "Choice_Carry_Next",
+                    sectionRole: "continuation",
+                    branchStepOrder: 2,
+                    parentBranchKey: "Branch_Carry_Current",
+                    prerequisiteBranchKeys: ["Branch_Carry_Current"],
+                    revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                    revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                    revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    strategy: { conditions: ["Secure the signal."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Carry_Future", "Report onward"),
+                    choiceKey: "Choice_Carry_Future",
+                    sectionRole: "continuation",
+                    branchStepOrder: 3,
+                    parentBranchKey: "Branch_Carry_Next",
+                    prerequisiteBranchKeys: ["Branch_Carry_Current", "Branch_Carry_Next"],
+                    revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                    revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                    revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    nextEntryKeys: ["Quest_NextChapter"],
+                    strategy: { conditions: ["Report onward."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                questLineKey: "Line_Projected_Local",
+                questLineName: "Projected Local",
+                chapter: 2,
+                chapterLabel: "Chapter 2",
+                chapterOrder: 2,
+                stepOrder: 2,
+                previousEntryKeys: ["Quest_Projector"],
+                nextEntryKeys: ["Quest_NextChapter"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_NextChapter",
+            title: "Next Chapter",
+            summaryLines: ["The next chapter waits."],
+            strategyView: { objectives: [testObjective("Objective_NextChapter", "Continue onward.")] },
+            navigation: {
+                questLineKey: "Line_Projected_Local",
+                questLineName: "Projected Local",
+                chapter: 3,
+                chapterLabel: "Chapter 3",
+                chapterOrder: 3,
+                step: 1,
+                stepLabel: "Step 1",
+                stepOrder: 1,
+                previousEntryKeys: ["Quest_Projector", "Quest_Carried"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            {
+                ...projectedLocalContinuationQuestline,
+                chapters: [
+                    {
+                        ...projectedLocalContinuationQuestline.chapters[0],
+                        steps: projectedLocalContinuationQuestline.chapters[0].steps.map((step, index) => (
+                            index === 0
+                                ? {
+                                    ...step,
+                                    sourceEntryKeys: ["Quest_Projector", "Quest_Carried"],
+                                    variants: [
+                                        {
+                                            entryKey: "Quest_Projector",
+                                            title: "Projected Setup",
+                                            variantKind: "entry",
+                                            branchGroupKey: null,
+                                            branchLabel: null,
+                                            branchOrder: null,
+                                            previousEntryKeys: [],
+                                            nextEntryKeys: ["Quest_NextChapter"],
+                                            failureEntryKeys: [],
+                                            convergesIntoEntryKeys: ["Quest_NextChapter"],
+                                        },
+                                        {
+                                            entryKey: "Quest_Carried",
+                                            title: "Carried Chronicle",
+                                            variantKind: "entry",
+                                            branchGroupKey: null,
+                                            branchLabel: null,
+                                            branchOrder: null,
+                                            previousEntryKeys: ["Quest_Projector"],
+                                            nextEntryKeys: ["Quest_NextChapter"],
+                                            failureEntryKeys: [],
+                                            convergesIntoEntryKeys: [],
+                                        },
+                                    ],
+                                }
+                                : step
+                        )),
+                    },
+                    {
+                        chapterNumber: 3,
+                        chapterOrder: 3,
+                        title: "Next Chapter",
+                        steps: [
+                            {
+                                stepKey: "Line_Projected_Local:Faction_Kin:chapter-3:step-1",
+                                stepNumber: 1,
+                                stepOrder: 1,
+                                title: "Next Chapter",
+                                projectionKind: "real_entry_backed",
+                                detailEntryKey: "Quest_NextChapter",
+                                sourceEntryKeys: ["Quest_NextChapter"],
+                                aliasEntryKeys: [],
+                                variants: [
+                                    {
+                                        entryKey: "Quest_NextChapter",
+                                        title: "Next Chapter",
+                                        variantKind: "entry",
+                                        branchGroupKey: null,
+                                        branchLabel: null,
+                                        branchOrder: null,
+                                        previousEntryKeys: ["Quest_Projector", "Quest_Carried"],
+                                        nextEntryKeys: [],
+                                        failureEntryKeys: [],
+                                        convergesIntoEntryKeys: [],
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+        debugSummary: null,
+    },
+};
+
+const projectedLocalContinuationWithoutRevealPayload: QuestExplorerResponse = {
+    ...projectedLocalContinuationPayload,
+    entries: projectedLocalContinuationPayload.entries.map((entry) => ({
+        ...entry,
+        loreView: {
+            sections: entry.loreView.sections.map((section) => {
+                const {
+                    revealedByBranchKeys,
+                    revealedByChoiceKeys,
+                    revealedByBranchPathAlternatives,
+                    ...rest
+                } = section;
+                return rest;
+            }),
+        },
+        strategyView: {
+            objectives: entry.strategyView.objectives.map((objective) => {
+                const {
+                    revealedByBranchKeys,
+                    revealedByChoiceKeys,
+                    revealedByBranchPathAlternatives,
+                    ...rest
+                } = objective;
+                return rest;
+            }),
+        },
+        branches: entry.branches.map((branch) => {
+            const {
+                revealedByBranchKeys,
+                revealedByChoiceKeys,
+                revealedByBranchPathAlternatives,
+                ...rest
+            } = branch;
+            return rest;
+        }),
+    })),
+};
+
 const nextChapterQuestline = progressionQuestline({
     title: "Opening the Tide",
     steps: [
@@ -1040,6 +1617,93 @@ const gatedContinuationPayload: QuestExplorerResponse = {
     },
 };
 
+const ungatedContinuationPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Noisy Chronicle",
+            summaryLines: ["Only the first decision is ready."],
+            strategyView: { objectives: [testObjective("Objective_A", "Begin the chronicle.")] },
+            branches: [
+                {
+                    ...testBranch("Branch_First", "Choose the first path"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_B"],
+                    strategy: { conditions: ["Make the first choice."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Future", "Future-looking continuation"),
+                    sectionRole: "continuation",
+                    choiceGroupKey: "Quest_A:choice-group:step:2",
+                    branchStepOrder: 2,
+                    nextEntryKeys: ["Quest_C"],
+                    strategy: { conditions: ["This belongs after a selected path."], requirements: [], rewards: [] },
+                },
+            ],
+        }),
+        questEntry({ entryKey: "Quest_B", title: "Chosen Path", summaryLines: ["The chosen path resolves."] }),
+        questEntry({ entryKey: "Quest_C", title: "Future Path", summaryLines: ["This future path should not leak."] }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Noisy Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Noisy Chronicle", detailEntryKey: "Quest_A" },
+                    { stepNumber: 2, stepOrder: 2, title: "Chosen Path", detailEntryKey: "Quest_B", variantEntryKeys: ["Quest_C"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const branchVariantProjectionPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Projected Chronicle",
+            summaryLines: ["The real branch choices should own the reader surface."],
+            strategyView: { objectives: [testObjective("Objective_A", "Choose the live branch.")] },
+            branches: [
+                {
+                    ...testBranch("Branch_Claim", "Claim Lands"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_B"],
+                    strategy: { conditions: ["Claim the territory."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Seek", "Seek Facility"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_C"],
+                    strategy: { conditions: ["Seek the facility."], requirements: [], rewards: [] },
+                },
+            ],
+        }),
+        questEntry({ entryKey: "Quest_B", title: "Claimed Path", summaryLines: ["The claimed path opens."] }),
+        questEntry({ entryKey: "Quest_C", title: "Projected Future", summaryLines: ["This projection should only be visible in raw debug."] }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Projected Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Projected Chronicle", detailEntryKey: "Quest_A", variantEntryKeys: ["Quest_C"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
 const artifactCleanupPayload: QuestExplorerResponse = {
     ...payload,
     entries: [
@@ -1246,6 +1910,10 @@ function QuestRouteHarness() {
     );
 }
 
+function expectElementBefore(first: Element, second: Element) {
+    expect(Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+}
+
 describe("QuestExplorerPage", () => {
     beforeEach(() => {
         useQuestStore.getState().reset();
@@ -1290,6 +1958,7 @@ describe("QuestExplorerPage", () => {
         const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
 
         expect(within(debugPanel).getByText("Debug progression")).toBeInTheDocument();
+        expect(screen.getByRole("checkbox", { name: "Show raw hidden rows" })).not.toBeChecked();
         expect(within(debugPanel).getAllByText("stepKey").length).toBeGreaterThan(0);
         expect(within(debugPanel).getByText("Line_First_Tide:Faction_Kin:chapter-1:step-1")).toBeInTheDocument();
         expect(within(debugPanel).getAllByText("detailEntryKey").length).toBeGreaterThan(0);
@@ -1323,7 +1992,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Gain Dust.").length).toBeGreaterThan(0);
         expect(screen.queryByText("The tide record begins.")).not.toBeInTheDocument();
         expect(screen.queryByText("We follow the old marker.")).not.toBeInTheDocument();
-        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
 
         const choice = screen.getByRole("button", { name: /Follow the marker/ });
         await user.click(choice);
@@ -1332,6 +2001,200 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("scopes strategy content to the focused step before rendering choices", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
+        renderPage("/quests/Quest_Scoped");
+
+        await screen.findByRole("heading", { name: "Forked Chronicle" });
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("Hold the first line.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Secure the ash road.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Negotiate the coral road.")).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Take the ash road/ })).toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Take the ash road/ }));
+
+        expect(within(chronicle).getByText("Ash road outcome.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Ash road later objective must wait.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Coral road outcome.")).not.toBeInTheDocument();
+    });
+
+    it("scopes lore content to the focused step before rendering choices", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
+        renderPage("/quests/Quest_Scoped");
+
+        await screen.findByRole("heading", { name: "Forked Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("Shared opening belongs before the choice.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Step one lore belongs before the choice.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Future untagged lore must wait for the path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step two lore must wait for a selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step three lore must not pre-render.")).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Take the ash road/ })).toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Take the ash road/ }));
+
+        expect(within(chronicle).getByText("Only ash road lore is revealed.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Ash road later lore remains hidden.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Coral road lore remains hidden.")).not.toBeInTheDocument();
+    });
+
+    it("uses choice continuity metadata to prevent same-step future lore from leaking", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
+        renderPage("/quests/Quest_Keyed");
+
+        await screen.findByRole("heading", { name: "Keyed Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("The shared setup belongs before the first choice.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("The current beat belongs before the first choice.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("The current resolution belongs before the first choice.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
+
+        const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
+        const pathRevealed = within(chronicle).getByText("Path Revealed");
+        const nextBeat = within(chronicle).getByText("The next beat waits for the selected path.");
+
+        expect(pathRevealed).toBeInTheDocument();
+        expect(within(chronicle).getByText("Eliminate the threat")).toBeInTheDocument();
+        expect(nextBeat).toBeInTheDocument();
+        expectElementBefore(selectedChoice, pathRevealed);
+        expectElementBefore(pathRevealed, nextBeat);
+        expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
+    });
+
+    it("uses choice continuity metadata to prevent same-step future objectives from leaking", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
+        renderPage("/quests/Quest_Keyed?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Keyed Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("Resolve the current beat.")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
+
+        const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
+        const pathRevealed = within(chronicle).getByText("Path Revealed");
+        const nextObjective = within(chronicle).getByText("Resolve the next beat.");
+
+        expect(nextObjective).toBeInTheDocument();
+        expectElementBefore(selectedChoice, pathRevealed);
+        expectElementBefore(pathRevealed, nextObjective);
+        expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
+    });
+
+    it("promotes same-entry serial continuations into their progression steps", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
+        renderPage("/quests/Quest_Keyed?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Keyed Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
+        expect(within(chronicle).getByText("of 3")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
+
+        const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
+        const revealedTransitions = within(chronicle).getAllByText("Path Revealed");
+        const step2 = within(chronicle).getByText("Step 2");
+        const nextObjective = within(chronicle).getByText("Resolve the next beat.");
+        const step3 = within(chronicle).getByText("Step 3");
+        const futureObjective = within(chronicle).getByText("Resolve the future beat.");
+
+        expect(revealedTransitions).toHaveLength(2);
+        expectElementBefore(selectedChoice, revealedTransitions[0]);
+        expectElementBefore(revealedTransitions[0], step2);
+        expectElementBefore(step2, nextObjective);
+        expectElementBefore(nextObjective, revealedTransitions[1]);
+        expectElementBefore(revealedTransitions[1], step3);
+        expectElementBefore(step3, futureObjective);
+        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();
+    });
+
+    it("reveals projected local continuation steps from explicit reveal metadata", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(projectedLocalContinuationPayload);
+        renderPage("/quests/Quest_Projector?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Projected Setup" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
+
+        const selectedChoice = within(chronicle).getByRole("button", { name: /Search/ });
+        const step2 = within(chronicle).getByText("Step 2");
+        const nextObjective = within(chronicle).getByText("Resolve the carried next beat.");
+        const step3 = within(chronicle).getByText("Step 3");
+        const futureObjective = within(chronicle).getByText("Resolve the carried future beat.");
+
+        expect(within(chronicle).queryByText("Resolve the carried current beat.")).not.toBeInTheDocument();
+        expectElementBefore(selectedChoice, step2);
+        expectElementBefore(step2, nextObjective);
+        expectElementBefore(nextObjective, step3);
+        expectElementBefore(step3, futureObjective);
+        expect(screen.queryByText(/continues in Chapter 3/)).not.toBeInTheDocument();
+    });
+
+    it("does not bridge projected local steps without explicit reveal metadata", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(projectedLocalContinuationWithoutRevealPayload);
+        renderPage("/quests/Quest_Projector?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Projected Setup" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
+
+        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
+        expect(screen.getByText(/continues in Chapter 3: Next Chapter/)).toBeInTheDocument();
+    });
+
+    it("keeps revealedBy lore sections hidden until their owner branch is selected", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(projectedLocalContinuationPayload);
+        renderPage("/quests/Quest_Projector?mode=lore");
+
+        await screen.findByRole("heading", { name: "Projected Setup" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).queryByText("The carried next beat is now readable.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The carried future beat resolves the local chapter.")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
+
+        expect(within(chronicle).getByText("The carried next beat is now readable.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("The carried future beat resolves the local chapter.")).toBeInTheDocument();
     });
 
     it("renders minor faction objective variants without aggregate overview", async () => {
@@ -1456,7 +2319,7 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Open second tide" }));
 
         await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_B"));
-        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current");
+        expect(screen.queryByRole("button", { name: /Follow the marker/ })).not.toBeInTheDocument();
         expect(screen.getAllByText("The marker path opens.").length).toBeGreaterThan(0);
     });
 
@@ -1476,7 +2339,7 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("radio", { name: /^Faction Quests\s+\d+$/ }));
         expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
-        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
     });
 
     it("hides unresolved non-final main faction choices outside debug mode", async () => {
@@ -1488,8 +2351,42 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         expect(screen.queryByRole("button", { name: /Take the unknown road/ })).not.toBeInTheDocument();
-        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
+    });
+
+    it("hides ungated continuation rows from normal choices until raw debug is requested", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(ungatedContinuationPayload);
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "Noisy Chronicle" });
+
+        expect(screen.getByRole("button", { name: /Choose the first path/ })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Future-looking continuation/ })).not.toBeInTheDocument();
+        expect(screen.queryByText(/continuation row waits for a selected path/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(screen.getByRole("button", { name: /Future-looking continuation/ })).toBeInTheDocument();
+        expect(screen.getByText(/continuation row waits for a selected path/)).toBeInTheDocument();
+    });
+
+    it("keeps branch variant projections out of normal choices when entry-backed branches exist", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(branchVariantProjectionPayload);
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "Projected Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByRole("button", { name: /Claim Lands/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Seek Facility/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Projected Future/ })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(within(chronicle).getByRole("button", { name: /Projected Future/ })).toBeInTheDocument();
     });
 
     it("stops gracefully in debug mode when a modeled choice lacks explicit continuation keys", async () => {
@@ -1500,7 +2397,11 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
-        expect(screen.getByText("This step will be revealed after you make your choice.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Take the unknown road/ })).not.toBeInTheDocument();
+        expect(screen.queryByText(/hidden in normal UI: no modeled continuation before final chapter/)).not.toBeInTheDocument();
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
         expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
 
@@ -1523,9 +2424,17 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("button", { name: /Track/ }));
 
-        expect(screen.getByRole("button", { name: /Capture the rogue Lieutenant/ })).toBeInTheDocument();
+        expect(screen.queryByText("Continue Selected Path")).not.toBeInTheDocument();
+        const trackButton = screen.getByRole("button", { name: /Track/ });
+        const pathRevealed = screen.getByText("Path Revealed");
+        expect(pathRevealed).toBeInTheDocument();
+        expect(screen.getByText("Capture the rogue Lieutenant.")).toBeInTheDocument();
+        const revealedOutcome = screen.getByText("The quarry is cornered.");
+        expect(revealedOutcome).toBeInTheDocument();
+        expectElementBefore(trackButton, pathRevealed);
+        expectElementBefore(pathRevealed, revealedOutcome);
+        expect(screen.queryByRole("button", { name: /Capture the rogue Lieutenant/ })).not.toBeInTheDocument();
         expect(screen.queryByText(/does not identify the next continuation step/)).not.toBeInTheDocument();
-        await user.click(screen.getByRole("button", { name: /Capture the rogue Lieutenant/ }));
 
         expect(screen.getByText("The hunt resolves.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
@@ -1543,19 +2452,26 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Artifact Reject")).not.toBeInTheDocument();
     });
 
-    it("keeps artifact cleanup rows visible in debug with normal-mode counts and reasons", async () => {
+    it("keeps artifact cleanup diagnostics readable in debug and reveals raw rows on demand", async () => {
+        const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(artifactCleanupPayload);
         renderPage("/quests/Quest_A?debugQuestProgression=true");
 
         await screen.findByRole("heading", { name: "Final Choice" });
 
-        expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(2);
-        expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(2);
+        expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(1);
+        expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(1);
         const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
         expect(within(debugPanel).getByText("normal visible choice count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("debug visible choice count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("hidden artifact count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("selected branch path")).toBeInTheDocument();
+        expect(screen.queryByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(2);
+        expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(2);
         expect(screen.getAllByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).toHaveLength(2);
     });
 
@@ -1568,6 +2484,8 @@ describe("QuestExplorerPage", () => {
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
 
+        expect(screen.queryByText("Continue Selected Path")).not.toBeInTheDocument();
+        expect(screen.getByText("Next Choices")).toBeInTheDocument();
         expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
         expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
         expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
@@ -1576,7 +2494,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Far Bold")).not.toBeInTheDocument();
     });
 
-    it("keeps staged continuation convergence rows visible in debug with collapse diagnostics", async () => {
+    it("keeps staged continuation diagnostics readable in debug and reveals raw convergence rows on demand", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
         renderPage("/quests/Quest_A?debugQuestProgression=true");
@@ -1584,6 +2502,13 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "A Gamble" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
+
+        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
+        expect(screen.queryByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
         expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(2);
         expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(2);
@@ -1603,8 +2528,8 @@ describe("QuestExplorerPage", () => {
 
         const rail = screen.getByRole("complementary");
         expect(within(rail).getByRole("button", { name: /Chapter Two Rising\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
-        expect(screen.getByText("Next Chapter Reached")).toBeInTheDocument();
-        expect(screen.getByText("Chapter Two Rising is now the active rail context.")).toBeInTheDocument();
+        expect(screen.getByText("Path Continues")).toBeInTheDocument();
+        expect(screen.getByText("This path continues in Chapter 2: Chapter Two Rising.")).toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
@@ -1731,15 +2656,16 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("FactionQuest_Mukag_Chapter02_Step02_Choice01");
     });
 
-    it("renders repeated detailEntryKey virtual steps without parser labels", async () => {
+    it("focuses repeated detailEntryKey alias routes on their selected virtual step", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(repeatedDetailPayload);
         renderPage("/quests/Quest_Shared_Alias_Step02");
 
         expect(await screen.findByRole("heading", { name: "Shared Chronicle" })).toBeInTheDocument();
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
         expect(within(chronicle).getByText("Step 2")).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step 1")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Chronicle Checkpoint")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("virtual_alias_expanded")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("repeated detail content")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Entry-backed")).not.toBeInTheDocument();
@@ -1748,10 +2674,12 @@ describe("QuestExplorerPage", () => {
     });
 
     it("does not repeat branch choices for repeated detailEntryKey projection steps", async () => {
+        const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(repeatedChoicePayload);
         renderPage("/quests/Quest_Shared?debugQuestProgression=true");
 
         expect(await screen.findByRole("heading", { name: "Shared Chronicle" })).toBeInTheDocument();
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         expect(within(chronicle).getAllByRole("button", { name: /Open the sealed page/ })).toHaveLength(1);

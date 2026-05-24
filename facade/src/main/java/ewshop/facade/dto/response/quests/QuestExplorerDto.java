@@ -179,8 +179,22 @@ public record QuestExplorerDto(
             String choiceKey,
             Integer stepIndex,
             String objectiveKey,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             List<LoreLineDto> lines
-    ) {}
+    ) {
+        public LoreSectionDto(
+                String sectionKey,
+                String phase,
+                String choiceKey,
+                Integer stepIndex,
+                String objectiveKey,
+                List<LoreLineDto> lines
+        ) {
+            this(sectionKey, phase, choiceKey, stepIndex, objectiveKey, List.of(), List.of(), List.of(), lines);
+        }
+    }
 
     public record LoreLineDto(
             String speakerLabel,
@@ -194,9 +208,22 @@ public record QuestExplorerDto(
             String objectiveKey,
             String text,
             String phase,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             List<RequirementDto> requirements,
             List<RewardDto> rewards
-    ) {}
+    ) {
+        public ObjectiveDto(
+                String objectiveKey,
+                String text,
+                String phase,
+                List<RequirementDto> requirements,
+                List<RewardDto> rewards
+        ) {
+            this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+        }
+    }
 
     public record BranchDto(
             String branchKey,
@@ -210,6 +237,9 @@ public record QuestExplorerDto(
             String parentChoiceKey,
             List<String> prerequisiteBranchKeys,
             List<String> prerequisiteBranchPath,
+            List<String> revealedByBranchKeys,
+            List<String> revealedByChoiceKeys,
+            List<List<String>> revealedByBranchPathAlternatives,
             String choiceGroupKey,
             String convergenceGroupKey,
             String sectionRole,
@@ -244,9 +274,59 @@ public record QuestExplorerDto(
                     null,
                     List.of(),
                     List.of(),
+                    List.of(),
+                    List.of(),
+                    List.of(),
                     null,
                     null,
                     null,
+                    nextEntryKeys,
+                    failureEntryKeys,
+                    convergesIntoEntryKeys,
+                    lore,
+                    strategy
+            );
+        }
+
+        public BranchDto(
+                String branchKey,
+                String choiceKey,
+                String label,
+                Integer orderIndex,
+                String groupKey,
+                String groupLabel,
+                Integer branchStepOrder,
+                String parentBranchKey,
+                String parentChoiceKey,
+                List<String> prerequisiteBranchKeys,
+                List<String> prerequisiteBranchPath,
+                String choiceGroupKey,
+                String convergenceGroupKey,
+                String sectionRole,
+                List<String> nextEntryKeys,
+                List<String> failureEntryKeys,
+                List<String> convergesIntoEntryKeys,
+                BranchLoreDto lore,
+                BranchStrategyDto strategy
+        ) {
+            this(
+                    branchKey,
+                    choiceKey,
+                    label,
+                    orderIndex,
+                    groupKey,
+                    groupLabel,
+                    branchStepOrder,
+                    parentBranchKey,
+                    parentChoiceKey,
+                    prerequisiteBranchKeys,
+                    prerequisiteBranchPath,
+                    List.of(),
+                    List.of(),
+                    List.of(),
+                    choiceGroupKey,
+                    convergenceGroupKey,
+                    sectionRole,
                     nextEntryKeys,
                     failureEntryKeys,
                     convergesIntoEntryKeys,

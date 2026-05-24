@@ -69,11 +69,20 @@ class QuestExplorerRepositoryAdapterIT {
         assertThat(entry.navigation().sequenceIndex()).isEqualTo(10);
         assertThat(entry.navigation().nextEntryKeys()).containsExactly("Quest_B");
         assertThat(entry.loreView().sections().getFirst().lines().getFirst().text()).isEqualTo("The archive opens.");
+        assertThat(entry.loreView().sections().getFirst().revealedByBranchKeys()).containsExactly("Quest_A:branch:parent");
+        assertThat(entry.loreView().sections().getFirst().revealedByChoiceKeys()).containsExactly("Choice_Parent");
+        assertThat(entry.loreView().sections().getFirst().revealedByBranchPathAlternatives())
+                .containsExactly(List.of("Quest_A:branch:parent", "Quest_A:branch:1"));
         assertThat(entry.strategyView().objectives().getFirst().requirements().getFirst().displayText()).isEqualTo("Found your Capital City.");
+        assertThat(entry.strategyView().objectives().getFirst().revealedByBranchKeys()).containsExactly("Quest_A:branch:parent");
         assertThat(entry.branches().getFirst().sectionRole()).isEqualTo("true_choice");
         assertThat(entry.branches().getFirst().choiceGroupKey()).isEqualTo("Quest_A:choice-group:step:1");
         assertThat(entry.branches().getFirst().prerequisiteBranchKeys()).containsExactly("Quest_A:branch:parent");
         assertThat(entry.branches().getFirst().prerequisiteBranchPath()).containsExactly("Quest_A:branch:parent", "Quest_A:branch:1");
+        assertThat(entry.branches().getFirst().revealedByBranchKeys()).containsExactly("Quest_A:branch:parent");
+        assertThat(entry.branches().getFirst().revealedByChoiceKeys()).containsExactly("Choice_Parent");
+        assertThat(entry.branches().getFirst().revealedByBranchPathAlternatives())
+                .containsExactly(List.of("Quest_A:branch:parent", "Quest_A:branch:1"));
         assertThat(entry.branches().getFirst().strategy().rewards().getFirst().amount()).isEqualByComparingTo(new BigDecimal("200.0000"));
 
         ImportResult unchangedImport = repository.importQuestExplorerEntries(metadata(), snapshots("Quest_A", "Quest_B", 10));
@@ -225,12 +234,18 @@ class QuestExplorerRepositoryAdapterIT {
                         "Choice_A",
                         0,
                         firstKey + ":objective:0",
+                        List.of(firstKey + ":branch:parent"),
+                        List.of("Choice_Parent"),
+                        List.of(List.of(firstKey + ":branch:parent", firstKey + ":branch:1")),
                         List.of(new QuestExplorerLoreLineImportSnapshot("Archive", "narrator", loreText))
                 )),
                 List.of(new QuestExplorerStrategyObjectiveImportSnapshot(
                         firstKey + ":objective:0",
                         "Found a home.",
                         "Objective",
+                        List.of(firstKey + ":branch:parent"),
+                        List.of("Choice_Parent"),
+                        List.of(List.of(firstKey + ":branch:parent", firstKey + ":branch:1")),
                         List.of(requirement),
                         List.of(reward)
                 )),
@@ -246,6 +261,9 @@ class QuestExplorerRepositoryAdapterIT {
                         "Choice_Parent",
                         List.of(firstKey + ":branch:parent"),
                         List.of(firstKey + ":branch:parent", firstKey + ":branch:1"),
+                        List.of(firstKey + ":branch:parent"),
+                        List.of("Choice_Parent"),
+                        List.of(List.of(firstKey + ":branch:parent", firstKey + ":branch:1")),
                         firstKey + ":choice-group:step:1",
                         firstKey + ":convergence:" + secondKey,
                         "true_choice",

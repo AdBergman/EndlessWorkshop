@@ -82,6 +82,12 @@ const cleanStringList = (values: readonly unknown[] | null | undefined): string[
         .map((value) => value.trim())
         .filter(Boolean);
 
+const cleanStringMatrix = (values: readonly unknown[] | null | undefined): string[][] =>
+    (values ?? [])
+        .filter((value): value is readonly unknown[] => Array.isArray(value))
+        .map((value) => cleanStringList(value))
+        .filter((value) => value.length > 0);
+
 const normalizeRequirement = (requirement: any) => ({
     requirementKey: cleanRequiredString(requirement?.requirementKey),
     kind: cleanRequiredString(requirement?.kind),
@@ -156,6 +162,9 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
             choiceKey: cleanString(section?.choiceKey),
             stepIndex: cleanNumber(section?.stepIndex),
             objectiveKey: cleanString(section?.objectiveKey),
+            revealedByBranchKeys: cleanStringList(section?.revealedByBranchKeys),
+            revealedByChoiceKeys: cleanStringList(section?.revealedByChoiceKeys),
+            revealedByBranchPathAlternatives: cleanStringMatrix(section?.revealedByBranchPathAlternatives),
             lines: (section?.lines ?? []).map((line: any) => ({
                 speakerLabel: cleanString(line?.speakerLabel),
                 role: cleanRequiredString(line?.role),
@@ -168,6 +177,9 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
             objectiveKey: cleanString(objective?.objectiveKey),
             text: cleanRequiredString(objective?.text),
             phase: cleanString(objective?.phase),
+            revealedByBranchKeys: cleanStringList(objective?.revealedByBranchKeys),
+            revealedByChoiceKeys: cleanStringList(objective?.revealedByChoiceKeys),
+            revealedByBranchPathAlternatives: cleanStringMatrix(objective?.revealedByBranchPathAlternatives),
             requirements: (objective?.requirements ?? []).map(normalizeRequirement),
             rewards: (objective?.rewards ?? []).map(normalizeReward),
         })),
@@ -184,6 +196,9 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
         parentChoiceKey: cleanString(branch?.parentChoiceKey),
         prerequisiteBranchKeys: cleanStringList(branch?.prerequisiteBranchKeys),
         prerequisiteBranchPath: cleanStringList(branch?.prerequisiteBranchPath),
+        revealedByBranchKeys: cleanStringList(branch?.revealedByBranchKeys),
+        revealedByChoiceKeys: cleanStringList(branch?.revealedByChoiceKeys),
+        revealedByBranchPathAlternatives: cleanStringMatrix(branch?.revealedByBranchPathAlternatives),
         choiceGroupKey: cleanString(branch?.choiceGroupKey),
         convergenceGroupKey: cleanString(branch?.convergenceGroupKey),
         sectionRole: cleanString(branch?.sectionRole),

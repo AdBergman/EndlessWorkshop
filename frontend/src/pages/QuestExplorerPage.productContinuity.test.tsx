@@ -756,8 +756,12 @@ function debugValue(label: string) {
 }
 
 function firstDebugStepValue(label: string) {
+    return debugStepValue(0, label);
+}
+
+function debugStepValue(stepIndex: number, label: string) {
     const panel = screen.getByRole("region", { name: "Quest progression debug" });
-    const step = panel.querySelector(".questExplorer-debugStep");
+    const step = panel.querySelectorAll(".questExplorer-debugStep")[stepIndex];
     expect(step).not.toBeNull();
     const labelElement = within(step as HTMLElement).getByText(label);
     const value = labelElement.closest("div")?.querySelector("dd")?.textContent;
@@ -783,8 +787,9 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         await user.click(within(chronicle()).getByRole("button", { name: /Track/ }));
 
-        expect(chronicleButtons()).toHaveLength(3);
-        expect(queryChronicleButtons(/Capture the rogue Lieutenant/)).toHaveLength(1);
+        expect(chronicleButtons()).toHaveLength(2);
+        expect(queryChronicleButtons(/Capture the rogue Lieutenant/)).toHaveLength(0);
+        expect(within(chronicle()).getByText("Capture the rogue Lieutenant.")).toBeInTheDocument();
 
         normalRender.unmount();
         useQuestStore.getState().reset();
@@ -793,7 +798,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         renderProductQuest(kinCh4, Faction.KIN, "kin", true);
 
         expect(await screen.findByRole("heading", { name: "The Hunt" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(4);
+        expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
         expect(firstDebugStepValue("hidden artifact count")).toBe("0");
@@ -801,9 +806,17 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         await user.click(within(chronicle()).getByRole("button", { name: /Track/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
+        expect(chronicleButtons()).toHaveLength(2);
+        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
         expect(debugValue("selected branch path")).toContain(`${kinCh4}:branch:1`);
+        expect(queryChronicleButtons(/Capture the rogue Lieutenant/)).toHaveLength(0);
+        expect(within(chronicle()).getByText("Capture the rogue Lieutenant.")).toBeInTheDocument();
+        expect(screen.queryByText(/prerequisite branch path not selected/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(chronicleButtons()).toHaveLength(4);
         expect(queryChronicleButtons(/Capture the rogue Lieutenant/)).toHaveLength(2);
         expect(screen.getByText(/prerequisite branch path not selected/)).toBeInTheDocument();
     });
@@ -818,8 +831,9 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         await user.click(within(chronicle()).getByRole("button", { name: /Claim Lands/ }));
 
-        expect(chronicleButtons()).toHaveLength(3);
-        expect(queryChronicleButton(/Collect 3 collectibles/)).toBeInTheDocument();
+        expect(chronicleButtons()).toHaveLength(2);
+        expect(queryChronicleButton(/Collect 3 collectibles/)).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("Collect 3 collectibles")).toBeInTheDocument();
 
         normalRender.unmount();
         useQuestStore.getState().reset();
@@ -828,16 +842,22 @@ describe("QuestExplorerPage product continuity fixture", () => {
         renderProductQuest(necroCh3, Faction.NECROPHAGES, "necrophages", true);
 
         expect(await screen.findByRole("heading", { name: "Virgin Lands" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(4);
+        expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
 
         await user.click(within(chronicle()).getByRole("button", { name: /Claim Lands/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
+        expect(chronicleButtons()).toHaveLength(2);
+        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
         expect(debugValue("selected branch path")).toContain(`${necroCh3}:branch:1`);
-        expect(queryChronicleButton(/Collect 3 collectibles/)).toBeInTheDocument();
+        expect(queryChronicleButton(/Collect 3 collectibles/)).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("Collect 3 collectibles")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(chronicleButtons()).toHaveLength(4);
     });
 
     it("locks Mukag Ch2 and Ch4 staged continuation cleanup counts", async () => {
@@ -858,18 +878,25 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         renderProductQuest(mukagCh4, Faction.TAHUK, "mukag", true);
         expect(await screen.findByRole("heading", { name: "A Gamble" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(8);
+        expect(chronicleButtons()).toHaveLength(1);
         expect(firstDebugStepValue("normal visible choice count")).toBe("1");
         expect(firstDebugStepValue("debug visible choice count")).toBe("8");
         expect(firstDebugStepValue("hidden unresolved count")).toBe("1");
-        expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
+        expect(screen.queryByText(/hidden in normal UI: no modeled continuation before final chapter/)).not.toBeInTheDocument();
 
-        await user.click(chronicleButtons()[1]);
+        await user.click(chronicleButtons()[0]);
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("4");
-        expect(firstDebugStepValue("debug visible choice count")).toBe("8");
-        expect(firstDebugStepValue("hidden staged continuation count")).toBe("3");
+        expect(firstDebugStepValue("normal visible choice count")).toBe("1");
+        expect(debugStepValue(1, "normal visible choice count")).toBe("4");
+        expect(debugStepValue(1, "debug visible choice count")).toBe("7");
+        expect(debugStepValue(1, "hidden staged continuation count")).toBe("3");
         expect(debugValue("selected branch path")).toContain(`${mukagCh4}:branch:2`);
+        expect(chronicleButtons()).toHaveLength(4);
+        expect(screen.queryByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(chronicleButtons()).toHaveLength(8);
         expect(screen.getAllByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).toHaveLength(3);
     });
 
@@ -878,17 +905,24 @@ describe("QuestExplorerPage product continuity fixture", () => {
         const ch6ARender = renderProductQuest(lastLordCh6A, Faction.LORDS, "lords", true);
 
         expect(await screen.findByRole("heading", { name: "A Mortal Life?" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(6);
+        expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("6");
         expect(firstDebugStepValue("hidden artifact count")).toBe("2");
+        expect(screen.queryByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(chronicleButtons()).toHaveLength(6);
         expect(screen.getAllByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).toHaveLength(2);
 
-        await user.click(within(chronicle()).getAllByRole("button", { name: /Reclaim/ })[1]);
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+        await user.click(within(chronicle()).getByRole("button", { name: /Reclaim/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
+        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(debugValue("selected branch path")).toContain(`${lastLordCh6A}:branch:2`);
-        expect(queryChronicleButton(/Defeat Aspects' Army/)).toBeInTheDocument();
+        expect(queryChronicleButton(/Defeat Aspects' Army/)).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("Defeat Aspects' Army")).toBeInTheDocument();
 
         ch6ARender.unmount();
         useQuestStore.getState().reset();
@@ -896,15 +930,20 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         renderProductQuest(lastLordCh6B, Faction.LORDS, "lords", true);
         expect(await screen.findByRole("heading", { name: "Welcome Back, Faithful Friend" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(5);
+        expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("5");
         expect(firstDebugStepValue("hidden artifact count")).toBe("1");
 
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+        expect(chronicleButtons()).toHaveLength(5);
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
         await user.click(within(chronicle()).getByRole("button", { name: /Forgive/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
+        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(debugValue("selected branch path")).toContain(`${lastLordCh6B}:branch:1`);
-        expect(queryChronicleButton(/Pay the invoice at the quest location/)).toBeInTheDocument();
+        expect(queryChronicleButton(/Pay the invoice at the quest location/)).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText(/Pay the invoice at the quest location/)).toBeInTheDocument();
     });
 });

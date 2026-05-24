@@ -167,6 +167,9 @@ export type LoreSection = {
     choiceKey: string | null;
     stepIndex: number | null;
     objectiveKey: string | null;
+    revealedByBranchKeys?: string[];
+    revealedByChoiceKeys?: string[];
+    revealedByBranchPathAlternatives?: string[][];
     lines: LoreLine[];
 };
 
@@ -184,6 +187,9 @@ export type StrategyObjective = {
     objectiveKey: string | null;
     text: string;
     phase: string | null;
+    revealedByBranchKeys?: string[];
+    revealedByChoiceKeys?: string[];
+    revealedByBranchPathAlternatives?: string[][];
     requirements: Requirement[];
     rewards: Reward[];
 };
@@ -200,6 +206,9 @@ export type QuestBranch = {
     parentChoiceKey?: string | null;
     prerequisiteBranchKeys?: string[];
     prerequisiteBranchPath?: string[];
+    revealedByBranchKeys?: string[];
+    revealedByChoiceKeys?: string[];
+    revealedByBranchPathAlternatives?: string[][];
     choiceGroupKey?: string | null;
     convergenceGroupKey?: string | null;
     sectionRole?: string | null;

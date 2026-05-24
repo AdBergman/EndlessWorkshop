@@ -166,6 +166,9 @@ public final class QuestExplorerImportMapper {
                 trimToNull(dto.choiceKey()),
                 dto.stepIndex(),
                 trimToNull(dto.objectiveKey()),
+                cleanValues(dto.revealedByBranchKeys()),
+                cleanValues(dto.revealedByChoiceKeys()),
+                cleanPathAlternatives(dto.revealedByBranchPathAlternatives()),
                 safeList(dto.lines()).stream().map(QuestExplorerImportMapper::toSnapshot).toList()
         );
     }
@@ -189,6 +192,9 @@ public final class QuestExplorerImportMapper {
                 trimToNull(dto == null ? null : dto.objectiveKey()),
                 required(dto == null ? null : dto.text(), "objective.text"),
                 trimToNull(dto.phase()),
+                cleanValues(dto.revealedByBranchKeys()),
+                cleanValues(dto.revealedByChoiceKeys()),
+                cleanPathAlternatives(dto.revealedByBranchPathAlternatives()),
                 safeList(dto.requirements()).stream().map(QuestExplorerImportMapper::toSnapshot).toList(),
                 safeList(dto.rewards()).stream().map(QuestExplorerImportMapper::toSnapshot).toList()
         );
@@ -209,6 +215,9 @@ public final class QuestExplorerImportMapper {
                 trimToNull(dto.parentChoiceKey()),
                 cleanReferenceValues(dto.prerequisiteBranchKeys()),
                 cleanReferenceValues(dto.prerequisiteBranchPath()),
+                cleanValues(dto.revealedByBranchKeys()),
+                cleanValues(dto.revealedByChoiceKeys()),
+                cleanPathAlternatives(dto.revealedByBranchPathAlternatives()),
                 trimToNull(dto.choiceGroupKey()),
                 trimToNull(dto.convergenceGroupKey()),
                 trimToNull(dto.sectionRole()),
@@ -343,6 +352,14 @@ public final class QuestExplorerImportMapper {
                     String trimmed = clean(value);
                     return trimmed == null ? "" : trimmed;
                 })
+                .toList();
+    }
+
+    private static List<List<String>> cleanPathAlternatives(List<List<String>> values) {
+        if (values == null || values.isEmpty()) return List.of();
+        return values.stream()
+                .map(QuestExplorerImportMapper::cleanValues)
+                .filter(path -> !path.isEmpty())
                 .toList();
     }
 
