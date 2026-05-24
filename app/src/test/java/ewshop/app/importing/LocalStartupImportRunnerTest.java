@@ -194,6 +194,25 @@ class LocalStartupImportRunnerTest {
     }
 
     @Test
+    void questExplorerDiagnosticsAreNotImportedAsCodex(CapturedOutput output) throws Exception {
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("codex/quest_explorer_branch_diagnostics_0.80.json"), """
+                {"exportKind":"quest_explorer_branch_diagnostics","entries":[{"entryKey":"debug-row","displayName":"Debug"}]}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        runner.runStartupImport();
+
+        assertThat(facades.totalCalls()).isZero();
+        assertThat(output)
+                .contains("skipped quest explorer diagnostics file")
+                .contains("diagnostics are validation evidence")
+                .contains("Local startup import finished: 0 imported, 1 skipped, 0 failed.");
+    }
+
+    @Test
     void malformedSupportedLookingFileIsReportedAsFailure(CapturedOutput output) throws Exception {
         Files.createDirectories(tempDir.resolve("exports"));
         Files.createDirectories(tempDir.resolve("codex"));

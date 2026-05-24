@@ -246,6 +246,30 @@ public class QuestExplorerEntryEntity {
         public String groupKey;
         @Column(name = "group_label", length = 260)
         public String groupLabel;
+        @Column(name = "branch_step_order")
+        public Integer branchStepOrder;
+        @Column(name = "parent_branch_key", length = 360)
+        public String parentBranchKey;
+        @Column(name = "parent_choice_key", length = 300)
+        public String parentChoiceKey;
+        @Column(name = "choice_group_key", length = 360)
+        public String choiceGroupKey;
+        @Column(name = "convergence_group_key", length = 360)
+        public String convergenceGroupKey;
+        @Column(name = "section_role", length = 80)
+        public String sectionRole;
+
+        @ElementCollection
+        @CollectionTable(name = "quest_explorer_branch_prerequisite_keys", joinColumns = @JoinColumn(name = "branch_id"))
+        @OrderColumn(name = "key_order")
+        @Column(name = "branch_key", nullable = false, length = 360)
+        public List<String> prerequisiteBranchKeys = new ArrayList<>();
+
+        @ElementCollection
+        @CollectionTable(name = "quest_explorer_branch_prerequisite_path", joinColumns = @JoinColumn(name = "branch_id"))
+        @OrderColumn(name = "path_order")
+        @Column(name = "branch_key", nullable = false, length = 360)
+        public List<String> prerequisiteBranchPath = new ArrayList<>();
 
         @ElementCollection
         @CollectionTable(name = "quest_explorer_branch_next_entries", joinColumns = @JoinColumn(name = "branch_id"))

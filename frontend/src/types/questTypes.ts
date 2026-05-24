@@ -195,6 +195,14 @@ export type QuestBranch = {
     orderIndex: number | null;
     groupKey: string | null;
     groupLabel: string | null;
+    branchStepOrder?: number | null;
+    parentBranchKey?: string | null;
+    parentChoiceKey?: string | null;
+    prerequisiteBranchKeys?: string[];
+    prerequisiteBranchPath?: string[];
+    choiceGroupKey?: string | null;
+    convergenceGroupKey?: string | null;
+    sectionRole?: string | null;
     nextEntryKeys: string[];
     failureEntryKeys: string[];
     convergesIntoEntryKeys: string[];

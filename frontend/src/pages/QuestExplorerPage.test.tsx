@@ -946,6 +946,240 @@ const unresolvedChoicePayload: QuestExplorerResponse = {
     },
 };
 
+const gatedContinuationPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "The Hunt",
+            summaryLines: ["A forked hunt begins."],
+            loreView: payload.entries[0].loreView,
+            strategyView: payload.entries[0].strategyView,
+            branches: [
+                {
+                    ...testBranch("Branch_Track", "Track"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    groupLabel: "The Hunt",
+                    lore: { outcomePreviewLines: ["Track the quarry."] },
+                    strategy: { conditions: ["Follow the trail."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Capture_Track", "Capture the rogue Lieutenant."),
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Track",
+                    prerequisiteBranchKeys: ["Branch_Track"],
+                    prerequisiteBranchPath: ["Branch_Track"],
+                    choiceGroupKey: "Quest_A:choice-group:step:2:after:Branch_Track",
+                    convergenceGroupKey: "Quest_A:convergence:Quest_B",
+                    branchStepOrder: 2,
+                    groupLabel: "The Hunt",
+                    nextEntryKeys: ["Quest_B"],
+                    lore: { outcomePreviewLines: ["The quarry is cornered."] },
+                    strategy: { conditions: ["Commit to the capture."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Lure", "Lure"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    groupLabel: "The Hunt",
+                    lore: { outcomePreviewLines: ["Set a careful trap."] },
+                    strategy: { conditions: ["Prepare the lure."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Capture_Lure", "Capture the rogue Lieutenant."),
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Lure",
+                    prerequisiteBranchKeys: ["Branch_Lure"],
+                    prerequisiteBranchPath: ["Branch_Lure"],
+                    choiceGroupKey: "Quest_A:choice-group:step:2:after:Branch_Lure",
+                    convergenceGroupKey: "Quest_A:convergence:Quest_B",
+                    branchStepOrder: 2,
+                    groupLabel: "The Hunt",
+                    nextEntryKeys: ["Quest_B"],
+                    lore: { outcomePreviewLines: ["The trap closes."] },
+                    strategy: { conditions: ["Spring the trap."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                nextEntryKeys: [],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_B",
+            title: "The Kin's Fate",
+            summaryLines: ["The hunt resolves."],
+            strategyView: { objectives: [testObjective("Objective_B", "Resolve the hunt.")] },
+            branches: [],
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: null,
+                branchLabel: null,
+                branchOrder: null,
+                previousEntryKeys: ["Quest_A"],
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "The Hunt",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "The Hunt", detailEntryKey: "Quest_A" },
+                    { stepNumber: 2, stepOrder: 2, title: "The Kin's Fate", detailEntryKey: "Quest_B" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const artifactCleanupPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "Final Choice",
+            summaryLines: ["The final judgment is recorded."],
+            branches: [
+                {
+                    ...testBranch("Branch_Reclaim_Artifact", "Reclaim"),
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Artifact Reclaim"], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Reclaim", "Reclaim"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_B"],
+                    strategy: { conditions: ["True Reclaim"], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Reject_Artifact", "Reject"),
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Artifact Reject"], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Reject", "Reject"),
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_A:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_C"],
+                    strategy: { conditions: ["True Reject"], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                chapter: 6,
+                chapterLabel: "Chapter 6",
+                chapterOrder: 6,
+                nextEntryKeys: ["Quest_B", "Quest_C"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_B",
+            title: "Reclaimed",
+            summaryLines: ["Reclaim resolves."],
+            navigation: { sequenceIndex: 1, chapter: 6, chapterOrder: 6, step: 2, stepOrder: 2 },
+        }),
+        questEntry({
+            entryKey: "Quest_C",
+            title: "Rejected",
+            summaryLines: ["Reject resolves."],
+            navigation: { sequenceIndex: 2, chapter: 6, chapterOrder: 6, step: 2, stepOrder: 2 },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                chapterNumber: 6,
+                chapterOrder: 6,
+                title: "Chapter 6",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Final Choice", detailEntryKey: "Quest_A" },
+                    { stepNumber: 2, stepOrder: 2, title: "Resolution", detailEntryKey: "Quest_B", variantEntryKeys: ["Quest_C"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const stagedContinuationPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "A Gamble",
+            summaryLines: ["A staged continuation begins."],
+            branches: [
+                {
+                    ...testBranch("Branch_Gamble", "A Gamble"),
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Make the gamble."], requirements: [], rewards: [] },
+                },
+                ...["Pious", "Open", "Bold"].flatMap((label, index) => ([
+                    {
+                        ...testBranch(`Branch_${label}_Near`, label),
+                        sectionRole: "continuation",
+                        parentBranchKey: "Branch_Gamble",
+                        prerequisiteBranchKeys: ["Branch_Gamble"],
+                        prerequisiteBranchPath: ["Branch_Gamble"],
+                        choiceGroupKey: "Quest_A:choice-group:step:2:after:Branch_Gamble",
+                        branchStepOrder: 2,
+                        nextEntryKeys: [`Quest_${label}`],
+                        orderIndex: index * 2 + 2,
+                        strategy: { conditions: [`Near ${label}`], requirements: [], rewards: [] },
+                    },
+                    {
+                        ...testBranch(`Branch_${label}_Far`, label),
+                        sectionRole: "continuation",
+                        parentBranchKey: "Branch_Gamble",
+                        prerequisiteBranchKeys: ["Branch_Gamble"],
+                        prerequisiteBranchPath: ["Branch_Gamble"],
+                        choiceGroupKey: "Quest_A:choice-group:step:2:after:Branch_Gamble",
+                        convergenceGroupKey: "Quest_A:convergence:Quest_Final",
+                        branchStepOrder: 2,
+                        nextEntryKeys: ["Quest_Final"],
+                        orderIndex: index * 2 + 3,
+                        strategy: { conditions: [`Far ${label}`], requirements: [], rewards: [] },
+                    },
+                ])),
+            ],
+        }),
+        questEntry({ entryKey: "Quest_Pious", title: "Pious Path", summaryLines: ["Pious next step."] }),
+        questEntry({ entryKey: "Quest_Open", title: "Open Path", summaryLines: ["Open next step."] }),
+        questEntry({ entryKey: "Quest_Bold", title: "Bold Path", summaryLines: ["Bold next step."] }),
+        questEntry({ entryKey: "Quest_Final", title: "Final Convergence", summaryLines: ["The convergence resolves."] }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "A Gamble", detailEntryKey: "Quest_A" },
+                    {
+                        stepNumber: 2,
+                        stepOrder: 2,
+                        title: "Staged Choice",
+                        detailEntryKey: "Quest_Pious",
+                        variantEntryKeys: ["Quest_Open", "Quest_Bold"],
+                    },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
 const choiceResetWithWorldPayload: QuestExplorerResponse = {
     ...choiceResetPayload,
     entries: [
@@ -1274,6 +1508,89 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText(/does not identify the next continuation step/)).toBeInTheDocument();
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+    });
+
+    it("gates continuation branches until their prerequisite branch is selected", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(gatedContinuationPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "The Hunt" });
+
+        expect(screen.getByRole("button", { name: /Track/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Lure/ })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Capture the rogue Lieutenant/ })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /Track/ }));
+
+        expect(screen.getByRole("button", { name: /Capture the rogue Lieutenant/ })).toBeInTheDocument();
+        expect(screen.queryByText(/does not identify the next continuation step/)).not.toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /Capture the rogue Lieutenant/ }));
+
+        expect(screen.getByText("The hunt resolves.")).toBeInTheDocument();
+        expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+    });
+
+    it("hides duplicate no-link artifact rows beside true choices outside debug mode", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(artifactCleanupPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Final Choice" });
+
+        expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(1);
+        expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(1);
+        expect(screen.queryByText("Artifact Reclaim")).not.toBeInTheDocument();
+        expect(screen.queryByText("Artifact Reject")).not.toBeInTheDocument();
+    });
+
+    it("keeps artifact cleanup rows visible in debug with normal-mode counts and reasons", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(artifactCleanupPayload);
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "Final Choice" });
+
+        expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(2);
+        expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(2);
+        const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
+        expect(within(debugPanel).getByText("normal visible choice count")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("debug visible choice count")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("hidden artifact count")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("selected branch path")).toBeInTheDocument();
+        expect(screen.getAllByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).toHaveLength(2);
+    });
+
+    it("collapses staged continuation convergence rows outside debug mode", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "A Gamble" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
+
+        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
+        expect(screen.queryByText("Far Pious")).not.toBeInTheDocument();
+        expect(screen.queryByText("Far Open")).not.toBeInTheDocument();
+        expect(screen.queryByText("Far Bold")).not.toBeInTheDocument();
+    });
+
+    it("keeps staged continuation convergence rows visible in debug with collapse diagnostics", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
+        renderPage("/quests/Quest_A?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "A Gamble" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
+
+        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(2);
+        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(2);
+        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(2);
+        expect(screen.getAllByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).toHaveLength(3);
+        const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
+        expect(within(debugPanel).getByText("hidden staged continuation count")).toBeInTheDocument();
     });
 
     it("updates the active rail chapter when a modeled choice reaches the next chapter", async () => {

@@ -219,7 +219,9 @@ public final class QuestExplorerMapper {
     private static QuestExplorerDto.BranchDto toDto(QuestExplorer.Branch model) {
         return new QuestExplorerDto.BranchDto(
                 model.branchKey(), model.choiceKey(), model.label(), model.orderIndex(), model.groupKey(),
-                model.groupLabel(), model.nextEntryKeys(), model.failureEntryKeys(), model.convergesIntoEntryKeys(),
+                model.groupLabel(), model.branchStepOrder(), model.parentBranchKey(), model.parentChoiceKey(),
+                model.prerequisiteBranchKeys(), model.prerequisiteBranchPath(), model.choiceGroupKey(),
+                model.convergenceGroupKey(), model.sectionRole(), model.nextEntryKeys(), model.failureEntryKeys(), model.convergesIntoEntryKeys(),
                 toDto(model.lore()), toDto(model.strategy())
         );
     }

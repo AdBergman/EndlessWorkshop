@@ -170,6 +170,14 @@ class QuestExplorerMapperTest {
                 3,
                 "Quest_A",
                 "Opening",
+                2,
+                "Quest_A:branch:parent",
+                "Choice_Parent",
+                List.of("Quest_A:branch:parent"),
+                List.of("Quest_A:branch:parent", "Quest_A:branch:1"),
+                "Quest_A:choice-group:2",
+                "Quest_A:convergence:Quest_B",
+                "continuation",
                 List.of("Quest_B"),
                 List.of(),
                 List.of("Quest_B"),
@@ -196,6 +204,14 @@ class QuestExplorerMapperTest {
         var loadedBranch = snapshots.getFirst().branches().getFirst();
         assertThat(loadedBranch.orderIndex()).isEqualTo(3);
         assertThat(loadedBranch.groupLabel()).isEqualTo("Opening");
+        assertThat(loadedBranch.branchStepOrder()).isEqualTo(2);
+        assertThat(loadedBranch.parentBranchKey()).isEqualTo("Quest_A:branch:parent");
+        assertThat(loadedBranch.parentChoiceKey()).isEqualTo("Choice_Parent");
+        assertThat(loadedBranch.prerequisiteBranchKeys()).containsExactly("Quest_A:branch:parent");
+        assertThat(loadedBranch.prerequisiteBranchPath()).containsExactly("Quest_A:branch:parent", "Quest_A:branch:1");
+        assertThat(loadedBranch.choiceGroupKey()).isEqualTo("Quest_A:choice-group:2");
+        assertThat(loadedBranch.convergenceGroupKey()).isEqualTo("Quest_A:convergence:Quest_B");
+        assertThat(loadedBranch.sectionRole()).isEqualTo("continuation");
         assertThat(loadedBranch.convergesIntoEntryKeys()).containsExactly("Quest_B");
         assertThat(loadedBranch.conditions()).containsExactly("Pick Choice A");
     }

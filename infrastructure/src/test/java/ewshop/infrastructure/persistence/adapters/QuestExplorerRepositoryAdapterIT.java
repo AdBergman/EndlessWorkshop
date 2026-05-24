@@ -52,6 +52,8 @@ class QuestExplorerRepositoryAdapterIT {
         assertThat(count("quest_explorer_objective_requirements")).isEqualTo(1);
         assertThat(count("quest_explorer_objective_rewards")).isEqualTo(1);
         assertThat(count("quest_explorer_branches")).isEqualTo(1);
+        assertThat(count("quest_explorer_branch_prerequisite_keys")).isEqualTo(1);
+        assertThat(count("quest_explorer_branch_prerequisite_path")).isEqualTo(2);
         assertThat(count("quest_explorer_branch_requirements")).isEqualTo(1);
         assertThat(count("quest_explorer_branch_rewards")).isEqualTo(1);
         assertThat(count("quest_explorer_branch_conditions")).isEqualTo(1);
@@ -68,6 +70,10 @@ class QuestExplorerRepositoryAdapterIT {
         assertThat(entry.navigation().nextEntryKeys()).containsExactly("Quest_B");
         assertThat(entry.loreView().sections().getFirst().lines().getFirst().text()).isEqualTo("The archive opens.");
         assertThat(entry.strategyView().objectives().getFirst().requirements().getFirst().displayText()).isEqualTo("Found your Capital City.");
+        assertThat(entry.branches().getFirst().sectionRole()).isEqualTo("true_choice");
+        assertThat(entry.branches().getFirst().choiceGroupKey()).isEqualTo("Quest_A:choice-group:step:1");
+        assertThat(entry.branches().getFirst().prerequisiteBranchKeys()).containsExactly("Quest_A:branch:parent");
+        assertThat(entry.branches().getFirst().prerequisiteBranchPath()).containsExactly("Quest_A:branch:parent", "Quest_A:branch:1");
         assertThat(entry.branches().getFirst().strategy().rewards().getFirst().amount()).isEqualByComparingTo(new BigDecimal("200.0000"));
 
         ImportResult unchangedImport = repository.importQuestExplorerEntries(metadata(), snapshots("Quest_A", "Quest_B", 10));
@@ -235,6 +241,14 @@ class QuestExplorerRepositoryAdapterIT {
                         1,
                         "Branch_A",
                         "Opening",
+                        1,
+                        firstKey + ":branch:parent",
+                        "Choice_Parent",
+                        List.of(firstKey + ":branch:parent"),
+                        List.of(firstKey + ":branch:parent", firstKey + ":branch:1"),
+                        firstKey + ":choice-group:step:1",
+                        firstKey + ":convergence:" + secondKey,
+                        "true_choice",
                         List.of(secondKey),
                         List.of(),
                         List.of(),

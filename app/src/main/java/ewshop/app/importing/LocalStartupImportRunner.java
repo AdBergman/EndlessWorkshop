@@ -264,6 +264,14 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
         String exportKind = normalizedExportKind(json);
 
+        if ("quest_explorer_branch_diagnostics".equals(exportKind)) {
+            log.warn(
+                    "Local startup import skipped quest explorer diagnostics file {}; diagnostics are validation evidence and are not runtime import data.",
+                    file.toAbsolutePath().normalize()
+            );
+            return null;
+        }
+
         if (json != null && json.has("entries")) {
             return codexImportAdminFacade.importCodex(objectMapper.treeToValue(json, CodexImportBatchDto.class));
         }

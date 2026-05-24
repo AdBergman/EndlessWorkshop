@@ -205,12 +205,56 @@ public record QuestExplorerDto(
             Integer orderIndex,
             String groupKey,
             String groupLabel,
+            Integer branchStepOrder,
+            String parentBranchKey,
+            String parentChoiceKey,
+            List<String> prerequisiteBranchKeys,
+            List<String> prerequisiteBranchPath,
+            String choiceGroupKey,
+            String convergenceGroupKey,
+            String sectionRole,
             List<String> nextEntryKeys,
             List<String> failureEntryKeys,
             List<String> convergesIntoEntryKeys,
             BranchLoreDto lore,
             BranchStrategyDto strategy
-    ) {}
+    ) {
+        public BranchDto(
+                String branchKey,
+                String choiceKey,
+                String label,
+                Integer orderIndex,
+                String groupKey,
+                String groupLabel,
+                List<String> nextEntryKeys,
+                List<String> failureEntryKeys,
+                List<String> convergesIntoEntryKeys,
+                BranchLoreDto lore,
+                BranchStrategyDto strategy
+        ) {
+            this(
+                    branchKey,
+                    choiceKey,
+                    label,
+                    orderIndex,
+                    groupKey,
+                    groupLabel,
+                    null,
+                    null,
+                    null,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    null,
+                    nextEntryKeys,
+                    failureEntryKeys,
+                    convergesIntoEntryKeys,
+                    lore,
+                    strategy
+            );
+        }
+    }
 
     public record BranchLoreDto(List<String> outcomePreviewLines) {}
 

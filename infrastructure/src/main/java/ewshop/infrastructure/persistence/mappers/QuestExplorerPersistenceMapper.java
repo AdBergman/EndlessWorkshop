@@ -154,6 +154,14 @@ public class QuestExplorerPersistenceMapper {
         entity.orderIndex = model.orderIndex();
         entity.groupKey = model.groupKey();
         entity.groupLabel = model.groupLabel();
+        entity.branchStepOrder = model.branchStepOrder();
+        entity.parentBranchKey = model.parentBranchKey();
+        entity.parentChoiceKey = model.parentChoiceKey();
+        entity.prerequisiteBranchKeys = mutable(model.prerequisiteBranchKeys());
+        entity.prerequisiteBranchPath = mutable(model.prerequisiteBranchPath());
+        entity.choiceGroupKey = model.choiceGroupKey();
+        entity.convergenceGroupKey = model.convergenceGroupKey();
+        entity.sectionRole = model.sectionRole();
         entity.nextEntryKeys = mutable(model.nextEntryKeys());
         entity.failureEntryKeys = mutable(model.failureEntryKeys());
         entity.convergesIntoEntryKeys = mutable(model.convergesIntoEntryKeys());
@@ -327,6 +335,14 @@ public class QuestExplorerPersistenceMapper {
                 snapshot.orderIndex(),
                 snapshot.groupKey(),
                 snapshot.groupLabel(),
+                snapshot.branchStepOrder(),
+                snapshot.parentBranchKey(),
+                snapshot.parentChoiceKey(),
+                snapshot.prerequisiteBranchKeys(),
+                snapshot.prerequisiteBranchPath(),
+                snapshot.choiceGroupKey(),
+                snapshot.convergenceGroupKey(),
+                snapshot.sectionRole(),
                 snapshot.nextEntryKeys(),
                 snapshot.failureEntryKeys(),
                 snapshot.convergesIntoEntryKeys(),
@@ -460,6 +476,14 @@ public class QuestExplorerPersistenceMapper {
                 entity.orderIndex,
                 entity.groupKey,
                 entity.groupLabel,
+                entity.branchStepOrder,
+                entity.parentBranchKey,
+                entity.parentChoiceKey,
+                List.copyOf(entity.prerequisiteBranchKeys),
+                List.copyOf(entity.prerequisiteBranchPath),
+                entity.choiceGroupKey,
+                entity.convergenceGroupKey,
+                entity.sectionRole,
                 List.copyOf(entity.nextEntryKeys),
                 List.copyOf(entity.failureEntryKeys),
                 List.copyOf(entity.convergesIntoEntryKeys),
@@ -561,6 +585,14 @@ public class QuestExplorerPersistenceMapper {
                 branch.orderIndex(),
                 branch.groupKey(),
                 branch.groupLabel(),
+                branch.branchStepOrder(),
+                branch.parentBranchKey(),
+                branch.parentChoiceKey(),
+                branch.prerequisiteBranchKeys(),
+                branch.prerequisiteBranchPath(),
+                branch.choiceGroupKey(),
+                branch.convergenceGroupKey(),
+                branch.sectionRole(),
                 branch.nextEntryKeys(),
                 branch.failureEntryKeys(),
                 branch.convergesIntoEntryKeys(),

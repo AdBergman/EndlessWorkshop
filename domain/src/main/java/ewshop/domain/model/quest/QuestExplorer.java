@@ -295,13 +295,59 @@ public record QuestExplorer(
             Integer orderIndex,
             String groupKey,
             String groupLabel,
+            Integer branchStepOrder,
+            String parentBranchKey,
+            String parentChoiceKey,
+            List<String> prerequisiteBranchKeys,
+            List<String> prerequisiteBranchPath,
+            String choiceGroupKey,
+            String convergenceGroupKey,
+            String sectionRole,
             List<String> nextEntryKeys,
             List<String> failureEntryKeys,
             List<String> convergesIntoEntryKeys,
             BranchLore lore,
             BranchStrategy strategy
     ) {
+        public Branch(
+                String branchKey,
+                String choiceKey,
+                String label,
+                Integer orderIndex,
+                String groupKey,
+                String groupLabel,
+                List<String> nextEntryKeys,
+                List<String> failureEntryKeys,
+                List<String> convergesIntoEntryKeys,
+                BranchLore lore,
+                BranchStrategy strategy
+        ) {
+            this(
+                    branchKey,
+                    choiceKey,
+                    label,
+                    orderIndex,
+                    groupKey,
+                    groupLabel,
+                    null,
+                    null,
+                    null,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    null,
+                    nextEntryKeys,
+                    failureEntryKeys,
+                    convergesIntoEntryKeys,
+                    lore,
+                    strategy
+            );
+        }
+
         public Branch {
+            prerequisiteBranchKeys = safeList(prerequisiteBranchKeys);
+            prerequisiteBranchPath = safeList(prerequisiteBranchPath);
             nextEntryKeys = safeList(nextEntryKeys);
             failureEntryKeys = safeList(failureEntryKeys);
             convergesIntoEntryKeys = safeList(convergesIntoEntryKeys);
