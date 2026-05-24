@@ -20,6 +20,7 @@ CREATE TABLE quest_explorer_branch_prerequisite_keys (
     branch_id BIGINT NOT NULL,
     key_order INTEGER NOT NULL,
     branch_key VARCHAR(360) NOT NULL,
+    CONSTRAINT pk_quest_explorer_branch_prereq_keys PRIMARY KEY (branch_id, key_order),
     CONSTRAINT fk_quest_explorer_branch_prereq_keys
         FOREIGN KEY (branch_id) REFERENCES quest_explorer_branches(id) ON DELETE CASCADE
 );
@@ -28,6 +29,7 @@ CREATE TABLE quest_explorer_branch_prerequisite_path (
     branch_id BIGINT NOT NULL,
     path_order INTEGER NOT NULL,
     branch_key VARCHAR(360) NOT NULL,
+    CONSTRAINT pk_quest_explorer_branch_prereq_path PRIMARY KEY (branch_id, path_order),
     CONSTRAINT fk_quest_explorer_branch_prereq_path
         FOREIGN KEY (branch_id) REFERENCES quest_explorer_branches(id) ON DELETE CASCADE
 );
