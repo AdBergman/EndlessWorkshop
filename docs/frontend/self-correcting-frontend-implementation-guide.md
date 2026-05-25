@@ -216,3 +216,19 @@ A feature is ready for visual polish when:
 - Runtime smoke has no fatal console errors.
 - Remaining work is hierarchy, density, accessibility, and responsive polish rather than data correctness.
 
+## Quest-Like Implementation Readiness Checklist
+
+Before sending a future "build a complex reader/planner" prompt, make sure the prompt or linked spec answers these questions:
+
+- What is the exact sequential model?
+- What metadata is authoritative for reveal, ownership, visibility, and terminal states?
+- Which state is canonical, which state is page-local, and which state is passive scroll/session state?
+- Which behaviors must be route-addressable?
+- Which behaviors must never update the route?
+- Which normal-mode rows must be hidden unless debug is explicitly enabled?
+- What are the top five live-data cases that must be manually and automatically checked?
+- What screenshot viewports are required?
+- What console/API failures are acceptable during smoke, and which are blockers?
+- What diagnostic output proves the frontend did not reintroduce heuristic inference?
+
+If any answer is missing, stop before implementation and write the missing specification first. That is the cheapest place to correct the work.

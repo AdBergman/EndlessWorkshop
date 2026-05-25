@@ -2500,11 +2500,14 @@
         height: auto;
         min-height: 100%;
         overflow: auto;
+        overflow-x: hidden;
         padding: 10px;
     }
 
     .questExplorer {
         grid-template-columns: 1fr;
+        width: 100%;
+        min-width: 0;
         overflow: visible;
     }
 
@@ -2512,11 +2515,13 @@
         border-right: 0;
         border-bottom: 1px solid var(--quest-line);
         max-height: 52vh;
+        min-width: 0;
     }
 
     .questExplorer-detail {
         overflow: visible;
         padding: 30px 28px;
+        min-width: 0;
     }
 
     .questExplorer-detail::before,
@@ -2576,6 +2581,25 @@
         padding: 24px 18px;
     }
 
+    .questExplorer-sidebar > header {
+        display: grid;
+        gap: 10px;
+        padding: 24px 26px 20px;
+    }
+
+    .questExplorer-sidebarCount {
+        grid-auto-flow: column;
+        align-items: baseline;
+        justify-content: start;
+        justify-items: start;
+        gap: 8px;
+    }
+
+    .questExplorer-filters,
+    .questExplorer-list {
+        padding-inline: 26px;
+    }
+
     .questExplorer-questPathHeader h2 {
         font-size: clamp(2.18rem, 13vw, 3.35rem);
     }
@@ -2628,6 +2652,15 @@
 
     .questExplorer-categoryOptions {
         grid-template-columns: 1fr;
+    }
+
+    .questExplorer-categoryOption {
+        grid-template-columns: 26px auto minmax(0, 1fr);
+    }
+
+    .questExplorer-categoryOption small {
+        justify-self: start;
+        margin-left: 4px;
     }
 
     .questExplorer-choiceCard {
