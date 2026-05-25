@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { QuestExplorerMode } from "./questExplorerMode";
 
@@ -13,7 +13,7 @@ type UseQuestExplorerLoreScrollUrlOptions = {
 
 export type QuestExplorerLoreScrollUrlState = {
     scrollActiveRailEntryKey: string | null;
-    setScrollActiveRailEntryKey: (entryKey: string | null) => void;
+    applyPassiveScroll: (entryKey: string | null) => void;
 };
 
 export function useQuestExplorerLoreScrollUrl({
@@ -30,6 +30,9 @@ export function useQuestExplorerLoreScrollUrl({
     );
     const currentParamIsKnownSegment = Boolean(currentLoreEntryParam && segmentRailEntryKeySet.has(currentLoreEntryParam));
     const [scrollActiveRailEntryKey, setScrollActiveRailEntryKey] = useState<string | null>(null);
+    const applyPassiveScroll = useCallback((entryKey: string | null) => {
+        setScrollActiveRailEntryKey(entryKey);
+    }, []);
 
     useEffect(() => {
         setScrollActiveRailEntryKey(null);
@@ -70,6 +73,6 @@ export function useQuestExplorerLoreScrollUrl({
 
     return {
         scrollActiveRailEntryKey,
-        setScrollActiveRailEntryKey,
+        applyPassiveScroll,
     };
 }

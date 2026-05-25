@@ -2352,6 +2352,33 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "Stream Continuation" })).toBeInTheDocument();
     });
 
+    it("promotes a passively highlighted rail item to canonical navigation when clicked", async () => {
+        const user = userEvent.setup();
+        const observers = stubIntersectionObservers();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+        renderPage("/quests/Quest_Stream_A?mode=lore");
+
+        await screen.findByRole("heading", { name: "Stream Opening" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
+
+        await waitFor(() => {
+            expect(observers.at(-1)?.elements.length).toBeGreaterThanOrEqual(2);
+        });
+        intersectLoreSegment(observers, "Quest_Stream_B");
+
+        await waitFor(() => {
+            expect(screen.getByTestId("route-location")).toHaveTextContent("loreEntry=Quest_Stream_B");
+        });
+
+        const rail = screen.getByRole("complementary");
+        await user.click(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ }));
+
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_B"));
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_B");
+        expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+    });
+
     it("replaces passive Lore scroll URL updates without adding a rollback history entry", async () => {
         const user = userEvent.setup();
         const observers = stubIntersectionObservers();
@@ -2384,6 +2411,29 @@ describe("QuestExplorerPage", () => {
         });
         expect(await screen.findByRole("heading", { name: "Stream Ending" })).toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_C");
+    });
+
+    it("restores the canonical entry when browser back leaves a rail navigation", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+        renderPageWithHistory([
+            "/quests/Quest_Stream_C?mode=lore",
+            "/quests/Quest_Stream_A?mode=lore",
+        ]);
+
+        expect(await screen.findByRole("heading", { name: "Stream Opening" })).toBeInTheDocument();
+
+        const rail = screen.getByRole("complementary");
+        await user.click(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ }));
+
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_B"));
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_B");
+
+        await user.click(screen.getByRole("button", { name: "Back" }));
+
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A"));
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_A?mode=lore");
+        expect(await screen.findByRole("heading", { name: "Stream Opening" })).toBeInTheDocument();
     });
 
     it("renders strategy mode and reveals the next step after a modeled choice", async () => {
@@ -2803,6 +2853,43 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
+    });
+
+    it("preserves a Lore selected path across Lore to Strategy to Lore", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+        renderPage("/quests/Quest_A");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        await user.click(screen.getByRole("button", { name: /Study the shore/ }));
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
+    });
+
+    it("preserves a Strategy selected simulation across Strategy to Lore to Strategy", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
+        renderPage("/quests/Quest_A?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
         expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
         expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
     });

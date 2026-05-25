@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch";
 import {
@@ -930,7 +930,7 @@ export default function QuestExplorerPage() {
     const {
         strategyChoicePath,
         loreChoicePathsByContext,
-        chooseQuestPathChoice,
+        chooseExplicitChoice,
     } = useQuestExplorerPathState({
         mode,
         selectedEntryKey,
@@ -960,7 +960,7 @@ export default function QuestExplorerPage() {
     );
     const {
         scrollActiveRailEntryKey,
-        setScrollActiveRailEntryKey,
+        applyPassiveScroll,
     } = useQuestExplorerLoreScrollUrl({
         mode: requestedMode,
         selectedEntryKey,
@@ -1022,7 +1022,7 @@ export default function QuestExplorerPage() {
                     return Math.abs(left.boundingClientRect.top) - Math.abs(right.boundingClientRect.top);
                 });
             const railEntryKey = visibleSegments[0]?.target.getAttribute("data-rail-entry-key")?.trim() ?? "";
-            if (railEntryKey) setScrollActiveRailEntryKey(railEntryKey);
+            if (railEntryKey) applyPassiveScroll(railEntryKey);
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -1042,7 +1042,7 @@ export default function QuestExplorerPage() {
 
         segmentElements.forEach((element) => observer.observe(element));
         return () => observer.disconnect();
-    }, [loreSegmentObserverKey, mode, selectedProgressionKey]);
+    }, [applyPassiveScroll, loreSegmentObserverKey, mode, selectedProgressionKey]);
 
     useEffect(() => {
         if (!debugQuestProgression) setShowRawHiddenRows(false);
@@ -1095,10 +1095,13 @@ export default function QuestExplorerPage() {
         }))
     ), [entries, filters.searchText, progression, selectedFaction]);
 
-    const selectEntry = (entryKey: string) => {
+    const applyCanonicalNavigation = useCallback((entryKey: string) => {
+        // Future rollback/default-path inference should attach here so intentional
+        // navigation stays separate from passive Lore scroll and explicit choices.
+        applyPassiveScroll(null);
         setSelectedEntryKey(entryKey);
         navigate(questPath(entryKey, mode, debugQuestProgression));
-    };
+    }, [applyPassiveScroll, debugQuestProgression, mode, navigate, setSelectedEntryKey]);
 
     const changeMode = (nextMode: QuestExplorerMode) => {
         const nextParams = new URLSearchParams(searchParams);
@@ -1158,7 +1161,7 @@ export default function QuestExplorerPage() {
                     <QuestList
                         groups={railGroups}
                         selectedRailEntryKey={selectedRailEntryKey}
-                        onSelectEntry={selectEntry}
+                        onSelectEntry={applyCanonicalNavigation}
                     />
                 </aside>
 
@@ -1209,7 +1212,7 @@ export default function QuestExplorerPage() {
                                                 entriesByKey={entriesByKey}
                                                 debugQuestProgression={debugQuestProgression}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
-                                                onChoose={chooseQuestPathChoice}
+                                                onChoose={chooseExplicitChoice}
                                             />
                                         ) : (
                                             <section className="questExplorer-questPathFallback questExplorer-strategyFallback" aria-label="Selected progression">
@@ -1225,7 +1228,7 @@ export default function QuestExplorerPage() {
                                                 model={loreFlowModel}
                                                 entriesByKey={entriesByKey}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
-                                                onChoose={(segment, step, choice) => chooseQuestPathChoice(step, choice, segment.progression, segment.contextKey)}
+                                                onChoose={(segment, step, choice) => chooseExplicitChoice(step, choice, segment.progression, segment.contextKey)}
                                                 activeRailEntryKey={scrollActiveRailEntryKey}
                                                 getStepTitle={(step, entry) => stepTitle(step, entry, entriesByKey)}
                                                 getDebugChoiceDetails={debugQuestProgression

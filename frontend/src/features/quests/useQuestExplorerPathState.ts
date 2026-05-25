@@ -26,7 +26,7 @@ type ChooseQuestPathChoice = (
 export type QuestExplorerPathState = {
     strategyChoicePath: QuestPathChoiceSelection[];
     loreChoicePathsByContext: LoreChoicePathsByContext;
-    chooseQuestPathChoice: ChooseQuestPathChoice;
+    chooseExplicitChoice: ChooseQuestPathChoice;
 };
 
 function nextChoicePathForSelection(
@@ -64,7 +64,7 @@ export function useQuestExplorerPathState({
         setStrategyChoicePath([]);
     }, [choicePathResetKey]);
 
-    const chooseQuestPathChoice = useCallback<ChooseQuestPathChoice>(
+    const chooseExplicitChoice = useCallback<ChooseQuestPathChoice>(
         (
             step,
             choice,
@@ -99,6 +99,6 @@ export function useQuestExplorerPathState({
     return {
         strategyChoicePath,
         loreChoicePathsByContext,
-        chooseQuestPathChoice,
+        chooseExplicitChoice,
     };
 }
