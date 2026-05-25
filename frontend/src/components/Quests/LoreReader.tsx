@@ -1,4 +1,4 @@
-import type { ChoicePresentationGroups } from "@/features/quests/questChoicePresentation";
+import { choicePresentationGroups } from "@/features/quests/questChoicePresentation";
 import {
     isMinorFactionVariantQuest,
     isResolutionLoreSection,
@@ -7,8 +7,10 @@ import {
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
 import type {
-    LoreChronicleSegment,
-    LoreChronicleStream,
+    LoreFlowModel,
+    LoreFlowSegment,
+} from "@/features/quests/questLoreFlow";
+import type {
     QuestPathChoice,
     QuestPathChoiceSelection,
     RenderedPathStep,
@@ -20,18 +22,8 @@ import type {
     StrategyObjective,
 } from "@/types/questTypes";
 
-type LoreChoicePresentationBuilder = (
-    step: QuestProgressionStep,
-    choices: QuestPathChoice[],
-    selectedChoice: QuestPathChoiceSelection | null,
-    displayEntry: QuestExplorerEntry | null,
-    entriesByKey: Record<string, QuestExplorerEntry>,
-    showRawHiddenRows: boolean,
-    debugChoiceDetails?: Map<string, string>
-) => ChoicePresentationGroups;
-
 type LoreStepDebugDetailsBuilder = (
-    segment: LoreChronicleSegment,
+    segment: LoreFlowSegment,
     renderedStep: RenderedPathStep,
     isActiveDebugSegment: boolean
 ) => Map<string, string> | undefined;
@@ -63,10 +55,10 @@ function StepSummary({ entry }: { entry: QuestExplorerEntry }) {
     );
 }
 
-function objectivePaths(entry: QuestExplorerEntry): Array<{ objective: StrategyObjective; sections: LoreSection[] }> {
+function objectivePaths(entry: QuestExplorerEntry, sections: LoreSection[]): Array<{ objective: StrategyObjective; sections: LoreSection[] }> {
     return entry.strategyView.objectives.map((objective) => ({
         objective,
-        sections: entry.loreView.sections.filter((section) => (
+        sections: sections.filter((section) => (
             section.objectiveKey === objective.objectiveKey && !isResolutionLoreSection(section)
         )),
     }));
@@ -82,7 +74,7 @@ export function LoreSectionList({ entry, sections: scopedSections }: { entry: Qu
     }
 
     if (isMinorFactionVariantQuest(entry)) {
-        const paths = objectivePaths(entry);
+        const paths = objectivePaths(entry, sections);
         const sharedSections = sections.filter((section) => !section.objectiveKey && !isResolutionLoreSection(section));
         const resolutionSections = sections.filter(isResolutionLoreSection);
 
@@ -272,7 +264,6 @@ function LoreBranchMoment({
     entriesByKey,
     showRawHiddenRows,
     debugChoiceDetails,
-    buildChoicePresentation,
     onChoose,
 }: {
     step: QuestProgressionStep;
@@ -282,19 +273,17 @@ function LoreBranchMoment({
     entriesByKey: Record<string, QuestExplorerEntry>;
     showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
-    buildChoicePresentation: LoreChoicePresentationBuilder;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (choices.length === 0) return null;
 
-    const presentation = buildChoicePresentation(
+    const presentation = choicePresentationGroups(
         step,
         choices,
         selectedChoice,
         displayEntry,
         entriesByKey,
-        showRawHiddenRows,
-        debugChoiceDetails
+        showRawHiddenRows
     );
     const hasActionableChoices = presentation.primaryChoices.length > 0 || presentation.activeContinuationChoices.length > 0;
     const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
@@ -359,8 +348,8 @@ function LoreStep({
     showRawHiddenRows,
     debugChoiceDetails,
     loreSections,
+    loreSectionsWereSuppressed,
     revealedLoreSections,
-    buildChoicePresentation,
     onChoose,
 }: {
     renderedStep: RenderedPathStep;
@@ -369,8 +358,8 @@ function LoreStep({
     showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
     loreSections?: LoreSection[];
+    loreSectionsWereSuppressed: boolean;
     revealedLoreSections: LoreSection[];
-    buildChoicePresentation: LoreChoicePresentationBuilder;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     return (
@@ -386,7 +375,7 @@ function LoreStep({
                 <strong className="questExplorer-stepTitle">{title}</strong>
             </header>
 
-            {renderedStep.rendersRepeatedDetailContent ? (
+            {renderedStep.rendersRepeatedDetailContent || loreSectionsWereSuppressed ? (
                 <RepeatedDetailCheckpoint />
             ) : (
                 renderedStep.displayEntry ? (
@@ -404,7 +393,6 @@ function LoreStep({
                 entriesByKey={entriesByKey}
                 showRawHiddenRows={showRawHiddenRows}
                 debugChoiceDetails={debugChoiceDetails}
-                buildChoicePresentation={buildChoicePresentation}
                 onChoose={onChoose}
             />
 
@@ -436,7 +424,7 @@ function LorePathState({
     flow,
     entriesByKey,
 }: {
-    flow: LoreChronicleSegment["flow"];
+    flow: LoreFlowSegment["flow"];
     entriesByKey: Record<string, QuestExplorerEntry>;
 }) {
     return (
@@ -459,34 +447,28 @@ function LorePathState({
 }
 
 export function LoreContinuousProgression({
-    stream,
+    model,
     entriesByKey,
     showRawHiddenRows,
     onChoose,
     activeRailEntryKey,
     getStepTitle,
-    getLoreSectionsForStep,
-    getRevealedLoreSectionsForStep,
-    buildChoicePresentation,
     getDebugChoiceDetails,
 }: {
-    stream: LoreChronicleStream;
+    model: LoreFlowModel;
     entriesByKey: Record<string, QuestExplorerEntry>;
     showRawHiddenRows: boolean;
-    onChoose: (segment: LoreChronicleSegment, step: QuestProgressionStep, choice: QuestPathChoice) => void;
+    onChoose: (segment: LoreFlowSegment, step: QuestProgressionStep, choice: QuestPathChoice) => void;
     activeRailEntryKey: string | null;
     getStepTitle: (step: QuestProgressionStep, entry: QuestExplorerEntry | null) => string;
-    getLoreSectionsForStep: (entry: QuestExplorerEntry, renderedStep: RenderedPathStep) => LoreSection[];
-    getRevealedLoreSectionsForStep: (entry: QuestExplorerEntry, renderedStep: RenderedPathStep) => LoreSection[];
-    buildChoicePresentation: LoreChoicePresentationBuilder;
     getDebugChoiceDetails?: LoreStepDebugDetailsBuilder;
 }) {
-    if (stream.segments.length === 0) return null;
+    if (model.segments.length === 0) return null;
 
     return (
         <section className="questExplorer-questPathChronicle questExplorer-loreChronicle" aria-label="Selected progression">
-            {stream.segments.map((segment, segmentIndex) => {
-                const hasNextSegment = segmentIndex < stream.segments.length - 1;
+            {model.segments.map((segment, segmentIndex) => {
+                const hasNextSegment = segmentIndex < model.segments.length - 1;
                 const isScrollActive = Boolean(segment.railEntryKey && segment.railEntryKey === activeRailEntryKey);
                 const isActiveDebugSegment = activeRailEntryKey ? isScrollActive : segmentIndex === 0;
                 return (
@@ -496,13 +478,8 @@ export function LoreContinuousProgression({
                         data-rail-entry-key={segment.railEntryKey ?? ""}
                         key={segment.segmentKey}
                     >
-                        {segment.flow.renderedSteps.map((renderedStep) => {
-                            const loreSections = renderedStep.displayEntry
-                                ? getLoreSectionsForStep(renderedStep.displayEntry, renderedStep)
-                                : undefined;
-                            const revealedLoreSections = renderedStep.displayEntry
-                                ? getRevealedLoreSectionsForStep(renderedStep.displayEntry, renderedStep)
-                                : [];
+                        {segment.loreSteps.map((loreStep) => {
+                            const { renderedStep } = loreStep;
                             return (
                                 <LoreStep
                                     renderedStep={renderedStep}
@@ -510,9 +487,9 @@ export function LoreContinuousProgression({
                                     entriesByKey={entriesByKey}
                                     showRawHiddenRows={showRawHiddenRows}
                                     debugChoiceDetails={getDebugChoiceDetails?.(segment, renderedStep, isActiveDebugSegment)}
-                                    loreSections={loreSections}
-                                    revealedLoreSections={revealedLoreSections}
-                                    buildChoicePresentation={buildChoicePresentation}
+                                    loreSections={loreStep.loreSections}
+                                    loreSectionsWereSuppressed={loreStep.loreSectionsWereSuppressed}
+                                    revealedLoreSections={loreStep.revealedLoreSections}
                                     onChoose={(step, choice) => onChoose(segment, step, choice)}
                                     key={`${segment.segmentKey}:${renderedStep.step.stepKey}`}
                                 />

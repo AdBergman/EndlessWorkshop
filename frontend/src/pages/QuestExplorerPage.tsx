@@ -4,7 +4,6 @@ import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch
 import {
     InlineMetaList,
     StrategyDossier,
-    StrategyPathState,
 } from "@/components/Quests/StrategyDossier";
 import {
     LoreContinuousProgression,
@@ -42,8 +41,6 @@ import {
 } from "@/features/quests/questRail";
 import {
     EMPTY_CHOICE_PATH,
-    buildLoreChronicleStream,
-    buildQuestPathFlow,
     choiceKindLabel,
     findDetailProgression,
     locationLabel,
@@ -59,8 +56,6 @@ import {
     type QuestDetailProgression,
     type QuestPathChoice,
     type QuestPathChoiceSelection,
-    type QuestPathFlow,
-    type RenderedPathStep,
 } from "@/features/quests/questPathFlow";
 import {
     choicePresentationGroups,
@@ -73,14 +68,13 @@ import {
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
 import {
-    loreSectionsForRevealedContinuations,
-    loreSectionsForStep,
-    strategyObjectiveScopeForRevealedContinuations,
-    strategyObjectiveScopeForStep,
-} from "@/features/quests/questReaderScopes";
+    activeLoreSegmentForModel,
+    buildLoreFlowModel,
+} from "@/features/quests/questLoreFlow";
 import {
-    buildStrategyDossierModel,
-} from "@/features/quests/questStrategyDossier";
+    buildStrategyFlowModel,
+    type StrategyFlowModel,
+} from "@/features/quests/questStrategyFlow";
 import {
     LORE_SCROLL_ENTRY_QUERY_PARAM,
     useQuestExplorerLoreScrollUrl,
@@ -760,61 +754,23 @@ function RepeatedDetailCheckpoint() {
 }
 
 function StrategyStep({
-    renderedStep,
-    totalSteps,
-    flow,
+    model,
     entriesByKey,
     showRawHiddenRows,
     debugChoiceDetails,
+    projectedDebugDetails,
     onChoose,
 }: {
-    renderedStep: RenderedPathStep;
-    totalSteps: number;
-    flow: QuestPathFlow;
+    model: StrategyFlowModel;
     entriesByKey: Record<string, QuestExplorerEntry>;
     showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
+    projectedDebugDetails?: string[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    const title = stepTitle(renderedStep.step, renderedStep.displayEntry, entriesByKey);
-    const strategyScope = renderedStep.displayEntry
-        ? strategyObjectiveScopeForStep(renderedStep.displayEntry, renderedStep)
-        : null;
-    const revealedStrategyScope = renderedStep.displayEntry
-        ? strategyObjectiveScopeForRevealedContinuations(renderedStep.displayEntry, renderedStep)
-        : null;
-    const strategyChoicePresentation = choicePresentationGroups(
-        renderedStep.step,
-        renderedStep.choices,
-        renderedStep.selectedChoice,
-        renderedStep.displayEntry,
-        entriesByKey,
-        showRawHiddenRows
-    );
-    const strategyDossier = buildStrategyDossierModel({
-        renderedStep,
-        totalSteps,
-        title,
-        displayEntry: renderedStep.displayEntry,
-        objectiveScope: strategyScope,
-        revealedObjectiveScope: revealedStrategyScope,
-        flow,
-        entriesByKey,
-        usesObjectivePaths: renderedStep.displayEntry ? isMinorFactionVariantQuest(renderedStep.displayEntry) : false,
-        comparisonChoices: [
-            ...strategyChoicePresentation.primaryChoices,
-            ...strategyChoicePresentation.activeContinuationChoices,
-        ],
-    });
-    const selectedChoiceForDebug = renderedStep.selectedChoice
-        ? [...renderedStep.choices, ...renderedStep.revealedContinuations]
-            .find((choice) => choice.id === renderedStep.selectedChoice?.choiceId)
-        : null;
-    const projectedDebugDetails = debugChoiceDetails
-        ? (renderedStep.revealedContinuations.length > 0 ? renderedStep.revealedContinuations : selectedChoiceForDebug ? [selectedChoiceForDebug] : [])
-            .map((choice) => debugChoiceDetails.get(choice.id))
-            .filter((detail): detail is string => Boolean(detail))
-        : undefined;
+    const { renderedStep, dossier, title, totalSteps } = model;
+    if (!renderedStep || !dossier) return null;
+
     const fallbackChoiceGate = renderedStep.choices.length > 0 ? (
         <StrategyChoiceGate
             step={renderedStep.step}
@@ -851,12 +807,11 @@ function StrategyStep({
                 renderedStep.displayEntry ? (
                     <div className="questExplorer-strategyStepBody">
                         <StrategyDossier
-                            model={strategyDossier}
+                            model={dossier}
                             step={renderedStep.step}
                             debugChoiceDetails={debugChoiceDetails}
                             onChoose={onChoose}
                             projectedDebugDetails={projectedDebugDetails}
-                            showContinuityStrip={renderedStep.isActive}
                         />
                     </div>
                 ) : (
@@ -872,7 +827,7 @@ function StrategyStep({
 function StrategyProgression({
     progression,
     fullProgression,
-    flow,
+    model,
     entriesByKey,
     debugQuestProgression,
     showRawHiddenRows,
@@ -880,41 +835,42 @@ function StrategyProgression({
 }: {
     progression: QuestDetailProgression | null;
     fullProgression: QuestExplorerProgression | null;
-    flow: QuestPathFlow | null;
+    model: StrategyFlowModel | null;
     entriesByKey: Record<string, QuestExplorerEntry>;
     debugQuestProgression: boolean;
     showRawHiddenRows: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    if (!progression || !flow) return null;
+    if (!progression || !model || !model.renderedStep) return null;
 
-    const totalSteps = progression.chapter.steps.length;
+    const renderedStep = model.renderedStep;
+    const debugChoiceDetails = debugQuestProgression
+        ? choiceDebugDetailsForStep(
+            renderedStep.step,
+            model.debugChoices,
+            renderedStep.choiceDiagnostics,
+            progression,
+            fullProgression,
+            entriesByKey,
+            renderedStep.revealedContinuations
+        )
+        : undefined;
+    const projectedDebugDetails = debugChoiceDetails
+        ? model.projectedDebugChoices
+            .map((choice) => debugChoiceDetails.get(choice.id))
+            .filter((detail): detail is string => Boolean(detail))
+        : undefined;
 
     return (
         <section className="questExplorer-questPathChronicle questExplorer-strategyChronicle" aria-label="Selected progression">
-            {flow.renderedSteps.map((renderedStep) => (
-                <StrategyStep
-                    renderedStep={renderedStep}
-                    totalSteps={totalSteps}
-                    flow={flow}
-                    entriesByKey={entriesByKey}
-                    showRawHiddenRows={showRawHiddenRows}
-                    debugChoiceDetails={debugQuestProgression
-                        ? choiceDebugDetailsForStep(
-                            renderedStep.step,
-                            [...renderedStep.choices, ...renderedStep.revealedContinuations],
-                            renderedStep.choiceDiagnostics,
-                            progression,
-                            fullProgression,
-                            entriesByKey,
-                            renderedStep.revealedContinuations
-                        )
-                        : undefined}
-                    onChoose={onChoose}
-                    key={renderedStep.step.stepKey}
-                />
-            ))}
-            <StrategyPathState flow={flow} entriesByKey={entriesByKey} />
+            <StrategyStep
+                model={model}
+                entriesByKey={entriesByKey}
+                showRawHiddenRows={showRawHiddenRows}
+                debugChoiceDetails={debugChoiceDetails}
+                projectedDebugDetails={projectedDebugDetails}
+                onChoose={onChoose}
+            />
         </section>
     );
 }
@@ -981,17 +937,19 @@ export default function QuestExplorerPage() {
         selectedProgression,
         selectedProgressionKey,
     });
-    const strategyPathFlow = useMemo(
-        () => selectedProgression
-            ? buildQuestPathFlow(selectedProgression, entriesByKey, strategyChoicePath, progression, {
-                focusedStepIndex: selectedProgression.focusedStepIndex,
-                showRawHiddenRows: debugQuestProgression && showRawHiddenRows,
-            })
-            : null,
+    const strategyFlowModel = useMemo(
+        () => buildStrategyFlowModel({
+            progression: selectedProgression,
+            fullProgression: progression,
+            entriesByKey,
+            choicePath: strategyChoicePath,
+            showRawHiddenRows: debugQuestProgression && showRawHiddenRows,
+            getStepTitle: (step, entry) => stepTitle(step, entry, entriesByKey),
+        }),
         [debugQuestProgression, entriesByKey, progression, selectedProgression, showRawHiddenRows, strategyChoicePath]
     );
-    const loreChronicleStream = useMemo(
-        () => buildLoreChronicleStream({
+    const loreFlowModel = useMemo(
+        () => buildLoreFlowModel({
             selectedProgression,
             fullProgression: progression,
             entriesByKey,
@@ -1000,10 +958,6 @@ export default function QuestExplorerPage() {
         }),
         [debugQuestProgression, entriesByKey, loreChoicePathsByContext, progression, selectedProgression, showRawHiddenRows]
     );
-    const loreSegmentRailEntryKeys = useMemo(
-        () => uniqueStrings(loreChronicleStream.segments.map((segment) => segment.railEntryKey)),
-        [loreChronicleStream.segments]
-    );
     const {
         scrollActiveRailEntryKey,
         setScrollActiveRailEntryKey,
@@ -1011,12 +965,10 @@ export default function QuestExplorerPage() {
         mode: requestedMode,
         selectedEntryKey,
         selectedProgressionKey,
-        segmentRailEntryKeys: loreSegmentRailEntryKeys,
+        segmentRailEntryKeys: loreFlowModel.segmentRailEntryKeys,
     });
-    const activeLoreSegment = mode === "lore" && scrollActiveRailEntryKey
-        ? loreChronicleStream.segments.find((segment) => segment.railEntryKey === scrollActiveRailEntryKey) ?? loreChronicleStream.segments[0] ?? null
-        : loreChronicleStream.segments[0] ?? null;
-    const activeDebugFlow = mode === "lore" ? activeLoreSegment?.flow ?? null : strategyPathFlow;
+    const activeLoreSegment = activeLoreSegmentForModel(loreFlowModel, mode === "lore" ? scrollActiveRailEntryKey : null);
+    const activeDebugFlow = mode === "lore" ? activeLoreSegment?.flow ?? null : strategyFlowModel?.flow ?? null;
     const activeDebugProgression = mode === "lore" ? activeLoreSegment?.progression ?? selectedProgression : selectedProgression;
     const activeDebugLoreContextKey = mode === "lore" ? activeLoreSegment?.contextKey ?? selectedProgressionKey : selectedProgressionKey;
     const activeDebugLoreChoicePath = loreChoicePathsByContext[activeDebugLoreContextKey] ?? EMPTY_CHOICE_PATH;
@@ -1026,11 +978,11 @@ export default function QuestExplorerPage() {
         [activeDebugLoreChoicePath, strategyChoicePath]
     );
     const loreSegmentObserverKey = useMemo(
-        () => loreChronicleStream.segments.map((segment) => segment.segmentKey).join("|"),
-        [loreChronicleStream.segments]
+        () => loreFlowModel.segments.map((segment) => segment.segmentKey).join("|"),
+        [loreFlowModel.segments]
     );
-    const strategyRailEntry = strategyPathFlow?.reachedContinuationEntryKey
-        ? entriesByKey[strategyPathFlow.reachedContinuationEntryKey] ?? selectedEntry
+    const strategyRailEntry = strategyFlowModel?.flow.reachedContinuationEntryKey
+        ? entriesByKey[strategyFlowModel.flow.reachedContinuationEntryKey] ?? selectedEntry
         : selectedEntry;
     const activeRailEntry = mode === "lore"
         ? scrollActiveRailEntryKey
@@ -1253,7 +1205,7 @@ export default function QuestExplorerPage() {
                                             <StrategyProgression
                                                 progression={selectedProgression}
                                                 fullProgression={progression}
-                                                flow={strategyPathFlow}
+                                                model={strategyFlowModel}
                                                 entriesByKey={entriesByKey}
                                                 debugQuestProgression={debugQuestProgression}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
@@ -1270,15 +1222,12 @@ export default function QuestExplorerPage() {
                                         {!selectedProgression ? <LoreOpening entry={selectedEntry} /> : null}
                                         {selectedProgression ? (
                                             <LoreContinuousProgression
-                                                stream={loreChronicleStream}
+                                                model={loreFlowModel}
                                                 entriesByKey={entriesByKey}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
                                                 onChoose={(segment, step, choice) => chooseQuestPathChoice(step, choice, segment.progression, segment.contextKey)}
                                                 activeRailEntryKey={scrollActiveRailEntryKey}
                                                 getStepTitle={(step, entry) => stepTitle(step, entry, entriesByKey)}
-                                                getLoreSectionsForStep={loreSectionsForStep}
-                                                getRevealedLoreSectionsForStep={loreSectionsForRevealedContinuations}
-                                                buildChoicePresentation={choicePresentationGroups}
                                                 getDebugChoiceDetails={debugQuestProgression
                                                     ? (segment, renderedStep, isActiveDebugSegment) => (
                                                         isActiveDebugSegment

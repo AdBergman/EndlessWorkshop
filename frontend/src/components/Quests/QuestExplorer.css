@@ -1131,9 +1131,11 @@
 .questExplorer-loreLine,
 .questExplorer-stepObjective p,
 .questExplorer-strategyDossierBrief p,
+.questExplorer-strategyDecisionSummary p,
 .questExplorer-strategyDossierObjective p,
 .questExplorer-strategyComparisonOutcome,
 .questExplorer-strategyProjectedOutcome p,
+.questExplorer-strategyProgressionDetails p,
 .questExplorer-strategyDossierEmpty,
 .questExplorer-pathState p {
     margin: 0;
@@ -1211,7 +1213,9 @@
 }
 
 .questExplorer-strategyDossierBrief,
+.questExplorer-strategyDecisionSummary,
 .questExplorer-strategyProjectedOutcome,
+.questExplorer-strategyProgressionDetails,
 .questExplorer-strategyDossierObjectives {
     display: grid;
     gap: 11px;
@@ -1219,6 +1223,7 @@
 }
 
 .questExplorer-strategyDossierBrief span,
+.questExplorer-strategyDecisionSummary span,
 .questExplorer-strategyDossierObjective header span,
 .questExplorer-strategyDossierMarker strong {
     color: var(--quest-teal);
@@ -1229,6 +1234,7 @@
 }
 
 .questExplorer-strategyDossierBrief strong,
+.questExplorer-strategyDecisionSummary > strong,
 .questExplorer-strategyProjectedOutcome > strong {
     color: var(--quest-ink);
     font-family: Georgia, "Times New Roman", serif;
@@ -1302,7 +1308,7 @@
 
 .questExplorer-strategyPathBreadcrumb li {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 6px 10px;
     counter-increment: strategy-path;

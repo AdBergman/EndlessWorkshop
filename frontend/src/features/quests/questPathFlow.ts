@@ -74,6 +74,7 @@ export type QuestPathChoiceSelection = {
     label: string;
     targetEntryKey: string | null;
     nextEntryKeys: string[];
+    isPassive?: boolean;
 };
 
 export type LoreChoicePathsByContext = Record<string, QuestPathChoiceSelection[]>;
@@ -664,6 +665,17 @@ export function selectionForChoice(stepKey: string, choice: QuestPathChoice): Qu
     };
 }
 
+function passiveSelectionForChoice(stepKey: string, choice: QuestPathChoice): QuestPathChoiceSelection {
+    return {
+        ...selectionForChoice(stepKey, choice),
+        isPassive: true,
+    };
+}
+
+function selectionBranchOrder(selection: QuestPathChoiceSelection): number {
+    return selection.branchStepOrder ?? Number.MAX_SAFE_INTEGER;
+}
+
 export function selectedChoiceTargetKeys(selection: QuestPathChoiceSelection): string[] {
     return uniqueStrings([selection.targetEntryKey, ...selection.nextEntryKeys]);
 }
@@ -742,6 +754,10 @@ export function hiddenUnresolvedReason(
     displayEntry: QuestExplorerEntry | null,
     progression: QuestDetailProgression
 ): NormalHiddenChoiceReason | null {
+    if (choice.sectionRole === "continuation" && (choice.parentBranchKey || choice.prerequisiteBranchKeys.length > 0)) {
+        return null;
+    }
+
     const hidden = isMainFactionEntry(displayEntry)
         && !isTerminalChoiceChapter(progression)
         && !hasModeledChoiceContinuation(choice);
@@ -974,6 +990,87 @@ export function choicesScopedToCurrentBeat(
     ));
 }
 
+function selectionsByStepKey(choicePath: QuestPathChoiceSelection[]): Map<string, QuestPathChoiceSelection[]> {
+    const byStep = new Map<string, QuestPathChoiceSelection[]>();
+    choicePath.forEach((selection) => {
+        const selections = byStep.get(selection.stepKey) ?? [];
+        selections.push(selection);
+        byStep.set(selection.stepKey, selections);
+    });
+    byStep.forEach((selections) => {
+        selections.sort((left, right) => selectionBranchOrder(left) - selectionBranchOrder(right));
+    });
+    return byStep;
+}
+
+function activeContinuationChoicesForSelection(
+    choices: QuestPathChoice[],
+    selection: QuestPathChoiceSelection | null
+): QuestPathChoice[] {
+    if (!selection) return [];
+    return choices.filter((choice) => (
+        isContinuationForSelectedChoice(choice, selection)
+        && (
+            choice.hasDependentContinuations
+            || (
+                choice.sectionRole === "continuation"
+                && choice.prerequisiteBranchKeys.length > 0
+                && !hasModeledChoiceContinuation(choice)
+            )
+        )
+    ));
+}
+
+function choiceMatchesSelectionKey(choice: QuestPathChoice, selection: QuestPathChoiceSelection): boolean {
+    return choice.id === selection.choiceId
+        || Boolean(selection.branchKey && choice.branchKey === selection.branchKey)
+        || Boolean(selection.choiceKey && choice.choiceKey === selection.choiceKey);
+}
+
+function uniqueChoicesById(choices: QuestPathChoice[]): QuestPathChoice[] {
+    const seen = new Set<string>();
+    return choices.filter((choice) => {
+        if (seen.has(choice.id)) return false;
+        seen.add(choice.id);
+        return true;
+    });
+}
+
+function passiveSetupAdvance(
+    step: QuestProgressionStep,
+    stepIndex: number,
+    choices: QuestPathChoice[],
+    rawChoices: QuestPathChoice[],
+    steps: QuestProgressionStep[],
+    entriesByKey: Record<string, QuestExplorerEntry>,
+    revealContext: RevealContext
+): { selection: QuestPathChoiceSelection; followUpStepIndex: number } | null {
+    const candidates = choices.filter((choice) => (
+        choice.sectionRole === "artifact"
+        && choice.branchKey
+        && choice.hasDependentContinuations
+    ));
+    if (candidates.length !== 1 || choices.length !== 1) return null;
+
+    const candidate = candidates[0];
+    const selection = passiveSelectionForChoice(step.stepKey, candidate);
+    const passiveRevealContext = cloneRevealContext(revealContext);
+    addSelectionToRevealContext(passiveRevealContext, selection);
+    const revealEligibleChoices = rawChoices.filter((choice) => choicePrerequisitesSatisfied(choice, passiveRevealContext));
+    const continuations = continuationChoicesForSelectedChoice(revealEligibleChoices, selection, passiveRevealContext);
+    if (continuations.length === 0) return null;
+
+    const followUpStepIndex = followUpStepIndexForContinuationChoices(
+        steps,
+        step.detailEntryKey,
+        continuations,
+        entriesByKey,
+        stepIndex + 1
+    );
+
+    return followUpStepIndex == null ? null : { selection, followUpStepIndex };
+}
+
 export function buildQuestPathFlow(
     progression: QuestDetailProgression,
     entriesByKey: Record<string, QuestExplorerEntry>,
@@ -982,7 +1079,7 @@ export function buildQuestPathFlow(
     options: QuestPathFlowOptions
 ): QuestPathFlow {
     const steps = progression.chapter.steps;
-    const selectedByStep = new Map(choicePath.map((selection) => [selection.stepKey, selection]));
+    const selectedByStep = selectionsByStepKey(choicePath);
     const counts = detailEntryCounts(progression.chapter);
     const renderedDetailKeys = new Set<string>();
     const displayEntryOverrides = new Map<string, string>();
@@ -1004,6 +1101,11 @@ export function buildQuestPathFlow(
         const step = steps[index];
         const currentBeatChoice = carriedBeatChoicesByStepKey.get(step.stepKey) ?? null;
         addSelectionToRevealContext(revealContext, currentBeatChoice);
+        const storedSelections = selectedByStep.get(step.stepKey) ?? [];
+        const selectedStoredSelection = storedSelections.at(-1) ?? null;
+        for (const priorSelection of storedSelections.slice(0, -1)) {
+            addSelectionToRevealContext(revealContext, priorSelection);
+        }
         const stepRevealContext = cloneRevealContext(revealContext);
         const overrideEntryKey = displayEntryOverrides.get(step.stepKey);
         const displayEntry = (overrideEntryKey ? entriesByKey[overrideEntryKey] : null)
@@ -1032,11 +1134,10 @@ export function buildQuestPathFlow(
         const choices = options.showRawHiddenRows
             ? rawChoices
             : visibleChoicesForDiagnostics(prerequisiteEligibleChoices, choiceDiagnostics);
-        const storedSelection = selectedByStep.get(step.stepKey);
-        const storedChoice = storedSelection
-            ? choices.find((choice) => choice.id === storedSelection.choiceId) ?? null
+        const storedChoice = selectedStoredSelection
+            ? choices.find((choice) => choiceMatchesSelectionKey(choice, selectedStoredSelection)) ?? null
             : null;
-        const selectedChoice = storedSelection
+        const selectedChoice = selectedStoredSelection
             ? storedChoice ? selectionForChoice(step.stepKey, storedChoice) : null
             : implicitActiveChoice(choices, progression.activeVariantEntryKeys);
         const revealParentChoice = selectedChoice ?? currentBeatChoice;
@@ -1064,23 +1165,71 @@ export function buildQuestPathFlow(
             revealParentChoice,
             revealParentContext
         );
+        const activeFollowUpContinuations = activeContinuationChoicesForSelection(
+            followUpContinuations,
+            revealParentChoice
+        );
+        const activeFollowUpContinuationIds = new Set(activeFollowUpContinuations.map((choice) => choice.id));
+        if (!options.showRawHiddenRows && activeFollowUpContinuations.length > 0) {
+            choiceDiagnostics = visibilityDiagnosticsForChoices(
+                rawChoices,
+                revealEligibleChoices,
+                displayEntry,
+                step,
+                progression,
+                entriesByKey
+            );
+        }
         const revealedContinuationsBecomeSteps = revealedContinuations.some((choice) => (
             stepIndexForBranchStepOrder(steps, step.detailEntryKey, choice.branchStepOrder, index + 1) != null
         ));
-        const revealedContinuationIds = new Set(revealedContinuations.map((choice) => choice.id));
+        const revealedContinuationIds = new Set(
+            revealedContinuations
+                .filter((choice) => !activeFollowUpContinuationIds.has(choice.id))
+                .map((choice) => choice.id)
+        );
         const currentBeatChoiceId = currentBeatChoice?.choiceId ?? null;
-        const actionableChoices = choices.filter((choice) => (
+        const passiveAdvance = !options.showRawHiddenRows && !selectedChoice
+            ? passiveSetupAdvance(
+                step,
+                index,
+                choices,
+                rawChoices,
+                steps,
+                entriesByKey,
+                stepRevealContext
+            )
+            : null;
+        const passiveChoiceId = passiveAdvance?.selection.choiceId ?? null;
+        if (passiveChoiceId && !choiceDiagnostics.hiddenReasonsByChoiceId.has(passiveChoiceId)) {
+            choiceDiagnostics = {
+                ...choiceDiagnostics,
+                normalVisibleChoiceCount: Math.max(0, choiceDiagnostics.normalVisibleChoiceCount - 1),
+                hiddenArtifactCount: choiceDiagnostics.hiddenArtifactCount + 1,
+                hiddenReasonsByChoiceId: new Map([
+                    ...choiceDiagnostics.hiddenReasonsByChoiceId,
+                    [passiveChoiceId, {
+                        category: "artifact" as const,
+                        message: "passive setup context before modeled continuation choices",
+                    }],
+                ]),
+            };
+        }
+        const actionableChoices = uniqueChoicesById([...choices, ...activeFollowUpContinuations]).filter((choice) => (
             !revealedContinuationIds.has(choice.id)
             && choice.id !== currentBeatChoiceId
+            && choice.id !== passiveChoiceId
         ));
+        const displayedRevealedContinuations = revealedContinuations.filter((choice) => !activeFollowUpContinuationIds.has(choice.id));
+        const renderedBeatChoice = currentBeatChoice ?? passiveAdvance?.selection ?? null;
 
         renderedSteps.push({
             step,
             stepIndex: index,
             displayEntry,
             choices: actionableChoices,
-            revealedContinuations,
-            currentBeatChoice,
+            revealedContinuations: displayedRevealedContinuations,
+            currentBeatChoice: renderedBeatChoice,
             selectedChoice,
             choiceDiagnostics,
             isActive: progression.activeStepKeys.has(step.stepKey),
@@ -1095,8 +1244,17 @@ export function buildQuestPathFlow(
         }
 
         const lockCandidateChoiceCount = options.showRawHiddenRows ? rawChoices.length : prerequisiteEligibleChoices.length;
-        const visiblePathChoiceCount = actionableChoices.length + revealedContinuations.length;
-        if (lockCandidateChoiceCount > 0 && visiblePathChoiceCount === 0) {
+        const visiblePathChoiceCount = actionableChoices.length + displayedRevealedContinuations.length;
+        if (passiveAdvance) {
+            const followUpStep = steps[passiveAdvance.followUpStepIndex];
+            if (displayEntry) {
+                displayEntryOverrides.set(followUpStep.stepKey, displayEntry.entryKey);
+            }
+            carriedBeatChoicesByStepKey.set(followUpStep.stepKey, passiveAdvance.selection);
+            visibleUntil = Math.max(visibleUntil, passiveAdvance.followUpStepIndex);
+            continue;
+        }
+        if (!currentBeatChoice && lockCandidateChoiceCount > 0 && visiblePathChoiceCount === 0) {
             if (index < visibleUntil && progression.activeVariantEntryKeys.size > 0) {
                 continue;
             }
@@ -1104,7 +1262,7 @@ export function buildQuestPathFlow(
         }
 
         if (visiblePathChoiceCount > 0) {
-            const revealedContinuation = revealedContinuations[0] ?? null;
+            const revealedContinuation = displayedRevealedContinuations[0] ?? null;
             if (!selectedChoice && !revealedContinuation) {
                 if (index < visibleUntil && progression.activeVariantEntryKeys.size > 0) {
                     continue;

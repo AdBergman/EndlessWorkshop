@@ -251,15 +251,21 @@ describe("strategy dossier helpers", () => {
       buildStrategyPathStatus(
         questPathFlow(renderedStep({ choices: [failureChoice], selectedChoice: failureChoice })),
         entriesByKey,
-      ).kind,
-    ).toBe("failure");
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "failure",
+      label: "Failure",
+    }));
 
     expect(
       buildStrategyPathStatus(
         questPathFlow(renderedStep({ choices: [convergenceChoice], selectedChoice: convergenceChoice })),
         entriesByKey,
-      ).kind,
-    ).toBe("converges");
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "converges",
+      label: "Rejoins Path",
+    }));
 
     expect(
       buildStrategyPathStatus(
@@ -267,8 +273,11 @@ describe("strategy dossier helpers", () => {
           reachedContinuationEntryKey: "Quest_Next",
         }),
         entriesByKey,
-      ).kind,
-    ).toBe("chapter-exit");
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "chapter-exit",
+      label: "Leaves Chapter",
+    }));
 
     const unresolvedStep = renderedStep({ choices: [unresolvedChoice], selectedChoice: unresolvedChoice });
     expect(
@@ -277,15 +286,21 @@ describe("strategy dossier helpers", () => {
           unresolvedContinuation: selectionForChoice(unresolvedStep.step.stepKey, unresolvedChoice),
         }),
         entriesByKey,
-      ).kind,
-    ).toBe("unresolved");
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "unresolved",
+      label: "Unknown Next Step",
+    }));
 
     expect(
       buildStrategyPathStatus(
         questPathFlow(renderedStep({ choices: [unresolvedChoice], selectedChoice: unresolvedChoice })),
         entriesByKey,
-      ).kind,
-    ).toBe("complete");
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "complete",
+      label: "No Further Modeled Decision",
+    }));
   });
 
   it("builds selected path breadcrumbs and selected branch comparison details", () => {
@@ -347,6 +362,14 @@ describe("strategy dossier helpers", () => {
         rewards: ["Gain Dust"],
       }),
     );
+    expect(model.decision).toEqual(expect.objectContaining({
+      title: "Decision Options",
+      description: "Review the selected simulation or choose another path to compare its result.",
+    }));
+    expect(model.pathStatus).toEqual(expect.objectContaining({
+      kind: "chapter-exit",
+      label: "Leaves Chapter",
+    }));
     expect(model.markers).toEqual([
       expect.objectContaining({
         kind: "leads",

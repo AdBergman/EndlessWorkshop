@@ -365,4 +365,187 @@ describe("quest path flow helpers", () => {
       "Quest_Chapter2",
     ]);
   });
+
+  it("keeps same-step continuation chains actionable by branch order", () => {
+    const step = progressionStep(1, "Quest_Tutorial");
+    const chapter = progressionChapter(0, "Tutorial", [step]);
+    const progression = detailProgression(chapter);
+    const entry = questEntry({
+      entryKey: "Quest_Tutorial",
+      branches: [
+        questBranch({
+          branchKey: "Branch_FoundHome",
+          label: "Found a home",
+          sectionRole: "artifact",
+          branchStepOrder: 1,
+        }),
+        questBranch({
+          branchKey: "Branch_Rebuild",
+          label: "Start rebuilding",
+          sectionRole: "continuation",
+          branchStepOrder: 2,
+          parentBranchKey: "Branch_FoundHome",
+          prerequisiteBranchKeys: ["Branch_FoundHome"],
+        }),
+        questBranch({
+          branchKey: "Branch_Allies",
+          label: "Find allies",
+          sectionRole: "continuation",
+          branchStepOrder: 3,
+          parentBranchKey: "Branch_Rebuild",
+          prerequisiteBranchKeys: ["Branch_FoundHome", "Branch_Rebuild"],
+        }),
+      ],
+    });
+    const entriesByKey = { [entry.entryKey]: entry };
+    const choices = choicesForStep(step, entry, entriesByKey);
+    const foundHome = choices.find((choice) => choice.branchKey === "Branch_FoundHome")!;
+    const rebuild = choices.find((choice) => choice.branchKey === "Branch_Rebuild")!;
+    const allies = choices.find((choice) => choice.branchKey === "Branch_Allies")!;
+
+    const afterFirstChoice = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [selectionForChoice(step.stepKey, foundHome)],
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterFirstChoice.renderedSteps).toHaveLength(1);
+    expect(afterFirstChoice.renderedSteps[0].selectedChoice?.choiceId).toBe(foundHome.id);
+    expect(afterFirstChoice.renderedSteps[0].choices.map((choice) => choice.label)).toContain("Start rebuilding");
+    expect(afterFirstChoice.renderedSteps[0].revealedContinuations.map((choice) => choice.label)).not.toContain("Start rebuilding");
+
+    const afterSecondChoice = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [
+        selectionForChoice(step.stepKey, foundHome),
+        selectionForChoice(step.stepKey, rebuild),
+      ],
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterSecondChoice.renderedSteps[0].selectedChoice?.choiceId).toBe(rebuild.id);
+    expect(afterSecondChoice.renderedSteps[0].choices.map((choice) => choice.label)).toContain("Find allies");
+
+    const afterTerminalChoice = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [
+        selectionForChoice(step.stepKey, foundHome),
+        selectionForChoice(step.stepKey, rebuild),
+        selectionForChoice(step.stepKey, allies),
+      ],
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterTerminalChoice.unresolvedContinuation?.choiceId).toBe(allies.id);
+  });
+
+  it("passes artifact setup gates to the dependent decision step", () => {
+    const firstStep = progressionStep(1, "Quest_SetupGate");
+    const secondStep = progressionStep(2, "Quest_SetupGate");
+    const chapter = progressionChapter(2, "Setup Gate", [firstStep, secondStep]);
+    const progression = detailProgression(chapter);
+    const entry = questEntry({
+      entryKey: "Quest_SetupGate",
+      branches: [
+        questBranch({
+          branchKey: "Branch_Setup",
+          label: "Maintain the required empire value",
+          sectionRole: "artifact",
+          branchStepOrder: 1,
+        }),
+        ...["Pious", "Open", "Bold"].map((label, index) => questBranch({
+          branchKey: `Branch_${label}`,
+          label,
+          sectionRole: "continuation",
+          branchStepOrder: 2,
+          parentBranchKey: "Branch_Setup",
+          prerequisiteBranchKeys: ["Branch_Setup"],
+          nextEntryKeys: [`Quest_${label}`],
+          orderIndex: index + 2,
+        })),
+      ],
+    });
+    const entriesByKey = {
+      [entry.entryKey]: entry,
+      Quest_Pious: questEntry({ entryKey: "Quest_Pious" }),
+      Quest_Open: questEntry({ entryKey: "Quest_Open" }),
+      Quest_Bold: questEntry({ entryKey: "Quest_Bold" }),
+    };
+
+    const flow = buildQuestPathFlow(progression, entriesByKey, [], questlineProgression([chapter]), {
+      focusedStepIndex: 0,
+      showRawHiddenRows: false,
+    });
+
+    expect(flow.renderedSteps).toHaveLength(2);
+    expect(flow.renderedSteps[0].choices.map((choice) => choice.label)).not.toContain("Maintain the required empire value");
+    expect(flow.renderedSteps[1].currentBeatChoice?.label).toBe("Maintain the required empire value");
+    expect(flow.renderedSteps[1].choices.map((choice) => choice.label)).toEqual(["Pious", "Open", "Bold"]);
+  });
+
+  it("propagates a chapter exit after a carried same-entry continuation", () => {
+    const firstStep = progressionStep(1, "Quest_ChapterExit");
+    const secondStep = progressionStep(2, "Quest_ChapterExit");
+    const nextChapterStep = {
+      ...progressionStep(1, "Quest_NextChapter"),
+      stepKey: "QuestLine_Test:chapter-2:step-1",
+    };
+    const chapter1 = progressionChapter(1, "Chapter 1", [firstStep, secondStep]);
+    const chapter2 = progressionChapter(2, "Chapter 2", [nextChapterStep]);
+    const progression = detailProgression(chapter1);
+    const fullProgression = questlineProgression([chapter1, chapter2]);
+    const entry = questEntry({
+      entryKey: "Quest_ChapterExit",
+      branches: [
+        questBranch({
+          branchKey: "Branch_Track",
+          label: "Track",
+          sectionRole: "true_choice",
+          branchStepOrder: 1,
+        }),
+        questBranch({
+          branchKey: "Branch_Capture",
+          label: "Capture the rogue Lieutenant",
+          sectionRole: "continuation",
+          branchStepOrder: 2,
+          parentBranchKey: "Branch_Track",
+          prerequisiteBranchKeys: ["Branch_Track"],
+          nextEntryKeys: ["Quest_NextChapter"],
+        }),
+      ],
+    });
+    const nextEntry = questEntry({ entryKey: "Quest_NextChapter", title: "Next Chapter" });
+    const entriesByKey = { [entry.entryKey]: entry, [nextEntry.entryKey]: nextEntry };
+    const track = choicesForStep(firstStep, entry, entriesByKey)
+      .find((choice) => choice.branchKey === "Branch_Track")!;
+
+    const flow = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [selectionForChoice(firstStep.stepKey, track)],
+      fullProgression,
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(flow.reachedContinuationEntryKey).toBe("Quest_NextChapter");
+    expect(flow.unresolvedContinuation).toBeNull();
+  });
 });

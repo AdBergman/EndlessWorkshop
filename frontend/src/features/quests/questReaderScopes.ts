@@ -290,6 +290,29 @@ export function loreSectionsForRevealedContinuations(entry: QuestExplorerEntry, 
     return loreSectionsForChoiceContexts(entry.loreView.sections, choiceContexts, revealContextForRevealedContinuations(renderedStep));
 }
 
+export type LoreNarrativeOwnershipTracker = {
+    visibleSectionKeys: Set<string>;
+};
+
+export function createLoreNarrativeOwnershipTracker(): LoreNarrativeOwnershipTracker {
+    return { visibleSectionKeys: new Set() };
+}
+
+export function claimVisibleLoreSections(
+    sections: LoreSection[],
+    detailEntryKey: string,
+    ownershipTracker: LoreNarrativeOwnershipTracker | null
+): LoreSection[] {
+    if (!ownershipTracker) return sections;
+
+    return sections.filter((section) => {
+        const ownershipKey = loreSectionOwnershipKey(detailEntryKey, section);
+        if (ownershipTracker.visibleSectionKeys.has(ownershipKey)) return false;
+        ownershipTracker.visibleSectionKeys.add(ownershipKey);
+        return true;
+    });
+}
+
 function uniqueLoreSections(sections: LoreSection[]): LoreSection[] {
     const seen = new Set<string>();
     return sections.filter((section) => {
@@ -297,4 +320,47 @@ function uniqueLoreSections(sections: LoreSection[]): LoreSection[] {
         seen.add(section.sectionKey);
         return true;
     });
+}
+
+function loreSectionOwnershipKey(detailEntryKey: string, section: LoreSection): string {
+    const ownerKey = detailEntryKey.trim() || "unknown";
+    const sectionKey = section.sectionKey.trim();
+    if (sectionKey) return `${ownerKey}:section:${sectionKey}`;
+
+    const body = normalizedLoreSectionBody(section);
+    const bodySnippet = body.slice(0, 160);
+    return [
+        ownerKey,
+        "choice",
+        section.choiceKey ?? "any",
+        "step",
+        section.stepIndex != null ? String(section.stepIndex) : "any",
+        "body",
+        hashLoreBody(body),
+        bodySnippet,
+    ].join(":");
+}
+
+function normalizedLoreSectionBody(section: LoreSection): string {
+    return section.lines
+        .map((line) => [
+            normalizedLoreTextPart(line.speakerLabel),
+            normalizedLoreTextPart(line.role),
+            normalizedLoreTextPart(line.text),
+        ].join("|"))
+        .join("\n")
+        .trim();
+}
+
+function normalizedLoreTextPart(value: string | null): string {
+    return (value ?? "").replace(/\s+/g, " ").trim();
+}
+
+function hashLoreBody(value: string): string {
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index += 1) {
+        hash ^= value.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+    }
+    return (hash >>> 0).toString(36);
 }

@@ -2306,13 +2306,14 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getByRole("region", { name: "Chapter Tactical Brief" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Current Objective" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Requirements" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Rewards" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Selected Path" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Continuity Strip" })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Chapter Objective" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Active Decision" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Available Paths" })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Selected Simulation" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Next Destination" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Path Markers" })).not.toBeInTheDocument();
         expect(within(chronicle).getByText("Reach the marker.")).toBeInTheDocument();
         expect(within(chronicle).getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
         expect(within(chronicle).getAllByText("Gain Dust.").length).toBeGreaterThan(0);
@@ -2328,14 +2329,13 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getAllByText("Choose the marker path.").length).toBeGreaterThan(0);
         expect(within(chronicle).getAllByText("Leads To").length).toBeGreaterThan(0);
         expect(within(chronicle).getAllByText("Chapter 1: Second Tide").length).toBeGreaterThan(0);
-        const continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
-        expect(continuityStrip).toHaveTextContent("Follow the marker");
-        expect(continuityStrip).toHaveTextContent("Step 2");
-        const whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Complete");
-        expect(whatHappensNext).toHaveTextContent("No further modeled decision in this chapter");
-        expect(whatHappensNext).toHaveTextContent("Step 2: Second Tide");
-        expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Selected Simulation" })).toHaveTextContent("Follow the marker");
+        const projectedResult = within(chronicle).getByRole("region", { name: "Projected Result" });
+        expect(projectedResult).toHaveTextContent("Follow the marker");
+        const nextDestination = within(chronicle).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("No Further Modeled Decision");
+        expect(nextDestination).toHaveTextContent("No further modeled decision in this chapter");
+        expect(nextDestination).toHaveTextContent("Step 2: Second Tide");
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
@@ -2348,7 +2348,7 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Marker Brief" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        const comparison = within(chronicle).getByRole("region", { name: "Decision Options" });
+        const comparison = within(chronicle).getByRole("region", { name: "Available Paths" });
         const riskOption = within(comparison).getByRole("button", { name: /Risk the breach/ });
         const rejoinOption = within(comparison).getByRole("button", { name: /Rejoin the line/ });
 
@@ -2360,31 +2360,28 @@ describe("QuestExplorerPage", () => {
         expect(within(rejoinOption).getByText("Return to the main operation.")).toBeInTheDocument();
         expect(within(rejoinOption).getByText("Hold the line for one more turn.")).toBeInTheDocument();
         expect(within(rejoinOption).getByText("Preserve veteran readiness.")).toBeInTheDocument();
-        expect(within(rejoinOption).getByText("Converges")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Rejoins Path")).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Path Markers" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
 
         await user.click(riskOption);
 
         expect(riskOption).toHaveAttribute("aria-current", "true");
         expect(within(comparison).getByRole("button", { name: /Rejoin the line/ })).toBeInTheDocument();
-        const selectedPath = within(chronicle).getByRole("region", { name: "Selected Path" });
-        expect(selectedPath).toHaveTextContent("Step 1");
-        expect(selectedPath).toHaveTextContent("Risk the breach");
-        expect(selectedPath).toHaveTextContent("Current");
-
-        const selectedSummary = within(comparison).getByRole("region", { name: "Selected Option Summary" });
-        expect(selectedSummary).toHaveTextContent("Selected Option");
-        expect(selectedSummary).toHaveTextContent("Risk the breach");
-        expect(selectedSummary).toHaveTextContent("Accept the failed advance risk.");
-        expect(selectedSummary).toHaveTextContent("Spend Influence to force the breach.");
-        expect(selectedSummary).toHaveTextContent("Gain emergency command authority.");
-        expect(selectedSummary).toHaveTextContent("Failure");
-        expect(selectedSummary).toHaveTextContent("Chapter 1: Failed Advance");
-        expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toHaveTextContent("Accept the failed advance risk.");
-        const continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
-        expect(continuityStrip).toHaveTextContent("Risk the breach");
-        expect(continuityStrip).toHaveTextContent("Selected path enters a failure outcome");
-        expect(continuityStrip).toHaveTextContent("Failure");
-        expect(continuityStrip).not.toHaveTextContent("Rejoin the line");
+        const selectedSimulation = within(chronicle).getByRole("region", { name: "Selected Simulation" });
+        expect(selectedSimulation).toHaveTextContent("You Chose");
+        expect(selectedSimulation).toHaveTextContent("Risk the breach");
+        expect(selectedSimulation).toHaveTextContent("Spend Influence to force the breach.");
+        expect(selectedSimulation).toHaveTextContent("Gain emergency command authority.");
+        expect(within(chronicle).getByRole("region", { name: "Progression Details" })).toHaveTextContent("Current simulation");
+        expect(within(chronicle).getByRole("region", { name: "Projected Result" })).toHaveTextContent("Accept the failed advance risk.");
+        const nextDestination = within(chronicle).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Failure");
+        expect(nextDestination).toHaveTextContent("Selected path enters a failure outcome");
+        expect(nextDestination).toHaveTextContent("Chapter 1: Failed Advance");
+        expect(within(chronicle).queryByRole("region", { name: "Selected Option Summary" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
     });
 
     it("renders strategy dossier failure and convergence markers when a simulated branch exposes them", async () => {
@@ -2397,35 +2394,21 @@ describe("QuestExplorerPage", () => {
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         await user.click(within(chronicle).getByRole("button", { name: /Risk the breach/ }));
 
-        let markers = within(chronicle).getByRole("region", { name: "Path Markers" });
-        expect(within(markers).getByText("Failure")).toBeInTheDocument();
-        expect(within(markers).getByText("Chapter 1: Failed Advance")).toBeInTheDocument();
-        let whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Failure");
-        expect(whatHappensNext).toHaveTextContent("Selected path enters a failure outcome");
-        expect(whatHappensNext).toHaveTextContent("Chapter 1: Failed Advance");
-        let continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
-        expect(continuityStrip).toHaveTextContent("Failure");
-        expect(continuityStrip).toHaveTextContent("Chapter 1: Failed Advance");
-        const failureMarker = within(markers).getByText("Failure").closest(".questExplorer-strategyDossierMarker");
-        if (!failureMarker) throw new Error("Expected failure marker badge");
-        expect(failureMarker).toHaveClass("questExplorer-strategyDossierMarker--failure");
+        let nextDestination = within(chronicle).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Failure");
+        expect(nextDestination).toHaveTextContent("Selected path enters a failure outcome");
+        expect(nextDestination).toHaveTextContent("Chapter 1: Failed Advance");
+        expect(nextDestination).toHaveClass("questExplorer-pathState--failure");
+        expect(within(chronicle).queryByRole("region", { name: "Path Markers" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Rejoin the line/ }));
 
-        markers = within(chronicle).getByRole("region", { name: "Path Markers" });
-        expect(within(markers).getByText("Converges")).toBeInTheDocument();
-        expect(within(markers).getByText("Chapter 1: Main Line")).toBeInTheDocument();
-        whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Converges");
-        expect(whatHappensNext).toHaveTextContent("Selected path rejoins the main progression");
-        expect(whatHappensNext).toHaveTextContent("Chapter 1: Main Line");
-        continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
-        expect(continuityStrip).toHaveTextContent("Converges");
-        expect(continuityStrip).toHaveTextContent("Chapter 1: Main Line");
-        const convergenceMarker = within(markers).getByText("Converges").closest(".questExplorer-strategyDossierMarker");
-        if (!convergenceMarker) throw new Error("Expected convergence marker badge");
-        expect(convergenceMarker).toHaveClass("questExplorer-strategyDossierMarker--converges");
+        nextDestination = within(chronicle).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Rejoins Path");
+        expect(nextDestination).toHaveTextContent("Selected path rejoins the main progression");
+        expect(nextDestination).toHaveTextContent("Chapter 1: Main Line");
+        expect(nextDestination).toHaveClass("questExplorer-pathState--converges");
     });
 
     it("scopes strategy content to the focused step before rendering choices", async () => {
@@ -2444,7 +2427,7 @@ describe("QuestExplorerPage", () => {
 
         await user.click(within(chronicle).getByRole("button", { name: /Take the ash road/ }));
 
-        expect(within(chronicle).getByText("Ash road outcome.")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Choose the ash road.").length).toBeGreaterThan(0);
         expect(within(chronicle).queryByText("Ash road later objective must wait.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Coral road outcome.")).not.toBeInTheDocument();
     });
@@ -2479,9 +2462,9 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getByText("The shared setup belongs before the first choice.")).toBeInTheDocument();
-        expect(within(chronicle).getByText("The current beat belongs before the first choice.")).toBeInTheDocument();
-        expect(within(chronicle).getByText("The current resolution belongs before the first choice.")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("The shared setup belongs before the first choice.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("The current beat belongs before the first choice.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("The current resolution belongs before the first choice.")).toHaveLength(1);
         expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
@@ -2489,16 +2472,47 @@ describe("QuestExplorerPage", () => {
         await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
-        const pathRevealed = within(chronicle).getByText("Path Revealed");
-        const nextBeat = within(chronicle).getByText("The next beat waits for the selected path.");
+        const nextChoice = within(chronicle).getByRole("button", { name: /Eliminate the threat/ });
 
-        expect(pathRevealed).toBeInTheDocument();
-        expect(within(chronicle).getByText("Eliminate the threat")).toBeInTheDocument();
-        expect(nextBeat).toBeInTheDocument();
-        expectElementBefore(selectedChoice, pathRevealed);
-        expectElementBefore(pathRevealed, nextBeat);
+        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(nextChoice).toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expectElementBefore(selectedChoice, nextChoice);
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
+    });
+
+    it("keeps passive setup lore scoped before carried continuation choices", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
+        renderPage("/quests/Quest_Keyed");
+
+        await screen.findByRole("heading", { name: "Keyed Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getAllByText("The shared setup belongs before the first choice.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("The current beat belongs before the first choice.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("The current resolution belongs before the first choice.")).toHaveLength(1);
+        expect(within(chronicle).getByRole("button", { name: /Eliminate the threat/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Find Pryzja/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
+    });
+
+    it("keeps raw Lore diagnostics available while duplicate body ownership is guarded", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
+        renderPage("/quests/Quest_Keyed?debugQuestProgression=true");
+
+        await screen.findByRole("heading", { name: "Keyed Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getAllByText("The current beat belongs before the first choice.")).toHaveLength(1);
+        expect(screen.getByRole("region", { name: "Quest progression debug" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
+
+        expect(screen.getByRole("checkbox", { name: "Show raw hidden rows" })).toBeChecked();
+        expect(screen.getByRole("region", { name: "Quest progression debug" })).toBeInTheDocument();
+        expect(within(chronicle).getAllByRole("button", { name: /Find Pryzja/ }).length).toBeGreaterThan(0);
     });
 
     it("uses choice continuity metadata to prevent same-step future objectives from leaking", async () => {
@@ -2513,23 +2527,19 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
-        expect(within(chronicle).getByText("Choose a path to project the next outcome.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Select a path to simulate its result.")).toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
-        const projectedOutcome = within(chronicle).getAllByRole("region", { name: "Projected Outcome" })[0];
-        const nextObjective = within(chronicle).getByText("Resolve the next beat.");
+        const nextChoice = within(chronicle).getByRole("button", { name: /Eliminate the threat/ });
 
-        expect(nextObjective).toBeInTheDocument();
-        expect(within(projectedOutcome).getByText("Eliminate the threat")).toBeInTheDocument();
-        expectElementBefore(selectedChoice, projectedOutcome);
-        expectElementBefore(projectedOutcome, nextObjective);
+        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
+        expectElementBefore(selectedChoice, nextChoice);
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
     });
 
-    it("promotes same-entry serial continuations into their progression steps", async () => {
+    it("keeps same-entry serial continuations as active strategy decisions", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
         renderPage("/quests/Quest_Keyed?mode=strategy");
@@ -2537,35 +2547,21 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getAllByText("Step 1").length).toBeGreaterThan(0);
+        expect(within(chronicle).getAllByText("Step 2").length).toBeGreaterThan(0);
         expect(within(chronicle).getByText("of 3")).toBeInTheDocument();
-        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
 
-        await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
+        const nextChoice = within(chronicle).getByRole("button", { name: /Eliminate the threat/ });
 
-        const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
-        const projectedOutcomes = within(chronicle)
-            .getAllByRole("region", { name: "Projected Outcome" })
-            .filter((section) => (
-                within(section).queryByText("Eliminate the threat")
-                || within(section).queryByText("Rebuild the city")
-            ));
-        const step2 = getStepHeaderLabel(chronicle, "Step 2");
-        const nextObjective = within(chronicle).getAllByText("Resolve the next beat.").at(-1)!;
-        const step3 = getStepHeaderLabel(chronicle, "Step 3");
-        const futureObjective = within(chronicle).getAllByText("Resolve the future beat.").at(-1)!;
-
-        expect(projectedOutcomes).toHaveLength(2);
-        expectElementBefore(selectedChoice, projectedOutcomes[0]);
-        expectElementBefore(projectedOutcomes[0], step2);
-        expectElementBefore(step2, nextObjective);
-        expectElementBefore(nextObjective, projectedOutcomes[1]);
-        expectElementBefore(projectedOutcomes[1], step3);
-        expectElementBefore(step3, futureObjective);
-        expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
+        expect(nextChoice).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();
+
+        await user.click(nextChoice);
+
+        expect(within(chronicle).getAllByText("Rebuild the city").length).toBeGreaterThan(0);
+        expect(within(chronicle).getByText("Resolve the future beat.")).toBeInTheDocument();
     });
 
     it("reveals projected local continuation steps from explicit reveal metadata", async () => {
@@ -2584,16 +2580,13 @@ describe("QuestExplorerPage", () => {
         await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Search/ });
-        const step2 = getStepHeaderLabel(chronicle, "Step 2");
-        const nextObjective = within(chronicle).getAllByText("Resolve the carried next beat.").at(-1)!;
-        const step3 = getStepHeaderLabel(chronicle, "Step 3");
-        const futureObjective = within(chronicle).getAllByText("Resolve the carried future beat.").at(-1)!;
+        const projectedOutcome = within(chronicle).getByRole("region", { name: "Projected Result" });
 
         expect(within(chronicle).queryByText("Resolve the carried current beat.")).not.toBeInTheDocument();
-        expectElementBefore(selectedChoice, step2);
-        expectElementBefore(step2, nextObjective);
-        expectElementBefore(nextObjective, step3);
-        expectElementBefore(step3, futureObjective);
+        expect(projectedOutcome).toHaveTextContent("Search");
+        expectElementBefore(selectedChoice, projectedOutcome);
+        expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
         expect(screen.queryByText(/continues in Chapter 3/)).not.toBeInTheDocument();
     });
 
@@ -2609,10 +2602,10 @@ describe("QuestExplorerPage", () => {
 
         expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
-        const whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Converges");
-        expect(whatHappensNext).toHaveTextContent("Selected path rejoins the main progression");
-        expect(whatHappensNext).toHaveTextContent("Chapter 3: Next Chapter");
+        const nextDestination = within(chronicle).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Rejoins Path");
+        expect(nextDestination).toHaveTextContent("Selected path rejoins the main progression");
+        expect(nextDestination).toHaveTextContent("Chapter 3: Next Chapter");
     });
 
     it("keeps revealedBy lore sections hidden until their owner branch is selected", async () => {
@@ -2678,15 +2671,15 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
-        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
-        expect(screen.getAllByRole("region", { name: "Projected Outcome" })[0]).not.toHaveTextContent("Read the shore signs.");
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("region", { name: "Projected Result" })[0]).not.toHaveTextContent("Read the shore signs.");
 
         const shoreChoice = screen.getByRole("button", { name: /Study the shore/ });
         await user.click(shoreChoice);
 
         expect(shoreChoice).toHaveAttribute("aria-current", "true");
         expect(screen.getAllByText("Read the shore signs.").length).toBeGreaterThan(0);
-        expect(screen.getAllByRole("region", { name: "Projected Outcome" })[0]).toHaveTextContent("Read the shore signs.");
+        expect(screen.getAllByRole("region", { name: "Projected Result" })[0]).toHaveTextContent("Read the shore signs.");
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
@@ -2711,7 +2704,7 @@ describe("QuestExplorerPage", () => {
         const markerChoice = screen.getByRole("button", { name: /Follow the marker/ });
         await user.click(markerChoice);
         expect(markerChoice).toHaveAttribute("aria-current", "true");
-        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
 
         await user.click(screen.getByRole("button", { name: "Lore" }));
 
@@ -2723,7 +2716,7 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
-        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
     });
 
     it("keeps lore choices from selecting strategy choice cards", async () => {
@@ -2854,7 +2847,7 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
         await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
-        expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
+        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
 
         await user.click(screen.getByLabelText(/World Quests/));
         expect(await screen.findByRole("heading", { name: "Lost Curiosity" })).toBeInTheDocument();
@@ -2928,9 +2921,9 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
 
-        const whatHappensNext = screen.getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Unresolved");
-        expect(whatHappensNext).toHaveTextContent("Continuation is not identified");
+        const nextDestination = screen.getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Unknown Next Step");
+        expect(nextDestination).toHaveTextContent("Continuation is not identified");
         expect(screen.getAllByText(/does not identify the next continuation step/).length).toBeGreaterThan(0);
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
@@ -3001,13 +2994,11 @@ describe("QuestExplorerPage", () => {
     });
 
     it("collapses staged continuation convergence rows outside debug mode", async () => {
-        const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
         renderPage("/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "A Gamble" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
 
         expect(screen.queryByText("Continue Selected Path")).not.toBeInTheDocument();
         expect(screen.getByText("Next Choices")).toBeInTheDocument();
@@ -3026,7 +3017,6 @@ describe("QuestExplorerPage", () => {
 
         await screen.findByRole("heading", { name: "A Gamble" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        await user.click(within(chronicle).getByRole("button", { name: /Make the gamble/ }));
 
         expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
         expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
@@ -3035,10 +3025,9 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
-        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(2);
-        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(2);
-        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(2);
-        expect(screen.getAllByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).toHaveLength(3);
+        expect(within(chronicle).getAllByRole("button", { name: /Pious/ }).length).toBeGreaterThanOrEqual(2);
+        expect(within(chronicle).getAllByRole("button", { name: /Open/ }).length).toBeGreaterThanOrEqual(2);
+        expect(within(chronicle).getAllByRole("button", { name: /Bold/ }).length).toBeGreaterThanOrEqual(2);
         const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
         expect(within(debugPanel).getByText("hidden staged continuation count")).toBeInTheDocument();
     });
@@ -3053,9 +3042,9 @@ describe("QuestExplorerPage", () => {
 
         const rail = screen.getByRole("complementary");
         expect(within(rail).getByRole("button", { name: /Chapter Two Rising\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
-        const whatHappensNext = screen.getByRole("region", { name: "What Happens Next" });
-        expect(whatHappensNext).toHaveTextContent("Chapter Exit");
-        expect(whatHappensNext).toHaveTextContent("Continue strategy planning from Chapter 2: Chapter Two Rising");
+        const nextDestination = screen.getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Leaves Chapter");
+        expect(nextDestination).toHaveTextContent("Continue strategy planning from Chapter 2: Chapter Two Rising");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 

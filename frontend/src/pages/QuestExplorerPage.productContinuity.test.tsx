@@ -202,6 +202,7 @@ function questline(
     };
 }
 
+const kinCh0 = "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01";
 const kinCh4 = "FactionQuest_KinOfSheredyn_Chapter04_Step01";
 const necroCh3 = "FactionQuest_Necrophage_Chapter03_Step01";
 const mukagCh2 = "FactionQuest_Mukag_Chapter02_Step01";
@@ -216,6 +217,45 @@ const productContinuityPayload: QuestExplorerResponse = {
     exportKind: "quest_explorer",
     schemaVersion: "quest_explorer.v3",
     entries: [
+        productEntry({
+            entryKey: kinCh0,
+            title: "A New Home",
+            factionKey: "Faction_KinOfSheredyn",
+            questLineKey: "FactionQuest_KinOfSheredyn",
+            chapterOrder: 0,
+            stepOrder: 0,
+            sequenceIndex: 1,
+            branches: [
+                productBranch(kinCh0, 1, "Found a home for the surviving Kin.", {
+                    choiceKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01ChoiceDefinition",
+                    branchStepOrder: 1,
+                    sectionRole: "artifact",
+                    conditions: ["Found your Capital City."],
+                }),
+                productBranch(kinCh0, 2, "Start the task of rebuilding your Empire.", {
+                    choiceKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step02ChoiceDefinition",
+                    branchStepOrder: 2,
+                    parentBranchKey: `${kinCh0}:branch:1`,
+                    parentChoiceKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01ChoiceDefinition",
+                    prerequisiteBranchKeys: [`${kinCh0}:branch:1`],
+                    prerequisiteBranchPath: [`${kinCh0}:branch:1`],
+                    choiceGroupKey: `${kinCh0}:choice-group:step:2:after:${kinCh0}:branch:1`,
+                    sectionRole: "continuation",
+                    conditions: ["Build 1 District of any type in your Capital City Garin's Rest."],
+                }),
+                productBranch(kinCh0, 3, "Find local allies to join your ranks.", {
+                    choiceKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step03ChoiceDefinition",
+                    branchStepOrder: 3,
+                    parentBranchKey: `${kinCh0}:branch:2`,
+                    parentChoiceKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step02ChoiceDefinition",
+                    prerequisiteBranchKeys: [`${kinCh0}:branch:1`, `${kinCh0}:branch:2`],
+                    prerequisiteBranchPath: [`${kinCh0}:branch:1`, `${kinCh0}:branch:2`],
+                    choiceGroupKey: `${kinCh0}:choice-group:step:3:after:${kinCh0}:branch:2`,
+                    sectionRole: "continuation",
+                    conditions: ["Assimilate 1 minor faction"],
+                }),
+            ],
+        }),
         productEntry({
             entryKey: kinCh4,
             title: "The Hunt",
@@ -636,8 +676,20 @@ const productContinuityPayload: QuestExplorerResponse = {
     progression: {
         questlines: [
             questline("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", [
+                chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 0, "Tutorial", [
+                    { stepNumber: 1, stepOrder: 0, title: "A New Home", detailEntryKey: kinCh0 },
+                ]),
                 chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 4, "The Hunt", [
                     { stepNumber: 1, stepOrder: 0, title: "The Hunt", detailEntryKey: kinCh4 },
+                    {
+                        stepNumber: 2,
+                        stepOrder: 1,
+                        title: "The Hunt",
+                        detailEntryKey: kinCh4,
+                        projectionKind: "virtual_alias_expanded",
+                        sourceEntryKeys: [kinCh4],
+                        variants: [variant(kinCh4, "The Hunt")],
+                    },
                 ]),
                 chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 5, "The Kin's Fate", [
                     { stepNumber: 1, stepOrder: 0, title: "The Kin's Fate", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter05_Step01" },
@@ -777,6 +829,26 @@ describe("QuestExplorerPage product continuity fixture", () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(productContinuityPayload);
     });
 
+    it("lets Kin Ch0 Lore advance through same-entry continuation beats", async () => {
+        const user = userEvent.setup();
+        renderProductQuest(kinCh0, Faction.KIN, "kin", true);
+
+        expect(await screen.findByRole("heading", { name: "A New Home" })).toBeInTheDocument();
+        expect(within(chronicle()).getByRole("button", { name: /Found a home for the surviving Kin/ })).toBeInTheDocument();
+        expect(queryChronicleButton(/Start the task of rebuilding/)).not.toBeInTheDocument();
+
+        await user.click(within(chronicle()).getByRole("button", { name: /Found a home for the surviving Kin/ }));
+
+        expect(within(chronicle()).getByRole("button", { name: /Start the task of rebuilding your Empire/ })).toBeInTheDocument();
+        expect(screen.queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(debugValue("active selected branch path")).toContain(`${kinCh0}:branch:1`);
+
+        await user.click(within(chronicle()).getByRole("button", { name: /Start the task of rebuilding your Empire/ }));
+
+        expect(within(chronicle()).getByRole("button", { name: /Find local allies to join your ranks/ })).toBeInTheDocument();
+        expect(debugValue("active selected branch path")).toContain(`${kinCh0}:branch:1, ${kinCh0}:branch:2`);
+    });
+
     it("locks Kin Ch4 continuation gating counts and active selected branch path", async () => {
         const user = userEvent.setup();
         const normalRender = renderProductQuest(kinCh4, Faction.KIN, "kin");
@@ -865,9 +937,8 @@ describe("QuestExplorerPage product continuity fixture", () => {
         const ch2Render = renderProductQuest(mukagCh2, Faction.TAHUK, "mukag");
 
         expect(await screen.findByRole("heading", { name: "Forgotten Power" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(1);
-        await user.click(chronicleButtons()[0]);
-        expect(chronicleButtons()).toHaveLength(4);
+        expect(chronicleButtons()).toHaveLength(3);
+        expect(queryChronicleButton(/Maintain the required empire value/)).not.toBeInTheDocument();
         expect(within(chronicle()).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
         expect(within(chronicle()).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
         expect(within(chronicle()).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
@@ -878,26 +949,37 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         renderProductQuest(mukagCh4, Faction.TAHUK, "mukag", true);
         expect(await screen.findByRole("heading", { name: "A Gamble" })).toBeInTheDocument();
-        expect(chronicleButtons()).toHaveLength(1);
-        expect(firstDebugStepValue("normal visible choice count")).toBe("1");
+        expect(chronicleButtons()).toHaveLength(3);
+        expect(firstDebugStepValue("normal visible choice count")).toBe("0");
         expect(firstDebugStepValue("debug visible choice count")).toBe("8");
-        expect(firstDebugStepValue("hidden unresolved count")).toBe("1");
-        expect(screen.queryByText(/hidden in normal UI: no modeled continuation before final chapter/)).not.toBeInTheDocument();
-
-        await user.click(chronicleButtons()[0]);
-
-        expect(firstDebugStepValue("normal visible choice count")).toBe("1");
+        expect(firstDebugStepValue("hidden artifact count")).toBe("2");
         expect(debugStepValue(1, "normal visible choice count")).toBe("4");
         expect(debugStepValue(1, "debug visible choice count")).toBe("7");
         expect(debugStepValue(1, "hidden staged continuation count")).toBe("3");
-        expect(debugValue("active selected branch path")).toContain(`${mukagCh4}:branch:2`);
-        expect(chronicleButtons()).toHaveLength(4);
+        expect(debugValue("active selected branch path")).toBe("none");
         expect(screen.queryByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
         expect(chronicleButtons()).toHaveLength(8);
-        expect(screen.getAllByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).toHaveLength(3);
+    });
+
+    it("reports Kin Ch4 Strategy as a chapter exit instead of complete", async () => {
+        const user = userEvent.setup();
+        renderProductQuest(kinCh4, Faction.KIN, "kin");
+
+        expect(await screen.findByRole("heading", { name: "The Hunt" })).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        const chronicleRegion = chronicle();
+        expect(within(chronicleRegion).getAllByRole("region", { name: "Chapter Objective" })).toHaveLength(1);
+        await user.click(within(chronicleRegion).getByRole("button", { name: /Track/ }));
+
+        const nextDestination = within(chronicleRegion).getByRole("region", { name: "Next Destination" });
+        expect(nextDestination).toHaveTextContent("Leaves Chapter");
+        expect(nextDestination).toHaveTextContent("Continue strategy planning from Chapter 5: The Kin's Fate");
+        expect(nextDestination).not.toHaveTextContent("No further modeled decision in this chapter");
+        expect(useQuestStore.getState().selectedEntryKey).toBe(kinCh4);
     });
 
     it("locks Last Lord Ch6A and Ch6B duplicate artifact cleanup counts", async () => {
@@ -919,10 +1001,9 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
         await user.click(within(chronicle()).getByRole("button", { name: /Reclaim/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
+        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
         expect(debugValue("active selected branch path")).toContain(`${lastLordCh6A}:branch:2`);
-        expect(queryChronicleButton(/Defeat Aspects' Army/)).not.toBeInTheDocument();
-        expect(within(chronicle()).getByText("Defeat Aspects' Army")).toBeInTheDocument();
+        expect(queryChronicleButton(/Defeat Aspects' Army/)).toBeInTheDocument();
 
         ch6ARender.unmount();
         useQuestStore.getState().reset();
@@ -941,9 +1022,8 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         await user.click(within(chronicle()).getByRole("button", { name: /Forgive/ }));
 
-        expect(firstDebugStepValue("normal visible choice count")).toBe("2");
+        expect(firstDebugStepValue("normal visible choice count")).toBe("3");
         expect(debugValue("active selected branch path")).toContain(`${lastLordCh6B}:branch:1`);
-        expect(queryChronicleButton(/Pay the invoice at the quest location/)).not.toBeInTheDocument();
-        expect(within(chronicle()).getByText(/Pay the invoice at the quest location/)).toBeInTheDocument();
+        expect(queryChronicleButton(/Pay the invoice at the quest location/)).toBeInTheDocument();
     });
 });
