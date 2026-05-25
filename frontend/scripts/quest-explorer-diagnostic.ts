@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createQuestExplorerFrontendDiagnostic } from "@/features/quests/questExplorerDiagnostic";
-import { normalizeQuestExplorer } from "@/stores/questStore";
+import { normalizeQuestExplorer } from "@/features/quests/questExplorerNormalizer";
 import type { QuestExplorerResponse } from "@/types/questTypes";
 
 const sourceFiles = [

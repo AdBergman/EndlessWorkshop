@@ -1,6 +1,20 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch";
+import {
+    InlineMetaList,
+    StrategyDossier,
+    StrategyPathState,
+} from "@/components/Quests/StrategyDossier";
+import {
+    LoreContinuousProgression,
+    LoreOpening,
+    LoreSectionList,
+} from "@/components/Quests/LoreReader";
+import {
+    QuestProgressionDebugPanel,
+    type QuestModeDebugChoicePaths,
+} from "@/components/Quests/QuestProgressionDebugPanel";
 import {
     filterQuestEntries,
     selectQuestError,
@@ -28,45 +42,50 @@ import {
 } from "@/features/quests/questRail";
 import {
     EMPTY_CHOICE_PATH,
-    addSelectionToRevealContext,
     buildLoreChronicleStream,
     buildQuestPathFlow,
     choiceKindLabel,
-    cloneRevealContext,
-    continuationKeys,
-    entryKeysWithAliases,
     findDetailProgression,
     locationLabel,
     progressionContextKey,
     progressionLocationForKeys,
-    revealVisible,
     selectedChoiceContinuationKeys,
     selectedChoiceTargetKeys,
     selectionForChoice,
-    stepIdentityKeys,
     stepIndexForKeys,
     uniqueStrings,
     type ChoiceVisibilityDiagnostics,
-    type LoreChoicePathsByContext,
-    type LoreChronicleSegment,
-    type LoreChronicleStream,
     type NormalHiddenChoiceReason,
     type QuestDetailProgression,
     type QuestPathChoice,
     type QuestPathChoiceSelection,
     type QuestPathFlow,
     type RenderedPathStep,
-    type RevealContext,
 } from "@/features/quests/questPathFlow";
 import {
+    choicePresentationGroups,
+} from "@/features/quests/questChoicePresentation";
+import {
+    chapterPositionLabel,
+    isMinorFactionVariantQuest,
+    objectiveVariantLabel,
+    phaseDisplayLabel,
+    stepPositionLabel,
+} from "@/features/quests/questDisplay";
+import {
+    loreSectionsForRevealedContinuations,
+    loreSectionsForStep,
+    strategyObjectiveScopeForRevealedContinuations,
+    strategyObjectiveScopeForStep,
+} from "@/features/quests/questReaderScopes";
+import {
     buildStrategyDossierModel,
-    type StrategyDossierBranchComparisonGroup,
-    type StrategyDossierBranchOption,
-    type StrategyDossierMarker,
-    type StrategyDossierModel,
-    type StrategyDossierObjective,
-    type StrategyDossierSelectedPathStep,
 } from "@/features/quests/questStrategyDossier";
+import {
+    LORE_SCROLL_ENTRY_QUERY_PARAM,
+    useQuestExplorerLoreScrollUrl,
+} from "@/features/quests/useQuestExplorerLoreScrollUrl";
+import { useQuestExplorerPathState } from "@/features/quests/useQuestExplorerPathState";
 import {
     selectSelectedFaction,
     useFactionSelectionStore,
@@ -75,31 +94,10 @@ import { getEmpireLabel } from "@/lib/labels/empireLabels";
 import type {
     QuestExplorerEntry,
     QuestExplorerProgression,
-    LoreSection,
-    QuestProgressionChapter,
     QuestProgressionStep,
     StrategyObjective,
 } from "@/types/questTypes";
 import "@/components/Quests/QuestExplorer.css";
-
-type QuestModeDebugChoicePaths = Record<QuestExplorerMode, QuestPathChoiceSelection[]>;
-
-type ChoicePresentationGroups = {
-    structuralContextChoices: QuestPathChoice[];
-    primaryChoices: QuestPathChoice[];
-    activeContinuationChoices: QuestPathChoice[];
-    selectedPathBranchKeys: Set<string>;
-};
-
-type ReaderChoiceContext = {
-    choiceKey: string;
-    branchStepOrder: number | null;
-};
-
-type QuestObjectivePath = {
-    objective: StrategyObjective;
-    sections: LoreSection[];
-};
 
 function routeEntryKey(pathname: string): string | null {
     const raw = pathname.replace(/^\/quests\/?/, "").trim();
@@ -134,40 +132,8 @@ function compactMeta(entry: QuestExplorerEntry): string {
     ].filter(Boolean).join(" / ");
 }
 
-function stepPositionLabel(step: QuestProgressionStep): string {
-    if (step.stepNumber != null) return `Step ${step.stepNumber}`;
-    if (step.stepOrder != null) return `Order ${step.stepOrder}`;
-    return "Step";
-}
-
-function chapterPositionLabel(chapter: QuestProgressionChapter): string {
-    const chapterNumber = chapter.chapterNumber ?? chapter.chapterOrder;
-    return chapterNumber == null ? "Chapter" : `Chapter ${chapterNumber}`;
-}
-
 function countLabel(count: number, singular: string, plural = `${singular}s`): string {
     return `${count} ${count === 1 ? singular : plural}`;
-}
-
-function phaseDisplayLabel(phase: string | null | undefined, fallback = "Objective"): string {
-    const normalized = (phase ?? "").trim().toLowerCase();
-    if (!normalized) return fallback;
-
-    const labels: Record<string, string> = {
-        start: "Opening",
-        intro: "Opening",
-        success: "Resolution",
-        failure: "Setback",
-        choice: "Choice",
-        completion: "Objective",
-        other: fallback,
-    };
-
-    return labels[normalized] ?? normalized
-        .split(/[\s_-]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
 }
 
 function headerMetaItems(
@@ -273,32 +239,6 @@ function railGroupDisplayTitle(group: QuestRailGroup): string {
         ?? group.title;
 }
 
-function isMinorFactionVariantQuest(entry: QuestExplorerEntry): boolean {
-    return getQuestCategoryKey(entry.questType) === "minorFaction"
-        && entry.strategyView.objectives.length > 1;
-}
-
-function lorePhaseKey(phase: string | null | undefined): string {
-    return (phase ?? "").trim().toLowerCase();
-}
-
-function isResolutionLoreSection(section: LoreSection): boolean {
-    return lorePhaseKey(section.phase) === "success" || lorePhaseKey(section.phase) === "resolution";
-}
-
-function objectiveVariantLabel(index: number): string {
-    return `Objective ${index + 1}`;
-}
-
-function objectivePaths(entry: QuestExplorerEntry): QuestObjectivePath[] {
-    return entry.strategyView.objectives.map((objective) => ({
-        objective,
-        sections: entry.loreView.sections.filter((section) => (
-            section.objectiveKey === objective.objectiveKey && !isResolutionLoreSection(section)
-        )),
-    }));
-}
-
 function QuestList({
     groups,
     selectedRailEntryKey,
@@ -348,26 +288,6 @@ function QuestList({
             ))}
         </div>
     );
-}
-
-function choiceSelectedBranchKeys(choicePath: QuestPathChoiceSelection[]): Set<string> {
-    return new Set(choicePath.map((selection) => selection.branchKey).filter((branchKey): branchKey is string => Boolean(branchKey)));
-}
-
-function choiceSelectedChoiceKeys(choicePath: QuestPathChoiceSelection[]): Set<string> {
-    return new Set(choicePath.map((selection) => selection.choiceKey).filter((choiceKey): choiceKey is string => Boolean(choiceKey)));
-}
-
-function choiceSelectedBranchPath(choicePath: QuestPathChoiceSelection[]): string[] {
-    return choicePath.map((selection) => selection.branchKey).filter((branchKey): branchKey is string => Boolean(branchKey));
-}
-
-function debugChoicePath(choicePath: QuestPathChoiceSelection[]): string {
-    return choicePath.length > 0 ? choicePath.map(debugChoiceSelection).join(" || ") : "none";
-}
-
-function debugBranchPath(choicePath: QuestPathChoiceSelection[]): string {
-    return debugList([...choiceSelectedBranchKeys(choicePath)]);
 }
 
 function entryNavigationLocationLabel(entry: QuestExplorerEntry | null): string | null {
@@ -615,218 +535,6 @@ function OverviewColumn({
     );
 }
 
-function LoreOpening({ entry }: { entry: QuestExplorerEntry }) {
-    if (entry.loreView.sections.length === 0) return null;
-
-    const openingLines = entry.summaryLines.filter(Boolean).slice(0, 2);
-    if (openingLines.length === 0) return null;
-
-    return (
-        <section className="questExplorer-loreOpening" aria-label="Lore opening">
-            {openingLines.map((line, index) => (
-                <p key={`${entry.entryKey}:opening:${index}`}>{line}</p>
-            ))}
-        </section>
-    );
-}
-
-function StepSummary({ entry }: { entry: QuestExplorerEntry }) {
-    if (entry.summaryLines.length === 0) return null;
-
-    return (
-        <div className="questExplorer-stepSummary">
-            {entry.summaryLines.map((line, index) => (
-                <p key={`${entry.entryKey}:summary:${index}`}>{line}</p>
-            ))}
-        </div>
-    );
-}
-
-function uniqueReaderChoiceContexts(contexts: ReaderChoiceContext[]): ReaderChoiceContext[] {
-    const seen = new Set<string>();
-    return contexts.filter((context) => {
-        const key = `${context.choiceKey}:${context.branchStepOrder ?? "any"}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-    });
-}
-
-function contextForChoice(choice: QuestPathChoice | QuestPathChoiceSelection): ReaderChoiceContext | null {
-    return choice.choiceKey
-        ? { choiceKey: choice.choiceKey, branchStepOrder: choice.branchStepOrder }
-        : null;
-}
-
-function readerCurrentChoiceContextsForStep(renderedStep: RenderedPathStep): ReaderChoiceContext[] {
-    const currentBeatContext = renderedStep.currentBeatChoice
-        ? contextForChoice(renderedStep.currentBeatChoice)
-        : null;
-    if (currentBeatContext) return [currentBeatContext];
-
-    const selectedContext = renderedStep.selectedChoice
-        ? contextForChoice(renderedStep.selectedChoice)
-        : null;
-    if (selectedContext) return [selectedContext];
-
-    const keyedChoices = renderedStep.choices.filter((choice) => choice.choiceKey && choice.sectionRole !== "continuation");
-    if (keyedChoices.length === 0) return [];
-
-    const trueChoices = keyedChoices.filter((choice) => choice.sectionRole === "true_choice");
-    if (trueChoices.length > 1) return [];
-    if (keyedChoices.length === 1) {
-        const context = contextForChoice(keyedChoices[0]);
-        return context ? [context] : [];
-    }
-
-    const orderedChoices = keyedChoices.filter((choice) => choice.branchStepOrder != null);
-    if (orderedChoices.length === 0) return [];
-
-    const earliestOrder = Math.min(...orderedChoices.map((choice) => choice.branchStepOrder ?? Number.MAX_SAFE_INTEGER));
-    const earliestContexts = orderedChoices
-        .filter((choice) => choice.branchStepOrder === earliestOrder)
-        .map(contextForChoice)
-        .filter((context): context is ReaderChoiceContext => Boolean(context));
-
-    return uniqueReaderChoiceContexts(earliestContexts);
-}
-
-function readerRevealedChoiceContextsForStep(renderedStep: RenderedPathStep): ReaderChoiceContext[] {
-    return uniqueReaderChoiceContexts(
-        renderedStep.revealedContinuations
-            .map(contextForChoice)
-            .filter((context): context is ReaderChoiceContext => Boolean(context))
-    );
-}
-
-function revealContextForRevealedContinuations(renderedStep: RenderedPathStep): RevealContext {
-    const context = cloneRevealContext(renderedStep.revealContext);
-    addSelectionToRevealContext(context, renderedStep.selectedChoice);
-    addSelectionToRevealContext(context, renderedStep.currentBeatChoice);
-    renderedStep.revealedContinuations.forEach((choice) => {
-        addSelectionToRevealContext(context, selectionForChoice(renderedStep.step.stepKey, choice));
-    });
-    return context;
-}
-
-function loreSectionsForChoiceContexts(
-    sections: LoreSection[],
-    contexts: ReaderChoiceContext[],
-    revealContext?: RevealContext
-): LoreSection[] {
-    const scopedSections = contexts.flatMap((context) => {
-        const choiceSections = sections.filter((section) => (
-            section.choiceKey === context.choiceKey
-            && (!revealContext || revealVisible(section, revealContext))
-        ));
-        if (choiceSections.length === 0 || context.branchStepOrder == null) return choiceSections;
-
-        const branchStepIndex = context.branchStepOrder - 1;
-        const stepScopedSections = choiceSections.filter((section) => section.stepIndex === branchStepIndex);
-        return stepScopedSections.length > 0 ? stepScopedSections : choiceSections;
-    });
-
-    return uniqueLoreSections(scopedSections);
-}
-
-function objectivesForLoreSections(
-    objectives: StrategyObjective[],
-    sections: LoreSection[],
-    revealContext: RevealContext
-): { objectives: StrategyObjective[]; objectiveIndexOffset: number } | null {
-    const objectiveKeys = new Set(sections
-        .map((section) => section.objectiveKey)
-        .filter((objectiveKey): objectiveKey is string => Boolean(objectiveKey)));
-    if (objectiveKeys.size === 0) return null;
-
-    const scopedObjectives = objectives.filter((objective) => (
-        objective.objectiveKey != null && objectiveKeys.has(objective.objectiveKey)
-        && revealVisible(objective, revealContext)
-    ));
-    if (scopedObjectives.length === 0) return null;
-
-    const firstIndex = objectives.findIndex((objective) => objective.objectiveKey === scopedObjectives[0]?.objectiveKey);
-    return {
-        objectives: scopedObjectives,
-        objectiveIndexOffset: firstIndex >= 0 ? firstIndex : 0,
-    };
-}
-
-function objectiveScopeForBranchStepOrder(
-    objectives: StrategyObjective[],
-    branchStepOrder: number | null,
-    revealContext: RevealContext
-): { objectives: StrategyObjective[]; objectiveIndexOffset: number } | null {
-    if (branchStepOrder == null) return null;
-
-    const objectiveIndex = branchStepOrder - 1;
-    const objective = objectives[objectiveIndex];
-    return objective && revealVisible(objective, revealContext)
-        ? { objectives: [objective], objectiveIndexOffset: objectiveIndex }
-        : null;
-}
-
-function strategyObjectiveScopeForStep(
-    entry: QuestExplorerEntry,
-    renderedStep: RenderedPathStep
-): { objectives: StrategyObjective[]; objectiveIndexOffset: number } {
-    const allObjectives = entry.strategyView.objectives;
-    const visibleObjectiveEntries = allObjectives
-        .map((objective, index) => ({ objective, index }))
-        .filter(({ objective }) => revealVisible(objective, renderedStep.revealContext));
-    const objectives = visibleObjectiveEntries.map(({ objective }) => objective);
-    if (objectives.length <= 1) {
-        return {
-            objectives,
-            objectiveIndexOffset: visibleObjectiveEntries[0]?.index ?? 0,
-        };
-    }
-
-    const choiceContexts = readerCurrentChoiceContextsForStep(renderedStep);
-    const choiceScopedLoreSections = loreSectionsForChoiceContexts(entry.loreView.sections, choiceContexts, renderedStep.revealContext);
-    const choiceScopedObjectives = objectivesForLoreSections(allObjectives, choiceScopedLoreSections, renderedStep.revealContext);
-    if (choiceScopedObjectives) return choiceScopedObjectives;
-
-    const choiceOrderedObjectiveScope = choiceContexts
-        .map((context) => objectiveScopeForBranchStepOrder(allObjectives, context.branchStepOrder, renderedStep.revealContext))
-        .find((scope): scope is { objectives: StrategyObjective[]; objectiveIndexOffset: number } => Boolean(scope));
-    if (choiceOrderedObjectiveScope) return choiceOrderedObjectiveScope;
-
-    const hasChoiceKeyedRows = renderedStep.choices.some((choice) => choice.choiceKey);
-    if (choiceContexts.length > 0 || hasChoiceKeyedRows) {
-        return { objectives: [], objectiveIndexOffset: 0 };
-    }
-
-    const indexCandidates = stepIndexCandidates(renderedStep.step, renderedStep.stepIndex);
-    const stepScopedLoreSections = entry.loreView.sections.filter((section) => (
-        section.stepIndex != null && indexCandidates.has(section.stepIndex)
-    ));
-    const stepScopedObjectives = objectivesForLoreSections(allObjectives, stepScopedLoreSections, renderedStep.revealContext);
-    if (stepScopedObjectives) return stepScopedObjectives;
-
-    const preferredIndex = Math.min(Math.max(renderedStep.stepIndex, 0), objectives.length - 1);
-    return {
-        objectives: [objectives[preferredIndex]],
-        objectiveIndexOffset: visibleObjectiveEntries[preferredIndex]?.index ?? preferredIndex,
-    };
-}
-
-function strategyObjectiveScopeForRevealedContinuations(
-    entry: QuestExplorerEntry,
-    renderedStep: RenderedPathStep
-): { objectives: StrategyObjective[]; objectiveIndexOffset: number } | null {
-    const objectives = entry.strategyView.objectives;
-    if (objectives.length === 0) return null;
-
-    const choiceContexts = readerRevealedChoiceContextsForStep(renderedStep);
-    if (choiceContexts.length === 0) return null;
-
-    const revealContext = revealContextForRevealedContinuations(renderedStep);
-    const choiceScopedLoreSections = loreSectionsForChoiceContexts(entry.loreView.sections, choiceContexts, revealContext);
-    const choiceScopedObjectives = objectivesForLoreSections(objectives, choiceScopedLoreSections, revealContext);
-    return choiceScopedObjectives ?? null;
-}
-
 function EntryStrategyContent({
     entry,
     objectives: scopedObjectives,
@@ -870,524 +578,6 @@ function EntryStrategyContent({
     );
 }
 
-function StrategyDossier({
-    model,
-    step,
-    onChoose,
-    debugChoiceDetails,
-    projectedDebugDetails,
-}: {
-    model: StrategyDossierModel;
-    step: QuestProgressionStep;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-    debugChoiceDetails?: Map<string, string>;
-    projectedDebugDetails?: string[];
-}) {
-    return (
-        <div className="questExplorer-strategyDossier">
-            <StrategyDossierSection title="Chapter Tactical Brief">
-                <div className="questExplorer-strategyDossierBrief">
-                    <span>{model.brief.stepLabel} of {model.brief.totalSteps}</span>
-                    <strong>{model.brief.title}</strong>
-                    {model.brief.summaryLines.length > 0 ? (
-                        model.brief.summaryLines.map((line, index) => <p key={`${model.brief.title}:summary:${index}`}>{line}</p>)
-                    ) : (
-                        <p>No tactical summary is attached to this step.</p>
-                    )}
-                </div>
-            </StrategyDossierSection>
-
-            <StrategyDossierSection title="Current Objective">
-                <StrategyDossierObjectiveList
-                    objectives={model.objectives}
-                    emptyLabel="No strategy objectives are attached to this step."
-                />
-            </StrategyDossierSection>
-
-            <div className="questExplorer-strategyDossierTwin">
-                <StrategyDossierSection title="Requirements">
-                    <StrategyDossierList
-                        items={model.requirements}
-                        emptyLabel="No requirements recorded."
-                        tone="requirement"
-                    />
-                </StrategyDossierSection>
-                <StrategyDossierSection title="Rewards">
-                    <StrategyDossierList
-                        items={model.rewards}
-                        emptyLabel="No rewards recorded."
-                        tone="reward"
-                    />
-                </StrategyDossierSection>
-            </div>
-
-            <StrategyDossierSection title="Selected Path">
-                {model.selectedPathSteps.length > 0 ? (
-                    <ol className="questExplorer-strategyPathBreadcrumb">
-                        {model.selectedPathSteps.map((pathStep) => (
-                            <StrategyPathBreadcrumbItem pathStep={pathStep} key={pathStep.id} />
-                        ))}
-                    </ol>
-                ) : (
-                    <p className="questExplorer-strategyDossierEmpty">No path is being simulated yet.</p>
-                )}
-            </StrategyDossierSection>
-
-            <StrategyDossierSection title="Decision Options">
-                <StrategyBranchComparison
-                    groups={model.branchComparison.groups}
-                    emptyLabel={model.branchComparison.emptyLabel}
-                    selectedOption={model.branchComparison.selectedOption}
-                    step={step}
-                    debugChoiceDetails={debugChoiceDetails}
-                    onChoose={onChoose}
-                />
-            </StrategyDossierSection>
-
-            <StrategyDossierSection title="Projected Outcome">
-                {model.projectedOutcome ? (
-                    <div className="questExplorer-strategyProjectedOutcome">
-                        <strong>{model.projectedOutcome.title}</strong>
-                        {model.projectedOutcome.lines.map((line, index) => (
-                            <p key={`${model.projectedOutcome?.title}:line:${index}`}>{line}</p>
-                        ))}
-                        <StrategyDossierObjectiveList objectives={model.projectedOutcome.objectives} />
-                        <div className="questExplorer-stepObjectiveMetaGrid">
-                            <InlineMetaList
-                                label="Requirements"
-                                values={model.projectedOutcome.requirements}
-                                tone="requirement"
-                            />
-                            <InlineMetaList
-                                label="Rewards"
-                                values={model.projectedOutcome.rewards}
-                                tone="reward"
-                            />
-                        </div>
-                        {projectedDebugDetails?.map((detail, index) => (
-                            <span className="questExplorer-choiceDebugMeta" key={`projected-debug:${index}`}>{detail}</span>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="questExplorer-strategyDossierEmpty">Choose a path to project the next outcome.</p>
-                )}
-            </StrategyDossierSection>
-
-            <StrategyDossierSection title="Path Markers">
-                {model.markers.length > 0 ? (
-                    <div className="questExplorer-strategyDossierMarkers">
-                        {model.markers.map((marker, index) => (
-                            <StrategyDossierMarkerPill marker={marker} key={`${marker.kind}:${marker.detail}:${index}`} />
-                        ))}
-                    </div>
-                ) : (
-                    <p className="questExplorer-strategyDossierEmpty">No leads, convergence, failure, or unresolved markers are active.</p>
-                )}
-            </StrategyDossierSection>
-        </div>
-    );
-}
-
-function StrategyBranchComparison({
-    groups,
-    emptyLabel,
-    selectedOption,
-    step,
-    debugChoiceDetails,
-    onChoose,
-}: {
-    groups: StrategyDossierBranchComparisonGroup[];
-    emptyLabel: string;
-    selectedOption: StrategyDossierBranchOption | null;
-    step: QuestProgressionStep;
-    debugChoiceDetails?: Map<string, string>;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-}) {
-    if (groups.length === 0) {
-        return <p className="questExplorer-strategyDossierEmpty">{emptyLabel}</p>;
-    }
-
-    return (
-        <div className="questExplorer-strategyComparisonGroups">
-            {selectedOption ? <StrategySelectedOptionSummary option={selectedOption} /> : null}
-            {groups.map((group) => (
-                <section className="questExplorer-strategyComparisonGroup" key={group.id} aria-label={group.label}>
-                    <h4>{group.label}</h4>
-                    <div className="questExplorer-strategyComparisonGrid">
-                        {group.options.map((option) => (
-                            <StrategyBranchComparisonOption
-                                option={option}
-                                step={step}
-                                debugChoiceDetails={debugChoiceDetails}
-                                onChoose={onChoose}
-                                key={option.id}
-                            />
-                        ))}
-                    </div>
-                </section>
-            ))}
-        </div>
-    );
-}
-
-function StrategyPathBreadcrumbItem({ pathStep }: { pathStep: StrategyDossierSelectedPathStep }) {
-    return (
-        <li className={pathStep.isCurrent ? "is-current" : undefined}>
-            <span className="questExplorer-strategyPathStepLabel">{pathStep.stepLabel}</span>
-            <strong>{pathStep.label}</strong>
-            {pathStep.isCurrent ? <em>Current</em> : null}
-        </li>
-    );
-}
-
-function StrategySelectedOptionSummary({ option }: { option: StrategyDossierBranchOption }) {
-    return (
-        <section className="questExplorer-strategySelectedSummary" aria-label="Selected Option Summary">
-            <header>
-                <span>Selected Option</span>
-                <strong>{option.label}</strong>
-            </header>
-            {option.outcomeLines.length > 0 ? (
-                <p>{option.outcomeLines.join(" ")}</p>
-            ) : (
-                <p>No outcome preview is recorded for this option.</p>
-            )}
-            <div className="questExplorer-stepObjectiveMetaGrid">
-                <InlineMetaList label="Requirements" values={option.requirements} tone="requirement" />
-                <InlineMetaList label="Rewards" values={option.rewards} tone="reward" />
-                <InlineMetaList label="Leads To" values={option.leadsTo} tone="objective" />
-            </div>
-            {option.markers.length > 0 ? (
-                <div className="questExplorer-strategyComparisonMarkers">
-                    {option.markers.map((marker, index) => (
-                        <StrategyDossierMarkerPill marker={marker} key={`${option.id}:summary:${marker.kind}:${marker.detail}:${index}`} />
-                    ))}
-                </div>
-            ) : null}
-        </section>
-    );
-}
-
-function StrategyBranchComparisonOption({
-    option,
-    step,
-    debugChoiceDetails,
-    onChoose,
-}: {
-    option: StrategyDossierBranchOption;
-    step: QuestProgressionStep;
-    debugChoiceDetails?: Map<string, string>;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-}) {
-    const isActive = option.isSelected || option.isInSelectedPath;
-
-    return (
-        <button
-            type="button"
-            className={`questExplorer-strategyComparisonOption${option.isSelected ? " is-selected" : ""}${option.isInSelectedPath ? " is-inPath" : ""}`}
-            aria-pressed={isActive}
-            aria-current={option.isSelected ? "true" : undefined}
-            onClick={() => onChoose(step, option.choice)}
-        >
-            <span className="questExplorer-strategyComparisonStatus">
-                {option.isSelected ? "Selected" : option.isInSelectedPath ? "In Path" : "Alternative"}
-            </span>
-            <span className="questExplorer-strategyComparisonHeader">
-                <small>{option.eyebrow}</small>
-                <strong>{option.label}</strong>
-            </span>
-            {option.outcomeLines.length > 0 ? (
-                <span className="questExplorer-strategyComparisonOutcome">
-                    {option.outcomeLines.join(" ")}
-                </span>
-            ) : null}
-            <div className="questExplorer-strategyComparisonMeta">
-                <InlineMetaList label="Requirements" values={option.requirements} tone="requirement" />
-                <InlineMetaList label="Rewards" values={option.rewards} tone="reward" />
-                <InlineMetaList label="Leads To" values={option.leadsTo} tone="objective" />
-            </div>
-            {option.markers.length > 0 ? (
-                <div className="questExplorer-strategyComparisonMarkers">
-                    {option.markers.map((marker, index) => (
-                        <StrategyDossierMarkerPill marker={marker} key={`${option.id}:${marker.kind}:${marker.detail}:${index}`} />
-                    ))}
-                </div>
-            ) : null}
-            {debugChoiceDetails?.get(option.choice.id) ? (
-                <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(option.choice.id)}</span>
-            ) : null}
-        </button>
-    );
-}
-
-function StrategyDossierSection({
-    title,
-    children,
-}: {
-    title: string;
-    children: ReactNode;
-}) {
-    return (
-        <section className="questExplorer-strategyDossierSection" aria-label={title}>
-            <h3>{title}</h3>
-            {children}
-        </section>
-    );
-}
-
-function StrategyDossierObjectiveList({
-    objectives,
-    emptyLabel,
-}: {
-    objectives: StrategyDossierObjective[];
-    emptyLabel?: string;
-}) {
-    if (objectives.length === 0) {
-        return emptyLabel ? <p className="questExplorer-strategyDossierEmpty">{emptyLabel}</p> : null;
-    }
-
-    return (
-        <div className="questExplorer-strategyDossierObjectives">
-            {objectives.map((objective) => (
-                <section className="questExplorer-strategyDossierObjective" key={objective.id}>
-                    <header>
-                        <span>{objective.phaseLabel}</span>
-                        <strong>{objective.label}</strong>
-                    </header>
-                    <p>{objective.text}</p>
-                    <div className="questExplorer-stepObjectiveMetaGrid">
-                        <InlineMetaList label="Requirements" values={objective.requirements} tone="requirement" />
-                        <InlineMetaList label="Rewards" values={objective.rewards} tone="reward" />
-                    </div>
-                </section>
-            ))}
-        </div>
-    );
-}
-
-function StrategyDossierList({
-    items,
-    emptyLabel,
-    tone,
-}: {
-    items: string[];
-    emptyLabel: string;
-    tone: "requirement" | "reward";
-}) {
-    if (items.length === 0) {
-        return <p className="questExplorer-strategyDossierEmpty">{emptyLabel}</p>;
-    }
-
-    return (
-        <ul className={`questExplorer-strategyDossierList questExplorer-strategyDossierList--${tone}`}>
-            {items.map((item, index) => (
-                <li key={`${tone}:${index}`}>{item}</li>
-            ))}
-        </ul>
-    );
-}
-
-function StrategyDossierMarkerPill({ marker }: { marker: StrategyDossierMarker }) {
-    return (
-        <span className={`questExplorer-strategyDossierMarker questExplorer-strategyDossierMarker--${marker.kind}`}>
-            <span className="questExplorer-strategyDossierMarkerIcon" aria-hidden="true" />
-            <strong>{marker.label}</strong>
-            <span className="questExplorer-strategyDossierMarkerDetail">{marker.detail}</span>
-        </span>
-    );
-}
-
-function stepIndexCandidates(step: QuestProgressionStep, stepIndex: number): Set<number> {
-    return new Set([
-        stepIndex,
-        step.stepNumber != null ? step.stepNumber - 1 : null,
-        step.stepOrder != null ? step.stepOrder - 1 : null,
-    ].filter((value): value is number => value != null && Number.isFinite(value) && value >= 0));
-}
-
-function leadingSharedLoreSections(sections: LoreSection[]): LoreSection[] {
-    const sharedSections: LoreSection[] = [];
-    for (const section of sections) {
-        if (
-            section.stepIndex != null
-            || section.objectiveKey
-            || section.choiceKey
-            || isResolutionLoreSection(section)
-        ) {
-            break;
-        }
-        sharedSections.push(section);
-    }
-    return sharedSections;
-}
-
-function loreSectionsForStep(entry: QuestExplorerEntry, renderedStep: RenderedPathStep): LoreSection[] {
-    const sections = entry.loreView.sections.filter((section) => revealVisible(section, renderedStep.revealContext));
-    if (sections.length <= 1) return sections;
-
-    const sharedOpeningSections = renderedStep.stepIndex === 0
-        ? leadingSharedLoreSections(sections)
-        : [];
-    const choiceContexts = readerCurrentChoiceContextsForStep(renderedStep);
-    const choiceScopedSections = loreSectionsForChoiceContexts(sections, choiceContexts, renderedStep.revealContext);
-    if (choiceScopedSections.length > 0) {
-        return uniqueLoreSections([...sharedOpeningSections, ...choiceScopedSections]);
-    }
-
-    const choiceOrderedStepIndexes = new Set(choiceContexts
-        .map((context) => context.branchStepOrder != null ? context.branchStepOrder - 1 : null)
-        .filter((value): value is number => value != null && Number.isFinite(value) && value >= 0));
-    if (choiceOrderedStepIndexes.size > 0) {
-        const choiceOrderedSections = sections.filter((section) => (
-            section.stepIndex != null && choiceOrderedStepIndexes.has(section.stepIndex)
-        ));
-        if (choiceOrderedSections.length > 0) {
-            return uniqueLoreSections([...sharedOpeningSections, ...choiceOrderedSections]);
-        }
-    }
-
-    const hasChoiceKeyedRows = renderedStep.choices.some((choice) => choice.choiceKey);
-    if (choiceContexts.length > 0 || hasChoiceKeyedRows) {
-        return sharedOpeningSections;
-    }
-
-    const indexCandidates = stepIndexCandidates(renderedStep.step, renderedStep.stepIndex);
-    const stepTaggedSections = sections.filter((section) => (
-        section.stepIndex != null && indexCandidates.has(section.stepIndex)
-    ));
-    if (stepTaggedSections.length > 0) {
-        return uniqueLoreSections([...sharedOpeningSections, ...stepTaggedSections]);
-    }
-
-    const strategyScope = strategyObjectiveScopeForStep(entry, renderedStep);
-    const objectiveKeys = new Set(strategyScope.objectives.map((objective) => objective.objectiveKey).filter(Boolean));
-    const objectiveTaggedSections = sections.filter((section) => (
-        section.objectiveKey != null && objectiveKeys.has(section.objectiveKey)
-    ));
-    if (objectiveTaggedSections.length > 0) return objectiveTaggedSections;
-
-    const fallbackSection = sections[Math.min(Math.max(renderedStep.stepIndex, 0), sections.length - 1)];
-    return fallbackSection ? [fallbackSection] : [];
-}
-
-function loreSectionsForRevealedContinuations(entry: QuestExplorerEntry, renderedStep: RenderedPathStep): LoreSection[] {
-    const choiceContexts = readerRevealedChoiceContextsForStep(renderedStep);
-    if (choiceContexts.length === 0) return [];
-    return loreSectionsForChoiceContexts(entry.loreView.sections, choiceContexts, revealContextForRevealedContinuations(renderedStep));
-}
-
-function uniqueLoreSections(sections: LoreSection[]): LoreSection[] {
-    const seen = new Set<string>();
-    return sections.filter((section) => {
-        if (seen.has(section.sectionKey)) return false;
-        seen.add(section.sectionKey);
-        return true;
-    });
-}
-
-function InlineMetaList({
-    label,
-    values,
-    tone = "objective",
-}: {
-    label: string;
-    values: string[];
-    tone?: "objective" | "requirement" | "reward";
-}) {
-    const cleanValues = values.filter(Boolean);
-    if (cleanValues.length === 0) return null;
-
-    return (
-        <div className={`questExplorer-inlineMeta questExplorer-inlineMeta--${tone}`}>
-            <strong>{label}</strong>
-            <ul>
-                {cleanValues.map((value, index) => (
-                    <li key={`${label}:${index}`}>{value}</li>
-                ))}
-            </ul>
-        </div>
-    );
-}
-
-function LoreSectionList({ entry, sections: scopedSections }: { entry: QuestExplorerEntry; sections?: LoreSection[] }) {
-    const sections = scopedSections ?? entry.loreView.sections;
-
-    if (sections.length === 0) {
-        return entry.summaryLines.length > 0
-            ? <StepSummary entry={entry} />
-            : <p className="questExplorer-emptyState">No lore sections are attached to this step.</p>;
-    }
-
-    if (isMinorFactionVariantQuest(entry)) {
-        const paths = objectivePaths(entry);
-        const sharedSections = sections.filter((section) => !section.objectiveKey && !isResolutionLoreSection(section));
-        const resolutionSections = sections.filter(isResolutionLoreSection);
-
-        return (
-            <div className="questExplorer-loreSectionList questExplorer-loreSectionList--paths">
-                {sharedSections.map((section) => (
-                    <LoreSectionArticle section={section} key={section.sectionKey} />
-                ))}
-                <div className="questExplorer-lorePathList">
-                    {paths.map((path, index) => (
-                        <section
-                            className="questExplorer-lorePath"
-                            key={path.objective.objectiveKey ?? `${entry.entryKey}:path:${index}`}
-                        >
-                            <header className="questExplorer-lorePathHeader">
-                                <span>{objectiveVariantLabel(index)}</span>
-                                <strong>{path.objective.text}</strong>
-                            </header>
-                            {path.sections.length > 0 ? (
-                                <div className="questExplorer-lorePathSections">
-                                    {path.sections.map((section) => (
-                                        <LoreSectionLines section={section} key={section.sectionKey} />
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="questExplorer-emptyState">No lore section is attached to this objective.</p>
-                            )}
-                        </section>
-                    ))}
-                </div>
-                {resolutionSections.map((section) => (
-                    <LoreSectionArticle section={section} key={section.sectionKey} title="Resolution" />
-                ))}
-            </div>
-        );
-    }
-
-    return (
-        <div className="questExplorer-loreSectionList">
-            {sections.map((section) => (
-                <LoreSectionArticle section={section} key={section.sectionKey} />
-            ))}
-        </div>
-    );
-}
-
-function LoreSectionArticle({ section, title }: { section: LoreSection; title?: string }) {
-    return (
-        <section className="questExplorer-loreSection">
-            <h4>{title ?? phaseDisplayLabel(section.phase, "Chronicle")}</h4>
-            <LoreSectionLines section={section} />
-        </section>
-    );
-}
-
-function LoreSectionLines({ section }: { section: LoreSection }) {
-    return (
-        <>
-            {section.lines.map((line, index) => (
-                <p className={`questExplorer-loreLine questExplorer-loreLine--${line.role || "narrator"}`} key={`${section.sectionKey}:${index}`}>
-                    {line.speakerLabel ? <strong className="questExplorer-loreSpeaker">{line.speakerLabel}:</strong> : null}
-                    <span>{line.text}</span>
-                </p>
-            ))}
-        </>
-    );
-}
-
 function ProgressionPips({ total, activeIndex }: { total: number; activeIndex: number }) {
     return (
         <span className="questExplorer-stepPips" aria-hidden="true">
@@ -1404,76 +594,6 @@ function stepTitle(
     entriesByKey: Record<string, QuestExplorerEntry>
 ): string {
     return entry?.title || step.title || entriesByKey[step.detailEntryKey]?.title || "Unknown Horizons";
-}
-
-function choiceTargetsCurrentDisplayStep(
-    step: QuestProgressionStep,
-    choice: QuestPathChoice,
-    displayEntry: QuestExplorerEntry | null,
-    entriesByKey: Record<string, QuestExplorerEntry>
-): boolean {
-    if (!displayEntry) return false;
-
-    const stepKeys = new Set(stepIdentityKeys(step).flatMap((key) => entryKeysWithAliases(key, entriesByKey)));
-    return uniqueStrings([choice.targetEntryKey, ...choice.nextEntryKeys])
-        .flatMap((key) => entryKeysWithAliases(key, entriesByKey))
-        .some((key) => stepKeys.has(key));
-}
-
-function isStructuralContextChoice(
-    step: QuestProgressionStep,
-    choice: QuestPathChoice,
-    displayEntry: QuestExplorerEntry | null,
-    entriesByKey: Record<string, QuestExplorerEntry>,
-    showRawHiddenRows: boolean
-): boolean {
-    if (showRawHiddenRows) return false;
-    if (!choice.id.startsWith("variant:")) return false;
-    if (!displayEntry) return false;
-    if (choice.requirementLines.length > 0 || choice.rewardLines.length > 0) return false;
-    if (!choiceTargetsCurrentDisplayStep(step, choice, displayEntry, entriesByKey)) return false;
-
-    return [choice.label, choice.continuationTitle]
-        .filter(Boolean)
-        .some((label) => label === displayEntry.title);
-}
-
-function selectedPathBranchKeys(choices: QuestPathChoice[], selectedChoice: QuestPathChoiceSelection | null): Set<string> {
-    if (!selectedChoice) return new Set();
-    const selected = choices.find((choice) => choice.id === selectedChoice.choiceId);
-    return new Set([
-        ...(selected?.prerequisiteBranchKeys ?? []),
-        selected?.parentBranchKey ?? null,
-    ].filter((branchKey): branchKey is string => Boolean(branchKey)));
-}
-
-function choicePresentationGroups(
-    step: QuestProgressionStep,
-    choices: QuestPathChoice[],
-    selectedChoice: QuestPathChoiceSelection | null,
-    displayEntry: QuestExplorerEntry | null,
-    entriesByKey: Record<string, QuestExplorerEntry>,
-    showRawHiddenRows: boolean,
-    debugChoiceDetails?: Map<string, string>
-): ChoicePresentationGroups {
-    const structuralContextChoices = choices.filter((choice) => (
-        isStructuralContextChoice(step, choice, displayEntry, entriesByKey, showRawHiddenRows)
-    ));
-    const structuralIds = new Set(structuralContextChoices.map((choice) => choice.id));
-    const actionableChoices = choices.filter((choice) => !structuralIds.has(choice.id));
-    const activeContinuationChoices = showRawHiddenRows
-        ? []
-        : actionableChoices.filter((choice) => (
-            choice.sectionRole === "continuation" && choice.prerequisiteBranchKeys.length > 0
-        ));
-    const continuationIds = new Set(activeContinuationChoices.map((choice) => choice.id));
-
-    return {
-        structuralContextChoices,
-        primaryChoices: actionableChoices.filter((choice) => !continuationIds.has(choice.id)),
-        activeContinuationChoices,
-        selectedPathBranchKeys: selectedPathBranchKeys(choices, selectedChoice),
-    };
 }
 
 function ChoiceStageHeading({ children }: { children: string }) {
@@ -1562,7 +682,7 @@ function StrategyChoiceGate({
 }) {
     if (choices.length === 0) return null;
 
-    const presentation = choicePresentationGroups(step, choices, selectedChoice, displayEntry, entriesByKey, showRawHiddenRows, debugChoiceDetails);
+    const presentation = choicePresentationGroups(step, choices, selectedChoice, displayEntry, entriesByKey, showRawHiddenRows);
     const hasActionableChoices = presentation.primaryChoices.length > 0 || presentation.activeContinuationChoices.length > 0;
     const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
 
@@ -1630,184 +750,6 @@ function InlineChoiceMeta({ label, values }: { label: string; values: string[] }
     );
 }
 
-function LoreChoiceButton({
-    step,
-    choice,
-    selectedChoice,
-    selectedPathBranchKeys,
-    debugChoiceDetails,
-    onChoose,
-}: {
-    step: QuestProgressionStep;
-    choice: QuestPathChoice;
-    selectedChoice: QuestPathChoiceSelection | null;
-    selectedPathBranchKeys: Set<string>;
-    debugChoiceDetails?: Map<string, string>;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-}) {
-    const isSelected = selectedChoice?.choiceId === choice.id;
-    const isInSelectedPath = !isSelected && Boolean(choice.branchKey && selectedPathBranchKeys.has(choice.branchKey));
-    const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
-
-    return (
-        <button
-            type="button"
-            className={`questExplorer-loreChoice questExplorer-loreChoice--${choice.accent}${isSelected ? " is-selected" : ""}${isInSelectedPath ? " is-inPath" : ""}`}
-            aria-pressed={isSelected || isInSelectedPath}
-            aria-current={isSelected ? "true" : undefined}
-            onClick={() => onChoose(step, choice)}
-            key={`${step.stepKey}:${choice.id}`}
-        >
-            <span className="questExplorer-loreChoiceMark" aria-hidden="true" />
-            <span className="questExplorer-loreChoiceCopy">
-                <small>{choice.eyebrow}</small>
-                <strong>{choice.label}</strong>
-                {previewLines.length > 0 ? <span>{previewLines.join(" ")}</span> : null}
-                {debugChoiceDetails?.get(choice.id) ? (
-                    <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
-                ) : null}
-            </span>
-        </button>
-    );
-}
-
-function LoreChoiceContext({ choice }: { choice: QuestPathChoice }) {
-    const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
-
-    return (
-        <div className="questExplorer-loreChoiceContext" key={choice.id}>
-            <span className="questExplorer-loreChoiceMark" aria-hidden="true" />
-            <span className="questExplorer-loreChoiceCopy">
-                <small>{choice.eyebrow}</small>
-                <strong>{choice.label}</strong>
-                {previewLines.length > 0 ? <span>{previewLines.join(" ")}</span> : null}
-            </span>
-        </div>
-    );
-}
-
-function LoreRevealedContinuation({
-    choice,
-    debugChoiceDetails,
-}: {
-    choice: QuestPathChoice;
-    debugChoiceDetails?: Map<string, string>;
-}) {
-    const previewLines = (choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines)
-        .filter((line) => line !== choice.label && line !== choice.targetSummaryLine);
-
-    return (
-        <section className="questExplorer-revealedContinuation questExplorer-revealedContinuation--lore" key={choice.id}>
-            <span className="questExplorer-revealedContinuationLabel">Path Revealed</span>
-            <div className="questExplorer-revealedContinuationCopy">
-                <strong>{choice.label}</strong>
-                {previewLines.map((line, index) => (
-                    <p key={`${choice.id}:line:${index}`}>{line}</p>
-                ))}
-                {debugChoiceDetails?.get(choice.id) ? (
-                    <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
-                ) : null}
-            </div>
-        </section>
-    );
-}
-
-function LoreRevealedContinuations({
-    choices,
-    debugChoiceDetails,
-}: {
-    choices: QuestPathChoice[];
-    debugChoiceDetails?: Map<string, string>;
-}) {
-    if (choices.length === 0) return null;
-
-    return (
-        <div className="questExplorer-revealedContinuationList">
-            {choices.map((choice) => (
-                <LoreRevealedContinuation choice={choice} debugChoiceDetails={debugChoiceDetails} key={choice.id} />
-            ))}
-        </div>
-    );
-}
-
-function LoreBranchMoment({
-    step,
-    choices,
-    selectedChoice,
-    displayEntry,
-    entriesByKey,
-    showRawHiddenRows,
-    debugChoiceDetails,
-    onChoose,
-}: {
-    step: QuestProgressionStep;
-    choices: QuestPathChoice[];
-    selectedChoice: QuestPathChoiceSelection | null;
-    displayEntry: QuestExplorerEntry | null;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    showRawHiddenRows: boolean;
-    debugChoiceDetails?: Map<string, string>;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-}) {
-    if (choices.length === 0) return null;
-
-    const presentation = choicePresentationGroups(step, choices, selectedChoice, displayEntry, entriesByKey, showRawHiddenRows, debugChoiceDetails);
-    const hasActionableChoices = presentation.primaryChoices.length > 0 || presentation.activeContinuationChoices.length > 0;
-    const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
-
-    return (
-        <section className="questExplorer-loreBranchMoment" aria-label={`${stepPositionLabel(step)} narrative choices`}>
-            <h3>Choose a Path</h3>
-            {presentation.structuralContextChoices.length > 0 ? (
-                <div className="questExplorer-choiceContextList">
-                    {presentation.structuralContextChoices.map((choice) => (
-                        <LoreChoiceContext choice={choice} key={choice.id} />
-                    ))}
-                </div>
-            ) : null}
-            {presentation.primaryChoices.length > 0 ? (
-                <div className="questExplorer-choiceStage">
-                    {showPrimaryHeading ? <ChoiceStageHeading>Path Choices</ChoiceStageHeading> : null}
-                    <div>
-                        {presentation.primaryChoices.map((choice) => (
-                            <LoreChoiceButton
-                                step={step}
-                                choice={choice}
-                                selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
-                                debugChoiceDetails={debugChoiceDetails}
-                                onChoose={onChoose}
-                                key={`${step.stepKey}:${choice.id}`}
-                            />
-                        ))}
-                    </div>
-                </div>
-            ) : null}
-            {presentation.activeContinuationChoices.length > 0 ? (
-                <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    <ChoiceStageHeading>Next Choices</ChoiceStageHeading>
-                    <div>
-                        {presentation.activeContinuationChoices.map((choice) => (
-                            <LoreChoiceButton
-                                step={step}
-                                choice={choice}
-                                selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
-                                debugChoiceDetails={debugChoiceDetails}
-                                onChoose={onChoose}
-                                key={`${step.stepKey}:${choice.id}`}
-                            />
-                        ))}
-                    </div>
-                </div>
-            ) : null}
-            {!selectedChoice && hasActionableChoices ? (
-                <p className="questExplorer-choiceHint">The chronicle waits for your choice.</p>
-            ) : null}
-        </section>
-    );
-}
-
 function RepeatedDetailCheckpoint() {
     return (
         <div className="questExplorer-stepCheckpoint">
@@ -1847,8 +789,7 @@ function StrategyStep({
         renderedStep.selectedChoice,
         renderedStep.displayEntry,
         entriesByKey,
-        showRawHiddenRows,
-        debugChoiceDetails
+        showRawHiddenRows
     );
     const strategyDossier = buildStrategyDossierModel({
         renderedStep,
@@ -1915,6 +856,7 @@ function StrategyStep({
                             debugChoiceDetails={debugChoiceDetails}
                             onChoose={onChoose}
                             projectedDebugDetails={projectedDebugDetails}
+                            showContinuityStrip={renderedStep.isActive}
                         />
                     </div>
                 ) : (
@@ -1924,137 +866,6 @@ function StrategyStep({
 
             {!renderedStep.displayEntry ? fallbackChoiceGate : null}
         </article>
-    );
-}
-
-function LoreStep({
-    renderedStep,
-    entriesByKey,
-    showRawHiddenRows,
-    debugChoiceDetails,
-    onChoose,
-}: {
-    renderedStep: RenderedPathStep;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    showRawHiddenRows: boolean;
-    debugChoiceDetails?: Map<string, string>;
-    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
-}) {
-    const title = stepTitle(renderedStep.step, renderedStep.displayEntry, entriesByKey);
-    const loreSections = renderedStep.displayEntry
-        ? loreSectionsForStep(renderedStep.displayEntry, renderedStep)
-        : undefined;
-    const revealedLoreSections = renderedStep.displayEntry
-        ? loreSectionsForRevealedContinuations(renderedStep.displayEntry, renderedStep)
-        : [];
-
-    return (
-        <article
-            className={`questExplorer-questPathStep questExplorer-loreStep${renderedStep.isActive ? " is-active" : ""}`}
-            aria-current={renderedStep.isActive ? "step" : undefined}
-        >
-            <div className="questExplorer-stepRule" aria-hidden="true" />
-            <header className="questExplorer-stepHeader questExplorer-loreStepHeader">
-                <div>
-                    <span className="questExplorer-stepLabel">{stepPositionLabel(renderedStep.step)}</span>
-                </div>
-                <strong className="questExplorer-stepTitle">{title}</strong>
-            </header>
-
-            {renderedStep.rendersRepeatedDetailContent ? (
-                <RepeatedDetailCheckpoint />
-            ) : (
-                renderedStep.displayEntry ? (
-                    <LoreSectionList entry={renderedStep.displayEntry} sections={loreSections} />
-                ) : (
-                    <p className="questExplorer-emptyState">This progression step has no entry-backed content in the current DTO.</p>
-                )
-            )}
-
-            <LoreBranchMoment
-                step={renderedStep.step}
-                choices={renderedStep.choices}
-                selectedChoice={renderedStep.selectedChoice}
-                displayEntry={renderedStep.displayEntry}
-                entriesByKey={entriesByKey}
-                showRawHiddenRows={showRawHiddenRows}
-                debugChoiceDetails={debugChoiceDetails}
-                onChoose={onChoose}
-            />
-
-            <LoreRevealedContinuations
-                choices={renderedStep.revealedContinuations}
-                debugChoiceDetails={debugChoiceDetails}
-            />
-
-            {renderedStep.displayEntry && revealedLoreSections.length > 0 && !renderedStep.revealedContinuationsBecomeSteps ? (
-                <div className="questExplorer-revealedBeatBody questExplorer-revealedBeatBody--lore">
-                    <LoreSectionList entry={renderedStep.displayEntry} sections={revealedLoreSections} />
-                </div>
-            ) : null}
-        </article>
-    );
-}
-
-function continuationChapterMessage(entry: QuestExplorerEntry | null): string {
-    const title = entry?.title ?? "the next chapter";
-    const chapter = entry?.navigation.chapterLabel
-        ?? (entry?.navigation.chapter != null ? `Chapter ${entry.navigation.chapter}` : null);
-
-    return chapter
-        ? `This path continues in ${chapter}: ${title}.`
-        : `This path continues with ${title}.`;
-}
-
-function StrategyPathState({
-    flow,
-    entriesByKey,
-}: {
-    flow: QuestPathFlow;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-}) {
-    return (
-        <>
-            {flow.unresolvedContinuation ? (
-                <section className="questExplorer-pathState questExplorer-strategyPathState questExplorer-pathState--unresolved">
-                    <span>Path Continues</span>
-                    <p>The choice "{flow.unresolvedContinuation.label}" is modeled, but the archive does not identify the next continuation step. The chronicle stops here rather than guessing.</p>
-                </section>
-            ) : null}
-
-            {flow.reachedContinuationEntryKey ? (
-                <section className="questExplorer-pathState questExplorer-strategyPathState questExplorer-pathState--chapter">
-                    <span>Path Continues</span>
-                    <p>{continuationChapterMessage(entriesByKey[flow.reachedContinuationEntryKey] ?? null)}</p>
-                </section>
-            ) : null}
-        </>
-    );
-}
-
-function LorePathState({
-    flow,
-    entriesByKey,
-}: {
-    flow: QuestPathFlow;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-}) {
-    return (
-        <>
-            {flow.unresolvedContinuation ? (
-                <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--unresolved">
-                    <span>Path Continues</span>
-                    <p>The choice "{flow.unresolvedContinuation.label}" is preserved, but the archive does not identify the next continuation step. The chronicle closes this page rather than guessing.</p>
-                </section>
-            ) : null}
-
-            {flow.reachedContinuationEntryKey ? (
-                <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--chapter">
-                    <span>Path Continues</span>
-                    <p>{continuationChapterMessage(entriesByKey[flow.reachedContinuationEntryKey] ?? null)}</p>
-                </section>
-            ) : null}
-        </>
     );
 }
 
@@ -2108,261 +919,6 @@ function StrategyProgression({
     );
 }
 
-function LoreContinuousProgression({
-    stream,
-    fullProgression,
-    entriesByKey,
-    debugQuestProgression,
-    showRawHiddenRows,
-    onChoose,
-    activeRailEntryKey,
-}: {
-    stream: LoreChronicleStream;
-    fullProgression: QuestExplorerProgression | null;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    debugQuestProgression: boolean;
-    showRawHiddenRows: boolean;
-    onChoose: (segment: LoreChronicleSegment, step: QuestProgressionStep, choice: QuestPathChoice) => void;
-    activeRailEntryKey: string | null;
-}) {
-    if (stream.segments.length === 0) return null;
-
-    return (
-        <section className="questExplorer-questPathChronicle questExplorer-loreChronicle" aria-label="Selected progression">
-            {stream.segments.map((segment, segmentIndex) => {
-                const hasNextSegment = segmentIndex < stream.segments.length - 1;
-                const isScrollActive = Boolean(segment.railEntryKey && segment.railEntryKey === activeRailEntryKey);
-                const isActiveDebugSegment = activeRailEntryKey ? isScrollActive : segmentIndex === 0;
-                return (
-                    <section
-                        className={`questExplorer-loreChronicleSegment${isScrollActive ? " is-scrollActive" : ""}`}
-                        data-lore-segment-key={segment.segmentKey}
-                        data-rail-entry-key={segment.railEntryKey ?? ""}
-                        key={segment.segmentKey}
-                    >
-                        {segment.flow.renderedSteps.map((renderedStep) => (
-                            <LoreStep
-                                renderedStep={renderedStep}
-                                entriesByKey={entriesByKey}
-                                showRawHiddenRows={showRawHiddenRows}
-                                debugChoiceDetails={debugQuestProgression && isActiveDebugSegment
-                                    ? choiceDebugDetailsForStep(
-                                        renderedStep.step,
-                                        [...renderedStep.choices, ...renderedStep.revealedContinuations],
-                                        renderedStep.choiceDiagnostics,
-                                        segment.progression,
-                                        fullProgression,
-                                        entriesByKey,
-                                        renderedStep.revealedContinuations
-                                    )
-                                    : undefined}
-                                onChoose={(step, choice) => onChoose(segment, step, choice)}
-                                key={`${segment.segmentKey}:${renderedStep.step.stepKey}`}
-                            />
-                        ))}
-                        {hasNextSegment ? null : <LorePathState flow={segment.flow} entriesByKey={entriesByKey} />}
-                    </section>
-                );
-            })}
-        </section>
-    );
-}
-
-function debugList(values: string[]): string {
-    return values.length > 0 ? values.join(", ") : "none";
-}
-
-function debugChoiceSelection(selection: QuestPathChoiceSelection): string {
-    return [
-        `stepKey=${selection.stepKey || "implicit"}`,
-        `choiceId=${selection.choiceId}`,
-        `branchKey=${selection.branchKey ?? "none"}`,
-        `role=${selection.sectionRole ?? "none"}`,
-        `choiceGroupKey=${selection.choiceGroupKey ?? "none"}`,
-        `branchStepOrder=${selection.branchStepOrder ?? "none"}`,
-        `targetEntryKey=${selection.targetEntryKey ?? "none"}`,
-        `nextEntryKeys=${debugList(selection.nextEntryKeys)}`,
-    ].join(" | ");
-}
-
-function DebugRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
-    return (
-        <dl className="questExplorer-debugRows">
-            {rows.map((row) => (
-                <div key={row.label}>
-                    <dt>{row.label}</dt>
-                    <dd>{row.value}</dd>
-                </div>
-            ))}
-        </dl>
-    );
-}
-
-function QuestProgressionDebugPanel({
-    selectedEntry,
-    progression,
-    flow,
-    entriesByKey,
-    activeMode,
-    activeChoicePath,
-    debugChoicePathsByMode,
-    loreContextKey,
-    showRawHiddenRows,
-    onToggleRawHiddenRows,
-}: {
-    selectedEntry: QuestExplorerEntry;
-    progression: QuestDetailProgression | null;
-    flow: QuestPathFlow | null;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    activeMode: QuestExplorerMode;
-    activeChoicePath: QuestPathChoiceSelection[];
-    debugChoicePathsByMode: QuestModeDebugChoicePaths;
-    loreContextKey: string | null;
-    showRawHiddenRows: boolean;
-    onToggleRawHiddenRows: (value: boolean) => void;
-}) {
-    return (
-        <section className="questExplorer-debugPanel" aria-label="Quest progression debug">
-            <header className="questExplorer-debugPanelHeader">
-                <div>
-                    <span>Debug</span>
-                    <h3>Debug progression</h3>
-                </div>
-                <label className="questExplorer-debugToggle">
-                    <input
-                        type="checkbox"
-                        checked={showRawHiddenRows}
-                        onChange={(event) => onToggleRawHiddenRows(event.currentTarget.checked)}
-                    />
-                    <span>Show raw hidden rows</span>
-                </label>
-            </header>
-
-            <DebugRows
-                rows={[
-                    { label: "selected entry", value: selectedEntry.entryKey },
-                    {
-                        label: "questline",
-                        value: progression?.questline.questLineFamilyKey
-                            ?? progression?.questline.questLineKey
-                            ?? "none",
-                    },
-                    {
-                        label: "chapter",
-                        value: progression ? chapterPositionLabel(progression.chapter) : "none",
-                    },
-                    {
-                        label: "active mode",
-                        value: activeMode,
-                    },
-                    {
-                        label: "active selected choice path",
-                        value: debugChoicePath(activeChoicePath),
-                    },
-                    {
-                        label: "active selected branch path",
-                        value: debugBranchPath(activeChoicePath),
-                    },
-                    {
-                        label: "Lore context key",
-                        value: loreContextKey ?? "none",
-                    },
-                    {
-                        label: "Strategy selected choice path",
-                        value: debugChoicePath(debugChoicePathsByMode.strategy),
-                    },
-                    {
-                        label: "Lore selected choice path",
-                        value: debugChoicePath(debugChoicePathsByMode.lore),
-                    },
-                    {
-                        label: "unresolved continuation",
-                        value: flow?.unresolvedContinuation ? debugChoiceSelection(flow.unresolvedContinuation) : "none",
-                    },
-                    {
-                        label: "reached continuation entry",
-                        value: flow?.reachedContinuationEntryKey ?? "none",
-                    },
-                ]}
-            />
-
-            {flow?.renderedSteps.map((renderedStep) => {
-                const continuation = renderedStep.selectedChoice
-                    ? selectedChoiceContinuationKeys(renderedStep.selectedChoice, entriesByKey)
-                    : continuationKeys(renderedStep.displayEntry);
-                const variants = renderedStep.step.variants.map((variant) => [
-                    variant.entryKey,
-                    variant.variantKind ? `kind=${variant.variantKind}` : null,
-                    variant.branchLabel ? `branch=${variant.branchLabel}` : null,
-                ].filter(Boolean).join(" "));
-
-                return (
-                    <article className="questExplorer-debugStep" key={`debug:${renderedStep.step.stepKey}`}>
-                        <h4>{stepPositionLabel(renderedStep.step)}</h4>
-                        <DebugRows
-                            rows={[
-                                { label: "stepKey", value: renderedStep.step.stepKey },
-                                { label: "detailEntryKey", value: renderedStep.step.detailEntryKey },
-                                { label: "projectionKind", value: renderedStep.step.projectionKind || "none" },
-                                { label: "sourceEntryKeys", value: debugList(renderedStep.step.sourceEntryKeys) },
-                                { label: "aliasEntryKeys", value: debugList(renderedStep.step.aliasEntryKeys) },
-                                { label: "variant keys", value: debugList(variants) },
-                                { label: "continuation keys", value: debugList(continuation) },
-                                {
-                                    label: "normal visible choice count",
-                                    value: String(renderedStep.choiceDiagnostics.normalVisibleChoiceCount),
-                                },
-                                {
-                                    label: "debug visible choice count",
-                                    value: String(renderedStep.choiceDiagnostics.debugVisibleChoiceCount),
-                                },
-                                {
-                                    label: "hidden artifact count",
-                                    value: String(renderedStep.choiceDiagnostics.hiddenArtifactCount),
-                                },
-                                {
-                                    label: "hidden unresolved count",
-                                    value: String(renderedStep.choiceDiagnostics.hiddenUnresolvedCount),
-                                },
-                                {
-                                    label: "hidden staged continuation count",
-                                    value: String(renderedStep.choiceDiagnostics.hiddenContinuationCount),
-                                },
-                                {
-                                    label: "selected choice",
-                                    value: renderedStep.selectedChoice ? debugChoiceSelection(renderedStep.selectedChoice) : "none",
-                                },
-                                {
-                                    label: "current beat",
-                                    value: renderedStep.currentBeatChoice ? debugChoiceSelection(renderedStep.currentBeatChoice) : "none",
-                                },
-                                {
-                                    label: "revealed continuations",
-                                    value: renderedStep.revealedContinuations.length > 0
-                                        ? renderedStep.revealedContinuations.map((choice) => choice.label).join(", ")
-                                        : "none",
-                                },
-                                {
-                                    label: "revealed continuation step",
-                                    value: renderedStep.revealedContinuationsBecomeSteps ? "yes" : "no",
-                                },
-                                {
-                                    label: "repeated detailEntryKey",
-                                    value: renderedStep.repeatsDetailEntry
-                                        ? (renderedStep.rendersRepeatedDetailContent ? "yes, content already rendered" : "yes, first rendered occurrence")
-                                        : "no",
-                                },
-                            ]}
-                        />
-                    </article>
-                );
-            }) ?? (
-                <p className="questExplorer-debugEmpty">No progression step is active for this entry.</p>
-            )}
-        </section>
-    );
-}
-
 export default function QuestExplorerPage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -2385,10 +941,7 @@ export default function QuestExplorerPage() {
     const setMode = useQuestStore((state) => state.setMode);
     const setFilters = useQuestStore((state) => state.setFilters);
     const resolveEntryKey = useQuestStore((state) => state.resolveEntryKey);
-    const [strategyChoicePath, setStrategyChoicePath] = useState<QuestPathChoiceSelection[]>([]);
-    const [loreChoicePathsByContext, setLoreChoicePathsByContext] = useState<LoreChoicePathsByContext>({});
     const [showRawHiddenRows, setShowRawHiddenRows] = useState(false);
-    const [scrollActiveRailEntryKey, setScrollActiveRailEntryKey] = useState<string | null>(null);
 
     const requestedEntryKey = routeEntryKey(location.pathname) ?? searchParams.get("quest");
     const requestedMode = normalizeQuestExplorerMode(searchParams.get("mode"));
@@ -2418,7 +971,16 @@ export default function QuestExplorerPage() {
         () => progressionContextKey(selectedProgression, selectedEntryKey),
         [selectedEntryKey, selectedProgression]
     );
-    const choicePathResetKey = `${selectedEntryKey ?? "none"}:${selectedProgressionKey}`;
+    const {
+        strategyChoicePath,
+        loreChoicePathsByContext,
+        chooseQuestPathChoice,
+    } = useQuestExplorerPathState({
+        mode,
+        selectedEntryKey,
+        selectedProgression,
+        selectedProgressionKey,
+    });
     const strategyPathFlow = useMemo(
         () => selectedProgression
             ? buildQuestPathFlow(selectedProgression, entriesByKey, strategyChoicePath, progression, {
@@ -2438,6 +1000,19 @@ export default function QuestExplorerPage() {
         }),
         [debugQuestProgression, entriesByKey, loreChoicePathsByContext, progression, selectedProgression, showRawHiddenRows]
     );
+    const loreSegmentRailEntryKeys = useMemo(
+        () => uniqueStrings(loreChronicleStream.segments.map((segment) => segment.railEntryKey)),
+        [loreChronicleStream.segments]
+    );
+    const {
+        scrollActiveRailEntryKey,
+        setScrollActiveRailEntryKey,
+    } = useQuestExplorerLoreScrollUrl({
+        mode: requestedMode,
+        selectedEntryKey,
+        selectedProgressionKey,
+        segmentRailEntryKeys: loreSegmentRailEntryKeys,
+    });
     const activeLoreSegment = mode === "lore" && scrollActiveRailEntryKey
         ? loreChronicleStream.segments.find((segment) => segment.railEntryKey === scrollActiveRailEntryKey) ?? loreChronicleStream.segments[0] ?? null
         : loreChronicleStream.segments[0] ?? null;
@@ -2474,14 +1049,6 @@ export default function QuestExplorerPage() {
     useEffect(() => {
         if (mode !== requestedMode) setMode(requestedMode);
     }, [mode, requestedMode, setMode]);
-
-    useEffect(() => {
-        setScrollActiveRailEntryKey(null);
-    }, [mode, selectedProgressionKey]);
-
-    useEffect(() => {
-        setStrategyChoicePath([]);
-    }, [choicePathResetKey]);
 
     useEffect(() => {
         if (mode !== "lore") return;
@@ -2581,42 +1148,9 @@ export default function QuestExplorerPage() {
         navigate(questPath(entryKey, mode, debugQuestProgression));
     };
 
-    const chooseQuestPathChoice = (
-        step: QuestProgressionStep,
-        choice: QuestPathChoice,
-        choiceProgression = selectedProgression,
-        loreContextKey = selectedProgressionKey
-    ) => {
-        if (!choiceProgression) return;
-        const stepIndex = choiceProgression.chapter.steps.findIndex((candidate) => candidate.stepKey === step.stepKey);
-        if (stepIndex < 0) return;
-        const nextSelection = selectionForChoice(step.stepKey, choice);
-        const nextBranchStepOrder = nextSelection.branchStepOrder ?? Number.MAX_SAFE_INTEGER;
-
-        const nextChoicePath = (currentPath: QuestPathChoiceSelection[]) => {
-            const retained = currentPath.filter((selection) => {
-                const selectionIndex = choiceProgression.chapter.steps.findIndex((candidate) => candidate.stepKey === selection.stepKey);
-                if (selectionIndex < 0 || selectionIndex > stepIndex) return false;
-                if (selectionIndex < stepIndex) return true;
-                return (selection.branchStepOrder ?? Number.MAX_SAFE_INTEGER) < nextBranchStepOrder;
-            });
-            return [...retained, nextSelection];
-        };
-
-        if (mode === "strategy") {
-            setStrategyChoicePath(nextChoicePath);
-            return;
-        }
-
-        setLoreChoicePathsByContext((current) => ({
-            ...current,
-            [loreContextKey]: nextChoicePath(current[loreContextKey] ?? []),
-        }));
-    };
-
     const changeMode = (nextMode: QuestExplorerMode) => {
-        setMode(nextMode);
         const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete(LORE_SCROLL_ENTRY_QUERY_PARAM);
         if (nextMode === DEFAULT_QUEST_EXPLORER_MODE) {
             nextParams.delete("mode");
         } else {
@@ -2737,12 +1271,29 @@ export default function QuestExplorerPage() {
                                         {selectedProgression ? (
                                             <LoreContinuousProgression
                                                 stream={loreChronicleStream}
-                                                fullProgression={progression}
                                                 entriesByKey={entriesByKey}
-                                                debugQuestProgression={debugQuestProgression}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
                                                 onChoose={(segment, step, choice) => chooseQuestPathChoice(step, choice, segment.progression, segment.contextKey)}
                                                 activeRailEntryKey={scrollActiveRailEntryKey}
+                                                getStepTitle={(step, entry) => stepTitle(step, entry, entriesByKey)}
+                                                getLoreSectionsForStep={loreSectionsForStep}
+                                                getRevealedLoreSectionsForStep={loreSectionsForRevealedContinuations}
+                                                buildChoicePresentation={choicePresentationGroups}
+                                                getDebugChoiceDetails={debugQuestProgression
+                                                    ? (segment, renderedStep, isActiveDebugSegment) => (
+                                                        isActiveDebugSegment
+                                                            ? choiceDebugDetailsForStep(
+                                                                renderedStep.step,
+                                                                [...renderedStep.choices, ...renderedStep.revealedContinuations],
+                                                                renderedStep.choiceDiagnostics,
+                                                                segment.progression,
+                                                                progression,
+                                                                entriesByKey,
+                                                                renderedStep.revealedContinuations
+                                                            )
+                                                            : undefined
+                                                    )
+                                                    : undefined}
                                             />
                                         ) : (
                                             <section className="questExplorer-questPathFallback questExplorer-loreFallback" aria-label="Selected progression">

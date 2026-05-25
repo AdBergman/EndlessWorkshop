@@ -8,17 +8,10 @@ import type {
     QuestProgressionVariant,
 } from "@/types/questTypes";
 import { getQuestCategoryKey } from "@/features/quests/questCategories";
-
-function stepPositionLabel(step: QuestProgressionStep): string {
-    if (step.stepNumber != null) return `Step ${step.stepNumber}`;
-    if (step.stepOrder != null) return `Order ${step.stepOrder}`;
-    return "Step";
-}
-
-function chapterPositionLabel(chapter: QuestProgressionChapter): string {
-    const chapterNumber = chapter.chapterNumber ?? chapter.chapterOrder;
-    return chapterNumber == null ? "Chapter" : `Chapter ${chapterNumber}`;
-}
+import {
+    chapterPositionLabel,
+    stepPositionLabel,
+} from "@/features/quests/questDisplay";
 
 export type QuestDetailProgression = {
     questline: QuestProgressionQuestline;

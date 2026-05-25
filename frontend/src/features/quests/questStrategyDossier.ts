@@ -5,6 +5,7 @@ import type {
     QuestPathFlow,
     RenderedPathStep,
 } from "@/features/quests/questPathFlow";
+import { phaseDisplayLabel } from "@/features/quests/questDisplay";
 
 export type StrategyDossierObjectiveScope = {
     objectives: StrategyObjective[];
@@ -34,6 +35,25 @@ export type StrategyDossierMarker = {
     kind: StrategyDossierMarkerKind;
     label: string;
     detail: string;
+};
+
+export type StrategyPathStatusKind =
+    | "awaiting-choice"
+    | "continues-in-chapter"
+    | "chapter-exit"
+    | "converges"
+    | "failure"
+    | "unresolved"
+    | "complete";
+
+export type StrategyPathStatus = {
+    kind: StrategyPathStatusKind;
+    label: string;
+    title: string;
+    description: string;
+    choiceLabel: string | null;
+    targetLabel: string | null;
+    markers: StrategyDossierMarker[];
 };
 
 export type StrategyDossierSelectedPathStep = {
@@ -69,6 +89,32 @@ export type StrategyDossierBranchComparison = {
     selectedOption: StrategyDossierBranchOption | null;
 };
 
+export type StrategyContinuityStripItemKind =
+    | "step"
+    | "decision"
+    | "outcome"
+    | "transition"
+    | "stop";
+
+export type StrategyContinuityStripItem = {
+    id: string;
+    kind: StrategyContinuityStripItemKind;
+    eyebrow: string;
+    title: string;
+    detail: string | null;
+    markers: StrategyDossierMarker[];
+    isCurrent: boolean;
+    isSelectedPath: boolean;
+    isDecisionPoint: boolean;
+    isTerminal: boolean;
+};
+
+export type StrategyContinuityStrip = {
+    summary: string;
+    statusKind: StrategyPathStatusKind;
+    items: StrategyContinuityStripItem[];
+};
+
 export type StrategyDossierModel = {
     brief: {
         title: string;
@@ -83,6 +129,7 @@ export type StrategyDossierModel = {
     projectedOutcome: StrategyDossierOutcome | null;
     markers: StrategyDossierMarker[];
     branchComparison: StrategyDossierBranchComparison;
+    continuityStrip: StrategyContinuityStrip;
 };
 
 export function buildStrategyDossierModel({
@@ -135,7 +182,283 @@ export function buildStrategyDossierModel({
         projectedOutcome,
         markers: buildMarkers(renderedStep, selectedChoice, flow, entriesByKey),
         branchComparison: buildBranchComparison(renderedStep, comparisonChoices, flow, entriesByKey),
+        continuityStrip: buildStrategyContinuityStrip(flow, entriesByKey),
     };
+}
+
+export function buildStrategyContinuityStrip(
+    flow: QuestPathFlow,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): StrategyContinuityStrip {
+    const status = buildStrategyPathStatus(flow, entriesByKey);
+    const items: StrategyContinuityStripItem[] = [];
+
+    for (const renderedStep of flow.renderedSteps) {
+        const selectedChoice = choiceForSelection(
+            renderedStep,
+            renderedStep.selectedChoice ?? renderedStep.currentBeatChoice
+        );
+        const hasDecisionPoint = renderedStep.choices.length > 0;
+        const selectedPathTouchesStep = Boolean(
+            selectedChoice
+            || renderedStep.currentBeatChoice
+            || renderedStep.selectedChoice
+            || renderedStep.revealedContinuations.length > 0
+        );
+
+        items.push({
+            id: `${renderedStep.step.stepKey}:step`,
+            kind: "step",
+            eyebrow: stepDossierLabel(renderedStep),
+            title: renderedStep.displayEntry?.title ?? renderedStep.step.title,
+            detail: stepStripDetail(renderedStep, selectedPathTouchesStep),
+            markers: [],
+            isCurrent: renderedStep.isActive,
+            isSelectedPath: selectedPathTouchesStep,
+            isDecisionPoint: hasDecisionPoint,
+            isTerminal: false,
+        });
+
+        if (hasDecisionPoint || selectedChoice) {
+            const markers = selectedChoice ? markersForChoice(selectedChoice, entriesByKey) : [];
+            const pendingDecisionId = renderedStep.choices[0]?.choiceGroupKey
+                ?? renderedStep.choices[0]?.groupKey
+                ?? renderedStep.choices[0]?.id
+                ?? "pending";
+            items.push({
+                id: `${renderedStep.step.stepKey}:decision:${selectedChoice?.id ?? pendingDecisionId}`,
+                kind: "decision",
+                eyebrow: "Branch Point",
+                title: selectedChoice?.label ?? decisionTitleForStep(renderedStep),
+                detail: selectedChoice
+                    ? "Selected path"
+                    : decisionDetailForStep(renderedStep),
+                markers,
+                isCurrent: renderedStep.isActive,
+                isSelectedPath: Boolean(selectedChoice),
+                isDecisionPoint: true,
+                isTerminal: false,
+            });
+        }
+
+        const revealedContinuations = uniqueChoices(renderedStep.revealedContinuations);
+        if (revealedContinuations.length > 0) {
+            items.push({
+                id: `${renderedStep.step.stepKey}:outcome:${revealedContinuations.map((choice) => choice.id).join("|")}`,
+                kind: "outcome",
+                eyebrow: "Outcome",
+                title: revealedContinuations.length === 1
+                    ? revealedContinuations[0].label
+                    : "Revealed Outcomes",
+                detail: stripChoiceLines(revealedContinuations),
+                markers: uniqueMarkers(revealedContinuations.flatMap((choice) => (
+                    markersForChoice(choice, entriesByKey, { includeUnresolved: false })
+                ))),
+                isCurrent: renderedStep.isActive,
+                isSelectedPath: true,
+                isDecisionPoint: false,
+                isTerminal: false,
+            });
+        }
+    }
+
+    const terminalItem = terminalContinuityStripItem(status);
+    if (terminalItem) {
+        items.push(terminalItem);
+    }
+
+    return {
+        summary: stripSummaryForStatus(status),
+        statusKind: status.kind,
+        items,
+    };
+}
+
+export function buildStrategyPathStatus(
+    flow: QuestPathFlow,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): StrategyPathStatus {
+    const selectedChoices = selectedChoicesForFlow(flow);
+    const unresolvedChoice = flow.unresolvedContinuation
+        ? choiceForSelectionInFlow(flow, flow.unresolvedContinuation)
+        : null;
+    const statusChoice = unresolvedChoice ?? selectedChoices.at(-1) ?? null;
+    const latestChoiceMarkers = statusChoice
+        ? markersForChoice(statusChoice, entriesByKey, { includeUnresolved: false })
+        : [];
+    const failureMarker = latestChoiceMarkers.find((marker) => marker.kind === "failure") ?? null;
+    const convergenceMarker = latestChoiceMarkers.find((marker) => marker.kind === "converges") ?? null;
+    const terminalStep = flow.renderedSteps.at(-1) ?? null;
+    const hasSelectedPath = selectedChoices.length > 0;
+    const hasPendingTerminalChoice = Boolean(terminalStep && terminalStep.choices.length > 0 && !terminalStep.selectedChoice);
+
+    if (!hasSelectedPath) {
+        return {
+            kind: "awaiting-choice",
+            label: "Awaiting Choice",
+            title: "Choose a path to simulate",
+            description: "Select a decision option to reveal the next strategic outcome for this chapter.",
+            choiceLabel: null,
+            targetLabel: null,
+            markers: [],
+        };
+    }
+
+    if (failureMarker) {
+        return {
+            kind: "failure",
+            label: "Failure",
+            title: "Selected path enters a failure outcome",
+            description: `The simulated path resolves into ${failureMarker.detail}. Review the failure branch before comparing alternate options.`,
+            choiceLabel: statusChoice?.label ?? null,
+            targetLabel: failureMarker.detail,
+            markers: uniqueMarkers([failureMarker, ...latestChoiceMarkers.filter((marker) => marker.kind !== "failure")]),
+        };
+    }
+
+    if (convergenceMarker) {
+        return {
+            kind: "converges",
+            label: "Converges",
+            title: "Selected path rejoins the main progression",
+            description: `The simulated path converges at ${convergenceMarker.detail}. Alternate branches may rejoin this same point.`,
+            choiceLabel: statusChoice?.label ?? null,
+            targetLabel: convergenceMarker.detail,
+            markers: uniqueMarkers([convergenceMarker, ...latestChoiceMarkers.filter((marker) => marker.kind !== "converges")]),
+        };
+    }
+
+    if (flow.unresolvedContinuation) {
+        return {
+            kind: "unresolved",
+            label: "Unresolved",
+            title: "Continuation is not identified",
+            description: `The selected choice "${flow.unresolvedContinuation.label}" is modeled, but the archive does not identify the next continuation step. The dossier stops here rather than guessing.`,
+            choiceLabel: flow.unresolvedContinuation.label,
+            targetLabel: null,
+            markers: [{
+                kind: "unresolved",
+                label: "Unresolved",
+                detail: "No explicit next continuation step is modeled for this branch.",
+            }],
+        };
+    }
+
+    if (flow.reachedContinuationEntryKey) {
+        const targetLabel = entryLabel(flow.reachedContinuationEntryKey, entriesByKey);
+        return {
+            kind: "chapter-exit",
+            label: "Chapter Exit",
+            title: "Selected path leaves this chapter",
+            description: `Continue strategy planning from ${targetLabel}. This dossier remains scoped to the current chapter.`,
+            choiceLabel: statusChoice?.label ?? null,
+            targetLabel,
+            markers: markersForEntryKeys("leads", "Leads To", [flow.reachedContinuationEntryKey], entriesByKey),
+        };
+    }
+
+    if (hasPendingTerminalChoice && terminalStep) {
+        const targetLabel = `${stepDossierLabel(terminalStep)}: ${terminalStep.displayEntry?.title ?? terminalStep.step.title}`;
+        return {
+            kind: "continues-in-chapter",
+            label: "Next Decision",
+            title: "Selected path reaches another decision in this chapter",
+            description: `Continue simulation from ${targetLabel}. The dossier is waiting at the next modeled choice point.`,
+            choiceLabel: statusChoice?.label ?? null,
+            targetLabel,
+            markers: latestChoiceMarkers,
+        };
+    }
+
+    const terminalLabel = terminalStep
+        ? `${stepDossierLabel(terminalStep)}: ${terminalStep.displayEntry?.title ?? terminalStep.step.title}`
+        : null;
+
+    return {
+        kind: "complete",
+        label: "Complete",
+        title: "No further modeled decision in this chapter",
+        description: terminalLabel
+            ? `The selected path currently resolves at ${terminalLabel}. No additional branch choice, convergence, failure, or chapter exit is modeled from here.`
+            : "The selected path has no additional modeled branch choice, convergence, failure, or chapter exit.",
+        choiceLabel: statusChoice?.label ?? null,
+        targetLabel: terminalLabel,
+        markers: latestChoiceMarkers,
+    };
+}
+
+function stepStripDetail(renderedStep: RenderedPathStep, selectedPathTouchesStep: boolean): string {
+    if (renderedStep.isActive) return "Current step";
+    if (selectedPathTouchesStep) return "Selected path step";
+    return "Projected step";
+}
+
+function decisionTitleForStep(renderedStep: RenderedPathStep): string {
+    if (renderedStep.choices.length === 1) return "Decision Available";
+    return `${renderedStep.choices.length} Options Available`;
+}
+
+function decisionDetailForStep(renderedStep: RenderedPathStep): string {
+    if (renderedStep.choices.length === 0) return "No active options at this point.";
+    if (renderedStep.choices.length === 1) return "Select the available path to continue simulation.";
+    return "Choose one option to project this chapter path.";
+}
+
+function stripChoiceLines(choices: QuestPathChoice[]): string | null {
+    const lines = uniqueStrings(choices.flatMap((choice) => choiceLines(choice)));
+    if (lines.length > 0) return lines.join(" ");
+    if (choices.length === 1) return choices[0].targetSummaryLine;
+    return null;
+}
+
+function terminalContinuityStripItem(status: StrategyPathStatus): StrategyContinuityStripItem | null {
+    if (status.kind === "awaiting-choice" || status.kind === "continues-in-chapter") return null;
+
+    const isTransition = status.kind === "chapter-exit" || status.kind === "converges";
+    return {
+        id: `terminal:${status.kind}:${status.targetLabel ?? status.choiceLabel ?? status.label}`,
+        kind: isTransition ? "transition" : "stop",
+        eyebrow: status.label,
+        title: status.title,
+        detail: status.targetLabel ?? terminalStripDetail(status),
+        markers: status.markers,
+        isCurrent: false,
+        isSelectedPath: true,
+        isDecisionPoint: false,
+        isTerminal: true,
+    };
+}
+
+function stripSummaryForStatus(status: StrategyPathStatus): string {
+    switch (status.kind) {
+        case "awaiting-choice":
+            return "The chapter path is waiting at the active branch point.";
+        case "continues-in-chapter":
+            return "The selected path reaches another modeled decision in this chapter.";
+        case "chapter-exit":
+            return "The selected path leaves this chapter.";
+        case "converges":
+            return "The selected path rejoins a modeled convergence point.";
+        case "failure":
+            return "The selected path enters a modeled failure outcome.";
+        case "unresolved":
+            return "The selected path stops where the archive lacks an explicit continuation.";
+        case "complete":
+            return "The selected path has no further modeled decision in this chapter.";
+    }
+}
+
+function terminalStripDetail(status: StrategyPathStatus): string | null {
+    switch (status.kind) {
+        case "failure":
+            return "Failure branch";
+        case "unresolved":
+            return status.choiceLabel ? `After ${status.choiceLabel}` : "No explicit next step is modeled.";
+        case "complete":
+            return status.targetLabel;
+        default:
+            return status.targetLabel;
+    }
 }
 
 function buildBranchComparison(
@@ -342,6 +665,34 @@ function selectedPathForFlow(flow: QuestPathFlow): StrategyDossierSelectedPathSt
     }));
 }
 
+function selectedChoicesForFlow(flow: QuestPathFlow): QuestPathChoice[] {
+    const seen = new Set<string>();
+    const selectedChoices: QuestPathChoice[] = [];
+
+    for (const renderedStep of flow.renderedSteps) {
+        for (const selection of [renderedStep.currentBeatChoice, renderedStep.selectedChoice]) {
+            if (!selection || seen.has(selection.choiceId)) continue;
+            const choice = choiceForSelection(renderedStep, selection);
+            if (!choice) continue;
+            seen.add(selection.choiceId);
+            selectedChoices.push(choice);
+        }
+    }
+
+    return selectedChoices;
+}
+
+function choiceForSelectionInFlow(
+    flow: QuestPathFlow,
+    selection: QuestPathChoiceSelection
+): QuestPathChoice | null {
+    for (const renderedStep of flow.renderedSteps) {
+        const choice = choiceForSelection(renderedStep, selection);
+        if (choice) return choice;
+    }
+    return null;
+}
+
 function selectedPathBranchKeysForStep(renderedStep: RenderedPathStep): Set<string> {
     const selectedChoice = choiceForSelection(renderedStep, renderedStep.selectedChoice);
     return new Set([
@@ -356,8 +707,17 @@ function choiceForSelection(
 ): QuestPathChoice | null {
     if (!selection) return null;
     return [...renderedStep.choices, ...renderedStep.revealedContinuations]
-        .find((choice) => choice.id === selection.choiceId)
+        .find((choice) => choiceMatchesSelection(choice, selection))
         ?? null;
+}
+
+function choiceMatchesSelection(
+    choice: QuestPathChoice,
+    selection: QuestPathChoiceSelection
+): boolean {
+    return choice.id === selection.choiceId
+        || Boolean(selection.branchKey && choice.branchKey === selection.branchKey)
+        || Boolean(selection.choiceKey && choice.choiceKey === selection.choiceKey);
 }
 
 function choiceLines(choice: QuestPathChoice): string[] {
@@ -440,27 +800,6 @@ function stepDossierLabel(renderedStep: RenderedPathStep): string {
         : renderedStep.step.stepOrder != null
             ? `Order ${renderedStep.step.stepOrder}`
             : "Step";
-}
-
-function phaseDisplayLabel(phase: string | null | undefined): string {
-    const normalized = (phase ?? "").trim().toLowerCase();
-    if (!normalized) return "Objective";
-
-    const labels: Record<string, string> = {
-        start: "Opening",
-        intro: "Opening",
-        success: "Resolution",
-        failure: "Setback",
-        choice: "Choice",
-        completion: "Objective",
-        other: "Objective",
-    };
-
-    return labels[normalized] ?? normalized
-        .split(/[\s_-]+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
 }
 
 function uniqueChoices(choices: QuestPathChoice[]): QuestPathChoice[] {

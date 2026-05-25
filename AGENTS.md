@@ -35,6 +35,7 @@ These systems are intentionally stable and require bounded, explicit migrations.
 - Keep interactive/domain state store-native.
 - Preserve existing route behavior, query params, and deep-link semantics.
 - Prefer existing stores, selectors, helpers, and tests over new abstractions.
+- Follow the detailed React/TypeScript boundaries in `docs/frontend/frontend-architecture-guidelines.md` for page files, feature modules, view-model helpers, hooks, Zustand ownership, CSS, tests, and behavior-preserving extraction.
 
 ## Verification
 

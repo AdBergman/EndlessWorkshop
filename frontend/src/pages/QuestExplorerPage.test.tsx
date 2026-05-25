@@ -1,12 +1,20 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/api/apiClient";
 import QuestExplorerPage from "./QuestExplorerPage";
 import { buildLoreChronicleStream } from "@/features/quests/questPathFlow";
+import {
+    progressionQuestline,
+    questEntry,
+    testBranch,
+    testObjective,
+    testRequirement,
+    testReward,
+} from "@/features/quests/testUtils/questExplorerFixtures";
 import { useQuestStore } from "@/stores/questStore";
-import type { QuestExplorerProgression, QuestExplorerResponse } from "@/types/questTypes";
+import type { QuestExplorerResponse } from "@/types/questTypes";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { Faction } from "@/types/dataTypes";
 
@@ -17,74 +25,6 @@ vi.mock("@/api/apiClient", () => ({
 }));
 
 const mockedApiClient = vi.mocked(apiClient);
-
-const progressionQuestline = ({
-    questLineKey = "Line_First_Tide",
-    questLineFamilyKey = questLineKey,
-    questLineName = "First Tide",
-    factionKey = "Faction_Kin",
-    factionFamilyKey = factionKey,
-    factionName = "Kin",
-    chapterNumber = 1,
-    chapterOrder = 1,
-    title = "Archive of the First Tide",
-    steps,
-}: {
-    questLineKey?: string;
-    questLineFamilyKey?: string;
-    questLineName?: string;
-    factionKey?: string;
-    factionFamilyKey?: string;
-    factionName?: string;
-    chapterNumber?: number;
-    chapterOrder?: number;
-    title?: string;
-    steps: Array<{
-        stepNumber: number;
-        stepOrder: number;
-        title: string;
-        detailEntryKey: string;
-        variantEntryKeys?: string[];
-    }>;
-}): QuestExplorerProgression["questlines"][number] => ({
-    questLineKey,
-    questLineFamilyKey,
-    questLineName,
-    factionKey,
-    factionFamilyKey,
-    factionName,
-    sourceQuestLineKeys: [questLineKey],
-    sourceFactionKeys: [factionKey],
-    chapters: [
-        {
-            chapterNumber,
-            chapterOrder,
-            title,
-            steps: steps.map((step) => ({
-                stepKey: `${questLineFamilyKey}:${factionFamilyKey}:chapter-${chapterOrder}:step-${step.stepOrder}`,
-                stepNumber: step.stepNumber,
-                stepOrder: step.stepOrder,
-                title: step.title,
-                projectionKind: step.variantEntryKeys?.length ? "virtual_alias_expanded" : "real_entry_backed",
-                detailEntryKey: step.detailEntryKey,
-                sourceEntryKeys: [step.detailEntryKey, ...(step.variantEntryKeys ?? [])],
-                aliasEntryKeys: step.variantEntryKeys?.length ? [`${step.detailEntryKey}:alias`] : [],
-                variants: [step.detailEntryKey, ...(step.variantEntryKeys ?? [])].map((entryKey, index) => ({
-                    entryKey,
-                    title: index === 0 ? step.title : entryKey,
-                    variantKind: index === 0 ? "entry" : "branch_variant",
-                    branchGroupKey: index === 0 ? null : step.detailEntryKey,
-                    branchLabel: index === 0 ? null : title,
-                    branchOrder: index === 0 ? null : index,
-                    previousEntryKeys: [],
-                    nextEntryKeys: [],
-                    failureEntryKeys: [],
-                    convergesIntoEntryKeys: [],
-                })),
-            })),
-        },
-    ],
-});
 
 const payload: QuestExplorerResponse = {
     gameVersion: "0.80",
@@ -250,64 +190,6 @@ const payload: QuestExplorerResponse = {
         debugSummary: null,
     },
 };
-
-type QuestEntryOverride = Partial<Omit<QuestExplorerResponse["entries"][number], "navigation">> & {
-    navigation?: Partial<QuestExplorerResponse["entries"][number]["navigation"]>;
-};
-
-const questEntry = ({
-    navigation,
-    ...overrides
-}: QuestEntryOverride = {}): QuestExplorerResponse["entries"][number] => ({
-    ...payload.entries[0],
-    entryKey: overrides.entryKey ?? "Quest_Custom",
-    title: overrides.title ?? "Custom Quest",
-    summaryLines: overrides.summaryLines ?? [],
-    aliases: overrides.aliases ?? [],
-    loreView: overrides.loreView ?? { sections: [] },
-    strategyView: overrides.strategyView ?? { objectives: [] },
-    branches: overrides.branches ?? [],
-    quality: overrides.quality ?? null,
-    ...overrides,
-    navigation: {
-        ...payload.entries[0].navigation,
-        ...navigation,
-    },
-});
-
-const testObjective = (objectiveKey: string, text = objectiveKey) => ({
-    objectiveKey,
-    text,
-    phase: "completion",
-    requirements: [],
-    rewards: [],
-});
-
-const testRequirement = (requirementKey: string, displayText: string) => ({
-    ...payload.entries[0].strategyView.objectives[0].requirements[0],
-    requirementKey,
-    displayText,
-});
-
-const testReward = (rewardKey: string, displayText: string) => ({
-    ...payload.entries[0].strategyView.objectives[0].rewards[0],
-    rewardKey,
-    displayText,
-});
-
-const testBranch = (branchKey: string, label = branchKey) => ({
-    branchKey,
-    choiceKey: null,
-    label,
-    orderIndex: null,
-    groupKey: null,
-    groupLabel: null,
-    nextEntryKeys: [],
-    failureEntryKeys: [],
-    convergesIntoEntryKeys: [],
-    lore: null,
-    strategy: null,
-});
 
 const mixedPayload: QuestExplorerResponse = {
     ...payload,
@@ -2063,10 +1945,15 @@ function renderPage(initialEntry = "/quests") {
     return render(
         <MemoryRouter initialEntries={[initialEntry]}>
             <Routes>
-                <Route path="/quests/*" element={<QuestExplorerPage />} />
+                <Route path="/quests/*" element={<><LocationProbe /><QuestExplorerPage /></>} />
             </Routes>
         </MemoryRouter>
     );
+}
+
+function LocationProbe() {
+    const location = useLocation();
+    return <output data-testid="route-location">{`${location.pathname}${location.search}`}</output>;
 }
 
 function MissingRouteHarness() {
@@ -2397,6 +2284,18 @@ describe("QuestExplorerPage", () => {
 
         expect(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
+        await waitFor(() => {
+            expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_A");
+            expect(screen.getByTestId("route-location")).toHaveTextContent("loreEntry=Quest_Stream_B");
+        });
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_A");
+            expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+        });
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
     });
 
     it("renders strategy mode and reveals the next step after a modeled choice", async () => {
@@ -2412,6 +2311,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getByRole("region", { name: "Requirements" })).toBeInTheDocument();
         expect(within(chronicle).getByRole("region", { name: "Rewards" })).toBeInTheDocument();
         expect(within(chronicle).getByRole("region", { name: "Selected Path" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Continuity Strip" })).toBeInTheDocument();
         expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toBeInTheDocument();
         expect(within(chronicle).getByText("Reach the marker.")).toBeInTheDocument();
         expect(within(chronicle).getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
@@ -2428,6 +2328,13 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getAllByText("Choose the marker path.").length).toBeGreaterThan(0);
         expect(within(chronicle).getAllByText("Leads To").length).toBeGreaterThan(0);
         expect(within(chronicle).getAllByText("Chapter 1: Second Tide").length).toBeGreaterThan(0);
+        const continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
+        expect(continuityStrip).toHaveTextContent("Follow the marker");
+        expect(continuityStrip).toHaveTextContent("Step 2");
+        const whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Complete");
+        expect(whatHappensNext).toHaveTextContent("No further modeled decision in this chapter");
+        expect(whatHappensNext).toHaveTextContent("Step 2: Second Tide");
         expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
@@ -2473,6 +2380,11 @@ describe("QuestExplorerPage", () => {
         expect(selectedSummary).toHaveTextContent("Failure");
         expect(selectedSummary).toHaveTextContent("Chapter 1: Failed Advance");
         expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toHaveTextContent("Accept the failed advance risk.");
+        const continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
+        expect(continuityStrip).toHaveTextContent("Risk the breach");
+        expect(continuityStrip).toHaveTextContent("Selected path enters a failure outcome");
+        expect(continuityStrip).toHaveTextContent("Failure");
+        expect(continuityStrip).not.toHaveTextContent("Rejoin the line");
     });
 
     it("renders strategy dossier failure and convergence markers when a simulated branch exposes them", async () => {
@@ -2488,6 +2400,13 @@ describe("QuestExplorerPage", () => {
         let markers = within(chronicle).getByRole("region", { name: "Path Markers" });
         expect(within(markers).getByText("Failure")).toBeInTheDocument();
         expect(within(markers).getByText("Chapter 1: Failed Advance")).toBeInTheDocument();
+        let whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Failure");
+        expect(whatHappensNext).toHaveTextContent("Selected path enters a failure outcome");
+        expect(whatHappensNext).toHaveTextContent("Chapter 1: Failed Advance");
+        let continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
+        expect(continuityStrip).toHaveTextContent("Failure");
+        expect(continuityStrip).toHaveTextContent("Chapter 1: Failed Advance");
         const failureMarker = within(markers).getByText("Failure").closest(".questExplorer-strategyDossierMarker");
         if (!failureMarker) throw new Error("Expected failure marker badge");
         expect(failureMarker).toHaveClass("questExplorer-strategyDossierMarker--failure");
@@ -2497,6 +2416,13 @@ describe("QuestExplorerPage", () => {
         markers = within(chronicle).getByRole("region", { name: "Path Markers" });
         expect(within(markers).getByText("Converges")).toBeInTheDocument();
         expect(within(markers).getByText("Chapter 1: Main Line")).toBeInTheDocument();
+        whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Converges");
+        expect(whatHappensNext).toHaveTextContent("Selected path rejoins the main progression");
+        expect(whatHappensNext).toHaveTextContent("Chapter 1: Main Line");
+        continuityStrip = within(chronicle).getByRole("region", { name: "Continuity Strip" });
+        expect(continuityStrip).toHaveTextContent("Converges");
+        expect(continuityStrip).toHaveTextContent("Chapter 1: Main Line");
         const convergenceMarker = within(markers).getByText("Converges").closest(".questExplorer-strategyDossierMarker");
         if (!convergenceMarker) throw new Error("Expected convergence marker badge");
         expect(convergenceMarker).toHaveClass("questExplorer-strategyDossierMarker--converges");
@@ -2611,7 +2537,7 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Step 1").length).toBeGreaterThan(0);
         expect(within(chronicle).getByText("of 3")).toBeInTheDocument();
         expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
@@ -2650,7 +2576,7 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Projected Setup" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getByText("Step 1")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Step 1").length).toBeGreaterThan(0);
         expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
@@ -2683,7 +2609,10 @@ describe("QuestExplorerPage", () => {
 
         expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
-        expect(screen.getByText(/continues in Chapter 3: Next Chapter/)).toBeInTheDocument();
+        const whatHappensNext = within(chronicle).getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Converges");
+        expect(whatHappensNext).toHaveTextContent("Selected path rejoins the main progression");
+        expect(whatHappensNext).toHaveTextContent("Chapter 3: Next Chapter");
     });
 
     it("keeps revealedBy lore sections hidden until their owner branch is selected", async () => {
@@ -2999,8 +2928,10 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: /Take the unknown road/ }));
 
-        expect(screen.getByText("Path Continues")).toBeInTheDocument();
-        expect(screen.getByText(/does not identify the next continuation step/)).toBeInTheDocument();
+        const whatHappensNext = screen.getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Unresolved");
+        expect(whatHappensNext).toHaveTextContent("Continuation is not identified");
+        expect(screen.getAllByText(/does not identify the next continuation step/).length).toBeGreaterThan(0);
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
     });
@@ -3122,8 +3053,9 @@ describe("QuestExplorerPage", () => {
 
         const rail = screen.getByRole("complementary");
         expect(within(rail).getByRole("button", { name: /Chapter Two Rising\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
-        expect(screen.getByText("Path Continues")).toBeInTheDocument();
-        expect(screen.getByText("This path continues in Chapter 2: Chapter Two Rising.")).toBeInTheDocument();
+        const whatHappensNext = screen.getByRole("region", { name: "What Happens Next" });
+        expect(whatHappensNext).toHaveTextContent("Chapter Exit");
+        expect(whatHappensNext).toHaveTextContent("Continue strategy planning from Chapter 2: Chapter Two Rising");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
