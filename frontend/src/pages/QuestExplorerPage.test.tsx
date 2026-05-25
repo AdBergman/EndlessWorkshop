@@ -1951,9 +1951,79 @@ function renderPage(initialEntry = "/quests") {
     );
 }
 
+function renderPageWithHistory(initialEntries: string[], initialIndex = initialEntries.length - 1) {
+    return render(
+        <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
+            <Routes>
+                <Route path="/quests/*" element={<><HistoryBackButton /><LocationProbe /><QuestExplorerPage /></>} />
+            </Routes>
+        </MemoryRouter>
+    );
+}
+
 function LocationProbe() {
     const location = useLocation();
     return <output data-testid="route-location">{`${location.pathname}${location.search}`}</output>;
+}
+
+function HistoryBackButton() {
+    const navigate = useNavigate();
+    return <button type="button" onClick={() => navigate(-1)}>Back</button>;
+}
+
+type MockIntersectionObserverRecord = {
+    callback: IntersectionObserverCallback;
+    elements: Element[];
+    observer: IntersectionObserver;
+};
+
+function stubIntersectionObservers(): MockIntersectionObserverRecord[] {
+    const observers: MockIntersectionObserverRecord[] = [];
+    class MockIntersectionObserver implements IntersectionObserver {
+        readonly root: Element | Document | null = null;
+        readonly rootMargin = "";
+        readonly thresholds: ReadonlyArray<number> = [];
+        elements: Element[] = [];
+
+        constructor(callback: IntersectionObserverCallback) {
+            observers.push({ callback, elements: this.elements, observer: this });
+        }
+
+        observe = (target: Element) => {
+            this.elements.push(target);
+        };
+
+        unobserve = (target: Element) => {
+            this.elements = this.elements.filter((element) => element !== target);
+        };
+
+        disconnect = () => {
+            this.elements = [];
+        };
+
+        takeRecords = () => [];
+    }
+
+    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+    return observers;
+}
+
+function intersectLoreSegment(observers: MockIntersectionObserverRecord[], railEntryKey: string) {
+    const segment = document.querySelector(`[data-rail-entry-key="${railEntryKey}"]`);
+    expect(segment).not.toBeNull();
+    const observerRecord = observers.at(-1);
+    expect(observerRecord).toBeDefined();
+    act(() => {
+        observerRecord!.callback([{
+            boundingClientRect: { top: 0 } as DOMRectReadOnly,
+            intersectionRatio: 0.8,
+            intersectionRect: {} as DOMRectReadOnly,
+            isIntersecting: true,
+            rootBounds: null,
+            target: segment!,
+            time: 0,
+        }], observerRecord!.observer);
+    });
 }
 
 function MissingRouteHarness() {
@@ -2222,36 +2292,7 @@ describe("QuestExplorerPage", () => {
 
     it("lets the left rail follow the visible lore segment without mutating selected entry", async () => {
         const user = userEvent.setup();
-        const observers: Array<{
-            callback: IntersectionObserverCallback;
-            elements: Element[];
-            observer: IntersectionObserver;
-        }> = [];
-        class MockIntersectionObserver implements IntersectionObserver {
-            readonly root: Element | Document | null = null;
-            readonly rootMargin = "";
-            readonly thresholds: ReadonlyArray<number> = [];
-            elements: Element[] = [];
-
-            constructor(callback: IntersectionObserverCallback) {
-                observers.push({ callback, elements: this.elements, observer: this });
-            }
-
-            observe = (target: Element) => {
-                this.elements.push(target);
-            };
-
-            unobserve = (target: Element) => {
-                this.elements = this.elements.filter((element) => element !== target);
-            };
-
-            disconnect = () => {
-                this.elements = [];
-            };
-
-            takeRecords = () => [];
-        }
-        vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+        const observers = stubIntersectionObservers();
         mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
 
         renderPage("/quests/Quest_Stream_A?mode=lore");
@@ -2259,6 +2300,7 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Stream Opening" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
+        expect(within(chronicle).getByRole("button", { name: /Continue to chapter two/ })).toHaveAttribute("aria-current", "true");
 
         await waitFor(() => {
             expect(observers.at(-1)?.elements.length).toBeGreaterThanOrEqual(2);
@@ -2267,23 +2309,12 @@ describe("QuestExplorerPage", () => {
         const rail = screen.getByRole("complementary");
         expect(within(rail).getByRole("button", { name: /Stream Opening\s+Chapter 1\s+1 step/ })).toHaveAttribute("aria-current", "page");
 
-        const continuationSegment = document.querySelector('[data-rail-entry-key="Quest_Stream_B"]');
-        expect(continuationSegment).not.toBeNull();
-        const observerRecord = observers.at(-1)!;
-        act(() => {
-            observerRecord.callback([{
-                boundingClientRect: { top: 0 } as DOMRectReadOnly,
-                intersectionRatio: 0.8,
-                intersectionRect: {} as DOMRectReadOnly,
-                isIntersecting: true,
-                rootBounds: null,
-                target: continuationSegment!,
-                time: 0,
-            }], observerRecord.observer);
-        });
+        intersectLoreSegment(observers, "Quest_Stream_B");
 
         expect(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
+        expect(within(chronicle).getByRole("button", { name: /Continue to chapter two/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle).getByRole("button", { name: /Continue to chapter three/ })).toBeInTheDocument();
         await waitFor(() => {
             expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_A");
             expect(screen.getByTestId("route-location")).toHaveTextContent("loreEntry=Quest_Stream_B");
@@ -2296,6 +2327,63 @@ describe("QuestExplorerPage", () => {
             expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
         });
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+
+        const restoredChronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(restoredChronicle).getByText("Stream Continuation")).toBeInTheDocument();
+        expect(within(restoredChronicle).getByRole("button", { name: /Continue to chapter two/ })).toHaveAttribute("aria-current", "true");
+    });
+
+    it("treats a left rail click as canonical navigation rather than passive Lore scroll", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+        renderPage("/quests/Quest_Stream_A?mode=lore");
+
+        await screen.findByRole("heading", { name: "Stream Opening" });
+        expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+
+        const rail = screen.getByRole("complementary");
+        await user.click(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ }));
+
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_B"));
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_B");
+        expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+        expect(await screen.findByRole("heading", { name: "Stream Continuation" })).toBeInTheDocument();
+    });
+
+    it("replaces passive Lore scroll URL updates without adding a rollback history entry", async () => {
+        const user = userEvent.setup();
+        const observers = stubIntersectionObservers();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+        renderPageWithHistory([
+            "/quests/Quest_Stream_C?mode=lore",
+            "/quests/Quest_Stream_A?mode=lore",
+        ]);
+
+        await screen.findByRole("heading", { name: "Stream Opening" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
+
+        await waitFor(() => {
+            expect(observers.at(-1)?.elements.length).toBeGreaterThanOrEqual(2);
+        });
+        intersectLoreSegment(observers, "Quest_Stream_B");
+
+        await waitFor(() => {
+            expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_A");
+            expect(screen.getByTestId("route-location")).toHaveTextContent("loreEntry=Quest_Stream_B");
+        });
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
+        expect(within(chronicle).getByRole("button", { name: /Continue to chapter two/ })).toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Back" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Stream_C?mode=lore");
+        });
+        expect(await screen.findByRole("heading", { name: "Stream Ending" })).toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_C");
     });
 
     it("renders strategy mode and reveals the next step after a modeled choice", async () => {
