@@ -1,9 +1,10 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/api/apiClient";
 import QuestExplorerPage from "./QuestExplorerPage";
+import { buildLoreChronicleStream } from "@/features/quests/questPathFlow";
 import { useQuestStore } from "@/stores/questStore";
 import type { QuestExplorerProgression, QuestExplorerResponse } from "@/types/questTypes";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
@@ -280,6 +281,18 @@ const testObjective = (objectiveKey: string, text = objectiveKey) => ({
     phase: "completion",
     requirements: [],
     rewards: [],
+});
+
+const testRequirement = (requirementKey: string, displayText: string) => ({
+    ...payload.entries[0].strategyView.objectives[0].requirements[0],
+    requirementKey,
+    displayText,
+});
+
+const testReward = (rewardKey: string, displayText: string) => ({
+    ...payload.entries[0].strategyView.objectives[0].rewards[0],
+    rewardKey,
+    displayText,
 });
 
 const testBranch = (branchKey: string, label = branchKey) => ({
@@ -800,6 +813,178 @@ const choiceResetPayload: QuestExplorerResponse = {
         debugSummary: null,
     },
 };
+
+const strategyDossierMarkerPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_StrategyMarkers",
+            title: "Marker Brief",
+            summaryLines: ["Command must choose whether to risk or rejoin."],
+            strategyView: { objectives: [testObjective("Objective_Markers", "Choose the command posture.")] },
+            branches: [
+                {
+                    ...testBranch("Branch_Risk", "Risk the breach"),
+                    groupLabel: "Command Posture",
+                    choiceGroupKey: "Quest_StrategyMarkers:choice-group:posture",
+                    failureEntryKeys: ["Quest_FailedAdvance"],
+                    strategy: {
+                        conditions: ["Accept the failed advance risk."],
+                        requirements: [testRequirement("Requirement_Risk", "Spend Influence to force the breach.")],
+                        rewards: [testReward("Reward_Risk", "Gain emergency command authority.")],
+                    },
+                },
+                {
+                    ...testBranch("Branch_Rejoin", "Rejoin the line"),
+                    groupLabel: "Command Posture",
+                    choiceGroupKey: "Quest_StrategyMarkers:choice-group:posture",
+                    convergesIntoEntryKeys: ["Quest_MainLine"],
+                    convergenceGroupKey: "Quest_StrategyMarkers:convergence:Quest_MainLine",
+                    strategy: {
+                        conditions: ["Return to the main operation."],
+                        requirements: [testRequirement("Requirement_Rejoin", "Hold the line for one more turn.")],
+                        rewards: [testReward("Reward_Rejoin", "Preserve veteran readiness.")],
+                    },
+                },
+            ],
+        }),
+        questEntry({
+            entryKey: "Quest_FailedAdvance",
+            title: "Failed Advance",
+            summaryLines: ["The failed path is documented."],
+            strategyView: { objectives: [testObjective("Objective_Failure", "Recover from the failed advance.")] },
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                previousEntryKeys: ["Quest_StrategyMarkers"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_MainLine",
+            title: "Main Line",
+            summaryLines: ["The path rejoins the main line."],
+            strategyView: { objectives: [testObjective("Objective_MainLine", "Continue the main operation.")] },
+            navigation: {
+                sequenceIndex: 2,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                previousEntryKeys: ["Quest_StrategyMarkers"],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Marker Brief",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Marker Brief", detailEntryKey: "Quest_StrategyMarkers" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const continuousLorePayload: QuestExplorerResponse = (() => {
+    const openingChapter = progressionQuestline({
+        title: "Stream Opening",
+        steps: [
+            { stepNumber: 1, stepOrder: 1, title: "Stream Opening", detailEntryKey: "Quest_Stream_A" },
+        ],
+    }).chapters[0];
+    const continuationChapter = progressionQuestline({
+        chapterNumber: 2,
+        chapterOrder: 2,
+        title: "Stream Continuation",
+        steps: [
+            { stepNumber: 1, stepOrder: 1, title: "Stream Continuation", detailEntryKey: "Quest_Stream_B" },
+        ],
+    }).chapters[0];
+    const endingChapter = progressionQuestline({
+        chapterNumber: 3,
+        chapterOrder: 3,
+        title: "Stream Ending",
+        steps: [
+            { stepNumber: 1, stepOrder: 1, title: "Stream Ending", detailEntryKey: "Quest_Stream_C" },
+        ],
+    }).chapters[0];
+    const questline = progressionQuestline({
+        title: "Stream Opening",
+        steps: [
+            { stepNumber: 1, stepOrder: 1, title: "Stream Opening", detailEntryKey: "Quest_Stream_A" },
+        ],
+    });
+
+    return {
+        ...payload,
+        entries: [
+            questEntry({
+                entryKey: "Quest_Stream_A",
+                title: "Stream Opening",
+                summaryLines: ["The stream begins."],
+                branches: [{
+                    ...testBranch("Branch_Stream_Next", "Continue to chapter two"),
+                    nextEntryKeys: ["Quest_Stream_B"],
+                    lore: { outcomePreviewLines: ["The stream opens into chapter two."] },
+                }],
+                navigation: {
+                    chapter: 1,
+                    chapterLabel: "Chapter 1",
+                    chapterOrder: 1,
+                    step: 1,
+                    stepLabel: "Step 1",
+                    stepOrder: 1,
+                    sequenceIndex: 0,
+                    nextEntryKeys: ["Quest_Stream_B"],
+                },
+            }),
+            questEntry({
+                entryKey: "Quest_Stream_B",
+                title: "Stream Continuation",
+                summaryLines: ["The stream continues."],
+                branches: [{
+                    ...testBranch("Branch_Stream_End", "Continue to chapter three"),
+                    nextEntryKeys: ["Quest_Stream_C"],
+                    lore: { outcomePreviewLines: ["The stream opens into chapter three."] },
+                }],
+                navigation: {
+                    chapter: 2,
+                    chapterLabel: "Chapter 2",
+                    chapterOrder: 2,
+                    step: 1,
+                    stepLabel: "Step 1",
+                    stepOrder: 1,
+                    sequenceIndex: 1,
+                    previousEntryKeys: ["Quest_Stream_A"],
+                    nextEntryKeys: ["Quest_Stream_C"],
+                },
+            }),
+            questEntry({
+                entryKey: "Quest_Stream_C",
+                title: "Stream Ending",
+                summaryLines: ["The stream ends."],
+                navigation: {
+                    chapter: 3,
+                    chapterLabel: "Chapter 3",
+                    chapterOrder: 3,
+                    step: 1,
+                    stepLabel: "Step 1",
+                    stepOrder: 1,
+                    sequenceIndex: 2,
+                    previousEntryKeys: ["Quest_Stream_B"],
+                    nextEntryKeys: [],
+                },
+            }),
+        ],
+        progression: {
+            questlines: [{ ...questline, chapters: [openingChapter, continuationChapter, endingChapter] }],
+            debugSummary: null,
+        },
+    };
+})();
 
 const scopedReaderPayload: QuestExplorerResponse = {
     ...payload,
@@ -1914,12 +2099,24 @@ function expectElementBefore(first: Element, second: Element) {
     expect(Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
 }
 
+function getStepHeaderLabel(container: HTMLElement, label: string) {
+    const stepLabel = within(container)
+        .getAllByText(label)
+        .find((element) => element.closest(".questExplorer-stepLabel"));
+    if (!stepLabel) throw new Error(`Expected progression header label ${label}`);
+    return stepLabel;
+}
+
 describe("QuestExplorerPage", () => {
     beforeEach(() => {
         useQuestStore.getState().reset();
         useFactionSelectionStore.getState().reset();
         mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getQuestExplorer.mockResolvedValue(payload);
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
     });
 
     it("hydrates an alias route and renders lore mode", async () => {
@@ -1956,6 +2153,11 @@ describe("QuestExplorerPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
         const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
+        const debugValue = (label: string) => {
+            const row = Array.from(debugPanel.querySelectorAll(".questExplorer-debugRows > div"))
+                .find((candidate) => candidate.querySelector("dt")?.textContent === label);
+            return row?.querySelector("dd")?.textContent ?? "";
+        };
 
         expect(within(debugPanel).getByText("Debug progression")).toBeInTheDocument();
         expect(screen.getByRole("checkbox", { name: "Show raw hidden rows" })).not.toBeChecked();
@@ -1967,7 +2169,11 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getAllByText("aliasEntryKeys").length).toBeGreaterThan(0);
         expect(within(debugPanel).getAllByText("variant keys").length).toBeGreaterThan(0);
         expect(within(debugPanel).getAllByText("continuation keys").length).toBeGreaterThan(0);
-        expect(within(debugPanel).getByText("selected choice path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active mode")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active selected choice path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active selected branch path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("Strategy selected choice path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("Lore selected choice path")).toBeInTheDocument();
         expect(within(debugPanel).getByText("unresolved continuation")).toBeInTheDocument();
         expect(screen.getByText(/shown at Chapter 1 Step 1; owner Chapter 1 Step 1 .* branch -> Chapter 1 Step 2/)).toBeInTheDocument();
 
@@ -1976,8 +2182,221 @@ describe("QuestExplorerPage", () => {
         await waitFor(() => {
             expect(within(debugPanel).getAllByText(/choiceId=branch:Branch_A/).length).toBeGreaterThan(0);
         });
+        expect(debugValue("active mode")).toBe("lore");
+        expect(debugValue("active selected branch path")).toContain("Branch_A");
+        expect(debugValue("Strategy selected choice path")).toBe("none");
+        expect(debugValue("Lore selected choice path")).toContain("Branch_A");
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("derives stable lore chronicle stream segment identities", () => {
+        const chapterOne = progressionQuestline({
+            title: "Stream Opening",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "Stream Opening", detailEntryKey: "Quest_Stream_A" },
+            ],
+        }).chapters[0];
+        const chapterTwo = progressionQuestline({
+            chapterNumber: 2,
+            chapterOrder: 2,
+            title: "Stream Continuation",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "Stream Continuation", detailEntryKey: "Quest_Stream_B" },
+            ],
+        }).chapters[0];
+        const questline = progressionQuestline({
+            title: "Stream Opening",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "Stream Opening", detailEntryKey: "Quest_Stream_A" },
+            ],
+        });
+        const fullProgression = {
+            questlines: [{ ...questline, chapters: [chapterOne, chapterTwo] }],
+            debugSummary: null,
+        };
+        const entries = [
+            questEntry({
+                entryKey: "Quest_Stream_A",
+                title: "Stream Opening",
+                branches: [{
+                    ...testBranch("Branch_Stream_Next", "Continue to chapter two"),
+                    nextEntryKeys: ["Quest_Stream_B"],
+                }],
+                navigation: {
+                    chapter: 1,
+                    chapterLabel: "Chapter 1",
+                    chapterOrder: 1,
+                    step: 1,
+                    stepLabel: "Step 1",
+                    stepOrder: 1,
+                    sequenceIndex: 0,
+                    nextEntryKeys: ["Quest_Stream_B"],
+                },
+            }),
+            questEntry({
+                entryKey: "Quest_Stream_B",
+                title: "Stream Continuation",
+                navigation: {
+                    chapter: 2,
+                    chapterLabel: "Chapter 2",
+                    chapterOrder: 2,
+                    step: 1,
+                    stepLabel: "Step 1",
+                    stepOrder: 1,
+                    sequenceIndex: 1,
+                    previousEntryKeys: ["Quest_Stream_A"],
+                },
+            }),
+        ];
+        const entriesByKey = Object.fromEntries(entries.map((entry) => [entry.entryKey, entry]));
+        const selectedProgression = {
+            questline: fullProgression.questlines[0],
+            chapter: chapterOne,
+            activeStepKeys: new Set<string>([chapterOne.steps[0].stepKey]),
+            activeVariantEntryKeys: new Set<string>(),
+            focusedStepIndex: 0,
+        };
+
+        const initialStream = buildLoreChronicleStream({
+            selectedProgression,
+            fullProgression,
+            entriesByKey,
+            loreChoicePathsByContext: {},
+            showRawHiddenRows: false,
+        });
+        const selectedContextKey = initialStream.selectedContextKey ?? "";
+
+        expect(initialStream.segments).toHaveLength(1);
+        expect(initialStream.segments[0].contextKey).toBe(selectedContextKey);
+        expect(initialStream.segments[0].railEntryKey).toBe("Quest_Stream_A");
+
+        const selectedStream = buildLoreChronicleStream({
+            selectedProgression,
+            fullProgression,
+            entriesByKey,
+            loreChoicePathsByContext: {
+                [selectedContextKey]: [{
+                    stepKey: chapterOne.steps[0].stepKey,
+                    choiceId: "branch:Branch_Stream_Next",
+                    branchKey: "Branch_Stream_Next",
+                    choiceKey: null,
+                    sectionRole: null,
+                    choiceGroupKey: null,
+                    branchStepOrder: null,
+                    hasDependentContinuations: false,
+                    label: "Continue to chapter two",
+                    targetEntryKey: "Quest_Stream_B",
+                    nextEntryKeys: ["Quest_Stream_B"],
+                }],
+            },
+            showRawHiddenRows: false,
+        });
+
+        expect(selectedStream.segments).toHaveLength(2);
+        expect(selectedStream.segments.map((segment) => segment.railEntryKey)).toEqual(["Quest_Stream_A", "Quest_Stream_B"]);
+
+        const renamedStream = buildLoreChronicleStream({
+            selectedProgression: {
+                ...selectedProgression,
+                chapter: { ...chapterOne, title: "Renamed Stream Opening" },
+            },
+            fullProgression,
+            entriesByKey,
+            loreChoicePathsByContext: {},
+            showRawHiddenRows: false,
+        });
+
+        expect(renamedStream.selectedContextKey).toBe(selectedContextKey);
+    });
+
+    it("renders lore as a continuous selected-path chronicle and stops at the next unresolved choice", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+        renderPage("/quests/Quest_Stream_A?mode=lore");
+
+        await screen.findByRole("heading", { name: "Stream Opening" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+
+        expect(within(chronicle).queryByText("Stream Continuation")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Stream Ending")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
+
+        expect(within(chronicle).getByText("Stream Continuation")).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Continue to chapter three/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByText("Stream Ending")).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter three/ }));
+
+        expect(within(chronicle).getByText("Stream Ending")).toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
+    });
+
+    it("lets the left rail follow the visible lore segment without mutating selected entry", async () => {
+        const user = userEvent.setup();
+        const observers: Array<{
+            callback: IntersectionObserverCallback;
+            elements: Element[];
+            observer: IntersectionObserver;
+        }> = [];
+        class MockIntersectionObserver implements IntersectionObserver {
+            readonly root: Element | Document | null = null;
+            readonly rootMargin = "";
+            readonly thresholds: ReadonlyArray<number> = [];
+            elements: Element[] = [];
+
+            constructor(callback: IntersectionObserverCallback) {
+                observers.push({ callback, elements: this.elements, observer: this });
+            }
+
+            observe = (target: Element) => {
+                this.elements.push(target);
+            };
+
+            unobserve = (target: Element) => {
+                this.elements = this.elements.filter((element) => element !== target);
+            };
+
+            disconnect = () => {
+                this.elements = [];
+            };
+
+            takeRecords = () => [];
+        }
+        vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
+
+        renderPage("/quests/Quest_Stream_A?mode=lore");
+
+        await screen.findByRole("heading", { name: "Stream Opening" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
+
+        await waitFor(() => {
+            expect(observers.at(-1)?.elements.length).toBeGreaterThanOrEqual(2);
+        });
+
+        const rail = screen.getByRole("complementary");
+        expect(within(rail).getByRole("button", { name: /Stream Opening\s+Chapter 1\s+1 step/ })).toHaveAttribute("aria-current", "page");
+
+        const continuationSegment = document.querySelector('[data-rail-entry-key="Quest_Stream_B"]');
+        expect(continuationSegment).not.toBeNull();
+        const observerRecord = observers.at(-1)!;
+        act(() => {
+            observerRecord.callback([{
+                boundingClientRect: { top: 0 } as DOMRectReadOnly,
+                intersectionRatio: 0.8,
+                intersectionRect: {} as DOMRectReadOnly,
+                isIntersecting: true,
+                rootBounds: null,
+                target: continuationSegment!,
+                time: 0,
+            }], observerRecord.observer);
+        });
+
+        expect(within(rail).getByRole("button", { name: /Stream Continuation\s+Chapter 2\s+1 step/ })).toHaveAttribute("aria-current", "page");
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Stream_A");
     });
 
     it("renders strategy mode and reveals the next step after a modeled choice", async () => {
@@ -1987,9 +2406,16 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
-        expect(screen.getAllByText("Reach the marker.").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Gain Dust.").length).toBeGreaterThan(0);
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByRole("region", { name: "Chapter Tactical Brief" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Current Objective" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Requirements" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Rewards" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Selected Path" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toBeInTheDocument();
+        expect(within(chronicle).getByText("Reach the marker.")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Visit the first marker.").length).toBeGreaterThan(0);
+        expect(within(chronicle).getAllByText("Gain Dust.").length).toBeGreaterThan(0);
         expect(screen.queryByText("The tide record begins.")).not.toBeInTheDocument();
         expect(screen.queryByText("We follow the old marker.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
@@ -1998,9 +2424,82 @@ describe("QuestExplorerPage", () => {
         await user.click(choice);
 
         expect(choice).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle).getAllByText("Follow the marker").length).toBeGreaterThan(0);
+        expect(within(chronicle).getAllByText("Choose the marker path.").length).toBeGreaterThan(0);
+        expect(within(chronicle).getAllByText("Leads To").length).toBeGreaterThan(0);
+        expect(within(chronicle).getAllByText("Chapter 1: Second Tide").length).toBeGreaterThan(0);
         expect(screen.getByText("No strategy objectives are attached to this step.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
+    it("renders strategy branch comparison with per-branch tradeoffs and preserves alternatives after selection", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(strategyDossierMarkerPayload);
+        renderPage("/quests/Quest_StrategyMarkers?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Marker Brief" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const comparison = within(chronicle).getByRole("region", { name: "Decision Options" });
+        const riskOption = within(comparison).getByRole("button", { name: /Risk the breach/ });
+        const rejoinOption = within(comparison).getByRole("button", { name: /Rejoin the line/ });
+
+        expect(within(comparison).getByRole("region", { name: "Command Posture" })).toBeInTheDocument();
+        expect(within(riskOption).getByText("Accept the failed advance risk.")).toBeInTheDocument();
+        expect(within(riskOption).getByText("Spend Influence to force the breach.")).toBeInTheDocument();
+        expect(within(riskOption).getByText("Gain emergency command authority.")).toBeInTheDocument();
+        expect(within(riskOption).getByText("Failure")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Return to the main operation.")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Hold the line for one more turn.")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Preserve veteran readiness.")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Converges")).toBeInTheDocument();
+
+        await user.click(riskOption);
+
+        expect(riskOption).toHaveAttribute("aria-current", "true");
+        expect(within(comparison).getByRole("button", { name: /Rejoin the line/ })).toBeInTheDocument();
+        const selectedPath = within(chronicle).getByRole("region", { name: "Selected Path" });
+        expect(selectedPath).toHaveTextContent("Step 1");
+        expect(selectedPath).toHaveTextContent("Risk the breach");
+        expect(selectedPath).toHaveTextContent("Current");
+
+        const selectedSummary = within(comparison).getByRole("region", { name: "Selected Option Summary" });
+        expect(selectedSummary).toHaveTextContent("Selected Option");
+        expect(selectedSummary).toHaveTextContent("Risk the breach");
+        expect(selectedSummary).toHaveTextContent("Accept the failed advance risk.");
+        expect(selectedSummary).toHaveTextContent("Spend Influence to force the breach.");
+        expect(selectedSummary).toHaveTextContent("Gain emergency command authority.");
+        expect(selectedSummary).toHaveTextContent("Failure");
+        expect(selectedSummary).toHaveTextContent("Chapter 1: Failed Advance");
+        expect(within(chronicle).getByRole("region", { name: "Projected Outcome" })).toHaveTextContent("Accept the failed advance risk.");
+    });
+
+    it("renders strategy dossier failure and convergence markers when a simulated branch exposes them", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(strategyDossierMarkerPayload);
+        renderPage("/quests/Quest_StrategyMarkers?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Marker Brief" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Risk the breach/ }));
+
+        let markers = within(chronicle).getByRole("region", { name: "Path Markers" });
+        expect(within(markers).getByText("Failure")).toBeInTheDocument();
+        expect(within(markers).getByText("Chapter 1: Failed Advance")).toBeInTheDocument();
+        const failureMarker = within(markers).getByText("Failure").closest(".questExplorer-strategyDossierMarker");
+        if (!failureMarker) throw new Error("Expected failure marker badge");
+        expect(failureMarker).toHaveClass("questExplorer-strategyDossierMarker--failure");
+
+        await user.click(within(chronicle).getByRole("button", { name: /Rejoin the line/ }));
+
+        markers = within(chronicle).getByRole("region", { name: "Path Markers" });
+        expect(within(markers).getByText("Converges")).toBeInTheDocument();
+        expect(within(markers).getByText("Chapter 1: Main Line")).toBeInTheDocument();
+        const convergenceMarker = within(markers).getByText("Converges").closest(".questExplorer-strategyDossierMarker");
+        if (!convergenceMarker) throw new Error("Expected convergence marker badge");
+        expect(convergenceMarker).toHaveClass("questExplorer-strategyDossierMarker--converges");
     });
 
     it("scopes strategy content to the focused step before rendering choices", async () => {
@@ -2088,16 +2587,18 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(within(chronicle).getByText("Choose a path to project the next outcome.")).toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
-        const pathRevealed = within(chronicle).getByText("Path Revealed");
+        const projectedOutcome = within(chronicle).getAllByRole("region", { name: "Projected Outcome" })[0];
         const nextObjective = within(chronicle).getByText("Resolve the next beat.");
 
         expect(nextObjective).toBeInTheDocument();
-        expectElementBefore(selectedChoice, pathRevealed);
-        expectElementBefore(pathRevealed, nextObjective);
+        expect(within(projectedOutcome).getByText("Eliminate the threat")).toBeInTheDocument();
+        expectElementBefore(selectedChoice, projectedOutcome);
+        expectElementBefore(projectedOutcome, nextObjective);
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
     });
@@ -2119,18 +2620,23 @@ describe("QuestExplorerPage", () => {
         await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
-        const revealedTransitions = within(chronicle).getAllByText("Path Revealed");
-        const step2 = within(chronicle).getByText("Step 2");
-        const nextObjective = within(chronicle).getByText("Resolve the next beat.");
-        const step3 = within(chronicle).getByText("Step 3");
-        const futureObjective = within(chronicle).getByText("Resolve the future beat.");
+        const projectedOutcomes = within(chronicle)
+            .getAllByRole("region", { name: "Projected Outcome" })
+            .filter((section) => (
+                within(section).queryByText("Eliminate the threat")
+                || within(section).queryByText("Rebuild the city")
+            ));
+        const step2 = getStepHeaderLabel(chronicle, "Step 2");
+        const nextObjective = within(chronicle).getAllByText("Resolve the next beat.").at(-1)!;
+        const step3 = getStepHeaderLabel(chronicle, "Step 3");
+        const futureObjective = within(chronicle).getAllByText("Resolve the future beat.").at(-1)!;
 
-        expect(revealedTransitions).toHaveLength(2);
-        expectElementBefore(selectedChoice, revealedTransitions[0]);
-        expectElementBefore(revealedTransitions[0], step2);
+        expect(projectedOutcomes).toHaveLength(2);
+        expectElementBefore(selectedChoice, projectedOutcomes[0]);
+        expectElementBefore(projectedOutcomes[0], step2);
         expectElementBefore(step2, nextObjective);
-        expectElementBefore(nextObjective, revealedTransitions[1]);
-        expectElementBefore(revealedTransitions[1], step3);
+        expectElementBefore(nextObjective, projectedOutcomes[1]);
+        expectElementBefore(projectedOutcomes[1], step3);
         expectElementBefore(step3, futureObjective);
         expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();
@@ -2152,10 +2658,10 @@ describe("QuestExplorerPage", () => {
         await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Search/ });
-        const step2 = within(chronicle).getByText("Step 2");
-        const nextObjective = within(chronicle).getByText("Resolve the carried next beat.");
-        const step3 = within(chronicle).getByText("Step 3");
-        const futureObjective = within(chronicle).getByText("Resolve the carried future beat.");
+        const step2 = getStepHeaderLabel(chronicle, "Step 2");
+        const nextObjective = within(chronicle).getAllByText("Resolve the carried next beat.").at(-1)!;
+        const step3 = getStepHeaderLabel(chronicle, "Step 3");
+        const futureObjective = within(chronicle).getAllByText("Resolve the carried future beat.").at(-1)!;
 
         expect(within(chronicle).queryByText("Resolve the carried current beat.")).not.toBeInTheDocument();
         expectElementBefore(selectedChoice, step2);
@@ -2244,24 +2750,34 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
         expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
-        expect(screen.queryByText("Read the shore signs.")).not.toBeInTheDocument();
+        expect(screen.getAllByRole("region", { name: "Projected Outcome" })[0]).not.toHaveTextContent("Read the shore signs.");
 
         const shoreChoice = screen.getByRole("button", { name: /Study the shore/ });
         await user.click(shoreChoice);
 
         expect(shoreChoice).toHaveAttribute("aria-current", "true");
-        expect(screen.getByText("Read the shore signs.")).toBeInTheDocument();
+        expect(screen.getAllByText("Read the shore signs.").length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("region", { name: "Projected Outcome" })[0]).toHaveTextContent("Read the shore signs.");
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("preserves the selected progression path when switching strategy and lore modes", async () => {
+    it("keeps strategy and lore choice paths independent while preserving each tab", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        const loreShoreChoice = screen.getByRole("button", { name: /Study the shore/ });
+        await user.click(loreShoreChoice);
+        expect(loreShoreChoice).toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
+
         await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.queryByText("Path Revealed")).not.toBeInTheDocument();
 
         const markerChoice = screen.getByRole("button", { name: /Follow the marker/ });
         await user.click(markerChoice);
@@ -2270,7 +2786,9 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("button", { name: "Lore" }));
 
-        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
@@ -2279,7 +2797,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("Secure the marker path.")).toBeInTheDocument();
     });
 
-    it("uses one choice path for lore branch moments and strategy choice cards", async () => {
+    it("keeps lore choices from selecting strategy choice cards", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -2294,33 +2812,109 @@ describe("QuestExplorerPage", () => {
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
-        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
-        expect(screen.getByText("Read the shore signs.")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.queryByText("Path Revealed")).not.toBeInTheDocument();
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
     });
 
-    it("clears an incompatible choice path when navigation changes to another quest in the same chapter", async () => {
+    it("preserves lore paths by chapter context while strategy remains entry-scoped", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
-
-        render(
-            <MemoryRouter initialEntries={["/quests/Quest_A"]}>
-                <Routes>
-                    <Route path="/quests/*" element={<QuestRouteHarness />} />
-                </Routes>
-            </MemoryRouter>
-        );
+        const baseProgression = choiceResetPayload.progression!;
+        const baseQuestline = baseProgression.questlines[0]!;
+        const secondChapter = progressionQuestline({
+            chapterNumber: 2,
+            chapterOrder: 2,
+            title: "Later Archive",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "Later Archive", detailEntryKey: "Quest_D" },
+                { stepNumber: 2, stepOrder: 2, title: "Later Result", detailEntryKey: "Quest_E" },
+            ],
+        }).chapters[0];
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            ...choiceResetPayload,
+            entries: [
+                ...choiceResetPayload.entries,
+                questEntry({
+                    entryKey: "Quest_D",
+                    title: "Later Archive",
+                    summaryLines: ["Another chapter waits."],
+                    navigation: {
+                        chapter: 2,
+                        chapterLabel: "Chapter 2",
+                        chapterOrder: 2,
+                        step: 1,
+                        stepLabel: "Step 1",
+                        stepOrder: 1,
+                        sequenceIndex: 3,
+                        previousEntryKeys: [],
+                        nextEntryKeys: [],
+                    },
+                    branches: [{
+                        ...testBranch("Branch_D", "Open later record"),
+                        groupLabel: "Later Archive",
+                        nextEntryKeys: ["Quest_E"],
+                        lore: { outcomePreviewLines: ["The later path opens."] },
+                    }],
+                    strategyView: { objectives: [testObjective("Objective_D", "Hold the later archive.")] },
+                }),
+                questEntry({
+                    entryKey: "Quest_E",
+                    title: "Later Result",
+                    summaryLines: ["The later path opens."],
+                    navigation: {
+                        chapter: 2,
+                        chapterLabel: "Chapter 2",
+                        chapterOrder: 2,
+                        step: 2,
+                        stepLabel: "Step 2",
+                        stepOrder: 2,
+                        sequenceIndex: 4,
+                        previousEntryKeys: ["Quest_D"],
+                        nextEntryKeys: [],
+                    },
+                    strategyView: { objectives: [testObjective("Objective_E", "Resolve the later archive.")] },
+                }),
+            ],
+            progression: {
+                debugSummary: baseProgression.debugSummary,
+                questlines: [{ ...baseQuestline, chapters: [...baseQuestline.chapters, secondChapter] }],
+            },
+        });
+        renderPage("/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        await user.click(screen.getByRole("button", { name: /Study the shore/ }));
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+
         await user.click(screen.getByRole("button", { name: "Strategy" }));
         await user.click(screen.getByRole("button", { name: /Follow the marker/ }));
         expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
 
-        await user.click(screen.getByRole("button", { name: "Open second tide" }));
+        await user.click(screen.getByRole("button", { name: /Later Archive/ }));
 
-        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_B"));
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_D"));
         expect(screen.queryByRole("button", { name: /Follow the marker/ })).not.toBeInTheDocument();
-        expect(screen.getAllByText("The marker path opens.").length).toBeGreaterThan(0);
+        expect(screen.getByRole("heading", { name: "Later Archive", level: 2 })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+        const laterChoice = screen.getByRole("button", { name: /Open later record/ });
+        await user.click(laterChoice);
+        expect(laterChoice).toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: /Archive of the First Tide/ }));
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A"));
+
+        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Lore" }));
+        await user.click(screen.getByRole("button", { name: /Later Archive/ }));
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_D"));
+        expect(screen.getByRole("button", { name: /Open later record/ })).toHaveAttribute("aria-current", "true");
     });
 
     it("clears an incompatible choice path after category changes away and back", async () => {
@@ -2465,7 +3059,7 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getByText("normal visible choice count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("debug visible choice count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("hidden artifact count")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("selected branch path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active selected branch path")).toBeInTheDocument();
         expect(screen.queryByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
@@ -2518,10 +3112,10 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getByText("hidden staged continuation count")).toBeInTheDocument();
     });
 
-    it("updates the active rail chapter when a modeled choice reaches the next chapter", async () => {
+    it("updates the active rail chapter in strategy when a modeled choice reaches the next chapter", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(nextChapterPayload);
-        renderPage("/quests/Quest_A");
+        renderPage("/quests/Quest_A?mode=strategy");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: /Continue to chapter two/ }));

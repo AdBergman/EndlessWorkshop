@@ -777,7 +777,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(productContinuityPayload);
     });
 
-    it("locks Kin Ch4 continuation gating counts and selected branch path", async () => {
+    it("locks Kin Ch4 continuation gating counts and active selected branch path", async () => {
         const user = userEvent.setup();
         const normalRender = renderProductQuest(kinCh4, Faction.KIN, "kin");
 
@@ -802,14 +802,14 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
         expect(firstDebugStepValue("hidden artifact count")).toBe("0");
-        expect(debugValue("selected branch path")).toBe("none");
+        expect(debugValue("active selected branch path")).toBe("none");
 
         await user.click(within(chronicle()).getByRole("button", { name: /Track/ }));
 
         expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
-        expect(debugValue("selected branch path")).toContain(`${kinCh4}:branch:1`);
+        expect(debugValue("active selected branch path")).toContain(`${kinCh4}:branch:1`);
         expect(queryChronicleButtons(/Capture the rogue Lieutenant/)).toHaveLength(0);
         expect(within(chronicle()).getByText("Capture the rogue Lieutenant.")).toBeInTheDocument();
         expect(screen.queryByText(/prerequisite branch path not selected/)).not.toBeInTheDocument();
@@ -851,7 +851,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(chronicleButtons()).toHaveLength(2);
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
         expect(firstDebugStepValue("debug visible choice count")).toBe("4");
-        expect(debugValue("selected branch path")).toContain(`${necroCh3}:branch:1`);
+        expect(debugValue("active selected branch path")).toContain(`${necroCh3}:branch:1`);
         expect(queryChronicleButton(/Collect 3 collectibles/)).not.toBeInTheDocument();
         expect(within(chronicle()).getByText("Collect 3 collectibles")).toBeInTheDocument();
 
@@ -890,7 +890,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(debugStepValue(1, "normal visible choice count")).toBe("4");
         expect(debugStepValue(1, "debug visible choice count")).toBe("7");
         expect(debugStepValue(1, "hidden staged continuation count")).toBe("3");
-        expect(debugValue("selected branch path")).toContain(`${mukagCh4}:branch:2`);
+        expect(debugValue("active selected branch path")).toContain(`${mukagCh4}:branch:2`);
         expect(chronicleButtons()).toHaveLength(4);
         expect(screen.queryByText(/hidden in normal UI: later convergence row collapsed behind nearer continuation choice/)).not.toBeInTheDocument();
 
@@ -920,7 +920,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(within(chronicle()).getByRole("button", { name: /Reclaim/ }));
 
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
-        expect(debugValue("selected branch path")).toContain(`${lastLordCh6A}:branch:2`);
+        expect(debugValue("active selected branch path")).toContain(`${lastLordCh6A}:branch:2`);
         expect(queryChronicleButton(/Defeat Aspects' Army/)).not.toBeInTheDocument();
         expect(within(chronicle()).getByText("Defeat Aspects' Army")).toBeInTheDocument();
 
@@ -942,7 +942,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(within(chronicle()).getByRole("button", { name: /Forgive/ }));
 
         expect(firstDebugStepValue("normal visible choice count")).toBe("2");
-        expect(debugValue("selected branch path")).toContain(`${lastLordCh6B}:branch:1`);
+        expect(debugValue("active selected branch path")).toContain(`${lastLordCh6B}:branch:1`);
         expect(queryChronicleButton(/Pay the invoice at the quest location/)).not.toBeInTheDocument();
         expect(within(chronicle()).getByText(/Pay the invoice at the quest location/)).toBeInTheDocument();
     });
