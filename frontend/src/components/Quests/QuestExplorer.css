@@ -1132,9 +1132,11 @@
 .questExplorer-stepObjective p,
 .questExplorer-strategyDossierBrief p,
 .questExplorer-strategyDecisionSummary p,
+.questExplorer-strategyPathPrompt p,
 .questExplorer-strategyDossierObjective p,
 .questExplorer-strategyComparisonOutcome,
 .questExplorer-strategyProjectedOutcome p,
+.questExplorer-strategyOutcomeBlock p,
 .questExplorer-strategyProgressionDetails p,
 .questExplorer-strategyDossierEmpty,
 .questExplorer-pathState p {
@@ -1214,8 +1216,8 @@
 
 .questExplorer-strategyDossierBrief,
 .questExplorer-strategyDecisionSummary,
+.questExplorer-strategyPathPrompt,
 .questExplorer-strategyProjectedOutcome,
-.questExplorer-strategyProgressionDetails,
 .questExplorer-strategyDossierObjectives {
     display: grid;
     gap: 11px;
@@ -1225,6 +1227,7 @@
 .questExplorer-strategyDossierBrief span,
 .questExplorer-strategyDecisionSummary span,
 .questExplorer-strategyDossierObjective header span,
+.questExplorer-strategyOutcomeBlock > span,
 .questExplorer-strategyDossierMarker strong {
     color: var(--quest-teal);
     font-size: 0.72rem;
@@ -1235,11 +1238,29 @@
 
 .questExplorer-strategyDossierBrief strong,
 .questExplorer-strategyDecisionSummary > strong,
-.questExplorer-strategyProjectedOutcome > strong {
+.questExplorer-strategyProjectedOutcome > strong,
+.questExplorer-strategyOutcomeBlock > strong {
     color: var(--quest-ink);
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.35rem;
     line-height: 1.18;
+}
+
+.questExplorer-strategyDossierSection--compactObjective {
+    gap: 11px;
+}
+
+.questExplorer-strategyDossierSection--compactObjective .questExplorer-strategyDossierBrief {
+    gap: 7px;
+}
+
+.questExplorer-strategyDossierSection--compactObjective .questExplorer-strategyDossierObjective {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.questExplorer-strategyDossierSection--pathChoice {
+    gap: 13px;
 }
 
 .questExplorer-strategyDossierTwin {
@@ -1352,6 +1373,63 @@
 
 .questExplorer-strategyPathBreadcrumb em {
     color: var(--quest-gold-bright);
+}
+
+.questExplorer-strategyProgressionDetails {
+    display: grid;
+    gap: 11px;
+    min-width: 0;
+    padding-top: 15px;
+    border-top: 1px solid rgba(208, 162, 74, 0.16);
+}
+
+.questExplorer-strategyProgressionDetails summary {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px 14px;
+    color: var(--quest-gold);
+    cursor: pointer;
+    list-style: none;
+}
+
+.questExplorer-strategyProgressionDetails summary::-webkit-details-marker {
+    display: none;
+}
+
+.questExplorer-strategyProgressionDetails summary::before {
+    content: "+";
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(208, 162, 74, 0.34);
+    border-radius: 50%;
+    color: var(--quest-gold-bright);
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.questExplorer-strategyProgressionDetails[open] summary::before {
+    content: "-";
+}
+
+.questExplorer-strategyProgressionDetails summary span {
+    color: var(--quest-gold);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.questExplorer-strategyProgressionDetails summary em {
+    min-width: 0;
+    color: rgba(241, 234, 220, 0.58);
+    font-size: 0.86rem;
+    font-style: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .questExplorer-strategyContinuity {
@@ -1578,6 +1656,7 @@
 }
 
 .questExplorer-strategyComparisonOption.is-selected {
+    grid-column: 1 / -1;
     border-color: rgba(208, 162, 74, 0.95);
     background:
         linear-gradient(135deg, rgba(208, 162, 74, 0.16), rgba(81, 205, 189, 0.06) 58%, transparent),
@@ -1632,6 +1711,75 @@
 .questExplorer-strategyComparisonMeta {
     display: grid;
     gap: 10px;
+}
+
+.questExplorer-strategyInlineOutcome {
+    display: grid;
+    gap: 12px;
+    margin-top: 2px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(208, 162, 74, 0.2);
+}
+
+.questExplorer-strategyOutcomeBlock {
+    display: grid;
+    gap: 9px;
+}
+
+.questExplorer-strategyOutcomeBlock > strong {
+    font-size: 1.22rem;
+}
+
+.questExplorer-strategyOutcomeStatus {
+    display: grid;
+    gap: 4px;
+    padding: 11px 13px;
+    border: 1px solid rgba(81, 205, 189, 0.24);
+    border-radius: 4px;
+    background: rgba(81, 205, 189, 0.055);
+}
+
+.questExplorer-strategyOutcomeStatus > span {
+    color: var(--quest-teal);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.questExplorer-strategyOutcomeStatus > strong {
+    color: var(--quest-ink);
+    font-size: 0.98rem;
+    line-height: 1.45;
+}
+
+.questExplorer-strategyOutcomeStatus em {
+    color: var(--quest-ink-muted);
+    font-size: 0.9rem;
+    font-style: normal;
+    line-height: 1.5;
+}
+
+.questExplorer-strategyOutcomeStatus--failure {
+    border-color: rgba(214, 111, 96, 0.34);
+    background: rgba(214, 111, 96, 0.07);
+}
+
+.questExplorer-strategyOutcomeStatus--failure > span {
+    color: #d66f60;
+}
+
+.questExplorer-strategyOutcomeStatus--converges {
+    border-color: rgba(208, 162, 74, 0.32);
+}
+
+.questExplorer-strategyOutcomeStatus--converges > span {
+    color: var(--quest-gold-bright);
+}
+
+.questExplorer-strategyOutcomeStatus--complete > span,
+.questExplorer-strategyOutcomeStatus--unresolved > span {
+    color: rgba(241, 234, 220, 0.7);
 }
 
 .questExplorer-strategyComparisonMarkers {
