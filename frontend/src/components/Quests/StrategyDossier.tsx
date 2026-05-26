@@ -6,7 +6,6 @@ import {
     type StrategyDossierMarker,
     type StrategyDossierModel,
     type StrategyDossierObjective,
-    type StrategyDossierSelectedPathStep,
     type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
 import type { QuestPathChoice } from "@/features/quests/questPathFlow";
@@ -27,61 +26,109 @@ export function StrategyDossier({
     debugChoiceDetails?: Map<string, string>;
     projectedDebugDetails?: string[];
 }) {
-    const pathSectionTitle = pathChoiceSectionTitle(model.branchComparison.groups);
+    const presentation = strategyPresentation(model);
 
     return (
         <div className="questExplorer-strategyDossier">
-            <StrategyDossierSection title="Compact Objective" variant="compactObjective">
-                <div className="questExplorer-strategyDossierBrief">
-                    <span>{model.brief.stepLabel} of {model.brief.totalSteps}</span>
-                    {model.brief.summaryLines.length > 0 ? (
-                        model.brief.summaryLines.map((line, index) => <p key={`${model.brief.title}:summary:${index}`}>{line}</p>)
-                    ) : (
-                        <p>No tactical summary is attached to this step.</p>
-                    )}
-                </div>
-
-                <StrategyDossierObjectiveList
+            <StrategyDossierSection title="Current task" variant="currentTask">
+                <StrategyCurrentTask
                     objectives={model.objectives}
-                    emptyLabel="No strategy objectives are attached to this step."
-                />
-            </StrategyDossierSection>
-
-            <StrategyDossierSection title={pathSectionTitle} variant="pathChoice">
-                <StrategyPathPrompt
-                    description={model.decision.description}
-                    isAwaitingChoice={model.pathStatus.kind === "awaiting-choice"}
-                />
-                <StrategyBranchComparison
-                    groups={model.branchComparison.groups}
-                    emptyLabel={model.branchComparison.emptyLabel}
-                    step={step}
-                    projectedOutcome={model.projectedOutcome}
-                    pathStatus={model.pathStatus}
+                    soleOption={presentation.soleOption}
+                    nextStatus={presentation.soleOptionNextStatus}
                     debugChoiceDetails={debugChoiceDetails}
-                    projectedDebugDetails={projectedDebugDetails}
-                    onChoose={onChoose}
                 />
             </StrategyDossierSection>
 
-            <StrategyProgressionDetails
-                summary={model.continuityStrip.summary}
-                selectedPathSteps={model.selectedPathSteps}
-            />
+            {presentation.hasDecision ? (
+                <StrategyDossierSection title="Choose a path" variant="pathChoice">
+                    <StrategyBranchComparison
+                        groups={model.branchComparison.groups}
+                        emptyLabel={model.branchComparison.emptyLabel}
+                        step={step}
+                        projectedOutcome={model.projectedOutcome}
+                        pathStatus={model.pathStatus}
+                        debugChoiceDetails={debugChoiceDetails}
+                        projectedDebugDetails={projectedDebugDetails}
+                        onChoose={onChoose}
+                    />
+                </StrategyDossierSection>
+            ) : null}
         </div>
     );
 }
 
-function StrategyPathPrompt({
-    description,
-    isAwaitingChoice,
+type StrategyNextStatusContent = {
+    kind: StrategyPathStatus["kind"];
+    title: string;
+    detail: string | null;
+};
+
+type StrategyPresentation = {
+    hasDecision: boolean;
+    soleOption: StrategyDossierBranchOption | null;
+    soleOptionNextStatus: StrategyNextStatusContent | null;
+};
+
+function strategyPresentation(model: StrategyDossierModel): StrategyPresentation {
+    const options = strategyOptions(model.branchComparison.groups);
+    const soleOption = options.length === 1 ? options[0] : null;
+    const soleOptionNextStatus = soleOption
+        ? soleOption.isSelected && model.pathStatus.kind !== "awaiting-choice"
+            ? nextStatusContentForPathStatus(model.pathStatus)
+            : nextStatusContentForOption(soleOption)
+        : null;
+
+    return {
+        hasDecision: options.length > 1,
+        soleOption,
+        soleOptionNextStatus,
+    };
+}
+
+function strategyOptions(groups: StrategyDossierBranchComparisonGroup[]): StrategyDossierBranchOption[] {
+    return groups.flatMap((group) => group.options);
+}
+
+function StrategyCurrentTask({
+    objectives,
+    soleOption,
+    nextStatus,
+    debugChoiceDetails,
 }: {
-    description: string;
-    isAwaitingChoice: boolean;
+    objectives: StrategyDossierObjective[];
+    soleOption: StrategyDossierBranchOption | null;
+    nextStatus: StrategyNextStatusContent | null;
+    debugChoiceDetails?: Map<string, string>;
 }) {
+    if (!soleOption) {
+        const task = taskSummaryForObjectives(objectives);
+        if (!task) {
+            return <p className="questExplorer-strategyDossierEmpty">No strategy objectives are attached to this step.</p>;
+        }
+
+        return <StrategyTaskSummary {...task} />;
+    }
+
+    const fallbackObjectiveLines = objectives.map((objective) => objective.text);
+    const requirements = uniqueDisplayValues([
+        ...soleOption.requirements,
+        ...objectives.flatMap((objective) => objective.requirements),
+    ]);
+    const rewards = uniqueDisplayValues([
+        ...soleOption.rewards,
+        ...objectives.flatMap((objective) => objective.rewards),
+    ]);
+
     return (
-        <div className="questExplorer-strategyPathPrompt">
-            <p>{isAwaitingChoice ? "Select a path to preview its result and next destination." : description}</p>
+        <div className="questExplorer-strategyCurrentTask">
+            <StrategyTaskSummary
+                title={soleOption.label}
+                lines={soleOption.outcomeLines.length > 0 ? soleOption.outcomeLines : fallbackObjectiveLines}
+                requirements={requirements}
+                rewards={rewards}
+                debugDetail={debugChoiceDetails?.get(soleOption.choice.id)}
+            />
+            {nextStatus ? <StrategyNextStatus status={nextStatus} /> : null}
         </div>
     );
 }
@@ -109,9 +156,8 @@ function StrategyBranchComparison({
         return <p className="questExplorer-strategyDossierEmpty">{emptyLabel}</p>;
     }
 
-    const optionCount = groups.reduce((sum, group) => sum + group.options.length, 0);
-    const isRequiredPath = optionCount === 1;
     const showGroupHeadings = groups.length > 1;
+    const selectedOption = groups.flatMap((group) => group.options).find((option) => option.isSelected) ?? null;
 
     return (
         <div className="questExplorer-strategyComparisonGroups">
@@ -126,11 +172,7 @@ function StrategyBranchComparison({
                                 <StrategyBranchComparisonOption
                                     option={option}
                                     step={step}
-                                    projectedOutcome={option.isSelected ? projectedOutcome : null}
-                                    pathStatus={option.isSelected ? pathStatus : null}
-                                    isRequiredPath={isRequiredPath}
                                     debugChoiceDetails={debugChoiceDetails}
-                                    projectedDebugDetails={option.isSelected ? projectedDebugDetails : undefined}
                                     onChoose={onChoose}
                                     key={option.id}
                                 />
@@ -139,13 +181,16 @@ function StrategyBranchComparison({
                     </section>
                 );
             })}
+            {selectedOption ? (
+                <StrategyChoiceResult
+                    option={selectedOption}
+                    outcome={projectedOutcome}
+                    status={pathStatus}
+                    projectedDebugDetails={projectedDebugDetails}
+                />
+            ) : null}
         </div>
     );
-}
-
-function pathChoiceSectionTitle(groups: StrategyDossierBranchComparisonGroup[]): string {
-    const optionCount = groups.reduce((sum, group) => sum + group.options.length, 0);
-    return optionCount === 1 ? "Required Path" : "Choose a Path";
 }
 
 function pathGroupAriaLabel(label: string, showGroupHeadings: boolean): string | undefined {
@@ -157,67 +202,20 @@ function isGenericPathGroupLabel(label: string): boolean {
     return ["choice", "alternative", "decision options"].includes(normalizeValue(label).toLowerCase());
 }
 
-function StrategyPathBreadcrumbItem({ pathStep }: { pathStep: StrategyDossierSelectedPathStep }) {
-    return (
-        <li className={pathStep.isCurrent ? "is-current" : undefined}>
-            <strong>{pathStep.label}</strong>
-            {pathStep.isCurrent ? <em>Current simulation</em> : null}
-        </li>
-    );
-}
-
-function StrategyProgressionDetails({
-    summary,
-    selectedPathSteps,
-}: {
-    summary: string;
-    selectedPathSteps: StrategyDossierSelectedPathStep[];
-}) {
-    return (
-        <details className="questExplorer-strategyProgressionDetails">
-            <summary>
-                <span>Progression Details</span>
-                {selectedPathSteps.length > 0 ? (
-                    <em>{selectedPathSteps.map((pathStep) => pathStep.label).join(" -> ")}</em>
-                ) : null}
-            </summary>
-            <p>{summary}</p>
-            {selectedPathSteps.length > 0 ? (
-                <ol className="questExplorer-strategyPathBreadcrumb">
-                    {selectedPathSteps.map((pathStep) => (
-                        <StrategyPathBreadcrumbItem pathStep={pathStep} key={pathStep.id} />
-                    ))}
-                </ol>
-            ) : (
-                <p className="questExplorer-strategyDossierEmpty">No path is being simulated yet.</p>
-            )}
-        </details>
-    );
-}
-
 function StrategyBranchComparisonOption({
     option,
     step,
-    projectedOutcome,
-    pathStatus,
-    isRequiredPath,
     debugChoiceDetails,
-    projectedDebugDetails,
     onChoose,
 }: {
     option: StrategyDossierBranchOption;
     step: QuestProgressionStep;
-    projectedOutcome: StrategyDossierModel["projectedOutcome"];
-    pathStatus: StrategyPathStatus | null;
-    isRequiredPath: boolean;
     debugChoiceDetails?: Map<string, string>;
-    projectedDebugDetails?: string[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const isActive = option.isSelected || option.isInSelectedPath;
-    const supportingMarkers = option.markers.filter((marker) => marker.kind !== "leads");
-    const statusLabel = option.isSelected ? "Selected" : option.isInSelectedPath ? "In Path" : isRequiredPath ? "Required Path" : "Option";
-    const showLeadsTo = !(option.isSelected && pathStatus?.targetLabel);
+    const supportingMarkers = option.isSelected ? [] : option.markers.filter((marker) => marker.kind !== "leads");
+    const statusLabel = option.isSelected ? "Selected" : option.isInSelectedPath ? "In path" : null;
 
     return (
         <button
@@ -227,9 +225,11 @@ function StrategyBranchComparisonOption({
             aria-current={option.isSelected ? "true" : undefined}
             onClick={() => onChoose(step, option.choice)}
         >
-            <span className="questExplorer-strategyComparisonStatus">
-                {statusLabel}
-            </span>
+            {statusLabel ? (
+                <span className="questExplorer-strategyComparisonStatus">
+                    {statusLabel}
+                </span>
+            ) : null}
             <span className="questExplorer-strategyComparisonHeader">
                 <strong>{option.label}</strong>
             </span>
@@ -239,9 +239,8 @@ function StrategyBranchComparisonOption({
                 </span>
             ) : null}
             <div className="questExplorer-strategyComparisonMeta">
-                <InlineMetaList label="Requirements" values={option.requirements} tone="requirement" />
+                <InlineMetaList label="Requires" values={option.requirements} tone="requirement" />
                 <InlineMetaList label="Rewards" values={option.rewards} tone="reward" />
-                {showLeadsTo ? <InlineMetaList label="Leads To" values={option.leadsTo} tone="objective" /> : null}
             </div>
             {supportingMarkers.length > 0 ? (
                 <div className="questExplorer-strategyComparisonMarkers">
@@ -253,19 +252,11 @@ function StrategyBranchComparisonOption({
             {debugChoiceDetails?.get(option.choice.id) ? (
                 <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(option.choice.id)}</span>
             ) : null}
-            {option.isSelected && pathStatus ? (
-                <StrategySelectedOutcome
-                    option={option}
-                    outcome={projectedOutcome}
-                    status={pathStatus}
-                    projectedDebugDetails={projectedDebugDetails}
-                />
-            ) : null}
         </button>
     );
 }
 
-function StrategySelectedOutcome({
+function StrategyChoiceResult({
     option,
     outcome,
     status,
@@ -280,34 +271,26 @@ function StrategySelectedOutcome({
     const showProjectedRequirements = Boolean(outcome && shouldShowProjectedRequirements(option, outcome));
     const showProjectedRewards = Boolean(outcome && shouldShowProjectedRewards(option, outcome));
     const hasProjectedMeta = showProjectedRequirements || showProjectedRewards;
-    const outcomeObjectives = outcome ? projectedObjectivesForInlineOutcome(option, outcome) : [];
+    const projectedLines = outcome ? projectedOutcomeLines(option, outcome) : [];
 
     return (
-        <div className="questExplorer-strategyInlineOutcome">
+        <section className="questExplorer-strategyChoiceResult" aria-label={`Choosing ${option.label} leads to`}>
+            <h4>Choosing {option.label} leads to...</h4>
             {outcome && (showOutcomeSummary || hasProjectedMeta) ? (
                 <div className="questExplorer-strategyOutcomeBlock">
-                    <span>Outcome</span>
-                    {showOutcomeSummary ? (
-                        <>
-                            <strong>{outcome.title}</strong>
-                            {outcome.lines.map((line, index) => (
-                                <p key={`${outcome.title}:line:${index}`}>{line}</p>
-                            ))}
-                            <StrategyDossierObjectiveList objectives={outcomeObjectives} />
-                        </>
-                    ) : null}
+                    {showOutcomeSummary ? <StrategyTaskSummary title={outcome.title} lines={projectedLines} /> : null}
                     {hasProjectedMeta ? (
                         <div className="questExplorer-stepObjectiveMetaGrid">
                             {showProjectedRequirements ? (
                                 <InlineMetaList
-                                    label="Projected Requirements"
+                                    label="Requires"
                                     values={outcome.requirements}
                                     tone="requirement"
                                 />
                             ) : null}
                             {showProjectedRewards ? (
                                 <InlineMetaList
-                                    label="Projected Rewards"
+                                    label="Rewards"
                                     values={outcome.rewards}
                                     tone="reward"
                                 />
@@ -316,71 +299,121 @@ function StrategySelectedOutcome({
                     ) : null}
                 </div>
             ) : null}
-            <StrategyInlinePathStatus status={status} />
+            <StrategyNextStatus status={nextStatusContentForPathStatus(status)} />
             {projectedDebugDetails?.map((detail, index) => (
                 <span className="questExplorer-choiceDebugMeta" key={`projected-debug:${index}`}>{detail}</span>
             ))}
-        </div>
+        </section>
     );
 }
 
-function StrategyInlinePathStatus({ status }: { status: StrategyPathStatus }) {
-    const content = inlinePathStatusContent(status);
-
+function StrategyNextStatus({ status }: { status: StrategyNextStatusContent }) {
     return (
-        <div className={`questExplorer-strategyOutcomeStatus questExplorer-strategyOutcomeStatus--${status.kind}`}>
-            <span>{content.badge}</span>
-            <strong>{content.title}</strong>
-            {content.detail ? <em>{content.detail}</em> : null}
+        <div className={`questExplorer-strategyNextStatus questExplorer-strategyNextStatus--${status.kind}`}>
+            <span>Next</span>
+            <strong>{status.title}</strong>
+            {status.detail ? <em>{status.detail}</em> : null}
         </div>
     );
 }
 
-function inlinePathStatusContent(status: StrategyPathStatus): { badge: string; title: string; detail: string | null } {
+function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNextStatusContent {
     switch (status.kind) {
         case "chapter-exit":
             return {
-                badge: "Continues",
+                kind: status.kind,
                 title: status.targetLabel ? `Continues in ${status.targetLabel}` : "Continues beyond this chapter",
-                detail: "This chapter planning view stops here.",
+                detail: null,
             };
         case "continues-in-chapter":
             return {
-                badge: "Continues",
+                kind: status.kind,
                 title: status.targetLabel ? `Continues at ${status.targetLabel}` : "Continues in this chapter",
                 detail: null,
             };
         case "converges":
             return {
-                badge: "Rejoins Path",
+                kind: status.kind,
                 title: status.targetLabel ? `Rejoins path at ${status.targetLabel}` : "Rejoins Path",
                 detail: null,
             };
         case "failure":
             return {
-                badge: "Fails",
+                kind: status.kind,
                 title: status.targetLabel ? `Fails at ${status.targetLabel}` : "Fails",
-                detail: "Compare another option before committing.",
+                detail: null,
             };
         case "unresolved":
             return {
-                badge: "Unknown Next Step",
+                kind: status.kind,
                 title: "Unknown Next Step",
                 detail: "No explicit continuation is recorded for this branch.",
             };
         case "complete":
             return {
-                badge: "No Further Branch",
+                kind: status.kind,
                 title: "No further branch is recorded",
                 detail: status.targetLabel ? `Resolves at ${status.targetLabel}.` : null,
             };
         case "awaiting-choice":
             return {
-                badge: "Preview",
-                title: "Select a path to preview the next destination.",
+                kind: status.kind,
+                title: "Unknown Next Step",
                 detail: null,
             };
     }
+}
+
+function nextStatusContentForOption(option: StrategyDossierBranchOption): StrategyNextStatusContent {
+    const failure = option.markers.find((marker) => marker.kind === "failure");
+    if (failure) {
+        return {
+            kind: "failure",
+            title: `Fails at ${failure.detail}`,
+            detail: null,
+        };
+    }
+
+    const convergence = option.markers.find((marker) => marker.kind === "converges");
+    if (convergence) {
+        return {
+            kind: "converges",
+            title: `Rejoins path at ${convergence.detail}`,
+            detail: null,
+        };
+    }
+
+    const unresolved = option.markers.find((marker) => marker.kind === "unresolved");
+    if (unresolved) {
+        return {
+            kind: "unresolved",
+            title: "Unknown Next Step",
+            detail: null,
+        };
+    }
+
+    const lead = option.leadsTo[0];
+    if (lead) {
+        return {
+            kind: "chapter-exit",
+            title: `Continues in ${lead}`,
+            detail: null,
+        };
+    }
+
+    if (option.choice.hasDependentContinuations) {
+        return {
+            kind: "continues-in-chapter",
+            title: "Continues in this chapter",
+            detail: "Complete this task to reveal the next step.",
+        };
+    }
+
+    return {
+        kind: "complete",
+        title: "No further branch is recorded",
+        detail: null,
+    };
 }
 
 function StrategyDossierSection({
@@ -389,7 +422,7 @@ function StrategyDossierSection({
     children,
 }: {
     title: string;
-    variant?: "compactObjective" | "pathChoice";
+    variant?: "currentTask" | "pathChoice";
     children: ReactNode;
 }) {
     const variantClass = variant ? ` questExplorer-strategyDossierSection--${variant}` : "";
@@ -402,41 +435,51 @@ function StrategyDossierSection({
     );
 }
 
-function StrategyDossierObjectiveList({
-    objectives,
-    emptyLabel,
-}: {
-    objectives: StrategyDossierObjective[];
-    emptyLabel?: string;
-}) {
-    if (objectives.length === 0) {
-        return emptyLabel ? <p className="questExplorer-strategyDossierEmpty">{emptyLabel}</p> : null;
-    }
+type StrategyTaskSummaryProps = {
+    title?: string;
+    lines: string[];
+    requirements?: string[];
+    rewards?: string[];
+    debugDetail?: string;
+};
 
+function StrategyTaskSummary({
+    title,
+    lines,
+    requirements = [],
+    rewards = [],
+    debugDetail,
+}: StrategyTaskSummaryProps) {
     return (
-        <div className="questExplorer-strategyDossierObjectives">
-            {objectives.map((objective) => (
-                <section className="questExplorer-strategyDossierObjective" key={objective.id}>
-                    <header>
-                        <span>{objective.phaseLabel}</span>
-                        <strong>{objective.label}</strong>
-                    </header>
-                    <p>{objective.text}</p>
-                    <div className="questExplorer-stepObjectiveMetaGrid">
-                        <InlineMetaList label="Requirements" values={objective.requirements} tone="requirement" />
-                        <InlineMetaList label="Rewards" values={objective.rewards} tone="reward" />
-                    </div>
-                </section>
+        <article className="questExplorer-strategyTaskSummary">
+            {title ? <strong>{title}</strong> : null}
+            {uniqueDisplayValues(lines).map((line, index) => (
+                <p key={`strategy-task-line:${index}`}>{line}</p>
             ))}
-        </div>
+            <div className="questExplorer-stepObjectiveMetaGrid">
+                <InlineMetaList label="Requires" values={requirements} tone="requirement" />
+                <InlineMetaList label="Rewards" values={rewards} tone="reward" />
+            </div>
+            {debugDetail ? <span className="questExplorer-choiceDebugMeta">{debugDetail}</span> : null}
+        </article>
     );
+}
+
+function taskSummaryForObjectives(objectives: StrategyDossierObjective[]): StrategyTaskSummaryProps | null {
+    if (objectives.length === 0) return null;
+
+    return {
+        lines: objectives.map((objective) => objective.text),
+        requirements: uniqueDisplayValues(objectives.flatMap((objective) => objective.requirements)),
+        rewards: uniqueDisplayValues(objectives.flatMap((objective) => objective.rewards)),
+    };
 }
 
 function hasDistinctProjectedSummary(
     option: StrategyDossierBranchOption,
     outcome: NonNullable<StrategyDossierModel["projectedOutcome"]>
 ): boolean {
-    return outcome.objectives.length > 0
+    return projectedOutcomeLines(option, outcome).length > 0
         || normalizeValue(outcome.title) !== normalizeValue(option.label)
         || !sameValues(outcome.lines, option.outcomeLines);
 }
@@ -447,7 +490,6 @@ function shouldShowProjectedRequirements(
 ): boolean {
     if (outcome.requirements.length === 0) return false;
     if (sameValues(outcome.requirements, option.requirements)) return false;
-    if (sameValues(outcome.requirements, outcome.objectives.flatMap((objective) => objective.requirements))) return false;
     return true;
 }
 
@@ -457,24 +499,28 @@ function shouldShowProjectedRewards(
 ): boolean {
     if (outcome.rewards.length === 0) return false;
     if (sameValues(outcome.rewards, option.rewards)) return false;
-    if (sameValues(outcome.rewards, outcome.objectives.flatMap((objective) => objective.rewards))) return false;
     return true;
 }
 
-function projectedObjectivesForInlineOutcome(
+function projectedOutcomeLines(
     option: StrategyDossierBranchOption,
     outcome: NonNullable<StrategyDossierModel["projectedOutcome"]>
-): StrategyDossierObjective[] {
-    const hideRequirements = sameValues(outcome.requirements, option.requirements);
-    const hideRewards = sameValues(outcome.rewards, option.rewards);
+): string[] {
+    const title = normalizeValue(outcome.title);
+    const optionLabel = normalizeValue(option.label);
+    const optionLines = new Set(uniqueNormalizedValues(option.outcomeLines));
 
-    if (!hideRequirements && !hideRewards) return outcome.objectives;
-
-    return outcome.objectives.map((objective) => ({
-        ...objective,
-        requirements: hideRequirements ? [] : objective.requirements,
-        rewards: hideRewards ? [] : objective.rewards,
-    }));
+    return uniqueDisplayValues([
+        ...outcome.lines,
+        ...outcome.objectives.map((objective) => objective.text),
+    ]).filter((line) => {
+        const normalizedLine = normalizeValue(line);
+        if (!normalizedLine) return false;
+        if (normalizedLine === title) return false;
+        if (normalizedLine === optionLabel) return false;
+        if (optionLines.has(normalizedLine)) return false;
+        return true;
+    });
 }
 
 function sameValues(left: string[], right: string[]): boolean {
@@ -488,6 +534,17 @@ function sameValues(left: string[], right: string[]): boolean {
 
 function uniqueNormalizedValues(values: string[]): string[] {
     return [...new Set(values.map(normalizeValue).filter(Boolean))];
+}
+
+function uniqueDisplayValues(values: string[]): string[] {
+    const seen = new Set<string>();
+    return values.reduce<string[]>((accumulator, value) => {
+        const normalizedValue = normalizeValue(value);
+        if (!normalizedValue || seen.has(normalizedValue)) return accumulator;
+        seen.add(normalizedValue);
+        accumulator.push(value.trim());
+        return accumulator;
+    }, []);
 }
 
 function normalizeValue(value: string): string {

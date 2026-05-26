@@ -849,7 +849,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(debugValue("active selected branch path")).toContain(`${kinCh0}:branch:1, ${kinCh0}:branch:2`);
     });
 
-    it("renders Kin Ch0 Strategy as a required path without duplicate projected requirements", async () => {
+    it("renders Kin Ch0 Strategy as a current task without duplicate projected requirements", async () => {
         const user = userEvent.setup();
         renderProductQuest(kinCh0, Faction.KIN, "kin");
 
@@ -857,24 +857,21 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicleRegion = chronicle();
-        expect(within(chronicleRegion).getByRole("region", { name: "Compact Objective" })).toBeInTheDocument();
-        const requiredPath = within(chronicleRegion).getByRole("region", { name: "Required Path" });
-        expect(within(requiredPath).queryByText("Alternative")).not.toBeInTheDocument();
-
-        const homeChoice = within(requiredPath).getByRole("button", { name: /Found a home for the surviving Kin/ });
-        expect(within(homeChoice).getByText("Required Path")).toBeInTheDocument();
-        await user.click(homeChoice);
-
-        expect(homeChoice).toHaveAttribute("aria-current", "true");
-        expect(within(homeChoice).getByText("No further branch is recorded")).toBeInTheDocument();
-        expect(within(homeChoice).queryByText("Projected Requirements")).not.toBeInTheDocument();
-        expect(within(homeChoice).queryByText("Projected Rewards")).not.toBeInTheDocument();
+        const currentTask = within(chronicleRegion).getByRole("region", { name: "Current task" });
+        expect(within(chronicleRegion).queryByRole("region", { name: "Compact Objective" })).not.toBeInTheDocument();
+        expect(within(chronicleRegion).queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
+        expect(within(chronicleRegion).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
+        expect(within(currentTask).queryByText("Alternative")).not.toBeInTheDocument();
+        expect(within(currentTask).queryByText("Required Path")).not.toBeInTheDocument();
+        expect(within(currentTask).getByText(/Found a home for the surviving Kin/)).toBeInTheDocument();
+        expect(within(currentTask).getByText("Next")).toBeInTheDocument();
+        expect(within(currentTask).queryByText("Projected Requirements")).not.toBeInTheDocument();
+        expect(within(currentTask).queryByText("Projected Rewards")).not.toBeInTheDocument();
+        expect(within(chronicleRegion).queryByRole("button", { name: /Found a home for the surviving Kin/ })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Selected Simulation" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Next Destination" })).not.toBeInTheDocument();
-        const progressionDetails = chronicleRegion.querySelector(".questExplorer-strategyProgressionDetails");
-        expect(progressionDetails).not.toBeNull();
-        expect(progressionDetails).not.toHaveAttribute("open");
+        expect(chronicleRegion.querySelector(".questExplorer-strategyProgressionDetails")).toBeNull();
     });
 
     it("locks Kin Ch4 continuation gating counts and active selected branch path", async () => {
@@ -1000,11 +997,13 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicleRegion = chronicle();
-        expect(within(chronicleRegion).getAllByRole("region", { name: "Compact Objective" })).toHaveLength(1);
+        expect(within(chronicleRegion).getAllByRole("region", { name: "Current task" })).toHaveLength(1);
         await user.click(within(chronicleRegion).getByRole("button", { name: /Track/ }));
 
         const trackChoice = within(chronicleRegion).getByRole("button", { name: /Track/ });
-        expect(trackChoice).toHaveTextContent("Continues in Chapter 5: The Kin's Fate");
+        const trackResult = within(chronicleRegion).getByRole("region", { name: /Choosing .*Track.* leads to/ });
+        expect(trackChoice).not.toHaveTextContent("Continues in Chapter 5: The Kin's Fate");
+        expect(trackResult).toHaveTextContent("Continues in Chapter 5: The Kin's Fate");
         expect(trackChoice).not.toHaveTextContent("No further branch is recorded");
         expect(useQuestStore.getState().selectedEntryKey).toBe(kinCh4);
     });
