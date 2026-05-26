@@ -39,6 +39,48 @@ const entry = (entryKey: string, title: string, overrides: Partial<QuestExplorer
     ...overrides,
 });
 
+const linkedRequirement = (
+    requirementKey: string,
+    referenceKey: string
+): QuestExplorerResponse["entries"][number]["strategyView"]["objectives"][number]["requirements"][number] => ({
+    requirementKey,
+    kind: "Requirement",
+    displayText: "Research the linked tech.",
+    polarity: null,
+    groupLabel: null,
+    groupOrder: null,
+    targetRole: null,
+    targetLabel: null,
+    requiredCount: null,
+    durationTurns: null,
+    state: null,
+    referenceKind: "Tech",
+    referenceKey,
+    referenceDisplayName: "Linked Tech",
+    codexEntryKey: null,
+});
+
+const linkedReward = (
+    rewardKey: string,
+    assetKey: string
+): QuestExplorerResponse["entries"][number]["strategyView"]["objectives"][number]["rewards"][number] => ({
+    rewardKey,
+    kind: "Reward",
+    displayText: "Unlock the linked unit.",
+    amount: null,
+    groupLabel: null,
+    groupOrder: null,
+    formulaText: null,
+    assetKind: "Unit",
+    assetKey,
+    assetDisplayName: "Linked Unit",
+    referenceKind: null,
+    referenceKey: null,
+    referenceDisplayName: null,
+    codexEntryKey: null,
+    targetScopeLabel: null,
+});
+
 const diagnosticPayload: QuestExplorerResponse = {
     gameVersion: "0.80",
     exporterVersion: "diagnostic",
@@ -477,6 +519,184 @@ describe("quest explorer frontend diagnostic", () => {
         }));
         expect(diagnostic.reportText).toContain("semantic chapters: n/a (progression DTO missing)");
         expect(diagnostic.findings.filter((finding) => finding.classification === "blocker")).toHaveLength(2);
+    });
+
+    it("builds exact exporter handoff rows while treating Kin chapter 0 as a compatibility link", () => {
+        const kinTutorialKey = "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01";
+        const kinChapterOneKey = "FactionQuest_KinOfSheredyn_Chapter01_Step01";
+        const sharedWithGaps = {
+            ...diagnosticPayload.entries[0],
+            loreView: {
+                sections: [
+                    ...diagnosticPayload.entries[0].loreView.sections,
+                    {
+                        sectionKey: "Quest_Shared:lore:missing-owner",
+                        phase: "intro",
+                        choiceKey: "Missing_Choice",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Missing",
+                        revealedByBranchKeys: ["Missing_Branch"],
+                        revealedByChoiceKeys: ["Missing_Choice"],
+                        revealedByBranchPathAlternatives: [["Branch_Setup", "Missing_Branch"]],
+                        lines: [{ speakerLabel: null, role: "narrator", text: "This owner cannot be resolved." }],
+                    },
+                ],
+            },
+            strategyView: {
+                objectives: [
+                    ...diagnosticPayload.entries[0].strategyView.objectives,
+                    {
+                        objectiveKey: "Objective_Codex",
+                        text: "Resolve linked codex coverage.",
+                        phase: "completion",
+                        revealedByBranchKeys: ["Missing_Branch"],
+                        revealedByChoiceKeys: ["Missing_Choice"],
+                        revealedByBranchPathAlternatives: [["Missing_Branch"]],
+                        requirements: [linkedRequirement("Requirement_Linked_Tech", "Tech_Linked")],
+                        rewards: [linkedReward("Reward_Linked_Unit", "Unit_Linked")],
+                    },
+                ],
+            },
+        };
+        const kinTutorial = entry(kinTutorialKey, "A New Home", {
+            questType: "Major Faction",
+            navigation: {
+                ...entry(kinTutorialKey, "A New Home").navigation,
+                factionKey: null,
+                factionName: null,
+                questLineKey: null,
+                questLineName: null,
+                chapter: 1,
+                chapterLabel: "Chapter 1",
+                sequenceIndex: -1,
+            },
+        });
+        const kinChapterOne = entry(kinChapterOneKey, "The Missing Youth", {
+            navigation: {
+                ...entry(kinChapterOneKey, "The Missing Youth").navigation,
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin of Sheredyn",
+                chapter: 1,
+                chapterLabel: "Chapter 1",
+                sequenceIndex: 2,
+            },
+        });
+        const missingNavigation = entry("Quest_Missing_Nav", "Floating Major Quest", {
+            questType: "Faction Quest",
+            navigation: {
+                ...entry("Quest_Missing_Nav", "Floating Major Quest").navigation,
+                factionKey: null,
+                factionName: null,
+                questLineKey: null,
+                questLineName: null,
+                sequenceIndex: 3,
+            },
+        });
+
+        const diagnostic = createQuestExplorerFrontendDiagnostic({
+            ...diagnosticPayload,
+            entries: [
+                sharedWithGaps,
+                ...diagnosticPayload.entries.slice(1),
+                kinTutorial,
+                kinChapterOne,
+                missingNavigation,
+            ],
+            progression: null,
+        }, {
+            sourceTexts: {
+                "questRail.ts": "buildQuestRailGroups",
+            },
+        });
+
+        expect(diagnostic.exporterHandoff.items).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                kind: "missing_progression_dto",
+                classification: "blocker",
+                field: "progression",
+            }),
+            expect.objectContaining({
+                kind: "kin_chapter_zero_compatibility_link",
+                classification: "accepted modeled artifact",
+                entryKey: kinTutorialKey,
+                targetEntryKey: kinChapterOneKey,
+            }),
+            expect.objectContaining({
+                kind: "missing_major_faction_navigation",
+                classification: "known exporter/data-quality issue",
+                entryKey: "Quest_Missing_Nav",
+            }),
+            expect.objectContaining({
+                kind: "lore_ownership_gap",
+                entryKey: "Quest_Shared",
+                rowKey: "Quest_Shared:lore:missing-owner",
+                field: "choiceKey",
+                referencedKey: "Missing_Choice",
+            }),
+            expect.objectContaining({
+                kind: "objective_ownership_gap",
+                entryKey: "Quest_Shared",
+                rowKey: "Objective_Codex",
+                field: "revealedByBranchKeys",
+                referencedKey: "Missing_Branch",
+            }),
+            expect.objectContaining({
+                kind: "grouped_deterministic_continuations",
+                entryKey: "Quest_Shared",
+                branchKeys: ["Branch_Continue", "Branch_Continue_Alternate"],
+            }),
+        ]));
+        expect(diagnostic.exporterHandoff.items).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                kind: "missing_major_faction_navigation",
+                entryKey: kinTutorialKey,
+            }),
+        ]));
+
+        const codexCoverage = diagnostic.exporterHandoff.items.find((item) => (
+            item.kind === "codex_entry_key_coverage_gap"
+        ));
+        expect(codexCoverage).toEqual(expect.objectContaining({
+            classification: "design smell/future risk",
+            count: 2,
+            examples: expect.arrayContaining([
+                "Quest_Shared:Objective_Codex:requirement:Requirement_Linked_Tech",
+                "Quest_Shared:Objective_Codex:reward:Reward_Linked_Unit",
+            ]),
+        }));
+        expect(diagnostic.exporterHandoff.reportText).toContain("Exporter handoff:");
+        expect(diagnostic.reportText).toContain("Hardcoded compatibility link places Kin chapter 0");
+        expect(diagnostic.reportText).toContain("Quest_Missing_Nav");
+    });
+
+    it("counts failure links even when the branch row has another primary semantic kind", () => {
+        const diagnostic = createQuestExplorerFrontendDiagnostic({
+            ...diagnosticPayload,
+            entries: [
+                {
+                    ...diagnosticPayload.entries[0],
+                    branches: diagnosticPayload.entries[0].branches.map((branch) => (
+                        branch.branchKey === "Branch_Decision_A"
+                            ? { ...branch, failureEntryKeys: ["Quest_Branch"] }
+                            : branch
+                    )),
+                },
+                ...diagnosticPayload.entries.slice(1),
+            ],
+        }, {
+            sourceTexts: {
+                "QuestExplorerPage.tsx": "findDetailProgression buildQuestRailGroups",
+            },
+        });
+
+        expect(diagnostic.semanticCounts.failure).toBe(2);
+        expect(diagnostic.perFactionSummaries[0]).toEqual(expect.objectContaining({
+            failureLinks: 2,
+        }));
+        expect(diagnostic.reportText).toContain("failure states/links: 2");
+        expect(diagnostic.reportText).toContain("failure links: 2");
     });
 
     it("warns when lore or objective ownership metadata points outside exported topology keys", () => {

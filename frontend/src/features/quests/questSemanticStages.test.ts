@@ -98,6 +98,36 @@ describe("quest semantic stage classification", () => {
         expect(semanticKindsForEntry(entry)).toEqual(["deterministic_continuation"]);
     });
 
+    it("keeps grouped exporter continuation rows deterministic instead of topology-shaped", () => {
+        const continuations = [
+            branch({
+                branchKey: "Branch_Continuation_Pious",
+                label: "Pious continuation",
+                sectionRole: "continuation",
+                choiceGroupKey: "ChoiceGroup_Continuation",
+                parentBranchKey: "Branch_Setup",
+                prerequisiteBranchKeys: ["Branch_Setup"],
+                branchStepOrder: 2,
+                nextEntryKeys: ["Quest_Pious"],
+            }),
+            branch({
+                branchKey: "Branch_Continuation_Bold",
+                label: "Bold continuation",
+                sectionRole: "continuation",
+                choiceGroupKey: "ChoiceGroup_Continuation",
+                parentBranchKey: "Branch_Setup",
+                prerequisiteBranchKeys: ["Branch_Setup"],
+                branchStepOrder: 2,
+                nextEntryKeys: ["Quest_Bold"],
+            }),
+        ];
+
+        expect(continuations.map((candidate) => classifyQuestBranchSemanticStage(candidate, continuations))).toEqual([
+            "deterministic_continuation",
+            "deterministic_continuation",
+        ]);
+    });
+
     it("classifies shared true-choice groups as explicit decision options", () => {
         const entry = questEntry({
             entryKey: "Quest_Decision",

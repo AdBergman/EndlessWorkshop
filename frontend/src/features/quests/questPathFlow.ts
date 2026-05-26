@@ -16,6 +16,16 @@ import {
     classifyQuestBranchSemanticStage,
     type QuestSemanticStageKind,
 } from "@/features/quests/questSemanticStages";
+import {
+    rewardDisplayTexts,
+    rewardDisplaysFromRewards,
+    type QuestRewardDisplay,
+} from "@/features/quests/questRewardDisplay";
+import {
+    requirementDisplayTexts,
+    requirementDisplaysFromRequirements,
+    type QuestRequirementDisplay,
+} from "@/features/quests/questRequirementDisplay";
 
 export type QuestDetailProgression = {
     questline: QuestProgressionQuestline;
@@ -57,7 +67,9 @@ export type QuestPathChoice = {
     strategyLines: string[];
     loreLines: string[];
     requirementLines: string[];
+    requirementDetails?: QuestRequirementDisplay[];
     rewardLines: string[];
+    rewardDetails: QuestRewardDisplay[];
     targetEntryKey: string | null;
     targetSummaryLine: string | null;
     continuationTitle: string | null;
@@ -583,7 +595,9 @@ export function choicesForStep(
             strategyLines: choiceDescription([targetSummary], null),
             loreLines: descriptionLines,
             requirementLines: [],
+            requirementDetails: [],
             rewardLines: [],
+            rewardDetails: [],
             targetEntryKey: target?.entryKey ?? knownEntryKey(explicitTargets, entriesByKey),
             targetSummaryLine: targetSummary,
             continuationTitle: target?.title ?? null,
@@ -609,8 +623,10 @@ export function choicesForStep(
                 ...(branch.strategy?.conditions ?? []),
                 target?.summaryLines[0],
             ], target?.title ?? null);
-            const requirementLines = (branch.strategy?.requirements ?? []).map((requirement) => requirement.displayText);
-            const rewardLines = (branch.strategy?.rewards ?? []).map((reward) => reward.displayText);
+            const requirementDetails = requirementDisplaysFromRequirements(branch.strategy?.requirements ?? []);
+            const requirementLines = requirementDisplayTexts(requirementDetails);
+            const rewardDetails = rewardDisplaysFromRewards(branch.strategy?.rewards ?? []);
+            const rewardLines = rewardDisplayTexts(rewardDetails);
             const repeatedEntryTitle = branch.label && detailEntry?.title && branch.label === detailEntry.title;
 
             return {
@@ -638,7 +654,9 @@ export function choicesForStep(
                 strategyLines,
                 loreLines,
                 requirementLines,
+                requirementDetails,
                 rewardLines,
+                rewardDetails,
                 targetEntryKey,
                 targetSummaryLine: target?.summaryLines[0] ?? null,
                 continuationTitle: target?.title ?? null,

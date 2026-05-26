@@ -9,6 +9,19 @@ import {
     type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
 import type { QuestPathChoice } from "@/features/quests/questPathFlow";
+import {
+    sameRewardDisplays,
+    uniqueRewardDisplays,
+    type QuestRewardDisplay,
+} from "@/features/quests/questRewardDisplay";
+import {
+    requirementDisplaysForList,
+    sameRequirementDisplays,
+    uniqueRequirementDisplays,
+    type QuestRequirementDisplay,
+} from "@/features/quests/questRequirementDisplay";
+import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
+import { InlineRewardMetaList } from "@/components/Quests/QuestRewardMeta";
 import type {
     QuestProgressionStep,
 } from "@/types/questTypes";
@@ -123,9 +136,17 @@ function StrategyCurrentTask({
         ...soleOption.requirements,
         ...objectives.flatMap((objective) => objective.requirements),
     ]);
+    const requirementDetails = uniqueRequirementDisplays([
+        ...soleOption.requirementDetails,
+        ...objectives.flatMap((objective) => objective.requirementDetails),
+    ]);
     const rewards = uniqueDisplayValues([
         ...soleOption.rewards,
         ...objectives.flatMap((objective) => objective.rewards),
+    ]);
+    const rewardDetails = uniqueRewardDisplays([
+        ...soleOption.rewardDetails,
+        ...objectives.flatMap((objective) => objective.rewardDetails),
     ]);
 
     return (
@@ -134,7 +155,9 @@ function StrategyCurrentTask({
                 title={soleOption.label}
                 lines={soleOption.outcomeLines.length > 0 ? soleOption.outcomeLines : fallbackObjectiveLines}
                 requirements={requirements}
+                requirementDetails={requirementDetails}
                 rewards={rewards}
+                rewardDetails={rewardDetails}
                 debugDetail={debugChoiceDetails?.get(soleOption.choice.id)}
             />
             {nextStatus ? <StrategyNextStatus status={nextStatus} /> : null}
@@ -248,8 +271,13 @@ function StrategyBranchComparisonOption({
                 </span>
             ) : null}
             <div className="questExplorer-strategyComparisonMeta">
-                <InlineMetaList label="Requires" values={option.requirements} tone="requirement" />
-                <InlineMetaList label="Rewards" values={option.rewards} tone="reward" />
+                <InlineMetaList
+                    label="Requires"
+                    values={option.requirements}
+                    items={option.requirementDetails}
+                    tone="requirement"
+                />
+                <InlineRewardMetaList label="Rewards" rewards={option.rewardDetails} fallbackValues={option.rewards} />
             </div>
             {supportingMarkers.length > 0 ? (
                 <div className="questExplorer-strategyComparisonMarkers">
@@ -283,8 +311,17 @@ function StrategyTopologyAlternatives({
                         <p key={`${alternative.id}:line:${index}`}>{line}</p>
                     ))}
                     <div className="questExplorer-stepObjectiveMetaGrid">
-                        <InlineMetaList label="Requires" values={alternative.requirements} tone="requirement" />
-                        <InlineMetaList label="Rewards" values={alternative.rewards} tone="reward" />
+                        <InlineMetaList
+                            label="Requires"
+                            values={alternative.requirements}
+                            items={alternative.requirementDetails}
+                            tone="requirement"
+                        />
+                        <InlineRewardMetaList
+                            label="Rewards"
+                            rewards={alternative.rewardDetails}
+                            fallbackValues={alternative.rewards}
+                        />
                     </div>
                     {alternative.markers.length > 0 ? (
                         <div className="questExplorer-strategyComparisonMarkers">
@@ -334,14 +371,15 @@ function StrategyChoiceResult({
                                 <InlineMetaList
                                     label="Requires"
                                     values={outcome.requirements}
+                                    items={outcome.requirementDetails}
                                     tone="requirement"
                                 />
                             ) : null}
                             {showProjectedRewards ? (
-                                <InlineMetaList
+                                <InlineRewardMetaList
                                     label="Rewards"
-                                    values={outcome.rewards}
-                                    tone="reward"
+                                    rewards={outcome.rewardDetails}
+                                    fallbackValues={outcome.rewards}
                                 />
                             ) : null}
                         </div>
@@ -488,7 +526,9 @@ type StrategyTaskSummaryProps = {
     title?: string;
     lines: string[];
     requirements?: string[];
+    requirementDetails?: QuestRequirementDisplay[];
     rewards?: string[];
+    rewardDetails?: QuestRewardDisplay[];
     debugDetail?: string;
 };
 
@@ -496,7 +536,9 @@ function StrategyTaskSummary({
     title,
     lines,
     requirements = [],
+    requirementDetails = [],
     rewards = [],
+    rewardDetails = [],
     debugDetail,
 }: StrategyTaskSummaryProps) {
     return (
@@ -506,8 +548,8 @@ function StrategyTaskSummary({
                 <p key={`strategy-task-line:${index}`}>{line}</p>
             ))}
             <div className="questExplorer-stepObjectiveMetaGrid">
-                <InlineMetaList label="Requires" values={requirements} tone="requirement" />
-                <InlineMetaList label="Rewards" values={rewards} tone="reward" />
+                <InlineMetaList label="Requires" values={requirements} items={requirementDetails} tone="requirement" />
+                <InlineRewardMetaList label="Rewards" rewards={rewardDetails} fallbackValues={rewards} />
             </div>
             {debugDetail ? <span className="questExplorer-choiceDebugMeta">{debugDetail}</span> : null}
         </article>
@@ -520,7 +562,9 @@ function taskSummaryForObjectives(objectives: StrategyDossierObjective[]): Strat
     return {
         lines: objectives.map((objective) => objective.text),
         requirements: uniqueDisplayValues(objectives.flatMap((objective) => objective.requirements)),
+        requirementDetails: uniqueRequirementDisplays(objectives.flatMap((objective) => objective.requirementDetails)),
         rewards: uniqueDisplayValues(objectives.flatMap((objective) => objective.rewards)),
+        rewardDetails: uniqueRewardDisplays(objectives.flatMap((objective) => objective.rewardDetails)),
     };
 }
 
@@ -538,6 +582,10 @@ function shouldShowProjectedRequirements(
     outcome: NonNullable<StrategyDossierModel["projectedOutcome"]>
 ): boolean {
     if (outcome.requirements.length === 0) return false;
+    if (
+        (outcome.requirementDetails.length > 0 || option.requirementDetails.length > 0)
+        && sameRequirementDisplays(outcome.requirementDetails, option.requirementDetails)
+    ) return false;
     if (sameValues(outcome.requirements, option.requirements)) return false;
     return true;
 }
@@ -547,6 +595,10 @@ function shouldShowProjectedRewards(
     outcome: NonNullable<StrategyDossierModel["projectedOutcome"]>
 ): boolean {
     if (outcome.rewards.length === 0) return false;
+    if (
+        (outcome.rewardDetails.length > 0 || option.rewardDetails.length > 0)
+        && sameRewardDisplays(outcome.rewardDetails, option.rewardDetails)
+    ) return false;
     if (sameValues(outcome.rewards, option.rewards)) return false;
     return true;
 }
@@ -614,22 +666,28 @@ function StrategyDossierMarkerPill({ marker }: { marker: StrategyDossierMarker }
 
 export function InlineMetaList({
     label,
-    values,
+    values = [],
+    items = [],
     tone = "objective",
 }: {
     label: string;
-    values: string[];
+    values?: string[];
+    items?: QuestRequirementDisplay[];
     tone?: "objective" | "requirement" | "reward";
 }) {
-    const cleanValues = values.filter(Boolean);
-    if (cleanValues.length === 0) return null;
+    const displayItems = requirementDisplaysForList(items, values);
+    if (displayItems.length === 0) return null;
 
     return (
         <div className={`questExplorer-inlineMeta questExplorer-inlineMeta--${tone}`}>
             <strong>{label}</strong>
             <ul>
-                {cleanValues.map((value, index) => (
-                    <li key={`${label}:${index}`}>{value}</li>
+                {displayItems.map((item, index) => (
+                    <li key={`${label}:${index}:${item.displayText}:${item.referenceKey ?? ""}:${item.codexEntryKey ?? ""}`}>
+                        <QuestCodexReferenceLink source={item}>
+                            {item.displayText}
+                        </QuestCodexReferenceLink>
+                    </li>
                 ))}
             </ul>
         </div>

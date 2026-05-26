@@ -6,6 +6,11 @@ import {
     StrategyDossier,
 } from "@/components/Quests/StrategyDossier";
 import {
+    InlineRewardMetaList,
+    InlineStageRewardMeta,
+    RewardFormulaDetail,
+} from "@/components/Quests/QuestRewardMeta";
+import {
     LoreContinuousProgression,
     LoreOpening,
     LoreSectionList,
@@ -75,6 +80,17 @@ import {
     buildStrategyFlowModel,
     type StrategyFlowModel,
 } from "@/features/quests/questStrategyFlow";
+import {
+    rewardDisplaysFromRewards,
+    uniqueRewardDisplays,
+    type QuestRewardDisplay,
+} from "@/features/quests/questRewardDisplay";
+import {
+    requirementDisplaysFromRequirements,
+    uniqueRequirementDisplays,
+    type QuestRequirementDisplay,
+} from "@/features/quests/questRequirementDisplay";
+import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
 import {
     LORE_SCROLL_ENTRY_QUERY_PARAM,
     useQuestExplorerLoreScrollUrl,
@@ -485,18 +501,46 @@ function StrategyOverview({ entry }: { entry: QuestExplorerEntry }) {
                 emptyLabel="No objectives recorded"
                 tone="objective"
             />
-            <OverviewColumn
+            <OverviewRequirementColumn
                 title="Requirements"
-                items={requirements.map((requirement) => requirement.displayText)}
+                requirements={requirementDisplaysFromRequirements(requirements)}
                 emptyLabel="No requirements recorded"
-                tone="requirement"
             />
-            <OverviewColumn
+            <OverviewRewardColumn
                 title="Rewards"
-                items={rewards.map((reward) => reward.displayText)}
+                rewards={rewardDisplaysFromRewards(rewards)}
                 emptyLabel="No rewards recorded"
-                tone="reward"
             />
+        </section>
+    );
+}
+
+function OverviewRequirementColumn({
+    title,
+    requirements,
+    emptyLabel,
+}: {
+    title: string;
+    requirements: QuestRequirementDisplay[];
+    emptyLabel: string;
+}) {
+    const visibleRequirements = uniqueRequirementDisplays(requirements).slice(0, 5);
+
+    return (
+        <section className="questExplorer-overviewColumn questExplorer-overviewColumn--requirement">
+            <h3>
+                <span>{title}</span>
+                <small>{visibleRequirements.length}</small>
+            </h3>
+            <ul>
+                {visibleRequirements.length > 0 ? visibleRequirements.map((requirement, index) => (
+                    <li key={`${title}:${index}:${requirement.displayText}:${requirement.referenceKey ?? ""}:${requirement.codexEntryKey ?? ""}`}>
+                        <QuestCodexReferenceLink source={requirement}>
+                            {requirement.displayText}
+                        </QuestCodexReferenceLink>
+                    </li>
+                )) : <li className="is-empty">{emptyLabel}</li>}
+            </ul>
         </section>
     );
 }
@@ -523,6 +567,37 @@ function OverviewColumn({
             <ul>
                 {visibleItems.length > 0 ? visibleItems.map((item, index) => (
                     <li key={`${title}:${index}`}>{item}</li>
+                )) : <li className="is-empty">{emptyLabel}</li>}
+            </ul>
+        </section>
+    );
+}
+
+function OverviewRewardColumn({
+    title,
+    rewards,
+    emptyLabel,
+}: {
+    title: string;
+    rewards: QuestRewardDisplay[];
+    emptyLabel: string;
+}) {
+    const visibleRewards = uniqueRewardDisplays(rewards).slice(0, 5);
+
+    return (
+        <section className="questExplorer-overviewColumn questExplorer-overviewColumn--reward">
+            <h3>
+                <span>{title}</span>
+                <small>{visibleRewards.length}</small>
+            </h3>
+            <ul>
+                {visibleRewards.length > 0 ? visibleRewards.map((reward, index) => (
+                    <li key={`${title}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
+                        <QuestCodexReferenceLink source={reward}>
+                            <span>{reward.displayText}</span>
+                        </QuestCodexReferenceLink>
+                        <RewardFormulaDetail formulaText={reward.formulaText} />
+                    </li>
                 )) : <li className="is-empty">{emptyLabel}</li>}
             </ul>
         </section>
@@ -558,12 +633,13 @@ function EntryStrategyContent({
                         <InlineMetaList
                             label="Requirements"
                             values={objective.requirements.map((requirement) => requirement.displayText)}
+                            items={requirementDisplaysFromRequirements(objective.requirements)}
                             tone="requirement"
                         />
-                        <InlineMetaList
+                        <InlineRewardMetaList
                             label="Rewards"
-                            values={objective.rewards.map((reward) => reward.displayText)}
-                            tone="reward"
+                            rewards={rewardDisplaysFromRewards(objective.rewards)}
+                            fallbackValues={objective.rewards.map((reward) => reward.displayText)}
                         />
                     </div>
                 </section>
@@ -628,8 +704,12 @@ function StrategyStageButton({
                 <small>{choice.eyebrow}</small>
                 <strong>{choice.label}</strong>
                 {primaryLines.length > 0 ? <span>{primaryLines.join(" ")}</span> : null}
-                <InlineStageMeta label="Requires" values={choice.requirementLines} />
-                <InlineStageMeta label="Rewards" values={choice.rewardLines} />
+                <InlineStageMeta label="Requires" values={choice.requirementLines} items={choice.requirementDetails} />
+                <InlineStageRewardMeta
+                    label="Rewards"
+                    rewards={choice.rewardDetails}
+                    fallbackValues={choice.rewardLines}
+                />
                 <InlineStageMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
                 {debugChoiceDetails?.get(choice.id) ? (
                     <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
@@ -733,13 +813,48 @@ function StrategyStageGate({
     );
 }
 
-function InlineStageMeta({ label, values }: { label: string; values: string[] }) {
-    const cleanValues = values.filter(Boolean);
-    if (cleanValues.length === 0) return null;
+function InlineStageMeta({
+    label,
+    values,
+    items = [],
+}: {
+    label: string;
+    values: string[];
+    items?: QuestRequirementDisplay[];
+}) {
+    const displayItems = uniqueRequirementDisplays(items);
+    const fallbackItems = displayItems.length > 0
+        ? displayItems
+        : values.filter(Boolean).map((value, index) => ({
+            requirementKey: `stage:${label}:${index}:${value}`,
+            displayText: value,
+            kind: "",
+            polarity: null,
+            groupLabel: null,
+            groupOrder: null,
+            targetRole: null,
+            targetLabel: null,
+            requiredCount: null,
+            durationTurns: null,
+            state: null,
+            referenceKind: null,
+            referenceKey: null,
+            referenceDisplayName: null,
+            codexEntryKey: null,
+        }));
+    if (fallbackItems.length === 0) return null;
 
     return (
         <span className="questExplorer-choiceCardMeta">
-            <b>{label}</b> {cleanValues.join("; ")}
+            <b>{label}</b>{" "}
+            {fallbackItems.map((item, index) => (
+                <span key={`${label}:${index}:${item.displayText}:${item.referenceKey ?? ""}`}>
+                    {index > 0 ? "; " : null}
+                    <QuestCodexReferenceLink source={item}>
+                        {item.displayText}
+                    </QuestCodexReferenceLink>
+                </span>
+            ))}
         </span>
     );
 }

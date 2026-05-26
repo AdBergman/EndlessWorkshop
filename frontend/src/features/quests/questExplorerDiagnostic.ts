@@ -10,6 +10,8 @@ import type {
     QuestExplorerProgression,
     QuestExplorerResponse,
     QuestProgressionStep,
+    Requirement,
+    Reward,
 } from "@/types/questTypes";
 
 export type QuestExplorerDiagnosticClassification =
@@ -22,6 +24,34 @@ export type QuestExplorerDiagnosticClassification =
 export type QuestExplorerDiagnosticFinding = {
     classification: QuestExplorerDiagnosticClassification;
     message: string;
+};
+
+export type QuestExplorerExporterHandoffKind =
+    | "missing_progression_dto"
+    | "kin_chapter_zero_compatibility_link"
+    | "missing_major_faction_navigation"
+    | "lore_ownership_gap"
+    | "objective_ownership_gap"
+    | "codex_entry_key_coverage_gap"
+    | "grouped_deterministic_continuations";
+
+export type QuestExplorerExporterHandoffItem = {
+    kind: QuestExplorerExporterHandoffKind;
+    classification: QuestExplorerDiagnosticClassification;
+    message: string;
+    entryKey?: string;
+    rowKey?: string;
+    field?: string;
+    referencedKey?: string;
+    targetEntryKey?: string;
+    branchKeys?: string[];
+    count?: number;
+    examples?: string[];
+};
+
+export type QuestExplorerExporterHandoff = {
+    items: QuestExplorerExporterHandoffItem[];
+    reportText: string;
 };
 
 export type QuestExplorerSemanticDiagnosticCountKey =
@@ -65,6 +95,7 @@ export type QuestExplorerFrontendDiagnostic = {
     categoryCounts: Record<QuestCategoryKey, number>;
     semanticCounts: QuestExplorerSemanticDiagnosticCounts;
     perFactionSummaries: QuestExplorerFactionSemanticSummary[];
+    exporterHandoff: QuestExplorerExporterHandoff;
     selectedRailItem: string;
     railExamples: string[];
     findings: QuestExplorerDiagnosticFinding[];
@@ -147,6 +178,11 @@ const MAJOR_FACTION_DIAGNOSTIC_CONFIGS = [
         factionKeys: ["Faction_Mukag"],
     },
 ] as const;
+
+const KIN_CHAPTER_ZERO_ENTRY_KEY = "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01";
+const KIN_CHAPTER_ONE_ENTRY_KEY = "FactionQuest_KinOfSheredyn_Chapter01_Step01";
+const KIN_CHAPTER_ZERO_QUESTLINE_KEY = "FactionQuest_KinOfSheredyn";
+const EXPORTER_HANDOFF_SAMPLE_LIMIT = 8;
 
 function entryIdentityKeys(entry: QuestExplorerEntry): string[] {
     return [entry.entryKey, ...entry.aliases].filter(Boolean);
@@ -248,6 +284,7 @@ function semanticCounts(
         for (const branch of entry.branches) {
             const kind = canonicalDiagnosticStageKind(branch, entry.branches);
             counts[kind] += 1;
+            if (kind !== "failure" && branch.failureEntryKeys.length > 0) counts.failure += 1;
 
             const groupKey = branchSemanticGroupKey(entry.entryKey, branch);
             const group = groupedStages.get(groupKey) ?? {
@@ -488,6 +525,309 @@ function perFactionSemanticSummaries(
     });
 }
 
+function isKinChapterZeroCompatibilityEntry(
+    entry: QuestExplorerEntry,
+    byEntryKey: Record<string, QuestExplorerEntry>
+): boolean {
+    return entry.entryKey === KIN_CHAPTER_ZERO_ENTRY_KEY && Boolean(byEntryKey[KIN_CHAPTER_ONE_ENTRY_KEY]);
+}
+
+function addMissingReferenceHandoffItems(
+    items: QuestExplorerExporterHandoffItem[],
+    options: {
+        kind: "lore_ownership_gap" | "objective_ownership_gap";
+        entryKey: string;
+        rowKey: string;
+        field: string;
+        ownerKeys: string[] | undefined;
+        knownKeys: Set<string>;
+    }
+) {
+    for (const ownerKey of options.ownerKeys ?? []) {
+        if (!ownerKey || options.knownKeys.has(ownerKey)) continue;
+        items.push({
+            kind: options.kind,
+            classification: "known exporter/data-quality issue",
+            message: `${options.rowKey} references missing topology key ${ownerKey}.`,
+            entryKey: options.entryKey,
+            rowKey: options.rowKey,
+            field: options.field,
+            referencedKey: ownerKey,
+        });
+    }
+}
+
+function addMissingBranchPathHandoffItems(
+    items: QuestExplorerExporterHandoffItem[],
+    options: {
+        kind: "lore_ownership_gap" | "objective_ownership_gap";
+        entryKey: string;
+        rowKey: string;
+        field: string;
+        paths: string[][] | undefined;
+        knownBranchKeys: Set<string>;
+    }
+) {
+    for (const path of options.paths ?? []) {
+        for (const branchKey of path) {
+            if (!branchKey || options.knownBranchKeys.has(branchKey)) continue;
+            items.push({
+                kind: options.kind,
+                classification: "known exporter/data-quality issue",
+                message: `${options.rowKey} references missing branch path key ${branchKey}.`,
+                entryKey: options.entryKey,
+                rowKey: options.rowKey,
+                field: options.field,
+                referencedKey: branchKey,
+            });
+        }
+    }
+}
+
+function requirementNeedsCodexEntryKey(requirement: Requirement): boolean {
+    return Boolean(
+        !requirement.codexEntryKey
+        && (
+            requirement.referenceKey
+            || requirement.referenceKind
+            || requirement.referenceDisplayName
+        )
+    );
+}
+
+function rewardNeedsCodexEntryKey(reward: Reward): boolean {
+    return Boolean(
+        !reward.codexEntryKey
+        && (
+            reward.referenceKey
+            || reward.referenceKind
+            || reward.referenceDisplayName
+            || reward.assetKey
+            || reward.assetKind
+            || reward.assetDisplayName
+        )
+    );
+}
+
+function groupedDeterministicContinuationHandoffItems(entries: QuestExplorerEntry[]): QuestExplorerExporterHandoffItem[] {
+    const groups = new Map<string, {
+        entry: QuestExplorerEntry;
+        groupKey: string;
+        groupLabel: string | null;
+        deterministicContinuations: QuestBranch[];
+        explicitDecisionOptions: number;
+        topologyForkOptions: number;
+    }>();
+
+    for (const entry of entries) {
+        for (const branch of entry.branches) {
+            const key = branchSemanticGroupKey(entry.entryKey, branch);
+            const group = groups.get(key) ?? {
+                entry,
+                groupKey: key,
+                groupLabel: branch.groupLabel ?? null,
+                deterministicContinuations: [],
+                explicitDecisionOptions: 0,
+                topologyForkOptions: 0,
+            };
+            const kind = canonicalDiagnosticStageKind(branch, entry.branches);
+
+            if (kind === "deterministic_continuation") group.deterministicContinuations.push(branch);
+            if (kind === "explicit_decision_option") group.explicitDecisionOptions += 1;
+            if (kind === "topology_fork_option") group.topologyForkOptions += 1;
+            groups.set(key, group);
+        }
+    }
+
+    return [...groups.values()]
+        .filter((group) => (
+            group.deterministicContinuations.length >= 2
+            && group.explicitDecisionOptions === 0
+            && group.topologyForkOptions === 0
+        ))
+        .map((group) => {
+            const branches = [...group.deterministicContinuations].sort((left, right) => (
+                (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER)
+                || left.branchKey.localeCompare(right.branchKey)
+            ));
+
+            return {
+                kind: "grouped_deterministic_continuations",
+                classification: "design smell/future risk",
+                message: `${group.entry.title} has ${branches.length} grouped continuation rows; keep deterministic unless product/export marks them as topology alternatives.`,
+                entryKey: group.entry.entryKey,
+                rowKey: group.groupKey,
+                field: group.groupLabel ?? "continuation group",
+                branchKeys: branches.map((branch) => branch.branchKey),
+                examples: branches.slice(0, EXPORTER_HANDOFF_SAMPLE_LIMIT).map((branch) => branch.label),
+            } satisfies QuestExplorerExporterHandoffItem;
+        });
+}
+
+function createExporterHandoff(
+    entries: QuestExplorerEntry[],
+    progression: QuestExplorerProgression | null
+): QuestExplorerExporterHandoff {
+    const items: QuestExplorerExporterHandoffItem[] = [];
+    const byEntryKey = entriesByKey(entries);
+    const { branchKeys: knownBranchKeys, choiceKeys: knownChoiceKeys } = knownTopologyKeys(entries);
+    const codexGapExamples: string[] = [];
+    let codexGapCount = 0;
+
+    if (!progression) {
+        items.push({
+            kind: "missing_progression_dto",
+            classification: "blocker",
+            message: "Quest Explorer JSON is missing backend progression DTO semantics.",
+            field: "progression",
+        });
+    }
+
+    if (byEntryKey[KIN_CHAPTER_ZERO_ENTRY_KEY] && byEntryKey[KIN_CHAPTER_ONE_ENTRY_KEY]) {
+        items.push({
+            kind: "kin_chapter_zero_compatibility_link",
+            classification: "accepted modeled artifact",
+            message: `Hardcoded compatibility link places Kin chapter 0 before ${KIN_CHAPTER_ZERO_QUESTLINE_KEY} Chapter 1.`,
+            entryKey: KIN_CHAPTER_ZERO_ENTRY_KEY,
+            targetEntryKey: KIN_CHAPTER_ONE_ENTRY_KEY,
+        });
+    }
+
+    for (const entry of entries) {
+        if (
+            getQuestCategoryKey(entry.questType) === "faction"
+            && (!entry.navigation.factionKey || !entry.navigation.questLineKey)
+            && !isKinChapterZeroCompatibilityEntry(entry, byEntryKey)
+        ) {
+            items.push({
+                kind: "missing_major_faction_navigation",
+                classification: "known exporter/data-quality issue",
+                message: `${entry.title} is a major faction quest without factionKey or questLineKey navigation.`,
+                entryKey: entry.entryKey,
+                field: "navigation.factionKey/navigation.questLineKey",
+            });
+        }
+
+        for (const section of entry.loreView.sections) {
+            const rowKey = section.sectionKey;
+            addMissingReferenceHandoffItems(items, {
+                kind: "lore_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "choiceKey",
+                ownerKeys: section.choiceKey ? [section.choiceKey] : [],
+                knownKeys: knownChoiceKeys,
+            });
+            addMissingReferenceHandoffItems(items, {
+                kind: "lore_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByBranchKeys",
+                ownerKeys: section.revealedByBranchKeys,
+                knownKeys: knownBranchKeys,
+            });
+            addMissingReferenceHandoffItems(items, {
+                kind: "lore_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByChoiceKeys",
+                ownerKeys: section.revealedByChoiceKeys,
+                knownKeys: knownChoiceKeys,
+            });
+            addMissingBranchPathHandoffItems(items, {
+                kind: "lore_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByBranchPathAlternatives",
+                paths: section.revealedByBranchPathAlternatives,
+                knownBranchKeys,
+            });
+        }
+
+        for (const branch of entry.branches) {
+            if (!branch.strategy) continue;
+
+            for (const requirement of branch.strategy.requirements) {
+                if (!requirementNeedsCodexEntryKey(requirement)) continue;
+                codexGapCount += 1;
+                if (codexGapExamples.length < EXPORTER_HANDOFF_SAMPLE_LIMIT) {
+                    codexGapExamples.push(`${entry.entryKey}:${branch.branchKey}:strategy:requirement:${requirement.requirementKey || requirement.displayText}`);
+                }
+            }
+
+            for (const reward of branch.strategy.rewards) {
+                if (!rewardNeedsCodexEntryKey(reward)) continue;
+                codexGapCount += 1;
+                if (codexGapExamples.length < EXPORTER_HANDOFF_SAMPLE_LIMIT) {
+                    codexGapExamples.push(`${entry.entryKey}:${branch.branchKey}:strategy:reward:${reward.rewardKey || reward.displayText}`);
+                }
+            }
+        }
+
+        for (const objective of entry.strategyView.objectives) {
+            const rowKey = objective.objectiveKey || `${entry.entryKey}:objective`;
+            addMissingReferenceHandoffItems(items, {
+                kind: "objective_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByBranchKeys",
+                ownerKeys: objective.revealedByBranchKeys,
+                knownKeys: knownBranchKeys,
+            });
+            addMissingReferenceHandoffItems(items, {
+                kind: "objective_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByChoiceKeys",
+                ownerKeys: objective.revealedByChoiceKeys,
+                knownKeys: knownChoiceKeys,
+            });
+            addMissingBranchPathHandoffItems(items, {
+                kind: "objective_ownership_gap",
+                entryKey: entry.entryKey,
+                rowKey,
+                field: "revealedByBranchPathAlternatives",
+                paths: objective.revealedByBranchPathAlternatives,
+                knownBranchKeys,
+            });
+
+            for (const requirement of objective.requirements) {
+                if (!requirementNeedsCodexEntryKey(requirement)) continue;
+                codexGapCount += 1;
+                if (codexGapExamples.length < EXPORTER_HANDOFF_SAMPLE_LIMIT) {
+                    codexGapExamples.push(`${entry.entryKey}:${rowKey}:requirement:${requirement.requirementKey || requirement.displayText}`);
+                }
+            }
+
+            for (const reward of objective.rewards) {
+                if (!rewardNeedsCodexEntryKey(reward)) continue;
+                codexGapCount += 1;
+                if (codexGapExamples.length < EXPORTER_HANDOFF_SAMPLE_LIMIT) {
+                    codexGapExamples.push(`${entry.entryKey}:${rowKey}:reward:${reward.rewardKey || reward.displayText}`);
+                }
+            }
+        }
+    }
+
+    if (codexGapCount > 0) {
+        items.push({
+            kind: "codex_entry_key_coverage_gap",
+            classification: "design smell/future risk",
+            message: "Linked requirement/reward rows have reference or asset keys but no direct codexEntryKey.",
+            field: "requirements/rewards.codexEntryKey",
+            count: codexGapCount,
+            examples: codexGapExamples,
+        });
+    }
+
+    items.push(...groupedDeterministicContinuationHandoffItems(entries));
+
+    return {
+        items,
+        reportText: formatExporterHandoff(items).join("\n"),
+    };
+}
+
 function isChapterOnlyLabel(value: string): boolean {
     return /^chapter(?:\s+\d+)?$/i.test(value.trim());
 }
@@ -687,6 +1027,28 @@ function formatFinding(classification: QuestExplorerDiagnosticClassification, fi
     ];
 }
 
+function formatExporterHandoffItem(item: QuestExplorerExporterHandoffItem): string {
+    const details = [
+        item.entryKey ? `entry=${item.entryKey}` : null,
+        item.rowKey ? `row=${item.rowKey}` : null,
+        item.field ? `field=${item.field}` : null,
+        item.referencedKey ? `ref=${item.referencedKey}` : null,
+        item.targetEntryKey ? `target=${item.targetEntryKey}` : null,
+        item.branchKeys?.length ? `branches=${item.branchKeys.join(", ")}` : null,
+        item.count != null ? `count=${item.count}` : null,
+        item.examples?.length ? `examples=${item.examples.join(" | ")}` : null,
+    ].filter((detail): detail is string => Boolean(detail));
+
+    return `  - [${item.classification}] ${item.kind}: ${item.message}${details.length > 0 ? ` (${details.join("; ")})` : ""}`;
+}
+
+function formatExporterHandoff(items: QuestExplorerExporterHandoffItem[]): string[] {
+    return [
+        "Exporter handoff:",
+        ...(items.length === 0 ? ["  - none"] : items.map(formatExporterHandoffItem)),
+    ];
+}
+
 function formatSemanticCounts(counts: QuestExplorerSemanticDiagnosticCounts): string[] {
     return [
         "Canonical semantic taxonomy:",
@@ -739,6 +1101,7 @@ export function createQuestExplorerFrontendDiagnostic(
     const counts = categoryCounts(entries, progression);
     const canonicalCounts = semanticCounts(entries, progression);
     const factionSummaries = perFactionSemanticSummaries(entries, progression);
+    const exporterHandoff = createExporterHandoff(entries, progression);
     const examples = railExamples(groups);
     const findings: QuestExplorerDiagnosticFinding[] = [];
 
@@ -773,6 +1136,8 @@ export function createQuestExplorerFrontendDiagnostic(
         "",
         ...formatPerFactionSummaries(factionSummaries),
         "",
+        ...formatExporterHandoff(exporterHandoff.items),
+        "",
         "Classified findings:",
         ...formatFinding("blocker", findings),
         ...formatFinding("warning", findings),
@@ -786,6 +1151,7 @@ export function createQuestExplorerFrontendDiagnostic(
         categoryCounts: counts,
         semanticCounts: canonicalCounts,
         perFactionSummaries: factionSummaries,
+        exporterHandoff,
         selectedRailItem,
         railExamples: examples,
         findings,

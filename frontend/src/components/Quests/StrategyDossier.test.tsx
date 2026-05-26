@@ -1,12 +1,17 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StrategyDossier } from "@/components/Quests/StrategyDossier";
+import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
+import { useCodexStore } from "@/stores/codexStore";
+import type { CodexEntry } from "@/types/dataTypes";
 import type {
     StrategyDossierBranchOption,
     StrategyDossierModel,
 } from "@/features/quests/questStrategyDossier";
 import type { QuestPathChoice } from "@/features/quests/questPathFlow";
+import { rewardDisplaysFromText } from "@/features/quests/questRewardDisplay";
+import { requirementDisplaysFromText } from "@/features/quests/questRequirementDisplay";
 import type { QuestProgressionStep } from "@/types/questTypes";
 
 const step: QuestProgressionStep = {
@@ -20,6 +25,32 @@ const step: QuestProgressionStep = {
     aliasEntryKeys: [],
     variants: [],
 };
+
+function codexEntry(exportKind: string, entryKey: string, displayName = entryKey): CodexEntry {
+    return {
+        exportKind,
+        entryKey,
+        displayName,
+        descriptionLines: [],
+        referenceKeys: [],
+    };
+}
+
+function setCodexEntries(entries: CodexEntry[]) {
+    useCodexStore.setState({
+        entries,
+        entriesByKey: buildEntriesByKey(entries),
+        entriesByKindKey: buildEntriesByKindKey(entries),
+        entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((accumulator, entry) => {
+            const entriesForKind = accumulator[entry.exportKind] ?? [];
+            entriesForKind.push(entry);
+            accumulator[entry.exportKind] = entriesForKind;
+            return accumulator;
+        }, {}),
+        loading: false,
+        error: null,
+    });
+}
 
 function choice(overrides: Partial<QuestPathChoice> = {}): QuestPathChoice {
     return {
@@ -47,7 +78,9 @@ function choice(overrides: Partial<QuestPathChoice> = {}): QuestPathChoice {
         strategyLines: ["Hold the ridge."],
         loreLines: [],
         requirementLines: ["Spend supplies."],
+        requirementDetails: overrides.requirementDetails ?? requirementDisplaysFromText(overrides.requirementLines ?? ["Spend supplies."]),
         rewardLines: ["Gain command."],
+        rewardDetails: overrides.rewardDetails ?? rewardDisplaysFromText(overrides.rewardLines ?? ["Gain command."]),
         targetEntryKey: null,
         targetSummaryLine: null,
         continuationTitle: null,
@@ -69,7 +102,9 @@ function branchOption(overrides: Partial<StrategyDossierBranchOption> = {}): Str
         eyebrow: optionChoice.eyebrow,
         outcomeLines: optionChoice.strategyLines,
         requirements: optionChoice.requirementLines,
+        requirementDetails: optionChoice.requirementDetails ?? requirementDisplaysFromText(optionChoice.requirementLines),
         rewards: optionChoice.rewardLines,
+        rewardDetails: optionChoice.rewardDetails,
         leadsTo: [],
         markers: [],
         isSelected: true,
@@ -113,7 +148,9 @@ function modelForOptions(
         },
         objectives: [],
         requirements: [],
+        requirementDetails: [],
         rewards: [],
+        rewardDetails: [],
         selectedPathSteps: selectedOption ? [{ id: selectedOption.id, label: selectedOption.label, stepLabel: "Step 1", isCurrent: true }] : [],
         projectedOutcome,
         markers: [],
@@ -141,6 +178,10 @@ function renderDossier(model: StrategyDossierModel, debugChoiceDetails?: Map<str
 }
 
 describe("StrategyDossier", () => {
+    beforeEach(() => {
+        useCodexStore.getState().reset();
+    });
+
     it("renders a single option as the current task without choice framing", () => {
         const option = branchOption({
             choice: choice({
@@ -186,7 +227,9 @@ describe("StrategyDossier", () => {
             title: "Hold the ridge",
             lines: ["Hold the ridge."],
             requirements: ["Spend supplies."],
+            requirementDetails: requirementDisplaysFromText(["Spend supplies."]),
             rewards: ["Gain command."],
+            rewardDetails: selectedOption.rewardDetails,
             objectives: [],
         }));
 
@@ -206,6 +249,122 @@ describe("StrategyDossier", () => {
         expect(within(selectedOptionButton).queryByText("No further continuation is recorded")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Requirements")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Rewards")).not.toBeInTheDocument();
+    });
+
+    it("renders formula text as secondary Strategy reward detail without duplicating projected rewards", () => {
+        const selectedOption = branchOption({
+            choice: choice({
+                rewardLines: ["Gain Dust based on technology era."],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+                    formulaText: "50 + 50 * Technology Era",
+                }],
+            }),
+        });
+        const compareOption = branchOption({
+            choice: choice({
+                id: "choice-b",
+                branchKey: "Branch_B",
+                choiceKey: "Choice_B",
+                label: "Circle wide",
+                strategyLines: ["Circle wide."],
+                requirementLines: ["Spend scouts."],
+                rewardLines: ["Gain time."],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([selectedOption, compareOption], {
+            title: "Hold the ridge",
+            lines: ["Hold the ridge."],
+            requirements: ["Spend supplies."],
+            requirementDetails: requirementDisplaysFromText(["Spend supplies."]),
+            rewards: ["Gain Dust based on technology era."],
+            rewardDetails: selectedOption.rewardDetails,
+            objectives: [],
+        }));
+
+        const selectedOptionButton = screen.getByRole("button", { name: /Hold the ridge/ });
+        const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge leads to" });
+
+        expect(within(selectedOptionButton).getByText("Gain Dust based on technology era.")).toBeInTheDocument();
+        expect(within(selectedOptionButton).getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();
+        expect(screen.queryByText("Formula: 50 + 50 * Technology Era")).not.toBeInTheDocument();
+        expect(within(choiceResult).queryByText("Gain Dust based on technology era.")).not.toBeInTheDocument();
+        expect(within(choiceResult).queryByText("Formula: 50 + 50 × Technology Era")).not.toBeInTheDocument();
+    });
+
+    it("renders resolved requirement and reward metadata as Codex links", () => {
+        setCodexEntries([
+            codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics"),
+            codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen"),
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                requirementLines: ["Research Ridge Logistics."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Research Ridge Logistics."])[0]!,
+                    referenceKind: "Tech",
+                    referenceKey: "Technology_RidgeLogistics",
+                    referenceDisplayName: "Ridge Logistics",
+                }],
+                rewardLines: ["Unlock constructible: Chosen"],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                    assetKind: "Unit",
+                    assetKey: "Unit_KinOfSheredyn_Chosen",
+                    assetDisplayName: "Chosen",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        expect(screen.getByRole("link", { name: "Research Ridge Logistics." })).toHaveAttribute(
+            "href",
+            "/codex?entry=Technology_RidgeLogistics"
+        );
+        expect(screen.getByRole("link", { name: "Unlock constructible: Chosen" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+        );
+    });
+
+    it("keeps unresolved requirement and formula-only reward rows as plain text", () => {
+        setCodexEntries([codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics")]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                requirementLines: ["Research missing logistics."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Research missing logistics."])[0]!,
+                    referenceKind: "Tech",
+                    referenceKey: "Technology_Missing",
+                    referenceDisplayName: "Missing Logistics",
+                }],
+                rewardLines: ["Gain Dust based on technology era."],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+                    formulaText: "50 + 50 * Technology Era",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        expect(screen.getByText("Research missing logistics.")).toBeInTheDocument();
+        expect(screen.getByText("Gain Dust based on technology era.")).toBeInTheDocument();
+        expect(screen.getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Research missing logistics." })).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Gain Dust based on technology era." })).not.toBeInTheDocument();
     });
 
     it("renders topology forks as possible continuations without decision controls", () => {
@@ -308,7 +467,9 @@ describe("StrategyDossier", () => {
                 title: "Projected Advantage",
                 lines: ["The ridge route exposes a safer follow-up."],
                 requirements: ["Scout the ridge."],
+                requirementDetails: requirementDisplaysFromText(["Scout the ridge."]),
                 rewards: ["Open a side route."],
+                rewardDetails: rewardDisplaysFromText(["Open a side route."]),
                 objectives: [],
             },
             {

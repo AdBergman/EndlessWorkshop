@@ -21,10 +21,27 @@ Current diagnostic output should prefer canonical terms:
 - lore ownership gaps
 - objective ownership gaps
 
+The diagnostic report must also include an `Exporter handoff` section. Treat
+that section as the actionable DB/exporter queue for each inspected export.
+Current handoff item kinds are:
+
+- `missing_progression_dto`
+- `kin_chapter_zero_compatibility_link`
+- `missing_major_faction_navigation`
+- `lore_ownership_gap`
+- `objective_ownership_gap`
+- `codex_entry_key_coverage_gap`
+- `grouped_deterministic_continuations`
+
 Per-faction summaries should report the same taxonomy for configured major
 faction keys, plus semantic chapter counts when a progression DTO is available.
 When progression is missing, diagnostics should say that semantic chapter counts
 are unavailable instead of inferring chapters from titles or keys.
+
+Kin chapter 0 is the only accepted hardcoded compatibility exception:
+`TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01` links to
+`FactionQuest_KinOfSheredyn_Chapter01_Step01`. Diagnostics should report this
+as an accepted modeled artifact, not as missing major-faction navigation.
 
 Historical terms such as "choice path", "branch choice", "hidden branch",
 "Path Revealed", and "Next Choices" may still appear in legacy docs, raw DTO

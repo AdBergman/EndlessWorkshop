@@ -7,6 +7,20 @@ import type {
 } from "@/features/quests/questPathFlow";
 import { phaseDisplayLabel } from "@/features/quests/questDisplay";
 import type { QuestSemanticStageKind } from "@/features/quests/questSemanticStages";
+import {
+    rewardDisplayTexts,
+    rewardDisplaysFromRewards,
+    uniqueRewardDisplays,
+    type QuestRewardDisplay,
+} from "@/features/quests/questRewardDisplay";
+import {
+    requirementDisplayTexts,
+    requirementDisplaysFromRequirements,
+    requirementDisplaysFromText,
+    sameRequirementDisplays,
+    uniqueRequirementDisplays,
+    type QuestRequirementDisplay,
+} from "@/features/quests/questRequirementDisplay";
 
 export type StrategyDossierObjectiveScope = {
     objectives: StrategyObjective[];
@@ -19,14 +33,18 @@ export type StrategyDossierObjective = {
     label: string;
     text: string;
     requirements: string[];
+    requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
+    rewardDetails: QuestRewardDisplay[];
 };
 
 export type StrategyDossierOutcome = {
     title: string;
     lines: string[];
     requirements: string[];
+    requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
+    rewardDetails: QuestRewardDisplay[];
     objectives: StrategyDossierObjective[];
 };
 
@@ -71,7 +89,9 @@ export type StrategyDossierBranchOption = {
     eyebrow: string;
     outcomeLines: string[];
     requirements: string[];
+    requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
+    rewardDetails: QuestRewardDisplay[];
     leadsTo: string[];
     markers: StrategyDossierMarker[];
     isSelected: boolean;
@@ -140,7 +160,9 @@ export type StrategyDossierModel = {
     decision: StrategyDossierDecision;
     objectives: StrategyDossierObjective[];
     requirements: string[];
+    requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
+    rewardDetails: QuestRewardDisplay[];
     selectedPathSteps: StrategyDossierSelectedPathStep[];
     projectedOutcome: StrategyDossierOutcome | null;
     markers: StrategyDossierMarker[];
@@ -199,6 +221,8 @@ export function buildStrategyDossierModel({
         projectedOutcome,
         pathStatus
     );
+    const requirementDetails = uniqueRequirementDisplays(objectives.flatMap((objective) => objective.requirementDetails));
+    const rewardDetails = uniqueRewardDisplays(objectives.flatMap((objective) => objective.rewardDetails));
 
     return {
         brief: {
@@ -209,8 +233,10 @@ export function buildStrategyDossierModel({
         },
         decision: buildStrategyDecision(semanticInterpretation.decisionGroup),
         objectives,
-        requirements: uniqueStrings(objectives.flatMap((objective) => objective.requirements)),
-        rewards: uniqueStrings(objectives.flatMap((objective) => objective.rewards)),
+        requirements: requirementDisplayTexts(requirementDetails),
+        requirementDetails,
+        rewards: rewardDisplayTexts(rewardDetails),
+        rewardDetails,
         selectedPathSteps,
         projectedOutcome,
         markers: buildMarkers(renderedStep, selectedChoice, flow, entriesByKey),
@@ -579,7 +605,9 @@ function buildBranchOptions(
         eyebrow: choice.eyebrow,
         outcomeLines: choiceLines(choice),
         requirements: choice.requirementLines,
+        requirementDetails: choice.requirementDetails ?? requirementDisplaysFromText(choice.requirementLines),
         rewards: choice.rewardLines,
+        rewardDetails: choice.rewardDetails,
         leadsTo: leadsToForChoice(choice, entriesByKey),
         markers: markersForChoice(choice, entriesByKey),
         isSelected: renderedStep.selectedChoice?.choiceId === choice.id,
@@ -690,20 +718,22 @@ function buildProjectedOutcome(
             ? "Projected Path Outcomes"
             : "Projected Objective";
     const lines = uniqueStrings(outcomeChoices.flatMap((choice) => choiceLines(choice)));
-    const requirements = uniqueStrings([
-        ...outcomeChoices.flatMap((choice) => choice.requirementLines),
-        ...outcomeObjectives.flatMap((objective) => objective.requirements),
+    const requirementDetails = uniqueRequirementDisplays([
+        ...outcomeChoices.flatMap((choice) => choice.requirementDetails ?? requirementDisplaysFromText(choice.requirementLines)),
+        ...outcomeObjectives.flatMap((objective) => objective.requirementDetails),
     ]);
-    const rewards = uniqueStrings([
-        ...outcomeChoices.flatMap((choice) => choice.rewardLines),
-        ...outcomeObjectives.flatMap((objective) => objective.rewards),
+    const rewardDetails = uniqueRewardDisplays([
+        ...outcomeChoices.flatMap((choice) => choice.rewardDetails),
+        ...outcomeObjectives.flatMap((objective) => objective.rewardDetails),
     ]);
 
     return {
         title,
         lines,
-        requirements,
-        rewards,
+        requirements: requirementDisplayTexts(requirementDetails),
+        requirementDetails,
+        rewards: rewardDisplayTexts(rewardDetails),
+        rewardDetails,
         objectives: outcomeObjectives,
     };
 }
@@ -783,14 +813,21 @@ function dossierObjectives(
     usesObjectivePaths: boolean
 ): StrategyDossierObjective[] {
     const entryKey = entry?.entryKey ?? "entry";
-    return scope.objectives.map((objective, index) => ({
-        id: objective.objectiveKey ?? `${entryKey}:objective:${scope.objectiveIndexOffset + index}`,
-        phaseLabel: usesObjectivePaths ? "Pacification Objective" : phaseDisplayLabel(objective.phase),
-        label: `Objective ${scope.objectiveIndexOffset + index + 1}`,
-        text: objective.text,
-        requirements: objective.requirements.map((requirement) => requirement.displayText).filter(Boolean),
-        rewards: objective.rewards.map((reward) => reward.displayText).filter(Boolean),
-    }));
+    return scope.objectives.map((objective, index) => {
+        const requirementDetails = requirementDisplaysFromRequirements(objective.requirements);
+        const rewardDetails = rewardDisplaysFromRewards(objective.rewards);
+
+        return {
+            id: objective.objectiveKey ?? `${entryKey}:objective:${scope.objectiveIndexOffset + index}`,
+            phaseLabel: usesObjectivePaths ? "Pacification Objective" : phaseDisplayLabel(objective.phase),
+            label: `Objective ${scope.objectiveIndexOffset + index + 1}`,
+            text: objective.text,
+            requirements: requirementDisplayTexts(requirementDetails),
+            requirementDetails,
+            rewards: rewardDisplayTexts(rewardDetails),
+            rewardDetails,
+        };
+    });
 }
 
 function selectedPathForFlow(flow: QuestPathFlow): StrategyDossierSelectedPathStep[] {

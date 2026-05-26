@@ -19,6 +19,7 @@ import {
   buildStrategyPathStatus,
   type StrategyDossierObjectiveScope,
 } from "./questStrategyDossier";
+import { rewardDisplaysFromText } from "./questRewardDisplay";
 
 function requirement(displayText: string): Requirement {
   return {
@@ -40,7 +41,7 @@ function requirement(displayText: string): Requirement {
   };
 }
 
-function reward(displayText: string): Reward {
+function reward(displayText: string, formulaText: string | null = null): Reward {
   return {
     rewardKey: `Reward_${displayText}`,
     kind: "Reward",
@@ -48,7 +49,7 @@ function reward(displayText: string): Reward {
     amount: null,
     groupLabel: null,
     groupOrder: null,
-    formulaText: null,
+    formulaText,
     assetKind: null,
     assetKey: null,
     assetDisplayName: null,
@@ -149,6 +150,7 @@ function questChoice(overrides: Partial<QuestPathChoice> & Pick<QuestPathChoice,
     loreLines: overrides.loreLines ?? [],
     requirementLines: overrides.requirementLines ?? [],
     rewardLines: overrides.rewardLines ?? [],
+    rewardDetails: overrides.rewardDetails ?? rewardDisplaysFromText(overrides.rewardLines ?? []),
     targetEntryKey: overrides.targetEntryKey ?? null,
     targetSummaryLine: overrides.targetSummaryLine ?? null,
     continuationTitle: overrides.continuationTitle ?? null,
@@ -440,6 +442,69 @@ describe("strategy dossier helpers", () => {
     expect(model.continuityStrip.summary).toBe("The selected sequence leaves this chapter.");
   });
 
+  it("preserves formula-aware rewards through objective, option, and outcome models", () => {
+    const selectedChoice = questChoice({
+      id: "branch:Dust",
+      branchKey: "Branch_Dust",
+      label: "Claim the archive",
+      strategyLines: ["Secure the archive."],
+      rewardLines: ["Gain Dust based on technology era."],
+      rewardDetails: [{
+        ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+        formulaText: "50 + 50 * Technology Era",
+      }],
+    });
+    const alternateChoice = questChoice({
+      id: "branch:Industry",
+      branchKey: "Branch_Industry",
+      label: "Rebuild the archive",
+      strategyLines: ["Restore the archive."],
+      rewardLines: ["Gain Industry."],
+    });
+    const activeStep = renderedStep({
+      choices: [selectedChoice, alternateChoice],
+      selectedChoice,
+    });
+    const objectiveScope: StrategyDossierObjectiveScope = {
+      objectiveIndexOffset: 0,
+      objectives: [{
+        ...objective("Stabilize the archive"),
+        rewards: [reward("Gain Influence based on technology era.", "5 + 5 * Technology Era")],
+      }],
+    };
+    const model = buildStrategyDossierModel({
+      renderedStep: activeStep,
+      totalSteps: 1,
+      title: "Formula Brief",
+      displayEntry: activeStep.displayEntry,
+      objectiveScope,
+      revealedObjectiveScope: null,
+      flow: questPathFlow(activeStep),
+      entriesByKey: {},
+      usesObjectivePaths: false,
+      comparisonChoices: [selectedChoice, alternateChoice],
+    });
+
+    expect(model.rewardDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Gain Influence based on technology era.",
+        formulaText: "5 + 5 * Technology Era",
+      }),
+    ]);
+    expect(model.decisionGroup.selectedOption?.rewardDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Gain Dust based on technology era.",
+        formulaText: "50 + 50 * Technology Era",
+      }),
+    ]);
+    expect(model.outcomePreview?.rewardDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Gain Dust based on technology era.",
+        formulaText: "50 + 50 * Technology Era",
+      }),
+    ]);
+  });
+
   it("keeps deterministic continuations out of decision comparison semantics", () => {
     const continuation = questChoice({
       id: "branch:Continue",
@@ -471,6 +536,64 @@ describe("strategy dossier helpers", () => {
     }));
     expect(model.decisionGroup.groups).toHaveLength(0);
     expect(model.branchComparison.groups).toHaveLength(0);
+    expect(model.decision).toEqual(expect.objectContaining({
+      title: "No active decision",
+    }));
+    expect(model.continuityStrip.items).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "decision" }),
+    ]));
+  });
+
+  it("keeps grouped deterministic continuations out of decision and topology surfaces", () => {
+    const quietContinuation = questChoice({
+      id: "branch:Quiet",
+      branchKey: "Branch_Quiet",
+      label: "Quiet continuation",
+      sectionRole: "continuation",
+      semanticStageKind: "deterministic_continuation",
+      parentBranchKey: "Branch_Root",
+      prerequisiteBranchKeys: ["Branch_Root"],
+      choiceGroupKey: "ChoiceGroup_Continuation",
+      branchStepOrder: 2,
+      strategyLines: ["Keep the route quiet."],
+      nextEntryKeys: ["Quest_Quiet"],
+    });
+    const boldContinuation = questChoice({
+      id: "branch:Bold",
+      branchKey: "Branch_Bold",
+      label: "Bold continuation",
+      sectionRole: "continuation",
+      semanticStageKind: "deterministic_continuation",
+      parentBranchKey: "Branch_Root",
+      prerequisiteBranchKeys: ["Branch_Root"],
+      choiceGroupKey: "ChoiceGroup_Continuation",
+      branchStepOrder: 2,
+      strategyLines: ["Force the route open."],
+      nextEntryKeys: ["Quest_Bold"],
+    });
+    const step = renderedStep({
+      choices: [quietContinuation, boldContinuation],
+      selectedChoice: boldContinuation,
+    });
+    const model = modelForRenderedStep(step, {
+      entriesByKey: {
+        Quest_Quiet: questEntry("Quest_Quiet", "Quiet Result"),
+        Quest_Bold: questEntry("Quest_Bold", "Bold Result"),
+      },
+      comparisonChoices: [quietContinuation, boldContinuation],
+    });
+
+    expect(model.currentTask).toEqual(expect.objectContaining({
+      id: "branch:Bold",
+      label: "Bold continuation",
+      leadsTo: ["Chapter 1: Bold Result"],
+    }));
+    expect(model.continuation).toEqual(expect.objectContaining({
+      id: "branch:Bold",
+    }));
+    expect(model.decisionGroup.groups).toHaveLength(0);
+    expect(model.branchComparison.groups).toHaveLength(0);
+    expect(model.topologyAlternatives).toHaveLength(0);
     expect(model.decision).toEqual(expect.objectContaining({
       title: "No active decision",
     }));
