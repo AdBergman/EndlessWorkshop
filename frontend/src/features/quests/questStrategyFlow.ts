@@ -1,4 +1,4 @@
-import { choicePresentationGroups } from "@/features/quests/questChoicePresentation";
+import { stagePresentationGroups } from "@/features/quests/questChoicePresentation";
 import { isMinorFactionVariantQuest } from "@/features/quests/questDisplay";
 import {
     buildQuestPathFlow,
@@ -104,7 +104,7 @@ export function buildStrategyFlowModel({
     const revealedObjectiveScope = renderedStep.displayEntry
         ? strategyObjectiveScopeForRevealedContinuations(renderedStep.displayEntry, renderedStep)
         : null;
-    const choicePresentation = choicePresentationGroups(
+    const stagePresentation = stagePresentationGroups(
         renderedStep.step,
         renderedStep.choices,
         renderedStep.selectedChoice,
@@ -113,8 +113,8 @@ export function buildStrategyFlowModel({
         showRawHiddenRows
     );
     const comparisonChoices = [
-        ...choicePresentation.primaryChoices,
-        ...choicePresentation.activeContinuationChoices,
+        ...stagePresentation.primaryStages,
+        ...stagePresentation.activeContinuationStages,
     ];
     const dossier = buildStrategyDossierModel({
         renderedStep,

@@ -36,9 +36,35 @@ export type QuestExplorerSemanticDiagnosticCountKey =
 
 export type QuestExplorerSemanticDiagnosticCounts = Record<QuestExplorerSemanticDiagnosticCountKey, number>;
 
+export type QuestExplorerFactionSemanticSummary = {
+    label: string;
+    factionKeys: string[];
+    entries: number;
+    semanticChapters: number | null;
+    navigationChapterGroups: number;
+    setupArtifactRows: number;
+    deterministicContinuations: number;
+    explicitDecisionGroups: number;
+    explicitDecisionOptionRows: number;
+    topologyForksWithoutTrueChoice: number;
+    groupedDeterministicContinuationGroups: number;
+    convergenceRows: number;
+    convergenceGroups: number;
+    terminalRows: number;
+    failureLinks: number;
+    unresolvedContinuations: number;
+    internalVariants: number;
+    aliases: number;
+    unknownClassifications: number;
+    loreOwnershipGaps: number;
+    objectiveOwnershipGaps: number;
+    notableWarnings: string[];
+};
+
 export type QuestExplorerFrontendDiagnostic = {
     categoryCounts: Record<QuestCategoryKey, number>;
     semanticCounts: QuestExplorerSemanticDiagnosticCounts;
+    perFactionSummaries: QuestExplorerFactionSemanticSummary[];
     selectedRailItem: string;
     railExamples: string[];
     findings: QuestExplorerDiagnosticFinding[];
@@ -98,6 +124,29 @@ const SEMANTIC_COUNT_LABELS: Record<QuestExplorerSemanticDiagnosticCountKey, str
     lore_ownership_gaps: "lore ownership gaps",
     objective_ownership_gaps: "objective ownership gaps",
 };
+
+const MAJOR_FACTION_DIAGNOSTIC_CONFIGS = [
+    {
+        label: "Kin",
+        factionKeys: ["Faction_Kin", "Faction_KinOfSheredyn", "Faction_KinOfSheredyn02"],
+    },
+    {
+        label: "Aspect",
+        factionKeys: ["Faction_Aspect"],
+    },
+    {
+        label: "Last Lord",
+        factionKeys: ["Faction_LastLord"],
+    },
+    {
+        label: "Necrophage",
+        factionKeys: ["Faction_Necro", "Faction_Necrophage", "Faction_Necrophage02"],
+    },
+    {
+        label: "Mukag",
+        factionKeys: ["Faction_Mukag"],
+    },
+] as const;
 
 function entryIdentityKeys(entry: QuestExplorerEntry): string[] {
     return [entry.entryKey, ...entry.aliases].filter(Boolean);
@@ -169,25 +218,31 @@ function addMissingBranchPathReferences(
     ), 0);
 }
 
+function knownTopologyKeys(entries: QuestExplorerEntry[]): { branchKeys: Set<string>; choiceKeys: Set<string> } {
+    const branchKeys = new Set<string>();
+    const choiceKeys = new Set<string>();
+
+    for (const entry of entries) {
+        for (const branch of entry.branches) {
+            branchKeys.add(branch.branchKey);
+            if (branch.choiceKey) choiceKeys.add(branch.choiceKey);
+        }
+    }
+
+    return { branchKeys, choiceKeys };
+}
+
 function semanticCounts(
     entries: QuestExplorerEntry[],
     progression: QuestExplorerProgression | null
 ): QuestExplorerSemanticDiagnosticCounts {
     const counts = emptySemanticCounts();
-    const knownBranchKeys = new Set<string>();
-    const knownChoiceKeys = new Set<string>();
+    const { branchKeys: knownBranchKeys, choiceKeys: knownChoiceKeys } = knownTopologyKeys(entries);
     const groupedStages = new Map<string, {
         deterministicContinuations: number;
         explicitDecisionOptions: number;
         topologyForkOptions: number;
     }>();
-
-    for (const entry of entries) {
-        for (const branch of entry.branches) {
-            knownBranchKeys.add(branch.branchKey);
-            if (branch.choiceKey) knownChoiceKeys.add(branch.choiceKey);
-        }
-    }
 
     for (const entry of entries) {
         for (const branch of entry.branches) {
@@ -252,6 +307,185 @@ function semanticCounts(
     }
 
     return counts;
+}
+
+function navigationChapterKey(entry: QuestExplorerEntry): string {
+    return [
+        entry.navigation.factionKey ?? "no-faction",
+        entry.navigation.questLineKey ?? "no-questline",
+        entry.navigation.chapterOrder ?? entry.navigation.chapter ?? "no-chapter",
+    ].join(":");
+}
+
+function questlineMatchesFaction(
+    questline: QuestExplorerProgression["questlines"][number],
+    factionKeys: ReadonlySet<string>
+): boolean {
+    return [
+        questline.factionKey,
+        questline.factionFamilyKey,
+        ...questline.sourceFactionKeys,
+    ].some((key) => Boolean(key && factionKeys.has(key)));
+}
+
+function progressionChapterCountForFaction(
+    progression: QuestExplorerProgression | null,
+    factionKeys: ReadonlySet<string>
+): number | null {
+    if (!progression) return null;
+    return progression.questlines
+        .filter((questline) => questlineMatchesFaction(questline, factionKeys))
+        .reduce((total, questline) => total + questline.chapters.length, 0);
+}
+
+function progressionInternalVariantCountForFaction(
+    progression: QuestExplorerProgression | null,
+    factionKeys: ReadonlySet<string>
+): number {
+    return (progression?.questlines ?? [])
+        .filter((questline) => questlineMatchesFaction(questline, factionKeys))
+        .reduce((total, questline) => (
+            total + questline.chapters.reduce((chapterTotal, chapter) => (
+                chapterTotal + chapter.steps.reduce((stepTotal, step) => (
+                    stepTotal + step.variants.filter((variant) => variant.variantKind === "branch_variant").length
+                ), 0)
+            ), 0)
+        ), 0);
+}
+
+function entryOwnershipGaps(
+    entries: QuestExplorerEntry[],
+    knownBranchKeys: Set<string>,
+    knownChoiceKeys: Set<string>
+): { loreOwnershipGaps: number; objectiveOwnershipGaps: number } {
+    let loreOwnershipGaps = 0;
+    let objectiveOwnershipGaps = 0;
+
+    for (const entry of entries) {
+        for (const section of entry.loreView.sections) {
+            loreOwnershipGaps += section.choiceKey && !knownChoiceKeys.has(section.choiceKey) ? 1 : 0;
+            loreOwnershipGaps += addMissingOwnerReferences(section.revealedByBranchKeys, knownBranchKeys);
+            loreOwnershipGaps += addMissingOwnerReferences(section.revealedByChoiceKeys, knownChoiceKeys);
+            loreOwnershipGaps += addMissingBranchPathReferences(section.revealedByBranchPathAlternatives, knownBranchKeys);
+        }
+
+        for (const objective of entry.strategyView.objectives) {
+            objectiveOwnershipGaps += addMissingOwnerReferences(objective.revealedByBranchKeys, knownBranchKeys);
+            objectiveOwnershipGaps += addMissingOwnerReferences(objective.revealedByChoiceKeys, knownChoiceKeys);
+            objectiveOwnershipGaps += addMissingBranchPathReferences(objective.revealedByBranchPathAlternatives, knownBranchKeys);
+        }
+    }
+
+    return { loreOwnershipGaps, objectiveOwnershipGaps };
+}
+
+function groupedStageCounts(entries: QuestExplorerEntry[]): {
+    explicitDecisionGroups: number;
+    topologyForksWithoutTrueChoice: number;
+    groupedDeterministicContinuationGroups: number;
+    convergenceGroups: number;
+} {
+    const groups = new Map<string, {
+        deterministicContinuations: number;
+        explicitDecisionOptions: number;
+        topologyForkOptions: number;
+        convergenceRows: number;
+    }>();
+
+    for (const entry of entries) {
+        for (const branch of entry.branches) {
+            const key = branchSemanticGroupKey(entry.entryKey, branch);
+            const group = groups.get(key) ?? {
+                deterministicContinuations: 0,
+                explicitDecisionOptions: 0,
+                topologyForkOptions: 0,
+                convergenceRows: 0,
+            };
+            const kind = canonicalDiagnosticStageKind(branch, entry.branches);
+            if (kind === "deterministic_continuation") group.deterministicContinuations += 1;
+            if (kind === "explicit_decision_option") group.explicitDecisionOptions += 1;
+            if (kind === "topology_fork_option") group.topologyForkOptions += 1;
+            if (kind === "convergence") group.convergenceRows += 1;
+            groups.set(key, group);
+        }
+    }
+
+    return [...groups.values()].reduce((counts, group) => ({
+        explicitDecisionGroups: counts.explicitDecisionGroups + (group.explicitDecisionOptions >= 2 ? 1 : 0),
+        topologyForksWithoutTrueChoice: counts.topologyForksWithoutTrueChoice + (
+            group.topologyForkOptions >= 2 && group.explicitDecisionOptions === 0 ? 1 : 0
+        ),
+        groupedDeterministicContinuationGroups: counts.groupedDeterministicContinuationGroups + (
+            group.deterministicContinuations >= 2
+            && group.explicitDecisionOptions === 0
+            && group.topologyForkOptions === 0
+                ? 1
+                : 0
+        ),
+        convergenceGroups: counts.convergenceGroups + (group.convergenceRows > 0 ? 1 : 0),
+    }), {
+        explicitDecisionGroups: 0,
+        topologyForksWithoutTrueChoice: 0,
+        groupedDeterministicContinuationGroups: 0,
+        convergenceGroups: 0,
+    });
+}
+
+function perFactionSemanticSummaries(
+    entries: QuestExplorerEntry[],
+    progression: QuestExplorerProgression | null
+): QuestExplorerFactionSemanticSummary[] {
+    const { branchKeys: knownBranchKeys, choiceKeys: knownChoiceKeys } = knownTopologyKeys(entries);
+
+    return MAJOR_FACTION_DIAGNOSTIC_CONFIGS.map((config) => {
+        const factionKeys = new Set<string>(config.factionKeys);
+        const factionEntries = entries.filter((entry) => (
+            Boolean(entry.navigation.factionKey && factionKeys.has(entry.navigation.factionKey))
+        ));
+        const counts = semanticCounts(factionEntries, null);
+        const groupedCounts = groupedStageCounts(factionEntries);
+        const ownershipGaps = entryOwnershipGaps(factionEntries, knownBranchKeys, knownChoiceKeys);
+        const semanticChapters = progressionChapterCountForFaction(progression, factionKeys);
+        const aliases = factionEntries.reduce((total, entry) => total + entry.aliases.length, 0);
+        const failureLinks = factionEntries.reduce((total, entry) => (
+            total + entry.branches.filter((branch) => (
+                branch.failureEntryKeys.length > 0
+                || canonicalDiagnosticStageKind(branch, entry.branches) === "failure"
+            )).length
+        ), 0);
+        const notableWarnings = [
+            factionEntries.length === 0 ? "no entries found for configured faction keys" : null,
+            semanticChapters == null ? "progression DTO missing; semantic chapter count unavailable" : null,
+            counts.unknown > 0 ? `${counts.unknown} unknown semantic classification row(s)` : null,
+            ownershipGaps.loreOwnershipGaps > 0 ? `${ownershipGaps.loreOwnershipGaps} lore ownership gap(s)` : null,
+            ownershipGaps.objectiveOwnershipGaps > 0 ? `${ownershipGaps.objectiveOwnershipGaps} objective ownership gap(s)` : null,
+        ].filter((warning): warning is string => Boolean(warning));
+
+        return {
+            label: config.label,
+            factionKeys: [...config.factionKeys],
+            entries: factionEntries.length,
+            semanticChapters,
+            navigationChapterGroups: new Set(factionEntries.map(navigationChapterKey)).size,
+            setupArtifactRows: counts.setup_task,
+            deterministicContinuations: counts.deterministic_continuation,
+            explicitDecisionGroups: groupedCounts.explicitDecisionGroups,
+            explicitDecisionOptionRows: counts.explicit_decision_option,
+            topologyForksWithoutTrueChoice: groupedCounts.topologyForksWithoutTrueChoice,
+            groupedDeterministicContinuationGroups: groupedCounts.groupedDeterministicContinuationGroups,
+            convergenceRows: counts.convergence,
+            convergenceGroups: groupedCounts.convergenceGroups,
+            terminalRows: counts.terminal,
+            failureLinks,
+            unresolvedContinuations: counts.unresolved,
+            internalVariants: progressionInternalVariantCountForFaction(progression, factionKeys),
+            aliases,
+            unknownClassifications: counts.unknown,
+            loreOwnershipGaps: ownershipGaps.loreOwnershipGaps,
+            objectiveOwnershipGaps: ownershipGaps.objectiveOwnershipGaps,
+            notableWarnings,
+        };
+    });
 }
 
 function isChapterOnlyLabel(value: string): boolean {
@@ -461,6 +695,37 @@ function formatSemanticCounts(counts: QuestExplorerSemanticDiagnosticCounts): st
     ];
 }
 
+function formatSemanticChapterCount(summary: QuestExplorerFactionSemanticSummary): string {
+    return summary.semanticChapters == null
+        ? "n/a (progression DTO missing)"
+        : String(summary.semanticChapters);
+}
+
+function formatPerFactionSummaries(summaries: QuestExplorerFactionSemanticSummary[]): string[] {
+    return [
+        "Per-faction semantic summaries:",
+        ...summaries.flatMap((summary) => [
+            `  ${summary.label}:`,
+            `    entries: ${summary.entries}`,
+            `    semantic chapters: ${formatSemanticChapterCount(summary)}`,
+            `    navigation chapter groups: ${summary.navigationChapterGroups}`,
+            `    setup/artifact rows: ${summary.setupArtifactRows}`,
+            `    deterministic continuations: ${summary.deterministicContinuations}`,
+            `    explicit decision groups/options: ${summary.explicitDecisionGroups}/${summary.explicitDecisionOptionRows}`,
+            `    topology forks without true_choice: ${summary.topologyForksWithoutTrueChoice}`,
+            `    grouped deterministic continuation groups: ${summary.groupedDeterministicContinuationGroups}`,
+            `    convergence rows/groups: ${summary.convergenceRows}/${summary.convergenceGroups}`,
+            `    terminal rows: ${summary.terminalRows}`,
+            `    failure links: ${summary.failureLinks}`,
+            `    unresolved continuations: ${summary.unresolvedContinuations}`,
+            `    internal variants: ${summary.internalVariants}`,
+            `    aliases: ${summary.aliases}`,
+            `    unknown classifications: ${summary.unknownClassifications}`,
+            `    notable warnings/gaps: ${summary.notableWarnings.length > 0 ? summary.notableWarnings.join("; ") : "none"}`,
+        ]),
+    ];
+}
+
 export function createQuestExplorerFrontendDiagnostic(
     questExplorer: QuestExplorerResponse,
     options: CreateQuestExplorerFrontendDiagnosticOptions = {}
@@ -473,6 +738,7 @@ export function createQuestExplorerFrontendDiagnostic(
         : entries[0] ?? null;
     const counts = categoryCounts(entries, progression);
     const canonicalCounts = semanticCounts(entries, progression);
+    const factionSummaries = perFactionSemanticSummaries(entries, progression);
     const examples = railExamples(groups);
     const findings: QuestExplorerDiagnosticFinding[] = [];
 
@@ -505,6 +771,8 @@ export function createQuestExplorerFrontendDiagnostic(
         "",
         ...formatSemanticCounts(canonicalCounts),
         "",
+        ...formatPerFactionSummaries(factionSummaries),
+        "",
         "Classified findings:",
         ...formatFinding("blocker", findings),
         ...formatFinding("warning", findings),
@@ -517,6 +785,7 @@ export function createQuestExplorerFrontendDiagnostic(
     return {
         categoryCounts: counts,
         semanticCounts: canonicalCounts,
+        perFactionSummaries: factionSummaries,
         selectedRailItem,
         railExamples: examples,
         findings,

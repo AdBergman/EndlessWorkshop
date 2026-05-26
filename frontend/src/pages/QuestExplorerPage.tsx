@@ -58,7 +58,7 @@ import {
     type QuestPathChoiceSelection,
 } from "@/features/quests/questPathFlow";
 import {
-    choicePresentationGroups,
+    stagePresentationGroups,
 } from "@/features/quests/questChoicePresentation";
 import {
     chapterPositionLabel,
@@ -590,34 +590,34 @@ function stepTitle(
     return entry?.title || step.title || entriesByKey[step.detailEntryKey]?.title || "Unknown Horizons";
 }
 
-function ChoiceStageHeading({ children }: { children: string }) {
+function StageGroupHeading({ children }: { children: string }) {
     return <h4 className="questExplorer-choiceStageHeading">{children}</h4>;
 }
 
-function StrategyChoiceButton({
+function StrategyStageButton({
     step,
     choice,
     selectedChoice,
-    selectedPathBranchKeys,
+    selectedContextBranchKeys,
     debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
     choice: QuestPathChoice;
     selectedChoice: QuestPathChoiceSelection | null;
-    selectedPathBranchKeys: Set<string>;
+    selectedContextBranchKeys: Set<string>;
     debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const isSelected = selectedChoice?.choiceId === choice.id;
-    const isInSelectedPath = !isSelected && Boolean(choice.branchKey && selectedPathBranchKeys.has(choice.branchKey));
+    const isInSelectedContext = !isSelected && Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey));
     const primaryLines = choice.strategyLines.length > 0 ? choice.strategyLines : choice.descriptionLines;
 
     return (
         <button
             type="button"
-            className={`questExplorer-choiceCard questExplorer-choiceCard--${choice.accent}${isSelected ? " is-selected" : ""}${isInSelectedPath ? " is-inPath" : ""}`}
-            aria-pressed={isSelected || isInSelectedPath}
+            className={`questExplorer-choiceCard questExplorer-choiceCard--${choice.accent}${isSelected ? " is-selected" : ""}${isInSelectedContext ? " is-inPath" : ""}`}
+            aria-pressed={isSelected || isInSelectedContext}
             aria-current={isSelected ? "true" : undefined}
             onClick={() => onChoose(step, choice)}
             key={`${step.stepKey}:${choice.id}`}
@@ -628,9 +628,9 @@ function StrategyChoiceButton({
                 <small>{choice.eyebrow}</small>
                 <strong>{choice.label}</strong>
                 {primaryLines.length > 0 ? <span>{primaryLines.join(" ")}</span> : null}
-                <InlineChoiceMeta label="Requires" values={choice.requirementLines} />
-                <InlineChoiceMeta label="Rewards" values={choice.rewardLines} />
-                <InlineChoiceMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
+                <InlineStageMeta label="Requires" values={choice.requirementLines} />
+                <InlineStageMeta label="Rewards" values={choice.rewardLines} />
+                <InlineStageMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
                 {debugChoiceDetails?.get(choice.id) ? (
                     <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(choice.id)}</span>
                 ) : null}
@@ -639,7 +639,7 @@ function StrategyChoiceButton({
     );
 }
 
-function StrategyChoiceContext({ choice }: { choice: QuestPathChoice }) {
+function StrategyStageContext({ choice }: { choice: QuestPathChoice }) {
     const primaryLines = choice.strategyLines.length > 0 ? choice.strategyLines : choice.descriptionLines;
 
     return (
@@ -649,13 +649,13 @@ function StrategyChoiceContext({ choice }: { choice: QuestPathChoice }) {
                 <small>{choice.eyebrow}</small>
                 <strong>{choice.label}</strong>
                 {primaryLines.length > 0 ? <span>{primaryLines.join(" ")}</span> : null}
-                <InlineChoiceMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
+                <InlineStageMeta label="Leads to" values={choice.continuationTitle ? [choice.continuationTitle] : []} />
             </span>
         </div>
     );
 }
 
-function StrategyChoiceGate({
+function StrategyStageGate({
     step,
     choices,
     selectedChoice,
@@ -676,30 +676,30 @@ function StrategyChoiceGate({
 }) {
     if (choices.length === 0) return null;
 
-    const presentation = choicePresentationGroups(step, choices, selectedChoice, displayEntry, entriesByKey, showRawHiddenRows);
-    const hasActionableChoices = presentation.primaryChoices.length > 0 || presentation.activeContinuationChoices.length > 0;
-    const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
+    const presentation = stagePresentationGroups(step, choices, selectedChoice, displayEntry, entriesByKey, showRawHiddenRows);
+    const hasActionableStages = presentation.primaryStages.length > 0 || presentation.activeContinuationStages.length > 0;
+    const showPrimaryHeading = presentation.activeContinuationStages.length > 0 || presentation.structuralContextStages.length > 0;
 
     return (
         <section className="questExplorer-choiceGate questExplorer-strategyChoiceGate" aria-label={`${stepPositionLabel(step)} strategy stages`}>
             <h3>Strategy stages</h3>
-            {presentation.structuralContextChoices.length > 0 ? (
+            {presentation.structuralContextStages.length > 0 ? (
                 <div className="questExplorer-choiceContextList">
-                    {presentation.structuralContextChoices.map((choice) => (
-                        <StrategyChoiceContext choice={choice} key={choice.id} />
+                    {presentation.structuralContextStages.map((choice) => (
+                        <StrategyStageContext choice={choice} key={choice.id} />
                     ))}
                 </div>
             ) : null}
-            {presentation.primaryChoices.length > 0 ? (
+            {presentation.primaryStages.length > 0 ? (
                 <div className="questExplorer-choiceStage">
-                    {showPrimaryHeading ? <ChoiceStageHeading>Available decisions</ChoiceStageHeading> : null}
+                    {showPrimaryHeading ? <StageGroupHeading>Available decisions</StageGroupHeading> : null}
                     <div>
-                        {presentation.primaryChoices.map((choice) => (
-                            <StrategyChoiceButton
+                        {presentation.primaryStages.map((choice) => (
+                            <StrategyStageButton
                                 step={step}
                                 choice={choice}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
+                                selectedContextBranchKeys={presentation.selectedContextBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
                                 key={`${step.stepKey}:${choice.id}`}
@@ -708,16 +708,16 @@ function StrategyChoiceGate({
                     </div>
                 </div>
             ) : null}
-            {presentation.activeContinuationChoices.length > 0 ? (
+            {presentation.activeContinuationStages.length > 0 ? (
                 <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    <ChoiceStageHeading>Continuations</ChoiceStageHeading>
+                    <StageGroupHeading>Continuations</StageGroupHeading>
                     <div>
-                        {presentation.activeContinuationChoices.map((choice) => (
-                            <StrategyChoiceButton
+                        {presentation.activeContinuationStages.map((choice) => (
+                            <StrategyStageButton
                                 step={step}
                                 choice={choice}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
+                                selectedContextBranchKeys={presentation.selectedContextBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
                                 key={`${step.stepKey}:${choice.id}`}
@@ -726,14 +726,14 @@ function StrategyChoiceGate({
                     </div>
                 </div>
             ) : null}
-            {!selectedChoice && hasActionableChoices ? (
+            {!selectedChoice && hasActionableStages ? (
                 <p className="questExplorer-choiceHint">Select an available decision or continuation to preview the result.</p>
             ) : null}
         </section>
     );
 }
 
-function InlineChoiceMeta({ label, values }: { label: string; values: string[] }) {
+function InlineStageMeta({ label, values }: { label: string; values: string[] }) {
     const cleanValues = values.filter(Boolean);
     if (cleanValues.length === 0) return null;
 
@@ -774,7 +774,7 @@ function StrategyStep({
     const { renderedStep, dossier, title, totalStages } = activeStage;
 
     const fallbackChoiceGate = renderedStep.choices.length > 0 ? (
-        <StrategyChoiceGate
+        <StrategyStageGate
             step={renderedStep.step}
             choices={renderedStep.choices}
             selectedChoice={renderedStep.selectedChoice}
@@ -1098,8 +1098,8 @@ export default function QuestExplorerPage() {
     ), [entries, filters.searchText, progression, selectedFaction]);
 
     const applyCanonicalNavigation = useCallback((entryKey: string) => {
-        // Future rollback/default-path inference should attach here so intentional
-        // navigation stays separate from passive Lore scroll and explicit choices.
+        // Future rollback/default navigation inference should attach here so
+        // intentional navigation stays separate from passive Lore scroll and explicit decisions.
         applyPassiveScroll(null);
         setSelectedEntryKey(entryKey);
         navigate(questPath(entryKey, mode, debugQuestProgression));

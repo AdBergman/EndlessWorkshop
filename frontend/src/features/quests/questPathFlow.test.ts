@@ -174,7 +174,7 @@ function detailProgression(
   };
 }
 
-describe("quest path flow helpers", () => {
+describe("quest flow projection helpers", () => {
   it("satisfies reveal metadata through branch keys, choice keys, or explicit branch paths", () => {
     const context: RevealContext = {
       branchKeys: new Set(["Branch_Search", "Branch_Deep"]),
@@ -216,7 +216,7 @@ describe("quest path flow helpers", () => {
     ).toBe(true);
   });
 
-  it("keeps unresolved normal-mode faction choices hidden from product choices", () => {
+  it("keeps unresolved normal-mode faction rows hidden from product stages", () => {
     const step = progressionStep(1, "Quest_Unresolved");
     const chapter = progressionChapter(1, "Opening", [step, progressionStep(2, "Quest_Next")]);
     const progression = detailProgression(chapter);

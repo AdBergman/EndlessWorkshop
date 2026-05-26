@@ -169,7 +169,7 @@ function firstChronicleStage(
 }
 
 describe("buildLoreFlowModel", () => {
-    it("claims repeated narrative ownership once while leaving later continuation choices available", () => {
+    it("claims repeated narrative ownership once while leaving later continuation stages available", () => {
         const entry = keyedContinuationEntry();
         const progression = keyedContinuationProgression();
         const model = buildLoreFlowModel({

@@ -2104,7 +2104,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("stepKey")).not.toBeInTheDocument();
     });
 
-    it("renders progression debug from the URL param without changing choice behavior", async () => {
+    it("renders progression debug from the URL param without changing decision behavior", async () => {
         const user = userEvent.setup();
         renderPage("/quests/Quest_A?debugQuestProgression=true");
 
@@ -2268,7 +2268,7 @@ describe("QuestExplorerPage", () => {
         expect(renamedStream.selectedContextKey).toBe(selectedContextKey);
     });
 
-    it("renders lore as a continuous selected-path chronicle and stops at the next unresolved choice", async () => {
+    it("renders lore as a continuous selected chronicle and stops at the next unresolved continuation", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
         renderPage("/quests/Quest_Stream_A?mode=lore");
@@ -2555,7 +2555,7 @@ describe("QuestExplorerPage", () => {
         expect(selectedResult.querySelector(".questExplorer-strategyNextStatus--converges")).not.toBeNull();
     });
 
-    it("scopes strategy content to the focused step before rendering choices", async () => {
+    it("scopes strategy content to the focused step before rendering decision and continuation stages", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
         renderPage("/quests/Quest_Scoped");
@@ -2576,7 +2576,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Coral road outcome.")).not.toBeInTheDocument();
     });
 
-    it("scopes lore content to the focused step before rendering choices", async () => {
+    it("scopes lore content to the focused step before rendering decision and continuation stages", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
         renderPage("/quests/Quest_Scoped");
@@ -2598,7 +2598,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Coral road lore remains hidden.")).not.toBeInTheDocument();
     });
 
-    it("uses choice continuity metadata to prevent same-step future lore from leaking", async () => {
+    it("uses branch continuity metadata to prevent same-step future lore from leaking", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
         renderPage("/quests/Quest_Keyed");
@@ -2625,7 +2625,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
     });
 
-    it("keeps passive setup lore scoped before carried continuation choices", async () => {
+    it("keeps passive setup lore scoped before carried continuation stages", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
         renderPage("/quests/Quest_Keyed");
 
@@ -2659,7 +2659,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getAllByRole("button", { name: /Find Pryzja/ }).length).toBeGreaterThan(0);
     });
 
-    it("uses choice continuity metadata to prevent same-step future objectives from leaking", async () => {
+    it("uses branch continuity metadata to prevent same-step future objectives from leaking", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
         renderPage("/quests/Quest_Keyed?mode=strategy");
 
@@ -2803,7 +2803,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText("Thanks to your help, we know the way back.")).toBeInTheDocument();
     });
 
-    it("changing an earlier choice resets downstream revealed content", async () => {
+    it("changing an earlier decision resets downstream revealed content", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -2897,7 +2897,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
     });
 
-    it("keeps lore choices from selecting strategy choice cards", async () => {
+    it("keeps Lore decision controls from selecting Strategy stage controls", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -3036,7 +3036,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
     });
 
-    it("hides unresolved non-final main faction choices outside debug mode", async () => {
+    it("hides unresolved non-final main faction rows outside debug mode", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(unresolvedChoicePayload);
         renderPage("/quests/Quest_A");
@@ -3049,7 +3049,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
     });
 
-    it("hides ungated continuation rows from normal choices until raw debug is requested", async () => {
+    it("hides ungated continuation rows from normal stage groups until raw debug is requested", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(ungatedContinuationPayload);
         renderPage("/quests/Quest_A?debugQuestProgression=true");
@@ -3066,7 +3066,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText(/continuation row waits for a selected branch sequence/)).toBeInTheDocument();
     });
 
-    it("keeps branch variant projections out of normal choices when entry-backed branches exist", async () => {
+    it("keeps branch variant projections out of normal stage groups when entry-backed branches exist", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(branchVariantProjectionPayload);
         renderPage("/quests/Quest_A?debugQuestProgression=true");
@@ -3083,7 +3083,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getByRole("button", { name: /Projected Future/ })).toBeInTheDocument();
     });
 
-    it("stops gracefully in debug mode when a modeled choice lacks explicit continuation keys", async () => {
+    it("stops gracefully in debug mode when a modeled row lacks explicit continuation keys", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(unresolvedChoicePayload);
         renderPage("/quests/Quest_A?debugQuestProgression=true");

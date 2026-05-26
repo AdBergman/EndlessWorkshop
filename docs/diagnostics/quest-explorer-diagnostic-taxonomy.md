@@ -21,6 +21,11 @@ Current diagnostic output should prefer canonical terms:
 - lore ownership gaps
 - objective ownership gaps
 
+Per-faction summaries should report the same taxonomy for configured major
+faction keys, plus semantic chapter counts when a progression DTO is available.
+When progression is missing, diagnostics should say that semantic chapter counts
+are unavailable instead of inferring chapters from titles or keys.
+
 Historical terms such as "choice path", "branch choice", "hidden branch",
 "Path Revealed", and "Next Choices" may still appear in legacy docs, raw DTO
 field names, or stable implementation identifiers, but they should not be

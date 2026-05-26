@@ -197,8 +197,9 @@ This audit intentionally did not:
 - change navigation, route, or state ownership
 - parse keys/titles as semantic truth
 
-## Next Step
+## Follow-Up Status
 
-The next surgical cleanup should be a diagnostics-only enhancement that can
-optionally print per-faction semantic counts for a supplied export path. That
-would make future live-export audits repeatable without temporary scripts.
+Implemented follow-up: Quest Explorer diagnostics now print per-faction
+semantic summaries for configured major faction keys. Future live-export audits
+can use `npm run diagnostics:quests -- <export-path>` without temporary scripts
+for the main faction coverage view.

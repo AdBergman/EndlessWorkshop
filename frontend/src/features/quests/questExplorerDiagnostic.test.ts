@@ -425,6 +425,37 @@ describe("quest explorer frontend diagnostic", () => {
         expect(diagnostic.reportText).toContain("convergence states: 1");
         expect(diagnostic.reportText).toContain("terminal states: 1");
         expect(diagnostic.reportText).toContain("failure states/links: 1");
+        expect(diagnostic.perFactionSummaries[0]).toEqual(expect.objectContaining({
+            label: "Kin",
+            entries: 2,
+            semanticChapters: 1,
+            navigationChapterGroups: 1,
+            setupArtifactRows: 1,
+            deterministicContinuations: 2,
+            explicitDecisionGroups: 1,
+            explicitDecisionOptionRows: 2,
+            topologyForksWithoutTrueChoice: 1,
+            groupedDeterministicContinuationGroups: 1,
+            convergenceRows: 1,
+            convergenceGroups: 1,
+            terminalRows: 1,
+            failureLinks: 1,
+            unresolvedContinuations: 1,
+            internalVariants: 1,
+            aliases: 1,
+            unknownClassifications: 0,
+            notableWarnings: [],
+        }));
+        expect(diagnostic.perFactionSummaries.find((summary) => summary.label === "Aspect")).toEqual(expect.objectContaining({
+            entries: 0,
+            semanticChapters: 0,
+            notableWarnings: ["no entries found for configured faction keys"],
+        }));
+        expect(diagnostic.reportText).toContain("Per-faction semantic summaries:");
+        expect(diagnostic.reportText).toContain("  Kin:");
+        expect(diagnostic.reportText).toContain("    explicit decision groups/options: 1/2");
+        expect(diagnostic.reportText).toContain("    convergence rows/groups: 1/1");
+        expect(diagnostic.reportText).toContain("    notable warnings/gaps: none");
         expect(diagnostic.reportText).toContain("Internal/chapter variants stay in detail/chronicle context, not rail rows (1 variant(s)).");
         expect(diagnostic.reportText).toContain("Repeated detailEntryKey Quest_Shared is represented as alias-owned projection content across 2 progression projection stage(s).");
         expect(diagnostic.reportText).toContain("Canonical semantic taxonomy summary recorded for semantic rows");
@@ -439,6 +470,12 @@ describe("quest explorer frontend diagnostic", () => {
 
         expect(diagnostic.reportText).toContain("Quest Explorer response is missing backend progression DTO semantics.");
         expect(diagnostic.reportText).toContain("Frontend progression inference symbols present: questRail.ts:inferQuestProgression");
+        expect(diagnostic.perFactionSummaries[0]).toEqual(expect.objectContaining({
+            label: "Kin",
+            semanticChapters: null,
+            notableWarnings: ["progression DTO missing; semantic chapter count unavailable"],
+        }));
+        expect(diagnostic.reportText).toContain("semantic chapters: n/a (progression DTO missing)");
         expect(diagnostic.findings.filter((finding) => finding.classification === "blocker")).toHaveLength(2);
     });
 

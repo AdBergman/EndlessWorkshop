@@ -274,7 +274,7 @@ export function buildStrategyContinuityStrip(
         const selectedDecisionChoice = selectedChoice?.semanticStageKind === "explicit_decision_option"
             ? selectedChoice
             : null;
-        const selectedPathTouchesStep = Boolean(
+        const selectedSequenceTouchesStage = Boolean(
             selectedChoice
             || renderedStep.currentBeatChoice
             || renderedStep.selectedChoice
@@ -286,10 +286,10 @@ export function buildStrategyContinuityStrip(
             kind: "step",
             eyebrow: stepDossierLabel(renderedStep),
             title: renderedStep.displayEntry?.title ?? renderedStep.step.title,
-            detail: stepStripDetail(renderedStep, selectedPathTouchesStep),
+            detail: stepStripDetail(renderedStep, selectedSequenceTouchesStage),
             markers: [],
             isCurrent: renderedStep.isActive,
-            isSelectedPath: selectedPathTouchesStep,
+            isSelectedPath: selectedSequenceTouchesStage,
             isDecisionPoint: hasDecisionPoint,
             isTerminal: false,
         });
@@ -464,9 +464,9 @@ export function buildStrategyPathStatus(
     };
 }
 
-function stepStripDetail(renderedStep: RenderedPathStep, selectedPathTouchesStep: boolean): string {
+function stepStripDetail(renderedStep: RenderedPathStep, selectedSequenceTouchesStage: boolean): string {
     if (renderedStep.isActive) return "Current stage";
-    if (selectedPathTouchesStep) return "Selected sequence stage";
+    if (selectedSequenceTouchesStage) return "Selected sequence stage";
     return "Projected stage";
 }
 
@@ -570,7 +570,7 @@ function buildBranchOptions(
     choices: QuestPathChoice[],
     entriesByKey: Record<string, QuestExplorerEntry>
 ): StrategyDossierBranchOption[] {
-    const selectedPathBranchKeys = selectedPathBranchKeysForStep(renderedStep);
+    const selectedContextBranchKeys = selectedContextBranchKeysForStep(renderedStep);
 
     return choices.map((choice): StrategyDossierBranchOption => ({
         id: choice.id,
@@ -583,7 +583,7 @@ function buildBranchOptions(
         leadsTo: leadsToForChoice(choice, entriesByKey),
         markers: markersForChoice(choice, entriesByKey),
         isSelected: renderedStep.selectedChoice?.choiceId === choice.id,
-        isInSelectedPath: Boolean(choice.branchKey && selectedPathBranchKeys.has(choice.branchKey)),
+        isInSelectedPath: Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey)),
     }));
 }
 
@@ -855,7 +855,7 @@ function choiceForSelectionInFlow(
     return null;
 }
 
-function selectedPathBranchKeysForStep(renderedStep: RenderedPathStep): Set<string> {
+function selectedContextBranchKeysForStep(renderedStep: RenderedPathStep): Set<string> {
     const selectedChoice = choiceForSelection(renderedStep, renderedStep.selectedChoice);
     return new Set([
         ...(selectedChoice?.prerequisiteBranchKeys ?? []),

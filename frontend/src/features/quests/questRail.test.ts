@@ -498,7 +498,7 @@ describe("quest rail projection", () => {
         ]);
     });
 
-    it("maps a selected hidden branch entry back through backend step variants", () => {
+    it("maps a selected internal branch entry back through backend step variants", () => {
         const parent = entry();
         const hiddenBranch = entry({
             entryKey: "FactionQuest_Mukag_Chapter02_Step02_Choice01",

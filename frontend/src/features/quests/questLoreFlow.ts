@@ -8,7 +8,7 @@ import {
     type QuestPathChoice,
     type RenderedPathStep,
 } from "@/features/quests/questPathFlow";
-import { choicePresentationGroups } from "@/features/quests/questChoicePresentation";
+import { stagePresentationGroups } from "@/features/quests/questChoicePresentation";
 import {
     claimVisibleLoreSections,
     createLoreNarrativeOwnershipTracker,
@@ -42,11 +42,11 @@ export type ChronicleChoiceItem = {
 export type ChronicleBranchMoment = {
     title: string;
     ariaNoun: string;
-    structuralContextChoices: ChronicleChoiceItem[];
+    structuralContextStages: ChronicleChoiceItem[];
     decisionChoices: ChronicleChoiceItem[];
     continuationChoices: ChronicleChoiceItem[];
     branchingContinuationChoices: ChronicleChoiceItem[];
-    selectedPathBranchKeys: Set<string>;
+    selectedContextBranchKeys: Set<string>;
     hasActionableStages: boolean;
 };
 
@@ -179,7 +179,7 @@ export function buildChronicleBranchMoment(
 ): ChronicleBranchMoment | null {
     if (renderedStep.choices.length === 0) return null;
 
-    const presentation = choicePresentationGroups(
+    const presentation = stagePresentationGroups(
         renderedStep.step,
         renderedStep.choices,
         renderedStep.selectedChoice,
@@ -188,8 +188,8 @@ export function buildChronicleBranchMoment(
         showRawHiddenRows
     );
     const chroniclePresentation = chronicleBranchPresentation(
-        presentation.primaryChoices,
-        presentation.activeContinuationChoices
+        presentation.primaryStages,
+        presentation.activeContinuationStages
     );
     const stageCount = [
         chroniclePresentation.decisionChoices.length,
@@ -198,16 +198,16 @@ export function buildChronicleBranchMoment(
     ].filter((count) => count > 0).length;
     const hasActionableStages = stageCount > 0;
 
-    if (!hasActionableStages && presentation.structuralContextChoices.length === 0) return null;
+    if (!hasActionableStages && presentation.structuralContextStages.length === 0) return null;
 
     return {
         title: chroniclePresentation.title,
         ariaNoun: chroniclePresentation.ariaNoun,
-        structuralContextChoices: presentation.structuralContextChoices.map((choice) => chronicleChoiceItem(choice, "context")),
+        structuralContextStages: presentation.structuralContextStages.map((choice) => chronicleChoiceItem(choice, "context")),
         decisionChoices: chroniclePresentation.decisionChoices.map((choice) => chronicleChoiceItem(choice, "decision")),
         continuationChoices: chroniclePresentation.continuationChoices.map((choice) => chronicleChoiceItem(choice, "continuation")),
         branchingContinuationChoices: chroniclePresentation.branchingContinuationChoices.map((choice) => chronicleChoiceItem(choice, "branching_continuation")),
-        selectedPathBranchKeys: presentation.selectedPathBranchKeys,
+        selectedContextBranchKeys: presentation.selectedContextBranchKeys,
         hasActionableStages,
     };
 }
@@ -221,26 +221,26 @@ type ChronicleBranchPresentation = {
 };
 
 function chronicleBranchPresentation(
-    primaryChoices: QuestPathChoice[],
-    activeContinuationChoices: QuestPathChoice[]
+    primaryStages: QuestPathChoice[],
+    activeContinuationStages: QuestPathChoice[]
 ): ChronicleBranchPresentation {
-    const explicitDecisionChoices = primaryChoices.filter(isExplicitChronicleDecision);
-    const topologyChoices = primaryChoices.filter(isTopologyChronicleContinuation);
-    const deterministicPrimaryChoices = primaryChoices.filter((choice) => (
+    const explicitDecisionChoices = primaryStages.filter(isExplicitChronicleDecision);
+    const topologyChoices = primaryStages.filter(isTopologyChronicleContinuation);
+    const deterministicPrimaryChoices = primaryStages.filter((choice) => (
         !isExplicitChronicleDecision(choice)
         && !isTopologyChronicleContinuation(choice)
-        && isDeterministicChronicleContinuation(choice, primaryChoices)
+        && isDeterministicChronicleContinuation(choice, primaryStages)
     ));
-    const fallbackDecisionChoices = primaryChoices.filter((choice) => (
+    const fallbackDecisionChoices = primaryStages.filter((choice) => (
         !explicitDecisionChoices.includes(choice)
         && !topologyChoices.includes(choice)
         && !deterministicPrimaryChoices.includes(choice)
     ));
-    const deterministicContinuations = activeContinuationChoices.length > 1
+    const deterministicContinuations = activeContinuationStages.length > 1
         ? []
-        : [...deterministicPrimaryChoices, ...activeContinuationChoices];
-    const branchingContinuations = activeContinuationChoices.length > 1
-        ? [...topologyChoices, ...deterministicPrimaryChoices, ...activeContinuationChoices]
+        : [...deterministicPrimaryChoices, ...activeContinuationStages];
+    const branchingContinuations = activeContinuationStages.length > 1
+        ? [...topologyChoices, ...deterministicPrimaryChoices, ...activeContinuationStages]
         : topologyChoices;
     const decisionChoices = [...explicitDecisionChoices, ...fallbackDecisionChoices];
 

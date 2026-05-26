@@ -145,7 +145,7 @@ function LoreSectionLines({ section }: { section: LoreSection }) {
     );
 }
 
-function ChoiceStageHeading({ children }: { children: string }) {
+function StageGroupHeading({ children }: { children: string }) {
     return <h4 className="questExplorer-choiceStageHeading">{children}</h4>;
 }
 
@@ -158,31 +158,31 @@ function RepeatedDetailCheckpoint() {
     );
 }
 
-function LoreChoiceButton({
+function LoreStageButton({
     step,
     choiceItem,
     selectedChoice,
-    selectedPathBranchKeys,
+    selectedContextBranchKeys,
     debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
     choiceItem: ChronicleChoiceItem;
     selectedChoice: QuestPathChoiceSelection | null;
-    selectedPathBranchKeys: Set<string>;
+    selectedContextBranchKeys: Set<string>;
     debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const { choice, stageLabel } = choiceItem;
     const isSelected = selectedChoice?.choiceId === choice.id;
-    const isInSelectedPath = !isSelected && Boolean(choice.branchKey && selectedPathBranchKeys.has(choice.branchKey));
+    const isInSelectedContext = !isSelected && Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey));
     const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
 
     return (
         <button
             type="button"
-            className={`questExplorer-loreChoice questExplorer-loreChoice--${choice.accent}${isSelected ? " is-selected" : ""}${isInSelectedPath ? " is-inPath" : ""}`}
-            aria-pressed={isSelected || isInSelectedPath}
+            className={`questExplorer-loreChoice questExplorer-loreChoice--${choice.accent}${isSelected ? " is-selected" : ""}${isInSelectedContext ? " is-inPath" : ""}`}
+            aria-pressed={isSelected || isInSelectedContext}
             aria-current={isSelected ? "true" : undefined}
             onClick={() => onChoose(step, choice)}
             key={`${step.stepKey}:${choice.id}`}
@@ -200,7 +200,7 @@ function LoreChoiceButton({
     );
 }
 
-function LoreChoiceContext({ choiceItem }: { choiceItem: ChronicleChoiceItem }) {
+function LoreStageContext({ choiceItem }: { choiceItem: ChronicleChoiceItem }) {
     const { choice, stageLabel } = choiceItem;
     const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
 
@@ -279,30 +279,30 @@ function LoreBranchMoment({
         branchMoment?.continuationChoices.length ?? 0,
         branchMoment?.branchingContinuationChoices.length ?? 0,
     ].filter((count) => count > 0).length;
-    if (!branchMoment || (!branchMoment.hasActionableStages && branchMoment.structuralContextChoices.length === 0)) return null;
+    if (!branchMoment || (!branchMoment.hasActionableStages && branchMoment.structuralContextStages.length === 0)) return null;
 
     return (
         <section className="questExplorer-loreBranchMoment" aria-label={`${stepPositionLabel(step)} ${branchMoment.ariaNoun}`}>
             <h3>{branchMoment.title}</h3>
-            {branchMoment.structuralContextChoices.length > 0 ? (
+            {branchMoment.structuralContextStages.length > 0 ? (
                 <div className="questExplorer-choiceContextList">
-                    {branchMoment.structuralContextChoices.map((choiceItem) => (
-                        <LoreChoiceContext choiceItem={choiceItem} key={choiceItem.choice.id} />
+                    {branchMoment.structuralContextStages.map((choiceItem) => (
+                        <LoreStageContext choiceItem={choiceItem} key={choiceItem.choice.id} />
                     ))}
                 </div>
             ) : null}
             {branchMoment.decisionChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage">
-                    {stageCount > 1 || branchMoment.structuralContextChoices.length > 0 ? (
-                        <ChoiceStageHeading>Decision options</ChoiceStageHeading>
+                    {stageCount > 1 || branchMoment.structuralContextStages.length > 0 ? (
+                        <StageGroupHeading>Decision options</StageGroupHeading>
                     ) : null}
                     <div>
                         {branchMoment.decisionChoices.map((choiceItem) => (
-                            <LoreChoiceButton
+                            <LoreStageButton
                                 step={step}
                                 choiceItem={choiceItem}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
+                                selectedContextBranchKeys={branchMoment.selectedContextBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
                                 key={`${step.stepKey}:${choiceItem.choice.id}`}
@@ -313,14 +313,14 @@ function LoreBranchMoment({
             ) : null}
             {branchMoment.continuationChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    {stageCount > 1 ? <ChoiceStageHeading>Continue the chronicle</ChoiceStageHeading> : null}
+                    {stageCount > 1 ? <StageGroupHeading>Continue the chronicle</StageGroupHeading> : null}
                     <div>
                         {branchMoment.continuationChoices.map((choiceItem) => (
-                            <LoreChoiceButton
+                            <LoreStageButton
                                 step={step}
                                 choiceItem={choiceItem}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
+                                selectedContextBranchKeys={branchMoment.selectedContextBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
                                 key={`${step.stepKey}:${choiceItem.choice.id}`}
@@ -331,14 +331,14 @@ function LoreBranchMoment({
             ) : null}
             {branchMoment.branchingContinuationChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    {stageCount > 1 ? <ChoiceStageHeading>Possible continuations</ChoiceStageHeading> : null}
+                    {stageCount > 1 ? <StageGroupHeading>Possible continuations</StageGroupHeading> : null}
                     <div>
                         {branchMoment.branchingContinuationChoices.map((choiceItem) => (
-                            <LoreChoiceButton
+                            <LoreStageButton
                                 step={step}
                                 choiceItem={choiceItem}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
+                                selectedContextBranchKeys={branchMoment.selectedContextBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
                                 key={`${step.stepKey}:${choiceItem.choice.id}`}

@@ -92,8 +92,9 @@ export function classifyQuestSemanticStage(
     row: QuestSemanticStageRow,
     context: QuestSemanticStageContext = {}
 ): QuestSemanticStageKind {
-    // Keep this vocabulary additive: rendering still uses the existing path flow,
-    // while future adapters can stop treating every row as step -> choice -> step.
+    // Keep this vocabulary additive: rendering still uses the existing flow,
+    // while adapters classify rows before treating them as tasks, decisions,
+    // continuations, or topology artifacts.
     if (context.isInternalVariant) return "internal_variant";
 
     const role = cleanRole(row.sectionRole);
