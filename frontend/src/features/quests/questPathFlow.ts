@@ -125,6 +125,7 @@ export type RenderedPathStep = {
     displayEntry: QuestExplorerEntry | null;
     choices: QuestPathChoice[];
     revealedContinuations: QuestPathChoice[];
+    autoContinuedChoices: QuestPathChoice[];
     currentBeatChoice: QuestPathChoiceSelection | null;
     selectedChoice: QuestPathChoiceSelection | null;
     choiceDiagnostics: ChoiceVisibilityDiagnostics;
@@ -470,6 +471,67 @@ export function isSameProgressionChapter(
         (left.questline.questLineFamilyKey ?? left.questline.questLineKey) === (right.questline.questLineFamilyKey ?? right.questline.questLineKey)
         && (left.questline.factionFamilyKey ?? left.questline.factionKey) === (right.questline.factionFamilyKey ?? right.questline.factionKey)
         && (left.chapter.chapterOrder ?? left.chapter.chapterNumber ?? left.chapter.title) === (right.chapter.chapterOrder ?? right.chapter.chapterNumber ?? right.chapter.title)
+    );
+}
+
+export function nextProgressionChapterLocation(
+    progression: QuestDetailProgression,
+    fullProgression: QuestExplorerProgression | null
+): QuestProgressionLocation | null {
+    const questline = matchingProgressionQuestline(progression, fullProgression) ?? progression.questline;
+    const chapterIndex = questline.chapters.findIndex((chapter) => progressionChapterMatches(chapter, progression.chapter));
+    if (chapterIndex < 0) return null;
+
+    const currentOrder = progression.chapter.chapterOrder ?? progression.chapter.chapterNumber;
+    for (let index = chapterIndex + 1; index < questline.chapters.length; index += 1) {
+        const chapter = questline.chapters[index];
+        const step = chapter.steps[0] ?? null;
+        if (!step) continue;
+
+        const nextOrder = chapter.chapterOrder ?? chapter.chapterNumber;
+        if (currentOrder != null && nextOrder != null && nextOrder !== currentOrder + 1) {
+            return null;
+        }
+
+        return {
+            questline,
+            chapter,
+            step,
+            stepIndex: 0,
+        };
+    }
+
+    return null;
+}
+
+function matchingProgressionQuestline(
+    progression: QuestDetailProgression,
+    fullProgression: QuestExplorerProgression | null
+): QuestProgressionQuestline | null {
+    if (!fullProgression) return null;
+
+    const questlineKey = progression.questline.questLineFamilyKey ?? progression.questline.questLineKey;
+    const factionKey = progression.questline.factionFamilyKey ?? progression.questline.factionKey;
+
+    return fullProgression.questlines.find((candidate) => {
+        const candidateQuestlineKey = candidate.questLineFamilyKey ?? candidate.questLineKey;
+        const candidateFactionKey = candidate.factionFamilyKey ?? candidate.factionKey;
+        return (!questlineKey || candidateQuestlineKey === questlineKey)
+            && (!factionKey || candidateFactionKey === factionKey);
+    }) ?? null;
+}
+
+function progressionChapterMatches(
+    candidate: QuestProgressionChapter,
+    selected: QuestProgressionChapter
+): boolean {
+    const selectedStepKeys = new Set(selected.steps.map((step) => step.stepKey));
+    if (candidate.steps.some((step) => selectedStepKeys.has(step.stepKey))) return true;
+
+    return (
+        (candidate.chapterOrder ?? candidate.chapterNumber ?? candidate.title)
+        === (selected.chapterOrder ?? selected.chapterNumber ?? selected.title)
+        && candidate.title === selected.title
     );
 }
 
@@ -1098,6 +1160,114 @@ function passiveSetupAdvance(
     return followUpStepIndex == null ? null : { selection, followUpStepIndex };
 }
 
+type PassiveDeterministicChapterExit = {
+    choices: QuestPathChoice[];
+    selection: QuestPathChoiceSelection;
+    revealContext: RevealContext;
+    targetEntryKey: string;
+};
+
+function passiveDeterministicChapterExit(
+    step: QuestProgressionStep,
+    choices: QuestPathChoice[],
+    rawChoices: QuestPathChoice[],
+    progression: QuestDetailProgression,
+    fullProgression: QuestExplorerProgression | null,
+    revealContext: RevealContext
+): PassiveDeterministicChapterExit | null {
+    if (progression.chapter.steps.length !== 1) return null;
+
+    const nextLocation = nextProgressionChapterLocation(progression, fullProgression);
+    const targetEntryKey = nextLocation?.step.detailEntryKey ?? null;
+    if (!targetEntryKey) return null;
+
+    const consumedChoices: QuestPathChoice[] = [];
+    const consumedIds = new Set<string>();
+    const passiveRevealContext = cloneRevealContext(revealContext);
+    let latestSelection: QuestPathChoiceSelection | null = null;
+
+    while (true) {
+        const candidatePool = consumedChoices.length === 0
+            ? choices
+            : rawChoices.filter((choice) => choicePrerequisitesSatisfied(choice, passiveRevealContext));
+        const candidates = candidatePool
+            .filter((choice) => !consumedIds.has(choice.id))
+            .filter(isPassiveDeterministicNoLinkChoice)
+            .filter((choice) => isNextPassiveChainChoice(choice, latestSelection))
+            .sort((left, right) => (left.branchStepOrder ?? 0) - (right.branchStepOrder ?? 0));
+
+        if (candidates.length === 0) break;
+        if (candidates.length > 1) return null;
+
+        const choice = candidates[0];
+        const selection = passiveSelectionForChoice(step.stepKey, choice);
+        consumedChoices.push(choice);
+        consumedIds.add(choice.id);
+        addSelectionToRevealContext(passiveRevealContext, selection);
+        latestSelection = selection;
+    }
+
+    if (consumedChoices.length <= 1 || !latestSelection) return null;
+
+    return {
+        choices: consumedChoices,
+        selection: latestSelection,
+        revealContext: passiveRevealContext,
+        targetEntryKey,
+    };
+}
+
+function isPassiveDeterministicNoLinkChoice(choice: QuestPathChoice): boolean {
+    return Boolean(
+        choice.branchKey
+        && choice.branchStepOrder != null
+        && choiceHasNoExplicitLink(choice)
+        && choice.failureEntryKeys.length === 0
+        && choice.convergesIntoEntryKeys.length === 0
+        && (choice.sectionRole === "artifact" || choice.sectionRole === "continuation")
+    );
+}
+
+function isNextPassiveChainChoice(
+    choice: QuestPathChoice,
+    latestSelection: QuestPathChoiceSelection | null
+): boolean {
+    if (!latestSelection) return true;
+    if (!latestSelection.branchKey) return false;
+    return choice.parentBranchKey === latestSelection.branchKey
+        || choice.prerequisiteBranchKeys.includes(latestSelection.branchKey);
+}
+
+function diagnosticsWithPassiveChain(
+    diagnostics: ChoiceVisibilityDiagnostics,
+    choices: QuestPathChoice[]
+): ChoiceVisibilityDiagnostics {
+    const hiddenReasonsByChoiceId = new Map(diagnostics.hiddenReasonsByChoiceId);
+    let newlyHidden = 0;
+    let newlyHiddenArtifacts = 0;
+    let newlyHiddenContinuations = 0;
+
+    choices.forEach((choice) => {
+        if (!hiddenReasonsByChoiceId.has(choice.id)) {
+            newlyHidden += 1;
+            if (choice.sectionRole === "artifact") newlyHiddenArtifacts += 1;
+            if (choice.sectionRole === "continuation") newlyHiddenContinuations += 1;
+        }
+        hiddenReasonsByChoiceId.set(choice.id, {
+            category: choice.sectionRole === "artifact" ? "artifact" : "continuation",
+            message: "passive deterministic tutorial chain before next chapter",
+        });
+    });
+
+    return {
+        ...diagnostics,
+        normalVisibleChoiceCount: Math.max(0, diagnostics.normalVisibleChoiceCount - newlyHidden),
+        hiddenArtifactCount: diagnostics.hiddenArtifactCount + newlyHiddenArtifacts,
+        hiddenContinuationCount: diagnostics.hiddenContinuationCount + newlyHiddenContinuations,
+        hiddenReasonsByChoiceId,
+    };
+}
+
 export function buildQuestPathFlow(
     progression: QuestDetailProgression,
     entriesByKey: Record<string, QuestExplorerEntry>,
@@ -1227,7 +1397,20 @@ export function buildQuestPathFlow(
                 stepRevealContext
             )
             : null;
+        const deterministicChapterExit = !options.showRawHiddenRows && !selectedChoice && !currentBeatChoice
+            ? passiveDeterministicChapterExit(
+                step,
+                choices,
+                rawChoices,
+                progression,
+                fullProgression,
+                stepRevealContext
+            )
+            : null;
         const passiveChoiceId = passiveAdvance?.selection.choiceId ?? null;
+        if (deterministicChapterExit) {
+            choiceDiagnostics = diagnosticsWithPassiveChain(choiceDiagnostics, deterministicChapterExit.choices);
+        }
         if (passiveChoiceId && !choiceDiagnostics.hiddenReasonsByChoiceId.has(passiveChoiceId)) {
             choiceDiagnostics = {
                 ...choiceDiagnostics,
@@ -1247,15 +1430,18 @@ export function buildQuestPathFlow(
             && choice.id !== currentBeatChoiceId
             && choice.id !== passiveChoiceId
         ));
-        const displayedRevealedContinuations = revealedContinuations.filter((choice) => !activeFollowUpContinuationIds.has(choice.id));
-        const renderedBeatChoice = currentBeatChoice ?? passiveAdvance?.selection ?? null;
+        const displayedRevealedContinuations = deterministicChapterExit
+            ? []
+            : revealedContinuations.filter((choice) => !activeFollowUpContinuationIds.has(choice.id));
+        const renderedBeatChoice = deterministicChapterExit?.selection ?? currentBeatChoice ?? passiveAdvance?.selection ?? null;
 
         renderedSteps.push({
             step,
             stepIndex: index,
             displayEntry,
-            choices: actionableChoices,
+            choices: deterministicChapterExit ? [] : actionableChoices,
             revealedContinuations: displayedRevealedContinuations,
+            autoContinuedChoices: deterministicChapterExit?.choices ?? [],
             currentBeatChoice: renderedBeatChoice,
             selectedChoice,
             choiceDiagnostics,
@@ -1263,11 +1449,16 @@ export function buildQuestPathFlow(
             repeatsDetailEntry,
             rendersRepeatedDetailContent,
             revealedContinuationsBecomeSteps,
-            revealContext: stepRevealContext,
+            revealContext: deterministicChapterExit?.revealContext ?? stepRevealContext,
         });
 
         if (!rendersRepeatedDetailContent) {
             renderedDetailKeys.add(step.detailEntryKey);
+        }
+
+        if (deterministicChapterExit) {
+            reachedContinuationEntryKey = deterministicChapterExit.targetEntryKey;
+            break;
         }
 
         const lockCandidateChoiceCount = options.showRawHiddenRows ? rawChoices.length : prerequisiteEligibleChoices.length;

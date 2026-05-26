@@ -394,18 +394,6 @@ export function buildStrategyPathStatus(
     const hasSelectedPath = selectedChoices.length > 0;
     const hasPendingTerminalChoice = Boolean(terminalStep && terminalStep.choices.length > 0 && !terminalStep.selectedChoice);
 
-    if (!hasSelectedPath) {
-        return {
-            kind: "awaiting-choice",
-            label: "Awaiting Choice",
-            title: "Choose a path to simulate",
-            description: "Select a decision option to reveal the next strategic outcome for this chapter.",
-            choiceLabel: null,
-            targetLabel: null,
-            markers: [],
-        };
-    }
-
     if (failureMarker) {
         return {
             kind: "failure",
@@ -457,6 +445,18 @@ export function buildStrategyPathStatus(
             choiceLabel: statusChoice?.label ?? null,
             targetLabel,
             markers: markersForEntryKeys("leads", "Leads To", [flow.reachedContinuationEntryKey], entriesByKey),
+        };
+    }
+
+    if (!hasSelectedPath) {
+        return {
+            kind: "awaiting-choice",
+            label: "Awaiting Choice",
+            title: "Choose a path to simulate",
+            description: "Select a decision option to reveal the next strategic outcome for this chapter.",
+            choiceLabel: null,
+            targetLabel: null,
+            markers: [],
         };
     }
 
@@ -905,7 +905,7 @@ function choiceForSelection(
     selection: QuestPathChoiceSelection | null
 ): QuestPathChoice | null {
     if (!selection) return null;
-    return [...renderedStep.choices, ...renderedStep.revealedContinuations]
+    return [...renderedStep.choices, ...renderedStep.revealedContinuations, ...renderedStep.autoContinuedChoices]
         .find((choice) => choiceMatchesSelection(choice, selection))
         ?? null;
 }

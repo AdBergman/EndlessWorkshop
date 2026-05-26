@@ -454,6 +454,83 @@ describe("quest flow projection helpers", () => {
     expect(afterTerminalChoice.unresolvedContinuation?.choiceId).toBe(allies.id);
   });
 
+  it("auto-collapses single-step deterministic tutorial chains into the next projected chapter", () => {
+    const tutorialStep = {
+      ...progressionStep(1, "Quest_Tutorial"),
+      stepKey: "QuestLine_Test:chapter-0:step-1",
+    };
+    const chapterOneStep = {
+      ...progressionStep(1, "Quest_Chapter1"),
+      stepKey: "QuestLine_Test:chapter-1:step-1",
+    };
+    const tutorialChapter = progressionChapter(0, "Tutorial", [tutorialStep]);
+    const chapterOne = progressionChapter(1, "Chapter 1", [chapterOneStep]);
+    const progression = detailProgression(tutorialChapter);
+    const fullProgression = questlineProgression([tutorialChapter, chapterOne]);
+    const entry = questEntry({
+      entryKey: "Quest_Tutorial",
+      branches: [
+        questBranch({
+          branchKey: "Branch_FoundHome",
+          label: "Found a home",
+          sectionRole: "artifact",
+          branchStepOrder: 1,
+        }),
+        questBranch({
+          branchKey: "Branch_Rebuild",
+          label: "Start rebuilding",
+          sectionRole: "continuation",
+          branchStepOrder: 2,
+          parentBranchKey: "Branch_FoundHome",
+          prerequisiteBranchKeys: ["Branch_FoundHome"],
+        }),
+        questBranch({
+          branchKey: "Branch_Allies",
+          label: "Find allies",
+          sectionRole: "continuation",
+          branchStepOrder: 3,
+          parentBranchKey: "Branch_Rebuild",
+          prerequisiteBranchKeys: ["Branch_FoundHome", "Branch_Rebuild"],
+        }),
+      ],
+    });
+    const nextEntry = questEntry({
+      entryKey: "Quest_Chapter1",
+      title: "The Missing Youth",
+    });
+    const entriesByKey = {
+      [entry.entryKey]: entry,
+      [nextEntry.entryKey]: nextEntry,
+    };
+
+    const flow = buildQuestPathFlow(progression, entriesByKey, [], fullProgression, {
+      focusedStepIndex: 0,
+      showRawHiddenRows: false,
+    });
+
+    expect(flow.renderedSteps).toHaveLength(1);
+    expect(flow.renderedSteps[0].choices).toHaveLength(0);
+    expect(flow.renderedSteps[0].autoContinuedChoices.map((choice) => choice.label)).toEqual([
+      "Found a home",
+      "Start rebuilding",
+      "Find allies",
+    ]);
+    expect(flow.reachedContinuationEntryKey).toBe("Quest_Chapter1");
+    expect(flow.unresolvedContinuation).toBeNull();
+
+    const rawFlow = buildQuestPathFlow(progression, entriesByKey, [], fullProgression, {
+      focusedStepIndex: 0,
+      showRawHiddenRows: true,
+    });
+
+    expect(rawFlow.renderedSteps[0].choices.map((choice) => choice.label)).toEqual([
+      "Found a home",
+      "Start rebuilding",
+      "Find allies",
+    ]);
+    expect(rawFlow.reachedContinuationEntryKey).toBeNull();
+  });
+
   it("passes artifact setup gates to the dependent decision step", () => {
     const firstStep = progressionStep(1, "Quest_SetupGate");
     const secondStep = progressionStep(2, "Quest_SetupGate");

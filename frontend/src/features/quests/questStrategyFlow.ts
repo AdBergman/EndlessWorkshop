@@ -7,6 +7,7 @@ import {
     hiddenNoLinkArtifactReason,
     hiddenUngatedContinuationReason,
     hiddenUnresolvedReason,
+    nextProgressionChapterLocation,
     stepIndexForBranchStepOrder,
     uniqueStrings,
     type QuestDetailProgression,
@@ -24,11 +25,13 @@ import {
     buildStrategyBranchOptions,
     buildStrategyDossierObjectives,
     buildStrategyDossierModel,
+    buildStrategyPathStatus,
     strategyComparisonGroupId,
     strategyComparisonGroupLabel,
     type StrategyDossierBranchOption,
     type StrategyDossierModel,
     type StrategyDossierObjective,
+    type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
 import type { QuestSemanticStageKind } from "@/features/quests/questSemanticStages";
 import {
@@ -105,6 +108,7 @@ export type StrategyChapterTask = {
     };
     status: StrategyChapterTaskStatus;
     option: StrategyDossierBranchOption | null;
+    continuationStatus: StrategyPathStatus | null;
 };
 
 export type StrategyDecisionPointKind =
@@ -181,6 +185,7 @@ export function buildStrategyFlowModel({
     const totalSteps = progression.chapter.steps.length;
     const chapterPlan = buildStrategyChapterPlan({
         progression,
+        fullProgression,
         entriesByKey,
         flow,
         choicePath,
@@ -297,6 +302,7 @@ type StrategyRevealContext = {
 
 function buildStrategyChapterPlan({
     progression,
+    fullProgression,
     entriesByKey,
     flow,
     choicePath,
@@ -304,6 +310,7 @@ function buildStrategyChapterPlan({
     getStepTitle,
 }: {
     progression: QuestDetailProgression;
+    fullProgression: QuestExplorerProgression | null;
     entriesByKey: Record<string, QuestExplorerEntry>;
     flow: QuestPathFlow;
     choicePath: QuestPathChoiceSelection[];
@@ -320,6 +327,16 @@ function buildStrategyChapterPlan({
     const activeStageOrder = flow.renderedSteps.at(-1)?.stepIndex != null
         ? flow.renderedSteps.at(-1)!.stepIndex + 1
         : Math.min(Math.max(progression.focusedStepIndex + 1, 1), Math.max(stageCount, 1));
+    const flowPathStatus = buildStrategyPathStatus(flow, entriesByKey);
+    const autoContinuedBranchKeys = new Set(
+        flow.renderedSteps.flatMap((renderedStep) => (
+            renderedStep.autoContinuedChoices.map((choice) => choice.branchKey).filter((branchKey): branchKey is string => Boolean(branchKey))
+        ))
+    );
+    const inferredNextChapter = nextProgressionChapterLocation(progression, fullProgression);
+    const autoContinuedChapterExitStatus = flowPathStatus.kind === "chapter-exit" && inferredNextChapter
+        ? flowPathStatus
+        : null;
 
     const chapterTasks = stageContexts
         .map((stage): StrategyChapterTask | null => {
@@ -376,6 +393,7 @@ function buildStrategyChapterPlan({
                 },
                 status: taskStatusForStage(stageOrder, activeStageOrder, taskOption),
                 option: taskOption,
+                continuationStatus: taskContinuationStatus(taskOption, autoContinuedBranchKeys, autoContinuedChapterExitStatus),
             };
         })
         .filter((task): task is StrategyChapterTask => Boolean(task));
@@ -748,6 +766,7 @@ function syntheticRenderedStep({
         displayEntry,
         choices,
         revealedContinuations: [],
+        autoContinuedChoices: [],
         currentBeatChoice: null,
         selectedChoice,
         choiceDiagnostics: {
@@ -935,6 +954,17 @@ function taskStatusForStage(
     if (option?.isSelected || stageOrder === activeStageOrder) return "selected";
     if (stageOrder > activeStageOrder) return "preview";
     return "available";
+}
+
+function taskContinuationStatus(
+    option: StrategyDossierBranchOption | null,
+    autoContinuedBranchKeys: Set<string>,
+    autoContinuedChapterExitStatus: StrategyPathStatus | null
+): StrategyPathStatus | null {
+    if (!option?.choice.branchKey || !autoContinuedChapterExitStatus) return null;
+    return autoContinuedBranchKeys.has(option.choice.branchKey)
+        ? autoContinuedChapterExitStatus
+        : null;
 }
 
 function continuationPreviewForFlow(flow: QuestPathFlow): StrategyContinuationPreview {

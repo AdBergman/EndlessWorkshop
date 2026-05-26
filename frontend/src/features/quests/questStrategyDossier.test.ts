@@ -201,6 +201,7 @@ function renderedStep({
     displayEntry,
     choices,
     revealedContinuations,
+    autoContinuedChoices: [],
     currentBeatChoice: null,
     selectedChoice: selectedChoice ? selectionForChoice(step.stepKey, selectedChoice) : null,
     choiceDiagnostics: emptyChoiceDiagnostics(choices.length),

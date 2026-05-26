@@ -43,6 +43,14 @@ function contextForChoice(choice: QuestPathChoice | QuestPathChoiceSelection): R
 }
 
 function readerCurrentChoiceContextsForStep(renderedStep: RenderedPathStep): ReaderChoiceContext[] {
+    if (renderedStep.autoContinuedChoices.length > 0) {
+        return uniqueReaderChoiceContexts(
+            renderedStep.autoContinuedChoices
+                .map(contextForChoice)
+                .filter((context): context is ReaderChoiceContext => Boolean(context))
+        );
+    }
+
     const currentBeatContext = renderedStep.currentBeatChoice
         ? contextForChoice(renderedStep.currentBeatChoice)
         : null;

@@ -136,7 +136,9 @@ function StrategyChapterTaskBlock({
     task: StrategyChapterTask;
     debugChoiceDetails?: Map<string, string>;
 }) {
-    const nextStatus = task.option ? nextStatusContentForOption(task.option) : null;
+    const nextStatus = task.continuationStatus
+        ? nextStatusContentForPathStatus(task.continuationStatus)
+        : task.option ? nextStatusContentForOption(task.option) : null;
     const showCompactStatus = nextStatus && nextStatus.kind !== "complete";
 
     return (

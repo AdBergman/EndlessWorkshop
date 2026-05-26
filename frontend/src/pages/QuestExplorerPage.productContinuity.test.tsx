@@ -203,6 +203,7 @@ function questline(
 }
 
 const kinCh0 = "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01";
+const kinCh1 = "FactionQuest_KinOfSheredyn_Chapter01_Step01";
 const kinCh4 = "FactionQuest_KinOfSheredyn_Chapter04_Step01";
 const necroCh3 = "FactionQuest_Necrophage_Chapter03_Step01";
 const mukagCh2 = "FactionQuest_Mukag_Chapter02_Step01";
@@ -255,6 +256,16 @@ const productContinuityPayload: QuestExplorerResponse = {
                     conditions: ["Assimilate 1 minor faction"],
                 }),
             ],
+        }),
+        productEntry({
+            entryKey: kinCh1,
+            title: "The Missing Youth",
+            factionKey: "Faction_KinOfSheredyn",
+            questLineKey: "FactionQuest_KinOfSheredyn",
+            chapterOrder: 1,
+            stepOrder: 0,
+            sequenceIndex: 10,
+            previousEntryKeys: [kinCh0],
         }),
         productEntry({
             entryKey: kinCh4,
@@ -679,6 +690,9 @@ const productContinuityPayload: QuestExplorerResponse = {
                 chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 0, "Tutorial", [
                     { stepNumber: 1, stepOrder: 0, title: "A New Home", detailEntryKey: kinCh0 },
                 ]),
+                chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 1, "The Missing Youth", [
+                    { stepNumber: 1, stepOrder: 0, title: "The Missing Youth", detailEntryKey: kinCh1 },
+                ]),
                 chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 4, "The Hunt", [
                     { stepNumber: 1, stepOrder: 0, title: "The Hunt", detailEntryKey: kinCh4 },
                     {
@@ -829,24 +843,26 @@ describe("QuestExplorerPage product continuity fixture", () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(productContinuityPayload);
     });
 
-    it("lets Kin Ch0 Lore advance through same-entry continuation beats", async () => {
+    it("lets Kin Ch0 Lore read the deterministic tutorial chain without repeated clicks", async () => {
         const user = userEvent.setup();
         renderProductQuest(kinCh0, Faction.KIN, "kin", true);
 
         expect(await screen.findByRole("heading", { name: "A New Home" })).toBeInTheDocument();
-        expect(within(chronicle()).getByRole("button", { name: /Found a home for the surviving Kin/ })).toBeInTheDocument();
+        expect(queryChronicleButton(/Found a home for the surviving Kin/)).not.toBeInTheDocument();
         expect(queryChronicleButton(/Start the task of rebuilding/)).not.toBeInTheDocument();
+        expect(queryChronicleButton(/Find local allies/)).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("Found a home for the surviving Kin.")).toBeInTheDocument();
+        expect(within(chronicle()).getByText("Start the task of rebuilding your Empire.")).toBeInTheDocument();
+        expect(within(chronicle()).getByText("Find local allies to join your ranks.")).toBeInTheDocument();
+        expect(within(chronicle()).getByText("The Missing Youth")).toBeInTheDocument();
+        expect(within(chronicle()).queryByText("Chronicle pauses")).not.toBeInTheDocument();
+        expect(debugValue("reached continuation entry")).toBe(kinCh1);
 
-        await user.click(within(chronicle()).getByRole("button", { name: /Found a home for the surviving Kin/ }));
+        await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
+        expect(within(chronicle()).getByRole("button", { name: /Found a home for the surviving Kin/ })).toBeInTheDocument();
         expect(within(chronicle()).getByRole("button", { name: /Start the task of rebuilding your Empire/ })).toBeInTheDocument();
-        expect(screen.queryByText("Continuation revealed")).not.toBeInTheDocument();
-        expect(debugValue("active branch sequence")).toContain(`${kinCh0}:branch:1`);
-
-        await user.click(within(chronicle()).getByRole("button", { name: /Start the task of rebuilding your Empire/ }));
-
         expect(within(chronicle()).getByRole("button", { name: /Find local allies to join your ranks/ })).toBeInTheDocument();
-        expect(debugValue("active branch sequence")).toContain(`${kinCh0}:branch:1, ${kinCh0}:branch:2`);
     });
 
     it("renders Kin Ch0 Strategy as a chapter-plan task without duplicate projected requirements", async () => {
@@ -867,6 +883,8 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(within(currentTask).queryByText("Required Path")).not.toBeInTheDocument();
         expect(within(currentTask).getByText(/Found a home for the surviving Kin/)).toBeInTheDocument();
         expect(within(currentTask).getByText("Continuation")).toBeInTheDocument();
+        expect(within(currentTask).getByText("Continues in Chapter 1: The Missing Youth")).toBeInTheDocument();
+        expect(within(currentTask).queryByText("Continues in this chapter")).not.toBeInTheDocument();
         expect(within(currentTask).queryByText("Projected Requirements")).not.toBeInTheDocument();
         expect(within(currentTask).queryByText("Projected Rewards")).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("button", { name: /Found a home for the surviving Kin/ })).not.toBeInTheDocument();

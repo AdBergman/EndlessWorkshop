@@ -177,7 +177,19 @@ export function buildChronicleBranchMoment(
     entriesByKey: Record<string, QuestExplorerEntry>,
     showRawHiddenRows: boolean
 ): ChronicleBranchMoment | null {
-    if (renderedStep.choices.length === 0) return null;
+    if (renderedStep.choices.length === 0) {
+        if (renderedStep.autoContinuedChoices.length === 0) return null;
+        return {
+            title: "Continue the chronicle",
+            ariaNoun: "chronicle continuation",
+            structuralContextStages: renderedStep.autoContinuedChoices.map(chronicleAutoContinuedChoiceItem),
+            decisionChoices: [],
+            continuationChoices: [],
+            branchingContinuationChoices: [],
+            selectedContextBranchKeys: new Set(),
+            hasActionableStages: false,
+        };
+    }
 
     const presentation = stagePresentationGroups(
         renderedStep.step,
@@ -298,6 +310,14 @@ function chronicleChoiceItem(choice: QuestPathChoice, tone: ChronicleChoiceTone)
         choice,
         tone,
         stageLabel: chronicleStageLabel(choice, tone),
+    };
+}
+
+function chronicleAutoContinuedChoiceItem(choice: QuestPathChoice): ChronicleChoiceItem {
+    return {
+        choice,
+        tone: "context",
+        stageLabel: chronicleStageLabel(choice, "continuation"),
     };
 }
 
