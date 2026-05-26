@@ -125,9 +125,9 @@ function modelForOptions(
     projectedOutcome: StrategyDossierModel["projectedOutcome"],
     pathStatus: StrategyDossierModel["pathStatus"] = {
         kind: "complete",
-        label: "Complete",
-        title: "No further modeled decision",
-        description: "No further modeled decision in this chapter.",
+        label: "Final Outcome",
+        title: "Story currently ends here",
+        description: "No later quest step is recorded for this path in the current archive.",
         choiceLabel: options.find((option) => option.isSelected)?.label ?? null,
         targetLabel: null,
         markers: [],
@@ -240,9 +240,11 @@ describe("StrategyDossier", () => {
             objectives: [],
         }));
 
-        const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge leads to" });
+        const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge completes this path" });
         expect(screen.getByRole("region", { name: "Choose a path" })).toBeInTheDocument();
-        expect(within(choiceResult).getByRole("heading", { name: "Choosing Hold the ridge leads to..." })).toBeInTheDocument();
+        expect(within(choiceResult).getByRole("heading", { name: "Choosing Hold the ridge completes this path" })).toBeInTheDocument();
+        expect(within(choiceResult).getByText("Final outcome")).toBeInTheDocument();
+        expect(within(choiceResult).getByText("Story currently ends here")).toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Selected Simulation" })).not.toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
@@ -256,6 +258,48 @@ describe("StrategyDossier", () => {
         expect(within(selectedOptionButton).queryByText("No further continuation is recorded")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Requirements")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Rewards")).not.toBeInTheDocument();
+    });
+
+    it("omits empty branch result panels when same-chapter continuation status is suppressed", () => {
+        const selectedOption = branchOption();
+        const compareOption = branchOption({
+            choice: choice({
+                id: "choice-b",
+                branchKey: "Branch_B",
+                choiceKey: "Choice_B",
+                label: "Circle wide",
+                strategyLines: ["Circle wide."],
+                requirementLines: ["Spend scouts."],
+                rewardLines: ["Gain time."],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions(
+            [selectedOption, compareOption],
+            {
+                title: "Hold the ridge",
+                lines: ["Hold the ridge."],
+                requirements: selectedOption.requirements,
+                requirementDetails: selectedOption.requirementDetails,
+                rewards: selectedOption.rewards,
+                rewardDetails: selectedOption.rewardDetails,
+                objectives: [],
+            },
+            {
+                kind: "continues-in-chapter",
+                label: "Continues",
+                title: "Selected sequence reaches another decision in this chapter",
+                description: "Continue simulation from Step 2.",
+                choiceLabel: selectedOption.label,
+                targetLabel: "Step 2: Follow-up",
+                markers: [],
+            }
+        ));
+
+        expect(screen.queryByRole("region", { name: "Choosing Hold the ridge leads to" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Choosing Hold the ridge" })).not.toBeInTheDocument();
     });
 
     it("renders formula text as secondary Strategy reward detail without duplicating projected rewards", () => {
@@ -293,7 +337,7 @@ describe("StrategyDossier", () => {
         }));
 
         const selectedOptionButton = screen.getByRole("button", { name: /Hold the ridge/ });
-        const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge leads to" });
+        const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge completes this path" });
 
         expect(within(selectedOptionButton).getByText("Gain Dust based on technology era.")).toBeInTheDocument();
         expect(within(selectedOptionButton).getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();

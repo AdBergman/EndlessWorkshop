@@ -352,7 +352,9 @@ function buildStrategyChapterPlan({
                     selectedChoice: selectedSelectionForChoices(step, choices, selectedByStepKey),
                     isActive: progression.activeStepKeys.has(step.stepKey),
                 });
-            const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey);
+            const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey, {
+                unresolvedChoiceIds: unresolvedChoiceIdsForStage(choices, displayEntry, progression),
+            });
             const decisionOptions = decisionPointChoicesForStage(options, showRawHiddenRows);
             const decisionOptionIds = new Set(decisionOptions.map((option) => option.id));
             const decisionChoiceKeys = new Set(
@@ -417,7 +419,9 @@ function buildStrategyChapterPlan({
                 selectedChoice: selectedSelectionForChoices(step, choices, selectedByStepKey),
                 isActive: progression.activeStepKeys.has(step.stepKey),
             });
-        const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey);
+        const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey, {
+            unresolvedChoiceIds: unresolvedChoiceIdsForStage(choices, displayEntry, progression),
+        });
         const dossier = buildStrategyDossierModel({
             renderedStep,
             totalSteps: stageCount,
@@ -853,6 +857,20 @@ function choiceMatchesSelection(choice: QuestPathChoice, selection: QuestPathCho
     return choice.id === selection.choiceId
         || Boolean(selection.branchKey && choice.branchKey === selection.branchKey)
         || Boolean(selection.choiceKey && choice.choiceKey === selection.choiceKey);
+}
+
+function unresolvedChoiceIdsForStage(
+    choices: QuestPathChoice[],
+    displayEntry: QuestExplorerEntry | null,
+    progression: QuestDetailProgression
+): ReadonlySet<string> {
+    const unresolvedChoiceIds = new Set<string>();
+    choices.forEach((choice) => {
+        if (hiddenUnresolvedReason(choice, displayEntry, progression)?.category === "unresolved") {
+            unresolvedChoiceIds.add(choice.id);
+        }
+    });
+    return unresolvedChoiceIds;
 }
 
 function decisionPointChoicesForStage(

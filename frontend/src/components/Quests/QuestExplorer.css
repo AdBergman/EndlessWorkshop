@@ -1484,7 +1484,21 @@
     color: var(--quest-gold-bright);
 }
 
-.questExplorer-strategyNextStatus--complete > span,
+.questExplorer-strategyNextChip--complete {
+    border-color: rgba(208, 162, 74, 0.34);
+    background: rgba(208, 162, 74, 0.06);
+}
+
+.questExplorer-strategyNextChip--complete > span,
+.questExplorer-strategyNextStatus--complete > span {
+    color: var(--quest-gold-bright);
+}
+
+.questExplorer-strategyNextStatus--complete {
+    border-color: rgba(208, 162, 74, 0.32);
+    background: rgba(208, 162, 74, 0.055);
+}
+
 .questExplorer-strategyNextStatus--unresolved > span {
     color: rgba(241, 234, 220, 0.7);
 }
@@ -1556,6 +1570,19 @@
 
 .questExplorer-strategyDossierMarker--converges .questExplorer-strategyDossierMarkerIcon {
     border-color: var(--quest-gold);
+}
+
+.questExplorer-strategyDossierMarker--complete {
+    border-left-color: rgba(208, 162, 74, 0.55);
+    background: rgba(208, 162, 74, 0.055);
+}
+
+.questExplorer-strategyDossierMarker--complete strong {
+    color: var(--quest-gold-bright);
+}
+
+.questExplorer-strategyDossierMarker--complete .questExplorer-strategyDossierMarkerIcon {
+    border-color: var(--quest-gold-bright);
 }
 
 .questExplorer-strategyDossierMarker--unresolved {
@@ -1749,7 +1776,8 @@
     border-color: var(--quest-gold);
 }
 
-.questExplorer-loreOpening {
+.questExplorer-loreOpening,
+.questExplorer-loreIntro {
     position: relative;
     display: grid;
     gap: 16px;
@@ -1757,18 +1785,25 @@
     padding: 0 0 4px;
 }
 
-.questExplorer-loreOpening::after {
+.questExplorer-loreOpening::after,
+.questExplorer-loreIntro::after {
     content: none;
 }
 
-.questExplorer-loreOpening p {
+.questExplorer-loreIntro {
+    margin-bottom: -4px;
+}
+
+.questExplorer-loreOpening p,
+.questExplorer-loreIntro p {
     color: rgba(232, 204, 158, 0.9);
-    font-size: clamp(1.18rem, 1.35vw, 1.42rem);
+    font-size: 1.32rem;
     font-style: italic;
     line-height: 1.9;
 }
 
-.questExplorer-loreOpening p:first-child::first-letter {
+.questExplorer-loreOpening p:first-child::first-letter,
+.questExplorer-loreIntro p:first-child::first-letter {
     float: left;
     margin: 0.08em 0.12em 0 0;
     border: 1px solid rgba(208, 162, 74, 0.42);
@@ -1782,6 +1817,10 @@
     display: grid;
     gap: 34px;
     max-width: 76ch;
+}
+
+.questExplorer-loreSectionList--campaign {
+    gap: 28px;
 }
 
 .questExplorer-loreSection {

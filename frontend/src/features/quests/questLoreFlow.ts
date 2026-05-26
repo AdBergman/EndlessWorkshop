@@ -13,6 +13,7 @@ import {
     claimVisibleLoreSections,
     createLoreNarrativeOwnershipTracker,
     loreSectionsForRevealedContinuations,
+    loreSectionsForSelectedChoice,
     loreSectionsForStep,
 } from "@/features/quests/questReaderScopes";
 import type {
@@ -59,6 +60,7 @@ type ChronicleStageBase = {
     branchMoment: ChronicleBranchMoment | null;
     loreSections?: LoreSection[];
     loreSectionsWereSuppressed: boolean;
+    selectedChoiceLoreSections: LoreSection[];
     revealedLoreSections: LoreSection[];
     revealedContinuationStages: ChronicleChoiceItem[];
 };
@@ -117,20 +119,39 @@ export function buildLoreFlowModel({
     const ownershipTracker = showRawHiddenRows ? null : createLoreNarrativeOwnershipTracker();
     const segments = stream.segments.map((segment): LoreFlowSegment => ({
         ...segment,
-        loreSteps: segment.flow.renderedSteps.map((renderedStep): LoreFlowStep => {
+        loreSteps: segment.flow.renderedSteps.map((renderedStep, renderedStepIndex): LoreFlowStep => {
             const visibleDetailEntryKey = renderedStep.displayEntry?.entryKey ?? renderedStep.step.detailEntryKey;
-            const branchMoment = buildChronicleBranchMoment(renderedStep, entriesByKey, showRawHiddenRows);
+            const branchMoment = buildChronicleBranchMoment(renderedStep, entriesByKey, showRawHiddenRows, {
+                anchorFutureContinuations: hasLaterCarriedSelectedChoice(
+                    renderedStep,
+                    segment.flow.renderedSteps.slice(renderedStepIndex + 1)
+                ),
+            });
             let loreSections: LoreSection[] | undefined;
             let loreSectionsWereSuppressed = false;
+            let selectedChoiceLoreSections: LoreSection[] = [];
 
             if (renderedStep.displayEntry && !renderedStep.rendersRepeatedDetailContent) {
-                const scopedLoreSections = loreSectionsForStep(renderedStep.displayEntry, renderedStep);
+                const shouldAppendSelectedChoiceLore = Boolean(
+                    renderedStep.selectedChoice && branchMoment?.hasActionableStages
+                );
+                const scopedLoreSections = loreSectionsForStep(renderedStep.displayEntry, renderedStep, {
+                    includeSelectedChoice: !shouldAppendSelectedChoiceLore,
+                });
                 loreSections = claimVisibleLoreSections(
                     scopedLoreSections,
                     visibleDetailEntryKey,
                     ownershipTracker
                 );
                 loreSectionsWereSuppressed = scopedLoreSections.length > 0 && loreSections.length === 0;
+
+                selectedChoiceLoreSections = shouldAppendSelectedChoiceLore
+                    ? claimVisibleLoreSections(
+                        loreSectionsForSelectedChoice(renderedStep.displayEntry, renderedStep),
+                        visibleDetailEntryKey,
+                        ownershipTracker
+                    )
+                    : [];
             }
 
             const revealedLoreSections = renderedStep.displayEntry && !renderedStep.revealedContinuationsBecomeSteps
@@ -150,6 +171,7 @@ export function buildLoreFlowModel({
                 branchMoment,
                 loreSections,
                 loreSectionsWereSuppressed,
+                selectedChoiceLoreSections,
                 revealedLoreSections,
                 revealedContinuationStages: renderedStep.revealedContinuations.map((choice) => chronicleChoiceItem(choice, "continuation")),
             } as LoreFlowStep;
@@ -175,7 +197,8 @@ export function activeLoreSegmentForModel(
 export function buildChronicleBranchMoment(
     renderedStep: RenderedPathStep,
     entriesByKey: Record<string, QuestExplorerEntry>,
-    showRawHiddenRows: boolean
+    showRawHiddenRows: boolean,
+    options: { anchorFutureContinuations?: boolean } = {}
 ): ChronicleBranchMoment | null {
     if (renderedStep.choices.length === 0) {
         if (renderedStep.autoContinuedChoices.length === 0) return null;
@@ -193,7 +216,7 @@ export function buildChronicleBranchMoment(
 
     const presentation = stagePresentationGroups(
         renderedStep.step,
-        renderedStep.choices,
+        chronologyAnchoredChoices(renderedStep, showRawHiddenRows, options.anchorFutureContinuations ?? false),
         renderedStep.selectedChoice,
         renderedStep.displayEntry,
         entriesByKey,
@@ -222,6 +245,45 @@ export function buildChronicleBranchMoment(
         selectedContextBranchKeys: presentation.selectedContextBranchKeys,
         hasActionableStages,
     };
+}
+
+function chronologyAnchoredChoices(
+    renderedStep: RenderedPathStep,
+    showRawHiddenRows: boolean,
+    anchorFutureContinuations: boolean
+): QuestPathChoice[] {
+    const selectedChoice = renderedStep.selectedChoice;
+    if (showRawHiddenRows || !anchorFutureContinuations || selectedChoice?.branchStepOrder == null) {
+        return renderedStep.choices;
+    }
+
+    return renderedStep.choices.filter((choice) => (
+        choice.id === selectedChoice.choiceId
+        || Boolean(selectedChoice.branchKey && choice.branchKey === selectedChoice.branchKey)
+        || Boolean(selectedChoice.choiceKey && choice.choiceKey === selectedChoice.choiceKey)
+        || choice.branchStepOrder == null
+        || choice.branchStepOrder <= selectedChoice.branchStepOrder!
+    ));
+}
+
+function hasLaterCarriedSelectedChoice(
+    renderedStep: RenderedPathStep,
+    laterSteps: RenderedPathStep[]
+): boolean {
+    const selectedChoice = renderedStep.selectedChoice;
+    if (!selectedChoice) return false;
+
+    return laterSteps.some((step) => {
+        const carriedChoice = step.currentBeatChoice;
+        return Boolean(
+            carriedChoice
+            && (
+                carriedChoice.choiceId === selectedChoice.choiceId
+                || (selectedChoice.branchKey && carriedChoice.branchKey === selectedChoice.branchKey)
+                || (selectedChoice.choiceKey && carriedChoice.choiceKey === selectedChoice.choiceKey)
+            )
+        );
+    });
 }
 
 type ChronicleBranchPresentation = {

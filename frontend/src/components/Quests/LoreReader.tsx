@@ -1,10 +1,12 @@
 import {
     isMinorFactionVariantQuest,
     isResolutionLoreSection,
+    lorePhaseKey,
     objectiveVariantLabel,
     phaseDisplayLabel,
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
+import { getQuestCategoryKey } from "@/features/quests/questCategories";
 import type {
     ChronicleBranchMoment,
     ChronicleChoiceItem,
@@ -29,6 +31,12 @@ type LoreStepDebugDetailsBuilder = (
     renderedStep: RenderedPathStep,
     isActiveDebugSegment: boolean
 ) => Map<string, string> | undefined;
+
+type LoreNarrativeLead = {
+    section: LoreSection;
+    lines: LoreSection["lines"];
+    remainingSection: LoreSection | null;
+};
 
 export function LoreOpening({ entry }: { entry: QuestExplorerEntry }) {
     if (entry.loreView.sections.length === 0) return null;
@@ -64,6 +72,52 @@ function objectivePaths(entry: QuestExplorerEntry, sections: LoreSection[]): Arr
             section.objectiveKey === objective.objectiveKey && !isResolutionLoreSection(section)
         )),
     }));
+}
+
+function isMajorFactionQuest(entry: QuestExplorerEntry): boolean {
+    return getQuestCategoryKey(entry.questType) === "faction";
+}
+
+function isOpeningLoreSection(section: LoreSection): boolean {
+    const phase = lorePhaseKey(section.phase);
+    return phase === "start" || phase === "intro" || phase === "opening";
+}
+
+function isNarrativeLine(line: LoreSection["lines"][number]): boolean {
+    return !line.speakerLabel && line.role !== "character";
+}
+
+function campaignNarrativeLead(entry: QuestExplorerEntry, sections: LoreSection[]): LoreNarrativeLead | null {
+    if (!isMajorFactionQuest(entry)) return null;
+
+    const [firstSection] = sections;
+    if (!firstSection || !isOpeningLoreSection(firstSection)) return null;
+
+    const firstNarrativeLineIndex = firstSection.lines.findIndex(isNarrativeLine);
+    if (firstNarrativeLineIndex !== 0) return null;
+
+    const leadLines = [firstSection.lines[0]];
+    const remainingLines = firstSection.lines.slice(1);
+
+    return {
+        section: firstSection,
+        lines: leadLines,
+        remainingSection: remainingLines.length > 0
+            ? { ...firstSection, lines: remainingLines }
+            : null,
+    };
+}
+
+function LoreChronicleIntro({ lead }: { lead: LoreNarrativeLead }) {
+    return (
+        <section className="questExplorer-loreIntro" aria-label="Chapter narrative lead">
+            {lead.lines.map((line, index) => (
+                <p className={`questExplorer-loreIntroLine questExplorer-loreIntroLine--${line.role || "narrator"}`} key={`${lead.section.sectionKey}:lead:${index}`}>
+                    <span>{line.text}</span>
+                </p>
+            ))}
+        </section>
+    );
 }
 
 export function LoreSectionList({ entry, sections: scopedSections }: { entry: QuestExplorerEntry; sections?: LoreSection[] }) {
@@ -114,9 +168,18 @@ export function LoreSectionList({ entry, sections: scopedSections }: { entry: Qu
         );
     }
 
+    const narrativeLead = campaignNarrativeLead(entry, sections);
+    const displaySections = narrativeLead
+        ? [
+            ...(narrativeLead.remainingSection ? [narrativeLead.remainingSection] : []),
+            ...sections.slice(1),
+        ]
+        : sections;
+
     return (
-        <div className="questExplorer-loreSectionList">
-            {sections.map((section) => (
+        <div className={`questExplorer-loreSectionList${narrativeLead ? " questExplorer-loreSectionList--campaign" : ""}`}>
+            {narrativeLead ? <LoreChronicleIntro lead={narrativeLead} /> : null}
+            {displaySections.map((section) => (
                 <LoreSectionArticle section={section} key={section.sectionKey} />
             ))}
         </div>
@@ -366,6 +429,14 @@ function LoreStep({
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const { renderedStep } = stage;
+    const suppressCarryForward = Boolean(
+        stage.branchMoment
+        || stage.selectedChoiceLoreSections.length > 0
+        || stage.revealedLoreSections.length > 0
+        || stage.revealedContinuationStages.length > 0
+    );
+    const showCarryForward = (renderedStep.rendersRepeatedDetailContent || stage.loreSectionsWereSuppressed)
+        && !suppressCarryForward;
 
     return (
         <article
@@ -380,8 +451,10 @@ function LoreStep({
                 <strong className="questExplorer-stepTitle">{title}</strong>
             </header>
 
-            {renderedStep.rendersRepeatedDetailContent || stage.loreSectionsWereSuppressed ? (
+            {showCarryForward ? (
                 <RepeatedDetailCheckpoint />
+            ) : renderedStep.rendersRepeatedDetailContent || stage.loreSectionsWereSuppressed ? (
+                null
             ) : (
                 renderedStep.displayEntry ? (
                     <LoreSectionList entry={renderedStep.displayEntry} sections={stage.loreSections} />
@@ -397,6 +470,12 @@ function LoreStep({
                 debugChoiceDetails={debugChoiceDetails}
                 onChoose={onChoose}
             />
+
+            {renderedStep.displayEntry && stage.selectedChoiceLoreSections.length > 0 ? (
+                <div className="questExplorer-revealedBeatBody questExplorer-revealedBeatBody--lore">
+                    <LoreSectionList entry={renderedStep.displayEntry} sections={stage.selectedChoiceLoreSections} />
+                </div>
+            ) : null}
 
             <LoreRevealedContinuations
                 continuationStages={stage.revealedContinuationStages}

@@ -1124,6 +1124,235 @@ const choiceKeyScopedPayload: QuestExplorerResponse = {
     },
 };
 
+const loreChronologyPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_Chronology",
+            title: "Stable Chronicle",
+            summaryLines: ["The branch consequence must read forward from the choice."],
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Chronology:lore:opening",
+                        phase: "intro",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Shared opening remains before the choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Chronology:lore:ash",
+                        phase: "intro",
+                        choiceKey: "Choice_Ash",
+                        stepIndex: 0,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Ash branch consequence appends after the choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Chronology:lore:coral",
+                        phase: "intro",
+                        choiceKey: "Choice_Coral",
+                        stepIndex: 0,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Coral branch consequence remains hidden." }],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Ash", "Take the ash road"),
+                    choiceKey: "Choice_Ash",
+                    choiceGroupKey: "Quest_Chronology:choice-group:step:1",
+                    sectionRole: "true_choice",
+                    nextEntryKeys: ["Quest_Ash_After"],
+                    lore: { outcomePreviewLines: ["The ash road opens."] },
+                },
+                {
+                    ...testBranch("Branch_Coral", "Take the coral road"),
+                    choiceKey: "Choice_Coral",
+                    choiceGroupKey: "Quest_Chronology:choice-group:step:1",
+                    sectionRole: "true_choice",
+                    nextEntryKeys: ["Quest_Coral_After"],
+                    lore: { outcomePreviewLines: ["The coral road opens."] },
+                },
+            ],
+        }),
+        questEntry({
+            entryKey: "Quest_Ash_After",
+            title: "Ash Aftermath",
+            summaryLines: ["The ash aftermath follows."],
+            navigation: {
+                sequenceIndex: 1,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                previousEntryKeys: ["Quest_Chronology"],
+            },
+        }),
+        questEntry({
+            entryKey: "Quest_Coral_After",
+            title: "Coral Aftermath",
+            summaryLines: ["The coral aftermath follows."],
+            navigation: {
+                sequenceIndex: 2,
+                step: 2,
+                stepLabel: "Step 2",
+                stepOrder: 2,
+                branchGroupKey: "Quest_Chronology",
+                branchLabel: "Stable Chronicle",
+                branchOrder: 2,
+                previousEntryKeys: ["Quest_Chronology"],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "Stable Chronicle",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "Stable Chronicle", detailEntryKey: "Quest_Chronology" },
+                    { stepNumber: 2, stepOrder: 2, title: "Ash Aftermath", detailEntryKey: "Quest_Ash_After", variantEntryKeys: ["Quest_Coral_After"] },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const stagedNecroLorePayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_Necro_Ch6",
+            title: "A Bitter Truth",
+            summaryLines: ["The final Necrophage chronicle must read forward."],
+            loreView: {
+                sections: [
+                    {
+                        sectionKey: "Quest_Necro_Ch6:lore:opening",
+                        phase: "start",
+                        choiceKey: null,
+                        stepIndex: null,
+                        objectiveKey: null,
+                        lines: [{ speakerLabel: "Prime", role: "character", text: "The swarm learns the bitter truth." }],
+                    },
+                    {
+                        sectionKey: "Quest_Necro_Ch6:lore:first",
+                        phase: "success",
+                        choiceKey: "Choice_First",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_First",
+                        lines: [{ speakerLabel: "Prime", role: "character", text: "The first battle is over." }],
+                    },
+                    {
+                        sectionKey: "Quest_Necro_Ch6:lore:site-a",
+                        phase: "start",
+                        choiceKey: "Choice_Site",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Site_A",
+                        lines: [{ speakerLabel: "Oroyo", role: "character", text: "The old site opens after the chosen continuation." }],
+                    },
+                    {
+                        sectionKey: "Quest_Necro_Ch6:lore:site-b",
+                        phase: "success",
+                        choiceKey: "Choice_Site",
+                        stepIndex: 1,
+                        objectiveKey: "Objective_Site_B",
+                        lines: [{ speakerLabel: "Prime", role: "character", text: "The relic is recovered before the next choice." }],
+                    },
+                    {
+                        sectionKey: "Quest_Necro_Ch6:lore:save",
+                        phase: "success",
+                        choiceKey: "Choice_Save",
+                        stepIndex: 0,
+                        objectiveKey: "Objective_Save",
+                        lines: [{ speakerLabel: "Prime", role: "character", text: "The saved girl path remains hidden until selected." }],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_First", "A Bitter Truth"),
+                    choiceKey: "Choice_First",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                },
+                {
+                    ...testBranch("Branch_Site", "Interact with Site of the Ancients using a hero"),
+                    choiceKey: "Choice_Site",
+                    sectionRole: "continuation",
+                    branchStepOrder: 2,
+                    parentBranchKey: "Branch_First",
+                    prerequisiteBranchKeys: ["Branch_First"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:2:after:Branch_First",
+                },
+                {
+                    ...testBranch("Branch_Enhance", "Enhance Hero"),
+                    choiceKey: "Choice_Enhance",
+                    sectionRole: "continuation",
+                    branchStepOrder: 3,
+                    parentBranchKey: "Branch_Site",
+                    prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
+                },
+                {
+                    ...testBranch("Branch_Save", "Save Girl"),
+                    choiceKey: "Choice_Save",
+                    sectionRole: "continuation",
+                    branchStepOrder: 3,
+                    parentBranchKey: "Branch_Site",
+                    prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
+                },
+                {
+                    ...testBranch("Branch_Execute", "Execute Kazra"),
+                    choiceKey: "Choice_Execute",
+                    sectionRole: "continuation",
+                    branchStepOrder: 4,
+                    parentBranchKey: "Branch_Site",
+                    prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Site",
+                },
+            ],
+            navigation: {
+                factionKey: "Faction_Kin",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_Kin",
+                questLineName: "Kin",
+                chapter: 6,
+                chapterLabel: "Chapter 6",
+                chapterOrder: 6,
+                step: 1,
+                stepLabel: "Step 1",
+                stepOrder: 1,
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                title: "A Bitter Truth",
+                questLineKey: "FactionQuest_Kin",
+                questLineFamilyKey: "FactionQuest_Kin",
+                questLineName: "Kin",
+                factionKey: "Faction_Kin",
+                factionFamilyKey: "Faction_Kin",
+                factionName: "Kin",
+                chapterNumber: 6,
+                chapterOrder: 6,
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "A Bitter Truth", detailEntryKey: "Quest_Necro_Ch6" },
+                    { stepNumber: 2, stepOrder: 2, title: "A Bitter Truth", detailEntryKey: "Quest_Necro_Ch6" },
+                    { stepNumber: 3, stepOrder: 3, title: "A Bitter Truth", detailEntryKey: "Quest_Necro_Ch6" },
+                    { stepNumber: 4, stepOrder: 4, title: "A Bitter Truth", detailEntryKey: "Quest_Necro_Ch6" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
 const serializedContinuationPayload: QuestExplorerResponse = {
     ...choiceKeyScopedPayload,
     entries: choiceKeyScopedPayload.entries.map((entry) => (
@@ -1583,6 +1812,49 @@ const unresolvedChoicePayload: QuestExplorerResponse = {
                 steps: [
                     { stepNumber: 1, stepOrder: 1, title: "Archive of the First Tide", detailEntryKey: "Quest_A" },
                     { stepNumber: 2, stepOrder: 2, title: "Second Tide", detailEntryKey: "Quest_B" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
+const terminalNoLinkPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "Quest_A",
+            title: "End of the Chronicle",
+            summaryLines: ["The current archive records no later quest step."],
+            loreView: payload.entries[0].loreView,
+            strategyView: payload.entries[0].strategyView,
+            branches: [
+                {
+                    ...testBranch("Branch_Final", "End the story"),
+                    groupLabel: "Final Tide",
+                    lore: { outcomePreviewLines: ["The story rests here."] },
+                    strategy: { conditions: ["Choose the final oath."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                chapter: 6,
+                chapterLabel: "Chapter 6",
+                chapterOrder: 6,
+                step: 1,
+                stepLabel: "Step 1",
+                stepOrder: 1,
+                nextEntryKeys: [],
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                chapterNumber: 6,
+                chapterOrder: 6,
+                title: "Chapter 6",
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: "End of the Chronicle", detailEntryKey: "Quest_A" },
                 ],
             }),
         ],
@@ -2603,6 +2875,62 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Coral road lore remains hidden.")).not.toBeInTheDocument();
     });
 
+    it("appends selected branch lore after the choice without mutating the pre-choice transcript", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(loreChronologyPayload);
+        renderPage("/quests/Quest_Chronology?mode=lore");
+
+        await screen.findByRole("heading", { name: "Stable Chronicle" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const sharedOpening = within(chronicle).getByText("Shared opening remains before the choice.");
+        const ashChoice = within(chronicle).getByRole("button", { name: /Take the ash road/ });
+
+        expectElementBefore(sharedOpening, ashChoice);
+        expect(within(chronicle).queryByText("Ash branch consequence appends after the choice.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Coral branch consequence remains hidden.")).not.toBeInTheDocument();
+
+        await user.click(ashChoice);
+
+        const sharedOpeningAfterChoice = within(chronicle).getByText("Shared opening remains before the choice.");
+        const selectedAshChoice = within(chronicle).getByRole("button", { name: /Take the ash road/ });
+        const ashConsequence = within(chronicle).getByText("Ash branch consequence appends after the choice.");
+
+        expect(within(chronicle).getAllByText("Shared opening remains before the choice.")).toHaveLength(1);
+        expectElementBefore(sharedOpeningAfterChoice, selectedAshChoice);
+        expectElementBefore(selectedAshChoice, ashConsequence);
+        expect(within(chronicle).queryByText("Coral branch consequence remains hidden.")).not.toBeInTheDocument();
+    });
+
+    it("keeps Necrophage-style staged continuation lore after the selected anchor without carry-forward noise", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedNecroLorePayload);
+        renderPage("/quests/Quest_Necro_Ch6?mode=lore");
+
+        await screen.findByRole("heading", { name: "A Bitter Truth" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const opening = within(chronicle).getByText("The swarm learns the bitter truth.");
+        const siteChoice = within(chronicle).getByRole("button", { name: /Interact with Site of the Ancients using a hero/ });
+
+        expectElementBefore(opening, siteChoice);
+        expect(within(chronicle).queryByText("Chronicle carry-forward")).not.toBeInTheDocument();
+
+        await user.click(siteChoice);
+
+        const selectedSiteChoice = within(chronicle).getByRole("button", { name: /Interact with Site of the Ancients using a hero/ });
+        const siteOpening = within(chronicle).getByText("The old site opens after the chosen continuation.");
+        const siteResolution = within(chronicle).getByText("The relic is recovered before the next choice.");
+        const enhanceChoice = within(chronicle).getByRole("button", { name: /Enhance Hero/ });
+
+        expect(within(chronicle).getAllByText("The swarm learns the bitter truth.")).toHaveLength(1);
+        expectElementBefore(selectedSiteChoice, siteOpening);
+        expectElementBefore(siteOpening, siteResolution);
+        expectElementBefore(siteResolution, enhanceChoice);
+        expect(within(chronicle).queryByText("The saved girl path remains hidden until selected.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Chronicle carry-forward")).not.toBeInTheDocument();
+    });
+
     it("uses branch continuity metadata to prevent same-step future lore from leaking", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
@@ -3123,6 +3451,19 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByRole("button", { name: /Take the unknown road/ })).not.toBeInTheDocument();
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
+    });
+
+    it("renders terminal no-link Strategy outcomes as a final story state", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(terminalNoLinkPayload);
+        renderPage("/quests/Quest_A?mode=strategy");
+
+        expect(await screen.findByRole("heading", { name: "End of the Chronicle" })).toBeInTheDocument();
+        const chapterPlan = screen.getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 1: End the story" });
+
+        expect(within(currentTask).getByText("Final outcome")).toBeInTheDocument();
+        expect(within(currentTask).getByText("Story currently ends here")).toBeInTheDocument();
+        expect(within(currentTask).queryByText("Unknown continuation")).not.toBeInTheDocument();
     });
 
     it("gates continuation branches until their prerequisite branch is selected", async () => {

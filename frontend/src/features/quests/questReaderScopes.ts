@@ -26,6 +26,10 @@ type ReaderChoiceContext = {
     branchStepOrder: number | null;
 };
 
+type ReaderCurrentChoiceContextOptions = {
+    includeSelectedChoice?: boolean;
+};
+
 function uniqueReaderChoiceContexts(contexts: ReaderChoiceContext[]): ReaderChoiceContext[] {
     const seen = new Set<string>();
     return contexts.filter((context) => {
@@ -42,7 +46,12 @@ function contextForChoice(choice: QuestPathChoice | QuestPathChoiceSelection): R
         : null;
 }
 
-function readerCurrentChoiceContextsForStep(renderedStep: RenderedPathStep): ReaderChoiceContext[] {
+function readerCurrentChoiceContextsForStep(
+    renderedStep: RenderedPathStep,
+    options: ReaderCurrentChoiceContextOptions = {}
+): ReaderChoiceContext[] {
+    const includeSelectedChoice = options.includeSelectedChoice ?? true;
+
     if (renderedStep.autoContinuedChoices.length > 0) {
         return uniqueReaderChoiceContexts(
             renderedStep.autoContinuedChoices
@@ -56,7 +65,7 @@ function readerCurrentChoiceContextsForStep(renderedStep: RenderedPathStep): Rea
         : null;
     if (currentBeatContext) return [currentBeatContext];
 
-    const selectedContext = renderedStep.selectedChoice
+    const selectedContext = includeSelectedChoice && renderedStep.selectedChoice
         ? contextForChoice(renderedStep.selectedChoice)
         : null;
     if (selectedContext) return [selectedContext];
@@ -119,6 +128,19 @@ function loreSectionsForChoiceContexts(
     });
 
     return uniqueLoreSections(scopedSections);
+}
+
+function allLoreSectionsForChoiceContexts(
+    sections: LoreSection[],
+    contexts: ReaderChoiceContext[],
+    revealContext?: RevealContext
+): LoreSection[] {
+    const choiceKeys = new Set(contexts.map((context) => context.choiceKey));
+    return uniqueLoreSections(sections.filter((section) => (
+        section.choiceKey != null
+        && choiceKeys.has(section.choiceKey)
+        && (!revealContext || revealVisible(section, revealContext))
+    )));
 }
 
 function objectivesForLoreSections(
@@ -243,14 +265,17 @@ function leadingSharedLoreSections(sections: LoreSection[]): LoreSection[] {
     return sharedSections;
 }
 
-export function loreSectionsForStep(entry: QuestExplorerEntry, renderedStep: RenderedPathStep): LoreSection[] {
+export function loreSectionsForStep(
+    entry: QuestExplorerEntry,
+    renderedStep: RenderedPathStep,
+    options: ReaderCurrentChoiceContextOptions = {}
+): LoreSection[] {
     const sections = entry.loreView.sections.filter((section) => revealVisible(section, renderedStep.revealContext));
-    if (sections.length <= 1) return sections;
 
     const sharedOpeningSections = renderedStep.stepIndex === 0
         ? leadingSharedLoreSections(sections)
         : [];
-    const choiceContexts = readerCurrentChoiceContextsForStep(renderedStep);
+    const choiceContexts = readerCurrentChoiceContextsForStep(renderedStep, options);
     const choiceScopedSections = loreSectionsForChoiceContexts(sections, choiceContexts, renderedStep.revealContext);
     if (choiceScopedSections.length > 0) {
         return uniqueLoreSections([...sharedOpeningSections, ...choiceScopedSections]);
@@ -290,6 +315,19 @@ export function loreSectionsForStep(entry: QuestExplorerEntry, renderedStep: Ren
 
     const fallbackSection = sections[Math.min(Math.max(renderedStep.stepIndex, 0), sections.length - 1)];
     return fallbackSection ? [fallbackSection] : [];
+}
+
+export function loreSectionsForSelectedChoice(entry: QuestExplorerEntry, renderedStep: RenderedPathStep): LoreSection[] {
+    const selectedContext = renderedStep.selectedChoice
+        ? contextForChoice(renderedStep.selectedChoice)
+        : null;
+    if (!selectedContext) return [];
+
+    const revealContext = cloneRevealContext(renderedStep.revealContext);
+    addSelectionToRevealContext(revealContext, renderedStep.currentBeatChoice);
+    addSelectionToRevealContext(revealContext, renderedStep.selectedChoice);
+
+    return allLoreSectionsForChoiceContexts(entry.loreView.sections, [selectedContext], revealContext);
 }
 
 export function loreSectionsForRevealedContinuations(entry: QuestExplorerEntry, renderedStep: RenderedPathStep): LoreSection[] {

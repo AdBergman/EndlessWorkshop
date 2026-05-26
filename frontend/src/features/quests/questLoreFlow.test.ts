@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
+import {
+    createLoreChronologySnapshot,
+    diffLoreChronologySnapshots,
+    formatLoreChronologyDiff,
+    formatLoreChronologySnapshot,
+} from "@/features/quests/questLoreChronologyDiagnostic";
 import { buildLoreFlowModel } from "@/features/quests/questLoreFlow";
-import type { QuestDetailProgression } from "@/features/quests/questPathFlow";
+import {
+    progressionContextKey,
+    selectionForChoice,
+    type QuestDetailProgression,
+    type QuestPathChoiceSelection,
+} from "@/features/quests/questPathFlow";
 import {
     progressionQuestline,
     questEntry,
@@ -132,12 +143,217 @@ function keyedContinuationProgression(): QuestExplorerProgression {
     };
 }
 
+function branchChronologyEntry(): QuestExplorerEntry {
+    return questEntry({
+        entryKey: "Quest_Chronology",
+        title: "Stable Chronicle",
+        summaryLines: ["The branch consequence must read forward from the choice."],
+        loreView: {
+            sections: [
+                {
+                    sectionKey: "Quest_Chronology:lore:opening",
+                    phase: "intro",
+                    choiceKey: null,
+                    stepIndex: null,
+                    objectiveKey: null,
+                    lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Shared opening remains before the choice." }],
+                },
+                {
+                    sectionKey: "Quest_Chronology:lore:ash",
+                    phase: "intro",
+                    choiceKey: "Choice_Ash",
+                    stepIndex: 0,
+                    objectiveKey: null,
+                    lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Ash branch consequence appends after the choice." }],
+                },
+                {
+                    sectionKey: "Quest_Chronology:lore:coral",
+                    phase: "intro",
+                    choiceKey: "Choice_Coral",
+                    stepIndex: 0,
+                    objectiveKey: null,
+                    lines: [{ speakerLabel: "Archivist", role: "narrator", text: "Coral branch consequence remains hidden." }],
+                },
+            ],
+        },
+        branches: [
+            {
+                ...testBranch("Branch_Ash", "Take the ash road"),
+                choiceKey: "Choice_Ash",
+                choiceGroupKey: "Quest_Chronology:choice-group:step:1",
+                sectionRole: "true_choice",
+                nextEntryKeys: ["Quest_Ash_After"],
+                lore: { outcomePreviewLines: ["The ash road opens."] },
+            },
+            {
+                ...testBranch("Branch_Coral", "Take the coral road"),
+                choiceKey: "Choice_Coral",
+                choiceGroupKey: "Quest_Chronology:choice-group:step:1",
+                sectionRole: "true_choice",
+                nextEntryKeys: ["Quest_Coral_After"],
+                lore: { outcomePreviewLines: ["The coral road opens."] },
+            },
+        ],
+    });
+}
+
+function branchChronologyProgression(entry: QuestExplorerEntry): QuestExplorerProgression {
+    return {
+        questlines: [
+            progressionQuestline({
+                title: entry.title,
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: entry.title, detailEntryKey: entry.entryKey },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    };
+}
+
+function stagedNecrophageContinuationEntry(): QuestExplorerEntry {
+    return questEntry({
+        entryKey: "Quest_Necro_Ch6",
+        title: "A Bitter Truth",
+        loreView: {
+            sections: [
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:opening",
+                    phase: "start",
+                    choiceKey: null,
+                    stepIndex: null,
+                    objectiveKey: null,
+                    lines: [{ speakerLabel: "Prime", role: "character", text: "The swarm learns the bitter truth." }],
+                },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:first",
+                    phase: "success",
+                    choiceKey: "Choice_First",
+                    stepIndex: 0,
+                    objectiveKey: "Objective_First",
+                    lines: [{ speakerLabel: "Prime", role: "character", text: "The first battle is over." }],
+                },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:site-a",
+                    phase: "start",
+                    choiceKey: "Choice_Site",
+                    stepIndex: 0,
+                    objectiveKey: "Objective_Site_A",
+                    lines: [{ speakerLabel: "Oroyo", role: "character", text: "The old site opens after the chosen continuation." }],
+                },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:site-b",
+                    phase: "success",
+                    choiceKey: "Choice_Site",
+                    stepIndex: 1,
+                    objectiveKey: "Objective_Site_B",
+                    lines: [{ speakerLabel: "Prime", role: "character", text: "The relic is recovered before the next choice." }],
+                },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:enhance",
+                    phase: "success",
+                    choiceKey: "Choice_Enhance",
+                    stepIndex: 0,
+                    objectiveKey: "Objective_Enhance",
+                    lines: [{ speakerLabel: "Prime", role: "character", text: "The enhanced warrior path resolves." }],
+                },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:save",
+                    phase: "success",
+                    choiceKey: "Choice_Save",
+                    stepIndex: 0,
+                    objectiveKey: "Objective_Save",
+                    lines: [{ speakerLabel: "Prime", role: "character", text: "The saved girl path resolves." }],
+                },
+            ],
+        },
+        branches: [
+            {
+                ...testBranch("Branch_First", "A Bitter Truth"),
+                choiceKey: "Choice_First",
+                sectionRole: "artifact",
+                branchStepOrder: 1,
+            },
+            {
+                ...testBranch("Branch_Site", "Interact with Site of the Ancients using a hero"),
+                choiceKey: "Choice_Site",
+                sectionRole: "continuation",
+                branchStepOrder: 2,
+                parentBranchKey: "Branch_First",
+                prerequisiteBranchKeys: ["Branch_First"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:2:after:Branch_First",
+            },
+            {
+                ...testBranch("Branch_Enhance", "Enhance Hero"),
+                choiceKey: "Choice_Enhance",
+                sectionRole: "continuation",
+                branchStepOrder: 3,
+                parentBranchKey: "Branch_Site",
+                prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
+            },
+            {
+                ...testBranch("Branch_Save", "Save Girl"),
+                choiceKey: "Choice_Save",
+                sectionRole: "continuation",
+                branchStepOrder: 3,
+                parentBranchKey: "Branch_Site",
+                prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
+            },
+            {
+                ...testBranch("Branch_Execute", "Execute Kazra"),
+                choiceKey: "Choice_Execute",
+                sectionRole: "continuation",
+                branchStepOrder: 4,
+                parentBranchKey: "Branch_Site",
+                prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Site",
+            },
+        ],
+    });
+}
+
+function repeatedEntryProgression(entry: QuestExplorerEntry, stepCount: number): QuestExplorerProgression {
+    return {
+        questlines: [
+            progressionQuestline({
+                title: entry.title,
+                steps: Array.from({ length: stepCount }, (_, index) => ({
+                    stepNumber: index + 1,
+                    stepOrder: index + 1,
+                    title: entry.title,
+                    detailEntryKey: entry.entryKey,
+                })),
+            }),
+        ],
+        debugSummary: null,
+    };
+}
+
 function loreTexts(model: ReturnType<typeof buildLoreFlowModel>): string[] {
     return model.segments.flatMap((segment) => (
         segment.loreSteps.flatMap((step) => (
             (step.loreSections ?? []).flatMap((section) => section.lines.map((line) => line.text))
         ))
     ));
+}
+
+function buildLoreModelFor(
+    entry: QuestExplorerEntry,
+    progression: QuestExplorerProgression,
+    choicePath: QuestPathChoiceSelection[] = []
+): ReturnType<typeof buildLoreFlowModel> {
+    const selectedProgression = detailProgressionFrom(progression);
+    const contextKey = progressionContextKey(selectedProgression, entry.entryKey);
+
+    return buildLoreFlowModel({
+        selectedProgression,
+        fullProgression: progression,
+        entriesByKey: { [entry.entryKey]: entry },
+        loreChoicePathsByContext: choicePath.length > 0 ? { [contextKey]: choicePath } : {},
+        showRawHiddenRows: false,
+    });
 }
 
 function singleEntryProgression(entry: QuestExplorerEntry): QuestExplorerProgression {
@@ -169,6 +385,125 @@ function firstChronicleStage(
 }
 
 describe("buildLoreFlowModel", () => {
+    it("diagnoses branch chronology as a stable read-choose-append transcript", () => {
+        const entry = branchChronologyEntry();
+        const progression = branchChronologyProgression(entry);
+        const beforeModel = buildLoreModelFor(entry, progression);
+        const stage = beforeModel.segments[0]?.loreSteps[0];
+        const ashChoice = stage?.branchMoment?.decisionChoices
+            .find((choiceItem) => choiceItem.choice.label === "Take the ash road")
+            ?.choice;
+        if (!stage || !ashChoice) throw new Error("Expected ash branch choice in chronology fixture.");
+
+        const before = createLoreChronologySnapshot(beforeModel, "before branch selection");
+        const afterModel = buildLoreModelFor(entry, progression, [
+            selectionForChoice(stage.step.stepKey, ashChoice),
+        ]);
+        const after = createLoreChronologySnapshot(afterModel, "after branch selection");
+        const diff = diffLoreChronologySnapshots(before, after);
+
+        if (diff.preChoiceMutations.length > 0 || diff.removedBlocks.length > 0 || diff.duplicateStableKeysAfter.length > 0) {
+            throw new Error([
+                formatLoreChronologySnapshot(before),
+                formatLoreChronologySnapshot(after),
+                formatLoreChronologyDiff(diff),
+            ].join("\n\n"));
+        }
+
+        const sharedOpening = after.blocks.find((block) => block.text === "Shared opening remains before the choice.");
+        const ashChoiceNode = after.blocks.find((block) => block.group === "choice_node" && block.text === "Take the ash road");
+        const ashConsequence = after.blocks.find((block) => block.text === "Ash branch consequence appends after the choice.");
+
+        expect(before.blocks.map((block) => block.text)).toEqual([
+            "Shared opening remains before the choice.",
+            "Take the ash road",
+            "Take the coral road",
+        ]);
+        expect(after.blocks.filter((block) => block.text === "Shared opening remains before the choice.")).toHaveLength(1);
+        expect(after.blocks.some((block) => block.text === "Coral branch consequence remains hidden.")).toBe(false);
+        expect(sharedOpening?.chronologyIndex).toBeLessThan(ashChoiceNode?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(ashChoiceNode?.chronologyIndex).toBeLessThan(ashConsequence?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(ashConsequence).toEqual(expect.objectContaining({
+            group: "post_choice",
+            source: "stage.selectedChoiceLoreSections",
+            choiceKey: "Choice_Ash",
+        }));
+        expect(formatLoreChronologySnapshot(after)).toContain("[post_choice] stage.selectedChoiceLoreSections");
+    });
+
+    it("keeps deterministic continuation collapse in forward chronology order", () => {
+        const entry = keyedContinuationEntry();
+        const progression = keyedContinuationProgression();
+        const model = buildLoreModelFor(entry, progression);
+        const snapshot = createLoreChronologySnapshot(model, "deterministic continuation");
+
+        const sharedSetup = snapshot.blocks.find((block) => block.text === "The shared setup belongs before the first choice.");
+        const currentBeat = snapshot.blocks.find((block) => block.text === "The current beat belongs before the first choice.");
+        const currentResolution = snapshot.blocks.find((block) => block.text === "The current resolution belongs before the first choice.");
+        const continuation = snapshot.blocks.find((block) => (
+            block.source === "branchMoment.continuation"
+            && block.text === "Eliminate the threat"
+        ));
+
+        expect(snapshot.blocks.filter((block) => block.text === "The shared setup belongs before the first choice.")).toHaveLength(1);
+        expect(snapshot.blocks.some((block) => block.text === "The next beat waits for the selected continuation.")).toBe(false);
+        expect(snapshot.blocks.some((block) => block.text === "The future beat must not leak.")).toBe(false);
+        expect(sharedSetup?.chronologyIndex).toBeLessThan(currentBeat?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(currentBeat?.chronologyIndex).toBeLessThan(currentResolution?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(currentResolution?.chronologyIndex).toBeLessThan(continuation?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        if (!continuation) throw new Error(formatLoreChronologySnapshot(snapshot));
+        expect(continuation).toEqual(expect.objectContaining({
+            group: "choice_node",
+            ownershipSource: expect.stringContaining("semantic=deterministic_continuation"),
+        }));
+    });
+
+    it("anchors staged continuation branches after the selected choice instead of rewriting the choice node", () => {
+        const entry = stagedNecrophageContinuationEntry();
+        const progression = repeatedEntryProgression(entry, 4);
+        const beforeModel = buildLoreModelFor(entry, progression);
+        const continuationStage = beforeModel.segments[0]?.loreSteps
+            .find((stage) => stage.branchMoment?.continuationChoices.some((choiceItem) => (
+                choiceItem.choice.label === "Interact with Site of the Ancients using a hero"
+            )));
+        const siteChoice = continuationStage?.branchMoment?.continuationChoices[0]?.choice;
+        if (!continuationStage || !siteChoice) throw new Error("Expected staged site continuation.");
+
+        const afterModel = buildLoreModelFor(entry, progression, [
+            selectionForChoice(continuationStage.step.stepKey, siteChoice),
+        ]);
+        const after = createLoreChronologySnapshot(afterModel, "after site continuation");
+        const selectedStage = afterModel.segments[0]?.loreSteps
+            .find((stage) => stage.renderedStep.selectedChoice?.choiceKey === "Choice_Site");
+        const nextChoiceStage = afterModel.segments[0]?.loreSteps
+            .find((stage) => stage.branchMoment?.branchingContinuationChoices.some((choiceItem) => (
+                choiceItem.choice.label === "Enhance Hero"
+            )));
+
+        expect(selectedStage?.branchMoment?.continuationChoices.map((choiceItem) => choiceItem.choice.label)).toEqual([
+            "Interact with Site of the Ancients using a hero",
+        ]);
+        expect(selectedStage?.branchMoment?.branchingContinuationChoices.map((choiceItem) => choiceItem.choice.label)).toEqual([]);
+        expect(selectedStage?.selectedChoiceLoreSections.map((section) => section.lines.map((line) => line.text).join(" "))).toEqual([
+            "The old site opens after the chosen continuation.",
+            "The relic is recovered before the next choice.",
+        ]);
+        expect(nextChoiceStage?.branchMoment?.branchingContinuationChoices.map((choiceItem) => choiceItem.choice.label)).toEqual([
+            "Enhance Hero",
+            "Save Girl",
+            "Execute Kazra",
+        ]);
+
+        const selectedChoiceBlock = after.blocks.find((block) => block.text === "Interact with Site of the Ancients using a hero");
+        const selectedLoreBlock = after.blocks.find((block) => block.text === "The old site opens after the chosen continuation.");
+        const futureChoiceBlock = after.blocks.find((block) => block.text === "Enhance Hero");
+
+        expect(selectedChoiceBlock?.chronologyIndex).toBeLessThan(selectedLoreBlock?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(selectedLoreBlock?.chronologyIndex).toBeLessThan(futureChoiceBlock?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(after.blocks.filter((block) => block.text === "The swarm learns the bitter truth.")).toHaveLength(1);
+        expect(after.blocks.some((block) => block.text === "The saved girl path resolves.")).toBe(false);
+    });
+
     it("claims repeated narrative ownership once while leaving later continuation stages available", () => {
         const entry = keyedContinuationEntry();
         const progression = keyedContinuationProgression();

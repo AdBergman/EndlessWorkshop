@@ -212,7 +212,7 @@ function StrategyDecisionPointBlock({
 function StrategyCompactNextStatus({ status }: { status: StrategyNextStatusContent }) {
     return (
         <div className={`questExplorer-strategyNextChip questExplorer-strategyNextChip--${status.kind}`}>
-            <span>Continuation</span>
+            <span>{nextStatusEyebrow(status)}</span>
             <strong>{status.title}</strong>
         </div>
     );
@@ -227,10 +227,11 @@ type StrategyNextStatusContent = {
     kind: StrategyPathStatus["kind"];
     title: string;
     detail: string | null;
+    isFinalOutcome?: boolean;
 };
 
 function shouldRenderNextStatus(status: StrategyNextStatusContent): boolean {
-    return status.kind !== "complete"
+    return (status.kind !== "complete" || Boolean(status.isFinalOutcome))
         && status.kind !== "awaiting-choice"
         && status.kind !== "continues-in-chapter";
 }
@@ -509,10 +510,24 @@ function StrategyChoiceResult({
     const hasProjectedMeta = showProjectedRequirements || showProjectedRewards;
     const projectedLines = outcome ? projectedOutcomeLines(option, outcome) : [];
     const nextStatus = nextStatusContentForPathStatus(status);
+    const showNextStatus = shouldRenderNextStatus(nextStatus);
+
+    if (!showOutcomeSummary && !hasProjectedMeta && !showNextStatus) return null;
+
+    const heading = nextStatus.isFinalOutcome && showNextStatus
+        ? `Choosing ${option.label} completes this path`
+        : showNextStatus
+            ? `Choosing ${option.label} leads to...`
+            : `Choosing ${option.label}`;
+    const ariaLabel = nextStatus.isFinalOutcome && showNextStatus
+        ? `Choosing ${option.label} completes this path`
+        : showNextStatus
+            ? `Choosing ${option.label} leads to`
+            : `Choosing ${option.label}`;
 
     return (
-        <section className="questExplorer-strategyChoiceResult" aria-label={`Choosing ${option.label} leads to`}>
-            <h4>Choosing {option.label} leads to...</h4>
+        <section className="questExplorer-strategyChoiceResult" aria-label={ariaLabel}>
+            <h4>{heading}</h4>
             {outcome && (showOutcomeSummary || hasProjectedMeta) ? (
                 <div className="questExplorer-strategyOutcomeBlock">
                     {showOutcomeSummary ? <StrategyTaskSummary title={outcome.title} lines={projectedLines} /> : null}
@@ -537,7 +552,7 @@ function StrategyChoiceResult({
                     ) : null}
                 </div>
             ) : null}
-            {shouldRenderNextStatus(nextStatus) ? <StrategyNextStatus status={nextStatus} /> : null}
+            {showNextStatus ? <StrategyNextStatus status={nextStatus} /> : null}
             {projectedDebugDetails?.map((detail, index) => (
                 <span className="questExplorer-choiceDebugMeta" key={`projected-debug:${index}`}>{detail}</span>
             ))}
@@ -548,11 +563,26 @@ function StrategyChoiceResult({
 function StrategyNextStatus({ status }: { status: StrategyNextStatusContent }) {
     return (
         <div className={`questExplorer-strategyNextStatus questExplorer-strategyNextStatus--${status.kind}`}>
-            <span>Continuation</span>
+            <span>{nextStatusEyebrow(status)}</span>
             <strong>{status.title}</strong>
             {status.detail ? <em>{status.detail}</em> : null}
         </div>
     );
+}
+
+function nextStatusEyebrow(status: StrategyNextStatusContent): string {
+    switch (status.kind) {
+        case "complete":
+            return status.isFinalOutcome ? "Final outcome" : "Complete";
+        case "failure":
+            return "Failure";
+        case "converges":
+            return "Convergence";
+        case "unresolved":
+            return "Archive gap";
+        default:
+            return "Continuation";
+    }
 }
 
 function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNextStatusContent {
@@ -590,8 +620,9 @@ function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNex
         case "complete":
             return {
                 kind: status.kind,
-                title: "No further continuation is recorded",
-                detail: status.targetLabel ? `Resolves at ${status.targetLabel}.` : null,
+                title: "Story currently ends here",
+                detail: "No later quest step is recorded for this path in the current archive.",
+                isFinalOutcome: true,
             };
         case "awaiting-choice":
             return {
@@ -630,6 +661,16 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
         };
     }
 
+    const complete = option.markers.find((marker) => marker.kind === "complete");
+    if (complete) {
+        return {
+            kind: "complete",
+            title: "Story currently ends here",
+            detail: complete.detail,
+            isFinalOutcome: true,
+        };
+    }
+
     const lead = option.leadsTo[0];
     if (lead) {
         return {
@@ -649,8 +690,9 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
 
     return {
         kind: "complete",
-        title: "No further continuation is recorded",
-        detail: null,
+        title: "Story currently ends here",
+        detail: "No later quest step is recorded for this outcome in the current archive.",
+        isFinalOutcome: true,
     };
 }
 

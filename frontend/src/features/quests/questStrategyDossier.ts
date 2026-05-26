@@ -50,7 +50,7 @@ export type StrategyDossierOutcome = {
     objectives: StrategyDossierObjective[];
 };
 
-export type StrategyDossierMarkerKind = "leads" | "converges" | "failure" | "unresolved";
+export type StrategyDossierMarkerKind = "leads" | "converges" | "failure" | "unresolved" | "complete";
 
 export type StrategyDossierMarker = {
     kind: StrategyDossierMarkerKind;
@@ -482,11 +482,11 @@ export function buildStrategyPathStatus(
 
     return {
         kind: "complete",
-        label: "No further modeled decision",
-        title: "No further modeled decision in this chapter",
+        label: "Final Outcome",
+        title: "Story currently ends here",
         description: terminalLabel
-            ? `The selected sequence currently resolves at ${terminalLabel}. No additional explicit decision, convergence, failure, or chapter exit is modeled from here.`
-            : "The selected sequence has no additional modeled explicit decision, convergence, failure, or chapter exit.",
+            ? `The selected sequence resolves at ${terminalLabel}. No later quest step is recorded for this path in the current archive.`
+            : "No later quest step is recorded for this selected path in the current archive.",
         choiceLabel: statusChoice?.label ?? null,
         targetLabel: terminalLabel,
         markers: latestChoiceMarkers,
@@ -587,7 +587,7 @@ function terminalStripDetail(status: StrategyPathStatus): string | null {
         case "unresolved":
             return status.choiceLabel ? `After ${status.choiceLabel}` : "No explicit next step is modeled.";
         case "complete":
-            return status.targetLabel;
+            return "No later quest step is recorded in the current archive.";
         default:
             return status.targetLabel;
     }
@@ -597,7 +597,8 @@ export function buildStrategyBranchOptions(
     renderedStep: RenderedPathStep,
     choices: QuestPathChoice[],
     entriesByKey: Record<string, QuestExplorerEntry>,
-    objectivesByChoiceKey: Map<string, StrategyDossierObjective[]> = new Map()
+    objectivesByChoiceKey: Map<string, StrategyDossierObjective[]> = new Map(),
+    markerOptions: { unresolvedChoiceIds?: ReadonlySet<string> } = {}
 ): StrategyDossierBranchOption[] {
     const selectedContextBranchKeys = selectedContextBranchKeysForStep(renderedStep);
 
@@ -635,7 +636,9 @@ export function buildStrategyBranchOptions(
             rewards: rewardDisplayTexts(rewardDetails),
             rewardDetails,
             leadsTo: leadsToForChoice(choice, entriesByKey),
-            markers: markersForChoice(choice, entriesByKey),
+            markers: markersForChoice(choice, entriesByKey, {
+                forceUnresolved: markerOptions.unresolvedChoiceIds?.has(choice.id),
+            }),
             isSelected: renderedStep.selectedChoice?.choiceId === choice.id,
             isInSelectedPath: Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey)),
         };
@@ -806,7 +809,7 @@ function buildMarkers(
 function markersForChoice(
     choice: QuestPathChoice,
     entriesByKey: Record<string, QuestExplorerEntry>,
-    options: { includeUnresolved?: boolean } = {}
+    options: { includeUnresolved?: boolean; forceUnresolved?: boolean } = {}
 ): StrategyDossierMarker[] {
     const includeUnresolved = options.includeUnresolved ?? true;
     const markers: StrategyDossierMarker[] = [
@@ -823,12 +826,28 @@ function markersForChoice(
         });
     }
 
-    if (includeUnresolved && markers.length === 0 && !choice.hasDependentContinuations) {
+    if (includeUnresolved && options.forceUnresolved && markers.length === 0) {
         markers.push({
             kind: "unresolved",
             label: "Unknown continuation",
-            detail: "No explicit next, failure, or convergence entry is modeled for this option.",
+            detail: "The archive shows later progression, but this option has no explicit next, failure, or convergence entry.",
         });
+    }
+
+    if (includeUnresolved && markers.length === 0 && !choice.hasDependentContinuations) {
+        if (choice.semanticStageKind === "unresolved" || choice.sectionRole === "unresolved") {
+            markers.push({
+                kind: "unresolved",
+                label: "Unknown continuation",
+                detail: "No explicit next, failure, or convergence entry is modeled for this option.",
+            });
+        } else {
+            markers.push({
+                kind: "complete",
+                label: "Final outcome",
+                detail: "No later quest step is recorded for this outcome in the current archive.",
+            });
+        }
     }
 
     return uniqueMarkers(markers);

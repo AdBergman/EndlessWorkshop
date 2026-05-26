@@ -350,7 +350,8 @@ describe("strategy dossier helpers", () => {
       ),
     ).toEqual(expect.objectContaining({
       kind: "complete",
-      label: "No further modeled decision",
+      label: "Final Outcome",
+      title: "Story currently ends here",
     }));
   });
 
