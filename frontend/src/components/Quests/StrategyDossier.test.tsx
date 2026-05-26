@@ -204,8 +204,8 @@ describe("StrategyDossier", () => {
         expect(within(currentTask).getByText("Hold the ridge.")).toBeInTheDocument();
         expect(within(currentTask).getAllByText("Spend supplies.")).toHaveLength(1);
         expect(within(currentTask).getAllByText("Gain command.")).toHaveLength(1);
-        expect(within(currentTask).getAllByText("Continuation")).toHaveLength(1);
-        expect(within(currentTask).getAllByText("No further continuation is recorded")).toHaveLength(1);
+        expect(within(currentTask).queryByText("Continuation")).not.toBeInTheDocument();
+        expect(within(currentTask).queryByText("No further continuation is recorded")).not.toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
         expect(screen.queryByText("No path is being simulated yet.")).not.toBeInTheDocument();
@@ -251,7 +251,7 @@ describe("StrategyDossier", () => {
         expect(within(selectedOptionButton).getAllByText("Gain command.")).toHaveLength(1);
         expect(within(choiceResult).queryByText("Spend supplies.")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Gain command.")).not.toBeInTheDocument();
-        expect(within(choiceResult).getByText("No further continuation is recorded")).toBeInTheDocument();
+        expect(within(choiceResult).queryByText("No further continuation is recorded")).not.toBeInTheDocument();
         expect(within(selectedOptionButton).queryByText("No further continuation is recorded")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Requirements")).not.toBeInTheDocument();
         expect(screen.queryByText("Projected Rewards")).not.toBeInTheDocument();

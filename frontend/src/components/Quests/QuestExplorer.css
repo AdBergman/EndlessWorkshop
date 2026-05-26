@@ -1223,11 +1223,6 @@
     text-transform: uppercase;
 }
 
-.questExplorer-strategyPlanTaskHeader span:last-child {
-    color: var(--quest-teal);
-    letter-spacing: 0.1em;
-}
-
 .questExplorer-strategyChoiceResult h4,
 .questExplorer-strategyDossierMarker strong {
     color: var(--quest-teal);

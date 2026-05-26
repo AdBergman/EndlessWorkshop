@@ -2675,7 +2675,7 @@ describe("QuestExplorerPage", () => {
         const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 1: Find Pryzja" });
         expect(within(currentTask).getByText("Find Pryzja")).toBeInTheDocument();
         expect(within(currentTask).getByText("Find Pryzja.")).toBeInTheDocument();
-        expect(within(currentTask).getByText("Continues in this chapter")).toBeInTheDocument();
+        expect(within(currentTask).queryByText("Continues in this chapter")).not.toBeInTheDocument();
         expect(within(currentTask).getByText("Resolve the current beat.")).toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
@@ -2705,13 +2705,16 @@ describe("QuestExplorerPage", () => {
         expect(within(setupTask).getByText("Find Pryzja")).toBeInTheDocument();
         expect(within(setupTask).getByText("Find Pryzja.")).toBeInTheDocument();
         expect(within(setupTask).getByText("Resolve the current beat.")).toBeInTheDocument();
+        expect(within(setupTask).queryByText("Available")).not.toBeInTheDocument();
         expect(within(nextTask).getByText("Eliminate the threat")).toBeInTheDocument();
         expect(within(nextTask).getByText("Eliminate the threat.")).toBeInTheDocument();
         expect(within(nextTask).getByText("Resolve the next beat.")).toBeInTheDocument();
-        expect(within(nextTask).getByText("Continues in this chapter")).toBeInTheDocument();
+        expect(within(nextTask).queryByText("Continues in this chapter")).not.toBeInTheDocument();
+        expect(within(nextTask).queryByText("Selected")).not.toBeInTheDocument();
         expect(within(futureTask).getByText("Rebuild the city")).toBeInTheDocument();
         expect(within(futureTask).getByText("Rebuild the city.")).toBeInTheDocument();
         expect(within(futureTask).getByText("Resolve the future beat.")).toBeInTheDocument();
+        expect(within(futureTask).queryByText("Preview")).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();

@@ -139,7 +139,7 @@ function StrategyChapterTaskBlock({
     const nextStatus = task.continuationStatus
         ? nextStatusContentForPathStatus(task.continuationStatus)
         : task.option ? nextStatusContentForOption(task.option) : null;
-    const showCompactStatus = nextStatus && nextStatus.kind !== "complete";
+    const showCompactStatus = nextStatus && shouldRenderNextStatus(nextStatus);
 
     return (
         <section
@@ -148,7 +148,6 @@ function StrategyChapterTaskBlock({
         >
             <header className="questExplorer-strategyPlanTaskHeader">
                 <span>{task.stageLabel}</span>
-                <span>{taskStatusLabel(task.status)}</span>
             </header>
             <StrategyTaskSummary
                 title={task.title}
@@ -219,19 +218,6 @@ function StrategyCompactNextStatus({ status }: { status: StrategyNextStatusConte
     );
 }
 
-function taskStatusLabel(status: StrategyChapterTask["status"]): string {
-    switch (status) {
-        case "selected":
-            return "Selected";
-        case "preview":
-            return "Preview";
-        case "locked":
-            return "Locked";
-        default:
-            return "Available";
-    }
-}
-
 function decisionPointGroupLabel(options: StrategyDossierBranchOption[]): string | null {
     const labels = uniqueDisplayValues(options.map((option) => option.choice.groupLabel ?? option.choice.eyebrow));
     return labels[0] ?? null;
@@ -242,6 +228,12 @@ type StrategyNextStatusContent = {
     title: string;
     detail: string | null;
 };
+
+function shouldRenderNextStatus(status: StrategyNextStatusContent): boolean {
+    return status.kind !== "complete"
+        && status.kind !== "awaiting-choice"
+        && status.kind !== "continues-in-chapter";
+}
 
 type StrategyPresentation = {
     hasDecision: boolean;
@@ -318,7 +310,7 @@ function StrategyCurrentTask({
                 rewardDetails={rewardDetails}
                 debugDetail={debugChoiceDetails?.get(soleOption.choice.id)}
             />
-            {nextStatus ? <StrategyNextStatus status={nextStatus} /> : null}
+            {nextStatus && shouldRenderNextStatus(nextStatus) ? <StrategyNextStatus status={nextStatus} /> : null}
         </div>
     );
 }
@@ -516,6 +508,7 @@ function StrategyChoiceResult({
     const showProjectedRewards = Boolean(outcome && shouldShowProjectedRewards(option, outcome));
     const hasProjectedMeta = showProjectedRequirements || showProjectedRewards;
     const projectedLines = outcome ? projectedOutcomeLines(option, outcome) : [];
+    const nextStatus = nextStatusContentForPathStatus(status);
 
     return (
         <section className="questExplorer-strategyChoiceResult" aria-label={`Choosing ${option.label} leads to`}>
@@ -544,7 +537,7 @@ function StrategyChoiceResult({
                     ) : null}
                 </div>
             ) : null}
-            <StrategyNextStatus status={nextStatusContentForPathStatus(status)} />
+            {shouldRenderNextStatus(nextStatus) ? <StrategyNextStatus status={nextStatus} /> : null}
             {projectedDebugDetails?.map((detail, index) => (
                 <span className="questExplorer-choiceDebugMeta" key={`projected-debug:${index}`}>{detail}</span>
             ))}
