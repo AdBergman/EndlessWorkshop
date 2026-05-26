@@ -206,6 +206,7 @@ public record QuestExplorerDto(
 
     public record ObjectiveDto(
             String objectiveKey,
+            String choiceKey,
             String text,
             String phase,
             List<String> revealedByBranchKeys,
@@ -221,7 +222,7 @@ public record QuestExplorerDto(
                 List<RequirementDto> requirements,
                 List<RewardDto> rewards
         ) {
-            this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+            this(objectiveKey, null, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
         }
     }
 

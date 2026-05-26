@@ -211,7 +211,7 @@ public final class QuestExplorerMapper {
 
     private static QuestExplorerDto.ObjectiveDto toDto(QuestExplorer.Objective model) {
         return new QuestExplorerDto.ObjectiveDto(
-                model.objectiveKey(), model.text(), model.phase(),
+                model.objectiveKey(), model.choiceKey(), model.text(), model.phase(),
                 model.revealedByBranchKeys(), model.revealedByChoiceKeys(), model.revealedByBranchPathAlternatives(),
                 model.requirements().stream().map(QuestExplorerMapper::toDto).toList(),
                 model.rewards().stream().map(QuestExplorerMapper::toDto).toList()

@@ -190,6 +190,7 @@ public final class QuestExplorerImportMapper {
     private static QuestExplorerStrategyObjectiveImportSnapshot toSnapshot(QuestExplorerImportObjectiveDto dto) {
         return new QuestExplorerStrategyObjectiveImportSnapshot(
                 trimToNull(dto == null ? null : dto.objectiveKey()),
+                trimToNull(dto == null ? null : dto.choiceKey()),
                 required(dto == null ? null : dto.text(), "objective.text"),
                 trimToNull(dto.phase()),
                 cleanValues(dto.revealedByBranchKeys()),

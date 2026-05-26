@@ -219,6 +219,7 @@ export function questEntry({
 export function testObjective(objectiveKey: string, text = objectiveKey): StrategyObjective {
   return {
     objectiveKey,
+    choiceKey: null,
     text,
     phase: "completion",
     requirements: [],

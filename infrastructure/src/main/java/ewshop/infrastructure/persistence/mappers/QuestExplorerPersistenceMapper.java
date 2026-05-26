@@ -138,6 +138,7 @@ public class QuestExplorerPersistenceMapper {
         QuestExplorerEntryEntity.ObjectiveEntity entity = new QuestExplorerEntryEntity.ObjectiveEntity();
         entity.entry = entry;
         entity.objectiveKey = model.objectiveKey();
+        entity.choiceKey = model.choiceKey();
         entity.text = model.text();
         entity.phase = model.phase();
         entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
@@ -320,6 +321,7 @@ public class QuestExplorerPersistenceMapper {
     private QuestExplorer.Objective toModel(QuestExplorerStrategyObjectiveImportSnapshot snapshot) {
         return new QuestExplorer.Objective(
                 snapshot.objectiveKey(),
+                snapshot.choiceKey(),
                 snapshot.text(),
                 snapshot.phase(),
                 snapshot.revealedByBranchKeys(),
@@ -472,6 +474,7 @@ public class QuestExplorerPersistenceMapper {
     private QuestExplorer.Objective toModel(QuestExplorerEntryEntity.ObjectiveEntity entity) {
         return new QuestExplorer.Objective(
                 entity.objectiveKey,
+                entity.choiceKey,
                 entity.text,
                 entity.phase,
                 List.copyOf(entity.revealedByBranchKeys),
@@ -593,6 +596,7 @@ public class QuestExplorerPersistenceMapper {
     private QuestExplorer.Objective normalizeForComparison(QuestExplorer.Objective objective) {
         return new QuestExplorer.Objective(
                 objective.objectiveKey(),
+                objective.choiceKey(),
                 objective.text(),
                 objective.phase(),
                 objective.revealedByBranchKeys(),

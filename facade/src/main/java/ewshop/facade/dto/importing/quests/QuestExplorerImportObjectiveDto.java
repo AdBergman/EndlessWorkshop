@@ -7,6 +7,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record QuestExplorerImportObjectiveDto(
         String objectiveKey,
+        String choiceKey,
         String text,
         String phase,
         List<String> revealedByBranchKeys,
@@ -22,6 +23,17 @@ public record QuestExplorerImportObjectiveDto(
             List<QuestExplorerImportRequirementDto> requirements,
             List<QuestExplorerImportRewardDto> rewards
     ) {
-        this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+        this(objectiveKey, null, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+    }
+
+    public QuestExplorerImportObjectiveDto(
+            String objectiveKey,
+            String choiceKey,
+            String text,
+            String phase,
+            List<QuestExplorerImportRequirementDto> requirements,
+            List<QuestExplorerImportRewardDto> rewards
+    ) {
+        this(objectiveKey, choiceKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
     }
 }

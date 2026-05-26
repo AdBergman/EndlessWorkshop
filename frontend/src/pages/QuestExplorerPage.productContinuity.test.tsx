@@ -849,7 +849,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(debugValue("active branch sequence")).toContain(`${kinCh0}:branch:1, ${kinCh0}:branch:2`);
     });
 
-    it("renders Kin Ch0 Strategy as a current task without duplicate projected requirements", async () => {
+    it("renders Kin Ch0 Strategy as a chapter-plan task without duplicate projected requirements", async () => {
         const user = userEvent.setup();
         renderProductQuest(kinCh0, Faction.KIN, "kin");
 
@@ -857,7 +857,9 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicleRegion = chronicle();
-        const currentTask = within(chronicleRegion).getByRole("region", { name: "Current task" });
+        const chapterPlan = within(chronicleRegion).getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 1: Found a home for the surviving Kin." });
+        expect(within(chronicleRegion).queryByRole("region", { name: "Current task" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Compact Objective" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
@@ -997,7 +999,8 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicleRegion = chronicle();
-        expect(within(chronicleRegion).getAllByRole("region", { name: "Current task" })).toHaveLength(1);
+        expect(within(chronicleRegion).getAllByRole("region", { name: "Chapter plan" })).toHaveLength(1);
+        expect(within(chronicleRegion).queryByRole("region", { name: "Current task" })).not.toBeInTheDocument();
         await user.click(within(chronicleRegion).getByRole("button", { name: /Track/ }));
 
         const trackChoice = within(chronicleRegion).getByRole("button", { name: /Track/ });

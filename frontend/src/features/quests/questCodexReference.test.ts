@@ -114,6 +114,40 @@ describe("Quest Codex reference display metadata", () => {
         expect(resolved).toBe(direct);
     });
 
+    it.each([
+        ["Tech", "Technology_Cartography", "tech"],
+        ["Unit", "Unit_KinOfSheredyn_Chosen", "units"],
+        ["Hero", "Hero_KinOfSheredyn_Archer_0", "heroes"],
+        ["Trait", "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest", "traits"],
+        ["FactionTrait", "FactionTrait_Aspects_BattleAffinity", "traits"],
+        ["HeroTrait", "HeroTrait_Tactician", "traits"],
+        ["Equipment", "Equipment_Accessory_01_Definition", "equipment"],
+        ["District", "District_Tier1_Industry", "districts"],
+        ["Improvement", "DistrictImprovement_Bridge_00", "improvements"],
+    ])("resolves %s references through the mapped Codex export kind", (referenceKind, referenceKey, exportKind) => {
+        const entry = codexEntry(exportKind, referenceKey, `${referenceKind} entry`);
+
+        expect(resolveQuestCodexReference({
+            displayText: `Linked ${referenceKind}`,
+            codexEntryKey: null,
+            referenceKind,
+            referenceKey,
+            referenceDisplayName: `${referenceKind} entry`,
+        }, indexes([entry]))).toBe(entry);
+    });
+
+    it("falls back to typed metadata when codexEntryKey is empty", () => {
+        const tech = codexEntry("tech", "Technology_Cartography", "Cartography");
+
+        expect(resolveQuestCodexReference({
+            displayText: "Research Cartography",
+            codexEntryKey: " ",
+            referenceKind: "Tech",
+            referenceKey: tech.entryKey,
+            referenceDisplayName: tech.displayName,
+        }, indexes([tech]))).toBe(tech);
+    });
+
     it("resolves typed reference metadata and reward asset fallback", () => {
         const district = codexEntry("districts", "District_Tier1_Industry", "Works");
         const unit = codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen");
@@ -141,17 +175,14 @@ describe("Quest Codex reference display metadata", () => {
 
     it("does not invent a Codex target for formula-only or unresolved rows", () => {
         const codexIndexes = indexes([codexEntry("tech", "Technology_Cartography", "Cartography")]);
-
-        expect(resolveQuestCodexReference({
+        const formulaOnlyReward = rewardDisplayFromReward(reward({
+            kind: "Money",
             displayText: "Gain Dust based on technology era.",
-            codexEntryKey: null,
-            referenceKind: null,
-            referenceKey: null,
-            referenceDisplayName: null,
-            assetKind: null,
-            assetKey: null,
-            assetDisplayName: null,
-        }, codexIndexes)).toBeUndefined();
+            formulaText: "50 + 50 * Technology Era",
+        }));
+
+        expect(formulaOnlyReward).not.toBeNull();
+        expect(resolveQuestCodexReference(formulaOnlyReward!, codexIndexes)).toBeUndefined();
 
         expect(resolveQuestCodexReference({
             displayText: "Build the missing thing.",

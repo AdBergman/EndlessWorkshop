@@ -297,6 +297,7 @@ public record QuestExplorer(
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Objective(
             String objectiveKey,
+            String choiceKey,
             String text,
             String phase,
             List<String> revealedByBranchKeys,
@@ -312,7 +313,7 @@ public record QuestExplorer(
                 List<Requirement> requirements,
                 List<Reward> rewards
         ) {
-            this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+            this(objectiveKey, null, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
         }
 
         public Objective {

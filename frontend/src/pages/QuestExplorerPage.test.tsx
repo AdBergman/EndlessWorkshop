@@ -2440,7 +2440,7 @@ describe("QuestExplorerPage", () => {
         expect(await screen.findByRole("heading", { name: "Stream Opening" })).toBeInTheDocument();
     });
 
-    it("renders one-option strategy mode as the current task without choice framing", async () => {
+    it("renders one-option strategy mode as a chapter-plan task without choice framing", async () => {
         const user = userEvent.setup();
         renderPage("/quests/Quest_A");
 
@@ -2448,7 +2448,9 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        const currentTask = within(chronicle).getByRole("region", { name: "Current task" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 2: Follow the marker" });
+        expect(within(chronicle).queryByRole("region", { name: "Current task" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Compact Objective" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
@@ -2461,6 +2463,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByRole("region", { name: "Path Markers" })).not.toBeInTheDocument();
         expect(within(currentTask).getByText("Follow the marker")).toBeInTheDocument();
         expect(within(currentTask).getByText("Choose the marker path.")).toBeInTheDocument();
+        expect(within(currentTask).getByText("Reach the marker.")).toBeInTheDocument();
         expect(within(currentTask).getAllByText("Visit the first marker.")).toHaveLength(1);
         expect(within(currentTask).getAllByText("Gain Dust.")).toHaveLength(1);
         expect(within(currentTask).getByText("Continuation")).toBeInTheDocument();
@@ -2489,7 +2492,9 @@ describe("QuestExplorerPage", () => {
         const riskOption = within(comparison).getByRole("button", { name: /Risk the breach/ });
         const rejoinOption = within(comparison).getByRole("button", { name: /Rejoin the line/ });
 
-        expect(within(chronicle).getByRole("region", { name: "Current task" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Chapter plan" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Step 1 of 1: Marker Brief" })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("region", { name: "Current task" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Compact Objective" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Required Path" })).not.toBeInTheDocument();
         expect(within(comparison).getByRole("region", { name: "Command Posture" })).toBeInTheDocument();
@@ -2555,7 +2560,7 @@ describe("QuestExplorerPage", () => {
         expect(selectedResult.querySelector(".questExplorer-strategyNextStatus--converges")).not.toBeNull();
     });
 
-    it("scopes strategy content to the focused step before rendering decision and continuation stages", async () => {
+    it("renders strategy as a chapter plan while keeping unselected variants out of task details", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
         renderPage("/quests/Quest_Scoped");
@@ -2666,11 +2671,12 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        const currentTask = within(chronicle).getByRole("region", { name: "Current task" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 1: Find Pryzja" });
         expect(within(currentTask).getByText("Find Pryzja")).toBeInTheDocument();
         expect(within(currentTask).getByText("Find Pryzja.")).toBeInTheDocument();
         expect(within(currentTask).getByText("Continues in this chapter")).toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the current beat.")).not.toBeInTheDocument();
+        expect(within(currentTask).getByText("Resolve the current beat.")).toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Continuation revealed")).not.toBeInTheDocument();
@@ -2689,21 +2695,26 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getAllByText("Step 2").length).toBeGreaterThan(0);
-        expect(within(chronicle).getByText("of 3")).toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("region", { name: "Chapter plan" })).toBeInTheDocument();
+        expect(within(chronicle).getByText("3 steps")).toBeInTheDocument();
 
-        const currentTask = within(chronicle).getByRole("region", { name: "Current task" });
-        expect(within(currentTask).getByText("Eliminate the threat")).toBeInTheDocument();
-        expect(within(currentTask).getByText("Eliminate the threat.")).toBeInTheDocument();
-        expect(within(currentTask).getByText("Continues in this chapter")).toBeInTheDocument();
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const setupTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 3: Find Pryzja" });
+        const nextTask = within(chapterPlan).getByRole("region", { name: "Step 2 of 3: Eliminate the threat" });
+        const futureTask = within(chapterPlan).getByRole("region", { name: "Step 3 of 3: Rebuild the city" });
+        expect(within(setupTask).getByText("Find Pryzja")).toBeInTheDocument();
+        expect(within(setupTask).getByText("Find Pryzja.")).toBeInTheDocument();
+        expect(within(setupTask).getByText("Resolve the current beat.")).toBeInTheDocument();
+        expect(within(nextTask).getByText("Eliminate the threat")).toBeInTheDocument();
+        expect(within(nextTask).getByText("Eliminate the threat.")).toBeInTheDocument();
+        expect(within(nextTask).getByText("Resolve the next beat.")).toBeInTheDocument();
+        expect(within(nextTask).getByText("Continues in this chapter")).toBeInTheDocument();
+        expect(within(futureTask).getByText("Rebuild the city")).toBeInTheDocument();
+        expect(within(futureTask).getByText("Rebuild the city.")).toBeInTheDocument();
+        expect(within(futureTask).getByText("Resolve the future beat.")).toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Rebuild the city")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
     });
 
     it("reveals projected local continuation steps from explicit reveal metadata", async () => {
@@ -2714,8 +2725,9 @@ describe("QuestExplorerPage", () => {
         await screen.findByRole("heading", { name: "Projected Setup" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(chronicle).getAllByText("Step 1").length).toBeGreaterThan(0);
-        expect(within(chronicle).queryByText("Step 2")).not.toBeInTheDocument();
+        const initialChapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(initialChapterPlan).getByRole("region", { name: "Step 1 of 3: Projected Setup" })).toBeInTheDocument();
+        expect(within(initialChapterPlan).queryByRole("region", { name: "Step 2 of 3: Inspect the signal" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
 
@@ -2723,12 +2735,15 @@ describe("QuestExplorerPage", () => {
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Search/ });
 
-        expect(within(chronicle).queryByText("Resolve the carried current beat.")).not.toBeInTheDocument();
         expect(selectedChoice).toHaveAttribute("aria-current", "true");
         expect(selectedChoice).toHaveTextContent("Search");
-        expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
-        expect(screen.queryByText(/continues in Chapter 3/)).not.toBeInTheDocument();
+        const selectedChapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(selectedChapterPlan).getByRole("region", { name: "Step 2 of 3: Inspect the signal" })).toBeInTheDocument();
+        expect(within(selectedChapterPlan).getByRole("region", { name: "Step 3 of 3: Report onward" })).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried current beat.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried next beat.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried future beat.")).toBeInTheDocument();
+        expect(screen.getByText(/Continues in Chapter 3/)).toBeInTheDocument();
     });
 
     it("does not bridge projected local steps without explicit reveal metadata", async () => {
@@ -3097,7 +3112,8 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
         expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
-        const currentTask = screen.getByRole("region", { name: "Current task" });
+        const chapterPlan = screen.getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 2: Take the unknown road" });
         expect(within(currentTask).getByText("Take the unknown road")).toBeInTheDocument();
         expect(within(currentTask).getByText("Unknown continuation")).toBeInTheDocument();
         expect(within(currentTask).queryByText("No explicit continuation is recorded for this stage.")).not.toBeInTheDocument();
@@ -3191,6 +3207,22 @@ describe("QuestExplorerPage", () => {
         expect(screen.queryByText("Far Bold")).not.toBeInTheDocument();
     });
 
+    it("surfaces staged continuation completion choices once in Strategy mode", async () => {
+        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
+        renderPage("/quests/Quest_A?mode=strategy");
+
+        await screen.findByRole("heading", { name: "A Gamble" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+
+        expect(screen.getByText("Completion choices")).toBeInTheDocument();
+        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
+        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
+        expect(screen.queryByText("Far Pious")).not.toBeInTheDocument();
+        expect(screen.queryByText("Far Open")).not.toBeInTheDocument();
+        expect(screen.queryByText("Far Bold")).not.toBeInTheDocument();
+    });
+
     it("keeps staged continuation diagnostics readable in debug and reveals raw convergence rows on demand", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
@@ -3213,14 +3245,15 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getByText("hidden staged continuation count")).toBeInTheDocument();
     });
 
-    it("shows a one-option chapter exit in strategy without mutating the selected entry", async () => {
+    it("keeps the Strategy rail on the selected chapter when a one-option chapter exits immediately", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(nextChapterPayload);
         renderPage("/quests/Quest_A?mode=strategy");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        const currentTask = within(chronicle).getByRole("region", { name: "Current task" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const currentTask = within(chapterPlan).getByRole("region", { name: "Step 1 of 1: Continue to chapter two" });
         const rail = screen.getByRole("complementary");
         expect(within(currentTask).getByText("Continue to chapter two")).toBeInTheDocument();
         expect(within(currentTask).getByText("Continues in Chapter 2: Chapter Two Rising")).toBeInTheDocument();
@@ -3229,6 +3262,7 @@ describe("QuestExplorerPage", () => {
         expect(within(rail).getByRole("button", { name: /Archive of the First Tide\s+Chapter 1\s+1 step/ })).toHaveAttribute("aria-current", "page");
         expect(within(rail).getByRole("button", { name: /Chapter Two Rising\s+Chapter 2\s+1 step/ })).not.toHaveAttribute("aria-current", "page");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_A?mode=strategy");
     });
 
     it("clears the selected entry when navigation lands on a missing alias", async () => {

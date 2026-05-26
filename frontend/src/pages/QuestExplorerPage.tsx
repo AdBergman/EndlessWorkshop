@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import QuestExplorerModeSwitch from "@/components/Quests/QuestExplorerModeSwitch";
 import {
     InlineMetaList,
-    StrategyDossier,
+    StrategyChapterPlan,
 } from "@/components/Quests/StrategyDossier";
 import {
     InlineRewardMetaList,
@@ -535,7 +535,7 @@ function OverviewRequirementColumn({
             <ul>
                 {visibleRequirements.length > 0 ? visibleRequirements.map((requirement, index) => (
                     <li key={`${title}:${index}:${requirement.displayText}:${requirement.referenceKey ?? ""}:${requirement.codexEntryKey ?? ""}`}>
-                        <QuestCodexReferenceLink source={requirement}>
+                        <QuestCodexReferenceLink source={requirement} showTooltip>
                             {requirement.displayText}
                         </QuestCodexReferenceLink>
                     </li>
@@ -850,7 +850,7 @@ function InlineStageMeta({
             {fallbackItems.map((item, index) => (
                 <span key={`${label}:${index}:${item.displayText}:${item.referenceKey ?? ""}`}>
                     {index > 0 ? "; " : null}
-                    <QuestCodexReferenceLink source={item}>
+                    <QuestCodexReferenceLink source={item} showTooltip={label === "Requires"}>
                         {item.displayText}
                     </QuestCodexReferenceLink>
                 </span>
@@ -884,9 +884,13 @@ function StrategyStep({
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const activeStage = model.activeStage;
-    if (!activeStage) return null;
+    const renderedStep = activeStage?.renderedStep ?? model.renderedStep;
+    if (!renderedStep) return null;
 
-    const { renderedStep, dossier, title, totalStages } = activeStage;
+    const { title, totalStages } = activeStage ?? {
+        title: model.title,
+        totalStages: model.totalSteps,
+    };
 
     const fallbackChoiceGate = renderedStep.choices.length > 0 ? (
         <StrategyStageGate
@@ -910,10 +914,10 @@ function StrategyStep({
             <header className="questExplorer-stepHeader questExplorer-strategyStepHeader">
                 <div>
                     <span className="questExplorer-stepLabel">
-                        <span>{stepPositionLabel(renderedStep.step)}</span>
-                        <span>of {totalStages}</span>
+                        <span>Chapter plan</span>
+                        <span>{totalStages} {totalStages === 1 ? "step" : "steps"}</span>
                     </span>
-                    <ProgressionPips total={totalStages} activeIndex={activeStage.stepIndex} />
+                    <ProgressionPips total={totalStages} activeIndex={Math.max(model.chapterTasks[0]?.stageOrder ?? 1, 1) - 1} />
                 </div>
                 <strong className="questExplorer-stepTitle">{title}</strong>
             </header>
@@ -923,9 +927,9 @@ function StrategyStep({
             ) : (
                 renderedStep.displayEntry ? (
                     <div className="questExplorer-strategyStepBody">
-                        <StrategyDossier
-                            model={dossier}
-                            step={renderedStep.step}
+                        <StrategyChapterPlan
+                            tasks={model.chapterTasks}
+                            decisionPoints={model.decisionPoints}
                             debugChoiceDetails={debugChoiceDetails}
                             onChoose={onChoose}
                             projectedDebugDetails={projectedDebugDetails}
@@ -958,10 +962,11 @@ function StrategyProgression({
     showRawHiddenRows: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    if (!progression || !model?.activeStage) return null;
+    if (!progression || !model) return null;
 
-    const renderedStep = model.activeStage.renderedStep;
+    const renderedStep = model.activeStage?.renderedStep ?? model.renderedStep;
     const debugChoiceDetails = debugQuestProgression
+        && renderedStep
         ? choiceDebugDetailsForStep(
             renderedStep.step,
             model.debugChoices,
@@ -1098,14 +1103,12 @@ export default function QuestExplorerPage() {
         () => loreFlowModel.segments.map((segment) => segment.segmentKey).join("|"),
         [loreFlowModel.segments]
     );
-    const strategyRailEntry = strategyFlowModel?.flow.reachedContinuationEntryKey
-        ? entriesByKey[strategyFlowModel.flow.reachedContinuationEntryKey] ?? selectedEntry
-        : selectedEntry;
     const activeRailEntry = mode === "lore"
         ? scrollActiveRailEntryKey
             ? entriesByKey[scrollActiveRailEntryKey] ?? selectedEntry
             : selectedEntry
-        : strategyRailEntry;
+        // Strategy continuation projections describe dossier status, not canonical rail selection.
+        : selectedEntry;
     const selectedRailEntryKey = useMemo(
         () => resolveRailSelectionKey(activeRailEntry, railGroups),
         [activeRailEntry, railGroups]

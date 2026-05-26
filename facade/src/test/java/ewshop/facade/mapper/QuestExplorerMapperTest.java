@@ -186,6 +186,7 @@ class QuestExplorerMapperTest {
         );
         var objective = new QuestExplorerImportObjectiveDto(
                 "Quest_A:objective:1",
+                "Quest_A:choice:objective:1",
                 "Found a home.",
                 "Objective",
                 List.of(requirement),
@@ -199,6 +200,7 @@ class QuestExplorerMapperTest {
         var snapshots = toValidatedSnapshots(batch);
 
         var loadedObjective = snapshots.getFirst().objectives().getFirst();
+        assertThat(loadedObjective.choiceKey()).isEqualTo("Quest_A:choice:objective:1");
         assertThat(loadedObjective.requirements().getFirst().groupLabel()).isEqualTo("Completion");
         assertThat(loadedObjective.rewards().getFirst().groupOrder()).isEqualTo(10);
         var loadedBranch = snapshots.getFirst().branches().getFirst();

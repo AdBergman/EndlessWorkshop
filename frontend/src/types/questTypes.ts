@@ -185,6 +185,7 @@ export type QuestStrategyView = {
 
 export type StrategyObjective = {
     objectiveKey: string | null;
+    choiceKey?: string | null;
     text: string;
     phase: string | null;
     revealedByBranchKeys?: string[];

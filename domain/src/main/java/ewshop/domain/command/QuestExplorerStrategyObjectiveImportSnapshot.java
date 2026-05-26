@@ -4,6 +4,7 @@ import java.util.List;
 
 public record QuestExplorerStrategyObjectiveImportSnapshot(
         String objectiveKey,
+        String choiceKey,
         String text,
         String phase,
         List<String> revealedByBranchKeys,
@@ -19,7 +20,7 @@ public record QuestExplorerStrategyObjectiveImportSnapshot(
             List<QuestExplorerRequirementImportSnapshot> requirements,
             List<QuestExplorerRewardImportSnapshot> rewards
     ) {
-        this(objectiveKey, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
+        this(objectiveKey, null, text, phase, List.of(), List.of(), List.of(), requirements, rewards);
     }
 
     public QuestExplorerStrategyObjectiveImportSnapshot {

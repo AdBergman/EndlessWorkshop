@@ -218,6 +218,8 @@ public class QuestExplorerEntryEntity {
 
         @Column(name = "objective_key", length = 360)
         public String objectiveKey;
+        @Column(name = "choice_key", length = 300)
+        public String choiceKey;
         @Column(name = "text", nullable = false, columnDefinition = "TEXT")
         public String text;
         @Column(name = "phase", length = 120)

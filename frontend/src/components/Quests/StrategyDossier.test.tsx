@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StrategyDossier } from "@/components/Quests/StrategyDossier";
@@ -26,13 +26,19 @@ const step: QuestProgressionStep = {
     variants: [],
 };
 
-function codexEntry(exportKind: string, entryKey: string, displayName = entryKey): CodexEntry {
+function codexEntry(
+    exportKind: string,
+    entryKey: string,
+    displayName = entryKey,
+    overrides: Partial<CodexEntry> = {}
+): CodexEntry {
     return {
         exportKind,
         entryKey,
         displayName,
         descriptionLines: [],
         referenceKeys: [],
+        ...overrides,
     };
 }
 
@@ -295,7 +301,134 @@ describe("StrategyDossier", () => {
         expect(within(choiceResult).queryByText("Formula: 50 + 50 × Technology Era")).not.toBeInTheDocument();
     });
 
-    it("renders resolved requirement and reward metadata as Codex links", () => {
+    it("shows a compact Codex preview tooltip from linked Strategy reward text on hover and focus", async () => {
+        setCodexEntries([
+            codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen", {
+                kind: "Unit",
+                descriptionLines: [
+                    "Elite Kin warriors trained for decisive engagements.",
+                    "+70 Damage",
+                    "",
+                    "+3 [MovementPoints] Movement Points",
+                    "Requires strategic resources.",
+                    "Hidden overflow line should not render.",
+                ],
+            }),
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                rewardLines: ["Unlock constructible: Chosen"],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                    assetKind: "Unit",
+                    assetKey: "Unit_KinOfSheredyn_Chosen",
+                    assetDisplayName: "Chosen",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        const rewardPrefix = screen.getByText("Unlock constructible:");
+        const rewardText = screen.getByText("Chosen");
+        const rewardPreviewTarget = rewardText.closest(".questExplorer-codexPreviewTarget");
+        expect(rewardPrefix).toHaveClass("questExplorer-codexReferencePrefix");
+        expect(rewardPrefix.closest(".questExplorer-codexPreviewTarget")).toBeNull();
+        expect(rewardPreviewTarget).toBeInstanceOf(HTMLElement);
+        expect(rewardText.closest("a")).toBeNull();
+        expect(rewardPreviewTarget).toHaveAttribute("tabindex", "0");
+        expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+        );
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+        fireEvent.mouseEnter(rewardPreviewTarget!);
+
+        const hoverTooltip = await screen.findByRole("tooltip");
+        expect(within(hoverTooltip).getByText("Chosen")).toBeInTheDocument();
+        expect(within(hoverTooltip).getByText("Units · Unit")).toBeInTheDocument();
+        expect(within(hoverTooltip).getByText("Elite Kin warriors trained for decisive engagements.")).toBeInTheDocument();
+        expect(within(hoverTooltip).getByText("+70 Damage")).toBeInTheDocument();
+        expect(within(hoverTooltip).queryByText("Hidden overflow line should not render.")).not.toBeInTheDocument();
+
+        fireEvent.mouseLeave(rewardPreviewTarget!);
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        fireEvent.focus(rewardPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+    });
+
+    it("shows a compact Codex preview tooltip from linked Strategy requirement text on hover and focus", async () => {
+        setCodexEntries([
+            codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics", {
+                kind: "Technology",
+                descriptionLines: [
+                    "Improves movement and convoy handling along broken ridges.",
+                    "+1 [MovementPoints] Movement Points on ridge routes.",
+                    "Unlocks stronger expedition logistics.",
+                    "Hidden requirement overflow line should not render.",
+                    "Another hidden requirement overflow line should not render.",
+                ],
+            }),
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                requirementLines: ["Research Ridge Logistics."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Research Ridge Logistics."])[0]!,
+                    referenceKind: "Tech",
+                    referenceKey: "Technology_RidgeLogistics",
+                    referenceDisplayName: "Ridge Logistics",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        const requirementPrefix = screen.getByText("Research");
+        const requirementText = screen.getByText("Ridge Logistics");
+        const requirementSuffix = screen.getByText(".");
+        const requirementPreviewTarget = requirementText.closest(".questExplorer-codexPreviewTarget");
+        expect(requirementPrefix).toHaveClass("questExplorer-codexReferencePrefix");
+        expect(requirementPrefix.closest(".questExplorer-codexPreviewTarget")).toBeNull();
+        expect(requirementSuffix).toHaveClass("questExplorer-codexReferencePrefix");
+        expect(requirementSuffix.closest(".questExplorer-codexPreviewTarget")).toBeNull();
+        expect(requirementPreviewTarget).toBeInstanceOf(HTMLElement);
+        expect(requirementText.closest("a")).toBeNull();
+        expect(requirementPreviewTarget).toHaveAttribute("tabindex", "0");
+        expect(screen.queryByRole("link", { name: "Research Ridge Logistics." })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Ridge Logistics in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Technology_RidgeLogistics"
+        );
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+
+        fireEvent.mouseEnter(requirementPreviewTarget!);
+
+        const hoverTooltip = await screen.findByRole("tooltip");
+        expect(within(hoverTooltip).getByText("Ridge Logistics")).toBeInTheDocument();
+        expect(within(hoverTooltip).getByText("Tech · Technology")).toBeInTheDocument();
+        expect(within(hoverTooltip).getByText("Improves movement and convoy handling along broken ridges.")).toBeInTheDocument();
+        expect(within(hoverTooltip).queryByText("Another hidden requirement overflow line should not render.")).not.toBeInTheDocument();
+
+        fireEvent.mouseLeave(requirementPreviewTarget!);
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        fireEvent.focus(requirementPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+    });
+
+    it("uses explicit Codex open icons for resolved requirement and reward metadata", () => {
         setCodexEntries([
             codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics"),
             codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen"),
@@ -325,14 +458,112 @@ describe("StrategyDossier", () => {
 
         renderDossier(modelForOptions([option], null));
 
-        expect(screen.getByRole("link", { name: "Research Ridge Logistics." })).toHaveAttribute(
+        expect(screen.getByText("Research").closest("a")).toBeNull();
+        expect(screen.getByText("Ridge Logistics").closest("a")).toBeNull();
+        expect(screen.queryByRole("link", { name: "Research Ridge Logistics." })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Ridge Logistics in Codex" })).toHaveAttribute(
             "href",
             "/codex?entry=Technology_RidgeLogistics"
         );
-        expect(screen.getByRole("link", { name: "Unlock constructible: Chosen" })).toHaveAttribute(
+        expect(screen.getByText("Unlock constructible:").closest("a")).toBeNull();
+        expect(screen.getByText("Chosen").closest("a")).toBeNull();
+        expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
             "/codex?entry=Unit_KinOfSheredyn_Chosen"
         );
+    });
+
+    it("keeps the whole display text as the preview target when the entity label cannot be safely split", async () => {
+        setCodexEntries([
+            codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen", {
+                kind: "Unit",
+                descriptionLines: ["Elite Kin warriors trained for decisive engagements."],
+            }),
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                rewardLines: ["Unlock an elite constructible."],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock an elite constructible."])[0]!,
+                    assetKind: "Unit",
+                    assetKey: "Unit_KinOfSheredyn_Chosen",
+                    assetDisplayName: null,
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        const fallbackText = screen.getByText("Unlock an elite constructible.");
+        const fallbackPreviewTarget = fallbackText.closest(".questExplorer-codexPreviewTarget");
+        expect(fallbackPreviewTarget).toBeInstanceOf(HTMLElement);
+        expect(screen.queryByText("Unlock an elite constructible:", { exact: false })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+        );
+
+        fireEvent.focus(fallbackPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+    });
+
+    it("keeps requirement and reward Codex icons from selecting an enclosing decision option", () => {
+        setCodexEntries([
+            codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics"),
+            codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen"),
+        ]);
+        const linkedRewardOption = branchOption({
+            choice: choice({
+                id: "choice-linked",
+                label: "Train the chosen",
+                requirementLines: ["Research Ridge Logistics."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Research Ridge Logistics."])[0]!,
+                    referenceKind: "Tech",
+                    referenceKey: "Technology_RidgeLogistics",
+                    referenceDisplayName: "Ridge Logistics",
+                }],
+                rewardLines: ["Unlock constructible: Chosen"],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                    assetKind: "Unit",
+                    assetKey: "Unit_KinOfSheredyn_Chosen",
+                    assetDisplayName: "Chosen",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+        const plainOption = branchOption({
+            choice: choice({
+                id: "choice-plain",
+                branchKey: "Branch_B",
+                choiceKey: "Choice_B",
+                label: "Hold reserves",
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        const onChoose = renderDossier(modelForOptions([linkedRewardOption, plainOption], null));
+
+        const requirementOpenIcon = screen.getByRole("link", { name: "Open Ridge Logistics in Codex" });
+        expect(requirementOpenIcon).toHaveAttribute("href", "/codex?entry=Technology_RidgeLogistics");
+        requirementOpenIcon.addEventListener("click", (event) => event.preventDefault(), { once: true });
+        fireEvent.click(requirementOpenIcon);
+
+        const rewardOpenIcon = screen.getByRole("link", { name: "Open Chosen in Codex" });
+        expect(rewardOpenIcon).toHaveAttribute("href", "/codex?entry=Unit_KinOfSheredyn_Chosen");
+
+        rewardOpenIcon.addEventListener("click", (event) => event.preventDefault(), { once: true });
+        fireEvent.click(rewardOpenIcon);
+
+        expect(onChoose).not.toHaveBeenCalled();
     });
 
     it("keeps unresolved requirement and formula-only reward rows as plain text", () => {
@@ -348,11 +579,19 @@ describe("StrategyDossier", () => {
                     referenceKey: "Technology_Missing",
                     referenceDisplayName: "Missing Logistics",
                 }],
-                rewardLines: ["Gain Dust based on technology era."],
-                rewardDetails: [{
-                    ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
-                    formulaText: "50 + 50 * Technology Era",
-                }],
+                rewardLines: ["Gain Dust based on technology era.", "Unlock missing relic"],
+                rewardDetails: [
+                    {
+                        ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+                        formulaText: "50 + 50 * Technology Era",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Unlock missing relic"])[0]!,
+                        assetKind: "Unit",
+                        assetKey: "Unit_Missing_Relic",
+                        assetDisplayName: "Missing Relic",
+                    },
+                ],
             }),
             isSelected: false,
             isInSelectedPath: false,
@@ -362,9 +601,13 @@ describe("StrategyDossier", () => {
 
         expect(screen.getByText("Research missing logistics.")).toBeInTheDocument();
         expect(screen.getByText("Gain Dust based on technology era.")).toBeInTheDocument();
+        expect(screen.getByText("Unlock missing relic")).toBeInTheDocument();
         expect(screen.getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Research missing logistics." })).not.toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Gain Dust based on technology era." })).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Unlock missing relic" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Open Missing Relic in Codex" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
     });
 
     it("renders topology forks as possible continuations without decision controls", () => {

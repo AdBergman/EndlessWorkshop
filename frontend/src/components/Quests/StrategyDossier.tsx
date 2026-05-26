@@ -8,6 +8,10 @@ import {
     type StrategyDossierObjective,
     type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
+import type {
+    StrategyChapterTask,
+    StrategyDecisionPoint,
+} from "@/features/quests/questStrategyFlow";
 import type { QuestPathChoice } from "@/features/quests/questPathFlow";
 import {
     sameRewardDisplays,
@@ -77,6 +81,158 @@ export function StrategyDossier({
             ) : null}
         </div>
     );
+}
+
+export function StrategyChapterPlan({
+    tasks,
+    decisionPoints,
+    onChoose,
+    debugChoiceDetails,
+    projectedDebugDetails,
+}: {
+    tasks: StrategyChapterTask[];
+    decisionPoints: StrategyDecisionPoint[];
+    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
+    debugChoiceDetails?: Map<string, string>;
+    projectedDebugDetails?: string[];
+}) {
+    if (tasks.length === 0 && decisionPoints.length === 0) {
+        return <p className="questExplorer-strategyDossierEmpty">No strategy objectives are attached to this chapter.</p>;
+    }
+
+    return (
+        <div className="questExplorer-strategyDossier questExplorer-strategyChapterPlan">
+            {tasks.length > 0 ? (
+                <StrategyDossierSection title="Chapter plan" variant="currentTask">
+                    <div className="questExplorer-strategyTaskStack">
+                        {tasks.map((task) => (
+                            <StrategyChapterTaskBlock
+                                task={task}
+                                debugChoiceDetails={debugChoiceDetails}
+                                key={task.id}
+                            />
+                        ))}
+                    </div>
+                </StrategyDossierSection>
+            ) : null}
+
+            {decisionPoints.map((point) => (
+                <StrategyDecisionPointBlock
+                    point={point}
+                    onChoose={onChoose}
+                    debugChoiceDetails={debugChoiceDetails}
+                    projectedDebugDetails={projectedDebugDetails}
+                    key={point.id}
+                />
+            ))}
+        </div>
+    );
+}
+
+function StrategyChapterTaskBlock({
+    task,
+    debugChoiceDetails,
+}: {
+    task: StrategyChapterTask;
+    debugChoiceDetails?: Map<string, string>;
+}) {
+    const nextStatus = task.option ? nextStatusContentForOption(task.option) : null;
+    const showCompactStatus = nextStatus && nextStatus.kind !== "complete";
+
+    return (
+        <section
+            className={`questExplorer-strategyPlanTask questExplorer-strategyPlanTask--${task.status}`}
+            aria-label={`${task.stageLabel}: ${task.title}`}
+        >
+            <header className="questExplorer-strategyPlanTaskHeader">
+                <span>{task.stageLabel}</span>
+                <span>{taskStatusLabel(task.status)}</span>
+            </header>
+            <StrategyTaskSummary
+                title={task.title}
+                lines={task.lines}
+                requirements={task.requirements}
+                requirementDetails={task.requirementDetails}
+                rewards={task.rewards}
+                rewardDetails={task.rewardDetails}
+                debugDetail={task.option ? debugChoiceDetails?.get(task.option.choice.id) : undefined}
+            />
+            {showCompactStatus ? <StrategyCompactNextStatus status={nextStatus} /> : null}
+        </section>
+    );
+}
+
+function StrategyDecisionPointBlock({
+    point,
+    onChoose,
+    debugChoiceDetails,
+    projectedDebugDetails,
+}: {
+    point: StrategyDecisionPoint;
+    onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
+    debugChoiceDetails?: Map<string, string>;
+    projectedDebugDetails?: string[];
+}) {
+    const selectedOption = point.options.find((option) => option.isSelected) ?? null;
+    const groupLabel = decisionPointGroupLabel(point.options);
+    const showGroupRegion = Boolean(groupLabel && !isGenericDecisionGroupLabel(groupLabel));
+
+    return (
+        <StrategyDossierSection title={point.title} variant={point.kind === "topology_alternative" ? "continuations" : "decision"}>
+            <section
+                className="questExplorer-strategyComparisonGroup"
+                aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
+            >
+                {showGroupRegion ? <h4>{groupLabel}</h4> : null}
+                <div className="questExplorer-strategyComparisonGrid">
+                    {point.options.map((option) => (
+                        <StrategyBranchComparisonOption
+                            option={option}
+                            step={point.step}
+                            debugChoiceDetails={debugChoiceDetails}
+                            onChoose={onChoose}
+                            key={option.id}
+                        />
+                    ))}
+                </div>
+            </section>
+            {selectedOption ? (
+                <StrategyChoiceResult
+                    option={selectedOption}
+                    outcome={point.outcomePreview}
+                    status={point.continuationStatus}
+                    projectedDebugDetails={projectedDebugDetails}
+                />
+            ) : null}
+        </StrategyDossierSection>
+    );
+}
+
+function StrategyCompactNextStatus({ status }: { status: StrategyNextStatusContent }) {
+    return (
+        <div className={`questExplorer-strategyNextChip questExplorer-strategyNextChip--${status.kind}`}>
+            <span>Continuation</span>
+            <strong>{status.title}</strong>
+        </div>
+    );
+}
+
+function taskStatusLabel(status: StrategyChapterTask["status"]): string {
+    switch (status) {
+        case "selected":
+            return "Selected";
+        case "preview":
+            return "Preview";
+        case "locked":
+            return "Locked";
+        default:
+            return "Available";
+    }
+}
+
+function decisionPointGroupLabel(options: StrategyDossierBranchOption[]): string | null {
+    const labels = uniqueDisplayValues(options.map((option) => option.choice.groupLabel ?? option.choice.eyebrow));
+    return labels[0] ?? null;
 }
 
 type StrategyNextStatusContent = {
@@ -684,7 +840,7 @@ export function InlineMetaList({
             <ul>
                 {displayItems.map((item, index) => (
                     <li key={`${label}:${index}:${item.displayText}:${item.referenceKey ?? ""}:${item.codexEntryKey ?? ""}`}>
-                        <QuestCodexReferenceLink source={item}>
+                        <QuestCodexReferenceLink source={item} showTooltip={tone === "requirement"}>
                             {item.displayText}
                         </QuestCodexReferenceLink>
                     </li>

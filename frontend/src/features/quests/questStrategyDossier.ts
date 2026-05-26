@@ -201,7 +201,7 @@ export function buildStrategyDossierModel({
     comparisonChoices?: QuestPathChoice[];
 }): StrategyDossierModel {
     const objectives = objectiveScope
-        ? dossierObjectives(objectiveScope, displayEntry, usesObjectivePaths)
+        ? buildStrategyDossierObjectives(objectiveScope, displayEntry, usesObjectivePaths)
         : [];
     const selectedChoice = choiceForSelection(renderedStep, renderedStep.selectedChoice);
     const selectedPathSteps = selectedPathForFlow(flow);
@@ -260,7 +260,7 @@ export function buildStrategySemanticInterpretation(
     outcomePreview: StrategyDossierOutcome | null,
     continuationStatus: StrategyPathStatus
 ): StrategyDossierSemanticInterpretation {
-    const branchOptions = buildBranchOptions(renderedStep, choices, entriesByKey);
+    const branchOptions = buildStrategyBranchOptions(renderedStep, choices, entriesByKey);
     const decisionGroup = buildBranchComparisonFromOptions(
         renderedStep,
         branchOptions.filter((option) => isStrategyDecisionComparisonCandidate(option.choice)),
@@ -501,7 +501,7 @@ function decisionChoicesForStep(choices: QuestPathChoice[]): QuestPathChoice[] {
     choices
         .filter(isStrategyDecisionComparisonCandidate)
         .forEach((choice) => {
-            const groupId = comparisonGroupId(choice);
+            const groupId = strategyComparisonGroupId(choice);
             const group = groups.get(groupId) ?? [];
             group.push(choice);
             groups.set(groupId, group);
@@ -591,7 +591,7 @@ function terminalStripDetail(status: StrategyPathStatus): string | null {
     }
 }
 
-function buildBranchOptions(
+export function buildStrategyBranchOptions(
     renderedStep: RenderedPathStep,
     choices: QuestPathChoice[],
     entriesByKey: Record<string, QuestExplorerEntry>
@@ -624,10 +624,10 @@ function buildBranchComparisonFromOptions(
 
     for (const option of options) {
         const choice = option.choice;
-        const groupId = comparisonGroupId(choice);
+        const groupId = strategyComparisonGroupId(choice);
         const group = groups.get(groupId) ?? {
             id: groupId,
-            label: comparisonGroupLabel(choice),
+            label: strategyComparisonGroupLabel(choice),
             options: [],
         };
 
@@ -707,7 +707,7 @@ function buildProjectedOutcome(
             ? [selectedChoice]
             : [];
     const outcomeObjectives = revealedObjectiveScope
-        ? dossierObjectives(revealedObjectiveScope, displayEntry, usesObjectivePaths)
+        ? buildStrategyDossierObjectives(revealedObjectiveScope, displayEntry, usesObjectivePaths)
         : [];
 
     if (outcomeChoices.length === 0 && outcomeObjectives.length === 0) return null;
@@ -807,7 +807,7 @@ function markersForChoice(
     return uniqueMarkers(markers);
 }
 
-function dossierObjectives(
+export function buildStrategyDossierObjectives(
     scope: StrategyDossierObjectiveScope,
     entry: QuestExplorerEntry | null,
     usesObjectivePaths: boolean
@@ -928,7 +928,7 @@ function choiceLines(choice: QuestPathChoice): string[] {
     ));
 }
 
-function comparisonGroupId(choice: QuestPathChoice): string {
+export function strategyComparisonGroupId(choice: QuestPathChoice): string {
     return choice.choiceGroupKey
         ?? choice.groupKey
         ?? choice.parentChoiceKey
@@ -936,7 +936,7 @@ function comparisonGroupId(choice: QuestPathChoice): string {
         ?? `${choice.sectionRole ?? "choice"}:${choice.branchStepOrder ?? "current"}`;
 }
 
-function comparisonGroupLabel(choice: QuestPathChoice): string {
+export function strategyComparisonGroupLabel(choice: QuestPathChoice): string {
     return choice.groupLabel || choice.eyebrow || "Decision Options";
 }
 

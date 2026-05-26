@@ -35,7 +35,7 @@ export function InlineRewardMetaList({
             <ul>
                 {displayRewards.map((reward, index) => (
                     <li key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
-                        <QuestCodexReferenceLink source={reward}>
+                        <QuestCodexReferenceLink source={reward} showTooltip>
                             <span>{reward.displayText}</span>
                         </QuestCodexReferenceLink>
                         <RewardFormulaDetail formulaText={reward.formulaText} />
@@ -67,7 +67,7 @@ export function InlineStageRewardMeta({
             {displayRewards.map((reward, index) => (
                 <Fragment key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
                     {index > 0 ? "; " : null}
-                    <QuestCodexReferenceLink source={reward}>
+                    <QuestCodexReferenceLink source={reward} showTooltip>
                         {reward.displayText}
                     </QuestCodexReferenceLink>
                 </Fragment>

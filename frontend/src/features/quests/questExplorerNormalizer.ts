@@ -122,6 +122,7 @@ const normalizeEntry = (entry: any): QuestExplorerEntry => ({
     strategyView: {
         objectives: (entry?.strategyView?.objectives ?? []).map((objective: any) => ({
             objectiveKey: cleanString(objective?.objectiveKey),
+            choiceKey: cleanString(objective?.choiceKey),
             text: cleanRequiredString(objective?.text),
             phase: cleanString(objective?.phase),
             revealedByBranchKeys: cleanStringList(objective?.revealedByBranchKeys),

@@ -19,9 +19,10 @@ import {
   buildStrategyPathStatus,
   type StrategyDossierObjectiveScope,
 } from "./questStrategyDossier";
-import { rewardDisplaysFromText } from "./questRewardDisplay";
+import { requirementDisplaysFromRequirements } from "./questRequirementDisplay";
+import { rewardDisplaysFromRewards, rewardDisplaysFromText } from "./questRewardDisplay";
 
-function requirement(displayText: string): Requirement {
+function requirement(displayText: string, overrides: Partial<Requirement> = {}): Requirement {
   return {
     requirementKey: `Requirement_${displayText}`,
     kind: "Requirement",
@@ -38,10 +39,15 @@ function requirement(displayText: string): Requirement {
     referenceKey: null,
     referenceDisplayName: null,
     codexEntryKey: null,
+    ...overrides,
   };
 }
 
-function reward(displayText: string, formulaText: string | null = null): Reward {
+function reward(
+  displayText: string,
+  formulaText: string | null = null,
+  overrides: Partial<Reward> = {},
+): Reward {
   return {
     rewardKey: `Reward_${displayText}`,
     kind: "Reward",
@@ -58,6 +64,7 @@ function reward(displayText: string, formulaText: string | null = null): Reward 
     referenceDisplayName: null,
     codexEntryKey: null,
     targetScopeLabel: null,
+    ...overrides,
   };
 }
 
@@ -149,6 +156,7 @@ function questChoice(overrides: Partial<QuestPathChoice> & Pick<QuestPathChoice,
     strategyLines: overrides.strategyLines ?? [],
     loreLines: overrides.loreLines ?? [],
     requirementLines: overrides.requirementLines ?? [],
+    requirementDetails: overrides.requirementDetails,
     rewardLines: overrides.rewardLines ?? [],
     rewardDetails: overrides.rewardDetails ?? rewardDisplaysFromText(overrides.rewardLines ?? []),
     targetEntryKey: overrides.targetEntryKey ?? null,
@@ -503,6 +511,113 @@ describe("strategy dossier helpers", () => {
         formulaText: "50 + 50 * Technology Era",
       }),
     ]);
+  });
+
+  it("preserves Codex reference metadata through Strategy requirement and reward models", () => {
+    const objectiveRequirement = requirement("Research Cartography", {
+      referenceKind: "Tech",
+      referenceKey: "Technology_Cartography",
+      referenceDisplayName: "Cartography",
+      codexEntryKey: "",
+    });
+    const objectiveReward = reward("Gain hero: Uwe Rach", null, {
+      referenceKind: "Hero",
+      referenceKey: "Hero_KinOfSheredyn_Archer_0",
+      referenceDisplayName: "Uwe Rach",
+      assetKind: "Hero",
+      assetKey: "Hero_KinOfSheredyn_Archer_0",
+      assetDisplayName: "Uwe Rach",
+    });
+    const branchRequirement = requirement("Equip the champion", {
+      referenceKind: "Equipment",
+      referenceKey: "Equipment_Accessory_01_Definition",
+      referenceDisplayName: "Scions' Charm",
+    });
+    const branchReward = reward("Gain faction trait: Chosen Squad", null, {
+      referenceKind: "FactionTrait",
+      referenceKey: "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest",
+      referenceDisplayName: "Chosen Squad",
+      assetKind: "Trait",
+      assetKey: "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest",
+      assetDisplayName: "Chosen Squad",
+    });
+    const selectedChoice = questChoice({
+      id: "branch:Linked",
+      branchKey: "Branch_Linked",
+      label: "Use linked data",
+      strategyLines: ["Use the linked objective data."],
+      requirementLines: [branchRequirement.displayText],
+      requirementDetails: requirementDisplaysFromRequirements([branchRequirement]),
+      rewardLines: [branchReward.displayText],
+      rewardDetails: rewardDisplaysFromRewards([branchReward]),
+    });
+    const alternateChoice = questChoice({
+      id: "branch:Alternate",
+      branchKey: "Branch_Alternate",
+      label: "Use alternate data",
+      strategyLines: ["Use alternate objective data."],
+    });
+    const activeStep = renderedStep({
+      choices: [selectedChoice, alternateChoice],
+      selectedChoice,
+    });
+    const objectiveScope: StrategyDossierObjectiveScope = {
+      objectiveIndexOffset: 0,
+      objectives: [{
+        ...objective("Inspect linked data"),
+        requirements: [objectiveRequirement],
+        rewards: [objectiveReward],
+      }],
+    };
+    const model = buildStrategyDossierModel({
+      renderedStep: activeStep,
+      totalSteps: 1,
+      title: "Linked Metadata Brief",
+      displayEntry: activeStep.displayEntry,
+      objectiveScope,
+      revealedObjectiveScope: null,
+      flow: questPathFlow(activeStep),
+      entriesByKey: {},
+      usesObjectivePaths: false,
+      comparisonChoices: [selectedChoice, alternateChoice],
+    });
+
+    expect(model.requirementDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Research Cartography",
+        referenceKind: "Tech",
+        referenceKey: "Technology_Cartography",
+        referenceDisplayName: "Cartography",
+        codexEntryKey: "",
+      }),
+    ]);
+    expect(model.rewardDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Gain hero: Uwe Rach",
+        referenceKind: "Hero",
+        referenceKey: "Hero_KinOfSheredyn_Archer_0",
+        assetKind: "Hero",
+        assetKey: "Hero_KinOfSheredyn_Archer_0",
+      }),
+    ]);
+    expect(model.decisionGroup.selectedOption?.requirementDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Equip the champion",
+        referenceKind: "Equipment",
+        referenceKey: "Equipment_Accessory_01_Definition",
+      }),
+    ]);
+    expect(model.decisionGroup.selectedOption?.rewardDetails).toEqual([
+      expect.objectContaining({
+        displayText: "Gain faction trait: Chosen Squad",
+        referenceKind: "FactionTrait",
+        referenceKey: "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest",
+        assetKind: "Trait",
+        assetKey: "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest",
+      }),
+    ]);
+    expect(model.outcomePreview?.requirementDetails).toEqual(model.decisionGroup.selectedOption?.requirementDetails);
+    expect(model.outcomePreview?.rewardDetails).toEqual(model.decisionGroup.selectedOption?.rewardDetails);
   });
 
   it("keeps deterministic continuations out of decision comparison semantics", () => {

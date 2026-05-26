@@ -17,6 +17,7 @@ describe("questExplorerNormalizer", () => {
                 strategyView: {
                     objectives: [{
                         objectiveKey: "Objective_Formula",
+                        choiceKey: " Choice_Formula ",
                         text: "Resolve the formula objective.",
                         requirements: [{
                             requirementKey: "Requirement_Objective",
@@ -57,6 +58,7 @@ describe("questExplorerNormalizer", () => {
         } as any);
 
         const entry = normalized.entries[0];
+        expect(entry?.strategyView.objectives[0]?.choiceKey).toBe("Choice_Formula");
         expect(entry?.strategyView.objectives[0]?.requirements[0]).toEqual(expect.objectContaining({
             displayText: "Research Cartography.",
             referenceKind: "Tech",

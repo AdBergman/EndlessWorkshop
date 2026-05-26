@@ -1199,6 +1199,35 @@
     min-width: 0;
 }
 
+.questExplorer-strategyTaskStack {
+    display: grid;
+    gap: 14px;
+}
+
+.questExplorer-strategyPlanTask {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.questExplorer-strategyPlanTaskHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    color: var(--quest-gold);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.questExplorer-strategyPlanTaskHeader span:last-child {
+    color: var(--quest-teal);
+    letter-spacing: 0.1em;
+}
+
 .questExplorer-strategyChoiceResult h4,
 .questExplorer-strategyDossierMarker strong {
     color: var(--quest-teal);
@@ -1407,6 +1436,42 @@
     line-height: 1.5;
 }
 
+.questExplorer-strategyNextChip {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-self: start;
+    gap: 7px;
+    max-width: 100%;
+    padding: 6px 9px;
+    border: 1px solid rgba(81, 205, 189, 0.22);
+    border-radius: 999px;
+    background: rgba(81, 205, 189, 0.045);
+}
+
+.questExplorer-strategyNextChip > span {
+    color: var(--quest-teal);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.questExplorer-strategyNextChip > strong {
+    color: var(--quest-ink-soft);
+    font-size: 0.86rem;
+    line-height: 1.35;
+}
+
+.questExplorer-strategyNextChip--failure {
+    border-color: rgba(214, 111, 96, 0.32);
+    background: rgba(214, 111, 96, 0.06);
+}
+
+.questExplorer-strategyNextChip--failure > span {
+    color: #d66f60;
+}
+
 .questExplorer-strategyNextStatus--failure {
     border-color: rgba(214, 111, 96, 0.34);
     background: rgba(214, 111, 96, 0.07);
@@ -1586,6 +1651,103 @@
 .questExplorer-codexMetaLink:focus-visible {
     outline: 1px solid var(--quest-focus);
     outline-offset: 2px;
+}
+
+.questExplorer-codexReference {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.24em;
+}
+
+.questExplorer-codexReferencePrefix {
+    color: rgba(232, 204, 158, 0.84);
+}
+
+.questExplorer-codexPreviewTarget {
+    color: var(--quest-teal-bright);
+    cursor: default;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-decoration-thickness: 1px;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: color 0.16s ease, text-decoration-color 0.16s ease;
+}
+
+.questExplorer-codexPreviewTarget:hover,
+.questExplorer-codexPreviewTarget:focus-visible {
+    color: var(--quest-ink);
+    text-decoration-color: rgba(232, 204, 158, 0.72);
+}
+
+.questExplorer-codexPreviewTarget:focus-visible {
+    outline: 1px solid var(--quest-focus);
+    outline-offset: 2px;
+}
+
+.questExplorer-codexOpenLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(232, 204, 158, 0.58);
+    font-size: 0.72em;
+    line-height: 1;
+    text-decoration: none;
+    transform: translateY(-0.04em);
+    transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.questExplorer-codexOpenLink svg {
+    width: 0.86em;
+    height: 0.86em;
+}
+
+.questExplorer-codexReference:hover .questExplorer-codexOpenLink {
+    color: rgba(232, 204, 158, 0.86);
+}
+
+.questExplorer-codexOpenLink:hover,
+.questExplorer-codexOpenLink:focus-visible {
+    color: var(--quest-ink);
+    transform: translateY(-0.08em);
+}
+
+.questExplorer-codexOpenLink:focus-visible {
+    outline: 1px solid var(--quest-focus);
+    outline-offset: 2px;
+}
+
+.questExplorer-codexTooltip {
+    display: grid;
+    gap: 5px;
+    min-width: 220px;
+    max-width: 320px;
+}
+
+.questExplorer-codexTooltip > strong {
+    color: var(--quest-ink);
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.questExplorer-codexTooltip > span {
+    color: var(--quest-gold-bright);
+    font-size: 0.76rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.questExplorer-codexTooltipPreview {
+    display: grid;
+    gap: 4px;
+}
+
+.questExplorer-codexTooltipPreview p {
+    margin: 0;
+    color: rgba(242, 233, 211, 0.9);
+    font-size: 0.82rem;
+    line-height: 1.35;
 }
 
 .questExplorer-inlineMeta--reward li::before {

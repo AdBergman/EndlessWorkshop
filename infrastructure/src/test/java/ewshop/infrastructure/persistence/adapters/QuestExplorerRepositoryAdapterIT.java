@@ -73,6 +73,7 @@ class QuestExplorerRepositoryAdapterIT {
         assertThat(entry.loreView().sections().getFirst().revealedByChoiceKeys()).containsExactly("Choice_Parent");
         assertThat(entry.loreView().sections().getFirst().revealedByBranchPathAlternatives())
                 .containsExactly(List.of("Quest_A:branch:parent", "Quest_A:branch:1"));
+        assertThat(entry.strategyView().objectives().getFirst().choiceKey()).isEqualTo("Choice_A");
         assertThat(entry.strategyView().objectives().getFirst().requirements().getFirst().displayText()).isEqualTo("Found your Capital City.");
         assertThat(entry.strategyView().objectives().getFirst().revealedByBranchKeys()).containsExactly("Quest_A:branch:parent");
         assertThat(entry.branches().getFirst().sectionRole()).isEqualTo("true_choice");
@@ -241,6 +242,7 @@ class QuestExplorerRepositoryAdapterIT {
                 )),
                 List.of(new QuestExplorerStrategyObjectiveImportSnapshot(
                         firstKey + ":objective:0",
+                        "Choice_A",
                         "Found a home.",
                         "Objective",
                         List.of(firstKey + ":branch:parent"),
