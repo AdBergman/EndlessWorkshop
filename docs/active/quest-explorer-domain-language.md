@@ -1,9 +1,22 @@
 # Quest Explorer Domain Language
 
-Status: ACTIVE
+> [!WARNING]
+> Status: SUPERSEDED for Quest Explorer semantics. This document preserves
+> historical implementation vocabulary, but it is not canonical. Use
+> `docs/quest_explorer_canonical_semantics_v1.md` as the semantic source of
+> truth and `docs/quest_explorer_documentation_audit_v1.md` for the documentation
+> audit and deprecation plan.
+
+Status: SUPERSEDED - historical vocabulary reference only
 Audience: Codex / implementation agents
 
-## Authoritative model
+Authoritative hierarchy:
+1. `docs/quest_explorer_canonical_semantics_v1.md`
+2. live `quest_explorer.v3` export topology
+3. current frontend implementation as behavior evidence
+4. this historical vocabulary note
+
+## Historical Model (Superseded)
 
 Quest Explorer progression is:
 
@@ -65,7 +78,7 @@ Backend/domain owns:
 - continuation semantics
 
 Frontend owns:
-- selected choice path as session UI state
+- selected semantic sequence as session UI state
 - Strategy/Lore presentation
 - rendering
 - rail active state

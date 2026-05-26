@@ -1,5 +1,12 @@
 # Quest Branch Continuity Exporter Request
 
+> [!NOTE]
+> Status: historical exporter request, partially fulfilled and superseded for
+> semantics by the 0.80 canonical investigation. Do not treat this file as live
+> exporter requirements without checking
+> `../../quest_explorer_canonical_semantics_v1.md` and
+> `../../quest_explorer_documentation_audit_v1.md`.
+
 Audience: EL2.DBExporter
 
 Package: `docs/diagnostics/quest-branch-continuity/`

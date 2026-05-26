@@ -12,6 +12,10 @@ import {
     chapterPositionLabel,
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
+import {
+    classifyQuestBranchSemanticStage,
+    type QuestSemanticStageKind,
+} from "@/features/quests/questSemanticStages";
 
 export type QuestDetailProgression = {
     questline: QuestProgressionQuestline;
@@ -38,6 +42,7 @@ export type QuestPathChoice = {
     groupLabel: string | null;
     sourceEntryKey: string | null;
     sectionRole: string | null;
+    semanticStageKind: QuestSemanticStageKind;
     prerequisiteBranchKeys: string[];
     revealedByBranchKeys: string[];
     revealedByChoiceKeys: string[];
@@ -68,6 +73,7 @@ export type QuestPathChoiceSelection = {
     branchKey: string | null;
     choiceKey: string | null;
     sectionRole: string | null;
+    semanticStageKind: QuestSemanticStageKind;
     choiceGroupKey: string | null;
     branchStepOrder: number | null;
     hasDependentContinuations: boolean;
@@ -562,6 +568,7 @@ export function choicesForStep(
             groupLabel: variant.branchLabel,
             sourceEntryKey: target?.entryKey ?? variant.entryKey,
             sectionRole: null,
+            semanticStageKind: "internal_variant",
             prerequisiteBranchKeys: [],
             revealedByBranchKeys: [],
             revealedByChoiceKeys: [],
@@ -616,6 +623,7 @@ export function choicesForStep(
                 groupLabel: branch.groupLabel,
                 sourceEntryKey: detailEntry?.entryKey ?? null,
                 sectionRole: branchRole(branch),
+                semanticStageKind: classifyQuestBranchSemanticStage(branch, detailEntry?.branches ?? []),
                 prerequisiteBranchKeys: branchPrerequisiteKeys(branch),
                 revealedByBranchKeys: branch.revealedByBranchKeys ?? [],
                 revealedByChoiceKeys: branch.revealedByChoiceKeys ?? [],
@@ -656,6 +664,7 @@ export function selectionForChoice(stepKey: string, choice: QuestPathChoice): Qu
         branchKey: choice.branchKey,
         choiceKey: choice.choiceKey,
         sectionRole: choice.sectionRole,
+        semanticStageKind: choice.semanticStageKind,
         choiceGroupKey: choice.choiceGroupKey,
         branchStepOrder: choice.branchStepOrder,
         hasDependentContinuations: choice.hasDependentContinuations,
@@ -769,7 +778,7 @@ export function hiddenUnresolvedReason(
 
 export function hiddenUngatedContinuationReason(choice: QuestPathChoice): NormalHiddenChoiceReason | null {
     return choice.sectionRole === "continuation" && choice.prerequisiteBranchKeys.length === 0
-        ? { category: "continuation", message: "continuation row waits for a selected path" }
+        ? { category: "continuation", message: "continuation row waits for a selected branch sequence" }
         : null;
 }
 

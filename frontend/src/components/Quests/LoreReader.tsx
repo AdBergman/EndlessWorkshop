@@ -1,4 +1,3 @@
-import { choicePresentationGroups } from "@/features/quests/questChoicePresentation";
 import {
     isMinorFactionVariantQuest,
     isResolutionLoreSection,
@@ -7,6 +6,9 @@ import {
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
 import type {
+    ChronicleBranchMoment,
+    ChronicleChoiceItem,
+    ChronicleStage,
     LoreFlowModel,
     LoreFlowSegment,
 } from "@/features/quests/questLoreFlow";
@@ -150,27 +152,28 @@ function ChoiceStageHeading({ children }: { children: string }) {
 function RepeatedDetailCheckpoint() {
     return (
         <div className="questExplorer-stepCheckpoint">
-            <span>Chronicle Checkpoint</span>
-            <p>This moment carries forward from the record already shown above.</p>
+            <span>Chronicle carry-forward</span>
+            <p>This moment continues from the record already shown above.</p>
         </div>
     );
 }
 
 function LoreChoiceButton({
     step,
-    choice,
+    choiceItem,
     selectedChoice,
     selectedPathBranchKeys,
     debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
-    choice: QuestPathChoice;
+    choiceItem: ChronicleChoiceItem;
     selectedChoice: QuestPathChoiceSelection | null;
     selectedPathBranchKeys: Set<string>;
     debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
+    const { choice, stageLabel } = choiceItem;
     const isSelected = selectedChoice?.choiceId === choice.id;
     const isInSelectedPath = !isSelected && Boolean(choice.branchKey && selectedPathBranchKeys.has(choice.branchKey));
     const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
@@ -186,7 +189,7 @@ function LoreChoiceButton({
         >
             <span className="questExplorer-loreChoiceMark" aria-hidden="true" />
             <span className="questExplorer-loreChoiceCopy">
-                <small>{choice.eyebrow}</small>
+                <small>{stageLabel}</small>
                 <strong>{choice.label}</strong>
                 {previewLines.length > 0 ? <span>{previewLines.join(" ")}</span> : null}
                 {debugChoiceDetails?.get(choice.id) ? (
@@ -197,14 +200,15 @@ function LoreChoiceButton({
     );
 }
 
-function LoreChoiceContext({ choice }: { choice: QuestPathChoice }) {
+function LoreChoiceContext({ choiceItem }: { choiceItem: ChronicleChoiceItem }) {
+    const { choice, stageLabel } = choiceItem;
     const previewLines = choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines;
 
     return (
         <div className="questExplorer-loreChoiceContext" key={choice.id}>
             <span className="questExplorer-loreChoiceMark" aria-hidden="true" />
             <span className="questExplorer-loreChoiceCopy">
-                <small>{choice.eyebrow}</small>
+                <small>{stageLabel}</small>
                 <strong>{choice.label}</strong>
                 {previewLines.length > 0 ? <span>{previewLines.join(" ")}</span> : null}
             </span>
@@ -213,18 +217,19 @@ function LoreChoiceContext({ choice }: { choice: QuestPathChoice }) {
 }
 
 function LoreRevealedContinuation({
-    choice,
+    choiceItem,
     debugChoiceDetails,
 }: {
-    choice: QuestPathChoice;
+    choiceItem: ChronicleChoiceItem;
     debugChoiceDetails?: Map<string, string>;
 }) {
+    const { choice } = choiceItem;
     const previewLines = (choice.loreLines.length > 0 ? choice.loreLines : choice.descriptionLines)
         .filter((line) => line !== choice.label && line !== choice.targetSummaryLine);
 
     return (
         <section className="questExplorer-revealedContinuation questExplorer-revealedContinuation--lore" key={choice.id}>
-            <span className="questExplorer-revealedContinuationLabel">Path Revealed</span>
+            <span className="questExplorer-revealedContinuationLabel">Continuation revealed</span>
             <div className="questExplorer-revealedContinuationCopy">
                 <strong>{choice.label}</strong>
                 {previewLines.map((line, index) => (
@@ -239,18 +244,18 @@ function LoreRevealedContinuation({
 }
 
 function LoreRevealedContinuations({
-    choices,
+    continuationStages,
     debugChoiceDetails,
 }: {
-    choices: QuestPathChoice[];
+    continuationStages: ChronicleChoiceItem[];
     debugChoiceDetails?: Map<string, string>;
 }) {
-    if (choices.length === 0) return null;
+    if (continuationStages.length === 0) return null;
 
     return (
         <div className="questExplorer-revealedContinuationList">
-            {choices.map((choice) => (
-                <LoreRevealedContinuation choice={choice} debugChoiceDetails={debugChoiceDetails} key={choice.id} />
+            {continuationStages.map((choiceItem) => (
+                <LoreRevealedContinuation choiceItem={choiceItem} debugChoiceDetails={debugChoiceDetails} key={choiceItem.choice.id} />
             ))}
         </div>
     );
@@ -258,83 +263,91 @@ function LoreRevealedContinuations({
 
 function LoreBranchMoment({
     step,
-    choices,
+    branchMoment,
     selectedChoice,
-    displayEntry,
-    entriesByKey,
-    showRawHiddenRows,
     debugChoiceDetails,
     onChoose,
 }: {
     step: QuestProgressionStep;
-    choices: QuestPathChoice[];
+    branchMoment: ChronicleBranchMoment | null;
     selectedChoice: QuestPathChoiceSelection | null;
-    displayEntry: QuestExplorerEntry | null;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    if (choices.length === 0) return null;
-
-    const presentation = choicePresentationGroups(
-        step,
-        choices,
-        selectedChoice,
-        displayEntry,
-        entriesByKey,
-        showRawHiddenRows
-    );
-    const hasActionableChoices = presentation.primaryChoices.length > 0 || presentation.activeContinuationChoices.length > 0;
-    const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
+    const stageCount = [
+        branchMoment?.decisionChoices.length ?? 0,
+        branchMoment?.continuationChoices.length ?? 0,
+        branchMoment?.branchingContinuationChoices.length ?? 0,
+    ].filter((count) => count > 0).length;
+    if (!branchMoment || (!branchMoment.hasActionableStages && branchMoment.structuralContextChoices.length === 0)) return null;
 
     return (
-        <section className="questExplorer-loreBranchMoment" aria-label={`${stepPositionLabel(step)} narrative choices`}>
-            <h3>Choose a Path</h3>
-            {presentation.structuralContextChoices.length > 0 ? (
+        <section className="questExplorer-loreBranchMoment" aria-label={`${stepPositionLabel(step)} ${branchMoment.ariaNoun}`}>
+            <h3>{branchMoment.title}</h3>
+            {branchMoment.structuralContextChoices.length > 0 ? (
                 <div className="questExplorer-choiceContextList">
-                    {presentation.structuralContextChoices.map((choice) => (
-                        <LoreChoiceContext choice={choice} key={choice.id} />
+                    {branchMoment.structuralContextChoices.map((choiceItem) => (
+                        <LoreChoiceContext choiceItem={choiceItem} key={choiceItem.choice.id} />
                     ))}
                 </div>
             ) : null}
-            {presentation.primaryChoices.length > 0 ? (
+            {branchMoment.decisionChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage">
-                    {showPrimaryHeading ? <ChoiceStageHeading>Path Choices</ChoiceStageHeading> : null}
+                    {stageCount > 1 || branchMoment.structuralContextChoices.length > 0 ? (
+                        <ChoiceStageHeading>Decision options</ChoiceStageHeading>
+                    ) : null}
                     <div>
-                        {presentation.primaryChoices.map((choice) => (
+                        {branchMoment.decisionChoices.map((choiceItem) => (
                             <LoreChoiceButton
                                 step={step}
-                                choice={choice}
+                                choiceItem={choiceItem}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
+                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
-                                key={`${step.stepKey}:${choice.id}`}
+                                key={`${step.stepKey}:${choiceItem.choice.id}`}
                             />
                         ))}
                     </div>
                 </div>
             ) : null}
-            {presentation.activeContinuationChoices.length > 0 ? (
+            {branchMoment.continuationChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    <ChoiceStageHeading>Next Choices</ChoiceStageHeading>
+                    {stageCount > 1 ? <ChoiceStageHeading>Continue the chronicle</ChoiceStageHeading> : null}
                     <div>
-                        {presentation.activeContinuationChoices.map((choice) => (
+                        {branchMoment.continuationChoices.map((choiceItem) => (
                             <LoreChoiceButton
                                 step={step}
-                                choice={choice}
+                                choiceItem={choiceItem}
                                 selectedChoice={selectedChoice}
-                                selectedPathBranchKeys={presentation.selectedPathBranchKeys}
+                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
                                 debugChoiceDetails={debugChoiceDetails}
                                 onChoose={onChoose}
-                                key={`${step.stepKey}:${choice.id}`}
+                                key={`${step.stepKey}:${choiceItem.choice.id}`}
                             />
                         ))}
                     </div>
                 </div>
             ) : null}
-            {!selectedChoice && hasActionableChoices ? (
+            {branchMoment.branchingContinuationChoices.length > 0 ? (
+                <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
+                    {stageCount > 1 ? <ChoiceStageHeading>Possible continuations</ChoiceStageHeading> : null}
+                    <div>
+                        {branchMoment.branchingContinuationChoices.map((choiceItem) => (
+                            <LoreChoiceButton
+                                step={step}
+                                choiceItem={choiceItem}
+                                selectedChoice={selectedChoice}
+                                selectedPathBranchKeys={branchMoment.selectedPathBranchKeys}
+                                debugChoiceDetails={debugChoiceDetails}
+                                onChoose={onChoose}
+                                key={`${step.stepKey}:${choiceItem.choice.id}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            ) : null}
+            {!selectedChoice && branchMoment.decisionChoices.length > 0 ? (
                 <p className="questExplorer-choiceHint">The chronicle waits for your choice.</p>
             ) : null}
         </section>
@@ -342,26 +355,18 @@ function LoreBranchMoment({
 }
 
 function LoreStep({
-    renderedStep,
+    stage,
     title,
-    entriesByKey,
-    showRawHiddenRows,
     debugChoiceDetails,
-    loreSections,
-    loreSectionsWereSuppressed,
-    revealedLoreSections,
     onChoose,
 }: {
-    renderedStep: RenderedPathStep;
+    stage: ChronicleStage;
     title: string;
-    entriesByKey: Record<string, QuestExplorerEntry>;
-    showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
-    loreSections?: LoreSection[];
-    loreSectionsWereSuppressed: boolean;
-    revealedLoreSections: LoreSection[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
+    const { renderedStep } = stage;
+
     return (
         <article
             className={`questExplorer-questPathStep questExplorer-loreStep${renderedStep.isActive ? " is-active" : ""}`}
@@ -375,35 +380,32 @@ function LoreStep({
                 <strong className="questExplorer-stepTitle">{title}</strong>
             </header>
 
-            {renderedStep.rendersRepeatedDetailContent || loreSectionsWereSuppressed ? (
+            {renderedStep.rendersRepeatedDetailContent || stage.loreSectionsWereSuppressed ? (
                 <RepeatedDetailCheckpoint />
             ) : (
                 renderedStep.displayEntry ? (
-                    <LoreSectionList entry={renderedStep.displayEntry} sections={loreSections} />
+                    <LoreSectionList entry={renderedStep.displayEntry} sections={stage.loreSections} />
                 ) : (
-                    <p className="questExplorer-emptyState">This progression step has no entry-backed content in the current DTO.</p>
+                    <p className="questExplorer-emptyState">This chronicle stage has no entry-backed content in the current DTO.</p>
                 )
             )}
 
             <LoreBranchMoment
                 step={renderedStep.step}
-                choices={renderedStep.choices}
+                branchMoment={stage.branchMoment}
                 selectedChoice={renderedStep.selectedChoice}
-                displayEntry={renderedStep.displayEntry}
-                entriesByKey={entriesByKey}
-                showRawHiddenRows={showRawHiddenRows}
                 debugChoiceDetails={debugChoiceDetails}
                 onChoose={onChoose}
             />
 
             <LoreRevealedContinuations
-                choices={renderedStep.revealedContinuations}
+                continuationStages={stage.revealedContinuationStages}
                 debugChoiceDetails={debugChoiceDetails}
             />
 
-            {renderedStep.displayEntry && revealedLoreSections.length > 0 && !renderedStep.revealedContinuationsBecomeSteps ? (
+            {renderedStep.displayEntry && stage.revealedLoreSections.length > 0 && !renderedStep.revealedContinuationsBecomeSteps ? (
                 <div className="questExplorer-revealedBeatBody questExplorer-revealedBeatBody--lore">
-                    <LoreSectionList entry={renderedStep.displayEntry} sections={revealedLoreSections} />
+                    <LoreSectionList entry={renderedStep.displayEntry} sections={stage.revealedLoreSections} />
                 </div>
             ) : null}
         </article>
@@ -416,8 +418,8 @@ function continuationChapterMessage(entry: QuestExplorerEntry | null): string {
         ?? (entry?.navigation.chapter != null ? `Chapter ${entry.navigation.chapter}` : null);
 
     return chapter
-        ? `This path continues in ${chapter}: ${title}.`
-        : `This path continues with ${title}.`;
+        ? `The chronicle continues in ${chapter}: ${title}.`
+        : `The chronicle continues with ${title}.`;
 }
 
 function LorePathState({
@@ -431,14 +433,14 @@ function LorePathState({
         <>
             {flow.unresolvedContinuation ? (
                 <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--unresolved">
-                    <span>Path Continues</span>
-                    <p>The choice "{flow.unresolvedContinuation.label}" is preserved, but the archive does not identify the next continuation step. The chronicle closes this page rather than guessing.</p>
+                    <span>Chronicle pauses</span>
+                    <p>The selected continuation "{flow.unresolvedContinuation.label}" is preserved, but the archive does not identify the next chronicle step. The chronicle closes this page rather than guessing.</p>
                 </section>
             ) : null}
 
             {flow.reachedContinuationEntryKey ? (
                 <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--chapter">
-                    <span>Path Continues</span>
+                    <span>Chronicle continues</span>
                     <p>{continuationChapterMessage(entriesByKey[flow.reachedContinuationEntryKey] ?? null)}</p>
                 </section>
             ) : null}
@@ -449,7 +451,6 @@ function LorePathState({
 export function LoreContinuousProgression({
     model,
     entriesByKey,
-    showRawHiddenRows,
     onChoose,
     activeRailEntryKey,
     getStepTitle,
@@ -478,18 +479,13 @@ export function LoreContinuousProgression({
                         data-rail-entry-key={segment.railEntryKey ?? ""}
                         key={segment.segmentKey}
                     >
-                        {segment.loreSteps.map((loreStep) => {
-                            const { renderedStep } = loreStep;
+                        {segment.loreSteps.map((stage) => {
+                            const { renderedStep } = stage;
                             return (
                                 <LoreStep
-                                    renderedStep={renderedStep}
+                                    stage={stage}
                                     title={getStepTitle(renderedStep.step, renderedStep.displayEntry)}
-                                    entriesByKey={entriesByKey}
-                                    showRawHiddenRows={showRawHiddenRows}
                                     debugChoiceDetails={getDebugChoiceDetails?.(segment, renderedStep, isActiveDebugSegment)}
-                                    loreSections={loreStep.loreSections}
-                                    loreSectionsWereSuppressed={loreStep.loreSectionsWereSuppressed}
-                                    revealedLoreSections={loreStep.revealedLoreSections}
                                     onChoose={(step, choice) => onChoose(segment, step, choice)}
                                     key={`${segment.segmentKey}:${renderedStep.step.stepKey}`}
                                 />

@@ -1,5 +1,12 @@
 # Quest Branch Continuity Diagnostic Summary
 
+> [!NOTE]
+> Status: historical diagnostic evidence. This report helped identify topology
+> and ownership gaps, but its counts and labels are not canonical after the 0.80
+> semantic investigation. Use
+> `../../quest_explorer_canonical_semantics_v1.md` for current Quest Explorer
+> semantics.
+
 Packaged: 2026-05-23
 
 Source export: `local-imports/exports/ewshop_quest_explorer_export_0.80.json`

@@ -1,5 +1,11 @@
 # EWShop Quest Explorer Reset Context
 
+> [!WARNING]
+> Status: archived historical handoff. This document preserves reset context
+> from an earlier implementation pass and should not be used as canonical Quest
+> Explorer semantics. Use `../../quest_explorer_canonical_semantics_v1.md`
+> instead.
+
 ## Current Status
 Quest Explorer has had many rapid implementation/refactor passes. A large amount of code changed, but the product still does not work correctly in all cases. Treat the current implementation as unstable.
 

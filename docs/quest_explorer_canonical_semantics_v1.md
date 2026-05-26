@@ -642,12 +642,12 @@ Retire as canonical:
 - `docs/active/quest-explorer-domain-language.md`: the `questline -> chapter
   -> step -> choice / branch variant -> continuation step` model is too
   simplistic for 0.80.
-- `docs/quest-explorer/quest_explorer_lore_design.md`: the
+- `docs/archive/quest-explorer/quest_explorer_lore_design.md`: the
   `Step 1 lore -> choice -> selected Step 2 lore` model should become a
   historical design note.
 - `docs/quest-explorer/quest_explorer_strategy_design.md`: still useful as a
   product direction note, but not a semantic spec.
-- `docs/quest-explorer/quest_explorer_handoff.md`: historical reset context
+- `docs/archive/quest-explorer/quest_explorer_handoff.md`: historical reset context
   only.
 
 Revise or annotate:

@@ -53,7 +53,7 @@ const samplePayload: QuestExplorerResponse = {
         },
         {
             entryKey: "Quest_Branch",
-            title: "Branch Choice",
+            title: "Variant Outcome",
             summaryLines: [],
             questType: "Faction Quest",
             isMandatory: false,
@@ -194,7 +194,7 @@ const samplePayload: QuestExplorerResponse = {
                                 detailEntryKey: "Quest_Shared",
                                 sourceEntryKeys: ["Quest_Shared"],
                                 aliasEntryKeys: ["Quest_Shared_Alias_Step02"],
-                                variants: [{ entryKey: "Quest_Branch", title: "Branch Choice", variantKind: "branch_variant", branchGroupKey: "Quest_Shared", branchLabel: "Shared fork", branchOrder: 1, previousEntryKeys: [], nextEntryKeys: [], failureEntryKeys: [], convergesIntoEntryKeys: [] }],
+                                variants: [{ entryKey: "Quest_Branch", title: "Variant Outcome", variantKind: "branch_variant", branchGroupKey: "Quest_Shared", branchLabel: "Shared fork", branchOrder: 1, previousEntryKeys: [], nextEntryKeys: [], failureEntryKeys: [], convergesIntoEntryKeys: [] }],
                             },
                         ],
                     },

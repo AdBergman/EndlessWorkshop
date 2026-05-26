@@ -133,6 +133,7 @@ function questChoice(overrides: Partial<QuestPathChoice> & Pick<QuestPathChoice,
     groupLabel: overrides.groupLabel ?? "Decision Options",
     sourceEntryKey: overrides.sourceEntryKey ?? null,
     sectionRole: overrides.sectionRole ?? "true_choice",
+    semanticStageKind: overrides.semanticStageKind ?? "explicit_decision_option",
     prerequisiteBranchKeys: overrides.prerequisiteBranchKeys ?? [],
     revealedByBranchKeys: overrides.revealedByBranchKeys ?? [],
     revealedByChoiceKeys: overrides.revealedByChoiceKeys ?? [],
@@ -216,8 +217,26 @@ function questPathFlow(
   };
 }
 
+function modelForRenderedStep(
+  step: RenderedPathStep,
+  overrides: Partial<Parameters<typeof buildStrategyDossierModel>[0]> = {},
+) {
+  return buildStrategyDossierModel({
+    renderedStep: step,
+    totalSteps: 1,
+    title: "Semantic Brief",
+    displayEntry: step.displayEntry,
+    objectiveScope: null,
+    revealedObjectiveScope: null,
+    flow: questPathFlow(step),
+    entriesByKey: {},
+    usesObjectivePaths: false,
+    ...overrides,
+  });
+}
+
 describe("strategy dossier helpers", () => {
-  it("distinguishes selected path terminal states from explicit metadata", () => {
+  it("distinguishes selected semantic sequence terminal states from explicit metadata", () => {
     const failureChoice = questChoice({
       id: "branch:Failure",
       branchKey: "Branch_Failure",
@@ -240,6 +259,13 @@ describe("strategy dossier helpers", () => {
       id: "branch:Unknown",
       branchKey: "Branch_Unknown",
       label: "Follow the rumor",
+    });
+    const semanticUnresolvedChoice = questChoice({
+      id: "branch:SemanticUnknown",
+      branchKey: "Branch_SemanticUnknown",
+      label: "Follow the uncharted report",
+      sectionRole: "unresolved",
+      semanticStageKind: "unresolved",
     });
     const entriesByKey = {
       Quest_Failure: questEntry("Quest_Failure", "Failure Outcome"),
@@ -264,7 +290,7 @@ describe("strategy dossier helpers", () => {
       ),
     ).toEqual(expect.objectContaining({
       kind: "converges",
-      label: "Rejoins Path",
+      label: "Rejoins progression",
     }));
 
     expect(
@@ -289,7 +315,21 @@ describe("strategy dossier helpers", () => {
       ),
     ).toEqual(expect.objectContaining({
       kind: "unresolved",
-      label: "Unknown Next Step",
+      label: "Unknown continuation",
+    }));
+
+    expect(
+      buildStrategyPathStatus(
+        questPathFlow(renderedStep({
+          choices: [semanticUnresolvedChoice],
+          selectedChoice: semanticUnresolvedChoice,
+        })),
+        entriesByKey,
+      ),
+    ).toEqual(expect.objectContaining({
+      kind: "unresolved",
+      label: "Unknown continuation",
+      choiceLabel: "Follow the uncharted report",
     }));
 
     expect(
@@ -299,11 +339,11 @@ describe("strategy dossier helpers", () => {
       ),
     ).toEqual(expect.objectContaining({
       kind: "complete",
-      label: "No Further Modeled Decision",
+      label: "No further modeled decision",
     }));
   });
 
-  it("builds selected path breadcrumbs and selected branch comparison details", () => {
+  it("builds selected sequence breadcrumbs and explicit decision comparison details", () => {
     const selectedChoice = questChoice({
       id: "branch:Search",
       branchKey: "Branch_Search",
@@ -355,6 +395,8 @@ describe("strategy dossier helpers", () => {
       }),
     ]);
     expect(model.branchComparison.groups[0]?.options).toHaveLength(2);
+    expect(model.decisionGroup.groups[0]?.options).toHaveLength(2);
+    expect(model.currentTask).toBeNull();
     expect(model.branchComparison.selectedOption).toEqual(
       expect.objectContaining({
         label: "Search",
@@ -364,7 +406,7 @@ describe("strategy dossier helpers", () => {
     );
     expect(model.decision).toEqual(expect.objectContaining({
       title: "Decision Options",
-      description: "Review the selected simulation or choose another path to compare its result.",
+      description: "Review the selected decision option or choose another option to compare its result.",
     }));
     expect(model.pathStatus).toEqual(expect.objectContaining({
       kind: "chapter-exit",
@@ -389,13 +431,180 @@ describe("strategy dossier helpers", () => {
       }),
       expect.objectContaining({
         kind: "transition",
-        title: "Selected path leaves this chapter",
+        title: "Selected sequence leaves this chapter",
         markers: expect.arrayContaining([
           expect.objectContaining({ kind: "leads", label: "Leads To" }),
         ]),
       }),
     ]));
-    expect(model.continuityStrip.summary).toBe("The selected path leaves this chapter.");
+    expect(model.continuityStrip.summary).toBe("The selected sequence leaves this chapter.");
+  });
+
+  it("keeps deterministic continuations out of decision comparison semantics", () => {
+    const continuation = questChoice({
+      id: "branch:Continue",
+      branchKey: "Branch_Continue",
+      label: "Secure the relay",
+      sectionRole: "continuation",
+      semanticStageKind: "deterministic_continuation",
+      parentBranchKey: "Branch_Root",
+      prerequisiteBranchKeys: ["Branch_Root"],
+      choiceGroupKey: "ChoiceGroup_Continuation",
+      branchStepOrder: 2,
+      strategyLines: ["Complete the relay task."],
+      nextEntryKeys: ["Quest_Next"],
+    });
+    const step = renderedStep({ choices: [continuation] });
+    const model = modelForRenderedStep(step, {
+      entriesByKey: {
+        Quest_Next: questEntry("Quest_Next", "Next Task"),
+      },
+      comparisonChoices: [continuation],
+    });
+
+    expect(model.currentTask).toEqual(expect.objectContaining({
+      id: "branch:Continue",
+      label: "Secure the relay",
+    }));
+    expect(model.continuation).toEqual(expect.objectContaining({
+      id: "branch:Continue",
+    }));
+    expect(model.decisionGroup.groups).toHaveLength(0);
+    expect(model.branchComparison.groups).toHaveLength(0);
+    expect(model.decision).toEqual(expect.objectContaining({
+      title: "No active decision",
+    }));
+    expect(model.continuityStrip.items).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "decision" }),
+    ]));
+  });
+
+  it("keeps topology forks distinct from explicit decision groups", () => {
+    const leftFork = questChoice({
+      id: "branch:TopologyLeft",
+      branchKey: "Branch_TopologyLeft",
+      label: "Left topology route",
+      sectionRole: null,
+      semanticStageKind: "topology_fork_option",
+      choiceGroupKey: "ChoiceGroup_Topology",
+      nextEntryKeys: ["Quest_Left"],
+    });
+    const rightFork = questChoice({
+      id: "branch:TopologyRight",
+      branchKey: "Branch_TopologyRight",
+      label: "Right topology route",
+      sectionRole: null,
+      semanticStageKind: "topology_fork_option",
+      choiceGroupKey: "ChoiceGroup_Topology",
+      nextEntryKeys: ["Quest_Right"],
+    });
+    const step = renderedStep({ choices: [leftFork, rightFork] });
+    const model = modelForRenderedStep(step, {
+      comparisonChoices: [leftFork, rightFork],
+    });
+
+    expect(model.topologyAlternatives.map((option) => option.label)).toEqual([
+      "Left topology route",
+      "Right topology route",
+    ]);
+    expect(model.decisionGroup.groups).toHaveLength(0);
+    expect(model.branchComparison.groups).toHaveLength(0);
+    expect(model.currentTask).toBeNull();
+  });
+
+  it("preserves comparison fallback for legacy grouped rows without section roles", () => {
+    const risk = {
+      ...questChoice({
+        id: "branch:LegacyRisk",
+        branchKey: "Branch_LegacyRisk",
+        label: "Risk the breach",
+        semanticStageKind: "failure",
+        choiceGroupKey: "ChoiceGroup_Legacy",
+        failureEntryKeys: ["Quest_Failure"],
+      }),
+      sectionRole: null,
+    };
+    const rejoin = {
+      ...questChoice({
+        id: "branch:LegacyRejoin",
+        branchKey: "Branch_LegacyRejoin",
+        label: "Rejoin the line",
+        semanticStageKind: "convergence",
+        choiceGroupKey: "ChoiceGroup_Legacy",
+        convergenceGroupKey: "Convergence_Legacy",
+      }),
+      sectionRole: null,
+    };
+    const step = renderedStep({ choices: [risk, rejoin] });
+    const model = modelForRenderedStep(step, {
+      comparisonChoices: [risk, rejoin],
+    });
+
+    expect(model.decisionGroup.groups[0]?.options.map((option) => option.label)).toEqual([
+      "Risk the breach",
+      "Rejoin the line",
+    ]);
+    expect(model.currentTask).toBeNull();
+    expect(model.topologyAlternatives).toHaveLength(0);
+  });
+
+  it("carries convergence, terminal, and failure stage semantics without promoting single rows to decisions", () => {
+    const convergence = questChoice({
+      id: "branch:Converge",
+      branchKey: "Branch_Converge",
+      label: "Rejoin command",
+      sectionRole: "convergence",
+      semanticStageKind: "convergence",
+      convergenceGroupKey: "Convergence_Command",
+    });
+    const terminal = questChoice({
+      id: "branch:Terminal",
+      branchKey: "Branch_Terminal",
+      label: "Hold position",
+      sectionRole: "terminal",
+      semanticStageKind: "terminal",
+    });
+    const failure = questChoice({
+      id: "branch:Failure",
+      branchKey: "Branch_Failure",
+      label: "Risk collapse",
+      sectionRole: "terminal",
+      semanticStageKind: "failure",
+      failureEntryKeys: ["Quest_Failure"],
+    });
+
+    const convergenceStep = renderedStep({ choices: [convergence], selectedChoice: convergence });
+    const convergenceModel = modelForRenderedStep(convergenceStep, {
+      flow: questPathFlow(convergenceStep),
+    });
+    expect(convergenceModel.continuationStatus).toEqual(expect.objectContaining({
+      kind: "converges",
+    }));
+    expect(convergenceModel.currentTask?.choice.semanticStageKind).toBe("convergence");
+    expect(convergenceModel.decisionGroup.groups).toHaveLength(0);
+
+    const terminalStep = renderedStep({ choices: [terminal], selectedChoice: terminal });
+    const terminalModel = modelForRenderedStep(terminalStep, {
+      flow: questPathFlow(terminalStep),
+    });
+    expect(terminalModel.continuationStatus).toEqual(expect.objectContaining({
+      kind: "complete",
+    }));
+    expect(terminalModel.currentTask?.choice.semanticStageKind).toBe("terminal");
+    expect(terminalModel.decisionGroup.groups).toHaveLength(0);
+
+    const failureStep = renderedStep({ choices: [failure], selectedChoice: failure });
+    const failureModel = modelForRenderedStep(failureStep, {
+      flow: questPathFlow(failureStep),
+      entriesByKey: {
+        Quest_Failure: questEntry("Quest_Failure", "Failure Outcome"),
+      },
+    });
+    expect(failureModel.continuationStatus).toEqual(expect.objectContaining({
+      kind: "failure",
+    }));
+    expect(failureModel.currentTask?.choice.semanticStageKind).toBe("failure");
+    expect(failureModel.decisionGroup.groups).toHaveLength(0);
   });
 
   it("builds compact continuity strip markers for terminal branch outcomes", () => {
@@ -429,7 +638,7 @@ describe("strategy dossier helpers", () => {
     expect(failureModel.continuityStrip.items).toEqual(expect.arrayContaining([
       expect.objectContaining({
         kind: "stop",
-        title: "Selected path enters a failure outcome",
+        title: "Selected sequence enters a failure outcome",
         markers: expect.arrayContaining([
           expect.objectContaining({ kind: "failure", detail: "Chapter 1: Failure Outcome" }),
         ]),

@@ -183,7 +183,7 @@ Good store-owned state:
 
 Good page-local state:
 - active tab/mode when route already owns canonical mode
-- currently selected choice path inside a reader
+- currently selected semantic sequence inside a quest reader
 - expanded/collapsed local panels
 - transient hover/focus state
 - scroll-active segment highlight
@@ -340,6 +340,12 @@ Do not introduce a generic engine until two or more concrete product surfaces ne
 ## Quest Explorer Lesson
 
 Quest Explorer is the current example of why these guidelines exist. The page grew because it legitimately had to integrate continuity metadata, reveal ownership, Strategy/Lore path state, continuous Lore reading, Strategy Dossier view models, and debug tooling.
+
+Semantic note: current implementation names such as `questPathFlow` and "path
+state" are legacy vocabulary, not canonical user semantics. Quest Explorer
+semantic work should use `docs/quest_explorer_canonical_semantics_v1.md` as the
+authority and `docs/quest_explorer_documentation_audit_v1.md` for documentation
+status.
 
 The target direction is:
 - page owns orchestration

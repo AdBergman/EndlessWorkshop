@@ -1,5 +1,10 @@
 # EWShop Quest Explorer — Lore View Design Document
 
+> [!WARNING]
+> Status: archived historical semantic model. This document preserves an older
+> Lore design direction and should not be used as canonical Quest Explorer
+> semantics. Use `../../quest_explorer_canonical_semantics_v1.md` instead.
+
 ## Purpose
 Lore View is the narrative chronicle experience.
 

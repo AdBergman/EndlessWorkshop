@@ -49,10 +49,210 @@ const diagnosticPayload: QuestExplorerResponse = {
         entry("Quest_Shared", "Shared Chronicle", {
             aliases: ["Quest_Shared_Alias_Step02"],
             summaryLines: ["The same chronicle page carries both steps."],
+            loreView: {
+                sections: [{
+                    sectionKey: "Quest_Shared:lore:owned",
+                    phase: "intro",
+                    choiceKey: "Choice_Continue",
+                    stepIndex: 0,
+                    objectiveKey: "Objective_Continue",
+                    revealedByBranchKeys: ["Branch_Continue"],
+                    revealedByChoiceKeys: ["Choice_Continue"],
+                    revealedByBranchPathAlternatives: [["Branch_Setup", "Branch_Continue"]],
+                    lines: [{ speakerLabel: null, role: "narrator", text: "The continuation owns this chronicle beat." }],
+                }],
+            },
+            strategyView: {
+                objectives: [{
+                    objectiveKey: "Objective_Continue",
+                    text: "Resolve the continuation.",
+                    phase: "completion",
+                    revealedByBranchKeys: ["Branch_Continue"],
+                    revealedByChoiceKeys: ["Choice_Continue"],
+                    revealedByBranchPathAlternatives: [["Branch_Setup", "Branch_Continue"]],
+                    requirements: [],
+                    rewards: [],
+                }],
+            },
+            branches: [
+                {
+                    branchKey: "Branch_Setup",
+                    choiceKey: "Choice_Setup",
+                    label: "Prepare the site",
+                    orderIndex: 1,
+                    groupKey: "Group_Setup",
+                    groupLabel: "Setup",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    nextEntryKeys: [],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Continue",
+                    choiceKey: "Choice_Continue",
+                    label: "Continue the chronicle",
+                    orderIndex: 2,
+                    groupKey: "Group_Continue",
+                    groupLabel: "Continuation",
+                    choiceGroupKey: "ChoiceGroup_Continue",
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Setup",
+                    prerequisiteBranchKeys: ["Branch_Setup"],
+                    prerequisiteBranchPath: ["Branch_Setup"],
+                    branchStepOrder: 2,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Continue_Alternate",
+                    choiceKey: "Choice_Continue_Alternate",
+                    label: "Continue through the alternate chronicle",
+                    orderIndex: 3,
+                    groupKey: "Group_Continue",
+                    groupLabel: "Continuation",
+                    choiceGroupKey: "ChoiceGroup_Continue",
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Setup",
+                    prerequisiteBranchKeys: ["Branch_Setup"],
+                    prerequisiteBranchPath: ["Branch_Setup"],
+                    branchStepOrder: 2,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Decision_A",
+                    choiceKey: "Choice_Decision_A",
+                    label: "Hold",
+                    orderIndex: 4,
+                    groupKey: "Group_Decision",
+                    groupLabel: "Decision",
+                    choiceGroupKey: "ChoiceGroup_Decision",
+                    sectionRole: "true_choice",
+                    branchStepOrder: 3,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Decision_B",
+                    choiceKey: "Choice_Decision_B",
+                    label: "Yield",
+                    orderIndex: 5,
+                    groupKey: "Group_Decision",
+                    groupLabel: "Decision",
+                    choiceGroupKey: "ChoiceGroup_Decision",
+                    sectionRole: "true_choice",
+                    branchStepOrder: 3,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Topology_A",
+                    choiceKey: "Choice_Topology_A",
+                    label: "Eastern record",
+                    orderIndex: 6,
+                    groupKey: "Group_Topology",
+                    groupLabel: "Topology",
+                    branchStepOrder: 4,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Topology_B",
+                    choiceKey: "Choice_Topology_B",
+                    label: "Western record",
+                    orderIndex: 7,
+                    groupKey: "Group_Topology",
+                    groupLabel: "Topology",
+                    branchStepOrder: 4,
+                    nextEntryKeys: ["Quest_Branch"],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Unresolved",
+                    choiceKey: "Choice_Unresolved",
+                    label: "Unknown future",
+                    orderIndex: 8,
+                    groupKey: "Group_Unresolved",
+                    groupLabel: "Unresolved",
+                    sectionRole: "unresolved",
+                    branchStepOrder: 5,
+                    nextEntryKeys: [],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Converge",
+                    choiceKey: "Choice_Converge",
+                    label: "Rejoin",
+                    orderIndex: 9,
+                    groupKey: "Group_Converge",
+                    groupLabel: "Convergence",
+                    sectionRole: "convergence",
+                    branchStepOrder: 6,
+                    nextEntryKeys: [],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: ["Quest_Branch"],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Terminal",
+                    choiceKey: "Choice_Terminal",
+                    label: "End",
+                    orderIndex: 10,
+                    groupKey: "Group_Terminal",
+                    groupLabel: "Terminal",
+                    sectionRole: "terminal",
+                    branchStepOrder: 7,
+                    nextEntryKeys: [],
+                    failureEntryKeys: [],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+                {
+                    branchKey: "Branch_Failure",
+                    choiceKey: "Choice_Failure",
+                    label: "Fail",
+                    orderIndex: 11,
+                    groupKey: "Group_Failure",
+                    groupLabel: "Failure",
+                    sectionRole: "failure",
+                    branchStepOrder: 8,
+                    nextEntryKeys: [],
+                    failureEntryKeys: ["Quest_Branch"],
+                    convergesIntoEntryKeys: [],
+                    lore: null,
+                    strategy: null,
+                },
+            ],
         }),
-        entry("Quest_Branch", "Branch Choice", {
+        entry("Quest_Branch", "Variant Outcome", {
             navigation: {
-                ...entry("Quest_Branch", "Branch Choice").navigation,
+                ...entry("Quest_Branch", "Variant Outcome").navigation,
                 sequenceIndex: 1,
                 branchGroupKey: "Quest_Shared",
                 branchLabel: "Shared fork",
@@ -147,7 +347,7 @@ const diagnosticPayload: QuestExplorerResponse = {
                                 variants: [
                                     {
                                         entryKey: "Quest_Branch",
-                                        title: "Branch Choice",
+                                        title: "Variant Outcome",
                                         variantKind: "branch_variant",
                                         branchGroupKey: "Quest_Shared",
                                         branchLabel: "Shared fork",
@@ -196,8 +396,38 @@ describe("quest explorer frontend diagnostic", () => {
         expect(diagnostic.selectedRailItem).toBe("Shared Chronicle | Chapter 4 | 2 steps");
         expect(diagnostic.reportText).toContain("Shared Line: Shared Chronicle | Chapter 4 | 2 steps");
         expect(diagnostic.reportText).toContain("blocker (0):");
-        expect(diagnostic.reportText).toContain("Branch variants stay in detail/chronicle context, not rail rows (1 variant(s)).");
-        expect(diagnostic.reportText).toContain("Repeated detailEntryKey Quest_Shared is represented as repeated detail content / virtual alias-expanded step across 2 step DTOs.");
+        expect(diagnostic.semanticCounts).toMatchObject({
+            setup_task: 1,
+            deterministic_continuation: 2,
+            explicit_decision_option: 2,
+            topology_fork_option: 2,
+            convergence: 1,
+            terminal: 1,
+            failure: 1,
+            unresolved: 1,
+            internal_variant: 1,
+            true_choice_groups: 1,
+            topology_forks_without_true_choice: 1,
+            grouped_deterministic_continuation_groups: 1,
+            alias_owned_stages: 1,
+            chapter_variants: 1,
+            lore_ownership_gaps: 0,
+            objective_ownership_gaps: 0,
+        });
+        expect(diagnostic.reportText).toContain("Canonical semantic taxonomy:");
+        expect(diagnostic.reportText).toContain("reference: docs/quest_explorer_canonical_semantics_v1.md");
+        expect(diagnostic.reportText).toContain("setup/artifact rows: 1");
+        expect(diagnostic.reportText).toContain("deterministic continuations: 2");
+        expect(diagnostic.reportText).toContain("grouped deterministic continuation groups: 1");
+        expect(diagnostic.reportText).toContain("true-choice groups: 1");
+        expect(diagnostic.reportText).toContain("topology forks without true_choice: 1");
+        expect(diagnostic.reportText).toContain("unresolved continuations: 1");
+        expect(diagnostic.reportText).toContain("convergence states: 1");
+        expect(diagnostic.reportText).toContain("terminal states: 1");
+        expect(diagnostic.reportText).toContain("failure states/links: 1");
+        expect(diagnostic.reportText).toContain("Internal/chapter variants stay in detail/chronicle context, not rail rows (1 variant(s)).");
+        expect(diagnostic.reportText).toContain("Repeated detailEntryKey Quest_Shared is represented as alias-owned projection content across 2 progression projection stage(s).");
+        expect(diagnostic.reportText).toContain("Canonical semantic taxonomy summary recorded for semantic rows");
         expect(diagnostic.reportText).toContain("Frontend progression inference symbols are absent");
     });
 
@@ -210,5 +440,51 @@ describe("quest explorer frontend diagnostic", () => {
         expect(diagnostic.reportText).toContain("Quest Explorer response is missing backend progression DTO semantics.");
         expect(diagnostic.reportText).toContain("Frontend progression inference symbols present: questRail.ts:inferQuestProgression");
         expect(diagnostic.findings.filter((finding) => finding.classification === "blocker")).toHaveLength(2);
+    });
+
+    it("warns when lore or objective ownership metadata points outside exported topology keys", () => {
+        const diagnostic = createQuestExplorerFrontendDiagnostic({
+            ...diagnosticPayload,
+            entries: [
+                {
+                    ...diagnosticPayload.entries[0],
+                    loreView: {
+                        sections: [{
+                            sectionKey: "Quest_Shared:lore:missing-owner",
+                            phase: "intro",
+                            choiceKey: "Missing_Choice",
+                            stepIndex: 0,
+                            objectiveKey: "Objective_Missing",
+                            revealedByBranchKeys: ["Missing_Branch"],
+                            revealedByChoiceKeys: ["Missing_Choice"],
+                            revealedByBranchPathAlternatives: [["Branch_Setup", "Missing_Branch"]],
+                            lines: [{ speakerLabel: null, role: "narrator", text: "This owner cannot be resolved." }],
+                        }],
+                    },
+                    strategyView: {
+                        objectives: [{
+                            objectiveKey: "Objective_Missing",
+                            text: "Resolve a missing owner.",
+                            phase: "completion",
+                            revealedByBranchKeys: ["Missing_Branch"],
+                            revealedByChoiceKeys: ["Missing_Choice"],
+                            revealedByBranchPathAlternatives: [["Missing_Branch"]],
+                            requirements: [],
+                            rewards: [],
+                        }],
+                    },
+                },
+                ...diagnosticPayload.entries.slice(1),
+            ],
+        }, {
+            sourceTexts: {
+                "QuestExplorerPage.tsx": "findDetailProgression buildQuestRailGroups",
+            },
+        });
+
+        expect(diagnostic.semanticCounts.lore_ownership_gaps).toBe(4);
+        expect(diagnostic.semanticCounts.objective_ownership_gaps).toBe(3);
+        expect(diagnostic.reportText).toContain("Lore ownership gaps: 4 owner reference(s) do not match exported branch/choice keys.");
+        expect(diagnostic.reportText).toContain("Objective ownership gaps: 3 owner reference(s) do not match exported branch/choice keys.");
     });
 });

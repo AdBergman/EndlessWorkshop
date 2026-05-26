@@ -116,11 +116,11 @@ export function QuestProgressionDebugPanel({
                         value: activeMode,
                     },
                     {
-                        label: "active selected choice path",
+                        label: "active selection trace",
                         value: debugChoicePath(activeChoicePath),
                     },
                     {
-                        label: "active selected branch path",
+                        label: "active branch sequence",
                         value: debugBranchPath(activeChoicePath),
                     },
                     {
@@ -128,11 +128,11 @@ export function QuestProgressionDebugPanel({
                         value: loreContextKey ?? "none",
                     },
                     {
-                        label: "Strategy selected choice path",
+                        label: "Strategy selection trace",
                         value: debugChoicePath(debugChoicePathsByMode.strategy),
                     },
                     {
-                        label: "Lore selected choice path",
+                        label: "Lore selection trace",
                         value: debugChoicePath(debugChoicePathsByMode.lore),
                     },
                     {
@@ -169,11 +169,11 @@ export function QuestProgressionDebugPanel({
                                 { label: "variant keys", value: debugList(variants) },
                                 { label: "continuation keys", value: debugList(continuation) },
                                 {
-                                    label: "normal visible choice count",
+                                    label: "normal visible semantic row count",
                                     value: String(renderedStep.choiceDiagnostics.normalVisibleChoiceCount),
                                 },
                                 {
-                                    label: "debug visible choice count",
+                                    label: "debug visible semantic row count",
                                     value: String(renderedStep.choiceDiagnostics.debugVisibleChoiceCount),
                                 },
                                 {
@@ -189,7 +189,7 @@ export function QuestProgressionDebugPanel({
                                     value: String(renderedStep.choiceDiagnostics.hiddenContinuationCount),
                                 },
                                 {
-                                    label: "selected choice",
+                                    label: "selected semantic row",
                                     value: renderedStep.selectedChoice ? debugChoiceSelection(renderedStep.selectedChoice) : "none",
                                 },
                                 {
@@ -217,7 +217,7 @@ export function QuestProgressionDebugPanel({
                     </article>
                 );
             }) ?? (
-                <p className="questExplorer-debugEmpty">No progression step is active for this entry.</p>
+                <p className="questExplorer-debugEmpty">No progression stage is active for this entry.</p>
             )}
         </section>
     );

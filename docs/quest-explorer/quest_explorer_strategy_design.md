@@ -1,5 +1,11 @@
 # EWShop Quest Explorer — Strategy View Design Document
 
+> [!NOTE]
+> Status: product-direction note with superseded terminology. This document is
+> still useful for Strategy intent, but it is not a canonical semantic spec. Use
+> `../quest_explorer_canonical_semantics_v1.md` for true-choice, continuation,
+> setup-row, topology-fork, convergence, and unresolved-future semantics.
+
 ## Purpose
 Strategy View is the planning and decision surface.
 

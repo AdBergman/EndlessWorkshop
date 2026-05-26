@@ -681,8 +681,8 @@ function StrategyChoiceGate({
     const showPrimaryHeading = presentation.activeContinuationChoices.length > 0 || presentation.structuralContextChoices.length > 0;
 
     return (
-        <section className="questExplorer-choiceGate questExplorer-strategyChoiceGate" aria-label={`${stepPositionLabel(step)} choices`}>
-            <h3>Make a Choice</h3>
+        <section className="questExplorer-choiceGate questExplorer-strategyChoiceGate" aria-label={`${stepPositionLabel(step)} strategy stages`}>
+            <h3>Strategy stages</h3>
             {presentation.structuralContextChoices.length > 0 ? (
                 <div className="questExplorer-choiceContextList">
                     {presentation.structuralContextChoices.map((choice) => (
@@ -692,7 +692,7 @@ function StrategyChoiceGate({
             ) : null}
             {presentation.primaryChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage">
-                    {showPrimaryHeading ? <ChoiceStageHeading>Path Choices</ChoiceStageHeading> : null}
+                    {showPrimaryHeading ? <ChoiceStageHeading>Available decisions</ChoiceStageHeading> : null}
                     <div>
                         {presentation.primaryChoices.map((choice) => (
                             <StrategyChoiceButton
@@ -710,7 +710,7 @@ function StrategyChoiceGate({
             ) : null}
             {presentation.activeContinuationChoices.length > 0 ? (
                 <div className="questExplorer-choiceStage questExplorer-choiceStage--continuation">
-                    <ChoiceStageHeading>Next Choices</ChoiceStageHeading>
+                    <ChoiceStageHeading>Continuations</ChoiceStageHeading>
                     <div>
                         {presentation.activeContinuationChoices.map((choice) => (
                             <StrategyChoiceButton
@@ -727,7 +727,7 @@ function StrategyChoiceGate({
                 </div>
             ) : null}
             {!selectedChoice && hasActionableChoices ? (
-                <p className="questExplorer-choiceHint">Your choice will shape the path ahead.</p>
+                <p className="questExplorer-choiceHint">Select an available decision or continuation to preview the result.</p>
             ) : null}
         </section>
     );
@@ -768,8 +768,10 @@ function StrategyStep({
     projectedDebugDetails?: string[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    const { renderedStep, dossier, title, totalSteps } = model;
-    if (!renderedStep || !dossier) return null;
+    const activeStage = model.activeStage;
+    if (!activeStage) return null;
+
+    const { renderedStep, dossier, title, totalStages } = activeStage;
 
     const fallbackChoiceGate = renderedStep.choices.length > 0 ? (
         <StrategyChoiceGate
@@ -794,9 +796,9 @@ function StrategyStep({
                 <div>
                     <span className="questExplorer-stepLabel">
                         <span>{stepPositionLabel(renderedStep.step)}</span>
-                        <span>of {totalSteps}</span>
+                        <span>of {totalStages}</span>
                     </span>
-                    <ProgressionPips total={totalSteps} activeIndex={renderedStep.stepIndex} />
+                    <ProgressionPips total={totalStages} activeIndex={activeStage.stepIndex} />
                 </div>
                 <strong className="questExplorer-stepTitle">{title}</strong>
             </header>
@@ -815,7 +817,7 @@ function StrategyStep({
                         />
                     </div>
                 ) : (
-                    <p className="questExplorer-emptyState">This progression step has no entry-backed content in the current DTO.</p>
+                    <p className="questExplorer-emptyState">This progression stage has no entry-backed content in the current DTO.</p>
                 )
             )}
 
@@ -841,9 +843,9 @@ function StrategyProgression({
     showRawHiddenRows: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
-    if (!progression || !model || !model.renderedStep) return null;
+    if (!progression || !model?.activeStage) return null;
 
-    const renderedStep = model.renderedStep;
+    const renderedStep = model.activeStage.renderedStep;
     const debugChoiceDetails = debugQuestProgression
         ? choiceDebugDetailsForStep(
             renderedStep.step,

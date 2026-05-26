@@ -40,16 +40,25 @@ export function StrategyDossier({
             </StrategyDossierSection>
 
             {presentation.hasDecision ? (
-                <StrategyDossierSection title="Choose a path" variant="pathChoice">
+                <StrategyDossierSection title="Choose a path" variant="decision">
                     <StrategyBranchComparison
-                        groups={model.branchComparison.groups}
-                        emptyLabel={model.branchComparison.emptyLabel}
+                        groups={model.decisionGroup.groups}
+                        emptyLabel={model.decisionGroup.emptyLabel}
                         step={step}
-                        projectedOutcome={model.projectedOutcome}
-                        pathStatus={model.pathStatus}
+                        outcomePreview={model.outcomePreview}
+                        continuationStatus={model.continuationStatus}
                         debugChoiceDetails={debugChoiceDetails}
                         projectedDebugDetails={projectedDebugDetails}
                         onChoose={onChoose}
+                    />
+                </StrategyDossierSection>
+            ) : null}
+
+            {model.topologyAlternatives.length > 0 ? (
+                <StrategyDossierSection title="Possible continuations" variant="continuations">
+                    <StrategyTopologyAlternatives
+                        alternatives={model.topologyAlternatives}
+                        debugChoiceDetails={debugChoiceDetails}
                     />
                 </StrategyDossierSection>
             ) : null}
@@ -70,16 +79,16 @@ type StrategyPresentation = {
 };
 
 function strategyPresentation(model: StrategyDossierModel): StrategyPresentation {
-    const options = strategyOptions(model.branchComparison.groups);
-    const soleOption = options.length === 1 ? options[0] : null;
+    const decisionOptions = strategyOptions(model.decisionGroup.groups);
+    const soleOption = model.currentTask;
     const soleOptionNextStatus = soleOption
-        ? soleOption.isSelected && model.pathStatus.kind !== "awaiting-choice"
-            ? nextStatusContentForPathStatus(model.pathStatus)
+        ? soleOption.isSelected && model.continuationStatus.kind !== "awaiting-choice"
+            ? nextStatusContentForPathStatus(model.continuationStatus)
             : nextStatusContentForOption(soleOption)
         : null;
 
     return {
-        hasDecision: options.length > 1,
+        hasDecision: decisionOptions.length > 1,
         soleOption,
         soleOptionNextStatus,
     };
@@ -137,8 +146,8 @@ function StrategyBranchComparison({
     groups,
     emptyLabel,
     step,
-    projectedOutcome,
-    pathStatus,
+    outcomePreview,
+    continuationStatus,
     debugChoiceDetails,
     projectedDebugDetails,
     onChoose,
@@ -146,8 +155,8 @@ function StrategyBranchComparison({
     groups: StrategyDossierBranchComparisonGroup[];
     emptyLabel: string;
     step: QuestProgressionStep;
-    projectedOutcome: StrategyDossierModel["projectedOutcome"];
-    pathStatus: StrategyPathStatus;
+    outcomePreview: StrategyDossierModel["outcomePreview"];
+    continuationStatus: StrategyPathStatus;
     debugChoiceDetails?: Map<string, string>;
     projectedDebugDetails?: string[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
@@ -162,7 +171,7 @@ function StrategyBranchComparison({
     return (
         <div className="questExplorer-strategyComparisonGroups">
             {groups.map((group) => {
-                const groupLabel = pathGroupAriaLabel(group.label, showGroupHeadings);
+                const groupLabel = decisionGroupAriaLabel(group.label, showGroupHeadings);
 
                 return (
                     <section className="questExplorer-strategyComparisonGroup" key={group.id} aria-label={groupLabel}>
@@ -184,8 +193,8 @@ function StrategyBranchComparison({
             {selectedOption ? (
                 <StrategyChoiceResult
                     option={selectedOption}
-                    outcome={projectedOutcome}
-                    status={pathStatus}
+                    outcome={outcomePreview}
+                    status={continuationStatus}
                     projectedDebugDetails={projectedDebugDetails}
                 />
             ) : null}
@@ -193,12 +202,12 @@ function StrategyBranchComparison({
     );
 }
 
-function pathGroupAriaLabel(label: string, showGroupHeadings: boolean): string | undefined {
+function decisionGroupAriaLabel(label: string, showGroupHeadings: boolean): string | undefined {
     if (showGroupHeadings) return label;
-    return isGenericPathGroupLabel(label) ? undefined : label;
+    return isGenericDecisionGroupLabel(label) ? undefined : label;
 }
 
-function isGenericPathGroupLabel(label: string): boolean {
+function isGenericDecisionGroupLabel(label: string): boolean {
     return ["choice", "alternative", "decision options"].includes(normalizeValue(label).toLowerCase());
 }
 
@@ -215,7 +224,7 @@ function StrategyBranchComparisonOption({
 }) {
     const isActive = option.isSelected || option.isInSelectedPath;
     const supportingMarkers = option.isSelected ? [] : option.markers.filter((marker) => marker.kind !== "leads");
-    const statusLabel = option.isSelected ? "Selected" : option.isInSelectedPath ? "In path" : null;
+    const statusLabel = option.isSelected ? "Selected" : option.isInSelectedPath ? "In sequence" : null;
 
     return (
         <button
@@ -253,6 +262,46 @@ function StrategyBranchComparisonOption({
                 <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(option.choice.id)}</span>
             ) : null}
         </button>
+    );
+}
+
+function StrategyTopologyAlternatives({
+    alternatives,
+    debugChoiceDetails,
+}: {
+    alternatives: StrategyDossierBranchOption[];
+    debugChoiceDetails?: Map<string, string>;
+}) {
+    if (alternatives.length === 0) return null;
+
+    return (
+        <div className="questExplorer-strategyComparisonGrid">
+            {alternatives.map((alternative) => (
+                <article className="questExplorer-strategyTaskSummary" key={alternative.id}>
+                    <strong>{alternative.label}</strong>
+                    {uniqueDisplayValues(alternative.outcomeLines).map((line, index) => (
+                        <p key={`${alternative.id}:line:${index}`}>{line}</p>
+                    ))}
+                    <div className="questExplorer-stepObjectiveMetaGrid">
+                        <InlineMetaList label="Requires" values={alternative.requirements} tone="requirement" />
+                        <InlineMetaList label="Rewards" values={alternative.rewards} tone="reward" />
+                    </div>
+                    {alternative.markers.length > 0 ? (
+                        <div className="questExplorer-strategyComparisonMarkers">
+                            {alternative.markers.map((marker, index) => (
+                                <StrategyDossierMarkerPill
+                                    marker={marker}
+                                    key={`${alternative.id}:${marker.kind}:${marker.detail}:${index}`}
+                                />
+                            ))}
+                        </div>
+                    ) : null}
+                    {debugChoiceDetails?.get(alternative.choice.id) ? (
+                        <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(alternative.choice.id)}</span>
+                    ) : null}
+                </article>
+            ))}
+        </div>
     );
 }
 
@@ -310,7 +359,7 @@ function StrategyChoiceResult({
 function StrategyNextStatus({ status }: { status: StrategyNextStatusContent }) {
     return (
         <div className={`questExplorer-strategyNextStatus questExplorer-strategyNextStatus--${status.kind}`}>
-            <span>Next</span>
+            <span>Continuation</span>
             <strong>{status.title}</strong>
             {status.detail ? <em>{status.detail}</em> : null}
         </div>
@@ -334,7 +383,7 @@ function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNex
         case "converges":
             return {
                 kind: status.kind,
-                title: status.targetLabel ? `Rejoins path at ${status.targetLabel}` : "Rejoins Path",
+                title: status.targetLabel ? `Rejoins progression at ${status.targetLabel}` : "Rejoins progression",
                 detail: null,
             };
         case "failure":
@@ -346,19 +395,19 @@ function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNex
         case "unresolved":
             return {
                 kind: status.kind,
-                title: "Unknown Next Step",
-                detail: "No explicit continuation is recorded for this branch.",
+                title: "Unknown continuation",
+                detail: "No explicit continuation is recorded for this stage.",
             };
         case "complete":
             return {
                 kind: status.kind,
-                title: "No further branch is recorded",
+                title: "No further continuation is recorded",
                 detail: status.targetLabel ? `Resolves at ${status.targetLabel}.` : null,
             };
         case "awaiting-choice":
             return {
                 kind: status.kind,
-                title: "Unknown Next Step",
+                title: "Awaiting decision",
                 detail: null,
             };
     }
@@ -378,7 +427,7 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
     if (convergence) {
         return {
             kind: "converges",
-            title: `Rejoins path at ${convergence.detail}`,
+            title: `Rejoins progression at ${convergence.detail}`,
             detail: null,
         };
     }
@@ -387,7 +436,7 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
     if (unresolved) {
         return {
             kind: "unresolved",
-            title: "Unknown Next Step",
+            title: "Unknown continuation",
             detail: null,
         };
     }
@@ -405,13 +454,13 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
         return {
             kind: "continues-in-chapter",
             title: "Continues in this chapter",
-            detail: "Complete this task to reveal the next step.",
+            detail: "Complete this task to reveal the next continuation.",
         };
     }
 
     return {
         kind: "complete",
-        title: "No further branch is recorded",
+        title: "No further continuation is recorded",
         detail: null,
     };
 }
@@ -422,7 +471,7 @@ function StrategyDossierSection({
     children,
 }: {
     title: string;
-    variant?: "currentTask" | "pathChoice";
+    variant?: "currentTask" | "decision" | "continuations";
     children: ReactNode;
 }) {
     const variantClass = variant ? ` questExplorer-strategyDossierSection--${variant}` : "";
@@ -552,10 +601,12 @@ function normalizeValue(value: string): string {
 }
 
 function StrategyDossierMarkerPill({ marker }: { marker: StrategyDossierMarker }) {
+    const label = marker.kind === "converges" ? "Converges" : marker.label;
+
     return (
         <span className={`questExplorer-strategyDossierMarker questExplorer-strategyDossierMarker--${marker.kind}`}>
             <span className="questExplorer-strategyDossierMarkerIcon" aria-hidden="true" />
-            <strong>{marker.label}</strong>
+            <strong>{label}</strong>
             <span className="questExplorer-strategyDossierMarkerDetail">{marker.detail}</span>
         </span>
     );

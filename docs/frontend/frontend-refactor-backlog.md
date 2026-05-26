@@ -5,6 +5,12 @@ Created: 2026-05-25
 Scope: React + TypeScript frontend only
 Reference: `docs/frontend/frontend-architecture-guidelines.md`
 
+Quest Explorer semantic reference: future Quest Explorer refactors should use
+`docs/quest_explorer_canonical_semantics_v1.md` as the semantic authority and
+`docs/quest_explorer_documentation_audit_v1.md` for documentation status.
+Existing names such as `questPathFlow` are legacy implementation vocabulary and
+should not trigger behavior changes by themselves.
+
 ## Audit Summary
 
 The frontend is generally healthy outside a few concentrated hotspots. The highest-value work is not a rewrite; it is staged, behavior-preserving extraction around Quest Explorer and one admin import surface.
@@ -138,7 +144,7 @@ Recommended work:
   - projected local continuation behavior
   - Lore stream stop conditions
   - `buildStrategyPathStatus(...)` complete/chapter-exit/converges/failure/unresolved cases
-  - `buildStrategyDossierModel(...)` selected path, selected option, and marker semantics
+  - `buildStrategyDossierModel(...)` selected semantic sequence, selected option, and marker semantics
 
 Tests needed:
 - New helper unit tests.

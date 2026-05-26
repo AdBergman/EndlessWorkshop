@@ -13,6 +13,10 @@ This document does not rewrite or delete historical artifacts. It identifies whi
 documents remain useful, which require small amendments, and which should no longer
 guide semantic or frontend-model work.
 
+Migration note, 2026-05-26: the minimal amendment pass added deprecation/status
+banners, canonical-reference notes, and archive READMEs. The Lore design note,
+handoff note, and design bundle now live under `docs/archive/quest-explorer/`.
+
 ## Classification Legend
 
 `KEEP_AS_IS` means the artifact remains valid for its stated purpose and does not
@@ -74,10 +78,10 @@ migration removes or narrows them.
 | `docs/quest-explorer-export-contract-final.md` | export/API contract spec | DANGEROUSLY_OUTDATED | Presents a final locked contract but omits live topology fields such as branch parentage, prerequisites, reveal metadata, choice groups, convergence groups, section roles, and branch step order. It also makes ordering and alias statements that are incomplete for current semantics. | Add a warning that it is not current semantic authority. Update separately as a contract revision if needed. |
 | `docs/quest-explorer-ux-design-template.md` | UX design template | KEEP_WITH_AMENDMENTS | Still useful for visual direction and product posture, but broad "branching archive", "choices", "path", and "progression atlas" language can imply that every continuation is player agency. | Add a canonical-semantics reference and clarify that branch/path copy is UX shorthand only. |
 | `docs/quest-explorer-rich-import-architecture-review.md` | architecture review | KEEP_WITH_AMENDMENTS | Useful for backend/API architecture context, but it references older contract assumptions and does not include the canonical semantic corrections. | Add a note that semantic interpretation is governed by the canonical document, not by the older contract review. |
-| `docs/quest-explorer/quest_explorer_lore_design.md` | Lore design note | ARCHIVE_OUTDATED | Its core model is `Step 1 lore -> choice -> selected Step 2 lore/outcome -> choice -> selected Step 3 lore/outcome`. This is directly superseded by chapter chronicle semantics. | Mark historical or archive. Preserve only product principles such as future-lore gating and unresolved-continuation stopping. |
+| `docs/archive/quest-explorer/quest_explorer_lore_design.md` | Lore design note | ARCHIVE_OUTDATED | Its core model is `Step 1 lore -> choice -> selected Step 2 lore/outcome -> choice -> selected Step 3 lore/outcome`. This is directly superseded by chapter chronicle semantics. | Archived as historical. Preserve only product principles such as future-lore gating and unresolved-continuation stopping. |
 | `docs/quest-explorer/quest_explorer_strategy_design.md` | Strategy design note | KEEP_WITH_AMENDMENTS | Product intent remains useful: Strategy is not a duplicate Lore reader and should support planning. However, "compare branch options" and "simulate a path" must be narrowed to true choices, topology forks, deterministic continuations, and unresolved futures. | Add a status note linking to canonical semantics before using it for Strategy model work. |
-| `docs/quest-explorer/quest_explorer_handoff.md` | handoff/reset note | ARCHIVE_OUTDATED | Useful as historical project context, but it was written before the canonical 0.80 semantic investigation and should not steer current terminology. | Archive or prepend "historical handoff, superseded for semantics." |
-| `docs/quest-explorer/quest_explorer_design_bundle.docx` | bundled design/prompt artifact | ARCHIVE_OUTDATED | Bundles the older handoff, Lore, and Strategy notes, including the superseded step-choice-path model. Binary format also makes lightweight amendment harder. | Keep as historical artifact only. Do not use as semantic input without the audit and canonical doc. |
+| `docs/archive/quest-explorer/quest_explorer_handoff.md` | handoff/reset note | ARCHIVE_OUTDATED | Useful as historical project context, but it was written before the canonical 0.80 semantic investigation and should not steer current terminology. | Archived as historical handoff context. |
+| `docs/archive/quest-explorer/quest_explorer_design_bundle.docx` | bundled design/prompt artifact | ARCHIVE_OUTDATED | Bundles the older handoff, Lore, and Strategy notes, including the superseded step-choice-path model. Binary format also makes lightweight amendment harder. | Archived as historical artifact only. Do not use as semantic input without the audit and canonical doc. |
 | `docs/diagnostics/quest-branch-continuity/quest-branch-continuity-summary.md` | diagnostic report | KEEP_WITH_AMENDMENTS | Valuable because it identified continuation, ownership, duplicate-label, and hidden-topology problems. Some requested metadata now exists in 0.80, and its counts/status should not be reused as current truth. | Add a supersession note: historical continuity diagnostic, partially fulfilled by 0.80 and superseded by canonical semantics. |
 | `docs/diagnostics/quest-branch-continuity/quest-branch-continuity-exporter-request.md` | exporter request / prompt-like artifact | KEEP_WITH_AMENDMENTS | Historically useful request for topology metadata. Many requested fields landed, while others are absent or named differently. | Mark as fulfilled or partially fulfilled. Do not treat as live exporter requirements. |
 | `docs/diagnostics/quest-branch-continuity/*.json` and `*.tsv` | diagnostic evidence | KEEP_WITH_AMENDMENTS | Useful historical evidence, but derived from a diagnostic pass and not from the canonical semantic taxonomy. | Keep for traceability. If referenced, note that the canonical document supersedes interpretation. |
@@ -167,7 +171,7 @@ Historical usefulness:
 Still useful as a baseline contract artifact and import-history reference, but
 not as semantic authority.
 
-### `docs/quest-explorer/quest_explorer_lore_design.md`
+### `docs/archive/quest-explorer/quest_explorer_lore_design.md`
 
 Classification: `ARCHIVE_OUTDATED`
 
@@ -226,7 +230,7 @@ Historical usefulness:
 Useful product direction. It should stay available with a status note and a link
 to canonical semantics.
 
-### `docs/quest-explorer/quest_explorer_handoff.md`
+### `docs/archive/quest-explorer/quest_explorer_handoff.md`
 
 Classification: `ARCHIVE_OUTDATED`
 
@@ -251,7 +255,7 @@ Historical usefulness:
 
 Useful as project-history context and design intent. Not current authority.
 
-### `docs/quest-explorer/quest_explorer_design_bundle.docx`
+### `docs/archive/quest-explorer/quest_explorer_design_bundle.docx`
 
 Classification: `ARCHIVE_OUTDATED`
 
@@ -401,9 +405,9 @@ Authoritative after small amendment:
 
 Historical or archived:
 
-- `docs/quest-explorer/quest_explorer_lore_design.md`
-- `docs/quest-explorer/quest_explorer_handoff.md`
-- `docs/quest-explorer/quest_explorer_design_bundle.docx`
+- `docs/archive/quest-explorer/quest_explorer_lore_design.md`
+- `docs/archive/quest-explorer/quest_explorer_handoff.md`
+- `docs/archive/quest-explorer/quest_explorer_design_bundle.docx`
 
 Retain as product-direction note with amendment:
 

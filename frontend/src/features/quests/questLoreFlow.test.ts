@@ -66,7 +66,7 @@ function keyedContinuationEntry(): QuestExplorerEntry {
                     choiceKey: "Choice_Next",
                     stepIndex: 0,
                     objectiveKey: "Objective_Next",
-                    lines: [{ speakerLabel: "Scout", role: "character", text: "The next beat waits for the selected path." }],
+                    lines: [{ speakerLabel: "Scout", role: "character", text: "The next beat waits for the selected continuation." }],
                 },
                 {
                     sectionKey: "Quest_Keyed:lore:future",
@@ -140,6 +140,34 @@ function loreTexts(model: ReturnType<typeof buildLoreFlowModel>): string[] {
     ));
 }
 
+function singleEntryProgression(entry: QuestExplorerEntry): QuestExplorerProgression {
+    return {
+        questlines: [
+            progressionQuestline({
+                title: entry.title,
+                steps: [
+                    { stepNumber: 1, stepOrder: 1, title: entry.title, detailEntryKey: entry.entryKey },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    };
+}
+
+function firstChronicleStage(
+    entry: QuestExplorerEntry,
+    options: { showRawHiddenRows?: boolean } = {}
+) {
+    const progression = singleEntryProgression(entry);
+    return buildLoreFlowModel({
+        selectedProgression: detailProgressionFrom(progression),
+        fullProgression: progression,
+        entriesByKey: { [entry.entryKey]: entry },
+        loreChoicePathsByContext: {},
+        showRawHiddenRows: options.showRawHiddenRows ?? false,
+    }).segments[0]?.loreSteps[0];
+}
+
 describe("buildLoreFlowModel", () => {
     it("claims repeated narrative ownership once while leaving later continuation choices available", () => {
         const entry = keyedContinuationEntry();
@@ -156,7 +184,7 @@ describe("buildLoreFlowModel", () => {
         expect(texts.filter((text) => text === "The shared setup belongs before the first choice.")).toHaveLength(1);
         expect(texts.filter((text) => text === "The current beat belongs before the first choice.")).toHaveLength(1);
         expect(texts.filter((text) => text === "The current resolution belongs before the first choice.")).toHaveLength(1);
-        expect(texts).not.toContain("The next beat waits for the selected path.");
+        expect(texts).not.toContain("The next beat waits for the selected continuation.");
         expect(texts).not.toContain("The future beat must not leak.");
 
         const continuationStep = model.segments
@@ -165,6 +193,20 @@ describe("buildLoreFlowModel", () => {
         expect(continuationStep).toBeDefined();
         expect(continuationStep?.loreSections).toEqual([]);
         expect(continuationStep?.loreSectionsWereSuppressed).toBe(true);
+        expect(continuationStep?.kind).toBe("continuation");
+        expect(continuationStep?.branchMoment).toEqual(expect.objectContaining({
+            title: "Continue the chronicle",
+            decisionChoices: [],
+            continuationChoices: [
+                expect.objectContaining({
+                    stageLabel: "Continuation",
+                    choice: expect.objectContaining({
+                        label: "Eliminate the threat",
+                        semanticStageKind: "deterministic_continuation",
+                    }),
+                }),
+            ],
+        }));
     });
 
     it("does not dedupe distinct bodies that share the same rendered section title", () => {
@@ -231,5 +273,132 @@ describe("buildLoreFlowModel", () => {
             "The first same-titled body remains visible.",
             "The second same-titled body remains visible.",
         ]);
+    });
+
+    it("emits decision-oriented chronicle stages only for explicit decision groups", () => {
+        const entry = questEntry({
+            entryKey: "Quest_Explicit_Decision",
+            title: "Explicit Decision",
+            branches: [
+                {
+                    ...testBranch("Branch_Left", "Aid the scouts"),
+                    choiceKey: "Choice_Left",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Decision_Test",
+                    groupKey: "Decision_Test",
+                    groupLabel: "Decision Options",
+                    nextEntryKeys: ["Quest_Left"],
+                },
+                {
+                    ...testBranch("Branch_Right", "Hold the gate"),
+                    choiceKey: "Choice_Right",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Decision_Test",
+                    groupKey: "Decision_Test",
+                    groupLabel: "Decision Options",
+                    nextEntryKeys: ["Quest_Right"],
+                },
+            ],
+        });
+
+        const stage = firstChronicleStage(entry);
+
+        expect(stage?.kind).toBe("decision");
+        expect(stage?.branchMoment).toEqual(expect.objectContaining({
+            title: "Choose a path",
+            continuationChoices: [],
+            branchingContinuationChoices: [],
+        }));
+        expect(stage?.branchMoment?.decisionChoices.map((item) => ({
+            label: item.choice.label,
+            tone: item.tone,
+            semanticStageKind: item.choice.semanticStageKind,
+        }))).toEqual([
+            { label: "Aid the scouts", tone: "decision", semanticStageKind: "explicit_decision_option" },
+            { label: "Hold the gate", tone: "decision", semanticStageKind: "explicit_decision_option" },
+        ]);
+    });
+
+    it("keeps non-true-choice topology forks separate from explicit decisions", () => {
+        const entry = questEntry({
+            entryKey: "Quest_Topology_Fork",
+            title: "Topology Fork",
+            branches: [
+                {
+                    ...testBranch("Branch_North", "Northern continuation"),
+                    choiceGroupKey: "Topology_Test",
+                    groupKey: "Topology_Test",
+                    groupLabel: "Continuation Options",
+                    nextEntryKeys: ["Quest_North"],
+                },
+                {
+                    ...testBranch("Branch_South", "Southern continuation"),
+                    choiceGroupKey: "Topology_Test",
+                    groupKey: "Topology_Test",
+                    groupLabel: "Continuation Options",
+                    nextEntryKeys: ["Quest_South"],
+                },
+            ],
+        });
+
+        const stage = firstChronicleStage(entry);
+
+        expect(stage?.kind).toBe("branching_continuation");
+        expect(stage?.branchMoment).toEqual(expect.objectContaining({
+            title: "Possible continuations",
+            decisionChoices: [],
+            continuationChoices: [],
+        }));
+        expect(stage?.branchMoment?.branchingContinuationChoices.map((item) => ({
+            label: item.choice.label,
+            tone: item.tone,
+            stageLabel: item.stageLabel,
+            semanticStageKind: item.choice.semanticStageKind,
+        }))).toEqual([
+            {
+                label: "Northern continuation",
+                tone: "branching_continuation",
+                stageLabel: "Possible continuation",
+                semanticStageKind: "topology_fork_option",
+            },
+            {
+                label: "Southern continuation",
+                tone: "branching_continuation",
+                stageLabel: "Possible continuation",
+                semanticStageKind: "topology_fork_option",
+            },
+        ]);
+    });
+
+    it("preserves unresolved and terminal chronicle stage kinds through adapter conversion", () => {
+        const unresolvedStage = firstChronicleStage(questEntry({
+            entryKey: "Quest_Unresolved",
+            title: "Unresolved Future",
+            branches: [
+                {
+                    ...testBranch("Branch_Unresolved", "Follow the rumor"),
+                    sectionRole: "unresolved",
+                },
+            ],
+        }), { showRawHiddenRows: true });
+        const terminalStage = firstChronicleStage(questEntry({
+            entryKey: "Quest_Terminal",
+            title: "Terminal Future",
+            branches: [
+                {
+                    ...testBranch("Branch_Terminal", "Hold the ending"),
+                    sectionRole: "terminal",
+                },
+            ],
+        }), { showRawHiddenRows: true });
+
+        expect(unresolvedStage?.kind).toBe("unresolved");
+        expect(unresolvedStage?.branchMoment?.continuationChoices[0]).toEqual(expect.objectContaining({
+            stageLabel: "Unresolved continuation",
+        }));
+        expect(terminalStage?.kind).toBe("terminal");
+        expect(terminalStage?.branchMoment?.continuationChoices[0]).toEqual(expect.objectContaining({
+            stageLabel: "Ending",
+        }));
     });
 });

@@ -10,17 +10,30 @@ Version: v1 Status: ACTIVE FRONTEND UX TEMPLATE Audience:
 
 This document complements:
 
+- `/docs/quest_explorer_canonical_semantics_v1.md`
+- `/docs/quest_explorer_documentation_audit_v1.md`
 - `/docs/quest-explorer-export-contract-final.md`
 - `EWShop_Premium_UX_Design_Charter_v1.docx`
 - `EWShop_Quest_Explorer_Active_Design_Spec_v1.json`
 
+Semantic authority note:
+
+This UX template remains active for visual and product-direction guidance, but
+it is not the canonical Quest Explorer semantic model. UX language may use
+"path" or "branch" as presentation shorthand, but product behavior must follow
+`docs/quest_explorer_canonical_semantics_v1.md` and distinguish true choices,
+mandatory continuations, setup rows, topology forks, variants, convergence, and
+unresolved continuations.
+
 Priority order:
 
-1. Quest Explorer Export Contract
-2. This UX template
-3. Active Design Spec
-4. Premium UX Charter
-5. Existing EWShop frontend conventions
+1. Quest Explorer canonical semantics
+2. Quest Explorer documentation audit
+3. Quest Explorer Export Contract for DTO/schema baseline only
+4. This UX template
+5. Active Design Spec
+6. Premium UX Charter
+7. Existing EWShop frontend conventions
 
 ---
 

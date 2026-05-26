@@ -1,9 +1,16 @@
 
 # EWShop Quest Explorer Export Contract
 
+> [!WARNING]
+> Status: SUPERSEDED for live Quest Explorer semantics. This document remains a
+> historical contract baseline, but it is not a complete 0.80 topology or
+> semantic reference. Use `docs/quest_explorer_canonical_semantics_v1.md` for
+> canonical semantics and `docs/quest_explorer_documentation_audit_v1.md` for
+> documentation status.
+
 Version: v3
 Schema Version: quest_explorer.v3
-Status: FINAL LOCKED CONTRACT + FIELD SEMANTICS
+Status: HISTORICAL CONTRACT BASELINE - NOT CANONICAL SEMANTICS
 Audience:
 - EL2DBExporter team
 - EWShop backend importer team
@@ -13,7 +20,10 @@ Audience:
 
 # Purpose
 
-This locked contract defines the clean Quest Explorer export read model that the exporter, backend importer, and frontend prototype must validate against.
+This historical contract baseline documents the clean Quest Explorer export read
+model that the exporter, backend importer, and frontend prototype originally
+validated against. It is superseded for semantic authority by
+`docs/quest_explorer_canonical_semantics_v1.md`.
 
 This document now defines:
 - DTO shape

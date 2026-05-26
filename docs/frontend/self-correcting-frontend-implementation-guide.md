@@ -28,10 +28,16 @@ Minimum product specification:
 
 For Quest-like work, the product spec should include a matrix like:
 
+Quest Explorer note: for current Quest Explorer semantics, use
+`docs/quest_explorer_canonical_semantics_v1.md` as the authority. Inherited
+"choice gate", "selected path", and "chapter/path" language in older examples
+is shorthand only and must be checked against true-choice, continuation,
+setup-row, topology-fork, convergence, and unresolved-continuation semantics.
+
 | Mode | Primary job | State scope | Can show alternates? | Can reveal future? |
 | --- | --- | --- | --- | --- |
-| Lore | Read a sequential chronicle | chapter/progression context | only at choice gates | only after selected path metadata allows it |
-| Strategy | Plan current chapter/path | selected chapter | yes, for current decision point | only as projected outcome |
+| Lore | Read a sequential chronicle | chapter/progression context | only at explicit decision moments | only after selected semantic sequence metadata allows it |
+| Strategy | Plan the current task or decision | selected chapter | yes, for current explicit decision point | only as projected outcome |
 | Debug | Inspect continuity metadata | current active mode/segment | yes | yes, behind explicit raw toggle |
 
 ## Required Design Inputs
@@ -89,8 +95,8 @@ Required test layers:
 - Regression tests for recently fixed bugs.
 
 For Quest-like readers, tests should assert:
-- Future content does not render before triggering choice.
-- Selected path reveals exactly the owned continuation.
+- Future content does not render before the owning decision or continuation is selected.
+- Selected semantic sequence reveals exactly the owned continuation.
 - Strategy and Lore state do not silently mutate each other.
 - Scroll-follow does not mutate canonical selected entry.
 - URL scroll markers use `replace` and stay scoped to the relevant mode.
@@ -122,7 +128,7 @@ Browser smoke should verify:
 - The route loads without fatal console errors.
 - The primary mode renders data.
 - Mode switching works.
-- A branch choice updates only the intended state.
+- A branch or decision selection updates only the intended state.
 - Scroll-follow highlights the visible segment.
 - Passive scroll URL changes do not mutate canonical selected entry.
 - Debug toggle still exposes QA data.

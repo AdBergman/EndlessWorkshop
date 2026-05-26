@@ -907,7 +907,7 @@ const scopedReaderPayload: QuestExplorerResponse = {
                         choiceKey: null,
                         stepIndex: 1,
                         objectiveKey: "Scoped_Objective_2",
-                        lines: [{ speakerLabel: "Scout", role: "character", text: "Step two lore must wait for a selected path." }],
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "Step two lore must wait for a selected sequence." }],
                     },
                     {
                         sectionKey: "Quest_Scoped:lore:step-3",
@@ -1063,7 +1063,7 @@ const choiceKeyScopedPayload: QuestExplorerResponse = {
                         choiceKey: "Choice_Next",
                         stepIndex: 0,
                         objectiveKey: "Objective_Next",
-                        lines: [{ speakerLabel: "Scout", role: "character", text: "The next beat waits for the selected path." }],
+                        lines: [{ speakerLabel: "Scout", role: "character", text: "The next beat waits for the selected continuation." }],
                     },
                     {
                         sectionKey: "Quest_Keyed:lore:future",
@@ -1707,7 +1707,7 @@ const ungatedContinuationPayload: QuestExplorerResponse = {
                     choiceGroupKey: "Quest_A:choice-group:step:2",
                     branchStepOrder: 2,
                     nextEntryKeys: ["Quest_C"],
-                    strategy: { conditions: ["This belongs after a selected path."], requirements: [], rewards: [] },
+                    strategy: { conditions: ["This belongs after a selected sequence."], requirements: [], rewards: [] },
                 },
             ],
         }),
@@ -1734,7 +1734,7 @@ const branchVariantProjectionPayload: QuestExplorerResponse = {
         questEntry({
             entryKey: "Quest_A",
             title: "Projected Chronicle",
-            summaryLines: ["The real branch choices should own the reader surface."],
+            summaryLines: ["The real decision rows should own the reader surface."],
             strategyView: { objectives: [testObjective("Objective_A", "Choose the live branch.")] },
             branches: [
                 {
@@ -2127,10 +2127,10 @@ describe("QuestExplorerPage", () => {
         expect(within(debugPanel).getAllByText("variant keys").length).toBeGreaterThan(0);
         expect(within(debugPanel).getAllByText("continuation keys").length).toBeGreaterThan(0);
         expect(within(debugPanel).getByText("active mode")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("active selected choice path")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("active selected branch path")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("Strategy selected choice path")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("Lore selected choice path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active selection trace")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active branch sequence")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("Strategy selection trace")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("Lore selection trace")).toBeInTheDocument();
         expect(within(debugPanel).getByText("unresolved continuation")).toBeInTheDocument();
         expect(screen.getByText(/shown at Chapter 1 Step 1; owner Chapter 1 Step 1 .* branch -> Chapter 1 Step 2/)).toBeInTheDocument();
 
@@ -2140,9 +2140,9 @@ describe("QuestExplorerPage", () => {
             expect(within(debugPanel).getAllByText(/choiceId=branch:Branch_A/).length).toBeGreaterThan(0);
         });
         expect(debugValue("active mode")).toBe("lore");
-        expect(debugValue("active selected branch path")).toContain("Branch_A");
-        expect(debugValue("Strategy selected choice path")).toBe("none");
-        expect(debugValue("Lore selected choice path")).toContain("Branch_A");
+        expect(debugValue("active branch sequence")).toContain("Branch_A");
+        expect(debugValue("Strategy selection trace")).toBe("none");
+        expect(debugValue("Lore selection trace")).toContain("Branch_A");
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
@@ -2239,6 +2239,7 @@ describe("QuestExplorerPage", () => {
                     branchKey: "Branch_Stream_Next",
                     choiceKey: null,
                     sectionRole: null,
+                    semanticStageKind: "unknown",
                     choiceGroupKey: null,
                     branchStepOrder: null,
                     hasDependentContinuations: false,
@@ -2277,6 +2278,9 @@ describe("QuestExplorerPage", () => {
 
         expect(within(chronicle).queryByText("Stream Continuation")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Stream Ending")).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("heading", { name: "Continue the chronicle" })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("heading", { name: "Choose a path" })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Next Choices")).not.toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Continue to chapter two/ }));
 
@@ -2459,7 +2463,7 @@ describe("QuestExplorerPage", () => {
         expect(within(currentTask).getByText("Choose the marker path.")).toBeInTheDocument();
         expect(within(currentTask).getAllByText("Visit the first marker.")).toHaveLength(1);
         expect(within(currentTask).getAllByText("Gain Dust.")).toHaveLength(1);
-        expect(within(currentTask).getByText("Next")).toBeInTheDocument();
+        expect(within(currentTask).getByText("Continuation")).toBeInTheDocument();
         expect(within(currentTask).getByText("Continues in Chapter 1: Second Tide")).toBeInTheDocument();
         expect(screen.queryByText("The tide record begins.")).not.toBeInTheDocument();
         expect(screen.queryByText("We follow the old marker.")).not.toBeInTheDocument();
@@ -2496,7 +2500,7 @@ describe("QuestExplorerPage", () => {
         expect(within(rejoinOption).getByText("Return to the main operation.")).toBeInTheDocument();
         expect(within(rejoinOption).getByText("Hold the line for one more turn.")).toBeInTheDocument();
         expect(within(rejoinOption).getByText("Preserve veteran readiness.")).toBeInTheDocument();
-        expect(within(rejoinOption).getByText("Rejoins Path")).toBeInTheDocument();
+        expect(within(rejoinOption).getByText("Converges")).toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Path Markers" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
@@ -2546,8 +2550,8 @@ describe("QuestExplorerPage", () => {
 
         selectedOption = within(chronicle).getByRole("button", { name: /Rejoin the line/ });
         selectedResult = within(chronicle).getByRole("region", { name: "Choosing Rejoin the line leads to" });
-        expect(selectedOption).not.toHaveTextContent("Rejoins path at Chapter 1: Main Line");
-        expect(selectedResult).toHaveTextContent("Rejoins path at Chapter 1: Main Line");
+        expect(selectedOption).not.toHaveTextContent("Rejoins progression at Chapter 1: Main Line");
+        expect(selectedResult).toHaveTextContent("Rejoins progression at Chapter 1: Main Line");
         expect(selectedResult.querySelector(".questExplorer-strategyNextStatus--converges")).not.toBeNull();
     });
 
@@ -2583,7 +2587,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getByText("Shared opening belongs before the choice.")).toBeInTheDocument();
         expect(within(chronicle).getByText("Step one lore belongs before the choice.")).toBeInTheDocument();
         expect(within(chronicle).queryByText("Future untagged lore must wait for the path.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Step two lore must wait for a selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Step two lore must wait for a selected sequence.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Step three lore must not pre-render.")).not.toBeInTheDocument();
         expect(within(chronicle).getByRole("button", { name: /Take the ash road/ })).toBeInTheDocument();
 
@@ -2605,18 +2609,18 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getAllByText("The shared setup belongs before the first choice.")).toHaveLength(1);
         expect(within(chronicle).getAllByText("The current beat belongs before the first choice.")).toHaveLength(1);
         expect(within(chronicle).getAllByText("The current resolution belongs before the first choice.")).toHaveLength(1);
-        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected continuation.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Continuation revealed")).not.toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Find Pryzja/ }));
 
         const selectedChoice = within(chronicle).getByRole("button", { name: /Find Pryzja/ });
         const nextChoice = within(chronicle).getByRole("button", { name: /Eliminate the threat/ });
 
-        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Continuation revealed")).not.toBeInTheDocument();
         expect(nextChoice).toBeInTheDocument();
-        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected continuation.")).not.toBeInTheDocument();
         expectElementBefore(selectedChoice, nextChoice);
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
     });
@@ -2633,7 +2637,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).getAllByText("The current resolution belongs before the first choice.")).toHaveLength(1);
         expect(within(chronicle).getByRole("button", { name: /Eliminate the threat/ })).toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Find Pryzja/ })).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("The next beat waits for the selected path.")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("The next beat waits for the selected continuation.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("The future beat must not leak.")).not.toBeInTheDocument();
     });
 
@@ -2669,7 +2673,7 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Resolve the current beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the next beat.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Resolve the future beat.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(within(chronicle).queryByText("Continuation revealed")).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Select a path to preview its result and next destination.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("No path is being simulated yet.")).not.toBeInTheDocument();
@@ -2741,8 +2745,8 @@ describe("QuestExplorerPage", () => {
         expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
         const selectedChoice = within(chronicle).getByRole("button", { name: /Search/ });
         const selectedResult = within(chronicle).getByRole("region", { name: "Choosing Search leads to" });
-        expect(selectedChoice).not.toHaveTextContent("Rejoins path at Chapter 3: Next Chapter");
-        expect(selectedResult).toHaveTextContent("Rejoins path at Chapter 3: Next Chapter");
+        expect(selectedChoice).not.toHaveTextContent("Rejoins progression at Chapter 3: Next Chapter");
+        expect(selectedResult).toHaveTextContent("Rejoins progression at Chapter 3: Next Chapter");
     });
 
     it("keeps revealedBy lore sections hidden until their owner branch is selected", async () => {
@@ -2821,7 +2825,7 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("keeps strategy and lore choice paths independent while preserving each tab", async () => {
+    it("keeps Strategy and Lore semantic selections independent while preserving each tab", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -2836,7 +2840,7 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
-        expect(screen.queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(screen.queryByText("Continuation revealed")).not.toBeInTheDocument();
 
         const markerChoice = screen.getByRole("button", { name: /Follow the marker/ });
         await user.click(markerChoice);
@@ -2856,7 +2860,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
     });
 
-    it("preserves a Lore selected path across Lore to Strategy to Lore", async () => {
+    it("preserves a Lore selected sequence across Lore to Strategy to Lore", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -2909,11 +2913,11 @@ describe("QuestExplorerPage", () => {
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
         expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
-        expect(screen.queryByText("Path Revealed")).not.toBeInTheDocument();
+        expect(screen.queryByText("Continuation revealed")).not.toBeInTheDocument();
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
     });
 
-    it("preserves lore paths by chapter context while strategy remains entry-scoped", async () => {
+    it("preserves Lore selections by chapter context while Strategy remains entry-scoped", async () => {
         const user = userEvent.setup();
         const baseProgression = choiceResetPayload.progression!;
         const baseQuestline = baseProgression.questlines[0]!;
@@ -2949,14 +2953,14 @@ describe("QuestExplorerPage", () => {
                         ...testBranch("Branch_D", "Open later record"),
                         groupLabel: "Later Archive",
                         nextEntryKeys: ["Quest_E"],
-                        lore: { outcomePreviewLines: ["The later path opens."] },
+                        lore: { outcomePreviewLines: ["The later continuation opens."] },
                     }],
                     strategyView: { objectives: [testObjective("Objective_D", "Hold the later archive.")] },
                 }),
                 questEntry({
                     entryKey: "Quest_E",
                     title: "Later Result",
-                    summaryLines: ["The later path opens."],
+                    summaryLines: ["The later continuation opens."],
                     navigation: {
                         chapter: 2,
                         chapterLabel: "Chapter 2",
@@ -3013,7 +3017,7 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByRole("button", { name: /Open later record/ })).toHaveAttribute("aria-current", "true");
     });
 
-    it("clears an incompatible choice path after category changes away and back", async () => {
+    it("clears an incompatible semantic selection after category changes away and back", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetWithWorldPayload);
         renderPage("/quests/Quest_A");
@@ -3054,12 +3058,12 @@ describe("QuestExplorerPage", () => {
 
         expect(screen.getByRole("button", { name: /Choose the first path/ })).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /Future-looking continuation/ })).not.toBeInTheDocument();
-        expect(screen.queryByText(/continuation row waits for a selected path/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/continuation row waits for a selected branch sequence/)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
 
         expect(screen.getByRole("button", { name: /Future-looking continuation/ })).toBeInTheDocument();
-        expect(screen.getByText(/continuation row waits for a selected path/)).toBeInTheDocument();
+        expect(screen.getByText(/continuation row waits for a selected branch sequence/)).toBeInTheDocument();
     });
 
     it("keeps branch variant projections out of normal choices when entry-backed branches exist", async () => {
@@ -3095,8 +3099,8 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByText(/hidden in normal UI: no modeled continuation before final chapter/)).toBeInTheDocument();
         const currentTask = screen.getByRole("region", { name: "Current task" });
         expect(within(currentTask).getByText("Take the unknown road")).toBeInTheDocument();
-        expect(within(currentTask).getByText("Unknown Next Step")).toBeInTheDocument();
-        expect(within(currentTask).queryByText("No explicit continuation is recorded for this branch.")).not.toBeInTheDocument();
+        expect(within(currentTask).getByText("Unknown continuation")).toBeInTheDocument();
+        expect(within(currentTask).queryByText("No explicit continuation is recorded for this stage.")).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /Take the unknown road/ })).not.toBeInTheDocument();
         expect(screen.queryByText("Hidden objective.")).not.toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
@@ -3112,20 +3116,21 @@ describe("QuestExplorerPage", () => {
         expect(screen.getByRole("button", { name: /Track/ })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /Lure/ })).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /Capture the rogue Lieutenant/ })).not.toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Choose a path" })).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: /Track/ }));
 
         expect(screen.queryByText("Continue Selected Path")).not.toBeInTheDocument();
         const trackButton = screen.getByRole("button", { name: /Track/ });
-        const pathRevealed = screen.getByText("Path Revealed");
-        expect(pathRevealed).toBeInTheDocument();
+        const continuationRevealed = screen.getByText("Continuation revealed");
+        expect(continuationRevealed).toBeInTheDocument();
         expect(screen.getByText("Capture the rogue Lieutenant.")).toBeInTheDocument();
         const revealedOutcome = screen.getByText("The quarry is cornered.");
         expect(revealedOutcome).toBeInTheDocument();
-        expectElementBefore(trackButton, pathRevealed);
-        expectElementBefore(pathRevealed, revealedOutcome);
+        expectElementBefore(trackButton, continuationRevealed);
+        expectElementBefore(continuationRevealed, revealedOutcome);
         expect(screen.queryByRole("button", { name: /Capture the rogue Lieutenant/ })).not.toBeInTheDocument();
-        expect(screen.queryByText(/does not identify the next continuation step/)).not.toBeInTheDocument();
+        expect(screen.queryByText(/does not identify the next continuation/)).not.toBeInTheDocument();
 
         expect(screen.getByText("The hunt resolves.")).toBeInTheDocument();
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
@@ -3153,10 +3158,10 @@ describe("QuestExplorerPage", () => {
         expect(screen.getAllByRole("button", { name: /Reclaim/ })).toHaveLength(1);
         expect(screen.getAllByRole("button", { name: /Reject/ })).toHaveLength(1);
         const debugPanel = screen.getByRole("region", { name: "Quest progression debug" });
-        expect(within(debugPanel).getByText("normal visible choice count")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("debug visible choice count")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("normal visible semantic row count")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("debug visible semantic row count")).toBeInTheDocument();
         expect(within(debugPanel).getByText("hidden artifact count")).toBeInTheDocument();
-        expect(within(debugPanel).getByText("active selected branch path")).toBeInTheDocument();
+        expect(within(debugPanel).getByText("active branch sequence")).toBeInTheDocument();
         expect(screen.queryByText(/hidden in normal UI: duplicate no-link artifact beside true choices/)).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("checkbox", { name: "Show raw hidden rows" }));
@@ -3174,7 +3179,10 @@ describe("QuestExplorerPage", () => {
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
 
         expect(screen.queryByText("Continue Selected Path")).not.toBeInTheDocument();
-        expect(screen.getByText("Next Choices")).toBeInTheDocument();
+        expect(screen.getByText("Possible continuations")).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Choose a path" })).not.toBeInTheDocument();
+        expect(screen.queryByText("Next Choices")).not.toBeInTheDocument();
+        expect(screen.queryByText("Continuations")).not.toBeInTheDocument();
         expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
         expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
         expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
@@ -3363,7 +3371,7 @@ describe("QuestExplorerPage", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Shared");
     });
 
-    it("does not repeat branch choices for repeated detailEntryKey projection steps", async () => {
+    it("does not repeat branch rows for repeated detailEntryKey projection stages", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(repeatedChoicePayload);
         renderPage("/quests/Quest_Shared?debugQuestProgression=true");

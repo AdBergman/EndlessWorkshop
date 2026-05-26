@@ -16,14 +16,43 @@ import {
     buildStrategyDossierModel,
     type StrategyDossierModel,
 } from "@/features/quests/questStrategyDossier";
+import type { QuestSemanticStageKind } from "@/features/quests/questSemanticStages";
 import type {
     QuestExplorerEntry,
     QuestExplorerProgression,
     QuestProgressionStep,
 } from "@/types/questTypes";
 
+export type StrategyStageKind =
+    | "current_task"
+    | "decision"
+    | "continuation"
+    | "topology_alternative"
+    | "convergence"
+    | "terminal"
+    | "failure"
+    | "unresolved";
+
+export type StrategyActiveStage = {
+    kind: StrategyStageKind;
+    stageLabel: string;
+    renderedStep: RenderedPathStep;
+    step: QuestProgressionStep;
+    stepIndex: number;
+    title: string;
+    totalStages: number;
+    dossier: StrategyDossierModel;
+    currentTask: StrategyDossierModel["currentTask"];
+    decisionGroup: StrategyDossierModel["decisionGroup"];
+    continuation: StrategyDossierModel["continuation"];
+    topologyAlternatives: StrategyDossierModel["topologyAlternatives"];
+    outcomePreview: StrategyDossierModel["outcomePreview"];
+    continuationStatus: StrategyDossierModel["continuationStatus"];
+};
+
 export type StrategyFlowModel = {
     flow: QuestPathFlow;
+    activeStage: StrategyActiveStage | null;
     renderedStep: RenderedPathStep | null;
     dossier: StrategyDossierModel | null;
     title: string;
@@ -58,6 +87,7 @@ export function buildStrategyFlowModel({
     if (!renderedStep) {
         return {
             flow,
+            activeStage: null,
             renderedStep: null,
             dossier: null,
             title: "",
@@ -106,6 +136,12 @@ export function buildStrategyFlowModel({
 
     return {
         flow,
+        activeStage: buildStrategyActiveStage({
+            renderedStep,
+            dossier,
+            title,
+            totalStages: totalSteps,
+        }),
         renderedStep,
         dossier,
         title,
@@ -115,6 +151,86 @@ export function buildStrategyFlowModel({
             ? renderedStep.revealedContinuations
             : selectedChoiceForDebug ? [selectedChoiceForDebug] : [],
     };
+}
+
+export function buildStrategyActiveStage({
+    renderedStep,
+    dossier,
+    title,
+    totalStages,
+}: {
+    renderedStep: RenderedPathStep;
+    dossier: StrategyDossierModel;
+    title: string;
+    totalStages: number;
+}): StrategyActiveStage {
+    const kind = strategyStageKind(dossier);
+
+    return {
+        kind,
+        stageLabel: strategyStageLabel(kind),
+        renderedStep,
+        step: renderedStep.step,
+        stepIndex: renderedStep.stepIndex,
+        title,
+        totalStages,
+        dossier,
+        currentTask: dossier.currentTask,
+        decisionGroup: dossier.decisionGroup,
+        continuation: dossier.continuation,
+        topologyAlternatives: dossier.topologyAlternatives,
+        outcomePreview: dossier.outcomePreview,
+        continuationStatus: dossier.continuationStatus,
+    };
+}
+
+function strategyStageKind(dossier: StrategyDossierModel): StrategyStageKind {
+    if (dossier.decisionGroup.groups.some((group) => group.options.length > 0)) return "decision";
+    if (dossier.topologyAlternatives.length > 0) return "topology_alternative";
+
+    switch (dossier.continuationStatus.kind) {
+        case "failure":
+            return "failure";
+        case "unresolved":
+            return "unresolved";
+        case "converges":
+            return "convergence";
+        default:
+            break;
+    }
+
+    const semanticKinds = [
+        dossier.currentTask?.choice.semanticStageKind,
+        dossier.continuation?.choice.semanticStageKind,
+    ].filter((kind): kind is QuestSemanticStageKind => Boolean(kind));
+    if (semanticKinds.includes("failure")) return "failure";
+    if (semanticKinds.includes("unresolved")) return "unresolved";
+    if (semanticKinds.includes("convergence")) return "convergence";
+    if (semanticKinds.includes("terminal")) return "terminal";
+    if (dossier.continuation) return "continuation";
+
+    return "current_task";
+}
+
+function strategyStageLabel(kind: StrategyStageKind): string {
+    switch (kind) {
+        case "decision":
+            return "Decision";
+        case "continuation":
+            return "Continuation";
+        case "topology_alternative":
+            return "Possible continuations";
+        case "convergence":
+            return "Convergence";
+        case "terminal":
+            return "Terminal state";
+        case "failure":
+            return "Failure state";
+        case "unresolved":
+            return "Unresolved continuation";
+        default:
+            return "Current task";
+    }
 }
 
 function activeStrategyRenderedStep(flow: QuestPathFlow): RenderedPathStep | null {

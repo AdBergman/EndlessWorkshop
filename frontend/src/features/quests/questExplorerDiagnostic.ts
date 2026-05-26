@@ -1,6 +1,16 @@
 import { getQuestCategoryKey, QUEST_CATEGORY_OPTIONS, type QuestCategoryKey } from "@/features/quests/questCategories";
 import { buildQuestRailGroups, resolveRailSelectionKey, type QuestRailGroup, type QuestRailItem } from "@/features/quests/questRail";
-import type { QuestExplorerEntry, QuestExplorerProgression, QuestExplorerResponse, QuestProgressionStep } from "@/types/questTypes";
+import {
+    classifyQuestBranchSemanticStage,
+    type QuestSemanticStageKind,
+} from "@/features/quests/questSemanticStages";
+import type {
+    QuestBranch,
+    QuestExplorerEntry,
+    QuestExplorerProgression,
+    QuestExplorerResponse,
+    QuestProgressionStep,
+} from "@/types/questTypes";
 
 export type QuestExplorerDiagnosticClassification =
     | "blocker"
@@ -14,8 +24,21 @@ export type QuestExplorerDiagnosticFinding = {
     message: string;
 };
 
+export type QuestExplorerSemanticDiagnosticCountKey =
+    | QuestSemanticStageKind
+    | "true_choice_groups"
+    | "topology_forks_without_true_choice"
+    | "grouped_deterministic_continuation_groups"
+    | "alias_owned_stages"
+    | "chapter_variants"
+    | "lore_ownership_gaps"
+    | "objective_ownership_gaps";
+
+export type QuestExplorerSemanticDiagnosticCounts = Record<QuestExplorerSemanticDiagnosticCountKey, number>;
+
 export type QuestExplorerFrontendDiagnostic = {
     categoryCounts: Record<QuestCategoryKey, number>;
+    semanticCounts: QuestExplorerSemanticDiagnosticCounts;
     selectedRailItem: string;
     railExamples: string[];
     findings: QuestExplorerDiagnosticFinding[];
@@ -35,6 +58,46 @@ const FRONTEND_INFERENCE_SYMBOLS = [
     "questGraph",
     "QuestGraph",
 ];
+
+const SEMANTIC_COUNT_KEYS: QuestExplorerSemanticDiagnosticCountKey[] = [
+    "setup_task",
+    "deterministic_continuation",
+    "explicit_decision_option",
+    "topology_fork_option",
+    "convergence",
+    "terminal",
+    "failure",
+    "unresolved",
+    "internal_variant",
+    "unknown",
+    "true_choice_groups",
+    "topology_forks_without_true_choice",
+    "grouped_deterministic_continuation_groups",
+    "alias_owned_stages",
+    "chapter_variants",
+    "lore_ownership_gaps",
+    "objective_ownership_gaps",
+];
+
+const SEMANTIC_COUNT_LABELS: Record<QuestExplorerSemanticDiagnosticCountKey, string> = {
+    setup_task: "setup/artifact rows",
+    deterministic_continuation: "deterministic continuations",
+    explicit_decision_option: "explicit decision options",
+    topology_fork_option: "topology fork rows",
+    convergence: "convergence states",
+    terminal: "terminal states",
+    failure: "failure states/links",
+    unresolved: "unresolved continuations",
+    internal_variant: "internal variants",
+    unknown: "unknown rows",
+    true_choice_groups: "true-choice groups",
+    topology_forks_without_true_choice: "topology forks without true_choice",
+    grouped_deterministic_continuation_groups: "grouped deterministic continuation groups",
+    alias_owned_stages: "alias-owned stages",
+    chapter_variants: "chapter variants",
+    lore_ownership_gaps: "lore ownership gaps",
+    objective_ownership_gaps: "objective ownership gaps",
+};
 
 function entryIdentityKeys(entry: QuestExplorerEntry): string[] {
     return [entry.entryKey, ...entry.aliases].filter(Boolean);
@@ -66,6 +129,129 @@ function railExamples(groups: QuestRailGroup[]): string[] {
     return groups.flatMap((group) => group.items.slice(0, 3).map((item) => (
         `${group.title}: ${item.title} | ${item.chapterLabel} | ${item.metaLabel}`
     ))).slice(0, 8);
+}
+
+function emptySemanticCounts(): QuestExplorerSemanticDiagnosticCounts {
+    return Object.fromEntries(SEMANTIC_COUNT_KEYS.map((key) => [key, 0])) as QuestExplorerSemanticDiagnosticCounts;
+}
+
+function branchSemanticGroupKey(entryKey: string, branch: QuestBranch): string {
+    return [
+        entryKey,
+        branch.choiceGroupKey ?? branch.groupKey ?? "ungrouped",
+        branch.branchStepOrder ?? branch.orderIndex ?? "unordered",
+    ].join(":");
+}
+
+function hasValues(values: unknown[] | null | undefined): boolean {
+    return Boolean(values?.length);
+}
+
+function canonicalDiagnosticStageKind(branch: QuestBranch, siblingBranches: QuestBranch[]): QuestSemanticStageKind {
+    const classified = classifyQuestBranchSemanticStage(branch, siblingBranches);
+    if (classified === "unknown" && hasValues(branch.convergesIntoEntryKeys)) return "convergence";
+    return classified;
+}
+
+function addMissingOwnerReferences(
+    ownerKeys: string[] | undefined,
+    knownKeys: Set<string>
+): number {
+    return (ownerKeys ?? []).filter((key) => key && !knownKeys.has(key)).length;
+}
+
+function addMissingBranchPathReferences(
+    paths: string[][] | undefined,
+    knownBranchKeys: Set<string>
+): number {
+    return (paths ?? []).reduce((total, path) => (
+        total + path.filter((branchKey) => branchKey && !knownBranchKeys.has(branchKey)).length
+    ), 0);
+}
+
+function semanticCounts(
+    entries: QuestExplorerEntry[],
+    progression: QuestExplorerProgression | null
+): QuestExplorerSemanticDiagnosticCounts {
+    const counts = emptySemanticCounts();
+    const knownBranchKeys = new Set<string>();
+    const knownChoiceKeys = new Set<string>();
+    const groupedStages = new Map<string, {
+        deterministicContinuations: number;
+        explicitDecisionOptions: number;
+        topologyForkOptions: number;
+    }>();
+
+    for (const entry of entries) {
+        for (const branch of entry.branches) {
+            knownBranchKeys.add(branch.branchKey);
+            if (branch.choiceKey) knownChoiceKeys.add(branch.choiceKey);
+        }
+    }
+
+    for (const entry of entries) {
+        for (const branch of entry.branches) {
+            const kind = canonicalDiagnosticStageKind(branch, entry.branches);
+            counts[kind] += 1;
+
+            const groupKey = branchSemanticGroupKey(entry.entryKey, branch);
+            const group = groupedStages.get(groupKey) ?? {
+                deterministicContinuations: 0,
+                explicitDecisionOptions: 0,
+                topologyForkOptions: 0,
+            };
+            if (kind === "deterministic_continuation") group.deterministicContinuations += 1;
+            if (kind === "explicit_decision_option") group.explicitDecisionOptions += 1;
+            if (kind === "topology_fork_option") group.topologyForkOptions += 1;
+            groupedStages.set(groupKey, group);
+        }
+
+        for (const section of entry.loreView.sections) {
+            counts.lore_ownership_gaps += section.choiceKey && !knownChoiceKeys.has(section.choiceKey) ? 1 : 0;
+            counts.lore_ownership_gaps += addMissingOwnerReferences(section.revealedByBranchKeys, knownBranchKeys);
+            counts.lore_ownership_gaps += addMissingOwnerReferences(section.revealedByChoiceKeys, knownChoiceKeys);
+            counts.lore_ownership_gaps += addMissingBranchPathReferences(section.revealedByBranchPathAlternatives, knownBranchKeys);
+        }
+
+        for (const objective of entry.strategyView.objectives) {
+            counts.objective_ownership_gaps += addMissingOwnerReferences(objective.revealedByBranchKeys, knownBranchKeys);
+            counts.objective_ownership_gaps += addMissingOwnerReferences(objective.revealedByChoiceKeys, knownChoiceKeys);
+            counts.objective_ownership_gaps += addMissingBranchPathReferences(objective.revealedByBranchPathAlternatives, knownBranchKeys);
+        }
+    }
+
+    for (const group of groupedStages.values()) {
+        if (group.explicitDecisionOptions >= 2) counts.true_choice_groups += 1;
+        if (group.topologyForkOptions >= 2 && group.explicitDecisionOptions === 0) {
+            counts.topology_forks_without_true_choice += 1;
+        }
+        if (
+            group.deterministicContinuations >= 2
+            && group.explicitDecisionOptions === 0
+            && group.topologyForkOptions === 0
+        ) {
+            counts.grouped_deterministic_continuation_groups += 1;
+        }
+    }
+
+    for (const questline of progression?.questlines ?? []) {
+        for (const chapter of questline.chapters) {
+            for (const step of chapter.steps) {
+                if (step.projectionKind === "virtual_alias_expanded" || step.aliasEntryKeys.length > 0) {
+                    counts.alias_owned_stages += 1;
+                }
+
+                for (const variant of step.variants) {
+                    if (variant.variantKind === "branch_variant") {
+                        counts.internal_variant += 1;
+                        counts.chapter_variants += 1;
+                    }
+                }
+            }
+        }
+    }
+
+    return counts;
 }
 
 function isChapterOnlyLabel(value: string): boolean {
@@ -123,7 +309,7 @@ function addBranchVariantFinding(
     if (railRows.length > 0) {
         findings.push({
             classification: "blocker",
-            message: `Branch variants are visible as rail rows: ${railRows.join(", ")}`,
+            message: `Internal/chapter variants are visible as rail rows: ${railRows.join(", ")}`,
         });
         return;
     }
@@ -131,8 +317,8 @@ function addBranchVariantFinding(
     findings.push({
         classification: "accepted modeled artifact",
         message: branchKeys.size === 0
-            ? "No branch_variant DTO variants are present in this diagnostic payload."
-            : `Branch variants stay in detail/chronicle context, not rail rows (${branchKeys.size} variant(s)).`,
+            ? "No internal/chapter variant DTO rows are present in this diagnostic payload."
+            : `Internal/chapter variants stay in detail/chronicle context, not rail rows (${branchKeys.size} variant(s)).`,
     });
 }
 
@@ -157,7 +343,7 @@ function addRepeatedDetailEntryKeyFindings(
     if (repeated.length === 0) {
         findings.push({
             classification: "accepted modeled artifact",
-            message: "No repeated detailEntryKey DTO steps are present in this diagnostic payload.",
+            message: "No repeated detailEntryKey projection stages are present in this diagnostic payload.",
         });
         return;
     }
@@ -167,8 +353,32 @@ function addRepeatedDetailEntryKeyFindings(
         findings.push({
             classification: hasVirtualAliasExpandedStep ? "accepted modeled artifact" : "warning",
             message: hasVirtualAliasExpandedStep
-                ? `Repeated detailEntryKey ${detailEntryKey} is represented as repeated detail content / virtual alias-expanded step across ${steps.length} step DTOs.`
-                : `Repeated detailEntryKey ${detailEntryKey} lacks an explicit virtual alias-expanded step marker across ${steps.length} step DTOs.`,
+                ? `Repeated detailEntryKey ${detailEntryKey} is represented as alias-owned projection content across ${steps.length} progression projection stage(s).`
+                : `Repeated detailEntryKey ${detailEntryKey} lacks explicit alias-owned projection metadata across ${steps.length} progression projection stage(s).`,
+        });
+    }
+}
+
+function addSemanticTaxonomyFindings(
+    findings: QuestExplorerDiagnosticFinding[],
+    counts: QuestExplorerSemanticDiagnosticCounts
+) {
+    findings.push({
+        classification: "accepted modeled artifact",
+        message: "Canonical semantic taxonomy summary recorded for semantic rows, internal variants, aliases, lore ownership, and objective ownership.",
+    });
+
+    if (counts.lore_ownership_gaps > 0) {
+        findings.push({
+            classification: "warning",
+            message: `Lore ownership gaps: ${counts.lore_ownership_gaps} owner reference(s) do not match exported branch/choice keys.`,
+        });
+    }
+
+    if (counts.objective_ownership_gaps > 0) {
+        findings.push({
+            classification: "warning",
+            message: `Objective ownership gaps: ${counts.objective_ownership_gaps} owner reference(s) do not match exported branch/choice keys.`,
         });
     }
 }
@@ -184,7 +394,7 @@ function addBackendDebugFindings(
         ["entries missing chapter/step order", debug.entriesWithMissingChapterOrStepOrder.length],
         ["one-step chapters", debug.chaptersWithOnlyOneStep.length],
         ["numeric questline collapse decisions", debug.numericQuestlineVariantsCollapsed.length],
-        ["branch variants without parent step", debug.suspiciousBranchVariantsWithoutParentStep.length],
+        ["internal/chapter variants without parent projection", debug.suspiciousBranchVariantsWithoutParentStep.length],
         ["tutorial entries placed", debug.tutorialEntriesPlaced.length],
         ["major questlines missing chapters", debug.missingMajorFactionChapters.length],
     ] as const;
@@ -243,6 +453,14 @@ function formatFinding(classification: QuestExplorerDiagnosticClassification, fi
     ];
 }
 
+function formatSemanticCounts(counts: QuestExplorerSemanticDiagnosticCounts): string[] {
+    return [
+        "Canonical semantic taxonomy:",
+        "  reference: docs/quest_explorer_canonical_semantics_v1.md",
+        ...SEMANTIC_COUNT_KEYS.map((key) => `  ${SEMANTIC_COUNT_LABELS[key]}: ${counts[key]}`),
+    ];
+}
+
 export function createQuestExplorerFrontendDiagnostic(
     questExplorer: QuestExplorerResponse,
     options: CreateQuestExplorerFrontendDiagnosticOptions = {}
@@ -254,6 +472,7 @@ export function createQuestExplorerFrontendDiagnostic(
         ? entriesByKey(entries)[options.selectedEntryKey] ?? entries.find((entry) => entryIdentityKeys(entry).includes(options.selectedEntryKey ?? ""))
         : entries[0] ?? null;
     const counts = categoryCounts(entries, progression);
+    const canonicalCounts = semanticCounts(entries, progression);
     const examples = railExamples(groups);
     const findings: QuestExplorerDiagnosticFinding[] = [];
 
@@ -267,6 +486,7 @@ export function createQuestExplorerFrontendDiagnostic(
     addDuplicateRailFindings(findings, groups);
     addBranchVariantFinding(findings, groups, progression);
     addRepeatedDetailEntryKeyFindings(findings, progression);
+    addSemanticTaxonomyFindings(findings, canonicalCounts);
     addBackendDebugFindings(findings, progression);
     addInferenceSymbolFinding(findings, options.sourceTexts);
 
@@ -283,6 +503,8 @@ export function createQuestExplorerFrontendDiagnostic(
         "Rail title/subtitle/meta examples:",
         ...(examples.length === 0 ? ["  - none"] : examples.map((example) => `  - ${example}`)),
         "",
+        ...formatSemanticCounts(canonicalCounts),
+        "",
         "Classified findings:",
         ...formatFinding("blocker", findings),
         ...formatFinding("warning", findings),
@@ -294,6 +516,7 @@ export function createQuestExplorerFrontendDiagnostic(
 
     return {
         categoryCounts: counts,
+        semanticCounts: canonicalCounts,
         selectedRailItem,
         railExamples: examples,
         findings,

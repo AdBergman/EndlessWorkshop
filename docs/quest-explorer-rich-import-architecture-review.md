@@ -4,6 +4,11 @@ Date: 2026-05-21
 
 Scope: backend-only review of the quest explorer import/read path against the EWShop rich-import patterns used by units, tech, districts, and improvements.
 
+Status note: keep this architecture review as backend/API context only. It is
+not the canonical Quest Explorer semantic model. For semantics, topology terms,
+and frontend interpretation, use `docs/quest_explorer_canonical_semantics_v1.md`;
+for documentation status, use `docs/quest_explorer_documentation_audit_v1.md`.
+
 ## Executive Verdict
 
 Quest explorer now follows the same high-level rich-import architecture as units and tech:
@@ -503,4 +508,3 @@ Assessment:
 - Keeping `QuestExplorerImportBatchDto` is consistent with units/tech/districts/improvements.
 - Keeping a document-shaped read model is appropriate for the frontend contract.
 - Import metadata table is justified because the read document includes root metadata.
-
