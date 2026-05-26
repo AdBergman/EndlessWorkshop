@@ -323,6 +323,7 @@ function buildStrategyChapterPlan({
     const stageContexts = buildStageContexts(progression, entriesByKey, renderedStepByStepKey, chapterChoices);
     const choicesByStage = groupChoicesByStage(chapterChoices, stageContexts);
     const objectivesByStage = groupObjectivesByStage(progression, entriesByKey, chapterChoices, stageContexts);
+    const objectivesByChoiceKey = groupObjectivesByChoiceKey(entriesByKey, stageContexts);
     const selectedByStepKey = selectionsByStepKey(choicePath);
     const activeStageOrder = flow.renderedSteps.at(-1)?.stepIndex != null
         ? flow.renderedSteps.at(-1)!.stepIndex + 1
@@ -351,12 +352,16 @@ function buildStrategyChapterPlan({
                     selectedChoice: selectedSelectionForChoices(step, choices, selectedByStepKey),
                     isActive: progression.activeStepKeys.has(step.stepKey),
                 });
-            const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey);
-            const decisionOptionIds = new Set(
-                decisionPointChoicesForStage(options, showRawHiddenRows).map((option) => option.id)
+            const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey);
+            const decisionOptions = decisionPointChoicesForStage(options, showRawHiddenRows);
+            const decisionOptionIds = new Set(decisionOptions.map((option) => option.id));
+            const decisionChoiceKeys = new Set(
+                decisionOptions.map((option) => option.choice.choiceKey).filter((choiceKey): choiceKey is string => Boolean(choiceKey))
             );
             const taskOption = selectedOrFirstPlanOption(options.filter((option) => !decisionOptionIds.has(option.id)));
-            const objectives = objectivesByStage.get(stageOrder) ?? [];
+            const objectives = (objectivesByStage.get(stageOrder) ?? []).filter((objective) => (
+                !objective.choiceKey || !decisionChoiceKeys.has(objective.choiceKey)
+            ));
             if (!taskOption && objectives.length === 0) return null;
 
             const requirementDetails = uniqueRequirementDisplays([
@@ -412,7 +417,7 @@ function buildStrategyChapterPlan({
                 selectedChoice: selectedSelectionForChoices(step, choices, selectedByStepKey),
                 isActive: progression.activeStepKeys.has(step.stepKey),
             });
-        const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey);
+        const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey);
         const dossier = buildStrategyDossierModel({
             renderedStep,
             totalSteps: stageCount,
@@ -666,6 +671,41 @@ function groupObjectivesByStage(
     return byStage;
 }
 
+function groupObjectivesByChoiceKey(
+    entriesByKey: Record<string, QuestExplorerEntry>,
+    stageContexts: StrategyStageContext[]
+): Map<string, StrategyDossierObjective[]> {
+    const byChoiceKey = new Map<string, StrategyDossierObjective[]>();
+    const allowedEntryKeys = uniqueDisplayValues(stageContexts
+        .filter((stage) => stage.isPreviewAllowed && stage.displayEntry)
+        .map((stage) => stage.displayEntry?.entryKey));
+
+    allowedEntryKeys.forEach((entryKey) => {
+        const entry = entriesByKey[entryKey];
+        if (!entry) return;
+
+        entry.strategyView.objectives.forEach((objective, objectiveIndex) => {
+            const choiceKey = objective.choiceKey
+                ?? choiceKeyForObjectiveKey(entry, objective.objectiveKey)
+                ?? null;
+            if (!choiceKey) return;
+
+            const [dossierObjective] = buildStrategyDossierObjectives(
+                { objectives: [{ ...objective, choiceKey }], objectiveIndexOffset: objectiveIndex },
+                entry,
+                isMinorFactionVariantQuest(entry)
+            );
+            if (!dossierObjective) return;
+
+            const objectives = byChoiceKey.get(choiceKey) ?? [];
+            objectives.push(dossierObjective);
+            byChoiceKey.set(choiceKey, objectives);
+        });
+    });
+
+    return byChoiceKey;
+}
+
 function stageOrderForObjective(
     objective: StrategyObjective,
     objectiveIndex: number,
@@ -886,13 +926,13 @@ function buildDecisionPointGroups(
 
 function decisionPointKindForChoice(choice: QuestPathChoice): StrategyDecisionPointKind | null {
     if (choice.semanticStageKind === "explicit_decision_option") return "explicit_choice";
-    if (!choice.sectionRole && (
+    if (
         choice.semanticStageKind === "unknown"
         || choice.semanticStageKind === "convergence"
         || choice.semanticStageKind === "terminal"
         || choice.semanticStageKind === "failure"
         || choice.semanticStageKind === "unresolved"
-    )) {
+    ) {
         return "explicit_choice";
     }
     if (choice.sectionRole === "continuation") return "completion_choice";

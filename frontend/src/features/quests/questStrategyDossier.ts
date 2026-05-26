@@ -10,6 +10,7 @@ import type { QuestSemanticStageKind } from "@/features/quests/questSemanticStag
 import {
     rewardDisplayTexts,
     rewardDisplaysFromRewards,
+    rewardDisplaysFromText,
     uniqueRewardDisplays,
     type QuestRewardDisplay,
 } from "@/features/quests/questRewardDisplay";
@@ -29,6 +30,7 @@ export type StrategyDossierObjectiveScope = {
 
 export type StrategyDossierObjective = {
     id: string;
+    choiceKey: string | null;
     phaseLabel: string;
     label: string;
     text: string;
@@ -88,6 +90,7 @@ export type StrategyDossierBranchOption = {
     label: string;
     eyebrow: string;
     outcomeLines: string[];
+    objectives: StrategyDossierObjective[];
     requirements: string[];
     requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
@@ -514,7 +517,6 @@ function decisionChoicesForStep(choices: QuestPathChoice[]): QuestPathChoice[] {
 
 function isStrategyDecisionComparisonCandidate(choice: QuestPathChoice): boolean {
     if (choice.semanticStageKind === "explicit_decision_option") return true;
-    if (choice.sectionRole) return false;
 
     return choice.semanticStageKind === "unknown"
         || choice.semanticStageKind === "convergence"
@@ -594,25 +596,50 @@ function terminalStripDetail(status: StrategyPathStatus): string | null {
 export function buildStrategyBranchOptions(
     renderedStep: RenderedPathStep,
     choices: QuestPathChoice[],
-    entriesByKey: Record<string, QuestExplorerEntry>
+    entriesByKey: Record<string, QuestExplorerEntry>,
+    objectivesByChoiceKey: Map<string, StrategyDossierObjective[]> = new Map()
 ): StrategyDossierBranchOption[] {
     const selectedContextBranchKeys = selectedContextBranchKeysForStep(renderedStep);
 
-    return choices.map((choice): StrategyDossierBranchOption => ({
-        id: choice.id,
-        choice,
-        label: choice.label,
-        eyebrow: choice.eyebrow,
-        outcomeLines: choiceLines(choice),
-        requirements: choice.requirementLines,
-        requirementDetails: choice.requirementDetails ?? requirementDisplaysFromText(choice.requirementLines),
-        rewards: choice.rewardLines,
-        rewardDetails: choice.rewardDetails,
-        leadsTo: leadsToForChoice(choice, entriesByKey),
-        markers: markersForChoice(choice, entriesByKey),
-        isSelected: renderedStep.selectedChoice?.choiceId === choice.id,
-        isInSelectedPath: Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey)),
-    }));
+    return choices.map((choice): StrategyDossierBranchOption => {
+        const objectives = choice.choiceKey ? objectivesByChoiceKey.get(choice.choiceKey) ?? [] : [];
+        const rawRequirementDetails = choice.requirementDetails ?? [];
+        const rawRewardDetails = choice.rewardDetails ?? [];
+        const choiceRequirementDetails = rawRequirementDetails.length > 0
+            ? rawRequirementDetails
+            : requirementDisplaysFromText(choice.requirementLines ?? []);
+        const choiceRewardDetails = rawRewardDetails.length > 0
+            ? rawRewardDetails
+            : rewardDisplaysFromText(choice.rewardLines ?? []);
+        const requirementDetails = uniqueRequirementDisplays([
+            ...choiceRequirementDetails,
+            ...objectives.flatMap((objective) => objective.requirementDetails),
+        ]);
+        const rewardDetails = uniqueRewardDisplays([
+            ...choiceRewardDetails,
+            ...objectives.flatMap((objective) => objective.rewardDetails),
+        ]);
+
+        return {
+            id: choice.id,
+            choice,
+            label: choice.label,
+            eyebrow: choice.eyebrow,
+            outcomeLines: uniqueStrings([
+                ...choiceLines(choice),
+                ...objectives.map((objective) => objective.text),
+            ]),
+            objectives,
+            requirements: requirementDisplayTexts(requirementDetails),
+            requirementDetails,
+            rewards: rewardDisplayTexts(rewardDetails),
+            rewardDetails,
+            leadsTo: leadsToForChoice(choice, entriesByKey),
+            markers: markersForChoice(choice, entriesByKey),
+            isSelected: renderedStep.selectedChoice?.choiceId === choice.id,
+            isInSelectedPath: Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey)),
+        };
+    });
 }
 
 function buildBranchComparisonFromOptions(
@@ -819,6 +846,7 @@ export function buildStrategyDossierObjectives(
 
         return {
             id: objective.objectiveKey ?? `${entryKey}:objective:${scope.objectiveIndexOffset + index}`,
+            choiceKey: objective.choiceKey ?? null,
             phaseLabel: usesObjectivePaths ? "Pacification Objective" : phaseDisplayLabel(objective.phase),
             label: `Objective ${scope.objectiveIndexOffset + index + 1}`,
             text: objective.text,

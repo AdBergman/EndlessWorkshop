@@ -10,6 +10,8 @@ import {
     questEntry,
     testBranch,
     testObjective,
+    testRequirement,
+    testReward,
 } from "@/features/quests/testUtils/questExplorerFixtures";
 import type {
     QuestExplorerEntry,
@@ -328,6 +330,96 @@ describe("buildStrategyFlowModel semantic view models", () => {
         ]);
         expect(model.activeStage?.continuation).toBeNull();
         expect(model.activeStage?.topologyAlternatives).toHaveLength(0);
+    });
+
+    it("surfaces terminal branch objectives as comparable Chapter 6 decision outcomes", () => {
+        const entry = questEntry({
+            entryKey: "Quest_Kin_Final",
+            title: "A Place Called Home",
+            strategyView: {
+                objectives: [
+                    {
+                        ...testObjective("Objective_Leave_Study", "Study the starfarers vessel."),
+                        choiceKey: "Choice_Leave",
+                        requirements: [testRequirement("Requirement_Leave_Study", "Discover natural wonder: Stellar Ship")],
+                        rewards: [testReward("Reward_Leave", "Gain faction trait: Supreme Commandments")],
+                    },
+                    {
+                        ...testObjective("Objective_Leave_Contact", "Build interstellar communications."),
+                        choiceKey: "Choice_Leave",
+                        requirements: [testRequirement("Requirement_Leave_Contact", "Build constructible: Martial Discipline once")],
+                        rewards: [testReward("Reward_Leave", "Gain faction trait: Supreme Commandments")],
+                    },
+                    {
+                        ...testObjective("Objective_Stay_Claim", "Help the Kin embrace Saiadha as their home."),
+                        choiceKey: "Choice_Stay",
+                        requirements: [testRequirement("Requirement_Stay_Claim", "Claim a territory")],
+                        rewards: [testReward("Reward_Stay", "Unlock constructible: Reservists Authority")],
+                    },
+                    {
+                        ...testObjective("Objective_Stay_Settle", "Strengthen the Kin settlements."),
+                        choiceKey: "Choice_Stay",
+                        requirements: [testRequirement("Requirement_Stay_Settle", "Have 3 cities at level 3 for 5 turns")],
+                        rewards: [testReward("Reward_Stay", "Unlock constructible: Reservists Authority")],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Leave", "Leave"),
+                    choiceKey: "Choice_Leave",
+                    sectionRole: "terminal",
+                    branchStepOrder: 1,
+                    strategy: { conditions: [], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Stay", "Stay"),
+                    choiceKey: "Choice_Stay",
+                    sectionRole: "terminal",
+                    branchStepOrder: 1,
+                    strategy: { conditions: [], requirements: [], rewards: [] },
+                },
+            ],
+        });
+        const progression = {
+            questlines: [
+                progressionQuestline({
+                    title: "A Place Called Home",
+                    chapterNumber: 6,
+                    chapterOrder: 6,
+                    steps: [
+                        { stepNumber: 1, stepOrder: 1, title: "A Place Called Home", detailEntryKey: "Quest_Kin_Final" },
+                    ],
+                }),
+            ],
+            debugSummary: null,
+        };
+
+        const model = strategyModelForProgression([entry], progression);
+
+        expect(model.chapterTasks).toHaveLength(0);
+        expect(model.decisionPoints).toHaveLength(1);
+        expect(model.decisionPoints[0]).toEqual(expect.objectContaining({
+            kind: "explicit_choice",
+            title: "Choose a path",
+        }));
+        expect(model.decisionPoints[0].options.map((option) => option.label)).toEqual(["Leave", "Stay"]);
+        expect(model.decisionPoints[0].options[0].outcomeLines).toEqual([
+            "Study the starfarers vessel.",
+            "Build interstellar communications.",
+        ]);
+        expect(model.decisionPoints[0].options[0].requirements).toEqual([
+            "Discover natural wonder: Stellar Ship",
+            "Build constructible: Martial Discipline once",
+        ]);
+        expect(model.decisionPoints[0].options[1].outcomeLines).toEqual([
+            "Help the Kin embrace Saiadha as their home.",
+            "Strengthen the Kin settlements.",
+        ]);
+        expect(model.decisionPoints[0].options[1].requirements).toEqual([
+            "Claim a territory",
+            "Have 3 cities at level 3 for 5 turns",
+        ]);
     });
 
     it("keeps topology alternatives separate from explicit Strategy decisions", () => {

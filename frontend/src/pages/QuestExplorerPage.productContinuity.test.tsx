@@ -47,6 +47,8 @@ type EntryInput = {
     branchOrder?: number | null;
     previousEntryKeys?: string[];
     nextEntryKeys?: string[];
+    loreView?: QuestExplorerEntry["loreView"];
+    strategyView?: QuestExplorerEntry["strategyView"];
 };
 
 type BranchInput = Partial<QuestBranch> & {
@@ -69,6 +71,8 @@ function productEntry({
     branchOrder = null,
     previousEntryKeys = [],
     nextEntryKeys = [],
+    loreView,
+    strategyView,
 }: EntryInput): QuestExplorerEntry {
     const faction = factions[factionKey];
 
@@ -102,8 +106,8 @@ function productEntry({
             failureEntryKeys: [],
             convergesIntoEntryKeys: [],
         },
-        loreView: { sections: [] },
-        strategyView: { objectives: [] },
+        loreView: loreView ?? { sections: [] },
+        strategyView: strategyView ?? { objectives: [] },
         branches,
         quality: null,
     };
@@ -205,6 +209,7 @@ function questline(
 const kinCh0 = "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01";
 const kinCh1 = "FactionQuest_KinOfSheredyn_Chapter01_Step01";
 const kinCh4 = "FactionQuest_KinOfSheredyn_Chapter04_Step01";
+const kinCh6A = "FactionQuest_KinOfSheredyn_Chapter06A_Step01";
 const necroCh3 = "FactionQuest_Necrophage_Chapter03_Step01";
 const mukagCh2 = "FactionQuest_Mukag_Chapter02_Step01";
 const mukagCh4 = "FactionQuest_Mukag_Chapter04_Step00";
@@ -328,6 +333,63 @@ const productContinuityPayload: QuestExplorerResponse = {
             stepOrder: 0,
             sequenceIndex: 50,
             previousEntryKeys: [kinCh4],
+        }),
+        productEntry({
+            entryKey: kinCh6A,
+            title: "A Place Called Home",
+            factionKey: "Faction_KinOfSheredyn",
+            questLineKey: "FactionQuest_KinOfSheredyn",
+            chapterOrder: 6,
+            stepOrder: 0,
+            sequenceIndex: 60,
+            strategyView: {
+                objectives: [
+                    {
+                        objectiveKey: `${kinCh6A}:objective:leave:0`,
+                        choiceKey: `${kinCh6A}:Choice_Leave`,
+                        text: "Study the starfarers vessel.",
+                        phase: "completion",
+                        requirements: [],
+                        rewards: [],
+                    },
+                    {
+                        objectiveKey: `${kinCh6A}:objective:leave:1`,
+                        choiceKey: `${kinCh6A}:Choice_Leave`,
+                        text: "Build interstellar communications.",
+                        phase: "completion",
+                        requirements: [],
+                        rewards: [],
+                    },
+                    {
+                        objectiveKey: `${kinCh6A}:objective:stay:0`,
+                        choiceKey: `${kinCh6A}:Choice_Stay`,
+                        text: "Help the Kin embrace Saiadha as their home.",
+                        phase: "completion",
+                        requirements: [],
+                        rewards: [],
+                    },
+                    {
+                        objectiveKey: `${kinCh6A}:objective:stay:1`,
+                        choiceKey: `${kinCh6A}:Choice_Stay`,
+                        text: "Strengthen the Kin settlements.",
+                        phase: "completion",
+                        requirements: [],
+                        rewards: [],
+                    },
+                ],
+            },
+            branches: [
+                productBranch(kinCh6A, 1, "Leave", {
+                    choiceKey: `${kinCh6A}:Choice_Leave`,
+                    branchStepOrder: 1,
+                    sectionRole: "terminal",
+                }),
+                productBranch(kinCh6A, 2, "Stay", {
+                    choiceKey: `${kinCh6A}:Choice_Stay`,
+                    branchStepOrder: 1,
+                    sectionRole: "terminal",
+                }),
+            ],
         }),
         productEntry({
             entryKey: necroCh3,
@@ -708,6 +770,9 @@ const productContinuityPayload: QuestExplorerResponse = {
                 chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 5, "The Kin's Fate", [
                     { stepNumber: 1, stepOrder: 0, title: "The Kin's Fate", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter05_Step01" },
                 ]),
+                chapter("FactionQuest_KinOfSheredyn", "Faction_KinOfSheredyn", 6, "A Place Called Home", [
+                    { stepNumber: 1, stepOrder: 0, title: "A Place Called Home", detailEntryKey: kinCh6A },
+                ]),
             ]),
             questline("FactionQuest_Necrophage", "Faction_Necrophage", [
                 chapter("FactionQuest_Necrophage", "Faction_Necrophage", 3, "Virgin Lands", [
@@ -892,6 +957,28 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(within(chronicleRegion).queryByRole("region", { name: "Projected Result" })).not.toBeInTheDocument();
         expect(within(chronicleRegion).queryByRole("region", { name: "Next Destination" })).not.toBeInTheDocument();
         expect(chronicleRegion.querySelector(".questExplorer-strategyProgressionDetails")).toBeNull();
+    });
+
+    it("surfaces Kin Ch6 terminal Leave and Stay objectives in Strategy while Lore keeps both choices", async () => {
+        const user = userEvent.setup();
+        renderProductQuest(kinCh6A, Faction.KIN, "kin");
+
+        expect(await screen.findByRole("heading", { name: "A Place Called Home" })).toBeInTheDocument();
+        expect(within(chronicle()).getByRole("button", { name: /Leave/ })).toBeInTheDocument();
+        expect(within(chronicle()).getByRole("button", { name: /Stay/ })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        const chronicleRegion = chronicle();
+        const decision = within(chronicleRegion).getByRole("region", { name: "Choose a path" });
+
+        expect(within(chronicleRegion).queryByText("Step 1 of 1")).not.toBeInTheDocument();
+        expect(within(decision).getByRole("button", { name: /Leave/ })).toBeInTheDocument();
+        expect(within(decision).getByRole("button", { name: /Stay/ })).toBeInTheDocument();
+        expect(decision).toHaveTextContent("Study the starfarers vessel.");
+        expect(decision).toHaveTextContent("Build interstellar communications.");
+        expect(decision).toHaveTextContent("Help the Kin embrace Saiadha as their home.");
+        expect(decision).toHaveTextContent("Strengthen the Kin settlements.");
     });
 
     it("locks Kin Ch4 continuation gating counts and active branch sequence", async () => {

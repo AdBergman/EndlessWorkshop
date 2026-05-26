@@ -107,6 +107,7 @@ function branchOption(overrides: Partial<StrategyDossierBranchOption> = {}): Str
         label: optionChoice.label,
         eyebrow: optionChoice.eyebrow,
         outcomeLines: optionChoice.strategyLines,
+        objectives: [],
         requirements: optionChoice.requirementLines,
         requirementDetails: optionChoice.requirementDetails ?? requirementDisplaysFromText(optionChoice.requirementLines),
         rewards: optionChoice.rewardLines,
