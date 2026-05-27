@@ -666,7 +666,7 @@ export function objectiveRoutesForObjectives(
 
     return objectives.map((objective, index) => ({
         id: `${objective.id}:route`,
-        label: `Route ${index + 1}`,
+        label: `Objective ${index + 1}`,
         objective,
     }));
 }

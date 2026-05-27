@@ -103,31 +103,46 @@ export function StrategyChapterPlan({
 
     return (
         <div className="questExplorer-strategyDossier questExplorer-strategyChapterPlan">
-            {tasks.length > 0 ? (
-                <StrategyDossierSection title="Chapter plan" variant="currentTask">
-                    <div className="questExplorer-strategyTaskStack">
-                        {tasks.map((task) => (
+            <StrategyDossierSection title="Chapter plan" variant="currentTask">
+                <div className="questExplorer-strategyTaskStack">
+                    {orderedChapterPlanItems(tasks, decisionPoints).map((item) => (
+                        item.kind === "task" ? (
                             <StrategyChapterTaskBlock
-                                task={task}
+                                task={item.task}
                                 debugChoiceDetails={debugChoiceDetails}
-                                key={task.id}
+                                key={item.task.id}
                             />
-                        ))}
-                    </div>
-                </StrategyDossierSection>
-            ) : null}
-
-            {decisionPoints.map((point) => (
-                <StrategyDecisionPointBlock
-                    point={point}
-                    onChoose={onChoose}
-                    debugChoiceDetails={debugChoiceDetails}
-                    projectedDebugDetails={projectedDebugDetails}
-                    key={point.id}
-                />
-            ))}
+                        ) : (
+                            <StrategyDecisionPointBlock
+                                point={item.point}
+                                onChoose={onChoose}
+                                debugChoiceDetails={debugChoiceDetails}
+                                projectedDebugDetails={projectedDebugDetails}
+                                key={item.point.id}
+                            />
+                        )
+                    ))}
+                </div>
+            </StrategyDossierSection>
         </div>
     );
+}
+
+type OrderedChapterPlanItem =
+    | { kind: "task"; stageOrder: number; task: StrategyChapterTask }
+    | { kind: "decision"; stageOrder: number; point: StrategyDecisionPoint };
+
+function orderedChapterPlanItems(
+    tasks: StrategyChapterTask[],
+    decisionPoints: StrategyDecisionPoint[]
+): OrderedChapterPlanItem[] {
+    return [
+        ...tasks.map((task) => ({ kind: "task" as const, stageOrder: task.stageOrder, task })),
+        ...decisionPoints.map((point) => ({ kind: "decision" as const, stageOrder: point.stageOrder, point })),
+    ].sort((left, right) => (
+        left.stageOrder - right.stageOrder
+        || (left.kind === "task" ? 0 : 1) - (right.kind === "task" ? 0 : 1)
+    ));
 }
 
 function StrategyChapterTaskBlock({
@@ -183,7 +198,43 @@ function StrategyDecisionPointBlock({
 
     if (!isInteractiveDecision) {
         return (
-            <StrategyDossierSection title={point.title} variant="continuations">
+            <section
+                className="questExplorer-strategyPlanTask questExplorer-strategyPlanDecision"
+                aria-label={`${point.stageLabel}: ${point.title}`}
+            >
+                <header className="questExplorer-strategyPlanTaskHeader">
+                    <span>{point.stageLabel}</span>
+                </header>
+                <StrategyDossierSection title={point.title} variant="continuations">
+                    <section
+                        className="questExplorer-strategyComparisonGroup"
+                        aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
+                    >
+                        {showGroupRegion ? <h4>{groupLabel}</h4> : null}
+                        <div className="questExplorer-strategyComparisonGrid">
+                            {point.options.map((option) => (
+                                <StrategyPathVariantOption
+                                    option={option}
+                                    debugChoiceDetails={debugChoiceDetails}
+                                    key={option.id}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                </StrategyDossierSection>
+            </section>
+        );
+    }
+
+    return (
+        <section
+            className="questExplorer-strategyPlanTask questExplorer-strategyPlanDecision"
+            aria-label={`${point.stageLabel}: ${point.title}`}
+        >
+            <header className="questExplorer-strategyPlanTaskHeader">
+                <span>{point.stageLabel}</span>
+            </header>
+            <StrategyDossierSection title={point.title} variant="decision">
                 <section
                     className="questExplorer-strategyComparisonGroup"
                     aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
@@ -191,46 +242,26 @@ function StrategyDecisionPointBlock({
                     {showGroupRegion ? <h4>{groupLabel}</h4> : null}
                     <div className="questExplorer-strategyComparisonGrid">
                         {point.options.map((option) => (
-                            <StrategyPathVariantOption
+                            <StrategyBranchComparisonOption
                                 option={option}
+                                step={point.step}
                                 debugChoiceDetails={debugChoiceDetails}
+                                onChoose={onChoose}
                                 key={option.id}
                             />
                         ))}
                     </div>
                 </section>
+                {selectedOption ? (
+                    <StrategyChoiceResult
+                        option={selectedOption}
+                        outcome={point.outcomePreview}
+                        status={point.continuationStatus}
+                        projectedDebugDetails={projectedDebugDetails}
+                    />
+                ) : null}
             </StrategyDossierSection>
-        );
-    }
-
-    return (
-        <StrategyDossierSection title={point.title} variant="decision">
-            <section
-                className="questExplorer-strategyComparisonGroup"
-                aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
-            >
-                {showGroupRegion ? <h4>{groupLabel}</h4> : null}
-                <div className="questExplorer-strategyComparisonGrid">
-                    {point.options.map((option) => (
-                        <StrategyBranchComparisonOption
-                            option={option}
-                            step={point.step}
-                            debugChoiceDetails={debugChoiceDetails}
-                            onChoose={onChoose}
-                            key={option.id}
-                        />
-                    ))}
-                </div>
-            </section>
-            {selectedOption ? (
-                <StrategyChoiceResult
-                    option={selectedOption}
-                    outcome={point.outcomePreview}
-                    status={point.continuationStatus}
-                    projectedDebugDetails={projectedDebugDetails}
-                />
-            ) : null}
-        </StrategyDossierSection>
+        </section>
     );
 }
 
@@ -587,6 +618,8 @@ function StrategyChoiceResult({
     status: StrategyPathStatus;
     projectedDebugDetails?: string[];
 }) {
+    if (status.kind === "continues-in-chapter" || option.choice.hasDependentContinuations) return null;
+
     const showOutcomeSummary = Boolean(outcome && hasDistinctProjectedSummary(option, outcome));
     const showProjectedRequirements = Boolean(outcome && shouldShowProjectedRequirements(option, outcome));
     const showProjectedRewards = Boolean(outcome && shouldShowProjectedRewards(option, outcome));
@@ -683,6 +716,13 @@ function nextStatusContentForPathStatus(status: StrategyPathStatus): StrategyNex
                 detail: null,
             };
         case "converges":
+            if (status.targetLabel && normalizeValue(status.targetLabel).toLowerCase().startsWith("this branch rejoins")) {
+                return {
+                    kind: status.kind,
+                    title: "Rejoins progression",
+                    detail: null,
+                };
+            }
             return {
                 kind: status.kind,
                 title: status.targetLabel ? `Rejoins progression at ${status.targetLabel}` : "Rejoins progression",
@@ -728,9 +768,10 @@ function nextStatusContentForOption(option: StrategyDossierBranchOption): Strate
 
     const convergence = option.markers.find((marker) => marker.kind === "converges");
     if (convergence) {
+        const isGenericConvergence = normalizeValue(convergence.detail).toLowerCase().startsWith("this branch rejoins");
         return {
             kind: "converges",
-            title: `Rejoins progression at ${convergence.detail}`,
+            title: isGenericConvergence ? "Rejoins progression" : `Rejoins progression at ${convergence.detail}`,
             detail: null,
         };
     }
@@ -840,7 +881,7 @@ function StrategyObjectiveRoutes({ routes = [] }: { routes?: StrategyDossierObje
 
     return (
         <div className="questExplorer-strategyObjectiveRoutes">
-            <strong>Objective routes</strong>
+            <strong>Objectives</strong>
             <div className="questExplorer-strategyObjectiveRouteList">
                 {routes.map((route) => (
                     <article className="questExplorer-strategyObjectiveRoute" key={route.id}>
@@ -876,7 +917,11 @@ function routeSummaryLines(
     lines: string[],
     routes: StrategyDossierObjectiveRoute[]
 ): string[] {
-    const routeTexts = new Set(routes.map((route) => normalizeValue(route.objective.text)));
+    const routeTexts = new Set(routes.flatMap((route) => [
+        route.objective.text,
+        ...route.objective.requirements,
+        ...route.objective.rewards,
+    ]).map(normalizeValue));
     return uniqueDisplayValues(lines).filter((line) => !routeTexts.has(normalizeValue(line)));
 }
 
@@ -885,7 +930,7 @@ function taskSummaryForObjectives(objectives: StrategyDossierObjective[]): Strat
     const objectiveRoutes = objectives.length > 1
         ? objectives.map((objective, index) => ({
             id: `${objective.id}:route`,
-            label: `Route ${index + 1}`,
+            label: `Objective ${index + 1}`,
             objective,
         }))
         : [];

@@ -6,6 +6,7 @@ import {
     choiceKeyScopedPayload,
     choiceResetPayload,
     kinChapterTwoStaticStrategyPayload,
+    kinChapterThreeStagedStrategyPayload,
     lastLordChapterThreeStrategyPayload,
     minorVariantPayload,
     nextChapterPayload,
@@ -291,7 +292,43 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(chronicle).getAllByText("The Kin's inner strength must be bolstered.")).toHaveLength(1);
     });
 
-    it("renders Last Lords Chapter 3 continuation objectives as route-specific Strategy requirements", async () => {
+    it("renders Kin Chapter 3 Strategy as chronological branch-owned objectives without route duplication", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(kinChapterThreeStagedStrategyPayload);
+        renderPage("/quests/FactionQuest_KinOfSheredyn_Chapter03_Step01?mode=strategy");
+
+        await screen.findByRole("heading", { name: "What Lies Beneath" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(chapterPlan).getByRole("region", {
+            name: "Step 1 of 3: Rzeld's offered to be a guide to the site. Pay him.",
+        })).toBeInTheDocument();
+        expect(within(chapterPlan).getByRole("region", { name: "Step 2 of 3: Choose a path" })).toBeInTheDocument();
+        expect(within(chapterPlan).getByRole("button", { name: /Quiet/ })).toBeInTheDocument();
+        expect(within(chapterPlan).getByRole("button", { name: /Noisy/ })).toBeInTheDocument();
+        expect(within(chapterPlan).queryByText("Objective routes")).not.toBeInTheDocument();
+        expect(within(chapterPlan).queryByText("Route 1")).not.toBeInTheDocument();
+        expect(within(chapterPlan).queryByText("Discover who among the Kin has been using the mine-and why.")).not.toBeInTheDocument();
+        expect(within(chapterPlan).queryByText("Rescue Pryzja from the abandoned mine.")).not.toBeInTheDocument();
+
+        await user.click(within(chapterPlan).getByRole("button", { name: /Noisy/ }));
+
+        const selectedChapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const stepThree = within(selectedChapterPlan).getByRole("region", { name: "Step 3 of 3: Noisy path objectives" });
+        expect(within(stepThree).getByText("Objectives")).toBeInTheDocument();
+        expect(within(stepThree).getByText("Objective 1")).toBeInTheDocument();
+        expect(within(stepThree).getByText("Objective 2")).toBeInTheDocument();
+        expect(within(stepThree).getByText("Rescue Pryzja from the abandoned mine.")).toBeInTheDocument();
+        expect(within(stepThree).getByText("Fight off the merc attack.")).toBeInTheDocument();
+        expect(within(stepThree).queryByText("Route 1")).not.toBeInTheDocument();
+        expect(within(stepThree).queryByText("Objective routes")).not.toBeInTheDocument();
+        expect(within(stepThree).getAllByText("Clear the dungeon")).toHaveLength(1);
+        expect(within(stepThree).getAllByText("Gain hero: Pryzja")).toHaveLength(2);
+        expect(within(stepThree).queryByText("Discover who among the Kin has been using the mine-and why.")).not.toBeInTheDocument();
+    });
+
+    it("renders Last Lords Chapter 3 continuation objectives as path-specific Strategy requirements", async () => {
         const user = userEvent.setup();
         useFactionSelectionStore.getState().setSelectedFaction({
             isMajor: true,
@@ -309,7 +346,8 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
 
         const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
         const continuation = within(chapterPlan).getByRole("region", { name: "Step 2 of 2: Follow the sanction path." });
-        expect(within(continuation).getByText("Objective routes")).toBeInTheDocument();
+        expect(within(continuation).getByText("Objectives")).toBeInTheDocument();
+        expect(within(continuation).queryByText("Route 1")).not.toBeInTheDocument();
         expect(within(continuation).getByText("De Suluzzo advises strengthening our military.")).toBeInTheDocument();
         expect(within(continuation).getByText("Build constructible: Stalwart 3 times")).toBeInTheDocument();
         expect(within(continuation).getByText("Amass more Dust to further strengthen the Lords.")).toBeInTheDocument();

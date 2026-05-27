@@ -125,6 +125,7 @@ export type StrategyDecisionPoint = {
     id: string;
     kind: StrategyDecisionPointKind;
     stageOrder: number;
+    stageLabel: string;
     title: string;
     step: QuestProgressionStep;
     options: StrategyDossierBranchOption[];
@@ -297,12 +298,14 @@ type StrategyStageContext = {
     displayEntry: QuestExplorerEntry | null;
     renderedStep: RenderedPathStep | null;
     revealContext: StrategyRevealContext;
+    priorChoiceGroups: StrategyChoiceGroupRevealContext[];
     commonStaticRevealGroups: StrategyChoiceGroupRevealContext[];
     isPreviewAllowed: boolean;
 };
 
 type StrategyRevealContext = {
     branchKeys: Set<string>;
+    explicitBranchKeys: Set<string>;
     choiceKeys: Set<string>;
     branchPath: string[];
 };
@@ -391,18 +394,23 @@ function buildStrategyChapterPlan({
                 : objectiveRoutesForObjectives(objectives);
             const hasRouteSpecificMeta = objectiveRoutes.length > 1;
             const requirementDetails = hasRouteSpecificMeta
-                ? taskOption?.requirementDetails ?? []
+                ? routeLevelRequirementDetails(taskOption, objectiveRoutes)
                 : uniqueRequirementDisplays([
                     ...(taskOption?.requirementDetails ?? []),
                     ...objectives.flatMap((objective) => objective.requirementDetails),
                 ]);
             const rewardDetails = hasRouteSpecificMeta
-                ? taskOption?.rewardDetails ?? []
+                ? routeLevelRewardDetails(taskOption, objectiveRoutes)
                 : uniqueRewardDisplays([
                     ...(taskOption?.rewardDetails ?? []),
                     ...objectives.flatMap((objective) => objective.rewardDetails),
                 ]);
-            const title = taskOption?.label ?? getStepTitle(step, displayEntry);
+            const title = strategyTaskTitle({
+                taskOption,
+                objectiveRoutes,
+                fallbackTitle: getStepTitle(step, displayEntry),
+                activeSelection,
+            });
             const lines = uniqueDisplayValues([
                 ...(taskOption?.outcomeLines ?? []),
                 ...objectives.map((objective) => objective.text),
@@ -472,6 +480,7 @@ function buildStrategyChapterPlan({
 
         return buildDecisionPointsForStage({
             stageOrder,
+            stageLabel: `Step ${stageOrder} of ${stageCount}`,
             step,
             options,
             dossier,
@@ -522,6 +531,7 @@ function buildStageContexts(
             displayEntry,
             renderedStep,
             revealContext,
+            priorChoiceGroups: choiceGroupContexts.filter((group) => group.stageOrder < stageOrder),
             commonStaticRevealGroups,
             isPreviewAllowed: isPreviewStageAllowed({
                 renderedStep,
@@ -560,7 +570,7 @@ function isPreviewStageAllowed({
 function buildChoiceGroupRevealContexts(chapterChoices: ChapterChoice[]): StrategyChoiceGroupRevealContext[] {
     const groups = new Map<string, { stageOrder: number; choices: QuestPathChoice[] }>();
     chapterChoices.forEach(({ choice, stageOrder }) => {
-        if (decisionPointKindForChoice(choice) !== "explicit_choice") return;
+        if (!decisionPointKindForChoice(choice)) return;
         const groupId = choice.choiceGroupKey
             ?? choice.groupKey
             ?? strategyComparisonGroupId(choice);
@@ -611,6 +621,26 @@ function stageItemVisible(
     if (!hasRevealMetadata(item)) return true;
     if (revealMetadataSatisfied(item, stage.revealContext)) return true;
     return stage.commonStaticRevealGroups.some((group) => revealMetadataCoversAllOptions(item, group));
+}
+
+function choiceBlockedByUnselectedPriorChoice(
+    choice: QuestPathChoice,
+    stage: StrategyStageContext
+): boolean {
+    if (choice.sectionRole !== "continuation") return false;
+
+    const owningBranches = uniqueStrings([
+        choice.parentBranchKey,
+        ...choice.prerequisiteBranchKeys,
+    ].filter((branchKey): branchKey is string => Boolean(branchKey)));
+    if (owningBranches.length === 0) return false;
+
+    return stage.commonStaticRevealGroups.every((group) => !revealMetadataCoversAllOptions(choice, group))
+        && stagePriorChoiceGroups(stage).some((group) => {
+            const owningGroupBranches = owningBranches.filter((branchKey) => group.branchKeys.has(branchKey));
+            if (owningGroupBranches.length === 0) return false;
+            return owningGroupBranches.every((branchKey) => !stage.revealContext.explicitBranchKeys.has(branchKey));
+        });
 }
 
 function hasRevealMetadata(
@@ -746,6 +776,7 @@ function shouldHideChoiceFromChapterPlan(
 }
 
 function strategyChoiceAllowedForContext(choice: QuestPathChoice, stage: StrategyStageContext): boolean {
+    if (choiceBlockedByUnselectedPriorChoice(choice, stage)) return false;
     if (!choice.choiceKey || !choiceFamilyVariant(choice.choiceKey)) return true;
     if (stage.revealContext.branchKeys.size === 0) return true;
     if (hasRevealMetadata(choice) && revealMetadataSatisfied(choice, stage.revealContext)) return true;
@@ -756,6 +787,10 @@ function strategyChoiceAllowedForContext(choice: QuestPathChoice, stage: Strateg
     ].filter((branchKey): branchKey is string => Boolean(branchKey)));
     if (owningBranches.length === 0) return true;
     return owningBranches.some((branchKey) => stage.revealContext.branchKeys.has(branchKey));
+}
+
+function stagePriorChoiceGroups(stage: StrategyStageContext): StrategyChoiceGroupRevealContext[] {
+    return stage.priorChoiceGroups;
 }
 
 function stageOrderForChoice(
@@ -1091,12 +1126,14 @@ function decisionPointChoicesForStage(
 
 function buildDecisionPointsForStage({
     stageOrder,
+    stageLabel,
     step,
     options,
     dossier,
     showRawHiddenRows,
 }: {
     stageOrder: number;
+    stageLabel: string;
     step: QuestProgressionStep;
     options: StrategyDossierBranchOption[];
     dossier: StrategyDossierModel;
@@ -1106,6 +1143,7 @@ function buildDecisionPointsForStage({
         id: `${step.stepKey}:decision:${group.id}`,
         kind: group.kind,
         stageOrder,
+        stageLabel,
         title: decisionPointTitle(group),
         step,
         options: group.options,
@@ -1141,13 +1179,23 @@ function buildDecisionPointGroups(
     });
 
     return [...groups.values()]
-        .map((group) => ({
-            ...group,
-            options: group.kind === "path_variant" && !showRawHiddenRows
-                ? dedupeCompletionOptions(group.options)
-                : group.options,
-        }))
+        .map((group) => {
+            const kind = decisionPointGroupKind(group);
+            return {
+                ...group,
+                kind,
+                options: kind === "path_variant" && !showRawHiddenRows
+                    ? dedupeCompletionOptions(group.options)
+                    : group.options,
+            };
+        })
         .filter((group) => uniqueNormalizedLabels(group.options).length > 1);
+}
+
+function decisionPointGroupKind(group: DecisionPointGroup): StrategyDecisionPointKind {
+    if (group.kind !== "path_variant") return group.kind;
+    if (group.options.some((option) => option.choice.hasDependentContinuations)) return "explicit_choice";
+    return group.kind;
 }
 
 function decisionPointKindForChoice(choice: QuestPathChoice): StrategyDecisionPointKind | null {
@@ -1194,6 +1242,52 @@ function decisionPointTitle(group: DecisionPointGroup): string {
 
 function selectedOrFirstPlanOption(options: StrategyDossierBranchOption[]): StrategyDossierBranchOption | null {
     return options.find((option) => option.isSelected || option.isInSelectedPath) ?? options[0] ?? null;
+}
+
+function strategyTaskTitle({
+    taskOption,
+    objectiveRoutes,
+    fallbackTitle,
+    activeSelection,
+}: {
+    taskOption: StrategyDossierBranchOption | null;
+    objectiveRoutes: StrategyDossierObjectiveRoute[];
+    fallbackTitle: string;
+    activeSelection: QuestPathChoiceSelection | null;
+}): string {
+    if (objectiveRoutes.length <= 1) return taskOption?.label ?? fallbackTitle;
+
+    const optionLabel = normalizeValue(taskOption?.label ?? "");
+    const duplicatesObjective = objectiveRoutes.some((route) => normalizeValue(route.objective.text) === optionLabel);
+    if (!duplicatesObjective && taskOption?.label) return taskOption.label;
+
+    return activeSelection?.label
+        ? `${activeSelection.label} path objectives`
+        : "Path objectives";
+}
+
+function routeLevelRequirementDetails(
+    taskOption: StrategyDossierBranchOption | null,
+    objectiveRoutes: StrategyDossierObjectiveRoute[]
+): QuestRequirementDisplay[] {
+    const routeRequirements = new Set(
+        objectiveRoutes.flatMap((route) => route.objective.requirements).map(normalizeValue)
+    );
+    return uniqueRequirementDisplays((taskOption?.requirementDetails ?? []).filter((requirement) => (
+        !routeRequirements.has(normalizeValue(requirement.displayText))
+    )));
+}
+
+function routeLevelRewardDetails(
+    taskOption: StrategyDossierBranchOption | null,
+    objectiveRoutes: StrategyDossierObjectiveRoute[]
+): QuestRewardDisplay[] {
+    const routeRewards = new Set(
+        objectiveRoutes.flatMap((route) => route.objective.rewards).map(normalizeValue)
+    );
+    return uniqueRewardDisplays((taskOption?.rewardDetails ?? []).filter((reward) => (
+        !routeRewards.has(normalizeValue(reward.displayText))
+    )));
 }
 
 function taskSemanticKind(kind: QuestSemanticStageKind | null): StrategyChapterTaskSemanticKind {
@@ -1248,13 +1342,14 @@ function strategyRevealContext(
 ): StrategyRevealContext {
     const context: StrategyRevealContext = {
         branchKeys: new Set(),
+        explicitBranchKeys: new Set(),
         choiceKeys: new Set(),
         branchPath: [],
     };
-    choicePath.forEach((selection) => addSelectionToRevealContext(context, selection));
+    choicePath.forEach((selection) => addSelectionToRevealContext(context, selection, true));
     renderedSteps.forEach((step) => {
         [step.currentBeatChoice, step.selectedChoice].forEach((selection) => {
-            addSelectionToRevealContext(context, selection);
+            addSelectionToRevealContext(context, selection, false);
         });
     });
     return context;
@@ -1262,11 +1357,13 @@ function strategyRevealContext(
 
 function addSelectionToRevealContext(
     context: StrategyRevealContext,
-    selection: QuestPathChoiceSelection | null
+    selection: QuestPathChoiceSelection | null,
+    isExplicit: boolean
 ): void {
     if (!selection || selection.isPassive) return;
     if (selection.branchKey) {
         context.branchKeys.add(selection.branchKey);
+        if (isExplicit) context.explicitBranchKeys.add(selection.branchKey);
         context.branchPath.push(selection.branchKey);
     }
     if (selection.choiceKey) context.choiceKeys.add(selection.choiceKey);

@@ -17,6 +17,9 @@ import {
     testRequirement,
     testReward,
 } from "@/features/quests/testUtils/questExplorerFixtures";
+import {
+    kinChapterThreeStagedStrategyPayload,
+} from "@/features/quests/testUtils/questExplorerPageFixtures";
 import type {
     QuestExplorerEntry,
     QuestExplorerProgression,
@@ -580,6 +583,61 @@ describe("buildStrategyFlowModel semantic view models", () => {
             "Claim a territory",
             "Have 3 cities at level 3 for 5 turns",
         ]);
+    });
+
+    it("keeps Kin Chapter 3 staged Strategy objectives owned by the selected branch", () => {
+        const entries = kinChapterThreeStagedStrategyPayload.entries;
+        const progression = kinChapterThreeStagedStrategyPayload.progression;
+        if (!progression) throw new Error("Expected Kin Chapter 3 progression fixture.");
+        const initialModel = strategyModelForProgression(entries, progression);
+        const stepTwoKey = progression.questlines[0].chapters[0].steps[1].stepKey;
+        const quietChoice = initialModel.decisionPoints[0].options.find((option) => option.label === "Quiet")?.choice;
+        const noisyChoice = initialModel.decisionPoints[0].options.find((option) => option.label === "Noisy")?.choice;
+        if (!quietChoice || !noisyChoice) throw new Error("Expected Quiet and Noisy Strategy choices.");
+
+        expect(initialModel.chapterTasks.map((task) => [task.stageLabel, task.title])).toEqual([
+            ["Step 1 of 3", "Rzeld's offered to be a guide to the site. Pay him."],
+        ]);
+        expect(initialModel.decisionPoints.map((point) => [point.stageLabel, point.title])).toEqual([
+            ["Step 2 of 3", "Choose a path"],
+        ]);
+        expect(initialModel.decisionPoints[0].kind).toBe("explicit_choice");
+        expect(initialModel.decisionPoints[0].options.map((option) => option.label)).toEqual(["Quiet", "Noisy"]);
+        expect(initialModel.chapterTasks.flatMap((task) => task.objectives.map((objective) => objective.text))).not.toContain(
+            "Discover who among the Kin has been using the mine-and why."
+        );
+
+        const quietModel = strategyModelForProgression(entries, progression, {
+            choicePath: [selectionForChoice(stepTwoKey, quietChoice)],
+        });
+        const quietStepThree = quietModel.chapterTasks.find((task) => task.stageOrder === 3);
+        expect(quietStepThree?.title).toBe("Discover who among the Kin has been using the mine-and why.");
+        expect(quietStepThree?.objectives.map((objective) => objective.text)).toEqual([
+            "Discover who among the Kin has been using the mine-and why.",
+        ]);
+        expect(quietStepThree?.objectives.map((objective) => objective.text)).not.toContain(
+            "Rescue Pryzja from the abandoned mine."
+        );
+
+        const noisyModel = strategyModelForProgression(entries, progression, {
+            choicePath: [selectionForChoice(stepTwoKey, noisyChoice)],
+        });
+        const noisyStepThree = noisyModel.chapterTasks.find((task) => task.stageOrder === 3);
+        expect(noisyStepThree?.title).toBe("Noisy path objectives");
+        expect(noisyStepThree?.requirements).toEqual([]);
+        expect(noisyStepThree?.rewards).toEqual([]);
+        expect(noisyStepThree?.objectiveRoutes.map((route) => route.label)).toEqual(["Objective 1", "Objective 2"]);
+        expect(noisyStepThree?.objectiveRoutes.map((route) => route.objective.text)).toEqual([
+            "Rescue Pryzja from the abandoned mine.",
+            "Fight off the merc attack.",
+        ]);
+        expect(noisyStepThree?.objectiveRoutes.flatMap((route) => route.objective.requirements)).toEqual([
+            "Clear the dungeon",
+            "Defeat the marked army",
+        ]);
+        expect(noisyStepThree?.objectiveRoutes.map((route) => route.objective.text)).not.toContain(
+            "Discover who among the Kin has been using the mine-and why."
+        );
     });
 
     it("keeps Last Lord continuation objective routes separate and owned by the selected branch family", () => {

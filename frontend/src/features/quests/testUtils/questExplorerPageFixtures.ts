@@ -1880,6 +1880,224 @@ export const kinChapterTwoStaticStrategyPayload: QuestExplorerResponse = {
     },
 };
 
+export const kinChapterThreeStagedStrategyPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01",
+            title: "What Lies Beneath",
+            summaryLines: ["Pryzja is missing again. Could she have headed for the once-submerged site that Garin visited?"],
+            strategyView: {
+                objectives: [
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:step-1",
+                            "Rzeld's offered to be a guide to the site. Pay him."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01ChoiceDefinition",
+                        requirements: [
+                            testRequirement("Requirement_Rzeld_Pay", "Pay the invoice at the quest location"),
+                            testRequirement("Requirement_Rzeld_Tech", "Research The Wisdom of Garin"),
+                        ],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:quiet",
+                            "Tighten the grip on the population to make them talk."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice01ChoiceDefinition",
+                        requirements: [
+                            testRequirement("Requirement_Quiet_Value", "Reach the required empire value"),
+                            testRequirement("Requirement_Quiet_Maintain", "Maintain the required empire value for 5 turns"),
+                        ],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:noisy-1",
+                            "Capture and interrogate the nearby Doomwraith."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Noisy_Doomwraith", "Defeat Lingering Doomwraith")],
+                        rewards: [testReward("Reward_Noisy_Influence", "Gain Influence based on technology era")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:noisy-2",
+                            "Search an old mine for clues to Pryzja's disappearance."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Noisy_Mine", "Clear the dungeon")],
+                        rewards: [testReward("Reward_Noisy_Dust", "Gain Dust based on technology era")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:discover",
+                            "Discover who among the Kin has been using the mine-and why."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step03_Choice01ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Discover_Mine", "Clear the dungeon")],
+                        rewards: [testReward("Reward_Discover_Pryzja", "Gain hero: Pryzja")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:rescue",
+                            "Rescue Pryzja from the abandoned mine."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step03_Choice02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Rescue_Mine", "Clear the dungeon")],
+                        rewards: [testReward("Reward_Rescue_Pryzja", "Gain hero: Pryzja")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn_Chapter03_Step01:objective:merc",
+                            "Fight off the merc attack."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step03_Choice02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Merc_Army", "Defeat the marked army")],
+                        rewards: [testReward("Reward_Merc_Pryzja", "Gain hero: Pryzja")],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1", "Rzeld's offered to be a guide to the site. Pay him."),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01ChoiceDefinition",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: {
+                        conditions: ["Pay the invoice at the quest location"],
+                        requirements: [testRequirement("Requirement_Rzeld_Pay", "Pay the invoice at the quest location")],
+                        rewards: [testReward("Reward_Rzeld_Science", "Gain Science based on technology era")],
+                    },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:2", "Quiet"),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice01ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:choice-group:step:2",
+                    branchStepOrder: 2,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1",
+                    parentChoiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01ChoiceDefinition",
+                    prerequisiteBranchKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1"],
+                    strategy: {
+                        conditions: ["Maintain the required empire value for 5 turns"],
+                        requirements: [testRequirement("Requirement_Quiet_Maintain", "Maintain the required empire value for 5 turns")],
+                        rewards: [],
+                    },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:3", "Discover who among the Kin has been using the mine-and why."),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step03_Choice01ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:choice-group:step:3:quiet",
+                    branchStepOrder: 3,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:2",
+                    parentChoiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice01ChoiceDefinition",
+                    prerequisiteBranchKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1",
+                        "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:2",
+                    ],
+                    nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter04_Step01"],
+                    strategy: {
+                        conditions: ["Clear the dungeon"],
+                        requirements: [testRequirement("Requirement_Discover_Mine", "Clear the dungeon")],
+                        rewards: [testReward("Reward_Discover_Pryzja", "Gain hero: Pryzja")],
+                    },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:4", "Noisy"),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice02ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:choice-group:step:2",
+                    branchStepOrder: 2,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1",
+                    parentChoiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01ChoiceDefinition",
+                    prerequisiteBranchKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1"],
+                    strategy: {
+                        conditions: ["Defeat Lingering Doomwraith", "Clear the dungeon"],
+                        requirements: [
+                            testRequirement("Requirement_Noisy_Doomwraith", "Defeat Lingering Doomwraith"),
+                            testRequirement("Requirement_Noisy_Mine", "Clear the dungeon"),
+                        ],
+                        rewards: [
+                            testReward("Reward_Noisy_Influence", "Gain Influence based on technology era"),
+                            testReward("Reward_Noisy_Dust", "Gain Dust based on technology era"),
+                        ],
+                    },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:5", "Rescue Pryzja from the abandoned mine."),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step03_Choice02ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:choice-group:step:3:noisy",
+                    branchStepOrder: 3,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:4",
+                    parentChoiceKey: "FactionQuest_KinOfSheredyn_Chapter03_Step02_Choice02ChoiceDefinition",
+                    prerequisiteBranchKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:1",
+                        "FactionQuest_KinOfSheredyn_Chapter03_Step01:branch:4",
+                    ],
+                    nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter04_Step01"],
+                    strategy: {
+                        conditions: ["Clear the dungeon", "Defeat the marked army"],
+                        requirements: [
+                            testRequirement("Requirement_Rescue_Mine", "Clear the dungeon"),
+                            testRequirement("Requirement_Merc_Army", "Defeat the marked army"),
+                        ],
+                        rewards: [testReward("Reward_Rescue_Pryzja", "Gain hero: Pryzja")],
+                    },
+                },
+            ],
+            navigation: {
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                chapter: 3,
+                chapterLabel: "Chapter 3",
+                chapterOrder: 3,
+                stepOrder: 0,
+                nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter04_Step01"],
+            },
+        }),
+        questEntry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter04_Step01",
+            title: "The Hunt",
+            navigation: {
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                chapter: 4,
+                chapterLabel: "Chapter 4",
+                chapterOrder: 4,
+                stepOrder: 0,
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineFamilyKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                factionKey: "Faction_KinOfSheredyn",
+                factionFamilyKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                chapterNumber: 3,
+                chapterOrder: 3,
+                title: "What Lies Beneath",
+                steps: [
+                    { stepNumber: 1, stepOrder: 0, title: "What Lies Beneath", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01" },
+                    { stepNumber: 2, stepOrder: 1, title: "What Lies Beneath", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01" },
+                    { stepNumber: 3, stepOrder: 2, title: "What Lies Beneath", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
 export const projectedLocalContinuationWithoutRevealPayload: QuestExplorerResponse = {
     ...projectedLocalContinuationPayload,
     entries: projectedLocalContinuationPayload.entries.map((entry) => ({

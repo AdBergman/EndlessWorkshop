@@ -221,7 +221,7 @@ describe("QuestExplorerPage product continuity fixture", () => {
         const chronicleRegion = chronicle();
         const decision = within(chronicleRegion).getByRole("region", { name: "Choose a path" });
 
-        expect(within(chronicleRegion).queryByText("Step 1 of 1")).not.toBeInTheDocument();
+        expect(within(chronicleRegion).getByRole("region", { name: "Step 1 of 1: Choose a path" })).toBeInTheDocument();
         expect(within(decision).getByRole("button", { name: /Leave/ })).toBeInTheDocument();
         expect(within(decision).getByRole("button", { name: /Stay/ })).toBeInTheDocument();
         expect(decision).toHaveTextContent("Study the starfarers vessel.");
@@ -408,9 +408,12 @@ describe("QuestExplorerPage product continuity fixture", () => {
         await user.click(within(chronicleRegion).getByRole("button", { name: /Track/ }));
 
         const trackChoice = within(chronicleRegion).getByRole("button", { name: /Track/ });
-        const trackResult = within(chronicleRegion).getByRole("region", { name: /Choosing .*Track.* leads to/ });
+        const selectedChapterPlan = within(chronicleRegion).getByRole("region", { name: "Chapter plan" });
+        const continuationTask = within(selectedChapterPlan).getByRole("region", { name: "Step 2 of 2: Capture the rogue Lieutenant." });
         expect(trackChoice).not.toHaveTextContent("Continues in Chapter 5: The Kin's Fate");
-        expect(trackResult).toHaveTextContent("Continues in Chapter 5: The Kin's Fate");
+        expect(within(chronicleRegion).queryByRole("region", { name: /Choosing .*Track.* leads to/ })).not.toBeInTheDocument();
+        expect(within(continuationTask).getByText("Rejoins progression")).toBeInTheDocument();
+        expect(within(continuationTask).queryByText("Rejoins progression at This branch rejoins a modeled convergence point.")).not.toBeInTheDocument();
         expect(trackChoice).not.toHaveTextContent("No further continuation is recorded");
         expect(useQuestStore.getState().selectedEntryKey).toBe(kinCh4);
     });
