@@ -7,6 +7,7 @@ import {
 } from "@/features/quests/questLoreChronologyDiagnostic";
 import { buildLoreFlowModel } from "@/features/quests/questLoreFlow";
 import {
+    choicesForStep,
     progressionContextKey,
     selectionForChoice,
     type QuestDetailProgression,
@@ -734,6 +735,102 @@ describe("buildLoreFlowModel", () => {
         expect(terminalStage?.kind).toBe("terminal");
         expect(terminalStage?.branchMoment?.continuationChoices[0]).toEqual(expect.objectContaining({
             stageLabel: "Ending",
+        }));
+    });
+
+    it("classifies selected final-chapter no-link Lore paths as chronicle endings", () => {
+        const entry = questEntry({
+            entryKey: "Quest_Final",
+            title: "End of the Chronicle",
+            branches: [
+                testBranch("Branch_Final", "Stay"),
+            ],
+            navigation: {
+                chapter: 6,
+                chapterLabel: "Chapter 6",
+                chapterOrder: 6,
+                nextEntryKeys: [],
+            },
+        });
+        const fullProgression: QuestExplorerProgression = {
+            questlines: [
+                progressionQuestline({
+                    chapterNumber: 6,
+                    chapterOrder: 6,
+                    title: "Chapter 6",
+                    steps: [
+                        { stepNumber: 1, stepOrder: 1, title: entry.title, detailEntryKey: entry.entryKey },
+                    ],
+                }),
+            ],
+            debugSummary: null,
+        };
+        const selectedProgression = detailProgressionFrom(fullProgression);
+        const step = selectedProgression.chapter.steps[0];
+        const choice = choicesForStep(step, entry, { [entry.entryKey]: entry })[0]!;
+        const contextKey = progressionContextKey(selectedProgression, entry.entryKey);
+        const model = buildLoreFlowModel({
+            selectedProgression,
+            fullProgression,
+            entriesByKey: { [entry.entryKey]: entry },
+            loreChoicePathsByContext: {
+                [contextKey]: [selectionForChoice(step.stepKey, choice)],
+            },
+            showRawHiddenRows: false,
+        });
+
+        expect(model.segments[0]?.pathConclusion).toEqual(expect.objectContaining({
+            kind: "chronicle_end",
+            choiceLabel: "Stay",
+            reason: "terminal_chapter",
+        }));
+    });
+
+    it("keeps selected mid-progression no-link Lore paths diagnostic", () => {
+        const entry = questEntry({
+            entryKey: "Quest_Uncharted",
+            title: "Uncharted Road",
+            branches: [
+                testBranch("Branch_Uncharted", "Take the unknown road"),
+            ],
+        });
+        const nextEntry = questEntry({
+            entryKey: "Quest_Next",
+            title: "Known Later Step",
+        });
+        const fullProgression: QuestExplorerProgression = {
+            questlines: [
+                progressionQuestline({
+                    steps: [
+                        { stepNumber: 1, stepOrder: 1, title: entry.title, detailEntryKey: entry.entryKey },
+                        { stepNumber: 2, stepOrder: 2, title: nextEntry.title, detailEntryKey: nextEntry.entryKey },
+                    ],
+                }),
+            ],
+            debugSummary: null,
+        };
+        const selectedProgression = detailProgressionFrom(fullProgression);
+        const step = selectedProgression.chapter.steps[0];
+        const entriesByKey = {
+            [entry.entryKey]: entry,
+            [nextEntry.entryKey]: nextEntry,
+        };
+        const choice = choicesForStep(step, entry, entriesByKey)[0]!;
+        const contextKey = progressionContextKey(selectedProgression, entry.entryKey);
+        const model = buildLoreFlowModel({
+            selectedProgression,
+            fullProgression,
+            entriesByKey,
+            loreChoicePathsByContext: {
+                [contextKey]: [selectionForChoice(step.stepKey, choice)],
+            },
+            showRawHiddenRows: true,
+        });
+
+        expect(model.segments[0]?.pathConclusion).toEqual(expect.objectContaining({
+            kind: "archive_gap",
+            choiceLabel: "Take the unknown road",
+            reason: "missing_modeled_continuation",
         }));
     });
 });

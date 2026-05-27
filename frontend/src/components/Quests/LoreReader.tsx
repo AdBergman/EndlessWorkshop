@@ -13,6 +13,7 @@ import type {
     ChronicleStage,
     LoreFlowModel,
     LoreFlowSegment,
+    LorePathConclusion,
 } from "@/features/quests/questLoreFlow";
 import type {
     QuestPathChoice,
@@ -501,21 +502,37 @@ function continuationChapterMessage(entry: QuestExplorerEntry | null): string {
         : `The chronicle continues with ${title}.`;
 }
 
+function LoreNarrativeConclusion({ conclusion }: { conclusion: LorePathConclusion }) {
+    return (
+        <section className="questExplorer-loreConclusion questExplorer-loreConclusion--ending" aria-label="Chronicle conclusion">
+            <span>Chronicle conclusion</span>
+            <p>This chronicle concludes here. The story ends with "{conclusion.choiceLabel}"; no later chapter follows this outcome.</p>
+        </section>
+    );
+}
+
+function LoreArchiveGap({ conclusion }: { conclusion: LorePathConclusion }) {
+    return (
+        <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--unresolved" aria-label="Archive gap">
+            <span>Archive gap</span>
+            <p>The selected continuation "{conclusion.choiceLabel}" is preserved, but the archive does not identify the next chronicle step. The chronicle closes this page rather than guessing.</p>
+        </section>
+    );
+}
+
 function LorePathState({
-    flow,
+    segment,
     entriesByKey,
 }: {
-    flow: LoreFlowSegment["flow"];
+    segment: LoreFlowSegment;
     entriesByKey: Record<string, QuestExplorerEntry>;
 }) {
+    const { flow, pathConclusion } = segment;
+
     return (
         <>
-            {flow.unresolvedContinuation ? (
-                <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--unresolved">
-                    <span>Chronicle pauses</span>
-                    <p>The selected continuation "{flow.unresolvedContinuation.label}" is preserved, but the archive does not identify the next chronicle step. The chronicle closes this page rather than guessing.</p>
-                </section>
-            ) : null}
+            {pathConclusion?.kind === "chronicle_end" ? <LoreNarrativeConclusion conclusion={pathConclusion} /> : null}
+            {pathConclusion?.kind === "archive_gap" ? <LoreArchiveGap conclusion={pathConclusion} /> : null}
 
             {flow.reachedContinuationEntryKey ? (
                 <section className="questExplorer-pathState questExplorer-lorePathState questExplorer-pathState--chapter">
@@ -570,7 +587,7 @@ export function LoreContinuousProgression({
                                 />
                             );
                         })}
-                        {hasNextSegment ? null : <LorePathState flow={segment.flow} entriesByKey={entriesByKey} />}
+                        {hasNextSegment ? null : <LorePathState segment={segment} entriesByKey={entriesByKey} />}
                     </section>
                 );
             })}

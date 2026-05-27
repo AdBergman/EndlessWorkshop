@@ -1,5 +1,6 @@
 import {
     buildLoreChronicleStream,
+    isTerminalChoiceChapter,
     uniqueStrings,
     type LoreChoicePathsByContext,
     type LoreChronicleSegment,
@@ -86,8 +87,22 @@ export type ChronicleStage =
 
 export type LoreFlowStep = ChronicleStage;
 
+export type LorePathConclusionKind = "archive_gap" | "chronicle_end";
+
+export type LorePathConclusion = {
+    kind: LorePathConclusionKind;
+    choiceLabel: string;
+    reason:
+        | "explicit_unresolved"
+        | "missing_modeled_continuation"
+        | "explicit_terminal"
+        | "terminal_chapter"
+        | "final_progression_position";
+};
+
 export type LoreFlowSegment = LoreChronicleSegment & {
     loreSteps: LoreFlowStep[];
+    pathConclusion: LorePathConclusion | null;
 };
 
 export type LoreFlowModel = {
@@ -117,9 +132,8 @@ export function buildLoreFlowModel({
         showRawHiddenRows,
     });
     const ownershipTracker = showRawHiddenRows ? null : createLoreNarrativeOwnershipTracker();
-    const segments = stream.segments.map((segment): LoreFlowSegment => ({
-        ...segment,
-        loreSteps: segment.flow.renderedSteps.map((renderedStep, renderedStepIndex): LoreFlowStep => {
+    const segments = stream.segments.map((segment): LoreFlowSegment => {
+        const loreSteps = segment.flow.renderedSteps.map((renderedStep, renderedStepIndex): LoreFlowStep => {
             const visibleDetailEntryKey = renderedStep.displayEntry?.entryKey ?? renderedStep.step.detailEntryKey;
             const branchMoment = buildChronicleBranchMoment(renderedStep, entriesByKey, showRawHiddenRows, {
                 anchorFutureContinuations: hasLaterCarriedSelectedChoice(
@@ -175,14 +189,90 @@ export function buildLoreFlowModel({
                 revealedLoreSections,
                 revealedContinuationStages: renderedStep.revealedContinuations.map((choice) => chronicleChoiceItem(choice, "continuation")),
             } as LoreFlowStep;
-        }),
-    }));
+        });
+
+        return {
+            ...segment,
+            loreSteps,
+            pathConclusion: lorePathConclusion(segment.flow, segment.progression),
+        };
+    });
 
     return {
         stream,
         segments,
         segmentRailEntryKeys: uniqueStrings(segments.map((segment) => segment.railEntryKey)),
     };
+}
+
+function lorePathConclusion(
+    flow: LoreChronicleSegment["flow"],
+    progression: QuestDetailProgression
+): LorePathConclusion | null {
+    const continuation = flow.unresolvedContinuation;
+    if (!continuation) return null;
+
+    if (continuation.semanticStageKind === "unresolved" || continuation.sectionRole === "unresolved") {
+        return {
+            kind: "archive_gap",
+            choiceLabel: continuation.label,
+            reason: "explicit_unresolved",
+        };
+    }
+
+    if (
+        continuation.targetEntryKey
+        || continuation.nextEntryKeys.length > 0
+        || continuation.hasDependentContinuations
+    ) {
+        return {
+            kind: "archive_gap",
+            choiceLabel: continuation.label,
+            reason: "missing_modeled_continuation",
+        };
+    }
+
+    if (continuation.semanticStageKind === "terminal" || continuation.sectionRole === "terminal") {
+        return {
+            kind: "chronicle_end",
+            choiceLabel: continuation.label,
+            reason: "explicit_terminal",
+        };
+    }
+
+    if (isTerminalChoiceChapter(progression)) {
+        return {
+            kind: "chronicle_end",
+            choiceLabel: continuation.label,
+            reason: "terminal_chapter",
+        };
+    }
+
+    if (isFinalProgressionPosition(flow, progression)) {
+        return {
+            kind: "chronicle_end",
+            choiceLabel: continuation.label,
+            reason: "final_progression_position",
+        };
+    }
+
+    return {
+        kind: "archive_gap",
+        choiceLabel: continuation.label,
+        reason: "missing_modeled_continuation",
+    };
+}
+
+function isFinalProgressionPosition(
+    flow: LoreChronicleSegment["flow"],
+    progression: QuestDetailProgression
+): boolean {
+    const finalRenderedStep = flow.renderedSteps.at(-1);
+    if (!finalRenderedStep) return false;
+    if (finalRenderedStep.stepIndex < progression.chapter.steps.length - 1) return false;
+
+    const chapterIndex = progression.questline.chapters.findIndex((chapter) => chapter === progression.chapter);
+    return chapterIndex >= 0 && chapterIndex === progression.questline.chapters.length - 1;
 }
 
 export function activeLoreSegmentForModel(

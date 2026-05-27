@@ -2363,6 +2363,51 @@
     color: rgba(241, 234, 220, 0.7);
 }
 
+.questExplorer-loreConclusion {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    max-width: 72ch;
+    margin-top: 8px;
+    padding: 24px 0 12px;
+}
+
+.questExplorer-loreConclusion::before {
+    content: "";
+    width: min(58ch, 100%);
+    height: 1px;
+    background: linear-gradient(90deg, rgba(208, 162, 74, 0.62), rgba(208, 162, 74, 0.18) 68%, transparent);
+}
+
+.questExplorer-loreConclusion::after {
+    content: "";
+    width: 54px;
+    height: 9px;
+    margin-top: 4px;
+    opacity: 0.3;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 54 9' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23b88935' stroke-width='1'%3E%3Cpath d='M0 4.5h20M30 4.5h24'/%3E%3Cpath d='M25 1.5v6' opacity='.5'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.questExplorer-loreConclusion span {
+    color: rgba(208, 162, 74, 0.88);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.questExplorer-loreConclusion p {
+    max-width: 64ch;
+    margin: 0;
+    color: rgba(241, 234, 220, 0.82);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.12rem;
+    line-height: 1.72;
+    overflow-wrap: anywhere;
+}
+
 .questExplorer-debugPanel {
     display: grid;
     gap: 14px;

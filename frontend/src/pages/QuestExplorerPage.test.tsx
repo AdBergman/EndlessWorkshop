@@ -3466,6 +3466,21 @@ describe("QuestExplorerPage", () => {
         expect(within(currentTask).queryByText("Unknown continuation")).not.toBeInTheDocument();
     });
 
+    it("renders terminal no-link Lore outcomes as narrative conclusions", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(terminalNoLinkPayload);
+        renderPage("/quests/Quest_A?mode=lore");
+
+        expect(await screen.findByRole("heading", { name: "End of the Chronicle" })).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /End the story/ }));
+
+        expect(screen.getByRole("region", { name: "Chronicle conclusion" })).toHaveTextContent(
+            "This chronicle concludes here. The story ends with \"End the story\"; no later chapter follows this outcome."
+        );
+        expect(screen.queryByText("Chronicle pauses")).not.toBeInTheDocument();
+        expect(screen.queryByText(/archive does not identify/)).not.toBeInTheDocument();
+    });
+
     it("gates continuation branches until their prerequisite branch is selected", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(gatedContinuationPayload);
