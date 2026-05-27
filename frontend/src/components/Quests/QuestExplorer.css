@@ -1390,6 +1390,44 @@
     gap: 10px;
 }
 
+.questExplorer-strategyObjectiveRoutes {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.questExplorer-strategyObjectiveRoutes > strong,
+.questExplorer-strategyObjectiveRoute > span {
+    color: var(--quest-gold);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.questExplorer-strategyObjectiveRouteList {
+    display: grid;
+    gap: 8px;
+}
+
+.questExplorer-strategyObjectiveRoute {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px 12px;
+    border-left: 1px solid rgba(81, 205, 189, 0.36);
+    background: rgba(81, 205, 189, 0.035);
+}
+
+.questExplorer-strategyObjectiveRoute p {
+    margin: 0;
+    color: var(--quest-ink-soft);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
 .questExplorer-strategyChoiceResult {
     display: grid;
     gap: 12px;

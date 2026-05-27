@@ -6,6 +6,7 @@ import {
     type StrategyDossierMarker,
     type StrategyDossierModel,
     type StrategyDossierObjective,
+    type StrategyDossierObjectiveRoute,
     type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
 import type {
@@ -152,6 +153,7 @@ function StrategyChapterTaskBlock({
             <StrategyTaskSummary
                 title={task.title}
                 lines={task.lines}
+                objectiveRoutes={task.objectiveRoutes}
                 requirements={task.requirements}
                 requirementDetails={task.requirementDetails}
                 rewards={task.rewards}
@@ -240,17 +242,19 @@ function StrategyPathVariantOption({
     debugChoiceDetails?: Map<string, string>;
 }) {
     const supportingMarkers = option.markers.filter((marker) => marker.kind !== "leads");
+    const outcomeLines = outcomeLinesForOption(option);
 
     return (
         <article className="questExplorer-strategyPathVariant" aria-label={`${option.label} path variant`}>
             <span className="questExplorer-strategyComparisonHeader">
                 <strong>{option.label}</strong>
             </span>
-            {option.outcomeLines.length > 0 ? (
+            {outcomeLines.length > 0 ? (
                 <span className="questExplorer-strategyComparisonOutcome">
-                    {option.outcomeLines.join(" ")}
+                    {outcomeLines.join(" ")}
                 </span>
             ) : null}
+            <StrategyObjectiveRoutes routes={option.objectiveRoutes} />
             <div className="questExplorer-strategyComparisonMeta">
                 <InlineMetaList
                     label="Requires"
@@ -348,28 +352,39 @@ function StrategyCurrentTask({
     }
 
     const fallbackObjectiveLines = objectives.map((objective) => objective.text);
-    const requirements = uniqueDisplayValues([
-        ...soleOption.requirements,
-        ...objectives.flatMap((objective) => objective.requirements),
-    ]);
-    const requirementDetails = uniqueRequirementDisplays([
-        ...soleOption.requirementDetails,
-        ...objectives.flatMap((objective) => objective.requirementDetails),
-    ]);
-    const rewards = uniqueDisplayValues([
-        ...soleOption.rewards,
-        ...objectives.flatMap((objective) => objective.rewards),
-    ]);
-    const rewardDetails = uniqueRewardDisplays([
-        ...soleOption.rewardDetails,
-        ...objectives.flatMap((objective) => objective.rewardDetails),
-    ]);
+    const soleOptionRoutes = soleOption.objectiveRoutes ?? [];
+    const hasRouteSpecificMeta = soleOptionRoutes.length > 1;
+    const requirements = hasRouteSpecificMeta
+        ? soleOption.requirements
+        : uniqueDisplayValues([
+            ...soleOption.requirements,
+            ...objectives.flatMap((objective) => objective.requirements),
+        ]);
+    const requirementDetails = hasRouteSpecificMeta
+        ? soleOption.requirementDetails
+        : uniqueRequirementDisplays([
+            ...soleOption.requirementDetails,
+            ...objectives.flatMap((objective) => objective.requirementDetails),
+        ]);
+    const rewards = hasRouteSpecificMeta
+        ? soleOption.rewards
+        : uniqueDisplayValues([
+            ...soleOption.rewards,
+            ...objectives.flatMap((objective) => objective.rewards),
+        ]);
+    const rewardDetails = hasRouteSpecificMeta
+        ? soleOption.rewardDetails
+        : uniqueRewardDisplays([
+            ...soleOption.rewardDetails,
+            ...objectives.flatMap((objective) => objective.rewardDetails),
+        ]);
 
     return (
         <div className="questExplorer-strategyCurrentTask">
             <StrategyTaskSummary
                 title={soleOption.label}
                 lines={soleOption.outcomeLines.length > 0 ? soleOption.outcomeLines : fallbackObjectiveLines}
+                objectiveRoutes={soleOptionRoutes}
                 requirements={requirements}
                 requirementDetails={requirementDetails}
                 rewards={rewards}
@@ -464,6 +479,7 @@ function StrategyBranchComparisonOption({
     const isActive = option.isSelected || option.isInSelectedPath;
     const supportingMarkers = option.isSelected ? [] : option.markers.filter((marker) => marker.kind !== "leads");
     const statusLabel = option.isSelected ? "Selected" : option.isInSelectedPath ? "In sequence" : null;
+    const outcomeLines = outcomeLinesForOption(option);
 
     return (
         <button
@@ -481,11 +497,12 @@ function StrategyBranchComparisonOption({
             <span className="questExplorer-strategyComparisonHeader">
                 <strong>{option.label}</strong>
             </span>
-            {option.outcomeLines.length > 0 ? (
+            {outcomeLines.length > 0 ? (
                 <span className="questExplorer-strategyComparisonOutcome">
-                    {option.outcomeLines.join(" ")}
+                    {outcomeLines.join(" ")}
                 </span>
             ) : null}
+            <StrategyObjectiveRoutes routes={option.objectiveRoutes} />
             <div className="questExplorer-strategyComparisonMeta">
                 <InlineMetaList
                     label="Requires"
@@ -523,9 +540,10 @@ function StrategyTopologyAlternatives({
             {alternatives.map((alternative) => (
                 <article className="questExplorer-strategyTaskSummary" key={alternative.id}>
                     <strong>{alternative.label}</strong>
-                    {uniqueDisplayValues(alternative.outcomeLines).map((line, index) => (
+                    {outcomeLinesForOption(alternative).map((line, index) => (
                         <p key={`${alternative.id}:line:${index}`}>{line}</p>
                     ))}
+                    <StrategyObjectiveRoutes routes={alternative.objectiveRoutes} />
                     <div className="questExplorer-stepObjectiveMetaGrid">
                         <InlineMetaList
                             label="Requires"
@@ -787,6 +805,7 @@ type StrategyTaskSummaryProps = {
     requirementDetails?: QuestRequirementDisplay[];
     rewards?: string[];
     rewardDetails?: QuestRewardDisplay[];
+    objectiveRoutes?: StrategyDossierObjectiveRoute[];
     debugDetail?: string;
 };
 
@@ -797,14 +816,16 @@ function StrategyTaskSummary({
     requirementDetails = [],
     rewards = [],
     rewardDetails = [],
+    objectiveRoutes = [],
     debugDetail,
 }: StrategyTaskSummaryProps) {
     return (
         <article className="questExplorer-strategyTaskSummary">
             {title ? <strong>{title}</strong> : null}
-            {uniqueDisplayValues(lines).map((line, index) => (
+            {uniqueDisplayValues(objectiveRoutes.length > 1 ? routeSummaryLines(lines, objectiveRoutes) : lines).map((line, index) => (
                 <p key={`strategy-task-line:${index}`}>{line}</p>
             ))}
+            <StrategyObjectiveRoutes routes={objectiveRoutes} />
             <div className="questExplorer-stepObjectiveMetaGrid">
                 <InlineMetaList label="Requires" values={requirements} items={requirementDetails} tone="requirement" />
                 <InlineRewardMetaList label="Rewards" rewards={rewardDetails} fallbackValues={rewards} />
@@ -814,15 +835,69 @@ function StrategyTaskSummary({
     );
 }
 
+function StrategyObjectiveRoutes({ routes = [] }: { routes?: StrategyDossierObjectiveRoute[] }) {
+    if (routes.length <= 1) return null;
+
+    return (
+        <div className="questExplorer-strategyObjectiveRoutes">
+            <strong>Objective routes</strong>
+            <div className="questExplorer-strategyObjectiveRouteList">
+                {routes.map((route) => (
+                    <article className="questExplorer-strategyObjectiveRoute" key={route.id}>
+                        <span>{route.label}</span>
+                        <p>{route.objective.text}</p>
+                        <div className="questExplorer-stepObjectiveMetaGrid">
+                            <InlineMetaList
+                                label="Requires"
+                                values={route.objective.requirements}
+                                items={route.objective.requirementDetails}
+                                tone="requirement"
+                            />
+                            <InlineRewardMetaList
+                                label="Rewards"
+                                rewards={route.objective.rewardDetails}
+                                fallbackValues={route.objective.rewards}
+                            />
+                        </div>
+                    </article>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function outcomeLinesForOption(option: StrategyDossierBranchOption): string[] {
+    const routes = option.objectiveRoutes ?? [];
+    if (routes.length <= 1) return uniqueDisplayValues(option.outcomeLines);
+    return routeSummaryLines(option.outcomeLines, routes);
+}
+
+function routeSummaryLines(
+    lines: string[],
+    routes: StrategyDossierObjectiveRoute[]
+): string[] {
+    const routeTexts = new Set(routes.map((route) => normalizeValue(route.objective.text)));
+    return uniqueDisplayValues(lines).filter((line) => !routeTexts.has(normalizeValue(line)));
+}
+
 function taskSummaryForObjectives(objectives: StrategyDossierObjective[]): StrategyTaskSummaryProps | null {
     if (objectives.length === 0) return null;
+    const objectiveRoutes = objectives.length > 1
+        ? objectives.map((objective, index) => ({
+            id: `${objective.id}:route`,
+            label: `Route ${index + 1}`,
+            objective,
+        }))
+        : [];
+    const hasRouteSpecificMeta = objectiveRoutes.length > 1;
 
     return {
         lines: objectives.map((objective) => objective.text),
-        requirements: uniqueDisplayValues(objectives.flatMap((objective) => objective.requirements)),
-        requirementDetails: uniqueRequirementDisplays(objectives.flatMap((objective) => objective.requirementDetails)),
-        rewards: uniqueDisplayValues(objectives.flatMap((objective) => objective.rewards)),
-        rewardDetails: uniqueRewardDisplays(objectives.flatMap((objective) => objective.rewardDetails)),
+        objectiveRoutes,
+        requirements: hasRouteSpecificMeta ? [] : uniqueDisplayValues(objectives.flatMap((objective) => objective.requirements)),
+        requirementDetails: hasRouteSpecificMeta ? [] : uniqueRequirementDisplays(objectives.flatMap((objective) => objective.requirementDetails)),
+        rewards: hasRouteSpecificMeta ? [] : uniqueDisplayValues(objectives.flatMap((objective) => objective.rewards)),
+        rewardDetails: hasRouteSpecificMeta ? [] : uniqueRewardDisplays(objectives.flatMap((objective) => objective.rewardDetails)),
     };
 }
 

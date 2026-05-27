@@ -553,7 +553,21 @@ describe("buildStrategyFlowModel semantic view models", () => {
             "Study the starfarers vessel.",
             "Build interstellar communications.",
         ]);
-        expect(model.decisionPoints[0].options[0].requirements).toEqual([
+        expect(model.decisionPoints[0].options[0].requirements).toEqual([]);
+        expect(model.decisionPoints[0].options[0].objectiveRoutes?.map((route) => ({
+            text: route.objective.text,
+            requirements: route.objective.requirements,
+        }))).toEqual([
+            {
+                text: "Study the starfarers vessel.",
+                requirements: ["Discover natural wonder: Stellar Ship"],
+            },
+            {
+                text: "Build interstellar communications.",
+                requirements: ["Build constructible: Martial Discipline once"],
+            },
+        ]);
+        expect(model.decisionPoints[0].options[0].objectiveRoutes?.flatMap((route) => route.objective.requirements)).toEqual([
             "Discover natural wonder: Stellar Ship",
             "Build constructible: Martial Discipline once",
         ]);
@@ -561,10 +575,148 @@ describe("buildStrategyFlowModel semantic view models", () => {
             "Help the Kin embrace Saiadha as their home.",
             "Strengthen the Kin settlements.",
         ]);
-        expect(model.decisionPoints[0].options[1].requirements).toEqual([
+        expect(model.decisionPoints[0].options[1].requirements).toEqual([]);
+        expect(model.decisionPoints[0].options[1].objectiveRoutes?.flatMap((route) => route.objective.requirements)).toEqual([
             "Claim a territory",
             "Have 3 cities at level 3 for 5 turns",
         ]);
+    });
+
+    it("keeps Last Lord continuation objective routes separate and owned by the selected branch family", () => {
+        const entry = questEntry({
+            entryKey: "FactionQuest_LastLord_Chapter03_Step01",
+            title: "The Fork in the Road",
+            navigation: {
+                factionKey: "Faction_LastLord",
+                questLineKey: "FactionQuest_LastLord",
+                chapterOrder: 3,
+                stepOrder: 0,
+            },
+            strategyView: {
+                objectives: [
+                    {
+                        ...testObjective("Objective_Trust_Start", "Start seeking answers to the Lords' curse."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Trust_Start", "Clear the dungeon")],
+                    },
+                    {
+                        ...testObjective("Objective_Sanction_Start", "Strengthen the Lords by embracing their dark nature."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03B_Step01ChoiceDefinition",
+                    },
+                    {
+                        ...testObjective("Objective_Trust_Local", "Question the locals to discover the explorer's identity."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03A_Step02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Round_Up", "Use faction action: Last Lord Round Up Village 3 times")],
+                    },
+                    {
+                        ...testObjective("Objective_Trust_Lands", "Secure more lands to learn the explorer's identity."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03A_Step02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Trust_Territories", "Control 15 territories")],
+                    },
+                    {
+                        ...testObjective("Objective_Sanction_Military", "De Suluzzo advises strengthening our military."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03B_Step02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Stalwart", "Build constructible: Stalwart 3 times")],
+                    },
+                    {
+                        ...testObjective("Objective_Sanction_Dust", "Amass more Dust to further strengthen the Lords."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03B_Step02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Value", "Maintain the required empire value for 5 turns")],
+                    },
+                    {
+                        ...testObjective("Objective_Sanction_Lands", "De Suluzzo counsels securing more lands to cement power."),
+                        choiceKey: "FactionQuest_LastLord_Chapter03B_Step02ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Sanction_Territories", "Control 10 territories for 5 turns")],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Trust", "Trust"),
+                    choiceKey: "FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "LastLord_Ch3_Choice",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Trust Leofric."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Trust_Continue", "The Fork in the Road"),
+                    choiceKey: "FactionQuest_LastLord_Chapter03A_Step02ChoiceDefinition",
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Trust",
+                    parentChoiceKey: "FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition",
+                    prerequisiteBranchKeys: ["Branch_Trust"],
+                    branchStepOrder: 2,
+                    strategy: {
+                        conditions: ["Follow the trust path."],
+                        requirements: [testRequirement("Requirement_Trust_Aggregate", "Aggregate trust requirement")],
+                        rewards: [],
+                    },
+                },
+                {
+                    ...testBranch("Branch_Sanction_Continue", "The Fork in the Road"),
+                    choiceKey: "FactionQuest_LastLord_Chapter03B_Step02ChoiceDefinition",
+                    sectionRole: "continuation",
+                    parentBranchKey: "Branch_Trust",
+                    parentChoiceKey: "FactionQuest_LastLord_Chapter03A_Step01ChoiceDefinition",
+                    prerequisiteBranchKeys: ["Branch_Trust"],
+                    branchStepOrder: 2,
+                    strategy: {
+                        conditions: ["Follow the sanction path."],
+                        requirements: [testRequirement("Requirement_Sanction_Aggregate", "Aggregate sanction requirement")],
+                        rewards: [],
+                    },
+                },
+                {
+                    ...testBranch("Branch_Sanction", "Sanction"),
+                    choiceKey: "FactionQuest_LastLord_Chapter03B_Step01ChoiceDefinition",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "LastLord_Ch3_Choice",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Sanction Leofric."], requirements: [], rewards: [] },
+                },
+            ],
+        });
+        const progression = {
+            questlines: [
+                progressionQuestline({
+                    questLineKey: "FactionQuest_LastLord",
+                    factionKey: "Faction_LastLord",
+                    title: "The Fork in the Road",
+                    chapterNumber: 3,
+                    chapterOrder: 3,
+                    steps: [
+                        { stepNumber: 1, stepOrder: 1, title: "The Fork in the Road", detailEntryKey: entry.entryKey },
+                        { stepNumber: 2, stepOrder: 2, title: "The Fork in the Road", detailEntryKey: entry.entryKey },
+                    ],
+                }),
+            ],
+            debugSummary: null,
+        };
+        const initialModel = strategyModelForProgression([entry], progression);
+        const sanctionChoice = initialModel.decisionPoints[0].options.find((option) => option.label === "Sanction")?.choice;
+        if (!sanctionChoice) throw new Error("Expected Sanction choice.");
+
+        const sanctionModel = strategyModelForProgression([entry], progression, {
+            choicePath: [selectionForChoice(progression.questlines[0].chapters[0].steps[0].stepKey, sanctionChoice)],
+        });
+        const continuationTask = sanctionModel.chapterTasks.find((task) => task.stageOrder === 2);
+
+        expect(continuationTask?.source.branchKey).toBe("Branch_Sanction_Continue");
+        expect(continuationTask?.requirements).toEqual([]);
+        expect(continuationTask?.objectiveRoutes.map((route) => route.objective.text)).toEqual([
+            "De Suluzzo advises strengthening our military.",
+            "Amass more Dust to further strengthen the Lords.",
+            "De Suluzzo counsels securing more lands to cement power.",
+        ]);
+        expect(continuationTask?.objectiveRoutes.flatMap((route) => route.objective.requirements)).toEqual([
+            "Build constructible: Stalwart 3 times",
+            "Maintain the required empire value for 5 turns",
+            "Control 10 territories for 5 turns",
+        ]);
+        expect(continuationTask?.objectiveRoutes.map((route) => route.objective.text)).not.toContain(
+            "Question the locals to discover the explorer's identity."
+        );
     });
 
     it("keeps topology alternatives separate from explicit Strategy decisions", () => {

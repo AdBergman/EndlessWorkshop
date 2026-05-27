@@ -6,6 +6,7 @@ import {
     choiceKeyScopedPayload,
     choiceResetPayload,
     kinChapterTwoStaticStrategyPayload,
+    lastLordChapterThreeStrategyPayload,
     minorVariantPayload,
     nextChapterPayload,
     payload,
@@ -20,6 +21,7 @@ import {
     mockedApiClient,
     renderPage,
 } from "@/features/quests/testUtils/questExplorerPageTestUtils";
+import { Faction } from "@/types/dataTypes";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useQuestStore } from "@/stores/questStore";
 
@@ -287,6 +289,35 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(selectedChapterPlan).getByRole("region", { name: "Step 3 of 3: Assign settlement population: Artisans 3 times" })).toBeInTheDocument();
         expect(within(chronicle).getAllByText("Eliminate the Necrophage threat.")).toHaveLength(1);
         expect(within(chronicle).getAllByText("The Kin's inner strength must be bolstered.")).toHaveLength(1);
+    });
+
+    it("renders Last Lords Chapter 3 continuation objectives as route-specific Strategy requirements", async () => {
+        const user = userEvent.setup();
+        useFactionSelectionStore.getState().setSelectedFaction({
+            isMajor: true,
+            enumFaction: Faction.LORDS,
+            uiLabel: "Last Lords",
+            minorName: null,
+        });
+        mockedApiClient.getQuestExplorer.mockResolvedValue(lastLordChapterThreeStrategyPayload);
+        renderPage("/quests/FactionQuest_LastLord_Chapter03_Step01?mode=strategy");
+
+        await screen.findByRole("heading", { name: "The Fork in the Road" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Sanction/ }));
+
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        const continuation = within(chapterPlan).getByRole("region", { name: "Step 2 of 2: Follow the sanction path." });
+        expect(within(continuation).getByText("Objective routes")).toBeInTheDocument();
+        expect(within(continuation).getByText("De Suluzzo advises strengthening our military.")).toBeInTheDocument();
+        expect(within(continuation).getByText("Build constructible: Stalwart 3 times")).toBeInTheDocument();
+        expect(within(continuation).getByText("Amass more Dust to further strengthen the Lords.")).toBeInTheDocument();
+        expect(within(continuation).getByText("Maintain the required empire value for 5 turns")).toBeInTheDocument();
+        expect(within(continuation).getByText("De Suluzzo counsels securing more lands to cement power.")).toBeInTheDocument();
+        expect(within(continuation).getByText("Control 10 territories for 5 turns")).toBeInTheDocument();
+        expect(within(continuation).queryByText("Aggregate sanction requirement")).not.toBeInTheDocument();
+        expect(within(continuation).queryByText("Question the locals to discover the explorer's identity.")).not.toBeInTheDocument();
     });
 
     it("renders minor faction objective variants without aggregate overview", async () => {

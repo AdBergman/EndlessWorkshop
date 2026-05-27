@@ -28,11 +28,13 @@ import {
     buildStrategyDossierObjectives,
     buildStrategyDossierModel,
     buildStrategyPathStatus,
+    objectiveRoutesForObjectives,
     strategyComparisonGroupId,
     strategyComparisonGroupLabel,
     type StrategyDossierBranchOption,
     type StrategyDossierModel,
     type StrategyDossierObjective,
+    type StrategyDossierObjectiveRoute,
     type StrategyPathStatus,
 } from "@/features/quests/questStrategyDossier";
 import type { QuestSemanticStageKind } from "@/features/quests/questSemanticStages";
@@ -97,6 +99,7 @@ export type StrategyChapterTask = {
     title: string;
     lines: string[];
     objectives: StrategyDossierObjective[];
+    objectiveRoutes: StrategyDossierObjectiveRoute[];
     requirements: string[];
     requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
@@ -383,14 +386,22 @@ function buildStrategyChapterPlan({
             ));
             if (!taskOption && objectives.length === 0) return null;
 
-            const requirementDetails = uniqueRequirementDisplays([
-                ...(taskOption?.requirementDetails ?? []),
-                ...objectives.flatMap((objective) => objective.requirementDetails),
-            ]);
-            const rewardDetails = uniqueRewardDisplays([
-                ...(taskOption?.rewardDetails ?? []),
-                ...objectives.flatMap((objective) => objective.rewardDetails),
-            ]);
+            const objectiveRoutes = taskOption?.objectiveRoutes?.length
+                ? taskOption.objectiveRoutes
+                : objectiveRoutesForObjectives(objectives);
+            const hasRouteSpecificMeta = objectiveRoutes.length > 1;
+            const requirementDetails = hasRouteSpecificMeta
+                ? taskOption?.requirementDetails ?? []
+                : uniqueRequirementDisplays([
+                    ...(taskOption?.requirementDetails ?? []),
+                    ...objectives.flatMap((objective) => objective.requirementDetails),
+                ]);
+            const rewardDetails = hasRouteSpecificMeta
+                ? taskOption?.rewardDetails ?? []
+                : uniqueRewardDisplays([
+                    ...(taskOption?.rewardDetails ?? []),
+                    ...objectives.flatMap((objective) => objective.rewardDetails),
+                ]);
             const title = taskOption?.label ?? getStepTitle(step, displayEntry);
             const lines = uniqueDisplayValues([
                 ...(taskOption?.outcomeLines ?? []),
@@ -404,6 +415,7 @@ function buildStrategyChapterPlan({
                 title,
                 lines,
                 objectives,
+                objectiveRoutes,
                 requirements: requirementDisplayTexts(requirementDetails),
                 requirementDetails,
                 rewards: rewardDisplayTexts(rewardDetails),
@@ -643,8 +655,9 @@ function collectChapterChoices(
         const rawChoices = choicesForStep(step, entry, entriesByKey, {
             includeStepVariants: showRawHiddenRows || ((entry?.branches.length ?? 0) === 0),
         });
-        const filteredChoices = rawChoices.filter((choice) => (
-            !shouldHideChoiceFromChapterPlan(choice, rawChoices, entry, progression, showRawHiddenRows)
+        const strategyChoices = correctStrategyChoiceOwnership(rawChoices);
+        const filteredChoices = strategyChoices.filter((choice) => (
+            !shouldHideChoiceFromChapterPlan(choice, strategyChoices, entry, progression, showRawHiddenRows)
         ));
 
         filteredChoices.forEach((choice) => {
@@ -666,6 +679,57 @@ function collectChapterChoices(
     return choices;
 }
 
+function correctStrategyChoiceOwnership(choices: QuestPathChoice[]): QuestPathChoice[] {
+    const correctedChoices = choices.map((choice) => {
+        if (choice.sectionRole !== "continuation" || !choice.choiceKey) return choice;
+
+        const choiceVariant = choiceFamilyVariant(choice.choiceKey);
+        const parentVariant = choice.parentChoiceKey ? choiceFamilyVariant(choice.parentChoiceKey) : null;
+        if (!choiceVariant || choiceVariant === parentVariant) return choice;
+
+        const correctedParent = choices
+            .filter((candidate) => (
+                candidate.branchKey
+                && candidate.choiceKey
+                && candidate.id !== choice.id
+                && choiceFamilyVariant(candidate.choiceKey) === choiceVariant
+                && (candidate.branchStepOrder ?? 0) < (choice.branchStepOrder ?? Number.MAX_SAFE_INTEGER)
+            ))
+            .sort((left, right) => (right.branchStepOrder ?? 0) - (left.branchStepOrder ?? 0))[0];
+
+        if (!correctedParent?.branchKey) return choice;
+
+        return {
+            ...choice,
+            parentBranchKey: correctedParent.branchKey,
+            parentChoiceKey: correctedParent.choiceKey,
+            prerequisiteBranchKeys: uniqueStrings([
+                correctedParent.branchKey,
+                ...choice.prerequisiteBranchKeys.filter((branchKey) => branchKey !== choice.parentBranchKey),
+            ]),
+        };
+    });
+    const dependentParentBranchKeys = new Set(
+        correctedChoices
+            .filter((choice) => choice.sectionRole === "continuation")
+            .flatMap((choice) => [
+                choice.parentBranchKey,
+                ...choice.prerequisiteBranchKeys,
+            ])
+            .filter((branchKey): branchKey is string => Boolean(branchKey))
+    );
+
+    return correctedChoices.map((choice) => (
+        choice.branchKey && dependentParentBranchKeys.has(choice.branchKey)
+            ? { ...choice, hasDependentContinuations: true }
+            : choice
+    ));
+}
+
+function choiceFamilyVariant(choiceKey: string): string | null {
+    return choiceKey.match(/_Chapter\d+([A-Z])_/i)?.[1]?.toUpperCase() ?? null;
+}
+
 function shouldHideChoiceFromChapterPlan(
     choice: QuestPathChoice,
     rawChoices: QuestPathChoice[],
@@ -679,6 +743,19 @@ function shouldHideChoiceFromChapterPlan(
         ?? hiddenUngatedContinuationReason(choice)
         ?? hiddenUnresolvedReason(choice, displayEntry, progression)
     );
+}
+
+function strategyChoiceAllowedForContext(choice: QuestPathChoice, stage: StrategyStageContext): boolean {
+    if (!choice.choiceKey || !choiceFamilyVariant(choice.choiceKey)) return true;
+    if (stage.revealContext.branchKeys.size === 0) return true;
+    if (hasRevealMetadata(choice) && revealMetadataSatisfied(choice, stage.revealContext)) return true;
+    if (choice.sectionRole !== "continuation") return true;
+    const owningBranches = uniqueStrings([
+        choice.parentBranchKey,
+        ...choice.prerequisiteBranchKeys,
+    ].filter((branchKey): branchKey is string => Boolean(branchKey)));
+    if (owningBranches.length === 0) return true;
+    return owningBranches.some((branchKey) => stage.revealContext.branchKeys.has(branchKey));
 }
 
 function stageOrderForChoice(
@@ -738,6 +815,7 @@ function groupChoicesByStage(
     chapterChoices.forEach(({ choice, stageOrder }) => {
         const stage = allowedStages?.get(stageOrder);
         if (stage && !stage.isPreviewAllowed) return;
+        if (stage && !strategyChoiceAllowedForContext(choice, stage)) return;
         if (stage && !stageItemVisible(choice, stage)) return;
         const choices = byStage.get(stageOrder) ?? [];
         choices.push(choice);
@@ -771,6 +849,12 @@ function groupObjectivesByStage(
         if (!entry) return;
         const allowedStageOrders = uniqueNumbers(stageOrders).sort((left, right) => left - right);
         entry.strategyView.objectives.forEach((objective, objectiveIndex) => {
+            const objectiveChoiceKey = objective.choiceKey
+                ?? choiceKeyForObjectiveKey(entry, objective.objectiveKey)
+                ?? null;
+            const matchedChoice = objectiveChoiceKey
+                ? chapterChoices.find(({ choice }) => choice.choiceKey === objectiveChoiceKey)
+                : null;
             const stageOrder = stageOrderForObjective(
                 objective,
                 objectiveIndex,
@@ -781,6 +865,7 @@ function groupObjectivesByStage(
             );
             if (stageOrder == null) return;
             const stageContext = stageContextByOrder.get(stageOrder);
+            if (stageContext && matchedChoice && !strategyChoiceAllowedForContext(matchedChoice.choice, stageContext)) return;
             if (stageContext && !stageItemVisible(objective, stageContext)) return;
             const scope = { objectives: [objective], objectiveIndexOffset: objectiveIndex };
             const [dossierObjective] = buildStrategyDossierObjectives(

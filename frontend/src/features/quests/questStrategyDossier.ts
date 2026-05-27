@@ -40,6 +40,12 @@ export type StrategyDossierObjective = {
     rewardDetails: QuestRewardDisplay[];
 };
 
+export type StrategyDossierObjectiveRoute = {
+    id: string;
+    label: string;
+    objective: StrategyDossierObjective;
+};
+
 export type StrategyDossierOutcome = {
     title: string;
     lines: string[];
@@ -91,6 +97,7 @@ export type StrategyDossierBranchOption = {
     eyebrow: string;
     outcomeLines: string[];
     objectives: StrategyDossierObjective[];
+    objectiveRoutes?: StrategyDossierObjectiveRoute[];
     requirements: string[];
     requirementDetails: QuestRequirementDisplay[];
     rewards: string[];
@@ -604,6 +611,8 @@ export function buildStrategyBranchOptions(
 
     return choices.map((choice): StrategyDossierBranchOption => {
         const objectives = choice.choiceKey ? objectivesByChoiceKey.get(choice.choiceKey) ?? [] : [];
+        const objectiveRoutes = objectiveRoutesForObjectives(objectives);
+        const hasRouteSpecificMeta = objectiveRoutes.length > 1;
         const rawRequirementDetails = choice.requirementDetails ?? [];
         const rawRewardDetails = choice.rewardDetails ?? [];
         const choiceRequirementDetails = rawRequirementDetails.length > 0
@@ -612,14 +621,18 @@ export function buildStrategyBranchOptions(
         const choiceRewardDetails = rawRewardDetails.length > 0
             ? rawRewardDetails
             : rewardDisplaysFromText(choice.rewardLines ?? []);
-        const requirementDetails = uniqueRequirementDisplays([
-            ...choiceRequirementDetails,
-            ...objectives.flatMap((objective) => objective.requirementDetails),
-        ]);
-        const rewardDetails = uniqueRewardDisplays([
-            ...choiceRewardDetails,
-            ...objectives.flatMap((objective) => objective.rewardDetails),
-        ]);
+        const requirementDetails = hasRouteSpecificMeta
+            ? []
+            : uniqueRequirementDisplays([
+                ...choiceRequirementDetails,
+                ...objectives.flatMap((objective) => objective.requirementDetails),
+            ]);
+        const rewardDetails = hasRouteSpecificMeta
+            ? []
+            : uniqueRewardDisplays([
+                ...choiceRewardDetails,
+                ...objectives.flatMap((objective) => objective.rewardDetails),
+            ]);
 
         return {
             id: choice.id,
@@ -631,6 +644,7 @@ export function buildStrategyBranchOptions(
                 ...objectives.map((objective) => objective.text),
             ]),
             objectives,
+            objectiveRoutes,
             requirements: requirementDisplayTexts(requirementDetails),
             requirementDetails,
             rewards: rewardDisplayTexts(rewardDetails),
@@ -643,6 +657,18 @@ export function buildStrategyBranchOptions(
             isInSelectedPath: Boolean(choice.branchKey && selectedContextBranchKeys.has(choice.branchKey)),
         };
     });
+}
+
+export function objectiveRoutesForObjectives(
+    objectives: StrategyDossierObjective[]
+): StrategyDossierObjectiveRoute[] {
+    if (objectives.length <= 1) return [];
+
+    return objectives.map((objective, index) => ({
+        id: `${objective.id}:route`,
+        label: `Route ${index + 1}`,
+        objective,
+    }));
 }
 
 function buildBranchComparisonFromOptions(
