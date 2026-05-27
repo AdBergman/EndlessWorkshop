@@ -1038,6 +1038,40 @@ export function continuationChoicesForSelectedChoice(
     return choices.filter((choice) => isContinuationForSelectedChoice(choice, selectedChoice, revealContext));
 }
 
+function nextStageContinuationChoicesForSelection(
+    choices: QuestPathChoice[],
+    selectedChoice: QuestPathChoiceSelection | null,
+    revealContext: RevealContext
+): QuestPathChoice[] {
+    if (!selectedChoice?.branchKey) return [];
+
+    const eligibleContinuations = choices.filter((choice) => (
+        choice.sectionRole === "continuation"
+        && choice.id !== selectedChoice.choiceId
+        && choicePrerequisitesSatisfied(choice, revealContext)
+    ));
+    if (selectedChoice.branchStepOrder == null) {
+        return eligibleContinuations.filter((choice) => isContinuationForSelectedChoice(choice, selectedChoice, revealContext));
+    }
+
+    const nextOrderedContinuations = eligibleContinuations.filter((choice) => (
+        choice.branchStepOrder != null
+        && choice.branchStepOrder > selectedChoice.branchStepOrder!
+    ));
+    if (nextOrderedContinuations.length === 0) {
+        return eligibleContinuations.filter((choice) => isContinuationForSelectedChoice(choice, selectedChoice, revealContext));
+    }
+
+    const nextOrder = Math.min(...nextOrderedContinuations.map((choice) => choice.branchStepOrder ?? Number.MAX_SAFE_INTEGER));
+    const nextStageChoices = nextOrderedContinuations.filter((choice) => choice.branchStepOrder === nextOrder);
+    const unorderedDirectContinuations = eligibleContinuations.filter((choice) => (
+        choice.branchStepOrder == null
+        && isContinuationForSelectedChoice(choice, selectedChoice, revealContext)
+    ));
+
+    return uniqueChoicesById([...nextStageChoices, ...unorderedDirectContinuations]);
+}
+
 export function followUpStepIndexForContinuationChoices(
     steps: QuestProgressionStep[],
     sourceDetailEntryKey: string,
@@ -1073,9 +1107,13 @@ export function choicesScopedToCurrentBeat(
 ): QuestPathChoice[] {
     if (showRawHiddenRows || !currentBeatChoice?.branchKey) return choices;
 
+    const nextStageChoiceIds = new Set(
+        nextStageContinuationChoicesForSelection(choices, currentBeatChoice, revealContext)
+            .map((choice) => choice.id)
+    );
     return choices.filter((choice) => (
         choice.id === currentBeatChoice.choiceId
-        || isContinuationForSelectedChoice(choice, currentBeatChoice, revealContext)
+        || nextStageChoiceIds.has(choice.id)
     ));
 }
 
@@ -1094,12 +1132,12 @@ function selectionsByStepKey(choicePath: QuestPathChoiceSelection[]): Map<string
 
 function activeContinuationChoicesForSelection(
     choices: QuestPathChoice[],
-    selection: QuestPathChoiceSelection | null
+    selection: QuestPathChoiceSelection | null,
+    revealContext: RevealContext
 ): QuestPathChoice[] {
     if (!selection) return [];
-    return choices.filter((choice) => (
-        isContinuationForSelectedChoice(choice, selection)
-        && (
+    return nextStageContinuationChoicesForSelection(choices, selection, revealContext)
+        .filter((choice) => (
             choice.hasDependentContinuations
             || (
                 choice.sectionRole === "continuation"
@@ -1107,7 +1145,7 @@ function activeContinuationChoicesForSelection(
                 && !hasModeledChoiceContinuation(choice)
             )
         )
-    ));
+    );
 }
 
 function choiceMatchesSelectionKey(choice: QuestPathChoice, selection: QuestPathChoiceSelection): boolean {
@@ -1328,7 +1366,7 @@ export function buildQuestPathFlow(
             progression,
             entriesByKey
         );
-        const choices = options.showRawHiddenRows
+        let choices = options.showRawHiddenRows
             ? rawChoices
             : visibleChoicesForDiagnostics(prerequisiteEligibleChoices, choiceDiagnostics);
         const storedChoice = selectedStoredSelection
@@ -1337,10 +1375,17 @@ export function buildQuestPathFlow(
         const selectedChoice = selectedStoredSelection
             ? storedChoice ? selectionForChoice(step.stepKey, storedChoice) : null
             : implicitActiveChoice(choices, progression.activeVariantEntryKeys);
+        if (!options.showRawHiddenRows && selectedChoice?.branchStepOrder != null) {
+            choices = choices.filter((choice) => (
+                choice.id === selectedChoice.choiceId
+                || choice.branchStepOrder == null
+                || choice.branchStepOrder <= selectedChoice.branchStepOrder!
+            ));
+        }
         const revealParentChoice = selectedChoice ?? currentBeatChoice;
         const revealParentContext = cloneRevealContext(stepRevealContext);
         addSelectionToRevealContext(revealParentContext, revealParentChoice);
-        const revealEligibleChoices = rawChoices.filter((choice) => choicePrerequisitesSatisfied(choice, revealParentContext));
+        const revealEligibleChoices = unscopedRawChoices.filter((choice) => choicePrerequisitesSatisfied(choice, revealParentContext));
         if (options.showRawHiddenRows && revealParentChoice) {
             choiceDiagnostics = visibilityDiagnosticsForChoices(
                 rawChoices,
@@ -1363,8 +1408,9 @@ export function buildQuestPathFlow(
             revealParentContext
         );
         const activeFollowUpContinuations = activeContinuationChoicesForSelection(
-            followUpContinuations,
-            revealParentChoice
+            revealEligibleChoices,
+            revealParentChoice,
+            revealParentContext
         );
         const activeFollowUpContinuationIds = new Set(activeFollowUpContinuations.map((choice) => choice.id));
         if (!options.showRawHiddenRows && activeFollowUpContinuations.length > 0) {

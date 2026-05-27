@@ -1253,6 +1253,18 @@ export const stagedNecroLorePayload: QuestExplorerResponse = {
                     },
                 ],
             },
+            strategyView: {
+                objectives: [
+                    { ...testObjective("Objective_First", "The first battle is over."), choiceKey: "Choice_First" },
+                    { ...testObjective("Objective_Site_A", "Open the old site."), choiceKey: "Choice_Site" },
+                    { ...testObjective("Objective_Site_B", "Recover the relic."), choiceKey: "Choice_Site" },
+                    { ...testObjective("Objective_Enhance", "Enhance the hero."), choiceKey: "Choice_Enhance" },
+                    { ...testObjective("Objective_Save", "Save the girl."), choiceKey: "Choice_Save" },
+                    { ...testObjective("Objective_Rehabilitate", "Rehabilitate Kazra."), choiceKey: "Choice_Rehabilitate" },
+                    { ...testObjective("Objective_Release", "Release Kazra."), choiceKey: "Choice_Release" },
+                    { ...testObjective("Objective_Execute", "Execute Kazra."), choiceKey: "Choice_Execute" },
+                ],
+            },
             branches: [
                 {
                     ...testBranch("Branch_First", "A Bitter Truth"),
@@ -1286,6 +1298,24 @@ export const stagedNecroLorePayload: QuestExplorerResponse = {
                     parentBranchKey: "Branch_Site",
                     prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
                     choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
+                },
+                {
+                    ...testBranch("Branch_Rehabilitate", "Rehabilitate Kazra"),
+                    choiceKey: "Choice_Rehabilitate",
+                    sectionRole: "continuation",
+                    branchStepOrder: 4,
+                    parentBranchKey: "Branch_Enhance",
+                    prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Enhance"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Enhance",
+                },
+                {
+                    ...testBranch("Branch_Release", "Release Kazra"),
+                    choiceKey: "Choice_Release",
+                    sectionRole: "continuation",
+                    branchStepOrder: 4,
+                    parentBranchKey: "Branch_Save",
+                    prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Save"],
+                    choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Save",
                 },
                 {
                     ...testBranch("Branch_Execute", "Execute Kazra"),

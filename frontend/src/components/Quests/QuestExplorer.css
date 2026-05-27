@@ -1791,7 +1791,8 @@
 }
 
 .questExplorer-loreIntro {
-    margin-bottom: -4px;
+    max-width: 66ch;
+    margin-bottom: 0;
 }
 
 .questExplorer-loreOpening p,
@@ -1802,8 +1803,14 @@
     line-height: 1.9;
 }
 
-.questExplorer-loreOpening p:first-child::first-letter,
-.questExplorer-loreIntro p:first-child::first-letter {
+.questExplorer-loreIntro p {
+    max-width: 62ch;
+    color: rgba(232, 204, 158, 0.86);
+    font-size: 1.16rem;
+    line-height: 1.7;
+}
+
+.questExplorer-loreOpening p:first-child::first-letter {
     float: left;
     margin: 0.08em 0.12em 0 0;
     border: 1px solid rgba(208, 162, 74, 0.42);
@@ -1813,6 +1820,26 @@
     line-height: 0.9;
 }
 
+.questExplorer-loreIntroText {
+    display: block;
+}
+
+.questExplorer-loreIntro p:first-child .questExplorer-loreIntroText::first-letter {
+    float: left;
+    margin: 0.1em 0.11em 0 0;
+    border: 1px solid rgba(208, 162, 74, 0.32);
+    padding: 0 0.12em 0.03em;
+    color: var(--quest-gold-bright);
+    font-size: 2.15em;
+    line-height: 0.95;
+}
+
+.questExplorer-loreIntro .questExplorer-loreSpeaker {
+    display: inline-block;
+    margin: 0 0 0.32rem;
+    font-style: normal;
+}
+
 .questExplorer-loreSectionList {
     display: grid;
     gap: 34px;
@@ -1820,7 +1847,7 @@
 }
 
 .questExplorer-loreSectionList--campaign {
-    gap: 28px;
+    gap: 24px;
 }
 
 .questExplorer-loreSection {

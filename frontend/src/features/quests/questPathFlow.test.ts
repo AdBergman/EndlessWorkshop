@@ -454,6 +454,130 @@ describe("quest flow projection helpers", () => {
     expect(afterTerminalChoice.unresolvedContinuation?.choiceId).toBe(allies.id);
   });
 
+  it("keeps common-parent future continuations at the immediate next branch order", () => {
+    const steps = [
+      progressionStep(1, "Quest_Final"),
+      progressionStep(2, "Quest_Final"),
+      progressionStep(3, "Quest_Final"),
+      progressionStep(4, "Quest_Final"),
+    ];
+    const chapter = progressionChapter(6, "A Bitter Truth", steps);
+    const progression = detailProgression(chapter);
+    const entry = questEntry({
+      entryKey: "Quest_Final",
+      branches: [
+        questBranch({
+          branchKey: "Branch_First",
+          label: "A Bitter Truth",
+          sectionRole: "artifact",
+          branchStepOrder: 1,
+        }),
+        questBranch({
+          branchKey: "Branch_Site",
+          label: "Interact with Site of the Ancients using a hero",
+          sectionRole: "continuation",
+          branchStepOrder: 2,
+          parentBranchKey: "Branch_First",
+          prerequisiteBranchKeys: ["Branch_First"],
+        }),
+        questBranch({
+          branchKey: "Branch_Enhance",
+          label: "Enhance Hero",
+          sectionRole: "continuation",
+          branchStepOrder: 3,
+          parentBranchKey: "Branch_Site",
+          prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+        }),
+        questBranch({
+          branchKey: "Branch_Save",
+          label: "Save Girl",
+          sectionRole: "continuation",
+          branchStepOrder: 3,
+          parentBranchKey: "Branch_Site",
+          prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+        }),
+        questBranch({
+          branchKey: "Branch_Rehabilitate",
+          label: "Rehabilitate Kazra",
+          sectionRole: "continuation",
+          branchStepOrder: 4,
+          parentBranchKey: "Branch_Enhance",
+          prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Enhance"],
+        }),
+        questBranch({
+          branchKey: "Branch_Release",
+          label: "Release Kazra",
+          sectionRole: "continuation",
+          branchStepOrder: 4,
+          parentBranchKey: "Branch_Save",
+          prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Save"],
+        }),
+        questBranch({
+          branchKey: "Branch_Execute",
+          label: "Execute Kazra",
+          sectionRole: "continuation",
+          branchStepOrder: 4,
+          parentBranchKey: "Branch_Site",
+          prerequisiteBranchKeys: ["Branch_First", "Branch_Site"],
+        }),
+      ],
+    });
+    const entriesByKey = { [entry.entryKey]: entry };
+    const choices = choicesForStep(steps[0], entry, entriesByKey);
+    const first = choices.find((choice) => choice.branchKey === "Branch_First")!;
+    const site = choices.find((choice) => choice.branchKey === "Branch_Site")!;
+    const enhance = choices.find((choice) => choice.branchKey === "Branch_Enhance")!;
+    const save = choices.find((choice) => choice.branchKey === "Branch_Save")!;
+
+    const afterSite = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [first, site].map((choice) => selectionForChoice(steps[0].stepKey, choice)),
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterSite.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
+      "Enhance Hero",
+      "Save Girl",
+    ]);
+
+    const afterEnhance = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [first, site, enhance].map((choice) => selectionForChoice(steps[0].stepKey, choice)),
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterEnhance.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
+      "Rehabilitate Kazra",
+      "Execute Kazra",
+    ]);
+
+    const afterSave = buildQuestPathFlow(
+      progression,
+      entriesByKey,
+      [first, site, save].map((choice) => selectionForChoice(steps[0].stepKey, choice)),
+      questlineProgression([chapter]),
+      {
+        focusedStepIndex: 0,
+        showRawHiddenRows: false,
+      },
+    );
+
+    expect(afterSave.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
+      "Release Kazra",
+      "Execute Kazra",
+    ]);
+  });
+
   it("auto-collapses single-step deterministic tutorial chains into the next projected chapter", () => {
     const tutorialStep = {
       ...progressionStep(1, "Quest_Tutorial"),

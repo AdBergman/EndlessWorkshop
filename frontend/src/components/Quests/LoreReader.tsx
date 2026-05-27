@@ -84,8 +84,25 @@ function isOpeningLoreSection(section: LoreSection): boolean {
     return phase === "start" || phase === "intro" || phase === "opening";
 }
 
-function isNarrativeLine(line: LoreSection["lines"][number]): boolean {
-    return !line.speakerLabel && line.role !== "character";
+function splitLeadSentence(line: LoreSection["lines"][number]): {
+    leadLine: LoreSection["lines"][number];
+    remainingLine: LoreSection["lines"][number] | null;
+} {
+    const sentenceMatch = line.text.trim().match(/^(.+?[.!?]["')\]\u201d\u2019]?)(\s+.+)$/s);
+    if (!sentenceMatch) {
+        return { leadLine: line, remainingLine: null };
+    }
+
+    const leadText = sentenceMatch[1]?.trim();
+    const remainingText = sentenceMatch[2]?.trim();
+    if (!leadText || !remainingText) {
+        return { leadLine: line, remainingLine: null };
+    }
+
+    return {
+        leadLine: { ...line, text: leadText },
+        remainingLine: { ...line, text: remainingText },
+    };
 }
 
 function campaignNarrativeLead(entry: QuestExplorerEntry, sections: LoreSection[]): LoreNarrativeLead | null {
@@ -93,12 +110,14 @@ function campaignNarrativeLead(entry: QuestExplorerEntry, sections: LoreSection[
 
     const [firstSection] = sections;
     if (!firstSection || !isOpeningLoreSection(firstSection)) return null;
+    if (firstSection.lines.length === 0) return null;
 
-    const firstNarrativeLineIndex = firstSection.lines.findIndex(isNarrativeLine);
-    if (firstNarrativeLineIndex !== 0) return null;
-
-    const leadLines = [firstSection.lines[0]];
-    const remainingLines = firstSection.lines.slice(1);
+    const { leadLine, remainingLine } = splitLeadSentence(firstSection.lines[0]);
+    const leadLines = [leadLine];
+    const remainingLines = [
+        ...(remainingLine ? [remainingLine] : []),
+        ...firstSection.lines.slice(1),
+    ];
 
     return {
         section: firstSection,
@@ -113,8 +132,12 @@ function LoreChronicleIntro({ lead }: { lead: LoreNarrativeLead }) {
     return (
         <section className="questExplorer-loreIntro" aria-label="Chapter narrative lead">
             {lead.lines.map((line, index) => (
-                <p className={`questExplorer-loreIntroLine questExplorer-loreIntroLine--${line.role || "narrator"}`} key={`${lead.section.sectionKey}:lead:${index}`}>
-                    <span>{line.text}</span>
+                <p
+                    className={`questExplorer-loreIntroLine questExplorer-loreIntroLine--${line.role || "narrator"}${line.speakerLabel ? " questExplorer-loreIntroLine--hasSpeaker" : ""}`}
+                    key={`${lead.section.sectionKey}:lead:${index}`}
+                >
+                    {line.speakerLabel ? <strong className="questExplorer-loreSpeaker">{line.speakerLabel}:</strong> : null}
+                    <span className="questExplorer-loreIntroText">{line.text}</span>
                 </p>
             ))}
         </section>

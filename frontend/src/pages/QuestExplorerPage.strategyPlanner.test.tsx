@@ -10,6 +10,7 @@ import {
     payload,
     scopedReaderPayload,
     serializedContinuationPayload,
+    stagedNecroLorePayload,
     stagedContinuationPayload,
     strategyDossierMarkerPayload,
     terminalNoLinkPayload,
@@ -234,6 +235,31 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(chronicle).queryByRole("region", { name: "Choose a path" })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Eliminate the threat/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rebuild the city/ })).not.toBeInTheDocument();
+    });
+
+    it("keeps Necrophage future endings out of the active Strategy choice set until the next branch stage", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedNecroLorePayload);
+        renderPage("/quests/Quest_Necro_Ch6?mode=strategy");
+
+        await screen.findByRole("heading", { name: "A Bitter Truth" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(chapterPlan).getByText("Execute Kazra.")).toBeInTheDocument();
+
+        expect(within(chronicle).getByRole("button", { name: /Enhance Hero/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Save Girl/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Enhance Hero/ }));
+
+        const selectedBranchPlan = within(chapterPlan).getByRole("region", { name: "Step 4 of 4: Rehabilitate Kazra" });
+        expect(within(selectedBranchPlan).getByText("Rehabilitate Kazra.")).toBeInTheDocument();
+        expect(within(selectedBranchPlan).getByText("Execute Kazra.")).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Rehabilitate Kazra/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Release Kazra/ })).not.toBeInTheDocument();
     });
 
     it("renders minor faction objective variants without aggregate overview", async () => {

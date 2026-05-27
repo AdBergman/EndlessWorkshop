@@ -174,6 +174,122 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         expect(renamedStream.selectedContextKey).toBe(selectedContextKey);
     });
 
+    it("keeps only the first sentence from the first major faction opening line in the chronicle intro", async () => {
+        const questline = progressionQuestline({
+            title: "A Fragile Dawn",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "A Fragile Dawn", detailEntryKey: "Quest_LongLead" },
+            ],
+        });
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            ...payload,
+            entries: [
+                questEntry({
+                    entryKey: "Quest_LongLead",
+                    title: "A Fragile Dawn",
+                    questType: "Faction Quest",
+                    summaryLines: ["The Last Lords gather before daybreak."],
+                    loreView: {
+                        sections: [
+                            {
+                                sectionKey: "Quest_LongLead:opening",
+                                phase: "intro",
+                                choiceKey: null,
+                                stepIndex: null,
+                                objectiveKey: null,
+                                lines: [
+                                    {
+                                        speakerLabel: null,
+                                        role: "character",
+                                        text: "Dawn broke quietly over the Last Lords. The war-council carried every old grievance into the hall, and the long argument continued after the first bells.",
+                                    },
+                                    {
+                                        speakerLabel: null,
+                                        role: "narrator",
+                                        text: "Messengers waited at the threshold for a verdict.",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }),
+            ],
+            progression: {
+                questlines: [questline],
+                debugSummary: null,
+            },
+        });
+
+        renderPage("/quests/Quest_LongLead?mode=lore");
+
+        await screen.findByRole("heading", { name: "A Fragile Dawn" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const lead = within(chronicle).getByText("Dawn broke quietly over the Last Lords.");
+        const remainingOpening = within(chronicle).getByText("The war-council carried every old grievance into the hall, and the long argument continued after the first bells.");
+
+        expect(lead.closest(".questExplorer-loreIntro")).not.toBeNull();
+        expect(remainingOpening.closest(".questExplorer-loreIntro")).toBeNull();
+        expect(remainingOpening.closest(".questExplorer-loreSection")).not.toBeNull();
+        expect(within(chronicle).getByRole("heading", { name: "Opening" })).toBeInTheDocument();
+        expectElementBefore(lead, remainingOpening);
+    });
+
+    it("preserves speaker attribution in major faction chronicle intros", async () => {
+        const questline = progressionQuestline({
+            title: "Forgotten Power",
+            steps: [
+                { stepNumber: 1, stepOrder: 1, title: "Forgotten Power", detailEntryKey: "Quest_SpeakerLead" },
+            ],
+        });
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            ...payload,
+            entries: [
+                questEntry({
+                    entryKey: "Quest_SpeakerLead",
+                    title: "Forgotten Power",
+                    questType: "Faction Quest",
+                    summaryLines: ["The Tahuks argue over the Oculum."],
+                    loreView: {
+                        sections: [
+                            {
+                                sectionKey: "Quest_SpeakerLead:opening",
+                                phase: "start",
+                                choiceKey: null,
+                                stepIndex: null,
+                                objectiveKey: null,
+                                lines: [
+                                    {
+                                        speakerLabel: "Jalo",
+                                        role: "character",
+                                        text: "Meng, you conniving slime! Mark my words, the Oculum will not sit idle for long.",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                }),
+            ],
+            progression: {
+                questlines: [questline],
+                debugSummary: null,
+            },
+        });
+
+        renderPage("/quests/Quest_SpeakerLead?mode=lore");
+
+        await screen.findByRole("heading", { name: "Forgotten Power" });
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const intro = chronicle.querySelector(".questExplorer-loreIntro") as HTMLElement;
+        const speaker = within(intro).getByText("Jalo:");
+        const lead = within(intro).getByText("Meng, you conniving slime!");
+        const remainingOpening = within(chronicle).getByText("Mark my words, the Oculum will not sit idle for long.");
+
+        expect(speaker.closest(".questExplorer-loreIntro")).not.toBeNull();
+        expect(lead.closest(".questExplorer-loreIntro")).not.toBeNull();
+        expect(remainingOpening.closest(".questExplorer-loreIntro")).toBeNull();
+        expect(remainingOpening.closest(".questExplorer-loreSection")).not.toBeNull();
+    });
+
     it("renders lore as a continuous selected chronicle and stops at the next unresolved continuation", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
@@ -420,8 +536,16 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         expectElementBefore(selectedSiteChoice, siteOpening);
         expectElementBefore(siteOpening, siteResolution);
         expectElementBefore(siteResolution, enhanceChoice);
+        expect(within(chronicle).getByRole("button", { name: /Save Girl/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("The saved girl path remains hidden until selected.")).not.toBeInTheDocument();
         expect(within(chronicle).queryByText("Chronicle carry-forward")).not.toBeInTheDocument();
+
+        await user.click(enhanceChoice);
+
+        expect(within(chronicle).getByRole("button", { name: /Rehabilitate Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Execute Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Release Kazra/ })).not.toBeInTheDocument();
     });
 
     it("uses branch continuity metadata to prevent same-step future lore from leaking", async () => {

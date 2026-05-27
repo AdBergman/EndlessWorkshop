@@ -303,6 +303,24 @@ function stagedNecrophageContinuationEntry(): QuestExplorerEntry {
                 choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:3:after:Branch_Site",
             },
             {
+                ...testBranch("Branch_Rehabilitate", "Rehabilitate Kazra"),
+                choiceKey: "Choice_Rehabilitate",
+                sectionRole: "continuation",
+                branchStepOrder: 4,
+                parentBranchKey: "Branch_Enhance",
+                prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Enhance"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Enhance",
+            },
+            {
+                ...testBranch("Branch_Release", "Release Kazra"),
+                choiceKey: "Choice_Release",
+                sectionRole: "continuation",
+                branchStepOrder: 4,
+                parentBranchKey: "Branch_Save",
+                prerequisiteBranchKeys: ["Branch_First", "Branch_Site", "Branch_Save"],
+                choiceGroupKey: "Quest_Necro_Ch6:choice-group:step:4:after:Branch_Save",
+            },
+            {
                 ...testBranch("Branch_Execute", "Execute Kazra"),
                 choiceKey: "Choice_Execute",
                 sectionRole: "continuation",
@@ -492,7 +510,6 @@ describe("buildLoreFlowModel", () => {
         expect(nextChoiceStage?.branchMoment?.branchingContinuationChoices.map((choiceItem) => choiceItem.choice.label)).toEqual([
             "Enhance Hero",
             "Save Girl",
-            "Execute Kazra",
         ]);
 
         const selectedChoiceBlock = after.blocks.find((block) => block.text === "Interact with Site of the Ancients using a hero");
