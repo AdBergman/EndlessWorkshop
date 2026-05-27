@@ -246,6 +246,12 @@ Avoid tests that assert:
 
 When extracting pure helpers, add focused unit tests if the helper carries meaningful product semantics. For behavior-preserving extraction, existing tests should pass unchanged or with import-path/scoping updates only.
 
+Test file size guidance:
+- Keep page/component integration specs split by user-facing behavior area, such as route hydration, filtering, Strategy behavior, Lore behavior, and debug tooling.
+- Once a spec approaches 1000 LOC, first extract large DTO payloads, scenario builders, and repeated render/setup helpers into named `testUtils` modules.
+- Keep large payload builders out of spec files. Fixture modules may be larger than specs, but should be named by product scenario and split further when editing the fixture itself becomes costly.
+- Prefer preserving test names and assertions during splits so regressions stay easy to trace.
+
 ## File Size Guidance
 
 These are review signals, not compiler/build limits. Crossing a threshold should trigger architectural review, not automatic splitting.
@@ -255,6 +261,9 @@ These are review signals, not compiler/build limits. Crossing a threshold should
 | React page files | 300-500 LOC | 700 LOC | 1000 LOC unless justified |
 | React component files | 200-300 LOC | 400 LOC | 600 LOC unless justified |
 | Pure helper/view-model files | 300-500 LOC | 700 LOC | 1000 LOC unless justified |
+| Pure helper/unit test files | 300-500 LOC | 700 LOC | 1000 LOC unless justified |
+| Page/component integration test files | 400-700 LOC | 900 LOC | 1200 LOC unless justified |
+| Fixture/test data modules | Named scenario builders | 1000 LOC | 1500 LOC unless intentionally centralized |
 | CSS files | Feature-scoped and sectioned | 1000 LOC | 1500 LOC unless intentionally centralized |
 
 Large files are not automatically wrong. The question is whether a new contributor can safely answer:

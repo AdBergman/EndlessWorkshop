@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { QuestExplorerMode } from "./questExplorerMode";
 
@@ -30,7 +30,11 @@ export function useQuestExplorerLoreScrollUrl({
     );
     const currentParamIsKnownSegment = Boolean(currentLoreEntryParam && segmentRailEntryKeySet.has(currentLoreEntryParam));
     const [scrollActiveRailEntryKey, setScrollActiveRailEntryKey] = useState<string | null>(null);
+    const latestContextRef = useRef({ mode, selectedEntryKey, selectedProgressionKey });
+    const suppressNextUrlSyncRef = useRef(false);
+    latestContextRef.current = { mode, selectedEntryKey, selectedProgressionKey };
     const applyPassiveScroll = useCallback((entryKey: string | null) => {
+        if (entryKey === null) suppressNextUrlSyncRef.current = true;
         setScrollActiveRailEntryKey(entryKey);
     }, []);
 
@@ -44,8 +48,23 @@ export function useQuestExplorerLoreScrollUrl({
     }, [currentLoreEntryParam, mode, segmentRailEntryKeySet]);
 
     useEffect(() => {
+        if (suppressNextUrlSyncRef.current) {
+            if (scrollActiveRailEntryKey === null) suppressNextUrlSyncRef.current = false;
+            return;
+        }
+
+        const latestContext = latestContextRef.current;
+        if (
+            latestContext.mode !== mode
+            || latestContext.selectedEntryKey !== selectedEntryKey
+            || latestContext.selectedProgressionKey !== selectedProgressionKey
+        ) {
+            return;
+        }
+
         const nextLoreEntryParam = mode === "lore"
             && scrollActiveRailEntryKey
+            && segmentRailEntryKeySet.has(scrollActiveRailEntryKey)
             && scrollActiveRailEntryKey !== selectedEntryKey
             ? scrollActiveRailEntryKey
             : null;
@@ -66,8 +85,10 @@ export function useQuestExplorerLoreScrollUrl({
         currentLoreEntryParam,
         currentParamIsKnownSegment,
         mode,
+        segmentRailEntryKeySet,
         scrollActiveRailEntryKey,
         selectedEntryKey,
+        selectedProgressionKey,
         setSearchParams,
     ]);
 

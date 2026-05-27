@@ -503,10 +503,14 @@ function continuationChapterMessage(entry: QuestExplorerEntry | null): string {
 }
 
 function LoreNarrativeConclusion({ conclusion }: { conclusion: LorePathConclusion }) {
+    const needsClosingPeriod = !/[.!?]$/.test(conclusion.choiceLabel.trim());
+
     return (
         <section className="questExplorer-loreConclusion questExplorer-loreConclusion--ending" aria-label="Chronicle conclusion">
-            <span>Chronicle conclusion</span>
-            <p>This chronicle concludes here. The story ends with "{conclusion.choiceLabel}"; no later chapter follows this outcome.</p>
+            <p>
+                The story concludes here with <span className="questExplorer-loreConclusionChoice">"{conclusion.choiceLabel}"</span>{needsClosingPeriod ? "." : null}
+            </p>
+            <strong>The End</strong>
         </section>
     );
 }

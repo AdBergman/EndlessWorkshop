@@ -36,6 +36,7 @@ These systems are intentionally stable and require bounded, explicit migrations.
 - Preserve existing route behavior, query params, and deep-link semantics.
 - Prefer existing stores, selectors, helpers, and tests over new abstractions.
 - Follow the detailed React/TypeScript boundaries in `docs/frontend/frontend-architecture-guidelines.md` for page files, feature modules, view-model helpers, hooks, Zustand ownership, CSS, tests, and behavior-preserving extraction.
+- Keep frontend test specs reviewable: extract large fixtures/payload builders once a spec approaches ~1000 LOC, and split page/component integration specs by user-facing behavior area.
 
 ## Verification
 

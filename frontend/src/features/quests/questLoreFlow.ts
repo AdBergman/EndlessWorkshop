@@ -1,6 +1,7 @@
 import {
     buildLoreChronicleStream,
     isTerminalChoiceChapter,
+    stepIndexForBranchStepOrder,
     uniqueStrings,
     type LoreChoicePathsByContext,
     type LoreChronicleSegment,
@@ -145,19 +146,31 @@ export function buildLoreFlowModel({
             let loreSectionsWereSuppressed = false;
             let selectedChoiceLoreSections: LoreSection[] = [];
 
-            if (renderedStep.displayEntry && !renderedStep.rendersRepeatedDetailContent) {
+            if (renderedStep.displayEntry) {
+                const selectedChoiceRendersAsLaterStep = Boolean(
+                    renderedStep.selectedChoice?.branchStepOrder != null
+                    && stepIndexForBranchStepOrder(
+                        segment.progression.chapter.steps,
+                        renderedStep.step.detailEntryKey,
+                        renderedStep.selectedChoice.branchStepOrder,
+                        renderedStep.stepIndex + 1
+                    ) != null
+                );
                 const shouldAppendSelectedChoiceLore = Boolean(
                     renderedStep.selectedChoice && branchMoment?.hasActionableStages
+                    && !selectedChoiceRendersAsLaterStep
                 );
-                const scopedLoreSections = loreSectionsForStep(renderedStep.displayEntry, renderedStep, {
-                    includeSelectedChoice: !shouldAppendSelectedChoiceLore,
-                });
-                loreSections = claimVisibleLoreSections(
-                    scopedLoreSections,
-                    visibleDetailEntryKey,
-                    ownershipTracker
-                );
-                loreSectionsWereSuppressed = scopedLoreSections.length > 0 && loreSections.length === 0;
+                if (!renderedStep.rendersRepeatedDetailContent) {
+                    const scopedLoreSections = loreSectionsForStep(renderedStep.displayEntry, renderedStep, {
+                        includeSelectedChoice: !shouldAppendSelectedChoiceLore && !selectedChoiceRendersAsLaterStep,
+                    });
+                    loreSections = claimVisibleLoreSections(
+                        scopedLoreSections,
+                        visibleDetailEntryKey,
+                        ownershipTracker
+                    );
+                    loreSectionsWereSuppressed = scopedLoreSections.length > 0 && loreSections.length === 0;
+                }
 
                 selectedChoiceLoreSections = shouldAppendSelectedChoiceLore
                     ? claimVisibleLoreSections(
@@ -209,7 +222,7 @@ function lorePathConclusion(
     flow: LoreChronicleSegment["flow"],
     progression: QuestDetailProgression
 ): LorePathConclusion | null {
-    const continuation = flow.unresolvedContinuation;
+    const continuation = flow.unresolvedContinuation ?? carriedTerminalChoice(flow, progression);
     if (!continuation) return null;
 
     if (continuation.semanticStageKind === "unresolved" || continuation.sectionRole === "unresolved") {
@@ -261,6 +274,18 @@ function lorePathConclusion(
         choiceLabel: continuation.label,
         reason: "missing_modeled_continuation",
     };
+}
+
+function carriedTerminalChoice(
+    flow: LoreChronicleSegment["flow"],
+    progression: QuestDetailProgression
+) {
+    const finalRenderedStep = flow.renderedSteps.at(-1);
+    const choice = finalRenderedStep?.currentBeatChoice ?? null;
+    if (!choice) return null;
+    if (choice.targetEntryKey || choice.nextEntryKeys.length > 0 || choice.hasDependentContinuations) return null;
+    if (!isTerminalChoiceChapter(progression) && !isFinalProgressionPosition(flow, progression)) return null;
+    return choice;
 }
 
 function isFinalProgressionPosition(
