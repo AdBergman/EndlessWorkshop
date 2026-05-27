@@ -42,6 +42,13 @@ export type ChronicleChoiceItem = {
     stageLabel: string;
 };
 
+export type ChronicleContinuationStageGroup = {
+    key: string;
+    heading: string;
+    relation: "current" | "future";
+    choices: ChronicleChoiceItem[];
+};
+
 export type ChronicleBranchMoment = {
     title: string;
     ariaNoun: string;
@@ -49,6 +56,7 @@ export type ChronicleBranchMoment = {
     decisionChoices: ChronicleChoiceItem[];
     continuationChoices: ChronicleChoiceItem[];
     branchingContinuationChoices: ChronicleChoiceItem[];
+    branchingContinuationStageGroups: ChronicleContinuationStageGroup[];
     selectedContextBranchKeys: Set<string>;
     hasActionableStages: boolean;
 };
@@ -324,6 +332,7 @@ export function buildChronicleBranchMoment(
             decisionChoices: [],
             continuationChoices: [],
             branchingContinuationChoices: [],
+            branchingContinuationStageGroups: [],
             selectedContextBranchKeys: new Set(),
             hasActionableStages: false,
         };
@@ -357,6 +366,10 @@ export function buildChronicleBranchMoment(
         decisionChoices: chroniclePresentation.decisionChoices.map((choice) => chronicleChoiceItem(choice, "decision")),
         continuationChoices: chroniclePresentation.continuationChoices.map((choice) => chronicleChoiceItem(choice, "continuation")),
         branchingContinuationChoices: chroniclePresentation.branchingContinuationChoices.map((choice) => chronicleChoiceItem(choice, "branching_continuation")),
+        branchingContinuationStageGroups: chroniclePresentation.branchingContinuationStageGroups.map((group) => ({
+            ...group,
+            choices: group.choices.map((choice) => chronicleChoiceItem(choice, "branching_continuation")),
+        })),
         selectedContextBranchKeys: presentation.selectedContextBranchKeys,
         hasActionableStages,
     };
@@ -407,6 +420,12 @@ type ChronicleBranchPresentation = {
     decisionChoices: QuestPathChoice[];
     continuationChoices: QuestPathChoice[];
     branchingContinuationChoices: QuestPathChoice[];
+    branchingContinuationStageGroups: Array<{
+        key: string;
+        heading: string;
+        relation: "current" | "future";
+        choices: QuestPathChoice[];
+    }>;
 };
 
 function chronicleBranchPresentation(
@@ -431,6 +450,7 @@ function chronicleBranchPresentation(
     const branchingContinuations = activeContinuationStages.length > 1
         ? [...topologyChoices, ...deterministicPrimaryChoices, ...activeContinuationStages]
         : topologyChoices;
+    const branchingContinuationStageGroups = continuationProgressionGroups(branchingContinuations);
     const decisionChoices = [...explicitDecisionChoices, ...fallbackDecisionChoices];
 
     if (decisionChoices.length > 0) {
@@ -440,6 +460,7 @@ function chronicleBranchPresentation(
             decisionChoices,
             continuationChoices: deterministicContinuations,
             branchingContinuationChoices: branchingContinuations,
+            branchingContinuationStageGroups,
         };
     }
 
@@ -450,6 +471,7 @@ function chronicleBranchPresentation(
             decisionChoices,
             continuationChoices: deterministicContinuations,
             branchingContinuationChoices: branchingContinuations,
+            branchingContinuationStageGroups,
         };
     }
 
@@ -459,7 +481,54 @@ function chronicleBranchPresentation(
         decisionChoices,
         continuationChoices: deterministicContinuations,
         branchingContinuationChoices: branchingContinuations,
+        branchingContinuationStageGroups,
     };
+}
+
+function continuationProgressionGroups(choices: QuestPathChoice[]): Array<{
+    key: string;
+    heading: string;
+    relation: "current" | "future";
+    choices: QuestPathChoice[];
+}> {
+    const groups = new Map<string, {
+        key: string;
+        order: number;
+        firstIndex: number;
+        choices: QuestPathChoice[];
+    }>();
+
+    choices.forEach((choice, index) => {
+        const key = continuationProgressionGroupKey(choice);
+        const existing = groups.get(key);
+        const order = choice.branchStepOrder ?? Number.MAX_SAFE_INTEGER;
+        if (existing) {
+            existing.order = Math.min(existing.order, order);
+            existing.choices.push(choice);
+            return;
+        }
+
+        groups.set(key, {
+            key,
+            order,
+            firstIndex: index,
+            choices: [choice],
+        });
+    });
+
+    return [...groups.values()]
+        .sort((left, right) => left.order - right.order || left.firstIndex - right.firstIndex)
+        .map((group, index) => ({
+            key: group.key,
+            heading: index === 0 ? "Choose how to proceed" : "After this choice",
+            relation: index === 0 ? "current" : "future",
+            choices: group.choices,
+        }));
+}
+
+function continuationProgressionGroupKey(choice: QuestPathChoice): string {
+    if (choice.branchStepOrder != null) return `order:${choice.branchStepOrder}`;
+    return `group:${choice.choiceGroupKey ?? choice.groupKey ?? choice.parentBranchKey ?? "ungrouped"}`;
 }
 
 function chronicleStageKind(

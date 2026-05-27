@@ -5,7 +5,10 @@ import {
     formatLoreChronologyDiff,
     formatLoreChronologySnapshot,
 } from "@/features/quests/questLoreChronologyDiagnostic";
-import { buildLoreFlowModel } from "@/features/quests/questLoreFlow";
+import {
+    buildChronicleBranchMoment,
+    buildLoreFlowModel,
+} from "@/features/quests/questLoreFlow";
 import {
     choicesForStep,
     progressionContextKey,
@@ -520,6 +523,74 @@ describe("buildLoreFlowModel", () => {
         expect(selectedLoreBlock?.chronologyIndex).toBeLessThan(futureChoiceBlock?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
         expect(after.blocks.filter((block) => block.text === "The swarm learns the bitter truth.")).toHaveLength(1);
         expect(after.blocks.some((block) => block.text === "The saved girl path resolves.")).toBe(false);
+    });
+
+    it("groups visible continuation choices into current and future progression beats", () => {
+        const entry = stagedNecrophageContinuationEntry();
+        const progression = repeatedEntryProgression(entry, 4);
+        const step = progression.questlines[0].chapters[0].steps[2];
+        if (!step) throw new Error("Expected staged Necrophage fixture to include a third step.");
+        const entriesByKey = { [entry.entryKey]: entry };
+        const choices = choicesForStep(step, entry, entriesByKey)
+            .filter((choice) => [
+                "Enhance Hero",
+                "Save Girl",
+                "Execute Kazra",
+                "Release Kazra",
+                "Rehabilitate Kazra",
+            ].includes(choice.label));
+
+        const branchMoment = buildChronicleBranchMoment({
+            step,
+            stepIndex: 2,
+            displayEntry: entry,
+            choices,
+            revealedContinuations: [],
+            autoContinuedChoices: [],
+            currentBeatChoice: null,
+            selectedChoice: null,
+            choiceDiagnostics: {
+                normalVisibleChoiceCount: choices.length,
+                debugVisibleChoiceCount: choices.length,
+                hiddenArtifactCount: 0,
+                hiddenUnresolvedCount: 0,
+                hiddenContinuationCount: 0,
+                hiddenReasonsByChoiceId: new Map(),
+            },
+            isActive: true,
+            repeatsDetailEntry: true,
+            rendersRepeatedDetailContent: false,
+            revealedContinuationsBecomeSteps: false,
+            revealContext: {
+                branchKeys: new Set(["Branch_First", "Branch_Site"]),
+                choiceKeys: new Set(["Choice_First", "Choice_Site"]),
+                branchPath: ["Branch_First", "Branch_Site"],
+            },
+        }, entriesByKey, false);
+
+        expect(branchMoment?.branchingContinuationChoices.map((item) => item.choice.label)).toEqual([
+            "Enhance Hero",
+            "Save Girl",
+            "Rehabilitate Kazra",
+            "Release Kazra",
+            "Execute Kazra",
+        ]);
+        expect(branchMoment?.branchingContinuationStageGroups.map((group) => ({
+            heading: group.heading,
+            relation: group.relation,
+            labels: group.choices.map((item) => item.choice.label),
+        }))).toEqual([
+            {
+                heading: "Choose how to proceed",
+                relation: "current",
+                labels: ["Enhance Hero", "Save Girl"],
+            },
+            {
+                heading: "After this choice",
+                relation: "future",
+                labels: ["Rehabilitate Kazra", "Release Kazra", "Execute Kazra"],
+            },
+        ]);
     });
 
     it("claims repeated narrative ownership once while leaving later continuation stages available", () => {
