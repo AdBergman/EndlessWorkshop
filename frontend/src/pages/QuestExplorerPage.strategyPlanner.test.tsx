@@ -5,6 +5,7 @@ import {
     branchPayload,
     choiceKeyScopedPayload,
     choiceResetPayload,
+    kinChapterTwoStaticStrategyPayload,
     minorVariantPayload,
     nextChapterPayload,
     payload,
@@ -262,6 +263,30 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(chronicle).getByRole("button", { name: /Release Kazra/ })).toBeInTheDocument();
         expect(within(chronicle).getByRole("button", { name: /Rehabilitate Kazra/ })).toBeInTheDocument();
         expect(within(chronicle).getByRole("button", { name: /Execute Kazra/ })).toBeInTheDocument();
+    });
+
+    it("keeps Kin Chapter 2 static Strategy tasks visible before and after choosing Search or Build", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(kinChapterTwoStaticStrategyPayload);
+        renderPage("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Stirrings" });
+
+        const chronicle = screen.getByRole("region", { name: "Selected progression" });
+        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(chapterPlan).getByRole("region", { name: "Step 2 of 3: Interact with Mosaic Halls" })).toBeInTheDocument();
+        expect(within(chapterPlan).getByRole("region", { name: "Step 3 of 3: Assign settlement population: Artisans 3 times" })).toBeInTheDocument();
+        expect(within(chronicle).getByText("Eliminate the Necrophage threat.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("The Kin's inner strength must be bolstered.")).toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Build/ }));
+
+        const selectedChapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
+        expect(within(chronicle).getByRole("button", { name: /Build/ })).toHaveAttribute("aria-current", "true");
+        expect(within(selectedChapterPlan).getByRole("region", { name: "Step 2 of 3: Interact with Mosaic Halls" })).toBeInTheDocument();
+        expect(within(selectedChapterPlan).getByRole("region", { name: "Step 3 of 3: Assign settlement population: Artisans 3 times" })).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Eliminate the Necrophage threat.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("The Kin's inner strength must be bolstered.")).toHaveLength(1);
     });
 
     it("renders minor faction objective variants without aggregate overview", async () => {

@@ -1669,6 +1669,217 @@ export const projectedLocalContinuationPayload: QuestExplorerResponse = {
     },
 };
 
+export const kinChapterTwoStaticStrategyPayload: QuestExplorerResponse = {
+    ...payload,
+    entries: [
+        questEntry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01",
+            title: "Stirrings",
+            summaryLines: ["Pryzja thinks she saw the missing leader, Garin. Should the Great Search be reestablished?"],
+            strategyView: { objectives: [] },
+            branches: [
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1", "Search"),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+                    convergesIntoEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+                    strategy: { conditions: ["Search for Garin."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2", "Build"),
+                    choiceKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+                    convergesIntoEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+                    strategy: { conditions: ["Build the Kin defenses."], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                chapter: 2,
+                chapterLabel: "Chapter 2",
+                chapterOrder: 2,
+                stepOrder: 0,
+                nextEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+                convergesIntoEntryKeys: ["FactionQuest_KinOfSheredyn_Chapter03_Step01"],
+            },
+        }),
+        questEntry({
+            entryKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01",
+            title: "The Missing Youth",
+            summaryLines: ["Still regrouping in the aftermath of the starfall, the Kin must find Pryzja."],
+            strategyView: {
+                objectives: [
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn02_Chapter02_Step01:objective:step-1",
+                            "Pryzja, a Kin youth, is missing."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01ChoiceDefinition",
+                        requirements: [testRequirement("Requirement_Mosaic", "Interact with Mosaic Halls")],
+                        rewards: [testReward("Reward_Dust", "Gain Dust based on technology era")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn02_Chapter02_Step01:objective:step-2",
+                            "Eliminate the Necrophage threat."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step02ChoiceDefinition",
+                        revealedByBranchKeys: [
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1",
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2",
+                        ],
+                        revealedByChoiceKeys: [
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition",
+                        ],
+                        revealedByBranchPathAlternatives: [
+                            ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1"],
+                            ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2"],
+                        ],
+                        requirements: [testRequirement("Requirement_Necro", "Defeat Necro Horde")],
+                    },
+                    {
+                        ...testObjective(
+                            "FactionQuest_KinOfSheredyn02_Chapter02_Step01:objective:step-3",
+                            "The Kin's inner strength must be bolstered."
+                        ),
+                        choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step03ChoiceDefinition",
+                        revealedByBranchKeys: [
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1",
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2",
+                        ],
+                        revealedByChoiceKeys: [
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                            "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition",
+                        ],
+                        revealedByBranchPathAlternatives: [
+                            ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1"],
+                            ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2"],
+                        ],
+                        requirements: [testRequirement("Requirement_Artisans", "Assign settlement population: Artisans 3 times")],
+                        rewards: [testReward("Reward_Titanium", "Gain Titanium based on technology era")],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:1", "Interact with Mosaic Halls"),
+                    choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01ChoiceDefinition",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Interact with Mosaic Halls"], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:2", "Defeat Necro Horde"),
+                    choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step02ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01:choice-group:step:2",
+                    branchStepOrder: 2,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:1",
+                    prerequisiteBranchKeys: ["FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:1"],
+                    revealedByBranchKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1",
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2",
+                    ],
+                    revealedByChoiceKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition",
+                    ],
+                    revealedByBranchPathAlternatives: [
+                        ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1"],
+                        ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2"],
+                    ],
+                    strategy: { conditions: ["Defeat Necro Horde"], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch(
+                        "FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:3",
+                        "Assign settlement population: Artisans 3 times"
+                    ),
+                    choiceKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step03ChoiceDefinition",
+                    sectionRole: "continuation",
+                    choiceGroupKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01:choice-group:step:3",
+                    branchStepOrder: 3,
+                    parentBranchKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:2",
+                    prerequisiteBranchKeys: [
+                        "FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:1",
+                        "FactionQuest_KinOfSheredyn02_Chapter02_Step01:branch:2",
+                    ],
+                    revealedByBranchKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1",
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2",
+                    ],
+                    revealedByChoiceKeys: [
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice01ChoiceDefinition",
+                        "FactionQuest_KinOfSheredyn_Chapter02_Step01_Choice02ChoiceDefinition",
+                    ],
+                    revealedByBranchPathAlternatives: [
+                        ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:1"],
+                        ["FactionQuest_KinOfSheredyn_Chapter02_Step01:branch:2"],
+                    ],
+                    nextEntryKeys: ["FactionQuest_KinOfSheredyn02_Chapter03_Step01"],
+                    strategy: { conditions: ["Assign settlement population: Artisans 3 times"], requirements: [], rewards: [] },
+                },
+            ],
+            navigation: {
+                factionKey: "Faction_KinOfSheredyn02",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn02",
+                questLineName: "Kin",
+                chapter: 2,
+                chapterLabel: "Chapter 2",
+                chapterOrder: 2,
+                stepOrder: 0,
+                nextEntryKeys: ["FactionQuest_KinOfSheredyn02_Chapter03_Step01"],
+            },
+        }),
+        questEntry({
+            entryKey: "FactionQuest_KinOfSheredyn_Chapter03_Step01",
+            title: "What Lies Beneath",
+            navigation: {
+                factionKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                chapter: 3,
+                chapterLabel: "Chapter 3",
+                chapterOrder: 3,
+                stepOrder: 0,
+            },
+        }),
+    ],
+    progression: {
+        questlines: [
+            progressionQuestline({
+                questLineKey: "FactionQuest_KinOfSheredyn",
+                questLineFamilyKey: "FactionQuest_KinOfSheredyn",
+                questLineName: "Kin",
+                factionKey: "Faction_KinOfSheredyn",
+                factionFamilyKey: "Faction_KinOfSheredyn",
+                factionName: "Kin",
+                chapterNumber: 2,
+                chapterOrder: 2,
+                title: "Stirrings",
+                steps: [
+                    { stepNumber: 1, stepOrder: 0, title: "Stirrings", detailEntryKey: "FactionQuest_KinOfSheredyn_Chapter02_Step01" },
+                    { stepNumber: 2, stepOrder: 1, title: "The Missing Youth", detailEntryKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01" },
+                    { stepNumber: 3, stepOrder: 2, title: "The Missing Youth", detailEntryKey: "FactionQuest_KinOfSheredyn02_Chapter02_Step01" },
+                ],
+            }),
+        ],
+        debugSummary: null,
+    },
+};
+
 export const projectedLocalContinuationWithoutRevealPayload: QuestExplorerResponse = {
     ...projectedLocalContinuationPayload,
     entries: projectedLocalContinuationPayload.entries.map((entry) => ({

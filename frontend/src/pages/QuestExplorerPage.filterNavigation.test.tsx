@@ -35,7 +35,7 @@ describe("QuestExplorerPage filtering, projection, and rail navigation", () => {
         vi.unstubAllGlobals();
     });
 
-    it("reveals projected local continuation steps from explicit reveal metadata", async () => {
+    it("keeps all-options projected local Strategy steps static before and after choice selection", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(projectedLocalContinuationPayload);
         renderPage("/quests/Quest_Projector?mode=strategy");
@@ -45,9 +45,11 @@ describe("QuestExplorerPage filtering, projection, and rail navigation", () => {
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
         const initialChapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
         expect(within(initialChapterPlan).getByRole("region", { name: "Step 1 of 3: Projected Setup" })).toBeInTheDocument();
-        expect(within(initialChapterPlan).queryByRole("region", { name: "Step 2 of 3: Inspect the signal" })).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the carried next beat.")).not.toBeInTheDocument();
-        expect(within(chronicle).queryByText("Resolve the carried future beat.")).not.toBeInTheDocument();
+        expect(within(initialChapterPlan).getByRole("region", { name: "Step 2 of 3: Inspect the signal" })).toBeInTheDocument();
+        expect(within(initialChapterPlan).getByRole("region", { name: "Step 3 of 3: Report onward" })).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried current beat.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried next beat.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("Resolve the carried future beat.")).toBeInTheDocument();
 
         await user.click(within(chronicle).getByRole("button", { name: /Search/ }));
 
@@ -61,6 +63,8 @@ describe("QuestExplorerPage filtering, projection, and rail navigation", () => {
         expect(within(chronicle).getByText("Resolve the carried current beat.")).toBeInTheDocument();
         expect(within(chronicle).getByText("Resolve the carried next beat.")).toBeInTheDocument();
         expect(within(chronicle).getByText("Resolve the carried future beat.")).toBeInTheDocument();
+        expect(within(chronicle).getAllByText("Resolve the carried next beat.")).toHaveLength(1);
+        expect(within(chronicle).getAllByText("Resolve the carried future beat.")).toHaveLength(1);
         expect(screen.getByText(/Continues in Chapter 3/)).toBeInTheDocument();
     });
 

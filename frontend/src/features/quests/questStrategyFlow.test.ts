@@ -4,7 +4,11 @@ import {
     buildStrategyFlowModel,
     type StrategyFlowModel,
 } from "@/features/quests/questStrategyFlow";
-import type { QuestDetailProgression } from "@/features/quests/questPathFlow";
+import {
+    selectionForChoice,
+    type QuestDetailProgression,
+    type QuestPathChoiceSelection,
+} from "@/features/quests/questPathFlow";
 import {
     progressionQuestline,
     questEntry,
@@ -66,7 +70,11 @@ function strategyModelForEntry(
 function strategyModelForProgression(
     entries: QuestExplorerEntry[],
     progression: QuestExplorerProgression,
-    options: { showRawHiddenRows?: boolean; focusedStepIndex?: number } = {}
+    options: {
+        showRawHiddenRows?: boolean;
+        focusedStepIndex?: number;
+        choicePath?: QuestPathChoiceSelection[];
+    } = {}
 ): StrategyFlowModel {
     const selectedProgression = detailProgressionFrom(progression);
     const focusedStep = selectedProgression.chapter.steps[options.focusedStepIndex ?? 0]
@@ -78,7 +86,7 @@ function strategyModelForProgression(
         progression: selectedProgression,
         fullProgression: progression,
         entriesByKey: Object.fromEntries(entries.map((entry) => [entry.entryKey, entry])),
-        choicePath: [],
+        choicePath: options.choicePath ?? [],
         showRawHiddenRows: options.showRawHiddenRows ?? false,
     });
 
@@ -180,6 +188,142 @@ describe("buildStrategyFlowModel semantic view models", () => {
             ["Resolve the current beat."],
             ["Resolve the next beat."],
             ["Resolve the future beat."],
+        ]);
+    });
+
+    it("keeps all-options projected Strategy stages static while preserving subset reveal gating", () => {
+        const projector = questEntry({
+            entryKey: "Quest_Projector",
+            title: "Projected Setup",
+            strategyView: { objectives: [testObjective("Objective_Projector", "Choose the projected path.")] },
+            branches: [
+                {
+                    ...testBranch("Branch_Search", "Search"),
+                    choiceKey: "Choice_Search",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_Projector:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_Next"],
+                    convergesIntoEntryKeys: ["Quest_Next"],
+                    strategy: { conditions: ["Search for Garin."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Build", "Build"),
+                    choiceKey: "Choice_Build",
+                    sectionRole: "true_choice",
+                    choiceGroupKey: "Quest_Projector:choice-group:step:1",
+                    branchStepOrder: 1,
+                    nextEntryKeys: ["Quest_Next"],
+                    convergesIntoEntryKeys: ["Quest_Next"],
+                    strategy: { conditions: ["Build the settlement."], requirements: [], rewards: [] },
+                },
+            ],
+        });
+        const carried = questEntry({
+            entryKey: "Quest_Carried",
+            title: "Carried Chronicle",
+            strategyView: {
+                objectives: [
+                    { ...testObjective("Objective_Current", "Resolve the carried current beat."), choiceKey: "Choice_Current" },
+                    {
+                        ...testObjective("Objective_Common", "Resolve the common follow-up beat."),
+                        choiceKey: "Choice_Common",
+                        revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                        revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    },
+                    {
+                        ...testObjective("Objective_SearchOnly", "Resolve the search-only follow-up."),
+                        choiceKey: "Choice_SearchOnly",
+                        revealedByBranchKeys: ["Branch_Search"],
+                        revealedByChoiceKeys: ["Choice_Search"],
+                        revealedByBranchPathAlternatives: [["Branch_Search"]],
+                    },
+                ],
+            },
+            branches: [
+                {
+                    ...testBranch("Branch_Current", "Inspect common"),
+                    choiceKey: "Choice_Current",
+                    sectionRole: "artifact",
+                    branchStepOrder: 1,
+                    strategy: { conditions: ["Inspect common."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_Common", "Secure common"),
+                    choiceKey: "Choice_Common",
+                    sectionRole: "continuation",
+                    branchStepOrder: 2,
+                    parentBranchKey: "Branch_Current",
+                    prerequisiteBranchKeys: ["Branch_Current"],
+                    revealedByBranchKeys: ["Branch_Search", "Branch_Build"],
+                    revealedByChoiceKeys: ["Choice_Search", "Choice_Build"],
+                    revealedByBranchPathAlternatives: [["Branch_Search"], ["Branch_Build"]],
+                    strategy: { conditions: ["Secure common."], requirements: [], rewards: [] },
+                },
+                {
+                    ...testBranch("Branch_SearchOnly", "Search only follow-up"),
+                    choiceKey: "Choice_SearchOnly",
+                    sectionRole: "continuation",
+                    branchStepOrder: 3,
+                    parentBranchKey: "Branch_Common",
+                    prerequisiteBranchKeys: ["Branch_Current", "Branch_Common"],
+                    revealedByBranchKeys: ["Branch_Search"],
+                    revealedByChoiceKeys: ["Choice_Search"],
+                    revealedByBranchPathAlternatives: [["Branch_Search"]],
+                    strategy: { conditions: ["Search only follow-up."], requirements: [], rewards: [] },
+                },
+            ],
+        });
+        const progression = {
+            questlines: [
+                progressionQuestline({
+                    title: "Projected Setup",
+                    steps: [
+                        { stepNumber: 1, stepOrder: 1, title: "Projected Setup", detailEntryKey: "Quest_Projector" },
+                        { stepNumber: 2, stepOrder: 2, title: "Carried Chronicle", detailEntryKey: "Quest_Carried" },
+                        { stepNumber: 3, stepOrder: 3, title: "Carried Chronicle", detailEntryKey: "Quest_Carried" },
+                    ],
+                }),
+            ],
+            debugSummary: null,
+        };
+
+        const initialModel = strategyModelForProgression([projector, carried, questEntry({ entryKey: "Quest_Next" })], progression);
+        const stepKey = progression.questlines[0].chapters[0].steps[0].stepKey;
+        const searchChoice = initialModel.decisionPoints[0].options.find((option) => option.label === "Search")?.choice;
+        const buildChoice = initialModel.decisionPoints[0].options.find((option) => option.label === "Build")?.choice;
+        if (!searchChoice || !buildChoice) throw new Error("Expected Search and Build choices.");
+
+        const searchModel = strategyModelForProgression(
+            [projector, carried, questEntry({ entryKey: "Quest_Next" })],
+            progression,
+            { choicePath: [selectionForChoice(stepKey, searchChoice)] }
+        );
+        const buildModel = strategyModelForProgression(
+            [projector, carried, questEntry({ entryKey: "Quest_Next" })],
+            progression,
+            { choicePath: [selectionForChoice(stepKey, buildChoice)] }
+        );
+
+        expect(initialModel.chapterTasks.map((task) => task.title)).toEqual([
+            "Projected Setup",
+            "Inspect common",
+        ]);
+        expect(initialModel.chapterTasks[1].lines).toEqual([
+            "Inspect common.",
+            "Resolve the carried current beat.",
+            "Resolve the common follow-up beat.",
+        ]);
+        expect(initialModel.chapterTasks.flatMap((task) => task.lines)).not.toContain("Resolve the search-only follow-up.");
+        expect(searchModel.chapterTasks.map((task) => task.title)).toEqual([
+            "Projected Setup",
+            "Inspect common",
+            "Search only follow-up",
+        ]);
+        expect(buildModel.chapterTasks.map((task) => task.title)).toEqual([
+            "Projected Setup",
+            "Inspect common",
         ]);
     });
 

@@ -293,6 +293,8 @@ type StrategyStageContext = {
     baseEntry: QuestExplorerEntry | null;
     displayEntry: QuestExplorerEntry | null;
     renderedStep: RenderedPathStep | null;
+    revealContext: StrategyRevealContext;
+    commonStaticRevealGroups: StrategyChoiceGroupRevealContext[];
     isPreviewAllowed: boolean;
 };
 
@@ -300,6 +302,12 @@ type StrategyRevealContext = {
     branchKeys: Set<string>;
     choiceKeys: Set<string>;
     branchPath: string[];
+};
+
+type StrategyChoiceGroupRevealContext = {
+    stageOrder: number;
+    branchKeys: Set<string>;
+    choiceKeys: Set<string>;
 };
 
 function buildStrategyChapterPlan({
@@ -322,7 +330,7 @@ function buildStrategyChapterPlan({
     const stageCount = progression.chapter.steps.length;
     const chapterChoices = collectChapterChoices(progression, entriesByKey, showRawHiddenRows);
     const renderedStepByStepKey = new Map(flow.renderedSteps.map((step) => [step.step.stepKey, step]));
-    const stageContexts = buildStageContexts(progression, entriesByKey, renderedStepByStepKey, chapterChoices);
+    const stageContexts = buildStageContexts(progression, entriesByKey, renderedStepByStepKey, chapterChoices, choicePath);
     const choicesByStage = groupChoicesByStage(chapterChoices, stageContexts);
     const objectivesByStage = groupObjectivesByStage(progression, entriesByKey, chapterChoices, stageContexts);
     const objectivesByChoiceKey = groupObjectivesByChoiceKey(entriesByKey, stageContexts);
@@ -473,11 +481,13 @@ function buildStageContexts(
     progression: QuestDetailProgression,
     entriesByKey: Record<string, QuestExplorerEntry>,
     renderedStepByStepKey: Map<string, RenderedPathStep>,
-    chapterChoices: ChapterChoice[]
+    chapterChoices: ChapterChoice[],
+    choicePath: QuestPathChoiceSelection[]
 ): StrategyStageContext[] {
     const focusedEntryKey = progression.chapter.steps[progression.focusedStepIndex]?.detailEntryKey ?? null;
     const rawChoicesByStage = groupChoicesByStage(chapterChoices);
-    const revealContext = strategyRevealContext([...renderedStepByStepKey.values()]);
+    const revealContext = strategyRevealContext([...renderedStepByStepKey.values()], choicePath);
+    const choiceGroupContexts = buildChoiceGroupRevealContexts(chapterChoices);
 
     return progression.chapter.steps.map((step, stepIndex) => {
         const renderedStep = renderedStepByStepKey.get(step.stepKey) ?? null;
@@ -485,6 +495,12 @@ function buildStageContexts(
         const displayEntry = renderedStep?.displayEntry ?? baseEntry;
         const stageOrder = stepIndex + 1;
         const choices = rawChoicesByStage.get(stageOrder) ?? [];
+        const commonStaticRevealGroups = commonStaticRevealGroupsForStage(
+            stageOrder,
+            displayEntry,
+            choices,
+            choiceGroupContexts
+        );
 
         return {
             step,
@@ -493,12 +509,15 @@ function buildStageContexts(
             baseEntry,
             displayEntry,
             renderedStep,
+            revealContext,
+            commonStaticRevealGroups,
             isPreviewAllowed: isPreviewStageAllowed({
                 renderedStep,
                 displayEntry,
                 focusedEntryKey,
                 choices,
                 revealContext,
+                commonStaticRevealGroups,
             }),
         };
     });
@@ -510,17 +529,105 @@ function isPreviewStageAllowed({
     focusedEntryKey,
     choices,
     revealContext,
+    commonStaticRevealGroups,
 }: {
     renderedStep: RenderedPathStep | null;
     displayEntry: QuestExplorerEntry | null;
     focusedEntryKey: string | null;
     choices: QuestPathChoice[];
     revealContext: StrategyRevealContext;
+    commonStaticRevealGroups: StrategyChoiceGroupRevealContext[];
 }): boolean {
     if (renderedStep) return true;
     if (displayEntry?.entryKey && displayEntry.entryKey === focusedEntryKey) return true;
     if (choices.some((choice) => choice.sourceEntryKey === focusedEntryKey || revealMetadataSatisfied(choice, revealContext))) return true;
-    return Boolean(displayEntry?.strategyView.objectives.some((objective) => revealMetadataSatisfied(objective, revealContext)));
+    if (displayEntry?.strategyView.objectives.some((objective) => revealMetadataSatisfied(objective, revealContext))) return true;
+    return commonStaticRevealGroups.length > 0;
+}
+
+function buildChoiceGroupRevealContexts(chapterChoices: ChapterChoice[]): StrategyChoiceGroupRevealContext[] {
+    const groups = new Map<string, { stageOrder: number; choices: QuestPathChoice[] }>();
+    chapterChoices.forEach(({ choice, stageOrder }) => {
+        if (decisionPointKindForChoice(choice) !== "explicit_choice") return;
+        const groupId = choice.choiceGroupKey
+            ?? choice.groupKey
+            ?? strategyComparisonGroupId(choice);
+        const key = `${stageOrder}:${groupId}`;
+        const group = groups.get(key) ?? { stageOrder, choices: [] };
+        group.choices.push(choice);
+        groups.set(key, group);
+    });
+
+    return [...groups.values()]
+        .filter((group) => uniqueDisplayValues(group.choices.map((choice) => choice.label)).length > 1)
+        .map((group) => ({
+            stageOrder: group.stageOrder,
+            branchKeys: new Set(group.choices.map((choice) => choice.branchKey).filter((key): key is string => Boolean(key))),
+            choiceKeys: new Set(group.choices.map((choice) => choice.choiceKey).filter((key): key is string => Boolean(key))),
+        }))
+        .filter((group) => group.branchKeys.size > 0 || group.choiceKeys.size > 0);
+}
+
+function commonStaticRevealGroupsForStage(
+    stageOrder: number,
+    displayEntry: QuestExplorerEntry | null,
+    choices: QuestPathChoice[],
+    choiceGroupContexts: StrategyChoiceGroupRevealContext[]
+): StrategyChoiceGroupRevealContext[] {
+    return choiceGroupContexts.filter((group) => (
+        group.stageOrder < stageOrder
+        && stageHasCommonStaticReveal(displayEntry, choices, group)
+    ));
+}
+
+function stageHasCommonStaticReveal(
+    displayEntry: QuestExplorerEntry | null,
+    choices: QuestPathChoice[],
+    group: StrategyChoiceGroupRevealContext
+): boolean {
+    return choices.some((choice) => revealMetadataCoversAllOptions(choice, group))
+        || Boolean(displayEntry?.strategyView.objectives.some((objective) => (
+            revealMetadataCoversAllOptions(objective, group)
+        )));
+}
+
+function stageItemVisible(
+    item: Pick<QuestPathChoice, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">
+        | Pick<StrategyObjective, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">,
+    stage: StrategyStageContext
+): boolean {
+    if (!hasRevealMetadata(item)) return true;
+    if (revealMetadataSatisfied(item, stage.revealContext)) return true;
+    return stage.commonStaticRevealGroups.some((group) => revealMetadataCoversAllOptions(item, group));
+}
+
+function hasRevealMetadata(
+    item: Pick<QuestPathChoice, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">
+        | Pick<StrategyObjective, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">
+): boolean {
+    return (item.revealedByBranchKeys?.length ?? 0) > 0
+        || (item.revealedByChoiceKeys?.length ?? 0) > 0
+        || (item.revealedByBranchPathAlternatives?.length ?? 0) > 0;
+}
+
+function revealMetadataCoversAllOptions(
+    item: Pick<QuestPathChoice, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">
+        | Pick<StrategyObjective, "revealedByBranchKeys" | "revealedByChoiceKeys" | "revealedByBranchPathAlternatives">,
+    group: StrategyChoiceGroupRevealContext
+): boolean {
+    const choiceKeys = new Set(item.revealedByChoiceKeys ?? []);
+    const branchKeys = new Set(item.revealedByBranchKeys ?? []);
+    const branchPathAlternatives = item.revealedByBranchPathAlternatives ?? [];
+    const groupChoiceKeys = [...group.choiceKeys];
+    const groupBranchKeys = [...group.branchKeys];
+    return (
+        groupChoiceKeys.length > 0 && groupChoiceKeys.every((key) => choiceKeys.has(key))
+    ) || (
+        groupBranchKeys.length > 0 && groupBranchKeys.every((key) => branchKeys.has(key))
+    ) || (
+        groupBranchKeys.length > 0
+        && groupBranchKeys.every((key) => branchPathAlternatives.some((alternative) => alternative.includes(key)))
+    );
 }
 
 function collectChapterChoices(
@@ -631,6 +738,7 @@ function groupChoicesByStage(
     chapterChoices.forEach(({ choice, stageOrder }) => {
         const stage = allowedStages?.get(stageOrder);
         if (stage && !stage.isPreviewAllowed) return;
+        if (stage && !stageItemVisible(choice, stage)) return;
         const choices = byStage.get(stageOrder) ?? [];
         choices.push(choice);
         byStage.set(stageOrder, choices);
@@ -649,6 +757,7 @@ function groupObjectivesByStage(
 ): Map<number, StrategyDossierObjective[]> {
     const byStage = new Map<number, StrategyDossierObjective[]>();
     const allowedStageOrdersByEntry = new Map<string, number[]>();
+    const stageContextByOrder = new Map(stageContexts.map((stage) => [stage.stageOrder, stage]));
 
     stageContexts.forEach((stage) => {
         if (!stage.isPreviewAllowed || !stage.displayEntry) return;
@@ -671,6 +780,8 @@ function groupObjectivesByStage(
                 allowedStageOrders
             );
             if (stageOrder == null) return;
+            const stageContext = stageContextByOrder.get(stageOrder);
+            if (stageContext && !stageItemVisible(objective, stageContext)) return;
             const scope = { objectives: [objective], objectiveIndexOffset: objectiveIndex };
             const [dossierObjective] = buildStrategyDossierObjectives(
                 scope,
@@ -1046,23 +1157,34 @@ function continuationPreviewForFlow(flow: QuestPathFlow): StrategyContinuationPr
     };
 }
 
-function strategyRevealContext(renderedSteps: RenderedPathStep[]): StrategyRevealContext {
+function strategyRevealContext(
+    renderedSteps: RenderedPathStep[],
+    choicePath: QuestPathChoiceSelection[] = []
+): StrategyRevealContext {
     const context: StrategyRevealContext = {
         branchKeys: new Set(),
         choiceKeys: new Set(),
         branchPath: [],
     };
+    choicePath.forEach((selection) => addSelectionToRevealContext(context, selection));
     renderedSteps.forEach((step) => {
         [step.currentBeatChoice, step.selectedChoice].forEach((selection) => {
-            if (!selection || selection.isPassive) return;
-            if (selection.branchKey) {
-                context.branchKeys.add(selection.branchKey);
-                context.branchPath.push(selection.branchKey);
-            }
-            if (selection.choiceKey) context.choiceKeys.add(selection.choiceKey);
+            addSelectionToRevealContext(context, selection);
         });
     });
     return context;
+}
+
+function addSelectionToRevealContext(
+    context: StrategyRevealContext,
+    selection: QuestPathChoiceSelection | null
+): void {
+    if (!selection || selection.isPassive) return;
+    if (selection.branchKey) {
+        context.branchKeys.add(selection.branchKey);
+        context.branchPath.push(selection.branchKey);
+    }
+    if (selection.choiceKey) context.choiceKeys.add(selection.choiceKey);
 }
 
 function revealMetadataSatisfied(
