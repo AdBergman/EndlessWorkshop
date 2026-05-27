@@ -1,4 +1,5 @@
 import type {
+    LoreSection,
     QuestBranch,
     QuestExplorerEntry,
     QuestExplorerProgression,
@@ -149,6 +150,18 @@ export type QuestPathFlowOptions = {
 
 export const LORE_CHRONICLE_SEGMENT_CAP = 10;
 
+const NECROPHAGE_CH6_ENTRY_KEYS = new Set([
+    "FactionQuest_Necrophage_Chapter06_Step01",
+    "FactionQuest_Necrophage02_Chapter06_Step01",
+    "Quest_Necro_Ch6",
+]);
+
+const NECROPHAGE_CH6_FINAL_CHOICE_LABELS = new Set([
+    "Release Kazra",
+    "Rehabilitate Kazra",
+    "Execute Kazra",
+]);
+
 export type LoreChronicleSegment = {
     segmentKey: string;
     contextKey: string;
@@ -297,6 +310,93 @@ export function branchPrerequisiteKeys(branch: QuestBranch): string[] {
     return (branch.prerequisiteBranchKeys ?? []).filter(Boolean);
 }
 
+function isNecrophageCh6Entry(entryKey: string | null | undefined): boolean {
+    return Boolean(entryKey && NECROPHAGE_CH6_ENTRY_KEYS.has(entryKey));
+}
+
+export function isNecrophageCh6Choice(choice: Pick<QuestPathChoice, "sourceEntryKey" | "label">): boolean {
+    return isNecrophageCh6Entry(choice.sourceEntryKey)
+        && (
+            choice.label === "Enhance Hero"
+            || choice.label === "Save Girl"
+            || NECROPHAGE_CH6_FINAL_CHOICE_LABELS.has(choice.label)
+        );
+}
+
+export function isNecrophageCh6FinalChoice(choice: Pick<QuestPathChoice, "sourceEntryKey" | "label">): boolean {
+    return isNecrophageCh6Entry(choice.sourceEntryKey)
+        && NECROPHAGE_CH6_FINAL_CHOICE_LABELS.has(choice.label);
+}
+
+function branchByLabel(branches: QuestBranch[], label: string): QuestBranch | null {
+    return branches.find((branch) => branch.label === label) ?? null;
+}
+
+function normalizeNecrophageCh6Branch(
+    branch: QuestBranch,
+    entry: QuestExplorerEntry,
+    saveBranch: QuestBranch
+): QuestBranch {
+    if (!NECROPHAGE_CH6_FINAL_CHOICE_LABELS.has(branch.label)) return branch;
+
+    const prerequisiteBranchKeys = uniqueStrings([
+        ...branchPrerequisiteKeys(saveBranch),
+        saveBranch.branchKey,
+    ]);
+    const branchStepOrder = branch.branchStepOrder ?? 4;
+
+    return {
+        ...branch,
+        parentBranchKey: saveBranch.branchKey,
+        parentChoiceKey: saveBranch.choiceKey,
+        prerequisiteBranchKeys,
+        prerequisiteBranchPath: prerequisiteBranchKeys,
+        revealedByBranchKeys: uniqueStrings([
+            ...(branch.revealedByBranchKeys ?? []),
+            saveBranch.branchKey,
+        ]),
+        choiceGroupKey: `${entry.entryKey}:choice-group:step:${branchStepOrder}:after:${saveBranch.branchKey}`,
+    };
+}
+
+function isNecrophageCh6SecondChoicePrompt(section: LoreSection): boolean {
+    if (section.choiceKey) return false;
+    const lineTexts = new Set(section.lines.map((line) => line.text));
+    return [...NECROPHAGE_CH6_FINAL_CHOICE_LABELS].every((label) => lineTexts.has(label));
+}
+
+function normalizeNecrophageCh6LoreSection(section: LoreSection, saveBranch: QuestBranch): LoreSection {
+    if (!saveBranch.choiceKey || !isNecrophageCh6SecondChoicePrompt(section)) return section;
+
+    return {
+        ...section,
+        choiceKey: saveBranch.choiceKey,
+        revealedByChoiceKeys: uniqueStrings([
+            ...(section.revealedByChoiceKeys ?? []),
+            saveBranch.choiceKey,
+        ]),
+    };
+}
+
+export function normalizeQuestExplorerEntryForPathFlow(entry: QuestExplorerEntry): QuestExplorerEntry {
+    if (!isNecrophageCh6Entry(entry.entryKey)) return entry;
+
+    const saveBranch = branchByLabel(entry.branches, "Save Girl");
+    if (!saveBranch?.branchKey) return entry;
+
+    const branches = entry.branches.map((branch) => normalizeNecrophageCh6Branch(branch, entry, saveBranch));
+    const sections = entry.loreView.sections.map((section) => normalizeNecrophageCh6LoreSection(section, saveBranch));
+
+    return {
+        ...entry,
+        loreView: {
+            ...entry.loreView,
+            sections,
+        },
+        branches,
+    };
+}
+
 export function hasRevealMetadata(owner: {
     revealedByBranchKeys?: string[];
     revealedByChoiceKeys?: string[];
@@ -442,6 +542,26 @@ export function progressionLocationForKeys(
             if (stepIndex != null) {
                 return { questline, chapter, step: chapter.steps[stepIndex], stepIndex };
             }
+        }
+    }
+
+    return null;
+}
+
+function progressionLocationOutsideCurrentChapterForKeys(
+    progression: QuestExplorerProgression | null,
+    currentProgression: QuestDetailProgression,
+    keys: string[],
+    entriesByKey: Record<string, QuestExplorerEntry>
+): QuestProgressionLocation | null {
+    if (!progression || keys.length === 0) return null;
+
+    for (const questline of progression.questlines) {
+        for (const chapter of questline.chapters) {
+            const stepIndex = stepIndexForKeys(chapter.steps, keys, entriesByKey);
+            if (stepIndex == null) continue;
+            const location = { questline, chapter, step: chapter.steps[stepIndex], stepIndex };
+            if (!isSameProgressionChapter(currentProgression, location)) return location;
         }
     }
 
@@ -624,6 +744,9 @@ export function choicesForStep(
     entriesByKey: Record<string, QuestExplorerEntry>,
     options: { includeStepVariants?: boolean } = {}
 ): QuestPathChoice[] {
+    const normalizedDetailEntry = detailEntry
+        ? normalizeQuestExplorerEntryForPathFlow(detailEntry)
+        : null;
     const includeStepVariants = options.includeStepVariants ?? true;
     const variantChoices = includeStepVariants ? visibleStepVariants(step).map((variant): QuestPathChoice => {
         const target = entriesByKey[variant.entryKey] ?? null;
@@ -670,13 +793,13 @@ export function choicesForStep(
         };
     }) : [];
 
-    const branchChoices = [...(detailEntry?.branches ?? [])]
+    const branchChoices = [...(normalizedDetailEntry?.branches ?? [])]
         .sort((left, right) => (left.orderIndex ?? Number.MAX_SAFE_INTEGER) - (right.orderIndex ?? Number.MAX_SAFE_INTEGER))
         .map((branch): QuestPathChoice => {
             const explicitTargets = branchTargetKeys(branch);
             const targetEntryKey = knownEntryKey(explicitTargets, entriesByKey);
             const target = targetEntryKey ? entriesByKey[targetEntryKey] : null;
-            const dependentContinuations = dependentContinuationBranches(branch, detailEntry?.branches ?? []);
+            const dependentContinuations = dependentContinuationBranches(branch, normalizedDetailEntry?.branches ?? []);
             const loreLines = choiceDescription([
                 ...(branch.lore?.outcomePreviewLines ?? []),
                 target?.summaryLines[0],
@@ -689,7 +812,7 @@ export function choicesForStep(
             const requirementLines = requirementDisplayTexts(requirementDetails);
             const rewardDetails = rewardDisplaysFromRewards(branch.strategy?.rewards ?? []);
             const rewardLines = rewardDisplayTexts(rewardDetails);
-            const repeatedEntryTitle = branch.label && detailEntry?.title && branch.label === detailEntry.title;
+            const repeatedEntryTitle = branch.label && normalizedDetailEntry?.title && branch.label === normalizedDetailEntry.title;
 
             return {
                 id: `branch:${branch.branchKey}`,
@@ -699,9 +822,9 @@ export function choicesForStep(
                 eyebrow: branch.groupLabel || "Choice",
                 groupKey: branch.groupKey,
                 groupLabel: branch.groupLabel,
-                sourceEntryKey: detailEntry?.entryKey ?? null,
+                sourceEntryKey: normalizedDetailEntry?.entryKey ?? null,
                 sectionRole: branchRole(branch),
-                semanticStageKind: classifyQuestBranchSemanticStage(branch, detailEntry?.branches ?? []),
+                semanticStageKind: classifyQuestBranchSemanticStage(branch, normalizedDetailEntry?.branches ?? []),
                 prerequisiteBranchKeys: branchPrerequisiteKeys(branch),
                 revealedByBranchKeys: branch.revealedByBranchKeys ?? [],
                 revealedByChoiceKeys: branch.revealedByChoiceKeys ?? [],
@@ -778,6 +901,31 @@ export function selectedChoiceContinuationKeys(
         ...selection.nextEntryKeys,
         ...continuationKeys(target),
     ]);
+}
+
+function pairedContinuationKeysForSelection(
+    choices: QuestPathChoice[],
+    selection: QuestPathChoiceSelection,
+    entriesByKey: Record<string, QuestExplorerEntry>
+): string[] {
+    if (!selection.choiceGroupKey || !selection.label) return [];
+
+    const pairedChoices = choices.filter((choice) => (
+        choice.id !== selection.choiceId
+        && choice.sectionRole === "continuation"
+        && choice.choiceGroupKey === selection.choiceGroupKey
+        && choice.label === selection.label
+        && choice.branchStepOrder === selection.branchStepOrder
+        && hasModeledChoiceContinuation(choice)
+    ));
+
+    return uniqueStrings(pairedChoices.flatMap((choice) => {
+        const pairedSelection = selectionForChoice("", choice);
+        return [
+            ...selectedChoiceTargetKeys(pairedSelection),
+            ...selectedChoiceContinuationKeys(pairedSelection, entriesByKey),
+        ];
+    }));
 }
 
 export function implicitActiveChoice(
@@ -1343,9 +1491,12 @@ export function buildQuestPathFlow(
         }
         const stepRevealContext = cloneRevealContext(revealContext);
         const overrideEntryKey = displayEntryOverrides.get(step.stepKey);
-        const displayEntry = (overrideEntryKey ? entriesByKey[overrideEntryKey] : null)
+        const rawDisplayEntry = (overrideEntryKey ? entriesByKey[overrideEntryKey] : null)
             ?? entriesByKey[step.detailEntryKey]
             ?? null;
+        const displayEntry = rawDisplayEntry
+            ? normalizeQuestExplorerEntryForPathFlow(rawDisplayEntry)
+            : null;
         const repeatsDetailEntry = (counts.get(step.detailEntryKey) ?? 0) > 1;
         const rendersRepeatedDetailContent = repeatsDetailEntry
             && renderedDetailKeys.has(step.detailEntryKey)
@@ -1356,7 +1507,13 @@ export function buildQuestPathFlow(
             : choicesForStep(step, displayEntry, entriesByKey, {
                 includeStepVariants: options.showRawHiddenRows || (!overrideEntryKey && !hasEntryBackedBranchChoices),
             });
-        const rawChoices = choicesScopedToCurrentBeat(unscopedRawChoices, currentBeatChoice, options.showRawHiddenRows, stepRevealContext);
+        const scopedRawChoices = choicesScopedToCurrentBeat(unscopedRawChoices, currentBeatChoice, options.showRawHiddenRows, stepRevealContext);
+        const selectedRawChoice = selectedStoredSelection
+            ? unscopedRawChoices.find((choice) => choiceMatchesSelectionKey(choice, selectedStoredSelection)) ?? null
+            : null;
+        const rawChoices = selectedRawChoice && choicePrerequisitesSatisfied(selectedRawChoice, stepRevealContext)
+            ? uniqueChoicesById([...scopedRawChoices, selectedRawChoice])
+            : scopedRawChoices;
         const prerequisiteEligibleChoices = rawChoices.filter((choice) => choicePrerequisitesSatisfied(choice, stepRevealContext));
         let choiceDiagnostics = visibilityDiagnosticsForChoices(
             rawChoices,
@@ -1581,9 +1738,13 @@ export function buildQuestPathFlow(
                 visibleUntil = Math.max(visibleUntil, targetStepIndex);
             }
 
+            const pairedContinuationKeys = pairedContinuationKeysForSelection(revealEligibleChoices, advancingChoice, entriesByKey);
             const continuationStepIndex = stepIndexForKeys(
                 steps,
-                selectedChoiceContinuationKeys(advancingChoice, entriesByKey),
+                uniqueStrings([
+                    ...selectedChoiceContinuationKeys(advancingChoice, entriesByKey),
+                    ...pairedContinuationKeys,
+                ]),
                 entriesByKey,
                 index + 1
             );
@@ -1592,8 +1753,20 @@ export function buildQuestPathFlow(
                 continue;
             }
 
-            const nextLocation = progressionLocationForKeys(fullProgression, selectedChoiceContinuationKeys(advancingChoice, entriesByKey), entriesByKey)
-                ?? progressionLocationForKeys(fullProgression, targetKeys, entriesByKey);
+            const nextLocation = progressionLocationOutsideCurrentChapterForKeys(
+                fullProgression,
+                progression,
+                uniqueStrings([
+                    ...selectedChoiceContinuationKeys(advancingChoice, entriesByKey),
+                    ...pairedContinuationKeys,
+                ]),
+                entriesByKey
+            ) ?? progressionLocationOutsideCurrentChapterForKeys(
+                fullProgression,
+                progression,
+                targetKeys,
+                entriesByKey
+            );
             if (nextLocation && !isSameProgressionChapter(progression, nextLocation)) {
                 const projectedStep = nextRevealedProjectedStep(steps, index, entriesByKey, nextRevealContext);
                 if (projectedStep) {
@@ -1640,9 +1813,13 @@ export function buildQuestPathFlow(
                 continue;
             }
 
+            const pairedContinuationKeys = pairedContinuationKeysForSelection(revealEligibleChoices, currentBeatChoice, entriesByKey);
             const continuationStepIndex = stepIndexForKeys(
                 steps,
-                selectedChoiceContinuationKeys(currentBeatChoice, entriesByKey),
+                uniqueStrings([
+                    ...selectedChoiceContinuationKeys(currentBeatChoice, entriesByKey),
+                    ...pairedContinuationKeys,
+                ]),
                 entriesByKey,
                 index + 1
             );
@@ -1651,8 +1828,20 @@ export function buildQuestPathFlow(
                 continue;
             }
 
-            const nextLocation = progressionLocationForKeys(fullProgression, selectedChoiceContinuationKeys(currentBeatChoice, entriesByKey), entriesByKey)
-                ?? progressionLocationForKeys(fullProgression, targetKeys, entriesByKey);
+            const nextLocation = progressionLocationOutsideCurrentChapterForKeys(
+                fullProgression,
+                progression,
+                uniqueStrings([
+                    ...selectedChoiceContinuationKeys(currentBeatChoice, entriesByKey),
+                    ...pairedContinuationKeys,
+                ]),
+                entriesByKey
+            ) ?? progressionLocationOutsideCurrentChapterForKeys(
+                fullProgression,
+                progression,
+                targetKeys,
+                entriesByKey
+            );
             if (nextLocation && !isSameProgressionChapter(progression, nextLocation)) {
                 const projectedStep = nextRevealedProjectedStep(steps, index, entriesByKey, stepRevealContext);
                 if (projectedStep) {

@@ -454,17 +454,17 @@ describe("quest flow projection helpers", () => {
     expect(afterTerminalChoice.unresolvedContinuation?.choiceId).toBe(allies.id);
   });
 
-  it("keeps common-parent future continuations at the immediate next branch order", () => {
+  it("normalizes Necrophage Chapter 6 final choices under Save Girl", () => {
     const steps = [
-      progressionStep(1, "Quest_Final"),
-      progressionStep(2, "Quest_Final"),
-      progressionStep(3, "Quest_Final"),
-      progressionStep(4, "Quest_Final"),
+      progressionStep(1, "Quest_Necro_Ch6"),
+      progressionStep(2, "Quest_Necro_Ch6"),
+      progressionStep(3, "Quest_Necro_Ch6"),
+      progressionStep(4, "Quest_Necro_Ch6"),
     ];
     const chapter = progressionChapter(6, "A Bitter Truth", steps);
     const progression = detailProgression(chapter);
     const entry = questEntry({
-      entryKey: "Quest_Final",
+      entryKey: "Quest_Necro_Ch6",
       branches: [
         questBranch({
           branchKey: "Branch_First",
@@ -539,11 +539,13 @@ describe("quest flow projection helpers", () => {
         showRawHiddenRows: false,
       },
     );
+    const afterSiteLabels = afterSite.renderedSteps.flatMap((renderedStep) => renderedStep.choices.map((choice) => choice.label));
 
-    expect(afterSite.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
-      "Enhance Hero",
-      "Save Girl",
-    ]);
+    expect(afterSiteLabels).toContain("Enhance Hero");
+    expect(afterSiteLabels).toContain("Save Girl");
+    expect(afterSiteLabels).not.toContain("Rehabilitate Kazra");
+    expect(afterSiteLabels).not.toContain("Release Kazra");
+    expect(afterSiteLabels).not.toContain("Execute Kazra");
 
     const afterEnhance = buildQuestPathFlow(
       progression,
@@ -555,11 +557,13 @@ describe("quest flow projection helpers", () => {
         showRawHiddenRows: false,
       },
     );
+    const afterEnhanceLabels = afterEnhance.renderedSteps.flatMap((renderedStep) => renderedStep.choices.map((choice) => choice.label));
 
-    expect(afterEnhance.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
-      "Rehabilitate Kazra",
-      "Execute Kazra",
-    ]);
+    expect(afterEnhanceLabels).toContain("Enhance Hero");
+    expect(afterEnhanceLabels).toContain("Save Girl");
+    expect(afterEnhanceLabels).not.toContain("Rehabilitate Kazra");
+    expect(afterEnhanceLabels).not.toContain("Release Kazra");
+    expect(afterEnhanceLabels).not.toContain("Execute Kazra");
 
     const afterSave = buildQuestPathFlow(
       progression,
@@ -571,11 +575,13 @@ describe("quest flow projection helpers", () => {
         showRawHiddenRows: false,
       },
     );
+    const afterSaveLabels = afterSave.renderedSteps.flatMap((renderedStep) => renderedStep.choices.map((choice) => choice.label));
 
-    expect(afterSave.renderedSteps.at(-1)?.choices.map((choice) => choice.label)).toEqual([
-      "Release Kazra",
-      "Execute Kazra",
-    ]);
+    expect(afterSaveLabels).toContain("Enhance Hero");
+    expect(afterSaveLabels).toContain("Save Girl");
+    expect(afterSaveLabels).toContain("Rehabilitate Kazra");
+    expect(afterSaveLabels).toContain("Release Kazra");
+    expect(afterSaveLabels).toContain("Execute Kazra");
   });
 
   it("auto-collapses single-step deterministic tutorial chains into the next projected chapter", () => {

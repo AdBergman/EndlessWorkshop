@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildLoreChronicleStream } from "@/features/quests/questPathFlow";
@@ -34,6 +34,7 @@ import {
 } from "@/features/quests/testUtils/questExplorerPageTestUtils";
 import { useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { useQuestStore } from "@/stores/questStore";
+import { Faction } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
@@ -357,8 +358,167 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         await user.click(screen.getByRole("button", { name: "Lore" }));
 
         const restoredChronicle = screen.getByRole("region", { name: "Selected progression" });
-        expect(within(restoredChronicle).getByText("Stream Continuation")).toBeInTheDocument();
-        expect(within(restoredChronicle).getByRole("button", { name: /Continue to chapter two/ })).toHaveAttribute("aria-current", "true");
+        expect(within(restoredChronicle).queryByText("Stream Continuation")).not.toBeInTheDocument();
+        expect(within(restoredChronicle).getByRole("button", { name: /Continue to chapter two/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+    });
+
+    it("starts a newly selected major faction at Chapter 1 without stale Lore scroll or choices", async () => {
+        const kinChapterTwo = progressionQuestline({
+            questLineKey: "FactionQuest_Kin",
+            questLineFamilyKey: "FactionQuest_Kin",
+            questLineName: "Kin",
+            factionKey: "Faction_Kin",
+            factionFamilyKey: "Faction_Kin",
+            factionName: "Kin",
+            chapterNumber: 2,
+            chapterOrder: 2,
+            title: "Kin Later Chapter",
+            steps: [{ stepNumber: 1, stepOrder: 1, title: "Kin Later Chapter", detailEntryKey: "Quest_Kin_Ch2" }],
+        }).chapters[0];
+        const lordsChapterOne = progressionQuestline({
+            questLineKey: "FactionQuest_LastLord",
+            questLineFamilyKey: "FactionQuest_LastLord",
+            questLineName: "Last Lords",
+            factionKey: "Faction_LastLord",
+            factionFamilyKey: "Faction_LastLord",
+            factionName: "Last Lords",
+            chapterNumber: 1,
+            chapterOrder: 1,
+            title: "Lords Chapter One",
+            steps: [{ stepNumber: 1, stepOrder: 1, title: "Lords Chapter One", detailEntryKey: "Quest_Lords_Ch1" }],
+        }).chapters[0];
+        const lordsChapterTwo = progressionQuestline({
+            questLineKey: "FactionQuest_LastLord",
+            questLineFamilyKey: "FactionQuest_LastLord",
+            questLineName: "Last Lords",
+            factionKey: "Faction_LastLord",
+            factionFamilyKey: "Faction_LastLord",
+            factionName: "Last Lords",
+            chapterNumber: 2,
+            chapterOrder: 2,
+            title: "Lords Chapter Two",
+            steps: [{ stepNumber: 1, stepOrder: 1, title: "Lords Chapter Two", detailEntryKey: "Quest_Lords_Ch2" }],
+        }).chapters[0];
+
+        mockedApiClient.getQuestExplorer.mockResolvedValue({
+            ...payload,
+            entries: [
+                questEntry({
+                    entryKey: "Quest_Kin_Ch2",
+                    title: "Kin Later Chapter",
+                    questType: "Faction Quest",
+                    navigation: {
+                        factionKey: "Faction_Kin",
+                        factionName: "Kin",
+                        questLineKey: "FactionQuest_Kin",
+                        questLineName: "Kin",
+                        chapter: 2,
+                        chapterLabel: "Chapter 2",
+                        chapterOrder: 2,
+                        step: 1,
+                        stepLabel: "Step 1",
+                        stepOrder: 1,
+                        sequenceIndex: 20,
+                    },
+                }),
+                questEntry({
+                    entryKey: "Quest_Lords_Ch2",
+                    title: "Lords Chapter Two",
+                    questType: "Faction Quest",
+                    branches: [{ ...testBranch("Branch_Lords_Block", "Choose the blocked road") }],
+                    navigation: {
+                        factionKey: "Faction_LastLord",
+                        factionName: "Last Lords",
+                        questLineKey: "FactionQuest_LastLord",
+                        questLineName: "Last Lords",
+                        chapter: 2,
+                        chapterLabel: "Chapter 2",
+                        chapterOrder: 2,
+                        step: 1,
+                        stepLabel: "Step 1",
+                        stepOrder: 1,
+                        sequenceIndex: 10,
+                    },
+                }),
+                questEntry({
+                    entryKey: "Quest_Lords_Ch1",
+                    title: "Lords Chapter One",
+                    questType: "Faction Quest",
+                    loreView: {
+                        sections: [{
+                            sectionKey: "Quest_Lords_Ch1:opening",
+                            phase: "intro",
+                            choiceKey: null,
+                            stepIndex: null,
+                            objectiveKey: null,
+                            lines: [{ speakerLabel: null, role: "narrator", text: "Lords opening begins." }],
+                        }],
+                    },
+                    navigation: {
+                        factionKey: "Faction_LastLord",
+                        factionName: "Last Lords",
+                        questLineKey: "FactionQuest_LastLord",
+                        questLineName: "Last Lords",
+                        chapter: 1,
+                        chapterLabel: "Chapter 1",
+                        chapterOrder: 1,
+                        step: 1,
+                        stepLabel: "Step 1",
+                        stepOrder: 1,
+                        sequenceIndex: 30,
+                    },
+                }),
+            ],
+            progression: {
+                questlines: [
+                    {
+                        ...progressionQuestline({
+                            questLineKey: "FactionQuest_Kin",
+                            questLineFamilyKey: "FactionQuest_Kin",
+                            questLineName: "Kin",
+                            factionKey: "Faction_Kin",
+                            factionFamilyKey: "Faction_Kin",
+                            factionName: "Kin",
+                            steps: [{ stepNumber: 1, stepOrder: 1, title: "Kin Later Chapter", detailEntryKey: "Quest_Kin_Ch2" }],
+                        }),
+                        chapters: [kinChapterTwo],
+                    },
+                    {
+                        ...progressionQuestline({
+                            questLineKey: "FactionQuest_LastLord",
+                            questLineFamilyKey: "FactionQuest_LastLord",
+                            questLineName: "Last Lords",
+                            factionKey: "Faction_LastLord",
+                            factionFamilyKey: "Faction_LastLord",
+                            factionName: "Last Lords",
+                            steps: [{ stepNumber: 1, stepOrder: 1, title: "Lords Chapter One", detailEntryKey: "Quest_Lords_Ch1" }],
+                        }),
+                        chapters: [lordsChapterOne, lordsChapterTwo],
+                    },
+                ],
+                debugSummary: null,
+            },
+        });
+
+        renderPage("/quests/Quest_Kin_Ch2?mode=lore&loreEntry=Quest_Kin_Ch2");
+        await screen.findByRole("heading", { name: "Kin Later Chapter" });
+
+        act(() => {
+            useFactionSelectionStore.getState().setSelectedFaction({
+                isMajor: true,
+                enumFaction: Faction.LORDS,
+                uiLabel: "lords",
+                minorName: null,
+            });
+        });
+
+        expect(await screen.findByRole("heading", { name: "Lords Chapter One" })).toBeInTheDocument();
+        await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_Lords_Ch1"));
+        expect(screen.getByTestId("route-location")).toHaveTextContent("/quests/Quest_Lords_Ch1");
+        expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
+        expect(screen.getByText("Lords opening begins.")).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Choose the blocked road/ })).not.toBeInTheDocument();
     });
 
     it("treats a left rail click as canonical navigation rather than passive Lore scroll", async () => {
@@ -543,9 +703,19 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
         await user.click(enhanceChoice);
 
-        expect(within(chronicle).getByRole("button", { name: /Rehabilitate Kazra/ })).toBeInTheDocument();
-        expect(within(chronicle).getByRole("button", { name: /Execute Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByText("The enhanced warrior path resolves.")).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Rehabilitate Kazra/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Release Kazra/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Enhance Hero/ })).toHaveAttribute("aria-pressed", "true");
+
+        await user.click(within(chronicle).getByRole("button", { name: /Save Girl/ }));
+
+        expect(within(chronicle).getByText("The saved girl path remains hidden until selected.")).toBeInTheDocument();
+        expect(within(chronicle).getByText("The girl survives, and Kazra's fate must now be decided.")).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Rehabilitate Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Release Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Execute Kazra/ })).toBeInTheDocument();
     });
 
     it("uses branch continuity metadata to prevent same-step future lore from leaking", async () => {
@@ -666,7 +836,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
-    it("preserves a Lore selected sequence across Lore to Strategy to Lore", async () => {
+    it("resets a Lore selected sequence across Lore to Strategy to Lore", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -680,8 +850,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
 
         await user.click(screen.getByRole("button", { name: "Lore" }));
-        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
-        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
     });
 
     it("keeps Lore decision controls from selecting Strategy stage controls", async () => {
@@ -704,7 +873,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         expect(screen.queryByText("Secure the marker path.")).not.toBeInTheDocument();
     });
 
-    it("preserves Lore selections by chapter context while Strategy remains entry-scoped", async () => {
+    it("resets chapter choice state across mode and chapter changes", async () => {
         const user = userEvent.setup();
         const baseProgression = choiceResetPayload.progression!;
         const baseQuestline = baseProgression.questlines[0]!;
@@ -792,7 +961,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         await user.click(screen.getByRole("button", { name: /Archive of the First Tide/ }));
         await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A"));
 
-        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
         expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
@@ -801,7 +970,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
         await user.click(screen.getByRole("button", { name: "Lore" }));
         await user.click(screen.getByRole("button", { name: /Later Archive/ }));
         await waitFor(() => expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_D"));
-        expect(screen.getByRole("button", { name: /Open later record/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByRole("button", { name: /Open later record/ })).not.toHaveAttribute("aria-current", "true");
     });
 
     it("clears an incompatible semantic selection after category changes away and back", async () => {

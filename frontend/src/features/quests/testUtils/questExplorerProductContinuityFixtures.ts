@@ -199,7 +199,9 @@ export const necroCh3 = "FactionQuest_Necrophage_Chapter03_Step01";
 export const necroCh4 = "FactionQuest_Necrophage_Chapter04_Step01";
 export const necroCh5 = "FactionQuest_Necrophage_Chapter05_Step01";
 export const mukagCh2 = "FactionQuest_Mukag_Chapter02_Step01";
+export const mukagCh3 = "FactionQuest_Mukag_Chapter03_Step01";
 export const mukagCh4 = "FactionQuest_Mukag_Chapter04_Step00";
+export const mukagCh5 = "FactionQuest_Mukag_Chapter05_Step01";
 export const lastLordCh6A = "FactionQuest_LastLord_Chapter06A_Step01";
 export const lastLordCh6B = "FactionQuest_LastLord_Chapter06B_Step01";
 export const lastLordCh6AChoice1 = "FactionQuest_LastLord_Chapter06A_Step02_Choice1";
@@ -509,6 +511,16 @@ export const productContinuityPayload: QuestExplorerResponse = {
             previousEntryKeys: [mukagCh2],
         })),
         productEntry({
+            entryKey: mukagCh3,
+            title: "Precious Find",
+            factionKey: "Faction_Mukag",
+            questLineKey: "FactionQuest_Mukag",
+            chapterOrder: 3,
+            stepOrder: 0,
+            sequenceIndex: 230,
+            previousEntryKeys: [mukagCh2],
+        }),
+        productEntry({
             entryKey: mukagCh4,
             title: "A Gamble",
             factionKey: "Faction_Mukag",
@@ -619,6 +631,16 @@ export const productContinuityPayload: QuestExplorerResponse = {
             branchOrder: Number(stepOrder) - 2,
             previousEntryKeys: [mukagCh4],
         })),
+        productEntry({
+            entryKey: mukagCh5,
+            title: "The Confrontation",
+            factionKey: "Faction_Mukag",
+            questLineKey: "FactionQuest_Mukag",
+            chapterOrder: 5,
+            stepOrder: 0,
+            sequenceIndex: 250,
+            previousEntryKeys: [mukagCh4],
+        }),
         productEntry({
             entryKey: lastLordCh6A,
             title: "A Mortal Life?",
@@ -933,6 +955,9 @@ export const productContinuityPayload: QuestExplorerResponse = {
                         ],
                     },
                 ]),
+                chapter("FactionQuest_Mukag", "Faction_Mukag", 3, "Precious Find", [
+                    { stepNumber: 1, stepOrder: 0, title: "Precious Find", detailEntryKey: mukagCh3 },
+                ]),
                 chapter("FactionQuest_Mukag", "Faction_Mukag", 4, "A Gamble", [
                     { stepNumber: 1, stepOrder: 0, title: "A Gamble", detailEntryKey: mukagCh4 },
                     {
@@ -955,6 +980,9 @@ export const productContinuityPayload: QuestExplorerResponse = {
                             variant("FactionQuest_Mukag_Chapter04_Step02_Choice03", "Open", "branch_variant", 3),
                         ],
                     },
+                ]),
+                chapter("FactionQuest_Mukag", "Faction_Mukag", 5, "The Confrontation", [
+                    { stepNumber: 1, stepOrder: 0, title: "The Confrontation", detailEntryKey: mukagCh5 },
                 ]),
             ]),
             questline("FactionQuest_LastLord", "Faction_LastLord", [

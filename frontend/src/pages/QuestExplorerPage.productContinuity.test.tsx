@@ -371,6 +371,30 @@ describe("QuestExplorerPage product continuity fixture", () => {
         expect(chronicleButtons()).toHaveLength(8);
     });
 
+    it("lets Mukag Lore stance gates continue the chronicle instead of ending in an archive gap", async () => {
+        const user = userEvent.setup();
+        const ch2Render = renderProductQuest(mukagCh2, Faction.TAHUK, "mukag");
+
+        expect(await screen.findByRole("heading", { name: "Forgotten Power" })).toBeInTheDocument();
+        await user.click(within(chronicle()).getByRole("button", { name: /Pious/ }));
+
+        expect(within(chronicle()).getByRole("button", { name: /Pious/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle()).queryByRole("region", { name: "Archive gap" })).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("Precious Find")).toBeInTheDocument();
+
+        ch2Render.unmount();
+        useQuestStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
+
+        renderProductQuest(mukagCh4, Faction.TAHUK, "mukag");
+        expect(await screen.findByRole("heading", { name: "A Gamble" })).toBeInTheDocument();
+        await user.click(within(chronicle()).getByRole("button", { name: /Open/ }));
+
+        expect(within(chronicle()).getByRole("button", { name: /Open/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle()).queryByRole("region", { name: "Archive gap" })).not.toBeInTheDocument();
+        expect(within(chronicle()).getByText("The Confrontation")).toBeInTheDocument();
+    });
+
     it("reports Kin Ch4 Strategy as a chapter exit instead of complete", async () => {
         const user = userEvent.setup();
         renderProductQuest(kinCh4, Faction.KIN, "kin");

@@ -245,21 +245,23 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         await screen.findByRole("heading", { name: "A Bitter Truth" });
 
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
-        const chapterPlan = within(chronicle).getByRole("region", { name: "Chapter plan" });
-        expect(within(chapterPlan).getByText("Execute Kazra.")).toBeInTheDocument();
-
-        expect(within(chronicle).getByRole("button", { name: /Enhance Hero/ })).toBeInTheDocument();
+        const enhanceChoice = within(chronicle).getByRole("button", { name: /Enhance Hero/ });
+        expect(enhanceChoice).toBeInTheDocument();
         expect(within(chronicle).getByRole("button", { name: /Save Girl/ })).toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
 
-        await user.click(within(chronicle).getByRole("button", { name: /Enhance Hero/ }));
+        await user.click(enhanceChoice);
 
-        const selectedBranchPlan = within(chapterPlan).getByRole("region", { name: "Step 4 of 4: Rehabilitate Kazra" });
-        expect(within(selectedBranchPlan).getByText("Rehabilitate Kazra.")).toBeInTheDocument();
-        expect(within(selectedBranchPlan).getByText("Execute Kazra.")).toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Rehabilitate Kazra/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Execute Kazra/ })).not.toBeInTheDocument();
         expect(within(chronicle).queryByRole("button", { name: /Release Kazra/ })).not.toBeInTheDocument();
+
+        await user.click(within(chronicle).getByRole("button", { name: /Save Girl/ }));
+
+        expect(within(chronicle).getByRole("button", { name: /Save Girl/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle).getByRole("button", { name: /Release Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Rehabilitate Kazra/ })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("button", { name: /Execute Kazra/ })).toBeInTheDocument();
     });
 
     it("renders minor faction objective variants without aggregate overview", async () => {
@@ -281,7 +283,7 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(screen.getByText("Gain Glassteel.")).toBeInTheDocument();
     });
 
-    it("keeps Strategy and Lore semantic selections independent while preserving each tab", async () => {
+    it("resets Strategy and Lore semantic selections on mode switches", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A");
@@ -305,18 +307,17 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
 
         await user.click(screen.getByRole("button", { name: "Lore" }));
 
-        expect(screen.getByRole("button", { name: /Study the shore/ })).toHaveAttribute("aria-current", "true");
+        expect(screen.getByRole("button", { name: /Study the shore/ })).not.toHaveAttribute("aria-current", "true");
         expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
-        expect(screen.getAllByText("The shore path opens.").length).toBeGreaterThan(0);
         expect(screen.queryByText("This step will be revealed after you make your choice.")).not.toBeInTheDocument();
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
 
-        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
-        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.queryByRole("region", { name: "Choosing Follow the marker leads to" })).not.toBeInTheDocument();
     });
 
-    it("preserves a Strategy selected simulation across Strategy to Lore to Strategy", async () => {
+    it("returns to the selected chapter beginning when Strategy is reopened", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
         renderPage("/quests/Quest_A?mode=strategy");
@@ -331,8 +332,10 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
 
         await user.click(screen.getByRole("button", { name: "Strategy" }));
-        expect(screen.getByRole("button", { name: /Follow the marker/ })).toHaveAttribute("aria-current", "true");
-        expect(screen.getAllByText("Secure the old marker.").length).toBeGreaterThan(0);
+        expect(screen.getByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Follow the marker/ })).not.toHaveAttribute("aria-current", "true");
+        expect(screen.queryByRole("region", { name: "Choosing Follow the marker leads to" })).not.toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 
     it("renders terminal no-link Strategy outcomes as a final story state", async () => {
@@ -348,17 +351,20 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(currentTask).queryByText("Unknown continuation")).not.toBeInTheDocument();
     });
 
-    it("surfaces staged continuation completion choices once in Strategy mode", async () => {
+    it("surfaces staged continuation path variants once in Strategy mode without false choice controls", async () => {
         mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
         renderPage("/quests/Quest_A?mode=strategy");
 
         await screen.findByRole("heading", { name: "A Gamble" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
 
-        expect(screen.getByText("Completion choices")).toBeInTheDocument();
-        expect(within(chronicle).getAllByRole("button", { name: /Pious/ })).toHaveLength(1);
-        expect(within(chronicle).getAllByRole("button", { name: /Open/ })).toHaveLength(1);
-        expect(within(chronicle).getAllByRole("button", { name: /Bold/ })).toHaveLength(1);
+        expect(screen.getByText("Path variants")).toBeInTheDocument();
+        expect(within(chronicle).getByRole("article", { name: "Pious path variant" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("article", { name: "Open path variant" })).toBeInTheDocument();
+        expect(within(chronicle).getByRole("article", { name: "Bold path variant" })).toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Pious/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Open/ })).not.toBeInTheDocument();
+        expect(within(chronicle).queryByRole("button", { name: /Bold/ })).not.toBeInTheDocument();
         expect(screen.queryByText("Far Pious")).not.toBeInTheDocument();
         expect(screen.queryByText("Far Open")).not.toBeInTheDocument();
         expect(screen.queryByText("Far Bold")).not.toBeInTheDocument();

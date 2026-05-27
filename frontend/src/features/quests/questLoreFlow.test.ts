@@ -11,6 +11,7 @@ import {
 } from "@/features/quests/questLoreFlow";
 import {
     choicesForStep,
+    choicePrerequisitesSatisfied,
     progressionContextKey,
     selectionForChoice,
     type QuestDetailProgression,
@@ -269,6 +270,19 @@ function stagedNecrophageContinuationEntry(): QuestExplorerEntry {
                     objectiveKey: "Objective_Save",
                     lines: [{ speakerLabel: "Prime", role: "character", text: "The saved girl path resolves." }],
                 },
+                {
+                    sectionKey: "Quest_Necro_Ch6:lore:second-choice-prompt",
+                    phase: "start",
+                    choiceKey: null,
+                    stepIndex: null,
+                    objectiveKey: null,
+                    lines: [
+                        { speakerLabel: "Oroyo", role: "character", text: "The girl survives, and Kazra's fate must now be decided." },
+                        { speakerLabel: null, role: "narrator", text: "Rehabilitate Kazra" },
+                        { speakerLabel: null, role: "narrator", text: "Release Kazra" },
+                        { speakerLabel: null, role: "narrator", text: "Execute Kazra" },
+                    ],
+                },
             ],
         },
         branches: [
@@ -525,12 +539,72 @@ describe("buildLoreFlowModel", () => {
         expect(after.blocks.some((block) => block.text === "The saved girl path resolves.")).toBe(false);
     });
 
+    it("keeps Enhance Hero terminal while Save Girl reveals the second Necrophage choice beat", () => {
+        const entry = stagedNecrophageContinuationEntry();
+        const progression = repeatedEntryProgression(entry, 4);
+        const siteModel = buildLoreModelFor(entry, progression);
+        const siteStage = siteModel.segments[0]?.loreSteps
+            .find((stage) => stage.branchMoment?.continuationChoices.some((choiceItem) => (
+                choiceItem.choice.label === "Interact with Site of the Ancients using a hero"
+            )));
+        const siteChoice = siteStage?.branchMoment?.continuationChoices[0]?.choice;
+        if (!siteStage || !siteChoice) throw new Error("Expected staged site continuation.");
+
+        const afterSiteModel = buildLoreModelFor(entry, progression, [
+            selectionForChoice(siteStage.step.stepKey, siteChoice),
+        ]);
+        const firstChoiceStage = afterSiteModel.segments[0]?.loreSteps
+            .find((stage) => stage.branchMoment?.branchingContinuationChoices.some((choiceItem) => (
+                choiceItem.choice.label === "Enhance Hero"
+            )));
+        const branchChoices = [
+            ...(firstChoiceStage?.branchMoment?.decisionChoices ?? []),
+            ...(firstChoiceStage?.branchMoment?.continuationChoices ?? []),
+            ...(firstChoiceStage?.branchMoment?.branchingContinuationChoices ?? []),
+        ];
+        const enhanceChoice = branchChoices.find((choiceItem) => choiceItem.choice.label === "Enhance Hero")?.choice;
+        const saveChoice = branchChoices.find((choiceItem) => choiceItem.choice.label === "Save Girl")?.choice;
+        if (!firstChoiceStage || !enhanceChoice || !saveChoice) throw new Error("Expected Enhance and Save choices.");
+
+        const afterEnhance = createLoreChronologySnapshot(buildLoreModelFor(entry, progression, [
+            selectionForChoice(siteStage.step.stepKey, siteChoice),
+            selectionForChoice(firstChoiceStage.step.stepKey, enhanceChoice),
+        ]), "after enhance");
+        expect(afterEnhance.blocks.some((block) => block.text === "The enhanced warrior path resolves.")).toBe(true);
+        expect(afterEnhance.blocks.some((block) => block.group === "choice_node" && block.text === "Rehabilitate Kazra")).toBe(false);
+        expect(afterEnhance.blocks.some((block) => block.group === "choice_node" && block.text === "Release Kazra")).toBe(false);
+        expect(afterEnhance.blocks.some((block) => block.group === "choice_node" && block.text === "Execute Kazra")).toBe(false);
+
+        const afterSave = createLoreChronologySnapshot(buildLoreModelFor(entry, progression, [
+            selectionForChoice(siteStage.step.stepKey, siteChoice),
+            selectionForChoice(firstChoiceStage.step.stepKey, saveChoice),
+        ]), "after save");
+        const saveText = afterSave.blocks.find((block) => block.text === "The saved girl path resolves.");
+        const releaseChoice = afterSave.blocks.find((block) => block.group === "choice_node" && block.text === "Release Kazra");
+
+        expect(saveText?.chronologyIndex).toBeLessThan(releaseChoice?.chronologyIndex ?? Number.MAX_SAFE_INTEGER);
+        expect(afterSave.blocks.filter((block) => block.group === "choice_node" && [
+            "Rehabilitate Kazra",
+            "Release Kazra",
+            "Execute Kazra",
+        ].includes(block.text)).map((block) => block.text)).toEqual([
+            "Rehabilitate Kazra",
+            "Release Kazra",
+            "Execute Kazra",
+        ]);
+    });
+
     it("groups visible continuation choices into current and future progression beats", () => {
         const entry = stagedNecrophageContinuationEntry();
         const progression = repeatedEntryProgression(entry, 4);
         const step = progression.questlines[0].chapters[0].steps[2];
         if (!step) throw new Error("Expected staged Necrophage fixture to include a third step.");
         const entriesByKey = { [entry.entryKey]: entry };
+        const revealContext = {
+            branchKeys: new Set(["Branch_First", "Branch_Site"]),
+            choiceKeys: new Set(["Choice_First", "Choice_Site"]),
+            branchPath: ["Branch_First", "Branch_Site"],
+        };
         const choices = choicesForStep(step, entry, entriesByKey)
             .filter((choice) => [
                 "Enhance Hero",
@@ -538,7 +612,8 @@ describe("buildLoreFlowModel", () => {
                 "Execute Kazra",
                 "Release Kazra",
                 "Rehabilitate Kazra",
-            ].includes(choice.label));
+            ].includes(choice.label))
+            .filter((choice) => choicePrerequisitesSatisfied(choice, revealContext));
 
         const branchMoment = buildChronicleBranchMoment({
             step,
@@ -561,19 +636,12 @@ describe("buildLoreFlowModel", () => {
             repeatsDetailEntry: true,
             rendersRepeatedDetailContent: false,
             revealedContinuationsBecomeSteps: false,
-            revealContext: {
-                branchKeys: new Set(["Branch_First", "Branch_Site"]),
-                choiceKeys: new Set(["Choice_First", "Choice_Site"]),
-                branchPath: ["Branch_First", "Branch_Site"],
-            },
+            revealContext,
         }, entriesByKey, false);
 
         expect(branchMoment?.branchingContinuationChoices.map((item) => item.choice.label)).toEqual([
             "Enhance Hero",
             "Save Girl",
-            "Rehabilitate Kazra",
-            "Release Kazra",
-            "Execute Kazra",
         ]);
         expect(branchMoment?.branchingContinuationStageGroups.map((group) => ({
             heading: group.heading,
@@ -584,11 +652,6 @@ describe("buildLoreFlowModel", () => {
                 heading: "Choose how to proceed",
                 relation: "current",
                 labels: ["Enhance Hero", "Save Girl"],
-            },
-            {
-                heading: "After this choice",
-                relation: "future",
-                labels: ["Rehabilitate Kazra", "Release Kazra", "Execute Kazra"],
             },
         ]);
     });

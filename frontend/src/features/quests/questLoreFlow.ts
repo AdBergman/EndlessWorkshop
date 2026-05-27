@@ -1,6 +1,9 @@
 import {
+    addSelectionToRevealContext,
     buildLoreChronicleStream,
+    cloneRevealContext,
     isTerminalChoiceChapter,
+    revealVisible,
     stepIndexForBranchStepOrder,
     uniqueStrings,
     type LoreChoicePathsByContext,
@@ -70,6 +73,7 @@ type ChronicleStageBase = {
     branchMoment: ChronicleBranchMoment | null;
     loreSections?: LoreSection[];
     loreSectionsWereSuppressed: boolean;
+    selectedChoiceLoreEntry: QuestExplorerEntry | null;
     selectedChoiceLoreSections: LoreSection[];
     revealedLoreSections: LoreSection[];
     revealedContinuationStages: ChronicleChoiceItem[];
@@ -152,6 +156,7 @@ export function buildLoreFlowModel({
             });
             let loreSections: LoreSection[] | undefined;
             let loreSectionsWereSuppressed = false;
+            let selectedChoiceLoreEntry: QuestExplorerEntry | null = renderedStep.displayEntry;
             let selectedChoiceLoreSections: LoreSection[] = [];
 
             if (renderedStep.displayEntry) {
@@ -189,6 +194,25 @@ export function buildLoreFlowModel({
                     : [];
             }
 
+            const selectedChoiceTargetEntry = renderedStep.selectedChoice?.targetEntryKey
+                ? entriesByKey[renderedStep.selectedChoice.targetEntryKey] ?? null
+                : null;
+            if (
+                selectedChoiceLoreSections.length === 0
+                && selectedChoiceTargetEntry
+                && selectedChoiceTargetEntry.entryKey !== renderedStep.displayEntry?.entryKey
+            ) {
+                const selectedRevealContext = cloneRevealContext(renderedStep.revealContext);
+                addSelectionToRevealContext(selectedRevealContext, renderedStep.currentBeatChoice);
+                addSelectionToRevealContext(selectedRevealContext, renderedStep.selectedChoice);
+                selectedChoiceLoreEntry = selectedChoiceTargetEntry;
+                selectedChoiceLoreSections = claimVisibleLoreSections(
+                    loreSectionsForSelectedChoiceTargetEntry(selectedChoiceTargetEntry, selectedRevealContext),
+                    selectedChoiceTargetEntry.entryKey,
+                    ownershipTracker
+                );
+            }
+
             const revealedLoreSections = renderedStep.displayEntry && !renderedStep.revealedContinuationsBecomeSteps
                 ? claimVisibleLoreSections(
                     loreSectionsForRevealedContinuations(renderedStep.displayEntry, renderedStep),
@@ -206,6 +230,7 @@ export function buildLoreFlowModel({
                 branchMoment,
                 loreSections,
                 loreSectionsWereSuppressed,
+                selectedChoiceLoreEntry,
                 selectedChoiceLoreSections,
                 revealedLoreSections,
                 revealedContinuationStages: renderedStep.revealedContinuations.map((choice) => chronicleChoiceItem(choice, "continuation")),
@@ -224,6 +249,28 @@ export function buildLoreFlowModel({
         segments,
         segmentRailEntryKeys: uniqueStrings(segments.map((segment) => segment.railEntryKey)),
     };
+}
+
+function loreSectionsForSelectedChoiceTargetEntry(
+    entry: QuestExplorerEntry,
+    revealContext: ReturnType<typeof cloneRevealContext>
+): LoreSection[] {
+    const sections = entry.loreView.sections.filter((section) => revealVisible(section, revealContext));
+    const keyedChoiceKeys = uniqueStrings(sections.map((section) => section.choiceKey));
+    if (keyedChoiceKeys.length === 1) return sections;
+
+    const navigationStepIndex = entry.navigation.stepOrder != null
+        ? entry.navigation.stepOrder - 1
+        : entry.navigation.step != null ? entry.navigation.step - 1 : null;
+    if (navigationStepIndex != null && navigationStepIndex >= 0) {
+        const scopedSections = sections.filter((section) => (
+            section.stepIndex === navigationStepIndex
+            || (section.stepIndex == null && !section.choiceKey && !section.objectiveKey)
+        ));
+        if (scopedSections.length > 0) return scopedSections;
+    }
+
+    return sections;
 }
 
 function lorePathConclusion(

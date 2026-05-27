@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { QuestExplorerMode } from "./questExplorerMode";
 import {
     selectionForChoice,
@@ -40,7 +40,12 @@ function nextChoicePathForSelection(
 
     const nextSelection = selectionForChoice(step.stepKey, choice);
     const nextBranchStepOrder = nextSelection.branchStepOrder ?? Number.MAX_SAFE_INTEGER;
+    const requiredAncestorBranchKeys = new Set([
+        choice.parentBranchKey,
+        ...choice.prerequisiteBranchKeys,
+    ].filter((branchKey): branchKey is string => Boolean(branchKey)));
     const retained = currentPath.filter((selection) => {
+        if (selection.branchKey && requiredAncestorBranchKeys.has(selection.branchKey)) return true;
         const selectionIndex = choiceProgression.chapter.steps.findIndex((candidate) => candidate.stepKey === selection.stepKey);
         if (selectionIndex < 0 || selectionIndex > stepIndex) return false;
         if (selectionIndex < stepIndex) return true;
@@ -59,10 +64,20 @@ export function useQuestExplorerPathState({
     const [strategyChoicePath, setStrategyChoicePath] = useState<QuestPathChoiceSelection[]>([]);
     const [loreChoicePathsByContext, setLoreChoicePathsByContext] = useState<LoreChoicePathsByContext>({});
     const choicePathResetKey = `${selectedEntryKey ?? "none"}:${selectedProgressionKey}`;
+    const previousModeRef = useRef(mode);
 
     useEffect(() => {
         setStrategyChoicePath([]);
     }, [choicePathResetKey]);
+
+    useEffect(() => {
+        const previousMode = previousModeRef.current;
+        previousModeRef.current = mode;
+        if (previousMode === mode) return;
+
+        setStrategyChoicePath([]);
+        setLoreChoicePathsByContext({});
+    }, [mode]);
 
     const chooseExplicitChoice = useCallback<ChooseQuestPathChoice>(
         (

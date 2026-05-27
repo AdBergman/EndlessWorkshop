@@ -554,9 +554,9 @@ function LoreStep({
                 onChoose={onChoose}
             />
 
-            {renderedStep.displayEntry && stage.selectedChoiceLoreSections.length > 0 ? (
+            {stage.selectedChoiceLoreEntry && stage.selectedChoiceLoreSections.length > 0 ? (
                 <div className="questExplorer-revealedBeatBody questExplorer-revealedBeatBody--lore">
-                    <LoreSectionList entry={renderedStep.displayEntry} sections={stage.selectedChoiceLoreSections} />
+                    <LoreSectionList entry={stage.selectedChoiceLoreEntry} sections={stage.selectedChoiceLoreSections} />
                 </div>
             ) : null}
 

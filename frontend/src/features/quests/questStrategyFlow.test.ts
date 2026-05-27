@@ -183,7 +183,7 @@ describe("buildStrategyFlowModel semantic view models", () => {
         ]);
     });
 
-    it("deduplicates grouped continuation completion choices in the chapter plan", () => {
+    it("deduplicates grouped continuation path variants in the chapter plan", () => {
         const entry = questEntry({
             entryKey: "Quest_Gamble",
             title: "A Gamble",
@@ -250,7 +250,8 @@ describe("buildStrategyFlowModel semantic view models", () => {
         ], progression, { showRawHiddenRows: true });
 
         expect(model.decisionPoints).toHaveLength(1);
-        expect(model.decisionPoints[0].kind).toBe("completion_choice");
+        expect(model.decisionPoints[0].kind).toBe("path_variant");
+        expect(model.decisionPoints[0].title).toBe("Path variants");
         expect(model.decisionPoints[0].options.map((option) => option.label)).toEqual(["Pious", "Open", "Bold"]);
         expect(model.decisionPoints[0].options.map((option) => option.outcomeLines[0])).toEqual([
             "Near Pious",

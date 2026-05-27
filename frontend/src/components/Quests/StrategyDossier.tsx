@@ -177,9 +177,32 @@ function StrategyDecisionPointBlock({
     const selectedOption = point.options.find((option) => option.isSelected) ?? null;
     const groupLabel = decisionPointGroupLabel(point.options);
     const showGroupRegion = Boolean(groupLabel && !isGenericDecisionGroupLabel(groupLabel));
+    const isInteractiveDecision = point.kind === "explicit_choice";
+
+    if (!isInteractiveDecision) {
+        return (
+            <StrategyDossierSection title={point.title} variant="continuations">
+                <section
+                    className="questExplorer-strategyComparisonGroup"
+                    aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
+                >
+                    {showGroupRegion ? <h4>{groupLabel}</h4> : null}
+                    <div className="questExplorer-strategyComparisonGrid">
+                        {point.options.map((option) => (
+                            <StrategyPathVariantOption
+                                option={option}
+                                debugChoiceDetails={debugChoiceDetails}
+                                key={option.id}
+                            />
+                        ))}
+                    </div>
+                </section>
+            </StrategyDossierSection>
+        );
+    }
 
     return (
-        <StrategyDossierSection title={point.title} variant={point.kind === "topology_alternative" ? "continuations" : "decision"}>
+        <StrategyDossierSection title={point.title} variant="decision">
             <section
                 className="questExplorer-strategyComparisonGroup"
                 aria-label={showGroupRegion ? groupLabel ?? undefined : undefined}
@@ -206,6 +229,48 @@ function StrategyDecisionPointBlock({
                 />
             ) : null}
         </StrategyDossierSection>
+    );
+}
+
+function StrategyPathVariantOption({
+    option,
+    debugChoiceDetails,
+}: {
+    option: StrategyDossierBranchOption;
+    debugChoiceDetails?: Map<string, string>;
+}) {
+    const supportingMarkers = option.markers.filter((marker) => marker.kind !== "leads");
+
+    return (
+        <article className="questExplorer-strategyPathVariant" aria-label={`${option.label} path variant`}>
+            <span className="questExplorer-strategyComparisonHeader">
+                <strong>{option.label}</strong>
+            </span>
+            {option.outcomeLines.length > 0 ? (
+                <span className="questExplorer-strategyComparisonOutcome">
+                    {option.outcomeLines.join(" ")}
+                </span>
+            ) : null}
+            <div className="questExplorer-strategyComparisonMeta">
+                <InlineMetaList
+                    label="Requires"
+                    values={option.requirements}
+                    items={option.requirementDetails}
+                    tone="requirement"
+                />
+                <InlineRewardMetaList label="Rewards" rewards={option.rewardDetails} fallbackValues={option.rewards} />
+            </div>
+            {supportingMarkers.length > 0 ? (
+                <div className="questExplorer-strategyComparisonMarkers">
+                    {supportingMarkers.map((marker, index) => (
+                        <StrategyDossierMarkerPill marker={marker} key={`${option.id}:${marker.kind}:${marker.detail}:${index}`} />
+                    ))}
+                </div>
+            ) : null}
+            {debugChoiceDetails?.get(option.choice.id) ? (
+                <span className="questExplorer-choiceDebugMeta">{debugChoiceDetails.get(option.choice.id)}</span>
+            ) : null}
+        </article>
     );
 }
 

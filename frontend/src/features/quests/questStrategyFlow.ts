@@ -7,6 +7,8 @@ import {
     hiddenNoLinkArtifactReason,
     hiddenUngatedContinuationReason,
     hiddenUnresolvedReason,
+    isNecrophageCh6Choice,
+    isNecrophageCh6FinalChoice,
     nextProgressionChapterLocation,
     stepIndexForBranchStepOrder,
     uniqueStrings,
@@ -113,7 +115,7 @@ export type StrategyChapterTask = {
 
 export type StrategyDecisionPointKind =
     | "explicit_choice"
-    | "completion_choice"
+    | "path_variant"
     | "topology_alternative";
 
 export type StrategyDecisionPoint = {
@@ -339,6 +341,13 @@ function buildStrategyChapterPlan({
         ? flowPathStatus
         : null;
 
+    const activeSelection = [...choicePath].reverse().find((selection) => !selection.isPassive)
+        ?? flow.renderedSteps.flatMap((step) => [
+            step.selectedChoice,
+            step.currentBeatChoice,
+        ]).find((selection): selection is QuestPathChoiceSelection => Boolean(selection && !selection.isPassive))
+        ?? null;
+
     const chapterTasks = stageContexts
         .map((stage): StrategyChapterTask | null => {
             const { step, stepIndex, stageOrder, displayEntry } = stage;
@@ -422,6 +431,12 @@ function buildStrategyChapterPlan({
         const options = buildStrategyBranchOptions(renderedStep, choices, entriesByKey, objectivesByChoiceKey, {
             unresolvedChoiceIds: unresolvedChoiceIdsForStage(choices, displayEntry, progression),
         });
+        if (
+            options.some((option) => isNecrophageCh6FinalChoice(option.choice))
+            && activeSelection?.label !== "Save Girl"
+        ) {
+            return [];
+        }
         const dossier = buildStrategyDossierModel({
             renderedStep,
             totalSteps: stageCount,
@@ -450,10 +465,7 @@ function buildStrategyChapterPlan({
         selectedPriorContext: [],
         continuationPreview: continuationPreviewForFlow(flow),
         futureBranchImpacts: [],
-        activeSelection: flow.renderedSteps.flatMap((step) => [
-            step.selectedChoice,
-            step.currentBeatChoice,
-        ]).find((selection): selection is QuestPathChoiceSelection => Boolean(selection && !selection.isPassive)) ?? null,
+        activeSelection,
     };
 }
 
@@ -935,7 +947,7 @@ function buildDecisionPointGroups(
     return [...groups.values()]
         .map((group) => ({
             ...group,
-            options: group.kind === "completion_choice" && !showRawHiddenRows
+            options: group.kind === "path_variant" && !showRawHiddenRows
                 ? dedupeCompletionOptions(group.options)
                 : group.options,
         }))
@@ -943,6 +955,7 @@ function buildDecisionPointGroups(
 }
 
 function decisionPointKindForChoice(choice: QuestPathChoice): StrategyDecisionPointKind | null {
+    if (isNecrophageCh6Choice(choice)) return "explicit_choice";
     if (choice.semanticStageKind === "explicit_decision_option") return "explicit_choice";
     if (
         choice.semanticStageKind === "unknown"
@@ -953,7 +966,7 @@ function decisionPointKindForChoice(choice: QuestPathChoice): StrategyDecisionPo
     ) {
         return "explicit_choice";
     }
-    if (choice.sectionRole === "continuation") return "completion_choice";
+    if (choice.sectionRole === "continuation") return "path_variant";
     if (choice.semanticStageKind === "topology_fork_option") return "topology_alternative";
     return null;
 }
@@ -978,7 +991,7 @@ function completionOptionScore(option: StrategyDossierBranchOption): number {
 }
 
 function decisionPointTitle(group: DecisionPointGroup): string {
-    if (group.kind === "completion_choice") return "Completion choices";
+    if (group.kind === "path_variant") return "Path variants";
     if (group.kind === "topology_alternative") return "Possible continuations";
     return "Choose a path";
 }

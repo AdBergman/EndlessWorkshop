@@ -1113,6 +1113,10 @@ export default function QuestExplorerPage() {
         () => resolveRailSelectionKey(activeRailEntry, railGroups),
         [activeRailEntry, railGroups]
     );
+    const firstVisibleRailEntryKey = useMemo(
+        () => railGroups.flatMap((group) => group.items)[0]?.entry.entryKey ?? visibleEntries[0]?.entryKey ?? null,
+        [railGroups, visibleEntries]
+    );
 
     useEffect(() => {
         void loadQuestExplorer();
@@ -1180,7 +1184,7 @@ export default function QuestExplorerPage() {
                 return;
             }
             if (resolved && !visibleEntryKeys.has(resolved)) {
-                const fallbackEntryKey = visibleEntries[0]?.entryKey ?? null;
+                const fallbackEntryKey = firstVisibleRailEntryKey;
                 if (fallbackEntryKey !== selectedEntryKey) {
                     setSelectedEntryKey(fallbackEntryKey);
                 }
@@ -1196,9 +1200,9 @@ export default function QuestExplorerPage() {
         }
 
         if (!selectedEntryKey || !visibleEntryKeys.has(selectedEntryKey)) {
-            setSelectedEntryKey(visibleEntries[0]?.entryKey ?? null);
+            setSelectedEntryKey(firstVisibleRailEntryKey);
         }
-    }, [debugQuestProgression, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, setSelectedEntryKey, visibleEntries, visibleEntryKeys]);
+    }, [debugQuestProgression, firstVisibleRailEntryKey, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, setSelectedEntryKey, visibleEntryKeys]);
 
     const categoryOptions = useMemo(() => (
         QUEST_CATEGORY_OPTIONS.map((option) => ({
@@ -1226,6 +1230,8 @@ export default function QuestExplorerPage() {
     const changeMode = (nextMode: QuestExplorerMode) => {
         const nextParams = new URLSearchParams(searchParams);
         nextParams.delete(LORE_SCROLL_ENTRY_QUERY_PARAM);
+        applyPassiveScroll(null);
+        setMode(nextMode);
         if (nextMode === DEFAULT_QUEST_EXPLORER_MODE) {
             nextParams.delete("mode");
         } else {
