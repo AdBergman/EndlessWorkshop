@@ -1139,6 +1139,12 @@
     max-width: 86ch;
 }
 
+.questExplorer-content--majorFactionStrategy .questExplorer-strategyStepBody,
+.questExplorer-content--majorFactionStrategy .questExplorer-strategyChapterPlan {
+    width: 100%;
+    max-width: none;
+}
+
 .questExplorer-strategyStepBody .questExplorer-stepSummary {
     max-width: 70ch;
     padding-top: 2px;

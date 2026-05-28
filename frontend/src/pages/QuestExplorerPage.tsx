@@ -1250,6 +1250,9 @@ export default function QuestExplorerPage() {
     const strategySummary = selectedEntry
         ? selectedEntry.summaryLines[0] ?? compactMeta(selectedEntry)
         : null;
+    const isMajorFactionStrategyView = mode === "strategy" && selectedEntry
+        ? getQuestCategoryKey(selectedEntry.questType) === "faction"
+        : false;
 
     return (
         <main className="questExplorer-page">
@@ -1326,7 +1329,10 @@ export default function QuestExplorerPage() {
                                 />
                             )}
 
-                            <section className={`questExplorer-content questExplorer-content--${mode}`} ref={contentRef}>
+                            <section
+                                className={`questExplorer-content questExplorer-content--${mode}${isMajorFactionStrategyView ? " questExplorer-content--majorFactionStrategy" : ""}`}
+                                ref={contentRef}
+                            >
                                 {mode === "strategy" ? (
                                     <>
                                         {!selectedProgression ? <StrategyOverview entry={selectedEntry} /> : null}
