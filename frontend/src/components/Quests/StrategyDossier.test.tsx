@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { StrategyDossier } from "@/components/Quests/StrategyDossier";
+import {
+    shortenMechanicalStrategyRequirementLabel,
+    StrategyDossier,
+} from "@/components/Quests/StrategyDossier";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -187,6 +190,14 @@ function renderDossier(model: StrategyDossierModel, debugChoiceDetails?: Map<str
 describe("StrategyDossier", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
+    });
+
+    it("shortens mechanical Strategy requirement labels without changing the value", () => {
+        expect(shortenMechanicalStrategyRequirementLabel("Build constructible: Stalwart 3 times")).toBe("Build: Stalwart 3 times");
+        expect(shortenMechanicalStrategyRequirementLabel("Use faction action: Last Lord Round Up Village 3 times")).toBe(
+            "Use action: Last Lord Round Up Village 3 times"
+        );
+        expect(shortenMechanicalStrategyRequirementLabel("Control 10 territories for 5 turns")).toBe("Control 10 territories for 5 turns");
     });
 
     it("renders a single option as the current task without choice framing", () => {

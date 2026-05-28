@@ -70,6 +70,7 @@ import {
     isMinorFactionVariantQuest,
     objectiveVariantLabel,
     phaseDisplayLabel,
+    questChapterDisplayLabel,
     stepPositionLabel,
 } from "@/features/quests/questDisplay";
 import {
@@ -155,7 +156,9 @@ function headerMetaItems(
         { label: "Questline", value: entry.navigation.questLineName ?? progression?.questline.questLineName ?? "" },
         {
             label: "Chapter",
-            value: progression ? chapterPositionLabel(progression.chapter) : entry.navigation.chapterLabel ?? "",
+            value: progression
+                ? questChapterDisplayLabel(progression.chapter, { entry, questline: progression.questline })
+                : entry.navigation.chapterLabel ?? "",
         },
         {
             label: "Progression",
@@ -874,6 +877,7 @@ function StrategyStep({
     showRawHiddenRows,
     debugChoiceDetails,
     projectedDebugDetails,
+    shortenRequirementLabels,
     onChoose,
 }: {
     model: StrategyFlowModel;
@@ -881,6 +885,7 @@ function StrategyStep({
     showRawHiddenRows: boolean;
     debugChoiceDetails?: Map<string, string>;
     projectedDebugDetails?: string[];
+    shortenRequirementLabels: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     const activeStage = model.activeStage;
@@ -931,6 +936,7 @@ function StrategyStep({
                             tasks={model.chapterTasks}
                             decisionPoints={model.decisionPoints}
                             debugChoiceDetails={debugChoiceDetails}
+                            shortenRequirementLabels={shortenRequirementLabels}
                             onChoose={onChoose}
                             projectedDebugDetails={projectedDebugDetails}
                         />
@@ -952,6 +958,7 @@ function StrategyProgression({
     entriesByKey,
     debugQuestProgression,
     showRawHiddenRows,
+    shortenRequirementLabels,
     onChoose,
 }: {
     progression: QuestDetailProgression | null;
@@ -960,6 +967,7 @@ function StrategyProgression({
     entriesByKey: Record<string, QuestExplorerEntry>;
     debugQuestProgression: boolean;
     showRawHiddenRows: boolean;
+    shortenRequirementLabels: boolean;
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
 }) {
     if (!progression || !model) return null;
@@ -991,6 +999,7 @@ function StrategyProgression({
                 showRawHiddenRows={showRawHiddenRows}
                 debugChoiceDetails={debugChoiceDetails}
                 projectedDebugDetails={projectedDebugDetails}
+                shortenRequirementLabels={shortenRequirementLabels}
                 onChoose={onChoose}
             />
         </section>
@@ -1244,7 +1253,12 @@ export default function QuestExplorerPage() {
     const detailBreadcrumb = selectedEntry
         ? [
             getQuestCategoryLabel(selectedEntry.questType),
-            selectedProgression ? chapterPositionLabel(selectedProgression.chapter) : selectedEntry.navigation.chapterLabel,
+            selectedProgression
+                ? questChapterDisplayLabel(selectedProgression.chapter, {
+                    entry: selectedEntry,
+                    questline: selectedProgression.questline,
+                })
+                : selectedEntry.navigation.chapterLabel,
         ].filter((part): part is string => Boolean(part))
         : [];
     const strategySummary = selectedEntry
@@ -1344,6 +1358,7 @@ export default function QuestExplorerPage() {
                                                 entriesByKey={entriesByKey}
                                                 debugQuestProgression={debugQuestProgression}
                                                 showRawHiddenRows={debugQuestProgression && showRawHiddenRows}
+                                                shortenRequirementLabels={isMajorFactionStrategyView}
                                                 onChoose={chooseExplicitChoice}
                                             />
                                         ) : (

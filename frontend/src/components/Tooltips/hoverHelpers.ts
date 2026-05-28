@@ -1,9 +1,15 @@
 import { Improvement, District } from "@/types/dataTypes";
 
+export type PixelTooltipPlacement = "right" | "left";
+export type PixelTooltipCoords = { x: number; y: number; mode: "pixel"; placement?: PixelTooltipPlacement };
+
+const TOOLTIP_GAP_PX = 10;
+const TOOLTIP_MAX_WIDTH_PX = 320;
+
 // The coords property is now a union type to support both coordinate systems.
 export interface HoveredWithCoords<T> {
     data: T;
-    coords: { xPct: number; yPct: number } | { x: number; y: number; mode: 'pixel' };
+    coords: { xPct: number; yPct: number } | PixelTooltipCoords;
 }
 
 /**
@@ -11,15 +17,24 @@ export interface HoveredWithCoords<T> {
  */
 export const getHoverCoords = (
     e: React.MouseEvent<HTMLElement>
-): { x: number; y: number; mode: 'pixel' } => {
-    const rect = e.currentTarget.getBoundingClientRect();
+): PixelTooltipCoords => getHoverCoordsForElement(e.currentTarget);
 
-    // Position the tooltip based on the RIGHT edge of the hovered element, plus a small offset.
-    // This ensures the tooltip doesn't obscure the item being hovered.
+export const getHoverCoordsForElement = (element: HTMLElement): PixelTooltipCoords => {
+    const rect = element.getBoundingClientRect();
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+    const availableRight = viewportWidth - rect.right;
+    const availableLeft = rect.left;
+    const placement: PixelTooltipPlacement = availableRight < TOOLTIP_MAX_WIDTH_PX + TOOLTIP_GAP_PX
+        && availableLeft >= TOOLTIP_MAX_WIDTH_PX + TOOLTIP_GAP_PX
+        ? "left"
+        : "right";
+
     return {
-        x: rect.right + window.scrollX + 10, // Position 10px to the right of the element
+        x: (placement === "left" ? rect.left : rect.right) + window.scrollX
+            + (placement === "left" ? -TOOLTIP_GAP_PX : TOOLTIP_GAP_PX),
         y: rect.top + window.scrollY,
-        mode: 'pixel',
+        mode: "pixel",
+        placement,
     };
 };
 

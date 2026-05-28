@@ -349,7 +349,8 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(continuation).getByText("Objectives")).toBeInTheDocument();
         expect(within(continuation).queryByText("Route 1")).not.toBeInTheDocument();
         expect(within(continuation).getByText("De Suluzzo advises strengthening our military.")).toBeInTheDocument();
-        expect(within(continuation).getByText("Build constructible: Stalwart 3 times")).toBeInTheDocument();
+        expect(within(continuation).getByText("Build: Stalwart 3 times")).toBeInTheDocument();
+        expect(within(continuation).queryByText("Build constructible: Stalwart 3 times")).not.toBeInTheDocument();
         expect(within(continuation).getByText("Amass more Dust to further strengthen the Lords.")).toBeInTheDocument();
         expect(within(continuation).getByText("Maintain the required empire value for 5 turns")).toBeInTheDocument();
         expect(within(continuation).getByText("De Suluzzo counsels securing more lands to cement power.")).toBeInTheDocument();

@@ -1,7 +1,8 @@
 import React from "react";
+import type { PixelTooltipCoords } from "./hoverHelpers";
 
 interface BaseTooltipProps {
-    coords: { xPct: number; yPct: number } | { x: number; y: number; mode: "pixel" };
+    coords: { xPct: number; yPct: number } | PixelTooltipCoords;
     children: React.ReactNode;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
@@ -9,19 +10,27 @@ interface BaseTooltipProps {
 
 const isPixelCoords = (
     coords: BaseTooltipProps["coords"]
-): coords is { x: number; y: number; mode: "pixel" } => "mode" in coords && coords.mode === "pixel";
+): coords is PixelTooltipCoords => "mode" in coords && coords.mode === "pixel";
 
 const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnter, onMouseLeave }) => {
     // --- Determine styling based on the coordinate system ---
     let positionStyles: React.CSSProperties;
     if (isPixelCoords(coords)) {
         // Use absolute pixel coordinates for portaled tooltips (e.g., SpreadsheetView / Unit cards)
-        positionStyles = {
-            position: "absolute",
-            top: `${coords.y}px`,
-            left: `${coords.x}px`,
-            transform: "translateY(-50%)",
-        };
+        const viewportX = coords.x - window.scrollX;
+        positionStyles = coords.placement === "left"
+            ? {
+                position: "absolute",
+                top: `${coords.y}px`,
+                right: `${Math.max(12, window.innerWidth - viewportX)}px`,
+                transform: "translateY(-50%)",
+            }
+            : {
+                position: "absolute",
+                top: `${coords.y}px`,
+                left: `${coords.x}px`,
+                transform: "translateY(-50%)",
+            };
     } else {
         // Use percentage-based coordinates for tooltips within a specific container (e.g., TechTree)
         positionStyles = {
@@ -51,7 +60,7 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnte
 
         /* Hug content, but cap width for long lines */
         width: "max-content",
-        maxWidth: "320px",
+        maxWidth: "min(320px, calc(100vw - 24px))",
 
         whiteSpace: "normal",
         overflowWrap: "anywhere",

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 import {
     type StrategyDossierBranchComparisonGroup,
@@ -30,6 +30,8 @@ import { InlineRewardMetaList } from "@/components/Quests/QuestRewardMeta";
 import type {
     QuestProgressionStep,
 } from "@/types/questTypes";
+
+const StrategyRequirementPresentationContext = createContext(false);
 
 export function StrategyDossier({
     model,
@@ -90,41 +92,45 @@ export function StrategyChapterPlan({
     onChoose,
     debugChoiceDetails,
     projectedDebugDetails,
+    shortenRequirementLabels = false,
 }: {
     tasks: StrategyChapterTask[];
     decisionPoints: StrategyDecisionPoint[];
     onChoose: (step: QuestProgressionStep, choice: QuestPathChoice) => void;
     debugChoiceDetails?: Map<string, string>;
     projectedDebugDetails?: string[];
+    shortenRequirementLabels?: boolean;
 }) {
     if (tasks.length === 0 && decisionPoints.length === 0) {
         return <p className="questExplorer-strategyDossierEmpty">No strategy objectives are attached to this chapter.</p>;
     }
 
     return (
-        <div className="questExplorer-strategyDossier questExplorer-strategyChapterPlan">
-            <StrategyDossierSection title="Chapter plan" variant="currentTask">
-                <div className="questExplorer-strategyTaskStack">
-                    {orderedChapterPlanItems(tasks, decisionPoints).map((item) => (
-                        item.kind === "task" ? (
-                            <StrategyChapterTaskBlock
-                                task={item.task}
-                                debugChoiceDetails={debugChoiceDetails}
-                                key={item.task.id}
-                            />
-                        ) : (
-                            <StrategyDecisionPointBlock
-                                point={item.point}
-                                onChoose={onChoose}
-                                debugChoiceDetails={debugChoiceDetails}
-                                projectedDebugDetails={projectedDebugDetails}
-                                key={item.point.id}
-                            />
-                        )
-                    ))}
-                </div>
-            </StrategyDossierSection>
-        </div>
+        <StrategyRequirementPresentationContext.Provider value={shortenRequirementLabels}>
+            <div className="questExplorer-strategyDossier questExplorer-strategyChapterPlan">
+                <StrategyDossierSection title="Chapter plan" variant="currentTask">
+                    <div className="questExplorer-strategyTaskStack">
+                        {orderedChapterPlanItems(tasks, decisionPoints).map((item) => (
+                            item.kind === "task" ? (
+                                <StrategyChapterTaskBlock
+                                    task={item.task}
+                                    debugChoiceDetails={debugChoiceDetails}
+                                    key={item.task.id}
+                                />
+                            ) : (
+                                <StrategyDecisionPointBlock
+                                    point={item.point}
+                                    onChoose={onChoose}
+                                    debugChoiceDetails={debugChoiceDetails}
+                                    projectedDebugDetails={projectedDebugDetails}
+                                    key={item.point.id}
+                                />
+                            )
+                        ))}
+                    </div>
+                </StrategyDossierSection>
+            </div>
+        </StrategyRequirementPresentationContext.Provider>
     );
 }
 
@@ -1053,6 +1059,7 @@ export function InlineMetaList({
     items?: QuestRequirementDisplay[];
     tone?: "objective" | "requirement" | "reward";
 }) {
+    const shortenRequirementLabels = useContext(StrategyRequirementPresentationContext);
     const displayItems = requirementDisplaysForList(items, values);
     if (displayItems.length === 0) return null;
 
@@ -1060,14 +1067,30 @@ export function InlineMetaList({
         <div className={`questExplorer-inlineMeta questExplorer-inlineMeta--${tone}`}>
             <strong>{label}</strong>
             <ul>
-                {displayItems.map((item, index) => (
-                    <li key={`${label}:${index}:${item.displayText}:${item.referenceKey ?? ""}:${item.codexEntryKey ?? ""}`}>
-                        <QuestCodexReferenceLink source={item} showTooltip={tone === "requirement"}>
-                            {item.displayText}
-                        </QuestCodexReferenceLink>
-                    </li>
-                ))}
+                {displayItems.map((item, index) => {
+                    const displayItem = tone === "requirement" && shortenRequirementLabels
+                        ? {
+                            ...item,
+                            displayText: shortenMechanicalStrategyRequirementLabel(item.displayText),
+                        }
+                        : item;
+
+                    return (
+                        <li key={`${label}:${index}:${displayItem.displayText}:${displayItem.referenceKey ?? ""}:${displayItem.codexEntryKey ?? ""}`}>
+                            <QuestCodexReferenceLink source={displayItem} showTooltip={tone === "requirement"}>
+                                {displayItem.displayText}
+                            </QuestCodexReferenceLink>
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );
+}
+
+export function shortenMechanicalStrategyRequirementLabel(displayText: string): string {
+    return displayText
+        .trim()
+        .replace(/^Build constructible:\s*/i, "Build: ")
+        .replace(/^Use faction action:\s*/i, "Use action: ");
 }

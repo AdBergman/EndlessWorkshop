@@ -162,6 +162,10 @@ describe("QuestExplorerPage product continuity fixture", () => {
         renderProductQuest(kinCh0, Faction.KIN, "kin", true);
 
         expect(await screen.findByRole("heading", { name: "A New Home" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "A New Home Tutorial 1 step" })).toBeInTheDocument();
+        const loreBreadcrumb = screen.getByRole("navigation", { name: "Quest context" });
+        expect(within(loreBreadcrumb).getByText("Tutorial")).toBeInTheDocument();
+        expect(within(loreBreadcrumb).queryByText("Chapter 0")).not.toBeInTheDocument();
         expect(queryChronicleButton(/Found a home for the surviving Kin/)).not.toBeInTheDocument();
         expect(queryChronicleButton(/Start the task of rebuilding/)).not.toBeInTheDocument();
         expect(queryChronicleButton(/Find local allies/)).not.toBeInTheDocument();
@@ -185,6 +189,15 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
         expect(await screen.findByRole("heading", { name: "A New Home" })).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: "Strategy" }));
+
+        expect(screen.getByRole("button", { name: "A New Home Tutorial 1 step" })).toBeInTheDocument();
+        const strategyBreadcrumb = screen.getByRole("navigation", { name: "Quest context" });
+        expect(within(strategyBreadcrumb).getByText("Tutorial")).toBeInTheDocument();
+        expect(within(strategyBreadcrumb).queryByText("Chapter 0")).not.toBeInTheDocument();
+        const strategyHeaderMeta = document.querySelector(".questExplorer-headerMeta");
+        expect(strategyHeaderMeta).toBeInstanceOf(HTMLElement);
+        expect(within(strategyHeaderMeta as HTMLElement).getByText("Tutorial")).toBeInTheDocument();
+        expect(within(strategyHeaderMeta as HTMLElement).queryByText("Chapter 0")).not.toBeInTheDocument();
 
         const chronicleRegion = chronicle();
         const chapterPlan = within(chronicleRegion).getByRole("region", { name: "Chapter plan" });

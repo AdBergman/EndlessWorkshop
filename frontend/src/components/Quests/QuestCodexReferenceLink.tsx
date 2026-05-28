@@ -3,7 +3,11 @@ import { type FocusEvent, type MouseEvent, type ReactNode, useId, useMemo, useRe
 import { FaExternalLinkAlt } from "react-icons/fa";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
-import { getHoverCoords } from "@/components/Tooltips/hoverHelpers";
+import {
+    getHoverCoords,
+    getHoverCoordsForElement,
+    type PixelTooltipCoords,
+} from "@/components/Tooltips/hoverHelpers";
 import {
     codexEntryHref,
     resolveQuestCodexReference,
@@ -17,7 +21,7 @@ import {
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import { useCodexStore } from "@/stores/codexStore";
 
-type TooltipCoords = { x: number; y: number; mode: "pixel" };
+type TooltipCoords = PixelTooltipCoords;
 
 export function QuestCodexReferenceLink({
     source,
@@ -199,13 +203,7 @@ function cleanPart(value: string): string | null {
 }
 
 function tooltipCoordsForElement(element: HTMLElement): TooltipCoords {
-    const rect = element.getBoundingClientRect();
-
-    return {
-        x: rect.right + window.scrollX + 10,
-        y: rect.top + window.scrollY,
-        mode: "pixel",
-    };
+    return getHoverCoordsForElement(element);
 }
 
 function codexKindLine(exportKind: string, kind: string | null | undefined, category: string | null | undefined): string {

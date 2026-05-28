@@ -1,4 +1,5 @@
 import { getQuestCategoryKey, getQuestCategoryLabel } from "@/features/quests/questCategories";
+import { questChapterDisplayLabel } from "@/features/quests/questDisplay";
 import type {
     QuestExplorerEntry,
     QuestExplorerProgression,
@@ -210,11 +211,15 @@ export function getVisibleRailEntries(
 
 export const getRailProgressionEntries = getVisibleRailEntries;
 
-function chapterLabel(chapter: QuestProgressionChapter, entry: QuestExplorerEntry): string {
+function chapterLabel(
+    questline: QuestProgressionQuestline,
+    chapter: QuestProgressionChapter,
+    entry: QuestExplorerEntry
+): string {
     const chapterNumber = chapter.chapterNumber ?? chapter.chapterOrder;
     return chapterNumber == null
         ? entry.navigation.chapterLabel || "Chapter"
-        : `Chapter ${chapterNumber}`;
+        : questChapterDisplayLabel(chapter, { entry, questline });
 }
 
 function chapterTitle(chapter: QuestProgressionChapter, entry: QuestExplorerEntry): string {
@@ -358,7 +363,7 @@ export function buildQuestRailGroups(
                 entry: representativeEntry,
                 progression: { questline, chapter },
                 title: progressionItemTitle(questline, chapter, representativeEntry),
-                chapterLabel: chapterLabel(chapter, representativeEntry),
+                chapterLabel: chapterLabel(questline, chapter, representativeEntry),
                 metaLabel: stepCountLabel(chapter.steps.length),
                 selectionEntryKeys,
                 order: itemOrder,

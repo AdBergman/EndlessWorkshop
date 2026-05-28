@@ -3,6 +3,7 @@ import type {
     LoreSection,
     QuestExplorerEntry,
     QuestProgressionChapter,
+    QuestProgressionQuestline,
     QuestProgressionStep,
 } from "@/types/questTypes";
 
@@ -15,6 +16,43 @@ export function stepPositionLabel(step: QuestProgressionStep): string {
 export function chapterPositionLabel(chapter: QuestProgressionChapter): string {
     const chapterNumber = chapter.chapterNumber ?? chapter.chapterOrder;
     return chapterNumber == null ? "Chapter" : `Chapter ${chapterNumber}`;
+}
+
+export function questChapterDisplayLabel(
+    chapter: QuestProgressionChapter,
+    context: {
+        entry?: QuestExplorerEntry | null;
+        questline?: QuestProgressionQuestline | null;
+    } = {}
+): string {
+    const chapterNumber = chapter.chapterNumber ?? chapter.chapterOrder;
+    if (chapterNumber === 0 && isKinChapterContext(context)) return "Tutorial";
+    return chapterPositionLabel(chapter);
+}
+
+function isKinChapterContext({
+    entry,
+    questline,
+}: {
+    entry?: QuestExplorerEntry | null;
+    questline?: QuestProgressionQuestline | null;
+}): boolean {
+    return [
+        entry?.entryKey,
+        entry?.navigation.factionKey,
+        entry?.navigation.factionName,
+        entry?.navigation.questLineKey,
+        entry?.navigation.questLineName,
+        questline?.factionKey,
+        questline?.factionFamilyKey,
+        questline?.factionName,
+        questline?.questLineKey,
+        questline?.questLineFamilyKey,
+        questline?.questLineName,
+    ].some((value) => {
+        const normalized = (value ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+        return normalized === "kin" || normalized.includes("kinofsheredyn");
+    });
 }
 
 export function phaseDisplayLabel(phase: string | null | undefined, fallback = "Objective"): string {

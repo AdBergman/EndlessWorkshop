@@ -1708,6 +1708,15 @@
     overflow-wrap: anywhere;
 }
 
+.questExplorer-content--majorFactionStrategy .questExplorer-inlineMeta li,
+.questExplorer-content--majorFactionStrategy .questExplorer-codexReference,
+.questExplorer-content--majorFactionStrategy .questExplorer-codexReferencePrefix,
+.questExplorer-content--majorFactionStrategy .questExplorer-codexPreviewTarget {
+    min-width: 0;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+
 .questExplorer-inlineMetaDetail {
     display: block;
     margin-top: 2px;

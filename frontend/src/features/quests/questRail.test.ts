@@ -300,6 +300,43 @@ describe("quest rail projection", () => {
         expect(groups[0].items[0].title).not.toBe(groups[0].items[0].chapterLabel);
     });
 
+    it("labels Kin chapter zero as Tutorial in the rail", () => {
+        const tutorial = entry({
+            entryKey: "TutorialScenario_Quest_KinOfSheredyn_Chapter00_Step01",
+            title: "A New Home",
+            navigation: {
+                ...entry().navigation,
+                factionKey: null,
+                factionName: null,
+                questLineKey: null,
+                questLineName: null,
+                chapter: 0,
+                chapterLabel: "Chapter 0",
+                chapterOrder: 0,
+                stepOrder: 0,
+            },
+        });
+        const progression = testProgression({
+            questLineKey: "FactionQuest_KinOfSheredyn",
+            questLineFamilyKey: "FactionQuest_KinOfSheredyn",
+            questLineName: "Kin",
+            factionKey: "Faction_KinOfSheredyn",
+            factionFamilyKey: "Faction_KinOfSheredyn",
+            factionName: "Kin",
+            chapterNumber: 0,
+            chapterOrder: 0,
+            title: "Tutorial",
+            steps: [
+                { stepNumber: 1, stepOrder: 0, title: "A New Home", detailEntryKey: tutorial.entryKey },
+            ],
+        });
+
+        const groups = buildQuestRailGroups([tutorial], progression);
+
+        expect(groups[0].items[0].title).toBe("A New Home");
+        expect(groups[0].items[0].chapterLabel).toBe("Tutorial");
+    });
+
     it("uses minor faction display names as fallback rail subtitles when available", () => {
         const minor = entry({
             entryKey: "MinorFaction_SpecificQuest_Noquensii01",
