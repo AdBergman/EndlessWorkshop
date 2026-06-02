@@ -58,15 +58,15 @@ describe("codexDiagnosticsReport", () => {
             "unresolved-ref": 1,
         });
         expect(report.descriptorCounts).toEqual({
-            "entity-like-token": 2,
-            "known-style-token": 1,
+            "entity-like-token": 1,
+            "known-style-token": 2,
             "malformed-token": 1,
             "unknown-token": 1,
         });
         expect(report.signalCounts).toEqual({
-            "expected-style-token": 1,
+            "expected-style-token": 2,
             "high-signal-warning": 1,
-            other: 9,
+            other: 8,
         });
         expect(report.duplicateReferenceCount).toBe(1);
     });
@@ -91,7 +91,7 @@ describe("codexDiagnosticsReport", () => {
                 "unknown-token": 1,
             },
             units: {
-                "entity-like-token": 1,
+                "known-style-token": 1,
             },
         });
     });
@@ -175,7 +175,7 @@ describe("codexDiagnosticsReport", () => {
         expect(text).toContain("- duplicate references: 1");
         expect(text).toContain("DIAGNOSTIC SIGNAL SUMMARY");
         expect(text).toContain("- high-signal warnings: 1");
-        expect(text).toContain("- expected style tokens: 1");
+        expect(text).toContain("- expected style tokens: 2");
         expect(text).toContain("ICON USAGE SUMMARY");
         expect(text).toContain("ICON USAGE BY CATEGORY");
         expect(text).toContain("UNUSED MANIFEST CATEGORY EXAMPLES");

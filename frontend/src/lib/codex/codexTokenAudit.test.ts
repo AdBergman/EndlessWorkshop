@@ -26,13 +26,13 @@ describe("codexTokenAudit", () => {
             [
                 "UNKNOWN TOKENS",
                 "--------------",
-                "PopulationCategory_03 (1)",
                 "TBD (1)",
                 "",
                 "KNOWN TOKENS",
                 "------------",
                 "DustColored (2)",
                 "LuxuryResource01 (2)",
+                "PopulationCategory_03 (1)",
             ].join("\n")
         );
     });
@@ -55,12 +55,12 @@ describe("codexTokenAudit", () => {
             [
                 "UNKNOWN TOKENS",
                 "--------------",
-                "PopulationCategory_03 (1)",
                 "Unit_Necro_Drone (1)",
                 "Unit_Necro_Larva (1)",
                 "",
                 "KNOWN TOKENS",
                 "------------",
+                "PopulationCategory_03 (1)",
             ].join("\n")
         );
     });

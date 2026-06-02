@@ -69,12 +69,16 @@ describe("unit migration scope", () => {
     it("keeps unit card faction icons pinned and colored by the card faction token", () => {
         const cardSource = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.tsx"), "utf8");
         const cardCss = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.css"), "utf8");
-        const iconSource = readFileSync(resolve(srcDir, "components/Units/UnitCard/FactionIcon.tsx"), "utf8");
+        const iconResolverSource = readFileSync(resolve(srcDir, "features/icons/factionIconResolver.ts"), "utf8");
         const factionColors = readFileSync(resolve(srcDir, "types/factionColors.ts"), "utf8");
 
-        expect(cardSource).toMatch(/<FactionIcon\s+faction=\{d\.majorEnumFaction\}\s+color=\{colors\.border\}/);
+        expect(cardSource).toMatch(/getFactionIconPath\(d\.unit\.faction \?\? d\.majorEnumFaction\)/);
+        expect(cardSource).toMatch(/\["--faction-icon-path" as any\]:\s*`url\("\$\{factionIconPath\}"\)`/);
+        expect(cardSource).toMatch(/\["--faction-icon-color" as any\]:\s*colors\.border/);
         expect(cardCss).toMatch(/\.fortIcon\s*\{[\s\S]*position:\s*absolute;[\s\S]*top:\s*8px;[\s\S]*right:\s*10px;/);
-        expect(iconSource).toMatch(/color\s*=\s*"currentColor"/);
+        expect(cardCss).toMatch(/\.factionIcon\s*\{[\s\S]*background:\s*var\(--faction-icon-color, currentColor\);[\s\S]*mask-image:\s*var\(--faction-icon-path\);/);
+        expect(iconResolverSource).toMatch(/factionQuest_KinOfSheredyn_Chapter02_Step01_Choice1/);
+        expect(iconResolverSource).toMatch(/factionAffinity_Mukag_210fe287/);
         expect(factionColors).toMatch(/NECROPHAGES:\s*\{[\s\S]*border:\s*"#8BC34A"/);
     });
 });

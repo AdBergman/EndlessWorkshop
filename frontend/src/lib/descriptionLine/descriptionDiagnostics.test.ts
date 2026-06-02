@@ -63,11 +63,11 @@ describe("descriptionDiagnostics", () => {
                 style: getTokenStyle("LuxuryResource01"),
             },
             {
-                kind: "entity-like-token",
+                kind: "known-style-token",
                 token: "PopulationCategory_03",
                 raw: "[PopulationCategory_03]",
                 index: 51,
-                entityKindHint: "population",
+                style: getTokenStyle("PopulationCategory_03"),
             },
         ]);
     });

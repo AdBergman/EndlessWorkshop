@@ -1,4 +1,5 @@
 import { getIconByDescriptionToken } from "./semanticIconManifest";
+import { getDescriptionTokenAliasIcon } from "./descriptionTokenIconAliases";
 import { getResourceTokenIconPath } from "./resourceTokenIcons";
 
 export type DescriptionTokenIcon = {
@@ -60,6 +61,11 @@ export function getDescriptionTokenIcon(
         return {
             path: resourceIconPath,
         };
+    }
+
+    const aliasIcon = getDescriptionTokenAliasIcon(normalizedToken);
+    if (aliasIcon) {
+        return resolveDescriptionTokenIconVariant(aliasIcon, context);
     }
 
     const icon = getIconByDescriptionToken(normalizedToken);

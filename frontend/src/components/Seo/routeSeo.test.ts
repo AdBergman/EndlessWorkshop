@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
     INDEXABLE_PUBLIC_ROUTE_SEO,
@@ -9,6 +11,11 @@ const firstJsonLdNode = (route: (typeof INDEXABLE_PUBLIC_ROUTE_SEO)[number]) => 
     const jsonLd = route.jsonLd;
     if (!jsonLd) return null;
     return Array.isArray(jsonLd) ? jsonLd[0] : jsonLd;
+};
+
+const readStaticRouteHtml = (routePath: string) => {
+    const fileName = routePath === "/" ? "index.html" : `${routePath.slice(1)}.html`;
+    return readFileSync(resolve(process.cwd(), fileName), "utf8");
 };
 
 describe("publicRouteSeo", () => {
@@ -58,5 +65,16 @@ describe("publicRouteSeo", () => {
                 String(firstJsonLdNode(route)?.url ?? "").startsWith(SITE_URL)
             )
         ).toBe(true);
+    });
+
+    it("keeps static public route files as empty React mount shells", () => {
+        for (const route of INDEXABLE_PUBLIC_ROUTE_SEO) {
+            const html = readStaticRouteHtml(route.path);
+
+            expect(html).toContain('<div id="root"></div>');
+            expect(html).toContain('<meta name="description"');
+            expect(html).not.toContain('class="seo-shell"');
+            expect(html).not.toContain("<main");
+        }
     });
 });
