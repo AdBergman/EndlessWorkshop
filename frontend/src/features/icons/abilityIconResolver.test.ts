@@ -41,6 +41,24 @@ describe("abilityIconResolver", () => {
         expect(getAbilityIconPath("UnitAbility_ProtectiveOversight")).toBe(
             "/svg/battle-abilities/UI_UnitAbility_ProtectiveOversight.svg"
         );
+        expect(getAbilityIconPath("UnitAbility_Hero_BattleAbility_Equipment_Passive_30")).toBe(
+            "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive30.svg"
+        );
+        expect(getAbilityIconPath("UnitAbility_LeechingSeeding_1")).toBe(
+            "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_GreenScion01.svg"
+        );
+        expect(getAbilityIconPath("UnitAbility_LeechingSeeding_2")).toBe(
+            "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_GreenScion01.svg"
+        );
+        expect(getAbilityIconPath("UnitAbility_Blossom_1")).toBe(
+            "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender01.svg"
+        );
+        expect(getAbilityIconPath("UnitAbility_Blossom_2")).toBe(
+            "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender01.svg"
+        );
+        expect(getAbilityIconPath("UnitAbility_CompletedBlossom")).toBe(
+            "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender02.svg"
+        );
     });
 
     it("returns null when the current manifest has no safe ability match", () => {
