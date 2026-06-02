@@ -157,7 +157,7 @@ describe("CodexSearch", () => {
 
         expect(screen.getByText("Minor Factions")).toBeInTheDocument();
         expect(screen.queryByText("Minorfactions")).not.toBeInTheDocument();
-        expect(container.querySelector('img.codex-kindIcon--search[src="/svg/common/UI_Common_MinorVillage.svg"]'))
+        expect(container.querySelector('img.codex-kindIcon--search[src="/svg/hero-skills/UI_MinorEmpireSymbol_Ametrine.svg"]'))
             .toBeInTheDocument();
     });
 

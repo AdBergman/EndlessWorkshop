@@ -230,6 +230,45 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
+    it("renders the all-factions summary icon as a monochrome category icon", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Faction_Mukag",
+                descriptionLines: ["Affinity: Tahuks"],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                factions: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        const { container } = render(
+            <MemoryRouter initialEntries={["/codex?category=factions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Factions" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /all factions/i })).toBeInTheDocument();
+        expect(
+            container.querySelector(
+                'img.codex-kindIcon--result.codex-kindIcon--monochrome[src="/svg/quests/UI_QuestCategory_Faction.svg"]'
+            )
+        ).toBeInTheDocument();
+    });
+
     it("pushes category and entry states so browser back returns to category then index", async () => {
         const user = userEvent.setup();
 

@@ -1,4 +1,9 @@
 import type { CodexEntry } from "@/types/dataTypes";
+import {
+    formatCodexMajorFactionText,
+    getCodexDescriptionPreviewText,
+    getCodexEntryLabel,
+} from "@/lib/codex/codexPresentation";
 
 export const ALL_CODEX_KIND = "all";
 const AUTOCOMPLETE_LIMIT = 8;
@@ -10,6 +15,18 @@ const collator = new Intl.Collator(undefined, {
 
 function normalize(value: string | null | undefined): string {
     return (value ?? "").trim().toLowerCase();
+}
+
+function normalizedPublicText(value: string | null | undefined): string {
+    return normalize(formatCodexMajorFactionText(value ?? ""));
+}
+
+function searchableDescription(entry: CodexEntry): string {
+    return normalize(getCodexDescriptionPreviewText(entry.descriptionLines));
+}
+
+function searchablePublicLabel(entry: Pick<CodexEntry, "displayName" | "entryKey">): string {
+    return normalize(getCodexEntryLabel(entry));
 }
 
 export function sortCodexEntries(entries: readonly CodexEntry[]): CodexEntry[] {
@@ -31,7 +48,15 @@ export function entryMatchesQuery(entry: CodexEntry, query: string): boolean {
         entry.category ?? "",
         entry.kind ?? "",
         entry.descriptionLines.join(" "),
-    ].some((value) => normalize(value).includes(normalizedQuery));
+    ].some((value) => normalize(value).includes(normalizedQuery)) ||
+        [
+            searchablePublicLabel(entry),
+            normalizedPublicText(entry.displayName),
+            normalizedPublicText(entry.entryKey),
+            normalizedPublicText(entry.category),
+            normalizedPublicText(entry.kind),
+            searchableDescription(entry),
+        ].some((value) => value.includes(normalizedQuery));
 }
 
 export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
@@ -39,11 +64,15 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
     if (!normalizedQuery) return 0;
 
     const displayName = normalize(entry.displayName);
+    const publicLabel = searchablePublicLabel(entry);
     const entryKey = normalize(entry.entryKey);
     const description = normalize(entry.descriptionLines.join(" "));
+    const publicDescription = searchableDescription(entry);
     const exportKind = normalize(entry.exportKind);
     const category = normalize(entry.category);
+    const publicCategory = normalizedPublicText(entry.category);
     const sourceKind = normalize(entry.kind);
+    const publicSourceKind = normalizedPublicText(entry.kind);
 
     let score = -1;
 
@@ -55,6 +84,14 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
         score = Math.max(score, 840);
     }
 
+    if (publicLabel === normalizedQuery) {
+        score = Math.max(score, 1180);
+    } else if (publicLabel.startsWith(normalizedQuery)) {
+        score = Math.max(score, 940);
+    } else if (publicLabel.includes(normalizedQuery)) {
+        score = Math.max(score, 820);
+    }
+
     if (entryKey === normalizedQuery) {
         score = Math.max(score, 720);
     } else if (entryKey.startsWith(normalizedQuery)) {
@@ -63,7 +100,7 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
         score = Math.max(score, 520);
     }
 
-    if (description.includes(normalizedQuery)) {
+    if (description.includes(normalizedQuery) || publicDescription.includes(normalizedQuery)) {
         score = Math.max(score, 320);
     }
 
@@ -71,7 +108,12 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
         score = Math.max(score, 180);
     }
 
-    if (category.includes(normalizedQuery) || sourceKind.includes(normalizedQuery)) {
+    if (
+        category.includes(normalizedQuery) ||
+        sourceKind.includes(normalizedQuery) ||
+        publicCategory.includes(normalizedQuery) ||
+        publicSourceKind.includes(normalizedQuery)
+    ) {
         score = Math.max(score, 220);
     }
 
@@ -79,9 +121,10 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
         return score;
     }
 
-    if (displayName.includes(normalizedQuery)) {
-        score += Math.max(0, 40 - displayName.indexOf(normalizedQuery));
-        score += Math.max(0, 24 - Math.min(displayName.length, 24));
+    const labelForBoost = publicLabel.includes(normalizedQuery) ? publicLabel : displayName;
+    if (labelForBoost.includes(normalizedQuery)) {
+        score += Math.max(0, 40 - labelForBoost.indexOf(normalizedQuery));
+        score += Math.max(0, 24 - Math.min(labelForBoost.length, 24));
     }
 
     if (entryKey.includes(normalizedQuery)) {

@@ -2,6 +2,7 @@ import { extractBracketTokens } from "@/lib/descriptionLine/descriptionLineRende
 import type { CodexEntry } from "@/types/dataTypes";
 import { getAbilityIconPath } from "./abilityIconResolver";
 import { getCodexKindIconPath } from "./codexKindIcons";
+import { getFactionIconPath } from "./factionIconResolver";
 import { getExtractorResourceIconPath, getResourceTokenIconPath } from "./resourceTokenIcons";
 
 function getDisplayNameResourceIconPath(displayName: string): string | null {
@@ -14,8 +15,11 @@ function getDisplayNameResourceIconPath(displayName: string): string | null {
 }
 
 export function getCodexEntryIconPath(entry: Pick<CodexEntry, "exportKind" | "entryKey" | "displayName">): string | null {
+    const exportKind = entry.exportKind.trim().toLowerCase();
+
     return getDisplayNameResourceIconPath(entry.displayName)
         ?? getExtractorResourceIconPath(entry.entryKey)
-        ?? (entry.exportKind.trim().toLowerCase() === "abilities" ? getAbilityIconPath(entry.entryKey) : null)
+        ?? (exportKind === "factions" || exportKind === "minorfactions" ? getFactionIconPath(entry.entryKey) : null)
+        ?? (exportKind === "abilities" ? getAbilityIconPath(entry.entryKey) : null)
         ?? getCodexKindIconPath(entry.exportKind);
 }

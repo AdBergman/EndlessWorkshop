@@ -12,12 +12,17 @@ type CodexEntryIconProps = {
 export function CodexEntryIcon({ entry, label, className, size = 18 }: CodexEntryIconProps) {
     const path = getCodexEntryIconPath(entry);
     if (!path) return null;
+    const isMajorFaction = entry.exportKind.trim().toLowerCase() === "factions";
+    const classes = [
+        isMajorFaction ? "codex-kindIcon--monochrome" : null,
+        className,
+    ].filter(Boolean).join(" ");
 
     return (
         <IconImg
             path={path}
             title={label}
-            className={className}
+            className={classes}
             size={size}
             decorative
         />

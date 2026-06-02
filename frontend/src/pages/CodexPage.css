@@ -129,6 +129,10 @@
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
 }
 
+.codex-kindIcon--monochrome {
+    filter: brightness(0) invert(1) drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+}
+
 .codex-kindIcon--chip {
     opacity: 0.64;
 }

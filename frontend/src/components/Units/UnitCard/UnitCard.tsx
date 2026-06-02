@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
 
-import { FactionIcon } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import type { Unit } from "@/types/dataTypes";
 import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
@@ -11,6 +10,7 @@ import { useCodex } from "@/hooks/useCodex";
 import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
 import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
 import { IconImg } from "@/features/icons/IconImg";
+import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
 
 interface UnitCardProps {
@@ -90,6 +90,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
     const gradient = FACTION_GRADIENT[factionKey] || FACTION_GRADIENT.PLACEHOLDER;
     const typeDisplayLines = getTypeDisplayLines(d.classLabel, d.tierLabel);
+    const factionIconPath = !d.isMinor && d.majorEnumFaction
+        ? getFactionIconPath(d.unit.faction ?? d.majorEnumFaction)
+        : null;
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -195,9 +198,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             )}
                         </div>
 
-                        {!d.isMinor && d.majorEnumFaction && (
+                        {!d.isMinor && d.majorEnumFaction && factionIconPath && (
                             <div className="fortIcon" title={d.unit.faction ?? undefined}>
-                                <FactionIcon faction={d.majorEnumFaction} color={colors.border} />
+                                <span
+                                    className="factionIcon"
+                                    aria-hidden="true"
+                                    style={{
+                                        ["--faction-icon-path" as any]: `url("${factionIconPath}")`,
+                                        ["--faction-icon-color" as any]: colors.border,
+                                    }}
+                                />
                             </div>
                         )}
                     </div>
@@ -253,7 +263,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                         <div className="statsRow">
                             <StatValue stat="movement" label="Movement" value={d.stats.movement ?? "—"} />
-                            <StatValue stat="focus" label="Focus / Critical Chance" value={d.stats.focus ?? "—"} />
+                            <StatValue stat="focus" label="Focus / Critical Chance" value={d.stats.focus ?? 0} />
                             <StatValue stat="upkeep" label="Upkeep" value={d.stats.upkeep ?? 0} />
                         </div>
                     </div>

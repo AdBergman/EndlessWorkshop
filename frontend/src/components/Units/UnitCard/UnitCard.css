@@ -336,8 +336,25 @@
 
     width: 20px;
     height: 20px;
-    color: var(--card-border, #ff7f32);
     pointer-events: none;
+}
+
+.factionIcon {
+    flex: 0 0 auto;
+    display: block;
+    width: 22px;
+    height: 22px;
+    background: var(--faction-icon-color, currentColor);
+    mask-image: var(--faction-icon-path);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-image: var(--faction-icon-path);
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
 }
 
 /* === NAME BLOCK (unit + minor faction) === */

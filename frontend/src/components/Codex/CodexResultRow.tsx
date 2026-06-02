@@ -20,6 +20,10 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
     const isSummary = isCodexSummaryEntry(entry);
     const secondaryContext = isSummary ? "" : getCodexSecondaryContext(entry);
     const kindLabel = isSummary ? "Overview" : formatCodexKindLabel(entry.exportKind);
+    const iconClassName = [
+        "codex-kindIcon codex-kindIcon--result",
+        isSummary ? "codex-kindIcon--monochrome" : null,
+    ].filter(Boolean).join(" ");
 
     return (
         <button
@@ -33,7 +37,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
                 <CodexEntryIcon
                     entry={entry}
                     label={kindLabel}
-                    className="codex-kindIcon codex-kindIcon--result"
+                    className={iconClassName}
                     size={18}
                 />
                 <span className="codex-resultRow__title">{renderCodexLabel(getCodexEntryLabel(entry))}</span>

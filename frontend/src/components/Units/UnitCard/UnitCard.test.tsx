@@ -105,4 +105,63 @@ describe("UnitCard", () => {
         expect(container.querySelector('img.statIcon[src="/svg/resources/UI_Common_Resource_Money.svg"]'))
             .toBeInTheDocument();
     });
+
+    it("renders colored faction SVG icons for major unit card badges", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    faction: "Kin",
+                })}
+                showArtwork={false}
+            />
+        );
+
+        const icon = container.querySelector<HTMLElement>(".factionIcon");
+
+        expect(icon).toBeInTheDocument();
+        expect(icon).not.toHaveClass("codex-kindIcon--monochrome");
+        expect(icon).toHaveStyle({
+            "--faction-icon-path": 'url("/svg/factions/UI_Faction_KinOfSheredyn.svg")',
+            "--faction-icon-color": "#3B82F6",
+        });
+    });
+
+    it("uses the visible Mukag SVG for Tahuk major unit card badges", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    faction: "Tahuk",
+                })}
+                showArtwork={false}
+            />
+        );
+
+        const icon = container.querySelector<HTMLElement>(".factionIcon");
+
+        expect(icon).toBeInTheDocument();
+        expect(icon).not.toHaveClass("codex-kindIcon--monochrome");
+        expect(icon).toHaveStyle({
+            "--faction-icon-path": 'url("/svg/hero-skills/UI_EmpireSymbol_Mukag01.svg")',
+            "--faction-icon-color": "#06B6D4",
+        });
+    });
+
+    it("shows zero for missing Focus / Critical Chance values", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    descriptionLines: [
+                        "+12 [Damage] Damage",
+                        "+80 [Health] Health",
+                    ],
+                })}
+                showArtwork={false}
+            />
+        );
+
+        const focusStat = container.querySelector('img.statIcon[src="/svg/units/UI_UnitItem_Focus.svg"]')
+            ?.closest(".stat");
+
+        expect(focusStat).toHaveTextContent("0");
+    });
 });

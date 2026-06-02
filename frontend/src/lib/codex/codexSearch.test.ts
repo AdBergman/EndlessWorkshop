@@ -38,6 +38,20 @@ describe("filterCodexEntries", () => {
         expect(filterCodexEntries(sampleEntries, { query: "foodcolored" })).toHaveLength(1);
     });
 
+    it("searches public major-faction labels even when exporter names stay technical", () => {
+        const result = filterCodexEntries([
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Faction_Mukag",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ], { query: "Tahuk" });
+
+        expect(result.map((entry) => entry.entryKey)).toEqual(["Faction_Mukag"]);
+    });
+
     it("applies kind filtering before sorting", () => {
         const result = filterCodexEntries(sampleEntries, { kind: "abilities" });
         expect(result.map((entry) => entry.entryKey)).toEqual(["Ability_A", "Ability_B"]);

@@ -52,4 +52,24 @@ describe("codexEntryIcons", () => {
             }))
         ).toBe("/svg/factions/UI_Common_District.svg");
     });
+
+    it("uses specific major faction icons for faction entries", () => {
+        expect(
+            getCodexEntryIconPath(entry({
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Tahuk",
+            }))
+        ).toBe("/svg/hero-skills/UI_EmpireSymbol_Mukag01.svg");
+    });
+
+    it("uses specific minor faction icons for minor faction entries", () => {
+        expect(
+            getCodexEntryIconPath(entry({
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_Ametrine",
+                displayName: "Ametrine",
+            }))
+        ).toBe("/svg/hero-skills/UI_MinorEmpireSymbol_Ametrine.svg");
+    });
 });
