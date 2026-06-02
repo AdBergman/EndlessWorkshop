@@ -11,6 +11,7 @@ const ABILITY_ICON_ALIASES: Record<string, string[]> = {
     UnitAbility_Class_BonusVsHero: ["battleAbility_Class_BonusVsHero"],
     UnitAbility_Class_BonusVsJuggernaught: ["battleAbility_Class_BonusVsJuggernaught"],
     UnitAbility_Class_BonusVsCavalry: ["battleAbility_Class_BonusVsCavalry"],
+    UnitAbility_DefensivePlate: ["battleAbility_Defend_A", "status_Unit_DefensivePlate"],
 };
 
 function normalizeAbilityKey(abilityKey: string): string {
@@ -39,7 +40,9 @@ function buildAbilityRawKeyCandidates(abilityKey: string): string[] {
         normalized,
         `unitAbility_${suffix}`,
         `unitAbility_Descriptor_${suffix}`,
+        `battleAbility_Descriptor_${suffix}`,
         `battleAbility_${suffix}`,
+        `activeSkill_Unit_${suffix}`,
         `activeSkill_${suffix}`,
     ]);
 }
@@ -52,4 +55,3 @@ export function getAbilityIconPath(abilityKey: string): string | null {
 
     return null;
 }
-
