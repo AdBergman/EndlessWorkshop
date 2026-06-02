@@ -139,4 +139,24 @@ describe("UnitTooltip", () => {
             "/svg/abilities/UI_UnitItem_Defense.svg"
         );
     });
+
+    it("renders the hovered unit's manifest faction icon instead of the selected toolbar faction", () => {
+        render(
+            <UnitTooltip
+                hoveredUnit={{
+                    data: unit({
+                        faction: "Lords",
+                    }),
+                    coords: { x: 10, y: 10, mode: "pixel" },
+                }}
+            />
+        );
+
+        const icon = document.body.querySelector<HTMLElement>(".techTooltipFactionIcon");
+        expect(icon).toBeInTheDocument();
+        expect(icon).toHaveStyle({
+            "--faction-icon-path": 'url("/svg/factions/UI_Faction_LastLord.svg")',
+            "--faction-icon-color": "#EF4444",
+        });
+    });
 });

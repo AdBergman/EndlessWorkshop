@@ -69,6 +69,23 @@
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
 }
 
+.techTooltipFactionIcon {
+    flex: 0 0 auto;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: var(--faction-icon-color, currentColor);
+    mask-image: var(--faction-icon-path);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-image: var(--faction-icon-path);
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+}
+
 /* === Units: look more like clickable links === */
 .hoverable-link.unit-link {
     text-decoration: underline;

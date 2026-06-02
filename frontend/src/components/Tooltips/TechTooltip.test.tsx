@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import TechTooltip from "@/components/Tooltips/TechTooltip";
 import { Faction, Tech } from "@/types/dataTypes";
 import { useDistrictStore } from "@/stores/districtStore";
@@ -165,5 +165,56 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.getByText("Unit:")).toBeInTheDocument();
         expect(screen.getByText("Scout")).toBeInTheDocument();
         expect(container.querySelector('img.techUnlockIcon[src="/svg/common/UI_Common_Unit.svg"]')).toBeInTheDocument();
+    });
+
+    it("opens unit unlocks with the target unit faction and unitKey route params", () => {
+        const openSpy = vi.spyOn(window, "open").mockImplementation(() => null);
+        useUnitStore.setState({
+            unitsByKey: {
+                Unit_KinOfSheredyn_Archer: {
+                    unitKey: "Unit_KinOfSheredyn_Archer",
+                    displayName: "Explorer",
+                    artId: null,
+                    faction: "KinOfSheredyn",
+                    isMajorFaction: true,
+                    isHero: false,
+                    isChosen: false,
+                    spawnType: null,
+                    previousUnitKey: null,
+                    nextEvolutionUnitKeys: [],
+                    evolutionTierIndex: 0,
+                    unitClassKey: null,
+                    attackSkillKey: null,
+                    abilityKeys: [],
+                    descriptionLines: [],
+                },
+            },
+        });
+
+        render(
+            <TechTooltip
+                hoveredTech={{
+                    ...hoveredTech,
+                    unlocks: [
+                        {
+                            unlockType: "Constructible",
+                            unlockKey: "Unit_KinOfSheredyn_Archer",
+                            unlockCategory: "Unit",
+                        },
+                    ],
+                }}
+                onMouseEnter={() => {}}
+                onMouseLeave={() => {}}
+            />
+        );
+
+        fireEvent.click(screen.getByText("Explorer"));
+
+        expect(openSpy).toHaveBeenCalledWith(
+            "/units?faction=kinofsheredyn&unitKey=Unit_KinOfSheredyn_Archer",
+            "_blank"
+        );
+
+        openSpy.mockRestore();
     });
 });

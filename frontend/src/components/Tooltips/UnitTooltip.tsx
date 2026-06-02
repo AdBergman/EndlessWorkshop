@@ -4,11 +4,11 @@ import BaseTooltip from "./BaseTooltip";
 import TooltipSection from "./TooltipSection";
 import { Unit } from "@/types/dataTypes";
 import { HoveredWithCoords, createHoveredUnit } from "./hoverHelpers";
-import { FactionIcon } from "@/components/Units/UnitCard/FactionIcon";
 import { FACTION_COLORS } from "@/types/factionColors";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { getFactionIconPath } from "@/features/icons/factionIconResolver";
+import { deriveUnit } from "@/lib/units/deriveUnit";
 import { normalizeUnitKey, selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
-import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 
 interface UnitTooltipProps {
     hoveredUnit: HoveredWithCoords<Unit>;
@@ -49,6 +49,7 @@ const toRoman = (n: number) => {
 
 const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
     const { data, coords } = hoveredUnit;
+    const derived = deriveUnit(data);
 
     const {
         displayName,
@@ -61,10 +62,12 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
         descriptionLines,
     } = data;
 
-    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const unitsByKey = useUnitStore(selectUnitsByKey);
-    const factionKey = selectedFaction?.enumFaction ?? "PLACEHOLDER";
-    const accent = FACTION_COLORS[factionKey]?.accent ?? "#ffb673";
+    const factionKey = derived.majorEnumFaction ?? "PLACEHOLDER";
+    const factionIconPath = !derived.isMinor && derived.majorEnumFaction
+        ? getFactionIconPath(data.faction ?? derived.majorEnumFaction)
+        : null;
+    const factionColor = FACTION_COLORS[factionKey]?.border ?? FACTION_COLORS.PLACEHOLDER.border;
 
     const classLabel = unitClassDisplayName?.trim() || prettyClassKey(unitClassKey);
     const tierLabel = typeof evolutionTierIndex === "number" ? `Tier ${toRoman(evolutionTierIndex)}` : null;
@@ -81,8 +84,16 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
                     <span className="techTooltipName" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {displayName}
                     </span>
-                    {selectedFaction?.enumFaction ? (
-                        <FactionIcon faction={selectedFaction.enumFaction} size={14} color={accent} />
+                    {factionIconPath ? (
+                        <span
+                            className="techTooltipFactionIcon"
+                            aria-hidden="true"
+                            title={data.faction ?? undefined}
+                            style={{
+                                ["--faction-icon-path" as any]: `url("${factionIconPath}")`,
+                                ["--faction-icon-color" as any]: factionColor,
+                            }}
+                        />
                     ) : null}
                 </div>
 

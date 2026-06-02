@@ -190,6 +190,33 @@ describe("/units smoke behavior", () => {
         });
     });
 
+    it("hydrates target-unit faction route params used by tech unlock links", async () => {
+        mockedApiClient.getUnits.mockResolvedValue([
+            unit({
+                unitKey: "Unit_KinOfSheredyn_Archer",
+                displayName: "Explorer",
+                faction: "KinOfSheredyn",
+                nextEvolutionUnitKeys: ["Unit_KinOfSheredyn_Archer_Upgrade01"],
+            }),
+            unit({
+                unitKey: "Unit_KinOfSheredyn_Archer_Upgrade01",
+                displayName: "Pathfinder",
+                faction: "KinOfSheredyn",
+                previousUnitKey: "Unit_KinOfSheredyn_Archer",
+                evolutionTierIndex: 1,
+            }),
+        ]);
+
+        const { container } = renderExplorer("/units?faction=kinofsheredyn&unitKey=Unit_KinOfSheredyn_Archer");
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location")).toHaveTextContent(
+                "/units?faction=kinofsheredyn&unitKey=Unit_KinOfSheredyn_Archer"
+            );
+            expect(container.querySelector(".evolutionTreeWrapper")).toHaveTextContent("Pathfinder");
+        });
+    });
+
     it("falls back to the first faction root when the requested unit key is missing", async () => {
         renderExplorer("/units?faction=kin&unitKey=Unit_Does_Not_Exist");
 

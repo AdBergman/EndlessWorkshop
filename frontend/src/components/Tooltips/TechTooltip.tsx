@@ -17,6 +17,7 @@ import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
+import { buildUnitDetailsPath } from "@/lib/units/unitRoutes";
 import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
 import { TechUnlockIcon } from "@/features/icons/TechUnlockIcon";
 
@@ -100,8 +101,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
             }
 
             if (resolved.kind === "Unit") {
-                const faction = selectedFaction?.uiLabel?.toLowerCase() ?? "";
-                const unitParam = encodeURIComponent(unlockKey);
+                const unitPath = buildUnitDetailsPath(resolved.unit);
 
                 return (
                     <div key={index} className="techUnlockLine">
@@ -112,7 +112,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                                 className="hoverable-link unit-link"
                                 onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(resolved.unit, e))}
                                 onMouseLeave={() => setHoveredUnit(null)}
-                                onClick={() => window.open(`/units?faction=${faction}&unit=${unitParam}`, "_blank")}
+                                onClick={() => window.open(unitPath, "_blank")}
                             >
                                 {resolved.displayName}
                             </span>

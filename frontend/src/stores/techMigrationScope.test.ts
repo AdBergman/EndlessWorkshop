@@ -163,17 +163,18 @@ describe("tech data ownership migration scope", () => {
         expect(source).toMatch(/useFactionSelectionStore/);
     });
 
-    it("keeps tooltips reading selected faction from the faction store", () => {
-        for (const file of [
-            "components/Tooltips/TechTooltip.tsx",
-            "components/Tooltips/UnitTooltip.tsx",
-        ]) {
-            const source = readSrc(file);
+    it("keeps tooltips off the compatibility provider with scoped faction ownership", () => {
+        const techTooltipSource = readSrc("components/Tooltips/TechTooltip.tsx");
+        const unitTooltipSource = readSrc("components/Tooltips/UnitTooltip.tsx");
 
-            expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
-            expect(source).toMatch(/useFactionSelectionStore/);
-            expect(source).toMatch(/selectSelectedFaction/);
-        }
+        expect(techTooltipSource).not.toMatch(/useGameData\(\)|GameDataContext/);
+        expect(techTooltipSource).toMatch(/useFactionSelectionStore/);
+        expect(techTooltipSource).toMatch(/selectSelectedFaction/);
+
+        expect(unitTooltipSource).not.toMatch(/useGameData\(\)|GameDataContext/);
+        expect(unitTooltipSource).not.toMatch(/useFactionSelectionStore|selectSelectedFaction/);
+        expect(unitTooltipSource).toMatch(/deriveUnit/);
+        expect(unitTooltipSource).toMatch(/getFactionIconPath/);
     });
 
     it("keeps route declarations unchanged for tech and summary pages", () => {
