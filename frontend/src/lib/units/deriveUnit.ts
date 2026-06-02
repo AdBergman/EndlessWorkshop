@@ -8,6 +8,7 @@ export type UnitStats = {
     damage: number | null;
     movement: number | null;
     visionRange: number | null;
+    focus: number | null;
     upkeep: number | null;
 };
 
@@ -155,6 +156,7 @@ export function deriveUnit(unit: Unit): DerivedUnit {
         damage: findDamage(lines),
         movement: findStat(lines, "MovementPoints"),
         visionRange: findStat(lines, "VisionRange"),
+        focus: findStat(lines, "Focus"),
         upkeep: findUpkeep(lines),
     };
 

@@ -1,3 +1,5 @@
+import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
+
 type KindOption = {
     kind: string;
     label: string;
@@ -24,6 +26,12 @@ export default function KindFilter({ options, activeKind, onSelect }: Props) {
                         onClick={() => onSelect(option.kind)}
                         aria-pressed={isActive}
                     >
+                        <CodexKindIcon
+                            kind={option.kind}
+                            label={option.label}
+                            className="codex-kindIcon codex-kindIcon--chip"
+                            size={16}
+                        />
                         <span>{option.label}</span>
                         <span className="codex-kindFilter__count">{option.count}</span>
                     </button>

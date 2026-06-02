@@ -26,13 +26,13 @@ describe("codexTokenAudit", () => {
             [
                 "UNKNOWN TOKENS",
                 "--------------",
-                "LuxuryResource01 (2)",
                 "PopulationCategory_03 (1)",
                 "TBD (1)",
                 "",
                 "KNOWN TOKENS",
                 "------------",
                 "DustColored (2)",
+                "LuxuryResource01 (2)",
             ].join("\n")
         );
     });

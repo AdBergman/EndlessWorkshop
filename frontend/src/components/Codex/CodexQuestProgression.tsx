@@ -4,6 +4,7 @@ import {
     type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
+import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
 
 type Props = {
     group: CodexQuestGroupEntry | null;
@@ -17,7 +18,13 @@ export default function CodexQuestProgression({ group, selectedEntryKey, onSelec
     return (
         <section className="codex-questPath" aria-labelledby="codex-quest-path-heading">
             <div className="codex-sectionLabel" id="codex-quest-path-heading">
-                Quest Progression
+                <CodexKindIcon
+                    kind="quests"
+                    label="Quests"
+                    className="codex-kindIcon codex-kindIcon--section"
+                    size={16}
+                />
+                <span>Quest Progression</span>
             </div>
 
             <div className="codex-questPath__variants">

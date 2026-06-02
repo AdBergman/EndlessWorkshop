@@ -12,6 +12,7 @@ import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRend
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexQuestProgression from "./CodexQuestProgression";
 import RelatedEntries from "./RelatedEntries";
+import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
     entry: CodexEntry | null;
@@ -45,11 +46,18 @@ export default function CodexEntryDetail({
         ? getCodexQuestGroupDetailContextLines(entry)
         : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
+    const kindLabel = formatCodexKindLabel(entry.exportKind);
 
     return (
         <article className="codex-detail">
             <div className="codex-detail__metaRow">
-                {showKind ? <span className="codex-detail__kind">{formatCodexKindLabel(entry.exportKind)}</span> : null}
+                <CodexEntryIcon
+                    entry={entry}
+                    label={kindLabel}
+                    className="codex-kindIcon codex-kindIcon--detail"
+                    size={20}
+                />
+                {showKind ? <span className="codex-detail__kind">{kindLabel}</span> : null}
                 {detailContextLines.map((line) => (
                     <span className="codex-detail__context" key={line}>{line}</span>
                 ))}

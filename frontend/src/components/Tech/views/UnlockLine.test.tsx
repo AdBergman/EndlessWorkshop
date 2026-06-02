@@ -39,12 +39,13 @@ describe("UnlockLine district/improvement resolution", () => {
     });
 
     it("renders district and improvement unlock lines from their own store domains", () => {
-        const { rerender } = render(
+        const { container, rerender } = render(
             <UnlockLine unlock={{ unlockType: "Constructible", unlockKey: "District_Harbor" }} />
         );
 
         expect(screen.getByText(/District:/)).toBeInTheDocument();
         expect(screen.getByText("Harbor")).toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/factions/UI_Common_District.svg"]')).toBeInTheDocument();
 
         rerender(
             <UnlockLine unlock={{ unlockType: "Constructible", unlockKey: "Improvement_Market" }} />
@@ -52,6 +53,8 @@ describe("UnlockLine district/improvement resolution", () => {
 
         expect(screen.getByText(/Improvement:/)).toBeInTheDocument();
         expect(screen.getByText("Market")).toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/constructibles/UI_CityConstructionMode_Improvement.svg"]'))
+            .toBeInTheDocument();
     });
 
     it("renders nothing for missing district or improvement keys", () => {
@@ -63,11 +66,12 @@ describe("UnlockLine district/improvement resolution", () => {
     });
 
     it("renders unresolved constructible fallback text when descriptor lines are available", () => {
-        render(
+        const { container } = render(
             <UnlockLine
                 unlock={{
                     unlockType: "Constructible",
                     unlockKey: "Converter_IndustryToFood",
+                    unlockCategory: "Food",
                     fallbackDescriptionLines: [
                         "When placed in the first slot, [IndustryColored] Industry converts to [FoodColored] Food.",
                     ],
@@ -78,6 +82,8 @@ describe("UnlockLine district/improvement resolution", () => {
         expect(screen.getByText(/Constructible:/)).toBeInTheDocument();
         expect(screen.getByText("Converter_IndustryToFood")).toBeInTheDocument();
         expect(screen.getByText(/Industry converts to/)).toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/technologies/UI_Technology_UnlockCategory_DistrictImprovement_Food.svg"]'))
+            .toBeInTheDocument();
     });
 
     it("uses backend unlockCategory when a key exists in both domains", () => {

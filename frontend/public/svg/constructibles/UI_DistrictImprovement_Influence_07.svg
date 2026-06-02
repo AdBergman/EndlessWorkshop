@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25">
+  <path d="M 12.844 0.005 L 13.898 5.693 L 16.361 0.678 L 16.361 4.419 L 14.097 5.378 L 14.097 8.748 L 13.439 8.748 L 12.552 9.73 L 12.552 11.128 L 11.456 12.432 L 9.036 10.886 L 9.333 9.555 L 8.807 9.256 L 7.522 8.416 L 5.687 8.661 L 2.137 5.532 L 8.215 8.049 L 5.483 2.322 L 10.039 6.645 L 9.39 1.258 L 11.753 5.746 L 12.818 0.004 C 12.826 0.004 12.835 0.004 12.844 0.005" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 19.995 2.495 L 18.263 4.139 L 19.392 4.81 L 20.098 2.574 C 20.064 2.547 20.03 2.521 19.995 2.495" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 7.483 23.953 L 9.668 22.951 L 10.453 22.243 L 10.849 24.892 C 9.667 24.736 8.537 24.415 7.483 23.953" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 12.508 25 L 13.633 20.097 L 13.836 18.73 L 11.603 20.437 L 8.816 21.516 L 6.856 22.414 L 4.529 20.883 L 6.367 20.577 L 5.795 19.271 L 7.714 20.394 L 10.083 19.271 L 11.998 16.936 L 12.387 14.75 L 13.915 12.459 L 13.915 10.931 L 16.207 10.168 L 15.443 7.876 L 15.443 6.348 L 16.97 5.585 L 18.498 5.585 L 19.262 7.876 L 18.498 10.168 L 20.789 10.168 L 22.317 12.459 L 23.081 18.57 L 23.294 18.808 C 22.891 19.497 22.423 20.143 21.9 20.74 L 20.789 20.097 L 20.789 21.856 C 18.585 23.811 15.685 24.998 12.508 25" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 24.443 8.799 L 22.797 10.157 L 21.741 8.796 L 24.379 8.597 C 24.401 8.664 24.422 8.731 24.443 8.799" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 5.145 9.125 L 4.549 10.53 L 0.942 8.572 L 5.145 9.125" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 20.805 7.366 L 20.343 5.375 L 20.17 5.272 L 21.984 4.587 L 20.805 7.366" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+  <path d="M 3.947 18.71 L 6.072 17.691 L 7.814 18.71 L 9.749 16.611 L 10.232 15.677 L 9.265 14.226 L 9.265 13.26 L 7.815 12.776 L 8.298 11.326 L 8.298 10.359 L 7.331 9.875 L 6.365 9.875 L 5.881 11.326 L 6.365 12.776 L 4.914 12.776 L 3.947 14.226 L 3.464 17.094 L 3.947 18.71" transform="matrix(1 0 0 1 0 0)" fill="#EBEBEB" stroke="none" />
+</svg>

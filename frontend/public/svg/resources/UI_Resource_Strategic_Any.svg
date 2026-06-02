@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset; not original source SVG. UI tint/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14">
+  <path d="M 2.211 0.368 L 11.79 0.368 C 12.807 0.368 13.632 1.193 13.632 2.211 L 13.632 11.79 C 13.632 12.807 12.807 13.632 11.79 13.632 L 2.211 13.632 C 1.193 13.632 0.368 12.807 0.368 11.79 L 0.368 2.211 C 0.368 1.193 1.193 0.368 2.211 0.368" transform="matrix(1 0 0 1 0 0)" fill="#353535" stroke="#D2D2D2" stroke-width="0.737" />
+  <path d="M 4 4 L 10 4 L 10 10 L 4 10 L 4 4" transform="matrix(1 0 0 1 0 0)" fill="#9D55D8" stroke="none" />
+  <path d="M 7 0.738 L 7 4 L 10 4 L 10 7.5 L 13.263 7.5 L 13.263 2.211 C 13.263 1.397 12.603 0.738 11.79 0.738 L 7 0.738" transform="matrix(1 0 0 1 0 0)" fill="#D97430" stroke="none" />
+  <path d="M 7 13.263 L 7 10.001 L 10 10 L 10 7.5 L 13.263 7.5 L 13.263 11.79 C 13.263 12.604 12.603 13.263 11.79 13.263 L 7 13.263" transform="matrix(1 0 0 1 0 0)" fill="#D9A930" stroke="none" />
+  <path d="M 6.714 5.286 C 6.714 5.128 6.841 5 6.999 5 C 7.157 5 7.285 5.128 7.285 5.286 L 7.285 8.714 C 7.285 8.872 7.157 9 6.999 9 C 6.841 9 6.714 8.872 6.714 8.714 L 6.714 5.286" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 8.714 6.714 C 8.872 6.714 9 6.842 9 6.999 C 9 7.157 8.872 7.285 8.714 7.285 L 5.286 7.285 C 5.128 7.285 5 7.157 5 6.999 C 5 6.842 5.128 6.714 5.286 6.714 L 8.714 6.714" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

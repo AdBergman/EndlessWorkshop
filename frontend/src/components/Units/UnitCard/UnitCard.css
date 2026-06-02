@@ -204,6 +204,13 @@
     text-shadow: 0 1px 6px rgba(0, 0, 0, 0.75);
 }
 
+.statIcon {
+    flex: 0 0 auto;
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+}
+
 /* === BACK: layout wrapper + title === */
 .cardBackContent {
     width: 100%;
@@ -245,6 +252,11 @@
 }
 
 .skill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
     background: transparent;
     border: none;
 
@@ -261,12 +273,24 @@
 
     /* 👇 allow wrapping */
     white-space: normal;
-    text-align: center;
+    text-align: left;
 
     max-width: 100%;
     cursor: pointer;
 
     transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.skillIcon {
+    flex: 0 0 auto;
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+}
+
+.skillLabel {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .skill:hover {

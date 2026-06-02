@@ -88,7 +88,7 @@ describe("TechTooltip district/improvement unlock resolution", () => {
     });
 
     it("renders district and improvement unlock labels from the normalized store domains", () => {
-        render(
+        const { container } = render(
             <TechTooltip
                 hoveredTech={hoveredTech}
                 onMouseEnter={() => {}}
@@ -100,11 +100,15 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.getByText("Harbor")).toBeInTheDocument();
         expect(screen.getByText("Improvement:")).toBeInTheDocument();
         expect(screen.getByText("Market")).toBeInTheDocument();
+        expect(container.querySelector('img.techUnlockIcon[src="/svg/factions/UI_Common_District.svg"]'))
+            .toBeInTheDocument();
+        expect(container.querySelector('img.techUnlockIcon[src="/svg/constructibles/UI_CityConstructionMode_Improvement.svg"]'))
+            .toBeInTheDocument();
         expect(screen.queryByText("Missing_Key")).not.toBeInTheDocument();
     });
 
     it("renders unresolved constructible fallback rows without hover links", () => {
-        render(
+        const { container } = render(
             <TechTooltip
                 hoveredTech={{
                     ...hoveredTech,
@@ -112,6 +116,7 @@ describe("TechTooltip district/improvement unlock resolution", () => {
                         {
                             unlockType: "Constructible",
                             unlockKey: "Converter_IndustryToFood",
+                            unlockCategory: "Food",
                             fallbackDescriptionLines: [
                                 "When placed in the first slot, [IndustryColored] Industry converts to [FoodColored] Food.",
                             ],
@@ -126,11 +131,21 @@ describe("TechTooltip district/improvement unlock resolution", () => {
         expect(screen.getByText(/Constructible:/)).toBeInTheDocument();
         expect(screen.getByText("Converter_IndustryToFood")).toBeInTheDocument();
         expect(screen.getByText(/Industry converts to/)).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "IndustryColored" })).toHaveAttribute(
+            "src",
+            "/svg/constructibles/UI_Common_Resource_Industry.svg"
+        );
+        expect(screen.getByRole("img", { name: "FoodColored" })).toHaveAttribute(
+            "src",
+            "/svg/constructibles/UI_Common_Resource_Food.svg"
+        );
+        expect(container.querySelector('img.techUnlockIcon[src="/svg/technologies/UI_Technology_UnlockCategory_DistrictImprovement_Food.svg"]'))
+            .toBeInTheDocument();
         expect(screen.queryByRole("link", { name: /Converter_IndustryToFood/ })).not.toBeInTheDocument();
     });
 
     it("renders unit unlock labels from the normalized unit store domain", () => {
-        render(
+        const { container } = render(
             <TechTooltip
                 hoveredTech={{
                     ...hoveredTech,
@@ -149,5 +164,6 @@ describe("TechTooltip district/improvement unlock resolution", () => {
 
         expect(screen.getByText("Unit:")).toBeInTheDocument();
         expect(screen.getByText("Scout")).toBeInTheDocument();
+        expect(container.querySelector('img.techUnlockIcon[src="/svg/common/UI_Common_Unit.svg"]')).toBeInTheDocument();
     });
 });

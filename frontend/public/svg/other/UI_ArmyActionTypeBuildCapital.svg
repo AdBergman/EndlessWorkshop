@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset; not original source SVG. UI tint/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path d="M 3.639 18.245 L 11.979 22 L 20.382 18.359 C 20.699 18.212 20.936 17.887 20.984 17.497 L 22.999 2.12 C 23.014 2.009 22.879 1.954 22.82 2.049 C 21.58 4.04 17.582 10.947 17.106 7.678 L 16.457 3.175 L 15.809 3.175 L 11.947 8.426 L 8.086 3.175 L 7.437 3.175 L 6.788 7.678 C 6.285 11.547 2.312 4.339 1.203 2.233 C 1.147 2.127 0.985 2.185 1.001 2.305 L 3.037 17.383 C 3.101 17.773 3.322 18.082 3.639 18.245 M 11.995 11.434 L 15.207 14.441 L 11.995 17.448 L 8.782 14.441 L 11.995 11.434" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

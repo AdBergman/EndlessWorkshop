@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30">
+  <path d="M 16.112 11.507 C 16.922 11.1 17.477 10.261 17.477 9.293 C 17.477 7.925 16.368 6.816 15 6.816 C 13.632 6.816 12.523 7.925 12.523 9.293 C 12.523 10.261 13.078 11.099 13.888 11.507 C 12.387 11.979 11.299 13.381 11.299 15.038 L 11.299 18.918 L 18.701 18.918 L 18.701 15.038 C 18.701 13.381 17.613 11.979 16.112 11.507" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 11.656 20.321 L 6.975 25.294 L 2.483 23.746 L 11.656 20.321" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 18.581 19.543 L 24.249 23.353 L 28.285 20.847 L 18.581 19.543" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 19.321 16.001 L 23.85 12.31 L 27.517 13.035 L 19.321 16.001" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 10.148 17.031 L 4.913 14.438 L 1.498 15.959 L 10.148 17.031" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 9.925 14.488 C 9.396 14.698 8.908 14.919 8.462 15.151 M 19.246 12.802 C 19.869 12.818 20.456 12.865 21.004 12.94 M 5.525 17.624 C 5.15 18.259 5.015 18.916 5.134 19.571 C 5.254 20.233 5.683 20.804 6.353 21.269 M 10.879 22.595 C 12.482 22.723 14.31 22.632 16.218 22.287 C 17.286 22.093 18.302 21.834 19.246 21.524 M 23.637 19.341 C 25.083 18.248 25.856 17.017 25.647 15.86 C 25.581 15.498 25.434 15.164 25.212 14.859" transform="matrix(1 0 0 1 0 0)" fill="none" stroke="#FFFFFF" stroke-width="1" />
+  <path d="M 25.558 1.611 L 29.232 5.002 L 27.462 5.002 L 25.558 3.371 L 23.655 5.002 L 22 5.002 L 25.558 1.611" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 25.558 5.502 L 29.232 8.893 L 27.462 8.893 L 25.558 7.262 L 23.655 8.893 L 22 8.893 L 25.558 5.502" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

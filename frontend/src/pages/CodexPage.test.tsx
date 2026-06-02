@@ -107,7 +107,7 @@ describe("CodexPage", () => {
     });
 
     it("stays on /codex and shows the overview when no entry is selected", async () => {
-        render(
+        const { container } = render(
             <MemoryRouter initialEntries={["/codex"]}>
                 <Routes>
                     <Route
@@ -129,6 +129,8 @@ describe("CodexPage", () => {
         expect(screen.getByText("Browse the archive by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Categories" })).toBeInTheDocument();
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
+        expect(container.querySelector('img.codex-kindIcon--overview[src="/svg/factions/UI_Common_District.svg"]'))
+            .toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 
@@ -357,7 +359,7 @@ describe("CodexPage", () => {
     });
 
     it("renders tokenized labels in detail panes and related links without leaking bracket text", async () => {
-        render(
+        const { container } = render(
             <MemoryRouter initialEntries={["/codex?entry=District_MarketSquare"]}>
                 <Routes>
                     <Route path="/codex" element={<CodexPage />} />
@@ -369,6 +371,24 @@ describe("CodexPage", () => {
         expect(within(relatedSection).getByRole("button", { name: /auric coral improvements/i })).toBeInTheDocument();
         expect(screen.queryByText("[LuxuryResource01]")).not.toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
+        expect(container.querySelector('img.codex-kindIcon--relatedChip[src="/svg/constructibles/UI_Resource_Luxury_Klak.svg"]'))
+            .toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/constructibles/UI_Resource_Luxury_Klak.svg"]'))
+            .toBeInTheDocument();
+    });
+
+    it("uses exact resource icons in resource entry detail headers", async () => {
+        const { container } = render(
+            <MemoryRouter initialEntries={["/codex?entry=Improvement_AuricCoral"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Auric Coral" })).toBeInTheDocument();
+        expect(container.querySelector('img.codex-kindIcon--detail[src="/svg/constructibles/UI_Resource_Luxury_Klak.svg"]'))
+            .toBeInTheDocument();
     });
 
     it("renders same-title quest-to-quest related entries with new kind labels", async () => {

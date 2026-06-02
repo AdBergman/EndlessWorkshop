@@ -6,6 +6,7 @@ import { selectImprovementsByKey, useImprovementStore } from "@/stores/improveme
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { TechUnlockIcon } from "@/features/icons/TechUnlockIcon";
 
 interface UnlockLineProps {
     unlock: TechUnlockRef;
@@ -36,15 +37,18 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
 
     if (fallback) {
         return (
-            <div>
-                <span>{`${fallback.kind}: `}</span>
-                <span>{fallback.key}</span>
-                {fallback.descriptionLines.map((line, index) => (
-                    <span key={`${fallback.key}-${index}`}>
-                        {index === 0 ? " - " : "; "}
-                        {renderDescriptionLine(line)}
-                    </span>
-                ))}
+            <div className="techSheetUnlockLine techSheetUnlockLine--wrapped">
+                <TechUnlockIcon unlock={unlock} resolvedKind={fallback.kind} />
+                <span>
+                    <span>{`${fallback.kind}: `}</span>
+                    <span>{fallback.key}</span>
+                    {fallback.descriptionLines.map((line, index) => (
+                        <span key={`${fallback.key}-${index}`}>
+                            {index === 0 ? " - " : "; "}
+                            {renderDescriptionLine(line)}
+                        </span>
+                    ))}
+                </span>
             </div>
         );
     }
@@ -52,13 +56,16 @@ const UnlockLine: React.FC<UnlockLineProps> = ({ unlock }) => {
     if (!resolved) return null;
 
     return (
-        <HoverableItem
-            type={resolved.kind === "Unit" ? "Unit" : "Constructible"}
-            name={resolved.displayName}
-            unlockKey={unlockKey}
-            constructibleKind={resolved.kind === "Unit" ? undefined : resolved.kind}
-            prefix={`${resolved.kind}: `}
-        />
+        <div className="techSheetUnlockLine">
+            <TechUnlockIcon unlock={unlock} resolvedKind={resolved.kind} />
+            <HoverableItem
+                type={resolved.kind === "Unit" ? "Unit" : "Constructible"}
+                name={resolved.displayName}
+                unlockKey={unlockKey}
+                constructibleKind={resolved.kind === "Unit" ? undefined : resolved.kind}
+                prefix={`${resolved.kind}: `}
+            />
+        </div>
     );
 };
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path d="M 23.001 4.615 L 19.084 8.23 L 15.291 4.615 L 17.055 4.615 L 19.084 6.354 L 21.113 4.615 L 23.001 4.615" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 23.001 1.001 L 19.084 4.615 L 15.291 1.001 L 17.055 1.001 L 19.084 2.74 L 21.113 1.001 L 23.001 1.001" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 23.001 8 L 19.084 11.615 L 15.291 8 L 17.055 8 L 19.084 9.739 L 21.113 8 L 23.001 8" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 13.149 22.652 L 0.876 22.652 L 0.876 20.939 L 13.149 20.939 L 13.149 22.652 M 13.149 18.184 L 3.119 18.184 L 3.119 16.469 L 13.149 16.469 L 13.149 18.184 M 9.876 14.001 L 0.876 14.001 L 0.876 12 L 9.876 12 L 9.876 14.001" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 15.375 22.855 C 16.942 22.86 16.998 22.86 17.305 22.716 C 17.687 22.538 18.94 21.31 17.307 20.879 C 15.671 20.449 14.392 19.961 13.949 18.551 L 13.933 18.506 C 13.476 17.049 12.084 12.628 13.01 11.718 C 13.272 11.274 13.733 10.567 14.267 9.767 L 14.001 9.499 L 14.001 1.654 C 13.09 1.256 12.321 1.013 12.136 1.215 C 11.875 1.502 11.721 1.99 11.721 1.99 C 10.871 4.022 8.696 8.45 6.798 9.921 C 4.426 11.76 4.055 13.165 5.345 14.519 C 6.719 15.96 8.788 18.364 9.32 20.449 C 9.855 22.554 11.07 22.851 13.947 22.851 C 14.527 22.851 14.995 22.853 15.375 22.855" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

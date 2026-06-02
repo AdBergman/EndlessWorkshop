@@ -1,0 +1,4713 @@
+{
+  "schemaVersion": "1.0-semantic-svg-manifest",
+  "exportedAtUtc": "2026-06-01T22:41:00.1479195Z",
+  "stats": {
+    "combatStrength": {
+      "key": "combatStrength",
+      "sourceMapperName": "UIUnitSingleStatsCombatStrength",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_combatStrength.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "damage": {
+      "key": "damage",
+      "sourceMapperName": "UnitStatTypeDamage",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#C872FCFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": [
+        "DamageMin",
+        "DamageMax",
+        "DamageBonusFlat",
+        "DamageBonusModifier"
+      ]
+    },
+    "damageBonusFlat": {
+      "key": "damageBonusFlat",
+      "sourceMapperName": "UIUnitSingleStatsDamageBonusFlat",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "damageBonusModifier": {
+      "key": "damageBonusModifier",
+      "sourceMapperName": "UIUnitSingleStatsDamageBonusModifier",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "damageRange": {
+      "key": "damageRange",
+      "sourceMapperName": "UIUnitSingleStatsDamageRange",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "damageReductionFlat": {
+      "key": "damageReductionFlat",
+      "sourceMapperName": "UIUnitSingleStatsDamageReductionFlat",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Defense]",
+      "gameplayProperties": []
+    },
+    "damageReductionModifier": {
+      "key": "damageReductionModifier",
+      "sourceMapperName": "UIUnitSingleStatsDamageReductionModifier",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Defense]",
+      "gameplayProperties": []
+    },
+    "defendBonusDamageReductionFlat": {
+      "key": "defendBonusDamageReductionFlat",
+      "sourceMapperName": "UIUnitSingleStatsDefendBonusDamageReductionFlat",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Defense]",
+      "gameplayProperties": []
+    },
+    "defense": {
+      "key": "defense",
+      "sourceMapperName": "UnitStatTypeDefense",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#EE9A4CFF",
+      "symbol": "[Defense]",
+      "gameplayProperties": [
+        "DamageReductionFlat",
+        "DamageReductionModifier"
+      ]
+    },
+    "focus": {
+      "key": "focus",
+      "sourceMapperName": "UIUnitSingleStatsFocus",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Focus]",
+      "gameplayProperties": []
+    },
+    "focus-unitStatTypeFocus": {
+      "key": "focus-unitStatTypeFocus",
+      "sourceMapperName": "UnitStatTypeFocus",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#C872FCFF",
+      "symbol": "[Focus]",
+      "gameplayProperties": [
+        "Focus"
+      ]
+    },
+    "health": {
+      "key": "health",
+      "sourceMapperName": "UIUnitSingleStatsHealthPoints",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HealthPoints]",
+      "gameplayProperties": []
+    },
+    "health-unitStatTypeHealthPoints": {
+      "key": "health-unitStatTypeHealthPoints",
+      "sourceMapperName": "UnitStatTypeHealthPoints",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Health]",
+      "gameplayProperties": [
+        "HealthPoints"
+      ]
+    },
+    "healthRatio": {
+      "key": "healthRatio",
+      "sourceMapperName": "UIUnitSingleStatsHealthRatio",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HealthPoints]",
+      "gameplayProperties": []
+    },
+    "movement": {
+      "key": "movement",
+      "sourceMapperName": "UIUnitSingleStatsMovementPoints",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[MovementPoints]",
+      "gameplayProperties": []
+    },
+    "movement-uiUnitSingleStatsMovementSpeed": {
+      "key": "movement-uiUnitSingleStatsMovementSpeed",
+      "sourceMapperName": "UIUnitSingleStatsMovementSpeed",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[MovementPoints]",
+      "gameplayProperties": []
+    },
+    "movement-unitStatTypeMovementSpeed": {
+      "key": "movement-unitStatTypeMovementSpeed",
+      "sourceMapperName": "UnitStatTypeMovementSpeed",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[MovementPoints]",
+      "gameplayProperties": [
+        "MovementPoints"
+      ]
+    },
+    "shield": {
+      "key": "shield",
+      "sourceMapperName": "UnitStatTypeShield",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_UnitItem_Shield.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Shield]",
+      "gameplayProperties": [
+        "ShieldPoints"
+      ]
+    },
+    "shieldPoints": {
+      "key": "shieldPoints",
+      "sourceMapperName": "UIUnitSingleStatsShieldPoints",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_UnitItem_Shield.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Shield]",
+      "gameplayProperties": []
+    },
+    "unitPowerEstimation": {
+      "key": "unitPowerEstimation",
+      "sourceMapperName": "UIUnitSingleStatsUnitPowerEstimation",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_UnitPowerEstimation.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PowerEstimation]",
+      "gameplayProperties": []
+    },
+    "unitUpkeep": {
+      "key": "unitUpkeep",
+      "sourceMapperName": "UIUnitSingleStatsUnitUpkeep",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Money.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "veterancyLevel": {
+      "key": "veterancyLevel",
+      "sourceMapperName": "UIUnitSingleStatsVeterancyLevel",
+      "sourceMapperType": "UIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_UnitItem_VeterancyStar_Shape.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "vision": {
+      "key": "vision",
+      "sourceMapperName": "UnitStatTypeVisionRange",
+      "sourceMapperType": "UIUnitStatTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[VisionRange]",
+      "gameplayProperties": [
+        "VisionRange"
+      ]
+    }
+  },
+  "resources": {
+    "approval": {
+      "key": "approval",
+      "sourceMapperName": "ResourceApproval",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": [
+        "ApprovalProduced",
+        "ApprovalPerValidTile",
+        "ApprovalNet",
+        "ApprovalGain",
+        "ApprovalPerPopulation"
+      ]
+    },
+    "breach": {
+      "key": "breach",
+      "sourceMapperName": "ResourceBreach",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Breach.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Breach]",
+      "gameplayProperties": []
+    },
+    "cadavers": {
+      "key": "cadavers",
+      "sourceMapperName": "ResourceCadavers",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_SpecialResources_Cadavers.svg",
+      "color": "#E17272FF",
+      "symbol": "[Cadavers]",
+      "gameplayProperties": []
+    },
+    "city": {
+      "key": "city",
+      "sourceMapperName": "ResourceCity",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_City.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[City]",
+      "gameplayProperties": []
+    },
+    "food": {
+      "key": "food",
+      "sourceMapperName": "ResourceFood",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": [
+        "FoodFromTerrain",
+        "FoodPerValidTile",
+        "FoodProduced",
+        "FoodNet",
+        "FoodGain",
+        "FoodPerPopulation",
+        "FoodMaxStock"
+      ]
+    },
+    "fortification": {
+      "key": "fortification",
+      "sourceMapperName": "ResourceFortification",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[Fortification]",
+      "gameplayProperties": [
+        "Fortification",
+        "FortificationLevel",
+        "MaxSettlementFortification"
+      ]
+    },
+    "hero": {
+      "key": "hero",
+      "sourceMapperName": "ResourceHero",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Hero.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Hero]",
+      "gameplayProperties": []
+    },
+    "industry": {
+      "key": "industry",
+      "sourceMapperName": "ResourceIndustry",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": [
+        "IndustryFromTerrain",
+        "IndustryPerValidTile",
+        "IndustryProduced",
+        "IndustryNet",
+        "IndustryGain",
+        "IndustryPerPopulation"
+      ]
+    },
+    "influence": {
+      "key": "influence",
+      "sourceMapperName": "ResourceInfluence",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[CultureColored]",
+      "gameplayProperties": [
+        "InfluenceProduced",
+        "CultureNet",
+        "InfluenceNet",
+        "InfluenceGain",
+        "InfluencePerPopulation"
+      ]
+    },
+    "knowledge": {
+      "key": "knowledge",
+      "sourceMapperName": "ResourceKnowledge",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#00000000",
+      "symbol": "[Science]",
+      "gameplayProperties": []
+    },
+    "military": {
+      "key": "military",
+      "sourceMapperName": "ResourceMilitary",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[Military]",
+      "gameplayProperties": []
+    },
+    "militia": {
+      "key": "militia",
+      "sourceMapperName": "ResourceMilitia",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Militia.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Militia]",
+      "gameplayProperties": []
+    },
+    "money": {
+      "key": "money",
+      "sourceMapperName": "ResourceMoney",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Money.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": [
+        "MoneyFromTerrain",
+        "MoneyPerValidTile",
+        "MoneyProduced",
+        "MoneyNet",
+        "MoneyGain",
+        "MoneyPerPopulation",
+        "MoneyMaxStock"
+      ]
+    },
+    "population": {
+      "key": "population",
+      "sourceMapperName": "ResourcePopulation",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Settlement_PopulationPicto.svg",
+      "color": "#F5EBE1FF",
+      "symbol": "[Population]",
+      "gameplayProperties": []
+    },
+    "publicOpinion": {
+      "key": "publicOpinion",
+      "sourceMapperName": "ResourcePublicOpinion",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Diplomacy_PublicOpinion_Positive.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "science": {
+      "key": "science",
+      "sourceMapperName": "ResourceScience",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": [
+        "ScienceFromTerrain",
+        "SciencePerValidTile",
+        "ScienceProduced",
+        "ScienceNet",
+        "ScienceGain",
+        "SciencePerPopulation",
+        "ResearchNet"
+      ]
+    },
+    "spirits": {
+      "key": "spirits",
+      "sourceMapperName": "ResourceSpirits",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_SpecialResources_Spirits.svg",
+      "color": "#84F2F4FF",
+      "symbol": "[Spirits]",
+      "gameplayProperties": []
+    },
+    "subjugationPoints": {
+      "key": "subjugationPoints",
+      "sourceMapperName": "ResourceSubjugationPoints",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_SubjugationPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[SubjugationPoints]",
+      "gameplayProperties": []
+    },
+    "turn": {
+      "key": "turn",
+      "sourceMapperName": "ResourceTurn",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Turn.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Turn]",
+      "gameplayProperties": []
+    },
+    "unit": {
+      "key": "unit",
+      "sourceMapperName": "ResourceUnit",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Unit.svg",
+      "color": "#F5EBE1FF",
+      "symbol": "[Unit]",
+      "gameplayProperties": []
+    },
+    "unitPowerEstimation": {
+      "key": "unitPowerEstimation",
+      "sourceMapperName": "ResourceUnitPowerEstimation",
+      "sourceMapperType": "UIResourceTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_UnitPowerEstimation.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PowerEstimation]",
+      "gameplayProperties": []
+    }
+  },
+  "statuses": {
+    "administrativeCenterSiege": {
+      "key": "administrativeCenterSiege",
+      "sourceMapperName": "Status_AdministrativeCenter_Siege",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Siege.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_Siege]",
+      "gameplayProperties": []
+    },
+    "administrativeCenterSubjugation": {
+      "key": "administrativeCenterSubjugation",
+      "sourceMapperName": "Status_AdministrativeCenter_Subjugation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Siege.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_AdministrativeCenter_Subjugation]",
+      "gameplayProperties": []
+    },
+    "armyMapSpeedImmobile": {
+      "key": "armyMapSpeedImmobile",
+      "sourceMapperName": "Status_Army_Map_Speed_Immobile",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Entangled.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Army_Map_Speed_Immobile]",
+      "gameplayProperties": []
+    },
+    "bridgeRansacked": {
+      "key": "bridgeRansacked",
+      "sourceMapperName": "Status_Bridge_Ransacked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Bridge_Ransacked]",
+      "gameplayProperties": []
+    },
+    "cityApproval": {
+      "key": "cityApproval",
+      "sourceMapperName": "Status_City_Approval",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "cityApprovalHigh": {
+      "key": "cityApprovalHigh",
+      "sourceMapperName": "Status_City_Approval_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityApprovalLossHigh": {
+      "key": "cityApprovalLossHigh",
+      "sourceMapperName": "Status_City_ApprovalLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityApprovalLossMedium": {
+      "key": "cityApprovalLossMedium",
+      "sourceMapperName": "Status_City_ApprovalLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityApprovalLossSmall": {
+      "key": "cityApprovalLossSmall",
+      "sourceMapperName": "Status_City_ApprovalLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityApprovalMedium": {
+      "key": "cityApprovalMedium",
+      "sourceMapperName": "Status_City_Approval_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityApprovalSmall": {
+      "key": "cityApprovalSmall",
+      "sourceMapperName": "Status_City_Approval_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityDustHigh": {
+      "key": "cityDustHigh",
+      "sourceMapperName": "Status_City_Dust_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityDustLossHigh": {
+      "key": "cityDustLossHigh",
+      "sourceMapperName": "Status_City_DustLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityDustLossMedium": {
+      "key": "cityDustLossMedium",
+      "sourceMapperName": "Status_City_DustLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityDustLossSmall": {
+      "key": "cityDustLossSmall",
+      "sourceMapperName": "Status_City_DustLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityDustMedium": {
+      "key": "cityDustMedium",
+      "sourceMapperName": "Status_City_Dust_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityDustSmall": {
+      "key": "cityDustSmall",
+      "sourceMapperName": "Status_City_Dust_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodHigh": {
+      "key": "cityFoodHigh",
+      "sourceMapperName": "Status_City_Food_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodLossHigh": {
+      "key": "cityFoodLossHigh",
+      "sourceMapperName": "Status_City_FoodLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodLossMedium": {
+      "key": "cityFoodLossMedium",
+      "sourceMapperName": "Status_City_FoodLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodLossSmall": {
+      "key": "cityFoodLossSmall",
+      "sourceMapperName": "Status_City_FoodLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodMedium": {
+      "key": "cityFoodMedium",
+      "sourceMapperName": "Status_City_Food_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityFoodSmall": {
+      "key": "cityFoodSmall",
+      "sourceMapperName": "Status_City_Food_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityForeignPopulationConsumption": {
+      "key": "cityForeignPopulationConsumption",
+      "sourceMapperName": "Status_City_ForeignPopulationConsumption",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_City_ForeignConsumption.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_ForeignPopulationConsumption]",
+      "gameplayProperties": []
+    },
+    "cityFortificationHigh": {
+      "key": "cityFortificationHigh",
+      "sourceMapperName": "Status_City_Fortification_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityFortificationLossHigh": {
+      "key": "cityFortificationLossHigh",
+      "sourceMapperName": "Status_City_FortificationLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityFortificationLossMedium": {
+      "key": "cityFortificationLossMedium",
+      "sourceMapperName": "Status_City_FortificationLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityFortificationLossSmall": {
+      "key": "cityFortificationLossSmall",
+      "sourceMapperName": "Status_City_FortificationLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityFortificationMedium": {
+      "key": "cityFortificationMedium",
+      "sourceMapperName": "Status_City_Fortification_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityFortificationSmall": {
+      "key": "cityFortificationSmall",
+      "sourceMapperName": "Status_City_Fortification_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "cityGenericMinor12Step02C": {
+      "key": "cityGenericMinor12Step02C",
+      "sourceMapperName": "Status_City_GenericMinor12_Step02C",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Status_Positive.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Positive]",
+      "gameplayProperties": []
+    },
+    "cityGenericMinor14Step02B": {
+      "key": "cityGenericMinor14Step02B",
+      "sourceMapperName": "Status_City_GenericMinor14_Step02B",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "cityGenericMinor16Step02A": {
+      "key": "cityGenericMinor16Step02A",
+      "sourceMapperName": "Status_City_GenericMinor16_Step02A",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Status_Positive.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Positive]",
+      "gameplayProperties": []
+    },
+    "cityIndustryHigh": {
+      "key": "cityIndustryHigh",
+      "sourceMapperName": "Status_City_Industry_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityIndustryLossHigh": {
+      "key": "cityIndustryLossHigh",
+      "sourceMapperName": "Status_City_IndustryLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityIndustryLossMedium": {
+      "key": "cityIndustryLossMedium",
+      "sourceMapperName": "Status_City_IndustryLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityIndustryLossSmall": {
+      "key": "cityIndustryLossSmall",
+      "sourceMapperName": "Status_City_IndustryLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityIndustryMedium": {
+      "key": "cityIndustryMedium",
+      "sourceMapperName": "Status_City_Industry_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityIndustrySmall": {
+      "key": "cityIndustrySmall",
+      "sourceMapperName": "Status_City_Industry_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceHigh": {
+      "key": "cityInfluenceHigh",
+      "sourceMapperName": "Status_City_Influence_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceLossHigh": {
+      "key": "cityInfluenceLossHigh",
+      "sourceMapperName": "Status_City_InfluenceLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceLossMedium": {
+      "key": "cityInfluenceLossMedium",
+      "sourceMapperName": "Status_City_InfluenceLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceLossSmall": {
+      "key": "cityInfluenceLossSmall",
+      "sourceMapperName": "Status_City_InfluenceLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceMedium": {
+      "key": "cityInfluenceMedium",
+      "sourceMapperName": "Status_City_Influence_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityInfluenceSmall": {
+      "key": "cityInfluenceSmall",
+      "sourceMapperName": "Status_City_Influence_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "cityKnightingUnitProductionBonus": {
+      "key": "cityKnightingUnitProductionBonus",
+      "sourceMapperName": "Status_City_KnightingUnitProductionBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_City_ForeignConsumption.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_KnightingUnitProductionBonus]",
+      "gameplayProperties": []
+    },
+    "cityOverpopulation": {
+      "key": "cityOverpopulation",
+      "sourceMapperName": "Status_City_Overpopulation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_NextPopulationIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_Overpopulation]",
+      "gameplayProperties": []
+    },
+    "cityRansack": {
+      "key": "cityRansack",
+      "sourceMapperName": "Status_City_Ransack",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_Ransack]",
+      "gameplayProperties": []
+    },
+    "cityReducedRebellionSmall": {
+      "key": "cityReducedRebellionSmall",
+      "sourceMapperName": "Status_City_Reduced_Rebellion_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "cityReforestation": {
+      "key": "cityReforestation",
+      "sourceMapperName": "Status_City_Reforestation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Forest.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_Reforestation]",
+      "gameplayProperties": []
+    },
+    "cityScienceHigh": {
+      "key": "cityScienceHigh",
+      "sourceMapperName": "Status_City_Science_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "cityScienceLossHigh": {
+      "key": "cityScienceLossHigh",
+      "sourceMapperName": "Status_City_ScienceLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "cityScienceLossMedium": {
+      "key": "cityScienceLossMedium",
+      "sourceMapperName": "Status_City_ScienceLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "cityScienceLossSmall": {
+      "key": "cityScienceLossSmall",
+      "sourceMapperName": "Status_City_ScienceLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "cityScienceMedium": {
+      "key": "cityScienceMedium",
+      "sourceMapperName": "Status_City_Science_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "cityScienceSmall": {
+      "key": "cityScienceSmall",
+      "sourceMapperName": "Status_City_Science_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "citySiege": {
+      "key": "citySiege",
+      "sourceMapperName": "Status_City_Siege",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Siege.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_Siege]",
+      "gameplayProperties": []
+    },
+    "cityUnitCreationXpHigh": {
+      "key": "cityUnitCreationXpHigh",
+      "sourceMapperName": "Status_City_UnitCreationXP_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "cityUnitCreationXpMedium": {
+      "key": "cityUnitCreationXpMedium",
+      "sourceMapperName": "Status_City_UnitCreationXP_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "cityUnitCreationXpSmall": {
+      "key": "cityUnitCreationXpSmall",
+      "sourceMapperName": "Status_City_UnitCreationXP_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "cityWar": {
+      "key": "cityWar",
+      "sourceMapperName": "Status_City_War",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_DiplomaticState_War.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_City_War]",
+      "gameplayProperties": []
+    },
+    "damRansacked": {
+      "key": "damRansacked",
+      "sourceMapperName": "Status_Dam_Ransacked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Dam_Ransacked]",
+      "gameplayProperties": []
+    },
+    "districtRansacked": {
+      "key": "districtRansacked",
+      "sourceMapperName": "Status_District_Ransacked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_District_Ransacked]",
+      "gameplayProperties": []
+    },
+    "empireApprovalHigh": {
+      "key": "empireApprovalHigh",
+      "sourceMapperName": "Status_Empire_Approval_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireApprovalLossHigh": {
+      "key": "empireApprovalLossHigh",
+      "sourceMapperName": "Status_Empire_ApprovalLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireApprovalLossMedium": {
+      "key": "empireApprovalLossMedium",
+      "sourceMapperName": "Status_Empire_ApprovalLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireApprovalLossSmall": {
+      "key": "empireApprovalLossSmall",
+      "sourceMapperName": "Status_Empire_ApprovalLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireApprovalMedium": {
+      "key": "empireApprovalMedium",
+      "sourceMapperName": "Status_Empire_Approval_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireApprovalSmall": {
+      "key": "empireApprovalSmall",
+      "sourceMapperName": "Status_Empire_Approval_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireCurioLootImproveHigh": {
+      "key": "empireCurioLootImproveHigh",
+      "sourceMapperName": "Status_Empire_CurioLootImprove_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Curiosity.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Curiosity]",
+      "gameplayProperties": []
+    },
+    "empireCurioLootImproveMedium": {
+      "key": "empireCurioLootImproveMedium",
+      "sourceMapperName": "Status_Empire_CurioLootImprove_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Curiosity.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Curiosity]",
+      "gameplayProperties": []
+    },
+    "empireCurioLootImproveSmall": {
+      "key": "empireCurioLootImproveSmall",
+      "sourceMapperName": "Status_Empire_CurioLootImprove_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Curiosity.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Curiosity]",
+      "gameplayProperties": []
+    },
+    "empireDamageGainHigh": {
+      "key": "empireDamageGainHigh",
+      "sourceMapperName": "Status_Empire_Damage_Gain_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "empireDamageGainMedium": {
+      "key": "empireDamageGainMedium",
+      "sourceMapperName": "Status_Empire_Damage_Gain_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "empireDamageGainSmall": {
+      "key": "empireDamageGainSmall",
+      "sourceMapperName": "Status_Empire_Damage_Gain_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "empireDecreeDefense07PatrioticApproval": {
+      "key": "empireDecreeDefense07PatrioticApproval",
+      "sourceMapperName": "Status_Empire_Decree_Defense07_Patriotic_Approval",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireDustLossPerCouncilor": {
+      "key": "empireDustLossPerCouncilor",
+      "sourceMapperName": "Status_Empire_DustLossPerCouncilor",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireDustonPopHigh": {
+      "key": "empireDustonPopHigh",
+      "sourceMapperName": "Status_Empire_DustonPop_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireDustonPopMedium": {
+      "key": "empireDustonPopMedium",
+      "sourceMapperName": "Status_Empire_DustonPop_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireDustonPopSmall": {
+      "key": "empireDustonPopSmall",
+      "sourceMapperName": "Status_Empire_DustonPop_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireDustPerCouncilor": {
+      "key": "empireDustPerCouncilor",
+      "sourceMapperName": "Status_Empire_DustPerCouncilor",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireDustPerProtectorateVillage": {
+      "key": "empireDustPerProtectorateVillage",
+      "sourceMapperName": "Status_Empire_DustPerProtectorateVillage",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "empireGenericMinor04Step02C": {
+      "key": "empireGenericMinor04Step02C",
+      "sourceMapperName": "Status_Empire_GenericMinor04_Step02C",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireGenericMinor05Step02A": {
+      "key": "empireGenericMinor05Step02A",
+      "sourceMapperName": "Status_Empire_GenericMinor05_Step02A",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "empireGenericMinor05Step02C": {
+      "key": "empireGenericMinor05Step02C",
+      "sourceMapperName": "Status_Empire_GenericMinor05_Step02C",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "empireHpRegenHigh": {
+      "key": "empireHpRegenHigh",
+      "sourceMapperName": "Status_Empire_HPRegen_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HealthRegen]",
+      "gameplayProperties": []
+    },
+    "empireHpRegenMedium": {
+      "key": "empireHpRegenMedium",
+      "sourceMapperName": "Status_Empire_HPRegen_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HealthRegen]",
+      "gameplayProperties": []
+    },
+    "empireHpRegenSmall": {
+      "key": "empireHpRegenSmall",
+      "sourceMapperName": "Status_Empire_HPRegen_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HealthRegen]",
+      "gameplayProperties": []
+    },
+    "empireInfluencePerCouncilor": {
+      "key": "empireInfluencePerCouncilor",
+      "sourceMapperName": "Status_Empire_InfluencePerCouncilor",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "empireMissionary": {
+      "key": "empireMissionary",
+      "sourceMapperName": "Status_Empire_Missionary",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Empire_Missionary]",
+      "gameplayProperties": []
+    },
+    "empireMissionaryBase": {
+      "key": "empireMissionaryBase",
+      "sourceMapperName": "Status_Empire_MissionaryBase",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Empire_Missionary]",
+      "gameplayProperties": []
+    },
+    "empireMissionaryBonus": {
+      "key": "empireMissionaryBonus",
+      "sourceMapperName": "Status_Empire_MissionaryBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Empire_Missionary]",
+      "gameplayProperties": []
+    },
+    "empireMissionarySecularist": {
+      "key": "empireMissionarySecularist",
+      "sourceMapperName": "Status_Empire_MissionarySecularist",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Empire_Missionary]",
+      "gameplayProperties": []
+    },
+    "empireMissionarySecularistBonus": {
+      "key": "empireMissionarySecularistBonus",
+      "sourceMapperName": "Status_Empire_MissionarySecularistBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Empire_Missionary]",
+      "gameplayProperties": []
+    },
+    "empireNoquensii01ApprovalGain": {
+      "key": "empireNoquensii01ApprovalGain",
+      "sourceMapperName": "Status_Empire_Noquensii01_ApprovalGain",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePositiveTreatyCostReduction": {
+      "key": "empirePositiveTreatyCostReduction",
+      "sourceMapperName": "Status_Empire_PositiveTreatyCost_Reduction",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionHigh": {
+      "key": "empirePublicOpinionHigh",
+      "sourceMapperName": "Status_Empire_PublicOpinion_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionLossHigh": {
+      "key": "empirePublicOpinionLossHigh",
+      "sourceMapperName": "Status_Empire_PublicOpinionLoss_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionLossMedium": {
+      "key": "empirePublicOpinionLossMedium",
+      "sourceMapperName": "Status_Empire_PublicOpinionLoss_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionLossSmall": {
+      "key": "empirePublicOpinionLossSmall",
+      "sourceMapperName": "Status_Empire_PublicOpinionLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionMedium": {
+      "key": "empirePublicOpinionMedium",
+      "sourceMapperName": "Status_Empire_PublicOpinion_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empirePublicOpinionSmall": {
+      "key": "empirePublicOpinionSmall",
+      "sourceMapperName": "Status_Empire_PublicOpinion_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#F04698FF",
+      "symbol": "[PublicOrderColored]",
+      "gameplayProperties": []
+    },
+    "empireSpecificMinorAmetrine01BranchB": {
+      "key": "empireSpecificMinorAmetrine01BranchB",
+      "sourceMapperName": "Status_Empire_SpecificMinor_Ametrine01_BranchB",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_StrategicResource.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[ResourceStrategic]",
+      "gameplayProperties": []
+    },
+    "empireVisionGainHigh": {
+      "key": "empireVisionGainHigh",
+      "sourceMapperName": "Status_Empire_Vision_Gain_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[VisionRange]",
+      "gameplayProperties": []
+    },
+    "empireVisionGainMedium": {
+      "key": "empireVisionGainMedium",
+      "sourceMapperName": "Status_Empire_Vision_Gain_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[VisionRange]",
+      "gameplayProperties": []
+    },
+    "empireVisionGainSmall": {
+      "key": "empireVisionGainSmall",
+      "sourceMapperName": "Status_Empire_Vision_Gain_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[VisionRange]",
+      "gameplayProperties": []
+    },
+    "empireXpBoostHigh": {
+      "key": "empireXpBoostHigh",
+      "sourceMapperName": "Status_Empire_XPBoost_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "empireXpBoostMedium": {
+      "key": "empireXpBoostMedium",
+      "sourceMapperName": "Status_Empire_XPBoost_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "empireXpBoostSmall": {
+      "key": "empireXpBoostSmall",
+      "sourceMapperName": "Status_Empire_XPBoost_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Experience]",
+      "gameplayProperties": []
+    },
+    "heroBaseAbility02": {
+      "key": "heroBaseAbility02",
+      "sourceMapperName": "Status_Hero_BaseAbility_02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_Placeholder_PressuringTheEnemy.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "heroPartnerAmetrine01": {
+      "key": "heroPartnerAmetrine01",
+      "sourceMapperName": "Status_Hero_Partner_Ametrine01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/EntourageRelationTypePartner_Picto.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Hero_Partner_Ametrine01]",
+      "gameplayProperties": []
+    },
+    "heroStatusLoss": {
+      "key": "heroStatusLoss",
+      "sourceMapperName": "HeroStatus_Loss",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_HearthBroken.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[HeroStatus_Loss]",
+      "gameplayProperties": []
+    },
+    "heroStatusNecroEggCarrier": {
+      "key": "heroStatusNecroEggCarrier",
+      "sourceMapperName": "HeroStatus_NecroEggCarrier",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "heroStatusSarcophagusCarrier": {
+      "key": "heroStatusSarcophagusCarrier",
+      "sourceMapperName": "HeroStatus_SarcophagusCarrier",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFF00",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "heroUnitFriendSupport": {
+      "key": "heroUnitFriendSupport",
+      "sourceMapperName": "Status_HeroUnit_FriendSupport",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "heroUnitNecrophageFactionQuest": {
+      "key": "heroUnitNecrophageFactionQuest",
+      "sourceMapperName": "Status_HeroUnit_NecrophageFactionQuest",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFF00",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "observatoryStarGazing": {
+      "key": "observatoryStarGazing",
+      "sourceMapperName": "Status_Observatory_StarGazing",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Observatory_StarGazing]",
+      "gameplayProperties": []
+    },
+    "observatoryStarGazingBase": {
+      "key": "observatoryStarGazingBase",
+      "sourceMapperName": "Status_Observatory_StarGazingBase",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Observatory_StarGazing]",
+      "gameplayProperties": []
+    },
+    "observatoryStarGazingEnlightened": {
+      "key": "observatoryStarGazingEnlightened",
+      "sourceMapperName": "Status_Observatory_StarGazingEnlightened",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Observatory_StarGazingEnlightened]",
+      "gameplayProperties": []
+    },
+    "partnerDenDustBonus": {
+      "key": "partnerDenDustBonus",
+      "sourceMapperName": "Status_PartnerDen_DustBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Money.svg",
+      "color": "#E3B847FF",
+      "symbol": "[MoneyColored]",
+      "gameplayProperties": []
+    },
+    "partnerDenFoodBonus": {
+      "key": "partnerDenFoodBonus",
+      "sourceMapperName": "Status_PartnerDen_FoodBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+      "color": "#88C03FFF",
+      "symbol": "[FoodColored]",
+      "gameplayProperties": []
+    },
+    "partnerDenFortificationBonus": {
+      "key": "partnerDenFortificationBonus",
+      "sourceMapperName": "Status_PartnerDen_FortificationBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Fortification.svg",
+      "color": "#C73849FF",
+      "symbol": "[FortificationColored]",
+      "gameplayProperties": []
+    },
+    "partnerDenIndustryBonus": {
+      "key": "partnerDenIndustryBonus",
+      "sourceMapperName": "Status_PartnerDen_IndustryBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "partnerDenInfluenceBonus": {
+      "key": "partnerDenInfluenceBonus",
+      "sourceMapperName": "Status_PartnerDen_InfluenceBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+      "color": "#B359FDFF",
+      "symbol": "[InfluenceColored]",
+      "gameplayProperties": []
+    },
+    "partnerDenRansacked": {
+      "key": "partnerDenRansacked",
+      "sourceMapperName": "Status_PartnerDen_Ransacked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_PartnerDen_Ransacked]",
+      "gameplayProperties": []
+    },
+    "partnerDenScienceBonus": {
+      "key": "partnerDenScienceBonus",
+      "sourceMapperName": "Status_PartnerDen_ScienceBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Science.svg",
+      "color": "#53BEECFF",
+      "symbol": "[ScienceColored]",
+      "gameplayProperties": []
+    },
+    "populationGalvanizedCalled": {
+      "key": "populationGalvanizedCalled",
+      "sourceMapperName": "Status_Population_GalvanizedCalled",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[Industry]",
+      "gameplayProperties": []
+    },
+    "populationGalvanizedCalledBase": {
+      "key": "populationGalvanizedCalledBase",
+      "sourceMapperName": "Status_Population_GalvanizedCalledBase",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[Industry]",
+      "gameplayProperties": []
+    },
+    "populationGalvanizedEnlightened": {
+      "key": "populationGalvanizedEnlightened",
+      "sourceMapperName": "Status_Population_GalvanizedEnlightened",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[Industry]",
+      "gameplayProperties": []
+    },
+    "publicOpinionAtBattleFreePeaceForALongTime": {
+      "key": "publicOpinionAtBattleFreePeaceForALongTime",
+      "sourceMapperName": "Status_PublicOpinion_AtBattleFreePeaceForALongTime",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionAtPeaceForALongTime": {
+      "key": "publicOpinionAtPeaceForALongTime",
+      "sourceMapperName": "Status_PublicOpinion_AtPeaceForALongTime",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionAttackedWhileNonAgression": {
+      "key": "publicOpinionAttackedWhileNonAgression",
+      "sourceMapperName": "Status_PublicOpinion_AttackedWhileNonAgression",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionCloseFriendship01": {
+      "key": "publicOpinionCloseFriendship01",
+      "sourceMapperName": "Status_PublicOpinion_CloseFriendship01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionCloseFriendship02": {
+      "key": "publicOpinionCloseFriendship02",
+      "sourceMapperName": "Status_PublicOpinion_CloseFriendship02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionConjoinedResearchSigned": {
+      "key": "publicOpinionConjoinedResearchSigned",
+      "sourceMapperName": "Status_PublicOpinion_ConjoinedResearchSigned",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionDivinePopulation": {
+      "key": "publicOpinionDivinePopulation",
+      "sourceMapperName": "Status_PublicOpinion_DivinePopulation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Population.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Population]",
+      "gameplayProperties": []
+    },
+    "publicOpinionEmbraceCoralSymbiosisDeclared": {
+      "key": "publicOpinionEmbraceCoralSymbiosisDeclared",
+      "sourceMapperName": "Status_PublicOpinion_EmbraceCoralSymbiosisDeclared",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionINecroHateYouKin": {
+      "key": "publicOpinionINecroHateYouKin",
+      "sourceMapperName": "Status_PublicOpinion_INecroHateYouKin",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionINeedYourResources": {
+      "key": "publicOpinionINeedYourResources",
+      "sourceMapperName": "Status_PublicOpinion_INeedYourResources",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionInPartnershipForALongTime": {
+      "key": "publicOpinionInPartnershipForALongTime",
+      "sourceMapperName": "Status_PublicOpinion_InPartnershipForALongTime",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionIWantToInvadeYouForResources": {
+      "key": "publicOpinionIWantToInvadeYouForResources",
+      "sourceMapperName": "Status_PublicOpinion_IWantToInvadeYouForResources",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionJointMilitaryActive": {
+      "key": "publicOpinionJointMilitaryActive",
+      "sourceMapperName": "Status_PublicOpinion_JointMilitaryActive",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionOurHeroesAreArchenemies": {
+      "key": "publicOpinionOurHeroesAreArchenemies",
+      "sourceMapperName": "Status_PublicOpinion_OurHeroesAreArchenemies",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionShareCoralExploitationSigned": {
+      "key": "publicOpinionShareCoralExploitationSigned",
+      "sourceMapperName": "Status_PublicOpinion_ShareCoralExploitationSigned",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionSharedVictorySigned": {
+      "key": "publicOpinionSharedVictorySigned",
+      "sourceMapperName": "Status_PublicOpinion_SharedVictorySigned",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionSidedWithMyJointMilitary": {
+      "key": "publicOpinionSidedWithMyJointMilitary",
+      "sourceMapperName": "Status_PublicOpinion_SidedWithMyJointMilitary",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionSidedWithOtherJointMilitary": {
+      "key": "publicOpinionSidedWithOtherJointMilitary",
+      "sourceMapperName": "Status_PublicOpinion_SidedWithOtherJointMilitary",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionTruceRespected": {
+      "key": "publicOpinionTruceRespected",
+      "sourceMapperName": "Status_PublicOpinion_TruceRespected",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionWeAreAtWar": {
+      "key": "publicOpinionWeAreAtWar",
+      "sourceMapperName": "Status_PublicOpinion_WeAreAtWar",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionWeAreBothLowRanked": {
+      "key": "publicOpinionWeAreBothLowRanked",
+      "sourceMapperName": "Status_PublicOpinion_WeAreBothLowRanked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionWeShareAnAlly": {
+      "key": "publicOpinionWeShareAnAlly",
+      "sourceMapperName": "Status_PublicOpinion_WeShareAnAlly",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAreAtWarWithOurEnemy": {
+      "key": "publicOpinionYouAreAtWarWithOurEnemy",
+      "sourceMapperName": "Status_PublicOpinion_YouAreAtWarWithOurEnemy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAreFriendWithMyEnemy": {
+      "key": "publicOpinionYouAreFriendWithMyEnemy",
+      "sourceMapperName": "Status_PublicOpinion_YouAreFriendWithMyEnemy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAspectChapter06AStep02": {
+      "key": "publicOpinionYouAspectChapter06AStep02",
+      "sourceMapperName": "Status_PublicOpinion_YouAspect_Chapter06AStep02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAttackedMe": {
+      "key": "publicOpinionYouAttackedMe",
+      "sourceMapperName": "Status_PublicOpinion_YouAttackedMe",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAttackedMe02": {
+      "key": "publicOpinionYouAttackedMe02",
+      "sourceMapperName": "Status_PublicOpinion_YouAttackedMe02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAttackedMe03": {
+      "key": "publicOpinionYouAttackedMe03",
+      "sourceMapperName": "Status_PublicOpinion_YouAttackedMe03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAttackedMeBadge01": {
+      "key": "publicOpinionYouAttackedMeBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouAttackedMeBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouAttackedMyAlly": {
+      "key": "publicOpinionYouAttackedMyAlly",
+      "sourceMapperName": "Status_PublicOpinion_YouAttackedMyAlly",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouClaimedABorderTerritory": {
+      "key": "publicOpinionYouClaimedABorderTerritory",
+      "sourceMapperName": "Status_PublicOpinion_YouClaimedABorderTerritory",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouClearedADangerousTormented": {
+      "key": "publicOpinionYouClearedADangerousTormented",
+      "sourceMapperName": "Status_PublicOpinion_YouClearedADangerousTormented",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouClosedBorders": {
+      "key": "publicOpinionYouClosedBorders",
+      "sourceMapperName": "Status_PublicOpinion_YouClosedBorders",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouCrushedUsInWar": {
+      "key": "publicOpinionYouCrushedUsInWar",
+      "sourceMapperName": "Status_PublicOpinion_YouCrushedUsInWar",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDeclaredUnjustifiedWarOnMe": {
+      "key": "publicOpinionYouDeclaredUnjustifiedWarOnMe",
+      "sourceMapperName": "Status_PublicOpinion_YouDeclaredUnjustifiedWarOnMe",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDeclaredUnjustifiedWarOnSomeone": {
+      "key": "publicOpinionYouDeclaredUnjustifiedWarOnSomeone",
+      "sourceMapperName": "Status_PublicOpinion_YouDeclaredUnjustifiedWarOnSomeone",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDeclaredWarOnMe": {
+      "key": "publicOpinionYouDeclaredWarOnMe",
+      "sourceMapperName": "Status_PublicOpinion_YouDeclaredWarOnMe",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDestroyedCoral": {
+      "key": "publicOpinionYouDestroyedCoral",
+      "sourceMapperName": "Status_PublicOpinion_YouDestroyedCoral",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDevouredInMyTerritory": {
+      "key": "publicOpinionYouDevouredInMyTerritory",
+      "sourceMapperName": "Status_PublicOpinion_YouDevouredInMyTerritory",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouDoNotFollowMyVictoryPath": {
+      "key": "publicOpinionYouDoNotFollowMyVictoryPath",
+      "sourceMapperName": "Status_PublicOpinion_YouDoNotFollowMyVictoryPath",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouEliminatedMyAlly": {
+      "key": "publicOpinionYouEliminatedMyAlly",
+      "sourceMapperName": "Status_PublicOpinion_YouEliminatedMyAlly",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouEliminatedMyEnemy": {
+      "key": "publicOpinionYouEliminatedMyEnemy",
+      "sourceMapperName": "Status_PublicOpinion_YouEliminatedMyEnemy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouFollowMyVictoryPath": {
+      "key": "publicOpinionYouFollowMyVictoryPath",
+      "sourceMapperName": "Status_PublicOpinion_YouFollowMyVictoryPath",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouIgnoredTruce": {
+      "key": "publicOpinionYouIgnoredTruce",
+      "sourceMapperName": "Status_PublicOpinion_YouIgnoredTruce",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouInvadedWithBurrow": {
+      "key": "publicOpinionYouInvadedWithBurrow",
+      "sourceMapperName": "Status_PublicOpinion_YouInvadedWithBurrow",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouLiberatedACityOfMine": {
+      "key": "publicOpinionYouLiberatedACityOfMine",
+      "sourceMapperName": "Status_PublicOpinion_YouLiberatedACityOfMine",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMyCamp": {
+      "key": "publicOpinionYouOccupiedMyCamp",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMyCamp",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMySettlement": {
+      "key": "publicOpinionYouOccupiedMySettlement",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMySettlement",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMySettlement02": {
+      "key": "publicOpinionYouOccupiedMySettlement02",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMySettlement02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMySettlement03": {
+      "key": "publicOpinionYouOccupiedMySettlement03",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMySettlement03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMySettlement04": {
+      "key": "publicOpinionYouOccupiedMySettlement04",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMySettlement04",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOccupiedMySettlementBadge01": {
+      "key": "publicOpinionYouOccupiedMySettlementBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouOccupiedMySettlementBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouOpenedBorders": {
+      "key": "publicOpinionYouOpenedBorders",
+      "sourceMapperName": "Status_PublicOpinion_YouOpenedBorders",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouProvidesCoral": {
+      "key": "publicOpinionYouProvidesCoral",
+      "sourceMapperName": "Status_PublicOpinion_YouProvidesCoral",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMyCamp": {
+      "key": "publicOpinionYouRansackedMyCamp",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMyCamp",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMyMinistry": {
+      "key": "publicOpinionYouRansackedMyMinistry",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMyMinistry",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMySettlement": {
+      "key": "publicOpinionYouRansackedMySettlement",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMySettlement",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMySettlement02": {
+      "key": "publicOpinionYouRansackedMySettlement02",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMySettlement02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMySettlement03": {
+      "key": "publicOpinionYouRansackedMySettlement03",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMySettlement03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRansackedMySettlementBadge01": {
+      "key": "publicOpinionYouRansackedMySettlementBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouRansackedMySettlementBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMyCamp": {
+      "key": "publicOpinionYouRazedMyCamp",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMyCamp",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMyMinistry": {
+      "key": "publicOpinionYouRazedMyMinistry",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMyMinistry",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMySettlement": {
+      "key": "publicOpinionYouRazedMySettlement",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMySettlement",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMySettlement02": {
+      "key": "publicOpinionYouRazedMySettlement02",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMySettlement02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMySettlement03": {
+      "key": "publicOpinionYouRazedMySettlement03",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMySettlement03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRazedMySettlementBadge01": {
+      "key": "publicOpinionYouRazedMySettlementBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouRazedMySettlementBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRefusedATreaty01": {
+      "key": "publicOpinionYouRefusedATreaty01",
+      "sourceMapperName": "Status_PublicOpinion_YouRefusedATreaty01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRefusedATreaty02": {
+      "key": "publicOpinionYouRefusedATreaty02",
+      "sourceMapperName": "Status_PublicOpinion_YouRefusedATreaty02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRefusedATreaty03": {
+      "key": "publicOpinionYouRefusedATreaty03",
+      "sourceMapperName": "Status_PublicOpinion_YouRefusedATreaty03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRefusedATreatyBadge01": {
+      "key": "publicOpinionYouRefusedATreatyBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouRefusedATreatyBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedAspectChapter06AStep02": {
+      "key": "publicOpinionYouRevokedAspectChapter06AStep02",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedAspect_Chapter06AStep02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedATreaty": {
+      "key": "publicOpinionYouRevokedATreaty",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedATreaty",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedATreaty02": {
+      "key": "publicOpinionYouRevokedATreaty02",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedATreaty02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedATreaty03": {
+      "key": "publicOpinionYouRevokedATreaty03",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedATreaty03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedATreatyBadge01": {
+      "key": "publicOpinionYouRevokedATreatyBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedATreatyBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedClosedBorders": {
+      "key": "publicOpinionYouRevokedClosedBorders",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedClosedBorders",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouRevokedEmbraceCoralSymbiosis": {
+      "key": "publicOpinionYouRevokedEmbraceCoralSymbiosis",
+      "sourceMapperName": "Status_PublicOpinion_YouRevokedEmbraceCoralSymbiosis",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeACompliment": {
+      "key": "publicOpinionYouSentMeACompliment",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeACompliment",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeACompliment02": {
+      "key": "publicOpinionYouSentMeACompliment02",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeACompliment02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeACompliment03": {
+      "key": "publicOpinionYouSentMeACompliment03",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeACompliment03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeAComplimentBadge01": {
+      "key": "publicOpinionYouSentMeAComplimentBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeAComplimentBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeAnInsult": {
+      "key": "publicOpinionYouSentMeAnInsult",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeAnInsult",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeAnInsult02": {
+      "key": "publicOpinionYouSentMeAnInsult02",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeAnInsult02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeAnInsult03": {
+      "key": "publicOpinionYouSentMeAnInsult03",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeAnInsult03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSentMeAnInsultBadge01": {
+      "key": "publicOpinionYouSentMeAnInsultBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouSentMeAnInsultBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSettledNextToMeAspect": {
+      "key": "publicOpinionYouSettledNextToMeAspect",
+      "sourceMapperName": "Status_PublicOpinion_YouSettledNextToMeAspect",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSettledNextToMeKin": {
+      "key": "publicOpinionYouSettledNextToMeKin",
+      "sourceMapperName": "Status_PublicOpinion_YouSettledNextToMeKin",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSignedATreaty01": {
+      "key": "publicOpinionYouSignedATreaty01",
+      "sourceMapperName": "Status_PublicOpinion_YouSignedATreaty01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSignedATreaty02": {
+      "key": "publicOpinionYouSignedATreaty02",
+      "sourceMapperName": "Status_PublicOpinion_YouSignedATreaty02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSignedATreaty03": {
+      "key": "publicOpinionYouSignedATreaty03",
+      "sourceMapperName": "Status_PublicOpinion_YouSignedATreaty03",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSignedATreatyBadge01": {
+      "key": "publicOpinionYouSignedATreatyBadge01",
+      "sourceMapperName": "Status_PublicOpinion_YouSignedATreatyBadge01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouStoleMyRiches": {
+      "key": "publicOpinionYouStoleMyRiches",
+      "sourceMapperName": "Status_PublicOpinion_YouStoleMyRiches",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouSurrenderedToUs": {
+      "key": "publicOpinionYouSurrenderedToUs",
+      "sourceMapperName": "Status_PublicOpinion_YouSurrenderedToUs",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouTraumatizedMyHero": {
+      "key": "publicOpinionYouTraumatizedMyHero",
+      "sourceMapperName": "Status_PublicOpinion_YouTraumatizedMyHero",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouTrespassedMyNeutralBorder": {
+      "key": "publicOpinionYouTrespassedMyNeutralBorder",
+      "sourceMapperName": "Status_PublicOpinion_YouTrespassedMyNeutralBorder",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouWeakenedAnEnemy": {
+      "key": "publicOpinionYouWeakenedAnEnemy",
+      "sourceMapperName": "Status_PublicOpinion_YouWeakenedAnEnemy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "publicOpinionYouWitheredInMyTerritory": {
+      "key": "publicOpinionYouWitheredInMyTerritory",
+      "sourceMapperName": "Status_PublicOpinion_YouWitheredInMyTerritory",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "settlementBlindFanaticism": {
+      "key": "settlementBlindFanaticism",
+      "sourceMapperName": "Status_Settlement_BlindFanaticism",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_BlindFanaticism]",
+      "gameplayProperties": []
+    },
+    "settlementCalledBlessingHigh": {
+      "key": "settlementCalledBlessingHigh",
+      "sourceMapperName": "Status_Settlement_CalledBlessing_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCalledBlessingMedium": {
+      "key": "settlementCalledBlessingMedium",
+      "sourceMapperName": "Status_Settlement_CalledBlessing_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCalledBlessingSmall": {
+      "key": "settlementCalledBlessingSmall",
+      "sourceMapperName": "Status_Settlement_CalledBlessing_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCalledFurryHigh": {
+      "key": "settlementCalledFurryHigh",
+      "sourceMapperName": "Status_Settlement_CalledFurry_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCalledFurryMedium": {
+      "key": "settlementCalledFurryMedium",
+      "sourceMapperName": "Status_Settlement_CalledFurry_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCalledFurrySmall": {
+      "key": "settlementCalledFurrySmall",
+      "sourceMapperName": "Status_Settlement_CalledFurry_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementCorruptionNegative": {
+      "key": "settlementCorruptionNegative",
+      "sourceMapperName": "Status_Settlement_CorruptionNegative",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_CorruptionNegative]",
+      "gameplayProperties": []
+    },
+    "settlementCorruptionPositive": {
+      "key": "settlementCorruptionPositive",
+      "sourceMapperName": "Status_Settlement_CorruptionPositive",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_CorruptionPositive]",
+      "gameplayProperties": []
+    },
+    "settlementMonsoonFestival": {
+      "key": "settlementMonsoonFestival",
+      "sourceMapperName": "Status_Settlement_MonsoonFestival",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_SettlementActionType_MonsoonFestival.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_MonsoonFestival]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDay": {
+      "key": "settlementNeverEndingDay",
+      "sourceMapperName": "Status_Settlement_NeverEndingDay",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDay]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayBalanced": {
+      "key": "settlementNeverEndingDayBalanced",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayBalanced",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDay]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayBalancedBonus": {
+      "key": "settlementNeverEndingDayBalancedBonus",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayBalancedBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDay]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayBase": {
+      "key": "settlementNeverEndingDayBase",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayBase",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDay]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayBonus": {
+      "key": "settlementNeverEndingDayBonus",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDay]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayEnlightened": {
+      "key": "settlementNeverEndingDayEnlightened",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayEnlightened",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDayEnlightened]",
+      "gameplayProperties": []
+    },
+    "settlementNeverEndingDayEnlightenedBonus": {
+      "key": "settlementNeverEndingDayEnlightenedBonus",
+      "sourceMapperName": "Status_Settlement_NeverEndingDayEnlightenedBonus",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_NeverEndingDayEnlightened]",
+      "gameplayProperties": []
+    },
+    "settlementOccupation": {
+      "key": "settlementOccupation",
+      "sourceMapperName": "Status_Settlement_Occupation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementPrepared": {
+      "key": "settlementPrepared",
+      "sourceMapperName": "Settlement_Prepared",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Settlement_Prepared]",
+      "gameplayProperties": []
+    },
+    "settlementReligiousUnrest": {
+      "key": "settlementReligiousUnrest",
+      "sourceMapperName": "Status_Settlement_ReligiousUnrest",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementReligiousUnrestHigh": {
+      "key": "settlementReligiousUnrestHigh",
+      "sourceMapperName": "Status_Settlement_ReligiousUnrest_High",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementReligiousUnrestMedium": {
+      "key": "settlementReligiousUnrestMedium",
+      "sourceMapperName": "Status_Settlement_ReligiousUnrest_Medium",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "settlementReligiousUnrestSmall": {
+      "key": "settlementReligiousUnrestSmall",
+      "sourceMapperName": "Status_Settlement_ReligiousUnrest_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Settlement_ReligiousUnrest]",
+      "gameplayProperties": []
+    },
+    "territoryArmyDamageLossSmall": {
+      "key": "territoryArmyDamageLossSmall",
+      "sourceMapperName": "Status_Territory_ArmyDamageLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "territoryArmyDamageSmall": {
+      "key": "territoryArmyDamageSmall",
+      "sourceMapperName": "Status_Territory_ArmyDamage_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Damage]",
+      "gameplayProperties": []
+    },
+    "territoryIndustrySmall": {
+      "key": "territoryIndustrySmall",
+      "sourceMapperName": "Status_Territory_Industry_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+      "color": "#F27A60FF",
+      "symbol": "[IndustryColored]",
+      "gameplayProperties": []
+    },
+    "territoryStratProdLossSmall": {
+      "key": "territoryStratProdLossSmall",
+      "sourceMapperName": "Status_Territory_StratProdLoss_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_StrategicResource.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[ResourceStrategic]",
+      "gameplayProperties": []
+    },
+    "territoryStratProdSmall": {
+      "key": "territoryStratProdSmall",
+      "sourceMapperName": "Status_Territory_StratProd_Small",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_StrategicResource.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[ResourceStrategic]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusLargeNegative": {
+      "key": "treatyPublicOpinionStatusLargeNegative",
+      "sourceMapperName": "TreatyPublicOpinion_Status_LargeNegative",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusLargePositive": {
+      "key": "treatyPublicOpinionStatusLargePositive",
+      "sourceMapperName": "TreatyPublicOpinion_Status_LargePositive",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusMediumNegative": {
+      "key": "treatyPublicOpinionStatusMediumNegative",
+      "sourceMapperName": "TreatyPublicOpinion_Status_MediumNegative",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusMediumPositive": {
+      "key": "treatyPublicOpinionStatusMediumPositive",
+      "sourceMapperName": "TreatyPublicOpinion_Status_MediumPositive",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusSmallNegative": {
+      "key": "treatyPublicOpinionStatusSmallNegative",
+      "sourceMapperName": "TreatyPublicOpinion_Status_SmallNegative",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "treatyPublicOpinionStatusSmallPositive": {
+      "key": "treatyPublicOpinionStatusSmallPositive",
+      "sourceMapperName": "TreatyPublicOpinion_Status_SmallPositive",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_PublicOpinion.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[PublicOpinion]",
+      "gameplayProperties": []
+    },
+    "unitAccelerated1": {
+      "key": "unitAccelerated1",
+      "sourceMapperName": "Status_Unit_Accelerated_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Accelerated_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Accelerated_1]",
+      "gameplayProperties": []
+    },
+    "unitAccelerated2": {
+      "key": "unitAccelerated2",
+      "sourceMapperName": "Status_Unit_Accelerated_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Accelerated_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Accelerated_2]",
+      "gameplayProperties": []
+    },
+    "unitBattleCursedDefense": {
+      "key": "unitBattleCursedDefense",
+      "sourceMapperName": "Status_Unit_Battle_CursedDefense",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Battle_CursedDefense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_CursedDefense]",
+      "gameplayProperties": []
+    },
+    "unitBeatenUp": {
+      "key": "unitBeatenUp",
+      "sourceMapperName": "Status_Unit_BeatenUp",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_BeatenUp]",
+      "gameplayProperties": []
+    },
+    "unitBerserk": {
+      "key": "unitBerserk",
+      "sourceMapperName": "Status_Unit_Berserk",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Berserk.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Berserk]",
+      "gameplayProperties": []
+    },
+    "unitBleeding": {
+      "key": "unitBleeding",
+      "sourceMapperName": "Status_Unit_Bleeding",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Bleeding.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Bleeding]",
+      "gameplayProperties": []
+    },
+    "unitBodyguard": {
+      "key": "unitBodyguard",
+      "sourceMapperName": "Status_Unit_Bodyguard",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Bodyguard]",
+      "gameplayProperties": []
+    },
+    "unitBodyguarded": {
+      "key": "unitBodyguarded",
+      "sourceMapperName": "Status_Unit_Bodyguarded",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Bodyguarded]",
+      "gameplayProperties": []
+    },
+    "unitBreakRangedDamage": {
+      "key": "unitBreakRangedDamage",
+      "sourceMapperName": "Status_Unit_BreakRangedDamage",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_BreakRangedDamage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_BreakRangedDamage]",
+      "gameplayProperties": []
+    },
+    "unitCavalryCharge": {
+      "key": "unitCavalryCharge",
+      "sourceMapperName": "Status_Unit_CavalryCharge",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_UnitClass_Cavalry.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_CavalryCharge]",
+      "gameplayProperties": []
+    },
+    "unitConfused": {
+      "key": "unitConfused",
+      "sourceMapperName": "Status_Unit_Confused",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Confused.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Confused]",
+      "gameplayProperties": []
+    },
+    "unitCorrupted": {
+      "key": "unitCorrupted",
+      "sourceMapperName": "Status_Unit_Corrupted",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Corrupted.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Corrupted]",
+      "gameplayProperties": []
+    },
+    "unitCorruptedRebirth": {
+      "key": "unitCorruptedRebirth",
+      "sourceMapperName": "Status_Unit_CorruptedRebirth",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Corrupted.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_CorruptedRebirth]",
+      "gameplayProperties": []
+    },
+    "unitCumbersome": {
+      "key": "unitCumbersome",
+      "sourceMapperName": "Status_Unit_Cumbersome",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Cumbersome.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Cumbersome]",
+      "gameplayProperties": []
+    },
+    "unitDamaged": {
+      "key": "unitDamaged",
+      "sourceMapperName": "Status_Unit_Damaged",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Damaged.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Damaged]",
+      "gameplayProperties": []
+    },
+    "unitDefending": {
+      "key": "unitDefending",
+      "sourceMapperName": "Status_Unit_Defending",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_Placeholder_PressuringTheEnemy.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Defending]",
+      "gameplayProperties": []
+    },
+    "unitDefensivePlate": {
+      "key": "unitDefensivePlate",
+      "sourceMapperName": "Status_Unit_DefensivePlate",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Invicible.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_DefensivePlate]",
+      "gameplayProperties": []
+    },
+    "unitDefensivePosture1": {
+      "key": "unitDefensivePosture1",
+      "sourceMapperName": "Status_Unit_DefensivePosture_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_DefensivePosture_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_DefensivePosture_1]",
+      "gameplayProperties": []
+    },
+    "unitDrowning": {
+      "key": "unitDrowning",
+      "sourceMapperName": "Status_Unit_Drowning",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Drowning.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Drowning]",
+      "gameplayProperties": []
+    },
+    "unitDrunk": {
+      "key": "unitDrunk",
+      "sourceMapperName": "Status_Unit_Drunk",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn05.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Drunk]",
+      "gameplayProperties": []
+    },
+    "unitEcstatic": {
+      "key": "unitEcstatic",
+      "sourceMapperName": "Status_Unit_Ecstatic",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Ecstatic.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Ecstatic]",
+      "gameplayProperties": []
+    },
+    "unitEncircled": {
+      "key": "unitEncircled",
+      "sourceMapperName": "Status_Unit_Encircled",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Encircled.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Encircled]",
+      "gameplayProperties": []
+    },
+    "unitEnraged": {
+      "key": "unitEnraged",
+      "sourceMapperName": "Status_Unit_Enraged",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Enraged.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Enraged]",
+      "gameplayProperties": []
+    },
+    "unitEntangled": {
+      "key": "unitEntangled",
+      "sourceMapperName": "Status_Unit_Entangled",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Entangled.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Entangled]",
+      "gameplayProperties": []
+    },
+    "unitEphemeral": {
+      "key": "unitEphemeral",
+      "sourceMapperName": "Status_Unit_Ephemeral",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Ephemeral.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Ephemeral]",
+      "gameplayProperties": []
+    },
+    "unitFocused1": {
+      "key": "unitFocused1",
+      "sourceMapperName": "Status_Unit_Focused_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Focused_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Focused_1]",
+      "gameplayProperties": []
+    },
+    "unitFocused2": {
+      "key": "unitFocused2",
+      "sourceMapperName": "Status_Unit_Focused_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Focused_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Focused_2]",
+      "gameplayProperties": []
+    },
+    "unitFocusedStance": {
+      "key": "unitFocusedStance",
+      "sourceMapperName": "Status_Unit_FocusedStance",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_FocusedStance.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_FocusedStance]",
+      "gameplayProperties": []
+    },
+    "unitFrenzy": {
+      "key": "unitFrenzy",
+      "sourceMapperName": "Status_Unit_Frenzy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Frenzy.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Frenzy]",
+      "gameplayProperties": []
+    },
+    "unitHarmonized": {
+      "key": "unitHarmonized",
+      "sourceMapperName": "Status_Unit_Harmonized",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Harmonized.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Harmonized]",
+      "gameplayProperties": []
+    },
+    "unitHeavilyDamaged": {
+      "key": "unitHeavilyDamaged",
+      "sourceMapperName": "Status_Unit_HeavilyDamaged",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Damaged.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_HeavilyDamaged]",
+      "gameplayProperties": []
+    },
+    "unitHunted": {
+      "key": "unitHunted",
+      "sourceMapperName": "Status_Unit_Hunted",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Hunted.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Hunted]",
+      "gameplayProperties": []
+    },
+    "unitIlluminated": {
+      "key": "unitIlluminated",
+      "sourceMapperName": "Status_Unit_Illuminated",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Illuminated]",
+      "gameplayProperties": []
+    },
+    "unitIlluminatedUpgraded": {
+      "key": "unitIlluminatedUpgraded",
+      "sourceMapperName": "Status_Unit_Illuminated_Upgraded",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination_Upgraded.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Illuminated_Upgraded]",
+      "gameplayProperties": []
+    },
+    "unitImmobilized": {
+      "key": "unitImmobilized",
+      "sourceMapperName": "Status_Unit_Immobilized",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Immobilized.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Immobilized]",
+      "gameplayProperties": []
+    },
+    "unitInfantryLine": {
+      "key": "unitInfantryLine",
+      "sourceMapperName": "Status_Unit_InfantryLine",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/constructibles/UI_UnitItem_UnitClass_Melee.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_InfantryLine]",
+      "gameplayProperties": []
+    },
+    "unitInfected": {
+      "key": "unitInfected",
+      "sourceMapperName": "Status_Unit_Infected",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Infected.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Infected]",
+      "gameplayProperties": []
+    },
+    "unitInfused1": {
+      "key": "unitInfused1",
+      "sourceMapperName": "Status_Unit_Infused_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Infused_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Infused_1]",
+      "gameplayProperties": []
+    },
+    "unitInfused2": {
+      "key": "unitInfused2",
+      "sourceMapperName": "Status_Unit_Infused_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Infused_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Infused_2]",
+      "gameplayProperties": []
+    },
+    "unitInspired1": {
+      "key": "unitInspired1",
+      "sourceMapperName": "Status_Unit_Inspired_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Inspired_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Inspired_1]",
+      "gameplayProperties": []
+    },
+    "unitInspired2": {
+      "key": "unitInspired2",
+      "sourceMapperName": "Status_Unit_Inspired_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Inspired_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Inspired_2]",
+      "gameplayProperties": []
+    },
+    "unitInvincible": {
+      "key": "unitInvincible",
+      "sourceMapperName": "Status_Unit_Invincible",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Invincible.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Invincible]",
+      "gameplayProperties": []
+    },
+    "unitLeechingSeeds1": {
+      "key": "unitLeechingSeeds1",
+      "sourceMapperName": "Status_Unit_LeechingSeeds_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_LeechingSeeds_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_LeechingSeeds_1]",
+      "gameplayProperties": []
+    },
+    "unitLeechingSeeds2": {
+      "key": "unitLeechingSeeds2",
+      "sourceMapperName": "Status_Unit_LeechingSeeds_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_LeechingSeeds_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_LeechingSeeds_2]",
+      "gameplayProperties": []
+    },
+    "unitMapComa": {
+      "key": "unitMapComa",
+      "sourceMapperName": "Status_Unit_Map_Coma",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Dying]",
+      "gameplayProperties": []
+    },
+    "unitMapDamageGain01": {
+      "key": "unitMapDamageGain01",
+      "sourceMapperName": "Status_Unit_Map_Damage_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Damage_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapDamageGain02": {
+      "key": "unitMapDamageGain02",
+      "sourceMapperName": "Status_Unit_Map_Damage_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Damage_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapDamageLoss01": {
+      "key": "unitMapDamageLoss01",
+      "sourceMapperName": "Status_Unit_Map_Damage_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Damage_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapDamageLoss02": {
+      "key": "unitMapDamageLoss02",
+      "sourceMapperName": "Status_Unit_Map_Damage_Loss02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Damage_Loss02]",
+      "gameplayProperties": []
+    },
+    "unitMapDefenseGain01": {
+      "key": "unitMapDefenseGain01",
+      "sourceMapperName": "Status_Unit_Map_Defense_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Defense_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapDefenseGain02": {
+      "key": "unitMapDefenseGain02",
+      "sourceMapperName": "Status_Unit_Map_Defense_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Defense_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapDefenseLoss01": {
+      "key": "unitMapDefenseLoss01",
+      "sourceMapperName": "Status_Unit_Map_Defense_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Defense_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapDefenseLoss02": {
+      "key": "unitMapDefenseLoss02",
+      "sourceMapperName": "Status_Unit_Map_Defense_Loss02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/abilities/UI_UnitItem_Defense.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Defense_Loss02]",
+      "gameplayProperties": []
+    },
+    "unitMapDying": {
+      "key": "unitMapDying",
+      "sourceMapperName": "Status_Unit_Map_Dying",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Dying]",
+      "gameplayProperties": []
+    },
+    "unitMapExperienceGain01": {
+      "key": "unitMapExperienceGain01",
+      "sourceMapperName": "Status_Unit_Map_Experience_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Experience_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapExperienceGain02": {
+      "key": "unitMapExperienceGain02",
+      "sourceMapperName": "Status_Unit_Map_Experience_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Experience_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapExperienceLoss01": {
+      "key": "unitMapExperienceLoss01",
+      "sourceMapperName": "Status_Unit_Map_Experience_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_ExperiencePoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Experience_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapFeedingFrenzy": {
+      "key": "unitMapFeedingFrenzy",
+      "sourceMapperName": "Status_Unit_Map_FeedingFrenzy",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Frenzy.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_FeedingFrenzy]",
+      "gameplayProperties": []
+    },
+    "unitMapFocusGain01": {
+      "key": "unitMapFocusGain01",
+      "sourceMapperName": "Status_Unit_Map_Focus_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Focus_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapFocusGain02": {
+      "key": "unitMapFocusGain02",
+      "sourceMapperName": "Status_Unit_Map_Focus_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Focus_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapFocusLoss01": {
+      "key": "unitMapFocusLoss01",
+      "sourceMapperName": "Status_Unit_Map_Focus_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Focus_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapFocusLoss02": {
+      "key": "unitMapFocusLoss02",
+      "sourceMapperName": "Status_Unit_Map_Focus_Loss02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Focus.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Focus_Loss02]",
+      "gameplayProperties": []
+    },
+    "unitMapForbidRiftArmyAction": {
+      "key": "unitMapForbidRiftArmyAction",
+      "sourceMapperName": "Status_Unit_Map_ForbidRiftArmyAction",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Common_Rift.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_ForbidRiftArmyAction]",
+      "gameplayProperties": []
+    },
+    "unitMapGrieving": {
+      "key": "unitMapGrieving",
+      "sourceMapperName": "Status_Unit_Map_Grieving",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[DustColored]",
+      "gameplayProperties": []
+    },
+    "unitMapHeroCommon02": {
+      "key": "unitMapHeroCommon02",
+      "sourceMapperName": "Status_Unit_Map_Hero_Common02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common02.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[UnitAbility_Hero_Common02]",
+      "gameplayProperties": []
+    },
+    "unitMapHpLoss01": {
+      "key": "unitMapHpLoss01",
+      "sourceMapperName": "Status_Unit_Map_HP_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_UnitItem_Health.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_HP_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapHpRegenGain01": {
+      "key": "unitMapHpRegenGain01",
+      "sourceMapperName": "Status_Unit_Map_HpRegen_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_HpRegen_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapHpRegenGain02": {
+      "key": "unitMapHpRegenGain02",
+      "sourceMapperName": "Status_Unit_Map_HpRegen_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_HpRegen_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapPatroller01": {
+      "key": "unitMapPatroller01",
+      "sourceMapperName": "Status_Unit_Map_Patroller_01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Patroller_01]",
+      "gameplayProperties": []
+    },
+    "unitMapPatroller02": {
+      "key": "unitMapPatroller02",
+      "sourceMapperName": "Status_Unit_Map_Patroller_02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Patroller_02]",
+      "gameplayProperties": []
+    },
+    "unitMapSick": {
+      "key": "unitMapSick",
+      "sourceMapperName": "Status_Unit_Map_Sick",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+      "color": "#E3B847FF",
+      "symbol": "[DustColored]",
+      "gameplayProperties": []
+    },
+    "unitMapSpeedGain01": {
+      "key": "unitMapSpeedGain01",
+      "sourceMapperName": "Status_Unit_Map_Speed_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Speed_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapSpeedGain02": {
+      "key": "unitMapSpeedGain02",
+      "sourceMapperName": "Status_Unit_Map_Speed_Gain02",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Speed_Gain02]",
+      "gameplayProperties": []
+    },
+    "unitMapSpeedLoss01": {
+      "key": "unitMapSpeedLoss01",
+      "sourceMapperName": "Status_Unit_Map_Speed_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Speed_Loss01]",
+      "gameplayProperties": []
+    },
+    "unitMapVisionGain01": {
+      "key": "unitMapVisionGain01",
+      "sourceMapperName": "Status_Unit_Map_Vision_Gain01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Vision_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapVisionLoss01": {
+      "key": "unitMapVisionLoss01",
+      "sourceMapperName": "Status_Unit_Map_Vision_Loss01",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_UnitItem_Vision.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Vision_Gain01]",
+      "gameplayProperties": []
+    },
+    "unitMapWandering": {
+      "key": "unitMapWandering",
+      "sourceMapperName": "Status_Unit_Map_Wandering",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Wandering.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Map_Wandering]",
+      "gameplayProperties": []
+    },
+    "unitMarked": {
+      "key": "unitMarked",
+      "sourceMapperName": "Status_Unit_Marked",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Marked.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Marked]",
+      "gameplayProperties": []
+    },
+    "unitPreparation1": {
+      "key": "unitPreparation1",
+      "sourceMapperName": "Status_Unit_Preparation_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Preparation_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Preparation_1]",
+      "gameplayProperties": []
+    },
+    "unitPreparation2": {
+      "key": "unitPreparation2",
+      "sourceMapperName": "Status_Unit_Preparation_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Preparation_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Preparation_2]",
+      "gameplayProperties": []
+    },
+    "unitPreparedBreakRetaliation": {
+      "key": "unitPreparedBreakRetaliation",
+      "sourceMapperName": "Status_Unit_PreparedBreakRetaliation",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_PreparedBreakRetaliation.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_PreparedBreakRetaliation]",
+      "gameplayProperties": []
+    },
+    "unitReinforced1": {
+      "key": "unitReinforced1",
+      "sourceMapperName": "Status_Unit_Reinforced_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Reinforced_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Reinforced_1]",
+      "gameplayProperties": []
+    },
+    "unitReinforced2": {
+      "key": "unitReinforced2",
+      "sourceMapperName": "Status_Unit_Reinforced_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Reinforced_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Reinforced_2]",
+      "gameplayProperties": []
+    },
+    "unitReligiousRioter": {
+      "key": "unitReligiousRioter",
+      "sourceMapperName": "Status_Unit_ReligiousRioter",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_ReligiousRioter]",
+      "gameplayProperties": []
+    },
+    "unitSlowed1": {
+      "key": "unitSlowed1",
+      "sourceMapperName": "Status_Unit_Slowed_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Slowed_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Slowed_1]",
+      "gameplayProperties": []
+    },
+    "unitSlowed2": {
+      "key": "unitSlowed2",
+      "sourceMapperName": "Status_Unit_Slowed_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Slowed_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Slowed_2]",
+      "gameplayProperties": []
+    },
+    "unitSlowed3": {
+      "key": "unitSlowed3",
+      "sourceMapperName": "Status_Unit_Slowed_3",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Slowed_3.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Slowed_3]",
+      "gameplayProperties": []
+    },
+    "unitSlowed4": {
+      "key": "unitSlowed4",
+      "sourceMapperName": "Status_Unit_Slowed_4",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Slowed_4.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Slowed_4]",
+      "gameplayProperties": []
+    },
+    "unitSlowed5": {
+      "key": "unitSlowed5",
+      "sourceMapperName": "Status_Unit_Slowed_5",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Slowed_5.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Slowed_5]",
+      "gameplayProperties": []
+    },
+    "unitStoneSkin": {
+      "key": "unitStoneSkin",
+      "sourceMapperName": "Status_Unit_StoneSkin",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_StoneSkin.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_StoneSkin]",
+      "gameplayProperties": []
+    },
+    "unitTerrorized1": {
+      "key": "unitTerrorized1",
+      "sourceMapperName": "Status_Unit_Terrorized_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Terrorized_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Terrorized_1]",
+      "gameplayProperties": []
+    },
+    "unitTerrorized2": {
+      "key": "unitTerrorized2",
+      "sourceMapperName": "Status_Unit_Terrorized_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Terrorized_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Terrorized_2]",
+      "gameplayProperties": []
+    },
+    "unitUsedSandRuinTeleportDuringTurn": {
+      "key": "unitUsedSandRuinTeleportDuringTurn",
+      "sourceMapperName": "Status_Unit_UsedSandRuinTeleportDuringTurn",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_ArmyActionTypeRiftTeleport.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_UsedSandRuinTeleportDuringTurn]",
+      "gameplayProperties": []
+    },
+    "unitVulnerable1": {
+      "key": "unitVulnerable1",
+      "sourceMapperName": "Status_Unit_Vulnerable_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Vulnerable_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Vulnerable_1]",
+      "gameplayProperties": []
+    },
+    "unitVulnerable2": {
+      "key": "unitVulnerable2",
+      "sourceMapperName": "Status_Unit_Vulnerable_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Vulnerable_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Vulnerable_2]",
+      "gameplayProperties": []
+    },
+    "unitWeakened1": {
+      "key": "unitWeakened1",
+      "sourceMapperName": "Status_Unit_Weakened_1",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Weakened_1.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Weakened_1]",
+      "gameplayProperties": []
+    },
+    "unitWeakened2": {
+      "key": "unitWeakened2",
+      "sourceMapperName": "Status_Unit_Weakened_2",
+      "sourceMapperType": "StatusUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_Status_Unit_Weakened_2.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[Status_Unit_Weakened_2]",
+      "gameplayProperties": []
+    }
+  },
+  "armyActions": {
+    "tormentedArmyActionTypeBaitTormentedArmy": {
+      "key": "tormentedArmyActionTypeBaitTormentedArmy",
+      "sourceMapperName": "TormentedArmyActionTypeBaitTormentedArmy",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_TormentedStatusType_FollowingBait.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "tormentedArmyActionTypeHireTormentedHunter": {
+      "key": "tormentedArmyActionTypeHireTormentedHunter",
+      "sourceMapperName": "TormentedArmyActionTypeHireTormentedHunter",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Tormented.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeArmyTalk": {
+      "key": "typeArmyTalk",
+      "sourceMapperName": "ArmyActionTypeArmyTalk",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_SpeechBubble.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeAttackArmy": {
+      "key": "typeAttackArmy",
+      "sourceMapperName": "ArmyActionTypeAttackArmy",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Battle.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeAttackSettlement": {
+      "key": "typeAttackSettlement",
+      "sourceMapperName": "ArmyActionTypeAttackSettlement",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Battle.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeAttackVillage": {
+      "key": "typeAttackVillage",
+      "sourceMapperName": "ArmyActionTypeAttackVillage",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Battle.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeAutoExplore": {
+      "key": "typeAutoExplore",
+      "sourceMapperName": "ArmyActionTypeAutoExplore",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeAutoExplore.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeBribe": {
+      "key": "typeBribe",
+      "sourceMapperName": "ArmyActionTypeBribe",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Bribe.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeBuildBridge": {
+      "key": "typeBuildBridge",
+      "sourceMapperName": "ArmyActionTypeBuildBridge",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeBuildBridge.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeBuildBurrow": {
+      "key": "typeBuildBurrow",
+      "sourceMapperName": "ArmyActionTypeBuildBurrow",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeBuildBurrow.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeBuildCoralSpore": {
+      "key": "typeBuildCoralSpore",
+      "sourceMapperName": "ArmyActionTypeBuildCoralSpore",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/quests/UI_Common_Aspect_CoralSpore.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeBuildDam": {
+      "key": "typeBuildDam",
+      "sourceMapperName": "ArmyActionTypeBuildDam",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Dam.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeBuildObservatory": {
+      "key": "typeBuildObservatory",
+      "sourceMapperName": "ArmyActionTypeBuildObservatory",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeBuildPartnerDen": {
+      "key": "typeBuildPartnerDen",
+      "sourceMapperName": "ArmyActionTypeBuildPartnerDen",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/heroes/UI_DenPin_Picto.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeCancel": {
+      "key": "typeCancel",
+      "sourceMapperName": "ArmyActionTypeCancel",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Cancel.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeClearMountain": {
+      "key": "typeClearMountain",
+      "sourceMapperName": "ArmyActionTypeClearMountain",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/battle-abilities/UI_ArmyActionTypeClearMountain.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeCloseRift": {
+      "key": "typeCloseRift",
+      "sourceMapperName": "ArmyActionTypeCloseRift",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_CloseRift.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeConsume": {
+      "key": "typeConsume",
+      "sourceMapperName": "ArmyActionTypeConsume",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Consume.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeCreateCamp": {
+      "key": "typeCreateCamp",
+      "sourceMapperName": "ArmyActionTypeCreateCamp",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Camp.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeCutForest": {
+      "key": "typeCutForest",
+      "sourceMapperName": "ArmyActionTypeCutForest",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeCutForest.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeDisbandUnits": {
+      "key": "typeDisbandUnits",
+      "sourceMapperName": "ArmyActionTypeDisbandUnits",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Bin.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeEnterBurrow": {
+      "key": "typeEnterBurrow",
+      "sourceMapperName": "ArmyActionTypeEnterBurrow",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeEnterBurrow.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeFoundCity": {
+      "key": "typeFoundCity",
+      "sourceMapperName": "ArmyActionTypeFoundCity",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeBuildCapital.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeGuard": {
+      "key": "typeGuard",
+      "sourceMapperName": "ArmyActionTypeGuard",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/battle-abilities/UI_ArmyActionTypeGuard.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeGuardUntilHealed": {
+      "key": "typeGuardUntilHealed",
+      "sourceMapperName": "ArmyActionTypeGuardUntilHealed",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeGuardUntilHealed.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeHealUnits": {
+      "key": "typeHealUnits",
+      "sourceMapperName": "ArmyActionTypeHealUnits",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_ArmyActionTypeHealUnits.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeInteractQuestPoi": {
+      "key": "typeInteractQuestPoi",
+      "sourceMapperName": "ArmyActionTypeInteractQuestPOI",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Quest.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeMove": {
+      "key": "typeMove",
+      "sourceMapperName": "ArmyActionTypeMove",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Movement.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeOccupy": {
+      "key": "typeOccupy",
+      "sourceMapperName": "ArmyActionTypeOccupy",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Occupy.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeOpenDungeon": {
+      "key": "typeOpenDungeon",
+      "sourceMapperName": "ArmyActionTypeOpenDungeon",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeOpenDungeon.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeParley": {
+      "key": "typeParley",
+      "sourceMapperName": "ArmyActionTypeParley",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_SpeechBubble.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typePlantForest": {
+      "key": "typePlantForest",
+      "sourceMapperName": "ArmyActionTypePlantForest",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypePlantForest.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeRaze": {
+      "key": "typeRaze",
+      "sourceMapperName": "ArmyActionTypeRaze",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Raze.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeRename": {
+      "key": "typeRename",
+      "sourceMapperName": "ArmyActionTypeRename",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Rename.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeRenameUnit": {
+      "key": "typeRenameUnit",
+      "sourceMapperName": "ArmyActionTypeRenameUnit",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Rename.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeRiftTeleport": {
+      "key": "typeRiftTeleport",
+      "sourceMapperName": "ArmyActionTypeRiftTeleport",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/units/UI_ArmyActionTypeRiftTeleport.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeSack": {
+      "key": "typeSack",
+      "sourceMapperName": "ArmyActionTypeSack",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Ransack.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeScoutDungeon": {
+      "key": "typeScoutDungeon",
+      "sourceMapperName": "ArmyActionTypeScoutDungeon",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Dungeon.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeSiege": {
+      "key": "typeSiege",
+      "sourceMapperName": "ArmyActionTypeSiege",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/common/UI_Common_Siege.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeSkipTurn": {
+      "key": "typeSkipTurn",
+      "sourceMapperName": "ArmyActionTypeSkipTurn",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeSkipTurn.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeSleep": {
+      "key": "typeSleep",
+      "sourceMapperName": "ArmyActionTypeSleep",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeSleep.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    },
+    "typeStripTile": {
+      "key": "typeStripTile",
+      "sourceMapperName": "ArmyActionTypeStripTile",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeStripTile.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeSubjugate": {
+      "key": "typeSubjugate",
+      "sourceMapperName": "ArmyActionTypeSubjugate",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeSubjugate.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "typeTransferUnits": {
+      "key": "typeTransferUnits",
+      "sourceMapperName": "ArmyActionTypeTransferUnits",
+      "sourceMapperType": "ArmyActionUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_ArmyActionTypeTransferUnit.svg",
+      "color": "#00000000",
+      "gameplayProperties": []
+    }
+  },
+  "diplomacyStates": {
+    "bothEliminated": {
+      "key": "bothEliminated",
+      "sourceMapperName": "DiplomaticStateTypeBothEliminated",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_diplomaticState_eliminated.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "partiallyEliminated": {
+      "key": "partiallyEliminated",
+      "sourceMapperName": "DiplomaticStateTypePartiallyEliminated",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_diplomaticState_eliminated.svg",
+      "color": "#FF8585FF",
+      "gameplayProperties": []
+    },
+    "partnership": {
+      "key": "partnership",
+      "sourceMapperName": "DiplomaticStateTypePartnership",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_DiplomaticState_Partnership.svg",
+      "color": "#FFFFFFFF",
+      "symbol": "[DiplomaticState_Partnership]",
+      "gameplayProperties": []
+    },
+    "peace": {
+      "key": "peace",
+      "sourceMapperName": "DiplomaticStateTypePeace",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/factions/UI_DiplomaticState_Peace.svg",
+      "color": "#82E1FFFF",
+      "symbol": "[DiplomaticState_Peace]",
+      "gameplayProperties": []
+    },
+    "truce": {
+      "key": "truce",
+      "sourceMapperName": "DiplomaticStateTypeTruce",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_diplomaticState_truce.svg",
+      "color": "#82E1FFFF",
+      "symbol": "[DiplomaticState_Truce]",
+      "gameplayProperties": []
+    },
+    "unknown": {
+      "key": "unknown",
+      "sourceMapperName": "DiplomaticStateTypeUnknown",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/factions/UI_DiplomaticState_Unknown.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "war": {
+      "key": "war",
+      "sourceMapperName": "DiplomaticStateTypeWar",
+      "sourceMapperType": "DiplomaticStateTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/status-effects/UI_DiplomaticState_War.svg",
+      "color": "#FF8282FF",
+      "symbol": "[DiplomaticState_War]",
+      "gameplayProperties": []
+    }
+  },
+  "diplomacyActions": {},
+  "diplomacyTreaties": {
+    "conjoinedResearch": {
+      "key": "conjoinedResearch",
+      "sourceMapperName": "Treaty_ConjoinedResearch",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_ConjoinedResearch.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationCloseBorders": {
+      "key": "declarationCloseBorders",
+      "sourceMapperName": "Declaration_CloseBorders",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_ClosedBorders.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationCompliment": {
+      "key": "declarationCompliment",
+      "sourceMapperName": "Declaration_Compliment",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_Compliment.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationEmbraceCoralSymbiosis": {
+      "key": "declarationEmbraceCoralSymbiosis",
+      "sourceMapperName": "Declaration_EmbraceCoralSymbiosis",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_EmbraceCoralBlessing.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationFactionQuestAspectChapter06AStep02": {
+      "key": "declarationFactionQuestAspectChapter06AStep02",
+      "sourceMapperName": "Declaration_FactionQuest_Aspect_Chapter06AStep02",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/quests/UI_Diplomacy_CoralRejection.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationInsult": {
+      "key": "declarationInsult",
+      "sourceMapperName": "Declaration_Insult",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_Insult.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationJustifiedWar": {
+      "key": "declarationJustifiedWar",
+      "sourceMapperName": "Declaration_JustifiedWar",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_JustifiedWar.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationOpenBorders": {
+      "key": "declarationOpenBorders",
+      "sourceMapperName": "Declaration_OpenBorders",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_OpenBorders.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationSendCalledAway": {
+      "key": "declarationSendCalledAway",
+      "sourceMapperName": "Declaration_SendCalledAway",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/populations/UI_Population_Buyout.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "declarationUnjustifiedWar": {
+      "key": "declarationUnjustifiedWar",
+      "sourceMapperName": "Declaration_UnjustifiedWar",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_UnjustifiedWar.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "immigrationCustoms": {
+      "key": "immigrationCustoms",
+      "sourceMapperName": "Treaty_ImmigrationCustoms",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_ImmigrationCustom.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "jointMilitary": {
+      "key": "jointMilitary",
+      "sourceMapperName": "Treaty_JointMilitary",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_JoinMilitary.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "mapExchange": {
+      "key": "mapExchange",
+      "sourceMapperName": "Treaty_MapExchange",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_MapExchange.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "nonAggression": {
+      "key": "nonAggression",
+      "sourceMapperName": "Treaty_NonAggression",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_NonAgression.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "shareCoralExploitation": {
+      "key": "shareCoralExploitation",
+      "sourceMapperName": "Treaty_ShareCoralExploitation",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_CoralSymbiosis.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "sharedResearch": {
+      "key": "sharedResearch",
+      "sourceMapperName": "Treaty_SharedResearch",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_SharedResearch.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "sharedVictory": {
+      "key": "sharedVictory",
+      "sourceMapperName": "Treaty_SharedVictory",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_SharedVictory.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    },
+    "visionExchange": {
+      "key": "visionExchange",
+      "sourceMapperName": "Treaty_VisionExchange",
+      "sourceMapperType": "DiplomaticTreatyTypeUIMapper",
+      "imageKey": "Picto",
+      "path": "/svg/other/UI_Diplomacy_VisionExchanged.svg",
+      "color": "#FFFFFFFF",
+      "gameplayProperties": []
+    }
+  }
+}

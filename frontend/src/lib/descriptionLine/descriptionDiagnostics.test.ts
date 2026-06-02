@@ -14,6 +14,25 @@ describe("descriptionDiagnostics", () => {
         ]);
     });
 
+    it("classifies manifest-backed stat tokens as known styled tokens", () => {
+        expect(diagnoseDescriptionLine("Gain [Health] and [Damage].")).toEqual([
+            {
+                kind: "known-style-token",
+                token: "Health",
+                raw: "[Health]",
+                index: 5,
+                style: getTokenStyle("Health"),
+            },
+            {
+                kind: "known-style-token",
+                token: "Damage",
+                raw: "[Damage]",
+                index: 18,
+                style: getTokenStyle("Damage"),
+            },
+        ]);
+    });
+
     it("classifies unknown bracket tokens", () => {
         expect(diagnoseDescriptionLine("[TBD] Internal note")).toEqual([
             {
@@ -37,11 +56,11 @@ describe("descriptionDiagnostics", () => {
                 entityKindHint: "unit",
             },
             {
-                kind: "entity-like-token",
+                kind: "known-style-token",
                 token: "LuxuryResource01",
                 raw: "[LuxuryResource01]",
                 index: 27,
-                entityKindHint: "codex",
+                style: getTokenStyle("LuxuryResource01"),
             },
             {
                 kind: "entity-like-token",

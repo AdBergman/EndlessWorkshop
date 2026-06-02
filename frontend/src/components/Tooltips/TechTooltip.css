@@ -55,6 +55,20 @@
     color: #fff;
 }
 
+.techUnlockLine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.techUnlockIcon {
+    flex: 0 0 auto;
+    display: inline-block;
+    object-fit: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+}
+
 /* === Units: look more like clickable links === */
 .hoverable-link.unit-link {
     text-decoration: underline;

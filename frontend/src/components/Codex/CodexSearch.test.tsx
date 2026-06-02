@@ -140,7 +140,7 @@ describe("CodexSearch", () => {
     it("renders mapped kind labels in autocomplete options", async () => {
         const user = userEvent.setup();
 
-        render(
+        const { container } = render(
             <CodexSearch
                 value="ametrine"
                 onChange={() => {}}
@@ -157,5 +157,38 @@ describe("CodexSearch", () => {
 
         expect(screen.getByText("Minor Factions")).toBeInTheDocument();
         expect(screen.queryByText("Minorfactions")).not.toBeInTheDocument();
+        expect(container.querySelector('img.codex-kindIcon--search[src="/svg/common/UI_Common_MinorVillage.svg"]'))
+            .toBeInTheDocument();
+    });
+
+    it("uses exact resource icons in autocomplete options when available", async () => {
+        const user = userEvent.setup();
+
+        const { container } = render(
+            <CodexSearch
+                value="klax"
+                onChange={() => {}}
+                resultCount={1}
+                totalCount={12}
+                suggestions={[
+                    {
+                        exportKind: "extractors",
+                        entryKey: "Extractor_Luxury01",
+                        displayName: "[LuxuryResource01] Klax Extractor",
+                        descriptionLines: ["Extracts Klax."],
+                        referenceKeys: [],
+                    },
+                ]}
+                onSelectSuggestion={() => {}}
+                onConfirmQuery={() => {}}
+            />
+        );
+
+        const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.click(input);
+
+        expect(screen.getByText("Klax Extractor")).toBeInTheDocument();
+        expect(container.querySelector('img.codex-kindIcon--search[src="/svg/constructibles/UI_Resource_Luxury_Klak.svg"]'))
+            .toBeInTheDocument();
     });
 });

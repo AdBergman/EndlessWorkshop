@@ -18,6 +18,7 @@ import { selectImprovementsByKey, useImprovementStore } from "@/stores/improveme
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
 import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
+import { TechUnlockIcon } from "@/features/icons/TechUnlockIcon";
 
 interface TechTooltipProps {
     hoveredTech: Tech;
@@ -82,15 +83,18 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 if (!fallback) return null;
 
                 return (
-                    <div key={index} style={{ display: "block" }}>
-                        <span>{`${fallback.kind}: `}</span>
-                        <span>{fallback.key}</span>
-                        {fallback.descriptionLines.map((line, lineIndex) => (
-                            <span key={`${fallback.key}-${lineIndex}`}>
-                                {lineIndex === 0 ? " - " : "; "}
-                                {renderDescriptionLine(line)}
-                            </span>
-                        ))}
+                    <div key={index} className="techUnlockLine">
+                        <TechUnlockIcon unlock={u} resolvedKind={fallback.kind} className="techUnlockIcon" />
+                        <span>
+                            <span>{`${fallback.kind}: `}</span>
+                            <span>{fallback.key}</span>
+                            {fallback.descriptionLines.map((line, lineIndex) => (
+                                <span key={`${fallback.key}-${lineIndex}`}>
+                                    {lineIndex === 0 ? " - " : "; "}
+                                    {renderDescriptionLine(line)}
+                                </span>
+                            ))}
+                        </span>
                     </div>
                 );
             }
@@ -100,15 +104,18 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
                 const unitParam = encodeURIComponent(unlockKey);
 
                 return (
-                    <div key={index} style={{ display: "block" }}>
-                        <span>Unit: </span>
-                        <span
-                            className="hoverable-link unit-link"
-                            onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(resolved.unit, e))}
-                            onMouseLeave={() => setHoveredUnit(null)}
-                            onClick={() => window.open(`/units?faction=${faction}&unit=${unitParam}`, "_blank")}
-                        >
-                            {resolved.displayName}
+                    <div key={index} className="techUnlockLine">
+                        <TechUnlockIcon unlock={u} resolvedKind={resolved.kind} className="techUnlockIcon" />
+                        <span>
+                            <span>Unit: </span>
+                            <span
+                                className="hoverable-link unit-link"
+                                onMouseEnter={(e) => setHoveredUnit(createHoveredUnit(resolved.unit, e))}
+                                onMouseLeave={() => setHoveredUnit(null)}
+                                onClick={() => window.open(`/units?faction=${faction}&unit=${unitParam}`, "_blank")}
+                            >
+                                {resolved.displayName}
+                            </span>
                         </span>
                     </div>
                 );
@@ -116,17 +123,20 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
 
             if (resolved.kind === "Improvement") {
                 return (
-                    <div key={index} style={{ display: "block" }}>
-                        <span>Improvement: </span>
-                        <span
-                            className="hoverable-link"
-                            onMouseEnter={(e) => {
-                                setHoveredDistrict(null);
-                                setHoveredImprovement(createHoveredImprovement(resolved.improvement, e));
-                            }}
-                            onMouseLeave={() => setHoveredImprovement(null)}
-                        >
-                            {resolved.displayName}
+                    <div key={index} className="techUnlockLine">
+                        <TechUnlockIcon unlock={u} resolvedKind={resolved.kind} className="techUnlockIcon" />
+                        <span>
+                            <span>Improvement: </span>
+                            <span
+                                className="hoverable-link"
+                                onMouseEnter={(e) => {
+                                    setHoveredDistrict(null);
+                                    setHoveredImprovement(createHoveredImprovement(resolved.improvement, e));
+                                }}
+                                onMouseLeave={() => setHoveredImprovement(null)}
+                            >
+                                {resolved.displayName}
+                            </span>
                         </span>
                     </div>
                 );
@@ -134,17 +144,20 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
 
             if (resolved.kind === "District") {
                 return (
-                    <div key={index} style={{ display: "block" }}>
-                        <span>District: </span>
-                        <span
-                            className="hoverable-link"
-                            onMouseEnter={(e) => {
-                                setHoveredImprovement(null);
-                                setHoveredDistrict(createHoveredDistrict(resolved.district, e));
-                            }}
-                            onMouseLeave={() => setHoveredDistrict(null)}
-                        >
-                            {resolved.displayName}
+                    <div key={index} className="techUnlockLine">
+                        <TechUnlockIcon unlock={u} resolvedKind={resolved.kind} className="techUnlockIcon" />
+                        <span>
+                            <span>District: </span>
+                            <span
+                                className="hoverable-link"
+                                onMouseEnter={(e) => {
+                                    setHoveredImprovement(null);
+                                    setHoveredDistrict(createHoveredDistrict(resolved.district, e));
+                                }}
+                                onMouseLeave={() => setHoveredDistrict(null)}
+                            >
+                                {resolved.displayName}
+                            </span>
                         </span>
                     </div>
                 );

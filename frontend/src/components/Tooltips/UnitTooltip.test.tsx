@@ -117,4 +117,26 @@ describe("UnitTooltip", () => {
 
         expect(screen.getByText("Tier II Cavalry Ranged Hero")).toBeInTheDocument();
     });
+
+    it("renders manifest-backed stat icons in unit description lines", () => {
+        render(
+            <UnitTooltip
+                hoveredUnit={{
+                    data: unit({
+                        descriptionLines: ["+10 [Health] Health and +2 [Defense] Defense"],
+                    }),
+                    coords: { x: 10, y: 10, mode: "pixel" },
+                }}
+            />
+        );
+
+        expect(screen.getByRole("img", { name: "Health" })).toHaveAttribute(
+            "src",
+            "/svg/units/UI_UnitItem_Health.svg"
+        );
+        expect(screen.getByRole("img", { name: "Defense" })).toHaveAttribute(
+            "src",
+            "/svg/abilities/UI_UnitItem_Defense.svg"
+        );
+    });
 });

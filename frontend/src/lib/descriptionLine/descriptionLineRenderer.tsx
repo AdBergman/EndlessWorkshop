@@ -1,42 +1,32 @@
 import React from "react";
+import { getDescriptionTokenIcon } from "@/features/icons/descriptionTokenIcons";
 import { getEconomyMetricColor } from "./econColors";
 
 export const TOKEN_RE = /\[([^\]]+)\]/g;
 
-export type IconKey = "Food" | "Industry" | "Dust" | "Science" | "Influence" | "Stability";
-
-export const ICON_SRC: Record<IconKey, string> = {
-    Food: "/graphics/icons/FoodIcon.webp",
-    Industry: "/graphics/icons/IndustryIcon.webp",
-    Dust: "/graphics/icons/DustIcon.webp",
-    Science: "/graphics/icons/ScienceIcon.webp",
-    Influence: "/graphics/icons/InfluenceIcon.webp",
-    Stability: "/graphics/icons/StabilityIcon.webp",
-};
-
 const STABILITY_WORD_COLOR = "#e63969";
 
 export type TokenStyle = {
-    icon: IconKey;
-    wordColor: string;
+    iconPath: string;
+    wordColor?: string;
 };
 
-export const TOKEN_STYLE: Record<string, TokenStyle> = {
-    FoodColored: { icon: "Food", wordColor: getEconomyMetricColor("Food") },
-    IndustryColored: { icon: "Industry", wordColor: getEconomyMetricColor("Industry") },
-    DustColored: { icon: "Dust", wordColor: getEconomyMetricColor("Dust") },
-    MoneyColored: { icon: "Dust", wordColor: getEconomyMetricColor("Dust") },
-    ScienceColored: { icon: "Science", wordColor: getEconomyMetricColor("Science") },
-    CultureColored: { icon: "Influence", wordColor: getEconomyMetricColor("Influence") },
-    PublicOrderColored: { icon: "Stability", wordColor: STABILITY_WORD_COLOR },
+const TOKEN_WORD_COLOR_OVERRIDES: Record<string, string> = {
+    FoodColored: getEconomyMetricColor("Food"),
+    IndustryColored: getEconomyMetricColor("Industry"),
+    DustColored: getEconomyMetricColor("Dust"),
+    MoneyColored: getEconomyMetricColor("Dust"),
+    ScienceColored: getEconomyMetricColor("Science"),
+    CultureColored: getEconomyMetricColor("Influence"),
+    PublicOrderColored: STABILITY_WORD_COLOR,
 };
 
 export type KnownTokenMetadata = {
     token: string;
-    icon: IconKey;
-    wordColor: string;
+    iconPath: string;
+    wordColor?: string;
     hasIcon: true;
-    hasWordColor: true;
+    hasWordColor: boolean;
 };
 
 export type TokenMatch = {
@@ -71,17 +61,17 @@ type RenderTokenizedTextOptions = {
 };
 
 function Icon({
-    icon,
+    iconPath,
     title,
     decorative = false,
 }: {
-    icon: IconKey;
+    iconPath: string;
     title: string;
     decorative?: boolean;
 }) {
     return (
         <img
-            src={ICON_SRC[icon]}
+            src={iconPath}
             alt={decorative ? "" : title}
             title={decorative ? undefined : title}
             aria-hidden={decorative ? true : undefined}
@@ -94,6 +84,13 @@ function Icon({
             }}
         />
     );
+}
+
+function getTokenWordColor(token: string, manifestColor: string | undefined): string | undefined {
+    const override = TOKEN_WORD_COLOR_OVERRIDES[token];
+    if (override) return override;
+
+    return token.endsWith("Colored") ? manifestColor : undefined;
 }
 
 function splitWordish(text: string): { leadingSpace: string; word: string; rest: string } {
@@ -126,7 +123,7 @@ export function parseDescriptionLine(line: string): DescriptionLineAst {
             token,
             raw,
             index: matchIndex,
-            style: TOKEN_STYLE[token],
+            style: getTokenStyle(token, { line, tokenIndex: matchIndex }),
         });
 
         lastIndex = matchIndex + raw.length;
@@ -170,19 +167,47 @@ export function extractBracketTokens(value: string): string[] {
     return extractBracketTokenMatches(value).map((match) => match.token);
 }
 
-export function getTokenStyle(token: string): TokenStyle | undefined {
-    return TOKEN_STYLE[token];
+export function getTokenStyle(
+    token: string,
+    context?: { line?: string; tokenIndex?: number }
+): TokenStyle | undefined {
+    const icon = getDescriptionTokenIcon(token, context);
+    if (!icon) return undefined;
+
+    return {
+        iconPath: icon.path,
+        wordColor: getTokenWordColor(token, icon.color),
+    };
 }
 
 export function getKnownTokenMetadata(): KnownTokenMetadata[] {
-    return Object.entries(TOKEN_STYLE)
+    const tokenCandidates = [
+        ...Object.keys(TOKEN_WORD_COLOR_OVERRIDES),
+        "Health",
+        "HealthPoints",
+        "Damage",
+        "Defense",
+        "MovementPoints",
+        "VisionRange",
+        "Focus",
+        "Shield",
+        "Population",
+        "Cadavers",
+        "Curiosity",
+        "HealthRegen",
+        "Experience",
+    ];
+
+    return Array.from(new Set(tokenCandidates))
+        .map((token) => [token, getTokenStyle(token)] as const)
+        .filter((entry): entry is readonly [string, TokenStyle] => !!entry[1])
         .sort(([left], [right]) => left.localeCompare(right))
         .map(([token, style]) => ({
             token,
-            icon: style.icon,
+            iconPath: style.iconPath,
             wordColor: style.wordColor,
             hasIcon: true,
-            hasWordColor: true,
+            hasWordColor: !!style.wordColor,
         }));
 }
 
@@ -230,11 +255,11 @@ export function renderDescriptionAst(
             const count = seen.get(node.token) ?? 0;
             seen.set(node.token, count + 1);
 
-            if (count === 0) {
+            if (count === 0 || !style.wordColor) {
                 parts.push(
                     <Icon
                         key={reactKey++}
-                        icon={style.icon}
+                        iconPath={style.iconPath}
                         title={node.token}
                         decorative={options.decorativeIcons ?? false}
                     />

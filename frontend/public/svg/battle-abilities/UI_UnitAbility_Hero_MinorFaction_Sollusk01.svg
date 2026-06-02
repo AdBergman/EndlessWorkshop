@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path d="M 12.67 1 L 11.32 1 L 11.32 3.6 L 12.67 3.6 L 12.67 1" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 9.7 3.22 L 9.7 1.98 C 5.98 2.83 3.03 5.7 2.06 9.37 L 3.31 9.37 C 4.22 6.36 6.65 4.02 9.7 3.22" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 3.6 11.32 L 1 11.32 L 1 12.67 L 3.6 12.67 L 3.6 11.32" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 20.69 9.37 L 21.94 9.37 C 20.97 5.7 18.02 2.83 14.3 1.98 L 14.3 3.22 C 17.35 4.02 19.78 6.36 20.69 9.37" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 3.31 14.63 L 2.06 14.63 C 3.03 18.3 5.98 21.17 9.7 22.02 L 9.7 20.78 C 6.65 19.98 4.22 17.63 3.31 14.63" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 14.3 20.78 L 14.3 22.02 C 18.02 21.17 20.97 18.3 21.94 14.63 L 20.69 14.63 C 19.78 17.64 17.35 19.98 14.3 20.78" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 23 11.32 L 20.4 11.32 L 20.4 12.67 L 23 12.67 L 23 11.32" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 12.67 20.4 L 11.32 20.4 L 11.32 23 L 12.67 23 L 12.67 20.4" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 14.7 18.45 L 15.02 18.33 L 17.34 17.66 C 17.66 17.57 17.93 17.33 17.95 17 C 17.95 16.97 17.95 16.95 17.95 16.92 C 17.95 16.89 17.95 16.86 17.95 16.83 C 17.95 16.75 17.92 16.68 17.88 16.63 C 17.78 16.38 17.67 16.07 17.56 15.7 C 17.39 14.62 17.39 12.99 17.39 12.99 L 17.39 10.28 C 17.41 6.88 13.68 5.51 12.1 5 L 10.4 7.55 L 11.29 10.21 L 8.18 7.55 L 8.49 6.3 C 7.2 7.14 6.06 8.4 6.07 10.28 L 6.07 12.99 C 6.07 12.99 6.07 13.57 6.03 14.27 L 7.73 13.33 L 6.84 15.11 L 6 17.63 C 6 17.63 6.08 17.66 6.11 17.67 L 8.43 18.34 L 9.8 18.85 C 9.8 18.85 9.86 18.87 9.88 18.87 C 10.17 18.95 10.46 18.73 10.46 18.43 L 10.46 13.46 C 10.46 13.28 10.32 13.13 10.14 13.1 C 10.12 13.1 10.11 13.1 10.09 13.1 C 9.78 13.1 9.47 13 9.21 12.82 L 7.89 11.87 L 9.11 10.99 C 9.43 10.76 9.8 10.64 10.2 10.64 L 13.23 10.64 C 13.62 10.64 14 10.77 14.32 10.99 L 15.54 11.87 L 14.22 12.82 C 13.96 13 13.65 13.1 13.34 13.1 C 13.34 13.1 13.31 13.1 13.29 13.11 C 13.11 13.14 12.97 13.29 12.97 13.47 L 12.97 16.26 L 14.82 14.67 L 13.93 17.33 L 14.68 18.46 L 14.7 18.45" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

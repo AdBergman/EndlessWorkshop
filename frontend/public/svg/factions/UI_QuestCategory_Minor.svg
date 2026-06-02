@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25">
+  <path d="M 12.49 7.15 L 8.64 12.82 L 12.49 15.07 L 16.36 12.82 L 12.49 7.15" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+  <path d="M 3.76 14.17 L 3.76 19.29 L 11.12 18.84 C 11.12 18.84 12.11 17.94 12.5 17.94 C 12.89 17.94 13.88 18.84 13.88 18.84 L 21.24 19.29 L 21.24 14.17 L 17.56 14.17 L 12.5 16.87 L 7.9 14.17 L 3.76 14.17" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+  <path d="M 6.06 12.82 L 7.44 12.82 L 12.5 5.41 L 14.09 7.72 L 14.46 8.27 L 17.56 12.82 L 18.94 12.82 L 16.09 8.66 L 15.43 7.68 L 15.14 7.27 L 14.77 6.73 L 13.18 4.41 L 14.4 2.62 L 13.46 2 L 12.5 3.4 L 11.54 2 L 10.6 2.62 L 11.81 4.41 L 6.06 12.82" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+  <path d="M 21.24 8.48 C 19.69 7.34 18.06 6.76 16.62 6.58 L 21.24 12.92 L 21.24 8.49 L 21.24 8.48" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+  <path d="M 3.76 8.48 L 3.76 12.91 L 8.3 6.68 C 6.94 6.9 5.37 7.47 3.76 8.48" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+  <path d="M 18.92 4.3 C 17.92 3.86 16.85 3.64 15.78 3.62 L 15.26 4.26 L 15.81 5 C 16.87 5.03 17.92 5.27 18.9 5.72 L 22.63 7.42 L 22.63 20.66 L 21.25 20.66 L 13.89 20.21 L 13.02 19.64 C 12.71 19.44 12.31 19.44 12 19.64 L 11.13 20.21 L 3.77 20.66 L 2.39 20.66 L 2.39 7.41 L 6.12 5.71 C 7.11 5.26 8.17 5.02 9.24 4.99 L 9.75 4.26 L 9.23 3.62 C 8.16 3.64 7.09 3.86 6.09 4.3 L 1 6.51 L 1 22 L 3.76 22 L 11.12 21.55 L 11.99 20.98 C 12.3 20.78 12.7 20.78 13.01 20.98 L 13.88 21.55 L 21.24 22 L 24 22 L 24 6.51 L 18.92 4.3" transform="matrix(1 0 0 1 0 0)" fill="#8B5AB2" fill-opacity="0.8" stroke="none" />
+</svg>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+  <path d="M 7 5.918 L 6.506 5.424 L 6.411 8.652 L 7 9.241 L 7 5.918 M 8.626 10.867 L 8.689 10.93 L 8.689 10.901 L 8.626 10.867 M 9.653 11.414 L 9.639 11.88 L 11.917 14.158 L 11.917 12.622 L 9.653 11.414 M 12.677 13.028 L 12.677 14.917 L 16 18.24 L 14.142 13.809 L 12.677 13.028 M 1 4 L 4.703 5.139 L 5.557 8.557 L 2.234 7.702 L 1 4 M 4.703 11.69 L 2.424 9.411 L 5.747 9.411 L 7.931 11.69 L 4.703 11.69 M 7.931 14.918 L 5.652 12.639 L 8.975 12.639 L 11.159 14.918 L 7.931 14.918 M 15.336 19 L 9.354 16.531 L 2.044 15.677 L 12.013 15.677 L 15.336 19" transform="matrix(1 0 0 1 0 0)" fill="#88C03F" stroke="none" />
+  <path d="M 9.5 3.297 L 14.5 0.57 L 19.5 3.297 L 19.5 8.703 L 14.5 11.431 L 9.5 8.703 L 9.5 3.297" transform="matrix(1 0 0 1 0 0)" fill="none" stroke="#88C03F" stroke-width="1" />
+  <path d="M 14.5 3 L 17 4.2 L 17 7.8 L 14.5 9 L 12 7.8 L 12 4.2 L 14.5 3" transform="matrix(1 0 0 1 0 0)" fill="#88C03F" stroke="none" />
+</svg>

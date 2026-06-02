@@ -112,10 +112,31 @@
 
 .codex-eyebrow,
 .codex-sectionLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-size: 11px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--codex-gold-bright);
+}
+
+.codex-kindIcon {
+    flex: 0 0 auto;
+    display: inline-block;
+    object-fit: contain;
+    opacity: 0.78;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55));
+}
+
+.codex-kindIcon--chip {
+    opacity: 0.64;
+}
+
+.codex-kindFilter__chip.is-active .codex-kindIcon--chip,
+.codex-resultRow.is-selected .codex-kindIcon,
+.codex-questPath__node.is-selected .codex-kindIcon {
+    opacity: 0.95;
 }
 
 .codex-pageTitle {
@@ -228,10 +249,21 @@
     gap: 10px;
 }
 
+.codex-search__optionNameLine {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+}
+
 .codex-search__optionName {
+    min-width: 0;
+    overflow: hidden;
     color: #f1eadc;
     font-size: 14px;
     font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codex-search__optionKind {
@@ -528,6 +560,13 @@
     font-weight: 600;
     color: #f1eadc;
     line-height: 1.3;
+}
+
+.codex-resultRow__titleLine {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
 }
 
 .codex-resultRow__meta {
@@ -901,16 +940,27 @@
 
 .codex-overview__rowTop {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 14px;
 }
 
+.codex-overview__kindWrap {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 9px;
+}
+
 .codex-overview__kind {
+    min-width: 0;
+    overflow: hidden;
     color: #f1eadc;
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     transition: color 0.18s ease;
 }
 
@@ -1009,6 +1059,13 @@
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
+}
+
+.codex-related__groupLabel {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
 }
 
 .codex-related__chip {

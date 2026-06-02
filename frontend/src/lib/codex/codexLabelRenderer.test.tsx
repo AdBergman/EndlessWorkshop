@@ -10,11 +10,13 @@ describe("codexLabelRenderer", () => {
         expect(screen.queryByRole("img", { name: "DustColored" })).not.toBeInTheDocument();
     });
 
-    it("hides unknown display-name tokens while preserving readable text", () => {
-        render(<div>{renderCodexLabel("[LuxuryResource01] Auric Coral")}</div>);
+    it("renders exact resource display-name tokens as decorative icons", () => {
+        const { container } = render(<div>{renderCodexLabel("[LuxuryResource01] Auric Coral")}</div>);
 
         expect(screen.getByText("Auric Coral")).toBeInTheDocument();
         expect(screen.queryByText("LuxuryResource01")).not.toBeInTheDocument();
         expect(screen.queryByText("[LuxuryResource01]")).not.toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/constructibles/UI_Resource_Luxury_Klak.svg"]'))
+            .toBeInTheDocument();
     });
 });

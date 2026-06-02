@@ -1,3 +1,5 @@
+import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
+
 type CodexOverviewOption = {
     kind: string;
     label: string;
@@ -66,7 +68,15 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                         onClick={() => onSelectKind(option.kind)}
                     >
                         <span className="codex-overview__rowTop">
-                            <span className="codex-overview__kind">{option.label}</span>
+                            <span className="codex-overview__kindWrap">
+                                <CodexKindIcon
+                                    kind={option.kind}
+                                    label={option.label}
+                                    className="codex-kindIcon codex-kindIcon--overview"
+                                    size={22}
+                                />
+                                <span className="codex-overview__kind">{option.label}</span>
+                            </span>
                             <span className="codex-overview__count">{option.count}</span>
                         </span>
                         <span className="codex-overview__description">{descriptionFor(option.kind)}</span>

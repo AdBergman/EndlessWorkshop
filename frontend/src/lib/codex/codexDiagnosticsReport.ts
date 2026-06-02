@@ -15,6 +15,11 @@ import {
     classifyDescriptionTokenDiagnostic,
     type CodexDiagnosticClassification,
 } from "./codexDiagnosticClassification";
+import {
+    createIconUsageDiagnosticsReport,
+    formatIconUsageDiagnosticsReport,
+    type IconUsageDiagnosticsReport,
+} from "./iconUsageDiagnostics";
 
 export type DescriptorDiagnosticField = "displayName" | "descriptionLine";
 
@@ -45,6 +50,7 @@ export type CodexDiagnosticsReport = {
     descriptorCountsByExportKind: Record<string, DiagnosticKindCounts<DescriptionDiagnosticKind>>;
     signalCounts: DiagnosticKindCounts<DiagnosticSignalBucket>;
     duplicateReferenceCount: number;
+    iconUsage: IconUsageDiagnosticsReport;
 };
 
 function normalizeExportKind(value: string): string {
@@ -138,6 +144,7 @@ export function createCodexDiagnosticsReport(entries: readonly CodexEntry[]): Co
         descriptorCountsByExportKind,
         signalCounts,
         duplicateReferenceCount,
+        iconUsage: createIconUsageDiagnosticsReport(entries),
     };
 }
 
@@ -230,6 +237,8 @@ export function formatCodexDiagnosticsReport(report: CodexDiagnosticsReport): st
         "DESCRIPTOR SUMMARY BY EXPORT KIND",
         "---------------------------------",
         ...formatGroupedCounts(report.descriptorCountsByExportKind),
+        "",
+        ...formatIconUsageDiagnosticsReport(report.iconUsage),
         "",
         "REFERENCE DETAILS",
         "-----------------",

@@ -2,8 +2,6 @@ import React, { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
 
-import { FaBolt, FaCoins, FaHeart, FaRunning, FaShieldAlt } from "react-icons/fa";
-
 import { FactionIcon } from "./FactionIcon";
 import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
 import type { Unit } from "@/types/dataTypes";
@@ -11,6 +9,9 @@ import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { useCodex } from "@/hooks/useCodex";
 import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
+import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
+import { IconImg } from "@/features/icons/IconImg";
+import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
 
 interface UnitCardProps {
     unit: Unit;
@@ -51,6 +52,25 @@ function getTypeDisplayLines(classLabel: string | null, tierLabel: string | null
     return [];
 }
 
+function StatValue({ stat, label, value }: { stat: UnitCardStat; label: string; value: number | string }) {
+    const iconPath = getUnitCardStatIconPath(stat);
+
+    return (
+        <div className="stat" title={label}>
+            {iconPath ? (
+                <IconImg
+                    path={iconPath}
+                    title={label}
+                    className="statIcon"
+                    size={16}
+                    decorative
+                />
+            ) : null}
+            <span>{value}</span>
+        </div>
+    );
+}
+
 export const UnitCard: React.FC<UnitCardProps> = ({
                                                       unit,
                                                       showArtwork = true,
@@ -83,9 +103,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             .map((k) => {
                 const codex = getVisibleEntry("abilities", k);
                 if (!codex) return null;
-                return { key: k, codex };
+                return { key: k, codex, iconPath: getAbilityIconPath(k) };
             })
-            .filter((x): x is { key: string; codex: any } => !!x);
+            .filter((x): x is { key: string; codex: any; iconPath: string | null } => !!x);
     }, [unit.abilityKeys, getVisibleEntry]);
 
     // Tooltip hover handling (sticky)
@@ -226,24 +246,15 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                     {/* Compact stats */}
                     <div className="statsBox">
                         <div className="statsRow">
-                            <div className="stat">
-                                <FaBolt /> {d.stats.damage ?? "—"}
-                            </div>
-                            <div className="stat">
-                                <FaHeart /> {d.stats.health ?? "—"}
-                            </div>
-                            <div className="stat">
-                                <FaShieldAlt /> {d.stats.defense ?? 0}
-                            </div>
+                            <StatValue stat="damage" label="Damage" value={d.stats.damage ?? "—"} />
+                            <StatValue stat="health" label="Health" value={d.stats.health ?? "—"} />
+                            <StatValue stat="defense" label="Defense" value={d.stats.defense ?? 0} />
                         </div>
 
                         <div className="statsRow">
-                            <div className="stat">
-                                <FaRunning /> {d.stats.movement ?? "—"}
-                            </div>
-                            <div className="stat">
-                                <FaCoins /> {d.stats.upkeep ?? 0}
-                            </div>
+                            <StatValue stat="movement" label="Movement" value={d.stats.movement ?? "—"} />
+                            <StatValue stat="focus" label="Focus / Critical Chance" value={d.stats.focus ?? "—"} />
+                            <StatValue stat="upkeep" label="Upkeep" value={d.stats.upkeep ?? 0} />
                         </div>
                     </div>
                 </div>
@@ -268,7 +279,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             <div className="noSkills">No abilities</div>
                         ) : (
                             <div className="skillsList">
-                                {visibleSkills.map(({ key, codex }) => (
+                                {visibleSkills.map(({ key, codex, iconPath }) => (
                                     <div
                                         key={key}
                                         className="skill"
@@ -276,7 +287,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         onMouseMove={handleSkillMove}
                                         onMouseLeave={clearHoverSoon}
                                     >
-                                        {codex.displayName}
+                                        {iconPath ? (
+                                            <IconImg
+                                                path={iconPath}
+                                                title={codex.displayName}
+                                                className="skillIcon"
+                                                size={20}
+                                                decorative
+                                            />
+                                        ) : null}
+                                        <span className="skillLabel">{codex.displayName}</span>
                                     </div>
                                 ))}
                             </div>

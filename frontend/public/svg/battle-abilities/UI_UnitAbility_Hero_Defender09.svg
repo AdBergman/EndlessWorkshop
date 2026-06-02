@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Reconstructed from Amplitude.Graphics.Svg.SvgAsset and recolored from static UIMapper.Color metadata for EWShop; not original source SVG. Live UI state/material colors are not included. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <path d="M 4.162 13.801 L 5.604 15.628 C 5.496 15.743 5.416 15.882 5.371 16.032 L 5.338 16.189 L 5.331 16.241 L 0.963 13.365 L 4.162 13.801 M 6.99 6.714 L 6.91 6.909 C 6.748 7.3 6.85 7.75 7.163 8.034 L 9.803 10.425 L 9.628 10.378 L 9.961 11.101 L 9.466 11.615 L 7.98 11.545 L 8.966 12.135 L 8.129 13.005 L 4.208 10.746 C 3.793 10.507 3.266 10.597 2.953 10.959 C 2.783 11.156 2.704 11.403 2.713 11.648 L 0.963 10.601 L 5.961 10.155 L 2.081 3.237 L 6.99 6.714" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 14.389 11.149 L 2.911 23.305 L 0.7 21.999 L 2.117 22.386 L 2.569 20.258 L 5.102 17.629 L 6.131 18.465 L 5.827 17.097 L 7 15.733 L 3.747 11.612 L 8.501 14.098 L 12.698 9.741 L 13.987 9.649 L 14.389 11.149" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 22.963 23 L 21.075 23 L 19.046 21.261 L 17.018 23 L 15.253 23 L 19.046 19.386 L 22.963 23" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 22.963 19.386 L 21.075 19.386 L 19.046 17.647 L 17.018 19.386 L 15.253 19.386 L 19.046 15.771 L 22.963 19.386" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 19.015 14.486 L 19.045 14.513 L 18.849 14.79 C 18.669 14.826 18.497 14.912 18.356 15.047 L 17.796 15.58 L 17.261 15.506 L 14.015 12.653 L 14.978 11.013 L 19.015 14.486" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 10.459 2.862 L 12.363 0.907 L 22.859 9.845 L 19.667 13.73 L 8.9 4.463 L 9.372 3.977 L 5.271 0.711 L 10.459 2.862" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+  <path d="M 12.559 8.93 L 11.292 10.391 L 7.871 7.293 L 8.604 5.525 L 12.559 8.93" transform="matrix(1 0 0 1 0 0)" fill="#FFFFFF" stroke="none" />
+</svg>

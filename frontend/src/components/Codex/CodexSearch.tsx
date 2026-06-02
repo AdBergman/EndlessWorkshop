@@ -8,6 +8,7 @@ import {
     getCodexSecondaryContext,
 } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
+import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
     value: string;
@@ -116,6 +117,7 @@ export default function CodexSearch({
                         {suggestions.map((entry, index) => {
                             const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
                             const secondaryContext = getCodexSecondaryContext(entry);
+                            const kindLabel = formatCodexKindLabel(entry.exportKind);
 
                             return (
                                 <button
@@ -135,11 +137,19 @@ export default function CodexSearch({
                                     onMouseEnter={() => setHighlightedIndex(index)}
                                 >
                                     <span className="codex-search__optionTop">
-                                        <span className="codex-search__optionName">
-                                            {renderCodexLabel(getCodexEntryLabel(entry))}
+                                        <span className="codex-search__optionNameLine">
+                                            <CodexEntryIcon
+                                                entry={entry}
+                                                label={kindLabel}
+                                                className="codex-kindIcon codex-kindIcon--search"
+                                                size={16}
+                                            />
+                                            <span className="codex-search__optionName">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
                                         </span>
                                         <span className="codex-search__optionKind">
-                                            <span>{formatCodexKindLabel(entry.exportKind)}</span>
+                                            <span>{kindLabel}</span>
                                             {secondaryContext ? (
                                                 <span className="codex-search__optionContext"> / {secondaryContext}</span>
                                             ) : null}

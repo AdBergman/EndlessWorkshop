@@ -1,6 +1,8 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { formatCodexKindLabel, getCodexEntryLabel, getCodexRelatedContext } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
+import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
+import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
     entries: CodexEntry[];
@@ -52,7 +54,15 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
                 {groups.map((group) => (
                     <div className="codex-related__group" key={group.kind}>
                         <div className="codex-related__groupHeader">
-                            <span>{group.label}</span>
+                            <span className="codex-related__groupLabel">
+                                <CodexKindIcon
+                                    kind={group.kind}
+                                    label={group.label}
+                                    className="codex-kindIcon codex-kindIcon--relatedGroup"
+                                    size={16}
+                                />
+                                <span>{group.label}</span>
+                            </span>
                             <span>{group.entries.length}</span>
                         </div>
 
@@ -72,6 +82,12 @@ export default function RelatedEntries({ entries, onSelect }: Props) {
                                         className="codex-related__chip"
                                         onClick={() => onSelect(entry)}
                                     >
+                                        <CodexEntryIcon
+                                            entry={entry}
+                                            label={formatCodexKindLabel(entry.exportKind)}
+                                            className="codex-kindIcon codex-kindIcon--relatedChip"
+                                            size={16}
+                                        />
                                         <span className="codex-related__name">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
                                         <span className="codex-related__kind">{contextLabel}</span>
                                     </button>

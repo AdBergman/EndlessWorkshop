@@ -117,6 +117,56 @@ describe("codexDiagnosticsReport", () => {
         });
     });
 
+    it("tracks resolved icon usage and manifest category coverage", () => {
+        const report = createCodexDiagnosticsReport([
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Luxury01",
+                displayName: "[LuxuryResource01] Klax Extractor",
+                descriptionLines: ["Extracts [LuxuryResource01] Klax."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Fly",
+                displayName: "Fly",
+                descriptionLines: ["Missing [UnknownIconToken]."],
+                referenceKeys: [],
+            },
+        ]);
+
+        expect(report.iconUsage.resolvedTokens).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    token: "LuxuryResource01",
+                    count: 2,
+                    path: "/svg/constructibles/UI_Resource_Luxury_Klak.svg",
+                }),
+            ])
+        );
+        expect(report.iconUsage.unresolvedTokens).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    token: "UnknownIconToken",
+                    count: 1,
+                }),
+            ])
+        );
+        expect(report.iconUsage.iconUsages).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    path: "/svg/constructibles/UI_Resource_Luxury_Klak.svg",
+                }),
+                expect.objectContaining({
+                    path: "/svg/unit-abilities/UI_UnitAbility_Fly.svg",
+                }),
+            ])
+        );
+        expect(report.iconUsage.categories.find((category) => category.category === "constructibles")?.usedPathCount)
+            .toBeGreaterThan(0);
+        expect(report.iconUsage.unusedCategories.length).toBeGreaterThan(0);
+    });
+
     it("formats a deterministic developer-facing text report", () => {
         const text = formatCodexDiagnosticsReport(createCodexDiagnosticsReport(entries));
 
@@ -126,6 +176,9 @@ describe("codexDiagnosticsReport", () => {
         expect(text).toContain("DIAGNOSTIC SIGNAL SUMMARY");
         expect(text).toContain("- high-signal warnings: 1");
         expect(text).toContain("- expected style tokens: 1");
+        expect(text).toContain("ICON USAGE SUMMARY");
+        expect(text).toContain("ICON USAGE BY CATEGORY");
+        expect(text).toContain("UNUSED MANIFEST CATEGORY EXAMPLES");
         expect(text).toContain("- abilities:Ability_A ref[0] raw-fallback-ref Shared_Key (raw fallback; ambiguous: heroes, units)");
         expect(text).toContain("- abilities:Ability_A ref[2] resolved-typed-ref codex:heroes%3AHero_A (duplicate of #1)");
         expect(text).toContain("- abilities:Ability_A ref[3] unresolved-imported-domain-ref Unit_MissingImported (imported: unit)");

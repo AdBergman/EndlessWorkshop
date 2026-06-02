@@ -34,7 +34,9 @@ describe("descriptionLineRenderer", () => {
                     token: "LuxuryResource01",
                     raw: "[LuxuryResource01]",
                     index: 33,
-                    style: undefined,
+                    style: {
+                        iconPath: "/svg/constructibles/UI_Resource_Luxury_Klak.svg",
+                    },
                 },
                 { type: "text", value: " value", index: 51 },
             ],
@@ -53,7 +55,10 @@ describe("descriptionLineRenderer", () => {
 
         expect(screen.getByText("Auric Coral")).toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
-        expect(screen.getByRole("img", { name: "DustColored" })).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "DustColored" })).toHaveAttribute(
+            "src",
+            "/svg/resources/UI_Common_Resource_Dust.svg"
+        );
     });
 
     it("preserves repeated known-token word coloring behavior", () => {
@@ -62,6 +67,41 @@ describe("descriptionLineRenderer", () => {
         expect(screen.getByRole("img", { name: "DustColored" })).toBeInTheDocument();
         expect(screen.queryByText("[DustColored]")).not.toBeInTheDocument();
         expect(screen.getByText("income")).toHaveStyle({ color: getTokenStyle("DustColored")?.wordColor });
+    });
+
+    it("renders manifest-backed unit stat tokens as SVG icons", () => {
+        render(<div>{renderDescriptionLine("[Health] Health, [Damage] Damage, [MovementPoints] Move")}</div>);
+
+        expect(screen.getByRole("img", { name: "Health" })).toHaveAttribute(
+            "src",
+            "/svg/units/UI_UnitItem_Health.svg"
+        );
+        expect(screen.getByRole("img", { name: "Damage" })).toHaveAttribute(
+            "src",
+            "/svg/heroes/UI_UnitItem_Damage.svg"
+        );
+        expect(screen.getByRole("img", { name: "MovementPoints" })).toHaveAttribute(
+            "src",
+            "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+        );
+    });
+
+    it("renders repeated non-colored stat tokens as icons each time", () => {
+        render(<div>{renderDescriptionLine("[Health] Health and [Health] more health")}</div>);
+
+        expect(screen.getAllByRole("img", { name: "Health" })).toHaveLength(2);
+        expect(getTokenStyle("Health")?.wordColor).toBeUndefined();
+    });
+
+    it("renders exact luxury resource tokens as SVG icons", () => {
+        render(<div>{renderDescriptionLine("[LuxuryResource01] Klax")}</div>);
+
+        expect(screen.getByText("Klax")).toBeInTheDocument();
+        expect(screen.queryByText("[LuxuryResource01]")).not.toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "LuxuryResource01" })).toHaveAttribute(
+            "src",
+            "/svg/constructibles/UI_Resource_Luxury_Klak.svg"
+        );
     });
 
     it("strips known and unknown bracket tokens from plain previews", () => {
