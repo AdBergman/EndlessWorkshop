@@ -9,8 +9,8 @@
     display: grid;
     grid-template-columns: auto 1fr auto; /* left | center | right */
     align-items: center;
-    min-height: 58px;
-    padding: 0.54rem 1rem 0.58rem;
+    min-height: 54px;
+    padding: 0.42rem 1rem 0.46rem;
     border-bottom: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.065));
     color: var(--ew-text, #fff);
     background:
@@ -19,7 +19,7 @@
     box-shadow:
         inset 0 -1px 0 color-mix(in srgb, var(--ew-accent, #ff7f32) 12%, transparent),
         0 12px 26px rgba(0, 0, 0, 0.26);
-    gap: 1rem;
+    gap: 0.72rem;
 }
 
 .top-container::after {
@@ -46,15 +46,15 @@
 }
 
 .top-bar-icon {
-    width: 32px;
-    height: 32px;
-    margin-right: 0.5rem;
+    width: 28px;
+    height: 28px;
+    margin-right: 0.42rem;
 }
 
 .logo-title {
     font-family: 'Audiowide', sans-serif;
-    font-size: 2.1rem;
-    letter-spacing: 1.5px;
+    font-size: clamp(1.42rem, 2vw, 1.95rem);
+    letter-spacing: 0.06em;
     background: linear-gradient(90deg, #e67328, #e65c1f, #eb8c4d);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -65,14 +65,14 @@
 .view-selector {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.48rem;
     justify-content: center;
 }
 
 .view-selector a {
     display: inline-block;
-    padding: 0.4rem 0.6rem;
-    font-size: 1.05rem;
+    padding: 0.34rem 0.55rem;
+    font-size: 0.95rem;
     font-weight: 500;
     border-radius: 5px;
     border: 1px solid var(--ew-border-soft, rgba(255, 255, 255, 0.055));
@@ -102,6 +102,9 @@
     background: var(--ew-accent-soft, rgba(255, 127, 50, 0.12));
     color: var(--ew-accent, #ff7f32);
     font-weight: 600;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 0 0 1px color-mix(in srgb, var(--ew-active-accent, #ff7f32) 14%, transparent);
 }
 
 .view-selector a.disabled {
@@ -120,7 +123,7 @@
     display: flex;
     flex-wrap: wrap;          /* allow buttons to go onto 2+ rows */
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: 0.34rem;
 }
 
 /* Optional: center on very small screens */
@@ -133,7 +136,7 @@
 /* Faction buttons now have the vibrant style */
 .faction-selector button {
     margin-left: 0;
-    padding: 0.4rem 0.8rem;
+    padding: 0.34rem 0.62rem;
     border: 1px solid rgba(255, 255, 255, 0.055);
     border-radius: 5px;
     background: var(--ew-bg-input, rgba(255, 255, 255, 0.052));
@@ -141,6 +144,7 @@
     cursor: pointer;
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     font-weight: 500;
+    font-size: 0.84rem;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
