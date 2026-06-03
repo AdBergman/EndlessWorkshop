@@ -8,6 +8,11 @@ import {
     type CodexListItem,
     type CodexSummaryEntry,
 } from "@/lib/codex/codexPresentation";
+import {
+    getCodexFactionAffinityLabel,
+    getCodexFactionSummaryPreview,
+    getCodexFactionTraitSummary,
+} from "@/lib/codex/codexFactionPresentation";
 
 type Props = {
     summaryEntry: CodexSummaryEntry;
@@ -75,8 +80,15 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                             );
                         }
 
-                        const preview = getCodexEntryPreview(entry, 240);
-                        const secondaryContext = getCodexSecondaryContext(entry);
+                        const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
+                        const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
+                        const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
+                        const preview = isFactionEntry
+                            ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
+                            : getCodexEntryPreview(entry, 240);
+                        const secondaryContext = factionAffinity
+                            ? `Affinity: ${factionAffinity}`
+                            : getCodexSecondaryContext(entry);
 
                         return (
                             <button

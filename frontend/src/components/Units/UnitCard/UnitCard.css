@@ -98,19 +98,16 @@
     padding-right: 34px;
 }
 
-/* Unit name (gradient is applied inline in TSX) */
+/* Unit name */
 .name {
-    font-weight: 800;
-    font-size: 1.3rem;
-
-    color: var(--card-border, #f2b584);
-    -webkit-text-stroke: 0.35px color-mix(in srgb, var(--card-border, #f2b584) 72%, white);
-    filter:
-            drop-shadow(0 1px 1px rgba(0, 0, 0, 0.95))
-            drop-shadow(0 0 4px color-mix(in srgb, var(--card-border, #f2b584) 42%, transparent));
-    text-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.95),
-            0 0 4px color-mix(in srgb, var(--card-border, #f2b584) 34%, transparent);
+    color: color-mix(in srgb, var(--card-border, #f2b584) 88%, #f1eadc);
+    font-size: 1.18rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    line-height: 1.08;
+    text-shadow: none;
+    -webkit-text-stroke: 0;
+    filter: none;
 
     flex: 1 1 auto;
     min-width: 0;
@@ -237,6 +234,7 @@
 }
 
 .backName {
+    color: color-mix(in srgb, var(--card-border, #f2b584) 88%, #f1eadc);
     font-weight: 800;
     text-align: center;
     line-height: 1.05;
@@ -245,9 +243,8 @@
     margin-bottom: 10px;
     padding: 0 8px;
 
-    text-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.9),
-            0 0 1px rgba(0, 0, 0, 0.62);
+    letter-spacing: 0.015em;
+    text-shadow: none;
     overflow-wrap: anywhere;
 }
 

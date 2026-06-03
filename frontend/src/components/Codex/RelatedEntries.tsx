@@ -7,6 +7,7 @@ import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 type Props = {
     entries: CodexEntry[];
     onSelect: (entry: CodexEntry) => void;
+    priorityMode?: "default" | "faction";
 };
 
 type RelatedEntryGroup = {
@@ -15,7 +16,16 @@ type RelatedEntryGroup = {
     entries: CodexEntry[];
 };
 
-function groupRelatedEntries(entries: CodexEntry[]): RelatedEntryGroup[] {
+const FACTION_RELATED_KIND_ORDER = [
+    "traits",
+    "units",
+    "tech",
+    "districts",
+    "heroes",
+    "populations",
+];
+
+function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorityMode"]): RelatedEntryGroup[] {
     const groups = new Map<string, RelatedEntryGroup>();
 
     entries.forEach((entry) => {
@@ -34,15 +44,26 @@ function groupRelatedEntries(entries: CodexEntry[]): RelatedEntryGroup[] {
         });
     });
 
-    return Array.from(groups.values()).sort((left, right) => left.label.localeCompare(right.label));
+    return Array.from(groups.values()).sort((left, right) => {
+        if (priorityMode === "faction") {
+            const leftPriority = FACTION_RELATED_KIND_ORDER.indexOf(left.kind);
+            const rightPriority = FACTION_RELATED_KIND_ORDER.indexOf(right.kind);
+            const leftRank = leftPriority === -1 ? Number.MAX_SAFE_INTEGER : leftPriority;
+            const rightRank = rightPriority === -1 ? Number.MAX_SAFE_INTEGER : rightPriority;
+
+            if (leftRank !== rightRank) return leftRank - rightRank;
+        }
+
+        return left.label.localeCompare(right.label);
+    });
 }
 
-export default function RelatedEntries({ entries, onSelect }: Props) {
+export default function RelatedEntries({ entries, onSelect, priorityMode = "default" }: Props) {
     if (entries.length === 0) {
         return null;
     }
 
-    const groups = groupRelatedEntries(entries);
+    const groups = groupRelatedEntries(entries, priorityMode);
 
     return (
         <section className="codex-related" aria-labelledby="codex-related-heading">

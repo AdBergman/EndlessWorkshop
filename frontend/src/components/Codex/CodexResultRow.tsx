@@ -7,6 +7,10 @@ import {
     isCodexSummaryEntry,
     type CodexListItem,
 } from "@/lib/codex/codexPresentation";
+import {
+    getCodexFactionAffinityLabel,
+    getCodexFactionTraitSummary,
+} from "@/lib/codex/codexFactionPresentation";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
@@ -16,9 +20,16 @@ type Props = {
 };
 
 export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
-    const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
     const isSummary = isCodexSummaryEntry(entry);
-    const secondaryContext = isSummary ? "" : getCodexSecondaryContext(entry);
+    const isFactionEntry = !isSummary && entry.exportKind.trim().toLowerCase() === "factions";
+    const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
+    const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry, 2) : "";
+    const previewLine = factionTraits || getCodexDescriptionPreviewLine(entry.descriptionLines);
+    const secondaryContext = isSummary
+        ? ""
+        : factionAffinity
+            ? `Affinity: ${factionAffinity}`
+            : getCodexSecondaryContext(entry);
     const kindLabel = isSummary ? "Overview" : formatCodexKindLabel(entry.exportKind);
     const iconClassName = [
         "codex-kindIcon codex-kindIcon--result",

@@ -835,4 +835,235 @@ describe("CodexPage", () => {
         expect(within(summaryList).queryByText("The first main node.")).not.toBeInTheDocument();
         expect(within(summaryList).queryByText("The second alternate node.")).not.toBeInTheDocument();
     });
+
+    it("structures faction details into affinity, traits, notes, and dossier index anchors", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Faction_Aspect",
+                descriptionLines: [
+                    "Affinity: Aspects",
+                    "Opening faction note.",
+                    "Trait: Diplomat",
+                    "They prioritize Diplomacy and peace.",
+                    "Trait: Common Rights",
+                    "+10 [PublicOrderColored] Public Opinion due to neighbors",
+                ],
+                referenceKeys: ["Trait_Diplomat"],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Diplomat",
+                displayName: "Diplomat",
+                descriptionLines: ["Treaties are easier."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                factions: entries.filter((entry) => entry.exportKind === "factions"),
+                traits: entries.filter((entry) => entry.exportKind === "traits"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=Faction_Aspect"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        expect(within(detailPane).getByRole("heading", { name: "Aspects" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("Faction dossier")).toBeInTheDocument();
+        expect(within(detailPane).queryByRole("navigation", { name: /faction dossier index/i })).not.toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Affinity" })).toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Aspects").length).toBeGreaterThan(0);
+        expect(within(detailPane).getByRole("heading", { name: "Diplomat" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("They prioritize Diplomacy and peace.")).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Common Rights" })).toBeInTheDocument();
+        expect(within(detailPane).getByText(/Public Opinion due to neighbors/)).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("Opening faction note.")).toBeInTheDocument();
+        expect(within(detailPane).queryByText("Description")).not.toBeInTheDocument();
+    });
+
+    it("keeps non-faction detail entries on the generic description renderer", async () => {
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=District_MarketSquare"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        expect(within(detailPane).getByText("Description")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Centralized trade district.")).toBeInTheDocument();
+        expect(within(detailPane).queryByText("Faction dossier")).not.toBeInTheDocument();
+    });
+
+    it("summarizes faction rows with affinity and trait metadata", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Faction_Aspect",
+                descriptionLines: [
+                    "Affinity: Aspects",
+                    "Trait: Diplomat",
+                    "They prioritize Diplomacy and peace.",
+                    "Trait: Common Rights",
+                    "Population bonuses are improved.",
+                    "Trait: Fencing",
+                    "Unlocks dueling schools.",
+                    "Trait: Trade Code",
+                    "Markets are stronger.",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                factions: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=factions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const resultsPane = await screen.findByLabelText("Codex results");
+        expect(within(resultsPane).getByText("Affinity: Aspects")).toBeInTheDocument();
+        expect(within(resultsPane).getByText("Traits: Diplomat, Common Rights, +2 traits")).toBeInTheDocument();
+
+        await user.click(within(resultsPane).getByRole("button", { name: /all factions/i }));
+        const summaryList = await screen.findByLabelText("Factions overview");
+        expect(within(summaryList).getByText("Affinity: Aspects")).toBeInTheDocument();
+        expect(within(summaryList).getByText("Traits: Diplomat, Common Rights, Fencing, +1 trait")).toBeInTheDocument();
+        expect(within(summaryList).queryByText(/They prioritize Diplomacy and peace.*Population bonuses/s)).not.toBeInTheDocument();
+    });
+
+    it("orders faction related entry groups by gameplay usefulness", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Faction_Aspect",
+                descriptionLines: ["Affinity: Aspects", "Trait: Diplomat", "They prioritize Diplomacy and peace."],
+                referenceKeys: [
+                    "Hero_Aspects",
+                    "District_Foundation",
+                    "Trait_Diplomat",
+                    "Unit_Sentry",
+                    "Tech_CommonRights",
+                    "Population_Aspects",
+                    "Ability_Bloom",
+                ],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Aspects",
+                displayName: "Polemephon",
+                descriptionLines: ["Hero."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_Foundation",
+                displayName: "Foundation",
+                descriptionLines: ["District."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Diplomat",
+                displayName: "Diplomat",
+                descriptionLines: ["Trait."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Sentry",
+                displayName: "Sentry",
+                descriptionLines: ["Unit."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_CommonRights",
+                displayName: "Common Rights",
+                descriptionLines: ["Tech."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspects",
+                displayName: "Aspects",
+                descriptionLines: ["Population."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Bloom",
+                displayName: "Bloom",
+                descriptionLines: ["Ability."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        const { container } = render(
+            <MemoryRouter initialEntries={["/codex?entry=Faction_Aspect"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const relatedSection = await screen.findByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).queryByText(/links \/ .*groups/i)).not.toBeInTheDocument();
+
+        const labels = Array.from(container.querySelectorAll(".codex-related__groupLabel span:last-child"))
+            .map((node) => node.textContent);
+        expect(labels).toEqual([
+            "Traits",
+            "Units",
+            "Tech",
+            "Districts",
+            "Heroes",
+            "Populations",
+            "Abilities",
+        ]);
+    });
 });

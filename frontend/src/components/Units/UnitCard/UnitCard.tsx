@@ -2,7 +2,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import "./UnitCard.css";
 
-import { FACTION_COLORS, FACTION_GRADIENT } from "@/types/factionColors";
+import { FACTION_COLORS } from "@/types/factionColors";
 import type { Unit } from "@/types/dataTypes";
 import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
 import { deriveUnit } from "@/lib/units/deriveUnit";
@@ -88,7 +88,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         : ((d.majorEnumFaction ?? "PLACEHOLDER") as any);
 
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
-    const gradient = FACTION_GRADIENT[factionKey] || FACTION_GRADIENT.PLACEHOLDER;
     const typeDisplayLines = getTypeDisplayLines(d.classLabel, d.tierLabel);
     const factionIconPath = !d.isMinor && d.majorEnumFaction
         ? getFactionIconPath(d.unit.faction ?? d.majorEnumFaction)
@@ -181,11 +180,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                         <div className="nameBlock">
                             <div
                                 className="name"
-                                style={{
-                                    background: gradient,
-                                    WebkitBackgroundClip: "text",
-                                    WebkitTextFillColor: "transparent",
-                                }}
                                 title={d.displayName}
                             >
                                 {d.displayName}
@@ -276,9 +270,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             className="backName"
                             style={{
                                 fontSize: `${backNameSize}rem`,
-                                background: gradient,
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
                             }}
                             title={d.displayName}
                         >
