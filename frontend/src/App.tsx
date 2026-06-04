@@ -14,19 +14,66 @@ import GameDataProvider from "./context/GameDataProvider";
 import { useShareProcessingGate } from "./context/appOrchestration";
 import PageSeo from "@/components/Seo/PageSeo";
 import { AppRouteSeoKey, publicRouteSeo } from "@/components/Seo/routeSeo";
+import {
+    loadAdminImportPage,
+    loadCodexPage,
+    loadGameSummaryPage,
+    loadModsPage,
+    loadQuestExplorerPage,
+    loadUnitEvolutionExplorer,
+    warmPrimaryRouteChunks,
+} from "@/routeLoaders";
 
 import "./App.css";
 
-const GameSummaryPage = lazy(() => import("./components/GameSummary/GameSummaryPage"));
-const UnitEvolutionExplorer = lazy(() =>
-    import("@/components/Units/UnitEvolutionExplorer").then((module) => ({
-        default: module.UnitEvolutionExplorer,
-    }))
-);
-const AdminImportPage = lazy(() => import("@/components/AdminImport/AdminImportPage"));
-const CodexPage = lazy(() => import("@/pages/CodexPage"));
-const ModsPage = lazy(() => import("@/pages/ModsPage"));
-const QuestExplorerPage = lazy(() => import("@/pages/QuestExplorerPage"));
+const GameSummaryPage = lazy(loadGameSummaryPage);
+const UnitEvolutionExplorer = lazy(loadUnitEvolutionExplorer);
+const AdminImportPage = lazy(loadAdminImportPage);
+const CodexPage = lazy(loadCodexPage);
+const ModsPage = lazy(loadModsPage);
+const QuestExplorerPage = lazy(loadQuestExplorerPage);
+
+class RouteChunkBoundary extends React.Component<
+    { children: React.ReactNode; resetKey: string },
+    { hasError: boolean }
+> {
+    state = { hasError: false };
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidUpdate(previousProps: { resetKey: string }) {
+        if (previousProps.resetKey !== this.props.resetKey && this.state.hasError) {
+            this.setState({ hasError: false });
+        }
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <main className="route-state route-state--error" role="alert">
+                    <h1>Route failed to load</h1>
+                    <p>The page bundle did not load cleanly. Refreshing will request the current build again.</p>
+                    <button type="button" onClick={() => window.location.reload()}>
+                        Reload
+                    </button>
+                </main>
+            );
+        }
+
+        return this.props.children;
+    }
+}
+
+function RouteLoadingFallback() {
+    return (
+        <main className="route-state" aria-live="polite" aria-busy="true">
+            <div className="route-state__spinner" aria-hidden="true" />
+            <span>Loading page...</span>
+        </main>
+    );
+}
 
 // Extend the Window type for Cloudflare beacon
 declare global {
@@ -65,6 +112,10 @@ const AppLayout: React.FC = () => {
         appHue = "gold";
     }
 
+    useEffect(() => {
+        warmPrimaryRouteChunks();
+    }, []);
+
     return (
         <div className={appClassName} data-ew-hue={appHue}>
             <TopContainer />
@@ -99,7 +150,13 @@ function SeoRoute({
 }
 
 function LazyRoute({ children }: { children: React.ReactNode }) {
-    return <Suspense fallback={null}>{children}</Suspense>;
+    const location = useLocation();
+
+    return (
+        <RouteChunkBoundary resetKey={location.key}>
+            <Suspense fallback={<RouteLoadingFallback />}>{children}</Suspense>
+        </RouteChunkBoundary>
+    );
 }
 
 export function AppRoutes() {

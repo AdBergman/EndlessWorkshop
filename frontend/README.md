@@ -2,6 +2,11 @@
 
 Vite + React + TypeScript frontend for EWShop.
 
+## Requirements
+
+- Node.js >=20.19.0. Docker builds currently use Node 24.
+- npm 11.6.0, as declared by `packageManager`.
+
 ## Commands
 
 Run from `frontend/`:

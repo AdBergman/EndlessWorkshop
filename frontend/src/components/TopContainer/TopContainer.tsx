@@ -9,6 +9,7 @@ import {
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
 import {useTechPlannerStore} from "@/stores/techPlannerStore";
+import { preloadRoutePath } from "@/routeLoaders";
 
 const factions = [
     { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" },
@@ -49,6 +50,9 @@ const TopContainer: React.FC = () => {
                     <NavLink
                         key={route.label}
                         to={route.path}
+                        onFocus={() => preloadRoutePath(route.path)}
+                        onPointerEnter={() => preloadRoutePath(route.path)}
+                        onPointerDown={() => preloadRoutePath(route.path)}
                         onClick={(event) => {
                             if (route.path !== "/codex") return;
 
