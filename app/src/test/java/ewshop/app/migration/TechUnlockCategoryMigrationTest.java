@@ -32,6 +32,7 @@ class TechUnlockCategoryMigrationTest {
                 .locations("classpath:db/migration/common")
                 .baselineOnMigrate(true)
                 .baselineVersion("3.3.4")
+                .target("3.3.6")
                 .load()
                 .migrate();
 

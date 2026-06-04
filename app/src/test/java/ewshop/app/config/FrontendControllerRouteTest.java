@@ -245,6 +245,18 @@ class FrontendControllerRouteTest {
     }
 
     @Test
+    void rejectsMalformedGeneratedSeoRouteSegments() throws Exception {
+        mockMvc.perform(get("/encyclopedia/Tech/workshop"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/encyclopedia/tech/work_shop"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/encyclopedia/tech/workshop/../secret"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void legacyAndTrailingSlashRedirectsDoNotCreateChainsWhenCanonicalOutputExists() throws Exception {
         Path externalWorkshop = Path.of("build/test-generated-seo/encyclopedia/tech/workshop/index.html");
         Files.createDirectories(externalWorkshop.getParent());

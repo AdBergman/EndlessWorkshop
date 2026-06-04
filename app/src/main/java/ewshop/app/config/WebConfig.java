@@ -14,12 +14,14 @@ import java.util.List;
 @Configuration
 public class WebConfig {
 
+    private static final String NO_ORIGINS_ALLOWED = "https://cors-disabled.invalid";
+
     private final SeoOutputLocator seoOutputLocator;
     private final List<String> apiAllowedOrigins;
 
     public WebConfig(
             SeoOutputLocator seoOutputLocator,
-            @Value("${ewshop.cors.allowed-origins:*}") String apiAllowedOrigins
+            @Value("${ewshop.cors.allowed-origins:}") String apiAllowedOrigins
     ) {
         this.seoOutputLocator = seoOutputLocator;
         this.apiAllowedOrigins = parseAllowedOrigins(apiAllowedOrigins);
@@ -37,6 +39,8 @@ public class WebConfig {
 
                 if (apiAllowedOrigins.contains("*")) {
                     registration.allowedOriginPatterns("*");
+                } else if (apiAllowedOrigins.isEmpty()) {
+                    registration.allowedOrigins(NO_ORIGINS_ALLOWED);
                 } else {
                     registration.allowedOrigins(apiAllowedOrigins.toArray(String[]::new));
                 }

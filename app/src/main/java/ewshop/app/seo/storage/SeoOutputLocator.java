@@ -29,7 +29,7 @@ public class SeoOutputLocator {
     }
 
     public Path getFeaturedEntityFile(String page, String entryKey) {
-        return outputRoot.resolve("encyclopedia").resolve(page).resolve(entryKey).resolve("index.html");
+        return resolveUnderOutputRoot("encyclopedia", page, entryKey, "index.html");
     }
 
     public Path getFeaturedEntityFile(String page, String slug, String entryKeySlug) {
@@ -37,15 +37,15 @@ public class SeoOutputLocator {
         if (keySlug.isBlank()) {
             return getFeaturedEntityFile(page, slug);
         }
-        return outputRoot.resolve("encyclopedia").resolve(page).resolve(slug).resolve(keySlug).resolve("index.html");
+        return resolveUnderOutputRoot("encyclopedia", page, slug, keySlug, "index.html");
     }
 
     public Path getEncyclopediaCategoryFile(String page) {
-        return outputRoot.resolve("encyclopedia").resolve(page).resolve("index.html");
+        return resolveUnderOutputRoot("encyclopedia", page, "index.html");
     }
 
     public Path getGeneratedIndexFile(String page) {
-        return outputRoot.resolve(page).resolve("index.html");
+        return resolveUnderOutputRoot(page, "index.html");
     }
 
     public boolean hasGeneratedIndex(String page) {
@@ -85,18 +85,41 @@ public class SeoOutputLocator {
     }
 
     public Path getSitemapFile() {
-        return outputRoot.resolve("sitemap.xml");
+        return resolveUnderOutputRoot("sitemap.xml");
     }
 
     public Path getGeneratedSitemapPath() {
-        return outputRoot.resolve("sitemap.xml");
+        return resolveUnderOutputRoot("sitemap.xml");
     }
 
     public Path getMissingReferenceAuditJsonFile() {
-        return outputRoot.resolve("codex-missing-references-audit.json");
+        return resolveUnderOutputRoot("codex-missing-references-audit.json");
     }
 
     public Path getMissingReferenceAuditMarkdownFile() {
-        return outputRoot.resolve("codex-missing-references-audit.md");
+        return resolveUnderOutputRoot("codex-missing-references-audit.md");
+    }
+
+    private Path resolveUnderOutputRoot(String... segments) {
+        Path current = outputRoot;
+        for (String segment : segments) {
+            validatePathSegment(segment);
+            current = current.resolve(segment);
+        }
+
+        Path normalized = current.normalize();
+        if (!normalized.startsWith(outputRoot)) {
+            throw new IllegalArgumentException("Generated SEO path escapes output root");
+        }
+        return normalized;
+    }
+
+    private static void validatePathSegment(String segment) {
+        if (segment == null || segment.isBlank()) {
+            throw new IllegalArgumentException("Generated SEO path segment must not be blank");
+        }
+        if (segment.equals(".") || segment.equals("..") || segment.contains("/") || segment.contains("\\")) {
+            throw new IllegalArgumentException("Generated SEO path segment is not safe");
+        }
     }
 }
