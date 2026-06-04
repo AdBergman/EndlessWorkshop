@@ -78,3 +78,7 @@ seo:
 
 admin:
   token: ${ADMIN_TOKEN:}
+
+ewshop:
+  cors:
+    allowed-origins: ${EWSHOP_CORS_ALLOWED_ORIGINS:https://endlessworkshop.dev}

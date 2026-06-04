@@ -67,6 +67,8 @@ admin:
   token: dev-admin-token
 
 ewshop:
+  cors:
+    allowed-origins: ${EWSHOP_CORS_ALLOWED_ORIGINS:*}
   local-import:
     enabled: ${EWSHOP_LOCAL_IMPORT_ENABLED:true}
     root: ${EWSHOP_LOCAL_IMPORT_ROOT:local-imports}

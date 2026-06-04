@@ -15,7 +15,7 @@
     "react-ga4": "^2.1.0",
     "react-helmet-async": "^3.0.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.9.3",
+    "react-router-dom": "^7.16.0",
     "react-toastify": "^11.0.5",
     "recharts": "^3.5.1",
     "web-vitals": "^2.1.4",
@@ -47,12 +47,12 @@
     "@types/node": "^24.6.1",
     "@types/react-csv": "^1.1.10",
     "@types/testing-library__jest-dom": "^5.14.9",
-    "@vitejs/plugin-react": "^4.3.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "jsdom": "^24.1.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^5.3.5",
+    "vite": "^7.3.5",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.8"
   }
 }

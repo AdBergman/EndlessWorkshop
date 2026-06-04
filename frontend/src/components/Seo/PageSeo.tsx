@@ -25,6 +25,10 @@ function buildCanonicalUrl(path: string): string {
     return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export function stringifyJsonLd(node: Record<string, unknown>): string {
+    return JSON.stringify(node).replace(/</g, "\\u003c");
+}
+
 export default function PageSeo({
     title,
     description,
@@ -63,7 +67,7 @@ export default function PageSeo({
 
             {jsonLdNodes.map((node, index) => (
                 <script key={`${canonicalUrl}-jsonld-${index}`} type="application/ld+json">
-                    {JSON.stringify(node)}
+                    {stringifyJsonLd(node)}
                 </script>
             ))}
 

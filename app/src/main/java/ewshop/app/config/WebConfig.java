@@ -1,19 +1,28 @@
 package ewshop.app.config;
 
 import ewshop.app.seo.storage.SeoOutputLocator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 public class WebConfig {
 
     private final SeoOutputLocator seoOutputLocator;
+    private final List<String> apiAllowedOrigins;
 
-    public WebConfig(SeoOutputLocator seoOutputLocator) {
+    public WebConfig(
+            SeoOutputLocator seoOutputLocator,
+            @Value("${ewshop.cors.allowed-origins:*}") String apiAllowedOrigins
+    ) {
         this.seoOutputLocator = seoOutputLocator;
+        this.apiAllowedOrigins = parseAllowedOrigins(apiAllowedOrigins);
     }
 
     @Bean
@@ -22,9 +31,15 @@ public class WebConfig {
 
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
+                var registration = registry.addMapping("/api/**")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedHeaders("Content-Type", "X-Admin-Token");
+
+                if (apiAllowedOrigins.contains("*")) {
+                    registration.allowedOriginPatterns("*");
+                } else {
+                    registration.allowedOrigins(apiAllowedOrigins.toArray(String[]::new));
+                }
             }
 
             @Override
@@ -46,5 +61,17 @@ public class WebConfig {
                         .addResourceLocations(outputLocation, "classpath:/static/");
             }
         };
+    }
+
+    private static List<String> parseAllowedOrigins(String rawOrigins) {
+        if (rawOrigins == null || rawOrigins.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(rawOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isBlank())
+                .distinct()
+                .toList();
     }
 }

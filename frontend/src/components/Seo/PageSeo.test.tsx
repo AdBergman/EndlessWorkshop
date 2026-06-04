@@ -90,4 +90,32 @@ describe("PageSeo", () => {
             "@type": "BreadcrumbList",
         });
     });
+
+    it("escapes JSON-LD script text without changing parsed data", async () => {
+        render(
+            <HelmetProvider>
+                <PageSeo
+                    title="Unsafe Test"
+                    description="Escaping test"
+                    path="/tech"
+                    jsonLd={{
+                        "@context": "https://schema.org",
+                        "@type": "WebPage",
+                        name: "</script><script>alert(1)</script>",
+                    }}
+                />
+            </HelmetProvider>
+        );
+
+        await waitFor(() => {
+            expect(document.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(1);
+        });
+
+        const scriptText = document.querySelector('script[type="application/ld+json"]')?.textContent ?? "";
+        expect(scriptText).not.toContain("</script>");
+        expect(scriptText).toContain("\\u003c/script>");
+        expect(JSON.parse(scriptText)).toMatchObject({
+            name: "</script><script>alert(1)</script>",
+        });
+    });
 });

@@ -281,7 +281,7 @@ export default function AdminImportPage() {
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";
 
-    const [token, setToken] = useState<string>(() => (localStorage.getItem("ewshop_admin_token") ?? "").trim());
+    const [token, setToken] = useState<string>(() => (sessionStorage.getItem("ewshop_admin_token") ?? "").trim());
     const [tokenStatus, setTokenStatus] = useState<TokenStatus>(() => (token ? "checking" : "missing"));
     const [tokenError, setTokenError] = useState<string | null>(null);
     const [seoActionState, setSeoActionState] = useState<SeoActionState>({ status: "idle" });
@@ -493,7 +493,11 @@ export default function AdminImportPage() {
                     onTokenChange={(t) => {
                         const next = t.trim();
                         setToken(next);
-                        localStorage.setItem("ewshop_admin_token", next);
+                        if (next) {
+                            sessionStorage.setItem("ewshop_admin_token", next);
+                        } else {
+                            sessionStorage.removeItem("ewshop_admin_token");
+                        }
                         void runTokenValidation(next);
                     }}
                 />
