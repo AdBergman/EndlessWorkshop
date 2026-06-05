@@ -81,6 +81,26 @@ function getTierRankLabel(tierLabel: string | null): string | null {
     return numberToRoman[value] ?? value;
 }
 
+function getTierRankNumberLabel(tierRankLabel: string | null): string | null {
+    if (!tierRankLabel) return null;
+
+    const romanToNumber: Record<string, number> = {
+        I: 1,
+        II: 2,
+        III: 3,
+        IV: 4,
+        V: 5,
+        VI: 6,
+        VII: 7,
+        VIII: 8,
+        IX: 9,
+        X: 10,
+    };
+
+    const parsed = Number(tierRankLabel) || romanToNumber[tierRankLabel.toUpperCase()] || 0;
+    return parsed > 0 ? String(parsed) : tierRankLabel;
+}
+
 function getTooltipCoordsFromElement(element: HTMLElement): { x: number; y: number; mode: "pixel" } {
     const rect = element.getBoundingClientRect();
     return { x: rect.right + 10, y: rect.top + rect.height / 2, mode: "pixel" };
@@ -143,6 +163,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         [d.classKey, d.classLabel]
     );
     const tierRankLabel = getTierRankLabel(d.tierLabel);
+    const tierRankNumberLabel = getTierRankNumberLabel(tierRankLabel);
     const hasClassMetadata = classIcons.length > 0;
 
     const onCardClick = () => {
@@ -304,22 +325,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                     }}
                                 />
                             )}
-
-                            {tierRankLabel && (
-                                <button
-                                    type="button"
-                                    className="tierRankBadge"
-                                    aria-label={d.tierLabel ?? tierRankLabel}
-                                    onMouseEnter={handleTierEnter}
-                                    onMouseMove={handleSkillMove}
-                                    onMouseLeave={clearHoverSoon}
-                                    onFocus={handleTierFocus}
-                                    onBlur={clearHoverSoon}
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    {tierRankLabel}
-                                </button>
-                            )}
                         </div>
                     </div>
 
@@ -386,6 +391,25 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                     </div>
 
                                 </div>
+                            )}
+
+                            {tierRankLabel && tierRankNumberLabel && (
+                                <button
+                                    type="button"
+                                    className="tierRankBadge unitArtTierSeal"
+                                    aria-label={d.tierLabel ?? tierRankLabel}
+                                    data-tier-rank={tierRankLabel}
+                                    onMouseEnter={handleTierEnter}
+                                    onMouseMove={handleSkillMove}
+                                    onMouseLeave={clearHoverSoon}
+                                    onFocus={handleTierFocus}
+                                    onBlur={clearHoverSoon}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <span className="tierRankNumber" aria-hidden="true">
+                                        {tierRankNumberLabel}
+                                    </span>
+                                </button>
                             )}
                         </div>
                     )}

@@ -27,6 +27,7 @@
     width: 100%;
     height: 100%;
     min-height: 340px;
+    --unit-card-metadata-right: 8px;
     --unit-card-minor-accent: var(--ew-accent, #ff7f32);
     --unit-card-minor-accent-soft: color-mix(in srgb, var(--unit-card-minor-accent) 76%, #fff1e4);
 
@@ -121,7 +122,7 @@
 .unitIdentityStack {
     position: absolute;
     top: 8px;
-    right: 10px;
+    right: var(--unit-card-metadata-right);
 
     display: flex;
     flex-direction: column;
@@ -137,36 +138,53 @@
     appearance: none;
     -webkit-appearance: none;
     pointer-events: auto;
-    min-width: 20px;
-    height: 14px;
-    margin: -1px 1px 0 0;
-    padding: 0 4px;
-    border: 1px solid color-mix(in srgb, var(--unit-identity-color, var(--card-border, #f2b584)) 42%, rgba(241, 234, 220, 0.32));
-    border-radius: 2px;
+    width: 27px;
+    height: 27px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 72%, rgba(241, 234, 220, 0.38));
+    border-radius: 999px;
     background:
-            linear-gradient(180deg, rgba(31, 34, 37, 0.92), rgba(9, 10, 12, 0.96));
-    color: #f1eadc;
+            radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.18), transparent 40%),
+            radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 26%, transparent), transparent 64%),
+            linear-gradient(180deg, rgba(42, 46, 50, 0.97), rgba(7, 8, 10, 0.96));
+    color: #fff3cc;
     box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.08),
-            0 1px 3px rgba(0, 0, 0, 0.58);
+            inset 0 0 0 2px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.15),
+            inset 0 -2px 6px rgba(0, 0, 0, 0.5),
+            0 3px 7px rgba(0, 0, 0, 0.68),
+            0 0 0 1px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 18%, transparent);
     cursor: pointer;
-    font-family: "Audiowide", sans-serif;
-    font-size: 0.48rem;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.tierRankNumber {
+    display: block;
+    font-size: 0.76rem;
     font-weight: 900;
     line-height: 1;
     letter-spacing: 0;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.88);
-    transition: border-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+    transform: translateY(-0.5px);
+    text-shadow:
+            0 1px 1px rgba(0, 0, 0, 0.88),
+            0 0 4px rgba(255, 221, 135, 0.26);
 }
 
 .tierRankBadge:hover,
 .tierRankBadge:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--unit-identity-color, var(--card-border, #f2b584)) 72%, #f1eadc);
+    border-color: color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 78%, #f1eadc);
     box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.1),
-            0 0 0 1px color-mix(in srgb, var(--unit-identity-color, var(--card-border, #f2b584)) 26%, transparent),
-            0 2px 6px rgba(0, 0, 0, 0.66);
+            inset 0 0 0 2px rgba(0, 0, 0, 0.48),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16),
+            0 0 0 1px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 32%, transparent),
+            0 3px 8px rgba(0, 0, 0, 0.7);
     transform: translateY(-1px);
 }
 
@@ -211,7 +229,7 @@
 .unitArtIdentityPlate {
     position: absolute;
     top: 8px;
-    right: 5px;
+    right: var(--unit-card-metadata-right);
     z-index: 3;
 
     display: inline-flex;
@@ -281,6 +299,13 @@
             0 0 0 1px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 30%, transparent),
             0 2px 7px rgba(0, 0, 0, 0.7);
     transform: translateY(-1px);
+}
+
+.unitArtTierSeal {
+    position: absolute;
+    right: var(--unit-card-metadata-right);
+    bottom: 8px;
+    z-index: 3;
 }
 
 /* === STATS === */

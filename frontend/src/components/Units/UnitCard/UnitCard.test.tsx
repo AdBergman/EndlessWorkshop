@@ -126,7 +126,7 @@ describe("UnitCard", () => {
         });
     });
 
-    it("renders class icons on the art plate and tier as a separate rank marker", () => {
+    it("renders class icons and tier as separate art metadata markers", () => {
         const { container } = render(
             <UnitCard
                 unit={unit({
@@ -138,12 +138,13 @@ describe("UnitCard", () => {
         );
 
         expect(screen.getByLabelText("Ranged: bonus vs Flying")).toBeInTheDocument();
-        expect(screen.getByLabelText("Tier I")).toHaveTextContent("I");
+        expect(screen.getByLabelText("Tier I")).toHaveAttribute("data-tier-rank", "I");
+        expect(container.querySelector(".tierRankNumber")).toHaveTextContent("1");
         expect(screen.queryByText("T1")).not.toBeInTheDocument();
         expect(screen.queryByText("Ranged Tier I")).not.toBeInTheDocument();
         expect(container.querySelector(".unitArtIdentityPlate")).toBeInTheDocument();
-        expect(container.querySelector(".unitArtIdentityPlate .tierRankBadge")).not.toBeInTheDocument();
-        expect(container.querySelector(".unitIdentityStack .tierRankBadge")).toBeInTheDocument();
+        expect(container.querySelector(".artContainer .unitArtTierSeal")).toBeInTheDocument();
+        expect(container.querySelector(".unitIdentityStack .tierRankBadge")).not.toBeInTheDocument();
         expect(container.querySelector('img.unitClassIcon[src="/svg/units/UI_UnitItem_UnitClass_Ranged.svg"]'))
             .toBeInTheDocument();
         expect(container.querySelector(".unitClassIcon")).not.toHaveStyle({
@@ -165,7 +166,8 @@ describe("UnitCard", () => {
         expect(screen.getByLabelText("Juggernaught Ranged")).toBeInTheDocument();
         expect(screen.getByLabelText("Juggernaught: bonus vs Hero")).toBeInTheDocument();
         expect(screen.getByLabelText("Ranged: bonus vs Flying")).toBeInTheDocument();
-        expect(screen.getByLabelText("Tier I")).toHaveTextContent("I");
+        expect(screen.getByLabelText("Tier I")).toHaveAttribute("data-tier-rank", "I");
+        expect(container.querySelector(".tierRankNumber")).toHaveTextContent("1");
         expect(screen.queryByText("T1")).not.toBeInTheDocument();
         expect(screen.queryByText("Juggernaught Ranged")).not.toBeInTheDocument();
 
@@ -238,13 +240,16 @@ describe("UnitCard", () => {
     });
 
     it("shows tier tooltip content from the separate rank marker", async () => {
-        render(
+        const { container } = render(
             <UnitCard
                 unit={unit({
                     evolutionTierIndex: 1,
                 })}
             />
         );
+
+        expect(screen.getByLabelText("Tier II")).toHaveAttribute("data-tier-rank", "II");
+        expect(container.querySelector(".tierRankNumber")).toHaveTextContent("2");
 
         fireEvent.mouseEnter(screen.getByLabelText("Tier II"), {
             clientX: 30,
@@ -255,6 +260,19 @@ describe("UnitCard", () => {
             expect(screen.getByText("Tier II")).toBeInTheDocument();
             expect(screen.getByText("Evolution tier.")).toBeInTheDocument();
         });
+    });
+
+    it("renders Tier III as a numeric rank seal", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    evolutionTierIndex: 2,
+                })}
+            />
+        );
+
+        expect(screen.getByLabelText("Tier III")).toHaveAttribute("data-tier-rank", "III");
+        expect(container.querySelector(".tierRankNumber")).toHaveTextContent("3");
     });
 
     it("uses the visible Mukag SVG for Tahuk major unit card badges", () => {
