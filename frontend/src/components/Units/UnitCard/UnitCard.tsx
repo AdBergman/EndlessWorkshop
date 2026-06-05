@@ -39,19 +39,6 @@ function computeBackNameFontSizeRem(name: string, skillCount: number): number {
     return clamp(size, 0.85, 1.15);
 }
 
-function getTypeDisplayLines(classLabel: string | null, tierLabel: string | null): string[] {
-    const classWords = (classLabel ?? "").split(/\s+/g).filter(Boolean);
-
-    if (classWords.length > 1) {
-        return tierLabel ? [...classWords, tierLabel] : classWords;
-    }
-
-    if (classLabel && tierLabel) return [`${classLabel} ${tierLabel}`];
-    if (classLabel) return [classLabel];
-    if (tierLabel) return [tierLabel];
-    return [];
-}
-
 function StatValue({ stat, label, value }: { stat: UnitCardStat; label: string; value: number | string }) {
     const iconPath = getUnitCardStatIconPath(stat);
 
@@ -88,7 +75,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         : ((d.majorEnumFaction ?? "PLACEHOLDER") as any);
 
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
-    const typeDisplayLines = getTypeDisplayLines(d.classLabel, d.tierLabel);
     const factionIconSource = d.unit.faction?.trim() || (!d.isMinor ? d.majorEnumFaction : null);
     const factionIconPath = factionIconSource
         ? getFactionIconPath(factionIconSource)
@@ -211,15 +197,18 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                     </div>
 
                     {d.typeLine && (
-                        <div className="typeTier" style={{ color: colors.border }}>
-                            <span className="type" aria-label={d.typeLine} title={d.typeLine}>
-                                {typeDisplayLines.map((line, index) => (
-                                    <React.Fragment key={`${line}-${index}`}>
-                                        <span className="typeLineSegment">{line}</span>
-                                        {index < typeDisplayLines.length - 1 ? " " : null}
-                                    </React.Fragment>
-                                ))}
-                            </span>
+                        <div
+                            className="typeTier"
+                            style={{ color: colors.border }}
+                            title={d.typeLine}
+                            aria-label={d.typeLine}
+                        >
+                            {d.classLabel ? (
+                                <span className="typeLabel">{d.classLabel}</span>
+                            ) : <span aria-hidden="true" />}
+                            {d.tierLabel ? (
+                                <span className="tierLabel">{d.tierLabel}</span>
+                            ) : null}
                         </div>
                     )}
 
