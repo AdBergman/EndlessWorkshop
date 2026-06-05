@@ -89,9 +89,13 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
     const colors = FACTION_COLORS[factionKey] || FACTION_COLORS.PLACEHOLDER;
     const typeDisplayLines = getTypeDisplayLines(d.classLabel, d.tierLabel);
-    const factionIconPath = !d.isMinor && d.majorEnumFaction
-        ? getFactionIconPath(d.unit.faction ?? d.majorEnumFaction)
+    const factionIconSource = d.unit.faction?.trim() || (!d.isMinor ? d.majorEnumFaction : null);
+    const factionIconPath = factionIconSource
+        ? getFactionIconPath(factionIconSource)
         : null;
+    const factionIconColor = d.isMinor
+        ? "var(--unit-card-minor-accent, var(--ew-accent, #ff7f32))"
+        : colors.border;
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -176,7 +180,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                 {/* FRONT */}
                 <div className={`cardFace cardFront ${d.isMinor ? "minorCardFace" : ""}`}>
-                    <div className={`header ${d.isMinor ? "minorHeader" : ""} ${!d.isMinor && d.majorEnumFaction ? "headerWithIcon" : ""}`}>
+                    <div className={`header ${d.isMinor ? "minorHeader" : ""} ${factionIconPath ? "headerWithIcon" : ""}`}>
                         <div className="nameBlock">
                             <div
                                 className="name"
@@ -192,14 +196,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             )}
                         </div>
 
-                        {!d.isMinor && d.majorEnumFaction && factionIconPath && (
+                        {factionIconPath && (
                             <div className="fortIcon" title={d.unit.faction ?? undefined}>
                                 <span
-                                    className="factionIcon"
+                                    className={`factionIcon ${d.isMinor ? "minorFactionIcon" : ""}`}
                                     aria-hidden="true"
                                     style={{
                                         ["--faction-icon-path" as any]: `url("${factionIconPath}")`,
-                                        ["--faction-icon-color" as any]: colors.border,
+                                        ["--faction-icon-color" as any]: factionIconColor,
                                     }}
                                 />
                             </div>

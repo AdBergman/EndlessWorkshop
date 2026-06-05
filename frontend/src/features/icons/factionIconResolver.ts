@@ -24,6 +24,32 @@ const MAJOR_FACTION_ICON_RAW_KEYS: Record<string, string> = {
     Necrophage: "factionTrait_Necrophage_CadaversConversion_EffectFeedbackOverride",
 };
 
+const MINOR_FACTION_ICON_RAW_KEYS: Record<string, string> = {
+    ametrine: "factionAffinity_Ametrine",
+    blackhammer: "factionAffinity_Blackhammer",
+    blackhammers: "factionAffinity_Blackhammer",
+    daughterofbor: "factionAffinity_DaughterOfBor",
+    daughtersofbor: "factionAffinity_DaughterOfBor",
+    dungeon: "factionAffinity_Dungeon",
+    foundling: "factionAffinity_Foundling",
+    foundlings: "factionAffinity_Foundling",
+    gorog: "factionAffinity_Gorog",
+    greenscion: "factionAffinity_GreenScion",
+    greenscions: "factionAffinity_GreenScion",
+    hoyandladhran: "factionAffinity_HoyAndLadhran",
+    hydracorn: "factionAffinity_Hydracorn",
+    mangroveofharmony: "factionAffinity_MangroveOfHarmony",
+    noquensii: "factionAffinity_Noquensii",
+    ochling: "factionAffinity_Ochling",
+    oneiroi: "factionAffinity_Oneiroi",
+    sollusk: "factionAffinity_Sollusk",
+    consortium: "factionAffinity_TheConsortium",
+    theconsortium: "factionAffinity_TheConsortium",
+    unseeingseer: "factionAffinity_UnseeingSeer",
+    unseeingseers: "factionAffinity_UnseeingSeer",
+    xavius: "factionAffinity_Xavius",
+};
+
 function normalizeFactionToken(value: string): string {
     return value
         .trim()
@@ -40,6 +66,9 @@ function rawAffinityKey(value: string): string | null {
     if (majorAlias) {
         return MAJOR_FACTION_ICON_RAW_KEYS[majorAlias] ?? `factionAffinity_${majorAlias}`;
     }
+
+    const minorRawKey = MINOR_FACTION_ICON_RAW_KEYS[normalized];
+    if (minorRawKey) return minorRawKey;
 
     const compactValue = value
         .trim()

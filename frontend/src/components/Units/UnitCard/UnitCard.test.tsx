@@ -146,6 +146,28 @@ describe("UnitCard", () => {
         });
     });
 
+    it("renders minor faction card badges with the Endless Workshop accent color", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    faction: "Ametrine",
+                    isMajorFaction: false,
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.getByText("Ametrine")).toBeInTheDocument();
+        const icon = container.querySelector<HTMLElement>(".factionIcon.minorFactionIcon");
+
+        expect(icon).toBeInTheDocument();
+        expect(container.querySelector("img.minorFactionIcon")).not.toBeInTheDocument();
+        expect(icon).toHaveStyle({
+            "--faction-icon-path": 'url("/svg/hero-skills/UI_MinorEmpireSymbol_Ametrine.svg")',
+            "--faction-icon-color": "var(--unit-card-minor-accent, var(--ew-accent, #ff7f32))",
+        });
+    });
+
     it("shows zero for missing Focus / Critical Chance values", () => {
         const { container } = render(
             <UnitCard

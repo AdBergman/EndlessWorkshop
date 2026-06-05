@@ -27,6 +27,8 @@
     width: 100%;
     height: 100%;
     min-height: 340px;
+    --unit-card-minor-accent: var(--ew-accent, #ff7f32);
+    --unit-card-minor-accent-soft: color-mix(in srgb, var(--unit-card-minor-accent) 76%, #fff1e4);
 
     transform-style: preserve-3d;
     border-radius: 8px;
@@ -373,6 +375,10 @@
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
 }
 
+.factionIcon.minorFactionIcon {
+    background: var(--unit-card-minor-accent, var(--ew-accent, #ff7f32));
+}
+
 /* === NAME BLOCK (unit + minor faction) === */
 .nameBlock {
     display: flex;
@@ -391,13 +397,21 @@
     align-items: flex-start;
 }
 
+.minorCardFace .name {
+    color: var(--unit-card-minor-accent, var(--ew-accent, #ff7f32));
+}
+
 /* Minor faction text — brighter, crisp */
 .minorFactionName {
-    color: #f0ddd0;
-    text-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.9),
-            0 0 1px rgba(0, 0, 0, 0.62);
-    opacity: 0.96;
+    margin-top: 3px;
+    color: var(--unit-card-minor-accent-soft, #ffb27a);
+    font-size: 0.76rem;
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: 0;
+    text-shadow: none;
+    opacity: 0.98;
+    overflow-wrap: anywhere;
 }
 
 /* Back placeholder (if you still use it elsewhere) */

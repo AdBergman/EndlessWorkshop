@@ -21,8 +21,8 @@ export const FACTION_COLORS = {
     },
 
     MINOR: {
-        border: "#8f5e3a", // deep bronze edge — grounded, readable
-        accent: "#c15512", // warm copper-orange highlight
+        border: "#ff7f32", // Endless Workshop accent — shared minor-faction identity
+        accent: "#ffb27a",
     },
 
     PLACEHOLDER: {
@@ -39,7 +39,7 @@ export const FACTION_GRADIENT: Record<string, string> = {
     TAHUK: "linear-gradient(90deg, #fff566, #ffeb3b, #fbc02d)",       // yellow-ish, bright, smooth
     ASPECTS: "linear-gradient(90deg, #b366d1, #9c27b0, #6a1b9a)",     // purple-ish, mystical, soft
 
-    MINOR: "linear-gradient(90deg, #8f5e3a 0%, #ae7046 40%, #c15512 100%)",
+    MINOR: "linear-gradient(90deg, #ff7f32 0%, #ff9a52 45%, #ffb27a 100%)",
 
     PLACEHOLDER: "linear-gradient(90deg, #f7d878, #f4d35e, #e2b842)"  // gold, soft, neutral
 };

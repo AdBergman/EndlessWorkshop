@@ -66,19 +66,25 @@ describe("unit migration scope", () => {
         }
     });
 
-    it("keeps unit card faction icons pinned and colored by the card faction token", () => {
+    it("keeps unit card faction icons pinned with major tinting and minor EW accent tinting", () => {
         const cardSource = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.tsx"), "utf8");
         const cardCss = readFileSync(resolve(srcDir, "components/Units/UnitCard/UnitCard.css"), "utf8");
         const iconResolverSource = readFileSync(resolve(srcDir, "features/icons/factionIconResolver.ts"), "utf8");
         const factionColors = readFileSync(resolve(srcDir, "types/factionColors.ts"), "utf8");
 
-        expect(cardSource).toMatch(/getFactionIconPath\(d\.unit\.faction \?\? d\.majorEnumFaction\)/);
+        expect(cardSource).toMatch(/const factionIconSource = d\.unit\.faction\?\.trim\(\) \|\| \(!d\.isMinor \? d\.majorEnumFaction : null\);/);
+        expect(cardSource).toMatch(/getFactionIconPath\(factionIconSource\)/);
+        expect(cardSource).toMatch(/var\(--unit-card-minor-accent, var\(--ew-accent, #ff7f32\)\)/);
         expect(cardSource).toMatch(/\["--faction-icon-path" as any\]:\s*`url\("\$\{factionIconPath\}"\)`/);
-        expect(cardSource).toMatch(/\["--faction-icon-color" as any\]:\s*colors\.border/);
+        expect(cardSource).toMatch(/\["--faction-icon-color" as any\]:\s*factionIconColor/);
+        expect(cardSource).toMatch(/className=\{`factionIcon \$\{d\.isMinor \? "minorFactionIcon" : ""\}`\}/);
         expect(cardCss).toMatch(/\.fortIcon\s*\{[\s\S]*position:\s*absolute;[\s\S]*top:\s*8px;[\s\S]*right:\s*10px;/);
         expect(cardCss).toMatch(/\.factionIcon\s*\{[\s\S]*background:\s*var\(--faction-icon-color, currentColor\);[\s\S]*mask-image:\s*var\(--faction-icon-path\);/);
+        expect(cardCss).toMatch(/--unit-card-minor-accent:\s*var\(--ew-accent, #ff7f32\);/);
+        expect(cardCss).toMatch(/\.factionIcon\.minorFactionIcon\s*\{[\s\S]*background:\s*var\(--unit-card-minor-accent/);
         expect(iconResolverSource).toMatch(/factionQuest_KinOfSheredyn_Chapter02_Step01_Choice1/);
         expect(iconResolverSource).toMatch(/factionAffinity_Mukag_210fe287/);
         expect(factionColors).toMatch(/NECROPHAGES:\s*\{[\s\S]*border:\s*"#8BC34A"/);
+        expect(factionColors).toMatch(/MINOR:\s*\{[\s\S]*border:\s*"#ff7f32"/);
     });
 });
