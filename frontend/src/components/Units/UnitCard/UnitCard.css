@@ -92,12 +92,13 @@
     justify-content: space-between;
     align-items: flex-start;
 
-    padding: 8px 10px 2px;
+    min-height: 48px;
+    padding: 8px 10px 4px;
     flex-wrap: nowrap;
 }
 
 .headerWithIcon {
-    padding-right: 34px;
+    padding-right: 70px;
 }
 
 /* Unit name */
@@ -116,52 +117,119 @@
     overflow-wrap: anywhere;
 }
 
-/* === TYPE & TIER (Infantry Tier I etc) === */
-.typeTier {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) max-content;
+/* === IDENTITY STACK (faction + class + tier) === */
+.unitIdentityStack {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+
+    min-width: 58px;
+    color: var(--unit-identity-color, var(--card-border, #f2b584));
+    pointer-events: none;
+}
+
+.unitTypeTierCluster {
+    display: inline-flex;
     align-items: center;
-    column-gap: 8px;
+    justify-content: flex-end;
+    gap: 4px;
+    max-width: 74px;
+    pointer-events: auto;
+}
+
+.unitClassIconSlot {
+    position: relative;
+    flex: 0 0 auto;
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+.unitClassIcon {
+    display: block;
     width: 100%;
+    height: 100%;
+    background: currentColor;
+    mask-image: var(--unit-class-icon-path);
+    mask-position: center;
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    -webkit-mask-image: var(--unit-class-icon-path);
+    -webkit-mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+}
 
-    margin-top: 0;
-    padding: 0 10px;
-    font-size: 0.88rem;
+.tierBadge {
+    position: relative;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 4px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background:
+            linear-gradient(180deg, color-mix(in srgb, currentColor 22%, transparent), rgba(0, 0, 0, 0.72));
+    color: color-mix(in srgb, currentColor 72%, #fff4df);
+    box-shadow:
+            inset 0 0 8px color-mix(in srgb, currentColor 20%, transparent),
+            0 1px 4px rgba(0, 0, 0, 0.8);
+    font-size: 0.62rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.unitClassIconSlot::after,
+.tierBadge::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    z-index: 4;
+    max-width: 120px;
+    padding: 3px 6px;
+    border: 1px solid rgba(242, 181, 132, 0.35);
+    border-radius: 3px;
+    background: rgba(12, 13, 15, 0.94);
+    color: #f1eadc;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.42);
+    font-size: 0.62rem;
     font-weight: 700;
-
-    color: #eaa06b !important;
-    text-shadow:
-            0 1px 2px rgba(0, 0, 0, 0.9),
-            0 0 1px rgba(0, 0, 0, 0.68);
-    opacity: 1;
-}
-
-.typeLabel,
-.tierLabel {
-    min-width: 0;
-    line-height: 1.08;
-    white-space: nowrap;
-}
-
-.typeLabel {
-    overflow: hidden;
-    text-align: left;
-    text-overflow: ellipsis;
-}
-
-.tierLabel {
-    justify-self: end;
+    line-height: 1.1;
+    letter-spacing: 0;
     text-align: right;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+    pointer-events: none;
+}
+
+.unitClassIconSlot:hover::after,
+.tierBadge:hover::after {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 /* === ART === */
 .artContainer {
     width: 100%;
-    height: 200px;
+    height: 214px;
 
     overflow: hidden;
     border-radius: 0;
-    margin: 8px 0;
+    margin: 4px 0 8px;
 
     display: flex;
     justify-content: center;
@@ -182,8 +250,10 @@
 }
 
 .artPlaceholder {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    height: 120px;
+    height: 100%;
     background: var(--ew-bg-panel-raised, #15191d);
     border-radius: 0;
 }

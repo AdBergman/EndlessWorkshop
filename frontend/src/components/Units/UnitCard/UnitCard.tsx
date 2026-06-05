@@ -11,6 +11,7 @@ import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
 import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
 import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
+import { getUnitClassIcons } from "@/features/icons/unitClassIconResolver";
 import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
 
 interface UnitCardProps {
@@ -58,6 +59,28 @@ function StatValue({ stat, label, value }: { stat: UnitCardStat; label: string; 
     );
 }
 
+function getCompactTierLabel(tierLabel: string | null): string | null {
+    if (!tierLabel) return null;
+    const match = tierLabel.match(/(\d+|[IVXLCDM]+)$/i);
+    if (!match) return tierLabel.replace(/^Tier\s+/i, "T");
+
+    const value = match[1].toUpperCase();
+    const romanToNumber: Record<string, string> = {
+        I: "1",
+        II: "2",
+        III: "3",
+        IV: "4",
+        V: "5",
+        VI: "6",
+        VII: "7",
+        VIII: "8",
+        IX: "9",
+        X: "10",
+    };
+
+    return `T${romanToNumber[value] ?? value}`;
+}
+
 export const UnitCard: React.FC<UnitCardProps> = ({
                                                       unit,
                                                       showArtwork = true,
@@ -82,6 +105,12 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     const factionIconColor = d.isMinor
         ? "var(--unit-card-minor-accent, var(--ew-accent, #ff7f32))"
         : colors.border;
+    const classIcons = useMemo(
+        () => getUnitClassIcons(d.classKey, d.classLabel),
+        [d.classKey, d.classLabel]
+    );
+    const compactTierLabel = getCompactTierLabel(d.tierLabel);
+    const hasIdentityMetadata = classIcons.length > 0 || !!compactTierLabel;
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -182,8 +211,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             )}
                         </div>
 
-                        {factionIconPath && (
-                            <div className="fortIcon" title={d.unit.faction ?? undefined}>
+                        <div
+                            className="unitIdentityStack"
+                            aria-label={d.typeLine ?? undefined}
+                            style={{
+                                ["--unit-identity-color" as any]: factionIconColor,
+                            }}
+                        >
+                            {factionIconPath && (
                                 <span
                                     className={`factionIcon ${d.isMinor ? "minorFactionIcon" : ""}`}
                                     aria-hidden="true"
@@ -192,25 +227,39 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         ["--faction-icon-color" as any]: factionIconColor,
                                     }}
                                 />
-                            </div>
-                        )}
-                    </div>
+                            )}
 
-                    {d.typeLine && (
-                        <div
-                            className="typeTier"
-                            style={{ color: colors.border }}
-                            title={d.typeLine}
-                            aria-label={d.typeLine}
-                        >
-                            {d.classLabel ? (
-                                <span className="typeLabel">{d.classLabel}</span>
-                            ) : <span aria-hidden="true" />}
-                            {d.tierLabel ? (
-                                <span className="tierLabel">{d.tierLabel}</span>
-                            ) : null}
+                            {hasIdentityMetadata && (
+                                <span className="unitTypeTierCluster">
+                                    {classIcons.map((icon) => (
+                                        <span
+                                            key={icon.path}
+                                            className="unitClassIconSlot"
+                                            aria-label={icon.label}
+                                            data-tooltip={icon.label}
+                                        >
+                                            <span
+                                                className="unitClassIcon"
+                                                aria-hidden="true"
+                                                style={{
+                                                    ["--unit-class-icon-path" as any]: `url("${icon.path}")`,
+                                                }}
+                                            />
+                                        </span>
+                                    ))}
+                                    {compactTierLabel && (
+                                        <span
+                                            className="tierBadge"
+                                            aria-label={d.tierLabel ?? compactTierLabel}
+                                            data-tooltip={d.tierLabel ?? compactTierLabel}
+                                        >
+                                            {compactTierLabel}
+                                        </span>
+                                    )}
+                                </span>
+                            )}
                         </div>
-                    )}
+                    </div>
 
                     {showArtwork && (
                         <div className="artContainer">
@@ -223,14 +272,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         src={d.imageUrl}
                                         alt={d.displayName}
                                         draggable={false}
-                                        loading="lazy"
+                                        loading="eager"
                                         onLoad={() => setImageLoaded(true)}
                                         onError={(e) => {
                                             (e.target as HTMLImageElement).src = DEFAULT_UNIT_IMAGE;
                                         }}
-                                        initial={{ opacity: 0, scale: 0.98 }}
+                                        initial={{ opacity: 1, scale: 0.98 }}
                                         animate={{
-                                            opacity: imageLoaded ? 1 : 0,
+                                            opacity: 1,
                                             scale: imageLoaded ? 1 : 0.98,
                                         }}
                                         transition={{ duration: 0.2 }}

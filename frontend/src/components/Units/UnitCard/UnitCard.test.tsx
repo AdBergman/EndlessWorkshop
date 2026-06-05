@@ -126,6 +126,53 @@ describe("UnitCard", () => {
         });
     });
 
+    it("renders class icons and a compact tier badge instead of front type text", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    unitClassKey: "UnitClass_Ranged",
+                    unitClassDisplayName: "Ranged",
+                    evolutionTierIndex: 0,
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.getByLabelText("Ranged")).toBeInTheDocument();
+        expect(screen.getByText("T1")).toBeInTheDocument();
+        expect(screen.queryByText("Ranged Tier I")).not.toBeInTheDocument();
+        expect(container.querySelector(".unitClassIcon")).toHaveStyle({
+            "--unit-class-icon-path": 'url("/svg/units/UI_UnitItem_UnitClass_Ranged.svg")',
+        });
+    });
+
+    it("splits long dual class labels into icons without rendering truncated class text", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    unitClassKey: "UnitClass_JuggernaughtRanged",
+                    unitClassDisplayName: "Juggernaught Ranged",
+                    evolutionTierIndex: 0,
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.getByLabelText("Juggernaught Ranged Tier I")).toBeInTheDocument();
+        expect(screen.getByLabelText("Juggernaught")).toBeInTheDocument();
+        expect(screen.getByLabelText("Ranged")).toBeInTheDocument();
+        expect(screen.getByText("T1")).toBeInTheDocument();
+        expect(screen.queryByText("Juggernaught Ranged")).not.toBeInTheDocument();
+
+        const iconPaths = Array.from(container.querySelectorAll<HTMLElement>(".unitClassIcon"))
+            .map((icon) => icon.style.getPropertyValue("--unit-class-icon-path"));
+
+        expect(iconPaths).toEqual([
+            'url("/svg/units/UI_UnitItem_UnitClass_Juggernaught.svg")',
+            'url("/svg/units/UI_UnitItem_UnitClass_Ranged.svg")',
+        ]);
+    });
+
     it("uses the visible Mukag SVG for Tahuk major unit card badges", () => {
         const { container } = render(
             <UnitCard
@@ -165,6 +212,10 @@ describe("UnitCard", () => {
         expect(icon).toHaveStyle({
             "--faction-icon-path": 'url("/svg/hero-skills/UI_MinorEmpireSymbol_Ametrine.svg")',
             "--faction-icon-color": "var(--unit-card-minor-accent, var(--ew-accent, #ff7f32))",
+        });
+
+        expect(container.querySelector(".unitIdentityStack")).toHaveStyle({
+            "--unit-identity-color": "var(--unit-card-minor-accent, var(--ew-accent, #ff7f32))",
         });
     });
 
