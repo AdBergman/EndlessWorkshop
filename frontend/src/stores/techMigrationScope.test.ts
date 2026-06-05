@@ -1,62 +1,50 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { dirname, relative, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import {
+    expectFilesToExclude,
+    expectSourceToExclude,
+    expectSourceToInclude,
+    listProductionSourceFiles,
+    readSource,
+} from "@/tests/sourceGuardTestUtils";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(currentDir, "..");
 
-const readSrc = (file: string) => readFileSync(resolve(srcDir, file), "utf8");
-
-const listProductionSourceFiles = (dir = srcDir): string[] =>
-    readdirSync(dir).flatMap((entry) => {
-        const fullPath = resolve(dir, entry);
-        const relativePath = relative(srcDir, fullPath);
-        const stat = statSync(fullPath);
-
-        if (stat.isDirectory()) {
-            if (relativePath === "tests") return [];
-            return listProductionSourceFiles(fullPath);
-        }
-
-        if (!/\.(ts|tsx)$/.test(entry)) return [];
-        if (entry.includes(".test.")) return [];
-        return [relativePath];
-    });
+const readSrc = (file: string) => readSource(srcDir, file);
 
 describe("tech data ownership migration scope", () => {
     it("keeps techStore limited to tech data ownership", () => {
         const source = readSrc("stores/techStore.ts");
 
-        expect(source).not.toMatch(
-            /\b(selectedFaction|setSelectedFaction|selectedTechs|setSelectedTechs|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore)\b/
-        );
+        expectSourceToExclude(source, [
+            /\b(selectedFaction|setSelectedFaction|selectedTechs|setSelectedTechs|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore)\b/,
+        ]);
     });
 
     it("keeps techPlannerStore limited to selected tech key interaction state", () => {
         const source = readSrc("stores/techPlannerStore.ts");
 
-        expect(source).toMatch(/selectedTechs/);
-        expect(source).toMatch(/setSelectedTechs/);
-        expect(source).not.toMatch(
-            /\b(selectedFaction|setSelectedFaction|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore|techStore|useTechStore|apiClient)\b/
-        );
+        expectSourceToInclude(source, [/selectedTechs/, /setSelectedTechs/]);
+        expectSourceToExclude(source, [
+            /\b(selectedFaction|setSelectedFaction|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore|techStore|useTechStore|apiClient)\b/,
+        ]);
     });
 
     it("keeps factionSelectionStore limited to selected faction state", () => {
         const source = readSrc("stores/factionSelectionStore.ts");
 
-        expect(source).toMatch(/selectedFaction/);
-        expect(source).toMatch(/setSelectedFaction/);
-        expect(source).not.toMatch(
-            /\b(selectedTechs|setSelectedTechs|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore|techStore|useTechStore|apiClient)\b/
-        );
+        expectSourceToInclude(source, [/selectedFaction/, /setSelectedFaction/]);
+        expectSourceToExclude(source, [
+            /\b(selectedTechs|setSelectedTechs|SavedTechBuild|createSavedBuild|getSavedBuild|share|useNavigate|react-router|codexStore|useCodexStore|techStore|useTechStore|apiClient)\b/,
+        ]);
     });
 
     it("does not add hero import, store, API, or UI plumbing", () => {
         const forbiddenHeroPlumbing =
             /\b(getHeroes|loadHeroes|refreshHeroes|invalidateHeroes|heroesByKey|heroStore|HeroStore)\b|\/heroes\b/;
 
-        for (const file of [
+        expectFilesToExclude(srcDir, [
             "stores/techStore.ts",
             "context/GameDataProvider.tsx",
             "components/Tech/TechContainer.tsx",
@@ -64,23 +52,21 @@ describe("tech data ownership migration scope", () => {
             "components/Tech/TechTree.tsx",
             "components/Tech/views/SpreadSheetView.tsx",
             "components/GameSummary/GameSummaryPage.tsx",
-        ]) {
-            expect(readSrc(file)).not.toMatch(forbiddenHeroPlumbing);
-        }
+        ], [forbiddenHeroPlumbing]);
     });
 
     it("leaves share orchestration and saved builds in GameDataProvider", () => {
         const source = readSrc("context/GameDataProvider.tsx");
         const contextSource = readSrc("context/GameDataContext.ts");
 
-        expect(source).toMatch(/useFactionSelectionStore\(selectSelectedFaction\)/);
-        expect(source).toMatch(/useFactionSelectionStore\(selectSetSelectedFaction\)/);
-        expect(source).toMatch(/useTechPlannerStore\(selectSelectedTechs\)/);
-        expect(source).toMatch(/useTechPlannerStore\(selectSetSelectedTechs\)/);
-        expect(source).toMatch(/const \[isProcessingSharedBuild, setIsProcessingSharedBuild\] = useState/);
-        expect(source).toMatch(/apiClient\.createSavedBuild/);
-        expect(source).toMatch(/apiClient\.getSavedBuild/);
-        expect(contextSource).not.toMatch(/refreshTechs/);
+        expectSourceToInclude(source, [
+            /useFactionSelectionStore/,
+            /useTechPlannerStore/,
+            /isProcessingSharedBuild/,
+            /apiClient\.createSavedBuild/,
+            /apiClient\.getSavedBuild/,
+        ]);
+        expectSourceToExclude(contextSource, [/refreshTechs/]);
         const contextInterface =
             contextSource.match(/export interface GameDataContextType \{[\s\S]*?\n\}/)?.[0] ?? "";
         expect(contextInterface).not.toMatch(
@@ -89,7 +75,7 @@ describe("tech data ownership migration scope", () => {
     });
 
     it("keeps direct production useGameData calls limited to the orchestration facade", () => {
-        const callSites = listProductionSourceFiles()
+        const callSites = listProductionSourceFiles(srcDir)
             .filter((file) => readSrc(file).match(/\buseGameData\(\)/))
             .sort();
 
@@ -97,7 +83,7 @@ describe("tech data ownership migration scope", () => {
     });
 
     it("keeps production GameDataContext imports inside context internals", () => {
-        const importSites = listProductionSourceFiles()
+        const importSites = listProductionSourceFiles(srcDir)
             .filter((file) => file !== "context/GameDataContext.ts")
             .filter((file) => readSrc(file).match(/from ["'].*GameDataContext["']/))
             .sort();
@@ -113,68 +99,69 @@ describe("tech data ownership migration scope", () => {
         const containerSource = readSrc("components/Tech/TechContainer.tsx");
         const hydrationSource = readSrc("components/Tech/useTechRouteHydration.ts");
 
-        expect(treeSource).not.toMatch(/useGameData\(\)/);
-        expect(treeSource).toMatch(/selectedTechs/);
-        expect(treeSource).toMatch(/setSelectedTechs/);
-        expect(treeSource).toMatch(/refreshTechs/);
-        expect(treeSource).toMatch(/useTechStore/);
-        expect(treeSource).toMatch(/useTechPlannerStore/);
-        expect(treeSource).toMatch(/useFactionSelectionStore/);
+        expectSourceToExclude(treeSource, [/useGameData\(\)/]);
+        expectSourceToInclude(treeSource, [
+            /selectedTechs/,
+            /setSelectedTechs/,
+            /refreshTechs/,
+            /useTechStore/,
+            /useTechPlannerStore/,
+            /useFactionSelectionStore/,
+        ]);
 
-        expect(containerSource).not.toMatch(/useGameData\(\)/);
-        expect(containerSource).not.toMatch(/useSharedBuildLoader|useDeepLinkedTech|useImportedTechListLoader/);
-        expect(containerSource).toMatch(/useTechRouteHydration/);
+        expectSourceToExclude(containerSource, [/useGameData\(\)/, /useSharedBuildLoader|useDeepLinkedTech|useImportedTechListLoader/]);
+        expectSourceToInclude(containerSource, [/useTechRouteHydration/]);
 
-        expect(hydrationSource).toMatch(/useTechStore/);
-        expect(hydrationSource).toMatch(/useTechPlannerStore/);
-        expect(hydrationSource).toMatch(/useFactionSelectionStore/);
-        expect(hydrationSource).not.toMatch(/useCodexStore|codexStore/);
+        expectSourceToInclude(hydrationSource, [/useTechStore/, /useTechPlannerStore/, /useFactionSelectionStore/]);
+        expectSourceToExclude(hydrationSource, [/useCodexStore|codexStore/]);
     });
 
     it("keeps narrow app orchestration hooks over the compatibility provider", () => {
         const source = readSrc("context/appOrchestration.ts");
 
-        expect(source).toMatch(/useGameData\(\)/);
-        expect(source).toMatch(/useShareProcessingGate/);
-        expect(source).toMatch(/useSavedTechBuildCommands/);
-        expect(source).toMatch(/isProcessingSharedBuild/);
-        expect(source).toMatch(/createSavedTechBuild/);
-        expect(source).not.toMatch(/useTechStore|useTechPlannerStore|useFactionSelectionStore|useNavigate/);
+        expectSourceToInclude(source, [
+            /useGameData\(\)/,
+            /useShareProcessingGate/,
+            /useSavedTechBuildCommands/,
+            /isProcessingSharedBuild/,
+            /createSavedTechBuild/,
+        ]);
+        expectSourceToExclude(source, [/useTechStore|useTechPlannerStore|useFactionSelectionStore|useNavigate/]);
     });
 
     it("keeps TopContainer using the narrow share-processing gate", () => {
         const source = readSrc("components/TopContainer/TopContainer.tsx");
 
-        expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
-        expect(source).toMatch(/useShareProcessingGate/);
-        expect(source).toMatch(/isProcessingSharedBuild/);
-        expect(source).toMatch(/useFactionSelectionStore/);
-        expect(source).toMatch(/useTechPlannerStore/);
-        expect(source).not.toMatch(/const \{ selectedFaction, setSelectedFaction, setSelectedTechs/);
+        expectSourceToExclude(source, [/useGameData\(\)|GameDataContext/, /const \{ selectedFaction, setSelectedFaction, setSelectedTechs/]);
+        expectSourceToInclude(source, [
+            /useShareProcessingGate/,
+            /isProcessingSharedBuild/,
+            /useFactionSelectionStore/,
+            /useTechPlannerStore/,
+        ]);
     });
 
     it("keeps SpreadSheetView on the narrow saved-build command hook", () => {
         const source = readSrc("components/Tech/views/SpreadSheetView.tsx");
 
-        expect(source).not.toMatch(/useGameData\(\)|GameDataContext/);
-        expect(source).toMatch(/useSavedTechBuildCommands/);
-        expect(source).toMatch(/createSavedTechBuild/);
-        expect(source).toMatch(/useTechPlannerStore/);
-        expect(source).toMatch(/useFactionSelectionStore/);
+        expectSourceToExclude(source, [/useGameData\(\)|GameDataContext/]);
+        expectSourceToInclude(source, [
+            /useSavedTechBuildCommands/,
+            /createSavedTechBuild/,
+            /useTechPlannerStore/,
+            /useFactionSelectionStore/,
+        ]);
     });
 
     it("keeps tooltips off the compatibility provider with scoped faction ownership", () => {
         const techTooltipSource = readSrc("components/Tooltips/TechTooltip.tsx");
         const unitTooltipSource = readSrc("components/Tooltips/UnitTooltip.tsx");
 
-        expect(techTooltipSource).not.toMatch(/useGameData\(\)|GameDataContext/);
-        expect(techTooltipSource).toMatch(/useFactionSelectionStore/);
-        expect(techTooltipSource).toMatch(/selectSelectedFaction/);
+        expectSourceToExclude(techTooltipSource, [/useGameData\(\)|GameDataContext/]);
+        expectSourceToInclude(techTooltipSource, [/useFactionSelectionStore/, /selectSelectedFaction/]);
 
-        expect(unitTooltipSource).not.toMatch(/useGameData\(\)|GameDataContext/);
-        expect(unitTooltipSource).not.toMatch(/useFactionSelectionStore|selectSelectedFaction/);
-        expect(unitTooltipSource).toMatch(/deriveUnit/);
-        expect(unitTooltipSource).toMatch(/getFactionIconPath/);
+        expectSourceToExclude(unitTooltipSource, [/useGameData\(\)|GameDataContext/, /useFactionSelectionStore|selectSelectedFaction/]);
+        expectSourceToInclude(unitTooltipSource, [/deriveUnit/, /getFactionIconPath/]);
     });
 
     it("keeps route declarations unchanged for tech and summary pages", () => {

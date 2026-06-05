@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-rou
 import { expect, vi } from "vitest";
 import { apiClient } from "@/api/apiClient";
 import QuestExplorerPage from "@/pages/QuestExplorerPage";
+import type { QuestExplorerResponse } from "@/types/questTypes";
 
 export const mockedApiClient = vi.mocked(apiClient);
 
@@ -14,6 +15,11 @@ export function renderPage(initialEntry = "/quests") {
             </Routes>
         </MemoryRouter>
     );
+}
+
+export function renderPageWithQuestPayload(payload: QuestExplorerResponse, initialEntry = "/quests") {
+    mockedApiClient.getQuestExplorer.mockResolvedValue(payload);
+    return renderPage(initialEntry);
 }
 
 export function renderPageWithHistory(initialEntries: string[], initialIndex = initialEntries.length - 1) {

@@ -29,6 +29,7 @@ import {
     intersectLoreSegment,
     mockedApiClient,
     renderPage,
+    renderPageWithQuestPayload,
     renderPageWithHistory,
     stubIntersectionObservers,
 } from "@/features/quests/testUtils/questExplorerPageTestUtils";
@@ -293,8 +294,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("renders lore as a continuous selected chronicle and stops at the next unresolved continuation", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
-        renderPage("/quests/Quest_Stream_A?mode=lore");
+        renderPageWithQuestPayload(continuousLorePayload, "/quests/Quest_Stream_A?mode=lore");
 
         await screen.findByRole("heading", { name: "Stream Opening" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
@@ -320,9 +320,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
     it("lets the left rail follow the visible lore segment without mutating selected entry", async () => {
         const user = userEvent.setup();
         const observers = stubIntersectionObservers();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
-
-        renderPage("/quests/Quest_Stream_A?mode=lore");
+        renderPageWithQuestPayload(continuousLorePayload, "/quests/Quest_Stream_A?mode=lore");
 
         await screen.findByRole("heading", { name: "Stream Opening" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
@@ -523,8 +521,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("treats a left rail click as canonical navigation rather than passive Lore scroll", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
-        renderPage("/quests/Quest_Stream_A?mode=lore");
+        renderPageWithQuestPayload(continuousLorePayload, "/quests/Quest_Stream_A?mode=lore");
 
         await screen.findByRole("heading", { name: "Stream Opening" });
         expect(screen.getByTestId("route-location").textContent ?? "").not.toContain("loreEntry=");
@@ -541,8 +538,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
     it("promotes a passively highlighted rail item to canonical navigation when clicked", async () => {
         const user = userEvent.setup();
         const observers = stubIntersectionObservers();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(continuousLorePayload);
-        renderPage("/quests/Quest_Stream_A?mode=lore");
+        renderPageWithQuestPayload(continuousLorePayload, "/quests/Quest_Stream_A?mode=lore");
 
         await screen.findByRole("heading", { name: "Stream Opening" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });
@@ -624,8 +620,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("scopes lore content to the focused step before rendering decision and continuation stages", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(scopedReaderPayload);
-        renderPage("/quests/Quest_Scoped");
+        renderPageWithQuestPayload(scopedReaderPayload, "/quests/Quest_Scoped");
 
         await screen.findByRole("heading", { name: "Forked Chronicle" });
 
@@ -646,8 +641,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("appends selected branch lore after the choice without mutating the pre-choice transcript", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(loreChronologyPayload);
-        renderPage("/quests/Quest_Chronology?mode=lore");
+        renderPageWithQuestPayload(loreChronologyPayload, "/quests/Quest_Chronology?mode=lore");
 
         await screen.findByRole("heading", { name: "Stable Chronicle" });
 
@@ -673,8 +667,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("keeps Necrophage-style staged continuation lore after the selected anchor without carry-forward noise", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedNecroLorePayload);
-        renderPage("/quests/Quest_Necro_Ch6?mode=lore");
+        renderPageWithQuestPayload(stagedNecroLorePayload, "/quests/Quest_Necro_Ch6?mode=lore");
 
         await screen.findByRole("heading", { name: "A Bitter Truth" });
 
@@ -720,8 +713,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("uses branch continuity metadata to prevent same-step future lore from leaking", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceKeyScopedPayload);
-        renderPage("/quests/Quest_Keyed");
+        renderPageWithQuestPayload(choiceKeyScopedPayload, "/quests/Quest_Keyed");
 
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
@@ -746,8 +738,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
     });
 
     it("keeps passive setup lore scoped before carried continuation stages", async () => {
-        mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
-        renderPage("/quests/Quest_Keyed");
+        renderPageWithQuestPayload(serializedContinuationPayload, "/quests/Quest_Keyed");
 
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
@@ -763,8 +754,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("keeps raw Lore diagnostics available while duplicate body ownership is guarded", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(serializedContinuationPayload);
-        renderPage("/quests/Quest_Keyed?debugQuestProgression=true");
+        renderPageWithQuestPayload(serializedContinuationPayload, "/quests/Quest_Keyed?debugQuestProgression=true");
 
         await screen.findByRole("heading", { name: "Keyed Chronicle" });
 
@@ -781,8 +771,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("keeps revealedBy lore sections hidden until their owner branch is selected", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(projectedLocalContinuationPayload);
-        renderPage("/quests/Quest_Projector?mode=lore");
+        renderPageWithQuestPayload(projectedLocalContinuationPayload, "/quests/Quest_Projector?mode=lore");
 
         await screen.findByRole("heading", { name: "Projected Setup" });
 
@@ -798,8 +787,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("groups minor faction lore by shared opening, objective variants, and shared resolution", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(minorVariantPayload);
-        renderPage("/quests");
+        renderPageWithQuestPayload(minorVariantPayload);
 
         await user.click(await screen.findByRole("radio", { name: /^Minor Faction Quests\s+\d+$/ }));
         expect(await screen.findByRole("heading", { name: "Ancient Graveyard" })).toBeInTheDocument();
@@ -816,8 +804,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("changing an earlier decision resets downstream revealed content", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(choiceResetPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
@@ -838,8 +825,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("resets a Lore selected sequence across Lore to Strategy to Lore", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(choiceResetPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
 
@@ -855,8 +841,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("keeps Lore decision controls from selecting Strategy stage controls", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(choiceResetPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
 
@@ -975,8 +960,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("clears an incompatible semantic selection after category changes away and back", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(choiceResetWithWorldPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(choiceResetWithWorldPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "Archive of the First Tide" });
         await user.click(screen.getByRole("button", { name: "Strategy" }));
@@ -994,8 +978,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("renders terminal no-link Lore outcomes as narrative conclusions", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(terminalNoLinkPayload);
-        renderPage("/quests/Quest_A?mode=lore");
+        renderPageWithQuestPayload(terminalNoLinkPayload, "/quests/Quest_A?mode=lore");
 
         expect(await screen.findByRole("heading", { name: "End of the Chronicle" })).toBeInTheDocument();
         await user.click(screen.getByRole("button", { name: /End the story/ }));
@@ -1009,8 +992,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
 
     it("gates continuation branches until their prerequisite branch is selected", async () => {
         const user = userEvent.setup();
-        mockedApiClient.getQuestExplorer.mockResolvedValue(gatedContinuationPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(gatedContinuationPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "The Hunt" });
 
@@ -1038,8 +1020,7 @@ describe("QuestExplorerPage Lore chronicle behavior", () => {
     });
 
     it("collapses staged continuation convergence rows outside debug mode", async () => {
-        mockedApiClient.getQuestExplorer.mockResolvedValue(stagedContinuationPayload);
-        renderPage("/quests/Quest_A");
+        renderPageWithQuestPayload(stagedContinuationPayload, "/quests/Quest_A");
 
         await screen.findByRole("heading", { name: "A Gamble" });
         const chronicle = screen.getByRole("region", { name: "Selected progression" });

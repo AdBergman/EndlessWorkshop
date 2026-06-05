@@ -231,6 +231,11 @@ Guidance:
 
 Tests should lock product behavior, not implementation trivia.
 
+For the current frontend testing posture, AI-assisted-change guidance, and
+production-build smoke checklist, also see:
+- `docs/frontend/frontend-testing-strategy.md`
+- `docs/frontend/frontend-production-smoke-checklist.md`
+
 Prefer tests that assert:
 - visible user behavior
 - route/store state that defines the product contract

@@ -1,104 +1,17 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { BrowserRouter, MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
+import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
 import type { CodexEntry } from "@/types/dataTypes";
-
-function LocationProbe() {
-    const location = useLocation();
-
-    return <div data-testid="location-probe">{`${location.pathname}${location.search}`}</div>;
-}
-
-function BackButton() {
-    const navigate = useNavigate();
-
-    return <button type="button" onClick={() => navigate(-1)}>Back</button>;
-}
 
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
-        useCodexStore.setState({
-            entries: [
-                {
-                    exportKind: "districts",
-                    entryKey: "District_MarketSquare",
-                    displayName: "[DustColored] Market Square",
-                    descriptionLines: ["Centralized trade district."],
-                    referenceKeys: ["Improvement_AuricCoral"],
-                },
-                {
-                    exportKind: "districts",
-                    entryKey: "District_BloomHarbor",
-                    displayName: "Bloom Harbor",
-                    descriptionLines: ["Supports blossom logistics."],
-                    referenceKeys: [],
-                },
-                {
-                    exportKind: "improvements",
-                    entryKey: "Improvement_AuricCoral",
-                    displayName: "[LuxuryResource01] Auric Coral",
-                    descriptionLines: ["Rare sea harvest."],
-                    referenceKeys: [],
-                },
-            ],
-            entriesByKey: {
-                District_MarketSquare: {
-                    exportKind: "districts",
-                    entryKey: "District_MarketSquare",
-                    displayName: "[DustColored] Market Square",
-                    descriptionLines: ["Centralized trade district."],
-                    referenceKeys: ["Improvement_AuricCoral"],
-                },
-                District_BloomHarbor: {
-                    exportKind: "districts",
-                    entryKey: "District_BloomHarbor",
-                    displayName: "Bloom Harbor",
-                    descriptionLines: ["Supports blossom logistics."],
-                    referenceKeys: [],
-                },
-                Improvement_AuricCoral: {
-                    exportKind: "improvements",
-                    entryKey: "Improvement_AuricCoral",
-                    displayName: "[LuxuryResource01] Auric Coral",
-                    descriptionLines: ["Rare sea harvest."],
-                    referenceKeys: [],
-                },
-            },
-            entriesByKind: {
-                districts: [
-                    {
-                        exportKind: "districts",
-                        entryKey: "District_MarketSquare",
-                        displayName: "[DustColored] Market Square",
-                        descriptionLines: ["Centralized trade district."],
-                        referenceKeys: ["Improvement_AuricCoral"],
-                    },
-                    {
-                        exportKind: "districts",
-                        entryKey: "District_BloomHarbor",
-                        displayName: "Bloom Harbor",
-                        descriptionLines: ["Supports blossom logistics."],
-                        referenceKeys: [],
-                    },
-                ],
-                improvements: [
-                    {
-                        exportKind: "improvements",
-                        entryKey: "Improvement_AuricCoral",
-                        displayName: "[LuxuryResource01] Auric Coral",
-                        descriptionLines: ["Rare sea harvest."],
-                        referenceKeys: [],
-                    },
-                ],
-            },
-            loading: false,
-            error: null,
-        });
+        seedDefaultCodexStore();
     });
 
     afterEach(() => {
