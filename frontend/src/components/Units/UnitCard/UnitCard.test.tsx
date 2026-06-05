@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { UnitCard } from "./UnitCard";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry, Unit } from "@/types/dataTypes";
@@ -126,7 +126,7 @@ describe("UnitCard", () => {
         });
     });
 
-    it("renders class icons and a compact tier badge instead of front type text", () => {
+    it("renders class icons on the art plate and tier as a separate rank marker", () => {
         const { container } = render(
             <UnitCard
                 unit={unit({
@@ -134,14 +134,19 @@ describe("UnitCard", () => {
                     unitClassDisplayName: "Ranged",
                     evolutionTierIndex: 0,
                 })}
-                showArtwork={false}
             />
         );
 
-        expect(screen.getByLabelText("Ranged")).toBeInTheDocument();
-        expect(screen.getByText("T1")).toBeInTheDocument();
+        expect(screen.getByLabelText("Ranged: bonus vs Flying")).toBeInTheDocument();
+        expect(screen.getByLabelText("Tier I")).toHaveTextContent("I");
+        expect(screen.queryByText("T1")).not.toBeInTheDocument();
         expect(screen.queryByText("Ranged Tier I")).not.toBeInTheDocument();
-        expect(container.querySelector(".unitClassIcon")).toHaveStyle({
+        expect(container.querySelector(".unitArtIdentityPlate")).toBeInTheDocument();
+        expect(container.querySelector(".unitArtIdentityPlate .tierRankBadge")).not.toBeInTheDocument();
+        expect(container.querySelector(".unitIdentityStack .tierRankBadge")).toBeInTheDocument();
+        expect(container.querySelector('img.unitClassIcon[src="/svg/units/UI_UnitItem_UnitClass_Ranged.svg"]'))
+            .toBeInTheDocument();
+        expect(container.querySelector(".unitClassIcon")).not.toHaveStyle({
             "--unit-class-icon-path": 'url("/svg/units/UI_UnitItem_UnitClass_Ranged.svg")',
         });
     });
@@ -154,23 +159,102 @@ describe("UnitCard", () => {
                     unitClassDisplayName: "Juggernaught Ranged",
                     evolutionTierIndex: 0,
                 })}
-                showArtwork={false}
             />
         );
 
-        expect(screen.getByLabelText("Juggernaught Ranged Tier I")).toBeInTheDocument();
-        expect(screen.getByLabelText("Juggernaught")).toBeInTheDocument();
-        expect(screen.getByLabelText("Ranged")).toBeInTheDocument();
-        expect(screen.getByText("T1")).toBeInTheDocument();
+        expect(screen.getByLabelText("Juggernaught Ranged")).toBeInTheDocument();
+        expect(screen.getByLabelText("Juggernaught: bonus vs Hero")).toBeInTheDocument();
+        expect(screen.getByLabelText("Ranged: bonus vs Flying")).toBeInTheDocument();
+        expect(screen.getByLabelText("Tier I")).toHaveTextContent("I");
+        expect(screen.queryByText("T1")).not.toBeInTheDocument();
         expect(screen.queryByText("Juggernaught Ranged")).not.toBeInTheDocument();
 
-        const iconPaths = Array.from(container.querySelectorAll<HTMLElement>(".unitClassIcon"))
-            .map((icon) => icon.style.getPropertyValue("--unit-class-icon-path"));
+        const iconPaths = Array.from(container.querySelectorAll<HTMLImageElement>(".unitClassIcon"))
+            .map((icon) => icon.getAttribute("src"));
 
         expect(iconPaths).toEqual([
-            'url("/svg/units/UI_UnitItem_UnitClass_Juggernaught.svg")',
-            'url("/svg/units/UI_UnitItem_UnitClass_Ranged.svg")',
+            "/svg/units/UI_UnitItem_UnitClass_Juggernaught.svg",
+            "/svg/units/UI_UnitItem_UnitClass_Ranged.svg",
         ]);
+    });
+
+    it("shows fallback gameplay tooltip content for class icons when Codex entries are missing", async () => {
+        render(
+            <UnitCard
+                unit={unit({
+                    unitClassKey: "UnitClass_Ranged",
+                    unitClassDisplayName: "Ranged",
+                    evolutionTierIndex: 0,
+                })}
+            />
+        );
+
+        fireEvent.mouseEnter(screen.getByLabelText("Ranged: bonus vs Flying"), {
+            clientX: 30,
+            clientY: 30,
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText("Ranged")).toBeInTheDocument();
+            expect(screen.getByText(/when attacking Flying units/i)).toBeInTheDocument();
+        });
+    });
+
+    it("uses rich Codex ability tooltip content for class icons when available", async () => {
+        const entries = [
+            {
+                ...abilityEntry("UnitAbility_Class_BonusVsFlying", "Anti-Air Training"),
+                descriptionLines: ["Deals bonus damage against Flying units."],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKindKey: {
+                abilities: Object.fromEntries(entries.map((entry) => [entry.entryKey, entry])),
+            },
+        });
+
+        render(
+            <UnitCard
+                unit={unit({
+                    unitClassKey: "UnitClass_Ranged",
+                    unitClassDisplayName: "Ranged",
+                    abilityKeys: ["UnitAbility_Class_BonusVsFlying"],
+                    evolutionTierIndex: 0,
+                })}
+            />
+        );
+
+        fireEvent.mouseEnter(screen.getByLabelText("Ranged: bonus vs Flying"), {
+            clientX: 30,
+            clientY: 30,
+        });
+
+        await waitFor(() => {
+            expect(screen.getAllByText("Anti-Air Training").length).toBeGreaterThanOrEqual(2);
+            expect(screen.getByText("Deals bonus damage against Flying units.")).toBeInTheDocument();
+        });
+    });
+
+    it("shows tier tooltip content from the separate rank marker", async () => {
+        render(
+            <UnitCard
+                unit={unit({
+                    evolutionTierIndex: 1,
+                })}
+            />
+        );
+
+        fireEvent.mouseEnter(screen.getByLabelText("Tier II"), {
+            clientX: 30,
+            clientY: 30,
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText("Tier II")).toBeInTheDocument();
+            expect(screen.getByText("Evolution tier.")).toBeInTheDocument();
+        });
     });
 
     it("uses the visible Mukag SVG for Tahuk major unit card badges", () => {

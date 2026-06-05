@@ -342,7 +342,8 @@ describe("/units smoke behavior", () => {
 
         renderExplorer("/units?faction=lords&unitKey=Unit_LastLord_DustBishopChariot_Upgrade01");
 
-        expect(await screen.findByLabelText("Juggernaught Ranged Tier I")).toBeInTheDocument();
+        expect((await screen.findAllByLabelText("Juggernaught Ranged")).length).toBeGreaterThan(0);
+        expect(screen.getAllByLabelText("Tier I").length).toBeGreaterThan(0);
         expect(screen.queryByText(/Juggernaughtranged/i)).not.toBeInTheDocument();
     });
 

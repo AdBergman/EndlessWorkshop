@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import "./UnitCard.css";
 
 import { FACTION_COLORS } from "@/types/factionColors";
-import type { Unit } from "@/types/dataTypes";
+import type { Codex, Unit } from "@/types/dataTypes";
 import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { useCodex } from "@/hooks/useCodex";
@@ -11,7 +11,7 @@ import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
 import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
 import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
-import { getUnitClassIcons } from "@/features/icons/unitClassIconResolver";
+import { getUnitClassIcons, type UnitClassIcon } from "@/features/icons/unitClassIconResolver";
 import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
 
 interface UnitCardProps {
@@ -59,26 +59,59 @@ function StatValue({ stat, label, value }: { stat: UnitCardStat; label: string; 
     );
 }
 
-function getCompactTierLabel(tierLabel: string | null): string | null {
+function getTierRankLabel(tierLabel: string | null): string | null {
     if (!tierLabel) return null;
     const match = tierLabel.match(/(\d+|[IVXLCDM]+)$/i);
-    if (!match) return tierLabel.replace(/^Tier\s+/i, "T");
+    if (!match) return tierLabel.replace(/^Tier\s+/i, "");
 
     const value = match[1].toUpperCase();
-    const romanToNumber: Record<string, string> = {
-        I: "1",
-        II: "2",
-        III: "3",
-        IV: "4",
-        V: "5",
-        VI: "6",
-        VII: "7",
-        VIII: "8",
-        IX: "9",
-        X: "10",
+    const numberToRoman: Record<string, string> = {
+        "1": "I",
+        "2": "II",
+        "3": "III",
+        "4": "IV",
+        "5": "V",
+        "6": "VI",
+        "7": "VII",
+        "8": "VIII",
+        "9": "IX",
+        "10": "X",
     };
 
-    return `T${romanToNumber[value] ?? value}`;
+    return numberToRoman[value] ?? value;
+}
+
+function getTooltipCoordsFromElement(element: HTMLElement): { x: number; y: number; mode: "pixel" } {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.right + 10, y: rect.top + rect.height / 2, mode: "pixel" };
+}
+
+function buildClassFallbackCodex(icon: UnitClassIcon): Codex {
+    const fallbackLines = icon.fallbackDescriptionLines.length > 0
+        ? icon.fallbackDescriptionLines
+        : [`${icon.label} unit class.`];
+
+    return {
+        exportKind: "abilities",
+        entryKey: icon.bonusAbilityKey ?? `UnitClass_${icon.classKey}`,
+        displayName: icon.label,
+        kind: "Ability",
+        category: null,
+        descriptionLines: fallbackLines,
+        referenceKeys: icon.bonusAbilityKey ? [icon.bonusAbilityKey] : [],
+    };
+}
+
+function buildTierTooltipCodex(tierLabel: string, tierRankLabel: string): Codex {
+    return {
+        exportKind: "units",
+        entryKey: `UnitTier_${tierRankLabel}`,
+        displayName: tierLabel,
+        kind: "Unit Tier",
+        category: null,
+        descriptionLines: ["Evolution tier."],
+        referenceKeys: [],
+    };
 }
 
 export const UnitCard: React.FC<UnitCardProps> = ({
@@ -109,8 +142,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         () => getUnitClassIcons(d.classKey, d.classLabel),
         [d.classKey, d.classLabel]
     );
-    const compactTierLabel = getCompactTierLabel(d.tierLabel);
-    const hasIdentityMetadata = classIcons.length > 0 || !!compactTierLabel;
+    const tierRankLabel = getTierRankLabel(d.tierLabel);
+    const hasClassMetadata = classIcons.length > 0;
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -151,6 +184,50 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             data: codex,
             coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" },
         });
+    };
+
+    const showTooltip = (data: Codex, coords: { x: number; y: number; mode: "pixel" }) => {
+        if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
+
+        setHoveredSkill({
+            data,
+            coords,
+        });
+    };
+
+    const handleClassIconEnter = (e: React.MouseEvent<HTMLElement>, icon: UnitClassIcon) => {
+        const codex = icon.bonusAbilityKey
+            ? getVisibleEntry("abilities", icon.bonusAbilityKey)
+            : undefined;
+
+        showTooltip(
+            codex ?? buildClassFallbackCodex(icon),
+            { x: e.clientX + 12, y: e.clientY, mode: "pixel" }
+        );
+    };
+
+    const handleClassIconFocus = (e: React.FocusEvent<HTMLElement>, icon: UnitClassIcon) => {
+        const codex = icon.bonusAbilityKey
+            ? getVisibleEntry("abilities", icon.bonusAbilityKey)
+            : undefined;
+
+        showTooltip(codex ?? buildClassFallbackCodex(icon), getTooltipCoordsFromElement(e.currentTarget));
+    };
+
+    const handleTierEnter = (e: React.MouseEvent<HTMLElement>) => {
+        if (!d.tierLabel || !tierRankLabel) return;
+        showTooltip(
+            buildTierTooltipCodex(d.tierLabel, tierRankLabel),
+            { x: e.clientX + 12, y: e.clientY, mode: "pixel" }
+        );
+    };
+
+    const handleTierFocus = (e: React.FocusEvent<HTMLElement>) => {
+        if (!d.tierLabel || !tierRankLabel) return;
+        showTooltip(
+            buildTierTooltipCodex(d.tierLabel, tierRankLabel),
+            getTooltipCoordsFromElement(e.currentTarget)
+        );
     };
 
     const handleSkillMove = (e: React.MouseEvent) => {
@@ -213,7 +290,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
                         <div
                             className="unitIdentityStack"
-                            aria-label={d.typeLine ?? undefined}
                             style={{
                                 ["--unit-identity-color" as any]: factionIconColor,
                             }}
@@ -229,40 +305,31 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                 />
                             )}
 
-                            {hasIdentityMetadata && (
-                                <span className="unitTypeTierCluster">
-                                    {classIcons.map((icon) => (
-                                        <span
-                                            key={icon.path}
-                                            className="unitClassIconSlot"
-                                            aria-label={icon.label}
-                                            data-tooltip={icon.label}
-                                        >
-                                            <span
-                                                className="unitClassIcon"
-                                                aria-hidden="true"
-                                                style={{
-                                                    ["--unit-class-icon-path" as any]: `url("${icon.path}")`,
-                                                }}
-                                            />
-                                        </span>
-                                    ))}
-                                    {compactTierLabel && (
-                                        <span
-                                            className="tierBadge"
-                                            aria-label={d.tierLabel ?? compactTierLabel}
-                                            data-tooltip={d.tierLabel ?? compactTierLabel}
-                                        >
-                                            {compactTierLabel}
-                                        </span>
-                                    )}
-                                </span>
+                            {tierRankLabel && (
+                                <button
+                                    type="button"
+                                    className="tierRankBadge"
+                                    aria-label={d.tierLabel ?? tierRankLabel}
+                                    onMouseEnter={handleTierEnter}
+                                    onMouseMove={handleSkillMove}
+                                    onMouseLeave={clearHoverSoon}
+                                    onFocus={handleTierFocus}
+                                    onBlur={clearHoverSoon}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {tierRankLabel}
+                                </button>
                             )}
                         </div>
                     </div>
 
                     {showArtwork && (
-                        <div className="artContainer">
+                        <div
+                            className="artContainer"
+                            style={{
+                                ["--unit-art-accent" as any]: factionIconColor,
+                            }}
+                        >
                             {!d.imageUrl && <div className="artPlaceholder" />}
 
                             {d.imageUrl && (
@@ -285,6 +352,40 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         transition={{ duration: 0.2 }}
                                     />
                                 </>
+                            )}
+
+                            {hasClassMetadata && (
+                                <div
+                                    className="unitArtIdentityPlate"
+                                    aria-label={d.classLabel ?? undefined}
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <div className="unitClassIconGroup">
+                                        {classIcons.map((icon) => (
+                                            <button
+                                                key={icon.path}
+                                                type="button"
+                                                className="unitClassIconButton"
+                                                aria-label={`${icon.label}${icon.bonusTargetLabel ? `: bonus vs ${icon.bonusTargetLabel}` : ""}`}
+                                                onMouseEnter={(e) => handleClassIconEnter(e, icon)}
+                                                onMouseMove={handleSkillMove}
+                                                onMouseLeave={clearHoverSoon}
+                                                onFocus={(e) => handleClassIconFocus(e, icon)}
+                                                onBlur={clearHoverSoon}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <img
+                                                    src={icon.path}
+                                                    alt=""
+                                                    aria-hidden="true"
+                                                    draggable={false}
+                                                    className="unitClassIcon"
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                </div>
                             )}
                         </div>
                     )}
