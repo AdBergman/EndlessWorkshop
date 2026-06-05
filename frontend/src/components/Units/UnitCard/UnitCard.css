@@ -53,6 +53,21 @@
     pointer-events: none;
 }
 
+.cardFlipWrapper::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 5px;
+    border: 1px solid color-mix(in srgb, var(--card-border, #f2b584) 26%, rgba(241, 234, 220, 0.12));
+    box-shadow:
+            inset 0 0 0 1px rgba(0, 0, 0, 0.38),
+            inset 0 12px 18px rgba(255, 255, 255, 0.025),
+            inset 0 -14px 22px rgba(0, 0, 0, 0.32);
+    transform: translateZ(1px);
+    pointer-events: none;
+    z-index: 4;
+}
+
 /* === FRONT / BACK FACES === */
 .cardFace {
     position: absolute;
@@ -96,6 +111,24 @@
     min-height: 48px;
     padding: 8px 10px 4px;
     flex-wrap: nowrap;
+    background:
+            linear-gradient(180deg, rgba(28, 32, 36, 0.76), rgba(9, 11, 13, 0.54) 76%, rgba(2, 3, 5, 0.38));
+    box-shadow:
+            inset 0 -1px 0 color-mix(in srgb, var(--card-border, #f2b584) 42%, rgba(241, 234, 220, 0.1)),
+            inset 0 -7px 12px rgba(0, 0, 0, 0.2);
+}
+
+.header::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 0;
+    height: 1px;
+    background:
+            linear-gradient(90deg, transparent, color-mix(in srgb, var(--card-border, #f2b584) 72%, transparent) 12%, color-mix(in srgb, var(--card-border, #f2b584) 32%, rgba(241, 234, 220, 0.18)) 58%, transparent);
+    opacity: 0.8;
+    pointer-events: none;
 }
 
 .headerWithIcon {
@@ -116,6 +149,9 @@
     flex: 1 1 auto;
     min-width: 0;
     overflow-wrap: anywhere;
+    text-shadow:
+            0 1px 0 rgba(0, 0, 0, 0.86),
+            0 0 7px color-mix(in srgb, var(--card-border, #f2b584) 18%, transparent);
 }
 
 /* === IDENTITY STACK (faction) === */
@@ -269,11 +305,13 @@
     border: 1px solid rgba(241, 234, 220, 0.2);
     border-radius: 999px;
     background:
-            linear-gradient(180deg, rgba(24, 27, 30, 0.94), rgba(7, 8, 10, 0.88));
+            radial-gradient(circle at 32% 22%, rgba(255, 255, 255, 0.16), transparent 38%),
+            linear-gradient(180deg, rgba(24, 27, 30, 0.96), rgba(5, 6, 8, 0.9));
     box-shadow:
-            0 6px 14px rgba(0, 0, 0, 0.55),
+            0 6px 14px rgba(0, 0, 0, 0.58),
+            0 0 0 1px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 20%, transparent),
             inset 0 1px 0 rgba(255, 255, 255, 0.09),
-            inset 0 0 10px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 18%, transparent);
+            inset 0 0 12px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 20%, transparent);
 }
 
 .unitClassIconGroup {
@@ -295,14 +333,16 @@
 .unitClassIconButton {
     width: 24px;
     height: 24px;
-    border: 1px solid rgba(241, 234, 220, 0.18);
+    border: 1px solid color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 48%, rgba(241, 234, 220, 0.2));
     border-radius: 999px;
     background:
-            radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.16), transparent 42%),
-            linear-gradient(180deg, rgba(38, 42, 46, 0.94), rgba(11, 12, 14, 0.96));
+            radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.18), transparent 38%),
+            radial-gradient(circle at 50% 58%, color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 18%, transparent), transparent 68%),
+            linear-gradient(180deg, rgba(42, 46, 50, 0.96), rgba(8, 9, 11, 0.98));
     box-shadow:
-            inset 0 0 0 1px rgba(0, 0, 0, 0.48),
-            0 1px 3px rgba(0, 0, 0, 0.62);
+            inset 0 0 0 1px rgba(0, 0, 0, 0.56),
+            inset 0 0 8px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 12%, transparent),
+            0 1px 3px rgba(0, 0, 0, 0.66);
 
     display: inline-flex;
     align-items: center;
@@ -315,8 +355,12 @@
     width: 18px;
     height: 18px;
     object-fit: contain;
-    opacity: 0.96;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.78));
+    opacity: 0.92;
+    filter:
+            sepia(0.08)
+            saturate(0.88)
+            drop-shadow(0 1px 1px rgba(0, 0, 0, 0.82))
+            drop-shadow(0 0 3px color-mix(in srgb, var(--unit-art-accent, var(--card-border, #f2b584)) 18%, transparent));
 }
 
 .unitClassIconButton:hover,
@@ -342,21 +386,33 @@
     display: flex;
     flex-direction: column;
 
-    width: 100%;
-    margin: 8px 0;
+    width: calc(100% - 18px);
+    margin: 6px 9px 8px;
+    padding: 6px 8px 7px;
     gap: 6px;
+    border-top: 1px solid color-mix(in srgb, var(--card-border, #f2b584) 36%, rgba(241, 234, 220, 0.12));
+    border-radius: 0 0 5px 5px;
+    background:
+            radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--card-border, #f2b584) 12%, transparent), transparent 54%),
+            linear-gradient(180deg, rgba(3, 4, 6, 0.76), rgba(0, 0, 0, 0.42));
+    box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.035),
+            inset 0 8px 16px rgba(0, 0, 0, 0.24);
 }
 
 .statsRow {
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .stat {
     display: flex;
     align-items: center;
     gap: 6px;
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
 
     font-size: 0.9rem;
     font-weight: 600;
