@@ -134,6 +134,40 @@ function buildTierTooltipCodex(tierLabel: string, tierRankLabel: string): Codex 
     };
 }
 
+function TierRankSeal({ label }: { label: string }) {
+    return (
+        <svg
+            className="tierRankSvg"
+            viewBox="0 0 36 36"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <path
+                className="tierRankSealGlow"
+                d="M18 1.8 23.3 4 29 3.8 32.2 8.7 34.2 14 32.5 19.5 32.2 25.3 27.3 28.5 23.3 32 18 34.2 12.7 32 7.2 32.2 3.8 27.3 1.8 22 3.5 16.5 3.8 10.7 8.7 7.5 12.7 4z"
+            />
+            <path
+                className="tierRankSealOuter"
+                d="M18 2.8 22.7 5 28 5 31 9.5 33 14.2 31.4 19.2 31 24.5 26.5 27.5 22.7 31 18 33.2 13.3 31 8 31 5 26.5 3 21.8 4.6 16.8 5 11.5 9.5 8.5 13.3 5z"
+            />
+            <circle className="tierRankSealRim" cx="18" cy="18" r="12.2" />
+            <circle className="tierRankSealCore" cx="18" cy="18" r="9.1" />
+            <path
+                className="tierRankSealShine"
+                d="M9.7 15.2c1.8-5.1 6.8-8 12.1-6.8 2 .4 3.7 1.4 5 2.8-2.7-1.4-6.1-1.8-9.6-.8-3.3.9-5.9 2.7-7.5 4.8Z"
+            />
+            <text
+                className="tierRankNumber"
+                x="18"
+                y="22.4"
+                textAnchor="middle"
+            >
+                {label}
+            </text>
+        </svg>
+    );
+}
+
 export const UnitCard: React.FC<UnitCardProps> = ({
                                                       unit,
                                                       showArtwork = true,
@@ -406,9 +440,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                     onBlur={clearHoverSoon}
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <span className="tierRankNumber" aria-hidden="true">
-                                        {tierRankNumberLabel}
-                                    </span>
+                                    <TierRankSeal label={tierRankNumberLabel} />
                                 </button>
                             )}
                         </div>
