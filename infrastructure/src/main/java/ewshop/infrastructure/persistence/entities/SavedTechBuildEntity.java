@@ -48,10 +48,6 @@ public class SavedTechBuildEntity {
         this.majorFaction = majorFaction;
     }
 
-    public void setFaction(ewshop.domain.model.enums.MajorFaction majorFaction) {
-        this.majorFaction = majorFaction == null ? null : majorFaction.getDisplayName();
-    }
-
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

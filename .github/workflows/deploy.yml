@@ -95,6 +95,105 @@ jobs:
             HOST_SEO_DIR=/var/lib/ewshop/generated-seo
             CONTAINER_SEO_DIR=/app/generated-seo
 
+            rollback() {
+              echo "❌ New container failed deploy smoke. Collecting logs..."
+              docker logs \$CONTAINER_NAME || true
+              docker rm -f \$CONTAINER_NAME || true
+
+              echo "Rolling back to previous version..."
+              if docker ps -a --format '{{.Names}}' | grep -q "^\$BACKUP_CONTAINER\$"; then
+                docker rename \$BACKUP_CONTAINER \$CONTAINER_NAME
+                docker start \$CONTAINER_NAME
+                echo "✅ Rollback complete. Old container restored."
+              else
+                echo "⚠️ No backup container found, manual restore needed."
+              fi
+              exit 1
+            }
+
+            expect_http_status() {
+              path="\$1"
+              expected_status="\$2"
+              label="\$3"
+              method="\${4:-GET}"
+              body="\${5:-}"
+              response_file="\$(mktemp)"
+
+              if [ "\$method" = "POST" ]; then
+                status="\$(curl -sS -o "\$response_file" -w "%{http_code}" -X POST "http://127.0.0.1:8080\$path" -H 'Content-Type: application/json' --data "\$body" || true)"
+              else
+                status="\$(curl -sS -o "\$response_file" -w "%{http_code}" "http://127.0.0.1:8080\$path" || true)"
+              fi
+
+              if [ "\$status" != "\$expected_status" ]; then
+                echo "❌ \$label expected HTTP \$expected_status but got \$status"
+                cat "\$response_file" || true
+                return 1
+              fi
+
+              echo "✅ \$label returned HTTP \$status"
+              return 0
+            }
+
+            expect_http_not_200() {
+              path="\$1"
+              label="\$2"
+              response_file="\$(mktemp)"
+              status="\$(curl -sS -o "\$response_file" -w "%{http_code}" "http://127.0.0.1:8080\$path" || true)"
+
+              if [ "\$status" = "200" ]; then
+                echo "❌ \$label is public in prod"
+                cat "\$response_file" || true
+                return 1
+              fi
+
+              echo "✅ \$label is not public in prod (HTTP \$status)"
+              return 0
+            }
+
+            wait_for_health() {
+              for attempt in \$(seq 1 30); do
+                if expect_http_status "/actuator/health" "200" "Actuator health"; then
+                  return 0
+                fi
+                echo "Waiting for health check... attempt \$attempt/30"
+                sleep 2
+              done
+              return 1
+            }
+
+            smoke_saved_build_roundtrip() {
+              response_file="\$(mktemp)"
+              status="\$(curl -sS -o "\$response_file" -w "%{http_code}" -X POST "http://127.0.0.1:8080/api/builds" -H 'Content-Type: application/json' --data '{"name":"Deploy smoke","selectedFaction":"Tahuk","techIds":["stoneworking"]}' || true)"
+
+              if [ "\$status" != "200" ]; then
+                echo "❌ Saved build POST expected HTTP 200 but got \$status"
+                cat "\$response_file" || true
+                return 1
+              fi
+
+              uuid="\$(sed -n 's/.*"uuid":"\([^"]*\)".*/\1/p' "\$response_file")"
+              if [ -z "\$uuid" ]; then
+                echo "❌ Saved build POST did not return a uuid"
+                cat "\$response_file" || true
+                return 1
+              fi
+
+              expect_http_status "/api/builds/\$uuid" "200" "Saved build GET"
+            }
+
+            run_deploy_smoke() {
+              wait_for_health &&
+              expect_http_status "/api/techs" "200" "Tech API" &&
+              expect_http_status "/api/units" "200" "Units API" &&
+              expect_http_status "/api/districts" "200" "Districts API" &&
+              expect_http_status "/api/improvements" "200" "Improvements API" &&
+              smoke_saved_build_roundtrip &&
+              expect_http_status "/api/saved-tech-builds" "404" "Stale saved-build API path" "POST" '{"name":"Stale smoke","selectedFaction":"Tahuk","techIds":["stoneworking"]}' &&
+              expect_http_not_200 "/v3/api-docs" "OpenAPI docs" &&
+              expect_http_not_200 "/swagger-ui.html" "Swagger UI"
+            }
+
             echo "Pulling latest image from Docker Hub..."
             docker pull \$IMAGE_NAME:\$TAG
 
@@ -104,6 +203,7 @@ jobs:
             # Backup running container (if any)
             if docker ps -a --format '{{.Names}}' | grep -q "^\$CONTAINER_NAME\$"; then
               echo "Stopping and backing up existing container..."
+              docker rm -f \$BACKUP_CONTAINER || true
               docker stop \$CONTAINER_NAME || true
               docker rename \$CONTAINER_NAME \$BACKUP_CONTAINER || true
             fi
@@ -132,6 +232,9 @@ jobs:
               \$IMAGE_NAME:\$TAG; then
 
               echo "✅ New container started successfully!"
+              echo "Running deploy smoke checks..."
+              run_deploy_smoke || rollback
+
               echo "Cleaning up old backup..."
               docker rm \$BACKUP_CONTAINER || true
               echo "SEO output is persisted at \$HOST_SEO_DIR and mounted to \$CONTAINER_SEO_DIR."

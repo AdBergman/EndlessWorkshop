@@ -23,7 +23,7 @@ class SavedTechBuildMapperTest {
         SavedTechBuildEntity entity = new SavedTechBuildEntity();
         entity.setUuid(uuid);
         entity.setName("Test Build");
-        entity.setFaction(MajorFaction.ASPECTS);
+        entity.setFaction("Aspects");
         entity.setTechIds(List.of("tech1", "tech2"));
         entity.setCreatedAt(now);
 

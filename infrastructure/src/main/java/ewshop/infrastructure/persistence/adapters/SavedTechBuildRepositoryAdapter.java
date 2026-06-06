@@ -7,10 +7,8 @@ import ewshop.infrastructure.persistence.mappers.SavedTechBuildMapper;
 import ewshop.infrastructure.persistence.repositories.SavedTechBuildJpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class SavedTechBuildRepositoryAdapter implements SavedTechBuildRepository {
@@ -35,17 +33,5 @@ public class SavedTechBuildRepositoryAdapter implements SavedTechBuildRepository
     public Optional<SavedTechBuild> findByUuid(UUID uuid) {
         return springDataRepository.findByUuid(uuid)
                 .map(mapper::toDomain);
-    }
-
-    @Override
-    public List<SavedTechBuild> findAll() {
-        return springDataRepository.findAll().stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void deleteAll() {
-        springDataRepository.deleteAll();
     }
 }
