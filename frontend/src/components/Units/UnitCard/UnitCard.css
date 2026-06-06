@@ -463,17 +463,17 @@
 .backName::after {
     content: "";
     position: absolute;
-    left: 10px;
-    right: 10px;
+    left: 2px;
+    right: 2px;
     bottom: -8px;
     height: 1px;
     background: linear-gradient(
             90deg,
             transparent,
-            color-mix(in srgb, var(--card-border, #f2b584) 42%, transparent),
+            color-mix(in srgb, var(--card-border, #f2b584) 52%, transparent),
             transparent
     );
-    box-shadow: 0 0 8px color-mix(in srgb, var(--card-border, #f2b584) 20%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--card-border, #f2b584) 24%, transparent);
 }
 
 /* === BACK: ABILITIES LIST === */
@@ -488,23 +488,8 @@
     align-items: stretch;
     justify-content: flex-start;
 
-    padding: 0 0 0 8px;
+    padding: 0;
     margin-top: 4px;
-}
-
-.skillsList::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 5px;
-    bottom: 5px;
-    width: 1px;
-    background: linear-gradient(
-            180deg,
-            transparent,
-            color-mix(in srgb, var(--card-border, #f2b584) 34%, transparent),
-            transparent
-    );
 }
 
 .skill {
@@ -549,7 +534,7 @@
 }
 
 .skill + .skill {
-    border-top: 1px solid color-mix(in srgb, var(--card-border, #f2b584) 16%, transparent);
+    border-top: 1px solid color-mix(in srgb, var(--card-border, #f2b584) 14%, transparent);
     padding-top: 7px;
 }
 
