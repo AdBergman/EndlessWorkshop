@@ -12,6 +12,7 @@ public enum MinorFaction {
     GREEN_SCIONS("Green Scions"),
     HOY_AND_LADHRAN("Hoy and Ladhran"),
     HYDRACORN("Hydracorn"),
+    MANGROVE_OF_HARMONY("Mangrove of Harmony"),
     NOQUENSII("Noquensii"),
     OCHLING("Ochling"),
     ONEIROI("Oneiroi"),
@@ -25,12 +26,10 @@ public enum MinorFaction {
         this.displayName = displayName;
     }
 
-    /** Canonical in-game name (what you want stored/displayed). */
     public String getDisplayName() {
         return displayName;
     }
 
-    /** Canonical asset slug (matches your PNG filenames). */
     public String getSlug() {
         return displayName
                 .toLowerCase()
@@ -39,39 +38,16 @@ public enum MinorFaction {
                 .replaceAll("[^a-z0-9_]", "");
     }
 
-    /**
-     * Maps raw engine/import strings to canonical enum.
-     * Accepts both singular and plural variants where necessary.
-     */
     public static MinorFaction parseImportedMinorFaction(String raw) {
-        if (raw == null || raw.isBlank()) return null;
+        String displayName = FactionNamePolicy.canonicalMinorDisplayName(raw);
+        if (displayName == null) return null;
 
-        String normalized = raw.trim();
+        for (MinorFaction faction : values()) {
+            if (faction.getDisplayName().equals(displayName)) {
+                return faction;
+            }
+        }
 
-        return switch (normalized) {
-            case "Ametrine" -> AMETRINE;
-            case "Blackhammer", "Blackhammers" -> BLACKHAMMERS;
-            case "Consortium", "TheConsortium" -> CONSORTIUM;
-            case "DaughterOfBor", "DaughtersOfBor" -> DAUGHTERS_OF_BOR;
-            case "Dungeon" -> DUNGEON;
-            case "Foundling", "Foundlings" -> FOUNDLINGS;
-            case "Gorog", "Gorogs" -> GOROG;
-            case "GreenScion", "GreenScions" -> GREEN_SCIONS;
-            case "HoyAndLadhran" -> HOY_AND_LADHRAN;
-            case "Hydracorn", "Hydracorns" -> HYDRACORN;
-            case "Noquensii" -> NOQUENSII;
-            case "Ochling", "Ochlings" -> OCHLING;
-            case "Oneiroi" -> ONEIROI;
-            case "Sollusk" -> SOLLUSK;
-            case "UnseeingSeer", "UnseeingSeers" -> UNSEEING_SEERS;
-            case "Xavius" -> XAVIUS;
-
-            // explicitly blocked
-            case "MangroveOfHarmony" -> null;
-
-            default -> throw new IllegalArgumentException(
-                    "Unknown imported minor faction: " + raw
-            );
-        };
+        throw new IllegalArgumentException("Unknown imported minor faction: " + raw);
     }
 }

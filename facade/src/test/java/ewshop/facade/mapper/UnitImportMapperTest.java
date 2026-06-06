@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UnitImportMapperTest {
 
     @Test
-    void mapsXaviusPantinelRowsExportedAsMangroveOfHarmonyToXavius() {
+    void mapsMangroveOfHarmonyMinorFactionRowsToDisplayName() {
         UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
                 "Unit_MinorFaction_Xavius",
                 "Pantinel",
@@ -33,7 +34,7 @@ class UnitImportMapperTest {
         ));
 
         assertThat(snapshot.unitKey()).isEqualTo("Unit_MinorFaction_Xavius");
-        assertThat(snapshot.faction()).isEqualTo("Xavius");
+        assertThat(snapshot.faction()).isEqualTo("Mangrove of Harmony");
         assertThat(snapshot.isMajorFaction()).isFalse();
         assertThat(snapshot.unitClassKey()).isEqualTo("UnitClass_Juggernaught");
         assertThat(snapshot.unitClassDisplayName()).isEqualTo("Juggernaught");
@@ -67,7 +68,7 @@ class UnitImportMapperTest {
     }
 
     @Test
-    void stillBlocksNonXaviusMangroveOfHarmonyRows() {
+    void importsNonXaviusMangroveOfHarmonyRows() {
         UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
                 "Unit_MinorFaction_MangroveOfHarmony",
                 "Rootstalk",
@@ -89,6 +90,87 @@ class UnitImportMapperTest {
         ));
 
         assertThat(snapshot.unitKey()).isEqualTo("Unit_MinorFaction_MangroveOfHarmony");
+        assertThat(snapshot.faction()).isEqualTo("Mangrove of Harmony");
+    }
+
+    @Test
+    void rejectsUnknownMajorFactionRows() {
+        assertThatThrownBy(() -> UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                        "Unit_NewMajorFaction_Scout",
+                        "Wayfinder",
+                        "NewMajorFaction",
+                        true,
+                        false,
+                        false,
+                        "Land",
+                        null,
+                        List.of(),
+                        0,
+                        "UnitClass_Ranged",
+                        null,
+                        List.of(),
+                        List.of(),
+                        List.of("A future major faction row."),
+                        List.of(),
+                        List.of()
+                )))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown imported major faction");
+    }
+
+    @Test
+    void rejectsUnknownMinorFactionRows() {
+        assertThatThrownBy(() -> UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                        "Unit_MinorFaction_NewMinorFaction",
+                        "Glimmerhand",
+                        "NewMinorFaction",
+                        false,
+                        false,
+                        false,
+                        "Land",
+                        null,
+                        List.of(),
+                        0,
+                        "UnitClass_Support",
+                        null,
+                        List.of(),
+                        List.of(),
+                        List.of("A future minor faction row."),
+                        List.of(),
+                        List.of()
+                )))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown imported minor faction");
+    }
+
+    @Test
+    void filtersExporterHiddenUnitRowsBeforePersistence() {
+        UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                "Unit_MinorFaction_MangroveOfHarmony_Final",
+                "%Unit_MinorFaction_MangroveOfHarmony_FinalTitle",
+                "MangroveOfHarmony",
+                false,
+                false,
+                false,
+                "Land",
+                "Unit_MinorFaction_MangroveOfHarmony_Upgraded",
+                List.of(),
+                2,
+                "UnitClass_Juggernaught",
+                null,
+                List.of(),
+                List.of(),
+                List.of("Placeholder row from exporter metadata."),
+                List.of(),
+                List.of(),
+                false,
+                false,
+                false,
+                false,
+                true,
+                false
+        ));
+
         assertThat(snapshot.faction()).isNull();
     }
 }

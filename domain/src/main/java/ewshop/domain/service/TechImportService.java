@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class TechImportService {
@@ -27,8 +29,14 @@ public class TechImportService {
             return new ImportResult();
         }
 
+        Set<String> importedMajorFactions = techImportSnapshots.stream()
+                .filter(snapshot -> !snapshot.hidden())
+                .map(TechImportSnapshot::factionDisplayName)
+                .filter(faction -> faction != null && !faction.isBlank())
+                .collect(Collectors.toSet());
+
         List<TechImportSnapshot> enrichedSnapshots = techImportSnapshots.stream()
-                .map(gateEvaluator::withDerivedAvailableFactions)
+                .map(snapshot -> gateEvaluator.withDerivedAvailableFactions(snapshot, importedMajorFactions))
                 .toList();
 
         List<TechImportSnapshot> publicSnapshots = enrichedSnapshots.stream()

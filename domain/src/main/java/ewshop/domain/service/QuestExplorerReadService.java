@@ -1,7 +1,6 @@
 package ewshop.domain.service;
 
-import ewshop.domain.model.enums.MajorFaction;
-import ewshop.domain.model.enums.MinorFaction;
+import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.domain.model.quest.QuestExplorer;
 import ewshop.domain.repository.QuestExplorerRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -111,14 +110,14 @@ public class QuestExplorerReadService {
     private static String displayNameForFactionKey(String key) {
         String majorFaction = suffixAfterPrefix(key, "Faction_");
         if (majorFaction != null) {
-            MajorFaction parsed = parseMajorFaction(majorFaction);
-            if (parsed != null) return parsed.getDisplayName();
+            String displayName = FactionNamePolicy.bestEffortMajorDisplayName(majorFaction);
+            if (displayName != null) return displayName;
         }
 
         String minorFaction = suffixAfterPrefix(key, "MinorFaction_");
         if (minorFaction != null) {
-            MinorFaction parsed = parseMinorFaction(withoutTrailingDigits(minorFaction));
-            if (parsed != null) return parsed.getDisplayName();
+            String displayName = FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
+            if (displayName != null) return displayName;
         }
 
         return null;
@@ -127,33 +126,17 @@ public class QuestExplorerReadService {
     private static String displayNameForQuestLineKey(String key) {
         String majorFaction = suffixAfterPrefix(key, "FactionQuest_");
         if (majorFaction != null) {
-            MajorFaction parsed = parseMajorFaction(baseFactionToken(majorFaction));
-            if (parsed != null) return parsed.getDisplayName();
+            String displayName = FactionNamePolicy.bestEffortMajorDisplayName(baseFactionToken(majorFaction));
+            if (displayName != null) return displayName;
         }
 
         String minorFaction = suffixAfterPrefix(key, "MinorFaction_SpecificQuest_");
         if (minorFaction != null) {
-            MinorFaction parsed = parseMinorFaction(withoutTrailingDigits(minorFaction));
-            if (parsed != null) return parsed.getDisplayName();
+            String displayName = FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
+            if (displayName != null) return displayName;
         }
 
         return null;
-    }
-
-    private static MajorFaction parseMajorFaction(String raw) {
-        try {
-            return MajorFaction.parseImportedMajorFaction(raw);
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
-    }
-
-    private static MinorFaction parseMinorFaction(String raw) {
-        try {
-            return MinorFaction.parseImportedMinorFaction(raw);
-        } catch (IllegalArgumentException ignored) {
-            return null;
-        }
     }
 
     private static String suffixAfterPrefix(String value, String prefix) {

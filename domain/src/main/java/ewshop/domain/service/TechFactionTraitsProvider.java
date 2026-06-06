@@ -1,22 +1,20 @@
 package ewshop.domain.service;
 
-import ewshop.domain.model.enums.MajorFaction;
 import org.springframework.stereotype.Component;
 
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
 @Component
 public class TechFactionTraitsProvider {
 
-    public EnumSet<MajorFaction> getAllowedFactions() {
-        return EnumSet.of(
-                MajorFaction.KIN,
-                MajorFaction.ASPECTS,
-                MajorFaction.LORDS,
-                MajorFaction.NECROPHAGES,
-                MajorFaction.TAHUK
+    public Set<String> getAllowedFactions() {
+        return Set.of(
+                "Kin",
+                "Aspects",
+                "Lords",
+                "Necrophages",
+                "Tahuk"
         );
     }
 
@@ -25,14 +23,14 @@ public class TechFactionTraitsProvider {
      * - Quest-related trait keys intentionally omitted.
      * - Includes a few aliases (old vs new naming) to avoid exporter naming drift causing missing techs.
      */
-    public Map<MajorFaction, Set<String>> getFactionTraits() {
+    public Map<String, Set<String>> getFactionTraits() {
         return Map.of(
-                MajorFaction.KIN, Set.of(
+                "Kin", Set.of(
                         "FactionAffinity_KinOfSheredyn",
                         "FactionTrait_KinOfSheredyn_Units",
                         "FactionTrait_KinOfSheredyn_Chosen"
                 ),
-                MajorFaction.ASPECTS, Set.of(
+                "Aspects", Set.of(
                         "FactionAffinity_Aspect",
                         "FactionTrait_Aspects_Units",
                         "FactionTrait_Aspects_Hippie",
@@ -41,7 +39,7 @@ public class TechFactionTraitsProvider {
                         // alias (older naming seen in some earlier data)
                         "FactionTrait_Aspect_Units"
                 ),
-                MajorFaction.LORDS, Set.of(
+                "Lords", Set.of(
                         "FactionAffinity_LastLord",
                         "FactionTrait_LastLord_Units",
 
@@ -49,12 +47,12 @@ public class TechFactionTraitsProvider {
                         "FactionAffinity_Lords",
                         "FactionTrait_Lords_Units"
                 ),
-                MajorFaction.NECROPHAGES, Set.of(
+                "Necrophages", Set.of(
                         "FactionAffinity_Necrophage",
                         "FactionTrait_Necrophage_Units",
                         "FactionTrait_Necrophage_NoDiplomacy"
                 ),
-                MajorFaction.TAHUK, Set.of(
+                "Tahuk", Set.of(
                         "FactionAffinity_Mukag",
                         "FactionTrait_Mukag_Units"
 

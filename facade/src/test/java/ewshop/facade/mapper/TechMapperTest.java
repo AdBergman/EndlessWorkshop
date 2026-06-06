@@ -3,7 +3,6 @@ package ewshop.facade.mapper;
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.TechUnlockRef;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.response.TechDto;
 import org.junit.jupiter.api.Test;
@@ -58,7 +57,7 @@ class TechMapperTest {
                 .techCoords(new TechCoords(0.5, 0.75))
                 .prereq(prereqTech)
                 .excludes(excludesTech)
-                .factions(Set.of(MajorFaction.ASPECTS, MajorFaction.LORDS))
+                .factions(Set.of("Aspects", "Lords"))
                 .build();
 
         TechDto techDto = TechMapper.toDto(tech);
@@ -149,7 +148,7 @@ class TechMapperTest {
                 .descriptionLines(List.of())
                 .unlocks(List.of())
                 .techCoords(new TechCoords(0.1, 0.1))
-                .factions(Set.of(MajorFaction.NECROPHAGES, MajorFaction.KIN, MajorFaction.TAHUK))
+                .factions(Set.of("Necrophages", "Kin", "Tahuk"))
                 .build();
 
         TechDto techDto = TechMapper.toDto(tech);

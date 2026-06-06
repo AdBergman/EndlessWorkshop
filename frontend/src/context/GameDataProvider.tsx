@@ -26,6 +26,21 @@ const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
     minorName: null,
 });
 
+const toFactionInfoFromSavedValue = (faction: string): FactionInfo => {
+    const label = String(faction ?? "").trim();
+    const enumKey = label.toUpperCase().replace(/[\s-]+/g, "_") as keyof typeof Faction;
+    const knownFaction = Faction[enumKey];
+
+    if (knownFaction) return toFactionInfoFromEnum(knownFaction);
+
+    return {
+        isMajor: true,
+        enumFaction: label as Faction,
+        uiLabel: label,
+        minorName: null,
+    };
+};
+
 const GameDataProvider: React.FC<Props> = ({ children }) => {
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
@@ -69,12 +84,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
             try {
                 const res = await apiClient.getSavedBuild(shareUuid);
 
-                const factionEnumLookup =
-                    Faction[res.selectedFaction.toUpperCase() as keyof typeof Faction];
-
-                const loadedFactionInfo = toFactionInfoFromEnum(factionEnumLookup);
-
-                setSelectedFaction(loadedFactionInfo);
+                setSelectedFaction(toFactionInfoFromSavedValue(res.selectedFaction));
                 setSelectedTechs(res.techIds);
                 setSharedBuildLoaded(true);
 
@@ -102,12 +112,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
     const getSavedBuild = async (uuid: string): Promise<SavedTechBuild> => {
         const saved = await apiClient.getSavedBuild(uuid);
 
-        const factionEnum =
-            Faction[saved.selectedFaction.toUpperCase() as keyof typeof Faction];
-
-        const loadedFactionInfo = toFactionInfoFromEnum(factionEnum);
-
-        setSelectedFaction(loadedFactionInfo);
+        setSelectedFaction(toFactionInfoFromSavedValue(saved.selectedFaction));
         setSelectedTechs(saved.techIds);
 
         return saved;

@@ -1,6 +1,5 @@
 package ewshop.infrastructure.persistence.entities;
 
-import ewshop.domain.model.enums.MajorFaction;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,8 +20,7 @@ public class SavedTechBuildEntity {
     private String name;
 
     @Column(name = "faction", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private MajorFaction majorFaction;
+    private String majorFaction;
 
     @ElementCollection
     @CollectionTable(name = "shared_tech_build_techs", joinColumns = @JoinColumn(name = "build_id"))
@@ -34,7 +32,7 @@ public class SavedTechBuildEntity {
 
     public SavedTechBuildEntity() {}
 
-    public SavedTechBuildEntity(UUID uuid, String name, MajorFaction majorFaction, List<String> techIds) {
+    public SavedTechBuildEntity(UUID uuid, String name, String majorFaction, List<String> techIds) {
         this.uuid = uuid;
         this.name = name;
         this.majorFaction = majorFaction;
@@ -42,14 +40,16 @@ public class SavedTechBuildEntity {
         this.createdAt = LocalDateTime.now();
     }
 
-    // --- Getters and setters ---
-
-    public MajorFaction getFaction() {
+    public String getFaction() {
         return majorFaction;
     }
 
-    public void setFaction(MajorFaction majorFaction) {
+    public void setFaction(String majorFaction) {
         this.majorFaction = majorFaction;
+    }
+
+    public void setFaction(ewshop.domain.model.enums.MajorFaction majorFaction) {
+        this.majorFaction = majorFaction == null ? null : majorFaction.getDisplayName();
     }
 
     public Long getId() { return id; }

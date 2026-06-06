@@ -2,6 +2,7 @@ package ewshop.facade.mapper;
 
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
+import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.facade.dto.response.TechCoordsDto;
 import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.dto.response.TechUnlockDto;
@@ -28,7 +29,7 @@ public final class TechMapper {
         String excludes = (t.getExcludes() != null) ? t.getExcludes().getTechKey() : null;
 
         List<String> factions = t.getFactions().stream()
-                .map(TechMapper::formatEnumName)
+                .map(FactionNamePolicy::canonicalMajorDisplayNameOrSelf)
                 .sorted()
                 .toList();
 

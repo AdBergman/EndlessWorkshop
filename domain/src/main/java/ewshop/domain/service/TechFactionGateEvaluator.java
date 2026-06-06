@@ -1,18 +1,17 @@
 package ewshop.domain.service;
 
 import ewshop.domain.command.TechImportSnapshot;
-import ewshop.domain.model.enums.MajorFaction;
 import org.springframework.stereotype.Service;
 
-import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 @Service
 public class TechFactionGateEvaluator {
 
-    private final Map<MajorFaction, Set<String>> factionTraits;
-    private final EnumSet<MajorFaction> allowedMajorFactions;
+    private final Map<String, Set<String>> factionTraits;
+    private final Set<String> allowedMajorFactions;
 
     public TechFactionGateEvaluator(TechFactionTraitsProvider traitsProvider) {
         this.factionTraits = traitsProvider.getFactionTraits();
@@ -31,19 +30,43 @@ public class TechFactionGateEvaluator {
      * - Blank/null trait keys are ignored.
      */
     public TechImportSnapshot withDerivedAvailableFactions(TechImportSnapshot s) {
+        return withDerivedAvailableFactions(s, Set.of());
+    }
+
+    public TechImportSnapshot withDerivedAvailableFactions(TechImportSnapshot s, Set<String> additionalMajorFactions) {
+        Set<String> candidateFactions = candidateFactions(additionalMajorFactions);
+
         if (s.traitPrereqs() == null || s.traitPrereqs().isEmpty()) {
-            return s.withAvailableFactions(allowedMajorFactions);
+            if (s.factionDisplayName() != null) {
+                return s.withAvailableFactions(Set.of(s.factionDisplayName()));
+            }
+            return s.withAvailableFactions(candidateFactions);
         }
 
-        EnumSet<MajorFaction> passing = EnumSet.noneOf(MajorFaction.class);
-        for (MajorFaction f : allowedMajorFactions) {
+        Set<String> passing = new LinkedHashSet<>();
+        for (String f : candidateFactions) {
             Set<String> traits = factionTraits.getOrDefault(f, Set.of());
             if (passesTraitGate(s, traits)) {
                 passing.add(f);
             }
         }
 
+        if (passing.isEmpty() && s.factionDisplayName() != null && hasOnlyAnyTraitPrerequisites(s)) {
+            passing.add(s.factionDisplayName());
+        }
+
         return s.withAvailableFactions(passing);
+    }
+
+    private Set<String> candidateFactions(Set<String> additionalMajorFactions) {
+        LinkedHashSet<String> candidates = new LinkedHashSet<>(allowedMajorFactions);
+        if (additionalMajorFactions != null) {
+            additionalMajorFactions.stream()
+                    .filter(faction -> faction != null && !faction.isBlank())
+                    .map(String::trim)
+                    .forEach(candidates::add);
+        }
+        return candidates;
     }
 
     private boolean passesTraitGate(TechImportSnapshot s, Set<String> traits) {
@@ -81,5 +104,15 @@ public class TechFactionGateEvaluator {
 
         // If there were Any-prereqs, require at least one match
         return !hasAnyGroup || anyMatched;
+    }
+
+    private boolean hasOnlyAnyTraitPrerequisites(TechImportSnapshot s) {
+        boolean foundAny = false;
+        for (var p : s.traitPrereqs()) {
+            if (p == null || p.traitKey() == null || p.traitKey().isBlank()) continue;
+            if (!"Any".equalsIgnoreCase(p.operator() == null ? "" : p.operator().trim())) return false;
+            foundAny = true;
+        }
+        return foundAny;
     }
 }

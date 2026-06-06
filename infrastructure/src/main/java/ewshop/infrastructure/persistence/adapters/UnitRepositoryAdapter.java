@@ -41,9 +41,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
             return result;
         }
 
-        // Filter out blocked/invalid rows BEFORE computing keepKeys.
-        // - faction == null => blocked by enum allow-list (Placeholder, Mangrove, etc.)
-        // - prototype class => internal template, never persist
+        // Filter invalid rows before computing keepKeys so skipped rows do not delete valid DB rows.
         List<UnitImportSnapshot> allowed = snapshots.stream()
                 .filter(Objects::nonNull)
                 .filter(s -> s.faction() != null)
@@ -51,8 +49,6 @@ public class UnitRepositoryAdapter implements UnitRepository {
                 .toList();
 
         if (allowed.isEmpty()) {
-            // If the input is all blocked rows, treat as "import nothing" and don't delete everything.
-            // Safer default: do not mutate DB at all.
             return result;
         }
 

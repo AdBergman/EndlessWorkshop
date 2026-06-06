@@ -1,8 +1,7 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.command.UnitImportSnapshot;
-import ewshop.domain.model.enums.MajorFaction;
-import ewshop.domain.model.enums.MinorFaction;
+import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 
 import java.util.ArrayList;
@@ -25,9 +24,8 @@ public final class UnitImportMapper {
         boolean isMajor = Boolean.TRUE.equals(dto.isMajorFaction());
         String unitKey = req(dto.unitKey(), "unitKey");
 
-        // Validate + canonicalize to in-game display name (stored as String)
         String rawFaction = trimToNull(dto.faction());
-        String resolvedFaction = resolveAndValidateFaction(rawFaction, isMajor, unitKey);
+        String resolvedFaction = shouldFilterOut(dto) ? null : resolveAndValidateFaction(rawFaction, isMajor);
         String unitClassKey = trimToNull(dto.unitClassKey());
 
         return UnitImportSnapshot.builder()
@@ -54,35 +52,23 @@ public final class UnitImportMapper {
                 .build();
     }
 
-    /**
-     * Resolves faction into the canonical in-game display name while enforcing the allow-list.
-     *
-     * Major examples:
-     *  - "Mukag" -> "Tahuk"
-     *  - "KinOfSheredyn" -> "Kin"
-     *
-     * Minor examples:
-     *  - "DaughterOfBor" -> "Daughters of Bor"
-     *  - "Blackhammer" -> "Blackhammers"
-     *
-     * Returns null for explicitly blocked values (e.g. Placeholder / MangroveOfHarmony).
-     */
-    private static String resolveAndValidateFaction(String rawFaction, boolean isMajor, String unitKey) {
+    private static String resolveAndValidateFaction(String rawFaction, boolean isMajor) {
         if (rawFaction == null) return null;
 
         if (isMajor) {
-            MajorFaction parsed = MajorFaction.parseImportedMajorFaction(rawFaction);
-            if (parsed == null) return null;
-            return parsed.getDisplayName();
+            return FactionNamePolicy.canonicalMajorDisplayName(rawFaction);
         }
 
-        if ("MangroveOfHarmony".equals(rawFaction) && trimToEmpty(unitKey).startsWith("Unit_MinorFaction_Xavius")) {
-            return MinorFaction.XAVIUS.getDisplayName();
-        }
+        return FactionNamePolicy.canonicalMinorDisplayName(rawFaction);
+    }
 
-        MinorFaction parsed = MinorFaction.parseImportedMinorFaction(rawFaction);
-        if (parsed == null) return null;
-        return parsed.getDisplayName();
+    private static boolean shouldFilterOut(UnitImportUnitDto dto) {
+        return Boolean.TRUE.equals(dto.isHidden())
+                || Boolean.FALSE.equals(dto.isPlayerFacing())
+                || Boolean.TRUE.equals(dto.isPrototype())
+                || Boolean.TRUE.equals(dto.isBaseTemplate())
+                || Boolean.TRUE.equals(dto.isPlaceholder())
+                || Boolean.TRUE.equals(dto.isInternal());
     }
 
     private static String req(String v, String field) {
@@ -97,10 +83,6 @@ public final class UnitImportMapper {
         if (v == null) return null;
         String t = v.trim();
         return t.isEmpty() ? null : t;
-    }
-
-    private static String trimToEmpty(String v) {
-        return v == null ? "" : v.trim();
     }
 
     private static List<String> cleanLines(List<String> lines) {

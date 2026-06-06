@@ -237,6 +237,76 @@ class TechImportMapperTest {
     }
 
     @Test
+    void toDomain_shouldTreatNonPlayerFacingRowsAsHidden() {
+        TechImportTechDto dto = new TechImportTechDto(
+                "Technology_Base_CityCenter_02",
+                "Urban Planning",
+                null,
+                false,
+                3,
+                "Society",
+                null,
+                false,
+                false,
+                true,
+                false,
+                false,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        TechImportSnapshot snap = TechImportMapper.toDomain(dto);
+
+        assertThat(snap.hidden()).isTrue();
+    }
+
+    @Test
+    void toDomain_shouldCanonicalizeFactionKeyWithoutEnumBinding() {
+        TechImportTechDto knownFaction = new TechImportTechDto(
+                "Mukag_Technology_02",
+                "Celestial Scrying",
+                null,
+                false,
+                1,
+                "Discovery",
+                "Mukag",
+                true,
+                false,
+                false,
+                false,
+                false,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        TechImportTechDto futureFaction = new TechImportTechDto(
+                "NewMajor_Technology_00",
+                "Future Visible Tech",
+                null,
+                false,
+                1,
+                "Discovery",
+                "NewMajorFaction",
+                true,
+                false,
+                false,
+                false,
+                false,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        assertThat(TechImportMapper.toDomain(knownFaction).factionDisplayName()).isEqualTo("Tahuk");
+        assertThat(TechImportMapper.toDomain(futureFaction).factionDisplayName()).isEqualTo("New Major Faction");
+    }
+
+    @Test
     void toDomain_shouldFilterNullAndBlank_andTrimPrereqLists() {
         // given
         List<String> prereqsWithNulls =

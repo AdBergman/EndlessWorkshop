@@ -34,7 +34,7 @@ class SavedTechBuildMapperTest {
         assertThat(domain).isNotNull();
         assertThat(domain.getUuid()).isEqualTo(uuid);
         assertThat(domain.getName()).isEqualTo("Test Build");
-        assertThat(domain.getFaction()).isEqualTo(MajorFaction.ASPECTS);
+        assertThat(domain.getFaction()).isEqualTo("Aspects");
         assertThat(domain.getTechIds()).containsExactly("tech1", "tech2");
         assertThat(domain.getCreatedAt()).isEqualTo(now);
     }
@@ -59,7 +59,7 @@ class SavedTechBuildMapperTest {
         assertThat(entity).isNotNull();
         assertThat(entity.getUuid()).isEqualTo(uuid);
         assertThat(entity.getName()).isEqualTo("Test Build");
-        assertThat(entity.getFaction()).isEqualTo(MajorFaction.ASPECTS);
+        assertThat(entity.getFaction()).isEqualTo("Aspects");
         assertThat(entity.getTechIds()).containsExactly("tech1", "tech2");
         assertThat(entity.getCreatedAt()).isEqualTo(now);
     }

@@ -1,7 +1,6 @@
 package ewshop.domain.command;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 
 import java.util.List;
@@ -12,6 +11,7 @@ public record TechImportSnapshot(
         String displayName,
         String lore,
         boolean hidden,
+        String factionDisplayName,
         int era,
         TechType type,
         TechCoords techCoords,
@@ -25,7 +25,7 @@ public record TechImportSnapshot(
         List<TechUnlockTuple> unlocks,
 
         // Derived at import-time (service postprocessor)
-        Set<MajorFaction> availableMajorFactions
+        Set<String> availableMajorFactions
 ) {
     private static final TechCoords DEFAULT_COORDS = new TechCoords(0.0, 0.0);
 
@@ -37,6 +37,7 @@ public record TechImportSnapshot(
         techKey = trimmedKey;
 
         displayName = displayName == null ? "" : displayName.trim();
+        factionDisplayName = trimToNull(factionDisplayName);
 
         if (type == null) {
             throw new IllegalArgumentException("TechImportSnapshot.type is required");
@@ -63,12 +64,13 @@ public record TechImportSnapshot(
                 : Set.copyOf(availableMajorFactions);
     }
 
-    public TechImportSnapshot withAvailableFactions(Set<MajorFaction> next) {
+    public TechImportSnapshot withAvailableFactions(Set<String> next) {
         return new TechImportSnapshot(
                 techKey,
                 displayName,
                 lore,
                 hidden,
+                factionDisplayName,
                 era,
                 type,
                 techCoords,
@@ -90,6 +92,7 @@ public record TechImportSnapshot(
         private String displayName = "";
         private String lore = null;
         private boolean hidden = false;
+        private String factionDisplayName = null;
         private int era = 1;
         private TechType type;
 
@@ -102,12 +105,13 @@ public record TechImportSnapshot(
         private List<String> descriptionLines = List.of();
         private List<TechUnlockTuple> unlocks = List.of();
 
-        private Set<MajorFaction> availableMajorFactions = Set.of();
+        private Set<String> availableMajorFactions = Set.of();
 
         public Builder techKey(String techKey) { this.techKey = techKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
         public Builder lore(String lore) { this.lore = lore; return this; }
         public Builder hidden(boolean hidden) { this.hidden = hidden; return this; }
+        public Builder factionDisplayName(String factionDisplayName) { this.factionDisplayName = factionDisplayName; return this; }
         public Builder era(int era) { this.era = era; return this; }
         public Builder type(TechType type) { this.type = type; return this; }
 
@@ -120,7 +124,7 @@ public record TechImportSnapshot(
         public Builder descriptionLines(List<String> descriptionLines) { this.descriptionLines = descriptionLines; return this; }
         public Builder unlocks(List<TechUnlockTuple> unlocks) { this.unlocks = unlocks; return this; }
 
-        public Builder availableFactions(Set<MajorFaction> availableMajorFactions) { this.availableMajorFactions = availableMajorFactions; return this; }
+        public Builder availableFactions(Set<String> availableMajorFactions) { this.availableMajorFactions = availableMajorFactions; return this; }
 
         public TechImportSnapshot build() {
             return new TechImportSnapshot(
@@ -128,6 +132,7 @@ public record TechImportSnapshot(
                     displayName,
                     lore,
                     hidden,
+                    factionDisplayName,
                     era,
                     type,
                     techCoords,
@@ -139,5 +144,11 @@ public record TechImportSnapshot(
                     availableMajorFactions
             );
         }
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) return null;
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

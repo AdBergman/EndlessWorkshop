@@ -298,6 +298,43 @@ describe("GameDataProvider orchestration boundary", () => {
         expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("saved-build-id");
     });
 
+    it("keeps future saved-build faction strings loadable", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "saved-build-id",
+            name: "Saved Build",
+            selectedFaction: "New Major Faction",
+            techIds: ["Tech_Shared_First"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
+
+        const CommandProbe = () => {
+            const { getSavedBuild } = useSavedTechBuildCommands();
+
+            return (
+                <button type="button" onClick={() => void getSavedBuild?.("saved-build-id")}>
+                    Load build
+                </button>
+            );
+        };
+
+        render(
+            <MemoryRouter>
+                <GameDataProvider>
+                    <CommandProbe />
+                    <StoreProbe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(screen.getByRole("button", { name: "Load build" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("1");
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("New Major Faction");
+        });
+    });
+
     it("preserves shared-build loading into selected faction and selected techs", async () => {
         window.history.pushState({}, "", "/tech?share=shared-build-id");
         mockedApiClient.getSavedBuild.mockResolvedValue({

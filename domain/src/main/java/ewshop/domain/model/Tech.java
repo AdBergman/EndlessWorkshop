@@ -17,7 +17,7 @@ public class Tech {
     private final TechCoords techCoords;
     private Tech prereq;
     private Tech excludes;
-    private final Set<MajorFaction> majorFactions;
+    private final Set<String> majorFactions;
 
     private Tech(Builder builder) {
         this.name = builder.name;
@@ -45,7 +45,7 @@ public class Tech {
     public TechCoords getTechCoords() { return techCoords; }
     public Tech getPrereq() { return prereq; }
     public Tech getExcludes() { return excludes; }
-    public Set<MajorFaction> getFactions() { return majorFactions; }
+    public Set<String> getFactions() { return majorFactions; }
 
     public void setPrereq(Tech prereqTech) { this.prereq = prereqTech; }
     public void setExcludes(Tech excludesTech) { this.excludes = excludesTech; }
@@ -64,7 +64,7 @@ public class Tech {
         private TechCoords techCoords;
         private Tech prereq;
         private Tech excludes;
-        private final Set<MajorFaction> majorFactions = new HashSet<>();
+        private final Set<String> majorFactions = new HashSet<>();
 
         public Builder name(String name) { this.name = name; return this; }
         public Builder techKey(String techKey) { this.techKey = techKey; return this; }
@@ -96,12 +96,25 @@ public class Tech {
         public Builder prereq(Tech prereq) { this.prereq = prereq; return this; }
         public Builder excludes(Tech excludes) { this.excludes = excludes; return this; }
 
-        public Builder factions(Set<MajorFaction> majorFactions) {
+        public Builder factions(Set<String> majorFactions) {
             this.majorFactions.clear();
-            if (majorFactions != null) this.majorFactions.addAll(majorFactions);
+            if (majorFactions != null) {
+                majorFactions.forEach(this::addFaction);
+            }
             return this;
         }
-        public Builder addFaction(MajorFaction majorFaction) { this.majorFactions.add(majorFaction); return this; }
+
+        public Builder addFaction(String majorFaction) {
+            String value = majorFaction == null ? null : majorFaction.trim();
+            if (value != null && !value.isBlank()) {
+                this.majorFactions.add(value);
+            }
+            return this;
+        }
+
+        public Builder addFaction(MajorFaction majorFaction) {
+            return addFaction(majorFaction == null ? null : majorFaction.getDisplayName());
+        }
 
         public Tech build() { return new Tech(this); }
     }

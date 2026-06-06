@@ -1,7 +1,6 @@
 package ewshop.infrastructure.persistence.repository;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
@@ -32,7 +31,7 @@ class TechIT {
         tech.setName("Advanced Weapons");
         tech.setEra(4);
         tech.setType(TechType.DEFENSE);
-        tech.setFactions(Set.of(MajorFaction.KIN));
+        tech.setFactions(Set.of("Kin"));
         tech.setTechCoords(new TechCoords(50, 50));
         tech.setDescriptionLines(List.of("Unlocks a powerful new weapon."));
 
@@ -49,6 +48,6 @@ class TechIT {
         assertThat(result.getDescriptionLines())
                 .containsExactly("Unlocks a powerful new weapon.");
         assertThat(result.getFactions())
-                .containsExactly(MajorFaction.KIN);
+                .containsExactly("Kin");
     }
 }

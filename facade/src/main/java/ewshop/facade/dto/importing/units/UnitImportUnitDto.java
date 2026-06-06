@@ -17,7 +17,6 @@ public record UnitImportUnitDto(
         Boolean isChosen,
         String spawnType,
 
-        // evolution graph
         String previousUnitKey,
         List<String> nextEvolutionUnitKeys,
         Integer evolutionTierIndex,
@@ -25,14 +24,65 @@ public record UnitImportUnitDto(
         String unitClassKey,
         String attackSkillKey,
 
-        // merged in domain
         List<String> ownAbilityKeys,
         List<String> abilityKeys,
 
         List<String> descriptionLines,
 
-        // dropped in Domain, kept for future implementation
         List<String> ownDescriptorKeys,
-        List<String> descriptorKeys
+        List<String> descriptorKeys,
 
-) {}
+        Boolean isHidden,
+        Boolean isPlayerFacing,
+        Boolean isPrototype,
+        Boolean isBaseTemplate,
+        Boolean isPlaceholder,
+        Boolean isInternal
+
+) {
+    public UnitImportUnitDto(
+            String unitKey,
+            String displayName,
+            String faction,
+            Boolean isMajorFaction,
+            Boolean isHero,
+            Boolean isChosen,
+            String spawnType,
+            String previousUnitKey,
+            List<String> nextEvolutionUnitKeys,
+            Integer evolutionTierIndex,
+            String unitClassKey,
+            String attackSkillKey,
+            List<String> ownAbilityKeys,
+            List<String> abilityKeys,
+            List<String> descriptionLines,
+            List<String> ownDescriptorKeys,
+            List<String> descriptorKeys
+    ) {
+        this(
+                unitKey,
+                displayName,
+                faction,
+                isMajorFaction,
+                isHero,
+                isChosen,
+                spawnType,
+                previousUnitKey,
+                nextEvolutionUnitKeys,
+                evolutionTierIndex,
+                unitClassKey,
+                attackSkillKey,
+                ownAbilityKeys,
+                abilityKeys,
+                descriptionLines,
+                ownDescriptorKeys,
+                descriptorKeys,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+}

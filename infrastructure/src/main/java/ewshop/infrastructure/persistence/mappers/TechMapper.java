@@ -2,6 +2,7 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechUnlockRef;
+import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockRefEmbeddable;
 import org.springframework.stereotype.Component;
@@ -41,7 +42,7 @@ public class TechMapper {
         );
 
         entity.setTechCoords(domain.getTechCoords());
-        entity.setFactions(domain.getFactions() != null ? domain.getFactions() : Collections.emptySet());
+        entity.setFactions(domain.getFactions() != null ? cleanFactions(domain.getFactions()) : Collections.emptySet());
 
         // legacy self refs stay as-is for now
         if (domain.getPrereq() != null) {
@@ -68,7 +69,6 @@ public class TechMapper {
     }
 
     public void updateReferences(TechEntity entity, Tech domain, Map<String, TechEntity> savedByTechKey) {
-        // unchanged legacy logic
         if (domain.getPrereq() != null) {
             String prereqKey = domain.getPrereq().getTechKey();
             if (prereqKey != null) {
@@ -141,7 +141,16 @@ public class TechMapper {
                         .era(entity.getExcludes().getEra())
                         .build()
                         : null)
-                .factions(entity.getFactions() != null ? entity.getFactions() : Collections.emptySet())
+                .factions(entity.getFactions() != null ? cleanFactions(entity.getFactions()) : Collections.emptySet())
                 .build();
+    }
+
+    private static java.util.Set<String> cleanFactions(java.util.Set<String> factions) {
+        if (factions == null || factions.isEmpty()) return Collections.emptySet();
+        return factions.stream()
+                .filter(faction -> faction != null && !faction.isBlank())
+                .map(FactionNamePolicy::canonicalMajorDisplayNameOrSelf)
+                .filter(faction -> faction != null && !faction.isBlank())
+                .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
     }
 }

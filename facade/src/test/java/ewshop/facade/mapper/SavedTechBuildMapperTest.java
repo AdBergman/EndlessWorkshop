@@ -119,7 +119,21 @@ class SavedTechBuildMapperTest {
 
         assertThat(domain.getUuid()).isNotNull();
         assertThat(domain.getName()).isEqualTo("Frontend Tech Build");
-        assertThat(domain.getFaction()).isEqualTo(MajorFaction.KIN);
+        assertThat(domain.getFaction()).isEqualTo("Kin");
         assertThat(domain.getTechIds()).containsExactly("Tech_A", "Tech_B");
+    }
+
+    @Test
+    @DisplayName("toDomain should preserve future faction strings")
+    void toDomain_shouldPreserveFutureFactionStrings() {
+        CreateSavedTechBuildRequest request = CreateSavedTechBuildRequest.builder()
+                .name("Future Tech Build")
+                .selectedFaction("NewMajorFaction")
+                .techIds(List.of("Tech_A"))
+                .build();
+
+        SavedTechBuild domain = SavedTechBuildMapper.toDomain(request);
+
+        assertThat(domain.getFaction()).isEqualTo("New Major Faction");
     }
 }

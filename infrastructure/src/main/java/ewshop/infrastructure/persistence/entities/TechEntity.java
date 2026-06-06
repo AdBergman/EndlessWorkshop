@@ -1,7 +1,6 @@
 package ewshop.infrastructure.persistence.entities;
 
 import ewshop.domain.model.TechCoords;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import jakarta.persistence.*;
 
@@ -53,8 +52,7 @@ public class TechEntity {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "tech_faction", joinColumns = @JoinColumn(name = "tech_id"))
     @Column(name = "faction", nullable = false, length = 64)
-    @Enumerated(EnumType.STRING)
-    private Set<MajorFaction> majorFactions;
+    private Set<String> majorFactions;
 
     @Column(name = "tech_key")
     private String techKey;
@@ -139,12 +137,19 @@ public class TechEntity {
         this.excludes = excludes;
     }
 
-    public Set<MajorFaction> getFactions() {
+    public Set<String> getFactions() {
         return majorFactions;
     }
 
-    public void setFactions(Set<MajorFaction> majorFactions) {
-        this.majorFactions = majorFactions;
+    public void setFactions(Set<String> majorFactions) {
+        if (majorFactions == null || majorFactions.isEmpty()) {
+            this.majorFactions = Set.of();
+            return;
+        }
+        this.majorFactions = majorFactions.stream()
+                .filter(faction -> faction != null && !faction.isBlank())
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.toSet());
     }
 
     public String getTechKey() {

@@ -3,7 +3,6 @@ package ewshop.infrastructure.persistence.adapters;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechPlacementUpdate;
 import ewshop.domain.model.Tech;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.TechRepository;
 import ewshop.infrastructure.persistence.entities.TechEntity;
@@ -16,8 +15,8 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -209,12 +208,12 @@ public class TechRepositoryAdapter implements TechRepository {
             changed = true;
         }
 
-        EnumSet<MajorFaction> nextMajorFactions = toEnumSet(update.availableMajorFactions());
-        EnumSet<MajorFaction> currentMajorFactions = toEnumSet(entity.getFactions());
+        Set<String> nextMajorFactions = toFactionSet(update.availableMajorFactions());
+        Set<String> currentMajorFactions = toFactionSet(entity.getFactions());
 
         if (!currentMajorFactions.equals(nextMajorFactions)) {
             // Give Hibernate a mutable collection for dirty-tracking
-            entity.setFactions(nextMajorFactions.isEmpty() ? new HashSet<>() : new HashSet<>(nextMajorFactions));
+            entity.setFactions(nextMajorFactions.isEmpty() ? new HashSet<>() : new LinkedHashSet<>(nextMajorFactions));
             changed = true;
         }
 
@@ -222,11 +221,14 @@ public class TechRepositoryAdapter implements TechRepository {
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
 
-    private static EnumSet<MajorFaction> toEnumSet(Set<MajorFaction> in) {
+    private static Set<String> toFactionSet(Set<String> in) {
         if (in == null || in.isEmpty()) {
-            return EnumSet.noneOf(MajorFaction.class);
+            return Set.of();
         }
-        return EnumSet.copyOf(in);
+        return in.stream()
+                .filter(faction -> faction != null && !faction.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private static List<TechUnlockRefEmbeddable> toUnlockEmbeddables(List<ewshop.domain.command.TechUnlockTuple> unlockTuples) {

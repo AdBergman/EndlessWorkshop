@@ -15,12 +15,10 @@ public enum MajorFaction {
         this.displayName = displayName;
     }
 
-    /** Canonical in-game name (what you want stored/displayed). */
     public String getDisplayName() {
         return displayName;
     }
 
-    /** Canonical asset prefix slug (matches your PNG filenames). */
     public String getSlug() {
         return displayName
                 .toLowerCase()
@@ -29,41 +27,11 @@ public enum MajorFaction {
                 .replaceAll("[^a-z0-9_]", "");
     }
 
-    /**
-     * Maps raw engine/import strings to canonical enum.
-     * Accepts common singular/plural variants where necessary.
-     */
     public static MajorFaction parseImportedMajorFaction(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-
-        return switch (raw.trim()) {
-            case "Aspect","Aspects" -> ASPECTS;
-            case "KinOfSheredyn","Kin" -> KIN;
-            case "LastLord","Lords","Lord" -> LORDS;
-            case "Mukag","Tahuk" -> TAHUK;
-            case "Necrophage","Necrophages" -> NECROPHAGES;
-            case "Tormented" -> TORMENTED;
-
-            // explicitly ignore / block
-            case "Placeholder" -> null;
-
-            default -> throw new IllegalArgumentException(
-                    "Unknown imported major faction: " + raw
-            );
-        };
+        return FactionNamePolicy.parseImportedMajorFaction(raw);
     }
 
     public static MajorFaction fromDisplayName(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-
-        return switch (raw.trim().toUpperCase()) {
-            case "ASPECTS" -> ASPECTS;
-            case "KIN" -> KIN;
-            case "LORDS" -> LORDS;
-            case "NECROPHAGES" -> NECROPHAGES;
-            case "TAHUK" -> TAHUK;
-            case "TORMENTED" -> TORMENTED;
-            default -> throw new IllegalArgumentException("Unknown major faction displayName: " + raw);
-        };
+        return FactionNamePolicy.parseImportedMajorFaction(raw);
     }
 }

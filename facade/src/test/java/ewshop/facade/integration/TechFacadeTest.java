@@ -3,7 +3,6 @@ package ewshop.facade.integration;
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.TechUnlockRef;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.domain.repository.TechRepository;
 import ewshop.facade.dto.response.TechDto;
@@ -45,7 +44,7 @@ class TechFacadeTest extends BaseIT {
                 .type(TechType.DEFENSE)
                 .descriptionLines(List.of("+100 Fortification on Capital"))
                 .unlocks(List.of(new TechUnlockRef("Constructible", "Improvement_Foundry", "Improvement")))
-                .factions(Set.of(MajorFaction.ASPECTS, MajorFaction.KIN))
+                .factions(Set.of("Aspects", "Kin"))
                 .techCoords(new TechCoords(10.0, 20.0))
                 .build();
 
@@ -55,7 +54,7 @@ class TechFacadeTest extends BaseIT {
                 .era(1)
                 .type(TechType.DISCOVERY)
                 .descriptionLines(List.of("Unlocks Farms"))
-                .factions(Set.of(MajorFaction.LORDS))
+                .factions(Set.of("Lords"))
                 .techCoords(new TechCoords(30.0, 40.0))
                 .build();
 

@@ -3,6 +3,7 @@ package ewshop.facade.mapper;
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.command.TechTraitPrereq;
 import ewshop.domain.command.TechUnlockTuple;
+import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.domain.model.enums.TechType;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
@@ -29,6 +30,13 @@ public final class TechImportMapper {
 
         TechType type = mapQuadrantToTechType(dto.quadrant(), dto.techKey());
         int era = dto.eraIndex() == null ? 1 : dto.eraIndex();
+        String factionDisplayName = FactionNamePolicy.canonicalMajorDisplayNameOrSelf(dto.factionKey());
+        boolean hidden = Boolean.TRUE.equals(dto.hidden())
+                || Boolean.FALSE.equals(dto.isPlayerFacing())
+                || Boolean.TRUE.equals(dto.isPrototype())
+                || Boolean.TRUE.equals(dto.isBaseTemplate())
+                || Boolean.TRUE.equals(dto.isPlaceholder())
+                || Boolean.TRUE.equals(dto.isInternal());
 
         List<String> prereqTechKeys = emptyIfNull(dto.technologyPrerequisiteTechKeys()).stream()
                 .filter(value -> value != null && !value.isBlank())
@@ -69,7 +77,8 @@ public final class TechImportMapper {
                 .techKey(dto.techKey())
                 .displayName(dto.displayName())
                 .lore(dto.lore())
-                .hidden(Boolean.TRUE.equals(dto.hidden()))
+                .hidden(hidden)
+                .factionDisplayName(factionDisplayName)
                 .era(era)
                 .type(type)
                 .prereqTechKeys(prereqTechKeys)

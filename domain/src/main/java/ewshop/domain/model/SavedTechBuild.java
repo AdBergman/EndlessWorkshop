@@ -14,7 +14,7 @@ public class SavedTechBuild {
 
     private final UUID uuid;
     private final String name;
-    private final MajorFaction majorFaction;
+    private final String majorFaction;
     private final List<String> techIds;
     private final LocalDateTime createdAt;
 
@@ -28,7 +28,7 @@ public class SavedTechBuild {
 
     public UUID getUuid() { return uuid; }
     public String getName() { return name; }
-    public MajorFaction getFaction() { return majorFaction; }
+    public String getFaction() { return majorFaction; }
     public List<String> getTechIds() { return techIds; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
@@ -37,7 +37,7 @@ public class SavedTechBuild {
     public static class Builder {
         private UUID uuid;
         private String name;
-        private MajorFaction majorFaction;
+        private String majorFaction;
         private final List<String> techIds = new ArrayList<>();
         private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -54,8 +54,13 @@ public class SavedTechBuild {
         }
 
         @JsonProperty("majorFaction")
-        public Builder faction(MajorFaction majorFaction) {
+        public Builder faction(String majorFaction) {
             this.majorFaction = majorFaction;
+            return this;
+        }
+
+        public Builder faction(MajorFaction majorFaction) {
+            this.majorFaction = majorFaction == null ? null : majorFaction.getDisplayName();
             return this;
         }
 

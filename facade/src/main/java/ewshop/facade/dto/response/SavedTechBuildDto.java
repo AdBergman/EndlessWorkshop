@@ -1,6 +1,7 @@
 package ewshop.facade.dto.response;
 
 import ewshop.domain.model.enums.MajorFaction;
+import ewshop.domain.model.enums.FactionNamePolicy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +29,10 @@ public record SavedTechBuildDto(
         public Builder uuid(UUID uuid) { this.uuid = uuid; return this; }
         public Builder name(String name) { this.name = name; return this; }
         public Builder selectedFaction(MajorFaction selectedMajorFaction) { this.selectedFaction = selectedMajorFaction.getDisplayName(); return this; }
+        public Builder selectedFaction(String selectedMajorFaction) {
+            this.selectedFaction = FactionNamePolicy.canonicalMajorDisplayNameOrSelf(selectedMajorFaction);
+            return this;
+        }
         public Builder techIds(List<String> techIds) { this.techIds = techIds; return this; }
         public Builder createdAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
 

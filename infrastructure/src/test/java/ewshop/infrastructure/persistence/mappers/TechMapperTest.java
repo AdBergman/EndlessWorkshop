@@ -3,7 +3,6 @@ package ewshop.infrastructure.persistence.mappers;
 import ewshop.domain.model.Tech;
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.TechUnlockRef;
-import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.model.enums.TechType;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.entities.TechUnlockRefEmbeddable;
@@ -46,7 +45,7 @@ class TechMapperTest {
                 ),
                 new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
         ));
-        techEntity.setFactions(Set.of(MajorFaction.ASPECTS));
+        techEntity.setFactions(Set.of("Aspects"));
         techEntity.setTechCoords(new TechCoords(50.5, 75.5));
         techEntity.setPrereq(prereqEntity);
 
@@ -69,7 +68,7 @@ class TechMapperTest {
                 new TechUnlockRef("Action", "ActionTypeCutForest")
         );
 
-        assertThat(tech.getFactions()).containsExactly(MajorFaction.ASPECTS);
+        assertThat(tech.getFactions()).containsExactly("Aspects");
 
         assertThat(tech.getTechCoords()).isNotNull();
         assertThat(tech.getTechCoords().getXPct()).isEqualTo(50.5);
@@ -104,7 +103,7 @@ class TechMapperTest {
                         ),
                         new TechUnlockRef("Action", "ActionTypeCutForest")
                 ))
-                .factions(Set.of(MajorFaction.ASPECTS))
+                .factions(Set.of("Aspects"))
                 .techCoords(new TechCoords(50.5, 75.5))
                 .prereq(prereqTech)
                 .build();
@@ -128,7 +127,7 @@ class TechMapperTest {
                 new TechUnlockRefEmbeddable("Action", "ActionTypeCutForest")
         );
 
-        assertThat(techEntity.getFactions()).containsExactlyInAnyOrder(MajorFaction.ASPECTS);
+        assertThat(techEntity.getFactions()).containsExactlyInAnyOrder("Aspects");
 
         assertThat(techEntity.getTechCoords()).isNotNull();
         assertThat(techEntity.getTechCoords().getXPct()).isEqualTo(50.5);
