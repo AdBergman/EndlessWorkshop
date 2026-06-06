@@ -443,13 +443,16 @@
 }
 
 .backName {
+    position: relative;
+    width: min(100%, 176px);
+    box-sizing: border-box;
     color: color-mix(in srgb, var(--card-border, #f2b584) 88%, #f1eadc);
     font-weight: 800;
     text-align: center;
     line-height: 1.05;
 
     margin-top: 2px;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
     padding: 0 8px;
 
     letter-spacing: 0.015em;
@@ -457,8 +460,25 @@
     overflow-wrap: anywhere;
 }
 
+.backName::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -8px;
+    height: 1px;
+    background: linear-gradient(
+            90deg,
+            transparent,
+            color-mix(in srgb, var(--card-border, #f2b584) 42%, transparent),
+            transparent
+    );
+    box-shadow: 0 0 8px color-mix(in srgb, var(--card-border, #f2b584) 20%, transparent);
+}
+
 /* === BACK: ABILITIES LIST === */
 .skillsList {
+    position: relative;
     width: min(100%, 168px);
     box-sizing: border-box;
 
@@ -468,8 +488,23 @@
     align-items: stretch;
     justify-content: flex-start;
 
-    padding: 0;
+    padding: 0 0 0 8px;
     margin-top: 4px;
+}
+
+.skillsList::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 1px;
+    background: linear-gradient(
+            180deg,
+            transparent,
+            color-mix(in srgb, var(--card-border, #f2b584) 34%, transparent),
+            transparent
+    );
 }
 
 .skill {
