@@ -2,6 +2,7 @@ package ewshop.facade.impl;
 
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
+import ewshop.domain.model.results.TechImportPreview;
 import ewshop.domain.service.TechImportService;
 import ewshop.domain.service.TechService;
 import ewshop.facade.dto.importing.*;
@@ -112,6 +113,57 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
         techService.getAllTechs();
 
         return ImportSummaryDto.of("tech", counts, diagnostics, durationMs);
+    }
+
+    @Override
+    public ImportSmokeSummaryDto smokeTestTechs(TechImportBatchDto fileDto) {
+        if (fileDto == null) {
+            throw new IllegalArgumentException("Import file is required");
+        }
+
+        assertExportKind(fileDto.exportKind());
+
+        List<TechImportTechDto> techDtos = fileDto.techs();
+        if (techDtos == null || techDtos.isEmpty()) {
+            throw new IllegalArgumentException("Import file has no techs");
+        }
+
+        int received = techDtos.size();
+
+        List<ImportIssueDto> errors = new ArrayList<>();
+        List<TechImportSnapshot> snapshots = new ArrayList<>(received);
+
+        for (TechImportTechDto dto : techDtos) {
+            try {
+                snapshots.add(TechImportMapper.toDomain(dto));
+            } catch (RuntimeException ex) {
+                if (errors.size() < MAX_ERRORS) {
+                    errors.add(toIssue(dto, ex));
+                }
+            }
+        }
+
+        TechImportPreview preview = techImportService.previewSnapshot(snapshots);
+        int failed = received - snapshots.size();
+
+        List<ImportCountDto> filters = new ArrayList<>();
+        if (preview.hiddenSnapshots() > 0) {
+            filters.add(new ImportCountDto("HIDDEN_OR_NON_PLAYER_FACING_TECH", preview.hiddenSnapshots()));
+        }
+        if (preview.snapshotsWithoutAvailableFactions() > 0) {
+            filters.add(new ImportCountDto("NO_AVAILABLE_MAJOR_FACTIONS", preview.snapshotsWithoutAvailableFactions()));
+        }
+
+        return new ImportSmokeSummaryDto(
+                "tech",
+                received,
+                snapshots.size(),
+                preview.importable(),
+                preview.filtered(),
+                failed,
+                filters,
+                errors
+        );
     }
 
     private static ImportIssueDto toIssue(TechImportTechDto dto, RuntimeException ex) {

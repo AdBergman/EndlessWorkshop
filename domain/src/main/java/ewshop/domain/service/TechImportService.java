@@ -2,6 +2,7 @@ package ewshop.domain.service;
 
 import ewshop.domain.command.TechImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
+import ewshop.domain.model.results.TechImportPreview;
 import ewshop.domain.repository.TechRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,20 @@ public class TechImportService {
             return new ImportResult();
         }
 
+        TechImportPreview preview = previewSnapshot(techImportSnapshots);
+
+        if (preview.importableSnapshots().isEmpty()) {
+            throw new IllegalStateException("Tech import produced 0 public techs; refusing to write/delete.");
+        }
+
+        return techRepository.importTechSnapshot(preview.importableSnapshots());
+    }
+
+    public TechImportPreview previewSnapshot(List<TechImportSnapshot> techImportSnapshots) {
+        if (techImportSnapshots == null || techImportSnapshots.isEmpty()) {
+            return new TechImportPreview(List.of(), 0, 0);
+        }
+
         Set<String> importedMajorFactions = techImportSnapshots.stream()
                 .filter(snapshot -> !snapshot.hidden())
                 .map(TechImportSnapshot::factionDisplayName)
@@ -44,10 +59,15 @@ public class TechImportService {
                 .filter(snapshot -> snapshot.availableMajorFactions() != null && !snapshot.availableMajorFactions().isEmpty())
                 .toList();
 
-        if (!enrichedSnapshots.isEmpty() && publicSnapshots.isEmpty()) {
-            throw new IllegalStateException("Tech import produced 0 public techs; refusing to write/delete.");
-        }
+        int hidden = (int) enrichedSnapshots.stream()
+                .filter(TechImportSnapshot::hidden)
+                .count();
 
-        return techRepository.importTechSnapshot(publicSnapshots);
+        int noAvailableFactions = (int) enrichedSnapshots.stream()
+                .filter(snapshot -> !snapshot.hidden())
+                .filter(snapshot -> snapshot.availableMajorFactions() == null || snapshot.availableMajorFactions().isEmpty())
+                .count();
+
+        return new TechImportPreview(publicSnapshots, hidden, noAvailableFactions);
     }
 }

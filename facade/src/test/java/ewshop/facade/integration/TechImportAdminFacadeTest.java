@@ -2,6 +2,7 @@ package ewshop.facade.integration;
 
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
+import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
@@ -172,5 +173,77 @@ class TechImportAdminFacadeTest extends BaseIT {
         assertThatThrownBy(() -> techImportAdminFacade.importTechs(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Import file is required");
+    }
+
+    @Test
+    void smokeTestTechs_reportsImportableAndFilteredRows_withoutWritingToDatabase() {
+        TechImportTechDto visibleDto = new TechImportTechDto(
+                "Technology_VISIBLE",
+                "Visible Tech",
+                null,
+                false,
+                1,
+                "Discovery",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        TechImportTechDto filteredDto = new TechImportTechDto(
+                "Technology_FILTERED",
+                "Filtered Tech",
+                null,
+                false,
+                1,
+                "Discovery",
+                null,
+                false,
+                false,
+                false,
+                false,
+                false,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        TechImportTechDto invalidDto = new TechImportTechDto(
+                "Technology_INVALID",
+                "Invalid Tech",
+                null,
+                false,
+                1,
+                "Invalid",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        TechImportBatchDto file = new TechImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-06T00:00:00Z",
+                "tech",
+                List.of(visibleDto, filteredDto, invalidDto)
+        );
+
+        ImportSmokeSummaryDto summary = techImportAdminFacade.smokeTestTechs(file);
+
+        assertThat(summary.kind()).isEqualTo("tech");
+        assertThat(summary.received()).isEqualTo(3);
+        assertThat(summary.valid()).isEqualTo(2);
+        assertThat(summary.importable()).isEqualTo(1);
+        assertThat(summary.filtered()).isEqualTo(1);
+        assertThat(summary.failed()).isEqualTo(1);
+        assertThat(summary.filters()).anySatisfy(filter -> {
+            assertThat(filter.code()).isEqualTo("HIDDEN_OR_NON_PLAYER_FACING_TECH");
+            assertThat(filter.count()).isEqualTo(1);
+        });
+        assertThat(summary.errors()).hasSize(1);
+        assertThat(techJpaRepository.findAllForCache()).isEmpty();
     }
 }

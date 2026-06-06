@@ -63,12 +63,7 @@ public final class UnitImportMapper {
     }
 
     private static boolean shouldFilterOut(UnitImportUnitDto dto) {
-        return Boolean.TRUE.equals(dto.isHidden())
-                || Boolean.FALSE.equals(dto.isPlayerFacing())
-                || Boolean.TRUE.equals(dto.isPrototype())
-                || Boolean.TRUE.equals(dto.isBaseTemplate())
-                || Boolean.TRUE.equals(dto.isPlaceholder())
-                || Boolean.TRUE.equals(dto.isInternal());
+        return dto.filteredFromImport();
     }
 
     private static String req(String v, String field) {

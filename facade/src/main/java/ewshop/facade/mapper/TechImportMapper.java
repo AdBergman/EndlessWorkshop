@@ -31,12 +31,7 @@ public final class TechImportMapper {
         TechType type = mapQuadrantToTechType(dto.quadrant(), dto.techKey());
         int era = dto.eraIndex() == null ? 1 : dto.eraIndex();
         String factionDisplayName = FactionNamePolicy.canonicalMajorDisplayNameOrSelf(dto.factionKey());
-        boolean hidden = Boolean.TRUE.equals(dto.hidden())
-                || Boolean.FALSE.equals(dto.isPlayerFacing())
-                || Boolean.TRUE.equals(dto.isPrototype())
-                || Boolean.TRUE.equals(dto.isBaseTemplate())
-                || Boolean.TRUE.equals(dto.isPlaceholder())
-                || Boolean.TRUE.equals(dto.isInternal());
+        boolean hidden = dto.hiddenForImport();
 
         List<String> prereqTechKeys = emptyIfNull(dto.technologyPrerequisiteTechKeys()).stream()
                 .filter(value -> value != null && !value.isBlank())

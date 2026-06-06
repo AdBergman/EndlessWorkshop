@@ -2,6 +2,7 @@ package ewshop.facade.impl;
 
 import ewshop.domain.command.UnitImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
+import ewshop.domain.model.results.UnitImportPreview;
 import ewshop.domain.service.UnitImportService;
 import ewshop.domain.service.UnitService;
 import ewshop.facade.dto.importing.*;
@@ -103,6 +104,52 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
         unitService.getAllUnits(); // warm cache
 
         return ImportSummaryDto.of("units", counts, diagnostics, durationMs);
+    }
+
+    @Override
+    public ImportSmokeSummaryDto smokeTestUnits(UnitImportBatchDto fileDto) {
+        if (fileDto == null) throw new IllegalArgumentException("Import file is required");
+        assertExportKind(fileDto.exportKind());
+
+        List<UnitImportUnitDto> rows = fileDto.units();
+        if (rows == null || rows.isEmpty()) throw new IllegalArgumentException("Import file has no units");
+
+        int received = rows.size();
+
+        List<ImportIssueDto> errors = new ArrayList<>();
+        List<UnitImportSnapshot> snapshots = new ArrayList<>(received);
+
+        for (UnitImportUnitDto dto : rows) {
+            try {
+                snapshots.add(UnitImportMapper.toSnapshot(dto));
+            } catch (RuntimeException ex) {
+                if (errors.size() < MAX_ERRORS) {
+                    errors.add(toIssue(dto, ex));
+                }
+            }
+        }
+
+        UnitImportPreview preview = unitImportService.previewUnits(snapshots);
+        int failed = received - snapshots.size();
+
+        List<ImportCountDto> filters = new ArrayList<>();
+        if (preview.rowsWithoutFaction() > 0) {
+            filters.add(new ImportCountDto("MISSING_OR_FILTERED_FACTION", preview.rowsWithoutFaction()));
+        }
+        if (preview.prototypeClassRows() > 0) {
+            filters.add(new ImportCountDto("PROTOTYPE_UNIT_CLASS", preview.prototypeClassRows()));
+        }
+
+        return new ImportSmokeSummaryDto(
+                "units",
+                received,
+                snapshots.size(),
+                preview.importable(),
+                preview.filtered(),
+                failed,
+                filters,
+                errors
+        );
     }
 
     private static ImportIssueDto toIssue(UnitImportUnitDto dto, RuntimeException ex) {

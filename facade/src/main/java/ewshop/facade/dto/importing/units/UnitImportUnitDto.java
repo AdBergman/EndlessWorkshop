@@ -1,6 +1,7 @@
 package ewshop.facade.dto.importing.units;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ewshop.facade.dto.importing.ImportVisibilityPolicy;
 
 import java.util.List;
 
@@ -83,6 +84,18 @@ public record UnitImportUnitDto(
                 null,
                 null,
                 null
+        );
+    }
+
+    public boolean filteredFromImport() {
+        return ImportVisibilityPolicy.shouldFilter(
+                null,
+                isHidden,
+                isPlayerFacing,
+                isPrototype,
+                isBaseTemplate,
+                isPlaceholder,
+                isInternal
         );
     }
 }

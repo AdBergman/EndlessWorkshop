@@ -1,6 +1,7 @@
 package ewshop.api.controller;
 
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
@@ -57,6 +58,14 @@ public class ImportAdminController {
         return techImportAdminFacade.importTechs(dto);
     }
 
+    @PostMapping(value = "/techs/smoke", consumes = "application/json", produces = "application/json")
+    public ImportSmokeSummaryDto smokeTestTechs(@RequestBody TechImportBatchDto dto) {
+        if (dto.techs() == null || dto.techs().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing techs[]");
+        }
+        return techImportAdminFacade.smokeTestTechs(dto);
+    }
+
     @PostMapping(value = "/districts", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importDistricts(@RequestBody DistrictImportBatchDto dto) {
         if (dto.districts() == null || dto.districts().isEmpty()) {
@@ -79,6 +88,14 @@ public class ImportAdminController {
             throw new IllegalArgumentException("Import file is missing units[]");
         }
         return unitImportAdminFacade.importUnits(dto);
+    }
+
+    @PostMapping(value = "/units/smoke", consumes = "application/json", produces = "application/json")
+    public ImportSmokeSummaryDto smokeTestUnits(@RequestBody UnitImportBatchDto dto) {
+        if (dto.units() == null || dto.units().isEmpty()) {
+            throw new IllegalArgumentException("Import file is missing units[]");
+        }
+        return unitImportAdminFacade.smokeTestUnits(dto);
     }
 
     @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")

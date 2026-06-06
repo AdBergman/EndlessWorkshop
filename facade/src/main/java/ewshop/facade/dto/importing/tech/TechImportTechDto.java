@@ -1,6 +1,7 @@
 package ewshop.facade.dto.importing.tech;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import ewshop.facade.dto.importing.ImportVisibilityPolicy;
 
 import java.util.List;
 
@@ -54,6 +55,18 @@ public record TechImportTechDto(
                 exclusiveTechnologyPrerequisiteTechKeys,
                 factionTraitPrerequisites,
                 unlocks
+        );
+    }
+
+    public boolean hiddenForImport() {
+        return ImportVisibilityPolicy.shouldFilter(
+                hidden,
+                null,
+                isPlayerFacing,
+                isPrototype,
+                isBaseTemplate,
+                isPlaceholder,
+                isInternal
         );
     }
 }

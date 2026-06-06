@@ -59,18 +59,7 @@ export function buildEvolutionLayers(
         else layers.set(d, [u]);
     }
 
-    const sortTier = (a: Unit, b: Unit) => {
-        const ta = a.evolutionTierIndex ?? Number.MAX_SAFE_INTEGER;
-        const tb = b.evolutionTierIndex ?? Number.MAX_SAFE_INTEGER;
-        if (ta !== tb) return ta - tb;
-
-        const na = (a.displayName ?? "").localeCompare(b.displayName ?? "");
-        if (na !== 0) return na;
-
-        return a.unitKey.localeCompare(b.unitKey);
-    };
-
     return [...layers.entries()]
         .sort((a, b) => a[0] - b[0])
-        .map(([, units]) => units.sort(sortTier));
+        .map(([, units]) => units);
 }

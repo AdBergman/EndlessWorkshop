@@ -27,6 +27,7 @@ vi.mock("@/api/apiClient", () => ({
 }));
 
 const mockedApiClient = vi.mocked(apiClient);
+const originalImage = globalThis.Image;
 
 const tech = (overrides: Partial<Tech>): Tech => ({
     techKey: "Tech_Workshop",
@@ -98,6 +99,10 @@ describe("TechContainer routing regressions", () => {
                 era: 3,
             }),
         ]);
+    });
+
+    afterEach(() => {
+        vi.stubGlobal("Image", originalImage);
     });
 
     it("hydrates faction and selected tech from faction/tech deep links without changing URL semantics", async () => {
@@ -235,5 +240,55 @@ describe("TechContainer routing regressions", () => {
         expect(screen.getByTestId("selected-techs")).toBeEmptyDOMElement();
         expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
         expect(useTechPlannerStore.getState().selectedTechs).toEqual([]);
+    });
+
+    it("smokes the /tech select-all and copy-link build save flow", async () => {
+        class InstantImage {
+            onload: (() => void) | null = null;
+            onerror: (() => void) | null = null;
+
+            set src(_value: string) {
+                window.setTimeout(() => this.onload?.(), 0);
+            }
+        }
+
+        vi.stubGlobal("Image", InstantImage as unknown as typeof Image);
+        window.history.pushState({}, "", "/tech");
+
+        const user = userEvent.setup({ skipHover: true });
+        mockedApiClient.createSavedBuild.mockImplementation(async () => {
+            return {
+                uuid: "saved-build-id",
+                name: "My Build",
+                selectedFaction: "KIN",
+                techIds: ["Tech_Summary_First"],
+                createdAt: "2026-06-06T00:00:00Z",
+            };
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/tech"]}>
+                <GameDataProvider>
+                    <TechContainer />
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await user.click(await screen.findByTestId("select-all-button"));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("selected-techs")).toHaveTextContent("Tech_Summary_First");
+        });
+
+        await user.click(screen.getByRole("button", { name: "Copy Link" }));
+
+        await waitFor(() => {
+            expect(mockedApiClient.createSavedBuild).toHaveBeenCalledWith(
+                "My Build",
+                "KIN",
+                ["Tech_Summary_First"]
+            );
+        });
     });
 });
