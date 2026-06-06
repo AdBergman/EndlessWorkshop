@@ -56,13 +56,13 @@ public enum MajorFaction {
     public static MajorFaction fromDisplayName(String raw) {
         if (raw == null || raw.isBlank()) return null;
 
-        return switch (raw.trim()) {
-            case "Aspects" -> ASPECTS;
-            case "Kin" -> KIN;
-            case "Lords" -> LORDS;
-            case "Necrophages" -> NECROPHAGES;
-            case "Tahuk" -> TAHUK;
-            case "Tormented" -> TORMENTED;
+        return switch (raw.trim().toUpperCase()) {
+            case "ASPECTS" -> ASPECTS;
+            case "KIN" -> KIN;
+            case "LORDS" -> LORDS;
+            case "NECROPHAGES" -> NECROPHAGES;
+            case "TAHUK" -> TAHUK;
+            case "TORMENTED" -> TORMENTED;
             default -> throw new IllegalArgumentException("Unknown major faction displayName: " + raw);
         };
     }

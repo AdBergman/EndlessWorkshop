@@ -2,6 +2,7 @@ package ewshop.facade.mapper;
 
 import ewshop.domain.model.SavedTechBuild;
 import ewshop.domain.model.enums.MajorFaction;
+import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,5 +104,22 @@ class SavedTechBuildMapperTest {
         assertThat(dto.selectedFaction()).isEqualTo("Lords");
         assertThat(dto.techIds()).isEmpty();
         assertThat(dto.createdAt()).isEqualTo(createdAt);
+    }
+
+    @Test
+    @DisplayName("toDomain should accept frontend enum faction values")
+    void toDomain_shouldAcceptFrontendEnumFactionValues() {
+        CreateSavedTechBuildRequest request = CreateSavedTechBuildRequest.builder()
+                .name("Frontend Tech Build")
+                .selectedFaction("KIN")
+                .techIds(List.of("Tech_A", "Tech_B"))
+                .build();
+
+        SavedTechBuild domain = SavedTechBuildMapper.toDomain(request);
+
+        assertThat(domain.getUuid()).isNotNull();
+        assertThat(domain.getName()).isEqualTo("Frontend Tech Build");
+        assertThat(domain.getFaction()).isEqualTo(MajorFaction.KIN);
+        assertThat(domain.getTechIds()).containsExactly("Tech_A", "Tech_B");
     }
 }
