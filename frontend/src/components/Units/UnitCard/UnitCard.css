@@ -475,7 +475,7 @@
 .skill {
     display: grid;
     grid-template-columns: 22px minmax(0, 1fr);
-    align-items: start;
+    align-items: center;
     column-gap: 7px;
     justify-content: stretch;
 
@@ -491,6 +491,7 @@
     font-size: 0.95rem;
     line-height: 1.15;
 
+    min-height: 24px;
     padding: 2px 0;
 
     letter-spacing: 0.02em;
@@ -510,7 +511,7 @@
     object-fit: contain;
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
     justify-self: center;
-    margin-top: -1px;
+    align-self: center;
 }
 
 .skillLabel {
