@@ -70,6 +70,7 @@ describe("UnitCard", () => {
         expect(container.querySelector('img.skillIcon[src="/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg"]'))
             .toBeInTheDocument();
         expect(container.querySelectorAll("img.skillIcon")).toHaveLength(1);
+        expect(container.querySelector(".skillNoIcon")).toHaveTextContent("Land Unit");
     });
 
     it("renders game SVG icons for compact unit stats", () => {

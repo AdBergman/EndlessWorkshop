@@ -482,7 +482,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                 {visibleSkills.map(({ key, codex, iconPath }) => (
                                     <div
                                         key={key}
-                                        className="skill"
+                                        className={`skill ${iconPath ? "" : "skillNoIcon"}`}
                                         onMouseEnter={(e) => handleSkillEnter(e, key)}
                                         onMouseMove={handleSkillMove}
                                         onMouseLeave={clearHoverSoon}

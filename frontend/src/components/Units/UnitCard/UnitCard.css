@@ -459,24 +459,25 @@
 
 /* === BACK: ABILITIES LIST === */
 .skillsList {
-    width: 100%;
+    width: min(100%, 168px);
     box-sizing: border-box;
 
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+    justify-content: flex-start;
 
-    /* keep pills away from card edges */
-    padding: 0 12px;
+    padding: 0;
     margin-top: 4px;
 }
 
 .skill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 7px;
+    justify-content: stretch;
 
     background: transparent;
     border: none;
@@ -490,11 +491,10 @@
     font-size: 0.95rem;
     line-height: 1.15;
 
-    padding: 3px 6px;
+    padding: 2px 0;
 
     letter-spacing: 0.02em;
 
-    /* 👇 allow wrapping */
     white-space: normal;
     text-align: left;
 
@@ -506,14 +506,21 @@
 
 .skillIcon {
     flex: 0 0 auto;
-    display: inline-block;
+    display: block;
     object-fit: contain;
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.75));
+    justify-self: center;
+    margin-top: -1px;
 }
 
 .skillLabel {
     min-width: 0;
     overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.skillNoIcon .skillLabel {
+    grid-column: 2;
 }
 
 .skill:hover {
