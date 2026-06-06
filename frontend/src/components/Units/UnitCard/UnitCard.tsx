@@ -8,6 +8,7 @@ import { DEFAULT_UNIT_IMAGE } from "@/utils/assetHelpers";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { useCodex } from "@/hooks/useCodex";
 import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
+import UnitCardMetadataTooltip, { type HoveredUnitCardMetadata } from "./UnitCardMetadataTooltip";
 import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
 import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
@@ -103,35 +104,32 @@ function getTierRankNumberLabel(tierRankLabel: string | null): string | null {
 
 function getTooltipCoordsFromElement(element: HTMLElement): { x: number; y: number; mode: "pixel" } {
     const rect = element.getBoundingClientRect();
-    return { x: rect.right + 10, y: rect.top + rect.height / 2, mode: "pixel" };
+    return { x: rect.right + 8, y: rect.top + rect.height / 2, mode: "pixel" };
 }
 
-function buildClassFallbackCodex(icon: UnitClassIcon): Codex {
-    const fallbackLines = icon.fallbackDescriptionLines.length > 0
-        ? icon.fallbackDescriptionLines
-        : [`${icon.label} unit class.`];
+function stripDescriptionTokens(line: string): string {
+    return line.replace(/\[([^\]]+)]/g, "$1");
+}
 
+function buildClassMetadataTooltip(icon: UnitClassIcon): Omit<HoveredUnitCardMetadata, "coords"> {
+    if (icon.bonusTargetLabel) {
+        return {
+            kind: "class",
+            title: `${icon.label}: +10% Damage`,
+            body: `when attacking ${icon.bonusTargetLabel} units.`,
+        };
+    }
+
+    const fallbackLine = icon.fallbackDescriptionLines[0];
     return {
-        exportKind: "abilities",
-        entryKey: icon.bonusAbilityKey ?? `UnitClass_${icon.classKey}`,
-        displayName: icon.label,
-        kind: "Ability",
-        category: null,
-        descriptionLines: fallbackLines,
-        referenceKeys: icon.bonusAbilityKey ? [icon.bonusAbilityKey] : [],
+        kind: "class",
+        title: icon.label,
+        body: fallbackLine ? stripDescriptionTokens(fallbackLine) : undefined,
     };
 }
 
-function buildTierTooltipCodex(tierLabel: string, tierRankLabel: string): Codex {
-    return {
-        exportKind: "units",
-        entryKey: `UnitTier_${tierRankLabel}`,
-        displayName: tierLabel,
-        kind: "Unit Tier",
-        category: null,
-        descriptionLines: ["Evolution tier."],
-        referenceKeys: [],
-    };
+function buildTierMetadataTooltip(tierLabel: string): Omit<HoveredUnitCardMetadata, "coords"> {
+    return { kind: "tier", title: tierLabel };
 }
 
 function TierRankSeal({ label }: { label: string }) {
@@ -219,13 +217,17 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
     // Tooltip hover handling (sticky)
     const [hoveredSkill, setHoveredSkill] = useState<HoveredSkill | null>(null);
+    const [hoveredMetadata, setHoveredMetadata] = useState<HoveredUnitCardMetadata | null>(null);
     const hoveringTooltipRef = useRef(false);
     const clearTimerRef = useRef<number | null>(null);
 
     const clearHoverSoon = () => {
         if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
         clearTimerRef.current = window.setTimeout(() => {
-            if (!hoveringTooltipRef.current) setHoveredSkill(null);
+            if (!hoveringTooltipRef.current) {
+                setHoveredSkill(null);
+                setHoveredMetadata(null);
+            }
         }, 60);
     };
 
@@ -239,6 +241,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             data: codex,
             coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" },
         });
+        setHoveredMetadata(null);
     };
 
     const handleSkillFocus = (e: React.FocusEvent<HTMLElement>, codex: Codex) => {
@@ -252,47 +255,55 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             data,
             coords,
         });
+        setHoveredMetadata(null);
+    };
+
+    const showMetadataTooltip = (
+        metadata: Omit<HoveredUnitCardMetadata, "coords">,
+        coords: { x: number; y: number; mode: "pixel" }
+    ) => {
+        if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
+
+        setHoveredSkill(null);
+        setHoveredMetadata({
+            ...metadata,
+            coords,
+        });
     };
 
     const handleClassIconEnter = (e: React.MouseEvent<HTMLElement>, icon: UnitClassIcon) => {
-        const codex = icon.bonusAbilityKey
-            ? getVisibleEntry("abilities", icon.bonusAbilityKey)
-            : undefined;
-
-        showTooltip(
-            codex ?? buildClassFallbackCodex(icon),
-            { x: e.clientX + 12, y: e.clientY, mode: "pixel" }
+        showMetadataTooltip(
+            buildClassMetadataTooltip(icon),
+            { x: e.clientX + 8, y: e.clientY, mode: "pixel" }
         );
     };
 
     const handleClassIconFocus = (e: React.FocusEvent<HTMLElement>, icon: UnitClassIcon) => {
-        const codex = icon.bonusAbilityKey
-            ? getVisibleEntry("abilities", icon.bonusAbilityKey)
-            : undefined;
-
-        showTooltip(codex ?? buildClassFallbackCodex(icon), getTooltipCoordsFromElement(e.currentTarget));
+        showMetadataTooltip(buildClassMetadataTooltip(icon), getTooltipCoordsFromElement(e.currentTarget));
     };
 
     const handleTierEnter = (e: React.MouseEvent<HTMLElement>) => {
         if (!d.tierLabel || !tierRankLabel) return;
-        showTooltip(
-            buildTierTooltipCodex(d.tierLabel, tierRankLabel),
-            { x: e.clientX + 12, y: e.clientY, mode: "pixel" }
+        showMetadataTooltip(
+            buildTierMetadataTooltip(d.tierLabel),
+            { x: e.clientX + 8, y: e.clientY, mode: "pixel" }
         );
     };
 
     const handleTierFocus = (e: React.FocusEvent<HTMLElement>) => {
         if (!d.tierLabel || !tierRankLabel) return;
-        showTooltip(
-            buildTierTooltipCodex(d.tierLabel, tierRankLabel),
-            getTooltipCoordsFromElement(e.currentTarget)
-        );
+        showMetadataTooltip(buildTierMetadataTooltip(d.tierLabel), getTooltipCoordsFromElement(e.currentTarget));
     };
 
     const handleSkillMove = (e: React.MouseEvent) => {
         setHoveredSkill((prev) =>
             prev
                 ? { ...prev, coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" } }
+                : prev
+        );
+        setHoveredMetadata((prev) =>
+            prev
+                ? { ...prev, coords: { x: e.clientX + 8, y: e.clientY, mode: "pixel" } }
                 : prev
         );
     };
@@ -516,6 +527,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             {hoveredSkill && (
                 <SkillTooltip
                     hoveredSkill={hoveredSkill}
+                    onMouseEnter={onTooltipEnter}
+                    onMouseLeave={onTooltipLeave}
+                />
+            )}
+
+            {hoveredMetadata && (
+                <UnitCardMetadataTooltip
+                    hoveredMetadata={hoveredMetadata}
                     onMouseEnter={onTooltipEnter}
                     onMouseLeave={onTooltipLeave}
                 />

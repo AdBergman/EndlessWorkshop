@@ -181,33 +181,33 @@ describe("UnitCard", () => {
         ]);
     });
 
-    it("shows fallback gameplay tooltip content for class icons when Codex entries are missing", async () => {
+    it("shows compact gameplay tooltip content for class icons", async () => {
         render(
             <UnitCard
                 unit={unit({
-                    unitClassKey: "UnitClass_Ranged",
-                    unitClassDisplayName: "Ranged",
+                    unitClassKey: "UnitClass_Juggernaught",
+                    unitClassDisplayName: "Juggernaught",
                     evolutionTierIndex: 0,
                 })}
             />
         );
 
-        fireEvent.mouseEnter(screen.getByLabelText("Ranged: bonus vs Flying"), {
+        fireEvent.mouseEnter(screen.getByLabelText("Juggernaught: bonus vs Hero"), {
             clientX: 30,
             clientY: 30,
         });
 
         await waitFor(() => {
-            expect(screen.getByText("Ranged")).toBeInTheDocument();
-            expect(screen.getByText(/when attacking Flying units/i)).toBeInTheDocument();
+            expect(screen.getByText("Juggernaught: +10% Damage")).toBeInTheDocument();
+            expect(screen.getByText("when attacking Hero units.")).toBeInTheDocument();
         });
     });
 
-    it("uses rich Codex ability tooltip content for class icons when available", async () => {
+    it("keeps rich ability tooltips on the card back separate from compact class metadata tooltips", async () => {
         const entries = [
             {
-                ...abilityEntry("UnitAbility_Class_BonusVsFlying", "Anti-Air Training"),
-                descriptionLines: ["Deals bonus damage against Flying units."],
+                ...abilityEntry("UnitAbility_Ranged_3", "Ranged Attack"),
+                descriptionLines: ["Deals ranged damage from a safe distance."],
             },
         ];
 
@@ -223,20 +223,20 @@ describe("UnitCard", () => {
                 unit={unit({
                     unitClassKey: "UnitClass_Ranged",
                     unitClassDisplayName: "Ranged",
-                    abilityKeys: ["UnitAbility_Class_BonusVsFlying"],
+                    abilityKeys: ["UnitAbility_Ranged_3"],
                     evolutionTierIndex: 0,
                 })}
             />
         );
 
-        fireEvent.mouseEnter(screen.getByLabelText("Ranged: bonus vs Flying"), {
+        fireEvent.mouseEnter(screen.getByRole("button", { name: "Ranged Attack" }), {
             clientX: 30,
             clientY: 30,
         });
 
         await waitFor(() => {
-            expect(screen.getAllByText("Anti-Air Training").length).toBeGreaterThanOrEqual(2);
-            expect(screen.getByText("Deals bonus damage against Flying units.")).toBeInTheDocument();
+            expect(screen.getAllByText("Ranged Attack").length).toBeGreaterThanOrEqual(2);
+            expect(screen.getByText("Deals ranged damage from a safe distance.")).toBeInTheDocument();
         });
     });
 
@@ -259,7 +259,7 @@ describe("UnitCard", () => {
 
         await waitFor(() => {
             expect(screen.getByText("Tier II")).toBeInTheDocument();
-            expect(screen.getByText("Evolution tier.")).toBeInTheDocument();
+            expect(screen.queryByText("Evolution tier.")).not.toBeInTheDocument();
         });
     });
 

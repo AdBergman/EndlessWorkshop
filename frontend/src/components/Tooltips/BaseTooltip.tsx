@@ -6,13 +6,20 @@ interface BaseTooltipProps {
     children: React.ReactNode;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
+    tooltipStyle?: React.CSSProperties;
 }
 
 const isPixelCoords = (
     coords: BaseTooltipProps["coords"]
 ): coords is PixelTooltipCoords => "mode" in coords && coords.mode === "pixel";
 
-const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnter, onMouseLeave }) => {
+const BaseTooltip: React.FC<BaseTooltipProps> = ({
+                                                     coords,
+                                                     children,
+                                                     onMouseEnter,
+                                                     onMouseLeave,
+                                                     tooltipStyle,
+                                                 }) => {
     // --- Determine styling based on the coordinate system ---
     let positionStyles: React.CSSProperties;
     if (isPixelCoords(coords)) {
@@ -74,7 +81,7 @@ const BaseTooltip: React.FC<BaseTooltipProps> = ({ coords, children, onMouseEnte
     return (
         <div
             className="base-tooltip"
-            style={{ ...baseStyles, ...positionStyles }}
+            style={{ ...baseStyles, ...tooltipStyle, ...positionStyles }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
