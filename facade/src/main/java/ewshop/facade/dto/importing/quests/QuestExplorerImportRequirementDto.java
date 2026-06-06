@@ -1,8 +1,6 @@
 package ewshop.facade.dto.importing.quests;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public record QuestExplorerImportRequirementDto(
         String requirementKey,
         String kind,

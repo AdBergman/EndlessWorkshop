@@ -1,6 +1,5 @@
 package ewshop.domain.model.quest;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -294,7 +293,6 @@ public record QuestExplorer(
         }
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Objective(
             String objectiveKey,
             String choiceKey,

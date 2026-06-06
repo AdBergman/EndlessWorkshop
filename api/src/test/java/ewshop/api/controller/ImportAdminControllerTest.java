@@ -1,6 +1,5 @@
 package ewshop.api.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportDiagnosticsDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
@@ -26,8 +25,12 @@ import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -40,7 +43,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ImportAdminControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
+    private final ObjectMapper objectMapper = jsonMapper;
     private RecordingTechImportAdminFacade techFacade;
     private RecordingDistrictImportAdminFacade districtFacade;
     private RecordingImprovementImportAdminFacade improvementFacade;
@@ -66,6 +72,7 @@ class ImportAdminControllerTest {
                 questFacade
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setMessageConverters(new JacksonJsonHttpMessageConverter(jsonMapper))
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }

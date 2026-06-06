@@ -1,11 +1,13 @@
 package ewshop.facade.mapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.model.quest.QuestExplorer;
 import ewshop.domain.service.QuestExplorerProgressionDiagnosticReporter;
 import ewshop.domain.service.QuestExplorerProgressionProjector;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -400,7 +402,7 @@ class QuestExplorerProgressionProjectorTest {
         );
         Assumptions.assumeTrue(exportPath != null, "local quest_explorer export fixture is not present");
 
-        QuestExplorer source = new ObjectMapper().readValue(exportPath.toFile(), QuestExplorer.class);
+        QuestExplorer source = objectMapper().readValue(exportPath.toFile(), QuestExplorer.class);
         QuestExplorer.Progression progression = QuestExplorerProgressionProjector.project(source);
         QuestExplorer projectedExplorer = new QuestExplorer(
                 source.gameVersion(),
@@ -446,6 +448,12 @@ class QuestExplorerProgressionProjectorTest {
         assertThat(progression.debugSummary().entriesWithMissingChapterOrStepOrder()).hasSize(40);
         assertThat(progression.debugSummary().chaptersWithOnlyOneStep()).hasSize(3);
         assertThat(progression.debugSummary().missingMajorFactionChapters()).isEmpty();
+    }
+
+    private static ObjectMapper objectMapper() {
+        return JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     private static QuestExplorer.Progression project(List<QuestExplorer.Entry> entries) {

@@ -1,6 +1,5 @@
 package ewshop.api.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.api.TestApplication;
 import ewshop.domain.model.enums.MajorFaction;
 import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
@@ -14,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;

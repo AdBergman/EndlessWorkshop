@@ -9,10 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class Jackson2UsageInventoryTest {
+    private static final String JACKSON2_PACKAGE = "com.fasterxml" + ".jackson";
+    private static final String JACKSON2_BRIDGE_ARTIFACT = "spring-boot-" + "jackson2";
 
     @Test
-    void reportRemainingJackson2UsageByModule() throws IOException {
+    void noJackson2UsageRemainsInApplicationCodeOrPoms() throws IOException {
         Path repoRoot = findRepoRoot(Path.of("").toAbsolutePath());
         List<Usage> usages = new ArrayList<>();
 
@@ -22,19 +26,24 @@ class Jackson2UsageInventoryTest {
         }
         collectPomUsages(repoRoot.resolve("pom.xml"), "root", usages);
 
-        System.out.println();
-        System.out.println("Jackson 2 usage inventory. Informational while spring-boot-jackson2 is intentional debt.");
-        usages.stream()
-                .sorted()
-                .forEach(usage -> System.out.printf(
-                        Locale.ROOT,
-                        "[%s] %-14s %-12s %s:%d%n",
-                        usage.category(),
-                        usage.module(),
-                        usage.kind(),
-                        repoRoot.relativize(usage.path()),
-                        usage.lineNumber()
-                ));
+        if (!usages.isEmpty()) {
+            System.out.println();
+            System.out.println("Jackson 2 usage was found after the strict Jackson 3 cutover:");
+            usages.stream()
+                    .sorted()
+                    .forEach(usage -> System.out.printf(
+                            Locale.ROOT,
+                            "[%s] %-14s %-12s %s:%d%n",
+                            usage.category(),
+                            usage.module(),
+                            usage.kind(),
+                            repoRoot.relativize(usage.path()),
+                            usage.lineNumber()
+                    ));
+        }
+        assertThat(usages)
+                .as("EWShop application modules must not reintroduce Jackson 2 packages or bridge dependencies")
+                .isEmpty();
     }
 
     private static void collectJavaUsages(Path moduleRoot, String module, List<Usage> usages) throws IOException {
@@ -52,7 +61,7 @@ class Jackson2UsageInventoryTest {
             for (Path javaFile : javaFiles) {
                 List<String> lines = Files.readAllLines(javaFile);
                 for (int index = 0; index < lines.size(); index++) {
-                    if (lines.get(index).contains("com.fasterxml.jackson")) {
+                    if (lines.get(index).contains(JACKSON2_PACKAGE)) {
                         usages.add(new Usage(module, javaFile, index + 1, kind(javaFile), category(javaFile)));
                     }
                 }
@@ -68,7 +77,7 @@ class Jackson2UsageInventoryTest {
         List<String> lines = Files.readAllLines(pom);
         for (int index = 0; index < lines.size(); index++) {
             String line = lines.get(index);
-            if (line.contains("spring-boot-jackson2") || line.contains("com.fasterxml.jackson")) {
+            if (line.contains(JACKSON2_BRIDGE_ARTIFACT) || line.contains(JACKSON2_PACKAGE)) {
                 usages.add(new Usage(module, pom, index + 1, "pom", "dependency"));
             }
         }

@@ -1,6 +1,5 @@
 package ewshop.app.importing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportDiagnosticsDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
@@ -27,6 +26,9 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -283,7 +285,7 @@ class LocalStartupImportRunnerTest {
 
         return new LocalStartupImportRunner(
                 properties,
-                new ObjectMapper(),
+                objectMapper(),
                 facades,
                 facades,
                 facades,
@@ -291,6 +293,12 @@ class LocalStartupImportRunnerTest {
                 facades,
                 facades
         );
+    }
+
+    private static ObjectMapper objectMapper() {
+        return JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     private static ImportSummaryDto summary(String kind, int received) {
@@ -409,7 +417,7 @@ class LocalStartupImportRunnerTest {
 
         @Bean
         ObjectMapper objectMapper() {
-            return new ObjectMapper();
+            return LocalStartupImportRunnerTest.objectMapper();
         }
 
         @Bean

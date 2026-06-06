@@ -1,10 +1,8 @@
 package ewshop.facade.dto.importing.quests;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.math.BigDecimal;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public record QuestExplorerImportRewardDto(
         String rewardKey,
         String kind,

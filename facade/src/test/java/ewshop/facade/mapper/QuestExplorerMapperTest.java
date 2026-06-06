@@ -1,6 +1,5 @@
 package ewshop.facade.mapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.domain.command.QuestExplorerEntryImportSnapshot;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBranchDto;
@@ -15,6 +14,9 @@ import ewshop.facade.dto.importing.quests.QuestExplorerImportRewardDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportStrategyViewDto;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -249,7 +251,7 @@ class QuestExplorerMapperTest {
         );
         Assumptions.assumeTrue(exportPath != null, "local quest_explorer export fixture is not present");
 
-        var dto = new ObjectMapper().readValue(exportPath.toFile(), QuestExplorerImportBatchDto.class);
+        var dto = objectMapper().readValue(exportPath.toFile(), QuestExplorerImportBatchDto.class);
         var metadata = QuestExplorerImportMapper.toMetadata(dto);
         var snapshots = toValidatedSnapshots(dto);
 
@@ -298,6 +300,12 @@ class QuestExplorerMapperTest {
                 .toList();
         QuestExplorerImportMapper.validateSnapshots(snapshots);
         return snapshots;
+    }
+
+    private static ObjectMapper objectMapper() {
+        return JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     private static QuestExplorerImportBatchDto batch(List<QuestExplorerImportEntryDto> entries) {

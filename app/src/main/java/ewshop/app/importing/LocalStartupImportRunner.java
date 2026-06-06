@@ -1,7 +1,5 @@
 package ewshop.app.importing;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
@@ -23,6 +21,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -240,7 +241,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                 if ("quest_explorer".equals(exportKind)) {
                     explorerFiles.add(file);
                 }
-            } catch (IOException ignored) {
+            } catch (JacksonException ignored) {
                 // Let the normal per-file import path report malformed files.
             }
         }

@@ -49,6 +49,10 @@
             <groupId>com.endlessworkshop</groupId>
             <artifactId>infrastructure</artifactId>
         </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- OTLP metrics export (push) -->
         <dependency>
@@ -77,12 +81,6 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-        </dependency>
-
-        <!-- Temporary Jackson 2 bridge while runtime ObjectMapper usage is migrated separately. -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-jackson2</artifactId>
         </dependency>
 
         <!-- Springdoc OpenAPI (not managed by Boot BOM) -->
