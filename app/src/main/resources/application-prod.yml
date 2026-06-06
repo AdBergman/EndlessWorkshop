@@ -76,6 +76,12 @@ management:
 seo:
   output-dir: ${SEO_OUTPUT_DIR:generated-seo}
 
+springdoc:
+  api-docs:
+    enabled: ${SPRINGDOC_API_DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${SPRINGDOC_SWAGGER_UI_ENABLED:false}
+
 admin:
   token: ${ADMIN_TOKEN:}
 

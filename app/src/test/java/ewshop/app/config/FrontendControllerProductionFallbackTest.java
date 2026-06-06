@@ -1,5 +1,6 @@
 package ewshop.app.config;
 
+import ewshop.api.exception.GlobalExceptionHandler;
 import ewshop.app.seo.storage.SeoOutputLocator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,13 +82,22 @@ class FrontendControllerProductionFallbackTest {
         }
     }
 
+    @Test
+    void missingApiRoutesReturn404WhenGlobalExceptionHandlerIsPresent() throws Exception {
+        mockMvc.perform(get("/api/saved-tech-builds"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(post("/api/saved-tech-builds"))
+                .andExpect(status().isNotFound());
+    }
+
     @SpringBootConfiguration
     @EnableAutoConfiguration(exclude = {
             DataSourceAutoConfiguration.class,
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import({FrontendController.class, LegacySeoRedirectController.class, WebConfig.class})
+    @Import({FrontendController.class, GlobalExceptionHandler.class, LegacySeoRedirectController.class, WebConfig.class})
     static class TestApplication {
 
         @Bean
