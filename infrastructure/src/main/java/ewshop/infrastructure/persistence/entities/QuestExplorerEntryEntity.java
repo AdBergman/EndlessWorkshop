@@ -49,15 +49,15 @@ public class QuestExplorerEntryEntity {
     public NavigationEntity navigation;
 
     @OneToMany(mappedBy = "entry", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderColumn(name = "section_order")
+    @OrderBy("sectionOrder ASC, id ASC")
     public List<LoreSectionEntity> loreSections = new ArrayList<>();
 
     @OneToMany(mappedBy = "entry", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderColumn(name = "objective_order")
+    @OrderBy("objectiveOrder ASC, id ASC")
     public List<ObjectiveEntity> objectives = new ArrayList<>();
 
     @OneToMany(mappedBy = "entry", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderColumn(name = "branch_row_order")
+    @OrderBy("branchRowOrder ASC, id ASC")
     public List<BranchEntity> branches = new ArrayList<>();
 
     @ElementCollection
@@ -152,6 +152,9 @@ public class QuestExplorerEntryEntity {
         @JoinColumn(name = "entry_id", nullable = false)
         public QuestExplorerEntryEntity entry;
 
+        @Column(name = "section_order")
+        public Integer sectionOrder;
+
         @Column(name = "section_key", nullable = false, length = 360)
         public String sectionKey;
         @Column(name = "phase", nullable = false, length = 80)
@@ -176,7 +179,7 @@ public class QuestExplorerEntryEntity {
         public List<List<String>> revealedByBranchPathAlternatives = new ArrayList<>();
 
         @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, orphanRemoval = true)
-        @OrderColumn(name = "line_order")
+        @OrderBy("lineOrder ASC, id ASC")
         public List<LoreLineEntity> lines = new ArrayList<>();
 
         public LoreSectionEntity() {}
@@ -193,6 +196,9 @@ public class QuestExplorerEntryEntity {
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "section_id", nullable = false)
         public LoreSectionEntity section;
+
+        @Column(name = "line_order")
+        public Integer lineOrder;
 
         @Column(name = "speaker_label", length = 260)
         public String speakerLabel;
@@ -216,6 +222,9 @@ public class QuestExplorerEntryEntity {
         @JoinColumn(name = "entry_id", nullable = false)
         public QuestExplorerEntryEntity entry;
 
+        @Column(name = "objective_order")
+        public Integer objectiveOrder;
+
         @Column(name = "objective_key", length = 360)
         public String objectiveKey;
         @Column(name = "choice_key", length = 300)
@@ -238,11 +247,11 @@ public class QuestExplorerEntryEntity {
         public List<List<String>> revealedByBranchPathAlternatives = new ArrayList<>();
 
         @OneToMany(mappedBy = "objective", cascade = CascadeType.ALL, orphanRemoval = true)
-        @OrderColumn(name = "requirement_order")
+        @OrderBy("requirementOrder ASC, id ASC")
         public List<ObjectiveRequirementEntity> requirements = new ArrayList<>();
 
         @OneToMany(mappedBy = "objective", cascade = CascadeType.ALL, orphanRemoval = true)
-        @OrderColumn(name = "reward_order")
+        @OrderBy("rewardOrder ASC, id ASC")
         public List<ObjectiveRewardEntity> rewards = new ArrayList<>();
 
         public ObjectiveEntity() {}
@@ -259,6 +268,9 @@ public class QuestExplorerEntryEntity {
         @ManyToOne(fetch = FetchType.LAZY, optional = false)
         @JoinColumn(name = "entry_id", nullable = false)
         public QuestExplorerEntryEntity entry;
+
+        @Column(name = "branch_row_order")
+        public Integer branchRowOrder;
 
         @Column(name = "branch_key", nullable = false, length = 360)
         public String branchKey;
@@ -340,11 +352,11 @@ public class QuestExplorerEntryEntity {
         public List<String> conditions = new ArrayList<>();
 
         @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)
-        @OrderColumn(name = "requirement_order")
+        @OrderBy("requirementOrder ASC, id ASC")
         public List<BranchRequirementEntity> requirements = new ArrayList<>();
 
         @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)
-        @OrderColumn(name = "reward_order")
+        @OrderBy("rewardOrder ASC, id ASC")
         public List<BranchRewardEntity> rewards = new ArrayList<>();
 
         public BranchEntity() {}
@@ -356,6 +368,8 @@ public class QuestExplorerEntryEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         public Long id;
+        @Column(name = "requirement_order")
+        public Integer requirementOrder;
         @Column(name = "requirement_key", nullable = false, columnDefinition = "TEXT")
         public String requirementKey;
         @Column(name = "kind", nullable = false, length = 160)
@@ -394,6 +408,8 @@ public class QuestExplorerEntryEntity {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         public Long id;
+        @Column(name = "reward_order")
+        public Integer rewardOrder;
         @Column(name = "reward_key", nullable = false, columnDefinition = "TEXT")
         public String rewardKey;
         @Column(name = "kind", nullable = false, length = 160)

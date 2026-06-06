@@ -49,9 +49,15 @@ public class QuestExplorerPersistenceMapper {
         entity.loreSections.clear();
         entity.objectives.clear();
         entity.branches.clear();
-        model.loreSections().forEach(section -> entity.loreSections.add(toLoreSectionEntity(entity, section)));
-        model.objectives().forEach(objective -> entity.objectives.add(toObjectiveEntity(entity, objective)));
-        model.branches().forEach(branch -> entity.branches.add(toBranchEntity(entity, branch)));
+        for (int index = 0; index < model.loreSections().size(); index++) {
+            entity.loreSections.add(toLoreSectionEntity(entity, model.loreSections().get(index), index));
+        }
+        for (int index = 0; index < model.objectives().size(); index++) {
+            entity.objectives.add(toObjectiveEntity(entity, model.objectives().get(index), index));
+        }
+        for (int index = 0; index < model.branches().size(); index++) {
+            entity.branches.add(toBranchEntity(entity, model.branches().get(index), index));
+        }
     }
 
     public boolean isUnchanged(QuestExplorerEntryEntity entity, QuestExplorerEntryImportSnapshot snapshot) {
@@ -103,10 +109,12 @@ public class QuestExplorerPersistenceMapper {
 
     private QuestExplorerEntryEntity.LoreSectionEntity toLoreSectionEntity(
             QuestExplorerEntryEntity entry,
-            QuestExplorerLoreSectionImportSnapshot model
+            QuestExplorerLoreSectionImportSnapshot model,
+            int sectionOrder
     ) {
         QuestExplorerEntryEntity.LoreSectionEntity entity = new QuestExplorerEntryEntity.LoreSectionEntity();
         entity.entry = entry;
+        entity.sectionOrder = sectionOrder;
         entity.sectionKey = model.sectionKey();
         entity.phase = model.phase();
         entity.choiceKey = model.choiceKey();
@@ -115,16 +123,20 @@ public class QuestExplorerPersistenceMapper {
         entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
         entity.revealedByChoiceKeys = mutable(model.revealedByChoiceKeys());
         entity.revealedByBranchPathAlternatives = mutableNested(model.revealedByBranchPathAlternatives());
-        model.lines().forEach(line -> entity.lines.add(toLoreLineEntity(entity, line)));
+        for (int index = 0; index < model.lines().size(); index++) {
+            entity.lines.add(toLoreLineEntity(entity, model.lines().get(index), index));
+        }
         return entity;
     }
 
     private QuestExplorerEntryEntity.LoreLineEntity toLoreLineEntity(
             QuestExplorerEntryEntity.LoreSectionEntity section,
-            QuestExplorerLoreLineImportSnapshot model
+            QuestExplorerLoreLineImportSnapshot model,
+            int lineOrder
     ) {
         QuestExplorerEntryEntity.LoreLineEntity entity = new QuestExplorerEntryEntity.LoreLineEntity();
         entity.section = section;
+        entity.lineOrder = lineOrder;
         entity.speakerLabel = model.speakerLabel();
         entity.role = model.role();
         entity.text = model.text();
@@ -133,10 +145,12 @@ public class QuestExplorerPersistenceMapper {
 
     private QuestExplorerEntryEntity.ObjectiveEntity toObjectiveEntity(
             QuestExplorerEntryEntity entry,
-            QuestExplorerStrategyObjectiveImportSnapshot model
+            QuestExplorerStrategyObjectiveImportSnapshot model,
+            int objectiveOrder
     ) {
         QuestExplorerEntryEntity.ObjectiveEntity entity = new QuestExplorerEntryEntity.ObjectiveEntity();
         entity.entry = entry;
+        entity.objectiveOrder = objectiveOrder;
         entity.objectiveKey = model.objectiveKey();
         entity.choiceKey = model.choiceKey();
         entity.text = model.text();
@@ -144,17 +158,23 @@ public class QuestExplorerPersistenceMapper {
         entity.revealedByBranchKeys = mutable(model.revealedByBranchKeys());
         entity.revealedByChoiceKeys = mutable(model.revealedByChoiceKeys());
         entity.revealedByBranchPathAlternatives = mutableNested(model.revealedByBranchPathAlternatives());
-        model.requirements().forEach(requirement -> entity.requirements.add(toObjectiveRequirementEntity(entity, requirement)));
-        model.rewards().forEach(reward -> entity.rewards.add(toObjectiveRewardEntity(entity, reward)));
+        for (int index = 0; index < model.requirements().size(); index++) {
+            entity.requirements.add(toObjectiveRequirementEntity(entity, model.requirements().get(index), index));
+        }
+        for (int index = 0; index < model.rewards().size(); index++) {
+            entity.rewards.add(toObjectiveRewardEntity(entity, model.rewards().get(index), index));
+        }
         return entity;
     }
 
     private QuestExplorerEntryEntity.BranchEntity toBranchEntity(
             QuestExplorerEntryEntity entry,
-            QuestExplorerBranchImportSnapshot model
+            QuestExplorerBranchImportSnapshot model,
+            int branchRowOrder
     ) {
         QuestExplorerEntryEntity.BranchEntity entity = new QuestExplorerEntryEntity.BranchEntity();
         entity.entry = entry;
+        entity.branchRowOrder = branchRowOrder;
         entity.branchKey = model.branchKey();
         entity.choiceKey = model.choiceKey();
         entity.label = model.label();
@@ -177,47 +197,59 @@ public class QuestExplorerPersistenceMapper {
         entity.convergesIntoEntryKeys = mutable(model.convergesIntoEntryKeys());
         entity.outcomePreviewLines = mutable(model.outcomePreviewLines());
         entity.conditions = mutable(model.conditions());
-        model.requirements().forEach(requirement -> entity.requirements.add(toBranchRequirementEntity(entity, requirement)));
-        model.rewards().forEach(reward -> entity.rewards.add(toBranchRewardEntity(entity, reward)));
+        for (int index = 0; index < model.requirements().size(); index++) {
+            entity.requirements.add(toBranchRequirementEntity(entity, model.requirements().get(index), index));
+        }
+        for (int index = 0; index < model.rewards().size(); index++) {
+            entity.rewards.add(toBranchRewardEntity(entity, model.rewards().get(index), index));
+        }
         return entity;
     }
 
     private QuestExplorerEntryEntity.ObjectiveRequirementEntity toObjectiveRequirementEntity(
             QuestExplorerEntryEntity.ObjectiveEntity objective,
-            QuestExplorerRequirementImportSnapshot model
+            QuestExplorerRequirementImportSnapshot model,
+            int requirementOrder
     ) {
         QuestExplorerEntryEntity.ObjectiveRequirementEntity entity = new QuestExplorerEntryEntity.ObjectiveRequirementEntity();
         entity.objective = objective;
+        entity.requirementOrder = requirementOrder;
         copyRequirement(entity, model);
         return entity;
     }
 
     private QuestExplorerEntryEntity.BranchRequirementEntity toBranchRequirementEntity(
             QuestExplorerEntryEntity.BranchEntity branch,
-            QuestExplorerRequirementImportSnapshot model
+            QuestExplorerRequirementImportSnapshot model,
+            int requirementOrder
     ) {
         QuestExplorerEntryEntity.BranchRequirementEntity entity = new QuestExplorerEntryEntity.BranchRequirementEntity();
         entity.branch = branch;
+        entity.requirementOrder = requirementOrder;
         copyRequirement(entity, model);
         return entity;
     }
 
     private QuestExplorerEntryEntity.ObjectiveRewardEntity toObjectiveRewardEntity(
             QuestExplorerEntryEntity.ObjectiveEntity objective,
-            QuestExplorerRewardImportSnapshot model
+            QuestExplorerRewardImportSnapshot model,
+            int rewardOrder
     ) {
         QuestExplorerEntryEntity.ObjectiveRewardEntity entity = new QuestExplorerEntryEntity.ObjectiveRewardEntity();
         entity.objective = objective;
+        entity.rewardOrder = rewardOrder;
         copyReward(entity, model);
         return entity;
     }
 
     private QuestExplorerEntryEntity.BranchRewardEntity toBranchRewardEntity(
             QuestExplorerEntryEntity.BranchEntity branch,
-            QuestExplorerRewardImportSnapshot model
+            QuestExplorerRewardImportSnapshot model,
+            int rewardOrder
     ) {
         QuestExplorerEntryEntity.BranchRewardEntity entity = new QuestExplorerEntryEntity.BranchRewardEntity();
         entity.branch = branch;
+        entity.rewardOrder = rewardOrder;
         copyReward(entity, model);
         return entity;
     }

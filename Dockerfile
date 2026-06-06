@@ -10,10 +10,12 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---------- Stage 2: Build backend ----------
-FROM maven:4.0.0-rc-4-eclipse-temurin-25-alpine AS backend-build
+FROM eclipse-temurin:25-jdk-alpine AS backend-build
 WORKDIR /app
 
 # Copy only poms first for better layer caching
+COPY .mvn .mvn
+COPY mvnw ./
 COPY pom.xml ./
 COPY app/pom.xml app/pom.xml
 COPY api/pom.xml api/pom.xml
@@ -21,7 +23,8 @@ COPY domain/pom.xml domain/pom.xml
 COPY facade/pom.xml facade/pom.xml
 COPY infrastructure/pom.xml infrastructure/pom.xml
 
-RUN mvn dependency:go-offline -B
+RUN chmod +x mvnw
+RUN ./mvnw -B dependency:go-offline
 
 # Copy sources
 COPY app ./app
@@ -37,7 +40,7 @@ COPY --from=frontend-build /app/frontend/dist ./app/src/main/resources/static
 COPY app/src/main/resources/static/seo ./app/src/main/resources/static/seo
 
 # Build the backend (single runnable jar ends up in app/target/)
-RUN mvn clean package -DskipTests
+RUN ./mvnw -B clean package -DskipTests
 
 # ---------- Stage 3: Run Spring Boot ----------
 FROM eclipse-temurin:25-jdk AS runtime
