@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -73,8 +74,11 @@ class UnitControllerTest {
         mockMvc.perform(get("/api/units")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
 
                 // Unit 1
+                .andExpect(jsonPath("$[0].length()").value(16))
                 .andExpect(jsonPath("$[0].unitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[0].displayName").value("Test Unit 1"))
                 // null fields still exist unless Jackson NON_NULL is configured
@@ -96,11 +100,15 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
 
                 // Unit 2
+                .andExpect(jsonPath("$[1].length()").value(16))
                 .andExpect(jsonPath("$[1].unitKey").value("Unit_Test_2"))
                 .andExpect(jsonPath("$[1].displayName").value("Test Unit 2"))
                 .andExpect(jsonPath("$[1].artId").value("herald"))
                 .andExpect(jsonPath("$[1].faction").value("KIN"))
                 .andExpect(jsonPath("$[1].isMajorFaction").value(true))
+                .andExpect(jsonPath("$[1].isHero").value(false))
+                .andExpect(jsonPath("$[1].isChosen").value(false))
+                .andExpect(jsonPath("$[1].spawnType").value("Land"))
                 .andExpect(jsonPath("$[1].previousUnitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[1].nextEvolutionUnitKeys").isEmpty())
                 .andExpect(jsonPath("$[1].evolutionTierIndex").value(2))

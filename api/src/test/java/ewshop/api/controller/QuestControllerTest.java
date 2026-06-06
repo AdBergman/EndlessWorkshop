@@ -106,13 +106,22 @@ class QuestControllerTest {
 
         mockMvc.perform(get("/api/quests/explorer"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(7))
+                .andExpect(jsonPath("$.entries.length()").value(1))
                 .andExpect(jsonPath("$.exportKind").value("quest_explorer"))
                 .andExpect(jsonPath("$.schemaVersion").value("quest_explorer.v3"))
+                .andExpect(jsonPath("$.entries[0].length()").value(12))
                 .andExpect(jsonPath("$.entries[0].entryKey").value("Quest_A"))
                 .andExpect(jsonPath("$.entries[0].aliases[0]").value("Source_A"))
+                .andExpect(jsonPath("$.entries[0].isMandatory").value(true))
+                .andExpect(jsonPath("$.entries[0].isKeyNarrativeBeat").value(false))
+                .andExpect(jsonPath("$.entries[0].quality").doesNotExist())
+                .andExpect(jsonPath("$.progression.questlines.length()").value(1))
+                .andExpect(jsonPath("$.progression.debugSummary").doesNotExist())
                 .andExpect(jsonPath("$.progression.questlines[0].chapters[0].steps[0].stepKey").value("FactionQuest_Mukag:Faction_Mukag:chapter-2:step-0"))
                 .andExpect(jsonPath("$.progression.questlines[0].chapters[0].steps[0].projectionKind").value("real_entry_backed"))
-                .andExpect(jsonPath("$.progression.questlines[0].chapters[0].steps[0].detailEntryKey").value("Quest_A"));
+                .andExpect(jsonPath("$.progression.questlines[0].chapters[0].steps[0].detailEntryKey").value("Quest_A"))
+                .andExpect(jsonPath("$.progression.questlines[0].chapters[0].steps[0].variants.length()").value(1));
     }
 
     @Test

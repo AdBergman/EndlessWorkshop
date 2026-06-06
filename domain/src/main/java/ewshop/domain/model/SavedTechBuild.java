@@ -1,7 +1,5 @@
 package ewshop.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import ewshop.domain.model.enums.MajorFaction;
 
 import java.time.LocalDateTime;
@@ -9,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@JsonDeserialize(builder = SavedTechBuild.Builder.class)
 public class SavedTechBuild {
 
     private final UUID uuid;
@@ -41,19 +38,16 @@ public class SavedTechBuild {
         private final List<String> techIds = new ArrayList<>();
         private LocalDateTime createdAt = LocalDateTime.now();
 
-        @JsonProperty("uuid")
         public Builder uuid(UUID uuid) {
             this.uuid = uuid;
             return this;
         }
 
-        @JsonProperty("name")
         public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        @JsonProperty("majorFaction")
         public Builder faction(String majorFaction) {
             this.majorFaction = majorFaction;
             return this;
@@ -65,7 +59,6 @@ public class SavedTechBuild {
         }
 
 
-        @JsonProperty("techIds")
         public Builder techIds(List<String> techIds) {
             this.techIds.clear();
             if (techIds != null) this.techIds.addAll(techIds);
@@ -77,7 +70,6 @@ public class SavedTechBuild {
             return this;
         }
 
-        @JsonProperty("createdAt")
         public Builder createdAt(LocalDateTime createdAt) {
             this.createdAt = createdAt;
             return this;

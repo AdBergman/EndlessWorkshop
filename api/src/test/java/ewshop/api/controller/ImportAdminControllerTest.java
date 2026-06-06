@@ -6,6 +6,8 @@ import ewshop.facade.dto.importing.ImportDiagnosticsDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
+import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportEntryDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportLoreViewDto;
@@ -16,6 +18,8 @@ import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
+import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
@@ -28,6 +32,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -37,6 +42,8 @@ class ImportAdminControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private RecordingTechImportAdminFacade techFacade;
+    private RecordingDistrictImportAdminFacade districtFacade;
+    private RecordingImprovementImportAdminFacade improvementFacade;
     private RecordingUnitImportAdminFacade unitFacade;
     private RecordingQuestExplorerImportAdminFacade questFacade;
     private RecordingCodexImportAdminFacade codexFacade;
@@ -45,13 +52,15 @@ class ImportAdminControllerTest {
     @BeforeEach
     void setUp() {
         techFacade = new RecordingTechImportAdminFacade();
+        districtFacade = new RecordingDistrictImportAdminFacade();
+        improvementFacade = new RecordingImprovementImportAdminFacade();
         unitFacade = new RecordingUnitImportAdminFacade();
         questFacade = new RecordingQuestExplorerImportAdminFacade();
         codexFacade = new RecordingCodexImportAdminFacade();
         ImportAdminController controller = new ImportAdminController(
                 techFacade,
-                file -> okSummary("districts"),
-                file -> okSummary("improvements"),
+                districtFacade,
+                improvementFacade,
                 unitFacade,
                 codexFacade,
                 questFacade
@@ -95,6 +104,120 @@ class ImportAdminControllerTest {
     }
 
     @Test
+    void importTechs_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "tech",
+                  "ignoredExporterBatchField": true,
+                  "techs": [
+                    {
+                      "techKey": "Tech_A",
+                      "displayName": "A",
+                      "hidden": false,
+                      "eraIndex": 1,
+                      "quadrant": "Discovery",
+                      "ignoredExporterTechField": "future",
+                      "technologyPrerequisiteTechKeys": [],
+                      "exclusiveTechnologyPrerequisiteTechKeys": [],
+                      "factionTraitPrerequisites": [
+                        { "operator": "Any", "traitKey": "Trait_A", "ignoredTraitField": "future" }
+                      ],
+                      "unlocks": [
+                        {
+                          "unlockType": "Constructible",
+                          "unlockCategory": "District",
+                          "unlockElementName": "District_A",
+                          "descriptorKeys": [],
+                          "descriptorLines": [],
+                          "descriptorLineKeys": [],
+                          "ignoredUnlockField": "future"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/techs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(techFacade.lastImportDto);
+        assertEquals("Tech_A", techFacade.lastImportDto.techs().getFirst().techKey());
+        assertEquals("Trait_A", techFacade.lastImportDto.techs().getFirst().factionTraitPrerequisites().getFirst().traitKey());
+        assertEquals("District_A", techFacade.lastImportDto.techs().getFirst().unlocks().getFirst().unlockElementName());
+    }
+
+    @Test
+    void importDistricts_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "districts",
+                  "ignoredExporterBatchField": true,
+                  "districts": [
+                    {
+                      "districtKey": "District_A",
+                      "displayName": "District A",
+                      "category": "Science",
+                      "descriptionLines": ["+2 Science"],
+                      "ignoredExporterDistrictField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/districts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(districtFacade.lastDto);
+        assertEquals("District_A", districtFacade.lastDto.districts().getFirst().districtKey());
+        assertEquals("+2 Science", districtFacade.lastDto.districts().getFirst().descriptionLines().getFirst());
+    }
+
+    @Test
+    void importImprovements_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "improvements",
+                  "ignoredExporterBatchField": true,
+                  "improvements": [
+                    {
+                      "constructibleKey": "Improvement_A",
+                      "displayName": "Improvement A",
+                      "category": "Economy",
+                      "descriptionLines": ["+15 Approval"],
+                      "ignoredExporterImprovementField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/improvements")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(improvementFacade.lastDto);
+        assertEquals("Improvement_A", improvementFacade.lastDto.improvements().getFirst().constructibleKey());
+        assertEquals("+15 Approval", improvementFacade.lastDto.improvements().getFirst().descriptionLines().getFirst());
+    }
+
+    @Test
     void smokeTestUnits_returnsOk_andCallsFacade_whenPayloadHasUnits() throws Exception {
         UnitImportBatchDto payload = new UnitImportBatchDto(
                 "Endless Legend 2",
@@ -135,6 +258,51 @@ class ImportAdminControllerTest {
     }
 
     @Test
+    void importUnits_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "units",
+                  "ignoredExporterBatchField": true,
+                  "units": [
+                    {
+                      "unitKey": "Unit_A",
+                      "displayName": "Unit A",
+                      "faction": "Kin",
+                      "isMajorFaction": true,
+                      "isHero": false,
+                      "isChosen": false,
+                      "spawnType": "Land",
+                      "previousUnitKey": null,
+                      "nextEvolutionUnitKeys": [],
+                      "evolutionTierIndex": 1,
+                      "unitClassKey": "UnitClass_Ranged",
+                      "attackSkillKey": "Skill_Attack_1",
+                      "ownAbilityKeys": [],
+                      "abilityKeys": ["UnitAbility_A"],
+                      "descriptionLines": ["Line 1"],
+                      "ownDescriptorKeys": [],
+                      "descriptorKeys": [],
+                      "ignoredExporterUnitField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/units")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(unitFacade.lastImportDto);
+        assertEquals("Unit_A", unitFacade.lastImportDto.units().getFirst().unitKey());
+        assertEquals("UnitAbility_A", unitFacade.lastImportDto.units().getFirst().abilityKeys().getFirst());
+    }
+
+    @Test
     void importQuestExplorer_returnsOk_andCallsFacade_whenPayloadHasEntries() throws Exception {
         QuestExplorerImportBatchDto payload = questPayload(List.of(questEntry()));
 
@@ -144,6 +312,53 @@ class ImportAdminControllerTest {
                 .andExpect(status().isOk());
 
         assertEquals(payload, questFacade.lastDto);
+    }
+
+    @Test
+    void importQuestExplorer_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "quest_explorer",
+                  "schemaVersion": "quest_explorer.v3",
+                  "ignoredExporterBatchField": true,
+                  "entries": [
+                    {
+                      "entryKey": "Quest_A",
+                      "title": "A Quest",
+                      "summaryLines": ["Summary"],
+                      "category": "Curiosity",
+                      "isKnownToPlayer": true,
+                      "isHidden": false,
+                      "aliases": ["Source_A"],
+                      "ignoredExporterEntryField": "future",
+                      "navigation": {
+                        "chapterNumber": 1,
+                        "previousEntryKeys": [],
+                        "nextEntryKeys": [],
+                        "failureEntryKeys": [],
+                        "convergesIntoEntryKeys": [],
+                        "ignoredNavigationField": "future"
+                      },
+                      "loreView": { "sections": [], "ignoredLoreViewField": "future" },
+                      "strategyView": { "objectives": [], "ignoredStrategyViewField": "future" },
+                      "branches": [],
+                      "quality": { "warnings": [], "ignoredQualityField": "future" }
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/quests/explorer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(questFacade.lastDto);
+        assertEquals("Quest_A", questFacade.lastDto.entries().getFirst().entryKey());
+        assertEquals("Source_A", questFacade.lastDto.entries().getFirst().aliases().getFirst());
     }
 
     @Test
@@ -178,6 +393,40 @@ class ImportAdminControllerTest {
                 .andExpect(status().isBadRequest());
 
         assertNull(codexFacade.lastDto);
+    }
+
+    @Test
+    void importCodex_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.80",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "codex",
+                  "ignoredExporterBatchField": true,
+                  "entries": [
+                    {
+                      "entryKey": "Codex_A",
+                      "displayName": "Codex A",
+                      "category": "Lore",
+                      "kind": "concept",
+                      "descriptionLines": ["Line 1"],
+                      "referenceKeys": ["Tech_A"],
+                      "ignoredExporterEntryField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/codex")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(codexFacade.lastDto);
+        assertEquals("Codex_A", codexFacade.lastDto.entries().getFirst().entryKey());
+        assertEquals("Tech_A", codexFacade.lastDto.entries().getFirst().referenceKeys().getFirst());
     }
 
     private static QuestExplorerImportBatchDto questPayload(List<QuestExplorerImportEntryDto> entries) {
@@ -269,6 +518,26 @@ class ImportAdminControllerTest {
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
             lastDto = file;
             return okSummary("codex");
+        }
+    }
+
+    private static final class RecordingDistrictImportAdminFacade implements DistrictImportAdminFacade {
+        private DistrictImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importDistricts(DistrictImportBatchDto file) {
+            lastDto = file;
+            return okSummary("districts");
+        }
+    }
+
+    private static final class RecordingImprovementImportAdminFacade implements ImprovementImportAdminFacade {
+        private ImprovementImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importImprovements(ImprovementImportBatchDto dto) {
+            lastDto = dto;
+            return okSummary("improvements");
         }
     }
 

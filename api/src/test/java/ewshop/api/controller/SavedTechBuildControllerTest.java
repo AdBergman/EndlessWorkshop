@@ -56,7 +56,7 @@ class SavedTechBuildControllerTest {
                 .name("My Awesome Build")
                 .selectedFaction(MajorFaction.ASPECTS)
                 .techIds(List.of("tech1", "tech2"))
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.of(2026, 6, 6, 12, 30, 45))
                 .build();
 
         when(savedTechBuildFacade.createSavedBuild(any(CreateSavedTechBuildRequest.class))).thenReturn(responseDto);
@@ -66,11 +66,13 @@ class SavedTechBuildControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5))
                 .andExpect(jsonPath("$.uuid").value(expectedUuid.toString()))
                 .andExpect(jsonPath("$.name").value("My Awesome Build"))
                 .andExpect(jsonPath("$.selectedFaction").value("Aspects"))
                 .andExpect(jsonPath("$.techIds[0]").value("tech1"))
-                .andExpect(jsonPath("$.techIds[1]").value("tech2"));
+                .andExpect(jsonPath("$.techIds[1]").value("tech2"))
+                .andExpect(jsonPath("$.createdAt").value("2026-06-06T12:30:45"));
     }
 
     @Test
@@ -85,7 +87,7 @@ class SavedTechBuildControllerTest {
                             .name(request.name())
                             .selectedFaction(request.selectedFaction())
                             .techIds(request.techIds())
-                            .createdAt(LocalDateTime.now())
+                            .createdAt(LocalDateTime.of(2026, 6, 6, 13, 15))
                             .build();
                     stored.set(dto);
                     return dto;
@@ -108,10 +110,12 @@ class SavedTechBuildControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(5))
                 .andExpect(jsonPath("$.selectedFaction").value("New Major Faction"))
                 .andExpect(jsonPath("$.techIds[0]").value("Tech_A"))
                 .andExpect(jsonPath("$.techIds[1]").value("Tech_B"))
                 .andExpect(jsonPath("$.techIds[2]").value("Tech_C"))
+                .andExpect(jsonPath("$.createdAt").value("2026-06-06T13:15:00"))
                 .andReturn();
 
         String uuid = objectMapper.readTree(createResult.getResponse().getContentAsString())
@@ -126,7 +130,8 @@ class SavedTechBuildControllerTest {
                 .andExpect(jsonPath("$.selectedFaction").value("New Major Faction"))
                 .andExpect(jsonPath("$.techIds[0]").value("Tech_A"))
                 .andExpect(jsonPath("$.techIds[1]").value("Tech_B"))
-                .andExpect(jsonPath("$.techIds[2]").value("Tech_C"));
+                .andExpect(jsonPath("$.techIds[2]").value("Tech_C"))
+                .andExpect(jsonPath("$.createdAt").value("2026-06-06T13:15:00"));
     }
 
     @Test
@@ -138,7 +143,7 @@ class SavedTechBuildControllerTest {
                 .name("Existing Build")
                 .selectedFaction(MajorFaction.KIN)
                 .techIds(List.of("techA", "techB"))
-                .createdAt(LocalDateTime.now())
+                .createdAt(LocalDateTime.of(2026, 6, 6, 14, 0, 1))
                 .build();
 
         when(savedTechBuildFacade.getSavedBuildByUuid(buildUuid)).thenReturn(Optional.of(existingBuild));
@@ -150,7 +155,8 @@ class SavedTechBuildControllerTest {
                 .andExpect(jsonPath("$.uuid").value(buildUuid.toString()))
                 .andExpect(jsonPath("$.name").value("Existing Build"))
                 .andExpect(jsonPath("$.selectedFaction").value("Kin"))
-                .andExpect(jsonPath("$.techIds[0]").value("techA"));
+                .andExpect(jsonPath("$.techIds[0]").value("techA"))
+                .andExpect(jsonPath("$.createdAt").value("2026-06-06T14:00:01"));
     }
 
     @Test

@@ -42,6 +42,8 @@ class DistrictControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].length()").value(4))
                 .andExpect(jsonPath("$[0].districtKey").value("Aspect_District_Tier1_Science"))
                 .andExpect(jsonPath("$[0].displayName").value("Laboratory"))
                 .andExpect(jsonPath("$[0].category").value("Science"))

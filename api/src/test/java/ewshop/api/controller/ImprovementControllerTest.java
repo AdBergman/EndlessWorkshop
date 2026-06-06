@@ -42,6 +42,8 @@ class ImprovementControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].length()").value(4))
                 .andExpect(jsonPath("$[0].improvementKey").value("DistrictImprovement_TravelersShrine"))
                 .andExpect(jsonPath("$[0].displayName").value("Traveler's Shrine"))
                 .andExpect(jsonPath("$[0].category").value("Economy"))
