@@ -3,7 +3,7 @@ package ewshop.api.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportDiagnosticsDto;
-import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
+import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
@@ -239,8 +239,8 @@ class ImportAdminControllerTest {
         );
     }
 
-    private static ImportSmokeSummaryDto okSmokeSummary(String kind) {
-        return new ImportSmokeSummaryDto(
+    private static ImportPreviewSummaryDto okSmokeSummary(String kind) {
+        return new ImportPreviewSummaryDto(
                 kind,
                 1,
                 1,
@@ -283,7 +283,7 @@ class ImportAdminControllerTest {
         }
 
         @Override
-        public ImportSmokeSummaryDto smokeTestTechs(TechImportBatchDto file) {
+        public ImportPreviewSummaryDto smokeTestTechs(TechImportBatchDto file) {
             lastSmokeDto = file;
             return okSmokeSummary("tech");
         }
@@ -300,7 +300,7 @@ class ImportAdminControllerTest {
         }
 
         @Override
-        public ImportSmokeSummaryDto smokeTestUnits(UnitImportBatchDto dto) {
+        public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto dto) {
             lastSmokeDto = dto;
             return okSmokeSummary("units");
         }

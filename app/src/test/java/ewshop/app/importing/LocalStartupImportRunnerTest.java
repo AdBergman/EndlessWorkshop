@@ -3,6 +3,7 @@ package ewshop.app.importing;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportDiagnosticsDto;
+import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
@@ -301,6 +302,10 @@ class LocalStartupImportRunnerTest {
         );
     }
 
+    private static ImportPreviewSummaryDto previewSummary(String kind, int received) {
+        return new ImportPreviewSummaryDto(kind, received, received, received, 0, 0, List.of(), List.of());
+    }
+
     private static final class RecordingFacades implements TechImportAdminFacade,
             DistrictImportAdminFacade,
             ImprovementImportAdminFacade,
@@ -331,6 +336,11 @@ class LocalStartupImportRunnerTest {
         }
 
         @Override
+        public ImportPreviewSummaryDto smokeTestTechs(TechImportBatchDto file) {
+            return previewSummary("tech", file.techs() == null ? 0 : file.techs().size());
+        }
+
+        @Override
         public ImportSummaryDto importDistricts(DistrictImportBatchDto file) {
             districtCalls++;
             if (file.districts() == null || file.districts().isEmpty()) {
@@ -356,6 +366,11 @@ class LocalStartupImportRunnerTest {
                 throw new IllegalArgumentException("Import file has no units");
             }
             return summary("units", dto.units().size());
+        }
+
+        @Override
+        public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto dto) {
+            return previewSummary("units", dto.units() == null ? 0 : dto.units().size());
         }
 
         @Override
@@ -399,7 +414,17 @@ class LocalStartupImportRunnerTest {
 
         @Bean
         TechImportAdminFacade techImportAdminFacade() {
-            return file -> summary("tech", file.techs().size());
+            return new TechImportAdminFacade() {
+                @Override
+                public ImportSummaryDto importTechs(TechImportBatchDto file) {
+                    return summary("tech", file.techs().size());
+                }
+
+                @Override
+                public ImportPreviewSummaryDto smokeTestTechs(TechImportBatchDto file) {
+                    return previewSummary("tech", file.techs().size());
+                }
+            };
         }
 
         @Bean
@@ -414,7 +439,17 @@ class LocalStartupImportRunnerTest {
 
         @Bean
         UnitImportAdminFacade unitImportAdminFacade() {
-            return dto -> summary("units", dto.units().size());
+            return new UnitImportAdminFacade() {
+                @Override
+                public ImportSummaryDto importUnits(UnitImportBatchDto dto) {
+                    return summary("units", dto.units().size());
+                }
+
+                @Override
+                public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto dto) {
+                    return previewSummary("units", dto.units().size());
+                }
+            };
         }
 
         @Bean

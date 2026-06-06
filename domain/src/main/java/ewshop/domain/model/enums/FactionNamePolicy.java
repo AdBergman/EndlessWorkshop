@@ -10,7 +10,8 @@ public final class FactionNamePolicy {
     private static final Set<String> BLOCKED_MAJOR_FACTIONS = Set.of("Placeholder");
     private static final Set<String> BLOCKED_MINOR_FACTIONS = Set.of();
 
-    private static final Map<String, MajorFaction> MAJOR_FACTIONS = Map.ofEntries(
+    // Add newly release-approved importer faction keys here.
+    private static final Map<String, MajorFaction> ALLOWED_MAJOR_IMPORT_FACTION_ALIASES = Map.ofEntries(
             entry("Aspect", MajorFaction.ASPECTS),
             entry("Aspects", MajorFaction.ASPECTS),
             entry("ASPECTS", MajorFaction.ASPECTS),
@@ -31,7 +32,7 @@ public final class FactionNamePolicy {
             entry("TORMENTED", MajorFaction.TORMENTED)
     );
 
-    private static final Map<String, String> MINOR_FACTION_DISPLAY_NAMES = Map.ofEntries(
+    private static final Map<String, String> ALLOWED_MINOR_IMPORT_FACTION_ALIASES = Map.ofEntries(
             entry("Ametrine", "Ametrine"),
             entry("Blackhammer", "Blackhammers"),
             entry("Blackhammers", "Blackhammers"),
@@ -67,7 +68,7 @@ public final class FactionNamePolicy {
         if (value == null) return null;
         if (BLOCKED_MAJOR_FACTIONS.contains(value)) return null;
 
-        MajorFaction faction = MAJOR_FACTIONS.get(value);
+        MajorFaction faction = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
         if (faction == null) {
             throw new IllegalArgumentException("Unknown imported major faction: " + raw);
         }
@@ -83,7 +84,7 @@ public final class FactionNamePolicy {
         String value = trimToNull(raw);
         if (value == null) return null;
 
-        MajorFaction known = MAJOR_FACTIONS.get(value);
+        MajorFaction known = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
         if (known != null) return known.getDisplayName();
         if (BLOCKED_MAJOR_FACTIONS.contains(value)) return null;
 
@@ -95,7 +96,7 @@ public final class FactionNamePolicy {
         if (value == null) return null;
         if (BLOCKED_MINOR_FACTIONS.contains(value)) return null;
 
-        String displayName = MINOR_FACTION_DISPLAY_NAMES.get(value);
+        String displayName = ALLOWED_MINOR_IMPORT_FACTION_ALIASES.get(value);
         if (displayName == null) {
             throw new IllegalArgumentException("Unknown imported minor faction: " + raw);
         }

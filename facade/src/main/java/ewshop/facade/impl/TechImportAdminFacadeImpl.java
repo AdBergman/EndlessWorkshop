@@ -116,7 +116,7 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
     }
 
     @Override
-    public ImportSmokeSummaryDto smokeTestTechs(TechImportBatchDto fileDto) {
+    public ImportPreviewSummaryDto smokeTestTechs(TechImportBatchDto fileDto) {
         if (fileDto == null) {
             throw new IllegalArgumentException("Import file is required");
         }
@@ -154,7 +154,7 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
             filters.add(new ImportCountDto("NO_AVAILABLE_MAJOR_FACTIONS", preview.snapshotsWithoutAvailableFactions()));
         }
 
-        return new ImportSmokeSummaryDto(
+        return new ImportPreviewSummaryDto(
                 "tech",
                 received,
                 snapshots.size(),

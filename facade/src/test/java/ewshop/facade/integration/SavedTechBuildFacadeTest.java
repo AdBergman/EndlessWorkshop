@@ -3,6 +3,7 @@ package ewshop.facade.integration;
 import ewshop.domain.model.SavedTechBuild;
 import ewshop.domain.model.enums.MajorFaction;
 import ewshop.domain.repository.SavedTechBuildRepository;
+import ewshop.facade.dto.request.CreateSavedTechBuildRequest;
 import ewshop.facade.dto.response.SavedTechBuildDto;
 import ewshop.facade.interfaces.SavedTechBuildFacade;
 import jakarta.persistence.EntityManager;
@@ -31,6 +32,28 @@ class SavedTechBuildFacadeTest extends  BaseIT {
     void contextLoads() {
         assertThat(savedTechBuildFacade).isNotNull();
         assertThat(savedTechBuildRepository).isNotNull();
+    }
+
+    @Test
+    void createSavedBuild_thenFetchByReturnedUuid_roundtripsFactionAndTechIds() {
+        CreateSavedTechBuildRequest request = CreateSavedTechBuildRequest.builder()
+                .name("Release Candidate Build")
+                .selectedFaction("NewMajorFaction")
+                .techIds(List.of("Tech_FirstEra_One", "Tech_FirstEra_Two", "Tech_FirstEra_Three"))
+                .build();
+
+        SavedTechBuildDto created = savedTechBuildFacade.createSavedBuild(request);
+        entityManager.flush();
+        entityManager.clear();
+
+        Optional<SavedTechBuildDto> fetched = savedTechBuildFacade.getSavedBuildByUuid(created.uuid());
+
+        assertThat(fetched).isPresent();
+        assertThat(fetched.get().uuid()).isEqualTo(created.uuid());
+        assertThat(fetched.get().name()).isEqualTo("Release Candidate Build");
+        assertThat(fetched.get().selectedFaction()).isEqualTo("New Major Faction");
+        assertThat(fetched.get().techIds())
+                .containsExactly("Tech_FirstEra_One", "Tech_FirstEra_Two", "Tech_FirstEra_Three");
     }
 
     @Test

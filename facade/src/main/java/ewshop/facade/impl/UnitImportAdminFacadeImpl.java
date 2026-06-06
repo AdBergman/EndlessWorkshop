@@ -107,7 +107,7 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
     }
 
     @Override
-    public ImportSmokeSummaryDto smokeTestUnits(UnitImportBatchDto fileDto) {
+    public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto fileDto) {
         if (fileDto == null) throw new IllegalArgumentException("Import file is required");
         assertExportKind(fileDto.exportKind());
 
@@ -140,7 +140,7 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
             filters.add(new ImportCountDto("PROTOTYPE_UNIT_CLASS", preview.prototypeClassRows()));
         }
 
-        return new ImportSmokeSummaryDto(
+        return new ImportPreviewSummaryDto(
                 "units",
                 received,
                 snapshots.size(),

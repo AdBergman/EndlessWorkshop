@@ -1,7 +1,7 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.service.UnitImportService;
-import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
+import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ class UnitImportAdminFacadeImplTest {
                 )
         );
 
-        ImportSmokeSummaryDto summary = facade.smokeTestUnits(file);
+        ImportPreviewSummaryDto summary = facade.smokeTestUnits(file);
 
         assertThat(summary.kind()).isEqualTo("units");
         assertThat(summary.received()).isEqualTo(4);

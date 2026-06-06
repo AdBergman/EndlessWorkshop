@@ -2,7 +2,7 @@ package ewshop.facade.integration;
 
 import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
-import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
+import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
@@ -231,7 +231,7 @@ class TechImportAdminFacadeTest extends BaseIT {
                 List.of(visibleDto, filteredDto, invalidDto)
         );
 
-        ImportSmokeSummaryDto summary = techImportAdminFacade.smokeTestTechs(file);
+        ImportPreviewSummaryDto summary = techImportAdminFacade.smokeTestTechs(file);
 
         assertThat(summary.kind()).isEqualTo("tech");
         assertThat(summary.received()).isEqualTo(3);

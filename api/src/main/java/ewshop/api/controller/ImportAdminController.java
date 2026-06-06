@@ -1,7 +1,7 @@
 package ewshop.api.controller;
 
 import ewshop.facade.dto.importing.ImportSummaryDto;
-import ewshop.facade.dto.importing.ImportSmokeSummaryDto;
+import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
@@ -59,7 +59,7 @@ public class ImportAdminController {
     }
 
     @PostMapping(value = "/techs/smoke", consumes = "application/json", produces = "application/json")
-    public ImportSmokeSummaryDto smokeTestTechs(@RequestBody TechImportBatchDto dto) {
+    public ImportPreviewSummaryDto smokeTestTechs(@RequestBody TechImportBatchDto dto) {
         if (dto.techs() == null || dto.techs().isEmpty()) {
             throw new IllegalArgumentException("Import file is missing techs[]");
         }
@@ -91,7 +91,7 @@ public class ImportAdminController {
     }
 
     @PostMapping(value = "/units/smoke", consumes = "application/json", produces = "application/json")
-    public ImportSmokeSummaryDto smokeTestUnits(@RequestBody UnitImportBatchDto dto) {
+    public ImportPreviewSummaryDto smokeTestUnits(@RequestBody UnitImportBatchDto dto) {
         if (dto.units() == null || dto.units().isEmpty()) {
             throw new IllegalArgumentException("Import file is missing units[]");
         }
