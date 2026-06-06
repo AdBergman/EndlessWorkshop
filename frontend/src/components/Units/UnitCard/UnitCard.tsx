@@ -499,6 +499,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         key={key}
                                         type="button"
                                         className={`skill ${iconPath ? "" : "skillNoIcon"}`}
+                                        onMouseDown={(e) => e.preventDefault()}
                                         onMouseEnter={(e) => handleSkillEnter(e, key)}
                                         onMouseMove={handleSkillMove}
                                         onMouseLeave={clearHoverSoon}

@@ -22,18 +22,23 @@ const SkillTooltip: React.FC<SkillTooltipProps> = ({
                                                        hoveredSkill,
                                                        onMouseEnter,
                                                        onMouseLeave,
-                                                   }) => {
+}) => {
     const { data, coords } = hoveredSkill;
     const { displayName, descriptionLines } = data;
+    const expandedDescriptionLines = (descriptionLines ?? [])
+        .flatMap((line) => line.split(/\r?\n/))
+        .map((line) => line.trim())
+        .map((line) => line.replace(/^\[DoubleArrow]\s*/i, ""))
+        .filter(Boolean);
 
     return ReactDOM.createPortal(
         <BaseTooltip coords={coords} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <div style={{ minWidth: "220px" }}>
                 <div style={{ fontWeight: 500 }}>{displayName}</div>
 
-                {(descriptionLines?.length ?? 0) > 0 && (
+                {expandedDescriptionLines.length > 0 && (
                     <TooltipSection>
-                        {descriptionLines.map((line, idx) => (
+                        {expandedDescriptionLines.map((line, idx) => (
                             <div key={idx}>{renderDescriptionLine(line)}</div>
                         ))}
                     </TooltipSection>

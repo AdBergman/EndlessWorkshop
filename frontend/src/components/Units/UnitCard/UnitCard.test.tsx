@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, createEvent, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { UnitCard } from "./UnitCard";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry, Unit } from "@/types/dataTypes";
@@ -238,6 +238,85 @@ describe("UnitCard", () => {
             expect(screen.getAllByText("Ranged Attack").length).toBeGreaterThanOrEqual(2);
             expect(screen.getByText("Deals ranged damage from a safe distance.")).toBeInTheDocument();
         });
+    });
+
+    it("does not let mouse clicks move back skill tooltips to the focused row anchor", async () => {
+        const entries = [
+            {
+                ...abilityEntry("UnitAbility_Ranged_3", "Ranged Attack"),
+                descriptionLines: ["Deals ranged damage from a safe distance."],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKindKey: {
+                abilities: Object.fromEntries(entries.map((entry) => [entry.entryKey, entry])),
+            },
+        });
+
+        render(
+            <UnitCard
+                unit={unit({
+                    abilityKeys: ["UnitAbility_Ranged_3"],
+                })}
+            />
+        );
+
+        const skillButton = screen.getByRole("button", { name: "Ranged Attack" });
+        fireEvent.mouseEnter(skillButton, {
+            clientX: 100,
+            clientY: 80,
+        });
+
+        await waitFor(() => expect(screen.getAllByText("Ranged Attack").length).toBeGreaterThanOrEqual(2));
+
+        const mouseDown = createEvent.mouseDown(skillButton);
+        fireEvent(skillButton, mouseDown);
+
+        expect(mouseDown.defaultPrevented).toBe(true);
+    });
+
+    it("renders exported skill tooltip rule breaks without the DoubleArrow marker icon", async () => {
+        const entries = [
+            {
+                ...abilityEntry("UnitAbility_ProtectiveOversight", "Protective Oversight"),
+                descriptionLines: [
+                    "When using this Active Skill on an empty Tile or enemy Units:\n[DoubleArrow] Gains [Shield] Shield equal to 75% of the Chosen's max [Damage] Damage",
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKindKey: {
+                abilities: Object.fromEntries(entries.map((entry) => [entry.entryKey, entry])),
+            },
+        });
+
+        render(
+            <UnitCard
+                unit={unit({
+                    abilityKeys: ["UnitAbility_ProtectiveOversight"],
+                })}
+            />
+        );
+
+        fireEvent.mouseEnter(screen.getByRole("button", { name: "Protective Oversight" }), {
+            clientX: 100,
+            clientY: 80,
+        });
+
+        await waitFor(() => {
+            expect(screen.getByText("When using this Active Skill on an empty Tile or enemy Units:"))
+                .toBeInTheDocument();
+            expect(document.body.textContent).toContain("Gains");
+            expect(screen.getByText(/Shield equal to 75% of the Chosen's max/i)).toBeInTheDocument();
+        });
+
+        expect(screen.getByRole("img", { name: "Shield" })).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "Damage" })).toBeInTheDocument();
+        expect(screen.queryByRole("img", { name: "DoubleArrow" })).not.toBeInTheDocument();
     });
 
     it("shows tier tooltip content from the separate rank marker", async () => {

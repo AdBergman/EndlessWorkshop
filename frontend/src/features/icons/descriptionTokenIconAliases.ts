@@ -12,7 +12,6 @@ const TOKEN_RAW_KEY_ALIASES: Record<string, string[]> = {
     cadaverscolored: ["necrophage_District_Appendage00_Tier1_v2"],
     coral: ["effect_EmpireBonus_CoralHealthRegen"],
     determination: ["unitAbility_Hero_DexterityTrad"],
-    doublearrow: ["technologyWindowLinkPrerequisiteUnlocked", "technologyWindowLinkPrerequisite"],
     food: ["constructibleCategoryFood"],
     influence: ["status_Empire_InfluencePerCouncilor"],
     intuition: ["unitAbility_Hero_IntellectTrad"],

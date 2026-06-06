@@ -97,10 +97,8 @@ describe("descriptionTokenIcons", () => {
         );
     });
 
-    it("resolves codex formatting arrow aliases", () => {
-        expect(getDescriptionTokenIcon("DoubleArrow")?.path).toBe(
-            "/svg/technologies/TechnologyWindow_Link_PrerequisiteUnlocked.svg"
-        );
+    it("does not resolve exporter formatting markers to borrowed gameplay icons", () => {
+        expect(getDescriptionTokenIcon("DoubleArrow")).toBeNull();
     });
 
     it("selects numeric token variants from the value immediately before the token", () => {

@@ -104,6 +104,15 @@ describe("descriptionLineRenderer", () => {
         );
     });
 
+    it("omits exporter formatting markers without showing borrowed icons", () => {
+        render(<div>{renderDescriptionLine("[DoubleArrow] Gains [Shield] Shield")}</div>);
+
+        expect(screen.getByText(/Gains/)).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "Shield" })).toBeInTheDocument();
+        expect(screen.queryByRole("img", { name: "DoubleArrow" })).not.toBeInTheDocument();
+        expect(screen.queryByText("[DoubleArrow]")).not.toBeInTheDocument();
+    });
+
     it("strips known and unknown bracket tokens from plain previews", () => {
         expect(stripDescriptionTokens("[DustColored] Auric Coral [LuxuryResource01]")).toBe("Auric Coral");
     });
