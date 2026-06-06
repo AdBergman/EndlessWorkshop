@@ -241,6 +241,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         });
     };
 
+    const handleSkillFocus = (e: React.FocusEvent<HTMLElement>, codex: Codex) => {
+        showTooltip(codex, getTooltipCoordsFromElement(e.currentTarget));
+    };
+
     const showTooltip = (data: Codex, coords: { x: number; y: number; mode: "pixel" }) => {
         if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
 
@@ -480,12 +484,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                         ) : (
                             <div className="skillsList">
                                 {visibleSkills.map(({ key, codex, iconPath }) => (
-                                    <div
+                                    <button
                                         key={key}
+                                        type="button"
                                         className={`skill ${iconPath ? "" : "skillNoIcon"}`}
                                         onMouseEnter={(e) => handleSkillEnter(e, key)}
                                         onMouseMove={handleSkillMove}
                                         onMouseLeave={clearHoverSoon}
+                                        onFocus={(e) => handleSkillFocus(e, codex)}
+                                        onBlur={clearHoverSoon}
+                                        onClick={(e) => e.stopPropagation()}
                                     >
                                         {iconPath ? (
                                             <IconImg
@@ -497,7 +505,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                             />
                                         ) : null}
                                         <span className="skillLabel">{codex.displayName}</span>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
                         )}
