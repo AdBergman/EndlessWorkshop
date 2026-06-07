@@ -11,14 +11,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @Service
 public class SeoPageRenderer {
 
-    private static final Pattern DETAIL_PATTERN = Pattern.compile("^([A-Za-z][A-Za-z /-]{1,40}):\\s*(.+)$");
+    private static final SeoDescriptionParser DESCRIPTION_PARSER = new SeoDescriptionParser();
     private static final List<String> PREFERRED_KIND_ORDER = List.of(
             "abilities",
             "councilors",
@@ -32,6 +29,9 @@ public class SeoPageRenderer {
             "tech",
             "units"
     );
+
+    private final SeoMetadataBuilder metadataBuilder = new SeoMetadataBuilder();
+    private final RelatedLinkRenderer relatedLinkRenderer = new RelatedLinkRenderer();
 
     public Map<String, List<PageCandidate>> candidatesByKind(List<PageCandidate> candidates) {
         LinkedHashMap<String, List<PageCandidate>> candidatesByKind = new LinkedHashMap<>();
@@ -60,38 +60,17 @@ public class SeoPageRenderer {
             Map<String, ReferenceTarget> referenceTargetsByEntryKey
     ) {
         String kindLabel = kindLabelFor(candidate.kind());
-        ParsedDescription description = parseDescription(candidate.descriptionLines());
+        String pluralKindLabel = pluralKindLabelFor(candidate.kind());
+        ParsedDescription description = DESCRIPTION_PARSER.parse(candidate.descriptionLines());
         String displayTitle = displayTitle(candidate);
-        String pageTitle = displayTitle + " " + kindLabel + " Reference | " + SeoRoutes.SITE_NAME;
-        String seoDescription = buildSeoDescription(displayTitle, kindLabel, description);
-        String canonicalUrl = SeoRoutes.SITE_URL + candidate.canonicalRoute();
-        String pageUrl = SeoRoutes.SITE_URL + route;
-        String robots = candidate.indexable() ? "index, follow" : "noindex, follow";
-
-        String webPageJsonLd = """
-                {"@context":"https://schema.org","@type":"WebPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"},"breadcrumb":{"@id":"%s#breadcrumb"}}
-                """.formatted(
-                escapeJson(pageTitle),
-                escapeJson(seoDescription),
-                escapeJson(pageUrl),
-                escapeJson(SeoRoutes.SITE_NAME),
-                escapeJson(SeoRoutes.SITE_URL),
-                escapeJson(pageUrl)
-        ).trim();
-        String breadcrumbJsonLd = """
-                {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"%s","item":"%s"},{"@type":"ListItem","position":2,"name":"Encyclopedia","item":"%s/%s"},{"@type":"ListItem","position":3,"name":"%s","item":"%s%s"},{"@type":"ListItem","position":4,"name":"%s","item":"%s"}],"@id":"%s#breadcrumb"}
-                """.formatted(
-                escapeJson(SeoRoutes.SITE_NAME),
-                escapeJson(SeoRoutes.SITE_URL),
-                escapeJson(SeoRoutes.SITE_URL),
-                escapeJson(SeoRoutes.ENCYCLOPEDIA_PAGE),
-                escapeJson(pluralKindLabelFor(candidate.kind())),
-                escapeJson(SeoRoutes.SITE_URL),
-                escapeJson(SeoRoutes.encyclopediaRouteFor(candidate.kind())),
-                escapeJson(displayTitle),
-                escapeJson(pageUrl),
-                escapeJson(pageUrl)
-        ).trim();
+        SeoMetadata metadata = metadataBuilder.buildEntityMetadata(
+                candidate,
+                route,
+                displayTitle,
+                kindLabel,
+                pluralKindLabel,
+                description
+        );
 
         return """
                 <!DOCTYPE html>
@@ -174,30 +153,30 @@ public class SeoPageRenderer {
                 </body>
                 </html>
                 """.formatted(
-                escapeHtml(pageTitle),
-                escapeHtml(seoDescription),
-                escapeHtml(robots),
-                canonicalUrl,
+                escapeHtml(metadata.pageTitle()),
+                escapeHtml(metadata.seoDescription()),
+                escapeHtml(metadata.robots()),
+                metadata.canonicalUrl(),
                 escapeHtml(SeoRoutes.SITE_NAME),
-                escapeHtml(pageTitle),
-                escapeHtml(seoDescription),
-                pageUrl,
+                escapeHtml(metadata.pageTitle()),
+                escapeHtml(metadata.seoDescription()),
+                metadata.pageUrl(),
                 SeoRoutes.DEFAULT_IMAGE_URL,
-                escapeHtml(pageTitle),
-                escapeHtml(seoDescription),
+                escapeHtml(metadata.pageTitle()),
+                escapeHtml(metadata.seoDescription()),
                 SeoRoutes.DEFAULT_IMAGE_URL,
-                webPageJsonLd,
-                breadcrumbJsonLd,
-                escapeHtml(pageTitle),
+                metadata.webPageJsonLd(),
+                metadata.breadcrumbJsonLd(),
+                escapeHtml(metadata.pageTitle()),
                 escapeHtml(SeoRoutes.encyclopediaRouteFor(candidate.kind())),
-                escapeHtml(pluralKindLabelFor(candidate.kind())),
+                escapeHtml(pluralKindLabel),
                 escapeHtml(displayTitle),
                 escapeHtml(buildMetadataLine(kindLabel, candidate, description.metadataHighlights())),
                 escapeHtml(displayTitle),
                 renderIntro(description.introLine()),
                 renderDescriptionSection(description),
                 renderCanonicalizedVariants(candidate),
-                renderRelatedSection(candidate.referenceKeys(), referenceTargetsByEntryKey),
+                relatedLinkRenderer.renderRelatedSection(candidate.referenceKeys(), referenceTargetsByEntryKey),
                 renderActionRow(candidate.kind())
         );
     }
@@ -285,11 +264,11 @@ public class SeoPageRenderer {
         String webPageJsonLd = """
                 {"@context":"https://schema.org","@type":"CollectionPage","name":"%s","description":"%s","url":"%s","isPartOf":{"@type":"WebSite","name":"%s","url":"%s"}}
                 """.formatted(
-                escapeJson(pageTitle),
-                escapeJson(seoDescription),
-                escapeJson(canonicalUrl),
-                escapeJson(SeoRoutes.SITE_NAME),
-                escapeJson(SeoRoutes.SITE_URL)
+                HtmlEscaper.escapeJson(pageTitle),
+                HtmlEscaper.escapeJson(seoDescription),
+                HtmlEscaper.escapeJson(canonicalUrl),
+                HtmlEscaper.escapeJson(SeoRoutes.SITE_NAME),
+                HtmlEscaper.escapeJson(SeoRoutes.SITE_URL)
         ).trim();
 
         return """
@@ -420,27 +399,6 @@ public class SeoPageRenderer {
         return "<p class=\"seo-text entity-page__summary\">" + escapeHtml(introLine) + "</p>";
     }
 
-    private static String renderRelatedSection(
-            List<String> referenceKeys,
-            Map<String, ReferenceTarget> referenceTargetsByEntryKey
-    ) {
-        if (referenceKeys == null || referenceKeys.isEmpty()) {
-            return "";
-        }
-
-        String referenceChips = renderReferenceChips(referenceKeys, referenceTargetsByEntryKey);
-        if (referenceChips.isBlank()) {
-            return "";
-        }
-
-        return """
-                        <section class="seo-section entity-page__section entity-page__references">
-                            <h2 class="seo-heading">Related</h2>
-                            %s
-                        </section>
-                """.formatted(referenceChips);
-    }
-
     private static String renderActionRow(String kind) {
         List<String> actions = new ArrayList<>();
         actions.add(renderActionLink("/codex", "Back to Codex"));
@@ -460,66 +418,6 @@ public class SeoPageRenderer {
                 + "\">"
                 + escapeHtml(label)
                 + "</a>";
-    }
-
-    private static String buildSeoDescription(String displayName, String kindLabel, ParsedDescription description) {
-        String supportingLine = !description.introLine().isBlank()
-                ? description.introLine()
-                : firstOrBlank(description.descriptionLines());
-        if (supportingLine.isBlank()) {
-            return displayName + " is a " + kindLabel.toLowerCase(Locale.ROOT)
-                    + " entry in the Endless Workshop codex.";
-        }
-
-        return displayName + " is a " + kindLabel.toLowerCase(Locale.ROOT)
-                + " entry in the Endless Workshop codex. " + supportingLine;
-    }
-
-    private static ParsedDescription parseDescription(List<String> rawDescriptionLines) {
-        List<String> normalizedLines = rawDescriptionLines.stream()
-                .map(SeoPageRenderer::normalizeContentLine)
-                .filter(line -> !line.isBlank())
-                .filter(line -> !isPrototypeLine(line))
-                .toList();
-
-        int introIndex = -1;
-        for (int index = 0; index < normalizedLines.size(); index++) {
-            if (isLikelyIntroLine(normalizedLines.get(index))) {
-                introIndex = index;
-                break;
-            }
-        }
-
-        String introLine = introIndex >= 0 ? normalizedLines.get(introIndex) : "";
-        List<String> contentLines = new ArrayList<>();
-        for (int index = 0; index < normalizedLines.size(); index++) {
-            if (index != introIndex) {
-                contentLines.add(normalizedLines.get(index));
-            }
-        }
-
-        return new ParsedDescription(
-                introLine,
-                List.copyOf(contentLines),
-                List.copyOf(extractMetadataHighlights(normalizedLines))
-        );
-    }
-
-    private static List<String> extractMetadataHighlights(List<String> lines) {
-        LinkedHashMap<String, String> highlights = new LinkedHashMap<>();
-        List<String> preferredKeys = List.of("Faction", "Category", "Type", "Role", "Slot", "Tier", "Rarity");
-
-        for (String preferredKey : preferredKeys) {
-            for (String line : lines) {
-                DetailLine detailLine = parseDetailLine(line);
-                if (detailLine != null && detailLine.label().equalsIgnoreCase(preferredKey)) {
-                    highlights.putIfAbsent(preferredKey, detailLine.label() + ": " + detailLine.value());
-                    break;
-                }
-            }
-        }
-
-        return highlights.values().stream().limit(3).toList();
     }
 
     private static String buildMetadataLine(String kindLabel, PageCandidate candidate, List<String> metadataHighlights) {
@@ -542,7 +440,7 @@ public class SeoPageRenderer {
         List<String> detailLines = new ArrayList<>();
 
         for (String line : description.descriptionLines()) {
-            if (isLikelyIntroLine(line)) {
+            if (DESCRIPTION_PARSER.isLikelyIntroLine(line)) {
                 proseLines.add(line);
             } else {
                 detailLines.add(line);
@@ -630,7 +528,7 @@ public class SeoPageRenderer {
     }
 
     private static String buildEntryPreview(PageCandidate candidate) {
-        ParsedDescription description = parseDescription(candidate.descriptionLines());
+        ParsedDescription description = DESCRIPTION_PARSER.parse(candidate.descriptionLines());
         String preview = !description.introLine().isBlank()
                 ? description.introLine()
                 : firstOrBlank(description.descriptionLines());
@@ -661,45 +559,6 @@ public class SeoPageRenderer {
         return displayName + " - " + context;
     }
 
-    private static String renderReferenceChips(
-            List<String> referenceKeys,
-            Map<String, ReferenceTarget> referenceTargetsByEntryKey
-    ) {
-        StringBuilder chips = new StringBuilder();
-        chips.append("<ul class=\"seo-chipList\">");
-        for (String referenceKey : referenceKeys) {
-            String key = trimToEmpty(referenceKey);
-            if (key.isBlank()) {
-                continue;
-            }
-
-            ReferenceTarget target = referenceTargetsByEntryKey.get(key);
-            if (target == null || trimToEmpty(target.route()).isBlank()) {
-                continue;
-            }
-
-            String label = trimToEmpty(target.displayName()).isBlank()
-                    ? key
-                    : target.displayName();
-
-            chips.append("<li>")
-                    .append("<a class=\"seo-chip\" href=\"")
-                    .append(escapeHtml(target.route()))
-                    .append("\" data-entry-key=\"")
-                    .append(escapeHtml(key))
-                    .append("\">")
-                    .append(escapeHtml(label))
-                    .append("</a>")
-                    .append("</li>");
-        }
-        if (chips.length() == "<ul class=\"seo-chipList\">".length()) {
-            return "";
-        }
-
-        chips.append("</ul>");
-        return chips.toString();
-    }
-
     private static String renderList(List<String> items) {
         StringBuilder html = new StringBuilder();
         for (String item : items) {
@@ -713,97 +572,11 @@ public class SeoPageRenderer {
     }
 
     private static String escapeHtml(String value) {
-        return value
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&#39;");
-    }
-
-    private static String escapeJson(String value) {
-        return value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"");
-    }
-
-    private static String normalizeContentLine(String value) {
-        String normalized = trimToEmpty(value)
-                .replaceAll("\\[[^]]+]", " ")
-                .replaceAll("([a-z])([A-Z])", "$1 $2")
-                .replaceAll("\\s+", " ")
-                .trim();
-        if (normalized.isBlank()) {
-            return normalized;
-        }
-
-        String deduped = normalized;
-        String previous;
-        do {
-            previous = deduped;
-            deduped = deduped.replaceAll("\\b([A-Za-z]+(?:\\s+[A-Za-z]+){0,2})\\s+\\1\\b", "$1");
-        } while (!deduped.equals(previous));
-
-        List<String> tokens = new ArrayList<>(List.of(deduped.split(" ")));
-        if (tokens.size() >= 2
-                && normalizedToken(tokens.getFirst()).equalsIgnoreCase(normalizedToken(tokens.get(1)))) {
-            tokens.removeFirst();
-        }
-        return String.join(" ", tokens).trim();
-    }
-
-    private static boolean isPrototypeLine(String line) {
-        return line.regionMatches(true, 0, "Prototype:", 0, "Prototype:".length());
-    }
-
-    private static String normalizedToken(String value) {
-        return value.replaceAll("^[^A-Za-z0-9]+|[^A-Za-z0-9]+$", "");
-    }
-
-    private static boolean isLikelyIntroLine(String line) {
-        if (line.isBlank() || parseDetailLine(line) != null) {
-            return false;
-        }
-
-        boolean hasSentencePunctuation = line.contains(".") || line.contains("!") || line.contains("?");
-        long wordCount = Stream.of(line.split("\\s+"))
-                .map(SeoPageRenderer::normalizedToken)
-                .filter(token -> !token.isBlank())
-                .count();
-        boolean looksStatLike = line.matches(".*\\d.*")
-                || line.contains("+")
-                || line.contains("%")
-                || line.contains("->");
-
-        return hasSentencePunctuation || (wordCount >= 6 && !looksStatLike);
-    }
-
-    private static DetailLine parseDetailLine(String line) {
-        Matcher matcher = DETAIL_PATTERN.matcher(line);
-        if (!matcher.matches()) {
-            return null;
-        }
-
-        String label = trimToEmpty(matcher.group(1));
-        String value = trimToEmpty(matcher.group(2));
-        if (label.isBlank() || value.isBlank()) {
-            return null;
-        }
-
-        return new DetailLine(label, value);
+        return HtmlEscaper.escapeHtml(value);
     }
 
     private static String firstOrBlank(List<String> values) {
         return values.isEmpty() ? "" : values.getFirst();
     }
 
-    record ParsedDescription(
-            String introLine,
-            List<String> descriptionLines,
-            List<String> metadataHighlights
-    ) {
-    }
-
-    record DetailLine(String label, String value) {
-    }
 }

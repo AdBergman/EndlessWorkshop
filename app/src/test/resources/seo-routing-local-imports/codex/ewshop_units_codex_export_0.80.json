@@ -1,0 +1,21 @@
+{
+  "game": "Endless Workshop",
+  "gameVersion": "0.80",
+  "exporterVersion": "test-fixture",
+  "exportedAtUtc": "2026-06-07T00:00:00Z",
+  "exportKind": "units",
+  "entries": [
+    {
+      "entryKey": "Unit_Sentinel",
+      "displayName": "Sentinel",
+      "category": "Kin",
+      "kind": "Unit",
+      "descriptionLines": [
+        "A frontline unit that anchors army formations.",
+        "Faction: Kin"
+      ],
+      "referenceKeys": [],
+      "futureExporterField": "ignored by import binding"
+    }
+  ]
+}

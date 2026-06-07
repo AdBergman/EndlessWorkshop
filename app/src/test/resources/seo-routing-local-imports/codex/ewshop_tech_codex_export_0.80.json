@@ -1,0 +1,23 @@
+{
+  "game": "Endless Workshop",
+  "gameVersion": "0.80",
+  "exporterVersion": "test-fixture",
+  "exportedAtUtc": "2026-06-07T00:00:00Z",
+  "exportKind": "tech",
+  "entries": [
+    {
+      "entryKey": "Technology_District_Tier1_Industry",
+      "displayName": "Workshop",
+      "category": "Economy",
+      "kind": "Technology",
+      "descriptionLines": [
+        "Workshop improves early city industry.",
+        "Category: Economy"
+      ],
+      "referenceKeys": [
+        "Unit_Sentinel"
+      ],
+      "futureExporterField": "ignored by import binding"
+    }
+  ]
+}

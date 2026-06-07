@@ -219,15 +219,15 @@ Updated: 2026-06-07
 - `SEO-001`: done. `docs/backend/seo-architecture.md` documents the SEO pipeline, subsystem ownership, current policy, serving boundaries, and cleanup direction.
 - `SEO-002`: done for the current risk profile. Existing regeneration tests plus focused route/writer tests cover metadata, canonical URLs, noindex variants, sitemap inclusion, related links, audit artifacts, route collisions, and generated route forwarding.
 - `SEO-003`: done. `PageCandidateBuilder` now owns candidate grouping, route choice, variant canonicalization, context labels, and duplicate alias attachment, with focused tests.
-- `SEO-004`: pragmatic skip/deferred. Rebuild orchestration is still large, but splitting all rebuild steps now would be high-churn and should follow candidate/renderer/audit extractions.
-- `SEO-005`: pragmatic skip/deferred. Metadata builder extraction remains useful, but current tests already pin title, meta, canonical, robots, Open Graph/Twitter-adjacent shell behavior, and JSON-LD output.
-- `SEO-006`: pragmatic skip/deferred. Description parsing remains inside `SeoPageRenderer`; representative description normalization is pinned by regeneration tests.
-- `SEO-007`: pragmatic skip/deferred. HTML shell extraction is not done because it risks byte-level output churn without a product behavior change.
-- `SEO-008`: pragmatic skip/deferred. Related-link rendering remains in the renderer; existing tests pin resolved labels, hrefs, `data-entry-key`, and omission of unresolved references.
+- `SEO-004`: done as pragmatic orchestration cleanup. `SeoRegenerationService` is now a smaller use-case orchestrator around candidate, audit, rendering, sitemap, and storage collaborators; no generic pipeline framework was added.
+- `SEO-005`: done. `SeoMetadataBuilder` owns entity title, description, canonical URL, robots, Open Graph/Twitter metadata inputs, and JSON-LD strings.
+- `SEO-006`: done. `SeoDescriptionParser` owns intro/detail parsing, prototype-line filtering, content normalization, and metadata highlight extraction, with focused tests.
+- `SEO-007`: pragmatic skip. HTML shell extraction is still not done because it would mostly move large static templates and risk byte-level output churn without a product behavior change.
+- `SEO-008`: done. `RelatedLinkRenderer` owns resolved reference chip rendering and unresolved-reference omission, with focused tests.
 - `SEO-009`: done. `SitemapRoutePolicy` now owns sitemap route selection and has a focused test for public generated routes, indexable candidates, and noindex/audit exclusions.
-- `SEO-010`: pragmatic skip/deferred. Missing-reference classification is still in `CodexMissingReferenceAuditService`; ownership and category behavior are pinned by deterministic audit tests.
-- `SEO-011`: pragmatic skip/deferred. Scoring remains in the audit service; current tests pin hidden pillbox estimate, recommendations, and source-kind analysis output.
-- `SEO-012`: pragmatic skip/deferred. JSON/Markdown report rendering remains in the audit service; deterministic output is tested and extraction should wait until report formats change.
+- `SEO-010`: done. `CodexMissingReferencePolicy` owns category classification, internal-noise recognition, and near-match identity policy, with focused tests.
+- `SEO-011`: done. `CodexMissingReferencePolicy` owns priority scoring and rationale policy, with focused tests.
+- `SEO-012`: done. `CodexMissingReferenceReportRenderer` owns JSON and Markdown rendering; `CodexMissingReferenceAuditService` computes audit data and delegates report output.
 - `SEO-013`: done. `GeneratedSeoWriterTest` pins deletion of requested generated directories while preserving unrelated directories and root SPA assets; locator path safety tests also guard traversal.
 - `SEO-014`: done as decision. The architecture note documents direct-write regeneration as acceptable for now and recommends temp-directory swap only if production rebuilds become user-visible.
 - `SEO-015`: done. `SeoRegenerationServiceTest` now simulates sitemap write failure and pins the current direct-write behavior: exception propagates and already-written pages can remain.
@@ -236,11 +236,11 @@ Updated: 2026-06-07
 - `SEO-018`: done as documented policy plus tests. The architecture note states thin-content, placeholder, duplicate, canonicalized duplicate, and internal/noise policy; codex filter/audit tests pin current behavior.
 - `SEO-019`: done as review decision. The architecture note keeps current `WebPage` plus `BreadcrumbList` JSON-LD until a dedicated SEO review approves a different schema type.
 - `SEO-020`: done. Canonical duplicate variant strategy is tested: duplicate variants are generated, canonicalized to the representative, marked `noindex`, and excluded from the sitemap.
-- `SEO-021`: pragmatic skip/deferred. Tests still use substring assertions in places; normalized semantic HTML snapshots are a good future cleanup, but current focused tests reduce the worst ambiguity.
+- `SEO-021`: done for current needs. `SeoGeneratedHtmlContractTest` uses normalized HTML assertions for semantic regions while broad regeneration tests continue pinning end-to-end output.
 - `SEO-022`: done. Existing regeneration tests cover duplicate slugs across kinds and duplicate variant handling within a kind without route overwrites.
 - `SEO-023`: done by `FrontendControllerRouteTest` and `FrontendControllerProductionFallbackTest`: generated routes forward when files exist, missing generated routes remain `404`, malformed segments are rejected, and root audit files are not publicly served.
 - `SEO-024`: done as decision. The architecture note keeps SEO in `app` for now and directs future cleanup into internal package boundaries before any module split.
-- `SEO-025`: pragmatic skip/deferred. SEO classes remain style outliers by design; this batch added guardrails and one focused extraction, while broad renderer/audit/style cleanup remains a dedicated future SEO cleanup branch.
+- `SEO-025`: done for current needs. SEO still has large static HTML/report assembly, but policy-heavy behavior is now in named helpers with focused tests; the remaining shell split is a documented pragmatic skip.
 
 SEO verification:
 

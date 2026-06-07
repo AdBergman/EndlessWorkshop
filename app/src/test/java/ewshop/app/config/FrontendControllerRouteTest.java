@@ -52,6 +52,9 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/codex.html"));
 
+        mockMvc.perform(get("/codex/Ability_Blossom"))
+                .andExpect(status().isNotFound());
+
         mockMvc.perform(get("/quests").queryParam("quest", "Quest_A"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/quests.html"));
