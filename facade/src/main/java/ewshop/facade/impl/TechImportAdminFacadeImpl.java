@@ -34,7 +34,7 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
             throw new IllegalArgumentException("Import file is required");
         }
 
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertExpectedExportKind(fileDto.exportKind(), EXPECTED_EXPORT_KIND);
 
         List<TechImportTechDto> techDtos = fileDto.techs();
         if (techDtos == null || techDtos.isEmpty()) {
@@ -81,7 +81,11 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
             return ImportSummaryDto.of("tech", counts, diagnostics, durationMs);
         }
 
-        assertNoDuplicateTechKeys(snapshots);
+        ImportAdminSupport.assertNoDuplicateKeys(
+                snapshots,
+                TechImportSnapshot::techKey,
+                "Duplicate techKey in import file: "
+        );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
 
@@ -121,7 +125,7 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
             throw new IllegalArgumentException("Import file is required");
         }
 
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertExpectedExportKind(fileDto.exportKind(), EXPECTED_EXPORT_KIND);
 
         List<TechImportTechDto> techDtos = fileDto.techs();
         if (techDtos == null || techDtos.isEmpty()) {
@@ -180,25 +184,6 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
         );
     }
 
-    private static void assertExportKind(String exportKind) {
-        if (!EXPECTED_EXPORT_KIND.equals(exportKind)) {
-            throw new IllegalArgumentException(
-                    "Wrong import file type: expected exportKind='" + EXPECTED_EXPORT_KIND +
-                            "' but got '" + exportKind + "'"
-            );
-        }
-    }
-
-    private static void assertNoDuplicateTechKeys(List<TechImportSnapshot> snapshots) {
-        Set<String> seen = new HashSet<>();
-        for (TechImportSnapshot snapshot : snapshots) {
-            String key = snapshot.techKey();
-            if (!seen.add(key)) {
-                throw new IllegalArgumentException("Duplicate techKey in import file: " + key);
-            }
-        }
-    }
-
     private static ImportDetailsDto buildDetails(List<TechImportSnapshot> snapshots, int received) {
         int distinct = (int) snapshots.stream()
                 .map(TechImportSnapshot::techKey)
@@ -223,12 +208,11 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
         if (emptyLore > 0) warnings.add(new ImportCountDto("EMPTY_LORE_IN_FILE", (int) emptyLore));
         if (tbdNames > 0) warnings.add(new ImportCountDto("TBD_NAME_IN_FILE", (int) tbdNames));
 
-        if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTER_VERSION", 1));
-        }
-        if (fileDto.exportedAtUtc() == null || fileDto.exportedAtUtc().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTED_AT_UTC", 1));
-        }
+        ImportAdminSupport.addMissingExporterMetadataWarnings(
+                warnings,
+                fileDto.exporterVersion(),
+                fileDto.exportedAtUtc()
+        );
 
         return warnings;
     }

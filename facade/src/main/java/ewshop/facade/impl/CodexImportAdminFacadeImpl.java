@@ -11,9 +11,7 @@ import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.mapper.CodexImportMapper;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
 
@@ -33,7 +31,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         long startMs = System.currentTimeMillis();
 
         if (fileDto == null) throw new IllegalArgumentException("Import file is required");
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertPresentExportKind(fileDto.exportKind());
 
         List<CodexImportEntryDto> rows = fileDto.entries();
         if (rows == null || rows.isEmpty()) throw new IllegalArgumentException("Import file has no entries");
@@ -76,7 +74,11 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
             return ImportSummaryDto.of("codex", counts, diagnostics, durationMs);
         }
 
-        assertNoDuplicateKeys(snapshots);
+        ImportAdminSupport.assertNoDuplicateKeys(
+                snapshots,
+                CodexImportSnapshot::entryKey,
+                "Duplicate entryKey in import file: "
+        );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
 
@@ -116,22 +118,6 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
                 name,
                 message
         );
-    }
-
-    private static void assertExportKind(String exportKind) {
-        if (exportKind == null || exportKind.isBlank()) {
-            throw new IllegalArgumentException("exportKind is missing");
-        }
-    }
-
-    private static void assertNoDuplicateKeys(List<CodexImportSnapshot> snapshots) {
-        Set<String> seen = new HashSet<>();
-        for (CodexImportSnapshot s : snapshots) {
-            String key = s.entryKey();
-            if (!seen.add(key)) {
-                throw new IllegalArgumentException("Duplicate entryKey in import file: " + key);
-            }
-        }
     }
 
     private static ImportDetailsDto buildDetails(List<CodexImportSnapshot> snapshots, int received) {

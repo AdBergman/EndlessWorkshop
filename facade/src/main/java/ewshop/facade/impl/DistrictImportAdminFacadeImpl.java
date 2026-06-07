@@ -11,9 +11,7 @@ import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.mapper.DistrictImportMapper;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DistrictImportAdminFacadeImpl implements DistrictImportAdminFacade {
 
@@ -34,7 +32,7 @@ public class DistrictImportAdminFacadeImpl implements DistrictImportAdminFacade 
         long startMs = System.currentTimeMillis();
 
         if (fileDto == null) throw new IllegalArgumentException("Import file is required");
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertExpectedExportKind(fileDto.exportKind(), EXPECTED_EXPORT_KIND);
 
         List<DistrictImportDistrictDto> rows = fileDto.districts();
         if (rows == null || rows.isEmpty()) throw new IllegalArgumentException("Import file has no districts");
@@ -77,7 +75,11 @@ public class DistrictImportAdminFacadeImpl implements DistrictImportAdminFacade 
             return ImportSummaryDto.of("districts", counts, diagnostics, durationMs);
         }
 
-        assertNoDuplicateKeys(snapshots);
+        ImportAdminSupport.assertNoDuplicateKeys(
+                snapshots,
+                DistrictImportSnapshot::districtKey,
+                "Duplicate districtKey in import file: "
+        );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
 
@@ -120,25 +122,6 @@ public class DistrictImportAdminFacadeImpl implements DistrictImportAdminFacade 
         );
     }
 
-    private static void assertExportKind(String exportKind) {
-        if (!EXPECTED_EXPORT_KIND.equals(exportKind)) {
-            throw new IllegalArgumentException(
-                    "Wrong import file type: expected exportKind='" + EXPECTED_EXPORT_KIND +
-                            "' but got '" + exportKind + "'"
-            );
-        }
-    }
-
-    private static void assertNoDuplicateKeys(List<DistrictImportSnapshot> snapshots) {
-        Set<String> seen = new HashSet<>();
-        for (DistrictImportSnapshot s : snapshots) {
-            String key = s.districtKey();
-            if (!seen.add(key)) {
-                throw new IllegalArgumentException("Duplicate districtKey in import file: " + key);
-            }
-        }
-    }
-
     private static ImportDetailsDto buildDetails(List<DistrictImportSnapshot> snapshots, int received) {
         int distinct = (int) snapshots.stream()
                 .map(DistrictImportSnapshot::districtKey)
@@ -162,12 +145,11 @@ public class DistrictImportAdminFacadeImpl implements DistrictImportAdminFacade 
         if (emptyCategory > 0) warnings.add(new ImportCountDto("EMPTY_CATEGORY_IN_FILE", (int) emptyCategory));
         if (emptyLines > 0) warnings.add(new ImportCountDto("EMPTY_DESCRIPTION_LINES_IN_FILE", (int) emptyLines));
 
-        if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTER_VERSION", 1));
-        }
-        if (fileDto.exportedAtUtc() == null || fileDto.exportedAtUtc().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTED_AT_UTC", 1));
-        }
+        ImportAdminSupport.addMissingExporterMetadataWarnings(
+                warnings,
+                fileDto.exporterVersion(),
+                fileDto.exportedAtUtc()
+        );
 
         return warnings;
     }

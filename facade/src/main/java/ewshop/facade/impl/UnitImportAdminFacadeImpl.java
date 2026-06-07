@@ -12,9 +12,7 @@ import ewshop.facade.interfaces.UnitImportAdminFacade;
 import ewshop.facade.mapper.UnitImportMapper;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
 
@@ -35,7 +33,7 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
         long startMs = System.currentTimeMillis();
 
         if (fileDto == null) throw new IllegalArgumentException("Import file is required");
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertExpectedExportKind(fileDto.exportKind(), EXPECTED_EXPORT_KIND);
 
         List<UnitImportUnitDto> rows = fileDto.units();
         if (rows == null || rows.isEmpty()) throw new IllegalArgumentException("Import file has no units");
@@ -78,7 +76,11 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
             return ImportSummaryDto.of("units", counts, diagnostics, durationMs);
         }
 
-        assertNoDuplicateKeys(snapshots);
+        ImportAdminSupport.assertNoDuplicateKeys(
+                snapshots,
+                UnitImportSnapshot::unitKey,
+                "Duplicate unitKey in import file: "
+        );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
 
@@ -109,7 +111,7 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
     @Override
     public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto fileDto) {
         if (fileDto == null) throw new IllegalArgumentException("Import file is required");
-        assertExportKind(fileDto.exportKind());
+        ImportAdminSupport.assertExpectedExportKind(fileDto.exportKind(), EXPECTED_EXPORT_KIND);
 
         List<UnitImportUnitDto> rows = fileDto.units();
         if (rows == null || rows.isEmpty()) throw new IllegalArgumentException("Import file has no units");
@@ -166,25 +168,6 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
         );
     }
 
-    private static void assertExportKind(String exportKind) {
-        if (!EXPECTED_EXPORT_KIND.equals(exportKind)) {
-            throw new IllegalArgumentException(
-                    "Wrong import file type: expected exportKind='" + EXPECTED_EXPORT_KIND +
-                            "' but got '" + exportKind + "'"
-            );
-        }
-    }
-
-    private static void assertNoDuplicateKeys(List<UnitImportSnapshot> snapshots) {
-        Set<String> seen = new HashSet<>();
-        for (UnitImportSnapshot s : snapshots) {
-            String key = s.unitKey();
-            if (!seen.add(key)) {
-                throw new IllegalArgumentException("Duplicate unitKey in import file: " + key);
-            }
-        }
-    }
-
     private static ImportDetailsDto buildDetails(List<UnitImportSnapshot> snapshots, int received) {
         int distinct = (int) snapshots.stream()
                 .map(UnitImportSnapshot::unitKey)
@@ -208,13 +191,11 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
             warnings.add(new ImportCountDto("EMPTY_DESCRIPTION_LINES_IN_FILE", (int) emptyLines));
         }
 
-        if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTER_VERSION", 1));
-        }
-
-        if (fileDto.exportedAtUtc() == null || fileDto.exportedAtUtc().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_EXPORTED_AT_UTC", 1));
-        }
+        ImportAdminSupport.addMissingExporterMetadataWarnings(
+                warnings,
+                fileDto.exporterVersion(),
+                fileDto.exportedAtUtc()
+        );
 
         return warnings;
     }

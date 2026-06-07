@@ -1,6 +1,7 @@
 package ewshop.facade.impl;
 
 import ewshop.domain.service.UnitImportService;
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class UnitImportAdminFacadeImplTest {
 
@@ -48,6 +50,46 @@ class UnitImportAdminFacadeImplTest {
             assertThat(filter.count()).isEqualTo(1);
         });
         assertThat(summary.errors()).hasSize(1);
+    }
+
+    @Test
+    void importUnits_refusesToWriteWhenAllRowsAreFiltered() {
+        UnitImportBatchDto file = new UnitImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-06T00:00:00Z",
+                "units",
+                List.of(
+                        unit("Unit_Kin_Hidden", "Kin", true, "UnitClass_Ranged", false),
+                        unit("Unit_Kin_Prototype", "Kin", true, "UnitClass_Prototype_LandUnit", true)
+                )
+        );
+
+        assertThatThrownBy(() -> facade.importUnits(file))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unit import produced 0 public units");
+    }
+
+    @Test
+    void importUnits_reportsFailedRowsWithoutWritingWhenNoRowsMap() {
+        UnitImportBatchDto file = new UnitImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-06T00:00:00Z",
+                "units",
+                List.of(
+                        unit("Unit_Unknown", "FutureFaction", true, "UnitClass_Ranged", true)
+                )
+        );
+
+        ImportSummaryDto summary = facade.importUnits(file);
+
+        assertThat(summary.counts().received()).isEqualTo(1);
+        assertThat(summary.counts().failed()).isEqualTo(1);
+        assertThat(summary.counts().inserted()).isZero();
+        assertThat(summary.diagnostics().errors()).hasSize(1);
     }
 
     private static UnitImportUnitDto unit(

@@ -20,8 +20,6 @@ import java.util.stream.Collectors;
 @Repository
 public class UnitRepositoryAdapter implements UnitRepository {
 
-    private static final String PROTOTYPE_UNIT_CLASS_KEY = "UnitClass_Prototype_LandUnit";
-
     private final UnitJpaRepository unitJpaRepository;
     private final UnitMapper mapper;
 
@@ -41,11 +39,8 @@ public class UnitRepositoryAdapter implements UnitRepository {
             return result;
         }
 
-        // Filter invalid rows before computing keepKeys so skipped rows do not delete valid DB rows.
         List<UnitImportSnapshot> allowed = snapshots.stream()
                 .filter(Objects::nonNull)
-                .filter(s -> s.faction() != null)
-                .filter(s -> !isPrototype(s.unitClassKey()))
                 .toList();
 
         if (allowed.isEmpty()) {
@@ -56,6 +51,10 @@ public class UnitRepositoryAdapter implements UnitRepository {
                 .map(UnitImportSnapshot::unitKey)
                 .distinct()
                 .toList();
+
+        if (keepKeys.isEmpty()) {
+            throw new IllegalStateException("Refusing to delete all units: keepKeys empty.");
+        }
 
         Map<String, UnitEntity> existingByKey = unitJpaRepository.findAllByUnitKeyIn(keepKeys).stream()
                 .collect(Collectors.toMap(UnitEntity::getUnitKey, Function.identity()));
@@ -96,10 +95,6 @@ public class UnitRepositoryAdapter implements UnitRepository {
         }
 
         return result;
-    }
-
-    private static boolean isPrototype(String unitClassKey) {
-        return unitClassKey != null && unitClassKey.trim().equals(PROTOTYPE_UNIT_CLASS_KEY);
     }
 
     private static UpsertOutcome applySnapshot(UnitEntity entity, UnitImportSnapshot update, boolean isInsert) {

@@ -375,9 +375,51 @@ class ImportAdminControllerTest {
         mockMvc.perform(post("/api/admin/import/quests/explorer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Quest explorer file entries[] must not be empty"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/quests/explorer"));
 
         assertNull(questFacade.lastDto);
+    }
+
+    @Test
+    void importUnits_returnsBadRequestJson_whenFacadeRejectsImport() throws Exception {
+        unitFacade.rejectImport = true;
+        UnitImportBatchDto payload = new UnitImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                "units",
+                List.of(new UnitImportUnitDto(
+                        "Unit_A",
+                        "A",
+                        "Kin",
+                        true,
+                        false,
+                        false,
+                        "Land",
+                        null,
+                        List.of(),
+                        0,
+                        "UnitClass_Ranged",
+                        null,
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                ))
+        );
+
+        mockMvc.perform(post("/api/admin/import/units")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("IMPORT_REJECTED"))
+                .andExpect(jsonPath("$.message").value("Unit import produced 0 public units; refusing to write/delete."))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/units"));
     }
 
     @Test
@@ -397,7 +439,10 @@ class ImportAdminControllerTest {
         mockMvc.perform(post("/api/admin/import/codex")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Import file entries[] must not be empty"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/codex"));
 
         assertNull(codexFacade.lastDto);
     }
@@ -568,9 +613,13 @@ class ImportAdminControllerTest {
     private static final class RecordingUnitImportAdminFacade implements UnitImportAdminFacade {
         private UnitImportBatchDto lastImportDto;
         private UnitImportBatchDto lastSmokeDto;
+        private boolean rejectImport;
 
         @Override
         public ImportSummaryDto importUnits(UnitImportBatchDto dto) {
+            if (rejectImport) {
+                throw new IllegalStateException("Unit import produced 0 public units; refusing to write/delete.");
+            }
             lastImportDto = dto;
             return okSummary("units");
         }

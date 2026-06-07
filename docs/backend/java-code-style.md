@@ -36,6 +36,8 @@ api -> facade -> domain <- infrastructure
 - Avoid broad `@NullMarked` unless the project adopts a formal nullness policy.
 - Annotations document contracts; they do not replace importer validation.
 - Bad importer data should fail or skip deliberately, with useful errors or logs.
+- Import facades map, diagnose, and orchestrate; domain services decide import policy and release gates; infrastructure persists accepted snapshots and owns DB mechanics.
+- Faction allow-lists are intentional release-safety gates, not incidental enum restrictions.
 
 ## DTOs And Mappers
 

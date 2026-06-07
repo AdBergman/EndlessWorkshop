@@ -13,8 +13,6 @@ import java.util.List;
 @Service
 public class UnitImportService {
 
-    private static final String PROTOTYPE_UNIT_CLASS_KEY = "UnitClass_Prototype_LandUnit";
-
     private final UnitRepository unitRepository;
 
     public UnitImportService(UnitRepository unitRepository) {
@@ -27,6 +25,9 @@ public class UnitImportService {
         UnitImportPreview preview = previewUnits(snapshots);
 
         if (preview.importableSnapshots().isEmpty()) {
+            if (snapshots != null && !snapshots.isEmpty()) {
+                throw new IllegalStateException("Unit import produced 0 public units; refusing to write/delete.");
+            }
             return new ImportResult();
         }
 
@@ -43,23 +44,17 @@ public class UnitImportService {
                 .toList();
 
         int rowsWithoutFaction = (int) nonNullSnapshots.stream()
-                .filter(snapshot -> snapshot.faction() == null)
+                .filter(UnitImportPolicy::isMissingAllowedFaction)
                 .count();
 
         int prototypeClassRows = (int) nonNullSnapshots.stream()
-                .filter(snapshot -> snapshot.faction() != null)
-                .filter(snapshot -> isPrototype(snapshot.unitClassKey()))
+                .filter(UnitImportPolicy::isPrototypeUnitClass)
                 .count();
 
         List<UnitImportSnapshot> allowed = nonNullSnapshots.stream()
-                .filter(snapshot -> snapshot.faction() != null)
-                .filter(snapshot -> !isPrototype(snapshot.unitClassKey()))
+                .filter(UnitImportPolicy::isImportable)
                 .toList();
 
         return new UnitImportPreview(allowed, rowsWithoutFaction, prototypeClassRows);
-    }
-
-    private static boolean isPrototype(String unitClassKey) {
-        return unitClassKey != null && unitClassKey.trim().equals(PROTOTYPE_UNIT_CLASS_KEY);
     }
 }
