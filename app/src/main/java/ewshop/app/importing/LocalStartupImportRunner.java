@@ -14,6 +14,8 @@ import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -39,6 +41,7 @@ import java.util.stream.Stream;
 @Component
 @Profile({"dev", "local", "ai", "codex"})
 @ConditionalOnProperty(prefix = "ewshop.local-import", name = "enabled", havingValue = "true")
+@NullMarked
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);
@@ -174,7 +177,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         }
     }
 
-    static Path resolveRoot(Path configuredRoot, Path workingDirectory) {
+    static Path resolveRoot(@Nullable Path configuredRoot, Path workingDirectory) {
         Path root = configuredRoot == null ? Path.of("local-imports") : configuredRoot;
         if (root.isAbsolute()) {
             return root.normalize();
@@ -193,7 +196,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         return direct;
     }
 
-    private ImportSummaryDto importFile(LocalImportFile file) throws IOException {
+    private @Nullable ImportSummaryDto importFile(LocalImportFile file) throws IOException {
         JsonNode json = objectMapper.readTree(file.path().toFile());
 
         return switch (file.folder()) {
@@ -202,7 +205,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         };
     }
 
-    private ImportSummaryDto importExportFile(Path file, JsonNode json) throws IOException {
+    private @Nullable ImportSummaryDto importExportFile(Path file, JsonNode json) throws IOException {
         String exportKind = normalizedExportKind(json);
 
         if ("tech".equals(exportKind) || shouldLetAdminValidationReport(json, "techs", exportKind)) {
@@ -262,7 +265,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         );
     }
 
-    private ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
+    private @Nullable ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
         String exportKind = normalizedExportKind(json);
 
         if ("quest_explorer_branch_diagnostics".equals(exportKind)) {
@@ -273,7 +276,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             return null;
         }
 
-        if (json != null && json.has("entries")) {
+        if (json.has("entries")) {
             return codexImportAdminFacade.importCodex(objectMapper.treeToValue(json, CodexImportBatchDto.class));
         }
 
@@ -285,16 +288,16 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         return null;
     }
 
-    private static boolean shouldLetAdminValidationReport(JsonNode json, String importArrayField, String exportKind) {
-        return exportKind == null && json != null && json.has(importArrayField);
+    private static boolean shouldLetAdminValidationReport(JsonNode json, String importArrayField, @Nullable String exportKind) {
+        return exportKind == null && json.has(importArrayField);
     }
 
-    private static String normalizedExportKind(JsonNode json) {
-        JsonNode value = json == null ? null : json.get("exportKind");
-        if (value == null || !value.isTextual()) {
+    private static @Nullable String normalizedExportKind(JsonNode json) {
+        JsonNode value = json.get("exportKind");
+        if (value == null || !value.isString()) {
             return null;
         }
-        String text = value.asText().trim().toLowerCase(Locale.ROOT);
+        String text = value.asString().trim().toLowerCase(Locale.ROOT);
         return text.isEmpty() ? null : text;
     }
 

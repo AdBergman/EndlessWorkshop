@@ -6,9 +6,11 @@ import ewshop.domain.model.enums.FactionNamePolicy;
 import ewshop.facade.dto.response.TechCoordsDto;
 import ewshop.facade.dto.response.TechDto;
 import ewshop.facade.dto.response.TechUnlockDto;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class TechMapper {
@@ -16,7 +18,7 @@ public final class TechMapper {
     private TechMapper() {
     }
 
-    public static TechDto toDto(Tech t) {
+    public static @Nullable TechDto toDto(@Nullable Tech t) {
         if (t == null) return null;
 
         TechCoords c = t.getTechCoords();
@@ -30,6 +32,7 @@ public final class TechMapper {
 
         List<String> factions = t.getFactions().stream()
                 .map(FactionNamePolicy::canonicalMajorDisplayNameOrSelf)
+                .filter(Objects::nonNull)
                 .sorted()
                 .toList();
 

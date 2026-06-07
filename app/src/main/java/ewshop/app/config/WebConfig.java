@@ -1,6 +1,8 @@
 package ewshop.app.config;
 
 import ewshop.app.seo.storage.SeoOutputLocator;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Configuration
+@NullMarked
 public class WebConfig {
 
     private static final String NO_ORIGINS_ALLOWED = "https://cors-disabled.invalid";
@@ -21,7 +24,7 @@ public class WebConfig {
 
     public WebConfig(
             SeoOutputLocator seoOutputLocator,
-            @Value("${ewshop.cors.allowed-origins:}") String apiAllowedOrigins
+            @Value("${ewshop.cors.allowed-origins:}") @Nullable String apiAllowedOrigins
     ) {
         this.seoOutputLocator = seoOutputLocator;
         this.apiAllowedOrigins = parseAllowedOrigins(apiAllowedOrigins);
@@ -67,7 +70,7 @@ public class WebConfig {
         };
     }
 
-    private static List<String> parseAllowedOrigins(String rawOrigins) {
+    private static List<String> parseAllowedOrigins(@Nullable String rawOrigins) {
         if (rawOrigins == null || rawOrigins.isBlank()) {
             return List.of();
         }

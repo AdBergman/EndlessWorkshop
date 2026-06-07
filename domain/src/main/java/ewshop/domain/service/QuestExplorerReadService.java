@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class QuestExplorerReadService {
@@ -110,14 +111,12 @@ public class QuestExplorerReadService {
     private static String displayNameForFactionKey(String key) {
         String majorFaction = suffixAfterPrefix(key, "Faction_");
         if (majorFaction != null) {
-            String displayName = FactionNamePolicy.bestEffortMajorDisplayName(majorFaction);
-            if (displayName != null) return displayName;
+            return FactionNamePolicy.bestEffortMajorDisplayName(majorFaction);
         }
 
         String minorFaction = suffixAfterPrefix(key, "MinorFaction_");
         if (minorFaction != null) {
-            String displayName = FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
-            if (displayName != null) return displayName;
+            return FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
         }
 
         return null;
@@ -126,14 +125,12 @@ public class QuestExplorerReadService {
     private static String displayNameForQuestLineKey(String key) {
         String majorFaction = suffixAfterPrefix(key, "FactionQuest_");
         if (majorFaction != null) {
-            String displayName = FactionNamePolicy.bestEffortMajorDisplayName(baseFactionToken(majorFaction));
-            if (displayName != null) return displayName;
+            return FactionNamePolicy.bestEffortMajorDisplayName(baseFactionToken(majorFaction));
         }
 
         String minorFaction = suffixAfterPrefix(key, "MinorFaction_SpecificQuest_");
         if (minorFaction != null) {
-            String displayName = FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
-            if (displayName != null) return displayName;
+            return FactionNamePolicy.bestEffortMinorDisplayName(withoutTrailingDigits(minorFaction));
         }
 
         return null;
@@ -163,8 +160,8 @@ public class QuestExplorerReadService {
     }
 
     private static boolean equalsNullable(String left, String right) {
-        return firstDisplayName(left) == null
-                ? firstDisplayName(right) == null
-                : firstDisplayName(left).equals(firstDisplayName(right));
+        String cleanLeft = firstDisplayName(left);
+        String cleanRight = firstDisplayName(right);
+        return Objects.equals(cleanLeft, cleanRight);
     }
 }

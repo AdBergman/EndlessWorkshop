@@ -5,7 +5,6 @@ import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public final class DistrictImportMapper {
 

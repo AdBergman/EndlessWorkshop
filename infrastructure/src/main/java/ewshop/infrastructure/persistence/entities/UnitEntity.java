@@ -16,13 +16,13 @@ public class UnitEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "unit_key", nullable = false, length = 255)
+    @Column(name = "unit_key", nullable = false)
     private String unitKey;
 
-    @Column(name = "display_name", nullable = false, length = 255)
+    @Column(name = "display_name", nullable = false)
     private String displayName;
 
-    @Column(name = "art_id", length = 255)
+    @Column(name = "art_id")
     private String artId;
 
     @Column(name = "faction", length = 64)
@@ -40,19 +40,19 @@ public class UnitEntity {
     @Column(name = "spawn_type", length = 64)
     private String spawnType;
 
-    @Column(name = "previous_unit_key", length = 255)
+    @Column(name = "previous_unit_key")
     private String previousUnitKey;
 
     @Column(name = "evolution_tier_index")
     private Integer evolutionTierIndex;
 
-    @Column(name = "unit_class_key", length = 255)
+    @Column(name = "unit_class_key")
     private String unitClassKey;
 
-    @Column(name = "unit_class_display_name", length = 255)
+    @Column(name = "unit_class_display_name")
     private String unitClassDisplayName;
 
-    @Column(name = "attack_skill_key", length = 255)
+    @Column(name = "attack_skill_key")
     private String attackSkillKey;
 
     @ElementCollection
@@ -61,7 +61,7 @@ public class UnitEntity {
             joinColumns = @JoinColumn(name = "unit_id", foreignKey = @ForeignKey(name = "fk_unit_next_evolutions_unit"))
     )
     @OrderColumn(name = "next_index")
-    @Column(name = "next_unit_key", nullable = false, length = 255)
+    @Column(name = "next_unit_key", nullable = false)
     private List<String> nextEvolutionUnitKeys = new ArrayList<>();
 
     @ElementCollection
@@ -70,7 +70,7 @@ public class UnitEntity {
             joinColumns = @JoinColumn(name = "unit_id", foreignKey = @ForeignKey(name = "fk_unit_abilities_unit"))
     )
     @OrderColumn(name = "ability_index")
-    @Column(name = "ability_key", nullable = false, length = 255)
+    @Column(name = "ability_key", nullable = false)
     private List<String> abilityKeys = new ArrayList<>();
 
     @ElementCollection

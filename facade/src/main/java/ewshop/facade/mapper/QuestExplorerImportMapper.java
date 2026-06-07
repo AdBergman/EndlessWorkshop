@@ -61,7 +61,8 @@ public final class QuestExplorerImportMapper {
     }
 
     public static QuestExplorerEntryImportSnapshot toSnapshot(QuestExplorerImportEntryDto dto) {
-        String entryKey = required(dto == null ? null : dto.entryKey(), "entry.entryKey");
+        if (dto == null) throw new IllegalArgumentException("entry is required");
+        String entryKey = required(dto.entryKey(), "entry.entryKey");
         requirePresent(dto.summaryLines(), "entry.summaryLines", entryKey);
         requirePresent(dto.aliases(), "entry.aliases", entryKey);
         requirePresent(dto.branches(), "entry.branches", entryKey);
@@ -98,16 +99,18 @@ public final class QuestExplorerImportMapper {
         Set<Integer> sequenceIndexes = new HashSet<>();
 
         for (QuestExplorerEntryImportSnapshot snapshot : safeList(snapshots)) {
-            String entryKey = required(snapshot == null ? null : snapshot.entryKey(), "entry.entryKey");
+            if (snapshot == null) throw new IllegalArgumentException("entry is required");
+            String entryKey = required(snapshot.entryKey(), "entry.entryKey");
             if (!entryKeys.add(entryKey)) {
                 throw new IllegalArgumentException("Duplicate quest explorer entryKey '" + entryKey + "'");
             }
-            if (snapshot.navigation() == null) {
+            QuestExplorerNavigationImportSnapshot navigation = snapshot.navigation();
+            if (navigation == null) {
                 throw new IllegalArgumentException("entry.navigation is required for '" + entryKey + "'");
             }
-            if (!sequenceIndexes.add(snapshot.navigation().sequenceIndex())) {
+            if (!sequenceIndexes.add(navigation.sequenceIndex())) {
                 throw new IllegalArgumentException(
-                        "Duplicate quest explorer navigation.sequenceIndex '" + snapshot.navigation().sequenceIndex() + "'"
+                        "Duplicate quest explorer navigation.sequenceIndex '" + navigation.sequenceIndex() + "'"
                 );
             }
         }
@@ -160,8 +163,9 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerLoreSectionImportSnapshot toSnapshot(QuestExplorerImportLoreSectionDto dto) {
+        if (dto == null) throw new IllegalArgumentException("lore section is required");
         return new QuestExplorerLoreSectionImportSnapshot(
-                required(dto == null ? null : dto.sectionKey(), "lore.sectionKey"),
+                required(dto.sectionKey(), "lore.sectionKey"),
                 required(dto.phase(), "lore.phase"),
                 trimToNull(dto.choiceKey()),
                 dto.stepIndex(),
@@ -174,9 +178,10 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerLoreLineImportSnapshot toSnapshot(QuestExplorerImportLoreLineDto dto) {
+        if (dto == null) throw new IllegalArgumentException("lore line is required");
         return new QuestExplorerLoreLineImportSnapshot(
-                trimToNull(dto == null ? null : dto.speakerLabel()),
-                required(dto == null ? null : dto.role(), "lore.line.role"),
+                trimToNull(dto.speakerLabel()),
+                required(dto.role(), "lore.line.role"),
                 required(dto.text(), "lore.line.text")
         );
     }
@@ -188,10 +193,11 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerStrategyObjectiveImportSnapshot toSnapshot(QuestExplorerImportObjectiveDto dto) {
+        if (dto == null) throw new IllegalArgumentException("objective is required");
         return new QuestExplorerStrategyObjectiveImportSnapshot(
-                trimToNull(dto == null ? null : dto.objectiveKey()),
-                trimToNull(dto == null ? null : dto.choiceKey()),
-                required(dto == null ? null : dto.text(), "objective.text"),
+                trimToNull(dto.objectiveKey()),
+                trimToNull(dto.choiceKey()),
+                required(dto.text(), "objective.text"),
                 trimToNull(dto.phase()),
                 cleanValues(dto.revealedByBranchKeys()),
                 cleanValues(dto.revealedByChoiceKeys()),
@@ -202,10 +208,11 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerBranchImportSnapshot toSnapshot(QuestExplorerImportBranchDto dto) {
+        if (dto == null) throw new IllegalArgumentException("branch is required");
         QuestExplorerImportBranchLoreDto lore = dto.lore();
         QuestExplorerImportBranchStrategyDto strategy = dto.strategy();
         return new QuestExplorerBranchImportSnapshot(
-                required(dto == null ? null : dto.branchKey(), "branch.branchKey"),
+                required(dto.branchKey(), "branch.branchKey"),
                 trimToNull(dto.choiceKey()),
                 required(dto.label(), "branch.label"),
                 dto.orderIndex(),
@@ -233,8 +240,9 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerRequirementImportSnapshot toSnapshot(QuestExplorerImportRequirementDto dto) {
+        if (dto == null) throw new IllegalArgumentException("requirement is required");
         return new QuestExplorerRequirementImportSnapshot(
-                required(dto == null ? null : dto.requirementKey(), "requirement.requirementKey"),
+                required(dto.requirementKey(), "requirement.requirementKey"),
                 required(dto.kind(), "requirement.kind"),
                 required(dto.displayText(), "requirement.displayText"),
                 trimToNull(dto.polarity()),
@@ -253,8 +261,9 @@ public final class QuestExplorerImportMapper {
     }
 
     private static QuestExplorerRewardImportSnapshot toSnapshot(QuestExplorerImportRewardDto dto) {
+        if (dto == null) throw new IllegalArgumentException("reward is required");
         return new QuestExplorerRewardImportSnapshot(
-                required(dto == null ? null : dto.rewardKey(), "reward.rewardKey"),
+                required(dto.rewardKey(), "reward.rewardKey"),
                 required(dto.kind(), "reward.kind"),
                 required(dto.displayText(), "reward.displayText"),
                 dto.amount(),
@@ -279,7 +288,8 @@ public final class QuestExplorerImportMapper {
     private static void validateBranches(String entryKey, List<QuestExplorerImportBranchDto> branches) {
         Set<String> branchKeys = new HashSet<>();
         for (QuestExplorerImportBranchDto branch : safeList(branches)) {
-            String branchKey = required(branch == null ? null : branch.branchKey(), "branch.branchKey");
+            if (branch == null) throw new IllegalArgumentException("branch is required in entry '" + entryKey + "'");
+            String branchKey = required(branch.branchKey(), "branch.branchKey");
             if (!branchKeys.add(branchKey)) {
                 throw new IllegalArgumentException("Duplicate branchKey '" + branchKey + "' in entry '" + entryKey + "'");
             }

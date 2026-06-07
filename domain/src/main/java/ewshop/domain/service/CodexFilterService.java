@@ -22,9 +22,9 @@ public class CodexFilterService {
     private static final String WEAK_DESCRIPTION_LINES = "weak-description-lines";
     private static final String DUPLICATE_SLUG = "duplicate-slug";
     private static final String FILTERED_OUT = "filtered-out";
-    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^]]+\\]\\s*");
+    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^]]+]\\s*");
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile(
-            "(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd\\])",
+            "(^%|\\b(?:tbd|todo|placeholder|lorem ipsum|coming soon)\\b|\\[tbd])",
             Pattern.CASE_INSENSITIVE
     );
     private static final Pattern DIGIT_CLUSTER_PATTERN = Pattern.compile("\\d{3,}");
@@ -211,6 +211,8 @@ public class CodexFilterService {
     }
 
     private static String slugify(String value) {
+        // Keep ASCII source while removing curly apostrophes from exported text.
+        //noinspection UnnecessaryUnicodeEscape
         return Normalizer.normalize(value, Normalizer.Form.NFKD)
                 .replace("'", "")
                 .replace("\u2019", "")

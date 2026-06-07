@@ -169,8 +169,7 @@ public final class QuestExplorerProgressionDiagnosticReporter {
             List<QuestExplorer.Entry> entries,
             QuestExplorer.Progression progression
     ) {
-        Set<String> validIdentities = entriesByIdentity(entries).keySet().stream()
-                .collect(Collectors.toCollection(TreeSet::new));
+        Set<String> validIdentities = new TreeSet<>(entriesByIdentity(entries).keySet());
         Map<String, ProgressionGroup> progressionGroupsByIdentity = progressionGroupsByIdentity(entries, progression);
         List<String> warnings = new ArrayList<>();
         for (QuestExplorer.Entry entry : entries) {

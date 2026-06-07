@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 final class CodexDisplayNameNormalizer {
 
-    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^]]+\\]\\s*");
+    private static final Pattern LEADING_BRACKET_PREFIX_PATTERN = Pattern.compile("^\\[[^]]+]\\s*");
 
     private CodexDisplayNameNormalizer() {}
 

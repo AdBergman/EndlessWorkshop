@@ -99,8 +99,8 @@ public class TechUnlockRefEmbeddable {
     private static List<String> decodeLines(String value) {
         if (value == null || value.isBlank()) return List.of();
         return Arrays.stream(value.split(LINE_SEPARATOR, -1))
-                .filter(line -> line != null && !line.trim().isEmpty())
                 .map(String::trim)
+                .filter(line -> !line.isEmpty())
                 .toList();
     }
 }

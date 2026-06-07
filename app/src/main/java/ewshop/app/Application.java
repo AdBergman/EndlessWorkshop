@@ -15,8 +15,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableAsync
 public class Application {
+    // Keep the conventional public Spring Boot entry point for launch tooling.
+    @SuppressWarnings("UnnecessaryModifier")
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
-    //testing re-deploy due to missing env variabels
 }

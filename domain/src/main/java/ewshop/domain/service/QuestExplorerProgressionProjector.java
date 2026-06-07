@@ -699,7 +699,7 @@ public final class QuestExplorerProgressionProjector {
 
         private List<QuestExplorer.NumericQuestlineVariantCollapse> numericCollapses() {
             return collapseCounts.entrySet().stream()
-                    .sorted(Map.Entry.<CollapseKey, Integer>comparingByKey())
+                    .sorted(Map.Entry.comparingByKey())
                     .map(entry -> new QuestExplorer.NumericQuestlineVariantCollapse(
                             entry.getKey().sourceQuestLineKey(),
                             entry.getKey().sourceFactionKey(),

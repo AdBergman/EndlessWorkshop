@@ -4,11 +4,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@NullMarked
 public class AdminTokenFilter extends OncePerRequestFilter {
 
     private static final String ADMIN_PATH_PREFIX = "/api/admin/";
@@ -16,7 +19,7 @@ public class AdminTokenFilter extends OncePerRequestFilter {
 
     private final String adminToken;
 
-    public AdminTokenFilter(String adminToken) {
+    public AdminTokenFilter(@Nullable String adminToken) {
         this.adminToken = adminToken == null ? "" : adminToken.trim();
     }
 

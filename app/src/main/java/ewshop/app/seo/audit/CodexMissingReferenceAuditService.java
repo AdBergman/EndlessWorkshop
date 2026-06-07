@@ -2,11 +2,9 @@ package ewshop.app.seo.audit;
 
 import ewshop.app.seo.generation.PageCandidate;
 import ewshop.app.seo.generation.ReferenceTarget;
-import ewshop.app.seo.generation.SeoRoutes;
 import ewshop.domain.service.CodexFilterResult;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -270,9 +268,8 @@ public class CodexMissingReferenceAuditService {
 
     private static String ownerFor(String classification) {
         return switch (classification) {
-            case "absent-from-import" -> "C# exporter / EL2 mapping";
+            case "absent-from-import", "near-match / present-under-other-key" -> "C# exporter / EL2 mapping";
             case "present-but-filtered" -> "EWShop codex diagnostics/filtering";
-            case "near-match / present-under-other-key" -> "C# exporter / EL2 mapping";
             case "internal/noise" -> "C# exporter / EL2 mapping policy";
             default -> "Needs triage";
         };

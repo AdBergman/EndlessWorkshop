@@ -506,6 +506,8 @@ public class SeoRegenerationService {
     }
 
     private static String slugify(String value) {
+        // Keep ASCII source while removing curly apostrophes from exported text.
+        //noinspection UnnecessaryUnicodeEscape
         return Normalizer.normalize(trimToEmpty(value), Normalizer.Form.NFKD)
                 .replace("'", "")
                 .replace("\u2019", "")
