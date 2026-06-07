@@ -14,7 +14,6 @@ import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
-import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,6 @@ import java.util.stream.Stream;
 @Component
 @Profile({"dev", "local", "ai", "codex"})
 @ConditionalOnProperty(prefix = "ewshop.local-import", name = "enabled", havingValue = "true")
-@NullMarked
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);

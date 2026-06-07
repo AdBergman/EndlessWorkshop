@@ -9,6 +9,7 @@ Prefer small, bounded changes that follow existing architecture. Do not perform 
 - Frontend changes using backend DTO fields should verify frontend types/API client/store usage against backend response DTOs.
 - Backend API DTO changes should verify corresponding frontend type/client/store/rendering usage.
 - Do not deep-audit importer, DB, or Flyway layers unless explicitly requested, the API contract is ambiguous, or a contract mismatch is suspected.
+- For backend Java changes, read and follow `docs/backend/java-code-style.md`; do not duplicate those rules here.
 
 ## Local Import Fixtures
 
