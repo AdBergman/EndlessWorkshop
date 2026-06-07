@@ -144,7 +144,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         if (emptyRefs > 0) warnings.add(new ImportCountDto("EMPTY_REFERENCE_LINES_IN_FILE", (int) emptyRefs));
 
         if (fileDto.exporterVersion() == null || fileDto.exporterVersion().isBlank()) {
-            warnings.add(new ImportCountDto("MISSING_SOURCE_VERSION", 1));
+            warnings.add(new ImportCountDto("MISSING_EXPORTER_VERSION", 1));
         }
 
         return warnings;

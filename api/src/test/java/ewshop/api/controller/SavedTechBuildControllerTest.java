@@ -76,6 +76,27 @@ class SavedTechBuildControllerTest {
     }
 
     @Test
+    void createBuild_returnsStructuredBadRequest_whenFacadeRejectsPayload() throws Exception {
+        CreateSavedTechBuildRequest request = CreateSavedTechBuildRequest.builder()
+                .name("Bad Build")
+                .selectedFaction("")
+                .techIds(List.of("Tech_A"))
+                .build();
+
+        when(savedTechBuildFacade.createSavedBuild(any(CreateSavedTechBuildRequest.class)))
+                .thenThrow(new IllegalArgumentException("selectedFaction is required"));
+
+        mockMvc.perform(post("/api/builds")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("selectedFaction is required"))
+                .andExpect(jsonPath("$.path").value("/api/builds"));
+    }
+
+
+    @Test
     void createBuild_thenGetBuild_roundtripsReturnedUuidFactionAndTechIds() throws Exception {
         AtomicReference<SavedTechBuildDto> stored = new AtomicReference<>();
 

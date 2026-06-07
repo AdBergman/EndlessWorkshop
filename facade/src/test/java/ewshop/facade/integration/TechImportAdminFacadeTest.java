@@ -6,6 +6,8 @@ import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.tech.TechImportUnlockDto;
+import ewshop.facade.dto.response.TechDto;
+import ewshop.facade.interfaces.TechFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.infrastructure.persistence.entities.TechEntity;
 import ewshop.infrastructure.persistence.repositories.TechJpaRepository;
@@ -24,6 +26,9 @@ class TechImportAdminFacadeTest extends BaseIT {
 
     @Autowired
     private TechImportAdminFacade techImportAdminFacade;
+
+    @Autowired
+    private TechFacade techFacade;
 
     @Autowired
     private TechJpaRepository techJpaRepository;
@@ -245,5 +250,154 @@ class TechImportAdminFacadeTest extends BaseIT {
         });
         assertThat(summary.errors()).hasSize(1);
         assertThat(techJpaRepository.findAllForCache()).isEmpty();
+    }
+
+    @Test
+    void importTechsThroughFacade_persistsRelationshipsAndReadDtoShape() {
+        TechImportTechDto root = new TechImportTechDto(
+                "Technology_Root",
+                "Root Discovery",
+                null,
+                false,
+                1,
+                "Discovery",
+                List.of(),
+                List.of("Technology_Branch"),
+                List.of(),
+                List.of(new TechImportUnlockDto(
+                        "Constructible",
+                        "District",
+                        "District_Root",
+                        List.of(),
+                        List.of("+2 Science", "+1 Dust"),
+                        List.of()
+                ))
+        );
+        TechImportTechDto branch = new TechImportTechDto(
+                "Technology_Branch",
+                "Branch Economy",
+                "Imported lore",
+                false,
+                2,
+                "Development",
+                List.of("Technology_Root"),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+
+        techImportAdminFacade.importTechs(new TechImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-07T00:00:00Z",
+                "tech",
+                List.of(root, branch)
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<TechDto> result = techFacade.getAllTechs();
+
+        assertThat(result).extracting(TechDto::techKey)
+                .containsExactlyInAnyOrder("Technology_Root", "Technology_Branch");
+
+        TechDto rootDto = findTech(result, "Technology_Root");
+        assertThat(rootDto.name()).isEqualTo("Root Discovery");
+        assertThat(rootDto.era()).isEqualTo(1);
+        assertThat(rootDto.type()).isEqualTo("Discovery");
+        assertThat(rootDto.descriptionLines()).containsExactly("+2 Science", "+1 Dust");
+        assertThat(rootDto.prereq()).isNull();
+        assertThat(rootDto.excludes()).isEqualTo("Technology_Branch");
+        assertThat(rootDto.unlocks()).hasSize(1);
+        assertThat(rootDto.unlocks().getFirst().unlockType()).isEqualTo("Constructible");
+        assertThat(rootDto.unlocks().getFirst().unlockCategory()).isEqualTo("District");
+        assertThat(rootDto.unlocks().getFirst().unlockKey()).isEqualTo("District_Root");
+        assertThat(rootDto.unlocks().getFirst().fallbackDescriptionLines()).containsExactly("+2 Science", "+1 Dust");
+        assertThat(rootDto.factions()).contains("Aspects", "Kin", "Tahuk");
+        assertThat(rootDto.coords().xPct()).isZero();
+        assertThat(rootDto.coords().yPct()).isZero();
+
+        TechDto branchDto = findTech(result, "Technology_Branch");
+        assertThat(branchDto.type()).isEqualTo("Economy");
+        assertThat(branchDto.prereq()).isEqualTo("Technology_Root");
+        assertThat(branchDto.excludes()).isNull();
+    }
+
+    @Test
+    void importTechs_clearsRelationshipsBeforeDeletingObsoleteTechs() {
+        techImportAdminFacade.importTechs(new TechImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-07T00:00:00Z",
+                "tech",
+                List.of(
+                        new TechImportTechDto(
+                                "Technology_A",
+                                "Tech A",
+                                null,
+                                false,
+                                1,
+                                "Discovery",
+                                List.of("Technology_B"),
+                                List.of(),
+                                List.of(),
+                                List.of()
+                        ),
+                        new TechImportTechDto(
+                                "Technology_B",
+                                "Tech B",
+                                null,
+                                false,
+                                1,
+                                "Discovery",
+                                List.of(),
+                                List.of("Technology_A"),
+                                List.of(),
+                                List.of()
+                        )
+                )
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(findTech(techFacade.getAllTechs(), "Technology_A").prereq()).isEqualTo("Technology_B");
+        assertThat(findTech(techFacade.getAllTechs(), "Technology_B").excludes()).isEqualTo("Technology_A");
+
+        techImportAdminFacade.importTechs(new TechImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-07T00:00:00Z",
+                "tech",
+                List.of(new TechImportTechDto(
+                        "Technology_A",
+                        "Tech A",
+                        null,
+                        false,
+                        1,
+                        "Discovery",
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                ))
+        ));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<TechDto> result = techFacade.getAllTechs();
+
+        assertThat(result).extracting(TechDto::techKey).containsExactly("Technology_A");
+        assertThat(result.getFirst().prereq()).isNull();
+        assertThat(result.getFirst().excludes()).isNull();
+    }
+
+    private static TechDto findTech(List<TechDto> techs, String techKey) {
+        return techs.stream()
+                .filter(tech -> techKey.equals(tech.techKey()))
+                .findFirst()
+                .orElseThrow();
     }
 }

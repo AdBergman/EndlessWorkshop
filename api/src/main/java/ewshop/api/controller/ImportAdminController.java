@@ -52,68 +52,41 @@ public class ImportAdminController {
 
     @PostMapping(value = "/techs", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importTechs(@RequestBody TechImportBatchDto dto) {
-        if (dto.techs() == null || dto.techs().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing techs[]");
-        }
         return techImportAdminFacade.importTechs(dto);
     }
 
     @PostMapping(value = "/techs/smoke", consumes = "application/json", produces = "application/json")
     public ImportPreviewSummaryDto smokeTestTechs(@RequestBody TechImportBatchDto dto) {
-        if (dto.techs() == null || dto.techs().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing techs[]");
-        }
         return techImportAdminFacade.smokeTestTechs(dto);
     }
 
     @PostMapping(value = "/districts", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importDistricts(@RequestBody DistrictImportBatchDto dto) {
-        if (dto.districts() == null || dto.districts().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing districts[]");
-        }
         return districtImportAdminFacade.importDistricts(dto);
     }
 
     @PostMapping(value = "/improvements", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importImprovements(@RequestBody ImprovementImportBatchDto dto) {
-        if (dto.improvements() == null || dto.improvements().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing improvements[]");
-        }
         return improvementImportAdminFacade.importImprovements(dto);
     }
 
     @PostMapping(value = "/units", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importUnits(@RequestBody UnitImportBatchDto dto) {
-        if (dto.units() == null || dto.units().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing units[]");
-        }
         return unitImportAdminFacade.importUnits(dto);
     }
 
     @PostMapping(value = "/units/smoke", consumes = "application/json", produces = "application/json")
     public ImportPreviewSummaryDto smokeTestUnits(@RequestBody UnitImportBatchDto dto) {
-        if (dto.units() == null || dto.units().isEmpty()) {
-            throw new IllegalArgumentException("Import file is missing units[]");
-        }
         return unitImportAdminFacade.smokeTestUnits(dto);
     }
 
     @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importCodex(@RequestBody CodexImportBatchDto dto) {
-        if (dto.entries() == null || dto.entries().isEmpty()) {
-            throw new IllegalArgumentException("Import file entries[] must not be empty");
-        }
         return codexImportAdminFacade.importCodex(dto);
     }
 
     @PostMapping(value = "/quests/explorer", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importQuestExplorer(@RequestBody QuestExplorerImportBatchDto dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("Quest explorer import file is required");
-        }
-        if (dto.entries() == null || dto.entries().isEmpty()) {
-            throw new IllegalArgumentException("Quest explorer file entries[] must not be empty");
-        }
         return questExplorerImportAdminFacade.importQuestExplorer(dto);
     }
 }

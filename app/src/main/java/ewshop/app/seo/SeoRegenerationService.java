@@ -7,6 +7,7 @@ import ewshop.app.seo.generation.ReferenceTarget;
 import ewshop.app.seo.generation.ReferenceTargetBuilder;
 import ewshop.app.seo.generation.SeoRoutes;
 import ewshop.app.seo.generation.SitemapGenerator;
+import ewshop.app.seo.generation.SitemapRoutePolicy;
 import ewshop.app.seo.rendering.SeoPageRenderer;
 import ewshop.app.seo.storage.GeneratedSeoWriter;
 import ewshop.app.seo.storage.SeoOutputLocator;
@@ -38,6 +39,7 @@ public class SeoRegenerationService {
     private final ReferenceTargetBuilder referenceTargetBuilder;
     private final SeoPageRenderer seoPageRenderer;
     private final SitemapGenerator sitemapGenerator;
+    private final SitemapRoutePolicy sitemapRoutePolicy;
     private final GeneratedSeoWriter generatedSeoWriter;
 
     public SeoRegenerationService(
@@ -48,6 +50,7 @@ public class SeoRegenerationService {
             ReferenceTargetBuilder referenceTargetBuilder,
             SeoPageRenderer seoPageRenderer,
             SitemapGenerator sitemapGenerator,
+            SitemapRoutePolicy sitemapRoutePolicy,
             GeneratedSeoWriter generatedSeoWriter
     ) {
         this.codexService = codexService;
@@ -57,6 +60,7 @@ public class SeoRegenerationService {
         this.referenceTargetBuilder = referenceTargetBuilder;
         this.seoPageRenderer = seoPageRenderer;
         this.sitemapGenerator = sitemapGenerator;
+        this.sitemapRoutePolicy = sitemapRoutePolicy;
         this.generatedSeoWriter = generatedSeoWriter;
     }
 
@@ -77,16 +81,7 @@ public class SeoRegenerationService {
         rebuildGeneratedPages(candidates, referenceTargetsByEntryKey);
 
         List<String> generatedRoutes = generatedSeoWriter.listGeneratedRoutes();
-        List<String> indexableRoutes = candidates.stream()
-                .filter(PageCandidate::indexable)
-                .map(PageCandidate::route)
-                .sorted()
-                .toList();
-        List<String> publicGeneratedRoutes = generatedRoutes.stream()
-                .filter(route -> route.equals("/" + SeoRoutes.ENCYCLOPEDIA_PAGE) || route.split("/").length == 3)
-                .toList();
-        List<String> sitemapRoutes = new ArrayList<>(publicGeneratedRoutes);
-        sitemapRoutes.addAll(indexableRoutes);
+        List<String> sitemapRoutes = sitemapRoutePolicy.routesFor(generatedRoutes, candidates);
         generatedSeoWriter.writeUtf8(seoOutputLocator.getSitemapFile(), sitemapGenerator.generate(sitemapRoutes));
         writeMissingReferenceAudit(missingReferenceAudit);
 

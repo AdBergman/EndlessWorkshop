@@ -370,6 +370,7 @@ class ImportAdminControllerTest {
 
     @Test
     void importQuestExplorer_returnsBadRequest_andDoesNotCallFacade_whenEntriesAreEmpty() throws Exception {
+        questFacade.rejection = new IllegalArgumentException("Quest explorer file entries[] must not be empty");
         QuestExplorerImportBatchDto payload = questPayload(List.of());
 
         mockMvc.perform(post("/api/admin/import/quests/explorer")
@@ -423,6 +424,162 @@ class ImportAdminControllerTest {
     }
 
     @Test
+    void importUnits_returnsBadRequestJson_whenFacadeRejectsDuplicateUnitKey() throws Exception {
+        unitFacade.rejection = new IllegalArgumentException("Duplicate unitKey in import file: Unit_A");
+
+        UnitImportBatchDto payload = new UnitImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                "units",
+                List.of(new UnitImportUnitDto(
+                        "Unit_A",
+                        "A",
+                        "Kin",
+                        true,
+                        false,
+                        false,
+                        "Land",
+                        null,
+                        List.of(),
+                        0,
+                        "UnitClass_Ranged",
+                        null,
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of()
+                ))
+        );
+
+        mockMvc.perform(post("/api/admin/import/units")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Duplicate unitKey in import file: Unit_A"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/units"));
+    }
+
+
+    @Test
+    void importTechs_returnsBadRequestJson_whenFacadeRejectsWrongExportKind() throws Exception {
+        techFacade.rejection = new IllegalArgumentException(
+                "Wrong import file type: expected exportKind='tech' but got 'units'"
+        );
+
+        mockMvc.perform(post("/api/admin/import/techs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(techPayload("units", List.of(tech("Technology_A"))))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Wrong import file type: expected exportKind='tech' but got 'units'"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/techs"));
+    }
+
+    @Test
+    void importDistricts_returnsBadRequestJson_whenFacadeRejectsDuplicateKey() throws Exception {
+        districtFacade.rejection = new IllegalArgumentException("Duplicate districtKey in import file: District_A");
+
+        DistrictImportBatchDto payload = new DistrictImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                "districts",
+                List.of(
+                        new ewshop.facade.dto.importing.districts.DistrictImportDistrictDto(
+                                "District_A",
+                                "District A",
+                                "Science",
+                                List.of("Line")
+                        )
+                )
+        );
+
+        mockMvc.perform(post("/api/admin/import/districts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Duplicate districtKey in import file: District_A"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/districts"));
+    }
+
+    @Test
+    void importImprovements_returnsBadRequestJson_whenFacadeRejectsDuplicateKey() throws Exception {
+        improvementFacade.rejection = new IllegalArgumentException(
+                "Duplicate constructibleKey in import file: Improvement_A"
+        );
+
+        ImprovementImportBatchDto payload = new ImprovementImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                "improvements",
+                List.of(
+                        new ewshop.facade.dto.importing.improvements.ImprovementImportImprovementDto(
+                                "Improvement_A",
+                                "Improvement A",
+                                "Economy",
+                                List.of("Line")
+                        )
+                )
+        );
+
+        mockMvc.perform(post("/api/admin/import/improvements")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Duplicate constructibleKey in import file: Improvement_A"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/improvements"));
+    }
+
+    @Test
+    void importCodex_returnsBadRequestJson_whenFacadeRejectsMissingExportKind() throws Exception {
+        codexFacade.rejection = new IllegalArgumentException("exportKind is missing");
+
+        CodexImportBatchDto payload = new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                "",
+                List.of(new ewshop.facade.dto.importing.codex.CodexImportEntryDto(
+                        "Entry_A",
+                        "Entry A",
+                        List.of("Line"),
+                        List.of()
+                ))
+        );
+
+        mockMvc.perform(post("/api/admin/import/codex")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("exportKind is missing"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/codex"));
+    }
+
+    @Test
+    void importQuestExplorer_returnsBadRequestJson_whenFacadeRejectsDuplicateEntryKey() throws Exception {
+        questFacade.rejection = new IllegalArgumentException("Duplicate entryKey in import file: Quest_A");
+
+        mockMvc.perform(post("/api/admin/import/quests/explorer")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(questPayload(List.of(questEntry())))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Duplicate entryKey in import file: Quest_A"))
+                .andExpect(jsonPath("$.path").value("/api/admin/import/quests/explorer"));
+    }
+
+    @Test
     void importTemporaryChronicleEndpoint_isNotMapped() throws Exception {
         mockMvc.perform(post("/api/admin/import/quests/chronicle")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -432,6 +589,7 @@ class ImportAdminControllerTest {
 
     @Test
     void importCodexStillUsesGenericEntriesContract() throws Exception {
+        codexFacade.rejection = new IllegalArgumentException("Import file has no entries");
         CodexImportBatchDto payload = new CodexImportBatchDto(
                 "Endless Legend 2", "0.80", "0.1.0", "now", "quests", List.of()
         );
@@ -441,7 +599,7 @@ class ImportAdminControllerTest {
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
-                .andExpect(jsonPath("$.message").value("Import file entries[] must not be empty"))
+                .andExpect(jsonPath("$.message").value("Import file has no entries"))
                 .andExpect(jsonPath("$.path").value("/api/admin/import/codex"));
 
         assertNull(codexFacade.lastDto);
@@ -489,6 +647,32 @@ class ImportAdminControllerTest {
                 "quest_explorer",
                 "quest_explorer.v3",
                 entries
+        );
+    }
+
+    private static TechImportBatchDto techPayload(String exportKind, List<TechImportTechDto> techs) {
+        return new TechImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "now",
+                exportKind,
+                techs
+        );
+    }
+
+    private static TechImportTechDto tech(String techKey) {
+        return new TechImportTechDto(
+                techKey,
+                "Tech A",
+                null,
+                false,
+                1,
+                "Discovery",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
         );
     }
 
@@ -555,9 +739,13 @@ class ImportAdminControllerTest {
 
     private static final class RecordingQuestExplorerImportAdminFacade implements QuestExplorerImportAdminFacade {
         private QuestExplorerImportBatchDto lastDto;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importQuestExplorer(QuestExplorerImportBatchDto file) {
+            if (rejection != null) {
+                throw rejection;
+            }
             lastDto = file;
             return okSummary("quest_explorer");
         }
@@ -565,9 +753,13 @@ class ImportAdminControllerTest {
 
     private static final class RecordingCodexImportAdminFacade implements CodexImportAdminFacade {
         private CodexImportBatchDto lastDto;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
+            if (rejection != null) {
+                throw rejection;
+            }
             lastDto = file;
             return okSummary("codex");
         }
@@ -575,9 +767,13 @@ class ImportAdminControllerTest {
 
     private static final class RecordingDistrictImportAdminFacade implements DistrictImportAdminFacade {
         private DistrictImportBatchDto lastDto;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importDistricts(DistrictImportBatchDto file) {
+            if (rejection != null) {
+                throw rejection;
+            }
             lastDto = file;
             return okSummary("districts");
         }
@@ -585,9 +781,13 @@ class ImportAdminControllerTest {
 
     private static final class RecordingImprovementImportAdminFacade implements ImprovementImportAdminFacade {
         private ImprovementImportBatchDto lastDto;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importImprovements(ImprovementImportBatchDto dto) {
+            if (rejection != null) {
+                throw rejection;
+            }
             lastDto = dto;
             return okSummary("improvements");
         }
@@ -596,9 +796,13 @@ class ImportAdminControllerTest {
     private static final class RecordingTechImportAdminFacade implements TechImportAdminFacade {
         private TechImportBatchDto lastImportDto;
         private TechImportBatchDto lastSmokeDto;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importTechs(TechImportBatchDto file) {
+            if (rejection != null) {
+                throw rejection;
+            }
             lastImportDto = file;
             return okSummary("tech");
         }
@@ -614,9 +818,13 @@ class ImportAdminControllerTest {
         private UnitImportBatchDto lastImportDto;
         private UnitImportBatchDto lastSmokeDto;
         private boolean rejectImport;
+        private RuntimeException rejection;
 
         @Override
         public ImportSummaryDto importUnits(UnitImportBatchDto dto) {
+            if (rejection != null) {
+                throw rejection;
+            }
             if (rejectImport) {
                 throw new IllegalStateException("Unit import produced 0 public units; refusing to write/delete.");
             }

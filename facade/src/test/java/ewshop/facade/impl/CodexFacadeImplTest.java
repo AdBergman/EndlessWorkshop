@@ -2,6 +2,7 @@ package ewshop.facade.impl;
 
 import ewshop.domain.model.Codex;
 import ewshop.domain.service.CodexFilterService;
+import ewshop.domain.service.CodexFilterResult;
 import ewshop.domain.service.CodexService;
 import ewshop.facade.dto.response.CodexDto;
 import org.junit.jupiter.api.Test;
@@ -126,6 +127,40 @@ class CodexFacadeImplTest {
                         "FactionQuest_Necrophage_Chapter01_Step01=Brave New World",
                         "FactionQuest_Necrophage_Chapter04_Step01=A Fresh Lead"
                 );
+    }
+
+    @Test
+    void codexFilterReasons_areStableForDiagnostics() {
+        CodexFilterService filterService = new CodexFilterService();
+
+        var result = filterService.filter(List.of(
+                codexEntry("abilities", "Ability_A_Valid", "Resolved Ability", List.of("Useful public description.")),
+                codexEntry("abilities", "Ability_Invalid_Name", "% Placeholder", List.of("Useful public description.")),
+                codexEntry("abilities", "Ability_Weak", "Weak Entry", List.of("TBD")),
+                codexEntry("abilities", "Ability_Duplicate", "Resolved Ability", List.of("Second useful public description."))
+        ));
+
+        assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
+                .containsExactly("Ability_A_Valid");
+        assertThat(result.filteredOutCount()).isEqualTo(3);
+        assertThat(result.skippedByReason())
+                .containsEntry("invalid-display-name", 1)
+                .containsEntry("weak-description-lines", 1)
+                .containsEntry("duplicate-slug", 1)
+                .containsEntry("filtered-out", 3);
+        assertThat(result.skippedEntries())
+                .extracting(CodexFilterResult.CodexFilterSkip::reason)
+                .containsExactlyInAnyOrder(
+                        "duplicate-slug",
+                        "invalid-display-name",
+                        "weak-description-lines"
+                );
+        assertThat(result.skippedEntries().stream()
+                .filter(skip -> "duplicate-slug".equals(skip.reason()))
+                .findFirst()
+                .orElseThrow()
+                .relationTargetEntryKey())
+                .isEqualTo("Ability_A_Valid");
     }
 
     private static Codex codexEntry(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {

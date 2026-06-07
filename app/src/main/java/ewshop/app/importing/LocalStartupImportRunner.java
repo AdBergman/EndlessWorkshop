@@ -77,10 +77,10 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         runStartupImport();
     }
 
-    void runStartupImport() {
+    LocalStartupImportSummary runStartupImport() {
         if (!properties.isEnabled()) {
             log.info("Local startup import is disabled.");
-            return;
+            return LocalStartupImportSummary.empty();
         }
 
         Path root = resolveRoot(properties.getRoot(), Path.of("").toAbsolutePath());
@@ -94,7 +94,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                     exportsDir,
                     codexDir
             );
-            return;
+            return LocalStartupImportSummary.empty();
         }
 
         List<LocalImportFile> files = new ArrayList<>();
@@ -103,7 +103,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
 
         if (files.isEmpty()) {
             log.info("No local startup import JSON files found under {}; continuing startup.", root);
-            return;
+            return LocalStartupImportSummary.empty();
         }
 
         log.info("Starting local startup import from {} with {} JSON file(s).", root, files.size());
@@ -150,6 +150,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
                 skipped,
                 failed
         );
+        return new LocalStartupImportSummary(imported, skipped, failed);
     }
 
     private List<LocalImportFile> jsonFiles(Path dir, LocalImportFolder folder) {

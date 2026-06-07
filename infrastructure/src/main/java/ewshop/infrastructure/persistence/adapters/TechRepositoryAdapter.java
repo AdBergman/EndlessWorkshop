@@ -128,6 +128,8 @@ public class TechRepositoryAdapter implements TechRepository {
             techJpaRepository.saveAll(toSave);
         }
 
+        applyImportedRelationships(snapshots, keepKeys);
+
         List<TechEntity> obsolete = techJpaRepository.findAllByTechKeyNotIn(keepKeys);
 
         if (!obsolete.isEmpty()) {
@@ -148,6 +150,67 @@ public class TechRepositoryAdapter implements TechRepository {
         }
 
         return result;
+    }
+
+    private void applyImportedRelationships(List<TechImportSnapshot> snapshots, List<String> keepKeys) {
+        Map<String, TechImportSnapshot> snapshotsByKey = snapshots.stream()
+                .collect(Collectors.toMap(
+                        TechImportSnapshot::techKey,
+                        Function.identity(),
+                        (first, ignored) -> first
+                ));
+
+        Map<String, TechEntity> entitiesByKey = techJpaRepository.findAllByTechKeyIn(keepKeys).stream()
+                .collect(Collectors.toMap(TechEntity::getTechKey, Function.identity()));
+
+        List<TechEntity> changed = new ArrayList<>();
+        for (TechEntity entity : entitiesByKey.values()) {
+            TechImportSnapshot snapshot = snapshotsByKey.get(entity.getTechKey());
+            if (snapshot == null) continue;
+
+            TechEntity nextPrereq = firstReferencedEntity(snapshot.prereqTechKeys(), entitiesByKey);
+            TechEntity nextExcludes = firstReferencedEntity(snapshot.exclusivePrereqTechKeys(), entitiesByKey);
+            boolean relationshipChanged = false;
+
+            if (!sameTechKey(entity.getPrereq(), nextPrereq)) {
+                entity.setPrereq(nextPrereq);
+                relationshipChanged = true;
+            }
+
+            if (!sameTechKey(entity.getExcludes(), nextExcludes)) {
+                entity.setExcludes(nextExcludes);
+                relationshipChanged = true;
+            }
+
+            if (relationshipChanged) {
+                changed.add(entity);
+            }
+        }
+
+        if (!changed.isEmpty()) {
+            techJpaRepository.saveAll(changed);
+        }
+    }
+
+    private static TechEntity firstReferencedEntity(List<String> techKeys, Map<String, TechEntity> entitiesByKey) {
+        if (techKeys == null || techKeys.isEmpty()) {
+            return null;
+        }
+
+        return techKeys.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(key -> !key.isBlank())
+                .map(entitiesByKey::get)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private static boolean sameTechKey(TechEntity current, TechEntity next) {
+        String currentKey = current == null ? null : current.getTechKey();
+        String nextKey = next == null ? null : next.getTechKey();
+        return Objects.equals(currentKey, nextKey);
     }
 
     private static UpsertOutcome applySnapshot(TechEntity entity, TechImportSnapshot update, boolean isInsert) {

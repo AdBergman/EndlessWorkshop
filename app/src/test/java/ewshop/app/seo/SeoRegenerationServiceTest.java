@@ -4,6 +4,7 @@ import ewshop.app.seo.audit.CodexMissingReferenceAuditService;
 import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
 import ewshop.app.seo.generation.ReferenceTargetBuilder;
 import ewshop.app.seo.generation.SitemapGenerator;
+import ewshop.app.seo.generation.SitemapRoutePolicy;
 import ewshop.app.seo.rendering.SeoPageRenderer;
 import ewshop.app.seo.storage.GeneratedSeoWriter;
 import ewshop.app.seo.storage.SeoOutputLocator;
@@ -13,12 +14,15 @@ import ewshop.domain.service.CodexService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -586,6 +590,36 @@ class SeoRegenerationServiceTest {
         assertThat(summary.duplicateAliasImpact().examples()).isEmpty();
     }
 
+    @Test
+    void propagatesWriteFailuresAndLeavesAlreadyWrittenDirectOutput() throws Exception {
+        CodexService codexService = mock(CodexService.class);
+        SeoOutputLocator outputLocator = new SeoOutputLocator(tempDir.toString());
+        GeneratedSeoWriter failingSitemapWriter = new GeneratedSeoWriter(outputLocator) {
+            @Override
+            public void writeUtf8(Path targetFile, String content) {
+                if (targetFile.getFileName().toString().equals("sitemap.xml")) {
+                    throw new UncheckedIOException("Simulated sitemap failure", new IOException("disk full"));
+                }
+                super.writeUtf8(targetFile, content);
+            }
+        };
+        SeoRegenerationService service = seoRegenerationService(codexService, outputLocator, failingSitemapWriter);
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("tech", "Technology_District_Tier1_Industry", "Workshop",
+                        List.of("Workshop improves early city industry."),
+                        List.of())
+        ));
+
+        assertThatThrownBy(service::regeneratePrototypePages)
+                .isInstanceOf(UncheckedIOException.class)
+                .hasMessageContaining("Simulated sitemap failure");
+
+        assertThat(tempDir.resolve("encyclopedia/tech/workshop/index.html")).exists();
+        assertThat(tempDir.resolve("sitemap.xml")).doesNotExist();
+        assertThat(tempDir.resolve("codex-missing-references-audit.json")).doesNotExist();
+    }
+
     private static Codex codexEntry(
             String exportKind,
             String entryKey,
@@ -606,6 +640,14 @@ class SeoRegenerationServiceTest {
             CodexService codexService,
             SeoOutputLocator outputLocator
     ) {
+        return seoRegenerationService(codexService, outputLocator, new GeneratedSeoWriter(outputLocator));
+    }
+
+    private static SeoRegenerationService seoRegenerationService(
+            CodexService codexService,
+            SeoOutputLocator outputLocator,
+            GeneratedSeoWriter generatedSeoWriter
+    ) {
         return new SeoRegenerationService(
                 codexService,
                 new CodexFilterService(),
@@ -614,7 +656,8 @@ class SeoRegenerationServiceTest {
                 new ReferenceTargetBuilder(),
                 new SeoPageRenderer(),
                 new SitemapGenerator(),
-                new GeneratedSeoWriter(outputLocator)
+                new SitemapRoutePolicy(),
+                generatedSeoWriter
         );
     }
 }

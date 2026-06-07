@@ -2,8 +2,11 @@ package ewshop.facade.integration;
 
 import ewshop.domain.command.DistrictImportSnapshot;
 import ewshop.domain.repository.DistrictRepository;
+import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.interfaces.DistrictFacade;
+import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,6 +21,9 @@ class DistrictFacadeTest extends BaseIT {
 
     @Autowired
     private DistrictRepository districtRepository;
+
+    @Autowired
+    private DistrictImportAdminFacade districtImportAdminFacade;
 
     @Test
     void contextLoads() {
@@ -67,5 +73,38 @@ class DistrictFacadeTest extends BaseIT {
         assertThat(workshop.displayName()).isEqualTo("Workshop");
         assertThat(workshop.category()).isEqualTo("Industry");
         assertThat(workshop.descriptionLines()).containsExactly("+2 Industry per District Level");
+    }
+
+    @Test
+    void importDistrictsThroughFacade_persistsPublicRowsAndReadDtoShape() {
+        districtRepository.importDistrictSnapshot(List.of(new DistrictImportSnapshot(
+                "District_Obsolete",
+                "Obsolete",
+                "Old",
+                List.of("Old line")
+        )));
+
+        districtImportAdminFacade.importDistricts(new DistrictImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.1.0",
+                "2026-06-07T00:00:00Z",
+                "districts",
+                List.of(new DistrictImportDistrictDto(
+                        "District_Science",
+                        "Laboratory",
+                        "Science",
+                        List.of("Line 1", "Line 2")
+                ))
+        ));
+
+        List<DistrictDto> result = districtFacade.getAllDistricts();
+
+        assertThat(result).extracting(DistrictDto::districtKey)
+                .containsExactly("District_Science");
+        DistrictDto district = result.getFirst();
+        assertThat(district.displayName()).isEqualTo("Laboratory");
+        assertThat(district.category()).isEqualTo("Science");
+        assertThat(district.descriptionLines()).containsExactly("Line 1", "Line 2");
     }
 }

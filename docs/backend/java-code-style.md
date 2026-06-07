@@ -31,6 +31,7 @@ api -> facade -> domain <- infrastructure
 ## Importer And Null Handling
 
 - Upstream exporter data is not trusted.
+- Import DTOs tolerate unknown exporter fields globally; validation belongs in importer mapping/policy.
 - Prefer explicit guards and validation over optimistic assumptions.
 - `@Nullable` is acceptable only for intentional null contracts.
 - Avoid broad `@NullMarked` unless the project adopts a formal nullness policy.
@@ -41,6 +42,7 @@ api -> facade -> domain <- infrastructure
 
 ## DTOs And Mappers
 
+- Facade response DTOs are the backend/frontend API contract.
 - DTOs should contain fields the backend/API actually needs.
 - Do not add exporter fields to DTOs just because they exist in JSON.
 - Keep import command snapshots separate from public API response DTOs.

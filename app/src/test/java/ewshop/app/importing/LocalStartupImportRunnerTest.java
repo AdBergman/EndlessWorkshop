@@ -78,7 +78,7 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.techCalls).isEqualTo(1);
         assertThat(facades.districtCalls).isEqualTo(1);
@@ -88,6 +88,7 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
         assertThat(facades.codexKinds).containsExactly("abilities", "futureKind", "minorFactions", "quests", "traits");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(9, 0, 0));
     }
 
     @Test
@@ -101,10 +102,11 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, false);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.techCalls).isZero();
         assertThat(facades.totalCalls()).isZero();
+        assertThat(summary).isEqualTo(LocalStartupImportSummary.empty());
     }
 
     @Test
@@ -133,7 +135,7 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.questCalls).isEqualTo(1);
         assertThat(facades.questDto.exportKind()).isEqualTo("quest_explorer");
@@ -143,6 +145,7 @@ class LocalStartupImportRunnerTest {
                 .contains("Local startup import loaded")
                 .contains("ewshop_quest_explorer_export_0.80.json")
                 .contains("as quest_explorer");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(1, 0, 0));
     }
 
     @Test
@@ -158,13 +161,14 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.totalCalls()).isZero();
         assertThat(output)
                 .contains("Local startup import failed for quest_explorer file")
                 .contains("requires exactly one quest_explorer file")
                 .contains("Local startup import finished: 0 imported, 0 skipped, 1 failed.");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(0, 0, 1));
     }
 
     @Test
@@ -184,7 +188,7 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.totalCalls()).isEqualTo(1);
         assertThat(facades.codexKinds).containsExactly("battle_abilities");
@@ -194,6 +198,7 @@ class LocalStartupImportRunnerTest {
                 .contains("exportKind='descriptor_evaluations'")
                 .doesNotContain("skipped unsupported codex file")
                 .contains("Local startup import finished: 1 imported, 2 skipped, 0 failed.");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(1, 2, 0));
     }
 
     @Test
@@ -206,13 +211,14 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.totalCalls()).isZero();
         assertThat(output)
                 .contains("skipped quest explorer diagnostics file")
                 .contains("diagnostics are validation evidence")
                 .contains("Local startup import finished: 0 imported, 1 skipped, 0 failed.");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(0, 1, 0));
     }
 
     @Test
@@ -226,7 +232,7 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.techCalls).isEqualTo(1);
         assertThat(output)
@@ -234,6 +240,7 @@ class LocalStartupImportRunnerTest {
                 .contains("ewshop_tech_export_0.78.json")
                 .contains("Import file has no techs")
                 .contains("Local startup import finished: 0 imported, 0 skipped, 1 failed.");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(0, 0, 1));
     }
 
     @Test
@@ -241,9 +248,10 @@ class LocalStartupImportRunnerTest {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
 
-        runner.runStartupImport();
+        LocalStartupImportSummary summary = runner.runStartupImport();
 
         assertThat(facades.totalCalls()).isZero();
+        assertThat(summary).isEqualTo(LocalStartupImportSummary.empty());
     }
 
     @Test

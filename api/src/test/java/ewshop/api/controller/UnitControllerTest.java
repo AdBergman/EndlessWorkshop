@@ -118,4 +118,35 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[1].abilityKeys[0]").value("UnitAbility_C"))
                 .andExpect(jsonPath("$[1].descriptionLines[0]").value("Only line"));
     }
+
+    @Test
+    void getAllUnits_returnsImportedMinorFactionDisplayName() throws Exception {
+        UnitDto mangrove = new UnitDto(
+                "Unit_MinorFaction_MangroveOfHarmony",
+                "Rootstalk",
+                null,
+                "Mangrove of Harmony",
+                false,
+                false,
+                false,
+                "Land",
+                null,
+                List.of(),
+                0,
+                "UnitClass_Juggernaught",
+                "Juggernaught",
+                null,
+                List.of("UnitAbility_Roots"),
+                List.of("Minor faction line")
+        );
+
+        when(unitFacade.getAllUnits()).thenReturn(List.of(mangrove));
+
+        mockMvc.perform(get("/api/units")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].unitKey").value("Unit_MinorFaction_MangroveOfHarmony"))
+                .andExpect(jsonPath("$[0].faction").value("Mangrove of Harmony"))
+                .andExpect(jsonPath("$[0].isMajorFaction").value(false));
+    }
 }

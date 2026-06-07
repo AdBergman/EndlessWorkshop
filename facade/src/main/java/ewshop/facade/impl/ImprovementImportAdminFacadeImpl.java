@@ -78,7 +78,7 @@ public class ImprovementImportAdminFacadeImpl implements ImprovementImportAdminF
         ImportAdminSupport.assertNoDuplicateKeys(
                 snapshots,
                 ImprovementImportSnapshot::constructibleKey,
-                "Duplicate improvementKey in import file: "
+                "Duplicate constructibleKey in import file: "
         );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);

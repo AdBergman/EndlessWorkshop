@@ -382,6 +382,32 @@ class CodexImportAdminFacadeImplTest {
         assertEquals(0, codexService.getAllCalls);
     }
 
+    @Test
+    void importCodex_usesSharedMissingExporterVersionWarningName() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        ImportSummaryDto summary = facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.78",
+                "",
+                "2026-05-02T07:42:00Z",
+                "heroes",
+                List.of(new CodexImportEntryDto("Hero_A", "Hero A", List.of("Line"), List.of()))
+        ));
+
+        assertEquals(
+                List.of("EMPTY_REFERENCE_LINES_IN_FILE", "MISSING_EXPORTER_VERSION"),
+                summary.diagnostics().warnings().stream()
+                        .map(warning -> warning.code())
+                        .toList()
+        );
+    }
+
     private static final class RecordingCodexImportService extends CodexImportService {
         private final ImportResult result;
         private List<CodexImportSnapshot> capturedSnapshots = List.of();

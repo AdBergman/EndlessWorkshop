@@ -27,7 +27,7 @@ public class SavedTechBuildController {
     }
 
 
-    @Cacheable(value = "savedTechBuilds", key = "#uuid")
+    @Cacheable(value = "savedTechBuilds", key = "#uuid", unless = "#result.statusCode.value() != 200")
     @GetMapping("/{uuid}")
     public ResponseEntity<SavedTechBuildDto> getBuild(@PathVariable UUID uuid) {
         Optional<SavedTechBuildDto> dtoOpt = facade.getSavedBuildByUuid(uuid);
