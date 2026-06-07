@@ -64,6 +64,7 @@ export default function PageSeo({
 
             <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
             <link rel="shortcut icon" href="/favicon.ico" />
+            <link rel="manifest" href="/manifest.json" />
 
             {jsonLdNodes.map((node, index) => (
                 <script key={`${canonicalUrl}-jsonld-${index}`} type="application/ld+json">

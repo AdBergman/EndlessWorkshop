@@ -90,6 +90,7 @@ public class SeoPageRenderer {
                     <link rel="stylesheet" href="/seo/entity-page.css" />
                     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     <link rel="shortcut icon" href="/favicon.ico" />
+                    <link rel="manifest" href="/manifest.json" />
                     <meta property="og:site_name" content="%s" />
                     <meta property="og:type" content="website" />
                     <meta property="og:title" content="%s" />
@@ -289,6 +290,7 @@ public class SeoPageRenderer {
                     <link rel="stylesheet" href="/seo/entity-page.css" />
                     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
                     <link rel="shortcut icon" href="/favicon.ico" />
+                    <link rel="manifest" href="/manifest.json" />
                     <meta property="og:site_name" content="%s" />
                     <meta property="og:type" content="website" />
                     <meta property="og:title" content="%s" />

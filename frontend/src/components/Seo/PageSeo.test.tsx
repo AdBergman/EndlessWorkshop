@@ -69,6 +69,7 @@ describe("PageSeo", () => {
         );
         expect(document.head.querySelector('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
         expect(document.head.querySelector('link[rel="shortcut icon"]')).toHaveAttribute("href", "/favicon.ico");
+        expect(document.head.querySelector('link[rel="manifest"]')).toHaveAttribute("href", "/manifest.json");
     });
 
     it("supports one or more JSON-LD payloads", async () => {

@@ -333,6 +333,10 @@ class FrontendControllerRouteTest {
 
         mockMvc.perform(get("/favicon.ico"))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/manifest.json"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"Endless Workshop\"")));
     }
 
     @SpringBootConfiguration
