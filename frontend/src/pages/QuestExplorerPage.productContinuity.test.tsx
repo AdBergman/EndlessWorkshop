@@ -1,6 +1,6 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/api/apiClient";
 import {
@@ -52,6 +52,21 @@ function renderProductQuest(entryKey: string, faction: Faction, uiLabel: string,
             </Routes>
         </MemoryRouter>
     );
+}
+
+function renderDirectProductQuestRoute(route: string) {
+    return render(
+        <MemoryRouter initialEntries={[route]}>
+            <Routes>
+                <Route path="/quests/*" element={<><LocationProbe /><QuestExplorerPage /></>} />
+            </Routes>
+        </MemoryRouter>
+    );
+}
+
+function LocationProbe() {
+    const location = useLocation();
+    return <output data-testid="route-location">{`${location.pathname}${location.search}`}</output>;
 }
 
 function chronicle() {
@@ -155,6 +170,17 @@ describe("QuestExplorerPage product continuity fixture", () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+    });
+
+    it("uses a direct Mukag quest URL to select Tahuk instead of redirecting to the Kin default", async () => {
+        renderDirectProductQuestRoute(`/quests/${mukagCh4}?mode=strategy`);
+
+        expect(await screen.findByRole("heading", { name: "A Gamble" })).toBeInTheDocument();
+        expect(screen.getByTestId("route-location")).toHaveTextContent(
+            `/quests/${mukagCh4}?mode=strategy`
+        );
+        expect(useQuestStore.getState().selectedEntryKey).toBe(mukagCh4);
+        expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.TAHUK);
     });
 
     it("lets Kin Ch0 Lore read the deterministic tutorial chain without repeated clicks", async () => {

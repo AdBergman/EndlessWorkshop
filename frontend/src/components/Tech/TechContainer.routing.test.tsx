@@ -239,6 +239,59 @@ describe("TechContainer routing regressions", () => {
         window.history.pushState({}, "", "/");
     });
 
+    it("keeps saved-build hydration stable while TechContainer owns route dataset loading", async () => {
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
+        useTechStore.getState().reset();
+        window.history.pushState({}, "", "/tech?share=shared-build-id");
+
+        mockedApiClient.getTechs.mockResolvedValue([
+            tech({
+                techKey: "Tech_Summary_First",
+                name: "Summary First",
+                era: 1,
+            }),
+            tech({
+                techKey: "Tech_Summary_Second",
+                name: "Summary Second",
+                era: 3,
+            }),
+        ]);
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "shared-build-id",
+            name: "Shared Build",
+            selectedFaction: "Aspects",
+            techIds: ["Tech_Summary_First", "Tech_Summary_Second"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/tech?share=shared-build-id"]}>
+                <GameDataProvider>
+                    <TechContainer />
+                    <Probe />
+                </GameDataProvider>
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(mockedApiClient.getTechs).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getDistricts).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getImprovements).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getUnits).toHaveBeenCalledTimes(1);
+            expect(screen.getByTestId("selected-techs")).toHaveTextContent(
+                "Tech_Summary_First,Tech_Summary_Second"
+            );
+            expect(screen.getByTestId("selected-faction")).toHaveTextContent("aspects");
+        });
+
+        expect(screen.getByTestId("location")).toHaveTextContent("/tech");
+        expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("shared-build-id");
+
+        window.history.pushState({}, "", "/");
+    });
+
     it("keeps /tech faction selection writing through stores and clearing selected techs", async () => {
         const user = userEvent.setup();
         act(() => {

@@ -4,7 +4,7 @@ import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import type { FactionInfo, Unit } from "@/types/dataTypes";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
-import { selectUnits, useUnitStore } from "@/stores/unitStore";
+import { selectUnitError, selectUnitLoaded, selectUnitLoading, selectUnits, useUnitStore } from "@/stores/unitStore";
 import {
     selectSelectedFaction,
     selectSetSelectedFaction,
@@ -53,6 +53,9 @@ function isHiddenInUi(u: Unit): boolean {
 export const UnitEvolutionExplorer: React.FC = () => {
     const [params, setParams] = useSearchParams();
     const units = useUnitStore(selectUnits);
+    const unitsLoading = useUnitStore(selectUnitLoading);
+    const unitsLoaded = useUnitStore(selectUnitLoaded);
+    const unitsError = useUnitStore(selectUnitError);
     const loadUnits = useUnitStore((s) => s.loadUnits);
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
@@ -224,8 +227,16 @@ export const UnitEvolutionExplorer: React.FC = () => {
         hydratedOnceForThisNav.current = true;
     }, [selectedFaction, selectedIndex, carouselUnits, setParams, params]);
 
-    if (units.length === 0) {
+    if (unitsError) {
+        return <div role="alert">{unitsError}</div>;
+    }
+
+    if (units.length === 0 && (unitsLoading || !unitsLoaded)) {
         return <div>Loading units...</div>;
+    }
+
+    if (units.length === 0) {
+        return <div>No units are available.</div>;
     }
 
     const selectedUnit = carouselUnits[selectedIndex] || null;

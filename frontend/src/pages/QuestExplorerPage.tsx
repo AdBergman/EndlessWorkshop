@@ -36,6 +36,7 @@ import {
 import {
     getQuestCategoryKey,
     getQuestCategoryLabel,
+    majorFactionInfoForQuest,
     QUEST_CATEGORY_OPTIONS,
     type QuestCategoryKey,
 } from "@/features/quests/questCategories";
@@ -104,6 +105,7 @@ import {
     QUEST_CHOICE_QUERY_PARAM,
 } from "@/features/quests/questExplorerUrlState";
 import {
+    selectSetSelectedFaction,
     selectSelectedFaction,
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
@@ -1019,6 +1021,7 @@ export default function QuestExplorerPage() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const contentRef = useRef<HTMLElement | null>(null);
+    const requestedFactionSyncKeyRef = useRef<string | null>(null);
 
     const loading = useQuestStore(selectQuestLoading);
     const loaded = useQuestStore(selectQuestLoaded);
@@ -1031,6 +1034,7 @@ export default function QuestExplorerPage() {
     const filters = useQuestStore((state) => state.filters);
     const mode = useQuestStore((state) => state.mode);
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
+    const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
     const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
     const setSelectedEntryKey = useQuestStore((state) => state.setSelectedEntryKey);
     const setMode = useQuestStore((state) => state.setMode);
@@ -1237,12 +1241,25 @@ export default function QuestExplorerPage() {
         if (requestedEntryKey) {
             const resolved = resolveEntryKey(requestedEntryKey);
             if (resolved && visibleEntryKeys.has(resolved)) {
+                requestedFactionSyncKeyRef.current = requestedEntryKey;
                 if (resolved !== selectedEntryKey) {
                     setSelectedEntryKey(resolved);
                 }
                 return;
             }
             if (resolved && !visibleEntryKeys.has(resolved)) {
+                const resolvedEntry = entriesByKey[resolved] ?? null;
+                const routeFaction = resolvedEntry ? majorFactionInfoForQuest(resolvedEntry) : null;
+                if (
+                    routeFaction
+                    && requestedFactionSyncKeyRef.current !== requestedEntryKey
+                    && selectedFaction.enumFaction !== routeFaction.enumFaction
+                ) {
+                    requestedFactionSyncKeyRef.current = requestedEntryKey;
+                    setSelectedFaction(routeFaction);
+                    return;
+                }
+
                 const fallbackEntryKey = firstVisibleRailEntryKey;
                 if (fallbackEntryKey !== selectedEntryKey) {
                     setSelectedEntryKey(fallbackEntryKey);
@@ -1258,10 +1275,11 @@ export default function QuestExplorerPage() {
             return;
         }
 
+        requestedFactionSyncKeyRef.current = null;
         if (!selectedEntryKey || !visibleEntryKeys.has(selectedEntryKey)) {
             setSelectedEntryKey(firstVisibleRailEntryKey);
         }
-    }, [debugQuestProgression, firstVisibleRailEntryKey, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, setSelectedEntryKey, visibleEntryKeys]);
+    }, [debugQuestProgression, entriesByKey, firstVisibleRailEntryKey, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, selectedFaction.enumFaction, setSelectedEntryKey, setSelectedFaction, visibleEntryKeys]);
 
     const categoryOptions = useMemo(() => (
         QUEST_CATEGORY_OPTIONS.map((option) => ({

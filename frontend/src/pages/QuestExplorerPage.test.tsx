@@ -42,10 +42,19 @@ describe("QuestExplorerPage route and deep-link hydration", () => {
         expect(screen.queryByText("Visit the first marker.")).not.toBeInTheDocument();
     });
 
+    it("requests quest explorer data on page mount without relying on app bootstrap", async () => {
+        renderPage("/quests");
+
+        await screen.findByRole("heading", { name: "Archive of the First Tide" });
+
+        expect(mockedApiClient.getQuestExplorer).toHaveBeenCalledTimes(1);
+    });
+
     it("hydrates the quest key from nested Quest Explorer paths", async () => {
         renderPage("/quests/FactionQuest_Alias/Branch_A/step-1?mode=strategy");
 
         expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        expect(screen.getByRole("region", { name: "Selected progression" })).toHaveTextContent("Reach the marker.");
         expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
     });
 

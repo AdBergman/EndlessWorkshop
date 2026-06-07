@@ -52,6 +52,14 @@ const majorFactionAliases: Record<Faction, string[]> = {
     [Faction.NECROPHAGES]: ["necrophage", "necrophages"],
 };
 
+const majorFactionLabels: Record<Faction, string> = {
+    [Faction.KIN]: "Kin",
+    [Faction.LORDS]: "Lords",
+    [Faction.TAHUK]: "Tahuk",
+    [Faction.ASPECTS]: "Aspects",
+    [Faction.NECROPHAGES]: "Necrophages",
+};
+
 function selectedFactionAliases(selectedFaction: FactionInfo | null | undefined): string[] {
     if (!selectedFaction?.isMajor || !selectedFaction.enumFaction) return [];
 
@@ -60,6 +68,37 @@ function selectedFactionAliases(selectedFaction: FactionInfo | null | undefined)
         selectedFaction.enumFaction,
         ...majorFactionAliases[selectedFaction.enumFaction],
     ].map(normalizeToken).filter(Boolean);
+}
+
+function questFactionTokens(entry: QuestExplorerEntry): string[] {
+    return [
+        entry.navigation.factionKey,
+        entry.navigation.factionName,
+        entry.navigation.questLineKey,
+        entry.navigation.questLineName,
+        entry.entryKey,
+    ].map(normalizeToken).filter(Boolean);
+}
+
+export function majorFactionInfoForQuest(entry: QuestExplorerEntry): FactionInfo | null {
+    if (getQuestCategoryKey(entry.questType) !== "faction") return null;
+
+    const tokens = questFactionTokens(entry);
+    const matchingFaction = Object.values(Faction).find((faction) => {
+        const aliases = [faction, ...majorFactionAliases[faction]].map(normalizeToken);
+        return tokens.some((token) =>
+            aliases.some((alias) => token.includes(alias))
+        );
+    });
+
+    if (!matchingFaction) return null;
+
+    return {
+        isMajor: true,
+        enumFaction: matchingFaction,
+        uiLabel: majorFactionLabels[matchingFaction],
+        minorName: null,
+    };
 }
 
 export function questMatchesSelectedMajorFaction(
@@ -71,15 +110,9 @@ export function questMatchesSelectedMajorFaction(
     const aliases = selectedFactionAliases(selectedFaction);
     if (aliases.length === 0) return true;
 
-    const questFactionTokens = [
-        entry.navigation.factionKey,
-        entry.navigation.factionName,
-        entry.navigation.questLineKey,
-        entry.navigation.questLineName,
-        entry.entryKey,
-    ].map(normalizeToken).filter(Boolean);
+    const tokens = questFactionTokens(entry);
 
-    return questFactionTokens.some((token) =>
+    return tokens.some((token) =>
         aliases.some((alias) => token.includes(alias))
     );
 }

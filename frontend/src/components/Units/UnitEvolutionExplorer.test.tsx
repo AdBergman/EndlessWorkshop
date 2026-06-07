@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, useLocation } from "react-router-dom";
+import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import { apiClient } from "@/api/apiClient";
@@ -29,6 +29,11 @@ const mockedApiClient = vi.mocked(apiClient);
 const LocationProbe = () => {
     const location = useLocation();
     return <div data-testid="location">{location.pathname}{location.search}</div>;
+};
+
+const BackButton = () => {
+    const navigate = useNavigate();
+    return <button type="button" onClick={() => navigate(-1)}>Back</button>;
 };
 
 const unit = (overrides: Partial<Unit>): Unit => ({
@@ -178,6 +183,34 @@ describe("/units smoke behavior", () => {
             expect(screen.getAllByText("Kin Root").length).toBeGreaterThan(0);
             expect(screen.getAllByText("Kin Evolved").length).toBeGreaterThan(0);
         });
+    });
+
+    it("requests units on page mount without relying on app bootstrap", async () => {
+        renderExplorer("/units");
+
+        await waitFor(() => {
+            expect(mockedApiClient.getUnits).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it("shows an explicit empty state when the units endpoint returns no records", async () => {
+        mockedApiClient.getUnits.mockResolvedValue([]);
+
+        renderExplorer("/units");
+
+        expect(await screen.findByText("No units are available.")).toBeInTheDocument();
+        expect(screen.queryByText("Loading units...")).not.toBeInTheDocument();
+    });
+
+    it("shows a units API error instead of a permanent loading state", async () => {
+        mockedApiClient.getUnits.mockRejectedValue(new Error("units endpoint failed"));
+
+        renderExplorer("/units");
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Failed to load units: units endpoint failed"
+        );
+        expect(screen.queryByText("Loading units...")).not.toBeInTheDocument();
     });
 
     it("looks up the selected root by unitKey without rendering another root's evolution chain", async () => {
@@ -372,5 +405,39 @@ describe("/units smoke behavior", () => {
 
         expect(screen.getAllByText("Lords Root").length).toBeGreaterThan(0);
         expect(useFactionSelectionStore.getState().selectedFaction.enumFaction).toBe(Faction.LORDS);
+    });
+
+    it("rehydrates unit selection when browser history changes the copied route params", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <MemoryRouter
+                initialEntries={[
+                    "/units?faction=kin&unitKey=Unit_Kin_Root",
+                    "/units?faction=lords&unitKey=Unit_Lords_Root",
+                ]}
+                initialIndex={1}
+            >
+                <BackButton />
+                <UnitEvolutionExplorer />
+                <LocationProbe />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location")).toHaveTextContent(
+                "/units?faction=lords&unitKey=Unit_Lords_Root"
+            );
+            expect(screen.getAllByText("Lords Root").length).toBeGreaterThan(0);
+        });
+
+        await user.click(screen.getByRole("button", { name: "Back" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location")).toHaveTextContent(
+                "/units?faction=kin&unitKey=Unit_Kin_Root"
+            );
+            expect(screen.getAllByText("Kin Root").length).toBeGreaterThan(0);
+        });
     });
 });
