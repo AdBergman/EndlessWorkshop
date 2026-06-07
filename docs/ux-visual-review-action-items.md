@@ -1,5 +1,8 @@
 # Endless Workshop Visual Cohesion Action Items
 
+Status: active visual review backlog
+Owner: frontend / UX
+
 Implementation posture: unify the site shell, dark surfaces, borders, and accent behavior first. Do not force every page into the Quest Archive language. Tech and Units keep their black, high-complexity canvases; Quests remains the premium north star; Codex, Summary, Mods, and Info move toward a shared charcoal workbench surface.
 
 ## EW-UX-01: Add Shared Dark-Surface CSS Tokens

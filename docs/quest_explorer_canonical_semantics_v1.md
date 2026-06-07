@@ -645,7 +645,7 @@ Retire as canonical:
 - `docs/archive/quest-explorer/quest_explorer_lore_design.md`: the
   `Step 1 lore -> choice -> selected Step 2 lore` model should become a
   historical design note.
-- `docs/quest-explorer/quest_explorer_strategy_design.md`: still useful as a
+- `docs/archive/quest-explorer/quest_explorer_strategy_design.md`: still useful as a
   product direction note, but not a semantic spec.
 - `docs/archive/quest-explorer/quest_explorer_handoff.md`: historical reset context
   only.
@@ -655,7 +655,7 @@ Revise or annotate:
 - `docs/quest-explorer-ux-design-template.md`: keep the premium UX direction,
   but revise broad "branching progression flow", "choices", and "path"
   language to distinguish tasks, continuations, forks, and true decisions.
-- `docs/quest-explorer-export-contract-final.md`: keep as the schema contract
+- `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`: keep as the historical schema contract
   baseline, but update it or add a pointer to this document for live topology
   fields and objective ownership.
 - Frontend tests and fixtures that use generic "choice/path/branch" wording for

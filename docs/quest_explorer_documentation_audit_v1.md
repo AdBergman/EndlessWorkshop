@@ -75,11 +75,11 @@ migration removes or narrows them.
 | --- | --- | --- | --- | --- |
 | `docs/quest_explorer_canonical_semantics_v1.md` | canonical semantic spec | KEEP_AS_IS | New source of truth for Quest Explorer semantics. | Make this the top semantic reference for future work. |
 | `docs/active/quest-explorer-domain-language.md` | active domain-language spec | DANGEROUSLY_OUTDATED | Declares a `questline -> chapter -> step -> choice / branch variant -> continuation step` model as active language. This conflicts with the 0.80 topology where entries, branch rows, continuations, setup rows, aliases, and variants do not form a universal step-choice-step chain. | Done: deprecation banner added. Keep as historical vocabulary only or archive in a later documentation pass. |
-| `docs/quest-explorer-export-contract-final.md` | export/API contract spec | DANGEROUSLY_OUTDATED | Presents a final locked contract but omits live topology fields such as branch parentage, prerequisites, reveal metadata, choice groups, convergence groups, section roles, and branch step order. It also makes ordering and alias statements that are incomplete for current semantics. | Add a warning that it is not current semantic authority. Update separately as a contract revision if needed. |
+| `docs/archive/quest-explorer/quest-explorer-export-contract-final.md` | export/API contract spec | ARCHIVED_DANGEROUSLY_OUTDATED | Presents a final locked contract but omits live topology fields such as branch parentage, prerequisites, reveal metadata, choice groups, convergence groups, section roles, and branch step order. It also makes ordering and alias statements that are incomplete for current semantics. | Archived as historical contract baseline. Update separately as a contract revision if needed. |
 | `docs/quest-explorer-ux-design-template.md` | UX design template | KEEP_WITH_AMENDMENTS | Still useful for visual direction and product posture, but broad "branching archive", "choices", "path", and "progression atlas" language can imply that every continuation is player agency. | Add a canonical-semantics reference and clarify that branch/path copy is UX shorthand only. |
 | `docs/quest-explorer-rich-import-architecture-review.md` | architecture review | KEEP_WITH_AMENDMENTS | Useful for backend/API architecture context, but it references older contract assumptions and does not include the canonical semantic corrections. | Add a note that semantic interpretation is governed by the canonical document, not by the older contract review. |
 | `docs/archive/quest-explorer/quest_explorer_lore_design.md` | Lore design note | ARCHIVE_OUTDATED | Its core model is `Step 1 lore -> choice -> selected Step 2 lore/outcome -> choice -> selected Step 3 lore/outcome`. This is directly superseded by chapter chronicle semantics. | Archived as historical. Preserve only product principles such as future-lore gating and unresolved-continuation stopping. |
-| `docs/quest-explorer/quest_explorer_strategy_design.md` | Strategy design note | KEEP_WITH_AMENDMENTS | Product intent remains useful: Strategy is not a duplicate Lore reader and should support planning. However, "compare branch options" and "simulate a path" must be narrowed to true choices, topology forks, deterministic continuations, and unresolved futures. | Add a status note linking to canonical semantics before using it for Strategy model work. |
+| `docs/archive/quest-explorer/quest_explorer_strategy_design.md` | Strategy design note | ARCHIVED_WITH_STATUS | Product intent remains useful: Strategy is not a duplicate Lore reader and should support planning. However, "compare branch options" and "simulate a path" must be narrowed to true choices, topology forks, deterministic continuations, and unresolved futures. | Archived with status note linking to canonical semantics. |
 | `docs/archive/quest-explorer/quest_explorer_handoff.md` | handoff/reset note | ARCHIVE_OUTDATED | Useful as historical project context, but it was written before the canonical 0.80 semantic investigation and should not steer current terminology. | Archived as historical handoff context. |
 | `docs/archive/quest-explorer/quest_explorer_design_bundle.docx` | bundled design/prompt artifact | ARCHIVE_OUTDATED | Bundles the older handoff, Lore, and Strategy notes, including the superseded step-choice-path model. Binary format also makes lightweight amendment harder. | Archived as historical artifact only. Do not use as semantic input without the audit and canonical doc. |
 | `docs/diagnostics/quest-branch-continuity/quest-branch-continuity-summary.md` | diagnostic report | KEEP_WITH_AMENDMENTS | Valuable because it identified continuation, ownership, duplicate-label, and hidden-topology problems. Some requested metadata now exists in 0.80, and its counts/status should not be reused as current truth. | Add a supersession note: historical continuity diagnostic, partially fulfilled by 0.80 and superseded by canonical semantics. |
@@ -139,7 +139,7 @@ Historical usefulness:
 Useful only as a record of the older product language. It should not remain in
 `docs/active/` unless it is rewritten as a redirect to the canonical document.
 
-### `docs/quest-explorer-export-contract-final.md`
+### `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`
 
 Classification: `DANGEROUSLY_OUTDATED`
 
@@ -202,7 +202,7 @@ Historical usefulness:
 Useful for preserving the principle that future lore should not leak before the
 relevant reveal point. Superseded for structure and terminology.
 
-### `docs/quest-explorer/quest_explorer_strategy_design.md`
+### `docs/archive/quest-explorer/quest_explorer_strategy_design.md`
 
 Classification: `KEEP_WITH_AMENDMENTS`
 
@@ -411,12 +411,12 @@ Historical or archived:
 
 Retain as product-direction note with amendment:
 
-- `docs/quest-explorer/quest_explorer_strategy_design.md`
+- `docs/archive/quest-explorer/quest_explorer_strategy_design.md`
 
 High-priority deprecation:
 
 - `docs/active/quest-explorer-domain-language.md`
-- `docs/quest-explorer-export-contract-final.md`
+- `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`
 
 ## Minimal Amendment Recommendations
 
@@ -424,7 +424,7 @@ High-priority deprecation:
    this document is superseded for Quest Explorer semantics by
    `docs/quest_explorer_canonical_semantics_v1.md`.
 
-2. Add a status banner to `docs/quest-explorer-export-contract-final.md`:
+2. Status banner added and file archived at `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`:
    this is no longer a complete live 0.80 semantic contract and must not be used
    as the source of truth for topology semantics.
 

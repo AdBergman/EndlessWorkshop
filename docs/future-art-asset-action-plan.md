@@ -1,5 +1,8 @@
 # Future Art And Asset Action Plan
 
+Status: active future-work note
+Owner: frontend / asset pipeline
+
 ## Scope
 
 This file tracks work that should not be included in the next SVG-only implementation pass.
@@ -91,4 +94,3 @@ Future action points:
 2. Prefer small frontend-ready registries over importing large raw manifests in shared UI paths.
 3. Include only browser-ready public paths, not Unity paths, GUIDs, or exporter internals.
 4. Validate every emitted asset path at export/import time.
-

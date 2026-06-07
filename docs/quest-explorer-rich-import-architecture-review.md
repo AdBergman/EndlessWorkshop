@@ -456,7 +456,7 @@ Recommendation: keep application-level validation unless SQL-level referential i
 
 Reference files:
 
-- `docs/quest-explorer-export-contract-final.md`
+- `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`
 - `local-imports/exports/ewshop_quest_explorer_export_0.80.json`
 - `frontend/src/features/quests/questExplorerContract.ts`
 - `frontend/src/features/quests/mockQuestExplorerExport.ts`

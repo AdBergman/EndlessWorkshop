@@ -16,6 +16,8 @@ Archived here:
 - `quest_explorer_lore_design.md`
 - `quest_explorer_handoff.md`
 - `quest_explorer_design_bundle.docx`
+- `quest-explorer-export-contract-final.md`
+- `quest_explorer_strategy_design.md`
 
 Use the archived files only for historical design context. Do not derive current
 Lore, Strategy, branch, choice, path, continuation, or topology semantics from

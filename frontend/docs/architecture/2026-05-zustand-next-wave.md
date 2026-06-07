@@ -1,5 +1,6 @@
 # EWShop Frontend Architecture Next Wave
 
+Status: historical architecture investigation; use `docs/frontend/frontend-architecture-guidelines.md` for current frontend guidance.
 Date: 2026-05-12
 
 ## Current Position

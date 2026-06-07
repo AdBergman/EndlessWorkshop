@@ -1,6 +1,7 @@
 # EWShop Architecture Quick Reference
 
 Status: active quick reference
+Last reviewed: 2026-06-07
 
 This file is a compact orientation guide for humans and coding agents. It does
 not replace `README.md`, `AGENTS.md`, or deeper feature docs. Use it to decide
