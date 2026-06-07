@@ -11,31 +11,13 @@ const InfoPage: React.FC = () => {
             <h1>Endless Workshop</h1>
 
             <p>
-                Endless Workshop is a fan-made tool built to help the community explore, learn,
-                and share strategies for <strong>Endless Legend 2</strong>.
+                Endless Workshop is an independent fan-made reference and planning tool for{" "}
+                <strong>Endless Legend 2</strong>.
             </p>
 
             <p>
-                The project currently includes an interactive technology tree with nested
-                tooltips, unit exploration tools, and save-file analysis with empire summaries,
-                technology order inspection, and late-game state overview.
-            </p>
-
-            <p>
-                Planned additions include a hero viewer, a searchable encyclopedia covering
-                technologies, units, districts, improvements and gameplay systems, and a
-                small modding section intended to help players understand and experiment
-                with the game’s underlying systems.
-            </p>
-
-            <p>
-                Endless Workshop aims to stay closely aligned with the game and will be
-                refreshed as new updates change the underlying systems.
-            </p>
-
-            <p>
-                This project is a work in progress and new tools will continue to appear
-                as development progresses.
+                It currently includes tools for technology planning, units, quests, codex data,
+                mods, and end-game report analysis.
             </p>
 
             <div className="orange-line thin-center" />
@@ -51,7 +33,7 @@ const InfoPage: React.FC = () => {
             </div>
 
             <p className="top-margin">
-                Please visit these links for official resources.
+                Official resources:
             </p>
 
             <div className="resource-links">
@@ -75,7 +57,7 @@ const InfoPage: React.FC = () => {
             </div>
 
             <p className="contact-note">
-                I’m usually on the official Discord as <strong>CalmBreakfast</strong>.
+                You can usually reach me on the official Discord as <strong>CalmBreakfast</strong>.
             </p>
         </div>
     );
