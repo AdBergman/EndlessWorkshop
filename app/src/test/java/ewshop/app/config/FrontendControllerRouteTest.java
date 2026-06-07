@@ -38,6 +38,7 @@ class FrontendControllerRouteTest {
     void preservesExistingSpaEntryRoutes() throws Exception {
         mockMvc.perform(get("/tech").queryParam("share", "demo-build"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
                 .andExpect(forwardedUrl("/tech.html"));
 
         mockMvc.perform(get("/tech").queryParam("faction", "kin").queryParam("tech", "stonework"))
@@ -61,6 +62,7 @@ class FrontendControllerRouteTest {
 
         mockMvc.perform(get("/quests/Quest_A").queryParam("mode", "lore"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
                 .andExpect(forwardedUrl("/quests.html"));
 
         mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01/"))
@@ -87,7 +89,17 @@ class FrontendControllerRouteTest {
 
         mockMvc.perform(get("/admin/import"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
                 .andExpect(forwardedUrl("/index.html"));
+    }
+
+    @Test
+    void appliesCachePolicyForSpaShellsAndHashedAssets() throws Exception {
+        mockMvc.perform(get("/tech.html"))
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"));
+
+        mockMvc.perform(get("/assets/index-test.js"))
+                .andExpect(header().string("Cache-Control", "public, max-age=31536000, immutable"));
     }
 
     @Test
