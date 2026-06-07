@@ -89,18 +89,21 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
 
                         <div className="codex-related__list">
                             {group.entries.map((entry) => {
+                                const entryLabel = getCodexEntryLabel(entry);
                                 const relatedContext = getCodexRelatedContext(entry);
                                 const contextLabel = relatedContext.startsWith("Quest ·")
                                     ? relatedContext
                                     : relatedContext
                                         ? `${formatCodexKindLabel(entry.exportKind)} / ${relatedContext}`
                                         : formatCodexKindLabel(entry.exportKind);
+                                const accessibilityLabel = `${entryLabel} ${contextLabel}`;
 
                                 return (
                                     <button
                                         key={entry.entryKey}
                                         type="button"
                                         className="codex-related__chip"
+                                        aria-label={accessibilityLabel}
                                         onClick={() => onSelect(entry)}
                                     >
                                         <CodexEntryIcon
@@ -109,7 +112,7 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
                                             className="codex-kindIcon codex-kindIcon--relatedChip"
                                             size={16}
                                         />
-                                        <span className="codex-related__name">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
+                                        <span className="codex-related__name">{renderCodexLabel(entryLabel)}</span>
                                         <span className="codex-related__kind">{contextLabel}</span>
                                     </button>
                                 );

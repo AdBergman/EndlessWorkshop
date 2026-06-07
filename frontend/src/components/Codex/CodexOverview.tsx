@@ -66,6 +66,7 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                         type="button"
                         className="codex-overview__row"
                         onClick={() => onSelectKind(option.kind)}
+                        aria-label={`${option.label} ${option.count} ${descriptionFor(option.kind)}`}
                     >
                         <span className="codex-overview__rowTop">
                             <span className="codex-overview__kindWrap">
