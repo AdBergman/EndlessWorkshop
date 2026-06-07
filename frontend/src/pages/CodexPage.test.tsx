@@ -47,6 +47,38 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 
+    it("requests codex entries on page mount when the global bootstrap has not populated the store yet", async () => {
+        const originalLoadEntries = useCodexStore.getState().loadEntries;
+        const loadEntries = vi.fn().mockResolvedValue(undefined);
+
+        useCodexStore.setState({
+            entries: [],
+            entriesByKey: {},
+            entriesByKind: {},
+            entriesByKindKey: {},
+            loading: false,
+            error: null,
+            lastLoadedAt: undefined,
+            loadEntries,
+        });
+
+        try {
+            render(
+                <MemoryRouter initialEntries={["/codex"]}>
+                    <Routes>
+                        <Route path="/codex" element={<CodexPage />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+
+            await waitFor(() => {
+                expect(loadEntries).toHaveBeenCalledTimes(1);
+            });
+        } finally {
+            useCodexStore.setState({ loadEntries: originalLoadEntries });
+        }
+    });
+
     it("treats extractors as their own codex category instead of counting them as districts", async () => {
         const entries: CodexEntry[] = [
             {

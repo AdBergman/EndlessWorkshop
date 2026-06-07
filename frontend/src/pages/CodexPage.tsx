@@ -51,6 +51,7 @@ export default function CodexPage() {
     const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
+    const loadEntries = useCodexStore((state) => state.loadEntries);
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
@@ -68,6 +69,10 @@ export default function CodexPage() {
     const detailTitleRef = useRef<HTMLHeadingElement>(null);
     const suppressNextPlainRouteResetRef = useRef(false);
     const lastHandledResetNonceRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        void loadEntries();
+    }, [loadEntries]);
 
     const filterOptions = useMemo(() => {
         const kindCounts = entries.reduce<Map<string, number>>((acc, entry) => {
