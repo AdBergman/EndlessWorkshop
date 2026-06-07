@@ -3,7 +3,10 @@
 import React, {useEffect, useMemo, useState} from "react";
 import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
+import {useDistrictStore} from "@/stores/districtStore";
+import {useImprovementStore} from "@/stores/improvementStore";
 import {getTechsByKeys, selectTechs, selectTechsByKey, useTechStore} from "@/stores/techStore";
+import {useUnitStore} from "@/stores/unitStore";
 import {selectSelectedTechs, useTechPlannerStore} from "@/stores/techPlannerStore";
 import {selectSelectedFaction, useFactionSelectionStore} from "@/stores/factionSelectionStore";
 import {useTechRouteHydration} from "@/components/Tech/useTechRouteHydration";
@@ -13,6 +16,10 @@ import "./TechContainer.css";
 const TechContainer: React.FC = () => {
     const allTechData = useTechStore(selectTechs);
     const techsByKey = useTechStore(selectTechsByKey);
+    const loadTechs = useTechStore((state) => state.loadTechs);
+    const loadDistricts = useDistrictStore((state) => state.loadDistricts);
+    const loadImprovements = useImprovementStore((state) => state.loadImprovements);
+    const loadUnits = useUnitStore((state) => state.loadUnits);
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const selectedTechs = useTechPlannerStore(selectSelectedTechs);
 
@@ -29,6 +36,13 @@ const TechContainer: React.FC = () => {
         setEra: eraController.setEra,
         setImportToast,
     });
+
+    useEffect(() => {
+        void loadTechs();
+        void loadDistricts();
+        void loadImprovements();
+        void loadUnits();
+    }, [loadDistricts, loadImprovements, loadTechs, loadUnits]);
 
     useEffect(() => {
         if (!selectedFaction) return;

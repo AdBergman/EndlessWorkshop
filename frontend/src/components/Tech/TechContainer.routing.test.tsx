@@ -127,6 +127,26 @@ describe("TechContainer routing regressions", () => {
         window.history.pushState({}, "", "/");
     });
 
+    it("requests tech route datasets on mount without relying on provider bootstrap", async () => {
+        useDistrictStore.getState().reset();
+        useImprovementStore.getState().reset();
+        useUnitStore.getState().reset();
+        useTechStore.getState().reset();
+
+        render(
+            <MemoryRouter initialEntries={["/tech"]}>
+                <TechContainer />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(mockedApiClient.getTechs).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getDistricts).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getImprovements).toHaveBeenCalledTimes(1);
+            expect(mockedApiClient.getUnits).toHaveBeenCalledTimes(1);
+        });
+    });
+
     it("leaves unmatched deep-link URLs untouched while applying no selected tech", async () => {
         window.history.pushState({}, "", "/tech?faction=kin&tech=missing");
 
