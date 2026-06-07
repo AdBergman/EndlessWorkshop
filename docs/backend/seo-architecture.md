@@ -13,11 +13,11 @@ renderer and audit classes are cleaned up.
 codex filtering, build page candidates, build reference targets, generate the
 missing-reference audit, write pages, write the sitemap, and return a summary.
 
-Candidate policy decides which codex rows become generated pages, which routes
-are canonical, and which duplicate variants are `noindex`. Rendering policy
-turns accepted candidates into HTML metadata, shell, content sections, related
-links, and JSON-LD. Storage policy owns output-root safety, generated file
-writes, and cleanup of generated directories.
+`PageCandidateBuilder` decides which codex rows become generated pages, which
+routes are canonical, and which duplicate variants are `noindex`. Rendering
+policy turns accepted candidates into HTML metadata, shell, content sections,
+related links, and JSON-LD. Storage policy owns output-root safety, generated
+file writes, and cleanup of generated directories.
 
 ## Current Policy
 
@@ -40,8 +40,8 @@ writes, and cleanup of generated directories.
 - Controllers stay thin and enforce admin access through the existing admin
   token filter.
 - `SeoRegenerationService` may orchestrate the use case, but policy-heavy
-  candidate, sitemap, metadata, description, related-link, and audit behavior
-  should move into focused collaborators behind tests.
+  metadata, description, related-link, and audit behavior should move into
+  focused collaborators behind tests.
 - `GeneratedSeoWriter` and `SeoOutputLocator` own filesystem mechanics.
 - `SitemapController`, `FrontendController`, and `WebConfig` own serving and
   forwarding generated files; missing generated encyclopedia routes should stay
@@ -50,6 +50,6 @@ writes, and cleanup of generated directories.
 ## Cleanup Direction
 
 Start with guardrails, then extract behavior-based units. Avoid broad generic
-pipelines. Useful future extractions are candidate building, metadata building,
-description parsing, related-link rendering, HTML shell rendering, audit
-classification, audit scoring, and report rendering.
+pipelines. Useful future extractions are metadata building, description parsing,
+related-link rendering, HTML shell rendering, audit classification, audit
+scoring, and report rendering.

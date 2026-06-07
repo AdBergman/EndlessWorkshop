@@ -64,6 +64,13 @@ class FrontendControllerProductionFallbackTest {
     }
 
     @Test
+    void forwardsQuestDeepLinksToQuestSpaShell() throws Exception {
+        mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01").queryParam("mode", "strategy"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/quests.html"));
+    }
+
+    @Test
     void stillServesExternalWorkshopWhenPresent() throws Exception {
         Path externalWorkshop = Path.of("build/test-generated-seo-prod/encyclopedia/tech/workshop/index.html");
         Files.createDirectories(externalWorkshop.getParent());

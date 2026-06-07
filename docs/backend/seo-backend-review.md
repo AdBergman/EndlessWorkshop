@@ -218,7 +218,7 @@ Updated: 2026-06-07
 
 - `SEO-001`: done. `docs/backend/seo-architecture.md` documents the SEO pipeline, subsystem ownership, current policy, serving boundaries, and cleanup direction.
 - `SEO-002`: done for the current risk profile. Existing regeneration tests plus focused route/writer tests cover metadata, canonical URLs, noindex variants, sitemap inclusion, related links, audit artifacts, route collisions, and generated route forwarding.
-- `SEO-003`: pragmatic skip/deferred. Candidate building remains in `SeoRegenerationService`; extracting it safely is worthwhile later, but this batch added guardrails first and avoided a broad SEO rewrite.
+- `SEO-003`: done. `PageCandidateBuilder` now owns candidate grouping, route choice, variant canonicalization, context labels, and duplicate alias attachment, with focused tests.
 - `SEO-004`: pragmatic skip/deferred. Rebuild orchestration is still large, but splitting all rebuild steps now would be high-churn and should follow candidate/renderer/audit extractions.
 - `SEO-005`: pragmatic skip/deferred. Metadata builder extraction remains useful, but current tests already pin title, meta, canonical, robots, Open Graph/Twitter-adjacent shell behavior, and JSON-LD output.
 - `SEO-006`: pragmatic skip/deferred. Description parsing remains inside `SeoPageRenderer`; representative description normalization is pinned by regeneration tests.
@@ -246,6 +246,7 @@ SEO verification:
 
 - `./mvnw -B -pl app -am -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dtest='SeoRegenerationServiceTest,SeoAdminControllerTest,SeoOutputLocatorPathSafetyTest,SeoOutputLocatorPropertyTest,GeneratedSeoWriterTest,SitemapRoutePolicyTest,FrontendControllerRouteTest,FrontendControllerProductionFallbackTest' test`
 - `./mvnw -B -pl app -am -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dtest='SeoRegenerationServiceTest,GeneratedSeoWriterTest,SitemapRoutePolicyTest' test`
+- `./mvnw -B -pl app -am -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false -Dtest='PageCandidateBuilderTest,SeoRegenerationServiceTest,GeneratedSeoWriterTest,SitemapRoutePolicyTest,FrontendControllerRouteTest,FrontendControllerProductionFallbackTest' test`
 
 ## Panel Conclusion
 

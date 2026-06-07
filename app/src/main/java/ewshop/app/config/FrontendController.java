@@ -42,6 +42,18 @@ public class FrontendController {
         };
     }
 
+    @RequestMapping(value = {
+            "/quests/{entryKey:[A-Za-z0-9_-]+}",
+            "/quests/{entryKey:[A-Za-z0-9_-]+}/"
+    })
+    public String forwardQuestDeepLinkDocument(@PathVariable String entryKey) {
+        if (entryKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        return "forward:/quests.html";
+    }
+
     @RequestMapping(value = "/encyclopedia")
     public String forwardGeneratedEncyclopediaIndex() {
         if (seoOutputLocator.hasGeneratedIndex("encyclopedia")) {

@@ -56,6 +56,14 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/quests.html"));
 
+        mockMvc.perform(get("/quests/Quest_A").queryParam("mode", "lore"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/quests.html"));
+
+        mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01/"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/quests.html"));
+
         mockMvc.perform(get("/mods"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/mods.html"));
@@ -241,6 +249,9 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/districts/works/extra"))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/quests/Quest_A/extra"))
                 .andExpect(status().isNotFound());
     }
 

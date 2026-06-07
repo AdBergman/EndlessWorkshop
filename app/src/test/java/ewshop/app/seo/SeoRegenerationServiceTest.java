@@ -2,6 +2,7 @@ package ewshop.app.seo;
 
 import ewshop.app.seo.audit.CodexMissingReferenceAuditService;
 import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
+import ewshop.app.seo.generation.PageCandidateBuilder;
 import ewshop.app.seo.generation.ReferenceTargetBuilder;
 import ewshop.app.seo.generation.SitemapGenerator;
 import ewshop.app.seo.generation.SitemapRoutePolicy;
@@ -653,6 +654,7 @@ class SeoRegenerationServiceTest {
                 new CodexFilterService(),
                 outputLocator,
                 new CodexMissingReferenceAuditService(),
+                new PageCandidateBuilder(),
                 new ReferenceTargetBuilder(),
                 new SeoPageRenderer(),
                 new SitemapGenerator(),

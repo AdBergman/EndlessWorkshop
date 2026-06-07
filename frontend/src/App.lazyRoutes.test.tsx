@@ -101,6 +101,7 @@ describe("App lazy route bundle isolation", () => {
         ["/units?faction=kin&unitKey=Unit_Kin_Root", "route-units"],
         ["/codex?entry=District_MarketSquare", "route-codex"],
         ["/quests?quest=Quest_A", "route-quests"],
+        ["/quests/Quest_A?mode=lore", "route-quests"],
         ["/summary", "route-summary"],
         ["/mods", "route-mods"],
         ["/admin/import?admin=1", "route-admin-import"],
