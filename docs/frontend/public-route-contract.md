@@ -15,8 +15,8 @@ routes, and hard `404`s from drifting into each other.
 | `/codex/{entryKey}` | hard `404` | Not a public route; crawlable codex/entity pages live under `/encyclopedia/...`. |
 | `/quests` | SPA shell | Interactive Quest Explorer route. |
 | `/quests/{entryKey}` | SPA shell | Canonical shareable quest deep-link route; query params such as `mode` remain frontend-owned. |
+| `/quests/{entryKey}/...` | SPA shell | Quest Explorer owns nested Quest paths for copied branch/step URLs; the React app resolves the first segment as the selected quest. |
 | `/quests?quest={entryKey}` | SPA shell | Backwards-compatible quest deep-link input. |
-| `/quests/{entryKey}/extra` | hard `404` | Nested quest paths are not public routes. |
 | `/mods` | SPA shell | Forwards to `mods.html`. |
 | `/info` | SPA shell | Forwards to `info.html`. |
 | `/admin/import` | SPA shell | Forwards to `index.html`; API access is protected separately. |
@@ -36,4 +36,5 @@ Current tests:
 
 - Backend route forwarding and `404` behavior: `FrontendControllerRouteTest` and `FrontendControllerProductionFallbackTest`.
 - Frontend lazy route tree: `App.lazyRoutes.test.tsx`.
+- Quest URL hydration: `QuestExplorerPage.test.tsx` and `QuestExplorerPage.strategyPlanner.test.tsx`.
 - SPA route metadata scope: `routeSeo.test.ts`.

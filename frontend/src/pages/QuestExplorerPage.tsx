@@ -98,6 +98,12 @@ import {
 } from "@/features/quests/useQuestExplorerLoreScrollUrl";
 import { useQuestExplorerPathState } from "@/features/quests/useQuestExplorerPathState";
 import {
+    decodeQuestChoicePath,
+    encodeQuestChoicePath,
+    questChoicePathTokensEqual,
+    QUEST_CHOICE_QUERY_PARAM,
+} from "@/features/quests/questExplorerUrlState";
+import {
     selectSelectedFaction,
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
@@ -113,10 +119,12 @@ import "@/components/Quests/QuestExplorer.css";
 function routeEntryKey(pathname: string): string | null {
     const raw = pathname.replace(/^\/quests\/?/, "").trim();
     if (!raw) return null;
+    const firstSegment = raw.split("/")[0] ?? "";
+    if (!firstSegment) return null;
     try {
-        return decodeURIComponent(raw);
+        return decodeURIComponent(firstSegment);
     } catch {
-        return raw;
+        return firstSegment;
     }
 }
 
@@ -1033,6 +1041,11 @@ export default function QuestExplorerPage() {
     const requestedEntryKey = routeEntryKey(location.pathname) ?? searchParams.get("quest");
     const requestedMode = normalizeQuestExplorerMode(searchParams.get("mode"));
     const debugQuestProgression = isQuestProgressionDebugEnabled(searchParams);
+    const strategyChoiceTokenKey = searchParams.getAll(QUEST_CHOICE_QUERY_PARAM).join("\u0001");
+    const initialStrategyChoicePath = useMemo(
+        () => decodeQuestChoicePath(searchParams.getAll(QUEST_CHOICE_QUERY_PARAM)),
+        [strategyChoiceTokenKey]
+    );
     const visibleEntries = useMemo(
         () => filterQuestEntries(entries, filters, selectedFaction),
         [entries, filters, selectedFaction]
@@ -1060,6 +1073,7 @@ export default function QuestExplorerPage() {
     );
     const {
         strategyChoicePath,
+        strategyChoiceRevision,
         loreChoicePathsByContext,
         chooseExplicitChoice,
     } = useQuestExplorerPathState({
@@ -1067,6 +1081,7 @@ export default function QuestExplorerPage() {
         selectedEntryKey,
         selectedProgression,
         selectedProgressionKey,
+        initialStrategyChoicePath,
     });
     const strategyFlowModel = useMemo(
         () => buildStrategyFlowModel({
@@ -1134,6 +1149,41 @@ export default function QuestExplorerPage() {
     useEffect(() => {
         if (mode !== requestedMode) setMode(requestedMode);
     }, [mode, requestedMode, setMode]);
+
+    useEffect(() => {
+        if (requestedMode !== mode) return;
+
+        const currentTokens = searchParams.getAll(QUEST_CHOICE_QUERY_PARAM);
+        const nextTokens = mode === "strategy" ? encodeQuestChoicePath(strategyChoicePath) : [];
+        if (
+            mode === "strategy"
+            && currentTokens.length > 0
+            && initialStrategyChoicePath.length > 0
+            && strategyChoicePath.length === 0
+        ) return;
+        if (
+            mode === "strategy"
+            && currentTokens.length === 0
+            && nextTokens.length > 0
+            && strategyChoiceRevision === 0
+        ) return;
+        if (questChoicePathTokensEqual(currentTokens, nextTokens)) return;
+
+        setSearchParams((currentParams) => {
+            const nextParams = new URLSearchParams(currentParams);
+            nextParams.delete(QUEST_CHOICE_QUERY_PARAM);
+            nextTokens.forEach((token) => nextParams.append(QUEST_CHOICE_QUERY_PARAM, token));
+            return nextParams;
+        }, { replace: true });
+    }, [
+        initialStrategyChoicePath.length,
+        mode,
+        requestedMode,
+        searchParams,
+        setSearchParams,
+        strategyChoicePath,
+        strategyChoiceRevision,
+    ]);
 
     useEffect(() => {
         if (mode !== "lore") return;

@@ -67,6 +67,13 @@ class FrontendControllerProductionFallbackTest {
     void forwardsQuestDeepLinksToQuestSpaShell() throws Exception {
         mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01").queryParam("mode", "strategy"))
                 .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
+                .andExpect(forwardedUrl("/quests.html"));
+
+        mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01/Branch_Pious/step-2")
+                        .queryParam("mode", "strategy"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
                 .andExpect(forwardedUrl("/quests.html"));
     }
 
@@ -104,7 +111,13 @@ class FrontendControllerProductionFallbackTest {
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import({FrontendController.class, GlobalExceptionHandler.class, LegacySeoRedirectController.class, WebConfig.class})
+    @Import({
+            FrontendController.class,
+            FrontendCacheHeaderFilter.class,
+            GlobalExceptionHandler.class,
+            LegacySeoRedirectController.class,
+            WebConfig.class
+    })
     static class TestApplication {
 
         @Bean

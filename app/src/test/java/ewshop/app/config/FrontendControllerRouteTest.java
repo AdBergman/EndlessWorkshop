@@ -67,6 +67,12 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/quests.html"));
 
+        mockMvc.perform(get("/quests/FactionQuest_KinOfSheredyn_Chapter02_Step01/Branch_Pious/step-2")
+                        .queryParam("mode", "strategy"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache, max-age=0, must-revalidate"))
+                .andExpect(forwardedUrl("/quests.html"));
+
         mockMvc.perform(get("/mods"))
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/mods.html"));
@@ -255,7 +261,8 @@ class FrontendControllerRouteTest {
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/quests/Quest_A/extra"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/quests.html"));
     }
 
     @Test
@@ -322,7 +329,7 @@ class FrontendControllerRouteTest {
             HibernateJpaAutoConfiguration.class,
             FlywayAutoConfiguration.class
     })
-    @Import({FrontendController.class, LegacySeoRedirectController.class, WebConfig.class})
+    @Import({FrontendController.class, FrontendCacheHeaderFilter.class, LegacySeoRedirectController.class, WebConfig.class})
     static class TestApplication {
 
         @Bean

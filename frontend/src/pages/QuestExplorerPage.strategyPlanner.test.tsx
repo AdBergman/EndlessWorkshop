@@ -137,6 +137,35 @@ describe("QuestExplorerPage Strategy planner behavior", () => {
         expect(within(chronicle).queryByRole("region", { name: "Continuity Strip" })).not.toBeInTheDocument();
     });
 
+    it("hydrates a copied strategy branch choice URL", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(strategyDossierMarkerPayload);
+        const firstRender = renderPage("/quests/Quest_StrategyMarkers?mode=strategy");
+
+        await screen.findByRole("heading", { name: "Marker Brief" });
+        let chronicle = screen.getByRole("region", { name: "Selected progression" });
+        await user.click(within(chronicle).getByRole("button", { name: /Risk the breach/ }));
+
+        let copiedUrl = "";
+        await waitFor(() => {
+            copiedUrl = screen.getByTestId("route-location").textContent ?? "";
+            expect(copiedUrl).toContain("choice=");
+        });
+        expect(within(chronicle).getByRole("button", { name: /Risk the breach/ })).toHaveAttribute("aria-current", "true");
+
+        firstRender.unmount();
+        useQuestStore.getState().reset();
+        useFactionSelectionStore.getState().reset();
+        mockedApiClient.getQuestExplorer.mockResolvedValue(strategyDossierMarkerPayload);
+        renderPage(copiedUrl);
+
+        await screen.findByRole("heading", { name: "Marker Brief" });
+        chronicle = screen.getByRole("region", { name: "Selected progression" });
+        expect(within(chronicle).getByRole("button", { name: /Risk the breach/ })).toHaveAttribute("aria-current", "true");
+        expect(within(chronicle).getByRole("region", { name: "Choosing Risk the breach leads to" }))
+            .toHaveTextContent("Fails at Chapter 1: Failed Advance");
+    });
+
     it("renders strategy dossier failure and convergence markers when a simulated branch exposes them", async () => {
         const user = userEvent.setup();
         mockedApiClient.getQuestExplorer.mockResolvedValue(strategyDossierMarkerPayload);

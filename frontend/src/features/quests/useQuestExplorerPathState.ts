@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { QuestExplorerMode } from "./questExplorerMode";
 import {
     selectionForChoice,
@@ -14,6 +14,7 @@ type UseQuestExplorerPathStateOptions = {
     selectedEntryKey: string | null;
     selectedProgression: QuestDetailProgression | null;
     selectedProgressionKey: string;
+    initialStrategyChoicePath: QuestPathChoiceSelection[];
 };
 
 type ChooseQuestPathChoice = (
@@ -25,6 +26,7 @@ type ChooseQuestPathChoice = (
 
 export type QuestExplorerPathState = {
     strategyChoicePath: QuestPathChoiceSelection[];
+    strategyChoiceRevision: number;
     loreChoicePathsByContext: LoreChoicePathsByContext;
     chooseExplicitChoice: ChooseQuestPathChoice;
 };
@@ -60,15 +62,18 @@ export function useQuestExplorerPathState({
     selectedEntryKey,
     selectedProgression,
     selectedProgressionKey,
+    initialStrategyChoicePath,
 }: UseQuestExplorerPathStateOptions): QuestExplorerPathState {
     const [strategyChoicePath, setStrategyChoicePath] = useState<QuestPathChoiceSelection[]>([]);
+    const [strategyChoiceRevision, setStrategyChoiceRevision] = useState(0);
     const [loreChoicePathsByContext, setLoreChoicePathsByContext] = useState<LoreChoicePathsByContext>({});
     const choicePathResetKey = `${selectedEntryKey ?? "none"}:${selectedProgressionKey}`;
     const previousModeRef = useRef(mode);
 
-    useEffect(() => {
-        setStrategyChoicePath([]);
-    }, [choicePathResetKey]);
+    useLayoutEffect(() => {
+        setStrategyChoicePath(choicePathForProgression(initialStrategyChoicePath, selectedProgression));
+        setStrategyChoiceRevision(0);
+    }, [choicePathResetKey, initialStrategyChoicePath, selectedProgression]);
 
     useEffect(() => {
         const previousMode = previousModeRef.current;
@@ -76,6 +81,7 @@ export function useQuestExplorerPathState({
         if (previousMode === mode) return;
 
         setStrategyChoicePath([]);
+        setStrategyChoiceRevision(0);
         setLoreChoicePathsByContext({});
     }, [mode]);
 
@@ -95,6 +101,7 @@ export function useQuestExplorerPathState({
                     choice,
                     choiceProgression
                 ));
+                setStrategyChoiceRevision((revision) => revision + 1);
                 return;
             }
 
@@ -113,7 +120,17 @@ export function useQuestExplorerPathState({
 
     return {
         strategyChoicePath,
+        strategyChoiceRevision,
         loreChoicePathsByContext,
         chooseExplicitChoice,
     };
+}
+
+function choicePathForProgression(
+    choicePath: QuestPathChoiceSelection[],
+    selectedProgression: QuestDetailProgression | null
+): QuestPathChoiceSelection[] {
+    if (!selectedProgression || choicePath.length === 0) return [];
+    const stepKeys = new Set(selectedProgression.chapter.steps.map((step) => step.stepKey));
+    return choicePath.filter((selection) => stepKeys.has(selection.stepKey));
 }

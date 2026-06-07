@@ -42,6 +42,13 @@ describe("QuestExplorerPage route and deep-link hydration", () => {
         expect(screen.queryByText("Visit the first marker.")).not.toBeInTheDocument();
     });
 
+    it("hydrates the quest key from nested Quest Explorer paths", async () => {
+        renderPage("/quests/FactionQuest_Alias/Branch_A/step-1?mode=strategy");
+
+        expect(await screen.findByRole("heading", { name: "Archive of the First Tide" })).toBeInTheDocument();
+        expect(useQuestStore.getState().selectedEntryKey).toBe("Quest_A");
+    });
+
     it("hydrates the quest query parameter for legacy links", async () => {
         renderPage("/quests?quest=FactionQuest_Alias");
 

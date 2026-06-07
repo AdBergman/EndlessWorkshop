@@ -10,20 +10,24 @@ The main routing issue found in this pass was a backend/frontend route contract
 mismatch for Quest Explorer deep links.
 
 React accepts `/quests/*`, and `QuestExplorerPage` reads the selected quest from
-either `/quests/{entryKey}` or `?quest={entryKey}`. Spring only forwarded
-`/quests` and `/quests/` to `quests.html`, so direct first visits or refreshes
-on `/quests/{entryKey}` did not reliably enter the React app. That matches the
-reported behavior where the first load can show non-interactive/static content
-or require a reload/navigation before the app hydrates correctly.
+either `/quests/{entryKey}` or `?quest={entryKey}`. Earlier Spring forwarding
+only covered the Quest root and then one-segment quest links. Nested copied
+Quest URLs could therefore miss the React shell on first visit, which matches
+the reported static/white-page behavior for direct production URLs.
 
 ## Implemented Now
 
 - Added Spring forwarding for one-segment quest deep links:
   - `/quests/{entryKey}`
   - `/quests/{entryKey}/`
-- Kept nested quest paths such as `/quests/{entryKey}/extra` as `404`.
+- Added Spring forwarding for nested Quest Explorer paths under `/quests/**`.
+- Added HTML shell cache revalidation headers for SPA route documents to reduce
+  stale-prod-shell white-page risk after deploys.
+- Added frontend URL hydration for copied strategy branch choices through
+  repeated `choice` query params.
 - Added backend route tests for dev/mock and production-style fallback.
-- Added a React route-tree test for `/quests/Quest_A?mode=lore`.
+- Added React route-tree and Quest page tests for nested Quest paths and copied
+  strategy branch state.
 - Added `docs/frontend/public-route-contract.md` as the route ownership matrix.
 - Added backend route coverage that `/codex/{entryKey}` is not a public route
   while `/codex?entry={entryKey}` remains the codex SPA deep-link contract.
@@ -66,7 +70,8 @@ Acceptance:
 
 Status: done for this batch. `/quests/{entryKey}` is documented as canonical,
 `/quests?quest={entryKey}` remains backwards-compatible, and Java/Vitest tests
-cover the route shapes and query preservation.
+cover the route shapes, nested Quest shell forwarding, choice query state, and
+query preservation.
 
 ### ROUTE-002: Add Backend/Frontend Route Contract Matrix
 

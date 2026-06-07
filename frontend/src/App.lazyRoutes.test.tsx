@@ -102,6 +102,7 @@ describe("App lazy route bundle isolation", () => {
         ["/codex?entry=District_MarketSquare", "route-codex"],
         ["/quests?quest=Quest_A", "route-quests"],
         ["/quests/Quest_A?mode=lore", "route-quests"],
+        ["/quests/Quest_A/Branch_A/step-1?mode=strategy", "route-quests"],
         ["/summary", "route-summary"],
         ["/mods", "route-mods"],
         ["/admin/import?admin=1", "route-admin-import"],
