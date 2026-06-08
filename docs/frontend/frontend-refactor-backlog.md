@@ -43,7 +43,7 @@ The frontend remains healthy. The main risk is not broken architecture; it is co
 | Ticket | Status | Recommendation |
 | --- | --- | --- |
 | FE-ARCH-001 Route hydration regression matrix | `safe now` | Keep route/component ownership covered by tests. Added a route contract guard for copyable route params and data-backed route owners. |
-| FE-ARCH-002 Split Quest Explorer CSS | `defer` | Do only with screenshot/visual guardrails and active Quest visual work. Avoid style-only churn. |
+| FE-ARCH-002 Split Quest Explorer CSS | `defer` | Added a lightweight Quest visual-structure guardrail test. Do CSS splitting only with screenshot/browser guardrails and active Quest visual work. Avoid style-only churn. |
 | FE-ARCH-003 Split Quest Explorer fixtures by scenario | `defer` | Do when adding or changing adjacent Quest tests; current large fixtures are valuable regression harnesses. |
 | FE-ARCH-004 Extract Codex URL/search helpers | `defer` | Do only when Codex grows again; current tests cover deep links and reset behavior. |
 | FE-ARCH-005 Keep Game Summary unknown-data typing isolated | `safe now` | Remove unnecessary `any` where typed store/view-model data already exists; keep parser escape hatches local to unknown exporter JSON. |
