@@ -1,6 +1,7 @@
 package ewshop.app.config;
 
 import ewshop.app.seo.storage.SeoOutputLocator;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,7 @@ public class WebConfig {
         return new WebMvcConfigurer() {
 
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
                 var registration = registry.addMapping("/api/**")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("Content-Type", "X-Admin-Token");
@@ -48,7 +49,7 @@ public class WebConfig {
             }
 
             @Override
-            public void addResourceHandlers(ResourceHandlerRegistry registry) {
+            public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
                 String encyclopediaOutputLocation = seoOutputLocator.getOutputRoot().resolve("encyclopedia").toUri().toString();
                 if (!encyclopediaOutputLocation.endsWith("/")) {
                     encyclopediaOutputLocation = encyclopediaOutputLocation + "/";
