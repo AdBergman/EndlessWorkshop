@@ -47,4 +47,6 @@ For frontend changes, run from `frontend/`:
 - `npx tsc --noEmit --project tsconfig.json`
 - `npm run build`
 
+Frontend ESLint is currently an advisory baseline. Run `npm run lint` for frontend review work and evaluate warnings pragmatically before changing code.
+
 For backend/API contract changes, run the relevant Maven tests.
