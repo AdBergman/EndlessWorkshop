@@ -9,7 +9,6 @@ import {
     type CitySortKey,
     type SortDir,
     buildCityBreakdownVM,
-    defaultEmpireFilterIndex,
     filterCitiesByEmpire,
     groupCitiesByEmpire,
     pickStableSelectedCityId,
@@ -38,43 +37,16 @@ export default function CityBreakdownView() {
     const [sortDir, setSortDir] = useState<SortDir>("desc");
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
-    if (state.status !== "ok") {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">City Breakdown</h3>
-                <p className="gs-muted">Load an end-game export to view cities.</p>
-            </div>
-        );
-    }
-
-    const allStats = state.allStats as AllStats | null;
-    const cityBreakdown = state.cityBreakdown;
-
-    if (!allStats) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">City Breakdown</h3>
-                <p className="gs-muted">Missing required section: allStats</p>
-            </div>
-        );
-    }
-
-    if (!cityBreakdown) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">City Breakdown</h3>
-                <p className="gs-muted">No cityBreakdown section found in this report.</p>
-            </div>
-        );
-    }
+    const allStats = state.status === "ok" ? state.allStats as AllStats | null : null;
+    const cityBreakdown = state.status === "ok" ? state.cityBreakdown : null;
 
     // ✅ camelCase contract (new export)
-    const empires = Array.isArray((allStats as any).empires) ? (allStats as any).empires : [];
+    const empires = Array.isArray((allStats as any)?.empires) ? (allStats as any).empires : [];
     const empireCount =
-        typeof (allStats as any).empireCount === "number" ? (allStats as any).empireCount : empires.length;
+        typeof (allStats as any)?.empireCount === "number" ? (allStats as any).empireCount : empires.length;
 
     const empireMeta: EmpireMeta[] = useMemo(() => {
-        return buildEmpireMeta(empireCount, allStats as any);
+        return buildEmpireMeta(empireCount, allStats);
     }, [empireCount, allStats]);
 
     const vm = useMemo(() => {
@@ -112,6 +84,33 @@ export default function CityBreakdownView() {
 
     const hasCities = vm.cities.length > 0;
     const hasFilteredCities = sortedCities.length > 0;
+
+    if (state.status !== "ok") {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">City Breakdown</h3>
+                <p className="gs-muted">Load an end-game export to view cities.</p>
+            </div>
+        );
+    }
+
+    if (!allStats) {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">City Breakdown</h3>
+                <p className="gs-muted">Missing required section: allStats</p>
+            </div>
+        );
+    }
+
+    if (!cityBreakdown) {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">City Breakdown</h3>
+                <p className="gs-muted">No cityBreakdown section found in this report.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="gs-panel">

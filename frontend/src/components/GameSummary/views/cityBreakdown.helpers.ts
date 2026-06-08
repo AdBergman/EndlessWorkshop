@@ -151,9 +151,9 @@ function resolveEmpireLabel(empireMeta: EmpireMeta[], idx: number): { label: str
 
 function computeTags(raw: RawCity): CityTag[] {
     const tags: CityTag[] = [];
-    if (!!raw?.isCapital) tags.push("Capital");
-    if (!!raw?.isBesieged) tags.push("Besieged");
-    if (!!raw?.isMutinous) tags.push("Mutiny");
+    if (raw?.isCapital) tags.push("Capital");
+    if (raw?.isBesieged) tags.push("Besieged");
+    if (raw?.isMutinous) tags.push("Mutiny");
     return tags;
 }
 

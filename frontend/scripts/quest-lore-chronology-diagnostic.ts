@@ -15,7 +15,6 @@ import {
 import { normalizeQuestExplorer } from "@/features/quests/questExplorerNormalizer";
 import {
     findDetailProgression,
-    progressionContextKey,
     selectionForChoice,
     type LoreChoicePathsByContext,
     type QuestDetailProgression,

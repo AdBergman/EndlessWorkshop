@@ -103,7 +103,6 @@ export function groupQuestListItems(entries: readonly CodexEntry[], options: Gro
                     return (leftContext?.sortKey ?? left.entryKey).localeCompare(rightContext?.sortKey ?? right.entryKey);
                 }),
             }));
-        const nodes = variants.flatMap((variant) => variant.nodes);
         const isExpanded = Boolean(options.expandedGroupKeys?.has(groupKey));
 
         return [

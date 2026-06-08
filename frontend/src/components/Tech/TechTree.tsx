@@ -1,5 +1,5 @@
 // TechTree.tsx
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import TechNode from "./TechNode";
 import { Tech } from "@/types/dataTypes";
 import EraNavigationButton from "./EraNavigationButton";
@@ -78,8 +78,9 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         );
     };
 
-    const isLocked = (techBase: Tech) =>
-        selectedTechObjects.some((t) => t.excludes === techBase.techKey) || techBase.era > maxUnlockedEra;
+    const isLocked = useCallback((techBase: Tech) =>
+        selectedTechObjects.some((t) => t.excludes === techBase.techKey) || techBase.era > maxUnlockedEra,
+    [maxUnlockedEra, selectedTechObjects]);
 
     const selectableTechs = useMemo(() => {
         const visibleThisEra: Tech[] = [];
@@ -92,7 +93,7 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
         }
 
         return visibleThisEra;
-    }, [currentFactionTechs, admin, era, maxUnlockedEra, selectedTechObjects]);
+    }, [currentFactionTechs, admin, era, isLocked]);
 
     const isButtonHidden = (dir: "previous" | "next") =>
         (dir === "previous" && era === MIN_ERA) || (dir === "next" && era === MAX_ERA);

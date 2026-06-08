@@ -8,7 +8,7 @@ import { selectDistrictsByKey, useDistrictStore } from "@/stores/districtStore";
 import { selectImprovementsByKey, useImprovementStore } from "@/stores/improvementStore";
 import { selectUnitsByKey, useUnitStore } from "@/stores/unitStore";
 import { selectSelectedFaction, useFactionSelectionStore } from "@/stores/factionSelectionStore";
-import { getFallbackUnlockDescription, resolveConstructibleUnlock } from "@/utils/unlocks";
+import { formatTechUnlocks } from "@/components/Tech/views/spreadsheetUnlockFormatter";
 
 export type SheetView = "techs" | "improvements" | "districts" | "units";
 
@@ -27,56 +27,6 @@ interface SpreadsheetToolbarProps {
 
 const exportDescriptionLines = (lines: string[] | undefined) =>
     (lines ?? []).map(stripDescriptionTokens).join("; ");
-
-export function formatTechUnlocks(
-    tech: Tech,
-    deps: {
-        districtsByKey: Record<string, District>;
-        improvementsByKey: Record<string, Improvement>;
-        unitsByKey: Record<string, Unit>;
-    }
-): string {
-    const { districtsByKey, improvementsByKey, unitsByKey } = deps;
-
-    return (tech.unlocks ?? [])
-        .map((u) => ({
-            type: (u.unlockType ?? "").trim(),
-            key: (u.unlockKey ?? "").trim(),
-            unlockCategory: u.unlockCategory,
-            constructibleKind: u.constructibleKind,
-            fallbackDescriptionLines: u.fallbackDescriptionLines,
-        }))
-        .filter((u) => !!u.key)
-        .map((u) => {
-            const resolved = resolveConstructibleUnlock(
-                {
-                    unlockType: u.type,
-                    unlockKey: u.key,
-                    unlockCategory: u.unlockCategory,
-                    constructibleKind: u.constructibleKind,
-                    fallbackDescriptionLines: u.fallbackDescriptionLines,
-                },
-                { districtsByKey, improvementsByKey, unitsByKey }
-            );
-            if (resolved) return `${resolved.kind}: ${resolved.displayName}`;
-
-            const fallback = getFallbackUnlockDescription({
-                unlockType: u.type,
-                unlockKey: u.key,
-                unlockCategory: u.unlockCategory,
-                constructibleKind: u.constructibleKind,
-                fallbackDescriptionLines: u.fallbackDescriptionLines,
-            });
-            if (!fallback) return null;
-
-            const description = fallback.descriptionLines.map(stripDescriptionTokens).join("; ");
-            return description
-                ? `${fallback.kind}: ${fallback.key} - ${description}`
-                : `${fallback.kind}: ${fallback.key}`;
-        })
-        .filter((s): s is string => !!s)
-        .join("; ");
-}
 
 const SpreadsheetToolbar: React.FC<SpreadsheetToolbarProps> = ({
                                                                    selectedTechs,

@@ -13,22 +13,26 @@ vi.mock("./components/Seo/PageSeo", () => ({
 vi.mock("./components/Tech/TechContainer", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockTechRoute() {
+        const location = useLocation();
+        return <main data-testid="route-tech">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-tech">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockTechRoute,
     };
 });
 
 vi.mock("./components/GameSummary/GameSummaryPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockSummaryRoute() {
+        const location = useLocation();
+        return <main data-testid="route-summary">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-summary">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockSummaryRoute,
     };
 });
 
@@ -46,44 +50,52 @@ vi.mock("@/components/Units/UnitEvolutionExplorer", async () => {
 vi.mock("@/pages/CodexPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockCodexRoute() {
+        const location = useLocation();
+        return <main data-testid="route-codex">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-codex">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockCodexRoute,
     };
 });
 
 vi.mock("@/pages/ModsPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockModsRoute() {
+        const location = useLocation();
+        return <main data-testid="route-mods">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-mods">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockModsRoute,
     };
 });
 
 vi.mock("@/pages/QuestExplorerPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockQuestRoute() {
+        const location = useLocation();
+        return <main data-testid="route-quests">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-quests">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockQuestRoute,
     };
 });
 
 vi.mock("@/components/AdminImport/AdminImportPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
+    function MockAdminImportRoute() {
+        const location = useLocation();
+        return <main data-testid="route-admin-import">{`${location.pathname}${location.search}`}</main>;
+    }
+
     return {
-        default: () => {
-            const location = useLocation();
-            return <main data-testid="route-admin-import">{`${location.pathname}${location.search}`}</main>;
-        },
+        default: MockAdminImportRoute,
     };
 });
 

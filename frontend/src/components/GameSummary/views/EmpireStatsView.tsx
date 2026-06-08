@@ -92,26 +92,17 @@ export default function EmpireStatsView() {
     const [mode, setMode] = useState<Mode>("compare");
     const didInitRef = useRef(false);
 
-    if (state.status !== "ok") {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Empire Stats</h3>
-                <p className="gs-muted">No loaded report.</p>
-            </div>
-        );
-    }
-
-    const { report } = state;
-
-    const allStats: AllStats = report.allStats;
-    const empires: AllStatsEmpire[] = allStats.empires ?? [];
+    const allStats: AllStats | null = state.status === "ok" ? state.report.allStats : null;
+    const empires: AllStatsEmpire[] = useMemo(() => allStats?.empires ?? [], [allStats]);
     const empireCount = empires.length;
 
     useEffect(() => {
+        if (state.status !== "ok") return;
         ensureDefaults(empireCount);
-    }, [empireCount, ensureDefaults]);
+    }, [empireCount, ensureDefaults, state.status]);
 
     useEffect(() => {
+        if (state.status !== "ok") return;
         if (didInitRef.current) return;
         if (empireCount <= 0) return;
 
@@ -119,7 +110,7 @@ export default function EmpireStatsView() {
         setMode("compare");
         setMetric("Score" as EmpireMetricKey);
         selectAll(empireCount);
-    }, [empireCount, selectAll, setMetric]);
+    }, [empireCount, selectAll, setMetric, state.status]);
 
     const legendLabelByIndex: LegendLabelByIndex = useMemo(() => {
         const map = new Map<number, string>();
@@ -144,6 +135,15 @@ export default function EmpireStatsView() {
 
     const rightHeaderMetricText = mode === "economy" ? "Player economy" : `Metric: ${metricLabel(selectedMetric)}`;
     const showCompareControls = mode === "compare";
+
+    if (state.status !== "ok") {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Empire Stats</h3>
+                <p className="gs-muted">No loaded report.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="gs-panel gs-esPanel" style={{ ["--gs-es-left-pad" as any]: `${Y_AXIS_WIDTH}px` }}>

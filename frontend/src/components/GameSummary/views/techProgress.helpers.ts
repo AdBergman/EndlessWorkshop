@@ -27,10 +27,10 @@ function factionFromAllStatsEmpire(
     };
 }
 
-export function buildEmpireMeta(empireCount: number, allStats: AllStats): EmpireMeta[] {
+export function buildEmpireMeta(empireCount: number, allStats: AllStats | null | undefined): EmpireMeta[] {
     const byIndex = new Map<number, { factionKey: string | null; factionLabel: string }>();
 
-    for (const e of allStats.empires) {
+    for (const e of allStats?.empires ?? []) {
         byIndex.set(e.empireIndex, factionFromAllStatsEmpire(e, e.empireIndex));
     }
 

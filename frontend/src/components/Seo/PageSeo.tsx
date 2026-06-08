@@ -5,6 +5,7 @@ import {
     SITE_NAME,
     SITE_URL,
 } from "@/components/Seo/routeSeo";
+import { stringifyJsonLd } from "@/components/Seo/pageSeoJson";
 
 type PageSeoProps = {
     title: string;
@@ -23,10 +24,6 @@ function buildCanonicalUrl(path: string): string {
     }
 
     return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-}
-
-export function stringifyJsonLd(node: Record<string, unknown>): string {
-    return JSON.stringify(node).replace(/</g, "\\u003c");
 }
 
 export default function PageSeo({

@@ -53,44 +53,35 @@ function buildEmpireMetaFromAllStats(allStats: AllStats): EmpireMeta[] {
 export default function GameOverviewView() {
     const state = useEndGameReportStore((s) => s.state);
 
-    if (state.status !== "ok") {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Overview</h3>
-                <p className="gs-muted">No loaded report.</p>
-            </div>
-        );
-    }
+    const report = state.status === "ok" ? state.report : null;
 
-    const { report } = state;
-
-    if (report.meta.version !== "1.0") {
+    if (report && report.meta.version !== "1.0") {
         console.error(
             `[schema] Expected report.meta.version === "1.0" but got: ${report.meta.version}`
         );
     }
 
-    const allStats = report.allStats as AllStats;
+    const allStats = report?.allStats as AllStats | undefined;
 
-    const gameId = report.meta.gameId;
-    const generatedAtUtc = report.meta.generatedAtUtc;
+    const gameId = report?.meta.gameId ?? "";
+    const generatedAtUtc = report?.meta.generatedAtUtc ?? "";
 
-    const maxTurn = allStats.maxTurn;
-    const empires = allStats.empires ?? [];
+    const maxTurn = allStats?.maxTurn ?? 0;
+    const empires = useMemo(() => allStats?.empires ?? [], [allStats]);
     const empireCount =
-        typeof allStats.empireCount === "number" ? allStats.empireCount : empires.length;
+        typeof allStats?.empireCount === "number" ? allStats.empireCount : empires.length;
 
-    const topScoreEmpire = allStats.topScoreEmpire;
-    const topScore = allStats.topScore;
+    const topScoreEmpire = allStats?.topScoreEmpire ?? 0;
+    const topScore = allStats?.topScore ?? 0;
 
-    const difficulty = allStats.game?.difficulty ?? "Unknown";
-    const mapSize = allStats.game?.mapSize ?? "Unknown";
-    const gameSpeed = allStats.game?.gameSpeed ?? "Unknown";
+    const difficulty = allStats?.game?.difficulty ?? "Unknown";
+    const mapSize = allStats?.game?.mapSize ?? "Unknown";
+    const gameSpeed = allStats?.game?.gameSpeed ?? "Unknown";
 
-    const victory = victoryLabel(allStats.victory?.actualVictoryCondition);
+    const victory = victoryLabel(allStats?.victory?.actualVictoryCondition);
     const generatedHuman = formatLocalDateTime(generatedAtUtc);
 
-    const empireMeta = useMemo(() => buildEmpireMetaFromAllStats(allStats), [allStats]);
+    const empireMeta = useMemo(() => allStats ? buildEmpireMetaFromAllStats(allStats) : [], [allStats]);
 
     const finalByIdx = useMemo(() => {
         const map = new Map<number, FinalSnapshot>();
@@ -106,6 +97,15 @@ export default function GameOverviewView() {
     }, [topScoreEmpire, empireMeta]);
 
     const topScoreColor = empireColor(topScoreEmpire);
+
+    if (state.status !== "ok") {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Overview</h3>
+                <p className="gs-muted">No loaded report.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="gs-panel">

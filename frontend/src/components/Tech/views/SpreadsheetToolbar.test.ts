@@ -1,4 +1,4 @@
-import { formatTechUnlocks } from "@/components/Tech/views/SpreadsheetToolbar";
+import { formatTechUnlocks } from "@/components/Tech/views/spreadsheetUnlockFormatter";
 import type { District, Improvement, Tech, Unit } from "@/types/dataTypes";
 
 const baseTech: Tech = {

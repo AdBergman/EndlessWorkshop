@@ -99,7 +99,7 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         };
 
         void loadSharedBuild();
-    }, [sharedBuildLoaded, navigate]);
+    }, [navigate, setSelectedFaction, setSelectedTechs, sharedBuildLoaded]);
 
     const createSavedTechBuild = async (
         name: string,

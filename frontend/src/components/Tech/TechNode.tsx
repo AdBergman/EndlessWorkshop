@@ -8,7 +8,6 @@ interface TechNodeProps {
 
     onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
     onHoverChange?: (hovered: boolean) => void;
-    offsetPx?: number;
     orderNumber?: number;
 
     adminMode?: boolean;
@@ -23,7 +22,6 @@ const TechNode: React.FC<TechNodeProps> = ({
                                                locked = false,
                                                onClick,
                                                onHoverChange,
-                                               offsetPx,
                                                orderNumber,
                                                adminMode = false,
                                                adminActive = false,

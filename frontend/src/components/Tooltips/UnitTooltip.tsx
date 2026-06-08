@@ -132,7 +132,6 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
                                             // and keep it instant (no fetch)
                                             // This will open a nested tooltip like in TechTooltip.
                                             // If you don't want nested tooltips here, tell me and I’ll remove it.
-                                            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                                             createHoveredUnit(resolved, e);
                                         }}
                                         title={unitKey}

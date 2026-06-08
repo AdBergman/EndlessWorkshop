@@ -142,13 +142,14 @@ export function deriveUnit(unit: Unit): DerivedUnit {
 
     const majorEnumFaction = isMinor ? null : mapMajorFactionStringToEnum(unit.faction);
 
-    let imageUrl: string | null = null;
-    try {
+    const imageUrl = (() => {
+        try {
         const url = getUnitImageUrl(unit);
-        imageUrl = typeof url === "string" && url.trim() ? url.trim() : null;
-    } catch {
-        imageUrl = null;
-    }
+            return typeof url === "string" && url.trim() ? url.trim() : null;
+        } catch {
+            return null;
+        }
+    })();
 
     const stats: UnitStats = {
         health: findStat(lines, "Health"),

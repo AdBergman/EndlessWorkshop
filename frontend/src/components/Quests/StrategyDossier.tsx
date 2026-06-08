@@ -27,6 +27,7 @@ import {
 } from "@/features/quests/questRequirementDisplay";
 import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
 import { InlineRewardMetaList } from "@/components/Quests/QuestRewardMeta";
+import { shortenMechanicalStrategyRequirementLabel } from "@/components/Quests/strategyDossierLabels";
 import type {
     QuestProgressionStep,
 } from "@/types/questTypes";
@@ -1086,11 +1087,4 @@ export function InlineMetaList({
             </ul>
         </div>
     );
-}
-
-export function shortenMechanicalStrategyRequirementLabel(displayText: string): string {
-    return displayText
-        .trim()
-        .replace(/^Build constructible:\s*/i, "Build: ")
-        .replace(/^Use faction action:\s*/i, "Use action: ");
 }

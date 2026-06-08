@@ -1,10 +1,8 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-    shortenMechanicalStrategyRequirementLabel,
-    StrategyDossier,
-} from "@/components/Quests/StrategyDossier";
+import { StrategyDossier } from "@/components/Quests/StrategyDossier";
+import { shortenMechanicalStrategyRequirementLabel } from "@/components/Quests/strategyDossierLabels";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry } from "@/types/dataTypes";

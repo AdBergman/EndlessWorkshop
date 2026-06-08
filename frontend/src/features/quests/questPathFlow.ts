@@ -1901,7 +1901,6 @@ export function buildLoreChronicleStream({
     const visitedContextKeys = new Set<string>();
     let currentProgression: QuestDetailProgression | null = selectedProgression;
     let currentContextKey: string | null = selectedContextKey;
-    let currentEntryKey: string | null = railEntryKeyForProgression(selectedProgression, entriesByKey);
 
     while (currentProgression && currentContextKey && segments.length < segmentCap) {
         if (visitedContextKeys.has(currentContextKey)) break;
@@ -1938,9 +1937,8 @@ export function buildLoreChronicleStream({
 
         currentProgression = reachedProgression;
         currentContextKey = reachedContextKey;
-        currentEntryKey = reachedEntryKey;
 
-        if (!currentProgression || !currentContextKey || !currentEntryKey) break;
+        if (!currentProgression || !currentContextKey) break;
     }
 
     return { segments, selectedContextKey };

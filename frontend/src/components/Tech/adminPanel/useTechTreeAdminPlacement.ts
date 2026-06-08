@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { Tech } from "@/types/dataTypes";
 import { apiClient, TechAdminDto } from "@/api/apiClient";
@@ -190,7 +190,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
         setRepositionEnabled((v) => !v);
     };
 
-    const pxToPctDelta = (dxPx: number, dyPx: number) => {
+    const pxToPctDelta = useCallback((dxPx: number, dyPx: number) => {
         const wrapper = wrapperRef.current;
         const rect = wrapper?.getBoundingClientRect();
         if (!rect || rect.width === 0 || rect.height === 0) return { dxPct: 0, dyPct: 0 };
@@ -198,7 +198,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
             dxPct: (dxPx / rect.width) * 100,
             dyPct: (dyPx / rect.height) * 100,
         };
-    };
+    }, [wrapperRef]);
 
     const centerCoordsFromClickPct = (clickXPct: number, clickYPct: number) => {
         const half = TECHNODE_BOX_SIZE_PCT / 2;
@@ -289,7 +289,7 @@ export function useTechTreeAdminPlacement({ isAdminMode, wrapperRef, allTechs, r
 
         window.addEventListener("keydown", onKeyDown, { passive: false });
         return () => window.removeEventListener("keydown", onKeyDown as any);
-    }, [isAdminMode, repositionEnabled, stepMode, stepPct, stepPx, techByKey, wrapperRef]);
+    }, [isAdminMode, pxToPctDelta, repositionEnabled, stepMode, stepPct, stepPx, techByKey, wrapperRef]);
 
     const stagedRows: AdminStagedRow[] = useMemo(() => {
         const rows: AdminStagedRow[] = [];

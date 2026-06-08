@@ -2105,9 +2105,9 @@ export const projectedLocalContinuationWithoutRevealPayload: QuestExplorerRespon
         loreView: {
             sections: entry.loreView.sections.map((section) => {
                 const {
-                    revealedByBranchKeys,
-                    revealedByChoiceKeys,
-                    revealedByBranchPathAlternatives,
+                    revealedByBranchKeys: _revealedByBranchKeys,
+                    revealedByChoiceKeys: _revealedByChoiceKeys,
+                    revealedByBranchPathAlternatives: _revealedByBranchPathAlternatives,
                     ...rest
                 } = section;
                 return rest;
@@ -2116,9 +2116,9 @@ export const projectedLocalContinuationWithoutRevealPayload: QuestExplorerRespon
         strategyView: {
             objectives: entry.strategyView.objectives.map((objective) => {
                 const {
-                    revealedByBranchKeys,
-                    revealedByChoiceKeys,
-                    revealedByBranchPathAlternatives,
+                    revealedByBranchKeys: _revealedByBranchKeys,
+                    revealedByChoiceKeys: _revealedByChoiceKeys,
+                    revealedByBranchPathAlternatives: _revealedByBranchPathAlternatives,
                     ...rest
                 } = objective;
                 return rest;
@@ -2126,9 +2126,9 @@ export const projectedLocalContinuationWithoutRevealPayload: QuestExplorerRespon
         },
         branches: entry.branches.map((branch) => {
             const {
-                revealedByBranchKeys,
-                revealedByChoiceKeys,
-                revealedByBranchPathAlternatives,
+                revealedByBranchKeys: _revealedByBranchKeys,
+                revealedByChoiceKeys: _revealedByChoiceKeys,
+                revealedByBranchPathAlternatives: _revealedByBranchPathAlternatives,
                 ...rest
             } = branch;
             return rest;

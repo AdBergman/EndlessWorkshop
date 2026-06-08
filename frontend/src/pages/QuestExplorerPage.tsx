@@ -56,7 +56,6 @@ import {
     selectedChoiceTargetKeys,
     selectionForChoice,
     stepIndexForKeys,
-    uniqueStrings,
     type ChoiceVisibilityDiagnostics,
     type NormalHiddenChoiceReason,
     type QuestDetailProgression,
@@ -1047,7 +1046,7 @@ export default function QuestExplorerPage() {
     const debugQuestProgression = isQuestProgressionDebugEnabled(searchParams);
     const strategyChoiceTokenKey = searchParams.getAll(QUEST_CHOICE_QUERY_PARAM).join("\u0001");
     const initialStrategyChoicePath = useMemo(
-        () => decodeQuestChoicePath(searchParams.getAll(QUEST_CHOICE_QUERY_PARAM)),
+        () => decodeQuestChoicePath(strategyChoiceTokenKey ? strategyChoiceTokenKey.split("\u0001") : []),
         [strategyChoiceTokenKey]
     );
     const visibleEntries = useMemo(

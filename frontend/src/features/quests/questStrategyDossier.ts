@@ -18,7 +18,6 @@ import {
     requirementDisplayTexts,
     requirementDisplaysFromRequirements,
     requirementDisplaysFromText,
-    sameRequirementDisplays,
     uniqueRequirementDisplays,
     type QuestRequirementDisplay,
 } from "@/features/quests/questRequirementDisplay";

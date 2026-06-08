@@ -48,11 +48,8 @@ export default function TurnTooltip({
                                         label,
                                         legendLabelByIndex,
                                         metricOrder,
-                                    }: TurnTooltipProps) {
-    if (!active) return null;
-
-    const rows = Array.isArray(payload) ? payload : [];
-    if (rows.length === 0) return null;
+}: TurnTooltipProps) {
+    const rows = useMemo(() => Array.isArray(payload) ? payload : [], [payload]);
 
     const ordered = useMemo(() => {
         // If explicit order provided (economy mode), enforce it.
@@ -101,6 +98,9 @@ export default function TurnTooltip({
             })
             .map((x) => x.p);
     }, [rows, metricOrder]);
+
+    if (!active) return null;
+    if (rows.length === 0) return null;
 
     return (
         <div className="gs-tooltip" role="tooltip">

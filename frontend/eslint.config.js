@@ -29,7 +29,11 @@ export default tseslint.config(
       'react-refresh': reactRefresh,
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      }],
       '@typescript-eslint/no-explicit-any': 'off',
       'no-extra-boolean-cast': 'warn',
       'no-useless-assignment': 'warn',
@@ -53,6 +57,16 @@ export default tseslint.config(
         ...globals.es2022,
         ...globals.node,
       },
+    },
+  },
+  {
+    files: [
+      'src/**/testUtils/**/*.{ts,tsx}',
+      'src/**/*.test.{ts,tsx}',
+      'src/lib/**/*.tsx',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
 );

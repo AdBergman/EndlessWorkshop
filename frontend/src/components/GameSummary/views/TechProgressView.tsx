@@ -1,6 +1,6 @@
 // TechProgressView.tsx
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "../GameSummary.css";
@@ -54,33 +54,14 @@ export default function TechProgressView() {
     const [filterWidthPx, setFilterWidthPx] = useState<number>(180);
     const filterSizerRef = useRef<HTMLSpanElement | null>(null);
 
-    if (state.status !== "ok") {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Tech Progress</h3>
-                <p className="gs-muted">No loaded report.</p>
-            </div>
-        );
-    }
-
-    const { report } = state;
-    const techOrder = report.techOrder;
-
-    if (!techOrder) {
-        return (
-            <div className="gs-panel">
-                <h3 className="gs-h3">Tech Progress</h3>
-                <p className="gs-muted">No techOrder section found in this report.</p>
-            </div>
-        );
-    }
-
-    const empireCount = techOrder.empireCount;
-    const entries = techOrder.entries;
+    const report = state.status === "ok" ? state.report : null;
+    const techOrder = report?.techOrder ?? null;
+    const empireCount = techOrder?.empireCount ?? 0;
+    const entries = useMemo(() => techOrder?.entries ?? [], [techOrder]);
 
     const empireMeta: EmpireMeta[] = useMemo(() => {
-        return buildEmpireMeta(empireCount, report.allStats);
-    }, [empireCount, report.allStats]);
+        return buildEmpireMeta(empireCount, report?.allStats);
+    }, [empireCount, report?.allStats]);
 
     const empireLabelByIndex = useMemo(() => {
         const m = new Map<number, EmpireMeta>();
@@ -105,10 +86,10 @@ export default function TechProgressView() {
         return turns.sort((a, b) => a - b);
     }, [mode, groupedGlobal, groupedByEmpire, selectedEmpire]);
 
-    const getEntriesForTurn = (turn: number): TechOrderEntry[] => {
+    const getEntriesForTurn = useCallback((turn: number): TechOrderEntry[] => {
         if (mode === "global") return groupedGlobal.get(turn) ?? [];
         return groupedByEmpire.get(selectedEmpire)?.get(turn) ?? [];
-    };
+    }, [groupedByEmpire, groupedGlobal, mode, selectedEmpire]);
 
     const filterTokens = useMemo(() => tokenizeFilter(filterText), [filterText]);
 
@@ -124,7 +105,7 @@ export default function TechProgressView() {
         }
 
         return out;
-    }, [turnsSorted, filterTokens, mode, selectedEmpire, groupedGlobal, groupedByEmpire, techsByKey]);
+    }, [turnsSorted, filterTokens, getEntriesForTurn, techsByKey]);
 
     const matchCount = useMemo(() => {
         if (filterTokens.length === 0) return 0;
@@ -198,6 +179,24 @@ export default function TechProgressView() {
 
         return filteredTurns.length === 0;
     }, [mode, selectedEmpireIsValid, filteredTurns]);
+
+    if (state.status !== "ok") {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Tech Progress</h3>
+                <p className="gs-muted">No loaded report.</p>
+            </div>
+        );
+    }
+
+    if (!techOrder) {
+        return (
+            <div className="gs-panel">
+                <h3 className="gs-h3">Tech Progress</h3>
+                <p className="gs-muted">No techOrder section found in this report.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="gs-panel">
