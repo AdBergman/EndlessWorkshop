@@ -68,7 +68,19 @@ describe("PageSeo", () => {
             "EL2 Tech Tree Planner | Endless Workshop"
         );
         expect(document.head.querySelector('link[rel="icon"]')).toHaveAttribute("href", "/favicon.svg");
+        expect(document.head.querySelector('link[rel="icon"][sizes="32x32"]')).toHaveAttribute(
+            "href",
+            "/favicon-32x32.png"
+        );
+        expect(document.head.querySelector('link[rel="icon"][sizes="16x16"]')).toHaveAttribute(
+            "href",
+            "/favicon-16x16.png"
+        );
         expect(document.head.querySelector('link[rel="shortcut icon"]')).toHaveAttribute("href", "/favicon.ico");
+        expect(document.head.querySelector('link[rel="apple-touch-icon"]')).toHaveAttribute(
+            "href",
+            "/apple-touch-icon.png"
+        );
         expect(document.head.querySelector('link[rel="manifest"]')).toHaveAttribute("href", "/manifest.json");
     });
 
