@@ -3,11 +3,11 @@ import "../CityBreakdown.css";
 
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import { buildEmpireMeta, type EmpireMeta } from "./techProgress.helpers";
-import type { AllStats } from "@/types/endGameReport";
 
 import {
     type CitySortKey,
     type SortDir,
+    type CityVM,
     buildCityBreakdownVM,
     filterCitiesByEmpire,
     groupCitiesByEmpire,
@@ -21,11 +21,9 @@ import CityCard from "../components/city/CityCard";
 
 type GroupMode = "grouped" | "flat";
 
-function cityRenderKey(c: any, i: number): string {
+function cityRenderKey(city: CityVM, index: number): string {
     // Prefer stable unique ids; add empire index and index as last-resort anti-collision
-    const id = typeof c?.id === "string" ? c.id : String(c?.id ?? "");
-    const e = typeof c?.empireIndex === "number" ? c.empireIndex : typeof c?.empireIdx === "number" ? c.empireIdx : "e?";
-    return `city:${e}:${id || "noid"}:${i}`;
+    return `city:${city.empireIndex}:${city.id || "noid"}:${index}`;
 }
 
 export default function CityBreakdownView() {
@@ -37,13 +35,13 @@ export default function CityBreakdownView() {
     const [sortDir, setSortDir] = useState<SortDir>("desc");
     const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
 
-    const allStats = state.status === "ok" ? state.allStats as AllStats | null : null;
+    const allStats = state.status === "ok" ? state.allStats : null;
     const cityBreakdown = state.status === "ok" ? state.cityBreakdown : null;
 
-    // ✅ camelCase contract (new export)
-    const empires = Array.isArray((allStats as any)?.empires) ? (allStats as any).empires : [];
+    // camelCase contract from the current exporter.
+    const empires = Array.isArray(allStats?.empires) ? allStats.empires : [];
     const empireCount =
-        typeof (allStats as any)?.empireCount === "number" ? (allStats as any).empireCount : empires.length;
+        typeof allStats?.empireCount === "number" ? allStats.empireCount : empires.length;
 
     const empireMeta: EmpireMeta[] = useMemo(() => {
         return buildEmpireMeta(empireCount, allStats);

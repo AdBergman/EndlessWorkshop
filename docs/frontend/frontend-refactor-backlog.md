@@ -34,6 +34,22 @@ Largest current frontend files reviewed:
 
 Primary finding: Quest Explorer now follows the intended boundaries reasonably well. The page is still large, but it has shifted toward orchestration while pure derivation, reader scope derivation, choice presentation grouping, Strategy rendering, Lore rendering, debug rendering, display wording, and store normalization have moved out. The remaining Quest Explorer work is planned boundary work, not emergency cleanup.
 
+## Light Frontend Review Refresh: 2026-06-08
+
+Status: active review notes after routing, SEO, favicon, and ESLint hardening.
+
+The frontend remains healthy. The main risk is not broken architecture; it is concentrated product complexity in a few route/state-heavy surfaces. Keep future work bounded and test-first around copied URLs, route hydration, and Quest/Codex behavior.
+
+| Ticket | Status | Recommendation |
+| --- | --- | --- |
+| FE-ARCH-001 Route hydration regression matrix | `safe now` | Keep route/component ownership covered by tests. Added a route contract guard for copyable route params and data-backed route owners. |
+| FE-ARCH-002 Split Quest Explorer CSS | `defer` | Do only with screenshot/visual guardrails and active Quest visual work. Avoid style-only churn. |
+| FE-ARCH-003 Split Quest Explorer fixtures by scenario | `defer` | Do when adding or changing adjacent Quest tests; current large fixtures are valuable regression harnesses. |
+| FE-ARCH-004 Extract Codex URL/search helpers | `defer` | Do only when Codex grows again; current tests cover deep links and reset behavior. |
+| FE-ARCH-005 Keep Game Summary unknown-data typing isolated | `safe now` | Remove unnecessary `any` where typed store/view-model data already exists; keep parser escape hatches local to unknown exporter JSON. |
+| FE-ARCH-006 Run bundle analysis before chunk splitting | `defer` | The Vite large-chunk warning is not a release blocker. Inspect before changing imports or chunks. |
+| FE-ARCH-007 Keep ESLint advisory, promote slowly | `active` | Hooks/order and clear correctness rules are errors; exhaustive deps stays warning until risky hydration code is reviewed case by case. |
+
 ## Ranking Rules
 
 Status values:

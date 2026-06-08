@@ -7,7 +7,7 @@ import CityBreakdownView from "./views/CityBreakdownView";
 import ReportMetaBar from "./components/ReportMetaBar";
 import { useEndGameReportStore } from "@/stores/endGameReportStore";
 import "./GameSummary.css";
-import {formatLocalDateTime} from "@/components/GameSummary/views/gameOverview.helpers";
+import { formatLocalDateTime } from "@/components/GameSummary/views/gameOverview.helpers";
 
 type TabKey = "overview" | "tech" | "empire" | "cities";
 
@@ -42,7 +42,7 @@ export default function GameSummaryPage() {
     }
 
     if (state.status === "error") {
-        const warningsCount = Array.isArray((state as any).warnings) ? (state as any).warnings.length : 0;
+        const warningsCount = state.warnings.length;
 
         return (
             <div className="gs-page">

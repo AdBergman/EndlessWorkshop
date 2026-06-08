@@ -23,6 +23,19 @@ vi.mock("./components/Tech/TechContainer", async () => {
     };
 });
 
+vi.mock("./components/InfoPage/InfoPage", async () => {
+    const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+
+    function MockInfoRoute() {
+        const location = useLocation();
+        return <main data-testid="route-info">{`${location.pathname}${location.search}`}</main>;
+    }
+
+    return {
+        default: MockInfoRoute,
+    };
+});
+
 vi.mock("./components/GameSummary/GameSummaryPage", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
@@ -109,6 +122,7 @@ function renderRoute(initialEntry: string) {
 
 describe("App lazy route bundle isolation", () => {
     it.each([
+        ["/", "route-tech", "/tech"],
         ["/tech", "route-tech"],
         ["/units?faction=kin&unitKey=Unit_Kin_Root", "route-units"],
         ["/codex?entry=District_MarketSquare", "route-codex"],
@@ -117,10 +131,11 @@ describe("App lazy route bundle isolation", () => {
         ["/quests/Quest_A/Branch_A/step-1?mode=strategy", "route-quests"],
         ["/summary", "route-summary"],
         ["/mods", "route-mods"],
+        ["/info", "route-info"],
         ["/admin/import?admin=1", "route-admin-import"],
-    ])("renders %s through the app route tree", async (initialEntry, testId) => {
+    ])("renders %s through the app route tree", async (initialEntry, testId, expectedEntry = initialEntry) => {
         renderRoute(initialEntry);
 
-        expect(await screen.findByTestId(testId)).toHaveTextContent(initialEntry);
+        expect(await screen.findByTestId(testId)).toHaveTextContent(expectedEntry);
     });
 });
