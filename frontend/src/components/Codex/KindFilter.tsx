@@ -25,6 +25,7 @@ export default function KindFilter({ options, activeKind, onSelect }: Props) {
                         className={`codex-kindFilter__chip ${isActive ? "is-active" : ""}`}
                         onClick={() => onSelect(option.kind)}
                         aria-pressed={isActive}
+                        aria-label={`${option.label} ${option.count}`}
                     >
                         <CodexKindIcon
                             kind={option.kind}

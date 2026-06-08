@@ -25,12 +25,14 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
     const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
     const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry, 2) : "";
     const previewLine = factionTraits || getCodexDescriptionPreviewLine(entry.descriptionLines);
+    const entryLabel = getCodexEntryLabel(entry);
     const secondaryContext = isSummary
         ? ""
         : factionAffinity
             ? `Affinity: ${factionAffinity}`
             : getCodexSecondaryContext(entry);
     const kindLabel = isSummary ? "Overview" : formatCodexKindLabel(entry.exportKind);
+    const accessibilityLabel = [entryLabel, kindLabel, secondaryContext, previewLine].filter(Boolean).join(" ");
     const iconClassName = [
         "codex-kindIcon codex-kindIcon--result",
         isSummary ? "codex-kindIcon--monochrome" : null,
@@ -42,6 +44,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
             className={`codex-resultRow ${isSelected ? "is-selected" : ""}`}
             data-entry-key={entry.entryKey}
             aria-pressed={isSelected}
+            aria-label={accessibilityLabel}
             onClick={() => onSelect(entry)}
         >
             <span className="codex-resultRow__titleLine">
@@ -51,7 +54,7 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
                     className={iconClassName}
                     size={18}
                 />
-                <span className="codex-resultRow__title">{renderCodexLabel(getCodexEntryLabel(entry))}</span>
+                <span className="codex-resultRow__title">{renderCodexLabel(entryLabel)}</span>
             </span>
             <span className="codex-resultRow__meta">
                 <span className="codex-resultRow__kind">{kindLabel}</span>

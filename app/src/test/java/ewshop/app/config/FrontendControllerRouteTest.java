@@ -334,6 +334,15 @@ class FrontendControllerRouteTest {
         mockMvc.perform(get("/favicon.ico"))
                 .andExpect(status().isOk());
 
+        mockMvc.perform(get("/favicon-32x32.png"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/favicon-16x16.png"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/apple-touch-icon.png"))
+                .andExpect(status().isOk());
+
         mockMvc.perform(get("/manifest.json"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("\"Endless Workshop\"")));
