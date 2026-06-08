@@ -1103,6 +1103,180 @@ describe("CodexPage", () => {
         expect(screen.getByText("Unlocks The Consortium’s Bazaar")).toBeInTheDocument();
     });
 
+    it("renders hero codex facts conservatively from current description lines", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Aspect_Archer_0",
+                displayName: "Polemephon",
+                descriptionLines: [
+                    "Faction: Hero",
+                    "Class: Archer",
+                    "Attack: 42",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { heroes: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Aspect_Archer_0"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Polemephon" })).toBeInTheDocument();
+        expect(screen.getByText("Hero dossier")).toBeInTheDocument();
+        expect(screen.getByText("Faction")).toBeInTheDocument();
+        expect(screen.getByText("Hero")).toBeInTheDocument();
+        expect(screen.getByText("Class")).toBeInTheDocument();
+        expect(screen.getByText("Archer")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+        expect(screen.getByText("Attack: 42")).toBeInTheDocument();
+    });
+
+    it("renders councilor effects as structured sections", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "councilors",
+                entryKey: "Councilor_Kin_Governor",
+                displayName: "Sheredyn Envoy",
+                descriptionLines: [
+                    "Faction: KinOfSheredyn",
+                    "Role: Governor",
+                    "Councilor effect: +2 Science on Cities",
+                    "Partner effect: +1 Influence on Alliance",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { councilors: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=councilors&entry=Councilor_Kin_Governor"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Sheredyn Envoy" })).toBeInTheDocument();
+        expect(screen.getByText("Councilor dossier")).toBeInTheDocument();
+        expect(screen.getByText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(screen.getByText("Governor")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Councilor effect" })).toBeInTheDocument();
+        expect(screen.getByText("+2 Science on Cities")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Partner effect" })).toBeInTheDocument();
+        expect(screen.getByText("+1 Influence on Alliance")).toBeInTheDocument();
+    });
+
+    it("renders trait codex facts without requiring exporter metadata", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Diplomat",
+                displayName: "Diplomat",
+                descriptionLines: [
+                    "Category: Faction",
+                    "Cost: 2",
+                    "Required affinity: Aspect",
+                    "Excludes: Warmonger",
+                    "Improves diplomatic leverage.",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { traits: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=traits&entry=Trait_Diplomat"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Diplomat" })).toBeInTheDocument();
+        expect(screen.getByText("Trait dossier")).toBeInTheDocument();
+        expect(screen.getByText("Category")).toBeInTheDocument();
+        expect(screen.getByText("Faction")).toBeInTheDocument();
+        expect(screen.getByText("Required affinity")).toBeInTheDocument();
+        expect(screen.getByText("Aspects")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+        expect(screen.getByText("Improves diplomatic leverage.")).toBeInTheDocument();
+    });
+
+    it("renders minor faction codex facts from current text prefixes", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_Noquensii",
+                displayName: "Noquensii",
+                descriptionLines: [
+                    "Disposition: Diplomatic",
+                    "Faction affinity: Necrophage",
+                    "Population: Noquensii",
+                    "Unit: Singer",
+                    "Trait: Silver Tongue",
+                    "Known for sharp songs.",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { minorfactions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=minorfactions&entry=MinorFaction_Noquensii"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Noquensii" })).toBeInTheDocument();
+        expect(screen.getByText("Minor faction dossier")).toBeInTheDocument();
+        expect(screen.getByText("Disposition")).toBeInTheDocument();
+        expect(screen.getByText("Diplomatic")).toBeInTheDocument();
+        expect(screen.getByText("Faction affinity")).toBeInTheDocument();
+        expect(screen.getByText("Necrophages")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+        expect(screen.getByText("Known for sharp songs.")).toBeInTheDocument();
+    });
+
     it("keeps generic paragraph rendering when no structured codex lines are present", async () => {
         const entries: CodexEntry[] = [
             {
