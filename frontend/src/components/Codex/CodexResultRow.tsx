@@ -11,6 +11,7 @@ import {
     getCodexFactionAffinityLabel,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
+import { getCodexStructuredSummary } from "@/lib/codex/codexStructuredDescription";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
@@ -24,7 +25,8 @@ export default function CodexResultRow({ entry, isSelected, onSelect }: Props) {
     const isFactionEntry = !isSummary && entry.exportKind.trim().toLowerCase() === "factions";
     const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
     const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry, 2) : "";
-    const previewLine = factionTraits || getCodexDescriptionPreviewLine(entry.descriptionLines);
+    const structuredSummary = !isSummary && !isFactionEntry ? getCodexStructuredSummary(entry) : "";
+    const previewLine = factionTraits || structuredSummary || getCodexDescriptionPreviewLine(entry.descriptionLines);
     const entryLabel = getCodexEntryLabel(entry);
     const secondaryContext = isSummary
         ? ""

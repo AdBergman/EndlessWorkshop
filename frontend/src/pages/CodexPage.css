@@ -943,6 +943,104 @@
     margin-top: 0;
 }
 
+.codex-structuredDossier {
+    display: grid;
+    gap: 18px;
+}
+
+.codex-structuredFacts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--codex-line);
+    border-radius: 6px;
+    background: var(--codex-line);
+}
+
+.codex-structuredFact {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    padding: 12px 14px;
+    background: rgba(12, 14, 15, 0.78);
+}
+
+.codex-structuredFact dt,
+.codex-structuredBlock__heading {
+    margin: 0;
+    color: var(--codex-gold-bright);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.codex-structuredFact dd {
+    min-width: 0;
+    margin: 0;
+    color: rgba(241, 234, 220, 0.88);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.codex-structuredBlock {
+    display: grid;
+    gap: 10px;
+}
+
+.codex-structuredBlock__lines {
+    display: grid;
+    gap: 8px;
+    padding-left: 18px;
+    border-left: 1px solid rgba(190, 150, 73, 0.16);
+}
+
+.codex-structuredBlock__line {
+    margin: 0;
+    color: rgba(241, 234, 220, 0.82);
+    font-size: 15px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.codex-structuredTimeline {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--codex-line);
+}
+
+.codex-structuredTimeline__item {
+    display: grid;
+    grid-template-columns: minmax(112px, 0.24fr) minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--codex-line);
+}
+
+.codex-structuredTimeline__label {
+    color: var(--codex-gold-bright);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.codex-structuredTimeline__value {
+    min-width: 0;
+    color: rgba(241, 234, 220, 0.84);
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.codex-detail__description--structuredNotes {
+    margin-top: 0;
+}
+
 .codex-detail__summaryLead {
     margin-top: 14px;
     color: rgba(241, 234, 220, 0.7);
@@ -1336,6 +1434,11 @@
 
     .codex-detail__description {
         padding-left: 12px;
+    }
+
+    .codex-structuredTimeline__item {
+        grid-template-columns: 1fr;
+        gap: 4px;
     }
 
     .codex-detail__title {

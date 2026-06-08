@@ -2,16 +2,15 @@ import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
-    formatCodexMajorFactionText,
     getCodexDetailContextLines,
     getCodexEntryLabel,
     getCodexQuestGroupDetailContextLines,
     type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
-import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexQuestProgression from "./CodexQuestProgression";
+import CodexStructuredDetail from "./CodexStructuredDetail";
 import RelatedEntries from "./RelatedEntries";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
@@ -42,7 +41,6 @@ export default function CodexEntryDetail({
         );
     }
 
-    const hasDescription = entry.descriptionLines.some((line) => line.trim().length > 0);
     const detailContextLines = questGroup
         ? getCodexQuestGroupDetailContextLines(entry)
         : getCodexDetailContextLines(entry);
@@ -78,23 +76,7 @@ export default function CodexEntryDetail({
             {isFactionEntry ? (
                 <CodexFactionDetail entry={entry} />
             ) : (
-                <section className="codex-detail__section" aria-labelledby="codex-description-heading">
-                    <div className="codex-sectionLabel" id="codex-description-heading">
-                        Description
-                    </div>
-
-                    {hasDescription ? (
-                        <div className="codex-detail__description">
-                            {entry.descriptionLines.map((line, index) => (
-                                <p key={`${entry.entryKey}-${index}`} className="codex-detail__line">
-                                    {renderDescriptionLine(formatCodexMajorFactionText(line))}
-                                </p>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="codex-detail__placeholder">No public description has been added for this entry yet.</p>
-                    )}
-                </section>
+                <CodexStructuredDetail entry={entry} />
             )}
 
             <RelatedEntries

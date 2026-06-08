@@ -1011,4 +1011,169 @@ describe("CodexPage", () => {
             "Abilities",
         ]);
     });
+
+    it("renders equipment codex entries as structured dossiers from current description lines", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_Weapon_02_Definition",
+                displayName: "Dawnblade",
+                descriptionLines: [
+                    "Type: Weapon",
+                    "Slot: Main hand",
+                    "Rarity: Rare",
+                    "Tier: 2",
+                    "Access pool: Hero",
+                    "Value: 120",
+                    "Forged for close combat.",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { equipment: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment&entry=Equipment_Weapon_02_Definition"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Dawnblade" })).toBeInTheDocument();
+        expect(screen.getByText("Equipment dossier")).toBeInTheDocument();
+        expect(screen.getByText("Type")).toBeInTheDocument();
+        expect(screen.getByText("Weapon")).toBeInTheDocument();
+        expect(screen.getByText("Rarity")).toBeInTheDocument();
+        expect(screen.getByText("Rare")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
+        expect(screen.getByText("Forged for close combat.")).toBeInTheDocument();
+    });
+
+    it("renders population worker effects and thresholds without exporter metadata", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "populations",
+                entryKey: "Population_Consortium",
+                displayName: "The Consortium",
+                descriptionLines: [
+                    "Faction: Mukag",
+                    "Type: Minor faction population",
+                    "Base food cost: 60",
+                    "Worker: +4 Dust on Scribes",
+                    "At 5 population: Unlocks The Consortium’s Bazaar",
+                    "At 15 population: +1 Dust on Consortium Population",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { populations: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations&entry=Population_Consortium"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "The Consortium" })).toBeInTheDocument();
+        expect(screen.getByText("Population dossier")).toBeInTheDocument();
+        expect(screen.getByText("Tahuk")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Worker" })).toBeInTheDocument();
+        expect(screen.getByText("+4 Dust on Scribes")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Population thresholds" })).toBeInTheDocument();
+        expect(screen.getByText("5 population")).toBeInTheDocument();
+        expect(screen.getByText("Unlocks The Consortium’s Bazaar")).toBeInTheDocument();
+    });
+
+    it("keeps generic paragraph rendering when no structured codex lines are present", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Bloom",
+                displayName: "Bloom",
+                descriptionLines: ["A plain ability description."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { abilities: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities&entry=Ability_Bloom"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Bloom" })).toBeInTheDocument();
+        const detailPane = screen.getByRole("region", { name: /selected codex entry/i });
+        expect(within(detailPane).getByText("Description")).toBeInTheDocument();
+        expect(within(detailPane).getByText("A plain ability description.")).toBeInTheDocument();
+        expect(screen.queryByText("Ability dossier")).not.toBeInTheDocument();
+    });
+
+    it("uses structured facts in kind summaries when current lines support it", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_Weapon_02_Definition",
+                displayName: "Dawnblade",
+                descriptionLines: [
+                    "Type: Weapon",
+                    "Slot: Main hand",
+                    "Rarity: Rare",
+                    "Tier: 2",
+                ],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { equipment: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const summaryList = await screen.findByLabelText("Equipment overview");
+        expect(within(summaryList).getByRole("button", { name: /dawnblade/i })).toHaveTextContent(
+            "Weapon / Main hand / Rare / Tier 2"
+        );
+    });
 });
