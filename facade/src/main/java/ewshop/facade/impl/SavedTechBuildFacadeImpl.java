@@ -65,6 +65,16 @@ public class SavedTechBuildFacadeImpl implements SavedTechBuildFacade {
             throw new IllegalArgumentException("techIds must contain at most " + MAX_TECH_IDS + " entries");
         }
 
+        List<String> normalizedTechIds = normalizeTechIds(rawTechIds);
+
+        return new CreateSavedTechBuildRequest(
+                request.name() == null ? "" : request.name().trim(),
+                selectedFaction,
+                List.copyOf(normalizedTechIds)
+        );
+    }
+
+    private static List<String> normalizeTechIds(List<String> rawTechIds) {
         List<String> normalizedTechIds = new ArrayList<>(rawTechIds.size());
         for (String techId : rawTechIds) {
             if (techId == null) {
@@ -79,12 +89,7 @@ public class SavedTechBuildFacadeImpl implements SavedTechBuildFacade {
             }
             normalizedTechIds.add(normalizedTechId);
         }
-
-        return new CreateSavedTechBuildRequest(
-                request.name() == null ? "" : request.name().trim(),
-                selectedFaction,
-                List.copyOf(normalizedTechIds)
-        );
+        return normalizedTechIds;
     }
 
     private static String trimToNull(String value) {
