@@ -9,6 +9,11 @@ updates:
       time: "08:00"
       timezone: "Europe/Stockholm"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 30
     groups:
       maven-minor-and-patch:
         patterns:
@@ -25,6 +30,11 @@ updates:
       time: "08:30"
       timezone: "Europe/Stockholm"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 21
     groups:
       npm-runtime-minor-and-patch:
         dependency-type: "production"
@@ -49,6 +59,8 @@ updates:
       time: "09:00"
       timezone: "Europe/Stockholm"
     open-pull-requests-limit: 3
+    cooldown:
+      default-days: 3
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -58,3 +70,5 @@ updates:
       time: "09:30"
       timezone: "Europe/Stockholm"
     open-pull-requests-limit: 3
+    cooldown:
+      default-days: 7
