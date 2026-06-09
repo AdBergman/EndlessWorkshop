@@ -3,7 +3,7 @@ import {
     formatCodexMajorFactionText,
     stripCodexDescriptionLine,
 } from "@/lib/codex/codexPresentation";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, CodexMetadataFact, CodexMetadataSectionItem } from "@/types/dataTypes";
 
 export type CodexStructuredFact = {
     label: string;
@@ -121,7 +121,112 @@ function addSection(sections: CodexStructuredSection[], label: string, line: str
     sections.push({ label, lines: [line] });
 }
 
-export function parseCodexStructuredDescription(entry: Pick<CodexEntry, "exportKind" | "descriptionLines">): CodexStructuredDescription {
+function exportedFactToStructuredFact(fact: CodexMetadataFact): CodexStructuredFact | null {
+    if (!fact?.label?.trim() || !fact?.value?.trim()) return null;
+
+    const label = fact.label.trim();
+    const value = cleanValue(fact.value);
+    return { label, value, sourceLine: `${label}: ${value}` };
+}
+
+function itemValue(item: CodexMetadataSectionItem): string {
+    const lineValue = (item.lines ?? [])
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .join("; ");
+
+    if (lineValue) return cleanValue(lineValue);
+
+    const rewardFact = (item.facts ?? []).find((fact) => fact.label?.trim().toLowerCase() === "reward");
+    if (rewardFact?.value?.trim()) return cleanValue(rewardFact.value);
+
+    const factSummary = (item.facts ?? [])
+        .filter((fact) => fact.label?.trim() && fact.value?.trim())
+        .map((fact) => `${fact.label.trim()}: ${cleanValue(fact.value)}`)
+        .join("; ");
+
+    return factSummary;
+}
+
+function exportedItemToTimelineItem(item: CodexMetadataSectionItem): CodexStructuredTimelineItem | null {
+    const label = item?.label?.trim();
+    if (!label) return null;
+
+    const value = itemValue(item);
+    if (!value) return null;
+
+    return { label, value, sourceLine: `${label}: ${value}` };
+}
+
+function exportedItemToSectionLine(item: CodexMetadataSectionItem): string | null {
+    const label = item?.label?.trim();
+    if (!label) return null;
+
+    const value = itemValue(item);
+    if (!value) return null;
+
+    return `${label}: ${value}`;
+}
+
+function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | "facts" | "sections">): CodexStructuredDescription | null {
+    const kind = normalizeKind(entry.exportKind);
+    const facts = (entry.facts ?? [])
+        .map(exportedFactToStructuredFact)
+        .filter((fact): fact is CodexStructuredFact => fact !== null);
+
+    const sections: CodexStructuredSection[] = [];
+    const timeline: CodexStructuredTimelineItem[] = [];
+
+    for (const section of entry.sections ?? []) {
+        const title = section.title?.trim();
+        if (!title) continue;
+
+        const lines = (section.lines ?? [])
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map(cleanValue);
+
+        const isPopulationThresholdSection =
+            kind === "populations" && title.toLowerCase().includes("threshold");
+
+        if (isPopulationThresholdSection) {
+            const itemTimeline = (section.items ?? [])
+                .map(exportedItemToTimelineItem)
+                .filter((item): item is CodexStructuredTimelineItem => item !== null);
+
+            timeline.push(...itemTimeline);
+        } else {
+            const itemLines = (section.items ?? [])
+                .map(exportedItemToSectionLine)
+                .filter((line): line is string => line !== null);
+
+            lines.push(...itemLines);
+        }
+
+        if (lines.length > 0) {
+            sections.push({ label: title, lines });
+        }
+    }
+
+    if (facts.length === 0 && sections.length === 0 && timeline.length === 0) {
+        return null;
+    }
+
+    return {
+        facts,
+        sections,
+        timeline,
+        bodyLines: [],
+        hasStructuredContent: true,
+    };
+}
+
+export function parseCodexStructuredDescription(
+    entry: Pick<CodexEntry, "exportKind" | "descriptionLines" | "facts" | "sections">
+): CodexStructuredDescription {
+    const exportedMetadata = parseExportedStructuredMetadata(entry);
+    if (exportedMetadata) return exportedMetadata;
+
     const kind = normalizeKind(entry.exportKind);
     const factLabels = FACT_LABELS_BY_KIND[kind] ?? new Set<string>();
     const sectionLabels = SECTION_LABELS_BY_KIND[kind] ?? {};
@@ -171,7 +276,9 @@ export function parseCodexStructuredDescription(entry: Pick<CodexEntry, "exportK
     };
 }
 
-export function getCodexStructuredSummary(entry: Pick<CodexEntry, "exportKind" | "descriptionLines">): string {
+export function getCodexStructuredSummary(
+    entry: Pick<CodexEntry, "exportKind" | "descriptionLines" | "facts" | "sections">
+): string {
     const kind = normalizeKind(entry.exportKind);
     const parsed = parseCodexStructuredDescription(entry);
     const preferredLabels = SUMMARY_FACT_LABELS_BY_KIND[kind] ?? [];

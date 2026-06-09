@@ -68,7 +68,10 @@ public class CodexFacadeImpl implements CodexFacade {
                 dto.category(),
                 dto.kind(),
                 dto.descriptionLines(),
-                referenceKeys
+                referenceKeys,
+                dto.facts(),
+                dto.sections(),
+                dto.publicContextKeys()
         );
     }
 

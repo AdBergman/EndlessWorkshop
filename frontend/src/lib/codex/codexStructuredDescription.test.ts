@@ -69,6 +69,61 @@ describe("codexStructuredDescription", () => {
         expect(parsed.bodyLines).toEqual(["+4 Food consumption"]);
     });
 
+    it("prefers exported structured population metadata over parsing fallback description lines", () => {
+        const parsed = parseCodexStructuredDescription({
+            ...entry("populations", [
+                "Faction: Faction_Aspect",
+                "Type: Major faction population",
+                "At 5 population: Fallback should not win",
+            ]),
+            facts: [
+                { label: "Faction", value: "Faction_Aspect", referenceKey: "Faction_Aspect" },
+                { label: "Base food cost", value: "60" },
+            ],
+            sections: [
+                {
+                    title: "Worker effects",
+                    lines: ["+1 [CultureColored] Influence"],
+                },
+                {
+                    title: "Threshold rewards",
+                    items: [
+                        {
+                            label: "At 5 population",
+                            facts: [{ label: "Reward", value: "Nutrient Extractor" }],
+                        },
+                        {
+                            label: "At 15 population",
+                            facts: [{ label: "Reward", value: "Descriptor" }],
+                            lines: ["+1 [CultureColored] Influence on Aspect Population"],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        expect(parsed.facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Faction=Aspects",
+            "Base food cost=60",
+        ]);
+        expect(parsed.sections).toEqual([
+            { label: "Worker effects", lines: ["+1 [CultureColored] Influence"] },
+        ]);
+        expect(parsed.timeline.map((item) => `${item.label}=${item.value}`)).toEqual([
+            "At 5 population=Nutrient Extractor",
+            "At 15 population=+1 [CultureColored] Influence on Aspect Population",
+        ]);
+        expect(parsed.bodyLines).toEqual([]);
+        expect(getCodexStructuredSummary({
+            ...entry("populations", []),
+            facts: [
+                { label: "Type", value: "Major faction population" },
+                { label: "Faction", value: "Faction_Aspect" },
+                { label: "Base food cost", value: "60" },
+            ],
+        })).toBe("Major faction population / Aspects / Base food cost 60");
+    });
+
     it("parses councilor, trait, hero, and minor faction facts conservatively", () => {
         expect(parseCodexStructuredDescription(entry("councilors", [
             "Faction: KinOfSheredyn",

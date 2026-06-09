@@ -56,6 +56,55 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_preservesOptionalStructuredPopulationMetadata() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.80",
+                "0.4.0",
+                "2026-06-09T07:42:00Z",
+                "populations",
+                List.of(new CodexImportEntryDto(
+                        "Population_Aspect",
+                        "Aspect",
+                        null,
+                        null,
+                        List.of("Faction: Faction_Aspect", "At 5 population: Unlocks Nutrient Extractor"),
+                        List.of("Faction_Aspect"),
+                        List.of(
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Faction", "Faction_Aspect", "Faction_Aspect"),
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Base food cost", "60", null)
+                        ),
+                        List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionDto(
+                                "Threshold rewards",
+                                List.of(),
+                                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
+                                        "At 5 population",
+                                        List.of(new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Reward", "Nutrient Extractor", null)),
+                                        List.of()
+                                ))
+                        )),
+                        List.of("Population_Aspect", "Faction_Aspect")
+                ))
+        ));
+
+        CodexImportSnapshot snapshot = codexImportService.capturedSnapshots.getFirst();
+        assertEquals("Population_Aspect", snapshot.entryKey());
+        assertEquals(2, snapshot.facts().size());
+        assertEquals("Faction", snapshot.facts().getFirst().label());
+        assertEquals("Faction_Aspect", snapshot.facts().getFirst().referenceKey());
+        assertEquals("Threshold rewards", snapshot.sections().getFirst().title());
+        assertEquals("At 5 population", snapshot.sections().getFirst().items().getFirst().label());
+        assertEquals(List.of("Population_Aspect", "Faction_Aspect"), snapshot.publicContextKeys());
+    }
+
+    @Test
     void importCodex_acceptsArbitraryNonBlankExportKind() {
         ImportResult result = new ImportResult();
         result.incrementInserted();

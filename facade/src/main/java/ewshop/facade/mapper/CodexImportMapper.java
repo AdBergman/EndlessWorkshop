@@ -1,7 +1,13 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.command.CodexImportSnapshot;
+import ewshop.domain.model.CodexMetadataFact;
+import ewshop.domain.model.CodexMetadataSection;
+import ewshop.domain.model.CodexMetadataSectionItem;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
+import ewshop.facade.dto.importing.codex.CodexMetadataFactDto;
+import ewshop.facade.dto.importing.codex.CodexMetadataSectionDto;
+import ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,8 +43,22 @@ public final class CodexImportMapper {
         String sourceKind = trimToNull(dto.kind());
         List<String> descriptionLines = cleanDescriptionLines(dto.descriptionLines());
         List<String> referenceKeys = cleanDistinctLines(dto.referenceKeys());
+        List<CodexMetadataFact> facts = cleanFacts(dto.facts());
+        List<CodexMetadataSection> sections = cleanSections(dto.sections());
+        List<String> publicContextKeys = cleanDistinctLines(dto.publicContextKeys());
 
-        return new CodexImportSnapshot(key, name, publicExportKind, category, sourceKind, descriptionLines, referenceKeys);
+        return new CodexImportSnapshot(
+                key,
+                name,
+                publicExportKind,
+                category,
+                sourceKind,
+                descriptionLines,
+                referenceKeys,
+                facts,
+                sections,
+                publicContextKeys
+        );
     }
 
     private static boolean isExtractorDistrict(String exportKind, String entryKey) {
@@ -91,6 +111,56 @@ public final class CodexImportMapper {
             String t = line.trim();
             if (t.isBlank()) continue;
             if (seen.add(t)) out.add(t);
+        }
+        return out;
+    }
+
+    private static List<CodexMetadataFact> cleanFacts(List<CodexMetadataFactDto> in) {
+        if (in == null || in.isEmpty()) return List.of();
+
+        List<CodexMetadataFact> out = new ArrayList<>(in.size());
+        for (CodexMetadataFactDto fact : in) {
+            if (fact == null) continue;
+            String label = trimToNull(fact.label());
+            String value = trimToNull(fact.value());
+            if (label == null || value == null) continue;
+            out.add(new CodexMetadataFact(label, value, trimToNull(fact.referenceKey())));
+        }
+        return out;
+    }
+
+    private static List<CodexMetadataSection> cleanSections(List<CodexMetadataSectionDto> in) {
+        if (in == null || in.isEmpty()) return List.of();
+
+        List<CodexMetadataSection> out = new ArrayList<>(in.size());
+        for (CodexMetadataSectionDto section : in) {
+            if (section == null) continue;
+            String title = trimToNull(section.title());
+            if (title == null) continue;
+
+            List<String> lines = cleanDescriptionLines(section.lines());
+            List<CodexMetadataSectionItem> items = cleanSectionItems(section.items());
+            if (lines.isEmpty() && items.isEmpty()) continue;
+
+            out.add(new CodexMetadataSection(title, lines, items));
+        }
+        return out;
+    }
+
+    private static List<CodexMetadataSectionItem> cleanSectionItems(List<CodexMetadataSectionItemDto> in) {
+        if (in == null || in.isEmpty()) return List.of();
+
+        List<CodexMetadataSectionItem> out = new ArrayList<>(in.size());
+        for (CodexMetadataSectionItemDto item : in) {
+            if (item == null) continue;
+            String label = trimToNull(item.label());
+            if (label == null) continue;
+
+            List<CodexMetadataFact> facts = cleanFacts(item.facts());
+            List<String> lines = cleanDescriptionLines(item.lines());
+            if (facts.isEmpty() && lines.isEmpty()) continue;
+
+            out.add(new CodexMetadataSectionItem(label, facts, lines));
         }
         return out;
     }

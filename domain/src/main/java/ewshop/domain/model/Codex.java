@@ -12,6 +12,9 @@ public class Codex {
     private final String kind;
     private final List<String> descriptionLines;
     private final List<String> referenceKeys;
+    private final List<CodexMetadataFact> facts;
+    private final List<CodexMetadataSection> sections;
+    private final List<String> publicContextKeys;
 
     private Codex(Builder b) {
         this.exportKind = b.exportKind;
@@ -21,6 +24,9 @@ public class Codex {
         this.kind = b.kind;
         this.descriptionLines = List.copyOf(b.descriptionLines);
         this.referenceKeys = List.copyOf(b.referenceKeys);
+        this.facts = List.copyOf(b.facts);
+        this.sections = List.copyOf(b.sections);
+        this.publicContextKeys = List.copyOf(b.publicContextKeys);
     }
 
     public String getExportKind() { return exportKind; }
@@ -30,6 +36,9 @@ public class Codex {
     public String getKind() { return kind; }
     public List<String> getDescriptionLines() { return descriptionLines; }
     public List<String> getReferenceKeys() { return referenceKeys; }
+    public List<CodexMetadataFact> getFacts() { return facts; }
+    public List<CodexMetadataSection> getSections() { return sections; }
+    public List<String> getPublicContextKeys() { return publicContextKeys; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -41,6 +50,9 @@ public class Codex {
         private String kind;
         private final ArrayList<String> descriptionLines = new ArrayList<>();
         private final ArrayList<String> referenceKeys = new ArrayList<>();
+        private final ArrayList<CodexMetadataFact> facts = new ArrayList<>();
+        private final ArrayList<CodexMetadataSection> sections = new ArrayList<>();
+        private final ArrayList<String> publicContextKeys = new ArrayList<>();
 
         public Builder exportKind(String v) { this.exportKind = v; return this; }
         public Builder entryKey(String v) { this.entryKey = v; return this; }
@@ -57,6 +69,24 @@ public class Codex {
         public Builder referenceKeys(List<String> v) {
             this.referenceKeys.clear();
             if (v != null) this.referenceKeys.addAll(v);
+            return this;
+        }
+
+        public Builder facts(List<CodexMetadataFact> v) {
+            this.facts.clear();
+            if (v != null) this.facts.addAll(v);
+            return this;
+        }
+
+        public Builder sections(List<CodexMetadataSection> v) {
+            this.sections.clear();
+            if (v != null) this.sections.addAll(v);
+            return this;
+        }
+
+        public Builder publicContextKeys(List<String> v) {
+            this.publicContextKeys.clear();
+            if (v != null) this.publicContextKeys.addAll(v);
             return this;
         }
 

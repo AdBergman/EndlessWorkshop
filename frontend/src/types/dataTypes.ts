@@ -68,6 +68,24 @@ export interface District {
     descriptionLines: string[];
 }
 
+export interface CodexMetadataFact {
+    label: string;
+    value: string;
+    referenceKey?: string | null;
+}
+
+export interface CodexMetadataSectionItem {
+    label: string;
+    facts?: CodexMetadataFact[];
+    lines?: string[];
+}
+
+export interface CodexMetadataSection {
+    title: string;
+    lines?: string[];
+    items?: CodexMetadataSectionItem[];
+}
+
 export interface Codex {
     exportKind: string;
     entryKey: string;
@@ -76,6 +94,9 @@ export interface Codex {
     kind?: string | null;
     descriptionLines: string[];
     referenceKeys: string[];
+    facts?: CodexMetadataFact[];
+    sections?: CodexMetadataSection[];
+    publicContextKeys?: string[];
 }
 
 export type CodexEntry = Codex;

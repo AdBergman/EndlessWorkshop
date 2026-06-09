@@ -6,6 +6,7 @@ import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.CodexRepository;
 import ewshop.infrastructure.persistence.entities.CodexEntity;
 import ewshop.infrastructure.persistence.mappers.CodexMapper;
+import ewshop.infrastructure.persistence.mappers.CodexMetadataJsonMapper;
 import ewshop.infrastructure.persistence.repositories.CodexJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -138,6 +139,24 @@ public class CodexRepositoryAdapter implements CodexRepository {
         List<String> newRefs = normalizeKeys(update.referenceKeys());
         if (!Objects.equals(entity.getReferenceKeys(), newRefs)) {
             entity.setReferenceKeys(newRefs);
+            changed = true;
+        }
+
+        String newFactsJson = CodexMetadataJsonMapper.encodeFacts(update.facts());
+        if (!Objects.equals(entity.getFactsJson(), newFactsJson)) {
+            entity.setFactsJson(newFactsJson);
+            changed = true;
+        }
+
+        String newSectionsJson = CodexMetadataJsonMapper.encodeSections(update.sections());
+        if (!Objects.equals(entity.getSectionsJson(), newSectionsJson)) {
+            entity.setSectionsJson(newSectionsJson);
+            changed = true;
+        }
+
+        List<String> newPublicContextKeys = normalizeKeys(update.publicContextKeys());
+        if (!Objects.equals(entity.getPublicContextKeys(), newPublicContextKeys)) {
+            entity.setPublicContextKeys(newPublicContextKeys);
             changed = true;
         }
 

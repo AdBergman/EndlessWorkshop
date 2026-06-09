@@ -4,7 +4,7 @@ import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
 import { buildEntriesByKey, buildEntriesByKindKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, CodexMetadataFact, CodexMetadataSection, CodexMetadataSectionItem } from "@/types/dataTypes";
 
 type Store = {
     entries: CodexEntry[];
@@ -27,6 +27,71 @@ type Store = {
 
 let inflightLoad: Promise<void> | null = null;
 
+function cleanStrings(values: unknown): string[] {
+    return Array.isArray(values)
+        ? values.filter((value): value is string => typeof value === "string")
+        : [];
+}
+
+function cleanFact(fact: CodexMetadataFact | null | undefined): CodexMetadataFact | null {
+    if (!fact || typeof fact.label !== "string" || typeof fact.value !== "string") return null;
+
+    const label = fact.label.trim();
+    const value = fact.value.trim();
+    if (!label || !value) return null;
+
+    return {
+        label,
+        value,
+        referenceKey: typeof fact.referenceKey === "string" ? fact.referenceKey.trim() || null : null,
+    };
+}
+
+function cleanFacts(values: unknown): CodexMetadataFact[] {
+    return Array.isArray(values)
+        ? values
+            .map((value) => cleanFact(value as CodexMetadataFact))
+            .filter((value): value is CodexMetadataFact => value !== null)
+        : [];
+}
+
+function cleanSectionItem(item: CodexMetadataSectionItem | null | undefined): CodexMetadataSectionItem | null {
+    if (!item || typeof item.label !== "string") return null;
+
+    const label = item.label.trim();
+    if (!label) return null;
+
+    const facts = cleanFacts(item.facts);
+    const lines = cleanStrings(item.lines);
+    if (facts.length === 0 && lines.length === 0) return null;
+
+    return { label, facts, lines };
+}
+
+function cleanSections(values: unknown): CodexMetadataSection[] {
+    if (!Array.isArray(values)) return [];
+
+    return values
+        .map((section): CodexMetadataSection | null => {
+            const candidate = section as CodexMetadataSection;
+            if (!candidate || typeof candidate.title !== "string") return null;
+
+            const title = candidate.title.trim();
+            if (!title) return null;
+
+            const lines = cleanStrings(candidate.lines);
+            const items = Array.isArray(candidate.items)
+                ? candidate.items
+                    .map((item) => cleanSectionItem(item))
+                    .filter((item): item is CodexMetadataSectionItem => item !== null)
+                : [];
+
+            if (lines.length === 0 && items.length === 0) return null;
+            return { title, lines, items };
+        })
+        .filter((section): section is CodexMetadataSection => section !== null);
+}
+
 function normalizeEntry(entry: CodexEntry): CodexEntry {
     return {
         exportKind: (entry.exportKind ?? "").trim().toLowerCase(),
@@ -34,8 +99,11 @@ function normalizeEntry(entry: CodexEntry): CodexEntry {
         displayName: entry.displayName ?? "",
         category: typeof entry.category === "string" ? entry.category.trim() || null : null,
         kind: typeof entry.kind === "string" ? entry.kind.trim() || null : null,
-        descriptionLines: (entry.descriptionLines ?? []).filter((line): line is string => typeof line === "string"),
-        referenceKeys: (entry.referenceKeys ?? []).filter((key): key is string => typeof key === "string"),
+        descriptionLines: cleanStrings(entry.descriptionLines),
+        referenceKeys: cleanStrings(entry.referenceKeys),
+        facts: cleanFacts(entry.facts),
+        sections: cleanSections(entry.sections),
+        publicContextKeys: cleanStrings(entry.publicContextKeys),
     };
 }
 

@@ -109,7 +109,7 @@ describe("useCodexStore", () => {
         expect(related[0].entryKey).toBe("Hero_A");
     });
 
-    it("handles missing referenceKeys and descriptionLines by normalizing them to empty arrays", async () => {
+    it("handles missing optional arrays by normalizing them to empty arrays", async () => {
         mockedApiClient.getCodex.mockResolvedValue([
             {
                 exportKind: "equipment",
@@ -117,6 +117,9 @@ describe("useCodexStore", () => {
                 displayName: "Crimson Wing Rune",
                 descriptionLines: undefined,
                 referenceKeys: undefined,
+                facts: undefined,
+                sections: undefined,
+                publicContextKeys: undefined,
             },
         ] as any);
 
@@ -125,6 +128,62 @@ describe("useCodexStore", () => {
         const entry = useCodexStore.getState().getEntryByKey("Equipment_Accessory_03_Definition");
         expect(entry?.descriptionLines).toEqual([]);
         expect(entry?.referenceKeys).toEqual([]);
+        expect(entry?.facts).toEqual([]);
+        expect(entry?.sections).toEqual([]);
+        expect(entry?.publicContextKeys).toEqual([]);
+    });
+
+    it("normalizes structured codex metadata from the API", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspect",
+                displayName: "Aspect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: " Faction ", value: " Faction_Aspect ", referenceKey: " Faction_Aspect " },
+                    { label: "", value: "ignored" },
+                ],
+                sections: [
+                    {
+                        title: " Worker effects ",
+                        lines: ["+1 [CultureColored] Influence"],
+                        items: [],
+                    },
+                    {
+                        title: "Threshold rewards",
+                        lines: [],
+                        items: [
+                            {
+                                label: " At 5 population ",
+                                facts: [{ label: "Reward", value: "Nutrient Extractor" }],
+                                lines: [],
+                            },
+                        ],
+                    },
+                ],
+                publicContextKeys: ["Population_Aspect", "Faction_Aspect"],
+            },
+        ] as any);
+
+        await useCodexStore.getState().loadEntries();
+
+        const entry = useCodexStore.getState().getEntryByKey("Population_Aspect");
+        expect(entry?.facts).toEqual([
+            { label: "Faction", value: "Faction_Aspect", referenceKey: "Faction_Aspect" },
+        ]);
+        expect(entry?.sections?.[0]).toEqual({
+            title: "Worker effects",
+            lines: ["+1 [CultureColored] Influence"],
+            items: [],
+        });
+        expect(entry?.sections?.[1].items?.[0]).toEqual({
+            label: "At 5 population",
+            facts: [{ label: "Reward", value: "Nutrient Extractor", referenceKey: null }],
+            lines: [],
+        });
+        expect(entry?.publicContextKeys).toEqual(["Population_Aspect", "Faction_Aspect"]);
     });
 
     it("searches across displayName, entryKey, exportKind, and descriptionLines with optional kind filtering", async () => {

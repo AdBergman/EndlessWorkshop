@@ -46,6 +46,18 @@ public class CodexEntity {
     @Column(name = "ref_key", nullable = false, length = 220)
     private List<String> referenceKeys = new ArrayList<>();
 
+    @Column(name = "facts_json", columnDefinition = "TEXT")
+    private String factsJson;
+
+    @Column(name = "sections_json", columnDefinition = "TEXT")
+    private String sectionsJson;
+
+    @ElementCollection
+    @CollectionTable(name = "codex_public_context_keys", joinColumns = @JoinColumn(name = "codex_id"))
+    @OrderColumn(name = "context_index")
+    @Column(name = "context_key", nullable = false, length = 220)
+    private List<String> publicContextKeys = new ArrayList<>();
+
     public CodexEntity() {}
 
     public Long getId() { return id; }
@@ -74,5 +86,16 @@ public class CodexEntity {
     public List<String> getReferenceKeys() { return referenceKeys; }
     public void setReferenceKeys(List<String> referenceKeys) {
         this.referenceKeys = referenceKeys == null ? new ArrayList<>() : new ArrayList<>(referenceKeys);
+    }
+
+    public String getFactsJson() { return factsJson; }
+    public void setFactsJson(String factsJson) { this.factsJson = factsJson; }
+
+    public String getSectionsJson() { return sectionsJson; }
+    public void setSectionsJson(String sectionsJson) { this.sectionsJson = sectionsJson; }
+
+    public List<String> getPublicContextKeys() { return publicContextKeys; }
+    public void setPublicContextKeys(List<String> publicContextKeys) {
+        this.publicContextKeys = publicContextKeys == null ? new ArrayList<>() : new ArrayList<>(publicContextKeys);
     }
 }

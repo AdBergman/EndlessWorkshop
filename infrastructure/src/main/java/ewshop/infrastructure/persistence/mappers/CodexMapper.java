@@ -21,6 +21,9 @@ public class CodexMapper {
                 .kind(entity.getKind())
                 .descriptionLines(entity.getDescriptionLines() == null ? List.of() : List.copyOf(entity.getDescriptionLines()))
                 .referenceKeys(entity.getReferenceKeys() == null ? List.of() : List.copyOf(entity.getReferenceKeys()))
+                .facts(CodexMetadataJsonMapper.decodeFacts(entity.getFactsJson()))
+                .sections(CodexMetadataJsonMapper.decodeSections(entity.getSectionsJson()))
+                .publicContextKeys(entity.getPublicContextKeys() == null ? List.of() : List.copyOf(entity.getPublicContextKeys()))
                 .build();
     }
 
@@ -35,6 +38,9 @@ public class CodexMapper {
         entity.setKind(domain.getKind());
         entity.setDescriptionLines(domain.getDescriptionLines() == null ? List.of() : new ArrayList<>(domain.getDescriptionLines()));
         entity.setReferenceKeys(domain.getReferenceKeys() == null ? List.of() : new ArrayList<>(domain.getReferenceKeys()));
+        entity.setFactsJson(CodexMetadataJsonMapper.encodeFacts(domain.getFacts()));
+        entity.setSectionsJson(CodexMetadataJsonMapper.encodeSections(domain.getSections()));
+        entity.setPublicContextKeys(domain.getPublicContextKeys() == null ? List.of() : new ArrayList<>(domain.getPublicContextKeys()));
         return entity;
     }
 }

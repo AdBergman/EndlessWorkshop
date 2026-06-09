@@ -62,6 +62,42 @@ class CodexFacadeIntegrationTest extends BaseIT {
         assertThat(unit.referenceKeys()).containsExactly("Ability_Kept");
     }
 
+    @Test
+    void importCodexThroughFacade_preservesStructuredMetadata() {
+        codexImportAdminFacade.importCodex(batch("populations", List.of(
+                new CodexImportEntryDto(
+                        "Population_Aspect",
+                        "Aspect",
+                        null,
+                        null,
+                        List.of("Faction: Faction_Aspect"),
+                        List.of("Faction_Aspect"),
+                        List.of(
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Faction", "Faction_Aspect", "Faction_Aspect"),
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Base food cost", "60", null)
+                        ),
+                        List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionDto(
+                                "Worker effects",
+                                List.of("+1 [CultureColored] Influence"),
+                                List.of()
+                        )),
+                        List.of("Population_Aspect", "Faction_Aspect")
+                )
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        CodexDto population = findCodex(codexFacade.getAllCodexEntries(), "Population_Aspect");
+
+        assertThat(population.facts()).extracting(ewshop.facade.dto.response.CodexMetadataFactDto::label)
+                .containsExactly("Faction", "Base food cost");
+        assertThat(population.facts().getFirst().referenceKey()).isEqualTo("Faction_Aspect");
+        assertThat(population.sections()).hasSize(1);
+        assertThat(population.sections().getFirst().title()).isEqualTo("Worker effects");
+        assertThat(population.sections().getFirst().lines()).containsExactly("+1 [CultureColored] Influence");
+        assertThat(population.publicContextKeys()).containsExactly("Population_Aspect", "Faction_Aspect");
+    }
+
     private static CodexDto findCodex(List<CodexDto> entries, String entryKey) {
         return entries.stream()
                 .filter(entry -> entryKey.equals(entry.entryKey()))
