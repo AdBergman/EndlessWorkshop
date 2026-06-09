@@ -14,6 +14,7 @@ import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { getUnitClassIcons, type UnitClassIcon } from "@/features/icons/unitClassIconResolver";
 import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 interface UnitCardProps {
     unit: Unit;
@@ -132,6 +133,14 @@ function buildTierMetadataTooltip(tierLabel: string): Omit<HoveredUnitCardMetada
     return { kind: "tier", title: tierLabel };
 }
 
+function getVeterancySummaryLine(unit: Unit): string | null {
+    if (unit.isHero) return null;
+    const lines = (unit.veterancyProgressionLines ?? [])
+        .filter((line): line is string => typeof line === "string" && line.trim().length > 0);
+
+    return lines.at(-1)?.trim() ?? null;
+}
+
 function TierRankSeal({ label }: { label: string }) {
     return (
         <svg
@@ -197,6 +206,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     const tierRankLabel = getTierRankLabel(d.tierLabel);
     const tierRankNumberLabel = getTierRankNumberLabel(tierRankLabel);
     const hasClassMetadata = classIcons.length > 0;
+    const veterancySummaryLine = getVeterancySummaryLine(unit);
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -519,6 +529,15 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                         <span className="skillLabel">{codex.displayName}</span>
                                     </button>
                                 ))}
+                            </div>
+                        )}
+
+                        {veterancySummaryLine && (
+                            <div className="veterancySummary" aria-label="Veterancy progression">
+                                <div className="veterancySummaryLabel">Veterancy</div>
+                                <div className="veterancySummaryLine">
+                                    {renderDescriptionLine(veterancySummaryLine)}
+                                </div>
                             </div>
                         )}
                     </div>

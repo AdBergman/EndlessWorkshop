@@ -27,6 +27,7 @@ public class Unit {
 
     private final List<String> abilityKeys;
     private final List<String> descriptionLines;
+    private final List<String> veterancyProgressionLines;
 
     private Unit(Builder builder) {
         this.unitKey = builder.unitKey;
@@ -50,6 +51,7 @@ public class Unit {
 
         this.abilityKeys = List.copyOf(builder.abilityKeys);
         this.descriptionLines = List.copyOf(builder.descriptionLines);
+        this.veterancyProgressionLines = List.copyOf(builder.veterancyProgressionLines);
     }
 
     public String getUnitKey() { return unitKey; }
@@ -74,6 +76,7 @@ public class Unit {
 
     public List<String> getAbilityKeys() { return abilityKeys; }
     public List<String> getDescriptionLines() { return descriptionLines; }
+    public List<String> getVeterancyProgressionLines() { return veterancyProgressionLines; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -100,6 +103,7 @@ public class Unit {
 
         private final List<String> abilityKeys = new ArrayList<>();
         private final List<String> descriptionLines = new ArrayList<>();
+        private final List<String> veterancyProgressionLines = new ArrayList<>();
 
         public Builder unitKey(String unitKey) { this.unitKey = unitKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
@@ -136,6 +140,12 @@ public class Unit {
         public Builder descriptionLines(List<String> lines) {
             this.descriptionLines.clear();
             if (lines != null) this.descriptionLines.addAll(lines);
+            return this;
+        }
+
+        public Builder veterancyProgressionLines(List<String> lines) {
+            this.veterancyProgressionLines.clear();
+            if (lines != null) this.veterancyProgressionLines.addAll(lines);
             return this;
         }
 

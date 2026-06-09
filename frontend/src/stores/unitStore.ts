@@ -52,6 +52,9 @@ const normalizeUnit = (unit: Unit): Unit => ({
     descriptionLines: (unit.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),
+    veterancyProgressionLines: (unit.veterancyProgressionLines ?? []).filter(
+        (line): line is string => typeof line === "string"
+    ),
 });
 
 const initialState = {

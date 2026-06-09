@@ -22,8 +22,46 @@ public record UnitImportSnapshot(
         String attackSkillKey,
 
         List<String> abilityKeys,
-        List<String> descriptionLines
+        List<String> descriptionLines,
+        List<String> veterancyProgressionLines
 ) {
+    public UnitImportSnapshot(
+            String unitKey,
+            String displayName,
+            String faction,
+            boolean isMajorFaction,
+            boolean isHero,
+            boolean isChosen,
+            String spawnType,
+            String previousUnitKey,
+            List<String> nextEvolutionUnitKeys,
+            Integer evolutionTierIndex,
+            String unitClassKey,
+            String unitClassDisplayName,
+            String attackSkillKey,
+            List<String> abilityKeys,
+            List<String> descriptionLines
+    ) {
+        this(
+                unitKey,
+                displayName,
+                faction,
+                isMajorFaction,
+                isHero,
+                isChosen,
+                spawnType,
+                previousUnitKey,
+                nextEvolutionUnitKeys,
+                evolutionTierIndex,
+                unitClassKey,
+                unitClassDisplayName,
+                attackSkillKey,
+                abilityKeys,
+                descriptionLines,
+                List.of()
+        );
+    }
+
 
     public UnitImportSnapshot {
         String trimmedKey = unitKey == null ? null : unitKey.trim();
@@ -49,6 +87,9 @@ public record UnitImportSnapshot(
         nextEvolutionUnitKeys = nextEvolutionUnitKeys == null ? List.of() : List.copyOf(nextEvolutionUnitKeys);
         abilityKeys = abilityKeys == null ? List.of() : List.copyOf(abilityKeys);
         descriptionLines = descriptionLines == null ? List.of() : List.copyOf(descriptionLines);
+        veterancyProgressionLines = veterancyProgressionLines == null
+                ? List.of()
+                : List.copyOf(veterancyProgressionLines);
     }
 
     public static Builder builder() {
@@ -76,6 +117,7 @@ public record UnitImportSnapshot(
 
         private List<String> abilityKeys = List.of();
         private List<String> descriptionLines = List.of();
+        private List<String> veterancyProgressionLines = List.of();
 
         public Builder unitKey(String unitKey) { this.unitKey = unitKey; return this; }
         public Builder displayName(String displayName) { this.displayName = displayName; return this; }
@@ -97,6 +139,10 @@ public record UnitImportSnapshot(
 
         public Builder abilityKeys(List<String> abilityKeys) { this.abilityKeys = abilityKeys; return this; }
         public Builder descriptionLines(List<String> descriptionLines) { this.descriptionLines = descriptionLines; return this; }
+        public Builder veterancyProgressionLines(List<String> veterancyProgressionLines) {
+            this.veterancyProgressionLines = veterancyProgressionLines;
+            return this;
+        }
 
         public UnitImportSnapshot build() {
             return new UnitImportSnapshot(
@@ -114,7 +160,8 @@ public record UnitImportSnapshot(
                     unitClassDisplayName,
                     attackSkillKey,
                     abilityKeys,
-                    descriptionLines
+                    descriptionLines,
+                    veterancyProgressionLines
             );
         }
     }

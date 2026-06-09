@@ -1,0 +1,1791 @@
+{
+  "schemaVersion": 1,
+  "abilities": {
+    "UnitAbility_AlwaysRetaliate": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_AlwaysRetaliate.svg",
+      "displayName": "Always Retaliate",
+      "kind": "passive"
+    },
+    "UnitAbility_Aoe_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_AoE_1.svg",
+      "displayName": "Collateral Damage I",
+      "kind": "passive"
+    },
+    "UnitAbility_Aoe_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_AoE_2.svg",
+      "displayName": "Collateral Damage II",
+      "kind": "passive"
+    },
+    "UnitAbility_AutoDestroyArmy": {
+      "path": "/svg/hero-skills/UI_Battle_HeroSkill_Defender_LastLord02_Placeholder.svg",
+      "displayName": "Unstable Vitality",
+      "kind": "passive"
+    },
+    "UnitAbility_Aware": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Aware.svg",
+      "displayName": "Aware",
+      "kind": "passive"
+    },
+    "UnitAbility_BloodMending_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_BloodMending_1.svg",
+      "displayName": "Blood Mending I",
+      "kind": "passive"
+    },
+    "UnitAbility_BloodMending_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_BloodMending_2.svg",
+      "displayName": "Blood Mending II",
+      "kind": "passive"
+    },
+    "UnitAbility_BodyGuard": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg",
+      "displayName": "Body Guard",
+      "kind": "passive"
+    },
+    "UnitAbility_BreachingAttack_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_BreachingAttack_1.svg",
+      "displayName": "Breaching Attack",
+      "kind": "passive"
+    },
+    "UnitAbility_BreachingAttack_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_BreachingAttack_2.svg",
+      "displayName": "Shattering Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_BreakRetaliate": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_BreakRetaliation.svg",
+      "displayName": "Alpha Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Careful_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Careful_1.svg",
+      "displayName": "Heads-Up! I",
+      "kind": "passive"
+    },
+    "UnitAbility_Careful_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Careful_2.svg",
+      "displayName": "Heads-Up! II",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_CavalryTag": {
+      "path": "/svg/units/UI_UnitItem_UnitClass_Cavalry.svg",
+      "displayName": "Cavalry",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_FlyingTag": {
+      "path": "/svg/units/UI_UnitItem_UnitClass_Flying.svg",
+      "displayName": "Flying",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_InfantryTag": {
+      "path": "/svg/constructibles/UI_UnitItem_UnitClass_Melee.svg",
+      "displayName": "Infantry",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_JuggernaughtTag": {
+      "path": "/svg/units/UI_UnitItem_UnitClass_Juggernaught.svg",
+      "displayName": "Juggernaut",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_RangedTag": {
+      "path": "/svg/units/UI_UnitItem_UnitClass_Ranged.svg",
+      "displayName": "Ranged",
+      "kind": "passive"
+    },
+    "UnitAbility_Class_SwarmTag": {
+      "path": "/svg/units/UI_UnitItem_UnitClass_Swarm.svg",
+      "displayName": "Swarm",
+      "kind": "passive"
+    },
+    "UnitAbility_Cleave_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Cleave_1.svg",
+      "displayName": "Wild Swing I",
+      "kind": "passive"
+    },
+    "UnitAbility_Cleave_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Cleave_2.svg",
+      "displayName": "Wild Swing II",
+      "kind": "passive"
+    },
+    "UnitAbility_CorruptionBurst": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_CorruptionBurst.svg",
+      "displayName": "Corruption Burst",
+      "kind": "active"
+    },
+    "UnitAbility_CorruptionSpreading": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_CorruptionSpreading.svg",
+      "displayName": "Corruption Spreading",
+      "kind": "passive"
+    },
+    "UnitAbility_Cruel": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Cruel.svg",
+      "displayName": "Cruel",
+      "kind": "passive"
+    },
+    "UnitAbility_Cumbersome": {
+      "path": "/svg/units/UI_Status_Unit_Cumbersome.svg",
+      "displayName": "Cumbersome",
+      "kind": "passive"
+    },
+    "UnitAbility_DefenseExpert_1": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_DefenseExpert_1.svg",
+      "displayName": "Defense Expert I",
+      "kind": "passive"
+    },
+    "UnitAbility_DefenseExpert_2": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_DefenseExpert_2.svg",
+      "displayName": "Defense Expert II",
+      "kind": "passive"
+    },
+    "UnitAbility_DefensiveAura_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_DefensiveAura_1.svg",
+      "displayName": "Defensive Aura I",
+      "kind": "passive"
+    },
+    "UnitAbility_DefensiveAura_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_DefensiveAura_2.svg",
+      "displayName": "Defensive Aura II",
+      "kind": "passive"
+    },
+    "UnitAbility_DefensivePlate": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_DefensivePlate.svg",
+      "displayName": "Defensive Plate",
+      "kind": "passive"
+    },
+    "UnitAbility_DestabilizingDefense_1": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_DestabilizingDefense.svg",
+      "displayName": "Destabilizing Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_DestabilizingDefense_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_DestabilizingDefense_2.svg",
+      "displayName": "Destabilizing Defense II",
+      "kind": "passive"
+    },
+    "UnitAbility_Devoration": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Devoration.svg",
+      "displayName": "Feast on the Dead",
+      "kind": "passive"
+    },
+    "UnitAbility_FightingTormented": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_FightingTormented.svg",
+      "displayName": "Beast Slayers",
+      "kind": "passive"
+    },
+    "UnitAbility_Fly": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Fly.svg",
+      "displayName": "Flying",
+      "kind": "passive"
+    },
+    "UnitAbility_Frenzy": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Frenzy.svg",
+      "displayName": "Blood Rush",
+      "kind": "passive"
+    },
+    "UnitAbility_GruesomeRegeneration": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_GruesomeRegeneration.svg",
+      "displayName": "Gruesome Regeneration",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_01_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer01.svg",
+      "displayName": "Scoped Shot I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_01_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer02.svg",
+      "displayName": "Scoped Shot II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_01_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer03.svg",
+      "displayName": "Scoped Shot III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_02_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender01.svg",
+      "displayName": "Shield Up I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_02_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender02.svg",
+      "displayName": "Shield Up II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_02_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender03.svg",
+      "displayName": "Shield Up III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_03_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior01.svg",
+      "displayName": "Power Slash I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_03_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior02.svg",
+      "displayName": "Power Slash II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_03_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior03.svg",
+      "displayName": "Power Slash III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior01.svg",
+      "displayName": "Seismic Slash",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_05_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior01.svg",
+      "displayName": "Power Thrust I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_05_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior02.svg",
+      "displayName": "Power Thrust II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_05_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Warrior03.svg",
+      "displayName": "Power Thrust III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_06": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender01.svg",
+      "displayName": "Ultimate Rampart",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_07": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Storm's Calling",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_08": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Rallying Cry",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_09": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Word of Obliteration",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_10": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Word of Ruin",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_11": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Illumination Strike",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_12": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Ruination Punch",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_13": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Sudden Birth",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_14": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Holy Heal",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_15": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Lullaby of the Stone",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_16": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Shuriken Strike",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_17": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Dagger Storm",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_18_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Call of the Deep I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_18_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster02.svg",
+      "displayName": "Call of the Deep II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_19_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Arcane Strike I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_19_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster02.svg",
+      "displayName": "Arcane Strike II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_20_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Second Wind I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_20_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster02.svg",
+      "displayName": "Second Wind II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_21": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Force Lance",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_22_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Molecular Strengthening I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_22_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster02.svg",
+      "displayName": "Molecular Strengthening II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_23_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Soldier's Litany I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_23_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster02.svg",
+      "displayName": "Soldier's Litany II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_24": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Dust Burst",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_25_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer01.svg",
+      "displayName": "Arrow Rain I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_25_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer02.svg",
+      "displayName": "Arrow Rain II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_25_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Archer03.svg",
+      "displayName": "Arrow Rain III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_26_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender01.svg",
+      "displayName": "Shield Shockwave I",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_26_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender02.svg",
+      "displayName": "Shield Shockwave II",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_26_3": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Defender03.svg",
+      "displayName": "Shield Shockwave III",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_27": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_ActiveSkill_Common_Equipment_Caster01.svg",
+      "displayName": "Horatio Cloning",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_28": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Armor.svg",
+      "displayName": "Provocation",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_29": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Accessory.svg",
+      "displayName": "Gorog's Call",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_30": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Accessory.svg",
+      "displayName": "Sollusk's Call",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_31": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Accessory.svg",
+      "displayName": "Xavius' Call",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_ActiveSkill_Equipment_32": {
+      "path": "/svg/heroes/UI_Hero_Class_Defender.svg",
+      "displayName": "Hurricane of Steel",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Archer02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Archer02.svg",
+      "displayName": "Terrain Logistics",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Archer04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer04.svg",
+      "displayName": "Guerilla Tactics",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Archer05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer05.svg",
+      "displayName": "Eye for Weaknesses",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Archer06": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer06.svg",
+      "displayName": "Rain of Arrows",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Archer08": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer08.svg",
+      "displayName": "Pinning Volley",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Archer09": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Archer09.svg",
+      "displayName": "Guiding Light",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Archer11": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer11.svg",
+      "displayName": "Recovery Shot",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Archer12": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Archer12.svg",
+      "displayName": "Patched Up",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Aspect01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Aspect01.svg",
+      "displayName": "Deflecting Stance",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect02.svg",
+      "displayName": "Balletic Shields",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Aspect03": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Aspect03.svg",
+      "displayName": "Deft Accessorizer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect04.svg",
+      "displayName": "Braced Shields",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Aspect05.svg",
+      "displayName": "Fast Learner",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect_Archer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Archer01.svg",
+      "displayName": "Second Wind",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect_Archer02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Archer02.svg",
+      "displayName": "Choral Onslaught",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Aspect_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Defender01.svg",
+      "displayName": "Coral Invasion",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Aspect_Defender02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Defender02.svg",
+      "displayName": "Mutual Aid",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect_PartnerTrait01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Aspect_PartnerTrait01.svg",
+      "displayName": "Power Couple",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect_Warrior01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Warrior01.svg",
+      "displayName": "Team Spirit",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Aspect_Warrior02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Aspect_Warrior02.svg",
+      "displayName": "Concordant Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive01.svg",
+      "displayName": "Acidic Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive02.svg",
+      "displayName": "Bane of the Wraiths",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_03": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive03.svg",
+      "displayName": "Clan's Protection",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive04.svg",
+      "displayName": "Cursed Stature",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive05.svg",
+      "displayName": "Cursed Strength",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_06": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive06.svg",
+      "displayName": "Evolution Chamber",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_07": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive07.svg",
+      "displayName": "Force of Plurality",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_08": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive08.svg",
+      "displayName": "Fully Aware",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_10": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive10.svg",
+      "displayName": "Inspirational Stature",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_11": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive11.svg",
+      "displayName": "Legitimated Suzerain",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_12": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive12.svg",
+      "displayName": "Master of Arrows",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_13": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive13.svg",
+      "displayName": "Offensive Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_14": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive14.svg",
+      "displayName": "Regenerative Shield",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_15": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive15.svg",
+      "displayName": "Reinforcing Mist",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_16": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive16.svg",
+      "displayName": "Sharp Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_17_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive17_1.svg",
+      "displayName": "Siphon Life I",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_17_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive17_1.svg",
+      "displayName": "Siphon Life II",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_18": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive18.svg",
+      "displayName": "Stoic Stature",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_19": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive19.svg",
+      "displayName": "Strength of Union",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_20": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive20.svg",
+      "displayName": "Unleashed Horde",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_21": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive21.svg",
+      "displayName": "Wisdom Whispers",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_22_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive22_1.svg",
+      "displayName": "Pulley Bow I",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_22_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive22_2.svg",
+      "displayName": "Pulley Bow II",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_23": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive23.svg",
+      "displayName": "Damaging Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_24": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive24.svg",
+      "displayName": "Anti Juggernaut",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_25": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive25.svg",
+      "displayName": "Confusing Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_26_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive26_1.svg",
+      "displayName": "Terrorizing Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_26_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive26_2.svg",
+      "displayName": "Terrorizing Strike II",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_27": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive27.svg",
+      "displayName": "Intuitive Attacks",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_28": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive28.svg",
+      "displayName": "Anti Swarm",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_29": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive29.svg",
+      "displayName": "Vigorous Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_30": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive30.svg",
+      "displayName": "Cutting Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_31": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive31.svg",
+      "displayName": "Warrior Stance",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_32": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive32.svg",
+      "displayName": "Anti Infantry",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_33": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive33.svg",
+      "displayName": "Anti Cavalry",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_34": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive34.svg",
+      "displayName": "Respite",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_35_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive35_1.svg",
+      "displayName": "Inspiring Defense I",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_35_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive35_2.svg",
+      "displayName": "Inspiring Defense II",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_36": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive36.svg",
+      "displayName": "Cruel Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_37": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive37.svg",
+      "displayName": "Absolute Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_38": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive38.svg",
+      "displayName": "Determined Intuition",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_39": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive39.svg",
+      "displayName": "Intuitive Determination",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_40": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive40.svg",
+      "displayName": "Resilient Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_41": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive41.svg",
+      "displayName": "Immobilizing Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_42": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive42.svg",
+      "displayName": "Colonialist Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_43": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive43.svg",
+      "displayName": "Guide",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_44": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive44.svg",
+      "displayName": "Fleet Winds",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_45": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive45.svg",
+      "displayName": "Unnatural Fitness",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_46": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive46.svg",
+      "displayName": "Resilient Might",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_47": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive47.svg",
+      "displayName": "Mighty Resilience",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_48": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive48.svg",
+      "displayName": "Exalted Intuition",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_49": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive49.svg",
+      "displayName": "Exalted Resilience",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_50": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive50.svg",
+      "displayName": "Exalted Determination",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_51": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive51.svg",
+      "displayName": "Exalted Might",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_BattleAbility_Equipment_Passive_53": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_BattleAbility_Equipment_Passive53.svg",
+      "displayName": "Divine Intuition",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Caster04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Caster04.svg",
+      "displayName": "Protective Spirit",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Caster05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Caster05.svg",
+      "displayName": "Learning from Mistakes",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Caster06": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Caster06.svg",
+      "displayName": "Vanish",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Caster07": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Caster07.svg",
+      "displayName": "Shared Ward",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Caster08": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Caster08.svg",
+      "displayName": "Indomitable Ward",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Caster09": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Caster09.svg",
+      "displayName": "Force Blast",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Caster11": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Caster11.svg",
+      "displayName": "Find and Learn",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Caster12": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Caster12.svg",
+      "displayName": "Curious Looter",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Common01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Common01.svg",
+      "displayName": "Piledriver",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Common02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common02.svg",
+      "displayName": "Tireless Pace",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Common03": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Common03.svg",
+      "displayName": "Nature of the Beast",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Common04": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common04.svg",
+      "displayName": "Hypervigilant",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Common05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common05.svg",
+      "displayName": "Line of Duty",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Defender01.svg",
+      "displayName": "Paragon of Defense",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Defender02.svg",
+      "displayName": "War Machine",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender03": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Defender03.svg",
+      "displayName": "Peak Health",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Defender05.svg",
+      "displayName": "Strong Defenses",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender07": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Defender07.svg",
+      "displayName": "Hammer Strike",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Defender09": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Defender09.svg",
+      "displayName": "Spinning Top",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Defender11": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Defender11.svg",
+      "displayName": "Buckled Up",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Defender12": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Defender12.svg",
+      "displayName": "Accusation",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable01": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Flask of Dust Fire Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable02": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Poison Salts Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable03": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Mantle of Protection Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable04": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Cipher of Horror Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable05": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Translocation Device Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable06": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Hymn of Cynosure Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable07": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Enervating Crystal Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable08": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Blood of the Old Ones Power",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Equipment_Consumable09": {
+      "path": "/svg/battle-abilities/UI_Hero_Equipment_Consumable.svg",
+      "displayName": "Tear of the Lost Power",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn01.svg",
+      "displayName": "Patient Mentor",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn02.svg",
+      "displayName": "Direct Order",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_KinOfSheredyn03": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn03.svg",
+      "displayName": "Chosen of the Chosen",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn04.svg",
+      "displayName": "Devoted Guard",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn05.svg",
+      "displayName": "Triumphant Celebration",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Archer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Archer01.svg",
+      "displayName": "Shooting Expertise",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Archer02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Archer02.svg",
+      "displayName": "Supported Attack",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Defender01.svg",
+      "displayName": "Not the Right Way",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Defender02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Defender02.svg",
+      "displayName": "Unbreakable Will",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Warrior01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Warrior01.svg",
+      "displayName": "Tactical Focus",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_KinOfSheredyn_Warrior02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_KinOfSheredyn_Warrior02.svg",
+      "displayName": "Armored Fist",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord01.svg",
+      "displayName": "Death Touch",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_LastLord02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord02.svg",
+      "displayName": "Despot",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord05.svg",
+      "displayName": "Essence Syphoning",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord_Caster01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Caster01.svg",
+      "displayName": "Eternal Servitude",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_LastLord_Caster02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Caster02.svg",
+      "displayName": "Soul Inspection",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Defender01.svg",
+      "displayName": "Lost in the Fray",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord_Defender02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Defender02.svg",
+      "displayName": "Won't Rest",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_LastLord_Warrior01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Warrior01.svg",
+      "displayName": "Chilling Coup de Grâce",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_LastLord_Warrior02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_LastLord_Warrior02.svg",
+      "displayName": "Undying Will",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MangroveOfHarmony_Defender_01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender01.svg",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MangroveOfHarmony_Defender_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender02.svg",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_Ametrine01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Ametrine01.svg",
+      "displayName": "Rock Solid",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_Ametrine02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Ametrine02.svg",
+      "displayName": "Earthshaking Victory",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Blackhammer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Blackhammer01.svg",
+      "displayName": "Defiant Look",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Blackhammer02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Blackhammer02.svg",
+      "displayName": "Armed to the Teeth",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Common01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Common01.svg",
+      "displayName": "Persuasive Leader",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Common02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Common02.svg",
+      "displayName": "Exotic Trainer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Common03": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Common03.svg",
+      "displayName": "Unconventional Tactics",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Common04": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Common04.svg",
+      "displayName": "Outlandish Healing",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Common05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Common05.svg",
+      "displayName": "Entering the Ranks",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_DaughterOfBor01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_DaughterOfBor01.svg",
+      "displayName": "Shackles Breaker",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_DaughterOfBor02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_DaughterOfBor02.svg",
+      "displayName": "Triumphant Roar",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Foundling01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Foundling01.svg",
+      "displayName": "Necrotic Rituals",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Foundling02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Foundling02.svg",
+      "displayName": "Combat Analyst",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Gorog01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Gorog01.svg",
+      "displayName": "Shielding Momentum",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Gorog02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Gorog02.svg",
+      "displayName": "Rally Roar",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_GreenScion01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_GreenScion01.svg",
+      "displayName": "Mass Jinx",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_GreenScion02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_GreenScion02.svg",
+      "displayName": "Prize Cuttings",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_HoyAndLadhran01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_HoyAndLadhran01.svg",
+      "displayName": "Soothing Breeze",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_HoyAndLadhran02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_HoyAndLadhran02.svg",
+      "displayName": "Pick of the Plunder",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Hydracorn01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Hydracorn01.svg",
+      "displayName": "Spectral Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Hydracorn02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Hydracorn02.svg",
+      "displayName": "Veil of Nightmare",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_MangroveOfHarmony_01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender01.svg",
+      "displayName": "Ties to the Land",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_MangroveOfHarmony_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_MangroveOfHarmony_Defender02.svg",
+      "displayName": "Lashing Blow",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_Noquensii01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Noquensii01.svg",
+      "displayName": "Crowd's Hero",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Noquensii02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Noquensii02.svg",
+      "displayName": "Renowned Artist",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Ochling01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Ochling01.svg",
+      "displayName": "Looting Enthusiast",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Ochling02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Ochling02.svg",
+      "displayName": "Scammer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Oneroi01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Oneroi01.svg",
+      "displayName": "Shiny Hunter",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Oneroi02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Oneroi02.svg",
+      "displayName": "Major Hustler",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Sollusk01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Sollusk01.svg",
+      "displayName": "Executioner",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Sollusk02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Sollusk02.svg",
+      "displayName": "Military Discipline",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_TheConsortium01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_TheConsortium01.svg",
+      "displayName": "Precision Dash",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_TheConsortium02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_TheConsortium02.svg",
+      "displayName": "Haggler",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_UnseeingSeer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_UnseeingSeer01.svg",
+      "displayName": "The Call of Fate",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_MinorFaction_UnseeingSeer02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_UnseeingSeer02.svg",
+      "displayName": "Prophet's Insights",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Xavius01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_MinorFaction_Xavius01.svg",
+      "displayName": "Vessel of Errands",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_MinorFaction_Xavius02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_MinorFaction_Xavius02.svg",
+      "displayName": "Master-of-Armors",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag01.svg",
+      "displayName": "Lightstealer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag02.svg",
+      "displayName": "Stonecaster",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Mukag03": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag03.svg",
+      "displayName": "Shieldbearer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag04.svg",
+      "displayName": "Easy Marks",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag05.svg",
+      "displayName": "Hunting for Weakpoints",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag_Archer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Archer01.svg",
+      "displayName": "Sages' Guidance",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag_Archer02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Archer02.svg",
+      "displayName": "Heavy Rain",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Mukag_Caster01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Caster01.svg",
+      "displayName": "Ecclesiarch's Fury",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Mukag_Caster02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Caster02.svg",
+      "displayName": "Fear of God",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Defender01.svg",
+      "displayName": "Prey on the Weak",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag_Defender02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Mukag_Defender02.svg",
+      "displayName": "In Their Honor",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Mukag_PartnerTrait01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Mukag_PartnerTrait01.svg",
+      "displayName": "Zealous Instructor",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage01.svg",
+      "displayName": "Vicious Predator",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Necrophage02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Necrophage02.svg",
+      "displayName": "Restless Predator",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage03": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Necrophage03.svg",
+      "displayName": "Infectious",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage04": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Necrophage04.svg",
+      "displayName": "Overflowing Horde",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage05.svg",
+      "displayName": "Smells Blood",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage_Archer01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage_Archer01.svg",
+      "displayName": "Pack's Leader",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage_Archer02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage_Archer02.svg",
+      "displayName": "Parasitic Burst",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Necrophage_Defender01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage_Defender01.svg",
+      "displayName": "Carapace Up!",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage_Defender02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage_Defender02.svg",
+      "displayName": "Swarm's Fury",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Necrophage_Warrior01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Necrophage_Warrior01.svg",
+      "displayName": "Always Room for More",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Necrophage_Warrior02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Necrophage_Warrior02.svg",
+      "displayName": "Herald of the Horde",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar01.svg",
+      "displayName": "Doomwraith Killer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar02.svg",
+      "displayName": "Shield Dome",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Stellar03": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Stellar03.svg",
+      "displayName": "Legendary Heroes",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar04": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Stellar04.svg",
+      "displayName": "Tireless",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Stellar05.svg",
+      "displayName": "Legendary Smith",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar_Caster_01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Stellar_Caster_01.svg",
+      "displayName": "Observant Wanderer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar_Caster_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar_Caster_02.svg",
+      "displayName": "Genius Attack",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Stellar_Defender_01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar_Defender_01.svg",
+      "displayName": "Quick Step",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar_Defender_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar_Defender_02.svg",
+      "displayName": "Hunker Down!",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Stellar_Warrior_01": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar_Warrior_01.svg",
+      "displayName": "Pierce",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Stellar_Warrior_02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Stellar_Warrior_02.svg",
+      "displayName": "Ram's Charge",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_UniqueHeroAbility_01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_UniqueHeroAbility_01.svg",
+      "displayName": "Blossoming Wisdom",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Warrior01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Warrior01.svg",
+      "displayName": "Pillaging Adept",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Warrior02": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Warrior02.svg",
+      "displayName": "Siege Engineer",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Warrior04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Warrior04.svg",
+      "displayName": "Charge",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Warrior05": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Warrior05.svg",
+      "displayName": "Relentless Dash",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Warrior07": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Warrior07.svg",
+      "displayName": "Stirring Words",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Warrior09": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Warrior09.svg",
+      "displayName": "Physical Training",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_Warrior10": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Warrior10.svg",
+      "displayName": "Death Blow!",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_Warrior11": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_Warrior11.svg",
+      "displayName": "Deathlier Blow!",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_WorldHero00": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_WorldHero00.svg",
+      "displayName": "Violence of the Stars",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_WorldHero01": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_WorldHero01.svg",
+      "displayName": "Beastly Summoning",
+      "kind": "active"
+    },
+    "UnitAbility_Hero_WorldHero02": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_WorldHero02.svg",
+      "displayName": "Steely Retaliation",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_WorldHero03": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_WorldHero03.svg",
+      "displayName": "Counterattacking Instincts",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_WorldHero04": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Hero_WorldHero04.svg",
+      "displayName": "Battlefield Meds",
+      "kind": "passive"
+    },
+    "UnitAbility_Hero_WorldHero05": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Hero_WorldHero05.svg",
+      "displayName": "Shockwave Slam",
+      "kind": "active"
+    },
+    "UnitAbility_IgnoreRangedBreakDamage": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_IgnoreRangedBreakDamage.svg",
+      "displayName": "Innate Agility",
+      "kind": "passive"
+    },
+    "UnitAbility_Immuable": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Immuable.svg",
+      "displayName": "Fighting through the Pain",
+      "kind": "passive"
+    },
+    "UnitAbility_Infection": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Infection.svg",
+      "displayName": "Infectious",
+      "kind": "passive"
+    },
+    "UnitAbility_InpenetrableMomentum": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_ImprenableMomentum.svg",
+      "displayName": "Impenetrable Momentum",
+      "kind": "passive"
+    },
+    "UnitAbility_InspiringStrike_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_InspiringStrike_1.svg",
+      "displayName": "Inspiring Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_InspiringStrike_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_InspiringStrike_2.svg",
+      "displayName": "Inspiring Strike II",
+      "kind": "passive"
+    },
+    "UnitAbility_LaserCall": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_LaserCall.svg",
+      "displayName": "Chosen's Wrath",
+      "kind": "active"
+    },
+    "UnitAbility_LeechingSeeding_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LeechingSeeding_1.svg",
+      "displayName": "Accurse I",
+      "kind": "passive"
+    },
+    "UnitAbility_LeechingSeeding_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LeechingSeeding_2.svg",
+      "displayName": "Accurse II",
+      "kind": "passive"
+    },
+    "UnitAbility_LeechingStrike_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LeechingStrike_1.svg",
+      "displayName": "Leeching Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_LeechingStrike_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LeechingStrike_2.svg",
+      "displayName": "Leeching Strike II",
+      "kind": "passive"
+    },
+    "UnitAbility_LineAttack_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LineAttack_1.svg",
+      "displayName": "Run Through I",
+      "kind": "passive"
+    },
+    "UnitAbility_LineAttack_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_LineAttack_2.svg",
+      "displayName": "Run Through II",
+      "kind": "passive"
+    },
+    "UnitAbility_Mobile": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Mobile.svg",
+      "displayName": "Mobile",
+      "kind": "passive"
+    },
+    "UnitAbility_Momentum_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Momentum_1.svg",
+      "displayName": "Fearless Charge I",
+      "kind": "passive"
+    },
+    "UnitAbility_Momentum_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Momentum_2.svg",
+      "displayName": "Fearless Charge II",
+      "kind": "passive"
+    },
+    "UnitAbility_NeverYielding": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_NeverYielding.svg",
+      "displayName": "Never Yielding",
+      "kind": "passive"
+    },
+    "UnitAbility_NoRetaliate": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_NoRetaliate.svg",
+      "displayName": "Can't Retaliate",
+      "kind": "passive"
+    },
+    "UnitAbility_Obliteration": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Obliteration.svg",
+      "displayName": "Obliteration",
+      "kind": "passive"
+    },
+    "UnitAbility_Opportunist_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Opportunist_1.svg",
+      "displayName": "Opportunist I",
+      "kind": "passive"
+    },
+    "UnitAbility_Opportunist_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Opportunist_2.svg",
+      "displayName": "Opportunist II",
+      "kind": "passive"
+    },
+    "UnitAbility_Patroller_1": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_1.svg",
+      "displayName": "Patroller I",
+      "kind": "passive"
+    },
+    "UnitAbility_Patroller_2": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_2.svg",
+      "displayName": "Patroller II",
+      "kind": "passive"
+    },
+    "UnitAbility_Preparation_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Preparation_1.svg",
+      "displayName": "Steady Blow I",
+      "kind": "passive"
+    },
+    "UnitAbility_Preparation_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Preparation_2.svg",
+      "displayName": "Steady Blow II",
+      "kind": "passive"
+    },
+    "UnitAbility_PreparedBreakRetaliation": {
+      "path": "/svg/units/UI_Status_Unit_PreparedBreakRetaliation.svg",
+      "displayName": "Heavy Strike",
+      "kind": "passive"
+    },
+    "UnitAbility_ProtectiveOversight": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_ProtectiveOversight.svg",
+      "displayName": "Protective Oversight",
+      "kind": "active"
+    },
+    "UnitAbility_Push_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Push_1.svg",
+      "displayName": "Shoving Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_Push_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Push_2.svg",
+      "displayName": "Shoving Strike II",
+      "kind": "passive"
+    },
+    "UnitAbility_Quickfooted": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Quickfooted.svg",
+      "displayName": "Evasive Maneuvers",
+      "kind": "passive"
+    },
+    "UnitAbility_RangedRetaliate": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_RangedRetaliate.svg",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_1": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_1.svg",
+      "displayName": "Ranged I",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_2": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_2.svg",
+      "displayName": "Ranged II",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_3": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg",
+      "displayName": "Ranged III",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_4": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_4.svg",
+      "displayName": "Ranged IV",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_5": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_5.svg",
+      "displayName": "Ranged V",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_6": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_6.svg",
+      "displayName": "Ranged VI",
+      "kind": "passive"
+    },
+    "UnitAbility_Ranged_7": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_7.svg",
+      "displayName": "Ranged VII",
+      "kind": "passive"
+    },
+    "UnitAbility_RestingAura_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_RestingAura_1.svg",
+      "displayName": "Resting Aura I",
+      "kind": "passive"
+    },
+    "UnitAbility_RestingAura_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_RestingAura_2.svg",
+      "displayName": "Resting Aura II",
+      "kind": "passive"
+    },
+    "UnitAbility_RighteousWrath": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_RighteousWarth.svg",
+      "displayName": "Righteous Wrath",
+      "kind": "passive"
+    },
+    "UnitAbility_RockChrysalid": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_RockChrysalid.svg",
+      "kind": "passive"
+    },
+    "UnitAbility_SeismicSlash": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_SeismicSlash.svg",
+      "displayName": "Seismic Slash",
+      "kind": "active"
+    },
+    "UnitAbility_ShieldMastery_1": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_ShieldMastery_1.svg",
+      "displayName": "Shield Mastery I",
+      "kind": "passive"
+    },
+    "UnitAbility_ShieldMastery_2": {
+      "path": "/svg/unit-abilities/UI_UnitAbility_ShieldMastery_2.svg",
+      "displayName": "Shield Mastery II",
+      "kind": "passive"
+    },
+    "UnitAbility_SoulTransfer": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_SoulTransfer.svg",
+      "displayName": "Life from Death",
+      "kind": "passive"
+    },
+    "UnitAbility_StandAlone": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_StandAlone.svg",
+      "displayName": "Defiant Gaze",
+      "kind": "passive"
+    },
+    "UnitAbility_StonyEffigy": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_StonyEffigy.svg",
+      "displayName": "Stony Effigy",
+      "kind": "passive"
+    },
+    "UnitAbility_Targeting": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Targeting.svg",
+      "displayName": "Targeting",
+      "kind": "passive"
+    },
+    "UnitAbility_TeamPlayer_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_TeamPlayer_1.svg",
+      "displayName": "Coordinated Attack I",
+      "kind": "passive"
+    },
+    "UnitAbility_TeamPlayer_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_TeamPlayer_2.svg",
+      "displayName": "Coordinated Attack II",
+      "kind": "passive"
+    },
+    "UnitAbility_Terror_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Terror_1.svg",
+      "displayName": "Terror I",
+      "kind": "active"
+    },
+    "UnitAbility_Terror_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Terror_2.svg",
+      "displayName": "Terror II",
+      "kind": "active"
+    },
+    "UnitAbility_ToxicPulse": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_ToxicPulse.svg",
+      "displayName": "Toxic Pulse",
+      "kind": "passive"
+    },
+    "UnitAbility_Tripping_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Tripping_1.svg",
+      "displayName": "Incapacitating Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_Tripping_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Tripping_2.svg",
+      "displayName": "Incapacitating Strike II",
+      "kind": "passive"
+    },
+    "UnitAbility_Warmaster": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_Warmaster.svg",
+      "displayName": "Warmaster",
+      "kind": "passive"
+    },
+    "UnitAbility_WeakeningStrike_1": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_WeakeningStrike_1.svg",
+      "displayName": "Weakening Strike I",
+      "kind": "passive"
+    },
+    "UnitAbility_WeakeningStrike_2": {
+      "path": "/svg/battle-abilities/UI_UnitAbility_WeakeningStrike_2.svg",
+      "displayName": "Weakening Strike II",
+      "kind": "passive"
+    }
+  }
+}

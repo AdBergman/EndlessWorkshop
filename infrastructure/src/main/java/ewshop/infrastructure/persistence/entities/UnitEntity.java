@@ -82,6 +82,15 @@ public class UnitEntity {
     @Column(name = "line", nullable = false, columnDefinition = "text")
     private List<String> descriptionLines = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(
+            name = "unit_veterancy_progression_lines",
+            joinColumns = @JoinColumn(name = "unit_id", foreignKey = @ForeignKey(name = "fk_unit_veterancy_progression_lines_unit"))
+    )
+    @OrderColumn(name = "line_index")
+    @Column(name = "line", nullable = false, columnDefinition = "text")
+    private List<String> veterancyProgressionLines = new ArrayList<>();
+
     public UnitEntity() {}
 
     public Long getId() { return id; }
@@ -133,4 +142,9 @@ public class UnitEntity {
 
     public List<String> getDescriptionLines() { return descriptionLines; }
     public void setDescriptionLines(List<String> descriptionLines) { this.descriptionLines = descriptionLines; }
+
+    public List<String> getVeterancyProgressionLines() { return veterancyProgressionLines; }
+    public void setVeterancyProgressionLines(List<String> veterancyProgressionLines) {
+        this.veterancyProgressionLines = veterancyProgressionLines;
+    }
 }

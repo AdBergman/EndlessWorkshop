@@ -35,6 +35,7 @@ export interface Unit {
 
     abilityKeys: string[];
     descriptionLines: string[];
+    veterancyProgressionLines?: string[];
 }
 
 export interface Tech {

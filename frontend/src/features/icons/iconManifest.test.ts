@@ -9,7 +9,6 @@ import {
 describe("iconManifest", () => {
     it("resolves direct semantic icon paths from the public SVG manifest", () => {
         expect(getIconPath("resources", "food")).toBe("/svg/constructibles/UI_Common_Resource_Food.svg");
-        expect(getIconPath("resources", "science")).toBe("/svg/resources/UI_Common_Resource_Science.svg");
         expect(getIconPath("resources", "influence")).toBe("/svg/resources/UI_Common_Resource_Influence.svg");
         expect(getIconPath("stats", "damage")).toBe("/svg/heroes/UI_UnitItem_Damage.svg");
         expect(getIconPath("stats", "health")).toBe("/svg/units/UI_UnitItem_Health.svg");
@@ -18,7 +17,7 @@ describe("iconManifest", () => {
     it("resolves gameplay properties through the semantic lookup index", () => {
         expect(getStatIconByGameplayProperty("FoodProduced")?.key).toBe("food");
         expect(getStatIconByGameplayProperty("DamageMin")?.key).toBe("damage");
-        expect(getStatIconByGameplayProperty("ScienceNet")?.key).toBe("science");
+        expect(getStatIconByGameplayProperty("CultureNet")?.key).toBe("influence");
         expect(getStatIconByGameplayProperty("InfluenceProduced")?.key).toBe("influence");
     });
 

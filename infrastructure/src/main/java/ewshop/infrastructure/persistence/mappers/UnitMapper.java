@@ -35,6 +35,7 @@ public class UnitMapper {
         entity.setNextEvolutionUnitKeys(copy(domain.getNextEvolutionUnitKeys()));
         entity.setAbilityKeys(copy(domain.getAbilityKeys()));
         entity.setDescriptionLines(copy(domain.getDescriptionLines()));
+        entity.setVeterancyProgressionLines(copy(domain.getVeterancyProgressionLines()));
 
         return entity;
     }
@@ -64,6 +65,7 @@ public class UnitMapper {
 
                 .abilityKeys(entity.getAbilityKeys())
                 .descriptionLines(entity.getDescriptionLines())
+                .veterancyProgressionLines(entity.getVeterancyProgressionLines())
                 .build();
     }
 

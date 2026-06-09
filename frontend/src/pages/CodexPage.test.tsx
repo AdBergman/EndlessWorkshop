@@ -1103,7 +1103,7 @@ describe("CodexPage", () => {
         expect(screen.getByText("Unlocks The Consortium’s Bazaar")).toBeInTheDocument();
     });
 
-    it("renders hero codex facts conservatively from current description lines", async () => {
+    it("renders hero codex facts from exported description lines instead of parsing ownership from keys", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "heroes",
@@ -1143,6 +1143,51 @@ describe("CodexPage", () => {
         expect(screen.getByText("Archer")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
         expect(screen.getByText("Attack: 42")).toBeInTheDocument();
+    });
+
+    it("renders Tahuk as the public hero faction label while keeping Mukag references stable", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Mukag_Archer_0",
+                displayName: "Uranpar",
+                descriptionLines: [
+                    "Faction: Tahuk",
+                    "Class: Archer",
+                ],
+                referenceKeys: ["Faction_Mukag"],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Faction_Mukag",
+                descriptionLines: ["Affinity: Tahuks"],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { heroes: [entries[0]], factions: [entries[1]] },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Mukag_Archer_0"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Uranpar" })).toBeInTheDocument();
+        expect(screen.getByText("Faction")).toBeInTheDocument();
+        expect(screen.getAllByText("Tahuk").length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText("Related entries")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Tahuk Factions / Tahuk" })).toBeInTheDocument();
     });
 
     it("renders councilor effects as structured sections", async () => {

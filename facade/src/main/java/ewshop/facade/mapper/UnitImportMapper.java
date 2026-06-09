@@ -19,10 +19,15 @@ public final class UnitImportMapper {
     private UnitImportMapper() {}
 
     public static UnitImportSnapshot toSnapshot(UnitImportUnitDto dto) {
+        return toSnapshot(dto, List.of());
+    }
+
+    public static UnitImportSnapshot toSnapshot(UnitImportUnitDto dto, List<String> veterancyProgressionLines) {
         if (dto == null) throw new IllegalArgumentException("Row is required");
 
         boolean isMajor = Boolean.TRUE.equals(dto.isMajorFaction());
         String unitKey = req(dto.unitKey(), "unitKey");
+        boolean isHero = Boolean.TRUE.equals(dto.isHero());
 
         String rawFaction = trimToNull(dto.faction());
         String resolvedFaction = shouldFilterOut(dto) ? null : resolveAndValidateFaction(rawFaction, isMajor);
@@ -35,7 +40,7 @@ public final class UnitImportMapper {
                 .faction(resolvedFaction)
                 .isMajorFaction(isMajor)
 
-                .isHero(Boolean.TRUE.equals(dto.isHero()))
+                .isHero(isHero)
                 .isChosen(Boolean.TRUE.equals(dto.isChosen()))
                 .spawnType(trimToNull(dto.spawnType()))
 
@@ -49,6 +54,7 @@ public final class UnitImportMapper {
 
                 .abilityKeys(mergeAbilities(dto.ownAbilityKeys(), dto.abilityKeys()))
                 .descriptionLines(cleanLines(dto.descriptionLines()))
+                .veterancyProgressionLines(isHero ? List.of() : cleanLines(veterancyProgressionLines))
                 .build();
     }
 

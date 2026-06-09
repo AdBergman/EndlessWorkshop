@@ -26,6 +26,7 @@ class UnitMapperTest {
                 .attackSkillKey("Skill_Attack_Griffin")
                 .abilityKeys(List.of("UnitAbility_Flying", "UnitAbility_Charge"))
                 .descriptionLines(List.of("Strong aerial unit", "High mobility"))
+                .veterancyProgressionLines(List.of("Level 5: +10 [Defense] Defense"))
                 .build();
 
         // When
@@ -46,6 +47,7 @@ class UnitMapperTest {
         assertThat(dto.attackSkillKey()).isEqualTo("Skill_Attack_Griffin");
         assertThat(dto.abilityKeys()).containsExactly("UnitAbility_Flying", "UnitAbility_Charge");
         assertThat(dto.descriptionLines()).containsExactly("Strong aerial unit", "High mobility");
+        assertThat(dto.veterancyProgressionLines()).containsExactly("Level 5: +10 [Defense] Defense");
     }
 
     @Test

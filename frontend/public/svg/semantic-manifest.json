@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0-semantic-svg-manifest",
-  "exportedAtUtc": "2026-06-01T22:41:00.1479195Z",
+  "exportedAtUtc": "2026-06-09T04:47:35.3491541Z",
   "stats": {
     "combatStrength": {
       "key": "combatStrength",
@@ -370,16 +370,6 @@
         "InfluencePerPopulation"
       ]
     },
-    "knowledge": {
-      "key": "knowledge",
-      "sourceMapperName": "ResourceKnowledge",
-      "sourceMapperType": "UIResourceTypeUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#00000000",
-      "symbol": "[Science]",
-      "gameplayProperties": []
-    },
     "military": {
       "key": "military",
       "sourceMapperName": "ResourceMilitary",
@@ -437,24 +427,6 @@
       "color": "#FFFFFFFF",
       "symbol": "[PublicOpinion]",
       "gameplayProperties": []
-    },
-    "science": {
-      "key": "science",
-      "sourceMapperName": "ResourceScience",
-      "sourceMapperType": "UIResourceTypeUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": [
-        "ScienceFromTerrain",
-        "SciencePerValidTile",
-        "ScienceProduced",
-        "ScienceNet",
-        "ScienceGain",
-        "SciencePerPopulation",
-        "ResearchNet"
-      ]
     },
     "spirits": {
       "key": "spirits",
@@ -1006,66 +978,6 @@
       "path": "/svg/status-effects/UI_Common_Forest.svg",
       "color": "#FFFFFFFF",
       "symbol": "[Status_City_Reforestation]",
-      "gameplayProperties": []
-    },
-    "cityScienceHigh": {
-      "key": "cityScienceHigh",
-      "sourceMapperName": "Status_City_Science_High",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": []
-    },
-    "cityScienceLossHigh": {
-      "key": "cityScienceLossHigh",
-      "sourceMapperName": "Status_City_ScienceLoss_High",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": []
-    },
-    "cityScienceLossMedium": {
-      "key": "cityScienceLossMedium",
-      "sourceMapperName": "Status_City_ScienceLoss_Medium",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": []
-    },
-    "cityScienceLossSmall": {
-      "key": "cityScienceLossSmall",
-      "sourceMapperName": "Status_City_ScienceLoss_Small",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": []
-    },
-    "cityScienceMedium": {
-      "key": "cityScienceMedium",
-      "sourceMapperName": "Status_City_Science_Medium",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
-      "gameplayProperties": []
-    },
-    "cityScienceSmall": {
-      "key": "cityScienceSmall",
-      "sourceMapperName": "Status_City_Science_Small",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
       "gameplayProperties": []
     },
     "citySiege": {
@@ -1755,16 +1667,6 @@
       "path": "/svg/common/UI_Common_Ransack.svg",
       "color": "#FFFFFFFF",
       "symbol": "[Status_PartnerDen_Ransacked]",
-      "gameplayProperties": []
-    },
-    "partnerDenScienceBonus": {
-      "key": "partnerDenScienceBonus",
-      "sourceMapperName": "Status_PartnerDen_ScienceBonus",
-      "sourceMapperType": "StatusUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/resources/UI_Common_Resource_Science.svg",
-      "color": "#53BEECFF",
-      "symbol": "[ScienceColored]",
       "gameplayProperties": []
     },
     "populationGalvanizedCalled": {
@@ -4214,15 +4116,6 @@
       "color": "#FFFFFFFF",
       "gameplayProperties": []
     },
-    "typeClearMountain": {
-      "key": "typeClearMountain",
-      "sourceMapperName": "ArmyActionTypeClearMountain",
-      "sourceMapperType": "ArmyActionUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/battle-abilities/UI_ArmyActionTypeClearMountain.svg",
-      "color": "#FFFFFFFF",
-      "gameplayProperties": []
-    },
     "typeCloseRift": {
       "key": "typeCloseRift",
       "sourceMapperName": "ArmyActionTypeCloseRift",
@@ -4376,24 +4269,6 @@
       "color": "#FFFFFFFF",
       "gameplayProperties": []
     },
-    "typeRename": {
-      "key": "typeRename",
-      "sourceMapperName": "ArmyActionTypeRename",
-      "sourceMapperType": "ArmyActionUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/common/UI_Common_Rename.svg",
-      "color": "#00000000",
-      "gameplayProperties": []
-    },
-    "typeRenameUnit": {
-      "key": "typeRenameUnit",
-      "sourceMapperName": "ArmyActionTypeRenameUnit",
-      "sourceMapperType": "ArmyActionUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/common/UI_Common_Rename.svg",
-      "color": "#00000000",
-      "gameplayProperties": []
-    },
     "typeRiftTeleport": {
       "key": "typeRiftTeleport",
       "sourceMapperName": "ArmyActionTypeRiftTeleport",
@@ -4505,16 +4380,6 @@
       "symbol": "[DiplomaticState_Partnership]",
       "gameplayProperties": []
     },
-    "peace": {
-      "key": "peace",
-      "sourceMapperName": "DiplomaticStateTypePeace",
-      "sourceMapperType": "DiplomaticStateTypeUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/factions/UI_DiplomaticState_Peace.svg",
-      "color": "#82E1FFFF",
-      "symbol": "[DiplomaticState_Peace]",
-      "gameplayProperties": []
-    },
     "truce": {
       "key": "truce",
       "sourceMapperName": "DiplomaticStateTypeTruce",
@@ -4523,15 +4388,6 @@
       "path": "/svg/other/UI_diplomaticState_truce.svg",
       "color": "#82E1FFFF",
       "symbol": "[DiplomaticState_Truce]",
-      "gameplayProperties": []
-    },
-    "unknown": {
-      "key": "unknown",
-      "sourceMapperName": "DiplomaticStateTypeUnknown",
-      "sourceMapperType": "DiplomaticStateTypeUIMapper",
-      "imageKey": "Picto",
-      "path": "/svg/factions/UI_DiplomaticState_Unknown.svg",
-      "color": "#FFFFFFFF",
       "gameplayProperties": []
     },
     "war": {

@@ -1,0 +1,1912 @@
+{
+  "administrativeCenterSiege": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "administrativeCenterSubjugation": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "approval": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "armyMapSpeedImmobile": {
+    "path": "/svg/units/UI_Status_Unit_Entangled.svg"
+  },
+  "attackRange": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg",
+    "variants": {
+      "1": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_1.svg"
+      },
+      "2": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_2.svg"
+      },
+      "3": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg"
+      },
+      "4": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_4.svg"
+      },
+      "5": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_5.svg"
+      },
+      "6": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_6.svg"
+      },
+      "7": {
+        "path": "/svg/unit-abilities/UI_UnitAbility_Ranged_7.svg"
+      }
+    }
+  },
+  "bothEliminated": {
+    "path": "/svg/other/UI_diplomaticState_eliminated.svg"
+  },
+  "breach": {
+    "path": "/svg/resources/UI_Breach.svg"
+  },
+  "bridgeRansacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "cadavers": {
+    "path": "/svg/constructibles/UI_SpecialResources_Cadavers.svg",
+    "color": "#E17272FF"
+  },
+  "city": {
+    "path": "/svg/common/UI_Common_City.svg"
+  },
+  "cityApproval": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "cityApprovalHigh": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityApprovalLossHigh": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityApprovalLossMedium": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityApprovalLossSmall": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityApprovalMedium": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityApprovalSmall": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityDustHigh": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityDustLossHigh": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityDustLossMedium": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityDustLossSmall": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityDustMedium": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityDustSmall": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "cityFoodHigh": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityFoodLossHigh": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityFoodLossMedium": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityFoodLossSmall": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityFoodMedium": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityFoodSmall": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityForeignPopulationConsumption": {
+    "path": "/svg/status-effects/UI_City_ForeignConsumption.svg"
+  },
+  "cityFortificationHigh": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityFortificationLossHigh": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityFortificationLossMedium": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityFortificationLossSmall": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityFortificationMedium": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityFortificationSmall": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "cityGenericMinor12Step02C": {
+    "path": "/svg/status-effects/UI_Common_Status_Positive.svg"
+  },
+  "cityGenericMinor14Step02B": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "cityGenericMinor16Step02A": {
+    "path": "/svg/status-effects/UI_Common_Status_Positive.svg"
+  },
+  "cityIndustryHigh": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityIndustryLossHigh": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityIndustryLossMedium": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityIndustryLossSmall": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityIndustryMedium": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityIndustrySmall": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "cityInfluenceHigh": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityInfluenceLossHigh": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityInfluenceLossMedium": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityInfluenceLossSmall": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityInfluenceMedium": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityInfluenceSmall": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "cityKnightingUnitProductionBonus": {
+    "path": "/svg/status-effects/UI_City_ForeignConsumption.svg"
+  },
+  "cityOverpopulation": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_NextPopulationIcon.svg"
+  },
+  "cityRansack": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "cityReducedRebellionSmall": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "cityReforestation": {
+    "path": "/svg/status-effects/UI_Common_Forest.svg"
+  },
+  "citySiege": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "cityUnitCreationXpHigh": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "cityUnitCreationXpMedium": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "cityUnitCreationXpSmall": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "cityWar": {
+    "path": "/svg/status-effects/UI_DiplomaticState_War.svg"
+  },
+  "combatStrength": {
+    "path": "/svg/other/UI_combatStrength.svg"
+  },
+  "conjoinedResearch": {
+    "path": "/svg/other/UI_Diplomacy_ConjoinedResearch.svg"
+  },
+  "cultureColored": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "curiosity": {
+    "path": "/svg/status-effects/UI_Common_Curiosity.svg"
+  },
+  "damRansacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "damage": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+    "color": "#C872FCFF"
+  },
+  "damageBonusFlat": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "damageBonusModifier": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "damageRange": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "damageReductionFlat": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "damageReductionModifier": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "declarationCloseBorders": {
+    "path": "/svg/other/UI_Diplomacy_ClosedBorders.svg"
+  },
+  "declarationCompliment": {
+    "path": "/svg/other/UI_Diplomacy_Compliment.svg"
+  },
+  "declarationEmbraceCoralSymbiosis": {
+    "path": "/svg/other/UI_Diplomacy_EmbraceCoralBlessing.svg"
+  },
+  "declarationFactionQuestAspectChapter06AStep02": {
+    "path": "/svg/quests/UI_Diplomacy_CoralRejection.svg"
+  },
+  "declarationInsult": {
+    "path": "/svg/other/UI_Diplomacy_Insult.svg"
+  },
+  "declarationJustifiedWar": {
+    "path": "/svg/other/UI_Diplomacy_JustifiedWar.svg"
+  },
+  "declarationOpenBorders": {
+    "path": "/svg/other/UI_Diplomacy_OpenBorders.svg"
+  },
+  "declarationSendCalledAway": {
+    "path": "/svg/populations/UI_Population_Buyout.svg"
+  },
+  "declarationUnjustifiedWar": {
+    "path": "/svg/other/UI_Diplomacy_UnjustifiedWar.svg"
+  },
+  "defendBonusDamageReductionFlat": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "defense": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "diplomaticState_Partnership": {
+    "path": "/svg/other/UI_DiplomaticState_Partnership.svg"
+  },
+  "diplomaticState_Truce": {
+    "path": "/svg/other/UI_diplomaticState_truce.svg",
+    "color": "#82E1FFFF"
+  },
+  "diplomaticState_War": {
+    "path": "/svg/status-effects/UI_DiplomaticState_War.svg",
+    "color": "#FF8282FF"
+  },
+  "districtRansacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "dustColored": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg"
+  },
+  "empireApprovalHigh": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireApprovalLossHigh": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireApprovalLossMedium": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireApprovalLossSmall": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireApprovalMedium": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireApprovalSmall": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireCurioLootImproveHigh": {
+    "path": "/svg/status-effects/UI_Common_Curiosity.svg"
+  },
+  "empireCurioLootImproveMedium": {
+    "path": "/svg/status-effects/UI_Common_Curiosity.svg"
+  },
+  "empireCurioLootImproveSmall": {
+    "path": "/svg/status-effects/UI_Common_Curiosity.svg"
+  },
+  "empireDamageGainHigh": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "empireDamageGainMedium": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "empireDamageGainSmall": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "empireDecreeDefense07PatrioticApproval": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireDustLossPerCouncilor": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireDustPerCouncilor": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireDustPerProtectorateVillage": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireDustonPopHigh": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireDustonPopMedium": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireDustonPopSmall": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "empireGenericMinor04Step02C": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empireGenericMinor05Step02A": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "empireGenericMinor05Step02C": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "empireHpRegenHigh": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "empireHpRegenMedium": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "empireHpRegenSmall": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "empireInfluencePerCouncilor": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "empireMissionary": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "empireMissionaryBase": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "empireMissionaryBonus": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "empireMissionarySecularist": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "empireMissionarySecularistBonus": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "empireNoquensii01ApprovalGain": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "empirePositiveTreatyCostReduction": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "empirePublicOpinionHigh": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empirePublicOpinionLossHigh": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empirePublicOpinionLossMedium": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empirePublicOpinionLossSmall": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empirePublicOpinionMedium": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empirePublicOpinionSmall": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg",
+    "color": "#F04698FF"
+  },
+  "empireSpecificMinorAmetrine01BranchB": {
+    "path": "/svg/resources/UI_Common_StrategicResource.svg"
+  },
+  "empireVisionGainHigh": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "empireVisionGainMedium": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "empireVisionGainSmall": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "empireXpBoostHigh": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "empireXpBoostMedium": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "empireXpBoostSmall": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "experience": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "focus": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "focusUnitStatTypeFocus": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg",
+    "color": "#C872FCFF"
+  },
+  "food": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "foodColored": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "fortification": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "fortificationColored": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "health": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "healthPoints": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "healthRatio": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "healthRegen": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "healthUnitStatTypeHealthPoints": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "hero": {
+    "path": "/svg/common/UI_Common_Hero.svg"
+  },
+  "heroBaseAbility02": {
+    "path": "/svg/heroes/UI_Placeholder_PressuringTheEnemy.svg"
+  },
+  "heroPartnerAmetrine01": {
+    "path": "/svg/heroes/EntourageRelationTypePartner_Picto.svg"
+  },
+  "heroStatusLoss": {
+    "path": "/svg/heroes/UI_HearthBroken.svg"
+  },
+  "heroStatusNecroEggCarrier": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "heroStatusSarcophagusCarrier": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+    "color": "#FFFFFF00"
+  },
+  "heroStatus_Loss": {
+    "path": "/svg/heroes/UI_HearthBroken.svg"
+  },
+  "heroUnitFriendSupport": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "heroUnitNecrophageFactionQuest": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg",
+    "color": "#FFFFFF00"
+  },
+  "immigrationCustoms": {
+    "path": "/svg/other/UI_Diplomacy_ImmigrationCustom.svg"
+  },
+  "industry": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "industryColored": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "influence": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "influenceColored": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "jointMilitary": {
+    "path": "/svg/other/UI_Diplomacy_JoinMilitary.svg"
+  },
+  "mapExchange": {
+    "path": "/svg/other/UI_Diplomacy_MapExchange.svg"
+  },
+  "military": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "militia": {
+    "path": "/svg/common/UI_Common_Militia.svg"
+  },
+  "money": {
+    "path": "/svg/resources/UI_Common_Resource_Money.svg",
+    "color": "#E3B847FF"
+  },
+  "moneyColored": {
+    "path": "/svg/resources/UI_Common_Resource_Money.svg",
+    "color": "#E3B847FF"
+  },
+  "movement": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "movementPoints": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "movementUiUnitSingleStatsMovementSpeed": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "movementUnitStatTypeMovementSpeed": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "nonAggression": {
+    "path": "/svg/other/UI_Diplomacy_NonAgression.svg"
+  },
+  "observatoryStarGazing": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "observatoryStarGazingBase": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "observatoryStarGazingEnlightened": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "partiallyEliminated": {
+    "path": "/svg/other/UI_diplomaticState_eliminated.svg",
+    "color": "#FF8585FF"
+  },
+  "partnerDenDustBonus": {
+    "path": "/svg/resources/UI_Common_Resource_Money.svg",
+    "color": "#E3B847FF"
+  },
+  "partnerDenFoodBonus": {
+    "path": "/svg/constructibles/UI_Common_Resource_Food.svg",
+    "color": "#88C03FFF"
+  },
+  "partnerDenFortificationBonus": {
+    "path": "/svg/common/UI_Common_Fortification.svg",
+    "color": "#C73849FF"
+  },
+  "partnerDenIndustryBonus": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "partnerDenInfluenceBonus": {
+    "path": "/svg/resources/UI_Common_Resource_Influence.svg",
+    "color": "#B359FDFF"
+  },
+  "partnerDenRansacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "partnership": {
+    "path": "/svg/other/UI_DiplomaticState_Partnership.svg"
+  },
+  "population": {
+    "path": "/svg/resources/UI_Settlement_PopulationPicto.svg",
+    "color": "#F5EBE1FF"
+  },
+  "populationGalvanizedCalled": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "populationGalvanizedCalledBase": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "populationGalvanizedEnlightened": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "powerEstimation": {
+    "path": "/svg/resources/UI_UnitPowerEstimation.svg"
+  },
+  "publicOpinion": {
+    "path": "/svg/resources/UI_Diplomacy_PublicOpinion_Positive.svg"
+  },
+  "publicOpinionAtBattleFreePeaceForALongTime": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionAtPeaceForALongTime": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionAttackedWhileNonAgression": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionCloseFriendship01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionCloseFriendship02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionConjoinedResearchSigned": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionDivinePopulation": {
+    "path": "/svg/common/UI_Common_Population.svg"
+  },
+  "publicOpinionEmbraceCoralSymbiosisDeclared": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionINecroHateYouKin": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionINeedYourResources": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionIWantToInvadeYouForResources": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionInPartnershipForALongTime": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionJointMilitaryActive": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionOurHeroesAreArchenemies": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionShareCoralExploitationSigned": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionSharedVictorySigned": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionSidedWithMyJointMilitary": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionSidedWithOtherJointMilitary": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionTruceRespected": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionWeAreAtWar": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionWeAreBothLowRanked": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionWeShareAnAlly": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAreAtWarWithOurEnemy": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAreFriendWithMyEnemy": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAspectChapter06AStep02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAttackedMe": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAttackedMe02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAttackedMe03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAttackedMeBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouAttackedMyAlly": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouClaimedABorderTerritory": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouClearedADangerousTormented": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouClosedBorders": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouCrushedUsInWar": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDeclaredUnjustifiedWarOnMe": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDeclaredUnjustifiedWarOnSomeone": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDeclaredWarOnMe": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDestroyedCoral": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDevouredInMyTerritory": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouDoNotFollowMyVictoryPath": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouEliminatedMyAlly": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouEliminatedMyEnemy": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouFollowMyVictoryPath": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouIgnoredTruce": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouInvadedWithBurrow": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouLiberatedACityOfMine": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMyCamp": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMySettlement": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMySettlement02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMySettlement03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMySettlement04": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOccupiedMySettlementBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouOpenedBorders": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouProvidesCoral": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMyCamp": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMyMinistry": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMySettlement": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMySettlement02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMySettlement03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRansackedMySettlementBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMyCamp": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMyMinistry": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMySettlement": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMySettlement02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMySettlement03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRazedMySettlementBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRefusedATreaty01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRefusedATreaty02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRefusedATreaty03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRefusedATreatyBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedATreaty": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedATreaty02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedATreaty03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedATreatyBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedAspectChapter06AStep02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedClosedBorders": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouRevokedEmbraceCoralSymbiosis": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeACompliment": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeACompliment02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeACompliment03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeAComplimentBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeAnInsult": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeAnInsult02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeAnInsult03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSentMeAnInsultBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSettledNextToMeAspect": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSettledNextToMeKin": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSignedATreaty01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSignedATreaty02": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSignedATreaty03": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSignedATreatyBadge01": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouStoleMyRiches": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouSurrenderedToUs": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouTraumatizedMyHero": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouTrespassedMyNeutralBorder": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouWeakenedAnEnemy": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOpinionYouWitheredInMyTerritory": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "publicOrderColored": {
+    "path": "/svg/resources/UI_Common_Resource_PublicOrder.svg",
+    "color": "#F04698FF"
+  },
+  "resourceStrategic": {
+    "path": "/svg/resources/UI_Common_StrategicResource.svg"
+  },
+  "scienceColored": {
+    "path": "/svg/resources/UI_Common_Resource_Science.svg"
+  },
+  "settlementBlindFanaticism": {
+    "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg"
+  },
+  "settlementCalledBlessingHigh": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCalledBlessingMedium": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCalledBlessingSmall": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCalledFurryHigh": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCalledFurryMedium": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCalledFurrySmall": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCorruptionNegative": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementCorruptionPositive": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementMonsoonFestival": {
+    "path": "/svg/status-effects/UI_SettlementActionType_MonsoonFestival.svg"
+  },
+  "settlementNeverEndingDay": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayBalanced": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayBalancedBonus": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayBase": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayBonus": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayEnlightened": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementNeverEndingDayEnlightenedBonus": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "settlementOccupation": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementPrepared": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementReligiousUnrest": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementReligiousUnrestHigh": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementReligiousUnrestMedium": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlementReligiousUnrestSmall": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "settlement_Prepared": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "shareCoralExploitation": {
+    "path": "/svg/other/UI_Diplomacy_CoralSymbiosis.svg"
+  },
+  "sharedResearch": {
+    "path": "/svg/other/UI_Diplomacy_SharedResearch.svg"
+  },
+  "sharedVictory": {
+    "path": "/svg/other/UI_Diplomacy_SharedVictory.svg"
+  },
+  "shield": {
+    "path": "/svg/other/UI_UnitItem_Shield.svg"
+  },
+  "shieldPoints": {
+    "path": "/svg/other/UI_UnitItem_Shield.svg"
+  },
+  "spirits": {
+    "path": "/svg/resources/UI_SpecialResources_Spirits.svg",
+    "color": "#84F2F4FF"
+  },
+  "status_AdministrativeCenter_Subjugation": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "status_Army_Map_Speed_Immobile": {
+    "path": "/svg/units/UI_Status_Unit_Entangled.svg"
+  },
+  "status_Bridge_Ransacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "status_City_ForeignPopulationConsumption": {
+    "path": "/svg/status-effects/UI_City_ForeignConsumption.svg"
+  },
+  "status_City_KnightingUnitProductionBonus": {
+    "path": "/svg/status-effects/UI_City_ForeignConsumption.svg"
+  },
+  "status_City_Overpopulation": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_NextPopulationIcon.svg"
+  },
+  "status_City_Ransack": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "status_City_Reforestation": {
+    "path": "/svg/status-effects/UI_Common_Forest.svg"
+  },
+  "status_City_Siege": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "status_City_War": {
+    "path": "/svg/status-effects/UI_DiplomaticState_War.svg"
+  },
+  "status_Dam_Ransacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "status_District_Ransacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "status_Empire_Missionary": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Knowledge01.svg"
+  },
+  "status_Hero_Partner_Ametrine01": {
+    "path": "/svg/heroes/EntourageRelationTypePartner_Picto.svg"
+  },
+  "status_Observatory_StarGazing": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "status_Observatory_StarGazingEnlightened": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "status_PartnerDen_Ransacked": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "status_Positive": {
+    "path": "/svg/status-effects/UI_Common_Status_Positive.svg"
+  },
+  "status_Settlement_BlindFanaticism": {
+    "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg"
+  },
+  "status_Settlement_CorruptionNegative": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "status_Settlement_CorruptionPositive": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "status_Settlement_MonsoonFestival": {
+    "path": "/svg/status-effects/UI_SettlementActionType_MonsoonFestival.svg"
+  },
+  "status_Settlement_NeverEndingDay": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "status_Settlement_NeverEndingDayEnlightened": {
+    "path": "/svg/status-effects/UI_EmpireActionTypeMukag_Light03.svg"
+  },
+  "status_Settlement_ReligiousUnrest": {
+    "path": "/svg/status-effects/UI_AllSettlementsWindow_CityLevelsIcon.svg"
+  },
+  "status_Unit_Accelerated_1": {
+    "path": "/svg/units/UI_Status_Unit_Accelerated_1.svg"
+  },
+  "status_Unit_Accelerated_2": {
+    "path": "/svg/units/UI_Status_Unit_Accelerated_2.svg"
+  },
+  "status_Unit_BeatenUp": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "status_Unit_Berserk": {
+    "path": "/svg/units/UI_Status_Unit_Berserk.svg"
+  },
+  "status_Unit_Bleeding": {
+    "path": "/svg/units/UI_Status_Unit_Bleeding.svg"
+  },
+  "status_Unit_Bodyguard": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg"
+  },
+  "status_Unit_Bodyguarded": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg"
+  },
+  "status_Unit_BreakRangedDamage": {
+    "path": "/svg/units/UI_Status_Unit_BreakRangedDamage.svg"
+  },
+  "status_Unit_CavalryCharge": {
+    "path": "/svg/units/UI_UnitItem_UnitClass_Cavalry.svg"
+  },
+  "status_Unit_Confused": {
+    "path": "/svg/units/UI_Status_Unit_Confused.svg"
+  },
+  "status_Unit_Corrupted": {
+    "path": "/svg/units/UI_Status_Unit_Corrupted.svg"
+  },
+  "status_Unit_CorruptedRebirth": {
+    "path": "/svg/units/UI_Status_Unit_Corrupted.svg"
+  },
+  "status_Unit_Cumbersome": {
+    "path": "/svg/units/UI_Status_Unit_Cumbersome.svg"
+  },
+  "status_Unit_CursedDefense": {
+    "path": "/svg/units/UI_Status_Unit_Battle_CursedDefense.svg"
+  },
+  "status_Unit_Damaged": {
+    "path": "/svg/units/UI_Status_Unit_Damaged.svg"
+  },
+  "status_Unit_Defending": {
+    "path": "/svg/heroes/UI_Placeholder_PressuringTheEnemy.svg"
+  },
+  "status_Unit_DefensivePlate": {
+    "path": "/svg/units/UI_Status_Unit_Invicible.svg"
+  },
+  "status_Unit_DefensivePosture_1": {
+    "path": "/svg/units/UI_Status_Unit_DefensivePosture_1.svg"
+  },
+  "status_Unit_Drowning": {
+    "path": "/svg/units/UI_Status_Unit_Drowning.svg"
+  },
+  "status_Unit_Drunk": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn05.svg"
+  },
+  "status_Unit_Ecstatic": {
+    "path": "/svg/units/UI_Status_Unit_Ecstatic.svg"
+  },
+  "status_Unit_Encircled": {
+    "path": "/svg/units/UI_Status_Unit_Encircled.svg"
+  },
+  "status_Unit_Enraged": {
+    "path": "/svg/units/UI_Status_Unit_Enraged.svg"
+  },
+  "status_Unit_Entangled": {
+    "path": "/svg/units/UI_Status_Unit_Entangled.svg"
+  },
+  "status_Unit_Ephemeral": {
+    "path": "/svg/units/UI_Status_Unit_Ephemeral.svg"
+  },
+  "status_Unit_FocusedStance": {
+    "path": "/svg/units/UI_Status_Unit_FocusedStance.svg"
+  },
+  "status_Unit_Focused_1": {
+    "path": "/svg/units/UI_Status_Unit_Focused_1.svg"
+  },
+  "status_Unit_Focused_2": {
+    "path": "/svg/units/UI_Status_Unit_Focused_2.svg"
+  },
+  "status_Unit_Frenzy": {
+    "path": "/svg/units/UI_Status_Unit_Frenzy.svg"
+  },
+  "status_Unit_Harmonized": {
+    "path": "/svg/units/UI_Status_Unit_Harmonized.svg"
+  },
+  "status_Unit_HeavilyDamaged": {
+    "path": "/svg/units/UI_Status_Unit_Damaged.svg"
+  },
+  "status_Unit_Hunted": {
+    "path": "/svg/units/UI_Status_Unit_Hunted.svg"
+  },
+  "status_Unit_Illuminated": {
+    "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination.svg"
+  },
+  "status_Unit_Illuminated_Upgraded": {
+    "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination_Upgraded.svg"
+  },
+  "status_Unit_Immobilized": {
+    "path": "/svg/units/UI_Status_Unit_Immobilized.svg"
+  },
+  "status_Unit_InfantryLine": {
+    "path": "/svg/constructibles/UI_UnitItem_UnitClass_Melee.svg"
+  },
+  "status_Unit_Infected": {
+    "path": "/svg/units/UI_Status_Unit_Infected.svg"
+  },
+  "status_Unit_Infused_1": {
+    "path": "/svg/units/UI_Status_Unit_Infused_1.svg"
+  },
+  "status_Unit_Infused_2": {
+    "path": "/svg/units/UI_Status_Unit_Infused_2.svg"
+  },
+  "status_Unit_Inspired_1": {
+    "path": "/svg/units/UI_Status_Unit_Inspired_1.svg"
+  },
+  "status_Unit_Inspired_2": {
+    "path": "/svg/units/UI_Status_Unit_Inspired_2.svg"
+  },
+  "status_Unit_Invincible": {
+    "path": "/svg/units/UI_Status_Unit_Invincible.svg"
+  },
+  "status_Unit_LeechingSeeds_1": {
+    "path": "/svg/units/UI_Status_Unit_LeechingSeeds_1.svg"
+  },
+  "status_Unit_LeechingSeeds_2": {
+    "path": "/svg/units/UI_Status_Unit_LeechingSeeds_2.svg"
+  },
+  "status_Unit_Map_Damage_Gain01": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "status_Unit_Map_Damage_Gain02": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "status_Unit_Map_Damage_Loss01": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "status_Unit_Map_Damage_Loss02": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "status_Unit_Map_Defense_Gain01": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "status_Unit_Map_Defense_Gain02": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "status_Unit_Map_Defense_Loss01": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "status_Unit_Map_Defense_Loss02": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "status_Unit_Map_Dying": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "status_Unit_Map_Experience_Gain01": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "status_Unit_Map_Experience_Gain02": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "status_Unit_Map_Experience_Loss01": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "status_Unit_Map_FeedingFrenzy": {
+    "path": "/svg/units/UI_Status_Unit_Frenzy.svg"
+  },
+  "status_Unit_Map_Focus_Gain01": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "status_Unit_Map_Focus_Gain02": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "status_Unit_Map_Focus_Loss01": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "status_Unit_Map_Focus_Loss02": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "status_Unit_Map_ForbidRiftArmyAction": {
+    "path": "/svg/units/UI_Common_Rift.svg"
+  },
+  "status_Unit_Map_HP_Loss01": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "status_Unit_Map_HpRegen_Gain01": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "status_Unit_Map_HpRegen_Gain02": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "status_Unit_Map_Patroller_01": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_1.svg"
+  },
+  "status_Unit_Map_Patroller_02": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_2.svg"
+  },
+  "status_Unit_Map_Speed_Gain01": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "status_Unit_Map_Speed_Gain02": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "status_Unit_Map_Speed_Loss01": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "status_Unit_Map_Vision_Gain01": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "status_Unit_Map_Wandering": {
+    "path": "/svg/units/UI_Status_Unit_Wandering.svg"
+  },
+  "status_Unit_Marked": {
+    "path": "/svg/units/UI_Status_Unit_Marked.svg"
+  },
+  "status_Unit_Preparation_1": {
+    "path": "/svg/units/UI_Status_Unit_Preparation_1.svg"
+  },
+  "status_Unit_Preparation_2": {
+    "path": "/svg/units/UI_Status_Unit_Preparation_2.svg"
+  },
+  "status_Unit_PreparedBreakRetaliation": {
+    "path": "/svg/units/UI_Status_Unit_PreparedBreakRetaliation.svg"
+  },
+  "status_Unit_Reinforced_1": {
+    "path": "/svg/units/UI_Status_Unit_Reinforced_1.svg"
+  },
+  "status_Unit_Reinforced_2": {
+    "path": "/svg/units/UI_Status_Unit_Reinforced_2.svg"
+  },
+  "status_Unit_ReligiousRioter": {
+    "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg"
+  },
+  "status_Unit_Slowed_1": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_1.svg"
+  },
+  "status_Unit_Slowed_2": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_2.svg"
+  },
+  "status_Unit_Slowed_3": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_3.svg"
+  },
+  "status_Unit_Slowed_4": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_4.svg"
+  },
+  "status_Unit_Slowed_5": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_5.svg"
+  },
+  "status_Unit_StoneSkin": {
+    "path": "/svg/units/UI_Status_Unit_StoneSkin.svg"
+  },
+  "status_Unit_Terrorized_1": {
+    "path": "/svg/units/UI_Status_Unit_Terrorized_1.svg"
+  },
+  "status_Unit_Terrorized_2": {
+    "path": "/svg/units/UI_Status_Unit_Terrorized_2.svg"
+  },
+  "status_Unit_UsedSandRuinTeleportDuringTurn": {
+    "path": "/svg/units/UI_ArmyActionTypeRiftTeleport.svg"
+  },
+  "status_Unit_Vulnerable_1": {
+    "path": "/svg/units/UI_Status_Unit_Vulnerable_1.svg"
+  },
+  "status_Unit_Vulnerable_2": {
+    "path": "/svg/units/UI_Status_Unit_Vulnerable_2.svg"
+  },
+  "status_Unit_Weakened_1": {
+    "path": "/svg/units/UI_Status_Unit_Weakened_1.svg"
+  },
+  "status_Unit_Weakened_2": {
+    "path": "/svg/units/UI_Status_Unit_Weakened_2.svg"
+  },
+  "subjugationPoints": {
+    "path": "/svg/resources/UI_SubjugationPoints.svg"
+  },
+  "territoryArmyDamageLossSmall": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "territoryArmyDamageSmall": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "territoryIndustrySmall": {
+    "path": "/svg/constructibles/UI_Common_Resource_Industry.svg",
+    "color": "#F27A60FF"
+  },
+  "territoryStratProdLossSmall": {
+    "path": "/svg/resources/UI_Common_StrategicResource.svg"
+  },
+  "territoryStratProdSmall": {
+    "path": "/svg/resources/UI_Common_StrategicResource.svg"
+  },
+  "tormentedArmyActionTypeBaitTormentedArmy": {
+    "path": "/svg/other/UI_TormentedStatusType_FollowingBait.svg"
+  },
+  "tormentedArmyActionTypeHireTormentedHunter": {
+    "path": "/svg/common/UI_Common_Tormented.svg"
+  },
+  "treatyPublicOpinionStatusLargeNegative": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "treatyPublicOpinionStatusLargePositive": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "treatyPublicOpinionStatusMediumNegative": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "treatyPublicOpinionStatusMediumPositive": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "treatyPublicOpinionStatusSmallNegative": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "treatyPublicOpinionStatusSmallPositive": {
+    "path": "/svg/common/UI_Common_PublicOpinion.svg"
+  },
+  "truce": {
+    "path": "/svg/other/UI_diplomaticState_truce.svg",
+    "color": "#82E1FFFF"
+  },
+  "turn": {
+    "path": "/svg/common/UI_Common_Turn.svg"
+  },
+  "typeArmyTalk": {
+    "path": "/svg/common/UI_Common_SpeechBubble.svg"
+  },
+  "typeAttackArmy": {
+    "path": "/svg/common/UI_Common_Battle.svg"
+  },
+  "typeAttackSettlement": {
+    "path": "/svg/common/UI_Common_Battle.svg"
+  },
+  "typeAttackVillage": {
+    "path": "/svg/common/UI_Common_Battle.svg"
+  },
+  "typeAutoExplore": {
+    "path": "/svg/other/UI_ArmyActionTypeAutoExplore.svg"
+  },
+  "typeBribe": {
+    "path": "/svg/common/UI_Common_Bribe.svg"
+  },
+  "typeBuildBridge": {
+    "path": "/svg/other/UI_ArmyActionTypeBuildBridge.svg"
+  },
+  "typeBuildBurrow": {
+    "path": "/svg/other/UI_ArmyActionTypeBuildBurrow.svg"
+  },
+  "typeBuildCoralSpore": {
+    "path": "/svg/quests/UI_Common_Aspect_CoralSpore.svg"
+  },
+  "typeBuildDam": {
+    "path": "/svg/common/UI_Common_Dam.svg"
+  },
+  "typeBuildObservatory": {
+    "path": "/svg/status-effects/UI_Common_Mukag_Observatory.svg"
+  },
+  "typeBuildPartnerDen": {
+    "path": "/svg/heroes/UI_DenPin_Picto.svg"
+  },
+  "typeCancel": {
+    "path": "/svg/common/UI_Common_Cancel.svg"
+  },
+  "typeCloseRift": {
+    "path": "/svg/common/UI_Common_CloseRift.svg"
+  },
+  "typeConsume": {
+    "path": "/svg/common/UI_Common_Consume.svg"
+  },
+  "typeCreateCamp": {
+    "path": "/svg/common/UI_Common_Camp.svg"
+  },
+  "typeCutForest": {
+    "path": "/svg/other/UI_ArmyActionTypeCutForest.svg"
+  },
+  "typeDisbandUnits": {
+    "path": "/svg/common/UI_Common_Bin.svg"
+  },
+  "typeEnterBurrow": {
+    "path": "/svg/other/UI_ArmyActionTypeEnterBurrow.svg"
+  },
+  "typeFoundCity": {
+    "path": "/svg/other/UI_ArmyActionTypeBuildCapital.svg"
+  },
+  "typeGuard": {
+    "path": "/svg/battle-abilities/UI_ArmyActionTypeGuard.svg"
+  },
+  "typeGuardUntilHealed": {
+    "path": "/svg/other/UI_ArmyActionTypeGuardUntilHealed.svg"
+  },
+  "typeHealUnits": {
+    "path": "/svg/status-effects/UI_ArmyActionTypeHealUnits.svg"
+  },
+  "typeInteractQuestPoi": {
+    "path": "/svg/common/UI_Common_Quest.svg"
+  },
+  "typeMove": {
+    "path": "/svg/common/UI_Common_Movement.svg"
+  },
+  "typeOccupy": {
+    "path": "/svg/common/UI_Common_Occupy.svg"
+  },
+  "typeOpenDungeon": {
+    "path": "/svg/other/UI_ArmyActionTypeOpenDungeon.svg"
+  },
+  "typeParley": {
+    "path": "/svg/common/UI_Common_SpeechBubble.svg"
+  },
+  "typePlantForest": {
+    "path": "/svg/other/UI_ArmyActionTypePlantForest.svg"
+  },
+  "typeRaze": {
+    "path": "/svg/common/UI_Common_Raze.svg"
+  },
+  "typeRiftTeleport": {
+    "path": "/svg/units/UI_ArmyActionTypeRiftTeleport.svg"
+  },
+  "typeSack": {
+    "path": "/svg/common/UI_Common_Ransack.svg"
+  },
+  "typeScoutDungeon": {
+    "path": "/svg/common/UI_Common_Dungeon.svg"
+  },
+  "typeSiege": {
+    "path": "/svg/common/UI_Common_Siege.svg"
+  },
+  "typeSkipTurn": {
+    "path": "/svg/other/UI_ArmyActionTypeSkipTurn.svg"
+  },
+  "typeSleep": {
+    "path": "/svg/other/UI_ArmyActionTypeSleep.svg"
+  },
+  "typeStripTile": {
+    "path": "/svg/other/UI_ArmyActionTypeStripTile.svg"
+  },
+  "typeSubjugate": {
+    "path": "/svg/other/UI_ArmyActionTypeSubjugate.svg"
+  },
+  "typeTransferUnits": {
+    "path": "/svg/other/UI_ArmyActionTypeTransferUnit.svg"
+  },
+  "unit": {
+    "path": "/svg/common/UI_Common_Unit.svg",
+    "color": "#F5EBE1FF"
+  },
+  "unitAbility_Hero_Common02": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common02.svg"
+  },
+  "unitAccelerated1": {
+    "path": "/svg/units/UI_Status_Unit_Accelerated_1.svg"
+  },
+  "unitAccelerated2": {
+    "path": "/svg/units/UI_Status_Unit_Accelerated_2.svg"
+  },
+  "unitBattleCursedDefense": {
+    "path": "/svg/units/UI_Status_Unit_Battle_CursedDefense.svg"
+  },
+  "unitBeatenUp": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "unitBerserk": {
+    "path": "/svg/units/UI_Status_Unit_Berserk.svg"
+  },
+  "unitBleeding": {
+    "path": "/svg/units/UI_Status_Unit_Bleeding.svg"
+  },
+  "unitBodyguard": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg"
+  },
+  "unitBodyguarded": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_BodyGuard.svg"
+  },
+  "unitBreakRangedDamage": {
+    "path": "/svg/units/UI_Status_Unit_BreakRangedDamage.svg"
+  },
+  "unitCavalryCharge": {
+    "path": "/svg/units/UI_UnitItem_UnitClass_Cavalry.svg"
+  },
+  "unitConfused": {
+    "path": "/svg/units/UI_Status_Unit_Confused.svg"
+  },
+  "unitCorrupted": {
+    "path": "/svg/units/UI_Status_Unit_Corrupted.svg"
+  },
+  "unitCorruptedRebirth": {
+    "path": "/svg/units/UI_Status_Unit_Corrupted.svg"
+  },
+  "unitCumbersome": {
+    "path": "/svg/units/UI_Status_Unit_Cumbersome.svg"
+  },
+  "unitDamaged": {
+    "path": "/svg/units/UI_Status_Unit_Damaged.svg"
+  },
+  "unitDefending": {
+    "path": "/svg/heroes/UI_Placeholder_PressuringTheEnemy.svg"
+  },
+  "unitDefensivePlate": {
+    "path": "/svg/units/UI_Status_Unit_Invicible.svg"
+  },
+  "unitDefensivePosture1": {
+    "path": "/svg/units/UI_Status_Unit_DefensivePosture_1.svg"
+  },
+  "unitDrowning": {
+    "path": "/svg/units/UI_Status_Unit_Drowning.svg"
+  },
+  "unitDrunk": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Hero_KinOfSheredyn05.svg"
+  },
+  "unitEcstatic": {
+    "path": "/svg/units/UI_Status_Unit_Ecstatic.svg"
+  },
+  "unitEncircled": {
+    "path": "/svg/units/UI_Status_Unit_Encircled.svg"
+  },
+  "unitEnraged": {
+    "path": "/svg/units/UI_Status_Unit_Enraged.svg"
+  },
+  "unitEntangled": {
+    "path": "/svg/units/UI_Status_Unit_Entangled.svg"
+  },
+  "unitEphemeral": {
+    "path": "/svg/units/UI_Status_Unit_Ephemeral.svg"
+  },
+  "unitFocused1": {
+    "path": "/svg/units/UI_Status_Unit_Focused_1.svg"
+  },
+  "unitFocused2": {
+    "path": "/svg/units/UI_Status_Unit_Focused_2.svg"
+  },
+  "unitFocusedStance": {
+    "path": "/svg/units/UI_Status_Unit_FocusedStance.svg"
+  },
+  "unitFrenzy": {
+    "path": "/svg/units/UI_Status_Unit_Frenzy.svg"
+  },
+  "unitHarmonized": {
+    "path": "/svg/units/UI_Status_Unit_Harmonized.svg"
+  },
+  "unitHeavilyDamaged": {
+    "path": "/svg/units/UI_Status_Unit_Damaged.svg"
+  },
+  "unitHunted": {
+    "path": "/svg/units/UI_Status_Unit_Hunted.svg"
+  },
+  "unitIlluminated": {
+    "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination.svg"
+  },
+  "unitIlluminatedUpgraded": {
+    "path": "/svg/battle-abilities/UI_BattleAbility_Mukag_Illumination_Upgraded.svg"
+  },
+  "unitImmobilized": {
+    "path": "/svg/units/UI_Status_Unit_Immobilized.svg"
+  },
+  "unitInfantryLine": {
+    "path": "/svg/constructibles/UI_UnitItem_UnitClass_Melee.svg"
+  },
+  "unitInfected": {
+    "path": "/svg/units/UI_Status_Unit_Infected.svg"
+  },
+  "unitInfused1": {
+    "path": "/svg/units/UI_Status_Unit_Infused_1.svg"
+  },
+  "unitInfused2": {
+    "path": "/svg/units/UI_Status_Unit_Infused_2.svg"
+  },
+  "unitInspired1": {
+    "path": "/svg/units/UI_Status_Unit_Inspired_1.svg"
+  },
+  "unitInspired2": {
+    "path": "/svg/units/UI_Status_Unit_Inspired_2.svg"
+  },
+  "unitInvincible": {
+    "path": "/svg/units/UI_Status_Unit_Invincible.svg"
+  },
+  "unitLeechingSeeds1": {
+    "path": "/svg/units/UI_Status_Unit_LeechingSeeds_1.svg"
+  },
+  "unitLeechingSeeds2": {
+    "path": "/svg/units/UI_Status_Unit_LeechingSeeds_2.svg"
+  },
+  "unitMapComa": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "unitMapDamageGain01": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "unitMapDamageGain02": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "unitMapDamageLoss01": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "unitMapDamageLoss02": {
+    "path": "/svg/heroes/UI_UnitItem_Damage.svg"
+  },
+  "unitMapDefenseGain01": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "unitMapDefenseGain02": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "unitMapDefenseLoss01": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "unitMapDefenseLoss02": {
+    "path": "/svg/abilities/UI_UnitItem_Defense.svg"
+  },
+  "unitMapDying": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "unitMapExperienceGain01": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "unitMapExperienceGain02": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "unitMapExperienceLoss01": {
+    "path": "/svg/common/UI_Common_ExperiencePoints.svg"
+  },
+  "unitMapFeedingFrenzy": {
+    "path": "/svg/units/UI_Status_Unit_Frenzy.svg"
+  },
+  "unitMapFocusGain01": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "unitMapFocusGain02": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "unitMapFocusLoss01": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "unitMapFocusLoss02": {
+    "path": "/svg/units/UI_UnitItem_Focus.svg"
+  },
+  "unitMapForbidRiftArmyAction": {
+    "path": "/svg/units/UI_Common_Rift.svg"
+  },
+  "unitMapGrieving": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg"
+  },
+  "unitMapHeroCommon02": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Hero_Common02.svg"
+  },
+  "unitMapHpLoss01": {
+    "path": "/svg/units/UI_UnitItem_Health.svg"
+  },
+  "unitMapHpRegenGain01": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "unitMapHpRegenGain02": {
+    "path": "/svg/status-effects/UI_UnitItem_HealthRegen.svg"
+  },
+  "unitMapPatroller01": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_1.svg"
+  },
+  "unitMapPatroller02": {
+    "path": "/svg/unit-abilities/UI_UnitAbility_Patroller_2.svg"
+  },
+  "unitMapSick": {
+    "path": "/svg/resources/UI_Common_Resource_Dust.svg",
+    "color": "#E3B847FF"
+  },
+  "unitMapSpeedGain01": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "unitMapSpeedGain02": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "unitMapSpeedLoss01": {
+    "path": "/svg/status-effects/UI_UnitItem_MovementPoints.svg"
+  },
+  "unitMapVisionGain01": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "unitMapVisionLoss01": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "unitMapWandering": {
+    "path": "/svg/units/UI_Status_Unit_Wandering.svg"
+  },
+  "unitMarked": {
+    "path": "/svg/units/UI_Status_Unit_Marked.svg"
+  },
+  "unitPowerEstimation": {
+    "path": "/svg/resources/UI_UnitPowerEstimation.svg"
+  },
+  "unitPreparation1": {
+    "path": "/svg/units/UI_Status_Unit_Preparation_1.svg"
+  },
+  "unitPreparation2": {
+    "path": "/svg/units/UI_Status_Unit_Preparation_2.svg"
+  },
+  "unitPreparedBreakRetaliation": {
+    "path": "/svg/units/UI_Status_Unit_PreparedBreakRetaliation.svg"
+  },
+  "unitReinforced1": {
+    "path": "/svg/units/UI_Status_Unit_Reinforced_1.svg"
+  },
+  "unitReinforced2": {
+    "path": "/svg/units/UI_Status_Unit_Reinforced_2.svg"
+  },
+  "unitReligiousRioter": {
+    "path": "/svg/units/UI_Status_Unit_ReligiousRioter.svg"
+  },
+  "unitSlowed1": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_1.svg"
+  },
+  "unitSlowed2": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_2.svg"
+  },
+  "unitSlowed3": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_3.svg"
+  },
+  "unitSlowed4": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_4.svg"
+  },
+  "unitSlowed5": {
+    "path": "/svg/units/UI_Status_Unit_Slowed_5.svg"
+  },
+  "unitStoneSkin": {
+    "path": "/svg/units/UI_Status_Unit_StoneSkin.svg"
+  },
+  "unitTerrorized1": {
+    "path": "/svg/units/UI_Status_Unit_Terrorized_1.svg"
+  },
+  "unitTerrorized2": {
+    "path": "/svg/units/UI_Status_Unit_Terrorized_2.svg"
+  },
+  "unitUpkeep": {
+    "path": "/svg/resources/UI_Common_Resource_Money.svg"
+  },
+  "unitUsedSandRuinTeleportDuringTurn": {
+    "path": "/svg/units/UI_ArmyActionTypeRiftTeleport.svg"
+  },
+  "unitVulnerable1": {
+    "path": "/svg/units/UI_Status_Unit_Vulnerable_1.svg"
+  },
+  "unitVulnerable2": {
+    "path": "/svg/units/UI_Status_Unit_Vulnerable_2.svg"
+  },
+  "unitWeakened1": {
+    "path": "/svg/units/UI_Status_Unit_Weakened_1.svg"
+  },
+  "unitWeakened2": {
+    "path": "/svg/units/UI_Status_Unit_Weakened_2.svg"
+  },
+  "veterancyLevel": {
+    "path": "/svg/other/UI_UnitItem_VeterancyStar_Shape.svg"
+  },
+  "vision": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "visionExchange": {
+    "path": "/svg/other/UI_Diplomacy_VisionExchanged.svg"
+  },
+  "visionRange": {
+    "path": "/svg/status-effects/UI_UnitItem_Vision.svg"
+  },
+  "war": {
+    "path": "/svg/status-effects/UI_DiplomaticState_War.svg",
+    "color": "#FF8282FF"
+  }
+}

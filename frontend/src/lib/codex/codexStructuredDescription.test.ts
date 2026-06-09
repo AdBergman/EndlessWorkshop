@@ -90,6 +90,12 @@ describe("codexStructuredDescription", () => {
             "Attack: 42",
         ]))).toBe("Hero / Archer");
 
+        expect(getCodexStructuredSummary(entry("heroes", [
+            "Faction: Tahuk",
+            "Class: Defender",
+            "Attack: 30",
+        ]))).toBe("Tahuk / Defender");
+
         expect(getCodexStructuredSummary(entry("minorfactions", [
             "Disposition: Diplomatic",
             "Faction affinity: Necrophage",

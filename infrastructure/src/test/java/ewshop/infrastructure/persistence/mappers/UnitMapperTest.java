@@ -20,6 +20,7 @@ class UnitMapperTest {
         entity.setUnitClassKey("UnitClass_JuggernaughtRanged");
         entity.setUnitClassDisplayName("Juggernaught Ranged");
         entity.setDescriptionLines(List.of("Class: UnitClass_JuggernaughtRanged"));
+        entity.setVeterancyProgressionLines(List.of("Level 5: +10 [Defense] Defense"));
 
         Unit domain = unitMapper.toDomain(entity);
 
@@ -27,6 +28,7 @@ class UnitMapperTest {
         assertThat(domain.getUnitClassKey()).isEqualTo("UnitClass_JuggernaughtRanged");
         assertThat(domain.getUnitClassDisplayName()).isEqualTo("Juggernaught Ranged");
         assertThat(domain.getDescriptionLines()).containsExactly("Class: UnitClass_JuggernaughtRanged");
+        assertThat(domain.getVeterancyProgressionLines()).containsExactly("Level 5: +10 [Defense] Defense");
     }
 
     @Test
@@ -37,6 +39,7 @@ class UnitMapperTest {
                 .unitClassKey("UnitClass_JuggernaughtRanged")
                 .unitClassDisplayName("Juggernaught Ranged")
                 .descriptionLines(List.of("Class: UnitClass_JuggernaughtRanged"))
+                .veterancyProgressionLines(List.of("Level 5: +10 [Defense] Defense"))
                 .build();
 
         UnitEntity entity = unitMapper.toEntity(domain);
@@ -45,5 +48,6 @@ class UnitMapperTest {
         assertThat(entity.getUnitClassKey()).isEqualTo("UnitClass_JuggernaughtRanged");
         assertThat(entity.getUnitClassDisplayName()).isEqualTo("Juggernaught Ranged");
         assertThat(entity.getDescriptionLines()).containsExactly("Class: UnitClass_JuggernaughtRanged");
+        assertThat(entity.getVeterancyProgressionLines()).containsExactly("Level 5: +10 [Defense] Defense");
     }
 }

@@ -1,7 +1,11 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import descriptionTokenIconsJson from "../../../public/svg/description-token-icons.json";
+import { expectSourceToExclude, readSource } from "../../tests/sourceGuardTestUtils";
 import { getDescriptionTokenIcon, resolveDescriptionTokenIconVariant } from "./descriptionTokenIcons";
 
 describe("descriptionTokenIcons", () => {
-    it("resolves description tokens through the temporary semantic manifest provider", () => {
+    it("resolves description tokens through the runtime token icon registry", () => {
         expect(getDescriptionTokenIcon("Health")?.path).toBe("/svg/units/UI_UnitItem_Health.svg");
         expect(getDescriptionTokenIcon("[Damage]")?.path).toBe("/svg/heroes/UI_UnitItem_Damage.svg");
         expect(getDescriptionTokenIcon("FoodColored")?.path).toBe("/svg/constructibles/UI_Common_Resource_Food.svg");
@@ -64,18 +68,13 @@ describe("descriptionTokenIcons", () => {
         );
     });
 
-    it("resolves population category aliases", () => {
-        expect(getDescriptionTokenIcon("PopulationCategory_01")?.path).toBe(
-            "/svg/populations/UI_PopulationCategory_1.svg"
-        );
-        expect(getDescriptionTokenIcon("PopulationCategory_02")?.path).toBe(
-            "/svg/populations/UI_PopulationCategory_2.svg"
-        );
+    it("does not invent population category fallbacks when no safe registry path exists", () => {
+        expect(getDescriptionTokenIcon("PopulationCategory_01")).toBeNull();
+        expect(getDescriptionTokenIcon("PopulationCategory_02")).toBeNull();
+        expect(getDescriptionTokenIcon("PopulationCategory_Homeless")).toBeNull();
+
         expect(getDescriptionTokenIcon("PopulationCategory_03")?.path).toBe(
             "/svg/populations/UI_PopulationCategory_3.svg"
-        );
-        expect(getDescriptionTokenIcon("PopulationCategory_Homeless")?.path).toBe(
-            "/svg/populations/UI_PopulationCategory_Homeless.svg"
         );
     });
 
@@ -92,9 +91,7 @@ describe("descriptionTokenIcons", () => {
                 tokenIndex: 3,
             })?.path
         ).toBe("/svg/unit-abilities/UI_UnitAbility_Ranged_7.svg");
-        expect(getDescriptionTokenIcon("AttackRange")?.path).toBe(
-            "/svg/unit-abilities/UI_UnitAbility_Ranged_1.svg"
-        );
+        expect(getDescriptionTokenIcon("AttackRange")?.path).toBe("/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg");
     });
 
     it("does not resolve exporter formatting markers to borrowed gameplay icons", () => {
@@ -134,5 +131,44 @@ describe("descriptionTokenIcons", () => {
         );
 
         expect(icon.path).toBe("/svg/unit-abilities/UI_UnitAbility_Ranged_3.svg");
+    });
+
+    it("keeps runtime token lookup independent from the broad semantic manifest", () => {
+        const source = readSource("src", "features/icons/descriptionTokenIcons.ts");
+
+        expectSourceToExclude(source, [/semanticIconManifest/, /semantic-manifest\.json/]);
+    });
+
+    it("validates exported token registry paths used by the frontend", () => {
+        const registry = descriptionTokenIconsJson as Record<string, {
+            path: string;
+            variants?: Record<string, { path: string }>;
+        }>;
+        const requiredTokens = [
+            "foodColored",
+            "industryColored",
+            "dustColored",
+            "scienceColored",
+            "cultureColored",
+            "publicOrderColored",
+            "health",
+            "damage",
+            "defense",
+            "attackRange",
+            "movementPoints",
+            "visionRange",
+        ];
+
+        for (const token of requiredTokens) {
+            expect(registry[token]?.path, token).toMatch(/^\/svg\//);
+            expect(existsSync(resolve("public", registry[token].path.slice(1))), token).toBe(true);
+        }
+
+        expect(Object.keys(registry.attackRange.variants ?? {})).toEqual(["1", "2", "3", "4", "5", "6", "7"]);
+        for (const range of ["1", "3", "7"]) {
+            const path = registry.attackRange.variants?.[range]?.path;
+            expect(path, `AttackRange.${range}`).toMatch(/^\/svg\//);
+            expect(existsSync(resolve("public", path!.slice(1))), `AttackRange.${range}`).toBe(true);
+        }
     });
 });

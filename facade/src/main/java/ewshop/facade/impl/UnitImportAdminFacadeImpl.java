@@ -10,6 +10,7 @@ import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import ewshop.facade.mapper.UnitImportMapper;
+import ewshop.facade.mapper.UnitVeterancyProgressionMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,10 +43,12 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
 
         List<ImportIssueDto> errors = new ArrayList<>();
         List<UnitImportSnapshot> snapshots = new ArrayList<>(received);
+        List<String> veterancyProgressionLines =
+                UnitVeterancyProgressionMapper.toCumulativeDisplayLines(fileDto.veterancyProgression());
 
         for (UnitImportUnitDto dto : rows) {
             try {
-                snapshots.add(UnitImportMapper.toSnapshot(dto));
+                snapshots.add(UnitImportMapper.toSnapshot(dto, veterancyProgressionLines));
             } catch (RuntimeException ex) {
                 if (errors.size() < MAX_ERRORS) {
                     errors.add(toIssue(dto, ex));
@@ -120,10 +123,12 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
 
         List<ImportIssueDto> errors = new ArrayList<>();
         List<UnitImportSnapshot> snapshots = new ArrayList<>(received);
+        List<String> veterancyProgressionLines =
+                UnitVeterancyProgressionMapper.toCumulativeDisplayLines(fileDto.veterancyProgression());
 
         for (UnitImportUnitDto dto : rows) {
             try {
-                snapshots.add(UnitImportMapper.toSnapshot(dto));
+                snapshots.add(UnitImportMapper.toSnapshot(dto, veterancyProgressionLines));
             } catch (RuntimeException ex) {
                 if (errors.size() < MAX_ERRORS) {
                     errors.add(toIssue(dto, ex));

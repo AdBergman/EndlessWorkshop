@@ -136,6 +136,12 @@ public class UnitRepositoryAdapter implements UnitRepository {
             changed = true;
         }
 
+        List<String> nextVeterancyLines = safeList(update.veterancyProgressionLines());
+        if (!Objects.equals(entity.getVeterancyProgressionLines(), nextVeterancyLines)) {
+            entity.setVeterancyProgressionLines(new ArrayList<>(nextVeterancyLines));
+            changed = true;
+        }
+
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
@@ -186,6 +192,7 @@ public class UnitRepositoryAdapter implements UnitRepository {
         entity.setNextEvolutionUnitKeys(new ArrayList<>(safeList(unit.getNextEvolutionUnitKeys())));
         entity.setAbilityKeys(new ArrayList<>(safeList(unit.getAbilityKeys())));
         entity.setDescriptionLines(new ArrayList<>(safeList(unit.getDescriptionLines())));
+        entity.setVeterancyProgressionLines(new ArrayList<>(safeList(unit.getVeterancyProgressionLines())));
 
         return mapper.toDomain(unitJpaRepository.save(entity));
     }

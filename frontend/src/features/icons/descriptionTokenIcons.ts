@@ -1,4 +1,4 @@
-import { getIconByDescriptionToken } from "./semanticIconManifest";
+import descriptionTokenIconsJson from "../../../public/svg/description-token-icons.json";
 import { getDescriptionTokenAliasIcon } from "./descriptionTokenIconAliases";
 import { getResourceTokenIconPath } from "./resourceTokenIcons";
 
@@ -13,11 +13,32 @@ export type DescriptionTokenIconContext = {
     tokenIndex?: number;
 };
 
+type DescriptionTokenIconRegistryJson = Record<string, DescriptionTokenIcon>;
+
+const descriptionTokenIconRegistry = buildDescriptionTokenIconRegistry(
+    descriptionTokenIconsJson as DescriptionTokenIconRegistryJson
+);
+
 function normalizeToken(token: string): string {
     const trimmed = token.trim();
     return trimmed.startsWith("[") && trimmed.endsWith("]")
         ? trimmed.slice(1, -1).trim()
         : trimmed;
+}
+
+function normalizeLookupKey(token: string): string {
+    return normalizeToken(token).toLowerCase();
+}
+
+function buildDescriptionTokenIconRegistry(registry: DescriptionTokenIconRegistryJson): Map<string, DescriptionTokenIcon> {
+    const index = new Map<string, DescriptionTokenIcon>();
+
+    for (const [token, icon] of Object.entries(registry)) {
+        if (!token.trim() || !icon?.path?.trim()) continue;
+        index.set(normalizeLookupKey(token), icon);
+    }
+
+    return index;
 }
 
 function nearestNumberBeforeToken(context: DescriptionTokenIconContext | undefined): string | null {
@@ -55,6 +76,12 @@ export function getDescriptionTokenIcon(
     context?: DescriptionTokenIconContext
 ): DescriptionTokenIcon | null {
     const normalizedToken = normalizeToken(token);
+
+    const registryIcon = descriptionTokenIconRegistry.get(normalizeLookupKey(normalizedToken));
+    if (registryIcon) {
+        return resolveDescriptionTokenIconVariant(registryIcon, context);
+    }
+
     const resourceIconPath = getResourceTokenIconPath(normalizedToken);
 
     if (resourceIconPath) {
@@ -68,16 +95,5 @@ export function getDescriptionTokenIcon(
         return resolveDescriptionTokenIconVariant(aliasIcon, context);
     }
 
-    const icon = getIconByDescriptionToken(normalizedToken);
-    if (!icon) {
-        return null;
-    }
-
-    return resolveDescriptionTokenIconVariant(
-        {
-            path: icon.path,
-            color: icon.color,
-        },
-        context
-    );
+    return null;
 }

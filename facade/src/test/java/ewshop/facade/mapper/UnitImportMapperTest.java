@@ -68,6 +68,57 @@ class UnitImportMapperTest {
     }
 
     @Test
+    void storesRootVeterancyProgressionLinesOnNonHeroUnits() {
+        UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                "Unit_Kin_Root",
+                "Sentinel",
+                "Kin",
+                true,
+                false,
+                false,
+                "Land",
+                null,
+                List.of(),
+                0,
+                "UnitClass_Cavalry",
+                null,
+                List.of(),
+                List.of(),
+                List.of("+120 [Health] Health"),
+                List.of(),
+                List.of()
+        ), List.of("Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health"));
+
+        assertThat(snapshot.veterancyProgressionLines())
+                .containsExactly("Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health");
+    }
+
+    @Test
+    void doesNotStoreVeterancyProgressionLinesOnHeroes() {
+        UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+                "Hero_Aspect_Archer_0",
+                "Xenos",
+                "Aspect",
+                true,
+                true,
+                false,
+                "Land",
+                null,
+                List.of(),
+                null,
+                "UnitClass_Ranged",
+                null,
+                List.of(),
+                List.of(),
+                List.of("+80 [Health] Health"),
+                List.of(),
+                List.of()
+        ), List.of("Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health"));
+
+        assertThat(snapshot.veterancyProgressionLines()).isEmpty();
+    }
+
+    @Test
     void importsNonXaviusMangroveOfHarmonyRows() {
         UnitImportSnapshot snapshot = UnitImportMapper.toSnapshot(new UnitImportUnitDto(
                 "Unit_MinorFaction_MangroveOfHarmony",

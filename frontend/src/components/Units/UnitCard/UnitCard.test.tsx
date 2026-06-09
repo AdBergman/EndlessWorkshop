@@ -107,6 +107,43 @@ describe("UnitCard", () => {
             .toBeInTheDocument();
     });
 
+    it("renders cumulative veterancy progression for non-hero units", () => {
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    veterancyProgressionLines: [
+                        "Level 1: +2 [Defense] Defense, +5% [Damage] Damage, +5% [Health] Health",
+                        "Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health",
+                    ],
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.getByLabelText("Veterancy progression")).toHaveTextContent(
+            "VeterancyLevel 5: +10 Defense, +25% Damage, +25% Health"
+        );
+        expect(container.querySelector('img[src="/svg/abilities/UI_UnitItem_Defense.svg"]')).toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/heroes/UI_UnitItem_Damage.svg"]')).toBeInTheDocument();
+        expect(container.querySelector('img[src="/svg/units/UI_UnitItem_Health.svg"]')).toBeInTheDocument();
+    });
+
+    it("does not render veterancy progression for hero units", () => {
+        render(
+            <UnitCard
+                unit={unit({
+                    isHero: true,
+                    veterancyProgressionLines: [
+                        "Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health",
+                    ],
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.queryByLabelText("Veterancy progression")).not.toBeInTheDocument();
+    });
+
     it("renders colored faction SVG icons for major unit card badges", () => {
         const { container } = render(
             <UnitCard

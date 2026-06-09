@@ -586,6 +586,39 @@
             0 0 1px rgba(0, 0, 0, 0.62);
 }
 
+.veterancySummary {
+    width: min(100%, 174px);
+    margin-top: auto;
+    padding: 8px 7px 0;
+    border-top: 1px solid color-mix(in srgb, var(--card-border, #f2b584) 22%, transparent);
+    color: rgba(241, 234, 220, 0.84);
+    text-align: center;
+}
+
+.veterancySummaryLabel {
+    color: color-mix(in srgb, var(--card-border, #f2b584) 78%, #f1eadc);
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.veterancySummaryLine {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 650;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.veterancySummaryLine img {
+    width: 12px !important;
+    height: 12px !important;
+    margin-right: 2px !important;
+    vertical-align: -2px !important;
+}
+
 /* === GLOW === */
 .cardGlowOverlay {
     position: absolute;

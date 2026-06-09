@@ -78,7 +78,7 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
 
                 // Unit 1
-                .andExpect(jsonPath("$[0].length()").value(16))
+                .andExpect(jsonPath("$[0].length()").value(17))
                 .andExpect(jsonPath("$[0].unitKey").value("Unit_Test_1"))
                 .andExpect(jsonPath("$[0].displayName").value("Test Unit 1"))
                 // null fields still exist unless Jackson NON_NULL is configured
@@ -98,9 +98,10 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[0].abilityKeys[1]").value("UnitAbility_B"))
                 .andExpect(jsonPath("$[0].descriptionLines[0]").value("Line 1"))
                 .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
+                .andExpect(jsonPath("$[0].veterancyProgressionLines").isEmpty())
 
                 // Unit 2
-                .andExpect(jsonPath("$[1].length()").value(16))
+                .andExpect(jsonPath("$[1].length()").value(17))
                 .andExpect(jsonPath("$[1].unitKey").value("Unit_Test_2"))
                 .andExpect(jsonPath("$[1].displayName").value("Test Unit 2"))
                 .andExpect(jsonPath("$[1].artId").value("herald"))
@@ -116,7 +117,8 @@ class UnitControllerTest {
                 .andExpect(jsonPath("$[1].unitClassDisplayName").value("Cavalry"))
                 .andExpect(jsonPath("$[1].attackSkillKey").value("Skill_Attack_2"))
                 .andExpect(jsonPath("$[1].abilityKeys[0]").value("UnitAbility_C"))
-                .andExpect(jsonPath("$[1].descriptionLines[0]").value("Only line"));
+                .andExpect(jsonPath("$[1].descriptionLines[0]").value("Only line"))
+                .andExpect(jsonPath("$[1].veterancyProgressionLines").isEmpty());
     }
 
     @Test

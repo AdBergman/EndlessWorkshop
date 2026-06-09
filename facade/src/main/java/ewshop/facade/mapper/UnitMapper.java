@@ -26,7 +26,8 @@ public final class UnitMapper {
                 displayUnitClassName(unit),
                 unit.getAttackSkillKey(),
                 unit.getAbilityKeys(),
-                unit.getDescriptionLines()
+                unit.getDescriptionLines(),
+                unit.getVeterancyProgressionLines()
         );
     }
 
