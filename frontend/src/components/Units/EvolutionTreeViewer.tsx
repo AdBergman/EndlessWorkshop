@@ -8,6 +8,7 @@ import "./EvolutionTreeViewer.css";
 interface EvolutionTreeViewerProps {
   rootUnit: Unit | null;
   skipRoot?: boolean;
+  veterancyLevel?: number;
 }
 
 const GlowArrow: React.FC = () => <div className="glowArrowSymbol">❯</div>;
@@ -27,6 +28,7 @@ function isNecrophageLarvae(u: Unit): boolean {
 export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
                                                                           rootUnit,
                                                                           skipRoot = false,
+                                                                          veterancyLevel = 0,
                                                                         }) => {
   const unitsByKey = useUnitStore(selectUnitsByKey);
 
@@ -58,7 +60,7 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
         <div className="evolutionTreeWrapper">
           {!skipRoot && (
               <div className="evoRow">
-                <UnitCard unit={rootUnit} showArtwork disableFlip={false} />
+                <UnitCard unit={rootUnit} showArtwork disableFlip={false} veterancyLevel={veterancyLevel} />
               </div>
           )}
 
@@ -66,7 +68,7 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
               <div key={`tier-${i}`} className="evoRow">
                 {tier.map((unit) => (
                     <div key={unit.unitKey} className="evoNodeWrapper">
-                      <UnitCard unit={unit} showArtwork disableFlip={false} />
+                      <UnitCard unit={unit} showArtwork disableFlip={false} veterancyLevel={veterancyLevel} />
                     </div>
                 ))}
               </div>
@@ -79,7 +81,7 @@ export const EvolutionTreeViewer: React.FC<EvolutionTreeViewerProps> = ({
       <div className="horizontalEvolution">
         {flatChain.map((unit, i) => (
             <Fragment key={unit.unitKey}>
-              <UnitCard unit={unit} showArtwork disableFlip={false} />
+              <UnitCard unit={unit} showArtwork disableFlip={false} veterancyLevel={veterancyLevel} />
               {i < flatChain.length - 1 && <GlowArrow />}
             </Fragment>
         ))}

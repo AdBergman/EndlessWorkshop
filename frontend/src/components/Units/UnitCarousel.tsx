@@ -8,9 +8,15 @@ interface UnitCarouselProps {
     units: Unit[];
     selectedIndex: number;
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
+    veterancyLevel?: number;
 }
 
-export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units, selectedIndex, setSelectedIndex }) => {
+export const UnitCarousel: React.FC<UnitCarouselProps> = ({
+    units,
+    selectedIndex,
+    setSelectedIndex,
+    veterancyLevel = 0,
+}) => {
     const total = units.length;
     const spacing = 260; // card(220)+gap(40)
 
@@ -60,7 +66,12 @@ export const UnitCarousel: React.FC<UnitCarouselProps> = ({ units, selectedIndex
                                 }}
                                 onClick={() => !isActive && setSelectedIndex(index)}
                             >
-                                <UnitCard unit={unit} showArtwork disableFlip={!isActive} />
+                                <UnitCard
+                                    unit={unit}
+                                    showArtwork
+                                    disableFlip={!isActive}
+                                    veterancyLevel={veterancyLevel}
+                                />
                             </motion.div>
                         );
                     })}

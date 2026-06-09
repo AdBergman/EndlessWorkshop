@@ -63,8 +63,9 @@
 ============================ */
 .unitExplorerHeader {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+    gap: 18px;
     width: 100%;
     max-width: 1280px;
     padding: 0 1.8rem;
@@ -78,7 +79,7 @@
     align-items: center;
     gap: 0.8rem;
     margin-left: auto;
-    margin-right: clamp(1rem, 8vw, 8rem);
+    margin-right: clamp(0rem, 4vw, 4rem);
     font-size: 0.9rem;
     font-weight: 500;
 }
@@ -149,4 +150,18 @@
 .togglePill:focus-visible {
     outline: 2px solid var(--ew-focus, rgba(255, 127, 50, 0.45));
     outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+    .unitExplorerHeader {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 0 1rem;
+    }
+
+    .minorSegmentedToggle.single {
+        justify-content: flex-end;
+        margin-right: 0;
+        width: 100%;
+    }
 }

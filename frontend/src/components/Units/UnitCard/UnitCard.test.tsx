@@ -1,4 +1,4 @@
-import { cleanup, createEvent, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, createEvent, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { UnitCard } from "./UnitCard";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry, Unit } from "@/types/dataTypes";
@@ -107,40 +107,69 @@ describe("UnitCard", () => {
             .toBeInTheDocument();
     });
 
-    it("renders cumulative veterancy progression for non-hero units", () => {
+    it("previews selected veterancy level in compact unit stats without mutating the unit", () => {
+        const source = unit({
+            descriptionLines: [
+                "+40 [Damage] Damage",
+                "+80 [Health] Health",
+                "+6 [Defense] Defense",
+                "+5 [MovementPoints] Movement",
+                "+10 [Focus] Critical Chance",
+                "2 [DustColored] Upkeep",
+            ],
+            veterancyProgressionLines: [
+                "Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health",
+            ],
+        });
+
+        const { container } = render(
+            <UnitCard
+                unit={source}
+                showArtwork={false}
+                veterancyLevel={5}
+            />
+        );
+
+        const statsBox = container.querySelector(".statsBox");
+        expect(statsBox).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("50")).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("100")).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("16")).toBeInTheDocument();
+        expect(source.descriptionLines).toEqual([
+            "+40 [Damage] Damage",
+            "+80 [Health] Health",
+            "+6 [Defense] Defense",
+            "+5 [MovementPoints] Movement",
+            "+10 [Focus] Critical Chance",
+            "2 [DustColored] Upkeep",
+        ]);
+        expect(screen.queryByLabelText("Veterancy progression")).not.toBeInTheDocument();
+    });
+
+    it("keeps hero stats at base values even when a veterancy level is supplied", () => {
         const { container } = render(
             <UnitCard
                 unit={unit({
-                    veterancyProgressionLines: [
-                        "Level 1: +2 [Defense] Defense, +5% [Damage] Damage, +5% [Health] Health",
-                        "Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health",
-                    ],
-                })}
-                showArtwork={false}
-            />
-        );
-
-        expect(screen.getByLabelText("Veterancy progression")).toHaveTextContent(
-            "VeterancyLevel 5: +10 Defense, +25% Damage, +25% Health"
-        );
-        expect(container.querySelector('img[src="/svg/abilities/UI_UnitItem_Defense.svg"]')).toBeInTheDocument();
-        expect(container.querySelector('img[src="/svg/heroes/UI_UnitItem_Damage.svg"]')).toBeInTheDocument();
-        expect(container.querySelector('img[src="/svg/units/UI_UnitItem_Health.svg"]')).toBeInTheDocument();
-    });
-
-    it("does not render veterancy progression for hero units", () => {
-        render(
-            <UnitCard
-                unit={unit({
                     isHero: true,
+                    descriptionLines: [
+                        "+40 [Damage] Damage",
+                        "+80 [Health] Health",
+                        "+6 [Defense] Defense",
+                    ],
                     veterancyProgressionLines: [
                         "Level 5: +10 [Defense] Defense, +25% [Damage] Damage, +25% [Health] Health",
                     ],
                 })}
                 showArtwork={false}
+                veterancyLevel={5}
             />
         );
 
+        const statsBox = container.querySelector(".statsBox");
+        expect(statsBox).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("40")).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("80")).toBeInTheDocument();
+        expect(within(statsBox as HTMLElement).getByText("6")).toBeInTheDocument();
         expect(screen.queryByLabelText("Veterancy progression")).not.toBeInTheDocument();
     });
 

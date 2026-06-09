@@ -55,6 +55,39 @@ const unit = (overrides: Partial<Unit>): Unit => ({
     ...overrides,
 });
 
+const veteranSmokeDescriptionLines = [
+    "+40 [Damage] Damage",
+    "+80 [Health] Health",
+    "+6 [Defense] Defense",
+    "+3 [MovementPoints] Movement",
+    "+1 [Focus] Critical Chance",
+    "4 [DustColored] Upkeep",
+];
+
+function getActiveCarouselStats(container: HTMLElement): string[] {
+    return Array.from(container.querySelectorAll(".carouselItem.active .statsBox .stat span"))
+        .map((element) => element.textContent?.trim() ?? "");
+}
+
+const majorFactionSmokeCases = [
+    ["Kin", "kin", "Unit_Kin_VetSmoke"],
+    ["Lords", "lords", "Unit_Lords_VetSmoke"],
+    ["Tahuk", "tahuk", "Unit_Tahuk_VetSmoke"],
+    ["Aspects", "aspects", "Unit_Aspects_VetSmoke"],
+    ["Necrophages", "necrophages", "Unit_Necrophages_VetSmoke"],
+] as const;
+
+function majorFactionVeterancySmokeUnits(): Unit[] {
+    return majorFactionSmokeCases.map(([faction, , unitKey]) =>
+        unit({
+            unitKey,
+            displayName: `${faction} Lens Scout`,
+            faction,
+            descriptionLines: veteranSmokeDescriptionLines,
+        })
+    );
+}
+
 describe("/units smoke behavior", () => {
     const renderExplorer = (initialPath: string) =>
         render(
@@ -348,6 +381,61 @@ describe("/units smoke behavior", () => {
             expect(screen.getByText("A precise opening attack.")).toBeInTheDocument();
         });
     });
+
+    it("uses the Veterancy Lens to preview Kin carousel stats at levels 0, 1, and 5", async () => {
+        const user = userEvent.setup();
+        mockedApiClient.getUnits.mockResolvedValue([
+            unit({
+                unitKey: "Unit_Kin_Root",
+                displayName: "Kin Root",
+                nextEvolutionUnitKeys: ["Unit_Kin_Evolved"],
+                descriptionLines: veteranSmokeDescriptionLines,
+            }),
+            unit({
+                unitKey: "Unit_Kin_Evolved",
+                displayName: "Kin Evolved",
+                previousUnitKey: "Unit_Kin_Root",
+                evolutionTierIndex: 1,
+            }),
+        ]);
+
+        const { container } = renderExplorer("/units?faction=kin&unitKey=Unit_Kin_Root");
+
+        await waitFor(() => {
+            expect(screen.getByRole("radio", { name: "Base stats" })).toHaveAttribute("aria-checked", "true");
+            expect(getActiveCarouselStats(container)).toEqual(["40", "80", "6", "3", "1", "4"]);
+        });
+
+        await user.click(screen.getByRole("radio", { name: "Veterancy level 1" }));
+
+        expect(screen.getByText("Level 1")).toBeInTheDocument();
+        expect(getActiveCarouselStats(container)).toEqual(["42", "84", "8", "3", "1", "4"]);
+
+        await user.click(screen.getByRole("radio", { name: "Veterancy level 5" }));
+
+        expect(screen.getByText("Level 5")).toBeInTheDocument();
+        expect(getActiveCarouselStats(container)).toEqual(["50", "100", "16", "3", "1", "4"]);
+    });
+
+    it.each(majorFactionSmokeCases)(
+        "previews level 5 veterancy stats for a representative %s unit",
+        async (_faction, routeFaction, unitKey) => {
+            const user = userEvent.setup();
+            mockedApiClient.getUnits.mockResolvedValue(majorFactionVeterancySmokeUnits());
+
+            const { container } = renderExplorer(`/units?faction=${routeFaction}&unitKey=${unitKey}`);
+
+            await waitFor(() => {
+                expect(screen.getByRole("radio", { name: "Base stats" })).toHaveAttribute("aria-checked", "true");
+                expect(getActiveCarouselStats(container)).toEqual(["40", "80", "6", "3", "1", "4"]);
+            });
+
+            await user.click(screen.getByRole("radio", { name: "Veterancy level 5" }));
+
+            expect(screen.getByText("Level 5")).toBeInTheDocument();
+            expect(getActiveCarouselStats(container)).toEqual(["50", "100", "16", "3", "1", "4"]);
+        }
+    );
 
     it("renders unit class display labels without collapsing camel-case words", async () => {
         mockedApiClient.getUnits.mockResolvedValue([

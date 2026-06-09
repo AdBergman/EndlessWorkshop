@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
+import { VeterancyLens } from "@/components/Units/VeterancyLens";
 import type { FactionInfo, Unit } from "@/types/dataTypes";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
+import { isVeterancyApplicable } from "@/components/Units/utils/applyVeterancy";
 import { selectUnitError, selectUnitLoaded, selectUnitLoading, selectUnits, useUnitStore } from "@/stores/unitStore";
 import {
     selectSelectedFaction,
@@ -62,6 +64,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [showMinorUnits, setShowMinorUnits] = useState(false);
+    const [veterancyLevel, setVeterancyLevel] = useState(0);
 
     // We only want to hydrate from URL on *external* URL changes (paste/back/forward/link).
     // When we write params ourselves (toolbar/carousel/toggle), we record it and ignore that change for hydration.
@@ -240,6 +243,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
     }
 
     const selectedUnit = carouselUnits[selectedIndex] || null;
+    const veterancyApplies = isVeterancyApplicable(selectedUnit);
 
     return (
         <div className="unitEvolutionExplorer">
@@ -256,6 +260,12 @@ export const UnitEvolutionExplorer: React.FC = () => {
             </div>
 
             <div className="unitExplorerHeader">
+                <VeterancyLens
+                    selectedLevel={veterancyApplies ? veterancyLevel : 0}
+                    onChange={setVeterancyLevel}
+                    disabled={!veterancyApplies}
+                />
+
                 <div className="minorSegmentedToggle single">
                     <span className="toggleLabel">Show Minor Factions:</span>
                     <div
@@ -273,9 +283,14 @@ export const UnitEvolutionExplorer: React.FC = () => {
                 </div>
             </div>
 
-            <UnitCarousel units={carouselUnits} selectedIndex={selectedIndex} setSelectedIndex={setSelectedIndex} />
+            <UnitCarousel
+                units={carouselUnits}
+                selectedIndex={selectedIndex}
+                setSelectedIndex={setSelectedIndex}
+                veterancyLevel={veterancyLevel}
+            />
 
-            <EvolutionTreeViewer rootUnit={selectedUnit} skipRoot />
+            <EvolutionTreeViewer rootUnit={selectedUnit} skipRoot veterancyLevel={veterancyLevel} />
         </div>
     );
 };

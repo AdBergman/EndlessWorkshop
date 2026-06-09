@@ -14,12 +14,13 @@ import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { getUnitClassIcons, type UnitClassIcon } from "@/features/icons/unitClassIconResolver";
 import { getUnitCardStatIconPath, type UnitCardStat } from "@/features/icons/unitStatIcons";
-import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { applyVeterancyToStats, isVeterancyApplicable } from "@/components/Units/utils/applyVeterancy";
 
 interface UnitCardProps {
     unit: Unit;
     showArtwork?: boolean;
     disableFlip?: boolean;
+    veterancyLevel?: number;
 }
 
 function clamp(n: number, min: number, max: number) {
@@ -133,14 +134,6 @@ function buildTierMetadataTooltip(tierLabel: string): Omit<HoveredUnitCardMetada
     return { kind: "tier", title: tierLabel };
 }
 
-function getVeterancySummaryLine(unit: Unit): string | null {
-    if (unit.isHero) return null;
-    const lines = (unit.veterancyProgressionLines ?? [])
-        .filter((line): line is string => typeof line === "string" && line.trim().length > 0);
-
-    return lines.at(-1)?.trim() ?? null;
-}
-
 function TierRankSeal({ label }: { label: string }) {
     return (
         <svg
@@ -179,6 +172,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                                                       unit,
                                                       showArtwork = true,
                                                       disableFlip = false,
+                                                      veterancyLevel = 0,
                                                   }) => {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [flipped, setFlipped] = useState(false);
@@ -206,7 +200,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     const tierRankLabel = getTierRankLabel(d.tierLabel);
     const tierRankNumberLabel = getTierRankNumberLabel(tierRankLabel);
     const hasClassMetadata = classIcons.length > 0;
-    const veterancySummaryLine = getVeterancySummaryLine(unit);
+    const previewStats = useMemo(
+        () => applyVeterancyToStats(d.stats, veterancyLevel, isVeterancyApplicable(unit)),
+        [d.stats, veterancyLevel, unit]
+    );
 
     const onCardClick = () => {
         if (disableFlip) return;
@@ -474,15 +471,15 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                     {/* Compact stats */}
                     <div className="statsBox">
                         <div className="statsRow">
-                            <StatValue stat="damage" label="Damage" value={d.stats.damage ?? "—"} />
-                            <StatValue stat="health" label="Health" value={d.stats.health ?? "—"} />
-                            <StatValue stat="defense" label="Defense" value={d.stats.defense ?? 0} />
+                            <StatValue stat="damage" label="Damage" value={previewStats.damage ?? "—"} />
+                            <StatValue stat="health" label="Health" value={previewStats.health ?? "—"} />
+                            <StatValue stat="defense" label="Defense" value={previewStats.defense ?? 0} />
                         </div>
 
                         <div className="statsRow">
-                            <StatValue stat="movement" label="Movement" value={d.stats.movement ?? "—"} />
-                            <StatValue stat="focus" label="Focus / Critical Chance" value={d.stats.focus ?? 0} />
-                            <StatValue stat="upkeep" label="Upkeep" value={d.stats.upkeep ?? 0} />
+                            <StatValue stat="movement" label="Movement" value={previewStats.movement ?? "—"} />
+                            <StatValue stat="focus" label="Focus / Critical Chance" value={previewStats.focus ?? 0} />
+                            <StatValue stat="upkeep" label="Upkeep" value={previewStats.upkeep ?? 0} />
                         </div>
                     </div>
                 </div>
@@ -532,14 +529,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             </div>
                         )}
 
-                        {veterancySummaryLine && (
-                            <div className="veterancySummary" aria-label="Veterancy progression">
-                                <div className="veterancySummaryLabel">Veterancy</div>
-                                <div className="veterancySummaryLine">
-                                    {renderDescriptionLine(veterancySummaryLine)}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </motion.div>
