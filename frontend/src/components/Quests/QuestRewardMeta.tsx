@@ -50,8 +50,20 @@ export function QuestRewardRow({ reward }: { reward: QuestRewardDisplay }) {
 
     return (
         <li className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}>
-            <QuestRewardInline reward={reward} icon={icon} />
-            <RewardFormulaDetail formulaText={reward.formulaText} />
+            {icon ? (
+                <span className="questExplorer-rewardStack">
+                    <QuestRewardKindIcon icon={icon} />
+                    <span className="questExplorer-rewardStackBody">
+                        <QuestRewardLabel reward={reward} />
+                        <RewardFormulaDetail formulaText={reward.formulaText} />
+                    </span>
+                </span>
+            ) : (
+                <>
+                    <QuestRewardInline reward={reward} icon={icon} />
+                    <RewardFormulaDetail formulaText={reward.formulaText} />
+                </>
+            )}
         </li>
     );
 }
@@ -101,10 +113,16 @@ function QuestRewardInline({
     return (
         <span className="questExplorer-rewardLine">
             <QuestRewardKindIcon icon={icon} />
-            <QuestCodexReferenceLink source={reward} showTooltip>
-                <span>{formatStrategyRewardLabel(reward)}</span>
-            </QuestCodexReferenceLink>
+            <QuestRewardLabel reward={reward} />
         </span>
+    );
+}
+
+function QuestRewardLabel({ reward }: { reward: QuestRewardDisplay }) {
+    return (
+        <QuestCodexReferenceLink source={reward} showTooltip>
+            <span>{formatStrategyRewardLabel(reward)}</span>
+        </QuestCodexReferenceLink>
     );
 }
 

@@ -90,9 +90,7 @@ export function sameRewardDisplays(left: QuestRewardDisplay[], right: QuestRewar
 }
 
 export function formatStrategyRewardFormula(formulaText: string): string {
-    return formulaText
-        .replace(/\*/g, "×")
-        .replace(/\bTechnology Era\b/g, "Tech Era");
+    return formulaText.replace(/\*/g, "×");
 }
 
 function rewardDisplayKey(reward: QuestRewardDisplay): string {

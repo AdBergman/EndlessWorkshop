@@ -350,15 +350,17 @@ describe("StrategyDossier", () => {
         const choiceResult = screen.getByRole("region", { name: "Choosing Hold the ridge completes this path" });
 
         expect(within(selectedOptionButton).getByText("Gain Dust")).toBeInTheDocument();
-        expect(within(selectedOptionButton).getByText("50 + 50 × Tech Era")).toBeInTheDocument();
+        expect(within(selectedOptionButton).getByText("50 + 50 × Technology Era")).toBeInTheDocument();
         expect(selectedOptionButton.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
         )).toBeInTheDocument();
         expect(selectedOptionButton.querySelector(".questExplorer-inlineMetaItem--iconReward")).toBeInTheDocument();
+        expect(selectedOptionButton.querySelector(".questExplorer-rewardStack")).toBeInTheDocument();
+        expect(selectedOptionButton.querySelector(".questExplorer-rewardStackBody")).toBeInTheDocument();
         expect(screen.queryByText("Formula: 50 + 50 * Technology Era")).not.toBeInTheDocument();
         expect(screen.queryByText("Formula: 50 + 50 × Technology Era")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Gain Dust based on technology era.")).not.toBeInTheDocument();
-        expect(within(choiceResult).queryByText("50 + 50 × Tech Era")).not.toBeInTheDocument();
+        expect(within(choiceResult).queryByText("50 + 50 × Technology Era")).not.toBeInTheDocument();
     });
 
     it("renders resource icons for structured economy reward kinds only", () => {
@@ -419,12 +421,13 @@ describe("StrategyDossier", () => {
         )).toBeInTheDocument();
         expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(4);
         expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(4);
+        expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(4);
         expect(screen.getByText("Gain Influence")).toBeInTheDocument();
         expect(screen.getByText("Gain Science")).toBeInTheDocument();
         expect(screen.getByText("Gain Food")).toBeInTheDocument();
-        expect(screen.getByText("5 + 5 × Tech Era")).toBeInTheDocument();
-        expect(screen.getByText("20 + 20 × Tech Era")).toBeInTheDocument();
-        expect(screen.getByText("25 + 50 × Tech Era")).toBeInTheDocument();
+        expect(screen.getByText("5 + 5 × Technology Era")).toBeInTheDocument();
+        expect(screen.getByText("20 + 20 × Technology Era")).toBeInTheDocument();
+        expect(screen.getByText("25 + 50 × Technology Era")).toBeInTheDocument();
     });
 
     it("shows a compact Codex preview tooltip from linked Strategy reward text on hover and focus", async () => {
@@ -735,7 +738,7 @@ describe("StrategyDossier", () => {
         expect(screen.getByText("Research missing logistics.")).toBeInTheDocument();
         expect(screen.getByText("Gain Dust")).toBeInTheDocument();
         expect(screen.getByText("Unlock missing relic")).toBeInTheDocument();
-        expect(screen.getByText("50 + 50 × Tech Era")).toBeInTheDocument();
+        expect(screen.getByText("50 + 50 × Technology Era")).toBeInTheDocument();
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
         )).toBeInTheDocument();

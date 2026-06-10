@@ -1746,6 +1746,24 @@
     filter: drop-shadow(0 0 5px rgba(208, 162, 74, 0.16));
 }
 
+.questExplorer-rewardStack {
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 6px;
+    min-width: 0;
+}
+
+.questExplorer-rewardStack .questExplorer-rewardIcon {
+    margin-top: 0.22em;
+}
+
+.questExplorer-rewardStackBody {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
 .questExplorer-codexMetaLink {
     color: var(--quest-teal-bright);
     text-decoration: underline;
@@ -1873,7 +1891,7 @@
 }
 
 .questExplorer-inlineMeta--reward .questExplorer-inlineMetaItem--iconReward .questExplorer-inlineMetaDetail {
-    margin-left: 21px;
+    margin-left: 0;
 }
 
 .questExplorer-loreOpening,
