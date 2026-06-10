@@ -9,6 +9,7 @@ Prefer small, bounded changes that follow existing architecture. Do not perform 
 - Frontend changes using backend DTO fields should verify frontend types/API client/store usage against backend response DTOs.
 - Backend API DTO changes should verify corresponding frontend type/client/store/rendering usage.
 - Do not deep-audit importer, DB, or Flyway layers unless explicitly requested, the API contract is ambiguous, or a contract mismatch is suspected.
+- For documentation cleanup, read and follow `docs/documentation-guidelines.md`; keep active docs short and archive completed handoffs under `docs/archive/`.
 - For backend Java changes, read and follow `docs/backend/java-code-style.md`; do not duplicate those rules here.
 - For dependency, CI, or workflow changes, read and follow `docs/dependency-and-ci-maintenance.md`; document any required manual maintainer action there.
 

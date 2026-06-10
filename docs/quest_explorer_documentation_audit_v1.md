@@ -5,6 +5,21 @@ Generated: 2026-05-26
 Primary reference: `docs/quest_explorer_canonical_semantics_v1.md`  
 Data reference: `local-imports/exports/ewshop_quest_explorer_export_0.80.json`
 
+Current cleanup status, 2026-06-10:
+
+- Reviewed current Quest frontend code before further archiving. The
+  implementation now classifies rows with canonical semantic kinds such as
+  `setup_task`, `deterministic_continuation`, `explicit_decision_option`,
+  `topology_fork_option`, `convergence`, `terminal`, `failure`, and
+  `unresolved`, while legacy names such as `questPathFlow` remain compatibility
+  implementation vocabulary.
+- No additional Quest docs were deleted in this cleanup pass. The dangerous
+  domain-language and final-contract artifacts are already archived under
+  `docs/archive/quest-explorer/`.
+- The remaining active Quest docs already carry canonical-semantics references
+  where needed. Future cleanup should focus on terminology only when adjacent
+  Quest behavior or UI-copy work is in scope.
+
 This audit classifies existing Quest Explorer documentation, design notes, diagnostics,
 architecture references, prompt-like artifacts, and relevant test descriptions against
 the canonical semantic model established from the live `quest_explorer.v3` export.
