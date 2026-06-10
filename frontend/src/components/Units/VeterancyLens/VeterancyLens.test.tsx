@@ -5,8 +5,7 @@ describe("VeterancyLens", () => {
     it("renders levels 0-5 with the selected level exposed as a radio", () => {
         render(<VeterancyLens selectedLevel={2} onChange={vi.fn()} />);
 
-        expect(screen.getByText("Veterancy Lens")).toBeInTheDocument();
-        expect(screen.getByText("Level 2")).toBeInTheDocument();
+        expect(screen.getByText("Veterancy")).toBeInTheDocument();
         expect(screen.getByRole("radio", { name: "Base stats" })).toHaveAttribute("aria-checked", "false");
         expect(screen.getByRole("radio", { name: "Veterancy level 2" })).toHaveAttribute("aria-checked", "true");
         expect(screen.getAllByRole("radio")).toHaveLength(6);
@@ -44,7 +43,7 @@ describe("VeterancyLens", () => {
 
         render(<VeterancyLens selectedLevel={5} onChange={onChange} disabled />);
 
-        expect(screen.getByText("Base only")).toBeInTheDocument();
+        expect(screen.getByText("Veterancy")).toBeInTheDocument();
         expect(screen.getByText("Heroes do not use unit veterancy.")).toBeInTheDocument();
 
         const levelFive = screen.getByRole("radio", { name: "Veterancy level 5" });

@@ -408,12 +408,12 @@ describe("/units smoke behavior", () => {
 
         await user.click(screen.getByRole("radio", { name: "Veterancy level 1" }));
 
-        expect(screen.getByText("Level 1")).toBeInTheDocument();
+        expect(screen.getByRole("radio", { name: "Veterancy level 1" })).toHaveAttribute("aria-checked", "true");
         expect(getActiveCarouselStats(container)).toEqual(["42", "84", "8", "3", "1", "4"]);
 
         await user.click(screen.getByRole("radio", { name: "Veterancy level 5" }));
 
-        expect(screen.getByText("Level 5")).toBeInTheDocument();
+        expect(screen.getByRole("radio", { name: "Veterancy level 5" })).toHaveAttribute("aria-checked", "true");
         expect(getActiveCarouselStats(container)).toEqual(["50", "100", "16", "3", "1", "4"]);
     });
 
@@ -432,7 +432,7 @@ describe("/units smoke behavior", () => {
 
             await user.click(screen.getByRole("radio", { name: "Veterancy level 5" }));
 
-            expect(screen.getByText("Level 5")).toBeInTheDocument();
+            expect(screen.getByRole("radio", { name: "Veterancy level 5" })).toHaveAttribute("aria-checked", "true");
             expect(getActiveCarouselStats(container)).toEqual(["50", "100", "16", "3", "1", "4"]);
         }
     );

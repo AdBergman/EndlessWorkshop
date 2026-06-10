@@ -1,23 +1,22 @@
-import { getIconPath } from "./iconManifest";
+import { getDescriptionTokenIcon } from "./descriptionTokenIcons";
 
 export type UnitCardStat = "damage" | "health" | "defense" | "movement" | "focus" | "upkeep";
 
-const UNIT_CARD_STAT_ICON_KEYS: Record<UnitCardStat, readonly [section: string, key: string]> = {
-    damage: ["stats", "damage"],
-    health: ["stats", "health"],
-    defense: ["stats", "defense"],
-    movement: ["stats", "movement"],
-    focus: ["stats", "focus"],
-    upkeep: ["stats", "unitUpkeep"],
+const UNIT_CARD_STAT_TOKENS: Record<UnitCardStat, string> = {
+    damage: "Damage",
+    health: "Health",
+    defense: "Defense",
+    movement: "MovementPoints",
+    focus: "Focus",
+    upkeep: "Money",
 };
 
 export function getUnitCardStatIconPath(stat: UnitCardStat): string | null {
-    const [section, key] = UNIT_CARD_STAT_ICON_KEYS[stat];
-    return getIconPath(section, key);
+    return getDescriptionTokenIcon(UNIT_CARD_STAT_TOKENS[stat])?.path ?? null;
 }
 
 export function getConfiguredUnitCardStatIconPaths(): string[] {
-    return Object.keys(UNIT_CARD_STAT_ICON_KEYS)
+    return Object.keys(UNIT_CARD_STAT_TOKENS)
         .map((stat) => getUnitCardStatIconPath(stat as UnitCardStat))
         .filter((path): path is string => !!path);
 }

@@ -4,7 +4,9 @@ import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import { VeterancyLens } from "@/components/Units/VeterancyLens";
 import type { FactionInfo, Unit } from "@/types/dataTypes";
+import { FACTION_COLORS } from "@/types/factionColors";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
+import { deriveUnit } from "@/lib/units/deriveUnit";
 import { isVeterancyApplicable } from "@/components/Units/utils/applyVeterancy";
 import { selectUnitError, selectUnitLoaded, selectUnitLoading, selectUnits, useUnitStore } from "@/stores/unitStore";
 import {
@@ -44,6 +46,17 @@ function isHiddenInUi(u: Unit): boolean {
     if (f === "Tormented") return true; // keep in DB, hide in /units for now
     if (u.isMajorFaction === false && f === "Dungeon") return true; // hide minor "Dungeon" for now
     return false;
+}
+
+function getUnitControlColors(unit: Unit | null): { border: string; accent: string } {
+    if (!unit) return FACTION_COLORS.PLACEHOLDER;
+
+    const derived = deriveUnit(unit);
+    const factionKey: keyof typeof FACTION_COLORS = derived.isMinor
+        ? "MINOR"
+        : ((derived.majorEnumFaction ?? "PLACEHOLDER") as keyof typeof FACTION_COLORS);
+
+    return FACTION_COLORS[factionKey] ?? FACTION_COLORS.PLACEHOLDER;
 }
 
 /**
@@ -244,6 +257,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
     const selectedUnit = carouselUnits[selectedIndex] || null;
     const veterancyApplies = isVeterancyApplicable(selectedUnit);
+    const unitControlColors = getUnitControlColors(selectedUnit);
 
     return (
         <div className="unitEvolutionExplorer">
@@ -259,26 +273,37 @@ export const UnitEvolutionExplorer: React.FC = () => {
                 ))}
             </div>
 
-            <div className="unitExplorerHeader">
-                <VeterancyLens
-                    selectedLevel={veterancyApplies ? veterancyLevel : 0}
-                    onChange={setVeterancyLevel}
-                    disabled={!veterancyApplies}
-                />
+            <div
+                className="unitExplorerHeader"
+                style={{
+                    ["--unit-command-accent" as any]: unitControlColors.border,
+                    ["--unit-command-accent-bright" as any]: unitControlColors.accent,
+                }}
+            >
+                <div className="unitCommandStrip" aria-label="Unit view controls">
+                    <VeterancyLens
+                        selectedLevel={veterancyApplies ? veterancyLevel : 0}
+                        onChange={setVeterancyLevel}
+                        disabled={!veterancyApplies}
+                    />
 
-                <div className="minorSegmentedToggle single">
-                    <span className="toggleLabel">Show Minor Factions:</span>
-                    <div
-                        className={`togglePill ${showMinorUnits ? "on" : "off"}`}
-                        onClick={() => {
-                            setShowMinorUnits((v) => !v);
-                            setSelectedIndex(0);
-                            hydratedOnceForThisNav.current = true;
-                        }}
-                    >
-                        <div className="toggleHighlight" />
-                        <span className={`toggleOption ${!showMinorUnits ? "active" : ""}`}>Off</span>
-                        <span className={`toggleOption ${showMinorUnits ? "active" : ""}`}>On</span>
+                    <div className="minorSegmentedToggle single">
+                        <span className="toggleLabel">Minor Factions</span>
+                        <button
+                            type="button"
+                            className={`togglePill ${showMinorUnits ? "on" : "off"}`}
+                            aria-pressed={showMinorUnits}
+                            aria-label={`${showMinorUnits ? "Hide" : "Show"} minor faction units`}
+                            onClick={() => {
+                                setShowMinorUnits((v) => !v);
+                                setSelectedIndex(0);
+                                hydratedOnceForThisNav.current = true;
+                            }}
+                        >
+                            <span className="toggleHighlight" />
+                            <span className={`toggleOption ${!showMinorUnits ? "active" : ""}`}>Off</span>
+                            <span className={`toggleOption ${showMinorUnits ? "active" : ""}`}>On</span>
+                        </button>
                     </div>
                 </div>
             </div>

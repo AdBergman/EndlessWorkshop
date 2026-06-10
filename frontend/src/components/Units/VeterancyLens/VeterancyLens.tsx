@@ -36,6 +36,8 @@ export const VeterancyLens: React.FC<VeterancyLensProps> = ({
 
     if (hidden) return null;
 
+    const progress = safeMax > 0 ? safeSelected / safeMax : 0;
+
     const commitLevel = (level: number) => {
         if (disabled) return;
         onChange(Math.min(clampVeterancyLevel(level), safeMax));
@@ -63,18 +65,14 @@ export const VeterancyLens: React.FC<VeterancyLensProps> = ({
         <section
             className={`veterancyLens ${disabled ? "isDisabled" : ""} ${className ?? ""}`.trim()}
             aria-labelledby={`${baseId}-label`}
+            style={{ "--lens-progress": progress } as React.CSSProperties}
         >
             <div className="veterancyLens__copy">
-                <div className="veterancyLens__labelRow">
-                    <span id={`${baseId}-label`} className="veterancyLens__label">
-                        Veterancy Lens
-                    </span>
-                    <span className="veterancyLens__levelText">
-                        {disabled ? "Base only" : `Level ${safeSelected}`}
-                    </span>
-                </div>
-                <p id={descriptionId} className="veterancyLens__hint" title={VETERANCY_LENS_DESCRIPTION}>
-                    {disabled ? "Heroes do not use unit veterancy." : "Preview cumulative unit stat gains."}
+                <span id={`${baseId}-label`} className="veterancyLens__label">
+                    Veterancy
+                </span>
+                <p id={descriptionId} className="veterancyLens__description">
+                    {disabled ? "Heroes do not use unit veterancy." : VETERANCY_LENS_DESCRIPTION}
                 </p>
             </div>
 
