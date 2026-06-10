@@ -46,7 +46,7 @@ export function InlineRewardMetaList({
 }
 
 export function QuestRewardRow({ reward }: { reward: QuestRewardDisplay }) {
-    const icon = economyRewardIcon(reward.kind);
+    const icon = rewardMarkerIcon(reward);
 
     return (
         <li className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}>
@@ -105,7 +105,7 @@ export function InlineStageRewardMeta({
 
 function QuestRewardInline({
     reward,
-    icon = economyRewardIcon(reward.kind),
+    icon = rewardMarkerIcon(reward),
 }: {
     reward: QuestRewardDisplay;
     icon?: DescriptionTokenIcon | null;
@@ -127,12 +127,9 @@ function QuestRewardLabel({ reward }: { reward: QuestRewardDisplay }) {
 }
 
 function formatStrategyRewardLabel(reward: QuestRewardDisplay): string {
-    const resourceLabel = economyRewardLabel(reward.kind);
-    if (!resourceLabel || !reward.formulaText) return reward.displayText;
-
-    const compactFormulaRewardPattern = new RegExp(`^gain\\s+${resourceLabel}\\s+based\\s+on\\s+technology\\s+era\\.?$`, "i");
-    return compactFormulaRewardPattern.test(reward.displayText.trim())
-        ? `Gain ${resourceLabel}`
+    const formulaBackedLabel = formulaBackedTechnologyEraRewardLabel(reward);
+    return formulaBackedLabel
+        ? formulaBackedLabel
         : reward.displayText;
 }
 
@@ -154,21 +151,6 @@ function economyRewardIcon(kind: string) {
     return token ? getDescriptionTokenIcon(token) : null;
 }
 
-function economyRewardLabel(kind: string): string | null {
-    switch (kind.trim().toLowerCase()) {
-        case "money":
-            return "Dust";
-        case "influence":
-            return "Influence";
-        case "science":
-            return "Science";
-        case "food":
-            return "Food";
-        default:
-            return null;
-    }
-}
-
 function economyRewardIconToken(kind: string): string | null {
     switch (kind.trim().toLowerCase()) {
         case "money":
@@ -179,6 +161,50 @@ function economyRewardIconToken(kind: string): string | null {
             return "ScienceColored";
         case "food":
             return "FoodColored";
+        default:
+            return null;
+    }
+}
+
+function rewardMarkerIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | null {
+    return economyRewardIcon(reward.kind)
+        ?? knownResourceRewardIcon(reward);
+}
+
+function formulaBackedTechnologyEraRewardLabel(reward: QuestRewardDisplay): string | null {
+    if (!reward.formulaText) return null;
+
+    const match = reward.displayText.trim().match(/^gain\s+(.+?)\s+based\s+on\s+technology\s+era\.?$/i);
+    const rewardSubject = match?.[1]?.trim();
+    return rewardSubject ? `Gain ${rewardSubject}` : null;
+}
+
+function knownResourceRewardIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | null {
+    const label = formulaBackedTechnologyEraRewardLabel(reward)
+        ?.replace(/^gain\s+/i, "")
+        ?? reward.assetDisplayName
+        ?? "";
+    const token = knownResourceRewardIconToken(label);
+
+    return token ? getDescriptionTokenIcon(token) : null;
+}
+
+function knownResourceRewardIconToken(label: string): string | null {
+    switch (label.trim().toLowerCase()) {
+        case "titanium":
+            return "Strategic01Colored";
+        case "glassteel":
+            return "Strategic02Colored";
+        case "lazualin":
+        case "lazuline":
+            return "Strategic03Colored";
+        case "hyperium":
+            return "Strategic04Colored";
+        case "eradione":
+            return "Strategic05Colored";
+        case "thalitine":
+        case "tthalitine":
+            return "Strategic06Colored";
         default:
             return null;
     }

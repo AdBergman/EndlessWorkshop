@@ -363,7 +363,7 @@ describe("StrategyDossier", () => {
         expect(within(choiceResult).queryByText("50 + 50 × Technology Era")).not.toBeInTheDocument();
     });
 
-    it("renders resource icons for structured economy reward kinds only", () => {
+    it("renders resource icons for economy and known strategic reward kinds", () => {
         const option = branchOption({
             choice: choice({
                 sectionRole: "continuation",
@@ -373,6 +373,7 @@ describe("StrategyDossier", () => {
                     "Gain Influence based on technology era",
                     "Gain Science based on technology era",
                     "Gain Food based on technology era",
+                    "Gain Titanium based on technology era",
                     "Gain equipment: The Adjudicator",
                 ],
                 rewardDetails: [
@@ -391,6 +392,11 @@ describe("StrategyDossier", () => {
                         ...rewardDisplaysFromText(["Gain Food based on technology era"])[0]!,
                         kind: "Food",
                         formulaText: "25 + 50 * Technology Era",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Gain Titanium based on technology era"])[0]!,
+                        kind: "Resource",
+                        formulaText: "5 + 5 * Technology Era",
                     },
                     {
                         ...rewardDisplaysFromText(["Gain equipment: The Adjudicator"])[0]!,
@@ -419,13 +425,17 @@ describe("StrategyDossier", () => {
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_Common_Resource_Food.svg"]'
         )).toBeInTheDocument();
-        expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(4);
-        expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(4);
-        expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(4);
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_Resource_Strategic_Titanium.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(5);
+        expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(5);
+        expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(5);
         expect(screen.getByText("Gain Influence")).toBeInTheDocument();
         expect(screen.getByText("Gain Science")).toBeInTheDocument();
         expect(screen.getByText("Gain Food")).toBeInTheDocument();
-        expect(screen.getByText("5 + 5 × Technology Era")).toBeInTheDocument();
+        expect(screen.getByText("Gain Titanium")).toBeInTheDocument();
+        expect(screen.getAllByText("5 + 5 × Technology Era")).toHaveLength(2);
         expect(screen.getByText("20 + 20 × Technology Era")).toBeInTheDocument();
         expect(screen.getByText("25 + 50 × Technology Era")).toBeInTheDocument();
     });
