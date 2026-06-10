@@ -1719,28 +1719,31 @@
 
 .questExplorer-inlineMetaDetail {
     display: block;
-    margin-top: 2px;
-    color: var(--quest-ink-muted);
+    margin-top: 1px;
+    color: rgba(199, 189, 171, 0.68);
     font-family: 'Inter', sans-serif;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-style: normal;
-    line-height: 1.35;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.25;
 }
 
 .questExplorer-rewardLine {
     display: inline-flex;
-    align-items: baseline;
-    gap: 0.34em;
+    align-items: center;
+    gap: 0.38em;
     min-width: 0;
     vertical-align: baseline;
 }
 
 .questExplorer-rewardIcon {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     flex: 0 0 auto;
+    opacity: 0.96;
     object-fit: contain;
-    transform: translateY(2px);
+    transform: translateY(0);
+    filter: drop-shadow(0 0 5px rgba(208, 162, 74, 0.16));
 }
 
 .questExplorer-codexMetaLink {
@@ -1870,7 +1873,7 @@
 }
 
 .questExplorer-inlineMeta--reward .questExplorer-inlineMetaItem--iconReward .questExplorer-inlineMetaDetail {
-    margin-left: 22px;
+    margin-left: 21px;
 }
 
 .questExplorer-loreOpening,
