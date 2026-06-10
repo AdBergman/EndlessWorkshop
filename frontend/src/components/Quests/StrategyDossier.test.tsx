@@ -354,6 +354,7 @@ describe("StrategyDossier", () => {
         expect(selectedOptionButton.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
         )).toBeInTheDocument();
+        expect(selectedOptionButton.querySelector(".questExplorer-inlineMetaItem--iconReward")).toBeInTheDocument();
         expect(screen.queryByText("Formula: 50 + 50 * Technology Era")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Gain Dust based on technology era.")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Formula: 50 + 50 × Technology Era")).not.toBeInTheDocument();
@@ -404,6 +405,7 @@ describe("StrategyDossier", () => {
             'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_Common_Resource_Food.svg"]'
         )).toBeInTheDocument();
         expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(4);
+        expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(4);
     });
 
     it("shows a compact Codex preview tooltip from linked Strategy reward text on hover and focus", async () => {

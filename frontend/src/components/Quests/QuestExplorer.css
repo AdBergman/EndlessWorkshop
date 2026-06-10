@@ -1861,6 +1861,18 @@
     border-color: var(--quest-gold);
 }
 
+.questExplorer-inlineMeta--reward .questExplorer-inlineMetaItem--iconReward {
+    padding-left: 0;
+}
+
+.questExplorer-inlineMeta--reward .questExplorer-inlineMetaItem--iconReward::before {
+    content: none;
+}
+
+.questExplorer-inlineMeta--reward .questExplorer-inlineMetaItem--iconReward .questExplorer-inlineMetaDetail {
+    margin-left: 22px;
+}
+
 .questExplorer-loreOpening,
 .questExplorer-loreIntro {
     position: relative;

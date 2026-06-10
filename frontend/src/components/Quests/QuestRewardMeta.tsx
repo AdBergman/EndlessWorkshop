@@ -34,17 +34,23 @@ export function InlineRewardMetaList({
         <div className="questExplorer-inlineMeta questExplorer-inlineMeta--reward">
             <strong>{label}</strong>
             <ul>
-                {displayRewards.map((reward, index) => (
-                    <li key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
-                        <span className="questExplorer-rewardLine">
-                            <QuestRewardKindIcon reward={reward} />
-                            <QuestCodexReferenceLink source={reward} showTooltip>
-                                <span>{reward.displayText}</span>
-                            </QuestCodexReferenceLink>
-                        </span>
-                        <RewardFormulaDetail formulaText={reward.formulaText} />
-                    </li>
-                ))}
+                {displayRewards.map((reward, index) => {
+                    const icon = economyRewardIcon(reward.kind);
+                    return (
+                        <li
+                            className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}
+                            key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}
+                        >
+                            <span className="questExplorer-rewardLine">
+                                <QuestRewardKindIcon icon={icon} />
+                                <QuestCodexReferenceLink source={reward} showTooltip>
+                                    <span>{reward.displayText}</span>
+                                </QuestCodexReferenceLink>
+                            </span>
+                            <RewardFormulaDetail formulaText={reward.formulaText} />
+                        </li>
+                    );
+                })}
             </ul>
         </div>
     );
@@ -72,7 +78,7 @@ export function InlineStageRewardMeta({
                 <Fragment key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
                     {index > 0 ? "; " : null}
                     <span className="questExplorer-rewardLine">
-                        <QuestRewardKindIcon reward={reward} />
+                        <QuestRewardKindIcon icon={economyRewardIcon(reward.kind)} />
                         <QuestCodexReferenceLink source={reward} showTooltip>
                             {reward.displayText}
                         </QuestCodexReferenceLink>
@@ -90,9 +96,7 @@ export function InlineStageRewardMeta({
     );
 }
 
-function QuestRewardKindIcon({ reward }: { reward: QuestRewardDisplay }) {
-    const token = economyRewardIconToken(reward.kind);
-    const icon = token ? getDescriptionTokenIcon(token) : null;
+function QuestRewardKindIcon({ icon }: { icon: ReturnType<typeof economyRewardIcon> }) {
     if (!icon) return null;
 
     return (
@@ -103,6 +107,11 @@ function QuestRewardKindIcon({ reward }: { reward: QuestRewardDisplay }) {
             aria-hidden="true"
         />
     );
+}
+
+function economyRewardIcon(kind: string) {
+    const token = economyRewardIconToken(kind);
+    return token ? getDescriptionTokenIcon(token) : null;
 }
 
 function economyRewardIconToken(kind: string): string | null {
