@@ -26,10 +26,12 @@ export function QuestCodexReferenceLink({
     source,
     children,
     showTooltip = false,
+    presentation = "default",
 }: {
     source: QuestCodexReferenceSource;
     children: ReactNode;
     showTooltip?: boolean;
+    presentation?: "default" | "compactReward";
 }) {
     const tooltipId = useId();
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
@@ -114,6 +116,46 @@ export function QuestCodexReferenceLink({
         : null;
 
     if (showTooltip) {
+        if (presentation === "compactReward") {
+            const compactPrimary = textParts.matchedEntity ? textParts.entityText : label;
+            const compactKind = compactRewardKindLabel(source, textParts, entry.exportKind, entry.kind);
+
+            return (
+                <span className="questExplorer-codexReference questExplorer-codexReference--compactReward" aria-label={source.displayText.trim()}>
+                    <span className="questExplorer-codexRewardText">
+                        <span
+                            className="questExplorer-codexPreviewTarget questExplorer-codexRewardTitle"
+                            tabIndex={0}
+                            aria-describedby={tooltip ? tooltipId : undefined}
+                            onMouseEnter={showMouseTooltip}
+                            onMouseLeave={hideTooltipSoon}
+                            onFocus={showFocusTooltip}
+                            onMouseDown={stopPreviewMouseDown}
+                            onClick={showClickTooltip}
+                            onBlur={hideTooltip}
+                        >
+                            {compactPrimary}
+                        </span>
+                        {compactKind ? (
+                            <small className="questExplorer-codexRewardKind">{compactKind}</small>
+                        ) : null}
+                    </span>
+                    <a
+                        className="questExplorer-codexOpenLink"
+                        href={codexEntryHref(entry)}
+                        aria-label={`Open ${label} in Codex`}
+                        onClick={stopContainingAction}
+                        onMouseDown={stopContainingAction}
+                        onFocus={showFocusTooltip}
+                        onBlur={hideTooltip}
+                    >
+                        <FaExternalLinkAlt aria-hidden="true" focusable="false" />
+                    </a>
+                    {tooltip}
+                </span>
+            );
+        }
+
         return (
             <span className="questExplorer-codexReference" aria-label={source.displayText.trim()}>
                 {textParts.prefix ? (
@@ -168,6 +210,7 @@ type ReferenceTextParts = {
     prefix: string | null;
     entityText: string;
     suffix: string | null;
+    matchedEntity: boolean;
 };
 
 function referenceTextParts(source: QuestCodexReferenceSource, resolvedLabel: string): ReferenceTextParts {
@@ -186,6 +229,7 @@ function referenceTextParts(source: QuestCodexReferenceSource, resolvedLabel: st
             prefix: cleanPart(displayText.slice(0, matchIndex)),
             entityText: displayText.slice(matchIndex, matchIndex + entityLabel.length),
             suffix: cleanPart(displayText.slice(matchIndex + entityLabel.length)),
+            matchedEntity: true,
         };
     }
 
@@ -193,6 +237,7 @@ function referenceTextParts(source: QuestCodexReferenceSource, resolvedLabel: st
         prefix: null,
         entityText: displayText,
         suffix: null,
+        matchedEntity: false,
     };
 }
 
@@ -212,6 +257,26 @@ function uniqueEntityLabels(values: Array<string | null | undefined>): string[] 
 function cleanPart(value: string): string | null {
     const cleaned = value.trim();
     return cleaned || null;
+}
+
+function compactRewardKindLabel(
+    source: QuestCodexReferenceSource,
+    textParts: ReferenceTextParts,
+    exportKind: string,
+    kind: string | null | undefined
+): string {
+    const sourceText = source.displayText.trim().toLowerCase();
+    const prefix = textParts.prefix?.toLowerCase() ?? "";
+
+    if (/\bequipment\b/.test(sourceText)) return "Equipment";
+    if (/\bfaction\s+trait\b/.test(sourceText)) return "Faction Trait";
+    if (/\bbonus\b/.test(prefix) || /\bbonus\b/.test(sourceText)) return "Bonus";
+    if (/\bconstructible\b/.test(prefix) || /\bconstructible\b/.test(sourceText)) return "Constructible";
+    if (/\bpopulation\b/.test(prefix) || /\bpopulation\b/.test(sourceText)) return "Population";
+    if (/\bhero\b/.test(prefix) || /\bhero\b/.test(sourceText)) return "Hero";
+    if (/\bunit\b/.test(prefix) || /\bunit\b/.test(sourceText)) return "Unit";
+
+    return formatCodexKindLabel(kind?.trim() || exportKind);
 }
 
 function tooltipCoordsForElement(element: HTMLElement): TooltipCoords {

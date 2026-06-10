@@ -374,6 +374,7 @@ describe("StrategyDossier", () => {
                     "Gain Science based on technology era",
                     "Gain Food based on technology era",
                     "Gain Titanium based on technology era",
+                    "Gain cadavers based on technology era",
                     "Gain equipment: The Adjudicator",
                 ],
                 rewardDetails: [
@@ -397,6 +398,11 @@ describe("StrategyDossier", () => {
                         ...rewardDisplaysFromText(["Gain Titanium based on technology era"])[0]!,
                         kind: "Resource",
                         formulaText: "5 + 5 * Technology Era",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Gain cadavers based on technology era"])[0]!,
+                        kind: "Resource",
+                        formulaText: "20 + 10 * Technology Era",
                     },
                     {
                         ...rewardDisplaysFromText(["Gain equipment: The Adjudicator"])[0]!,
@@ -428,14 +434,19 @@ describe("StrategyDossier", () => {
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_Resource_Strategic_Titanium.svg"]'
         )).toBeInTheDocument();
-        expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(5);
-        expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(5);
-        expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(5);
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_SpecialResources_Cadavers.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(6);
+        expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(6);
+        expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(6);
         expect(screen.getByText("Gain Influence")).toBeInTheDocument();
         expect(screen.getByText("Gain Science")).toBeInTheDocument();
         expect(screen.getByText("Gain Food")).toBeInTheDocument();
         expect(screen.getByText("Gain Titanium")).toBeInTheDocument();
+        expect(screen.getByText("Gain Cadavers")).toBeInTheDocument();
         expect(screen.getAllByText("5 + 5 × Technology Era")).toHaveLength(2);
+        expect(screen.getByText("20 + 10 × Technology Era")).toBeInTheDocument();
         expect(screen.getByText("20 + 20 × Technology Era")).toBeInTheDocument();
         expect(screen.getByText("25 + 50 × Technology Era")).toBeInTheDocument();
     });
@@ -472,13 +483,12 @@ describe("StrategyDossier", () => {
 
         const onChoose = renderDossier(modelForOptions([option], null));
 
-        const rewardPrefix = screen.getByText("Unlock constructible:");
         const rewardText = screen.getByText("Chosen");
         const rewardPreviewTarget = rewardText.closest(".questExplorer-codexPreviewTarget");
         const rewardReference = rewardText.closest(".questExplorer-codexReference");
-        expect(rewardPrefix).toHaveClass("questExplorer-codexReferencePrefix");
-        expect(rewardPrefix.closest(".questExplorer-codexPreviewTarget")).toBeNull();
         expect(rewardReference).toHaveAttribute("aria-label", "Unlock constructible: Chosen");
+        expect(within(rewardReference as HTMLElement).getByText("Constructible")).toHaveClass("questExplorer-codexRewardKind");
+        expect(screen.queryByText("Unlock constructible:")).not.toBeInTheDocument();
         expect(rewardPreviewTarget).toBeInstanceOf(HTMLElement);
         expect(rewardText.closest("a")).toBeNull();
         expect(rewardPreviewTarget).toHaveAttribute("tabindex", "0");
@@ -635,8 +645,9 @@ describe("StrategyDossier", () => {
             "href",
             "/codex?entry=Technology_RidgeLogistics"
         );
-        expect(screen.getByText("Unlock constructible:").closest("a")).toBeNull();
         expect(screen.getByText("Chosen").closest("a")).toBeNull();
+        expect(screen.queryByText("Unlock constructible:")).not.toBeInTheDocument();
+        expect(screen.getByText("Constructible")).toHaveClass("questExplorer-codexRewardKind");
         expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
@@ -650,6 +661,12 @@ describe("StrategyDossier", () => {
             "href",
             "/codex?entry=FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest"
         );
+        expect(screen.getByText("The Adjudicator")).toBeInTheDocument();
+        expect(screen.getByText("Ahead in the Polls")).toBeInTheDocument();
+        expect(screen.queryByText("Gain equipment:")).not.toBeInTheDocument();
+        expect(screen.queryByText("Gain bonus:")).not.toBeInTheDocument();
+        expect(screen.getByText("Equipment")).toHaveClass("questExplorer-codexRewardKind");
+        expect(screen.getByText("Bonus")).toHaveClass("questExplorer-codexRewardKind");
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Unit.svg"]'
         )).toBeInTheDocument();
@@ -661,7 +678,7 @@ describe("StrategyDossier", () => {
         )).toBeInTheDocument();
     });
 
-    it("keeps the whole display text as the preview target when the entity label cannot be safely split", async () => {
+    it("uses the resolved Codex label for compact reward links when the source text cannot be split", async () => {
         setCodexEntries([
             codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen", {
                 kind: "Unit",
@@ -686,9 +703,13 @@ describe("StrategyDossier", () => {
 
         renderDossier(modelForOptions([option], null));
 
-        const fallbackText = screen.getByText("Unlock an elite constructible.");
+        const fallbackText = screen.getByText("Chosen");
         const fallbackPreviewTarget = fallbackText.closest(".questExplorer-codexPreviewTarget");
+        const fallbackReference = fallbackText.closest(".questExplorer-codexReference");
         expect(fallbackPreviewTarget).toBeInstanceOf(HTMLElement);
+        expect(fallbackReference).toHaveAttribute("aria-label", "Unlock an elite constructible.");
+        expect(within(fallbackReference as HTMLElement).getByText("Constructible")).toHaveClass("questExplorer-codexRewardKind");
+        expect(screen.queryByText("Unlock an elite constructible.")).not.toBeInTheDocument();
         expect(screen.queryByText("Unlock an elite constructible:", { exact: false })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",

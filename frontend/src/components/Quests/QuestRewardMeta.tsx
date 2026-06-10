@@ -125,7 +125,7 @@ function QuestRewardInline({
 
 function QuestRewardLabel({ reward }: { reward: QuestRewardDisplay }) {
     return (
-        <QuestCodexReferenceLink source={reward} showTooltip>
+        <QuestCodexReferenceLink source={reward} showTooltip presentation="compactReward">
             <span>{formatStrategyRewardLabel(reward)}</span>
         </QuestCodexReferenceLink>
     );
@@ -204,7 +204,7 @@ function formulaBackedTechnologyEraRewardLabel(reward: QuestRewardDisplay): stri
 
     const match = reward.displayText.trim().match(/^gain\s+(.+?)\s+based\s+on\s+technology\s+era\.?$/i);
     const rewardSubject = match?.[1]?.trim();
-    return rewardSubject ? `Gain ${rewardSubject}` : null;
+    return rewardSubject ? `Gain ${formatKnownRewardSubject(rewardSubject)}` : null;
 }
 
 function knownResourceRewardIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | null {
@@ -219,6 +219,8 @@ function knownResourceRewardIcon(reward: QuestRewardDisplay): DescriptionTokenIc
 
 function knownResourceRewardIconToken(label: string): string | null {
     switch (label.trim().toLowerCase()) {
+        case "cadavers":
+            return "CadaversColored";
         case "titanium":
             return "Strategic01Colored";
         case "glassteel":
@@ -235,5 +237,14 @@ function knownResourceRewardIconToken(label: string): string | null {
             return "Strategic06Colored";
         default:
             return null;
+    }
+}
+
+function formatKnownRewardSubject(value: string): string {
+    switch (value.trim().toLowerCase()) {
+        case "cadavers":
+            return "Cadavers";
+        default:
+            return value;
     }
 }

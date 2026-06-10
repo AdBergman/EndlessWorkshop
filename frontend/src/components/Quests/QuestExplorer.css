@@ -1787,6 +1787,35 @@
     gap: 0.24em;
 }
 
+.questExplorer-codexReference--compactReward {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 5px;
+    min-width: 0;
+}
+
+.questExplorer-codexRewardText {
+    display: grid;
+    gap: 1px;
+    min-width: 0;
+}
+
+.questExplorer-codexRewardTitle {
+    justify-self: start;
+}
+
+.questExplorer-codexRewardKind {
+    color: rgba(199, 189, 171, 0.64);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.15;
+    text-transform: uppercase;
+}
+
 .questExplorer-codexReferencePrefix {
     color: rgba(232, 204, 158, 0.84);
 }
