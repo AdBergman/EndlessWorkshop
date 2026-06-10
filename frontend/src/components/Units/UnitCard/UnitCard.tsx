@@ -9,7 +9,7 @@ import { deriveUnit } from "@/lib/units/deriveUnit";
 import { useCodex } from "@/hooks/useCodex";
 import SkillTooltip, { HoveredSkill } from "../../Tooltips/SkillTooltip";
 import UnitCardMetadataTooltip, { type HoveredUnitCardMetadata } from "./UnitCardMetadataTooltip";
-import { getAbilityIconPath } from "@/features/icons/abilityIconResolver";
+import { getAbilityIconMetadata } from "@/features/icons/abilityIconResolver";
 import { IconImg } from "@/features/icons/IconImg";
 import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { getUnitClassIcons, type UnitClassIcon } from "@/features/icons/unitClassIconResolver";
@@ -113,6 +113,15 @@ function stripDescriptionTokens(line: string): string {
     return line.replace(/\[([^\]]+)]/g, "$1");
 }
 
+function shouldUseAbilityRegistryFallback(abilityKey: string): boolean {
+    return ![
+        /^UnitAbility_Class_/i,
+        /^UnitAbility_Prototype_/i,
+        /^UnitAbility_Break/i,
+        /^UnitAbility_LandMovement$/i,
+    ].some((pattern) => pattern.test(abilityKey));
+}
+
 function buildClassMetadataTooltip(icon: UnitClassIcon): Omit<HoveredUnitCardMetadata, "coords"> {
     if (icon.bonusTargetLabel) {
         return {
@@ -210,16 +219,49 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         setFlipped((v) => !v);
     };
 
-    // Resolve visible skills once per render
+    // Resolve visible skills once per render.
+    // Some unit abilities are player-facing but absent from the Codex tooltip export; keep those visible
+    // when the curated ability icon registry has a safe label/icon for them.
     const visibleSkills = useMemo(() => {
         const keys = unit.abilityKeys ?? [];
         return keys
             .map((k) => {
-                const codex = getVisibleEntry("abilities", k);
-                if (!codex) return null;
-                return { key: k, codex, iconPath: getAbilityIconPath(k) };
+                const key = k.trim();
+                if (!key) return null;
+
+                const codex = getVisibleEntry("abilities", key);
+                const icon = getAbilityIconMetadata(key);
+
+                if (codex) {
+                    return {
+                        key,
+                        label: codex.displayName,
+                        tooltipData: codex,
+                        iconPath: icon?.path ?? null,
+                    };
+                }
+
+                const fallbackLabel = icon?.displayName?.trim();
+                if (!fallbackLabel || !icon?.path || !shouldUseAbilityRegistryFallback(key)) return null;
+
+                const tooltipData: Codex = {
+                    exportKind: "abilities",
+                    entryKey: key,
+                    displayName: fallbackLabel,
+                    category: null,
+                    kind: icon.kind ?? "Ability",
+                    descriptionLines: [],
+                    referenceKeys: [key],
+                };
+
+                return {
+                    key,
+                    label: fallbackLabel,
+                    tooltipData,
+                    iconPath: icon.path,
+                };
             })
-            .filter((x): x is { key: string; codex: any; iconPath: string | null } => !!x);
+            .filter((x): x is { key: string; label: string; tooltipData: Codex; iconPath: string | null } => !!x);
     }, [unit.abilityKeys, getVisibleEntry]);
 
     // Tooltip hover handling (sticky)
@@ -238,14 +280,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         }, 60);
     };
 
-    const handleSkillEnter = (e: React.MouseEvent, abilityKey: string) => {
-        const codex = getVisibleEntry("abilities", abilityKey);
-        if (!codex) return;
-
+    const handleSkillEnter = (e: React.MouseEvent, data: Codex) => {
         if (clearTimerRef.current) window.clearTimeout(clearTimerRef.current);
 
         setHoveredSkill({
-            data: codex,
+            data,
             coords: { x: e.clientX + 12, y: e.clientY, mode: "pixel" },
         });
         setHoveredMetadata(null);
@@ -501,29 +540,29 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                             <div className="noSkills">No abilities</div>
                         ) : (
                             <div className="skillsList">
-                                {visibleSkills.map(({ key, codex, iconPath }) => (
+                                {visibleSkills.map(({ key, label, tooltipData, iconPath }) => (
                                     <button
                                         key={key}
                                         type="button"
                                         className={`skill ${iconPath ? "" : "skillNoIcon"}`}
                                         onMouseDown={(e) => e.preventDefault()}
-                                        onMouseEnter={(e) => handleSkillEnter(e, key)}
+                                        onMouseEnter={(e) => handleSkillEnter(e, tooltipData)}
                                         onMouseMove={handleSkillMove}
                                         onMouseLeave={clearHoverSoon}
-                                        onFocus={(e) => handleSkillFocus(e, codex)}
+                                        onFocus={(e) => handleSkillFocus(e, tooltipData)}
                                         onBlur={clearHoverSoon}
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         {iconPath ? (
                                             <IconImg
                                                 path={iconPath}
-                                                title={codex.displayName}
+                                                title={label}
                                                 className="skillIcon"
                                                 size={20}
                                                 decorative
                                             />
                                         ) : null}
-                                        <span className="skillLabel">{codex.displayName}</span>
+                                        <span className="skillLabel">{label}</span>
                                     </button>
                                 ))}
                             </div>

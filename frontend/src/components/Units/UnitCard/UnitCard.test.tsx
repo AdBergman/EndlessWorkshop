@@ -73,6 +73,50 @@ describe("UnitCard", () => {
         expect(container.querySelector(".skillNoIcon")).toHaveTextContent("Land Unit");
     });
 
+    it("renders player-facing registry abilities when the Codex tooltip entry is missing", () => {
+        const entries = [
+            abilityEntry("UnitAbility_Ranged_5", "Ranged V"),
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKindKey: {
+                abilities: Object.fromEntries(entries.map((entry) => [entry.entryKey, entry])),
+            },
+        });
+
+        const { container } = render(
+            <UnitCard
+                unit={unit({
+                    displayName: "Wrath Bearer",
+                    abilityKeys: [
+                        "UnitAbility_BreakRangedUnitDamage",
+                        "UnitAbility_Class_BonusVsFlying",
+                        "UnitAbility_Class_RangedTag",
+                        "UnitAbility_Cumbersome",
+                        "UnitAbility_LandMovement",
+                        "UnitAbility_NoRetaliate",
+                        "UnitAbility_Prototype_LandUnit",
+                        "UnitAbility_Prototype_Ranged",
+                        "UnitAbility_Prototype_Unit",
+                        "UnitAbility_Ranged_5",
+                    ],
+                })}
+                showArtwork={false}
+            />
+        );
+
+        expect(screen.getByRole("button", { name: "Cumbersome" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Can't Retaliate" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Ranged V" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Ranged" })).not.toBeInTheDocument();
+        expect(container.querySelectorAll(".skillsList .skill")).toHaveLength(3);
+        expect(container.querySelector('img.skillIcon[src="/svg/units/UI_Status_Unit_Cumbersome.svg"]'))
+            .toBeInTheDocument();
+        expect(container.querySelector('img.skillIcon[src="/svg/unit-abilities/UI_UnitAbility_NoRetaliate.svg"]'))
+            .toBeInTheDocument();
+    });
+
     it("renders game SVG icons for compact unit stats", () => {
         const { container } = render(
             <UnitCard

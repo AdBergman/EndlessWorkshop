@@ -1,6 +1,6 @@
 import abilityIconsJson from "../../../public/svg/ability-icons.json";
 
-type AbilityIconEntry = {
+export type AbilityIconMetadata = {
     path: string;
     displayName?: string;
     kind?: string;
@@ -9,7 +9,7 @@ type AbilityIconEntry = {
 
 type AbilityIconsJson = {
     schemaVersion?: number;
-    abilities?: Record<string, AbilityIconEntry>;
+    abilities?: Record<string, AbilityIconMetadata>;
 };
 
 const abilityIcons = (abilityIconsJson as AbilityIconsJson).abilities ?? {};
@@ -24,4 +24,15 @@ export function getAbilityIconPath(abilityKey: string): string | null {
 
     const icon = abilityIcons[normalized];
     return icon?.path?.trim() || null;
+}
+
+export function getAbilityIconMetadata(abilityKey: string): AbilityIconMetadata | null {
+    const normalized = normalizeAbilityKey(abilityKey);
+    if (!normalized) return null;
+
+    const icon = abilityIcons[normalized];
+    const path = icon?.path?.trim();
+    if (!icon || !path) return null;
+
+    return { ...icon, path };
 }
