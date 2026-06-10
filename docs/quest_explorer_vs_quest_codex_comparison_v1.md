@@ -1,6 +1,6 @@
 # Quest Explorer vs Quest Codex Comparison v1
 
-Status: investigation note - no behavior changes
+Status: historical comparison note with current implementation status
 Date: 2026-05-26
 Canonical semantic reference: `docs/quest_explorer_canonical_semantics_v1.md`
 Primary local evidence:
@@ -10,6 +10,35 @@ Primary local evidence:
 - all `local-imports/codex/*_codex_export_0.80.json` files for reference resolution checks
 
 `local-imports/` is local-only evidence and must not be committed.
+
+## Current Status
+
+Updated: 2026-06-10
+
+Several implementation gaps identified by this comparison have since been
+closed:
+
+- Quest Explorer now preserves `strategyView.objectives[].choiceKey` through
+  import, storage, API DTOs, frontend types, and Strategy tests.
+- Quest requirement and reward reference metadata is preserved into Strategy
+  display models.
+- Strategy requirement and reward rows can resolve exact Codex targets and show
+  compact Codex preview/open-link affordances.
+
+Still active:
+
+- Live local Codex `codexEntryKey` coverage for Quest requirement/reward rows is
+  still empty, so the frontend correctly relies on typed fallback resolution.
+- Codex quest rows still do not expose explicit owner links to Quest Explorer
+  entries/aliases.
+- DB exporter Codex metadata beyond populations is still pending, so compact
+  previews mostly use description lines rather than structured facts/sections.
+- Reward/resource SVG icons in Strategy rows should be investigated as a
+  separate UI polish pass.
+
+The original comparison below remains useful for projection boundaries and
+historical evidence. Statements that describe `choiceKey` loss or no
+Quest-to-Codex Strategy UI should be read as superseded by this status section.
 
 ## Executive Summary
 
@@ -28,11 +57,11 @@ The two exports are not interchangeable:
   topology, aliases, branch roles, reveal ownership, and backend-computed
   progression.
 
-The split should remain. The main gaps are link-contract gaps, not evidence that
-the projections should be merged:
+The split should remain. The main gaps were link-contract gaps, not evidence
+that the projections should be merged:
 
-1. Quest Explorer raw objectives contain `strategyView.objectives[].choiceKey`,
-   but the current backend import/domain/API/frontend DTO chain drops it.
+1. Quest Explorer raw objectives contain `strategyView.objectives[].choiceKey`;
+   this is now preserved through the current import/domain/API/frontend chain.
 2. Quest Explorer reward/requirement `codexEntryKey` fields exist in the
    contract, but the live 0.80 export does not populate them.
 3. Quest Codex quest grouping currently derives chapter/step/choice context from
@@ -40,9 +69,9 @@ the projections should be merged:
    heuristic, not semantic authority.
 4. Quest Codex entries do not expose an explicit owner link to Quest Explorer
    canonical entries/aliases, even though the live keys line up exactly.
-5. Quest Explorer does not currently render links to Codex entries for rewards,
-   requirements, heroes, techs, traits, units, equipment, districts, or
-   improvements.
+5. Quest Explorer Strategy now renders compact Codex references for resolved
+   requirement/reward rows; broader Lore and Codex-to-Explorer links remain out
+   of scope.
 
 ## Responsibility Split
 
@@ -204,16 +233,12 @@ Explorer preserves:
 - branch topology, role, reveal, prerequisite, convergence, failure, and
   continuation fields
 - structured requirements and rewards, including `formulaText`
+- objective `choiceKey`
 - backend-computed `progression` in the API response
-
-Explorer drops:
-
-- raw `strategyView.objectives[].choiceKey`
 
 Assessment:
 
 - Explorer is the correct source for canonical quest semantics.
-- The objective `choiceKey` omission is the clearest actual data-loss gap.
 - The live export also leaves `codexEntryKey` empty for requirements/rewards,
   which is an exporter/linking gap rather than a backend preservation problem.
 
@@ -268,13 +293,14 @@ Current behavior:
 - Preserves structured reward formula fields into Strategy rendering.
 - Preserves reward/requirement `referenceKey`, `referenceKind`,
   `referenceDisplayName`, asset fields, and `codexEntryKey` in types.
-- Does not currently resolve those references to Codex entries in the UI.
+- Resolves exact Strategy requirement/reward references to Codex entries in the
+  UI when current Codex data can support the target.
 
 Assessment:
 
 - Explorer is correctly independent from Codex for semantic rendering.
-- It has enough raw reference data to support future Codex links, but live data
-  would need either populated `codexEntryKey` or a safe typed resolver.
+- It has enough raw reference data to support current Codex links through the
+  safe typed resolver while waiting for populated `codexEntryKey` values.
 
 ## Missing Or Duplicated Field Analysis
 
@@ -282,7 +308,7 @@ Assessment:
 
 | Field/Data | Source | Severity | Recommendation |
 | --- | --- | --- | --- |
-| `strategyView.objectives[].choiceKey` | Raw Explorer export | High for future semantic precision | Preserve through import DTO, command snapshot, DB, domain, response DTO, frontend type, and normalizer in a bounded API migration. |
+| `strategyView.objectives[].choiceKey` | Raw Explorer export | Done | Preserved through import DTO, command snapshot, DB, domain, response DTO, frontend type, and Strategy tests. |
 | Generic `referenceKeys[]` | Quest Codex | Low | Do not copy wholesale. Explorer already has structured requirement/reward refs. Add links from structured refs instead. |
 | Codex category/kind labels | Quest Codex | Low | Do not duplicate unless Explorer needs search/category harmonization. Existing `questType` and navigation are enough for Explorer. |
 | Codex root `game` metadata | Quest Codex | Low | Not relevant to Explorer. |

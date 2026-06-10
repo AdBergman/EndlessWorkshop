@@ -83,28 +83,49 @@ Actionable next items:
 
 ## P1 - Codex Links For Quest Strategy View
 
-Owner: EWShop frontend/backend, when Quest Strategy work is back in scope.
+Owner: EWShop frontend, with DB exporter/backend as data-quality follow-up.
 
-Status: likely doable with current app data, but should be mapped into
-actionable Jira-style tickets before implementation.
+Status: initial Strategy implementation is already in place. Quest requirement
+and reward display models preserve reference metadata, the frontend has an exact
+Quest-to-Codex resolver, and Strategy requirement/reward rows can show compact
+Codex preview links when they resolve.
 
 Actionable next items:
 
-1. Create Jira tickets for a generic Codex reference resolver.
-2. Start with Strategy rewards, then requirements.
-3. Use exact keys only: `codexEntryKey`, `entryKey`, known aliases, or typed
-   reference keys.
-4. Do not infer from titles or prose.
-5. Keep Quest copy primary; Codex preview/linking should be secondary context.
+1. Keep the current exact-key rule: prefer `codexEntryKey`, then typed
+   `referenceKind/referenceKey`, then reward `assetKind/assetKey`.
+2. Do not infer links from titles or prose.
+3. Wait for DB exporter metadata before trying richer Codex preview content;
+   current local Codex metadata is still population-only.
+4. Investigate SVG/resource icons for Strategy reward rows as a separate visual
+   polish pass, using the existing description-token icon registry where the
+   display text contains tokens such as `[DustColored]` or `[InfluenceColored]`.
+5. Do not expand Codex links into Lore until Strategy has been reviewed in the
+   browser.
 
-Draft Jira ticket shape for later:
+Jira-style status:
 
-- `QX-CODEX-001`: Build exact Codex reference resolver.
-- `QX-CODEX-002`: Add Strategy reward Codex links.
-- `QX-CODEX-003`: Add Strategy requirement Codex links.
-- `QX-CODEX-004`: Add tests for unresolved references and no-title-inference.
-- `QX-CODEX-005`: Add optional compact Codex preview/tooltip after links are
-  stable.
+- `QX-CODEX-001`: Done - exact Quest Codex reference resolver exists in
+  `frontend/src/features/quests/questCodexReference.ts`.
+- `QX-CODEX-002`: Done - Strategy reward Codex links/previews are wired through
+  `QuestRewardMeta`.
+- `QX-CODEX-003`: Done - Strategy requirement Codex links/previews are wired
+  through requirement display models and `InlineMetaList`.
+- `QX-CODEX-004`: Done - tests cover unresolved references, formula-only
+  rewards, and no fake links.
+- `QX-CODEX-005`: Done for desktop hover/focus - compact Codex previews exist
+  for resolved Strategy references.
+- `QX-CODEX-006`: P1 - browser review of current Strategy Codex link UX,
+  including hover/focus behavior inside clickable decision cards.
+- `QX-CODEX-007`: P1 - mobile/tap accessibility hardening for Codex previews
+  if the current hover/focus behavior is not sufficient.
+- `QX-CODEX-008`: P1 - verify resolver kind coverage with real data,
+  especially `MinorFaction` and other less common reference kinds.
+- `QX-CODEX-009`: P1 - investigate reward SVG/resource icons in Strategy rows
+  without changing the primary Quest copy.
+- `QX-CODEX-010`: P2 - after DB exporter Codex metadata expands beyond
+  populations, improve tooltip content to prefer structured facts/sections over
+  plain description preview lines.
 
 ## P2 - Local Visual Polish Only Where We Are Working
 

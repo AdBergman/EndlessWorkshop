@@ -1,9 +1,43 @@
 # Quest Explorer Codex Tooltips Feasibility v1
 
-Status: investigation note - no tooltip behavior implemented
+Status: historical feasibility note with current implementation status
 Date: 2026-05-26
 Canonical semantic reference: `docs/quest_explorer_canonical_semantics_v1.md`
 Related comparison: `docs/quest_explorer_vs_quest_codex_comparison_v1.md`
+
+## Current Status
+
+Updated: 2026-06-10
+
+The first Strategy implementation has landed since this investigation was
+written.
+
+Implemented:
+
+- Quest reward and requirement display models preserve Codex reference metadata.
+- `resolveQuestCodexReference(...)` resolves exact Codex targets by
+  `codexEntryKey`, typed `referenceKind/referenceKey`, then reward
+  `assetKind/assetKey`.
+- Strategy requirement and reward rows render compact Codex preview affordances
+  when a target resolves.
+- Tests cover resolver precedence, typed kind mapping, asset fallback,
+  formula-only rewards, unresolved rows, desktop hover/focus previews, Codex
+  open links, and click isolation inside decision cards.
+
+Still active:
+
+- Review the current browser UX before adding more surfaces.
+- Harden mobile/tap behavior if needed.
+- Verify less-common reference kinds against real data, especially
+  `MinorFaction`.
+- Investigate SVG/resource icons in Strategy reward rows separately from Codex
+  links.
+- Wait for DB exporter Codex metadata expansion before making tooltip content
+  richer than a compact description preview.
+
+The original analysis below remains useful as rationale and historical context,
+but sections that say metadata is dropped or no tooltip behavior exists are
+superseded by the status above.
 
 Primary local evidence:
 
@@ -46,7 +80,7 @@ Tech/Unit shapes. The safer design is a generic `CodexReferenceTooltip` or
 Quest-specific wrapper backed by `useCodexStore`/`useCodex`, `BaseTooltip`,
 `hoverHelpers`, and `codexRefs`.
 
-Recommended first implementation:
+Original recommended first implementation:
 
 1. Preserve reference metadata in Quest Explorer requirement/reward display
    view-models.
@@ -316,6 +350,8 @@ enough.
 
 ### Phase 0 - View-model and resolver preparation
 
+Status: done.
+
 - Add a `QuestReferenceDisplay` or similar small view-model:
   - `displayText`
   - `referenceKind`
@@ -337,6 +373,9 @@ No visible UI change is required in this phase.
 
 ### Phase 1 - Strategy reward tooltips
 
+Status: done for the core Strategy reward contexts. Overview reward parity and
+visual reward-icon treatment remain separate follow-ups.
+
 - Add a lightweight `CodexReferenceTooltip` or `QuestCodexReferenceTooltip`.
 - Use it inside `InlineRewardMetaList` and `InlineStageRewardMeta`.
 - Preserve current primary display text and formula secondary line.
@@ -350,6 +389,8 @@ No visible UI change is required in this phase.
 
 ### Phase 2 - Strategy requirement tooltips
 
+Status: done for Strategy requirement contexts.
+
 - Replace local requirement `string[]` display plumbing with requirement display
   view-models in Strategy adapters.
 - Render requirement tooltips in current task, decision option, topology
@@ -359,6 +400,8 @@ No visible UI change is required in this phase.
 
 ### Phase 3 - Mobile and accessibility hardening
 
+Status: active follow-up after browser review.
+
 - Add tap/click behavior, focus behavior, escape dismissal, and outside-click
   dismissal.
 - Verify keyboard navigation in Strategy cards and buttons.
@@ -366,6 +409,9 @@ No visible UI change is required in this phase.
   debug panels, or Codex page overlays.
 
 ### Phase 4 - Optional richer domain cards
+
+Status: deferred. Keep the current compact Codex preview until DB exporter
+metadata coverage improves.
 
 - Consider using direct Unit/District/Improvement cards after the generic Codex
   preview is stable.
@@ -398,8 +444,10 @@ Minimum test set for the first implementation:
 
 - `codexEntryKey` is empty in live 0.80, so the first implementation must rely
   on typed fallback resolution.
-- Requirement metadata is currently dropped earlier than reward metadata.
-- Reward metadata currently drops reference fields in `QuestRewardDisplay`.
+- Requirement metadata is now preserved in Strategy display models; keep tests
+  around this boundary because it was a previous loss point.
+- Reward metadata is now preserved in `QuestRewardDisplay`; keep formula-only
+  and unresolved-reference tests so the resolver does not invent fake links.
 - Some live references do not resolve to Codex entries.
 - Resource/status/formula-only rewards do not currently have a first-class
   Codex target in the local exports.
