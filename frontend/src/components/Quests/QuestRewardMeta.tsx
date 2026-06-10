@@ -13,7 +13,7 @@ export function RewardFormulaDetail({ formulaText }: { formulaText: string | nul
 
     return (
         <small className="questExplorer-inlineMetaDetail">
-            Formula: {formatStrategyRewardFormula(formulaText)}
+            {formatStrategyRewardFormula(formulaText)}
         </small>
     );
 }
@@ -44,7 +44,7 @@ export function InlineRewardMetaList({
                             <span className="questExplorer-rewardLine">
                                 <QuestRewardKindIcon icon={icon} />
                                 <QuestCodexReferenceLink source={reward} showTooltip>
-                                    <span>{reward.displayText}</span>
+                                    <span>{formatStrategyRewardLabel(reward)}</span>
                                 </QuestCodexReferenceLink>
                             </span>
                             <RewardFormulaDetail formulaText={reward.formulaText} />
@@ -80,7 +80,7 @@ export function InlineStageRewardMeta({
                     <span className="questExplorer-rewardLine">
                         <QuestRewardKindIcon icon={economyRewardIcon(reward.kind)} />
                         <QuestCodexReferenceLink source={reward} showTooltip>
-                            {reward.displayText}
+                            {formatStrategyRewardLabel(reward)}
                         </QuestCodexReferenceLink>
                     </span>
                 </Fragment>
@@ -88,12 +88,22 @@ export function InlineStageRewardMeta({
             {formulaTexts.length > 0 ? (
                 <small className="questExplorer-inlineMetaDetail">
                     {formulaTexts
-                        .map((formulaText) => `Formula: ${formatStrategyRewardFormula(formulaText)}`)
+                        .map((formulaText) => formatStrategyRewardFormula(formulaText))
                         .join("; ")}
                 </small>
             ) : null}
         </span>
     );
+}
+
+function formatStrategyRewardLabel(reward: QuestRewardDisplay): string {
+    const resourceLabel = economyRewardLabel(reward.kind);
+    if (!resourceLabel || !reward.formulaText) return reward.displayText;
+
+    const compactFormulaRewardPattern = new RegExp(`^gain\\s+${resourceLabel}\\s+based\\s+on\\s+technology\\s+era\\.?$`, "i");
+    return compactFormulaRewardPattern.test(reward.displayText.trim())
+        ? `Gain ${resourceLabel}`
+        : reward.displayText;
 }
 
 function QuestRewardKindIcon({ icon }: { icon: ReturnType<typeof economyRewardIcon> }) {
@@ -112,6 +122,21 @@ function QuestRewardKindIcon({ icon }: { icon: ReturnType<typeof economyRewardIc
 function economyRewardIcon(kind: string) {
     const token = economyRewardIconToken(kind);
     return token ? getDescriptionTokenIcon(token) : null;
+}
+
+function economyRewardLabel(kind: string): string | null {
+    switch (kind.trim().toLowerCase()) {
+        case "money":
+            return "Dust";
+        case "influence":
+            return "Influence";
+        case "science":
+            return "Science";
+        case "food":
+            return "Food";
+        default:
+            return null;
+    }
 }
 
 function economyRewardIconToken(kind: string): string | null {
