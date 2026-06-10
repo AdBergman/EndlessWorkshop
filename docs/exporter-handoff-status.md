@@ -15,6 +15,10 @@ Current as of 2026-06-10.
 - Population Codex structured metadata is available from the exporter contract;
   future Codex UI should prefer `facts`, `sections`, and `publicContextKeys`
   when present, with `descriptionLines` as fallback.
+- Actions, bonuses/status effects, and diplomatic treaties are visible in
+  quests/tech/population data but do not yet have linkable Codex export kinds.
+  Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` for that
+  active request.
 
 ## Completed Handoff Areas
 
@@ -36,12 +40,17 @@ Current as of 2026-06-10.
   feature data.
 - Codex UI: upgrade detail views incrementally to use structured metadata where
   exported.
+- Missing Codex reference kinds: add public Codex exports and typed references
+  for actions, bonuses/status effects, and diplomatic treaties.
 - Units/art: run visual QA and polish card art, repeated/placeholder art,
   ability icon presentation, and faction accent consistency.
 
 See `docs/current-action-priorities.md` for the current product-priority view.
 Use `docs/active/db-exporter-codex-metadata-handoff.md` for the active DB
 exporter/backend Codex metadata request.
+Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` for the active
+request to add missing Codex export kinds for actions, bonuses/status effects,
+and diplomatic treaties.
 
 ## Archived Context
 

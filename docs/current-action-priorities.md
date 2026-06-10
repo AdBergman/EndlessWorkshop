@@ -8,6 +8,28 @@ This list reflects the current product focus:
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
 
+## P0 - DB Exporter Handoff For Missing Codex Reference Kinds
+
+Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
+
+Status: high priority. Actions, bonuses/status effects, and diplomatic treaties
+are already visible in Quest Strategy, tech unlocks, population rewards, and
+diplomacy data, but they do not currently exist as linkable Codex export kinds.
+EWShop can only infer them from display text, reward kind, target role, or
+internal-looking keys, which is not safe enough for Codex links.
+
+Actionable next items:
+
+1. Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` as the active
+   DB exporter/backend handoff for this work.
+2. Ask for new Codex export kinds for `actions`, `bonuses`, and
+   `diplomaticTreaties`.
+3. Ask quest rewards/requirements and unlock rows to emit typed references to
+   those entries when they mention them.
+4. Keep frontend text inference as diagnostics/fallback only.
+5. After exporter delivery, add resolver aliases and frontend tests for the new
+   reference kinds.
+
 ## P0 - DB Exporter Handoff For Codex Metadata Coverage
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
