@@ -1746,6 +1746,16 @@
     filter: drop-shadow(0 0 5px rgba(208, 162, 74, 0.16));
 }
 
+.questExplorer-rewardIcon--codexMonochrome {
+    width: 12px;
+    height: 12px;
+    opacity: 0.74;
+    transform: translateY(0.5px) scale(0.92);
+    filter:
+        drop-shadow(0 0 4px rgba(232, 204, 158, 0.18))
+        drop-shadow(0 1px 0 rgba(0, 0, 0, 0.34));
+}
+
 .questExplorer-rewardStack {
     display: grid;
     grid-template-columns: 14px minmax(0, 1fr);

@@ -421,7 +421,7 @@ describe("StrategyDossier", () => {
 
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
-        )).toBeInTheDocument();
+        )).not.toHaveClass("questExplorer-rewardIcon--codexMonochrome");
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Influence.svg"]'
         )).toBeInTheDocument();
@@ -436,7 +436,7 @@ describe("StrategyDossier", () => {
         )).toBeInTheDocument();
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_SpecialResources_Cadavers.svg"]'
-        )).toBeInTheDocument();
+        )).not.toHaveClass("questExplorer-rewardIcon--codexMonochrome");
         expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(6);
         expect(document.querySelectorAll(".questExplorer-inlineMetaItem--iconReward")).toHaveLength(6);
         expect(document.querySelectorAll(".questExplorer-rewardStack")).toHaveLength(6);
@@ -669,13 +669,13 @@ describe("StrategyDossier", () => {
         expect(screen.getByText("Bonus")).toHaveClass("questExplorer-codexRewardKind");
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Unit.svg"]'
-        )).toBeInTheDocument();
+        )).toHaveClass("questExplorer-rewardIcon--codexMonochrome");
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_HeroEquipment.svg"]'
-        )).toBeInTheDocument();
+        )).toHaveClass("questExplorer-rewardIcon--codexMonochrome");
         expect(document.querySelector(
             'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Deed.svg"]'
-        )).toBeInTheDocument();
+        )).toHaveClass("questExplorer-rewardIcon--codexMonochrome");
     });
 
     it("uses the resolved Codex label for compact reward links when the source text cannot be split", async () => {

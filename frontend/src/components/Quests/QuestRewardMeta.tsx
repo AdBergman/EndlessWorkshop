@@ -140,15 +140,23 @@ function formatStrategyRewardLabel(reward: QuestRewardDisplay): string {
 
 function QuestRewardKindIcon({ icon }: { icon: DescriptionTokenIcon | null | undefined }) {
     if (!icon) return null;
+    const classes = [
+        "questExplorer-rewardIcon",
+        isMonochromeCodexRewardIcon(icon.path) ? "questExplorer-rewardIcon--codexMonochrome" : null,
+    ].filter(Boolean).join(" ");
 
     return (
         <img
-            className="questExplorer-rewardIcon"
+            className={classes}
             src={icon.path}
             alt=""
             aria-hidden="true"
         />
     );
+}
+
+function isMonochromeCodexRewardIcon(path: string): boolean {
+    return path.startsWith("/svg/common/UI_Common_");
 }
 
 function economyRewardIcon(kind: string) {
