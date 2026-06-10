@@ -116,6 +116,7 @@ describe("Quest Codex reference display metadata", () => {
 
     it.each([
         ["Tech", "Technology_Cartography", "tech"],
+        ["Technology", "Technology_ImperialCartography", "tech"],
         ["Unit", "Unit_KinOfSheredyn_Chosen", "units"],
         ["Hero", "Hero_KinOfSheredyn_Archer_0", "heroes"],
         ["Trait", "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest", "traits"],
@@ -124,6 +125,9 @@ describe("Quest Codex reference display metadata", () => {
         ["Equipment", "Equipment_Accessory_01_Definition", "equipment"],
         ["District", "District_Tier1_Industry", "districts"],
         ["Improvement", "DistrictImprovement_Bridge_00", "improvements"],
+        ["Faction", "Faction_KinOfSheredyn", "factions"],
+        ["MinorFaction", "MinorFaction_Noquensii", "minorfactions"],
+        ["Population", "Population_Divine", "populations"],
     ])("resolves %s references through the mapped Codex export kind", (referenceKind, referenceKey, exportKind) => {
         const entry = codexEntry(exportKind, referenceKey, `${referenceKind} entry`);
 

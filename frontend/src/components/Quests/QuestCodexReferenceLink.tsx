@@ -72,7 +72,12 @@ export function QuestCodexReferenceLink({
     };
 
     const showClickTooltip = (event: MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
         showTooltipForElement(event.currentTarget);
+    };
+
+    const stopPreviewMouseDown = (event: MouseEvent<HTMLElement>) => {
+        event.stopPropagation();
     };
 
     const hideTooltip = () => {
@@ -121,6 +126,7 @@ export function QuestCodexReferenceLink({
                     onMouseEnter={showMouseTooltip}
                     onMouseLeave={hideTooltipSoon}
                     onFocus={showFocusTooltip}
+                    onMouseDown={stopPreviewMouseDown}
                     onClick={showClickTooltip}
                     onBlur={hideTooltip}
                 >

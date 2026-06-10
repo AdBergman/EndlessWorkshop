@@ -438,7 +438,7 @@ describe("StrategyDossier", () => {
             isInSelectedPath: false,
         });
 
-        renderDossier(modelForOptions([option], null));
+        const onChoose = renderDossier(modelForOptions([option], null));
 
         const rewardPrefix = screen.getByText("Unlock constructible:");
         const rewardText = screen.getByText("Chosen");
@@ -469,6 +469,7 @@ describe("StrategyDossier", () => {
 
         fireEvent.click(rewardPreviewTarget!);
         expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+        expect(onChoose).not.toHaveBeenCalled();
         fireEvent.blur(rewardPreviewTarget!);
         await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
 
