@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 
 import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
-import { getDescriptionTokenIcon } from "@/features/icons/descriptionTokenIcons";
+import { getDescriptionTokenIcon, type DescriptionTokenIcon } from "@/features/icons/descriptionTokenIcons";
 import {
     formatStrategyRewardFormula,
     rewardDisplaysForList,
@@ -34,25 +34,25 @@ export function InlineRewardMetaList({
         <div className="questExplorer-inlineMeta questExplorer-inlineMeta--reward">
             <strong>{label}</strong>
             <ul>
-                {displayRewards.map((reward, index) => {
-                    const icon = economyRewardIcon(reward.kind);
-                    return (
-                        <li
-                            className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}
-                            key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}
-                        >
-                            <span className="questExplorer-rewardLine">
-                                <QuestRewardKindIcon icon={icon} />
-                                <QuestCodexReferenceLink source={reward} showTooltip>
-                                    <span>{formatStrategyRewardLabel(reward)}</span>
-                                </QuestCodexReferenceLink>
-                            </span>
-                            <RewardFormulaDetail formulaText={reward.formulaText} />
-                        </li>
-                    );
-                })}
+                {displayRewards.map((reward, index) => (
+                    <QuestRewardRow
+                        key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}
+                        reward={reward}
+                    />
+                ))}
             </ul>
         </div>
+    );
+}
+
+export function QuestRewardRow({ reward }: { reward: QuestRewardDisplay }) {
+    const icon = economyRewardIcon(reward.kind);
+
+    return (
+        <li className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}>
+            <QuestRewardInline reward={reward} icon={icon} />
+            <RewardFormulaDetail formulaText={reward.formulaText} />
+        </li>
     );
 }
 
@@ -77,12 +77,7 @@ export function InlineStageRewardMeta({
             {displayRewards.map((reward, index) => (
                 <Fragment key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
                     {index > 0 ? "; " : null}
-                    <span className="questExplorer-rewardLine">
-                        <QuestRewardKindIcon icon={economyRewardIcon(reward.kind)} />
-                        <QuestCodexReferenceLink source={reward} showTooltip>
-                            {formatStrategyRewardLabel(reward)}
-                        </QuestCodexReferenceLink>
-                    </span>
+                    <QuestRewardInline reward={reward} />
                 </Fragment>
             ))}
             {formulaTexts.length > 0 ? (
@@ -92,6 +87,23 @@ export function InlineStageRewardMeta({
                         .join("; ")}
                 </small>
             ) : null}
+        </span>
+    );
+}
+
+function QuestRewardInline({
+    reward,
+    icon = economyRewardIcon(reward.kind),
+}: {
+    reward: QuestRewardDisplay;
+    icon?: DescriptionTokenIcon | null;
+}) {
+    return (
+        <span className="questExplorer-rewardLine">
+            <QuestRewardKindIcon icon={icon} />
+            <QuestCodexReferenceLink source={reward} showTooltip>
+                <span>{formatStrategyRewardLabel(reward)}</span>
+            </QuestCodexReferenceLink>
         </span>
     );
 }
@@ -106,7 +118,7 @@ function formatStrategyRewardLabel(reward: QuestRewardDisplay): string {
         : reward.displayText;
 }
 
-function QuestRewardKindIcon({ icon }: { icon: ReturnType<typeof economyRewardIcon> }) {
+function QuestRewardKindIcon({ icon }: { icon: DescriptionTokenIcon | null | undefined }) {
     if (!icon) return null;
 
     return (
