@@ -2,7 +2,32 @@
 
 Date: 2026-06-07
 
-Status: active routing/SEO follow-up backlog
+Status: historical diagnosis and completed cleanup record.
+
+## Current Status
+
+Updated: 2026-06-10
+
+This document records the routing/SEO incident diagnosis and the cleanup batch
+that followed it. It is no longer the active route contract or an active
+backlog.
+
+Current source of truth:
+
+- Active public route contract: `docs/frontend/public-route-contract.md`
+- Active SEO backend architecture: `docs/backend/seo-architecture.md`
+
+The core routing issue from this pass is resolved: Quest Explorer deep links,
+nested copied Quest URLs, SPA shell cache headers, and the Codex versus
+generated encyclopedia route split are documented and covered by backend and
+frontend tests.
+
+Remaining items are intentionally not active SEO blockers:
+
+- `ROUTE-003` is a future browser smoke candidate only if route regressions
+  recur.
+- `ROUTE-004` is Quest Explorer product behavior and should be handled when
+  Quest Explorer behavior work resumes.
 
 ## Summary
 

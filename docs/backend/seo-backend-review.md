@@ -2,7 +2,27 @@
 
 Date: 2026-06-07
 
-Status: active SEO backend improvement backlog
+Status: historical review and completed cleanup record.
+
+## Current Status
+
+Updated: 2026-06-10
+
+This document records the SEO backend review, ticket breakdown, and cleanup
+wave. It is no longer the active SEO backlog.
+
+Current source of truth:
+
+- Active SEO backend architecture: `docs/backend/seo-architecture.md`
+- Active public route contract: `docs/frontend/public-route-contract.md`
+
+The reviewed SEO cleanup wave has been completed or deliberately
+pragmatic-skipped for the current risk profile. The remaining large static
+HTML/report assembly is known and should only be split when future page-shape or
+report changes make that extraction worth the output churn.
+
+Keep the caution from this review: SEO is useful production code, but it should
+not be copied as a backend style model for unrelated systems.
 
 ## Summary
 

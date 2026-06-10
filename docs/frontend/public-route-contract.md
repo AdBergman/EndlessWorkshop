@@ -38,3 +38,11 @@ Current tests:
 - Frontend lazy route tree: `App.lazyRoutes.test.tsx`.
 - Quest URL hydration: `QuestExplorerPage.test.tsx` and `QuestExplorerPage.strategyPlanner.test.tsx`.
 - SPA route metadata scope: `routeSeo.test.ts`.
+
+Related docs:
+
+- `docs/backend/seo-architecture.md` is the active SEO backend architecture.
+- `docs/frontend/routing-diagnosis.md` is historical incident context, not the
+  active route backlog.
+- `docs/backend/seo-backend-review.md` is historical SEO cleanup context, not
+  the active SEO backlog.

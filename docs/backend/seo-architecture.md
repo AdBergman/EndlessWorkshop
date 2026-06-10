@@ -6,6 +6,12 @@ SEO is an app-level generation subsystem. It should not become domain logic and
 should not be used as a style model for the rest of the backend until the large
 renderer and audit classes are cleaned up.
 
+Related docs:
+
+- `docs/frontend/public-route-contract.md` is the active route ownership matrix.
+- `docs/backend/seo-backend-review.md` is historical cleanup context, not the
+  active SEO backlog.
+
 ## Pipeline
 
 `SeoAdminController` accepts the admin-triggered rebuild request and delegates.
