@@ -317,6 +317,7 @@ describe("StrategyDossier", () => {
                 rewardLines: ["Gain Dust based on technology era."],
                 rewardDetails: [{
                     ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+                    kind: "Money",
                     formulaText: "50 + 50 * Technology Era",
                 }],
             }),
@@ -350,9 +351,59 @@ describe("StrategyDossier", () => {
 
         expect(within(selectedOptionButton).getByText("Gain Dust based on technology era.")).toBeInTheDocument();
         expect(within(selectedOptionButton).getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();
+        expect(selectedOptionButton.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
+        )).toBeInTheDocument();
         expect(screen.queryByText("Formula: 50 + 50 * Technology Era")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Gain Dust based on technology era.")).not.toBeInTheDocument();
         expect(within(choiceResult).queryByText("Formula: 50 + 50 × Technology Era")).not.toBeInTheDocument();
+    });
+
+    it("renders resource icons for structured economy reward kinds only", () => {
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                rewardLines: [
+                    "Gain 500 Dust",
+                    "Gain Influence based on technology era",
+                    "Gain Science based on technology era",
+                    "Gain Food based on technology era",
+                    "Gain equipment: The Adjudicator",
+                ],
+                rewardDetails: [
+                    { ...rewardDisplaysFromText(["Gain 500 Dust"])[0]!, kind: "Money" },
+                    { ...rewardDisplaysFromText(["Gain Influence based on technology era"])[0]!, kind: "Influence" },
+                    { ...rewardDisplaysFromText(["Gain Science based on technology era"])[0]!, kind: "Science" },
+                    { ...rewardDisplaysFromText(["Gain Food based on technology era"])[0]!, kind: "Food" },
+                    {
+                        ...rewardDisplaysFromText(["Gain equipment: The Adjudicator"])[0]!,
+                        kind: "Equipment",
+                        referenceKind: "Equipment",
+                        referenceKey: "Equipment_TwoHanded_19_Definition",
+                        referenceDisplayName: "The Adjudicator",
+                    },
+                ],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Influence.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Science.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/constructibles/UI_Common_Resource_Food.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelectorAll("img.questExplorer-rewardIcon")).toHaveLength(4);
     });
 
     it("shows a compact Codex preview tooltip from linked Strategy reward text on hover and focus", async () => {
@@ -412,6 +463,11 @@ describe("StrategyDossier", () => {
         expect(within(hoverTooltip).queryByText("Hidden overflow line should not render.")).not.toBeInTheDocument();
 
         fireEvent.mouseLeave(rewardPreviewTarget!);
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        fireEvent.click(rewardPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+        fireEvent.blur(rewardPreviewTarget!);
         await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
 
         fireEvent.focus(rewardPreviewTarget!);
@@ -637,6 +693,7 @@ describe("StrategyDossier", () => {
                 rewardDetails: [
                     {
                         ...rewardDisplaysFromText(["Gain Dust based on technology era."])[0]!,
+                        kind: "Money",
                         formulaText: "50 + 50 * Technology Era",
                     },
                     {
@@ -657,6 +714,9 @@ describe("StrategyDossier", () => {
         expect(screen.getByText("Gain Dust based on technology era.")).toBeInTheDocument();
         expect(screen.getByText("Unlock missing relic")).toBeInTheDocument();
         expect(screen.getByText("Formula: 50 + 50 × Technology Era")).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/resources/UI_Common_Resource_Dust.svg"]'
+        )).toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Research missing logistics." })).not.toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Gain Dust based on technology era." })).not.toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Unlock missing relic" })).not.toBeInTheDocument();

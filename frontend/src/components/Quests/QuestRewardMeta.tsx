@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 
 import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
+import { getDescriptionTokenIcon } from "@/features/icons/descriptionTokenIcons";
 import {
     formatStrategyRewardFormula,
     rewardDisplaysForList,
@@ -35,9 +36,12 @@ export function InlineRewardMetaList({
             <ul>
                 {displayRewards.map((reward, index) => (
                     <li key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
-                        <QuestCodexReferenceLink source={reward} showTooltip>
-                            <span>{reward.displayText}</span>
-                        </QuestCodexReferenceLink>
+                        <span className="questExplorer-rewardLine">
+                            <QuestRewardKindIcon reward={reward} />
+                            <QuestCodexReferenceLink source={reward} showTooltip>
+                                <span>{reward.displayText}</span>
+                            </QuestCodexReferenceLink>
+                        </span>
                         <RewardFormulaDetail formulaText={reward.formulaText} />
                     </li>
                 ))}
@@ -67,9 +71,12 @@ export function InlineStageRewardMeta({
             {displayRewards.map((reward, index) => (
                 <Fragment key={`${label}:${index}:${reward.displayText}:${reward.formulaText ?? ""}`}>
                     {index > 0 ? "; " : null}
-                    <QuestCodexReferenceLink source={reward} showTooltip>
-                        {reward.displayText}
-                    </QuestCodexReferenceLink>
+                    <span className="questExplorer-rewardLine">
+                        <QuestRewardKindIcon reward={reward} />
+                        <QuestCodexReferenceLink source={reward} showTooltip>
+                            {reward.displayText}
+                        </QuestCodexReferenceLink>
+                    </span>
                 </Fragment>
             ))}
             {formulaTexts.length > 0 ? (
@@ -81,4 +88,34 @@ export function InlineStageRewardMeta({
             ) : null}
         </span>
     );
+}
+
+function QuestRewardKindIcon({ reward }: { reward: QuestRewardDisplay }) {
+    const token = economyRewardIconToken(reward.kind);
+    const icon = token ? getDescriptionTokenIcon(token) : null;
+    if (!icon) return null;
+
+    return (
+        <img
+            className="questExplorer-rewardIcon"
+            src={icon.path}
+            alt=""
+            aria-hidden="true"
+        />
+    );
+}
+
+function economyRewardIconToken(kind: string): string | null {
+    switch (kind.trim().toLowerCase()) {
+        case "money":
+            return "DustColored";
+        case "influence":
+            return "Influence";
+        case "science":
+            return "ScienceColored";
+        case "food":
+            return "FoodColored";
+        default:
+            return null;
+    }
 }

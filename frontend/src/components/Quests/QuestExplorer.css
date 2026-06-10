@@ -1727,6 +1727,22 @@
     line-height: 1.35;
 }
 
+.questExplorer-rewardLine {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.34em;
+    min-width: 0;
+    vertical-align: baseline;
+}
+
+.questExplorer-rewardIcon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    object-fit: contain;
+    transform: translateY(2px);
+}
+
 .questExplorer-codexMetaLink {
     color: var(--quest-teal-bright);
     text-decoration: underline;

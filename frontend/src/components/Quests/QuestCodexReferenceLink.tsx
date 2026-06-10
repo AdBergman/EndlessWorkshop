@@ -4,7 +4,6 @@ import { FaExternalLinkAlt } from "react-icons/fa";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
 import {
-    getHoverCoords,
     getHoverCoordsForElement,
     type PixelTooltipCoords,
 } from "@/components/Tooltips/hoverHelpers";
@@ -58,16 +57,22 @@ export function QuestCodexReferenceLink({
         hideTimerRef.current = null;
     };
 
-    const showMouseTooltip = (event: MouseEvent<HTMLElement>) => {
+    const showTooltipForElement = (element: HTMLElement) => {
         if (!showTooltip) return;
         clearHideTimer();
-        setTooltipCoords(getHoverCoords(event));
+        setTooltipCoords(tooltipCoordsForElement(element));
+    };
+
+    const showMouseTooltip = (event: MouseEvent<HTMLElement>) => {
+        showTooltipForElement(event.currentTarget);
     };
 
     const showFocusTooltip = (event: FocusEvent<HTMLElement>) => {
-        if (!showTooltip) return;
-        clearHideTimer();
-        setTooltipCoords(tooltipCoordsForElement(event.currentTarget));
+        showTooltipForElement(event.currentTarget);
+    };
+
+    const showClickTooltip = (event: MouseEvent<HTMLElement>) => {
+        showTooltipForElement(event.currentTarget);
     };
 
     const hideTooltip = () => {
@@ -116,6 +121,7 @@ export function QuestCodexReferenceLink({
                     onMouseEnter={showMouseTooltip}
                     onMouseLeave={hideTooltipSoon}
                     onFocus={showFocusTooltip}
+                    onClick={showClickTooltip}
                     onBlur={hideTooltip}
                 >
                     {textParts.entityText}
