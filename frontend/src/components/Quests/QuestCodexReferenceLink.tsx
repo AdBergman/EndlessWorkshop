@@ -115,7 +115,7 @@ export function QuestCodexReferenceLink({
 
     if (showTooltip) {
         return (
-            <span className="questExplorer-codexReference">
+            <span className="questExplorer-codexReference" aria-label={source.displayText.trim()}>
                 {textParts.prefix ? (
                     <span className="questExplorer-codexReferencePrefix">{textParts.prefix}</span>
                 ) : null}

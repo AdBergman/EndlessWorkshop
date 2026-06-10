@@ -475,11 +475,16 @@ describe("StrategyDossier", () => {
         const rewardPrefix = screen.getByText("Unlock constructible:");
         const rewardText = screen.getByText("Chosen");
         const rewardPreviewTarget = rewardText.closest(".questExplorer-codexPreviewTarget");
+        const rewardReference = rewardText.closest(".questExplorer-codexReference");
         expect(rewardPrefix).toHaveClass("questExplorer-codexReferencePrefix");
         expect(rewardPrefix.closest(".questExplorer-codexPreviewTarget")).toBeNull();
+        expect(rewardReference).toHaveAttribute("aria-label", "Unlock constructible: Chosen");
         expect(rewardPreviewTarget).toBeInstanceOf(HTMLElement);
         expect(rewardText.closest("a")).toBeNull();
         expect(rewardPreviewTarget).toHaveAttribute("tabindex", "0");
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Unit.svg"]'
+        )).toBeInTheDocument();
         expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
@@ -577,6 +582,8 @@ describe("StrategyDossier", () => {
         setCodexEntries([
             codexEntry("tech", "Technology_RidgeLogistics", "Ridge Logistics"),
             codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen"),
+            codexEntry("equipment", "Equipment_TwoHanded_19_Definition", "The Adjudicator"),
+            codexEntry("traits", "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest", "Ahead in the Polls"),
         ]);
         const option = branchOption({
             choice: choice({
@@ -589,13 +596,31 @@ describe("StrategyDossier", () => {
                     referenceKey: "Technology_RidgeLogistics",
                     referenceDisplayName: "Ridge Logistics",
                 }],
-                rewardLines: ["Unlock constructible: Chosen"],
-                rewardDetails: [{
-                    ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
-                    assetKind: "Unit",
-                    assetKey: "Unit_KinOfSheredyn_Chosen",
-                    assetDisplayName: "Chosen",
-                }],
+                rewardLines: [
+                    "Unlock constructible: Chosen",
+                    "Gain equipment: The Adjudicator",
+                    "Gain bonus: Ahead in the Polls",
+                ],
+                rewardDetails: [
+                    {
+                        ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                        assetKind: "Unit",
+                        assetKey: "Unit_KinOfSheredyn_Chosen",
+                        assetDisplayName: "Chosen",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Gain equipment: The Adjudicator"])[0]!,
+                        referenceKind: "Equipment",
+                        referenceKey: "Equipment_TwoHanded_19_Definition",
+                        referenceDisplayName: "The Adjudicator",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Gain bonus: Ahead in the Polls"])[0]!,
+                        referenceKind: "FactionTrait",
+                        referenceKey: "FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest",
+                        referenceDisplayName: "Ahead in the Polls",
+                    },
+                ],
             }),
             isSelected: false,
             isInSelectedPath: false,
@@ -617,6 +642,23 @@ describe("StrategyDossier", () => {
             "href",
             "/codex?entry=Unit_KinOfSheredyn_Chosen"
         );
+        expect(screen.getByRole("link", { name: "Open The Adjudicator in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Equipment_TwoHanded_19_Definition"
+        );
+        expect(screen.getByRole("link", { name: "Open Ahead in the Polls in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest"
+        );
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Unit.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_HeroEquipment.svg"]'
+        )).toBeInTheDocument();
+        expect(document.querySelector(
+            'img.questExplorer-rewardIcon[src="/svg/common/UI_Common_Deed.svg"]'
+        )).toBeInTheDocument();
     });
 
     it("keeps the whole display text as the preview target when the entity label cannot be safely split", async () => {

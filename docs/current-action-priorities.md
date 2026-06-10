@@ -97,9 +97,9 @@ Actionable next items:
 2. Do not infer links from titles or prose.
 3. Wait for DB exporter metadata before trying richer Codex preview content;
    current local Codex metadata is still population-only.
-4. Investigate SVG/resource icons for Strategy reward rows as a separate visual
-   polish pass, using the existing description-token icon registry where the
-   display text contains tokens such as `[DustColored]` or `[InfluenceColored]`.
+4. Keep the current frontend reward icon rule bounded: use known economy and
+   strategic resource icons, and use Codex entry icons only after an exact
+   Strategy reward reference resolves.
 5. Do not expand Codex links into Lore until Strategy has been reviewed in the
    browser.
 
@@ -121,9 +121,12 @@ Jira-style status:
   if the current hover/focus behavior is not sufficient.
 - `QX-CODEX-008`: P1 - verify resolver kind coverage with real data,
   especially `MinorFaction` and other less common reference kinds.
-- `QX-CODEX-009`: P1 - investigate reward SVG/resource icons in Strategy rows
-  without changing the primary Quest copy.
-- `QX-CODEX-010`: P2 - after DB exporter Codex metadata expands beyond
+- `QX-CODEX-009`: Done for current Strategy rows - reward SVG markers use known
+  economy/strategic resource icons and exact Codex entry icons where available.
+- `QX-CODEX-010`: Future - consider explicit exporter-provided reward icon or
+  resource metadata after the current DB exporter metadata request settles; do
+  not open a new backend request for this yet.
+- `QX-CODEX-011`: P2 - after DB exporter Codex metadata expands beyond
   populations, improve tooltip content to prefer structured facts/sections over
   plain description preview lines.
 

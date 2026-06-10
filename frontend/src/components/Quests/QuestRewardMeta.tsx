@@ -1,12 +1,15 @@
 import { Fragment } from "react";
 
 import { QuestCodexReferenceLink } from "@/components/Quests/QuestCodexReferenceLink";
+import { getCodexEntryIconPath } from "@/features/icons/codexEntryIcons";
 import { getDescriptionTokenIcon, type DescriptionTokenIcon } from "@/features/icons/descriptionTokenIcons";
+import { resolveQuestCodexReference } from "@/features/quests/questCodexReference";
 import {
     formatStrategyRewardFormula,
     rewardDisplaysForList,
     type QuestRewardDisplay,
 } from "@/features/quests/questRewardDisplay";
+import { useCodexStore } from "@/stores/codexStore";
 
 export function RewardFormulaDetail({ formulaText }: { formulaText: string | null }) {
     if (!formulaText) return null;
@@ -46,7 +49,7 @@ export function InlineRewardMetaList({
 }
 
 export function QuestRewardRow({ reward }: { reward: QuestRewardDisplay }) {
-    const icon = rewardMarkerIcon(reward);
+    const icon = useRewardMarkerIcon(reward);
 
     return (
         <li className={icon ? "questExplorer-inlineMetaItem--iconReward" : undefined}>
@@ -105,14 +108,16 @@ export function InlineStageRewardMeta({
 
 function QuestRewardInline({
     reward,
-    icon = rewardMarkerIcon(reward),
+    icon,
 }: {
     reward: QuestRewardDisplay;
     icon?: DescriptionTokenIcon | null;
 }) {
+    const markerIcon = useRewardMarkerIcon(reward, icon);
+
     return (
         <span className="questExplorer-rewardLine">
-            <QuestRewardKindIcon icon={icon} />
+            <QuestRewardKindIcon icon={markerIcon} />
             <QuestRewardLabel reward={reward} />
         </span>
     );
@@ -166,9 +171,32 @@ function economyRewardIconToken(kind: string): string | null {
     }
 }
 
+function useRewardMarkerIcon(
+    reward: QuestRewardDisplay,
+    overrideIcon?: DescriptionTokenIcon | null
+): DescriptionTokenIcon | null {
+    const entriesByKey = useCodexStore((state) => state.entriesByKey);
+    const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
+
+    if (overrideIcon !== undefined) return overrideIcon;
+
+    return rewardMarkerIcon(reward)
+        ?? linkedCodexRewardIcon(reward, { entriesByKey, entriesByKindKey });
+}
+
 function rewardMarkerIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | null {
     return economyRewardIcon(reward.kind)
         ?? knownResourceRewardIcon(reward);
+}
+
+function linkedCodexRewardIcon(
+    reward: QuestRewardDisplay,
+    indexes: Parameters<typeof resolveQuestCodexReference>[1]
+): DescriptionTokenIcon | null {
+    const entry = resolveQuestCodexReference(reward, indexes);
+    const path = entry ? getCodexEntryIconPath(entry) : null;
+
+    return path ? { path } : null;
 }
 
 function formulaBackedTechnologyEraRewardLabel(reward: QuestRewardDisplay): string | null {
