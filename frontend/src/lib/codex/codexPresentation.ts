@@ -28,6 +28,8 @@ const CODEX_KIND_LABELS: Record<string, string> = {
     action: "Actions",
     abilities: "Abilities",
     ability: "Abilities",
+    bonuses: "Bonuses",
+    bonus: "Bonuses",
     councilors: "Councilors",
     councilor: "Councilors",
     districts: "Districts",

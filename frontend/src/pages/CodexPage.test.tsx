@@ -175,7 +175,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
-    it("orders new Codex categories in taxonomy order while keeping bonuses out of top-level navigation", async () => {
+    it("orders new Codex categories in taxonomy order while exposing bonuses for review", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "abilities",
@@ -250,6 +250,7 @@ describe("CodexPage", () => {
             "All",
             "Abilities",
             "Actions",
+            "Bonuses",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
@@ -261,14 +262,15 @@ describe("CodexPage", () => {
         expect(overviewLabels).toEqual([
             "Abilities",
             "Actions",
+            "Bonuses",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
         ]);
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /bonuses/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /bonuses 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
-            .queryByRole("button", { name: /bonuses/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /bonuses 1 reviewable mechanics/i })).toBeInTheDocument();
     });
 
     it("renders the all-factions summary icon as a monochrome category icon", async () => {

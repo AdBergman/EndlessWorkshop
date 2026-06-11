@@ -28,6 +28,7 @@ import "./CodexPage.css";
 const PREFERRED_KIND_ORDER = [
     "abilities",
     "actions",
+    "bonuses",
     "councilors",
     "districts",
     "extractors",
@@ -43,7 +44,6 @@ const PREFERRED_KIND_ORDER = [
     "traits",
     "units",
 ];
-const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses"]);
 
 type SelectionIntent = "passive" | "related";
 
@@ -88,7 +88,6 @@ export default function CodexPage() {
         const knownKinds = PREFERRED_KIND_ORDER.filter((kind) => kindCounts.has(kind));
         const extraKinds = Array.from(kindCounts.keys())
             .filter((kind) => !PREFERRED_KIND_ORDER.includes(kind))
-            .filter((kind) => !HIDDEN_TOP_LEVEL_KINDS.has(kind))
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];

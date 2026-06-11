@@ -14,6 +14,7 @@ type Props = {
 const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
     actions: "Army, empire, and faction actions.",
+    bonuses: "Reviewable mechanics, statuses, and modifier records.",
     councilors: "Governors, advisors, and political specialists.",
     districts: "City tiles, exploitations, and terrain infrastructure.",
     diplomatictreaties: "Diplomatic declarations, treaties, and war states.",

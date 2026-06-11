@@ -93,6 +93,7 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("extractors")).toBe("Extractors");
         expect(formatCodexKindLabel("techs")).toBe("Tech");
         expect(formatCodexKindLabel("actions")).toBe("Actions");
+        expect(formatCodexKindLabel("bonuses")).toBe("Bonuses");
         expect(formatCodexKindLabel("diplomatictreaties")).toBe("Diplomatic Treaties");
         expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomatic Treaties");
     });
