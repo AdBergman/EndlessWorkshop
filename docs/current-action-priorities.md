@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-10.
+Current as of 2026-06-11.
 
 This list reflects the current product focus:
 
@@ -12,32 +12,33 @@ This list reflects the current product focus:
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: high priority. Actions, bonuses/status effects, and diplomatic treaties
-are already visible in Quest Strategy, tech unlocks, population rewards, and
-diplomacy data, but they do not currently exist as linkable Codex export kinds.
-EWShop can only infer them from display text, reward kind, target role, or
-internal-looking keys, which is not safe enough for Codex links.
+Status: EWShop baseline adoption is in place. Actions and Diplomatic Treaties
+are visible Codex categories, bonus-derived Statuses are visible, and
+bonus-derived Modifiers remain hidden from top-level navigation while staying
+searchable/linkable as exact targets. The remaining work here is exporter/data
+quality and real-data review, not broad EWShop category scaffolding.
 
 Actionable next items:
 
-1. Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` as the active
-   DB exporter/backend handoff for this work.
-2. Ask for new Codex export kinds for `actions`, `bonuses`, and
-   `diplomaticTreaties`.
+1. Keep `docs/active/db-exporter-codex-reference-kinds-handoff.md` as exporter
+   context for data-quality review.
+2. Verify real local imports for `actions`, `diplomaticTreaties`, and
+   bonus-derived `statuses`/`modifiers` before expanding links.
 3. Ask quest rewards/requirements and unlock rows to emit typed references to
    those entries when they mention them.
 4. Keep frontend text inference as diagnostics/fallback only.
-5. After exporter delivery, add resolver aliases and frontend tests for the new
-   reference kinds.
+5. Do not expose Modifiers in top-level Codex navigation without product review.
 
 ## P0 - DB Exporter Handoff For Codex Metadata Coverage
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: backend/frontend support exists, but exporter-populated Codex metadata
-is currently only present for populations in the local 0.80 Codex payloads.
-EWShop cannot complete this by parsing prose harder; the exporter needs to emit
-more structured metadata for high-value Codex kinds.
+Status: EWShop backend/frontend support exists and the generic Codex detail
+renderer consumes exported `facts`, `sections`, section items, and
+`publicContextKeys` consistently. Exporter-populated metadata is still only
+present for populations in the baseline local 0.80 Codex payloads, so broader
+category richness remains exporter-data work rather than a frontend parsing
+project.
 
 Verified local Codex metadata coverage:
 
@@ -66,6 +67,8 @@ Actionable next items:
 4. After exporter delivery, add backend/API/frontend fixture tests proving the
    metadata survives import and renders in Codex detail.
 5. Keep current text-prefix parsing as fallback only for older exports.
+6. Before cross-link expansion, review current Actions, Diplomatic Treaties,
+   Statuses, and hidden Modifiers with real imported data.
 
 Recommended first slice: `equipment`, because current Codex text already has
 stable prefixes for type, slot, rarity, tier, access pool, and value.

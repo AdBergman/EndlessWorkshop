@@ -38,11 +38,14 @@ export type CodexStructuredDescription = {
 };
 
 const FACT_LABELS_BY_KIND: Record<string, Set<string>> = {
+    bonuses: new Set(["Category", "Kind"]),
     councilors: new Set(["Faction", "Role"]),
     equipment: new Set(["Type", "Slot", "Rarity", "Tier", "Access pool", "Value"]),
     heroes: new Set(["Faction", "Class"]),
     minorfactions: new Set(["Disposition", "Faction affinity", "Population", "Unit", "Trait"]),
+    modifiers: new Set(["Category", "Kind", "Cost type", "Operation", "Value", "Display value"]),
     populations: new Set(["Faction", "Type", "Base food cost"]),
+    statuses: new Set(["Category", "Kind", "Duration", "Stacking"]),
     traits: new Set(["Category", "Cost", "Required affinity", "Excludes"]),
 };
 
@@ -57,11 +60,14 @@ const SECTION_LABELS_BY_KIND: Record<string, Record<string, string>> = {
 };
 
 const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
+    bonuses: ["Category", "Kind"],
     councilors: ["Faction", "Role"],
     equipment: ["Type", "Slot", "Rarity", "Tier"],
     heroes: ["Faction", "Class"],
     minorfactions: ["Disposition", "Faction affinity", "Population", "Unit"],
+    modifiers: ["Category", "Kind", "Cost type", "Value"],
     populations: ["Type", "Faction", "Base food cost"],
+    statuses: ["Category", "Kind", "Duration"],
     traits: ["Category", "Cost", "Required affinity"],
 };
 

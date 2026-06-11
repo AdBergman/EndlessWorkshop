@@ -285,6 +285,92 @@ describe("CodexPage", () => {
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
     });
 
+    it("renders status details while keeping related modifiers hidden from navigation but linkable", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "statuses",
+                entryKey: "Status_PublicOpinion_Test",
+                displayName: "Public Opinion Status",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                publicContextKeys: ["ActionCostModifier_Test"],
+                facts: [
+                    { label: "Category", value: "Diplomacy" },
+                    { label: "Kind", value: "Status" },
+                    { label: "Duration", value: "10 turns" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        lines: ["Changes treaty Public Opinion while active."],
+                    },
+                ],
+            },
+            {
+                exportKind: "modifiers",
+                entryKey: "ActionCostModifier_Test",
+                displayName: "Action Cost Modifier Test",
+                category: "Cost Modifier",
+                kind: "Cost Modifier",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Cost Modifier" },
+                    { label: "Kind", value: "Action Cost Modifier" },
+                    { label: "Cost type", value: "Influence" },
+                    { label: "Value", value: "-50%" },
+                ],
+                sections: [
+                    {
+                        title: "Modifier mechanics",
+                        lines: ["Reduces the action Influence cost."],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                statuses: entries.filter((entry) => entry.exportKind === "statuses"),
+                modifiers: entries.filter((entry) => entry.exportKind === "modifiers"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses&entry=Status_PublicOpinion_Test"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Public Opinion Status" })).toBeInTheDocument();
+        expect(screen.getByText("Status dossier")).toBeInTheDocument();
+        expect(screen.getByText("10 turns")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Status mechanics" })).toBeInTheDocument();
+        expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        await user.click(within(relatedSection).getByRole("button", { name: /action cost modifier test modifiers/i }));
+
+        expect(await screen.findByRole("heading", { name: "Action Cost Modifier Test" })).toBeInTheDocument();
+        expect(screen.getByText("Modifier dossier")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Modifier mechanics" })).toBeInTheDocument();
+        expect(screen.getByText("Reduces the action Influence cost.")).toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {

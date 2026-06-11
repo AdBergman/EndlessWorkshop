@@ -52,6 +52,8 @@ function sectionHeadingFor(kind: string): string {
     switch (kind.trim().toLowerCase()) {
         case "actions":
             return "Action dossier";
+        case "bonuses":
+            return "Bonus dossier";
         case "councilors":
             return "Councilor dossier";
         case "diplomatictreaties":
@@ -64,6 +66,10 @@ function sectionHeadingFor(kind: string): string {
             return "Minor faction dossier";
         case "populations":
             return "Population dossier";
+        case "modifiers":
+            return "Modifier dossier";
+        case "statuses":
+            return "Status dossier";
         case "traits":
             return "Trait dossier";
         default:
