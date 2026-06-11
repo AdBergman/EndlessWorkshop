@@ -12,6 +12,8 @@ import java.util.List;
 @Service
 public class CodexImportService {
 
+    private static final String ACTIONS_EXPORT_KIND = "actions";
+
     private final CodexRepository codexRepository;
 
     public CodexImportService(CodexRepository codexRepository) {
@@ -22,6 +24,19 @@ public class CodexImportService {
     @CacheEvict(value = "codex", allEntries = true)
     public ImportResult importCodex(List<CodexImportSnapshot> snapshots) {
         if (snapshots == null || snapshots.isEmpty()) return new ImportResult();
-        return codexRepository.importCodexSnapshot(snapshots);
+        List<CodexImportSnapshot> importableSnapshots = snapshots.stream()
+                .filter(CodexImportService::isImportableCodexSnapshot)
+                .toList();
+        return codexRepository.importCodexSnapshot(importableSnapshots);
+    }
+
+    private static boolean isImportableCodexSnapshot(CodexImportSnapshot snapshot) {
+        if (snapshot == null) return false;
+        if (!ACTIONS_EXPORT_KIND.equalsIgnoreCase(trimToEmpty(snapshot.exportKind()))) return true;
+        return PublicReleaseFactionPolicy.isReleasedFactionActionKey(snapshot.entryKey());
+    }
+
+    private static String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 }

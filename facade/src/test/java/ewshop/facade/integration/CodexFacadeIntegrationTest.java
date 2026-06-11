@@ -149,6 +149,27 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 .containsExactly("ActionTypeBuildBridge", "ActionCostModifier_BuildBridge_Decrease_00");
     }
 
+    @Test
+    void importCodexThroughFacade_doesNotExposeUnavailableFactionActions() {
+        codexImportAdminFacade.importCodex(batch("actions", List.of(
+                entry("FactionActionTypeMukag_PublicAction", "Public Faction Action", "Faction Action", "Action", List.of("Line"), List.of()),
+                entry("FactionActionTypeUnknown_TestAction", "Unknown Test Action", "Faction Action", "Action", List.of("Line"), List.of()),
+                entry("FactionActionTypeFutureFaction_TestAction", "Future Test Action", "Faction Action", "Action", List.of("Line"), List.of()),
+                entry("ActionTypeBuildBridge", "Build Bridge", "Action", "Action", List.of("Line"), List.of("FactionActionTypeUnknown_TestAction"))
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<CodexDto> result = codexFacade.getAllCodexEntries();
+
+        assertThat(result).extracting(CodexDto::entryKey)
+                .contains("FactionActionTypeMukag_PublicAction", "ActionTypeBuildBridge")
+                .doesNotContain(
+                        "FactionActionTypeUnknown_TestAction",
+                        "FactionActionTypeFutureFaction_TestAction"
+                );
+    }
+
     private static CodexDto findCodex(List<CodexDto> entries, String entryKey) {
         return entries.stream()
                 .filter(entry -> entryKey.equals(entry.entryKey()))

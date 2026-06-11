@@ -9,13 +9,7 @@ import java.util.Set;
 public class TechFactionTraitsProvider {
 
     public Set<String> getAllowedFactions() {
-        return Set.of(
-                "Kin",
-                "Aspects",
-                "Lords",
-                "Necrophages",
-                "Tahuk"
-        );
+        return PublicReleaseFactionPolicy.releasedMajorFactionDisplayNames();
     }
 
     /**
