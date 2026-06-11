@@ -60,15 +60,16 @@ const SECTION_LABELS_BY_KIND: Record<string, Record<string, string>> = {
 };
 
 const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
+    abilities: ["Target", "Range", "Cost"],
     bonuses: ["Category", "Kind"],
     councilors: ["Faction", "Role"],
     equipment: ["Type", "Slot", "Rarity", "Tier"],
-    heroes: ["Faction", "Class"],
+    heroes: ["Class"],
     minorfactions: ["Disposition", "Faction affinity", "Population", "Unit"],
     modifiers: ["Category", "Kind", "Cost type", "Value"],
     populations: ["Type", "Faction", "Base food cost"],
     statuses: ["Category", "Kind", "Duration"],
-    traits: ["Category", "Cost", "Required affinity"],
+    traits: ["Cost", "Required affinity"],
 };
 
 function normalizeKind(kind: string | null | undefined): string {
@@ -88,7 +89,7 @@ function formatSummaryFact(fact: CodexStructuredFact): string {
     const value = cleanPreviewValue(fact.value);
     if (!value) return "";
 
-    if (/^(Tier|Cost|Value|Base food cost)$/i.test(fact.label)) {
+    if (/^(Tier|Range|Cost|Value|Base food cost)$/i.test(fact.label)) {
         return `${fact.label} ${value}`;
     }
 

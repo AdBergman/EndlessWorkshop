@@ -173,6 +173,15 @@ describe("codexStructuredDescription", () => {
     });
 
     it("parses councilor, trait, hero, and minor faction facts conservatively", () => {
+        expect(getCodexStructuredSummary({
+            ...entry("abilities", ["When using this Active Skill:"]),
+            facts: [
+                { label: "Target", value: "Enemies" },
+                { label: "Range", value: "3" },
+                { label: "Cost", value: "1 Battle Token" },
+            ],
+        })).toBe("Enemies / Range 3 / Cost 1 Battle Token");
+
         expect(parseCodexStructuredDescription(entry("councilors", [
             "Faction: KinOfSheredyn",
             "Role: Governor",
@@ -185,19 +194,19 @@ describe("codexStructuredDescription", () => {
             "Cost: 2",
             "Required affinity: Aspect",
             "Quest-only note.",
-        ]))).toBe("Faction / Cost 2 / Aspects");
+        ]))).toBe("Cost 2 / Aspects");
 
         expect(getCodexStructuredSummary(entry("heroes", [
             "Faction: Hero",
             "Class: Archer",
             "Attack: 42",
-        ]))).toBe("Hero / Archer");
+        ]))).toBe("Archer");
 
         expect(getCodexStructuredSummary(entry("heroes", [
             "Faction: Tahuk",
             "Class: Defender",
             "Attack: 30",
-        ]))).toBe("Tahuk / Defender");
+        ]))).toBe("Defender");
 
         expect(getCodexStructuredSummary(entry("minorfactions", [
             "Disposition: Diplomatic",

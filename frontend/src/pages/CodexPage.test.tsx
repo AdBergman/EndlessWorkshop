@@ -1914,10 +1914,12 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Polemephon" })).toBeInTheDocument();
         expect(screen.getByText("Hero dossier")).toBeInTheDocument();
-        expect(screen.getByText("Faction")).toBeInTheDocument();
-        expect(screen.getByText("Hero")).toBeInTheDocument();
-        expect(screen.getByText("Class")).toBeInTheDocument();
-        expect(screen.getByText("Archer")).toBeInTheDocument();
+        const dossier = screen.getByText("Hero dossier").closest("section");
+        expect(dossier).not.toBeNull();
+        expect(within(dossier!).getByText("Faction")).toBeInTheDocument();
+        expect(within(dossier!).getByText("Hero")).toBeInTheDocument();
+        expect(within(dossier!).getByText("Class")).toBeInTheDocument();
+        expect(within(dossier!).getByText("Archer")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
         expect(screen.getByText("Attack: 42")).toBeInTheDocument();
     });
