@@ -71,6 +71,7 @@ export default function CodexPage() {
     const resultListRef = useRef<HTMLDivElement>(null);
     const detailTitleRef = useRef<HTMLHeadingElement>(null);
     const suppressNextPlainRouteResetRef = useRef(false);
+    const lastPlainRouteResetSignatureRef = useRef<string | null>(null);
     const lastHandledResetNonceRef = useRef<string | null>(null);
 
     useEffect(() => {
@@ -266,7 +267,16 @@ export default function CodexPage() {
     );
 
     useEffect(() => {
-        if (location.pathname !== "/codex" || location.search !== "") return;
+        if (location.pathname !== "/codex" || location.search !== "") {
+            lastPlainRouteResetSignatureRef.current = null;
+            return;
+        }
+
+        const plainRouteResetSignature = `${location.key}:${codexResetNonce ?? ""}`;
+        if (lastPlainRouteResetSignatureRef.current === plainRouteResetSignature) {
+            return;
+        }
+        lastPlainRouteResetSignatureRef.current = plainRouteResetSignature;
 
         if (suppressNextPlainRouteResetRef.current) {
             suppressNextPlainRouteResetRef.current = false;
@@ -277,14 +287,10 @@ export default function CodexPage() {
             return;
         }
 
-        if (!codexResetNonce && !selectedEntryKey && query.length === 0 && activeKind === ALL_CODEX_KIND) {
-            return;
-        }
-
         lastHandledResetNonceRef.current = codexResetNonce;
         setQuery("");
         setSelectionIntent("passive");
-    }, [activeKind, codexResetNonce, location.pathname, location.search, query.length, selectedEntryKey]);
+    }, [codexResetNonce, location.key, location.pathname, location.search]);
 
     useEffect(() => {
         if (loading) return;

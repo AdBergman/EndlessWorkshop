@@ -413,6 +413,40 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("heading", { name: "All Districts" })).not.toBeInTheDocument();
     });
 
+    it("keeps the search input focused and editable on the plain Codex route", async () => {
+        const user = userEvent.setup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const input = await screen.findByRole("combobox", { name: /search the encyclopedia/i });
+        await user.click(input);
+        await user.type(input, "blo");
+
+        const results = screen.getByLabelText("Codex results");
+        expect(within(results).getByRole("button", { name: /bloom harbor/i })).toBeInTheDocument();
+        expect(input).toHaveValue("blo");
+        expect(input).toHaveFocus();
+
+        await user.type(input, "om");
+
+        expect(input).toHaveValue("bloom");
+        expect(input).toHaveFocus();
+    });
+
     it("keeps valid deep links working", async () => {
         render(
             <MemoryRouter initialEntries={["/codex?entry=District_MarketSquare"]}>
