@@ -94,7 +94,12 @@ export function resolveRelatedEntries(
     const seen = new Set<string>();
     const resolved: CodexEntry[] = [];
 
-    for (const rawKey of entry.referenceKeys ?? []) {
+    const relationshipKeys = [
+        ...(entry.publicContextKeys ?? []),
+        ...(entry.referenceKeys ?? []),
+    ];
+
+    for (const rawKey of relationshipKeys) {
         const referenceKey = normalizeEntryKey(rawKey);
         if (!referenceKey || referenceKey === selfKey) {
             continue;

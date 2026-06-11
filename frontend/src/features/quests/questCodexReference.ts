@@ -13,10 +13,19 @@ export type QuestCodexReferenceSource = {
 };
 
 const QUEST_REFERENCE_KIND_TO_CODEX_EXPORT_KINDS: Record<string, string[]> = {
+    action: ["actions"],
+    actiontype: ["actions"],
+    declaration: ["diplomatictreaties"],
     district: ["districts"],
     equipment: ["equipment"],
+    empireaction: ["actions"],
+    empireactiontype: ["actions"],
     faction: ["factions"],
+    factionaction: ["actions"],
+    factionactiontype: ["actions"],
     factiontrait: ["traits"],
+    diplomatictreaty: ["diplomatictreaties"],
+    diplomatictreaties: ["diplomatictreaties"],
     hero: ["heroes", "units"],
     herotrait: ["traits"],
     improvement: ["improvements"],
@@ -24,6 +33,7 @@ const QUEST_REFERENCE_KIND_TO_CODEX_EXPORT_KINDS: Record<string, string[]> = {
     population: ["populations"],
     tech: ["tech"],
     technology: ["tech"],
+    treaty: ["diplomatictreaties"],
     trait: ["traits"],
     unit: ["units"],
 };

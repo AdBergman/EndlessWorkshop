@@ -562,6 +562,67 @@ describe("CodexPage", () => {
         expect(within(relatedSection).getByRole("button", { name: /protectorate traits/i })).toBeInTheDocument();
     });
 
+    it("renders related entries from publicContextKeys without self-links or unresolved raw keys", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                descriptionLines: [],
+                referenceKeys: ["ActionTypeBuildBridge"],
+                publicContextKeys: [
+                    "ActionTypeBuildBridge",
+                    "Trait_Engineer",
+                    "Missing_Public_Context_Key",
+                    "DistrictImprovement_Bridge_00",
+                ],
+                facts: [{ label: "Kind", value: "Action" }],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Engineer",
+                displayName: "Engineer",
+                descriptionLines: ["Bridge specialist."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Bridge_00",
+                displayName: "Bridge",
+                descriptionLines: ["River crossing."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                actions: entries.filter((entry) => entry.exportKind === "actions"),
+                traits: entries.filter((entry) => entry.exportKind === "traits"),
+                improvements: entries.filter((entry) => entry.exportKind === "improvements"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeBuildBridge"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /engineer traits/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /bridge improvements/i })).toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /build bridge actions/i })).not.toBeInTheDocument();
+        expect(screen.queryByText("Missing_Public_Context_Key")).not.toBeInTheDocument();
+    });
+
     it("keeps faction quest display names distinct while showing duplicate-title context separately", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [

@@ -191,6 +191,86 @@ describe("resolveRelatedEntries", () => {
         expect(related.map((entry) => entry.displayName)).toEqual(["Hero A"]);
     });
 
+    it("prefers publicContextKeys before broad referenceKeys and suppresses self/unresolved keys", () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                descriptionLines: [],
+                referenceKeys: ["ActionTypeBuildBridge", "DistrictImprovement_Bridge_00", "Trait_Engineer"],
+                publicContextKeys: [
+                    "ActionTypeBuildBridge",
+                    "Trait_Engineer",
+                    "Missing_Public_Context_Key",
+                    "DistrictImprovement_Bridge_00",
+                ],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Bridge_00",
+                displayName: "Bridge",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Engineer",
+                displayName: "Engineer",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        const related = resolveRelatedEntries(entries[0], {
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+        });
+
+        expect(related.map((entry) => `${entry.exportKind}:${entry.entryKey}`)).toEqual([
+            "traits:Trait_Engineer",
+            "improvements:DistrictImprovement_Bridge_00",
+        ]);
+    });
+
+    it("deduplicates publicContextKeys and referenceKeys that resolve to the same typed entry", () => {
+        const heroRef = entityRefId(codexEntityRef("heroes", "Shared_Key")!);
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "Action_Shared",
+                displayName: "Shared Action",
+                descriptionLines: [],
+                referenceKeys: ["Shared_Key", heroRef],
+                publicContextKeys: [heroRef],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Shared_Key",
+                displayName: "Hero Shared",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Shared_Key",
+                displayName: "Unit Shared",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        const related = resolveRelatedEntries(entries[0], {
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+        });
+
+        expect(related.map((entry) => `${entry.exportKind}:${entry.displayName}`)).toEqual([
+            "heroes:Hero Shared",
+            "units:Unit Shared",
+        ]);
+    });
+
     it("resolves representative links across new codex kinds without same-kind filtering or display-name dedupe", () => {
         const entries: CodexEntry[] = [
             {

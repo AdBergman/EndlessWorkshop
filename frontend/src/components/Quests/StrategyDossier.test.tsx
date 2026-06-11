@@ -678,6 +678,50 @@ describe("StrategyDossier", () => {
         )).toHaveClass("questExplorer-rewardIcon--codexMonochrome");
     });
 
+    it("links action and diplomatic treaty strategy metadata through exact Codex references", () => {
+        setCodexEntries([
+            codexEntry("actions", "ActionTypeBuildBridge", "Build Bridge"),
+            codexEntry("diplomatictreaties", "Treaty_VisionExchange", "Vision Exchange"),
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                requirementLines: ["Use action: Build Bridge."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Use action: Build Bridge."])[0]!,
+                    referenceKind: "ActionType",
+                    referenceKey: "ActionTypeBuildBridge",
+                    referenceDisplayName: "Build Bridge",
+                }],
+                rewardLines: ["Unlock diplomatic treaty: Vision Exchange"],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock diplomatic treaty: Vision Exchange"])[0]!,
+                    referenceKind: "DiplomaticTreaty",
+                    referenceKey: "Treaty_VisionExchange",
+                    referenceDisplayName: "Vision Exchange",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        expect(screen.getByText("Build Bridge").closest("a")).toBeNull();
+        expect(screen.queryByRole("link", { name: "Use action: Build Bridge." })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Build Bridge in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=ActionTypeBuildBridge"
+        );
+        expect(screen.getByText("Vision Exchange").closest("a")).toBeNull();
+        expect(screen.queryByRole("link", { name: "Unlock diplomatic treaty: Vision Exchange" })).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Open Vision Exchange in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?entry=Treaty_VisionExchange"
+        );
+    });
+
     it("uses the resolved Codex label for compact reward links when the source text cannot be split", async () => {
         setCodexEntries([
             codexEntry("units", "Unit_KinOfSheredyn_Chosen", "Chosen", {
