@@ -14,7 +14,6 @@ type Props = {
 const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
     actions: "Army, empire, and faction actions.",
-    bonuses: "Reviewable mechanics, statuses, and modifier records.",
     councilors: "Governors, advisors, and political specialists.",
     districts: "City tiles, exploitations, and terrain infrastructure.",
     diplomatictreaties: "Diplomatic declarations, treaties, and war states.",
@@ -26,6 +25,7 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
     minorfactions: "Regional peoples, villages, and protectorates.",
     populations: "Citizen groups and settlement identities.",
     quests: "Faction, world, and event quest records.",
+    statuses: "Public conditions, reputation effects, and timed effects.",
     tech: "Technologies, unlocks, and progression systems.",
     traits: "Faction, hero, and systemic modifiers.",
     units: "Military units, heroes, and evolution lines.",

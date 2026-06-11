@@ -175,7 +175,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
-    it("orders new Codex categories in taxonomy order while exposing bonuses for review", async () => {
+    it("orders new Codex categories in taxonomy order while keeping modifiers out of top-level navigation", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "abilities",
@@ -214,12 +214,20 @@ describe("CodexPage", () => {
                 referenceKeys: [],
             },
             {
-                exportKind: "bonuses",
-                entryKey: "Bonus_A",
-                displayName: "Bonus A",
+                exportKind: "statuses",
+                entryKey: "Status_A",
+                displayName: "Status A",
                 descriptionLines: [],
                 referenceKeys: [],
-                facts: [{ label: "Kind", value: "Bonus" }],
+                facts: [{ label: "Kind", value: "Status" }],
+            },
+            {
+                exportKind: "modifiers",
+                entryKey: "CostModifier_A",
+                displayName: "Modifier A",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Cost Modifier" }],
             },
         ];
 
@@ -250,10 +258,10 @@ describe("CodexPage", () => {
             "All",
             "Abilities",
             "Actions",
-            "Bonuses",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
+            "Statuses",
         ]);
 
         const overviewLabels = within(screen.getByLabelText("Codex kinds"))
@@ -262,15 +270,19 @@ describe("CodexPage", () => {
         expect(overviewLabels).toEqual([
             "Abilities",
             "Actions",
-            "Bonuses",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
+            "Statuses",
         ]);
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .getByRole("button", { name: /bonuses 1/i })).toBeInTheDocument();
+            .getByRole("button", { name: /statuses 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
-            .getByRole("button", { name: /bonuses 1 reviewable mechanics/i })).toBeInTheDocument();
+            .getByRole("button", { name: /statuses 1 public conditions/i })).toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex kinds"))
+            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
     });
 
     it("renders the all-factions summary icon as a monochrome category icon", async () => {

@@ -26,6 +26,8 @@ const CODEX_KIND_ICON_RAW_KEYS: Record<string, string> = {
     population: "status_PublicOpinion_DivinePopulation",
     quests: "hudWindowEmpireControlsQuest",
     quest: "hudWindowEmpireControlsQuest",
+    statuses: "status_PublicOpinion_DivinePopulation",
+    status: "status_PublicOpinion_DivinePopulation",
     tech: "aspect_Technology_00",
     techs: "aspect_Technology_00",
     technology: "aspect_Technology_00",

@@ -10,6 +10,7 @@ describe("codexKindIcons", () => {
         expect(getCodexKindIconPath("quests")).toBe("/svg/quests/UI_Header_QuestPicto.svg");
         expect(getCodexKindIconPath("actions")).toBe("/svg/common/UI_Common_ArmyAction.svg");
         expect(getCodexKindIconPath("diplomatictreaties")).toBe("/svg/common/UI_Common_Diplomacy.svg");
+        expect(getCodexKindIconPath("statuses")).toBe("/svg/common/UI_Common_Population.svg");
     });
 
     it("normalizes singular aliases and returns null for unknown kinds", () => {

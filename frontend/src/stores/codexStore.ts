@@ -92,9 +92,39 @@ function cleanSections(values: unknown): CodexMetadataSection[] {
         .filter((section): section is CodexMetadataSection => section !== null);
 }
 
+function isBonusStatusEntry(entry: CodexEntry): boolean {
+    const category = (entry.category ?? "").trim().toLowerCase();
+    const kind = (entry.kind ?? "").trim().toLowerCase();
+    const key = (entry.entryKey ?? "").trim();
+    return category === "status" ||
+        kind === "status" ||
+        key.startsWith("Status_") ||
+        key.startsWith("HeroStatus_") ||
+        key.startsWith("TreatyPublicOpinion_");
+}
+
+function isBonusModifierEntry(entry: CodexEntry): boolean {
+    const category = (entry.category ?? "").trim().toLowerCase();
+    const kind = (entry.kind ?? "").trim().toLowerCase();
+    const key = (entry.entryKey ?? "").trim();
+    return category === "cost modifier" ||
+        kind === "cost modifier" ||
+        key.includes("CostModifier") ||
+        key.includes("CostModifer");
+}
+
+function normalizeBonusDerivedKind(entry: CodexEntry): string {
+    const exportKind = (entry.exportKind ?? "").trim().toLowerCase();
+    if (exportKind !== "bonuses") return exportKind;
+
+    if (isBonusStatusEntry(entry)) return "statuses";
+    if (isBonusModifierEntry(entry)) return "modifiers";
+    return exportKind;
+}
+
 function normalizeEntry(entry: CodexEntry): CodexEntry {
     return {
-        exportKind: (entry.exportKind ?? "").trim().toLowerCase(),
+        exportKind: normalizeBonusDerivedKind(entry),
         entryKey: (entry.entryKey ?? "").trim(),
         displayName: entry.displayName ?? "",
         category: typeof entry.category === "string" ? entry.category.trim() || null : null,

@@ -206,6 +206,42 @@ describe("useCodexStore", () => {
             .toBe("Vision Exchange");
     });
 
+    it("classifies bonus-derived statuses separately from hidden modifiers", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "bonuses",
+                entryKey: "Status_PublicOpinion_Test",
+                displayName: "Public Opinion Status",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["Diplomatic status."],
+                referenceKeys: ["ActionCostModifier_Test"],
+            },
+            {
+                exportKind: "bonuses",
+                entryKey: "ActionCostModifier_Test",
+                displayName: "Action Cost Modifier Test",
+                category: "Cost Modifier",
+                kind: "Cost Modifier",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        const state = useCodexStore.getState();
+        expect(state.getEntry("statuses", "Status_PublicOpinion_Test")?.displayName)
+            .toBe("Public Opinion Status");
+        expect(state.getEntry("modifiers", "ActionCostModifier_Test")?.displayName)
+            .toBe("Action Cost Modifier Test");
+        expect(state.getEntriesByKind("statuses")).toHaveLength(1);
+        expect(state.getEntriesByKind("modifiers")).toHaveLength(1);
+        expect(state.searchEntries("cost modifier")).toHaveLength(1);
+        expect(state.getRelatedEntries(state.getEntryByKey("Status_PublicOpinion_Test")!))
+            .toEqual([state.getEntryByKey("ActionCostModifier_Test")]);
+    });
+
     it("searches across displayName, entryKey, exportKind, and descriptionLines with optional kind filtering", async () => {
         mockedApiClient.getCodex.mockResolvedValue([
             {
