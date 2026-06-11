@@ -180,6 +180,82 @@ class CodexFacadeIntegrationTest extends BaseIT {
                         "EmpireActionTypeUnknown_TestAction",
                         "EmpireActionTypeFutureFaction_TestAction"
                 );
+        assertThat(findCodex(result, "ActionTypeBuildBridge").referenceKeys()).isEmpty();
+    }
+
+    @Test
+    void importCodexThroughFacade_filtersHighConfidenceFactionScopedRowsAndRelationshipKeys() {
+        codexImportAdminFacade.importCodex(batch("traits", List.of(
+                entry("FactionTrait_Mukag_PublicTrait", "Public Trait", "Trait", "Trait", List.of("Line"), List.of()),
+                entry("FactionTrait_FutureFaction_Test", "Future Trait", "Trait", "Trait", List.of("Line"), List.of()),
+                entry("ProtectorateTrait_Public_Test", "Public Protectorate Trait", "Trait", "Trait", List.of("Line"), List.of())
+        )));
+        codexImportAdminFacade.importCodex(batch("quests", List.of(
+                entry("FactionQuest_Mukag_PublicQuest", "Public Quest", "Quest", "Quest", List.of("Line"), List.of()),
+                entry("FactionQuest_FutureFaction_Test", "Future Quest", "Quest", "Quest", List.of("Line"), List.of()),
+                entry("MinorFaction_GenericQuest_Test", "Public Minor Quest", "Quest", "Quest", List.of("Line"), List.of())
+        )));
+        codexImportAdminFacade.importCodex(batch("bonuses", List.of(
+                entry("FactionTrait_Mukag_PublicBonus", "Public Bonus", "Bonus", "Bonus", List.of("Line"), List.of()),
+                entry("FactionTrait_FutureFaction_TestBonus", "Future Bonus", "Bonus", "Bonus", List.of("Line"), List.of()),
+                new CodexImportEntryDto(
+                        "Status_Empire_PublicStatus",
+                        "Public Status",
+                        "Status",
+                        "Bonus",
+                        List.of("Line"),
+                        List.of(
+                                "FactionTrait_FutureFaction_Test",
+                                "FactionQuest_FutureFaction_Test",
+                                "FactionActionTypeFutureFaction_TestAction",
+                                "FactionTrait_Mukag_PublicTrait",
+                                "FactionQuest_Mukag_PublicQuest",
+                                "Unit_FutureFaction_Test"
+                        ),
+                        List.of(),
+                        List.of(),
+                        List.of(
+                                "FactionTrait_FutureFaction_Test",
+                                "FactionQuest_FutureFaction_Test",
+                                "FactionTrait_Mukag_PublicTrait",
+                                "FactionQuest_Mukag_PublicQuest",
+                                "Hero_FutureFaction_Test"
+                        )
+                )
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<CodexDto> result = codexFacade.getAllCodexEntries();
+
+        assertThat(result).extracting(CodexDto::entryKey)
+                .contains(
+                        "FactionTrait_Mukag_PublicTrait",
+                        "ProtectorateTrait_Public_Test",
+                        "FactionQuest_Mukag_PublicQuest",
+                        "MinorFaction_GenericQuest_Test",
+                        "FactionTrait_Mukag_PublicBonus",
+                        "Status_Empire_PublicStatus"
+                )
+                .doesNotContain(
+                        "FactionTrait_FutureFaction_Test",
+                        "FactionQuest_FutureFaction_Test",
+                        "FactionTrait_FutureFaction_TestBonus"
+                );
+
+        CodexDto status = findCodex(result, "Status_Empire_PublicStatus");
+        assertThat(status.referenceKeys())
+                .containsExactly(
+                        "FactionTrait_Mukag_PublicTrait",
+                        "FactionQuest_Mukag_PublicQuest",
+                        "Unit_FutureFaction_Test"
+                );
+        assertThat(status.publicContextKeys())
+                .containsExactly(
+                        "FactionTrait_Mukag_PublicTrait",
+                        "FactionQuest_Mukag_PublicQuest",
+                        "Hero_FutureFaction_Test"
+                );
     }
 
     private static CodexDto findCodex(List<CodexDto> entries, String entryKey) {
