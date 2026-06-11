@@ -24,12 +24,16 @@ export const CODEX_SUMMARY_ENTRY_PREFIX = "__summary__:";
 export const CODEX_QUEST_GROUP_ENTRY_PREFIX = "__questGroup__:";
 
 const CODEX_KIND_LABELS: Record<string, string> = {
+    actions: "Actions",
+    action: "Actions",
     abilities: "Abilities",
     ability: "Abilities",
     councilors: "Councilors",
     councilor: "Councilors",
     districts: "Districts",
     district: "Districts",
+    diplomatictreaties: "Diplomatic Treaties",
+    diplomatictreaty: "Diplomatic Treaties",
     extractors: "Extractors",
     extractor: "Extractors",
     equipment: "Equipment",
@@ -544,12 +548,16 @@ export function getCodexSecondaryContext(entry: Pick<CodexEntry, "entryKey" | "e
 function singularKindLabel(kind: string): string {
     const normalizedKind = compactWhitespace(kind ?? "").toLowerCase();
     switch (normalizedKind) {
+        case "actions":
+            return "Action";
         case "abilities":
             return "Ability";
         case "councilors":
             return "Councilor";
         case "districts":
             return "District";
+        case "diplomatictreaties":
+            return "Diplomatic Treaty";
         case "extractors":
             return "Extractor";
         case "factions":

@@ -8,6 +8,8 @@ describe("codexKindIcons", () => {
         expect(getCodexKindIconPath("units")).toBe("/svg/common/UI_Common_Unit.svg");
         expect(getCodexKindIconPath("tech")).toBe("/svg/common/UI_Common_Technology.svg");
         expect(getCodexKindIconPath("quests")).toBe("/svg/quests/UI_Header_QuestPicto.svg");
+        expect(getCodexKindIconPath("actions")).toBe("/svg/common/UI_Common_ArmyAction.svg");
+        expect(getCodexKindIconPath("diplomatictreaties")).toBe("/svg/common/UI_Common_Diplomacy.svg");
     });
 
     it("normalizes singular aliases and returns null for unknown kinds", () => {

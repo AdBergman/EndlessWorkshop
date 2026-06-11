@@ -92,6 +92,9 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("minorfactions")).toBe("Minor Factions");
         expect(formatCodexKindLabel("extractors")).toBe("Extractors");
         expect(formatCodexKindLabel("techs")).toBe("Tech");
+        expect(formatCodexKindLabel("actions")).toBe("Actions");
+        expect(formatCodexKindLabel("diplomatictreaties")).toBe("Diplomatic Treaties");
+        expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomatic Treaties");
     });
 
     it("adds stable quest step context for duplicate quest titles", () => {

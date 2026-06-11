@@ -50,8 +50,12 @@ function StructuredSectionItem({ item }: { item: CodexStructuredSectionItem }) {
 
 function sectionHeadingFor(kind: string): string {
     switch (kind.trim().toLowerCase()) {
+        case "actions":
+            return "Action dossier";
         case "councilors":
             return "Councilor dossier";
+        case "diplomatictreaties":
+            return "Diplomatic treaty dossier";
         case "equipment":
             return "Equipment dossier";
         case "heroes":

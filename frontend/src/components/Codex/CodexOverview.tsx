@@ -13,8 +13,10 @@ type Props = {
 
 const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
+    actions: "Army, empire, and faction actions.",
     councilors: "Governors, advisors, and political specialists.",
     districts: "City tiles, exploitations, and terrain infrastructure.",
+    diplomatictreaties: "Diplomatic declarations, treaties, and war states.",
     extractors: "Resource extraction districts and upgrades.",
     equipment: "Hero gear, relics, and battlefield artifacts.",
     factions: "Major empires and their defining systems.",
@@ -34,7 +36,6 @@ function descriptionFor(kind: string): string {
 
 export default function CodexOverview({ options, onSelectKind }: Props) {
     const totalCount = options.reduce((sum, option) => sum + option.count, 0);
-    const sortedOptions = [...options].sort((left, right) => left.label.localeCompare(right.label));
 
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
@@ -60,7 +61,7 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
             </div>
 
             <div className="codex-overview__index" aria-label="Codex kinds">
-                {sortedOptions.map((option) => (
+                {options.map((option) => (
                     <button
                         key={option.kind}
                         type="button"

@@ -175,6 +175,102 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
+    it("orders new Codex categories in taxonomy order while keeping bonuses out of top-level navigation", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_A",
+                displayName: "Ability A",
+                descriptionLines: ["Ability."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "Action_A",
+                displayName: "Action A",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Action" }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_A",
+                displayName: "Faction A",
+                descriptionLines: ["Faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Treaty_A",
+                displayName: "Treaty A",
+                descriptionLines: ["Treaty."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_A",
+                displayName: "Hero A",
+                descriptionLines: ["Hero."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "bonuses",
+                entryKey: "Bonus_A",
+                displayName: "Bonus A",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Bonus" }],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const toolbarLabels = within(await screen.findByRole("toolbar", { name: /filter codex by kind/i }))
+            .getAllByRole("button")
+            .map((button) => button.textContent?.replace(/\d+$/u, "").trim());
+        expect(toolbarLabels).toEqual([
+            "All",
+            "Abilities",
+            "Actions",
+            "Factions",
+            "Diplomatic Treaties",
+            "Heroes",
+        ]);
+
+        const overviewLabels = within(screen.getByLabelText("Codex kinds"))
+            .getAllByRole("button")
+            .map((button) => button.textContent?.replace(/\d+.*$/u, "").trim());
+        expect(overviewLabels).toEqual([
+            "Abilities",
+            "Actions",
+            "Factions",
+            "Diplomatic Treaties",
+            "Heroes",
+        ]);
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /bonuses/i })).not.toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex kinds"))
+            .queryByRole("button", { name: /bonuses/i })).not.toBeInTheDocument();
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {
@@ -1152,7 +1248,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
-        expect(screen.getByText("Description")).toBeInTheDocument();
+        expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByText("Constructible Action")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Influence cost multiplier" })).toBeInTheDocument();
@@ -1269,6 +1365,322 @@ describe("CodexPage", () => {
         expect(screen.getByText("Empire Action")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
         expect(screen.getByText("Shares vision with another empire.")).toBeInTheDocument();
+    });
+
+    it("browses and renders representative diplomatic treaty entries through generic metadata", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Treaty_VisionExchange",
+                displayName: "Vision Exchange",
+                category: "Beneficial Discovery",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Signing this Treaty will show each Empire the Tiles over which the other has vision.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Beneficial Discovery" },
+                    { label: "Bilateral", value: "Yes" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_OpenBorders",
+                displayName: "Open Borders",
+                category: "Beneficial Defense",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Signing this Treaty will open the borders between the two Empires.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Beneficial Defense" },
+                    { label: "Bilateral", value: "Yes" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Units may enter allied territories without Public Opinion loss."],
+                    },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_JustifiedWar",
+                displayName: "Justified War",
+                category: "War",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Declare a Justified War on this Empire for free.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "War" },
+                    { label: "Bilateral", value: "No" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Only available when Public Opinion reaches a very low threshold."],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { diplomatictreaties: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=diplomatictreaties&entry=Treaty_VisionExchange"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /all diplomatic treaties/i })).toBeInTheDocument();
+        expect(screen.getByText("Diplomatic treaty dossier")).toBeInTheDocument();
+        expect(screen.getByText("Beneficial Discovery")).toBeInTheDocument();
+        expect(screen.getByText("30 turns")).toBeInTheDocument();
+
+        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
+        await user.click(within(resultsPane).getByRole("button", { name: /open borders/i }));
+        expect(await screen.findByRole("heading", { name: "Open Borders" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
+        expect(screen.getByText("Units may enter allied territories without Public Opinion loss.")).toBeInTheDocument();
+
+        await user.click(within(resultsPane).getByRole("button", { name: /justified war/i }));
+        expect(await screen.findByRole("heading", { name: "Justified War" })).toBeInTheDocument();
+        expect(screen.getByText("War")).toBeInTheDocument();
+        expect(screen.getByText("No")).toBeInTheDocument();
+    });
+
+    it("browses and renders representative action entries with null descriptions", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                category: "Action",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Reference key", value: "ActionTypeBuildBridge" },
+                    { label: "Kind", value: "Action" },
+                    { label: "Category", value: "Action" },
+                ],
+                sections: [
+                    {
+                        title: "Cost modifiers",
+                        items: [
+                            {
+                                label: "Turn cost multiplier",
+                                facts: [
+                                    { label: "Cost type", value: "Turn" },
+                                    { label: "Operation", value: "Mult" },
+                                    { label: "Value", value: "0.50" },
+                                ],
+                                lines: ["Temporary Bridge takes less time to build."],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildDam",
+                displayName: "Build Dam",
+                category: "Action",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Reference key", value: "ActionTypeBuildDam" },
+                    { label: "Kind", value: "Action" },
+                    { label: "Category", value: "Action" },
+                ],
+                sections: [
+                    {
+                        title: "Cost modifiers",
+                        items: [
+                            {
+                                label: "Money cost multiplier",
+                                facts: [
+                                    { label: "Cost type", value: "Money" },
+                                    { label: "Operation", value: "Mult" },
+                                    { label: "Value", value: "0.90" },
+                                ],
+                                lines: ["Reduces the [DustColored] Dust cost to build Dams."],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "FactionActionTypeMukag_MonsoonFestival",
+                displayName: "Mukag Monsoon Festival",
+                category: "Faction Action",
+                kind: "Faction Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Reference key", value: "FactionActionTypeMukag_MonsoonFestival" },
+                    { label: "Kind", value: "Faction Action" },
+                    { label: "Category", value: "Faction Action" },
+                ],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "EmpireActionTypeMukag_Light01",
+                displayName: "Mukag Light01",
+                category: "Empire Action",
+                kind: "Empire Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Reference key", value: "EmpireActionTypeMukag_Light01" },
+                    { label: "Kind", value: "Empire Action" },
+                    { label: "Category", value: "Empire Action" },
+                    { label: "UI category", value: "Light" },
+                ],
+                sections: [
+                    {
+                        title: "Action mechanics",
+                        lines: ["Static formulas are shown from public-safe DB/RPN relationships."],
+                        items: [
+                            {
+                                label: "Empire project cost",
+                                facts: [
+                                    { label: "Value type", value: "Science" },
+                                    { label: "Formula", value: "10 + 30 * SGELevel" },
+                                ],
+                                lines: ["Empire project resource cost before applicable cost modifiers."],
+                            },
+                            {
+                                label: "Population added",
+                                facts: [
+                                    { label: "Value type", value: "Population" },
+                                    { label: "Formula", value: "1" },
+                                ],
+                                lines: ["Population units added to the related settlement."],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeBuildBridge"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /all actions/i })).toBeInTheDocument();
+        expect(screen.getByText("Action dossier")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Turn cost multiplier" })).toBeInTheDocument();
+        expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
+
+        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
+        await user.click(within(resultsPane).getByRole("button", { name: /build dam/i }));
+        expect(await screen.findByRole("heading", { name: "Build Dam" })).toBeInTheDocument();
+        expect(screen.getByText("0.90")).toBeInTheDocument();
+        expect(screen.getByText(/Reduces the/)).toBeInTheDocument();
+
+        await user.click(within(resultsPane).getByRole("button", { name: /mukag monsoon festival/i }));
+        expect(await screen.findByRole("heading", { name: "Mukag Monsoon Festival" })).toBeInTheDocument();
+        expect(within(screen.getByRole("region", { name: /selected codex entry/i }))
+            .getAllByText("Faction Action").length).toBeGreaterThanOrEqual(1);
+
+        await user.click(within(resultsPane).getByRole("button", { name: /mukag light01/i }));
+        expect(await screen.findByRole("heading", { name: "Mukag Light01" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Action mechanics" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Empire project cost" })).toBeInTheDocument();
+        expect(screen.getByText("10 + 30 * SGELevel")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Population added" })).toBeInTheDocument();
+    });
+
+    it("searches actions and diplomatic treaties through existing Codex search", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Action" }],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_JustifiedWar",
+                displayName: "Justified War",
+                descriptionLines: ["Declare a Justified War on this Empire for free."],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Diplomatic Treaty" }],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                actions: entries.filter((entry) => entry.exportKind === "actions"),
+                diplomatictreaties: entries.filter((entry) => entry.exportKind === "diplomatictreaties"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const input = await screen.findByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(input, "justified");
+        expect(await screen.findByRole("button", { name: /justified war/i })).toBeInTheDocument();
+        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
+        expect(within(resultsPane).getByText("Diplomatic Treaties")).toBeInTheDocument();
+
+        await user.clear(input);
+        await user.type(input, "ActionTypeBuildBridge");
+        expect(await screen.findByRole("button", { name: /build bridge/i })).toBeInTheDocument();
+        expect(within(resultsPane).getByText("Actions")).toBeInTheDocument();
     });
 
     it("renders hero codex facts from exported description lines instead of parsing ownership from keys", async () => {

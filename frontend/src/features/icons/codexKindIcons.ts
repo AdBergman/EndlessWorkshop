@@ -1,12 +1,16 @@
 import { getRawIcon } from "./iconManifest";
 
 const CODEX_KIND_ICON_RAW_KEYS: Record<string, string> = {
+    actions: "allArmiesSortStance",
+    action: "allArmiesSortStance",
     abilities: "reminderTypeHeroSpecializationAvailable",
     ability: "reminderTypeHeroSpecializationAvailable",
     councilors: "reminderTypeMandatoryCouncilReshufflePending",
     councilor: "reminderTypeMandatoryCouncilReshufflePending",
     districts: "factionTrait_Custom_Specific38",
     district: "factionTrait_Custom_Specific38",
+    diplomatictreaties: "factionTrait_Diplomacy_Belligerent",
+    diplomatictreaty: "factionTrait_Diplomacy_Belligerent",
     extractors: "factionTrait_Common_StartingResources",
     extractor: "factionTrait_Common_StartingResources",
     equipment: "addRandomEquipmentRewardTypeNothingShared",

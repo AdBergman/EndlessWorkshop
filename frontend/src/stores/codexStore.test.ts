@@ -186,6 +186,26 @@ describe("useCodexStore", () => {
         expect(entry?.publicContextKeys).toEqual(["Population_Aspect", "Faction_Aspect"]);
     });
 
+    it("normalizes camel-case Codex export kinds for category registration", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "diplomaticTreaties",
+                entryKey: "Treaty_VisionExchange",
+                displayName: "Vision Exchange",
+                descriptionLines: ["Shares vision."],
+                referenceKeys: [],
+            },
+        ] as any);
+
+        await useCodexStore.getState().loadEntries();
+
+        const state = useCodexStore.getState();
+        expect(state.entries[0].exportKind).toBe("diplomatictreaties");
+        expect(state.getEntriesByKind("diplomatictreaties")).toHaveLength(1);
+        expect(state.getEntry("diplomaticTreaties", "Treaty_VisionExchange")?.displayName)
+            .toBe("Vision Exchange");
+    });
+
     it("searches across displayName, entryKey, exportKind, and descriptionLines with optional kind filtering", async () => {
         mockedApiClient.getCodex.mockResolvedValue([
             {
