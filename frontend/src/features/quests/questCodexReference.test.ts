@@ -202,5 +202,13 @@ describe("Quest Codex reference display metadata", () => {
             referenceKey: "Technology_Missing",
             referenceDisplayName: "Missing Tech",
         }, codexIndexes)).toBeUndefined();
+
+        expect(resolveQuestCodexReference({
+            displayText: "Use missing empire action.",
+            codexEntryKey: null,
+            referenceKind: "EmpireActionType",
+            referenceKey: "EmpireActionTypeUnknown_TestAction",
+            referenceDisplayName: "Unknown Test Action",
+        }, codexIndexes)).toBeUndefined();
     });
 });

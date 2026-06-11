@@ -608,6 +608,7 @@ describe("CodexPage", () => {
                     "ActionTypeBuildBridge",
                     "Trait_Engineer",
                     "Missing_Public_Context_Key",
+                    "EmpireActionTypeUnknown_TestAction",
                     "DistrictImprovement_Bridge_00",
                 ],
                 facts: [{ label: "Kind", value: "Action" }],
@@ -655,6 +656,7 @@ describe("CodexPage", () => {
         expect(within(relatedSection).getByRole("button", { name: /bridge improvements/i })).toBeInTheDocument();
         expect(within(relatedSection).queryByRole("button", { name: /build bridge actions/i })).not.toBeInTheDocument();
         expect(screen.queryByText("Missing_Public_Context_Key")).not.toBeInTheDocument();
+        expect(screen.queryByText("EmpireActionTypeUnknown_TestAction")).not.toBeInTheDocument();
     });
 
     it("keeps faction quest display names distinct while showing duplicate-title context separately", async () => {

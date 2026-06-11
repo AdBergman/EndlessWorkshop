@@ -150,12 +150,22 @@ class CodexFacadeIntegrationTest extends BaseIT {
     }
 
     @Test
-    void importCodexThroughFacade_doesNotExposeUnavailableFactionActions() {
+    void importCodexThroughFacade_doesNotExposeUnavailableFactionOrEmpireActions() {
         codexImportAdminFacade.importCodex(batch("actions", List.of(
                 entry("FactionActionTypeMukag_PublicAction", "Public Faction Action", "Faction Action", "Action", List.of("Line"), List.of()),
                 entry("FactionActionTypeUnknown_TestAction", "Unknown Test Action", "Faction Action", "Action", List.of("Line"), List.of()),
                 entry("FactionActionTypeFutureFaction_TestAction", "Future Test Action", "Faction Action", "Action", List.of("Line"), List.of()),
-                entry("ActionTypeBuildBridge", "Build Bridge", "Action", "Action", List.of("Line"), List.of("FactionActionTypeUnknown_TestAction"))
+                entry("EmpireActionTypeMukag_PublicAction", "Public Empire Action", "Empire Action", "Action", List.of("Line"), List.of()),
+                entry("EmpireActionTypeUnknown_TestAction", "Unknown Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
+                entry("EmpireActionTypeFutureFaction_TestAction", "Future Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
+                entry(
+                        "ActionTypeBuildBridge",
+                        "Build Bridge",
+                        "Action",
+                        "Action",
+                        List.of("Line"),
+                        List.of("FactionActionTypeUnknown_TestAction", "EmpireActionTypeUnknown_TestAction")
+                )
         )));
         entityManager.flush();
         entityManager.clear();
@@ -163,10 +173,12 @@ class CodexFacadeIntegrationTest extends BaseIT {
         List<CodexDto> result = codexFacade.getAllCodexEntries();
 
         assertThat(result).extracting(CodexDto::entryKey)
-                .contains("FactionActionTypeMukag_PublicAction", "ActionTypeBuildBridge")
+                .contains("FactionActionTypeMukag_PublicAction", "EmpireActionTypeMukag_PublicAction", "ActionTypeBuildBridge")
                 .doesNotContain(
                         "FactionActionTypeUnknown_TestAction",
-                        "FactionActionTypeFutureFaction_TestAction"
+                        "FactionActionTypeFutureFaction_TestAction",
+                        "EmpireActionTypeUnknown_TestAction",
+                        "EmpireActionTypeFutureFaction_TestAction"
                 );
     }
 

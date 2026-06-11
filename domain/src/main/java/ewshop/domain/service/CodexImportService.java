@@ -33,7 +33,7 @@ public class CodexImportService {
     private static boolean isImportableCodexSnapshot(CodexImportSnapshot snapshot) {
         if (snapshot == null) return false;
         if (!ACTIONS_EXPORT_KIND.equalsIgnoreCase(trimToEmpty(snapshot.exportKind()))) return true;
-        return PublicReleaseFactionPolicy.isReleasedFactionActionKey(snapshot.entryKey());
+        return PublicReleaseFactionPolicy.isReleasedActionKey(snapshot.entryKey());
     }
 
     private static String trimToEmpty(String value) {
