@@ -11,9 +11,16 @@ export type CodexStructuredFact = {
     sourceLine: string;
 };
 
+export type CodexStructuredSectionItem = {
+    label: string;
+    facts: CodexStructuredFact[];
+    lines: string[];
+};
+
 export type CodexStructuredSection = {
     label: string;
     lines: string[];
+    items?: CodexStructuredSectionItem[];
 };
 
 export type CodexStructuredTimelineItem = {
@@ -158,14 +165,21 @@ function exportedItemToTimelineItem(item: CodexMetadataSectionItem): CodexStruct
     return { label, value, sourceLine: `${label}: ${value}` };
 }
 
-function exportedItemToSectionLine(item: CodexMetadataSectionItem): string | null {
+function exportedItemToStructuredItem(item: CodexMetadataSectionItem): CodexStructuredSectionItem | null {
     const label = item?.label?.trim();
     if (!label) return null;
 
-    const value = itemValue(item);
-    if (!value) return null;
+    const facts = (item.facts ?? [])
+        .map(exportedFactToStructuredFact)
+        .filter((fact): fact is CodexStructuredFact => fact !== null);
+    const lines = (item.lines ?? [])
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map(cleanValue);
 
-    return `${label}: ${value}`;
+    if (facts.length === 0 && lines.length === 0) return null;
+
+    return { label, facts, lines };
 }
 
 function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | "facts" | "sections">): CodexStructuredDescription | null {
@@ -196,14 +210,16 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
 
             timeline.push(...itemTimeline);
         } else {
-            const itemLines = (section.items ?? [])
-                .map(exportedItemToSectionLine)
-                .filter((line): line is string => line !== null);
+            const items = (section.items ?? [])
+                .map(exportedItemToStructuredItem)
+                .filter((item): item is CodexStructuredSectionItem => item !== null);
 
-            lines.push(...itemLines);
+            if (lines.length > 0 || items.length > 0) {
+                sections.push({ label: title, lines, ...(items.length > 0 ? { items } : {}) });
+            }
         }
 
-        if (lines.length > 0) {
+        if (isPopulationThresholdSection && lines.length > 0) {
             sections.push({ label: title, lines });
         }
     }

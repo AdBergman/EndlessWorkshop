@@ -1006,6 +1006,71 @@
     white-space: pre-wrap;
 }
 
+.codex-structuredItems {
+    display: grid;
+    gap: 10px;
+}
+
+.codex-structuredItem {
+    display: grid;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid rgba(190, 150, 73, 0.18);
+    border-radius: 6px;
+    background: rgba(12, 14, 15, 0.42);
+}
+
+.codex-structuredItem__heading {
+    margin: 0;
+    color: rgba(241, 234, 220, 0.9);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.codex-structuredItemFacts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px 12px;
+    margin: 0;
+}
+
+.codex-structuredItemFact {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.codex-structuredItemFact dt {
+    color: rgba(91, 217, 236, 0.78);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.codex-structuredItemFact dd {
+    min-width: 0;
+    margin: 0;
+    color: rgba(241, 234, 220, 0.84);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.codex-structuredItem__lines {
+    display: grid;
+    gap: 6px;
+}
+
+.codex-structuredItem__line {
+    margin: 0;
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
 .codex-structuredTimeline {
     display: grid;
     gap: 0;

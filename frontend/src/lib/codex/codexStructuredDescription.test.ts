@@ -124,6 +124,54 @@ describe("codexStructuredDescription", () => {
         })).toBe("Major faction population / Aspects / Base food cost 60");
     });
 
+    it("keeps generic exported section items structured for metadata-only entries", () => {
+        const parsed = parseCodexStructuredDescription({
+            ...entry("actions", []),
+            facts: [
+                { label: "Category", value: "Constructible Action" },
+                { label: "Kind", value: "Action" },
+            ],
+            sections: [
+                {
+                    title: "Cost modifiers",
+                    items: [
+                        {
+                            label: "Influence cost multiplier",
+                            facts: [
+                                { label: "Cost type", value: "Influence" },
+                                { label: "Display value", value: "-50%" },
+                            ],
+                            lines: ["Applies to bridge construction."],
+                        },
+                    ],
+                },
+            ],
+        });
+
+        expect(parsed.hasStructuredContent).toBe(true);
+        expect(parsed.bodyLines).toEqual([]);
+        expect(parsed.facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Constructible Action",
+            "Kind=Action",
+        ]);
+        expect(parsed.sections).toEqual([
+            {
+                label: "Cost modifiers",
+                lines: [],
+                items: [
+                    {
+                        label: "Influence cost multiplier",
+                        facts: [
+                            { label: "Cost type", value: "Influence", sourceLine: "Cost type: Influence" },
+                            { label: "Display value", value: "-50%", sourceLine: "Display value: -50%" },
+                        ],
+                        lines: ["Applies to bridge construction."],
+                    },
+                ],
+            },
+        ]);
+    });
+
     it("parses councilor, trait, hero, and minor faction facts conservatively", () => {
         expect(parseCodexStructuredDescription(entry("councilors", [
             "Faction: KinOfSheredyn",

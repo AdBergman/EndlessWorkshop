@@ -1,6 +1,9 @@
 package ewshop.domain.service;
 
 import ewshop.domain.model.Codex;
+import ewshop.domain.model.CodexMetadataFact;
+import ewshop.domain.model.CodexMetadataSection;
+import ewshop.domain.model.CodexMetadataSectionItem;
 import ewshop.domain.service.CodexFilterResult.CodexFilterSkip;
 import ewshop.domain.service.CodexFilterResult.FilteredCodexEntry;
 import org.springframework.stereotype.Service;
@@ -66,7 +69,7 @@ public class CodexFilterService {
                     }
 
                     List<String> meaningfulDescriptionLines = cleanMeaningfulTextList(entry.getDescriptionLines());
-                    if (meaningfulDescriptionLines.isEmpty()) {
+                    if (meaningfulDescriptionLines.isEmpty() && !hasMeaningfulStructuredMetadata(entry)) {
                         recordSkip(skippedEntries, skippedByReason, entry, WEAK_DESCRIPTION_LINES);
                         return;
                     }
@@ -159,6 +162,51 @@ public class CodexFilterService {
                 .filter(value -> !value.isBlank())
                 .distinct()
                 .toList();
+    }
+
+    private static boolean hasMeaningfulStructuredMetadata(Codex entry) {
+        return hasMeaningfulFacts(entry.getFacts())
+                || hasMeaningfulSections(entry.getSections())
+                || !cleanMeaningfulTextList(entry.getPublicContextKeys()).isEmpty();
+    }
+
+    private static boolean hasMeaningfulFacts(List<CodexMetadataFact> facts) {
+        if (facts == null || facts.isEmpty()) {
+            return false;
+        }
+
+        return facts.stream().anyMatch(fact ->
+                fact != null
+                        && isMeaningfulText(fact.label())
+                        && isMeaningfulText(fact.value())
+        );
+    }
+
+    private static boolean hasMeaningfulSections(List<CodexMetadataSection> sections) {
+        if (sections == null || sections.isEmpty()) {
+            return false;
+        }
+
+        return sections.stream().anyMatch(section -> {
+            if (section == null || !isMeaningfulText(section.title())) {
+                return false;
+            }
+
+            return !cleanMeaningfulTextList(section.lines()).isEmpty()
+                    || hasMeaningfulSectionItems(section.items());
+        });
+    }
+
+    private static boolean hasMeaningfulSectionItems(List<CodexMetadataSectionItem> items) {
+        if (items == null || items.isEmpty()) {
+            return false;
+        }
+
+        return items.stream().anyMatch(item ->
+                item != null
+                        && isMeaningfulText(item.label())
+                        && (hasMeaningfulFacts(item.facts()) || !cleanMeaningfulTextList(item.lines()).isEmpty())
+        );
     }
 
     private static boolean isMeaningfulText(String value) {

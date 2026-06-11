@@ -98,6 +98,57 @@ class CodexFacadeIntegrationTest extends BaseIT {
         assertThat(population.publicContextKeys()).containsExactly("Population_Aspect", "Faction_Aspect");
     }
 
+    @Test
+    void importCodexThroughFacade_preservesNestedMetadataForArbitraryCodexKinds() {
+        codexImportAdminFacade.importCodex(batch("actions", List.of(
+                new CodexImportEntryDto(
+                        "ActionTypeBuildBridge",
+                        "Build Bridge",
+                        "Constructible Action",
+                        "Action",
+                        List.of(),
+                        List.of("ActionCostModifier_BuildBridge_Decrease_00"),
+                        List.of(
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Category", "Constructible Action", null),
+                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Kind", "Action", null)
+                        ),
+                        List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionDto(
+                                "Cost modifiers",
+                                List.of(),
+                                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
+                                        "Influence cost multiplier",
+                                        List.of(
+                                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Cost type", "Influence", null),
+                                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Display value", "-50%", null)
+                                        ),
+                                        List.of("Applies to bridge construction.")
+                                ))
+                        )),
+                        List.of("ActionTypeBuildBridge", "ActionCostModifier_BuildBridge_Decrease_00")
+                )
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        CodexDto action = findCodex(codexFacade.getAllCodexEntries(), "ActionTypeBuildBridge");
+
+        assertThat(action.exportKind()).isEqualTo("actions");
+        assertThat(action.descriptionLines()).isEmpty();
+        assertThat(action.facts()).extracting(ewshop.facade.dto.response.CodexMetadataFactDto::label)
+                .containsExactly("Category", "Kind");
+        assertThat(action.sections()).hasSize(1);
+        assertThat(action.sections().getFirst().title()).isEqualTo("Cost modifiers");
+        assertThat(action.sections().getFirst().items()).hasSize(1);
+        assertThat(action.sections().getFirst().items().getFirst().label()).isEqualTo("Influence cost multiplier");
+        assertThat(action.sections().getFirst().items().getFirst().facts())
+                .extracting(ewshop.facade.dto.response.CodexMetadataFactDto::label)
+                .containsExactly("Cost type", "Display value");
+        assertThat(action.sections().getFirst().items().getFirst().lines())
+                .containsExactly("Applies to bridge construction.");
+        assertThat(action.publicContextKeys())
+                .containsExactly("ActionTypeBuildBridge", "ActionCostModifier_BuildBridge_Decrease_00");
+    }
+
     private static CodexDto findCodex(List<CodexDto> entries, String entryKey) {
         return entries.stream()
                 .filter(entry -> entryKey.equals(entry.entryKey()))

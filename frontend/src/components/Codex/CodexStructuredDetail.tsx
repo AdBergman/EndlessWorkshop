@@ -3,6 +3,7 @@ import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDesc
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 
 type Props = {
     entry: CodexEntry;
@@ -13,6 +14,37 @@ function RenderLine({ line, className }: { line: string; className: string }) {
         <p className={className}>
             {renderDescriptionLine(formatCodexMajorFactionText(line))}
         </p>
+    );
+}
+
+function StructuredSectionItem({ item }: { item: CodexStructuredSectionItem }) {
+    return (
+        <article className="codex-structuredItem">
+            <h4 className="codex-structuredItem__heading">{item.label}</h4>
+
+            {item.facts.length > 0 ? (
+                <dl className="codex-structuredItemFacts">
+                    {item.facts.map((fact) => (
+                        <div className="codex-structuredItemFact" key={`${item.label}-${fact.label}-${fact.value}`}>
+                            <dt>{fact.label}</dt>
+                            <dd>{renderDescriptionLine(formatCodexMajorFactionText(fact.value))}</dd>
+                        </div>
+                    ))}
+                </dl>
+            ) : null}
+
+            {item.lines.length > 0 ? (
+                <div className="codex-structuredItem__lines">
+                    {item.lines.map((line, index) => (
+                        <RenderLine
+                            key={`${item.label}-line-${index}`}
+                            line={line}
+                            className="codex-structuredItem__line"
+                        />
+                    ))}
+                </div>
+            ) : null}
+        </article>
     );
 }
 
@@ -40,7 +72,8 @@ export default function CodexStructuredDetail({ entry }: Props) {
         () => parseCodexStructuredDescription(entry),
         [entry]
     );
-    const hasDescription = entry.descriptionLines.some((line) => line.trim().length > 0);
+    const descriptionLines = entry.descriptionLines ?? [];
+    const hasDescription = descriptionLines.some((line) => line.trim().length > 0);
 
     if (!parsed.hasStructuredContent) {
         return (
@@ -51,7 +84,7 @@ export default function CodexStructuredDetail({ entry }: Props) {
 
                 {hasDescription ? (
                     <div className="codex-detail__description">
-                        {entry.descriptionLines.map((line, index) => (
+                        {descriptionLines.map((line, index) => (
                             <RenderLine
                                 key={`${entry.entryKey}-${index}`}
                                 line={line}
@@ -86,15 +119,24 @@ export default function CodexStructuredDetail({ entry }: Props) {
             {parsed.sections.map((section) => (
                 <section className="codex-structuredBlock" key={section.label}>
                     <h3 className="codex-structuredBlock__heading">{section.label}</h3>
-                    <div className="codex-structuredBlock__lines">
-                        {section.lines.map((line, index) => (
-                            <RenderLine
-                                key={`${section.label}-${index}`}
-                                line={line}
-                                className="codex-structuredBlock__line"
-                            />
-                        ))}
-                    </div>
+                    {section.lines.length > 0 ? (
+                        <div className="codex-structuredBlock__lines">
+                            {section.lines.map((line, index) => (
+                                <RenderLine
+                                    key={`${section.label}-${index}`}
+                                    line={line}
+                                    className="codex-structuredBlock__line"
+                                />
+                            ))}
+                        </div>
+                    ) : null}
+                    {section.items?.length ? (
+                        <div className="codex-structuredItems">
+                            {section.items.map((item) => (
+                                <StructuredSectionItem item={item} key={`${section.label}-${item.label}`} />
+                            ))}
+                        </div>
+                    ) : null}
                 </section>
             ))}
 

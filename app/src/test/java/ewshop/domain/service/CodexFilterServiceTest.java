@@ -1,6 +1,9 @@
 package ewshop.domain.service;
 
 import ewshop.domain.model.Codex;
+import ewshop.domain.model.CodexMetadataFact;
+import ewshop.domain.model.CodexMetadataSection;
+import ewshop.domain.model.CodexMetadataSectionItem;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -87,6 +90,47 @@ class CodexFilterServiceTest {
         assertThat(result.skippedByReason()).doesNotContainKey("duplicate-slug");
     }
 
+    @Test
+    void keepsMetadataRichEntriesWithoutDescriptionLines() {
+        CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
+                codexBuilder("actions", "Action_Facts", "Build Bridge", List.of())
+                        .facts(List.of(new CodexMetadataFact("Category", "Constructible Action", null)))
+                        .build(),
+                codexBuilder("actions", "Action_Sections", "Harvest Klax", null)
+                        .sections(List.of(new CodexMetadataSection(
+                                "Cost modifiers",
+                                List.of(),
+                                List.of(new CodexMetadataSectionItem(
+                                        "Influence cost multiplier",
+                                        List.of(new CodexMetadataFact("Display value", "-50%", null)),
+                                        List.of()
+                                ))
+                        )))
+                        .build(),
+                codexBuilder("actions", "Action_Context", "Vision Exchange", List.of())
+                        .publicContextKeys(List.of("ActionTypeVisionExchange"))
+                        .build()
+        ));
+
+        assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
+                .containsExactly("Action_Facts", "Action_Sections", "Action_Context");
+        assertThat(result.skippedByReason()).doesNotContainKey("weak-description-lines");
+    }
+
+    @Test
+    void stillSkipsEntriesWithOnlyEmptyOrPlaceholderMetadata() {
+        CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
+                codexBuilder("actions", "Action_Empty", "Empty Action", List.of())
+                        .facts(List.of(new CodexMetadataFact("  ", "  ", null)))
+                        .sections(List.of(new CodexMetadataSection("Cost modifiers", List.of("TBD"), List.of())))
+                        .publicContextKeys(List.of("TBD"))
+                        .build()
+        ));
+
+        assertThat(result.codexEntries()).isEmpty();
+        assertThat(result.skippedByReason()).containsEntry("weak-description-lines", 1);
+    }
+
     private static Codex codexEntry(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {
         return Codex.builder()
                 .exportKind(exportKind)
@@ -95,5 +139,14 @@ class CodexFilterServiceTest {
                 .descriptionLines(descriptionLines)
                 .referenceKeys(List.of())
                 .build();
+    }
+
+    private static Codex.Builder codexBuilder(String exportKind, String entryKey, String displayName, List<String> descriptionLines) {
+        return Codex.builder()
+                .exportKind(exportKind)
+                .entryKey(entryKey)
+                .displayName(displayName)
+                .descriptionLines(descriptionLines)
+                .referenceKeys(List.of());
     }
 }

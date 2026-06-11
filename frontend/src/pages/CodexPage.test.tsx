@@ -1103,6 +1103,174 @@ describe("CodexPage", () => {
         expect(screen.getByText("Unlocks The Consortium’s Bazaar")).toBeInTheDocument();
     });
 
+    it("renders metadata-only entries with nested section item facts", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Constructible Action" },
+                    { label: "Kind", value: "Action" },
+                ],
+                sections: [
+                    {
+                        title: "Cost modifiers",
+                        lines: [],
+                        items: [
+                            {
+                                label: "Influence cost multiplier",
+                                facts: [
+                                    { label: "Cost type", value: "Influence" },
+                                    { label: "Display value", value: "-50%" },
+                                ],
+                                lines: ["Applies to bridge construction."],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeBuildBridge"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        expect(screen.getByText("Description")).toBeInTheDocument();
+        expect(screen.getByText("Constructible Action")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Influence cost multiplier" })).toBeInTheDocument();
+        expect(screen.getByText("Cost type")).toBeInTheDocument();
+        expect(screen.getByText("Influence")).toBeInTheDocument();
+        expect(screen.getByText("Display value")).toBeInTheDocument();
+        expect(screen.getByText("-50%")).toBeInTheDocument();
+        expect(screen.getByText("Applies to bridge construction.")).toBeInTheDocument();
+        expect(screen.queryByText("Influence cost multiplier: Cost type: Influence; Display value: -50%"))
+            .not.toBeInTheDocument();
+        expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
+    });
+
+    it("renders exported population metadata without duplicating fallback description lines", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspect",
+                displayName: "Aspect",
+                descriptionLines: [
+                    "Faction: Faction_Aspect",
+                    "At 5 population: Fallback should not win",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Faction", value: "Faction_Aspect", referenceKey: "Faction_Aspect" },
+                    { label: "Type", value: "Major faction population" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [
+                    {
+                        title: "Worker effects",
+                        lines: ["+1 [CultureColored] Influence"],
+                    },
+                    {
+                        title: "Threshold rewards",
+                        items: [
+                            {
+                                label: "At 5 population",
+                                facts: [{ label: "Reward", value: "Nutrient Extractor" }],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { populations: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations&entry=Population_Aspect"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Aspects" })).toBeInTheDocument();
+        const detailPane = screen.getByRole("region", { name: /selected codex entry/i });
+        expect(within(detailPane).getByText("Population dossier")).toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Aspects").length).toBeGreaterThanOrEqual(1);
+        expect(within(detailPane).getByText("Major faction population")).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Worker effects" })).toBeInTheDocument();
+        expect(within(detailPane).getByText(/\+1/)).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Population thresholds" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("At 5 population")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Nutrient Extractor")).toBeInTheDocument();
+        expect(screen.queryByText("Fallback should not win")).not.toBeInTheDocument();
+    });
+
+    it("renders metadata when descriptionLines is nullish after API normalization boundaries", async () => {
+        const entries = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeVisionExchange",
+                displayName: "Vision Exchange",
+                descriptionLines: null,
+                referenceKeys: [],
+                facts: [{ label: "Category", value: "Empire Action" }],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Shares vision with another empire."],
+                    },
+                ],
+            },
+        ] as unknown as CodexEntry[];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeVisionExchange"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
+        expect(screen.getByText("Empire Action")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
+        expect(screen.getByText("Shares vision with another empire.")).toBeInTheDocument();
+    });
+
     it("renders hero codex facts from exported description lines instead of parsing ownership from keys", async () => {
         const entries: CodexEntry[] = [
             {
