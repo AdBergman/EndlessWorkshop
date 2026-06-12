@@ -244,6 +244,30 @@ describe("codexStructuredDescription", () => {
             "Attack: 30",
         ]))).toBe("Defender");
 
+        expect(getCodexStructuredSummary({
+            ...entry("districts", []),
+            facts: [
+                { label: "Kind", value: "District" },
+                { label: "Category", value: "Resource" },
+                { label: "Tier", value: "2" },
+            ],
+        })).toBe("Resource / Tier 2 / District");
+
+        expect(getCodexStructuredSummary({
+            ...entry("districts", []),
+            facts: [
+                { label: "Kind", value: "District" },
+            ],
+        })).toBe("District");
+
+        expect(getCodexStructuredSummary({
+            ...entry("improvements", []),
+            facts: [
+                { label: "Kind", value: "Improvement" },
+                { label: "Category", value: "Bridge" },
+            ],
+        })).toBe("Bridge");
+
         expect(getCodexStructuredSummary(entry("minorfactions", [
             "Disposition: Diplomatic",
             "Faction affinity: Necrophage",
