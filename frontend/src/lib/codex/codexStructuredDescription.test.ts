@@ -183,6 +183,75 @@ describe("codexStructuredDescription", () => {
         ]);
     });
 
+    it("filters non-player facts and duplicate classification from exported metadata", () => {
+        expect(parseCodexStructuredDescription({
+            ...entry("actions", []),
+            facts: [
+                { label: "Reference key", value: "ActionTypeBuildBridge" },
+                { label: "Kind", value: "Action" },
+                { label: "Category", value: "Action" },
+                { label: "UI category", value: "Construction" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Action",
+            "UI category=Construction",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("modifiers", []),
+            facts: [
+                { label: "Category", value: "Cost Modifier" },
+                { label: "Cost type", value: "Turn" },
+                { label: "Operation", value: "Mult" },
+                { label: "Value", value: "0.50" },
+                { label: "Kind", value: "Cost Modifier" },
+                { label: "Display value", value: "-50%" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Cost Modifier",
+            "Cost type=Turn",
+            "Display value=-50%",
+        ]);
+
+        expect(getCodexStructuredSummary({
+            ...entry("modifiers", []),
+            facts: [
+                { label: "Category", value: "Cost Modifier" },
+                { label: "Cost type", value: "Turn" },
+                { label: "Operation", value: "Mult" },
+                { label: "Value", value: "0.50" },
+                { label: "Kind", value: "Cost Modifier" },
+                { label: "Display value", value: "-50%" },
+            ],
+        })).toBe("Turn / -50% / Cost Modifier");
+    });
+
+    it("hides internal leader priority lines from hero and unit descriptions", () => {
+        expect(parseCodexStructuredDescription(entry("heroes", [
+            "Faction: Ametrine",
+            "Class: UnitClass_Infantry_Hero",
+            "+1000000 Leader Priority",
+            "+3 Leader Priority",
+            "+140 Health",
+        ])).bodyLines).toEqual(["+140 Health"]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("units", []),
+            facts: [{ label: "Class", value: "Flying" }],
+            sections: [
+                {
+                    title: "Stats",
+                    lines: [
+                        "+10000 Leader Priority",
+                        "+250 [Health] Health",
+                    ],
+                },
+            ],
+        }).sections).toEqual([
+            { label: "Stats", lines: ["+250 [Health] Health"] },
+        ]);
+    });
+
     it("parses councilor, trait, hero, and minor faction facts conservatively", () => {
         expect(getCodexStructuredSummary({
             ...entry("abilities", ["When using this Active Skill:"]),

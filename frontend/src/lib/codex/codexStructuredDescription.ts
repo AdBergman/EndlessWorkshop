@@ -39,15 +39,22 @@ export type CodexStructuredDescription = {
 };
 
 const FACT_LABELS_BY_KIND: Record<string, Set<string>> = {
+    abilities: new Set(["Category", "Target", "Range", "Cost", "Shape"]),
+    actions: new Set(["Category", "Kind", "Reference key", "Action type", "UI category"]),
     bonuses: new Set(["Category", "Kind"]),
     councilors: new Set(["Faction", "Role"]),
+    diplomatictreaties: new Set(["Category", "Bilateral", "Duration", "Kind"]),
+    districts: new Set(["Kind", "Category", "Tier"]),
     equipment: new Set(["Type", "Slot", "Rarity", "Tier", "Access pool", "Value"]),
     heroes: new Set(["Faction", "Class"]),
+    improvements: new Set(["Kind", "Category"]),
     minorfactions: new Set(["Disposition", "Faction affinity", "Population", "Unit", "Trait"]),
     modifiers: new Set(["Category", "Kind", "Cost type", "Operation", "Value", "Display value"]),
     populations: new Set(["Faction", "Type", "Base food cost"]),
     statuses: new Set(["Category", "Kind", "Duration", "Stacking"]),
+    tech: new Set(["Kind", "Tier", "Faction", "Era", "Quadrant"]),
     traits: new Set(["Category", "Cost", "Required affinity", "Excludes"]),
+    units: new Set(["Kind", "Tier", "Faction", "Class", "Spawn type"]),
 };
 
 const SECTION_LABELS_BY_KIND: Record<string, Record<string, string>> = {
@@ -69,7 +76,7 @@ const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
     heroes: ["Faction", "Class"],
     improvements: ["Category"],
     minorfactions: ["Disposition", "Faction affinity", "Population", "Unit"],
-    modifiers: ["Category", "Kind", "Cost type", "Value"],
+    modifiers: ["Cost type", "Display value", "Category"],
     populations: ["Type", "Faction", "Base food cost"],
     statuses: ["Category", "Kind", "Duration"],
     traits: ["Category", "Cost", "Required affinity"],
@@ -165,6 +172,68 @@ function hasFact(facts: CodexStructuredFact[], label: string, value: string): bo
     );
 }
 
+function normalizeComparable(value: string): string {
+    return value.trim().toLowerCase();
+}
+
+function hasDisplayValueFact(facts: CodexStructuredFact[]): boolean {
+    return facts.some((fact) => normalizeComparable(fact.label) === "display value");
+}
+
+function hasMatchingFact(facts: CodexStructuredFact[], label: string, value: string): boolean {
+    const normalizedLabel = normalizeComparable(label);
+    const normalizedValue = normalizeComparable(value);
+    return facts.some((fact) =>
+        normalizeComparable(fact.label) === normalizedLabel &&
+        normalizeComparable(fact.value) === normalizedValue
+    );
+}
+
+function isDuplicateKindFact(fact: CodexStructuredFact, facts: CodexStructuredFact[]): boolean {
+    if (normalizeComparable(fact.label) !== "kind") return false;
+
+    return facts.some((candidate) =>
+        normalizeComparable(candidate.label) === "category" &&
+        normalizeComparable(candidate.value) === normalizeComparable(fact.value)
+    );
+}
+
+function isPublicFact(kind: string, fact: CodexStructuredFact, facts: CodexStructuredFact[]): boolean {
+    const label = normalizeComparable(fact.label);
+
+    if (label === "reference key") return false;
+    if (isDuplicateKindFact(fact, facts)) return false;
+
+    if (kind === "modifiers" && hasDisplayValueFact(facts) && (label === "operation" || label === "value")) {
+        return false;
+    }
+
+    return true;
+}
+
+function filterPublicFacts(kind: string, facts: CodexStructuredFact[]): CodexStructuredFact[] {
+    return facts.filter((fact) => isPublicFact(kind, fact, facts));
+}
+
+function isNonPlayerLine(kind: string, line: string): boolean {
+    if ((kind === "heroes" || kind === "units") && /\bleader priority\b/i.test(line)) {
+        return true;
+    }
+
+    return false;
+}
+
+function filterPublicLines(kind: string, lines: string[]): string[] {
+    return lines.filter((line) => !isNonPlayerLine(kind, line));
+}
+
+function isDuplicateFactLine(line: string, facts: CodexStructuredFact[]): boolean {
+    const prefixedLine = splitPrefixedLine(line);
+    if (!prefixedLine) return false;
+
+    return hasMatchingFact(facts, prefixedLine.label, cleanValue(prefixedLine.value));
+}
+
 function addSection(sections: CodexStructuredSection[], label: string, line: string) {
     const existing = sections.find((section) => section.label === label);
 
@@ -213,29 +282,33 @@ function exportedItemToTimelineItem(item: CodexMetadataSectionItem): CodexStruct
     return { label, value, sourceLine: `${label}: ${value}` };
 }
 
-function exportedItemToStructuredItem(item: CodexMetadataSectionItem): CodexStructuredSectionItem | null {
+function exportedItemToStructuredItem(kind: string, item: CodexMetadataSectionItem): CodexStructuredSectionItem | null {
     const label = item?.label?.trim();
     if (!label) return null;
 
     const referenceKey = item.referenceKey?.trim() || null;
-    const facts = (item.facts ?? [])
+    const rawFacts = (item.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
+    const facts = filterPublicFacts(kind, rawFacts);
     const lines = (item.lines ?? [])
         .map((line) => line.trim())
         .filter(Boolean)
         .map(cleanValue);
+    const publicLines = filterPublicLines(kind, lines)
+        .filter((line) => !isDuplicateFactLine(line, facts));
 
-    if (!referenceKey && facts.length === 0 && lines.length === 0) return null;
+    if (!referenceKey && facts.length === 0 && publicLines.length === 0) return null;
 
-    return { label, referenceKey, facts, lines };
+    return { label, referenceKey, facts, lines: publicLines };
 }
 
 function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | "facts" | "sections">): CodexStructuredDescription | null {
     const kind = normalizeKind(entry.exportKind);
-    const facts = (entry.facts ?? [])
+    const rawFacts = (entry.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
+    const facts = filterPublicFacts(kind, rawFacts);
 
     const sections: CodexStructuredSection[] = [];
     const timeline: CodexStructuredTimelineItem[] = [];
@@ -244,10 +317,12 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
         const title = section.title?.trim();
         if (!title) continue;
 
-        const lines = (section.lines ?? [])
+        const rawLines = (section.lines ?? [])
             .map((line) => line.trim())
             .filter(Boolean)
             .map(cleanValue);
+        const lines = filterPublicLines(kind, rawLines)
+            .filter((line) => !isDuplicateFactLine(line, facts));
 
         const isPopulationThresholdSection =
             kind === "populations" && title.toLowerCase().includes("threshold");
@@ -260,7 +335,7 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
             timeline.push(...itemTimeline);
         } else {
             const items = (section.items ?? [])
-                .map(exportedItemToStructuredItem)
+                .map((item) => exportedItemToStructuredItem(kind, item))
                 .filter((item): item is CodexStructuredSectionItem => item !== null);
 
             if (lines.length > 0 || items.length > 0) {
@@ -329,15 +404,21 @@ export function parseCodexStructuredDescription(
             }
         }
 
+        if (isNonPlayerLine(kind, line) || isDuplicateFactLine(line, facts)) {
+            continue;
+        }
+
         bodyLines.push(line);
     }
 
+    const publicFacts = filterPublicFacts(kind, facts);
+
     return {
-        facts,
+        facts: publicFacts,
         sections,
         timeline,
         bodyLines,
-        hasStructuredContent: facts.length > 0 || sections.length > 0 || timeline.length > 0,
+        hasStructuredContent: publicFacts.length > 0 || sections.length > 0 || timeline.length > 0,
     };
 }
 

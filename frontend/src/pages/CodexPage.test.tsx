@@ -1814,6 +1814,8 @@ describe("CodexPage", () => {
         expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Turn cost multiplier" })).toBeInTheDocument();
+        expect(screen.queryByText("Reference key")).not.toBeInTheDocument();
+        expect(screen.queryByText("ActionTypeBuildBridge")).not.toBeInTheDocument();
         expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
 
         const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
