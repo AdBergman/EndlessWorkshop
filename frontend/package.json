@@ -26,6 +26,7 @@
     "build": "vite build --config vite.config.ts",
     "lint": "eslint .",
     "test": "vitest --config vitest.config.ts",
+    "diagnostics:codex-content": "node --experimental-strip-types scripts/codex-content-quality-diagnostic.ts",
     "diagnostics:quests": "vite-node --config vite.config.ts scripts/quest-explorer-diagnostic.ts",
     "diagnostics:quests:lore-chronology": "vite-node --config vite.config.ts scripts/quest-lore-chronology-diagnostic.ts"
   },
