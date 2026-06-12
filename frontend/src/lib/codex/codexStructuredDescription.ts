@@ -255,6 +255,10 @@ function isNonPlayerLine(kind: string, line: string): boolean {
         return true;
     }
 
+    if (/^[+-]0(?:\.0+)?(?=$|[\s%])/.test(line.trim())) {
+        return true;
+    }
+
     return false;
 }
 

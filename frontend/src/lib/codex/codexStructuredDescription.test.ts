@@ -477,6 +477,37 @@ describe("codexStructuredDescription", () => {
         ]);
     });
 
+    it("hides zero-value effect lines while preserving fractional gains", () => {
+        expect(parseCodexStructuredDescription(entry("abilities", [
+            "+0% Specialization Cost if %Effect_UnitVeterancy_Level2",
+            "+0 [Might] Might on Heroes",
+            "+0.25 [Strategic05Colored] Eradione on District",
+            "+1 [DustColored] Dust on City",
+        ])).bodyLines).toEqual([
+            "+0.25 [Strategic05Colored] Eradione on District",
+            "+1 [DustColored] Dust on City",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("tech", []),
+            facts: [{ label: "Tier", value: "1" }],
+            sections: [
+                {
+                    title: "Effects",
+                    lines: [
+                        "+0 [DustColored] Dust on [FoodColored] Farms Districts",
+                        "+0.5 [MoneyColored] Dust per [Technology] Technology sold in Libraries.",
+                    ],
+                },
+            ],
+        }).sections).toEqual([
+            {
+                label: "Effects",
+                lines: ["+0.5 [MoneyColored] Dust per [Technology] Technology sold in Libraries."],
+            },
+        ]);
+    });
+
     it("parses councilor, trait, hero, and minor faction facts conservatively", () => {
         expect(getCodexStructuredSummary({
             ...entry("abilities", ["When using this Active Skill:"]),
