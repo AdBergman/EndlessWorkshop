@@ -143,7 +143,10 @@ export default function CodexStructuredDetail({ entry }: Props) {
                     {section.items?.length ? (
                         <div className="codex-structuredItems">
                             {section.items.map((item) => (
-                                <StructuredSectionItem item={item} key={`${section.label}-${item.label}`} />
+                                <StructuredSectionItem
+                                    item={item}
+                                    key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
+                                />
                             ))}
                         </div>
                     ) : null}

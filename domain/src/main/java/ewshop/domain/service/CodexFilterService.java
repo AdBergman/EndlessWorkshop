@@ -205,7 +205,9 @@ public class CodexFilterService {
         return items.stream().anyMatch(item ->
                 item != null
                         && isMeaningfulText(item.label())
-                        && (hasMeaningfulFacts(item.facts()) || !cleanMeaningfulTextList(item.lines()).isEmpty())
+                        && (isMeaningfulText(item.referenceKey())
+                                || hasMeaningfulFacts(item.facts())
+                                || !cleanMeaningfulTextList(item.lines()).isEmpty())
         );
     }
 

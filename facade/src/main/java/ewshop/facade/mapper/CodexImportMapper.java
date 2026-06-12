@@ -156,11 +156,12 @@ public final class CodexImportMapper {
             String label = trimToNull(item.label());
             if (label == null) continue;
 
+            String referenceKey = trimToNull(item.referenceKey());
             List<CodexMetadataFact> facts = cleanFacts(item.facts());
             List<String> lines = cleanDescriptionLines(item.lines());
-            if (facts.isEmpty() && lines.isEmpty()) continue;
+            if (referenceKey == null && facts.isEmpty() && lines.isEmpty()) continue;
 
-            out.add(new CodexMetadataSectionItem(label, facts, lines));
+            out.add(new CodexMetadataSectionItem(label, referenceKey, facts, lines));
         }
         return out;
     }

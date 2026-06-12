@@ -157,7 +157,14 @@ describe("useCodexStore", () => {
                         items: [
                             {
                                 label: " At 5 population ",
+                                referenceKey: " Extractor_Nutrient ",
                                 facts: [{ label: "Reward", value: "Nutrient Extractor" }],
+                                lines: [],
+                            },
+                            {
+                                label: " At 15 population ",
+                                referenceKey: " Extractor_Garden ",
+                                facts: [],
                                 lines: [],
                             },
                         ],
@@ -180,7 +187,14 @@ describe("useCodexStore", () => {
         });
         expect(entry?.sections?.[1].items?.[0]).toEqual({
             label: "At 5 population",
+            referenceKey: "Extractor_Nutrient",
             facts: [{ label: "Reward", value: "Nutrient Extractor", referenceKey: null }],
+            lines: [],
+        });
+        expect(entry?.sections?.[1].items?.[1]).toEqual({
+            label: "At 15 population",
+            referenceKey: "Extractor_Garden",
+            facts: [],
             lines: [],
         });
         expect(entry?.publicContextKeys).toEqual(["Population_Aspect", "Faction_Aspect"]);

@@ -115,14 +115,23 @@ class CodexFacadeIntegrationTest extends BaseIT {
                         List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionDto(
                                 "Cost modifiers",
                                 List.of(),
-                                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
-                                        "Influence cost multiplier",
-                                        List.of(
-                                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Cost type", "Influence", null),
-                                                new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Display value", "-50%", null)
+                                List.of(
+                                        new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
+                                                "Influence cost multiplier",
+                                                "ActionCostModifier_BuildBridge_Decrease_00",
+                                                List.of(
+                                                        new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Cost type", "Influence", null),
+                                                        new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Display value", "-50%", null)
+                                                ),
+                                                List.of("Applies to bridge construction.")
                                         ),
-                                        List.of("Applies to bridge construction.")
-                                ))
+                                        new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
+                                                "Bridge planning ability",
+                                                "UnitAbility_BridgePlanning",
+                                                List.of(),
+                                                List.of()
+                                        )
+                                )
                         )),
                         List.of("ActionTypeBuildBridge", "ActionCostModifier_BuildBridge_Decrease_00")
                 )
@@ -138,13 +147,19 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 .containsExactly("Category", "Kind");
         assertThat(action.sections()).hasSize(1);
         assertThat(action.sections().getFirst().title()).isEqualTo("Cost modifiers");
-        assertThat(action.sections().getFirst().items()).hasSize(1);
+        assertThat(action.sections().getFirst().items()).hasSize(2);
         assertThat(action.sections().getFirst().items().getFirst().label()).isEqualTo("Influence cost multiplier");
+        assertThat(action.sections().getFirst().items().getFirst().referenceKey())
+                .isEqualTo("ActionCostModifier_BuildBridge_Decrease_00");
         assertThat(action.sections().getFirst().items().getFirst().facts())
                 .extracting(ewshop.facade.dto.response.CodexMetadataFactDto::label)
                 .containsExactly("Cost type", "Display value");
         assertThat(action.sections().getFirst().items().getFirst().lines())
                 .containsExactly("Applies to bridge construction.");
+        assertThat(action.sections().getFirst().items().get(1).label()).isEqualTo("Bridge planning ability");
+        assertThat(action.sections().getFirst().items().get(1).referenceKey()).isEqualTo("UnitAbility_BridgePlanning");
+        assertThat(action.sections().getFirst().items().get(1).facts()).isEmpty();
+        assertThat(action.sections().getFirst().items().get(1).lines()).isEmpty();
         assertThat(action.publicContextKeys())
                 .containsExactly("ActionTypeBuildBridge", "ActionCostModifier_BuildBridge_Decrease_00");
     }

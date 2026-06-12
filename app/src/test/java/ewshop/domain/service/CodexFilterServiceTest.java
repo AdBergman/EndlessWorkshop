@@ -102,6 +102,7 @@ class CodexFilterServiceTest {
                                 List.of(),
                                 List.of(new CodexMetadataSectionItem(
                                         "Influence cost multiplier",
+                                        null,
                                         List.of(new CodexMetadataFact("Display value", "-50%", null)),
                                         List.of()
                                 ))

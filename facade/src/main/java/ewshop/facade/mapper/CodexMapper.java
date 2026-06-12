@@ -70,6 +70,7 @@ public class CodexMapper {
         return items.stream()
                 .map(item -> new CodexMetadataSectionItemDto(
                         item.label(),
+                        item.referenceKey(),
                         toFactDtos(item.facts()),
                         item.lines() == null ? List.of() : List.copyOf(item.lines())
                 ))

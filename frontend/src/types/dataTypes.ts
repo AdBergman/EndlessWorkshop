@@ -76,6 +76,7 @@ export interface CodexMetadataFact {
 
 export interface CodexMetadataSectionItem {
     label: string;
+    referenceKey?: string | null;
     facts?: CodexMetadataFact[];
     lines?: string[];
 }

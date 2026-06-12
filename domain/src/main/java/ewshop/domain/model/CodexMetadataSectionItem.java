@@ -4,6 +4,7 @@ import java.util.List;
 
 public record CodexMetadataSectionItem(
         String label,
+        String referenceKey,
         List<CodexMetadataFact> facts,
         List<String> lines
 ) {

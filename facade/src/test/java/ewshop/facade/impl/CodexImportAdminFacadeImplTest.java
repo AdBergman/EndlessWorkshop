@@ -86,6 +86,7 @@ class CodexImportAdminFacadeImplTest {
                                 List.of(),
                                 List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
                                         "At 5 population",
+                                        "Extractor_Nutrient",
                                         List.of(new ewshop.facade.dto.importing.codex.CodexMetadataFactDto("Reward", "Nutrient Extractor", null)),
                                         List.of()
                                 ))
@@ -101,6 +102,7 @@ class CodexImportAdminFacadeImplTest {
         assertEquals("Faction_Aspect", snapshot.facts().getFirst().referenceKey());
         assertEquals("Threshold rewards", snapshot.sections().getFirst().title());
         assertEquals("At 5 population", snapshot.sections().getFirst().items().getFirst().label());
+        assertEquals("Extractor_Nutrient", snapshot.sections().getFirst().items().getFirst().referenceKey());
         assertEquals(List.of("Population_Aspect", "Faction_Aspect"), snapshot.publicContextKeys());
     }
 

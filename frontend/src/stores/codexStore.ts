@@ -61,11 +61,12 @@ function cleanSectionItem(item: CodexMetadataSectionItem | null | undefined): Co
     const label = item.label.trim();
     if (!label) return null;
 
+    const referenceKey = typeof item.referenceKey === "string" ? item.referenceKey.trim() || null : null;
     const facts = cleanFacts(item.facts);
     const lines = cleanStrings(item.lines);
-    if (facts.length === 0 && lines.length === 0) return null;
+    if (!referenceKey && facts.length === 0 && lines.length === 0) return null;
 
-    return { label, facts, lines };
+    return { label, referenceKey, facts, lines };
 }
 
 function cleanSections(values: unknown): CodexMetadataSection[] {

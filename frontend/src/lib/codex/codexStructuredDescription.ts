@@ -13,6 +13,7 @@ export type CodexStructuredFact = {
 
 export type CodexStructuredSectionItem = {
     label: string;
+    referenceKey: string | null;
     facts: CodexStructuredFact[];
     lines: string[];
 };
@@ -176,6 +177,7 @@ function exportedItemToStructuredItem(item: CodexMetadataSectionItem): CodexStru
     const label = item?.label?.trim();
     if (!label) return null;
 
+    const referenceKey = item.referenceKey?.trim() || null;
     const facts = (item.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
@@ -184,9 +186,9 @@ function exportedItemToStructuredItem(item: CodexMetadataSectionItem): CodexStru
         .filter(Boolean)
         .map(cleanValue);
 
-    if (facts.length === 0 && lines.length === 0) return null;
+    if (!referenceKey && facts.length === 0 && lines.length === 0) return null;
 
-    return { label, facts, lines };
+    return { label, referenceKey, facts, lines };
 }
 
 function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | "facts" | "sections">): CodexStructuredDescription | null {

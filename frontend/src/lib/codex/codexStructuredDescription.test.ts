@@ -143,6 +143,10 @@ describe("codexStructuredDescription", () => {
                             ],
                             lines: ["Applies to bridge construction."],
                         },
+                        {
+                            label: "Bridge planning ability",
+                            referenceKey: "UnitAbility_BridgePlanning",
+                        },
                     ],
                 },
             ],
@@ -161,11 +165,18 @@ describe("codexStructuredDescription", () => {
                 items: [
                     {
                         label: "Influence cost multiplier",
+                        referenceKey: null,
                         facts: [
                             { label: "Cost type", value: "Influence", sourceLine: "Cost type: Influence" },
                             { label: "Display value", value: "-50%", sourceLine: "Display value: -50%" },
                         ],
                         lines: ["Applies to bridge construction."],
+                    },
+                    {
+                        label: "Bridge planning ability",
+                        referenceKey: "UnitAbility_BridgePlanning",
+                        facts: [],
+                        lines: [],
                     },
                 ],
             },
