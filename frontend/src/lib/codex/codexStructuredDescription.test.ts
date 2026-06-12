@@ -264,6 +264,47 @@ describe("codexStructuredDescription", () => {
         ]);
     });
 
+    it("prioritizes decision-critical sections for category scanning", () => {
+        expect(parseCodexStructuredDescription({
+            ...entry("equipment", []),
+            sections: [
+                { title: "Effects", lines: ["+10 Damage"] },
+                { title: "Granted abilities", items: [{ label: "Scoped Shot", referenceKey: "UnitAbility_ScopedShot" }] },
+            ],
+        }).sections.map((section) => section.label)).toEqual([
+            "Granted abilities",
+            "Effects",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("traits", []),
+            sections: [
+                { title: "Effects", lines: ["+5 Industry"] },
+                { title: "Exclusions", lines: ["Cannot combine with Keep."] },
+                { title: "Unlocks", lines: ["Unlocks Iron Games I."] },
+            ],
+        }).sections.map((section) => section.label)).toEqual([
+            "Unlocks",
+            "Exclusions",
+            "Effects",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("quests", []),
+            sections: [
+                { title: "Choices", lines: ["Choose a side."] },
+                { title: "Rewards", lines: ["Gain Dust."] },
+                { title: "Objective", lines: ["Explore the ruin."] },
+                { title: "Requirements", lines: ["Requires a nearby army."] },
+            ],
+        }).sections.map((section) => section.label)).toEqual([
+            "Objective",
+            "Requirements",
+            "Rewards",
+            "Choices",
+        ]);
+    });
+
     it("hides internal leader priority lines from hero and unit descriptions", () => {
         expect(parseCodexStructuredDescription(entry("heroes", [
             "Faction: Ametrine",

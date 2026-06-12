@@ -82,6 +82,14 @@ const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
     traits: ["Category", "Cost", "Required affinity"],
 };
 
+const SECTION_PRIORITY_BY_KIND: Record<string, string[]> = {
+    equipment: ["granted abilities", "effects"],
+    traits: ["unlocks", "exclusions", "granted abilities", "effects"],
+    heroes: ["stats"],
+    units: ["stats"],
+    quests: ["objective", "requirements", "rewards", "choices", "effects"],
+};
+
 function normalizeKind(kind: string | null | undefined): string {
     return (kind ?? "").trim().toLowerCase();
 }
@@ -251,6 +259,25 @@ function addSection(sections: CodexStructuredSection[], label: string, line: str
     }
 
     sections.push({ label, lines: [line] });
+}
+
+function orderSections(kind: string, sections: CodexStructuredSection[]): CodexStructuredSection[] {
+    const priorityLabels = SECTION_PRIORITY_BY_KIND[kind] ?? [];
+    if (priorityLabels.length === 0 || sections.length < 2) return sections;
+
+    return sections
+        .map((section, index) => ({
+            section,
+            index,
+            priority: priorityLabels.indexOf(normalizeComparable(section.label)),
+        }))
+        .sort((left, right) => {
+            const leftPriority = left.priority >= 0 ? left.priority : Number.MAX_SAFE_INTEGER;
+            const rightPriority = right.priority >= 0 ? right.priority : Number.MAX_SAFE_INTEGER;
+            if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+            return left.index - right.index;
+        })
+        .map(({ section }) => section);
 }
 
 function exportedFactToStructuredFact(fact: CodexMetadataFact): CodexStructuredFact | null {
@@ -423,7 +450,7 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
 
     return {
         facts,
-        sections,
+        sections: orderSections(kind, sections),
         timeline,
         bodyLines: [],
         hasStructuredContent: true,
@@ -485,7 +512,7 @@ export function parseCodexStructuredDescription(
 
     return {
         facts: publicFacts,
-        sections,
+        sections: orderSections(kind, sections),
         timeline,
         bodyLines,
         hasStructuredContent: publicFacts.length > 0 || sections.length > 0 || timeline.length > 0,
