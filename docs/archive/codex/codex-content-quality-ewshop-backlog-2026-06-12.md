@@ -1,8 +1,12 @@
 # Codex Content Quality EWShop Backlog
 
-Status: active EWShop backlog  
-Created: 2026-06-12  
-Related audit: `docs/active/codex-content-quality-audit.md`
+Status: archived EWShop backlog snapshot
+Created: 2026-06-12
+Related audit:
+`docs/archive/codex/codex-content-quality-audit-2026-06-12.md`
+
+Archived note: several low-risk presentation items from this backlog have since
+been implemented. Use current diagnostics before reopening EWShop work.
 
 ## Scope
 

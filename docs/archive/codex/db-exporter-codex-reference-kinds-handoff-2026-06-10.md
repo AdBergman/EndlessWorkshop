@@ -1,8 +1,13 @@
 # DB Exporter Handoff: Missing Codex Reference Kinds
 
-Status: active handoff request  
-Audience: DB exporter team, backend/API team, EWShop frontend  
+Status: archived superseded handoff request
+Audience: DB exporter team, backend/API team, EWShop frontend
 Created: 2026-06-10
+
+Archived note: this handoff predates current EWShop support for Actions,
+Diplomatic Treaties, and bonus-derived Statuses. Use
+`docs/active/codex-content-quality-exporter-handoff.md` for the current DB
+exporter/editorial Codex handoff.
 
 ## Handoff Intent
 
@@ -293,4 +298,3 @@ After implementation, generate fresh exports and verify:
   - Vision Exchange
 - no internal-only keys, mapper names, GUIDs, or raw paths leak into public
   facts/sections.
-

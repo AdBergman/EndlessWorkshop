@@ -8,38 +8,16 @@ This list reflects the current product focus:
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
 
-## P0 - DB Exporter Handoff For Missing Codex Reference Kinds
+## P0 - Codex Content Quality DB Exporter Handoff
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: EWShop baseline adoption is in place. Actions and Diplomatic Treaties
-are visible Codex categories, bonus-derived Statuses are visible, and
-bonus-derived Modifiers remain hidden from top-level navigation while staying
-searchable/linkable as exact targets. The remaining work here is exporter/data
-quality and real-data review, not broad EWShop category scaffolding.
-
-Actionable next items:
-
-1. Keep `docs/active/db-exporter-codex-reference-kinds-handoff.md` as exporter
-   context for data-quality review.
-2. Verify real local imports for `actions`, `diplomaticTreaties`, and
-   bonus-derived `statuses`/`modifiers` before expanding links.
-3. Ask quest rewards/requirements and unlock rows to emit typed references to
-   those entries when they mention them.
-4. Keep frontend text inference as diagnostics/fallback only.
-5. Do not expose Modifiers in top-level Codex navigation without product review.
-
-## P0 - DB Exporter Handoff For Codex Metadata Coverage
-
-Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
-
-Status: EWShop backend/frontend support exists and the generic Codex detail
-renderer consumes exported `facts`, `sections`, section items, and
-`publicContextKeys` consistently. Current local 0.80 Codex imports now include
-structured metadata across the visible Codex categories, and the category
-presentation polish is complete for the current product surface. Remaining work
-is targeted data-quality review, search/discovery enrichment, or future
-exporter coverage, not baseline EWShop metadata adoption.
+Status: EWShop baseline Codex metadata adoption and presentation polish are
+complete for the current local imports. Actions and Diplomatic Treaties are
+visible Codex categories, bonus-derived Statuses are visible, and bonus-derived
+Modifiers remain hidden from top-level navigation while staying
+searchable/linkable as exact targets. The current exporter-facing work is
+player-facing content quality, not metadata plumbing or broad EWShop scaffolding.
 
 Verified local Codex metadata coverage:
 
@@ -68,15 +46,22 @@ navigation while preserving search/link targets.
 
 Actionable next items:
 
-1. Use `docs/active/db-exporter-codex-metadata-handoff.md` as the active DB
-   exporter/backend handoff only when new exporter data-quality questions arise.
-2. Keep current text-prefix parsing as fallback only for older exports.
-3. Treat baseline Codex metadata preservation, rendering, category exposure,
+1. Use `docs/active/codex-content-quality-exporter-handoff.md` as the current
+   DB exporter/editorial handoff.
+2. Use `docs/active/codex-content-quality-diagnostics.md` to regenerate current
+   evidence from local imports before sending follow-up requests.
+3. Keep current text-prefix parsing as fallback only for older exports.
+4. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-4. Before cross-link expansion, run product review on search/discovery and
+5. Before cross-link expansion, run product review on search/discovery and
    related-entry behavior with real imported data.
-5. Do not reopen exporter work unless a current category review identifies a
-   specific missing field or low-quality relationship.
+6. Do not expose Modifiers in top-level Codex navigation without product review.
+
+Archived historical context:
+
+- `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
+- `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
+- `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`
 
 ## P0 - Quest Documentation Cleanup Only
 

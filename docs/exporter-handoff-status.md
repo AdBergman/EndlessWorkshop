@@ -1,6 +1,6 @@
 # Exporter Handoff Status
 
-Current as of 2026-06-10.
+Current as of 2026-06-12.
 
 ## Active Frontend Consumption
 
@@ -12,13 +12,13 @@ Current as of 2026-06-10.
   `frontend/src/features/icons/unitStatIcons.ts`.
 - Unit veterancy progression is wired into the Units page through the reusable
   `VeterancyLens` component and pure stat projection helper.
-- Population Codex structured metadata is available from the exporter contract;
-  future Codex UI should prefer `facts`, `sections`, and `publicContextKeys`
-  when present, with `descriptionLines` as fallback.
-- Actions, bonuses/status effects, and diplomatic treaties are visible in
-  quests/tech/population data but do not yet have linkable Codex export kinds.
-  Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` for that
-  active request.
+- Codex structured metadata is broadly available from current local imports.
+  EWShop imports, preserves, serves, and renders `facts`, `sections`, and
+  `publicContextKeys`, with `descriptionLines` as fallback.
+- Actions and Diplomatic Treaties are visible Codex categories.
+- Bonus-derived Statuses are visible Codex entries. Bonus-derived Modifiers stay
+  hidden from top-level navigation while remaining searchable/linkable as exact
+  targets.
 
 ## Completed Handoff Areas
 
@@ -28,29 +28,30 @@ Current as of 2026-06-10.
 - Major-faction hero ownership context.
 - Ability icon registry keyed by public `UnitAbility_*` keys.
 - Unit veterancy progression metadata.
-- Population structured Codex metadata.
+- Codex structured metadata preservation and generic rendering.
+- Actions, Diplomatic Treaties, Statuses, hidden/linkable Modifiers, and current
+  Codex category presentation polish.
 - Export inventory diagnostics.
 
 ## Remaining Useful Follow-Ups
 
-- Equipment: add richer metadata or a rich equipment export.
-- Councilors: add richer metadata and clarify prototype/demo visibility.
-- Traits: add richer metadata or a trait raw export.
+- Codex content quality: replace placeholder names, raw internal labels, raw
+  mechanics text, formula-like effect text, and missing player context in public
+  Codex data.
+- Codex diagnostics: rerun content-quality diagnostics against current local
+  imports before each exporter/editorial handoff.
 - Hero skills: decide whether hero skills belong in Codex or remain future
   feature data.
-- Codex UI: upgrade detail views incrementally to use structured metadata where
-  exported.
-- Missing Codex reference kinds: add public Codex exports and typed references
-  for actions, bonuses/status effects, and diplomatic treaties.
+- Codex search/discovery and related-entry behavior: review with real imported
+  data before expanding links.
 - Units/art: run visual QA and polish card art, repeated/placeholder art,
   ability icon presentation, and faction accent consistency.
 
 See `docs/current-action-priorities.md` for the current product-priority view.
-Use `docs/active/db-exporter-codex-metadata-handoff.md` for the active DB
-exporter/backend Codex metadata request.
-Use `docs/active/db-exporter-codex-reference-kinds-handoff.md` for the active
-request to add missing Codex export kinds for actions, bonuses/status effects,
-and diplomatic treaties.
+Use `docs/active/codex-content-quality-exporter-handoff.md` for the current DB
+exporter/editorial Codex content-quality request.
+Use `docs/active/codex-content-quality-diagnostics.md` for the current
+diagnostic workflow.
 
 ## Archived Context
 
@@ -58,5 +59,7 @@ and diplomatic treaties.
   `docs/archive/exporter-handoffs/ewshop-handoff-2026-06.md`.
 - Original description-token/icon request and analysis:
   `docs/archive/exporter-handoffs/description-token-icons-handoff-2026-06.md`.
+- Superseded Codex metadata/reference-kind handoffs and implementation audits:
+  `docs/archive/codex/`.
 - Compact SVG icon contract guidance:
   `docs/frontend/svg-icon-contracts.md`.

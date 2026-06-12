@@ -4,6 +4,10 @@ Status: active exporter/editorial handoff
 Created: 2026-06-12
 Source diagnostic: `npm run diagnostics:codex-content -- --limit 80`
 
+This is the current DB exporter/editorial Codex handoff. Older Codex metadata
+coverage and reference-kind handoffs are archived under `docs/archive/codex/`
+and should be treated as historical context only.
+
 ## Purpose
 
 EWShop can now render and polish the current Codex metadata, but the next

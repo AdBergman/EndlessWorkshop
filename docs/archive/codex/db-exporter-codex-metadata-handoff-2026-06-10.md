@@ -1,8 +1,12 @@
 # DB Exporter Handoff: Codex Structured Metadata Coverage
 
-Status: active handoff request  
-Audience: DB exporter team, backend/API team, EWShop frontend  
+Status: archived superseded handoff request
+Audience: DB exporter team, backend/API team, EWShop frontend
 Created: 2026-06-10
+
+Archived note: this handoff predates the current local Codex imports with broad
+metadata coverage. Use `docs/active/codex-content-quality-exporter-handoff.md`
+for the current DB exporter/editorial Codex handoff.
 
 ## Handoff Intent
 
@@ -717,8 +721,8 @@ Quality matters more than quantity.
 Please review and implement the first bounded slice of Codex structured
 metadata coverage for EWShop.
 
-Source of truth:
-docs/active/db-exporter-codex-metadata-handoff.md
+Historical source:
+docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md
 
 Goal:
 Extend the existing generic Codex metadata fields `facts`, `sections`, and
