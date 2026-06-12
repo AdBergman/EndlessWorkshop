@@ -109,6 +109,28 @@ function findSummaryFact(kind: string, facts: CodexStructuredFact[], label: stri
     return facts.find((fact) => fact.label === label);
 }
 
+function appendMinorFactionAssociatedContent(
+    parsed: CodexStructuredDescription,
+    summaryParts: string[]
+): string[] {
+    const associated = parsed.sections.find((section) => section.label.toLowerCase() === "associated content");
+    if (!associated) return summaryParts;
+
+    const seen = new Set(summaryParts.map((part) => part.trim().toLowerCase()));
+    const out = [...summaryParts];
+    for (const line of associated.lines) {
+        const value = cleanPreviewValue(line);
+        const key = value.toLowerCase();
+        if (!value || seen.has(key)) continue;
+
+        seen.add(key);
+        out.push(value);
+        if (out.length >= 4) break;
+    }
+
+    return out;
+}
+
 function splitPrefixedLine(line: string): { label: string; value: string } | null {
     const match = line.match(/^([^:]{2,48}):\s*(.+)$/);
     if (!match) return null;
@@ -324,9 +346,12 @@ export function getCodexStructuredSummary(
         .filter((fact): fact is CodexStructuredFact => Boolean(fact))
         .map(formatSummaryFact)
         .filter(Boolean);
+    const enrichedSummaryParts = kind === "minorfactions"
+        ? appendMinorFactionAssociatedContent(parsed, summaryParts)
+        : summaryParts;
 
-    if (summaryParts.length > 0) {
-        return summaryParts.slice(0, 4).join(" / ");
+    if (enrichedSummaryParts.length > 0) {
+        return enrichedSummaryParts.slice(0, 4).join(" / ");
     }
 
     if (kind === "populations" && parsed.timeline.length > 0) {

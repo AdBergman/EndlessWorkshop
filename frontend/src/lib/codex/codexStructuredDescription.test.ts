@@ -275,6 +275,21 @@ describe("codexStructuredDescription", () => {
             "Unit: Singer",
             "Trait: Silver Tongue",
         ]))).toBe("Diplomatic / Necrophages / Noquensii / Singer");
+
+        expect(getCodexStructuredSummary({
+            ...entry("minorfactions", []),
+            facts: [
+                { label: "Kind", value: "MinorFaction" },
+                { label: "Disposition", value: "Pacifist" },
+                { label: "Faction affinity", value: "Noquensii" },
+            ],
+            sections: [
+                {
+                    title: "Associated content",
+                    lines: ["Noquensii", "Harper", "Elite Harper", "Mighty Harper"],
+                },
+            ],
+        })).toBe("Pacifist / Noquensii / Harper / Elite Harper");
     });
 
     it("keeps unknown lines as fallback body content", () => {
