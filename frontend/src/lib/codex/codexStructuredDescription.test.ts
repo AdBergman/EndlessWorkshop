@@ -242,7 +242,15 @@ describe("codexStructuredDescription", () => {
             "Faction: Tahuk",
             "Class: Defender",
             "Attack: 30",
-        ]))).toBe("Defender");
+        ]))).toBe("Tahuk / Defender");
+
+        expect(getCodexStructuredSummary({
+            ...entry("heroes", []),
+            facts: [
+                { label: "Faction", value: "Last Lords" },
+                { label: "Class", value: "Infantry Hero" },
+            ],
+        })).toBe("Last Lords / Infantry Hero");
 
         expect(getCodexStructuredSummary({
             ...entry("districts", []),

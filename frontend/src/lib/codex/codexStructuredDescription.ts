@@ -66,7 +66,7 @@ const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
     councilors: ["Role", "Councilor effect", "Partner effect"],
     districts: ["Category", "Tier", "Kind"],
     equipment: ["Type", "Slot", "Rarity", "Tier"],
-    heroes: ["Class"],
+    heroes: ["Faction", "Class"],
     improvements: ["Category"],
     minorfactions: ["Disposition", "Faction affinity", "Population", "Unit"],
     modifiers: ["Category", "Kind", "Cost type", "Value"],
@@ -104,6 +104,12 @@ function findSummaryFact(kind: string, facts: CodexStructuredFact[], label: stri
         return facts.find((fact) =>
             fact.label === label && fact.value.trim().toLowerCase() !== "faction"
         ) ?? facts.find((fact) => fact.label === label);
+    }
+
+    if (kind === "heroes" && label === "Faction") {
+        return facts.find((fact) =>
+            fact.label === label && fact.value.trim().toLowerCase() !== "hero"
+        );
     }
 
     return facts.find((fact) => fact.label === label);
