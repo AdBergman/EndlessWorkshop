@@ -31,6 +31,15 @@ public final class PublicReleaseFactionPolicy {
             "EmpireActionTypeNecrophage_"
     );
 
+    private static final List<String> UNRELEASED_STANDALONE_ACTION_KEYS = List.of(
+            "ActionTypeRaiseSandRuin",
+            "ConstructibleAction_TerraformationBiomeSandBanks"
+    );
+
+    private static final List<String> UNRELEASED_ACTION_COST_MODIFIER_PREFIXES = List.of(
+            "ActionCostModifier_RaiseRuin_"
+    );
+
     private static final List<String> RELEASED_FACTION_TRAIT_PREFIXES = List.of(
             "FactionTrait_KinOfSheredyn_",
             "FactionTrait_Mukag_",
@@ -71,6 +80,10 @@ public final class PublicReleaseFactionPolicy {
 
     public static boolean isReleasedActionKey(String entryKey) {
         String key = trimToEmpty(entryKey);
+        if (UNRELEASED_STANDALONE_ACTION_KEYS.contains(key)) {
+            return false;
+        }
+
         if (key.startsWith("FactionActionType")) {
             return RELEASED_FACTION_ACTION_PREFIXES.stream()
                     .anyMatch(key::startsWith);
@@ -103,6 +116,7 @@ public final class PublicReleaseFactionPolicy {
 
     public static boolean isReleasedBonusKey(String entryKey) {
         String key = trimToEmpty(entryKey);
+        if (UNRELEASED_ACTION_COST_MODIFIER_PREFIXES.stream().anyMatch(key::startsWith)) return false;
         if (key.startsWith("FactionTrait_")) return isReleasedFactionTraitKey(key);
         if (key.startsWith("FactionQuest_")) return isReleasedFactionQuestKey(key);
         if (key.startsWith("ActionCostModifier_FactionActionType")) {

@@ -25,6 +25,9 @@ class CodexImportServiceTest {
                 snapshot("actions", "EmpireActionTypeUnknown_TestAction"),
                 snapshot("actions", "EmpireActionTypeFutureFaction_TestAction"),
                 snapshot("actions", "ActionTypeBuildBridge"),
+                snapshot("actions", "ActionTypeRaiseSandRuin"),
+                snapshot("actions", "ConstructibleAction_TerraformationBiomeSandBanks"),
+                snapshot("bonuses", "ActionCostModifier_RaiseRuin_Decrease_00"),
                 snapshot("tech", "FactionActionTypeUnknown_TestAction")
         ));
 
@@ -43,8 +46,13 @@ class CodexImportServiceTest {
                         "FactionActionTypeUnknown_TestAction",
                         "FactionActionTypeFutureFaction_TestAction",
                         "EmpireActionTypeUnknown_TestAction",
-                        "EmpireActionTypeFutureFaction_TestAction"
+                        "EmpireActionTypeFutureFaction_TestAction",
+                        "ActionTypeRaiseSandRuin",
+                        "ConstructibleAction_TerraformationBiomeSandBanks"
                 );
+        assertThat(repository.capturedSnapshots)
+                .extracting(CodexImportSnapshot::entryKey)
+                .doesNotContain("ActionCostModifier_RaiseRuin_Decrease_00");
     }
 
     @Test
@@ -142,10 +150,13 @@ class CodexImportServiceTest {
                 List.of(
                         "FactionActionTypeFutureFaction_TestAction",
                         "EmpireActionTypeFutureFaction_TestAction",
+                        "ActionTypeRaiseSandRuin",
+                        "ConstructibleAction_TerraformationBiomeSandBanks",
                         "FactionTrait_FutureFaction_Test",
                         "FactionQuest_FutureFaction_Test",
                         "FactionQuest_FutureFaction",
                         "ActionCostModifier_FactionActionTypeFutureFaction_TestAction",
+                        "ActionCostModifier_RaiseRuin_Decrease_00",
                         "FactionActionTypeMukag_PublicAction",
                         "FactionTrait_Mukag_PublicTrait",
                         "FactionQuest_Mukag_PublicQuest",
@@ -156,9 +167,12 @@ class CodexImportServiceTest {
                 ),
                 List.of(
                         "FactionActionTypeFutureFaction_TestAction",
+                        "ActionTypeRaiseSandRuin",
+                        "ConstructibleAction_TerraformationBiomeSandBanks",
                         "FactionTrait_FutureFaction_Test",
                         "FactionQuest_FutureFaction_Test",
                         "FactionQuest_FutureFaction",
+                        "ActionCostModifier_RaiseRuin_Decrease_00",
                         "FactionActionTypeMukag_PublicAction",
                         "FactionTrait_Mukag_PublicTrait",
                         "FactionQuest_Mukag_PublicQuest",

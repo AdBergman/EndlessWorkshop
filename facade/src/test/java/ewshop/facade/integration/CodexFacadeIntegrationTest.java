@@ -173,14 +173,25 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 entry("EmpireActionTypeMukag_PublicAction", "Public Empire Action", "Empire Action", "Action", List.of("Line"), List.of()),
                 entry("EmpireActionTypeUnknown_TestAction", "Unknown Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
                 entry("EmpireActionTypeFutureFaction_TestAction", "Future Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
+                entry("ActionTypeRaiseSandRuin", "Unavailable Standalone Action", "Action", "Action", List.of("Line"), List.of()),
+                entry("ConstructibleAction_TerraformationBiomeSandBanks", "Unavailable Constructible Action", "Terraforming Action", "Action", List.of("Line"), List.of()),
                 entry(
                         "ActionTypeBuildBridge",
                         "Build Bridge",
                         "Action",
                         "Action",
                         List.of("Line"),
-                        List.of("FactionActionTypeUnknown_TestAction", "EmpireActionTypeUnknown_TestAction")
+                        List.of(
+                                "FactionActionTypeUnknown_TestAction",
+                                "EmpireActionTypeUnknown_TestAction",
+                                "ActionTypeRaiseSandRuin",
+                                "ConstructibleAction_TerraformationBiomeSandBanks"
+                        )
                 )
+        )));
+        codexImportAdminFacade.importCodex(batch("bonuses", List.of(
+                entry("ActionCostModifier_RaiseRuin_Decrease_00", "Unavailable Action Cost Modifier", "Cost Modifier", "Bonus", List.of("Line"), List.of()),
+                entry("Status_Empire_PublicStatus", "Public Status", "Status", "Bonus", List.of("Line"), List.of("ActionCostModifier_RaiseRuin_Decrease_00"))
         )));
         entityManager.flush();
         entityManager.clear();
@@ -193,9 +204,13 @@ class CodexFacadeIntegrationTest extends BaseIT {
                         "FactionActionTypeUnknown_TestAction",
                         "FactionActionTypeFutureFaction_TestAction",
                         "EmpireActionTypeUnknown_TestAction",
-                        "EmpireActionTypeFutureFaction_TestAction"
+                        "EmpireActionTypeFutureFaction_TestAction",
+                        "ActionTypeRaiseSandRuin",
+                        "ConstructibleAction_TerraformationBiomeSandBanks",
+                        "ActionCostModifier_RaiseRuin_Decrease_00"
                 );
         assertThat(findCodex(result, "ActionTypeBuildBridge").referenceKeys()).isEmpty();
+        assertThat(findCodex(result, "Status_Empire_PublicStatus").referenceKeys()).isEmpty();
     }
 
     @Test
