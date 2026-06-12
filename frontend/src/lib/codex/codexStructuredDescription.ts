@@ -70,7 +70,7 @@ const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
     modifiers: ["Category", "Kind", "Cost type", "Value"],
     populations: ["Type", "Faction", "Base food cost"],
     statuses: ["Category", "Kind", "Duration"],
-    traits: ["Cost", "Required affinity"],
+    traits: ["Category", "Cost", "Required affinity"],
 };
 
 function normalizeKind(kind: string | null | undefined): string {
@@ -95,6 +95,16 @@ function formatSummaryFact(fact: CodexStructuredFact): string {
     }
 
     return value;
+}
+
+function findSummaryFact(kind: string, facts: CodexStructuredFact[], label: string): CodexStructuredFact | undefined {
+    if (kind === "traits" && label === "Category") {
+        return facts.find((fact) =>
+            fact.label === label && fact.value.trim().toLowerCase() !== "faction"
+        ) ?? facts.find((fact) => fact.label === label);
+    }
+
+    return facts.find((fact) => fact.label === label);
 }
 
 function splitPrefixedLine(line: string): { label: string; value: string } | null {
@@ -308,7 +318,7 @@ export function getCodexStructuredSummary(
     const parsed = parseCodexStructuredDescription(entry);
     const preferredLabels = SUMMARY_FACT_LABELS_BY_KIND[kind] ?? [];
     const summaryParts = preferredLabels
-        .map((label) => parsed.facts.find((fact) => fact.label === label))
+        .map((label) => findSummaryFact(kind, parsed.facts, label))
         .filter((fact): fact is CodexStructuredFact => Boolean(fact))
         .map(formatSummaryFact)
         .filter(Boolean);

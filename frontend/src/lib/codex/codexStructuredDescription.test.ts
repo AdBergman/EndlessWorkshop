@@ -214,7 +214,13 @@ describe("codexStructuredDescription", () => {
             "Cost: 2",
             "Required affinity: Aspect",
             "Quest-only note.",
-        ]))).toBe("Cost 2 / Aspects");
+        ]))).toBe("Faction / Cost 2 / Aspects");
+
+        expect(getCodexStructuredSummary(entry("traits", [
+            "Category: Faction",
+            "Category: AI Behavior",
+            "Excludes: Diplomat",
+        ]))).toBe("AI Behavior");
 
         expect(getCodexStructuredSummary(entry("heroes", [
             "Faction: Hero",
