@@ -1088,6 +1088,12 @@ describe("CodexPage", () => {
                     "Trait: Common Rights",
                     "+10 [PublicOrderColored] Public Opinion due to neighbors",
                 ],
+                sections: [
+                    {
+                        title: "Unlocks",
+                        lines: ["Force Treaty"],
+                    },
+                ],
                 referenceKeys: ["Trait_Diplomat"],
             },
             {
@@ -1125,6 +1131,8 @@ describe("CodexPage", () => {
         expect(within(detailPane).queryByRole("navigation", { name: /faction dossier index/i })).not.toBeInTheDocument();
         expect(within(detailPane).getByRole("heading", { name: "Affinity" })).toBeInTheDocument();
         expect(within(detailPane).getAllByText("Aspects").length).toBeGreaterThan(0);
+        expect(within(detailPane).getByRole("heading", { name: "Unlocks" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("Force Treaty")).toBeInTheDocument();
         expect(within(detailPane).getByRole("heading", { name: "Diplomat" })).toBeInTheDocument();
         expect(within(detailPane).getByText("They prioritize Diplomacy and peace.")).toBeInTheDocument();
         expect(within(detailPane).getByRole("heading", { name: "Common Rights" })).toBeInTheDocument();

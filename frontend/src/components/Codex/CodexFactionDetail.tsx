@@ -36,18 +36,32 @@ function RenderLine({ line, className }: { line: string; className: string }) {
     );
 }
 
+function getExportedSectionLines(entry: CodexEntry, title: string): string[] {
+    return (entry.sections ?? [])
+        .find((section) => section.title?.trim().toLowerCase() === title.toLowerCase())
+        ?.lines
+        ?.map((line) => line.trim())
+        .filter(Boolean) ?? [];
+}
+
 export default function CodexFactionDetail({ entry }: Props) {
     const parsed = useMemo(
         () => parseCodexFactionDescription(entry.descriptionLines),
         [entry.descriptionLines]
     );
+    const unlockLines = useMemo(
+        () => getExportedSectionLines(entry, "Unlocks"),
+        [entry]
+    );
 
     const affinityId = sectionId(entry, "affinity");
+    const unlocksId = sectionId(entry, "unlocks");
     const traitsId = sectionId(entry, "traits");
     const notesId = sectionId(entry, "notes");
 
     const hasStructuredContent =
         Boolean(parsed.affinityLine) ||
+        unlockLines.length > 0 ||
         parsed.traits.length > 0 ||
         parsed.ungroupedLines.length > 0;
 
@@ -73,6 +87,26 @@ export default function CodexFactionDetail({ entry }: Props) {
                         line={stripPrefix(parsed.affinityLine, "Affinity")}
                         className="codex-factionBlock__lead"
                     />
+                </section>
+            ) : null}
+
+            {unlockLines.length > 0 ? (
+                <section
+                    className="codex-factionBlock"
+                    id={unlocksId}
+                    tabIndex={-1}
+                    aria-labelledby={`${unlocksId}-heading`}
+                >
+                    <h3 className="codex-factionBlock__heading" id={`${unlocksId}-heading`}>Unlocks</h3>
+                    <div className="codex-detail__description codex-detail__description--factionNotes">
+                        {unlockLines.map((line, index) => (
+                            <RenderLine
+                                key={`${entry.entryKey}-unlock-${index}`}
+                                line={line}
+                                className="codex-detail__line"
+                            />
+                        ))}
+                    </div>
                 </section>
             ) : null}
 
