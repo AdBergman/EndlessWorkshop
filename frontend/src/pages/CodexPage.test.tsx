@@ -2005,7 +2005,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Sheredyn Envoy" })).toBeInTheDocument();
         expect(screen.getByText("Councilor dossier")).toBeInTheDocument();
         expect(screen.getByText("Kin of Sheredyn")).toBeInTheDocument();
-        expect(screen.getByText("Governor")).toBeInTheDocument();
+        expect(screen.getAllByText("Governor").length).toBeGreaterThan(0);
         expect(screen.getByRole("heading", { name: "Councilor effect" })).toBeInTheDocument();
         expect(screen.getByText("+2 Science on Cities")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Partner effect" })).toBeInTheDocument();

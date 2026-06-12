@@ -209,6 +209,16 @@ describe("codexStructuredDescription", () => {
             "Partner effect: +1 Influence",
         ])).sections.map((section) => section.label)).toEqual(["Councilor effect", "Partner effect"]);
 
+        expect(getCodexStructuredSummary({
+            ...entry("councilors", []),
+            facts: [
+                { label: "Faction", value: "Noquensii" },
+                { label: "Councilor effect", value: "Visionary" },
+                { label: "Partner effect", value: "Supernova" },
+                { label: "Role", value: "Discovery" },
+            ],
+        })).toBe("Discovery / Visionary / Supernova");
+
         expect(getCodexStructuredSummary(entry("traits", [
             "Category: Faction",
             "Cost: 2",
