@@ -1,4 +1,5 @@
 import {
+    getCodexReadablePreviewLine,
     getCodexStructuredSummary,
     parseCodexStructuredDescription,
 } from "@/lib/codex/codexStructuredDescription";
@@ -303,6 +304,38 @@ describe("codexStructuredDescription", () => {
             "Rewards",
             "Choices",
         ]);
+    });
+
+    it("builds readable previews from cleaned structured content", () => {
+        expect(getCodexReadablePreviewLine({
+            ...entry("actions", []),
+            sections: [
+                {
+                    title: "Cost modifiers",
+                    items: [
+                        {
+                            label: "Turn cost multiplier",
+                            facts: [
+                                { label: "Cost type", value: "Turn" },
+                                { label: "Value", value: "0.50" },
+                            ],
+                            lines: ["Temporary Bridge takes less time to build."],
+                        },
+                    ],
+                },
+            ],
+        })).toBe("Temporary Bridge takes less time to build.");
+
+        expect(getCodexReadablePreviewLine(entry("heroes", [
+            "+1000000 Leader Priority",
+            "+140 Health",
+        ]))).toBe("+140 Health");
+
+        expect(getCodexReadablePreviewLine(entry("equipment", [
+            "Type: Accessory",
+            "Tier: 0",
+            "Forged for scouting.",
+        ]))).toBe("Accessory / Tier Base");
     });
 
     it("hides internal leader priority lines from hero and unit descriptions", () => {

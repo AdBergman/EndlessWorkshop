@@ -77,6 +77,23 @@ function sectionHeadingFor(kind: string): string {
     }
 }
 
+function emptyMessageFor(kind: string): string {
+    switch (kind.trim().toLowerCase()) {
+        case "actions":
+            return "No public gameplay summary has been added for this action yet.";
+        case "districts":
+            return "No public construction summary has been added for this district yet.";
+        case "improvements":
+            return "No public construction summary has been added for this improvement yet.";
+        case "modifiers":
+            return "No public modifier summary has been added for this linked mechanic yet.";
+        case "statuses":
+            return "No public status summary has been added for this effect yet.";
+        default:
+            return "No public description has been added for this entry yet.";
+    }
+}
+
 export default function CodexStructuredDetail({ entry }: Props) {
     const parsed = useMemo(
         () => parseCodexStructuredDescription(entry),
@@ -103,7 +120,7 @@ export default function CodexStructuredDetail({ entry }: Props) {
                         ))}
                     </div>
                 ) : (
-                    <p className="codex-detail__placeholder">No public description has been added for this entry yet.</p>
+                    <p className="codex-detail__placeholder">{emptyMessageFor(entry.exportKind)}</p>
                 )}
             </section>
         );

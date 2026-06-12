@@ -544,3 +544,38 @@ export function getCodexStructuredSummary(
 
     return "";
 }
+
+export function getCodexReadablePreviewLine(
+    entry: Pick<CodexEntry, "exportKind" | "descriptionLines" | "facts" | "sections">
+): string {
+    const structuredSummary = getCodexStructuredSummary(entry);
+    if (structuredSummary) return structuredSummary;
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const bodyLine = parsed.bodyLines
+        .map(cleanPreviewValue)
+        .find((line) => line.length > 0);
+    if (bodyLine) return bodyLine;
+
+    for (const section of parsed.sections) {
+        const sectionLine = section.lines
+            .map(cleanPreviewValue)
+            .find((line) => line.length > 0);
+        if (sectionLine) return sectionLine;
+
+        for (const item of section.items ?? []) {
+            const itemLine = item.lines
+                .map(cleanPreviewValue)
+                .find((line) => line.length > 0);
+            if (itemLine) return itemLine;
+
+            const fact = item.facts.find((candidate) => candidate.value.trim().length > 0);
+            if (fact) return cleanPreviewValue(fact.value);
+        }
+    }
+
+    const timelineItem = parsed.timeline.find((item) => item.value.trim().length > 0);
+    if (timelineItem) return cleanPreviewValue(timelineItem.value);
+
+    return "";
+}

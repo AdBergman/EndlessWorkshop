@@ -13,7 +13,7 @@ import {
     getCodexFactionSummaryPreview,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
-import { getCodexStructuredSummary } from "@/lib/codex/codexStructuredDescription";
+import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
 
 type Props = {
     summaryEntry: CodexSummaryEntry;
@@ -84,10 +84,10 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                         const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
-                        const structuredSummary = !isFactionEntry ? getCodexStructuredSummary(entry) : "";
+                        const readablePreview = !isFactionEntry ? getCodexReadablePreviewLine(entry) : "";
                         const preview = isFactionEntry
                             ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
-                            : structuredSummary || getCodexEntryPreview(entry, 240);
+                            : readablePreview || getCodexEntryPreview(entry, 240);
                         const secondaryContext = factionAffinity
                             ? `Affinity: ${factionAffinity}`
                             : getCodexSecondaryContext(entry);

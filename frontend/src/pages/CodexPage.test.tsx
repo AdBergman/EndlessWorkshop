@@ -1453,6 +1453,8 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /build bridge actions applies to bridge construction/i }))
+            .toBeInTheDocument();
         expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByText("Constructible Action")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
@@ -1461,7 +1463,7 @@ describe("CodexPage", () => {
         expect(screen.getByText("Influence")).toBeInTheDocument();
         expect(screen.getByText("Display value")).toBeInTheDocument();
         expect(screen.getByText("-50%")).toBeInTheDocument();
-        expect(screen.getByText("Applies to bridge construction.")).toBeInTheDocument();
+        expect(screen.getAllByText("Applies to bridge construction.").length).toBeGreaterThanOrEqual(1);
         expect(screen.queryByText("Influence cost multiplier: Cost type: Influence; Display value: -50%"))
             .not.toBeInTheDocument();
         expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
@@ -1569,7 +1571,40 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
         expect(screen.getByText("Empire Action")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
-        expect(screen.getByText("Shares vision with another empire.")).toBeInTheDocument();
+        expect(screen.getAllByText("Shares vision with another empire.").length).toBeGreaterThanOrEqual(1);
+    });
+
+    it("shows category-specific empty messaging for sparse action entries", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeNoPublicSummary",
+                displayName: "No Public Summary",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeNoPublicSummary"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "No Public Summary" })).toBeInTheDocument();
+        expect(screen.getByText("No public gameplay summary has been added for this action yet.")).toBeInTheDocument();
+        expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
     });
 
     it("browses and renders representative diplomatic treaty entries through generic metadata", async () => {
@@ -1666,7 +1701,8 @@ describe("CodexPage", () => {
         await user.click(within(resultsPane).getByRole("button", { name: /open borders/i }));
         expect(await screen.findByRole("heading", { name: "Open Borders" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
-        expect(screen.getByText("Units may enter allied territories without Public Opinion loss.")).toBeInTheDocument();
+        expect(screen.getAllByText("Units may enter allied territories without Public Opinion loss.").length)
+            .toBeGreaterThanOrEqual(1);
 
         await user.click(within(resultsPane).getByRole("button", { name: /justified war/i }));
         expect(await screen.findByRole("heading", { name: "Justified War" })).toBeInTheDocument();
@@ -1822,7 +1858,7 @@ describe("CodexPage", () => {
         await user.click(within(resultsPane).getByRole("button", { name: /build dam/i }));
         expect(await screen.findByRole("heading", { name: "Build Dam" })).toBeInTheDocument();
         expect(screen.getByText("0.90")).toBeInTheDocument();
-        expect(screen.getByText(/Reduces the/)).toBeInTheDocument();
+        expect(screen.getAllByText(/Reduces the/).length).toBeGreaterThanOrEqual(1);
 
         await user.click(within(resultsPane).getByRole("button", { name: /mukag monsoon festival/i }));
         expect(await screen.findByRole("heading", { name: "Mukag Monsoon Festival" })).toBeInTheDocument();
