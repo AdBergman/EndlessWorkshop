@@ -61,7 +61,7 @@ const SECTION_LABELS_BY_KIND: Record<string, Record<string, string>> = {
 };
 
 const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
-    abilities: ["Target", "Range", "Cost"],
+    abilities: ["Category", "Target", "Range", "Cost"],
     bonuses: ["Category", "Kind"],
     councilors: ["Faction", "Role"],
     equipment: ["Type", "Slot", "Rarity", "Tier"],

@@ -187,11 +187,20 @@ describe("codexStructuredDescription", () => {
         expect(getCodexStructuredSummary({
             ...entry("abilities", ["When using this Active Skill:"]),
             facts: [
+                { label: "Category", value: "Active" },
                 { label: "Target", value: "Enemies" },
                 { label: "Range", value: "3" },
                 { label: "Cost", value: "1 Battle Token" },
             ],
-        })).toBe("Enemies / Range 3 / Cost 1 Battle Token");
+        })).toBe("Active / Enemies / Range 3 / Cost 1 Battle Token");
+
+        expect(getCodexStructuredSummary({
+            ...entry("abilities", []),
+            facts: [
+                { label: "Kind", value: "Ability" },
+                { label: "Category", value: "Passive" },
+            ],
+        })).toBe("Passive");
 
         expect(parseCodexStructuredDescription(entry("councilors", [
             "Faction: KinOfSheredyn",
