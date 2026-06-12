@@ -209,9 +209,9 @@ describe("codexStructuredDescription", () => {
                 { label: "Display value", value: "-50%" },
             ],
         }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
-            "Category=Cost Modifier",
             "Cost type=Turn",
             "Effect=-50%",
+            "Category=Cost Modifier",
         ]);
 
         expect(getCodexStructuredSummary({
@@ -260,8 +260,44 @@ describe("codexStructuredDescription", () => {
             "Faction: Ametrine",
             "Class: UnitClass_Infantry_Hero",
         ])).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
-            "Faction=Ametrine",
             "Class=Infantry Hero",
+            "Faction=Ametrine",
+        ]);
+    });
+
+    it("orders facts by category scan value", () => {
+        expect(parseCodexStructuredDescription({
+            ...entry("units", []),
+            facts: [
+                { label: "Kind", value: "Unit" },
+                { label: "Faction", value: "Aspects" },
+                { label: "Tier", value: "0" },
+                { label: "Spawn type", value: "Land" },
+                { label: "Class", value: "UnitClass_Flying" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Class=Flying",
+            "Tier=Base",
+            "Faction=Aspects",
+            "Spawn type=Land",
+            "Kind=Unit",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("equipment", []),
+            facts: [
+                { label: "Value", value: "50.00" },
+                { label: "Access pool", value: "Marketplace" },
+                { label: "Rarity", value: "Common" },
+                { label: "Type", value: "Accessory" },
+                { label: "Tier", value: "0" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Type=Accessory",
+            "Rarity=Common",
+            "Tier=Base",
+            "Source=Marketplace",
+            "Market value=50",
         ]);
     });
 

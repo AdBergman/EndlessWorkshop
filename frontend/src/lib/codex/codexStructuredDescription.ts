@@ -90,6 +90,13 @@ const SECTION_PRIORITY_BY_KIND: Record<string, string[]> = {
     quests: ["objective", "requirements", "rewards", "choices", "effects"],
 };
 
+const FACT_PRIORITY_BY_KIND: Record<string, string[]> = {
+    equipment: ["type", "slot", "rarity", "tier", "source", "market value"],
+    heroes: ["class", "faction"],
+    modifiers: ["cost type", "effect", "category"],
+    units: ["class", "tier", "faction", "spawn type", "kind"],
+};
+
 function normalizeKind(kind: string | null | undefined): string {
     return (kind ?? "").trim().toLowerCase();
 }
@@ -280,6 +287,25 @@ function orderSections(kind: string, sections: CodexStructuredSection[]): CodexS
         .map(({ section }) => section);
 }
 
+function orderFacts(kind: string, facts: CodexStructuredFact[]): CodexStructuredFact[] {
+    const priorityLabels = FACT_PRIORITY_BY_KIND[kind] ?? [];
+    if (priorityLabels.length === 0 || facts.length < 2) return facts;
+
+    return facts
+        .map((fact, index) => ({
+            fact,
+            index,
+            priority: priorityLabels.indexOf(normalizeComparable(fact.label)),
+        }))
+        .sort((left, right) => {
+            const leftPriority = left.priority >= 0 ? left.priority : Number.MAX_SAFE_INTEGER;
+            const rightPriority = right.priority >= 0 ? right.priority : Number.MAX_SAFE_INTEGER;
+            if (leftPriority !== rightPriority) return leftPriority - rightPriority;
+            return left.index - right.index;
+        })
+        .map(({ fact }) => fact);
+}
+
 function exportedFactToStructuredFact(fact: CodexMetadataFact): CodexStructuredFact | null {
     if (!fact?.label?.trim() || !fact?.value?.trim()) return null;
 
@@ -384,8 +410,8 @@ function exportedItemToStructuredItem(kind: string, item: CodexMetadataSectionIt
     const rawFacts = (item.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
-    const facts = filterPublicFacts(kind, rawFacts)
-        .map((fact) => formatPlayerFacingFact(kind, fact));
+    const facts = orderFacts(kind, filterPublicFacts(kind, rawFacts)
+        .map((fact) => formatPlayerFacingFact(kind, fact)));
     const lines = (item.lines ?? [])
         .map((line) => line.trim())
         .filter(Boolean)
@@ -403,8 +429,8 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
     const rawFacts = (entry.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
-    const facts = filterPublicFacts(kind, rawFacts)
-        .map((fact) => formatPlayerFacingFact(kind, fact));
+    const facts = orderFacts(kind, filterPublicFacts(kind, rawFacts)
+        .map((fact) => formatPlayerFacingFact(kind, fact)));
 
     const sections: CodexStructuredSection[] = [];
     const timeline: CodexStructuredTimelineItem[] = [];
@@ -507,8 +533,8 @@ export function parseCodexStructuredDescription(
         bodyLines.push(line);
     }
 
-    const publicFacts = filterPublicFacts(kind, facts)
-        .map((fact) => formatPlayerFacingFact(kind, fact));
+    const publicFacts = orderFacts(kind, filterPublicFacts(kind, facts)
+        .map((fact) => formatPlayerFacingFact(kind, fact)));
 
     return {
         facts: publicFacts,
