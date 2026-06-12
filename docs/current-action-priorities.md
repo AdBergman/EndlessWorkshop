@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-11.
+Current as of 2026-06-12.
 
 This list reflects the current product focus:
 
@@ -35,43 +35,48 @@ Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
 Status: EWShop backend/frontend support exists and the generic Codex detail
 renderer consumes exported `facts`, `sections`, section items, and
-`publicContextKeys` consistently. Exporter-populated metadata is still only
-present for populations in the baseline local 0.80 Codex payloads, so broader
-category richness remains exporter-data work rather than a frontend parsing
-project.
+`publicContextKeys` consistently. Current local 0.80 Codex imports now include
+structured metadata across the visible Codex categories, and the category
+presentation polish is complete for the current product surface. Remaining work
+is targeted data-quality review, search/discovery enrichment, or future
+exporter coverage, not baseline EWShop metadata adoption.
 
 Verified local Codex metadata coverage:
 
-| Codex kind | Entries | With facts | With sections | With public context keys |
+| Codex export | Entries | With facts | With sections | With public context keys |
 | --- | ---: | ---: | ---: | ---: |
+| `abilities` | 336 | 336 | 305 | 336 |
+| `actions` | 145 | 145 | 52 | 145 |
+| `bonuses` | 585 | 585 | 552 | 585 |
+| `councilors` | 46 | 46 | 41 | 46 |
+| `diplomaticTreaties` | 22 | 22 | 8 | 22 |
+| `districts` | 167 | 167 | 79 | 167 |
+| `equipment` | 159 | 159 | 159 | 159 |
+| `factions` | 5 | 5 | 5 | 5 |
+| `heroes` | 79 | 79 | 79 | 79 |
+| `improvements` | 123 | 123 | 100 | 123 |
+| `minorFactions` | 16 | 16 | 16 | 16 |
 | `populations` | 26 | 26 | 25 | 26 |
-| `abilities` | 326 | 0 | 0 | 0 |
-| `councilors` | 47 | 0 | 0 | 0 |
-| `districts` | 167 | 0 | 0 | 0 |
-| `equipment` | 159 | 0 | 0 | 0 |
-| `factions` | 5 | 0 | 0 | 0 |
-| `heroes` | 79 | 0 | 0 | 0 |
-| `improvements` | 123 | 0 | 0 | 0 |
-| `minor_factions` | 16 | 0 | 0 | 0 |
-| `quests` | 292 | 0 | 0 | 0 |
-| `tech` | 133 | 0 | 0 | 0 |
-| `traits` | 178 | 0 | 0 | 0 |
-| `units` | 157 | 0 | 0 | 0 |
+| `quests` | 292 | 292 | 292 | 292 |
+| `tech` | 133 | 133 | 98 | 133 |
+| `traits` | 178 | 178 | 132 | 178 |
+| `units` | 156 | 156 | 156 | 156 |
+
+`bonuses` remains a source export. EWShop presents bonus-derived Statuses as a
+visible category and keeps bonus-derived Modifiers hidden from top-level
+navigation while preserving search/link targets.
 
 Actionable next items:
 
 1. Use `docs/active/db-exporter-codex-metadata-handoff.md` as the active DB
-   exporter/backend handoff.
-2. Ask for the next exporter metadata domain after populations.
-3. Recommended first exporter slice: `equipment`.
-4. After exporter delivery, add backend/API/frontend fixture tests proving the
-   metadata survives import and renders in Codex detail.
-5. Keep current text-prefix parsing as fallback only for older exports.
-6. Before cross-link expansion, review current Actions, Diplomatic Treaties,
-   Statuses, and hidden Modifiers with real imported data.
-
-Recommended first slice: `equipment`, because current Codex text already has
-stable prefixes for type, slot, rarity, tier, access pool, and value.
+   exporter/backend handoff only when new exporter data-quality questions arise.
+2. Keep current text-prefix parsing as fallback only for older exports.
+3. Treat baseline Codex metadata preservation, rendering, category exposure,
+   and category presentation polish as complete for the current local imports.
+4. Before cross-link expansion, run product review on search/discovery and
+   related-entry behavior with real imported data.
+5. Do not reopen exporter work unless a current category review identifies a
+   specific missing field or low-quality relationship.
 
 ## P0 - Quest Documentation Cleanup Only
 
@@ -120,8 +125,9 @@ Actionable next items:
 1. Keep the current exact-key rule: prefer `codexEntryKey`, then typed
    `referenceKind/referenceKey`, then reward `assetKind/assetKey`.
 2. Do not infer links from titles or prose.
-3. Wait for DB exporter metadata before trying richer Codex preview content;
-   current local Codex metadata is still population-only.
+3. Prefer exact exported metadata for richer Codex preview content; current
+   local Codex metadata is broad enough that follow-up work should be driven by
+   product review rather than by the old population-only blocker.
 4. Keep the current frontend reward icon rule bounded: use known economy and
    strategic resource icons, and use Codex entry icons only after an exact
    Strategy reward reference resolves.
@@ -151,9 +157,9 @@ Jira-style status:
 - `QX-CODEX-010`: Future - consider explicit exporter-provided reward icon or
   resource metadata after the current DB exporter metadata request settles; do
   not open a new backend request for this yet.
-- `QX-CODEX-011`: P2 - after DB exporter Codex metadata expands beyond
-  populations, improve tooltip content to prefer structured facts/sections over
-  plain description preview lines.
+- `QX-CODEX-011`: P2 - after product review, improve tooltip content to prefer
+  structured facts/sections over plain description preview lines where it
+  clearly improves Strategy readability.
 
 ## P2 - Local Visual Polish Only Where We Are Working
 
