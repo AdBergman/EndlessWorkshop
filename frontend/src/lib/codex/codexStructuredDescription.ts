@@ -91,9 +91,21 @@ const SECTION_PRIORITY_BY_KIND: Record<string, string[]> = {
 };
 
 const FACT_PRIORITY_BY_KIND: Record<string, string[]> = {
+    abilities: ["category", "target", "range", "cost", "shape", "kind"],
+    actions: ["category", "ui category", "action type", "kind"],
+    councilors: ["role", "faction", "councilor effect", "partner effect"],
+    diplomatictreaties: ["category", "participation", "duration", "kind"],
+    districts: ["category", "tier", "kind"],
     equipment: ["type", "slot", "rarity", "tier", "source", "market value"],
+    improvements: ["category", "kind"],
     heroes: ["class", "faction"],
+    minorfactions: ["disposition", "faction affinity", "population", "unit", "trait", "kind"],
     modifiers: ["cost type", "effect", "category"],
+    populations: ["type", "faction", "base food cost", "default population", "custom faction availability"],
+    quests: ["category", "chapter", "mandatory", "faction", "key narrative beat", "kind"],
+    statuses: ["category", "duration", "stacking", "kind"],
+    tech: ["tier", "era", "quadrant", "faction", "kind"],
+    traits: ["category", "cost", "required affinity", "excludes", "kind"],
     units: ["class", "tier", "faction", "spawn type", "kind"],
 };
 

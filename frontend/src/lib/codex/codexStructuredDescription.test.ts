@@ -56,8 +56,8 @@ describe("codexStructuredDescription", () => {
         ]));
 
         expect(parsed.facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
-            "Faction=Tahuk",
             "Type=Minor faction population",
+            "Faction=Tahuk",
             "Base food cost=60",
         ]);
         expect(parsed.sections).toEqual([
@@ -267,6 +267,51 @@ describe("codexStructuredDescription", () => {
 
     it("orders facts by category scan value", () => {
         expect(parseCodexStructuredDescription({
+            ...entry("actions", []),
+            facts: [
+                { label: "Kind", value: "Action" },
+                { label: "Action type", value: "Decree" },
+                { label: "UI category", value: "Construction" },
+                { label: "Category", value: "Constructible Action" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Constructible Action",
+            "UI category=Construction",
+            "Action type=Decree",
+            "Kind=Action",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("councilors", []),
+            facts: [
+                { label: "Partner effect", value: "Courier's Tongue" },
+                { label: "Councilor effect", value: "Surveyor" },
+                { label: "Faction", value: "Aspects" },
+                { label: "Role", value: "Development" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Role=Development",
+            "Faction=Aspects",
+            "Councilor effect=Surveyor",
+            "Partner effect=Courier's Tongue",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("traits", []),
+            facts: [
+                { label: "Kind", value: "Trait" },
+                { label: "Required affinity", value: "Aspects" },
+                { label: "Cost", value: "10" },
+                { label: "Category", value: "Affinity - Aspects" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Affinity - Aspects",
+            "Cost=10",
+            "Required affinity=Aspects",
+            "Kind=Trait",
+        ]);
+
+        expect(parseCodexStructuredDescription({
             ...entry("units", []),
             facts: [
                 { label: "Kind", value: "Unit" },
@@ -298,6 +343,38 @@ describe("codexStructuredDescription", () => {
             "Tier=Base",
             "Source=Marketplace",
             "Market value=50",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("quests", []),
+            facts: [
+                { label: "Kind", value: "Quest" },
+                { label: "Mandatory", value: "Yes" },
+                { label: "Chapter", value: "2" },
+                { label: "Category", value: "Faction" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=Faction",
+            "Chapter=2",
+            "Mandatory=Yes",
+            "Kind=Quest",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("tech", []),
+            facts: [
+                { label: "Kind", value: "Technology" },
+                { label: "Faction", value: "Aspects" },
+                { label: "Quadrant", value: "Empire" },
+                { label: "Era", value: "2" },
+                { label: "Tier", value: "1" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Tier=1",
+            "Era=2",
+            "Quadrant=Empire",
+            "Faction=Aspects",
+            "Kind=Technology",
         ]);
     });
 
