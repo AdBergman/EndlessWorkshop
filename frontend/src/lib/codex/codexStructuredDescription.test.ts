@@ -31,8 +31,8 @@ describe("codexStructuredDescription", () => {
             "Slot=Main hand",
             "Rarity=Rare",
             "Tier=2",
-            "Access pool=Hero",
-            "Value=120",
+            "Source=Hero",
+            "Market value=120",
         ]);
         expect(parsed.bodyLines).toEqual(["Forged for close combat."]);
         expect(getCodexStructuredSummary(entry("equipment", [
@@ -210,7 +210,7 @@ describe("codexStructuredDescription", () => {
         }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
             "Category=Cost Modifier",
             "Cost type=Turn",
-            "Display value=-50%",
+            "Effect=-50%",
         ]);
 
         expect(getCodexStructuredSummary({
@@ -224,6 +224,44 @@ describe("codexStructuredDescription", () => {
                 { label: "Display value", value: "-50%" },
             ],
         })).toBe("Turn / -50% / Cost Modifier");
+    });
+
+    it("formats raw content facts into player-facing labels and values", () => {
+        expect(parseCodexStructuredDescription({
+            ...entry("diplomatictreaties", []),
+            facts: [
+                { label: "Category", value: "War" },
+                { label: "Bilateral", value: "No" },
+                { label: "Kind", value: "Diplomatic Treaty" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Category=War",
+            "Participation=One-sided",
+            "Kind=Diplomatic Treaty",
+        ]);
+
+        expect(parseCodexStructuredDescription({
+            ...entry("equipment", []),
+            facts: [
+                { label: "Type", value: "Accessory" },
+                { label: "Tier", value: "0" },
+                { label: "Access pool", value: "Marketplace" },
+                { label: "Value", value: "50.00" },
+            ],
+        }).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Type=Accessory",
+            "Tier=Base",
+            "Source=Marketplace",
+            "Market value=50",
+        ]);
+
+        expect(parseCodexStructuredDescription(entry("heroes", [
+            "Faction: Ametrine",
+            "Class: UnitClass_Infantry_Hero",
+        ])).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Faction=Ametrine",
+            "Class=Infantry Hero",
+        ]);
     });
 
     it("hides internal leader priority lines from hero and unit descriptions", () => {

@@ -76,7 +76,7 @@ const SUMMARY_FACT_LABELS_BY_KIND: Record<string, string[]> = {
     heroes: ["Faction", "Class"],
     improvements: ["Category"],
     minorfactions: ["Disposition", "Faction affinity", "Population", "Unit"],
-    modifiers: ["Cost type", "Display value", "Category"],
+    modifiers: ["Cost type", "Effect", "Category"],
     populations: ["Type", "Faction", "Base food cost"],
     statuses: ["Category", "Kind", "Duration"],
     traits: ["Category", "Cost", "Required affinity"],
@@ -88,6 +88,14 @@ function normalizeKind(kind: string | null | undefined): string {
 
 function cleanValue(value: string): string {
     const trimmed = value.trim();
+    const classMatch = trimmed.match(/^UnitClass_(.+)$/i);
+    if (classMatch) {
+        return classMatch[1]
+            .replace(/_/g, " ")
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .trim();
+    }
+
     return formatCodexMajorFactionLabel(trimmed) ?? formatCodexMajorFactionText(trimmed);
 }
 
@@ -253,6 +261,65 @@ function exportedFactToStructuredFact(fact: CodexMetadataFact): CodexStructuredF
     return { label, value, sourceLine: `${label}: ${value}` };
 }
 
+function formatPlayerFacingFact(kind: string, fact: CodexStructuredFact): CodexStructuredFact {
+    const label = normalizeComparable(fact.label);
+    const value = fact.value.trim();
+
+    if (kind === "diplomatictreaties" && label === "bilateral") {
+        const normalizedValue = normalizeComparable(value);
+        const participation = normalizedValue === "yes"
+            ? "Bilateral"
+            : normalizedValue === "no"
+                ? "One-sided"
+                : value;
+
+        return {
+            label: "Participation",
+            value: participation,
+            sourceLine: `Participation: ${participation}`,
+        };
+    }
+
+    if (kind === "equipment" && label === "access pool") {
+        return {
+            label: "Source",
+            value,
+            sourceLine: `Source: ${value}`,
+        };
+    }
+
+    if (kind === "equipment" && label === "value") {
+        const numericValue = Number(value);
+        const displayValue = Number.isFinite(numericValue)
+            ? String(Number.parseFloat(numericValue.toFixed(2)))
+            : value;
+
+        return {
+            label: "Market value",
+            value: displayValue,
+            sourceLine: `Market value: ${displayValue}`,
+        };
+    }
+
+    if ((kind === "equipment" || kind === "units" || kind === "districts") && label === "tier" && value === "0") {
+        return {
+            label: fact.label,
+            value: "Base",
+            sourceLine: `${fact.label}: Base`,
+        };
+    }
+
+    if (kind === "modifiers" && label === "display value") {
+        return {
+            label: "Effect",
+            value,
+            sourceLine: `Effect: ${value}`,
+        };
+    }
+
+    return fact;
+}
+
 function itemValue(item: CodexMetadataSectionItem): string {
     const lineValue = (item.lines ?? [])
         .map((line) => line.trim())
@@ -290,7 +357,8 @@ function exportedItemToStructuredItem(kind: string, item: CodexMetadataSectionIt
     const rawFacts = (item.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
-    const facts = filterPublicFacts(kind, rawFacts);
+    const facts = filterPublicFacts(kind, rawFacts)
+        .map((fact) => formatPlayerFacingFact(kind, fact));
     const lines = (item.lines ?? [])
         .map((line) => line.trim())
         .filter(Boolean)
@@ -308,7 +376,8 @@ function parseExportedStructuredMetadata(entry: Pick<CodexEntry, "exportKind" | 
     const rawFacts = (entry.facts ?? [])
         .map(exportedFactToStructuredFact)
         .filter((fact): fact is CodexStructuredFact => fact !== null);
-    const facts = filterPublicFacts(kind, rawFacts);
+    const facts = filterPublicFacts(kind, rawFacts)
+        .map((fact) => formatPlayerFacingFact(kind, fact));
 
     const sections: CodexStructuredSection[] = [];
     const timeline: CodexStructuredTimelineItem[] = [];
@@ -411,7 +480,8 @@ export function parseCodexStructuredDescription(
         bodyLines.push(line);
     }
 
-    const publicFacts = filterPublicFacts(kind, facts);
+    const publicFacts = filterPublicFacts(kind, facts)
+        .map((fact) => formatPlayerFacingFact(kind, fact));
 
     return {
         facts: publicFacts,

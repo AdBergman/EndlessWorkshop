@@ -1671,7 +1671,7 @@ describe("CodexPage", () => {
         await user.click(within(resultsPane).getByRole("button", { name: /justified war/i }));
         expect(await screen.findByRole("heading", { name: "Justified War" })).toBeInTheDocument();
         expect(screen.getByText("War")).toBeInTheDocument();
-        expect(screen.getByText("No")).toBeInTheDocument();
+        expect(screen.getByText("One-sided")).toBeInTheDocument();
     });
 
     it("browses and renders representative action entries with null descriptions", async () => {
