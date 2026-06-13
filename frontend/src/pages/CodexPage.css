@@ -191,6 +191,7 @@
 .codex-resultRow:focus-visible,
 .codex-questGroup__header:focus-visible,
 .codex-questPath__node:focus-visible,
+.codex-factionPackage__item:focus-visible,
 .codex-related__chip:focus-visible,
 .codex-summaryList__item:focus-visible {
     outline: none;
@@ -322,6 +323,7 @@
 }
 
 .codex-kindFilter__chip:hover,
+.codex-factionPackage__item:hover,
 .codex-related__chip:hover {
     border-color: rgba(199, 189, 171, 0.16);
     background: rgba(255, 255, 255, 0.022);
@@ -949,6 +951,99 @@
 
 .codex-detail__description--factionNotes {
     margin-top: 0;
+}
+
+.codex-factionPackage {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--codex-line);
+}
+
+.codex-factionPackage__groups {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.codex-factionPackage__group {
+    padding: 12px 0 0;
+    border-top: 1px solid var(--codex-line);
+}
+
+.codex-factionPackage__groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--codex-gold-bright);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.codex-factionPackage__groupLabel {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: 7px;
+}
+
+.codex-factionPackage__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.codex-factionPackage__item {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: min(100%, 360px);
+    padding: 8px 12px;
+    border: 1px solid rgba(241, 234, 220, 0.055);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.008);
+    color: inherit;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.codex-factionPackage__copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+}
+
+.codex-factionPackage__name {
+    color: #f1eadc;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.codex-factionPackage__kind {
+    color: var(--codex-ink-muted);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.codex-factionPackage__preview {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-factionPackage__more {
+    margin-top: 8px;
+    color: var(--codex-ink-muted);
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .codex-structuredDossier {

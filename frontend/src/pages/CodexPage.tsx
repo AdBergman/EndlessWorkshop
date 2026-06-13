@@ -473,6 +473,7 @@ export default function CodexPage() {
                                 <CodexEntryDetail
                                     entry={selectedEntry}
                                     questGroup={selectedQuestGroup}
+                                    allEntries={entries}
                                     relatedEntries={resolvedRelatedEntries}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}

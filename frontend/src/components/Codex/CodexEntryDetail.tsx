@@ -19,6 +19,7 @@ import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 type Props = {
     entry: CodexEntry | null;
     questGroup: CodexQuestGroupEntry | null;
+    allEntries: readonly CodexEntry[];
     relatedEntries: CodexEntry[];
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectRelated: (entry: CodexEntry) => void;
@@ -27,6 +28,7 @@ type Props = {
 export default function CodexEntryDetail({
     entry,
     questGroup,
+    allEntries,
     relatedEntries,
     titleRef,
     onSelectRelated,
@@ -87,7 +89,11 @@ export default function CodexEntryDetail({
             />
 
             {isFactionEntry ? (
-                <CodexFactionDetail entry={entry} />
+                <CodexFactionDetail
+                    entry={entry}
+                    allEntries={allEntries}
+                    onSelectEntry={onSelectRelated}
+                />
             ) : (
                 <CodexStructuredDetail
                     entry={entry}

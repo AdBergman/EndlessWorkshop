@@ -1902,6 +1902,282 @@ describe("CodexPage", () => {
         ]);
     });
 
+    it("renders a compact faction package from exact outbound and reverse refs without promoting text-only mentions", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Faction_Aspect",
+                descriptionLines: [
+                    "Affinity: Aspects",
+                    "Trait: Diplomat",
+                    "Text-only actions and resources should stay in prose.",
+                ],
+                referenceKeys: [
+                    "Population_Aspects",
+                    "Unit_Sentry",
+                    "Unit_Envoy",
+                    "Tech_CommonRights",
+                    "Hero_Polemephon",
+                ],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspects",
+                displayName: "Aspects",
+                descriptionLines: ["Calm diplomatic population."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Sentry",
+                displayName: "Sentry",
+                descriptionLines: ["Protects the opening army."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Envoy",
+                displayName: "Envoy",
+                descriptionLines: ["Supports treaty pressure."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_ReverseSpecialist",
+                displayName: "Reverse Specialist",
+                descriptionLines: ["Reverse unit that should not displace exact outbound core units."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_CommonRights",
+                displayName: "Common Rights",
+                descriptionLines: ["Improves peaceful expansion."],
+                referenceKeys: [],
+            },
+            ...["I", "II", "III", "IV", "V"].map((suffix) => ({
+                exportKind: "tech",
+                entryKey: `Tech_Aspect_${suffix}`,
+                displayName: `Aspect Tech ${suffix}`,
+                descriptionLines: [`Aspect tech ${suffix}.`],
+                referenceKeys: ["Faction_Aspect"],
+            })),
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Polemephon",
+                displayName: "Polemephon",
+                descriptionLines: ["Faction hero."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_AspectDiplomat",
+                displayName: "Aspect Diplomat",
+                descriptionLines: ["Reverse faction hero."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            ...["01", "02", "03", "04"].map((suffix) => ({
+                exportKind: "quests",
+                entryKey: `FactionQuest_Aspect_Chapter${suffix}_Step01`,
+                displayName: suffix === "02" ? "Aspect Quest 01" : `Aspect Quest ${suffix}`,
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: [`Quest ${suffix}.`],
+                referenceKeys: ["Faction_Aspect"],
+            })),
+            {
+                exportKind: "councilors",
+                entryKey: "Councilor_Aspect",
+                displayName: "Aspect Speaker",
+                descriptionLines: ["Council support."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            {
+                exportKind: "bonuses",
+                entryKey: "Status_AspectCalm",
+                displayName: "Aspect Calm",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["A public status."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Diplomat",
+                displayName: "Diplomat",
+                descriptionLines: ["Exact trait ref stays out of the package prototype."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "Action_AspectParley",
+                displayName: "Aspect Parley",
+                descriptionLines: ["Exact action ref stays out of the package prototype."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Klax",
+                displayName: "Klax",
+                descriptionLines: ["Exact resource ref stays out of the package prototype."],
+                referenceKeys: ["Faction_Aspect"],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=Faction_Aspect"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(packageSection).getByText("Population")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Faction Techs")).toBeInTheDocument();
+        expect(within(packageSection).getAllByText("Heroes").length).toBeGreaterThan(0);
+        expect(within(packageSection).getByText("Questline")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Councilors")).toBeInTheDocument();
+        expect(within(packageSection).getAllByText("Statuses").length).toBeGreaterThan(0);
+
+        expect(within(packageSection).getByRole("button", { name: /Sentry/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Envoy/ })).toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Reverse Specialist/ })).not.toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Common Rights/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Aspect Tech III/ })).toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Aspect Tech IV/ })).not.toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 4 of 6 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).getAllByRole("button", { name: /Aspect Quest 01/ })).toHaveLength(1);
+        expect(within(packageSection).getByRole("button", { name: /Aspect Quest 04/ })).toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 3 of 4 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /^Diplomat\b/ })).not.toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /^Aspect Parley\b/ })).not.toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /^Klax\b/ })).not.toBeInTheDocument();
+
+        const relatedSection = within(detailPane).getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /Sentry/ })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /Common Rights/ })).toBeInTheDocument();
+
+        await user.click(within(packageSection).getByRole("button", { name: /Sentry/ }));
+        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_Sentry");
+    });
+
+    it("uses associated unit labeling for sparse faction pages and keeps text-only mentions plain", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Mukag",
+                displayName: "Faction_Mukag",
+                descriptionLines: [
+                    "Affinity: Mukag",
+                    "Trait: Ashen Dream",
+                    "Action: Call the Mist",
+                    "Resource: Glasssteel",
+                ],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_TahukGuard",
+                displayName: "Tahuk Guard",
+                descriptionLines: ["Defensive faction unit."],
+                referenceKeys: ["Faction_Mukag"],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_TahukRites",
+                displayName: "Tahuk Rites",
+                descriptionLines: ["Associated technology."],
+                referenceKeys: ["Faction_Mukag"],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Mukag_Chapter01_Step01",
+                displayName: "Tahuk Quest",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["First Tahuk quest."],
+                referenceKeys: ["Faction_Mukag"],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_AshenDream",
+                displayName: "Ashen Dream",
+                descriptionLines: ["Trait should not be promoted by text."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "Action_CallTheMist",
+                displayName: "Call the Mist",
+                descriptionLines: ["Action should not be promoted by text."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Glasssteel",
+                displayName: "Glasssteel",
+                descriptionLines: ["Resource should not be promoted by text."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=Faction_Mukag"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(packageSection).getByText("Associated Units")).toBeInTheDocument();
+        expect(within(packageSection).queryByText("Core Units")).not.toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Tahuk Guard/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Tahuk Rites/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Tahuk Quest/ })).toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Ashen Dream/ })).not.toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Call the Mist/ })).not.toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Glasssteel/ })).not.toBeInTheDocument();
+    });
+
     it("renders equipment codex entries as structured dossiers from current description lines", async () => {
         const entries: CodexEntry[] = [
             {
