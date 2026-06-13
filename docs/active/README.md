@@ -21,6 +21,11 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 - `codex-relationship-value-gap-audit.md` - current diagnostic report for
   player-important Codex relationships that are missing, text-only, unresolved,
   or not linkable.
+- `codex-category-review-matrix.md` - current category-by-category Codex
+  product/implementation matrix, including owner split, recommended treatment,
+  risk, player value, and examples.
+- `codex-category-jira-backlog.md` - grouped Jira-style backlog for remaining
+  Codex category/product/data work.
 
 ## Archived Codex Context
 
