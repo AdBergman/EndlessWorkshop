@@ -68,8 +68,9 @@ Latest content-quality diagnostic run, 2026-06-13:
 - Interpretation: current EWShop rendering already prefers exported facts and
   sections and suppresses duplicate fallback description lines for metadata-rich
   entries, so the raw duplicate-line count is mostly not a current UI defect.
-- Current EWShop opportunity: reduce repeated structured preview taxonomy in
-  result rows, autocomplete, and related chips.
+- Current EWShop status: repeated exact structured preview taxonomy is
+  suppressed in compact summaries, so equipment and status previews spend more
+  space on player-useful differentiators.
 - Current exporter/editorial opportunity: add player context to
   classification-only entries and replace raw key-like values in public fields.
 
@@ -89,12 +90,9 @@ Actionable next items:
 5. Keep current text-prefix parsing as fallback only for older exports.
 6. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-7. Continue EWShop product polish on repeated structured preview taxonomy in
-   search result rows, autocomplete, and related chips before cross-link
-   expansion.
-8. Continue product review on noisy or low-value related links and category
+7. Continue product review on noisy or low-value related links and category
    labels with real imported data before cross-link expansion.
-9. Do not expose Modifiers in top-level Codex navigation without product review.
+8. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
 

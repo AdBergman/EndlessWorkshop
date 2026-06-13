@@ -179,6 +179,18 @@ function appendMinorFactionAssociatedContent(
     return out;
 }
 
+function dedupeSummaryParts(summaryParts: string[]): string[] {
+    const seen = new Set<string>();
+
+    return summaryParts.filter((part) => {
+        const key = normalizeComparable(part);
+        if (seen.has(key)) return false;
+
+        seen.add(key);
+        return true;
+    });
+}
+
 function splitPrefixedLine(line: string): { label: string; value: string } | null {
     const match = line.match(/^([^:]{2,48}):\s*(.+)$/);
     if (!match) return null;
@@ -575,9 +587,10 @@ export function getCodexStructuredSummary(
     const enrichedSummaryParts = kind === "minorfactions"
         ? appendMinorFactionAssociatedContent(parsed, summaryParts)
         : summaryParts;
+    const uniqueSummaryParts = dedupeSummaryParts(enrichedSummaryParts);
 
-    if (enrichedSummaryParts.length > 0) {
-        return enrichedSummaryParts.slice(0, 4).join(" / ");
+    if (uniqueSummaryParts.length > 0) {
+        return uniqueSummaryParts.slice(0, 4).join(" / ");
     }
 
     if (kind === "populations" && parsed.timeline.length > 0) {

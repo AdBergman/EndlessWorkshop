@@ -227,6 +227,35 @@ describe("codexStructuredDescription", () => {
         })).toBe("Turn / -50% / Cost Modifier");
     });
 
+    it("deduplicates repeated compact summary facts without hiding detail facts", () => {
+        const equipment = {
+            ...entry("equipment", []),
+            facts: [
+                { label: "Type", value: "Armor" },
+                { label: "Slot", value: "Armor" },
+                { label: "Rarity", value: "Common" },
+                { label: "Tier", value: "0" },
+            ],
+        };
+
+        expect(getCodexStructuredSummary(equipment)).toBe("Armor / Common / Tier Base");
+        expect(parseCodexStructuredDescription(equipment).facts.map((fact) => `${fact.label}=${fact.value}`)).toEqual([
+            "Type=Armor",
+            "Slot=Armor",
+            "Rarity=Common",
+            "Tier=Base",
+        ]);
+
+        expect(getCodexStructuredSummary({
+            ...entry("statuses", []),
+            facts: [
+                { label: "Category", value: "Status" },
+                { label: "Kind", value: "Status" },
+                { label: "Duration", value: "10 turns" },
+            ],
+        })).toBe("Status / 10 turns");
+    });
+
     it("formats raw content facts into player-facing labels and values", () => {
         expect(parseCodexStructuredDescription({
             ...entry("diplomatictreaties", []),
