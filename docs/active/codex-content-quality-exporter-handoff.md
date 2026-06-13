@@ -8,6 +8,23 @@ This is the current DB exporter/editorial Codex handoff. Older Codex metadata
 coverage and reference-kind handoffs are archived under `docs/archive/codex/`
 and should be treated as historical context only.
 
+Latest status, 2026-06-13: the current exporter batch supersedes several
+counts and examples below. EWShop import/API compatibility has been validated
+against the latest local exports, and the bonus descriptor/tag target cleanup no
+longer appears in product Codex output. Before sending a new exporter request,
+regenerate diagnostics against current local imports and use
+`docs/active/ewshop-current-export-handoff.md` for current batch context.
+
+Latest diagnostic snapshot against current local imports:
+
+- Entries: `2459`
+- Findings: `3423`
+- High: `250`
+- Medium: `3173`
+- EWShop-owned duplicate fact/line presentation findings: `3173`
+- Exporter/editorial missing-context or raw-text findings: `250`
+- Critical placeholder findings: `0`
+
 ## Purpose
 
 EWShop can now render and polish the current Codex metadata, but the next

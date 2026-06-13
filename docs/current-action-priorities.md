@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-12.
+Current as of 2026-06-13.
 
 This list reflects the current product focus:
 
@@ -16,19 +16,21 @@ Status: EWShop baseline Codex metadata adoption and presentation polish are
 complete for the current local imports. Actions and Diplomatic Treaties are
 visible Codex categories, bonus-derived Statuses are visible, and bonus-derived
 Modifiers remain hidden from top-level navigation while staying
-searchable/linkable as exact targets. The current exporter-facing work is
-player-facing content quality, not metadata plumbing or broad EWShop scaffolding.
+searchable/linkable as exact targets. The latest exporter batch imported and
+served through the current Spring Boot/API path without a Codex importer
+migration. The current work is player-facing content quality, not metadata
+plumbing or broad EWShop scaffolding.
 
 Verified local Codex metadata coverage:
 
 | Codex export | Entries | With facts | With sections | With public context keys |
 | --- | ---: | ---: | ---: | ---: |
-| `abilities` | 336 | 336 | 305 | 336 |
-| `actions` | 145 | 145 | 52 | 145 |
+| `abilities` | 336 | 336 | 310 | 336 |
+| `actions` | 139 | 139 | 52 | 139 |
 | `bonuses` | 585 | 585 | 552 | 585 |
-| `councilors` | 46 | 46 | 41 | 46 |
+| `councilors` | 43 | 43 | 40 | 43 |
 | `diplomaticTreaties` | 22 | 22 | 8 | 22 |
-| `districts` | 167 | 167 | 79 | 167 |
+| `districts` | 167 | 167 | 76 | 167 |
 | `equipment` | 159 | 159 | 159 | 159 |
 | `factions` | 5 | 5 | 5 | 5 |
 | `heroes` | 79 | 79 | 79 | 79 |
@@ -36,8 +38,8 @@ Verified local Codex metadata coverage:
 | `minorFactions` | 16 | 16 | 16 | 16 |
 | `populations` | 26 | 26 | 25 | 26 |
 | `quests` | 292 | 292 | 292 | 292 |
-| `tech` | 133 | 133 | 98 | 133 |
-| `traits` | 178 | 178 | 132 | 178 |
+| `tech` | 133 | 133 | 97 | 133 |
+| `traits` | 178 | 178 | 130 | 178 |
 | `units` | 156 | 156 | 156 | 156 |
 
 `bonuses` remains a source export. EWShop presents bonus-derived Statuses as a
@@ -46,16 +48,20 @@ navigation while preserving search/link targets.
 
 Actionable next items:
 
-1. Use `docs/active/codex-content-quality-exporter-handoff.md` as the current
-   DB exporter/editorial handoff.
-2. Use `docs/active/codex-content-quality-diagnostics.md` to regenerate current
-   evidence from local imports before sending follow-up requests.
-3. Keep current text-prefix parsing as fallback only for older exports.
-4. Treat baseline Codex metadata preservation, rendering, category exposure,
+1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
+   import/product review handoff.
+2. Use `docs/active/bonuses-descriptor-target-correction-final-20260613_validation.md`
+   as the latest exporter validation evidence for bonus descriptor/tag target
+   cleanup.
+3. Treat older `codex-content-quality-*` diagnostics and handoffs as active
+   workflows or historical evidence only after regenerating them against the
+   current local imports.
+4. Keep current text-prefix parsing as fallback only for older exports.
+5. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-5. Before cross-link expansion, run product review on search/discovery and
+6. Before cross-link expansion, run product review on search/discovery and
    related-entry behavior with real imported data.
-6. Do not expose Modifiers in top-level Codex navigation without product review.
+7. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
 

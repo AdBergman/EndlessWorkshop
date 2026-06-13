@@ -1607,6 +1607,45 @@ describe("CodexPage", () => {
         expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
     });
 
+    it("flags action entries that only expose classification metadata", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeClassificationOnly",
+                displayName: "Classification Only Action",
+                category: "Empire Action",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Empire Action" },
+                    { label: "Kind", value: "Action" },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeClassificationOnly"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Classification Only Action" })).toBeInTheDocument();
+        expect(screen.getByText("Empire Action")).toBeInTheDocument();
+        expect(screen.getByText("No public gameplay summary has been added for this action yet.")).toBeInTheDocument();
+    });
+
     it("browses and renders representative diplomatic treaty entries through generic metadata", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [

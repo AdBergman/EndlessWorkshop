@@ -94,6 +94,20 @@ function emptyMessageFor(kind: string): string {
     }
 }
 
+function hasOnlyClassificationFacts(parsed: ReturnType<typeof parseCodexStructuredDescription>): boolean {
+    if (
+        parsed.facts.length === 0 ||
+        parsed.sections.length > 0 ||
+        parsed.timeline.length > 0 ||
+        parsed.bodyLines.length > 0
+    ) {
+        return false;
+    }
+
+    const classificationLabels = new Set(["category", "kind"]);
+    return parsed.facts.every((fact) => classificationLabels.has(fact.label.trim().toLowerCase()));
+}
+
 export default function CodexStructuredDetail({ entry }: Props) {
     const parsed = useMemo(
         () => parseCodexStructuredDescription(entry),
@@ -101,6 +115,7 @@ export default function CodexStructuredDetail({ entry }: Props) {
     );
     const descriptionLines = entry.descriptionLines ?? [];
     const hasDescription = descriptionLines.some((line) => line.trim().length > 0);
+    const hasOnlyClassificationMetadata = hasOnlyClassificationFacts(parsed);
 
     if (!parsed.hasStructuredContent) {
         return (
@@ -199,6 +214,10 @@ export default function CodexStructuredDetail({ entry }: Props) {
                         ))}
                     </div>
                 </section>
+            ) : null}
+
+            {hasOnlyClassificationMetadata ? (
+                <p className="codex-detail__placeholder">{emptyMessageFor(entry.exportKind)}</p>
             ) : null}
         </section>
     );
