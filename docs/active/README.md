@@ -26,6 +26,9 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
   risk, player value, and examples.
 - `codex-category-jira-backlog.md` - grouped Jira-style backlog for remaining
   Codex category/product/data work.
+- `codex-db-exporter-implementation-packets.md` - triaged DB
+  exporter/backend/editorial implementation packets for the Codex category
+  backlog.
 
 ## Archived Codex Context
 
