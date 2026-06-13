@@ -5,9 +5,7 @@ import {
     formatCodexMajorFactionText,
     stripCodexDescriptionLine,
 } from "@/lib/codex/codexPresentation";
-import type {
-    CodexUnitGrantedAbilityPreview as GrantedAbilityPreview,
-} from "@/lib/codex/codexUnitGrantedAbilities";
+import type { CodexGrantedAbilityPreview as GrantedAbilityPreview } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 
 type Props = {
@@ -15,7 +13,7 @@ type Props = {
     onSelect: (entry: GrantedAbilityPreview["ability"]) => void;
 };
 
-export default function CodexUnitGrantedAbilityPreview({ preview, onSelect }: Props) {
+export default function CodexGrantedAbilityPreview({ preview, onSelect }: Props) {
     const kindLabel = formatCodexKindLabel(preview.ability.exportKind);
     const accessibilityLabel = [
         preview.label,

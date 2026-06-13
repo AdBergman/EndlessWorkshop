@@ -7,14 +7,14 @@ import {
     type CodexAbilityInlineLinkCandidate,
 } from "@/lib/codex/codexAbilityInlineLinks";
 import {
-    buildUnitGrantedAbilityPreview,
-    isUnitGrantedAbilitiesSection,
-} from "@/lib/codex/codexUnitGrantedAbilities";
+    buildGrantedAbilityPreview,
+    isGrantedAbilityPreviewSection,
+} from "@/lib/codex/codexGrantedAbilityPreviews";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
-import CodexUnitGrantedAbilityPreview from "./CodexUnitGrantedAbilityPreview";
+import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
 
 type Props = {
     entry: CodexEntry;
@@ -112,13 +112,13 @@ function StructuredSectionItem({
     sectionLabel: string;
     relatedEntries: CodexEntry[];
 }) {
-    const grantedAbilityPreview = isUnitGrantedAbilitiesSection(entry, sectionLabel)
-        ? buildUnitGrantedAbilityPreview(item, relatedEntries)
+    const grantedAbilityPreview = isGrantedAbilityPreviewSection(entry, sectionLabel)
+        ? buildGrantedAbilityPreview(item, relatedEntries)
         : null;
 
     if (grantedAbilityPreview && onSelectInlineEntry) {
         return (
-            <CodexUnitGrantedAbilityPreview
+            <CodexGrantedAbilityPreview
                 preview={grantedAbilityPreview}
                 onSelect={onSelectInlineEntry}
             />

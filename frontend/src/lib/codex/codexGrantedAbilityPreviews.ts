@@ -6,12 +6,14 @@ import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDesc
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import type { CodexEntry } from "@/types/dataTypes";
 
-export type CodexUnitGrantedAbilityPreview = {
+export type CodexGrantedAbilityPreview = {
     ability: CodexEntry;
     label: string;
     metadata: string;
     effectLine: string;
 };
+
+const GRANTED_ABILITY_PREVIEW_KINDS = new Set(["equipment", "units"]);
 
 function normalizeKind(kind: string): string {
     return kind.trim().toLowerCase();
@@ -29,15 +31,15 @@ function firstSectionLine(entry: CodexEntry, label: string): string {
     return section?.lines.find((line) => line.trim().length > 0) ?? "";
 }
 
-export function isUnitGrantedAbilitiesSection(entry: CodexEntry, sectionLabel: string): boolean {
-    return normalizeKind(entry.exportKind) === "units" &&
+export function isGrantedAbilityPreviewSection(entry: CodexEntry, sectionLabel: string): boolean {
+    return GRANTED_ABILITY_PREVIEW_KINDS.has(normalizeKind(entry.exportKind)) &&
         sectionLabel.trim().toLowerCase() === "granted abilities";
 }
 
-export function buildUnitGrantedAbilityPreview(
+export function buildGrantedAbilityPreview(
     item: CodexStructuredSectionItem,
     relatedEntries: CodexEntry[]
-): CodexUnitGrantedAbilityPreview | null {
+): CodexGrantedAbilityPreview | null {
     const referenceKey = item.referenceKey?.trim();
     if (!referenceKey) return null;
 
@@ -54,22 +56,22 @@ export function buildUnitGrantedAbilityPreview(
     };
 }
 
-export function getDisplayedUnitGrantedAbilityKeys(
+export function getDisplayedGrantedAbilityKeys(
     entry: CodexEntry,
     relatedEntries: CodexEntry[]
 ): Set<string> {
     const displayedAbilityKeys = new Set<string>();
-    if (normalizeKind(entry.exportKind) !== "units") {
+    if (!GRANTED_ABILITY_PREVIEW_KINDS.has(normalizeKind(entry.exportKind))) {
         return displayedAbilityKeys;
     }
 
     const parsed = parseCodexStructuredDescription(entry);
 
     for (const section of parsed.sections) {
-        if (!isUnitGrantedAbilitiesSection(entry, section.label)) continue;
+        if (!isGrantedAbilityPreviewSection(entry, section.label)) continue;
 
         for (const item of section.items ?? []) {
-            const preview = buildUnitGrantedAbilityPreview(item, relatedEntries);
+            const preview = buildGrantedAbilityPreview(item, relatedEntries);
             if (preview) {
                 displayedAbilityKeys.add(preview.ability.entryKey);
             }

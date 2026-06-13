@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-    buildUnitGrantedAbilityPreview,
-    getDisplayedUnitGrantedAbilityKeys,
-    isUnitGrantedAbilitiesSection,
-} from "./codexUnitGrantedAbilities";
+    buildGrantedAbilityPreview,
+    getDisplayedGrantedAbilityKeys,
+    isGrantedAbilityPreviewSection,
+} from "./codexGrantedAbilityPreviews";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "./codexStructuredDescription";
 
@@ -28,15 +28,16 @@ function item(overrides: Partial<CodexStructuredSectionItem>): CodexStructuredSe
     };
 }
 
-describe("codexUnitGrantedAbilities", () => {
-    it("recognizes only Unit granted ability sections", () => {
-        expect(isUnitGrantedAbilitiesSection(entry({ exportKind: "units" }), "Granted abilities")).toBe(true);
-        expect(isUnitGrantedAbilitiesSection(entry({ exportKind: "equipment" }), "Granted abilities")).toBe(false);
-        expect(isUnitGrantedAbilitiesSection(entry({ exportKind: "units" }), "Stats")).toBe(false);
+describe("codexGrantedAbilityPreviews", () => {
+    it("recognizes only supported granted ability sections", () => {
+        expect(isGrantedAbilityPreviewSection(entry({ exportKind: "units" }), "Granted abilities")).toBe(true);
+        expect(isGrantedAbilityPreviewSection(entry({ exportKind: "equipment" }), "Granted abilities")).toBe(true);
+        expect(isGrantedAbilityPreviewSection(entry({ exportKind: "traits" }), "Granted abilities")).toBe(false);
+        expect(isGrantedAbilityPreviewSection(entry({ exportKind: "units" }), "Stats")).toBe(false);
     });
 
     it("builds previews from resolved related Ability entries", () => {
-        const preview = buildUnitGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Ranged_3" }), [
+        const preview = buildGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Ranged_3" }), [
             entry({
                 exportKind: "abilities",
                 entryKey: "UnitAbility_Ranged_3",
@@ -55,9 +56,9 @@ describe("codexUnitGrantedAbilities", () => {
     });
 
     it("ignores unresolved or non-Ability related entries", () => {
-        expect(buildUnitGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Missing" }), [])).toBeNull();
+        expect(buildGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Missing" }), [])).toBeNull();
         expect(
-            buildUnitGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Ranged_3" }), [
+            buildGrantedAbilityPreview(item({ referenceKey: "UnitAbility_Ranged_3" }), [
                 entry({
                     exportKind: "statuses",
                     entryKey: "UnitAbility_Ranged_3",
@@ -80,7 +81,7 @@ describe("codexUnitGrantedAbilities", () => {
                 },
             ],
         });
-        const displayedKeys = getDisplayedUnitGrantedAbilityKeys(unit, [
+        const displayedKeys = getDisplayedGrantedAbilityKeys(unit, [
             entry({
                 exportKind: "abilities",
                 entryKey: "UnitAbility_Ranged_3",
@@ -99,6 +100,43 @@ describe("codexUnitGrantedAbilities", () => {
         ]);
 
         expect([...displayedKeys]).toEqual(["UnitAbility_Ranged_3"]);
-        expect(getDisplayedUnitGrantedAbilityKeys(entry({ exportKind: "equipment" }), [])).toEqual(new Set());
+        expect(getDisplayedGrantedAbilityKeys(entry({ exportKind: "traits" }), [])).toEqual(new Set());
+    });
+
+    it("collects only resolved granted abilities that can be shown on Equipment details", () => {
+        const equipment = entry({
+            exportKind: "equipment",
+            entryKey: "Equipment_Bow_Test",
+            displayName: "Test Bow",
+            sections: [
+                {
+                    title: "Granted abilities",
+                    items: [
+                        { label: "Breaching Attack I", referenceKey: "UnitAbility_BreachingAttack_1" },
+                        { label: "Missing Ability", referenceKey: "UnitAbility_Missing" },
+                    ],
+                },
+            ],
+        });
+
+        const displayedKeys = getDisplayedGrantedAbilityKeys(equipment, [
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_BreachingAttack_1",
+                displayName: "Breaching Attack I",
+                category: "Combat",
+                kind: "Ability",
+                sections: [{ title: "Effects", lines: ["Applies Vulnerable I Status to targeted Units"] }],
+            }),
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+            }),
+        ]);
+
+        expect([...displayedKeys]).toEqual(["UnitAbility_BreachingAttack_1"]);
     });
 });

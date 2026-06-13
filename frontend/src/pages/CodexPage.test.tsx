@@ -666,6 +666,151 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_TeamPlayer_1");
     });
 
+    it("previews resolved granted abilities on Equipment details without repeating them in Related Entries", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_BloodmarkBow",
+                displayName: "Bloodmark Bow",
+                kind: "Bow",
+                category: "Weapon",
+                descriptionLines: [],
+                referenceKeys: [
+                    "UnitAbility_Ranged_4",
+                    "UnitAbility_BreachingAttack_1",
+                    "UnitAbility_Missing",
+                    "UnitAbility_Scouting",
+                    "Faction_LastLords",
+                ],
+                facts: [
+                    { label: "Kind", value: "Bow" },
+                    { label: "Slot", value: "Weapon" },
+                    { label: "Tier", value: "3" },
+                ],
+                sections: [
+                    {
+                        title: "Granted abilities",
+                        items: [
+                            { label: "Ranged IV", referenceKey: "UnitAbility_Ranged_4" },
+                            { label: "Breaching Attack I", referenceKey: "UnitAbility_BreachingAttack_1" },
+                            { label: "Unresolved Strike", referenceKey: "UnitAbility_Missing" },
+                        ],
+                    },
+                    {
+                        title: "Stats",
+                        lines: ["+70 [Damage] Damage"],
+                    },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Ranged_4",
+                displayName: "Ranged IV",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+4 [AttackRange] Attack Range"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+4 [AttackRange] Attack Range"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_BreachingAttack_1",
+                displayName: "Breaching Attack I",
+                category: "Combat",
+                kind: "Ability",
+                descriptionLines: ["Applies Vulnerable I Status to targeted Units"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Combat" },
+                ],
+                sections: [{ title: "Effects", lines: ["Applies Vulnerable I Status to targeted Units"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+1 [VisionRange] Vision Range"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+1 [VisionRange] Vision Range"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_LastLords",
+                displayName: "Last Lords",
+                category: "Last Lords",
+                kind: "Faction",
+                descriptionLines: ["Faction overview."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                equipment: entries.filter((entry) => entry.exportKind === "equipment"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+                factions: entries.filter((entry) => entry.exportKind === "factions"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment&entry=Equipment_BloodmarkBow"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Bloodmark Bow" })).toBeInTheDocument();
+
+        const rangedPreview = screen.getByRole("button", { name: "Ranged IV Passive / Ability +4 Attack Range" });
+        expect(rangedPreview).toHaveTextContent("Ranged IV");
+        expect(rangedPreview).toHaveTextContent("+4 Attack Range");
+        expect(rangedPreview).not.toHaveTextContent("[AttackRange]");
+
+        const breachingPreview = screen.getByRole("button", {
+            name: "Breaching Attack I Combat / Ability Applies Vulnerable I Status to targeted Units",
+        });
+        expect(breachingPreview).toHaveTextContent("Combat / Ability");
+        expect(breachingPreview).toHaveTextContent("Applies Vulnerable I Status to targeted Units");
+
+        expect(screen.getByRole("heading", { name: "Unresolved Strike" })).toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).queryByRole("button", { name: /ranged iv abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /breaching attack i abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /scouting abilities/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /last lords factions/i })).toBeInTheDocument();
+
+        await user.click(breachingPreview);
+        expect(await screen.findByRole("heading", { name: "Breaching Attack I" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack_1");
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {
