@@ -19,35 +19,36 @@ Preview-surface meanings:
 
 Already proven and covered: Ability -> applied Status inline links, Unit ->
 granted Ability compact previews, and Equipment -> granted Ability compact
-previews.
+previews. Hero -> granted Ability compact previews are now also implemented for
+resolved Ability refs; unresolved Hero ability refs remain exporter/editorial
+follow-up rather than frontend inference work.
 
 ## Top 10 Candidate Ranking
 
 | Rank | Source | Relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status | Examples |
 | ---: | --- | --- | --- | ---: | --- | ---: | ---: | --- | --- | --- |
-| 1 | heroes | Granted abilities | compact rendered preview | 19 | 27/31 resolved, 4 unresolved, 31 duplicate structured refs | 8 | 3 | EWShop | Candidate | Clar'usta (Elder_MinorFaction_GreenScion)<br>Plin and Berlior (Elder_MinorFaction_HoyAndLadhran)<br>Omangi Sizielu (Elder_MinorFaction_Noquensii) |
-| 2 | populations | Threshold reward targets | one-line summary/card | 25 | 54/54 resolved, 0 unresolved, 54 duplicate structured refs | 7 | 4 | EWShop | Candidate for exact reward-target summaries | Aspect (Population_Aspect)<br>Called Population (Population_Called)<br>Divine Population (Population_Divined) |
-| 3 | factions | Related Status/effect entries | one-line summary/card | 1 | 2/4 resolved, 2 unresolved, 0 duplicate structured refs | 6 | 5 | Both | Needs product review to avoid bloat | Necrophages (Faction_Necrophage) |
-| 4 | traits | Unlock relationships | one-line summary/card | 44 | 1/11 resolved, 10 unresolved, 11 duplicate structured refs | 5 | 4 | EWShop | Candidate after preview-surface product review | Harmonious Tactics (FactionTrait_Aspects_BattleAffinity)<br>Deadly Corals (FactionTrait_Aspects_Chapter05AStep01_FactionQuest)<br>Radiance (FactionTrait_Aspects_Chapter05AStep02_FactionQuest) |
-| 5 | diplomatictreaties | Related Status/effect entries | compact rendered preview | 6 | 14/35 resolved, 21 unresolved, 0 duplicate structured refs | 5 | 6 | Both | Needs product review to avoid bloat | Close Borders (Declaration_CloseBorders)<br>Embrace Symbiosis (Declaration_EmbraceCoralSymbiosis)<br>Coral Siphon (Declaration_FactionQuest_Aspect_Chapter06AStep02) |
-| 6 | quests | Faction references | one-line summary/card | 166 | 332/810 resolved, 478 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | The Great Dieback (FactionQuest_Aspect_Chapter01_Step01)<br>The Great Dieback (FactionQuest_Aspect_Chapter01_Step02)<br>Not of the Chorus (FactionQuest_Aspect_Chapter02_Step01) |
-| 7 | units | Faction references | one-line summary/card | 101 | 202/202 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Skyscale (Unit_Aspect_Giant)<br>Brightscale (Unit_Aspect_Giant_SpecializationA)<br>Scales of Balance (Unit_Aspect_Giant_SpecializationA_Upgraded) |
-| 8 | tech | Faction references | one-line summary/card | 60 | 120/122 resolved, 2 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Asceticism (Aspect_Technology_00)<br>Foreign Affairs (Aspect_Technology_MinorFaction_Protectorate_00)<br>The Strength of Garin (KinOfSheredyn_Technology_04) |
-| 9 | heroes | Faction references | one-line summary/card | 41 | 82/82 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Polemephon, the Steadfast (Hero_Aspect_Archer_0)<br>Mitoxus of Agora (Hero_Aspect_Archer_1)<br>Xenos (Hero_Aspect_Archer_2) |
-| 10 | councilors | Faction references | one-line summary/card | 10 | 20/20 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Diogen, the Inquisitive (Notable_CityManagement_Event018_Reward)<br>Axios, the Possessed (Notable_EndGameNarrative_Event012_Puppet)<br>Rzeld (Notable_FactionQuest_KinOfSheredyn_Chapter03_Rzeld) |
+| 1 | populations | Threshold reward targets | one-line summary/card | 25 | 54/54 resolved, 0 unresolved, 54 duplicate structured refs | 7 | 4 | EWShop | Candidate for exact reward-target summaries | Aspect (Population_Aspect)<br>Called Population (Population_Called)<br>Divine Population (Population_Divined) |
+| 2 | factions | Related Status/effect entries | one-line summary/card | 1 | 2/4 resolved, 2 unresolved, 0 duplicate structured refs | 6 | 5 | Both | Needs product review to avoid bloat | Necrophages (Faction_Necrophage) |
+| 3 | traits | Unlock relationships | one-line summary/card | 44 | 1/11 resolved, 10 unresolved, 11 duplicate structured refs | 5 | 4 | EWShop | Candidate after preview-surface product review | Harmonious Tactics (FactionTrait_Aspects_BattleAffinity)<br>Deadly Corals (FactionTrait_Aspects_Chapter05AStep01_FactionQuest)<br>Radiance (FactionTrait_Aspects_Chapter05AStep02_FactionQuest) |
+| 4 | diplomatictreaties | Related Status/effect entries | compact rendered preview | 6 | 14/35 resolved, 21 unresolved, 0 duplicate structured refs | 5 | 6 | Both | Needs product review to avoid bloat | Close Borders (Declaration_CloseBorders)<br>Embrace Symbiosis (Declaration_EmbraceCoralSymbiosis)<br>Coral Siphon (Declaration_FactionQuest_Aspect_Chapter06AStep02) |
+| 5 | quests | Faction references | one-line summary/card | 166 | 332/810 resolved, 478 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | The Great Dieback (FactionQuest_Aspect_Chapter01_Step01)<br>The Great Dieback (FactionQuest_Aspect_Chapter01_Step02)<br>Not of the Chorus (FactionQuest_Aspect_Chapter02_Step01) |
+| 6 | units | Faction references | one-line summary/card | 101 | 202/202 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Skyscale (Unit_Aspect_Giant)<br>Brightscale (Unit_Aspect_Giant_SpecializationA)<br>Scales of Balance (Unit_Aspect_Giant_SpecializationA_Upgraded) |
+| 7 | tech | Faction references | one-line summary/card | 60 | 120/122 resolved, 2 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Asceticism (Aspect_Technology_00)<br>Foreign Affairs (Aspect_Technology_MinorFaction_Protectorate_00)<br>The Strength of Garin (KinOfSheredyn_Technology_04) |
+| 8 | heroes | Faction references | one-line summary/card | 41 | 82/82 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Polemephon, the Steadfast (Hero_Aspect_Archer_0)<br>Mitoxus of Agora (Hero_Aspect_Archer_1)<br>Xenos (Hero_Aspect_Archer_2) |
+| 9 | councilors | Faction references | one-line summary/card | 10 | 20/20 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Diogen, the Inquisitive (Notable_CityManagement_Event018_Reward)<br>Axios, the Possessed (Notable_EndGameNarrative_Event012_Puppet)<br>Rzeld (Notable_FactionQuest_KinOfSheredyn_Chapter03_Rzeld) |
 
-## Recommended Next 3 Implementation Candidates After Equipment
+## Recommended Next Implementation Candidates
 
-1. Heroes -> Granted abilities: compact preview rows. This reuses the proven
-   granted-Ability pattern, has mostly resolved data, and answers what a hero
-   actually brings to battle.
-2. Populations -> threshold reward targets: one-line summaries/cards for
+1. Populations -> threshold reward targets: one-line summaries/cards for
    exact reward refs. This helps players compare population breakpoints
    without opening every reward target.
-3. Diplomatic Treaty -> related Status/effect entries: prototype only if a
+2. Diplomatic Treaty -> related Status/effect entries: prototype only if a
    focused treaty review still shows player confusion after direct Effects
    text and related chips. Prefer one-line effect summaries over inline
    expansion.
+3. Traits -> unlock relationships: review before implementation. Current
+   exact-key coverage is thin, so this may become an exporter/editorial
+   follow-up rather than EWShop UI work.
 
 Diplomatic Treaty -> Status/effect preview remains lower priority: the local
 data is narrow, several treaties already have direct Effects text, and the
@@ -296,7 +297,7 @@ Facts-only/no mechanics entries: 0/79 entries.
 
 | Candidate relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status |
 | --- | --- | ---: | --- | ---: | ---: | --- | --- |
-| Granted abilities | compact rendered preview | 19 | 27/31 resolved, 4 unresolved, 31 duplicate structured refs | 8 | 3 | EWShop | Candidate |
+| Granted abilities | compact rendered preview | 19 | 27/31 resolved, 4 unresolved, 31 duplicate structured refs | 0 | 1 | None | Implemented by current granted Ability preview pattern; unresolved refs remain exporter/editorial follow-up |
 | Faction references | one-line summary/card | 41 | 82/82 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers |
 
 ### improvements
@@ -583,16 +584,15 @@ Facts-only/no mechanics entries: 0/156 entries.
 
 EWShop-owned opportunities:
 
-- Compact preview rows where exact structured refs are resolved and explain the
-  current entry, especially Heroes -> granted Abilities.
-- One-line summary/card treatment for exact unlock targets where the player is
-  choosing a plan, especially Tech unlocks.
+- One-line summary/card treatment where exact structured refs are resolved and
+  answer planning questions, especially Population threshold reward targets.
 - Suppressing duplicate related cards only when the same target is already
   shown in a local preview surface.
 
 DB exporter/editorial blockers:
 
-- Unresolved structured refs, especially Traits -> granted Abilities.
+- Unresolved structured refs, especially Traits -> granted Abilities and the
+  remaining unresolved Hero granted Abilities.
 - Facts-only entries with no player-facing mechanics or context.
 - Raw/internal text in public fields, tracked separately by the content-quality
   diagnostic and exporter/editorial handoff.

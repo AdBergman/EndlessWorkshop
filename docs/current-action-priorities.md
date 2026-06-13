@@ -65,21 +65,24 @@ Codex preview surfaces:
   exact applied Status mentions from resolved related Status entries.
 - Compact rendered preview: when the relation explains what the current entry
   does, render a small local preview instead of forcing the player to leave the
-  page. Current example: Unit pages render resolved Granted Abilities as compact
-  clickable rows with icon, metadata, and one exported effect line.
+  page. Current examples: Unit, Equipment, and Hero pages render resolved
+  Granted Abilities as compact clickable rows with icon, metadata, and one
+  exported effect line.
 - Large-subject summary/card: when the relation points to a broad encyclopedia
   subject, keep the surface to a one-line summary/card and let the player click
   through for depth. Current example: Faction references should stay summary
   oriented rather than expanding into faction dossiers inline.
-- Related Entries remain exploration, not repetition. Current example: Unit
-  pages hide Ability related-entry cards already represented by shown Granted
-  Ability preview rows, but keep unrelated Ability links and non-Ability links.
+- Related Entries remain exploration, not repetition. Current examples: Unit,
+  Equipment, and Hero pages hide Ability related-entry cards already represented
+  by shown Granted Ability preview rows, but keep unrelated Ability links and
+  non-Ability links.
 
 This is a product direction, not a generic renderer yet. Current code remains
 scoped to proven cases rather than a site-wide link/preview system. Future
 candidates worth product review: Diplomatic Treaty -> Status/effect preview,
-Equipment -> granted Ability preview, and Faction references -> one-line
-summary only.
+Population threshold reward target summaries, and Faction references ->
+one-line summary only. Unresolved Hero granted Ability refs remain
+exporter/editorial follow-up, not frontend inference work.
 
 The default all-category Codex overview now suppresses the giant mixed result
 pane until the player searches or chooses a category, keeping the first view
