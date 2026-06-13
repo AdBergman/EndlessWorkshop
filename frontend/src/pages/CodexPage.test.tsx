@@ -39,7 +39,7 @@ describe("CodexPage", () => {
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
         expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
         expect(screen.getByText("categories")).toBeInTheDocument();
-        expect(screen.getByText("Browse the archive by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        expect(screen.getByText("Browse by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Categories" })).toBeInTheDocument();
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(container.querySelector('img.codex-kindIcon--overview[src="/svg/factions/UI_Common_District.svg"]'))
@@ -150,7 +150,7 @@ describe("CodexPage", () => {
             expect(screen.getByRole("heading", { name: "All Districts" })).toBeInTheDocument();
         });
 
-        expect(screen.getByLabelText("2 records in view")).toBeInTheDocument();
+        expect(screen.getByLabelText("2 entries in view")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /all districts/i })).toBeInTheDocument();
         const summaryList = screen.getByLabelText("Districts overview");
         expect(within(summaryList).getByRole("button", { name: /market square/i })).toBeInTheDocument();

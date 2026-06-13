@@ -391,10 +391,10 @@ export default function CodexPage() {
                             </h2>
                         </div>
 
-                        <div className="codex-header__stats" aria-label="Codex archive statistics">
+                        <div className="codex-header__stats" aria-label="Codex encyclopedia statistics">
                             <span className="codex-header__stat">
                                 <strong>{entries.length}</strong>
-                                <span>records</span>
+                                <span>entries</span>
                             </span>
                             <span className="codex-header__stat">
                                 <strong>{filterOptions.length - 1}</strong>

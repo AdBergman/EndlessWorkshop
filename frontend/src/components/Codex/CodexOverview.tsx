@@ -24,7 +24,7 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
     improvements: "Constructed city upgrades and economic engines.",
     minorfactions: "Regional peoples, villages, and protectorates.",
     populations: "Citizen groups and settlement identities.",
-    quests: "Faction, world, and event quest records.",
+    quests: "Faction, world, and event questlines.",
     statuses: "Public conditions, reputation effects, and timed effects.",
     tech: "Technologies, unlocks, and progression systems.",
     traits: "Faction, hero, and systemic modifiers.",
@@ -32,7 +32,7 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
 };
 
 function descriptionFor(kind: string): string {
-    return KIND_DESCRIPTIONS[kind] ?? "Indexed game-data records.";
+    return KIND_DESCRIPTIONS[kind] ?? "Indexed game entries.";
 }
 
 export default function CodexOverview({ options, onSelectKind }: Props) {
@@ -49,11 +49,11 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                 </div>
                 <div className="codex-overview__total">
                     <span>{totalCount}</span>
-                    <small>records</small>
+                    <small>entries</small>
                 </div>
             </div>
             <p className="codex-overview__intro">
-                Browse the archive by category, then inspect descriptions and resolved related links.
+                Browse by category, then inspect descriptions and resolved related links.
             </p>
 
             <div className="codex-overview__indexHeader">

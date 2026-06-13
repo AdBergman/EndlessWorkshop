@@ -28,7 +28,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
             <div className="codex-summaryDossier">
                 <div className="codex-detail__metaRow">
                     <span className="codex-detail__kind">{summaryEntry.summaryLabel}</span>
-                    <span className="codex-detail__context">Archive dossier</span>
+                    <span className="codex-detail__context">Category overview</span>
                 </div>
 
                 <div className="codex-summaryDossier__hero">
@@ -41,10 +41,10 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
 
                     <div
                         className="codex-summaryDossier__count"
-                        aria-label={`${summaryEntry.summaryCount} records in view`}
+                        aria-label={`${summaryEntry.summaryCount} entries in view`}
                     >
                         <strong>{summaryEntry.summaryCount}</strong>
-                        <span>records</span>
+                        <span>entries</span>
                     </div>
                 </div>
             </div>

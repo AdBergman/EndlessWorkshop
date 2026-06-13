@@ -71,6 +71,9 @@ Latest content-quality diagnostic run, 2026-06-13:
 - Current EWShop status: repeated exact structured preview taxonomy is
   suppressed in compact summaries, so equipment and status previews spend more
   space on player-useful differentiators.
+- Current UI wording status: Codex overview and category summary surfaces now
+  use encyclopedia-style "entries" and "category overview" language instead of
+  database-oriented "records" labels.
 - Current exporter/editorial opportunity: add player context to
   classification-only entries and replace raw key-like values in public fields.
 
@@ -90,8 +93,8 @@ Actionable next items:
 5. Keep current text-prefix parsing as fallback only for older exports.
 6. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-7. Continue product review on noisy or low-value related links and category
-   labels with real imported data before cross-link expansion.
+7. Continue product review on noisy or low-value related links with real
+   imported data before cross-link expansion.
 8. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
