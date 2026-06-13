@@ -6,10 +6,15 @@ import {
     findAbilityInlineLinkMatch,
     type CodexAbilityInlineLinkCandidate,
 } from "@/lib/codex/codexAbilityInlineLinks";
+import {
+    buildUnitGrantedAbilityPreview,
+    isUnitGrantedAbilitiesSection,
+} from "@/lib/codex/codexUnitGrantedAbilities";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
+import CodexUnitGrantedAbilityPreview from "./CodexUnitGrantedAbilityPreview";
 
 type Props = {
     entry: CodexEntry;
@@ -96,11 +101,30 @@ function StructuredSectionItem({
     item,
     inlineLinkCandidates,
     onSelectInlineEntry,
+    entry,
+    sectionLabel,
+    relatedEntries,
 }: {
     item: CodexStructuredSectionItem;
     inlineLinkCandidates: CodexAbilityInlineLinkCandidate[];
     onSelectInlineEntry?: (entry: CodexEntry) => void;
+    entry: CodexEntry;
+    sectionLabel: string;
+    relatedEntries: CodexEntry[];
 }) {
+    const grantedAbilityPreview = isUnitGrantedAbilitiesSection(entry, sectionLabel)
+        ? buildUnitGrantedAbilityPreview(item, relatedEntries)
+        : null;
+
+    if (grantedAbilityPreview && onSelectInlineEntry) {
+        return (
+            <CodexUnitGrantedAbilityPreview
+                preview={grantedAbilityPreview}
+                onSelect={onSelectInlineEntry}
+            />
+        );
+    }
+
     return (
         <article className="codex-structuredItem">
             <h4 className="codex-structuredItem__heading">{item.label}</h4>
@@ -279,6 +303,9 @@ export default function CodexStructuredDetail({
                                     item={item}
                                     inlineLinkCandidates={inlineLinkCandidates}
                                     onSelectInlineEntry={onSelectInlineEntry}
+                                    entry={entry}
+                                    sectionLabel={section.label}
+                                    relatedEntries={relatedEntries}
                                     key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
                                 />
                             ))}

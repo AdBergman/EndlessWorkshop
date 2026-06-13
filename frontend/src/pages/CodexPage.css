@@ -1079,6 +1079,69 @@
     white-space: pre-wrap;
 }
 
+.codex-grantedAbilityPreview {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    align-items: flex-start;
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid rgba(190, 150, 73, 0.2);
+    border-radius: 6px;
+    background: rgba(12, 14, 15, 0.42);
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.codex-grantedAbilityPreview:hover,
+.codex-grantedAbilityPreview:focus-visible {
+    border-color: rgba(229, 198, 123, 0.46);
+    background: rgba(229, 198, 123, 0.06);
+    outline: none;
+}
+
+.codex-grantedAbilityPreview:focus-visible {
+    box-shadow: 0 0 0 2px rgba(255, 217, 119, 0.24);
+}
+
+.codex-grantedAbilityPreview__copy {
+    display: grid;
+    min-width: 0;
+    gap: 5px;
+}
+
+.codex-grantedAbilityPreview__header {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 9px;
+}
+
+.codex-grantedAbilityPreview__name {
+    color: rgba(241, 234, 220, 0.92);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.codex-grantedAbilityPreview__meta {
+    color: rgba(91, 217, 236, 0.78);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.codex-grantedAbilityPreview__effect {
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
 .codex-structuredTimeline {
     display: grid;
     gap: 0;

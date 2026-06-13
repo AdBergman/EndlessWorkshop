@@ -18,8 +18,10 @@ visible Codex categories, bonus-derived Statuses are visible, and bonus-derived
 Modifiers remain hidden from top-level navigation while staying
 searchable/linkable as exact targets. The latest exporter batch imported and
 served through the current Spring Boot/API path without a Codex importer
-migration. The current work is player-facing content quality, not metadata
-plumbing or broad EWShop scaffolding.
+migration. Current EWShop frontend polish is stopped unless real bug reports,
+browser QA issues, or release-safety concerns appear. The current Codex work is
+exporter/editorial player-facing content quality, not metadata plumbing,
+frontend polish, or broad EWShop scaffolding.
 
 Verified local Codex metadata coverage:
 
@@ -94,8 +96,8 @@ Actionable next items:
 5. Keep current text-prefix parsing as fallback only for older exports.
 6. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-7. Continue product review on noisy or low-value related links with real
-   imported data before cross-link expansion.
+7. Do not continue Codex frontend polish without a concrete bug or browser QA
+   issue.
 8. Use the content-quality diagnostic primarily to produce exporter/editorial
    follow-up until new current EWShop-owned findings appear.
 9. Do not expose Modifiers in top-level Codex navigation without product review.

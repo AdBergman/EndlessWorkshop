@@ -14,7 +14,7 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 - `codex-content-quality-diagnostics.md` - current EWShop diagnostic workflow
   for separating EWShop presentation issues from exporter/editorial content
   issues.
-- `codex-content-quality-current-diagnostic-handoff.md` - current concise
+- `codex-content-quality-current-diagnostic-handoff.md` - final current
   exporter/editorial follow-up from the latest content-quality diagnostic run.
 
 ## Archived Codex Context

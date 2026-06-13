@@ -508,6 +508,136 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
     });
 
+    it("previews resolved granted abilities on Unit details while keeping related entries available", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_KinOfSheredyn_Archer",
+                displayName: "Archer",
+                kind: "Unit",
+                category: "Kin of Sheredyn",
+                descriptionLines: [],
+                referenceKeys: [
+                    "UnitAbility_Ranged_3",
+                    "UnitAbility_TeamPlayer_1",
+                ],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "0" },
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Ranged" },
+                    { label: "Spawn type", value: "Land" },
+                ],
+                sections: [
+                    {
+                        title: "Granted abilities",
+                        items: [
+                            { label: "Ranged III", referenceKey: "UnitAbility_Ranged_3" },
+                            { label: "Coordinated Attack I", referenceKey: "UnitAbility_TeamPlayer_1" },
+                            { label: "Unresolved Drill", referenceKey: "UnitAbility_Missing" },
+                        ],
+                    },
+                    {
+                        title: "Stats",
+                        lines: [
+                            "+3 [AttackRange] Attack Range",
+                            "+55 [Damage] Damage",
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Ranged_3",
+                displayName: "Ranged III",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+3 [AttackRange] Attack Range"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+3 [AttackRange] Attack Range"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_TeamPlayer_1",
+                displayName: "Coordinated Attack I",
+                category: "Combat",
+                kind: "Ability",
+                descriptionLines: ["When attacking a Unit adjacent to two friendly Units: \n[DoubleArrow] Adds 15% [Damage] Damage"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Combat" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["[DoubleArrow] Adds 15% [Damage] Damage"],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                units: entries.filter((entry) => entry.exportKind === "units"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units&entry=Unit_KinOfSheredyn_Archer"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Archer" })).toBeInTheDocument();
+
+        const rangedPreview = screen.getByRole("button", { name: "Ranged III Passive / Ability +3 Attack Range" });
+        expect(rangedPreview).toHaveTextContent("Ranged III");
+        expect(rangedPreview).toHaveTextContent("Passive / Ability");
+        expect(rangedPreview).toHaveTextContent("+3 Attack Range");
+        expect(rangedPreview).not.toHaveTextContent("[AttackRange]");
+        expect(rangedPreview.querySelector(".codex-kindIcon--grantedAbility")).toBeInTheDocument();
+
+        const coordinatedPreview = screen.getByRole("button", {
+            name: "Coordinated Attack I Combat / Ability Adds 15% Damage",
+        });
+        expect(coordinatedPreview).toHaveTextContent("Adds 15% Damage");
+        expect(coordinatedPreview).not.toHaveTextContent("[Damage]");
+        coordinatedPreview.focus();
+        expect(coordinatedPreview).toHaveFocus();
+
+        expect(screen.getByRole("heading", { name: "Unresolved Drill" })).toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /ranged iii abilities/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /coordinated attack i abilities/i })).toBeInTheDocument();
+
+        await user.click(coordinatedPreview);
+        expect(await screen.findByRole("heading", { name: "Coordinated Attack I" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_TeamPlayer_1");
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {
