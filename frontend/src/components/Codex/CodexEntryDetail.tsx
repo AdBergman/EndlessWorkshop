@@ -7,6 +7,7 @@ import {
     getCodexQuestGroupDetailContextLines,
     type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
+import { getDisplayedUnitGrantedAbilityKeys } from "@/lib/codex/codexUnitGrantedAbilities";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexQuestProgression from "./CodexQuestProgression";
@@ -47,6 +48,13 @@ export default function CodexEntryDetail({
     const showKind = entry.exportKind !== "quests";
     const kindLabel = formatCodexKindLabel(entry.exportKind);
     const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
+    const displayedGrantedAbilityKeys = getDisplayedUnitGrantedAbilityKeys(entry, relatedEntries);
+    const relatedEntriesForDisplay = displayedGrantedAbilityKeys.size > 0
+        ? relatedEntries.filter((relatedEntry) => (
+            relatedEntry.exportKind.trim().toLowerCase() !== "abilities" ||
+            !displayedGrantedAbilityKeys.has(relatedEntry.entryKey)
+        ))
+        : relatedEntries;
 
     return (
         <article className="codex-detail">
@@ -84,7 +92,7 @@ export default function CodexEntryDetail({
             )}
 
             <RelatedEntries
-                entries={relatedEntries}
+                entries={relatedEntriesForDisplay}
                 onSelect={onSelectRelated}
                 priorityMode={isFactionEntry ? "faction" : "default"}
             />

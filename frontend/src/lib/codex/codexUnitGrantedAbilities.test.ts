@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
     buildUnitGrantedAbilityPreview,
+    getDisplayedUnitGrantedAbilityKeys,
     isUnitGrantedAbilitiesSection,
 } from "./codexUnitGrantedAbilities";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -64,5 +65,40 @@ describe("codexUnitGrantedAbilities", () => {
                 }),
             ])
         ).toBeNull();
+    });
+
+    it("collects only resolved granted abilities that can be shown on Unit details", () => {
+        const unit = entry({
+            exportKind: "units",
+            sections: [
+                {
+                    title: "Granted abilities",
+                    items: [
+                        { label: "Ranged III", referenceKey: "UnitAbility_Ranged_3" },
+                        { label: "Missing Ability", referenceKey: "UnitAbility_Missing" },
+                    ],
+                },
+            ],
+        });
+        const displayedKeys = getDisplayedUnitGrantedAbilityKeys(unit, [
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Ranged_3",
+                displayName: "Ranged III",
+                category: "Passive",
+                kind: "Ability",
+                sections: [{ title: "Effects", lines: ["+3 [AttackRange] Attack Range"] }],
+            }),
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+            }),
+        ]);
+
+        expect([...displayedKeys]).toEqual(["UnitAbility_Ranged_3"]);
+        expect(getDisplayedUnitGrantedAbilityKeys(entry({ exportKind: "equipment" }), [])).toEqual(new Set());
     });
 });

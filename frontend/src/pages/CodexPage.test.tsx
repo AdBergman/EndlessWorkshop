@@ -519,8 +519,10 @@ describe("CodexPage", () => {
                 category: "Kin of Sheredyn",
                 descriptionLines: [],
                 referenceKeys: [
+                    "Faction_KinOfSheredyn",
                     "UnitAbility_Ranged_3",
                     "UnitAbility_TeamPlayer_1",
+                    "UnitAbility_Scouting",
                 ],
                 facts: [
                     { label: "Kind", value: "Unit" },
@@ -580,6 +582,29 @@ describe("CodexPage", () => {
                     },
                 ],
             },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+1 [VisionRange] Vision Range"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+1 [VisionRange] Vision Range"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_KinOfSheredyn",
+                displayName: "Kin of Sheredyn",
+                category: "Kin of Sheredyn",
+                kind: "Faction",
+                descriptionLines: ["Faction overview."],
+                referenceKeys: [],
+            },
         ];
 
         useCodexStore.setState({
@@ -588,6 +613,7 @@ describe("CodexPage", () => {
             entriesByKind: {
                 units: entries.filter((entry) => entry.exportKind === "units"),
                 abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+                factions: entries.filter((entry) => entry.exportKind === "factions"),
             },
             entriesByKindKey: buildEntriesByKindKey(entries),
             loading: false,
@@ -630,8 +656,10 @@ describe("CodexPage", () => {
         expect(screen.getByRole("heading", { name: "Unresolved Drill" })).toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
-        expect(within(relatedSection).getByRole("button", { name: /ranged iii abilities/i })).toBeInTheDocument();
-        expect(within(relatedSection).getByRole("button", { name: /coordinated attack i abilities/i })).toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /ranged iii abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /coordinated attack i abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /scouting abilities/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /kin of sheredyn factions/i })).toBeInTheDocument();
 
         await user.click(coordinatedPreview);
         expect(await screen.findByRole("heading", { name: "Coordinated Attack I" })).toBeInTheDocument();

@@ -53,3 +53,28 @@ export function buildUnitGrantedAbilityPreview(
         effectLine: firstSectionLine(ability, "effects"),
     };
 }
+
+export function getDisplayedUnitGrantedAbilityKeys(
+    entry: CodexEntry,
+    relatedEntries: CodexEntry[]
+): Set<string> {
+    const displayedAbilityKeys = new Set<string>();
+    if (normalizeKind(entry.exportKind) !== "units") {
+        return displayedAbilityKeys;
+    }
+
+    const parsed = parseCodexStructuredDescription(entry);
+
+    for (const section of parsed.sections) {
+        if (!isUnitGrantedAbilitiesSection(entry, section.label)) continue;
+
+        for (const item of section.items ?? []) {
+            const preview = buildUnitGrantedAbilityPreview(item, relatedEntries);
+            if (preview) {
+                displayedAbilityKeys.add(preview.ability.entryKey);
+            }
+        }
+    }
+
+    return displayedAbilityKeys;
+}
