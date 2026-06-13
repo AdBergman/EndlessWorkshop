@@ -48,6 +48,7 @@ class CodexControllerTest {
                         List.of(),
                         List.of(new CodexMetadataSectionItemDto(
                                 "At 5 population",
+                                null,
                                 List.of(new CodexMetadataFactDto("Reward", "Nutrient Extractor", null)),
                                 List.of()
                         ))

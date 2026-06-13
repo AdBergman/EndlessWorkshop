@@ -37,6 +37,9 @@ Validation result:
 
 ## Import / Contract Notes
 
+- EWShop local startup import expects Codex JSON files under
+  `local-imports/codex/` and raw supported exports under
+  `local-imports/exports/`.
 - No Codex root JSON shape changed.
 - No `exportKind` values changed.
 - No fields were removed or renamed.
