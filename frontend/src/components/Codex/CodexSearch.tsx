@@ -9,6 +9,7 @@ import {
 } from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
+import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
 
 type Props = {
     value: string;
@@ -115,7 +116,8 @@ export default function CodexSearch({
                 {showSuggestions ? (
                     <div className="codex-search__dropdown" role="listbox" id={listboxId}>
                         {suggestions.map((entry, index) => {
-                            const previewLine = getCodexDescriptionPreviewLine(entry.descriptionLines);
+                            const previewLine = getCodexReadablePreviewLine(entry) ||
+                                getCodexDescriptionPreviewLine(entry.descriptionLines);
                             const secondaryContext = getCodexSecondaryContext(entry);
                             const kindLabel = formatCodexKindLabel(entry.exportKind);
 

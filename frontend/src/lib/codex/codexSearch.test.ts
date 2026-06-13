@@ -38,6 +38,35 @@ describe("filterCodexEntries", () => {
         expect(filterCodexEntries(sampleEntries, { query: "foodcolored" })).toHaveLength(1);
     });
 
+    it("searches exported facts and sections for metadata-only entries", () => {
+        const result = filterCodexEntries([
+            {
+                exportKind: "actions",
+                entryKey: "Action_Bridge",
+                displayName: "Build Bridge",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Category", value: "Construction Action" }],
+                sections: [
+                    {
+                        title: "Action mechanics",
+                        lines: [],
+                        items: [
+                            {
+                                label: "Turn cost",
+                                referenceKey: null,
+                                facts: [{ label: "Cost", value: "2 turns" }],
+                                lines: ["Builds a bridge over a river tile."],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ], { query: "river tile" });
+
+        expect(result.map((entry) => entry.entryKey)).toEqual(["Action_Bridge"]);
+    });
+
     it("searches public major-faction labels even when exporter names stay technical", () => {
         const result = filterCodexEntries([
             {

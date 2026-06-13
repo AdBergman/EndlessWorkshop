@@ -46,6 +46,11 @@ Verified local Codex metadata coverage:
 visible category and keeps bonus-derived Modifiers hidden from top-level
 navigation while preserving search/link targets.
 
+EWShop Codex search now indexes exported facts, sections, section items,
+timeline values, and fallback description text. Autocomplete suggestions use
+the same structured preview logic as result rows so metadata-rich entries are
+not blank in first-contact discovery.
+
 Actionable next items:
 
 1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
@@ -53,14 +58,15 @@ Actionable next items:
 2. Use `docs/active/bonuses-descriptor-target-correction-final-20260613_validation.md`
    as the latest exporter validation evidence for bonus descriptor/tag target
    cleanup.
-3. Treat older `codex-content-quality-*` diagnostics and handoffs as active
-   workflows or historical evidence only after regenerating them against the
-   current local imports.
+3. Use `docs/active/codex-content-quality-diagnostics.md` to regenerate
+   evidence before creating new exporter requests. The old exporter handoff is
+   archived at
+   `docs/archive/codex/codex-content-quality-exporter-handoff-2026-06-12.md`.
 4. Keep current text-prefix parsing as fallback only for older exports.
 5. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-6. Before cross-link expansion, run product review on search/discovery and
-   related-entry behavior with real imported data.
+6. Continue related-entry product review with real imported data before
+   cross-link expansion.
 7. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:

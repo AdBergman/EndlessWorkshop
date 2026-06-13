@@ -11,10 +11,6 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
   review handoff for the latest exporter batch.
 - `bonuses-descriptor-target-correction-final-20260613_validation.md` -
   latest exporter validation evidence for bonus descriptor/tag target cleanup.
-- `codex-content-quality-exporter-handoff.md` - current DB exporter/editorial
-  handoff for improving player-facing Codex content quality; regenerate
-  diagnostics against current local imports before treating older counts as
-  current.
 - `codex-content-quality-diagnostics.md` - current EWShop diagnostic workflow
   for separating EWShop presentation issues from exporter/editorial content
   issues.
@@ -28,3 +24,7 @@ snapshots, and EWShop implementation story docs are archived under:
 
 Treat those archived docs as historical evidence only. They may describe stale
 metadata coverage or already-completed EWShop implementation work.
+
+The previous DB exporter/editorial content-quality handoff is archived at
+`docs/archive/codex/codex-content-quality-exporter-handoff-2026-06-12.md`.
+Regenerate diagnostics before creating a new exporter request.

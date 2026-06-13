@@ -1922,6 +1922,20 @@ describe("CodexPage", () => {
                 descriptionLines: [],
                 referenceKeys: [],
                 facts: [{ label: "Kind", value: "Action" }],
+                sections: [
+                    {
+                        title: "Action mechanics",
+                        lines: [],
+                        items: [
+                            {
+                                label: "Turn cost",
+                                referenceKey: null,
+                                facts: [{ label: "Cost", value: "2 turns" }],
+                                lines: ["Builds a bridge over a river tile."],
+                            },
+                        ],
+                    },
+                ],
             },
             {
                 exportKind: "diplomatictreaties",
@@ -1954,6 +1968,12 @@ describe("CodexPage", () => {
         );
 
         const input = await screen.findByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(input, "river tile");
+        expect(await screen.findByRole("button", { name: /build bridge/i })).toBeInTheDocument();
+        expect(within(await screen.findByRole("listbox")).getByText("Builds a bridge over a river tile."))
+            .toBeInTheDocument();
+
+        await user.clear(input);
         await user.type(input, "justified");
         expect(await screen.findByRole("button", { name: /justified war/i })).toBeInTheDocument();
         const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
