@@ -59,6 +59,20 @@ The default all-category Codex overview now suppresses the giant mixed result
 pane until the player searches or chooses a category, keeping the first view
 focused on category discovery instead of a database-length record list.
 
+Latest content-quality diagnostic run, 2026-06-13:
+
+- Command: `npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300`
+- Scope: 2459 current local Codex entries.
+- Result: 3423 findings total; 3173 medium `duplicate-fact-line` findings
+  attributed to EWShop and 250 high exporter/editorial findings.
+- Interpretation: current EWShop rendering already prefers exported facts and
+  sections and suppresses duplicate fallback description lines for metadata-rich
+  entries, so the raw duplicate-line count is mostly not a current UI defect.
+- Current EWShop opportunity: reduce repeated structured preview taxonomy in
+  result rows, autocomplete, and related chips.
+- Current exporter/editorial opportunity: add player context to
+  classification-only entries and replace raw key-like values in public fields.
+
 Actionable next items:
 
 1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
@@ -70,12 +84,17 @@ Actionable next items:
    evidence before creating new exporter requests. The old exporter handoff is
    archived at
    `docs/archive/codex/codex-content-quality-exporter-handoff-2026-06-12.md`.
-4. Keep current text-prefix parsing as fallback only for older exports.
-5. Treat baseline Codex metadata preservation, rendering, category exposure,
+4. Use `docs/active/codex-content-quality-current-diagnostic-handoff.md` as the
+   current concise exporter/editorial follow-up from the latest diagnostic run.
+5. Keep current text-prefix parsing as fallback only for older exports.
+6. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-6. Continue product review on noisy or low-value related links and category
+7. Continue EWShop product polish on repeated structured preview taxonomy in
+   search result rows, autocomplete, and related chips before cross-link
+   expansion.
+8. Continue product review on noisy or low-value related links and category
    labels with real imported data before cross-link expansion.
-7. Do not expose Modifiers in top-level Codex navigation without product review.
+9. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
 
