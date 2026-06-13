@@ -16,6 +16,8 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
   issues.
 - `codex-content-quality-current-diagnostic-handoff.md` - final current
   exporter/editorial follow-up from the latest content-quality diagnostic run.
+- `codex-preview-surface-audit.md` - current exact-key diagnostic report for
+  future Codex inline, preview-row, and related-entry surface opportunities.
 
 ## Archived Codex Context
 
