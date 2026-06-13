@@ -32,6 +32,7 @@ describe("codexGrantedAbilityPreviews", () => {
     it("recognizes only supported granted ability sections", () => {
         expect(isGrantedAbilityPreviewSection(entry({ exportKind: "units" }), "Granted abilities")).toBe(true);
         expect(isGrantedAbilityPreviewSection(entry({ exportKind: "equipment" }), "Granted abilities")).toBe(true);
+        expect(isGrantedAbilityPreviewSection(entry({ exportKind: "heroes" }), "Granted abilities")).toBe(true);
         expect(isGrantedAbilityPreviewSection(entry({ exportKind: "traits" }), "Granted abilities")).toBe(false);
         expect(isGrantedAbilityPreviewSection(entry({ exportKind: "units" }), "Stats")).toBe(false);
     });
@@ -138,5 +139,42 @@ describe("codexGrantedAbilityPreviews", () => {
         ]);
 
         expect([...displayedKeys]).toEqual(["UnitAbility_BreachingAttack_1"]);
+    });
+
+    it("collects only resolved granted abilities that can be shown on Hero details", () => {
+        const hero = entry({
+            exportKind: "heroes",
+            entryKey: "Hero_Test",
+            displayName: "Test Hero",
+            sections: [
+                {
+                    title: "Granted abilities",
+                    items: [
+                        { label: "Flying", referenceKey: "UnitAbility_Fly" },
+                        { label: "Missing Hero Ability", referenceKey: "UnitAbility_Hero_Missing" },
+                    ],
+                },
+            ],
+        });
+
+        const displayedKeys = getDisplayedGrantedAbilityKeys(hero, [
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Fly",
+                displayName: "Flying",
+                category: "Passive",
+                kind: "Ability",
+                sections: [{ title: "Effects", lines: ["Can fly over obstacles"] }],
+            }),
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+            }),
+        ]);
+
+        expect([...displayedKeys]).toEqual(["UnitAbility_Fly"]);
     });
 });

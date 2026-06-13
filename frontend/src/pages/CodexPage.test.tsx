@@ -811,6 +811,148 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack_1");
     });
 
+    it("previews resolved granted abilities on Hero details without repeating them in Related Entries", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_GreenScion_Test",
+                displayName: "Arol'chis",
+                kind: "Hero",
+                category: "Green Scion",
+                descriptionLines: [],
+                referenceKeys: [
+                    "MinorFaction_GreenScion",
+                    "UnitAbility_Fly",
+                    "UnitAbility_Quickfooted",
+                    "UnitAbility_Scouting",
+                    "UnitAbility_Hero_Missing",
+                ],
+                facts: [
+                    { label: "Class", value: "Support" },
+                    { label: "Faction", value: "Green Scion" },
+                ],
+                sections: [
+                    {
+                        title: "Granted abilities",
+                        items: [
+                            { label: "Flying", referenceKey: "UnitAbility_Fly" },
+                            { label: "Evasive Maneuvers", referenceKey: "UnitAbility_Quickfooted" },
+                            { label: "Unresolved Hero Gift", referenceKey: "UnitAbility_Hero_Missing" },
+                        ],
+                    },
+                    {
+                        title: "Stats",
+                        lines: ["+2 [Focus] Focus"],
+                    },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Fly",
+                displayName: "Flying",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["Can fly over obstacles."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["Can fly over obstacles."] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Quickfooted",
+                displayName: "Evasive Maneuvers",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["-30% [Damage] Damage from attacks of opportunity."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["-30% [Damage] Damage from attacks of opportunity."] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Scouting",
+                displayName: "Scouting",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+1 [VisionRange] Vision Range"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+1 [VisionRange] Vision Range"] }],
+            },
+            {
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_GreenScion",
+                displayName: "Green Scion",
+                kind: "MinorFaction",
+                descriptionLines: ["Minor faction overview."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                heroes: entries.filter((entry) => entry.exportKind === "heroes"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+                minorFactions: entries.filter((entry) => entry.exportKind === "minorFactions"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_GreenScion_Test"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Arol'chis" })).toBeInTheDocument();
+
+        const flyingPreview = screen.getByRole("button", { name: "Flying Passive / Ability Can fly over obstacles." });
+        expect(flyingPreview).toHaveTextContent("Flying");
+        expect(flyingPreview).toHaveTextContent("Passive / Ability");
+
+        const evasivePreview = screen.getByRole("button", {
+            name: "Evasive Maneuvers Passive / Ability -30% Damage from attacks of opportunity.",
+        });
+        expect(evasivePreview).toHaveTextContent("-30% Damage from attacks of opportunity.");
+        expect(evasivePreview).not.toHaveTextContent("[Damage]");
+
+        expect(screen.getByRole("heading", { name: "Unresolved Hero Gift" })).toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).queryByRole("button", { name: /flying abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /evasive maneuvers abilities/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /scouting abilities/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /green scion minor factions/i })).toBeInTheDocument();
+
+        await user.click(evasivePreview);
+        expect(await screen.findByRole("heading", { name: "Evasive Maneuvers" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Quickfooted");
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {

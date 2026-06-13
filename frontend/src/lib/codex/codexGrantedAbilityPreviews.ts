@@ -13,7 +13,7 @@ export type CodexGrantedAbilityPreview = {
     effectLine: string;
 };
 
-const GRANTED_ABILITY_PREVIEW_KINDS = new Set(["equipment", "units"]);
+const GRANTED_ABILITY_PREVIEW_KINDS = new Set(["equipment", "heroes", "units"]);
 
 function normalizeKind(kind: string): string {
     return kind.trim().toLowerCase();
