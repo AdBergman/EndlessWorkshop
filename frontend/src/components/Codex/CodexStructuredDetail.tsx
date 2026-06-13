@@ -10,11 +10,15 @@ import {
     buildGrantedAbilityPreview,
     isGrantedAbilityPreviewSection,
 } from "@/lib/codex/codexGrantedAbilityPreviews";
+import {
+    findPopulationThresholdTargetSummary,
+} from "@/lib/codex/codexPopulationThresholdTargets";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
 import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
+import CodexPopulationThresholdTargetSummary from "./CodexPopulationThresholdTargetSummary";
 
 type Props = {
     entry: CodexEntry;
@@ -318,14 +322,26 @@ export default function CodexStructuredDetail({
                 <section className="codex-structuredBlock">
                     <h3 className="codex-structuredBlock__heading">Population thresholds</h3>
                     <ol className="codex-structuredTimeline">
-                        {parsed.timeline.map((item) => (
-                            <li className="codex-structuredTimeline__item" key={`${item.label}-${item.value}`}>
-                                <span className="codex-structuredTimeline__label">{item.label}</span>
-                                <span className="codex-structuredTimeline__value">
-                                    {renderDescriptionLine(formatCodexMajorFactionText(item.value))}
-                                </span>
-                            </li>
-                        ))}
+                        {parsed.timeline.map((item) => {
+                            const thresholdTargetSummary = onSelectInlineEntry
+                                ? findPopulationThresholdTargetSummary(entry, item.label, relatedEntries)
+                                : null;
+
+                            return (
+                                <li className="codex-structuredTimeline__item" key={`${item.label}-${item.value}`}>
+                                    <span className="codex-structuredTimeline__label">{item.label}</span>
+                                    <span className="codex-structuredTimeline__value">
+                                        {renderDescriptionLine(formatCodexMajorFactionText(item.value))}
+                                        {thresholdTargetSummary && onSelectInlineEntry ? (
+                                            <CodexPopulationThresholdTargetSummary
+                                                summary={thresholdTargetSummary}
+                                                onSelect={onSelectInlineEntry}
+                                            />
+                                        ) : null}
+                                    </span>
+                                </li>
+                            );
+                        })}
                     </ol>
                 </section>
             ) : null}

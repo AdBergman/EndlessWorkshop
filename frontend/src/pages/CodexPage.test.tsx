@@ -2119,7 +2119,239 @@ describe("CodexPage", () => {
         expect(within(detailPane).getByRole("heading", { name: "Population thresholds" })).toBeInTheDocument();
         expect(within(detailPane).getByText("At 5 population")).toBeInTheDocument();
         expect(within(detailPane).getByText("Nutrient Extractor")).toBeInTheDocument();
+        expect(within(detailPane).queryByRole("button", { name: /nutrient extractor/i })).not.toBeInTheDocument();
         expect(screen.queryByText("Fallback should not win")).not.toBeInTheDocument();
+    });
+
+    it("renders exact Population threshold Improvement targets as light summaries and dedupes only shown targets", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "populations",
+                entryKey: "Population_Minor_DaughterOfBor",
+                displayName: "Daughter of Bor",
+                descriptionLines: [],
+                referenceKeys: [
+                    "MinorFaction_DaughterOfBor",
+                    "DistrictImprovement_MinorFaction_06",
+                    "DistrictImprovement_Unrelated",
+                ],
+                facts: [
+                    { label: "Faction", value: "Daughters of Bor", referenceKey: "MinorFaction_DaughterOfBor" },
+                    { label: "Type", value: "Minor faction population" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [
+                    {
+                        title: "Threshold rewards",
+                        items: [
+                            {
+                                label: "At 5 population",
+                                referenceKey: "DistrictImprovement_MinorFaction_06",
+                                facts: [
+                                    {
+                                        label: "Reward",
+                                        value: "Bor’s Sparring Ring",
+                                        referenceKey: "DistrictImprovement_MinorFaction_06",
+                                    },
+                                ],
+                            },
+                            {
+                                label: "At 15 population",
+                                lines: ["+1 [IndustryColored] Industry on Daughter of Bor Population"],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_MinorFaction_06",
+                displayName: "Bor’s Sparring Ring",
+                category: "Military",
+                kind: "Improvement",
+                descriptionLines: ["+200 [FortificationColored] District Fortification on City Hall"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "Military" },
+                ],
+                sections: [{ title: "Effects", lines: ["+200 [FortificationColored] District Fortification on City Hall"] }],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Unrelated",
+                displayName: "Unrelated Workshop",
+                category: "Industry",
+                kind: "Improvement",
+                descriptionLines: ["+1 [IndustryColored] Industry"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "Industry" },
+                ],
+                sections: [{ title: "Effects", lines: ["+1 [IndustryColored] Industry"] }],
+            },
+            {
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_DaughterOfBor",
+                displayName: "Daughters of Bor",
+                category: "Daughter of Bor",
+                kind: "MinorFaction",
+                descriptionLines: ["Minor faction overview."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                populations: entries.filter((entry) => entry.exportKind === "populations"),
+                improvements: entries.filter((entry) => entry.exportKind === "improvements"),
+                minorFactions: entries.filter((entry) => entry.exportKind === "minorFactions"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations&entry=Population_Minor_DaughterOfBor"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Daughter of Bor" })).toBeInTheDocument();
+        expect(screen.getAllByText("Bor’s Sparring Ring").length).toBeGreaterThanOrEqual(2);
+
+        const thresholdSummary = screen.getByRole("button", {
+            name: "Bor’s Sparring Ring Military / Improvement +200 District Fortification on City Hall",
+        });
+        expect(thresholdSummary).toHaveTextContent("Bor’s Sparring Ring");
+        expect(thresholdSummary).toHaveTextContent("Military / Improvement");
+        expect(thresholdSummary).toHaveTextContent("+200 District Fortification on City Hall");
+        expect(thresholdSummary).not.toHaveTextContent("[FortificationColored]");
+        expect(thresholdSummary).toHaveClass("codex-thresholdTarget");
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).queryByRole("button", { name: /bor’s sparring ring improvements/i }))
+            .not.toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /unrelated workshop improvements/i }))
+            .toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /daughters of bor minor factions/i }))
+            .toBeInTheDocument();
+
+        await user.click(thresholdSummary);
+        expect(await screen.findByRole("heading", { name: "Bor’s Sparring Ring" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=DistrictImprovement_MinorFaction_06");
+    });
+
+    it("renders exact Population threshold Unit targets as restrained one-line summaries", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "populations",
+                entryKey: "Population_Minor_Horatio",
+                displayName: "Inferior Imitation",
+                descriptionLines: [],
+                referenceKeys: ["Unit_HoratioBeta"],
+                facts: [
+                    { label: "Faction", value: "Pilgrim Agent" },
+                    { label: "Type", value: "Population" },
+                ],
+                sections: [
+                    {
+                        title: "Threshold rewards",
+                        items: [
+                            {
+                                label: "At 5 population",
+                                referenceKey: "Unit_HoratioBeta",
+                                facts: [
+                                    {
+                                        label: "Reward",
+                                        value: "Horatio Clone",
+                                        referenceKey: "Unit_HoratioBeta",
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_HoratioBeta",
+                displayName: "Horatio Clone",
+                kind: "Unit",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Class", value: "Ranged" },
+                ],
+                sections: [
+                    {
+                        title: "Stats",
+                        lines: ["+3 [AttackRange] Attack Range"],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                populations: entries.filter((entry) => entry.exportKind === "populations"),
+                units: entries.filter((entry) => entry.exportKind === "units"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations&entry=Population_Minor_Horatio"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Inferior Imitation" })).toBeInTheDocument();
+
+        const thresholdSummary = screen.getByRole("button", {
+            name: "Horatio Clone Unit +3 Attack Range",
+        });
+        expect(thresholdSummary).toHaveClass("codex-thresholdTarget");
+        expect(thresholdSummary).toHaveTextContent("Horatio Clone");
+        expect(thresholdSummary).toHaveTextContent("Unit");
+        expect(thresholdSummary).toHaveTextContent("+3 Attack Range");
+
+        expect(screen.queryByRole("region", { name: /related entries/i })).not.toBeInTheDocument();
+
+        await user.click(thresholdSummary);
+        expect(await screen.findByRole("heading", { name: "Horatio Clone" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_HoratioBeta");
     });
 
     it("renders metadata when descriptionLines is nullish after API normalization boundaries", async () => {

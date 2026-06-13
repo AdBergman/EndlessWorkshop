@@ -27,7 +27,7 @@ follow-up rather than frontend inference work.
 
 | Rank | Source | Relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status | Examples |
 | ---: | --- | --- | --- | ---: | --- | ---: | ---: | --- | --- | --- |
-| 1 | populations | Threshold reward targets | one-line summary/card | 25 | 54/54 resolved, 0 unresolved, 54 duplicate structured refs | 7 | 4 | EWShop | Candidate for exact reward-target summaries | Aspect (Population_Aspect)<br>Called Population (Population_Called)<br>Divine Population (Population_Divined) |
+| 1 | populations | Exact threshold reward targets | one-line summary/card | 16 | 16/16 unique exact targets resolved; remaining threshold rewards are text-only | 7 | 3 | EWShop | Candidate for exact reward-target summaries only | Daughter of Bor (Population_Minor_DaughterOfBor)<br>Demons of Pashm (Population_Minor_DemonsOfPashm)<br>Inferior Imitation (Population_Minor_Horatio) |
 | 2 | factions | Related Status/effect entries | one-line summary/card | 1 | 2/4 resolved, 2 unresolved, 0 duplicate structured refs | 6 | 5 | Both | Needs product review to avoid bloat | Necrophages (Faction_Necrophage) |
 | 3 | traits | Unlock relationships | one-line summary/card | 44 | 1/11 resolved, 10 unresolved, 11 duplicate structured refs | 5 | 4 | EWShop | Candidate after preview-surface product review | Harmonious Tactics (FactionTrait_Aspects_BattleAffinity)<br>Deadly Corals (FactionTrait_Aspects_Chapter05AStep01_FactionQuest)<br>Radiance (FactionTrait_Aspects_Chapter05AStep02_FactionQuest) |
 | 4 | diplomatictreaties | Related Status/effect entries | compact rendered preview | 6 | 14/35 resolved, 21 unresolved, 0 duplicate structured refs | 5 | 6 | Both | Needs product review to avoid bloat | Close Borders (Declaration_CloseBorders)<br>Embrace Symbiosis (Declaration_EmbraceCoralSymbiosis)<br>Coral Siphon (Declaration_FactionQuest_Aspect_Chapter06AStep02) |
@@ -39,9 +39,10 @@ follow-up rather than frontend inference work.
 
 ## Recommended Next Implementation Candidates
 
-1. Populations -> threshold reward targets: one-line summaries/cards for
-   exact reward refs. This helps players compare population breakpoints
-   without opening every reward target.
+1. Populations -> exact threshold reward targets: light one-line summaries for
+   the 16 exact resolved reward refs. This helps players compare minor faction
+   and special population breakpoints without inferring links from text-only
+   rewards.
 2. Diplomatic Treaty -> related Status/effect entries: prototype only if a
    focused treaty review still shows player confusion after direct Effects
    text and related chips. Prefer one-line effect summaries over inline
@@ -400,7 +401,13 @@ Related targets: minorfactions (16), improvements (15), factions (6), units (1)
 
 Resolved-vs-unresolved related entries: 1 unresolved public/reference keys observed.
 
-Duplicated structured relationships: 55 structured reference keys also appear in public/reference keys.
+Exact threshold reward targets: 16 unique resolved refs: 15 improvements and
+1 unit. The remaining threshold rewards are text-only in the current export and
+should stay plain in EWShop until exporter/editorial data supplies exact refs.
+
+Duplicated structured relationships: the 16 exact threshold reward targets also
+appear in public/reference keys and can repeat in Related Entries when surfaced
+inline.
 
 Direct Effects section coverage: 0/26 entries.
 
@@ -412,7 +419,8 @@ Facts-only/no mechanics entries: 1/26 entries.
 
 | Candidate relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status |
 | --- | --- | ---: | --- | ---: | ---: | --- | --- |
-| Threshold reward targets | one-line summary/card | 25 | 54/54 resolved, 0 unresolved, 54 duplicate structured refs | 7 | 4 | EWShop | Candidate for exact reward-target summaries |
+| Exact threshold reward targets | one-line summary/card | 16 | 16/16 unique exact targets resolved; text-only rewards remain unlinked | 7 | 3 | EWShop | Candidate for exact reward-target summaries only |
+| Text-only threshold rewards | no action | 58 | No exact target refs in current export | 4 | 8 | Exporter/editorial | Frontend should not infer reward links from prose |
 | Faction references | one-line summary/card | 6 | 12/12 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers |
 | Facts only, no player-facing mechanics | no action | 1 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context |
 
@@ -585,7 +593,8 @@ Facts-only/no mechanics entries: 0/156 entries.
 EWShop-owned opportunities:
 
 - One-line summary/card treatment where exact structured refs are resolved and
-  answer planning questions, especially Population threshold reward targets.
+  answer planning questions, especially exact Population threshold reward
+  targets.
 - Suppressing duplicate related cards only when the same target is already
   shown in a local preview surface.
 

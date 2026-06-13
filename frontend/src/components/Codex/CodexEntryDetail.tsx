@@ -8,6 +8,7 @@ import {
     type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
 import { getDisplayedGrantedAbilityKeys } from "@/lib/codex/codexGrantedAbilityPreviews";
+import { getDisplayedPopulationThresholdTargetKeys } from "@/lib/codex/codexPopulationThresholdTargets";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexQuestProgression from "./CodexQuestProgression";
@@ -49,10 +50,14 @@ export default function CodexEntryDetail({
     const kindLabel = formatCodexKindLabel(entry.exportKind);
     const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
     const displayedGrantedAbilityKeys = getDisplayedGrantedAbilityKeys(entry, relatedEntries);
-    const relatedEntriesForDisplay = displayedGrantedAbilityKeys.size > 0
+    const displayedThresholdTargetKeys = getDisplayedPopulationThresholdTargetKeys(entry, relatedEntries);
+    const hiddenRelatedEntryKeys = new Set([
+        ...displayedGrantedAbilityKeys,
+        ...displayedThresholdTargetKeys,
+    ]);
+    const relatedEntriesForDisplay = hiddenRelatedEntryKeys.size > 0
         ? relatedEntries.filter((relatedEntry) => (
-            relatedEntry.exportKind.trim().toLowerCase() !== "abilities" ||
-            !displayedGrantedAbilityKeys.has(relatedEntry.entryKey)
+            !hiddenRelatedEntryKeys.has(relatedEntry.entryKey)
         ))
         : relatedEntries;
 

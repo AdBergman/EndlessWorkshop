@@ -1079,6 +1079,60 @@
     white-space: pre-wrap;
 }
 
+.codex-thresholdTarget {
+    display: inline-flex;
+    align-items: baseline;
+    min-width: 0;
+    max-width: 100%;
+    gap: 6px;
+    margin-top: 2px;
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: rgba(241, 234, 220, 0.78);
+    cursor: pointer;
+    text-align: left;
+}
+
+.codex-thresholdTarget:hover,
+.codex-thresholdTarget:focus-visible {
+    color: rgba(241, 234, 220, 0.94);
+    outline: none;
+}
+
+.codex-thresholdTarget:focus-visible {
+    border-radius: 3px;
+    box-shadow: 0 0 0 2px rgba(255, 217, 119, 0.24);
+}
+
+.codex-thresholdTarget__copy {
+    display: inline;
+    min-width: 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.codex-thresholdTarget__name {
+    color: rgba(241, 234, 220, 0.9);
+    font-weight: 700;
+}
+
+.codex-thresholdTarget__meta {
+    color: rgba(91, 217, 236, 0.78);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.codex-thresholdTarget__preview {
+    color: rgba(241, 234, 220, 0.72);
+}
+
+.codex-thresholdTarget__separator {
+    margin: 0 5px;
+    color: rgba(229, 198, 123, 0.52);
+}
+
 .codex-grantedAbilityPreview {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
