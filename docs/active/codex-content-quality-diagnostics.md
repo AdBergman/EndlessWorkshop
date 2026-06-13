@@ -8,7 +8,7 @@ Owner: EWShop, with exporter/editorial handoff follow-up
 
 Use the Codex content-quality diagnostic to separate three different problems:
 
-- EWShop presentation noise that can be hidden, relabeled, or reordered locally.
+- EWShop presentation noise that is still visible after current Codex rendering.
 - Missing metadata where text looks structured but is not exported as facts or
   sections.
 - Source/editorial Codex data that needs DB exporter or content-team follow-up.
@@ -65,11 +65,15 @@ The first diagnostic pass is universal across Codex categories. It flags:
   `*Definition_*`, and cost-modifier keys;
 - raw labels such as `Reference key`, `Operation`, `Value type`, `Target scope`,
   and `Display value`;
-- exact description lines that duplicate exported facts;
 - fact-shaped description text when structured facts are missing;
 - entries with only classification facts and no player context;
 - zero-value effect lines such as `+0 Dust`;
 - formula-like text that needs a player-facing explanation.
+
+Exact `descriptionLines` that duplicate exported facts are not reported by the
+default diagnostic anymore. Current EWShop rendering already prefers exported
+facts and sections for metadata-rich entries, so those raw duplicates are source
+hygiene rather than current player-facing UI defects.
 
 The implementation has a category-rule hook for future tuning, but the default
 rules should stay conservative until a current local import proves a

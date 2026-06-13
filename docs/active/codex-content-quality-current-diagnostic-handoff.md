@@ -15,27 +15,27 @@ npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300
 Current local import result:
 
 - Entries scanned: 2459
-- Total findings: 3423
+- Total findings: 250
 - High severity: 250
-- Medium severity: 3173
-- EWShop-owned findings: 3173
+- Medium severity: 0
+- EWShop-owned findings: 0
 - Exporter-owned findings: 250
 
 Issue type counts:
 
-- `duplicate-fact-line`: 3173
 - `missing-player-context`: 238
 - `raw-internal-text`: 12
 
 ## Interpretation
 
-The `duplicate-fact-line` count is not a current exporter blocker for EWShop.
-Current EWShop Codex rendering prefers exported facts and sections, and exported
-metadata entries do not render fallback `descriptionLines` as detail body text.
-Search, result rows, and related previews also prefer structured metadata.
+The default diagnostic no longer reports exact `descriptionLines` that duplicate
+exported facts. Current EWShop Codex rendering prefers exported facts and
+sections, and exported metadata entries do not render fallback
+`descriptionLines` as detail body text. Search, result rows, and related
+previews also prefer structured metadata.
 
-Treat duplicate description lines as useful hygiene evidence for non-EWShop
-consumers, but not as the main player-facing problem in EWShop today.
+Treat duplicate description lines as source hygiene evidence for non-EWShop
+consumers if needed, but not as a current player-facing EWShop problem.
 
 The current exporter/editorial priority is the high-severity set:
 

@@ -16,7 +16,7 @@ function entry(overrides: Partial<CodexEntry> = {}): CodexEntry {
 }
 
 describe("codexContentQualityDiagnostics", () => {
-    it("separates placeholder text, raw labels, duplicate facts, metadata gaps, and sparse entries", () => {
+    it("separates placeholder text, raw labels, metadata gaps, and sparse entries", () => {
         const report = createCodexContentQualityReport([
             entry({
                 exportKind: "councilors",
@@ -53,7 +53,6 @@ describe("codexContentQualityDiagnostics", () => {
         ]);
 
         expect(report.countsByKind).toEqual(expect.objectContaining({
-            "duplicate-fact-line": 1,
             "metadata-gap": 1,
             "missing-player-context": 1,
             "placeholder-text": 2,
@@ -62,12 +61,6 @@ describe("codexContentQualityDiagnostics", () => {
         }));
 
         expect(report.findings).toEqual(expect.arrayContaining([
-            expect.objectContaining({
-                exportKind: "equipment",
-                entryKey: "Equipment_A",
-                kind: "duplicate-fact-line",
-                owner: "EWShop",
-            }),
             expect.objectContaining({
                 exportKind: "tech",
                 entryKey: "Technology_A",
@@ -79,6 +72,12 @@ describe("codexContentQualityDiagnostics", () => {
                 entryKey: "Action_A",
                 kind: "missing-player-context",
                 owner: "Exporter",
+            }),
+        ]));
+        expect(report.findings).not.toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                exportKind: "equipment",
+                entryKey: "Equipment_A",
             }),
         ]));
     });

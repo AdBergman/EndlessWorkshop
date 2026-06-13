@@ -4,7 +4,6 @@ export type CodexContentQualitySeverity = "critical" | "high" | "medium" | "low"
 export type CodexContentQualityOwner = "EWShop" | "Exporter" | "Both";
 
 export type CodexContentQualityFindingKind =
-    | "duplicate-fact-line"
     | "formula-like-text"
     | "metadata-gap"
     | "missing-player-context"
@@ -148,10 +147,6 @@ function splitPrefixedLine(line: string): { label: string; value: string } | nul
         label: match[1].trim(),
         value: match[2].trim(),
     };
-}
-
-function factKey(label: string, value: string): string {
-    return `${normalizeComparable(label)}=${normalizeComparable(value)}`;
 }
 
 function createFinding(
@@ -332,27 +327,6 @@ function diagnoseTextCandidate(
     return findings;
 }
 
-function diagnoseDuplicateFactLines(entry: CodexEntry): CodexContentQualityFinding[] {
-    const factKeys = new Set(collectFacts(entry).map((fact) => factKey(fact.label, fact.value)));
-
-    return entry.descriptionLines.flatMap((line, index) => {
-        const prefixedLine = splitPrefixedLine(line.trim());
-        if (!prefixedLine || !factKeys.has(factKey(prefixedLine.label, prefixedLine.value))) {
-            return [];
-        }
-
-        return createFinding(
-            entry,
-            "duplicate-fact-line",
-            "medium",
-            "EWShop",
-            { surface: "descriptionLine", path: `descriptionLines[${index}]`, value: line },
-            "A description line repeats a fact that is already available as structured metadata.",
-            "Hide exact duplicate fact-prefixed lines in EWShop detail/summary rendering."
-        );
-    });
-}
-
 function diagnoseMetadataGaps(entry: CodexEntry): CodexContentQualityFinding[] {
     if ((entry.facts ?? []).length > 0) return [];
 
@@ -419,7 +393,6 @@ function diagnoseEntry(entry: CodexEntry): CodexContentQualityFinding[] {
 
     return [
         ...collectTextCandidates(entry).flatMap((candidate) => diagnoseTextCandidate(entry, candidate, rules)),
-        ...diagnoseDuplicateFactLines(entry),
         ...diagnoseMetadataGaps(entry),
         ...diagnoseMissingContext(entry, rules),
     ];

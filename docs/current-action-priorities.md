@@ -63,11 +63,12 @@ Latest content-quality diagnostic run, 2026-06-13:
 
 - Command: `npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300`
 - Scope: 2459 current local Codex entries.
-- Result: 3423 findings total; 3173 medium `duplicate-fact-line` findings
-  attributed to EWShop and 250 high exporter/editorial findings.
+- Result after diagnostic refinement: 250 high exporter/editorial findings and
+  no current EWShop-owned findings.
 - Interpretation: current EWShop rendering already prefers exported facts and
   sections and suppresses duplicate fallback description lines for metadata-rich
-  entries, so the raw duplicate-line count is mostly not a current UI defect.
+  entries, so the diagnostic no longer treats exact duplicate description lines
+  as current player-facing UI defects.
 - Current EWShop status: repeated exact structured preview taxonomy is
   suppressed in compact summaries, so equipment and status previews spend more
   space on player-useful differentiators.
@@ -95,7 +96,9 @@ Actionable next items:
    and category presentation polish as complete for the current local imports.
 7. Continue product review on noisy or low-value related links with real
    imported data before cross-link expansion.
-8. Do not expose Modifiers in top-level Codex navigation without product review.
+8. Use the content-quality diagnostic primarily to produce exporter/editorial
+   follow-up until new current EWShop-owned findings appear.
+9. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
 
