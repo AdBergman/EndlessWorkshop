@@ -1,8 +1,14 @@
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
-import { formatCodexKindLabel, getCodexEntryLabel, getCodexRelatedContext } from "@/lib/codex/codexPresentation";
+import {
+    formatCodexKindLabel,
+    getCodexDescriptionPreviewLine,
+    getCodexEntryLabel,
+    getCodexRelatedContext,
+} from "@/lib/codex/codexPresentation";
 import type { CodexEntry } from "@/types/dataTypes";
 import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
+import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
 
 type Props = {
     entries: CodexEntry[];
@@ -90,13 +96,18 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
                         <div className="codex-related__list">
                             {group.entries.map((entry) => {
                                 const entryLabel = getCodexEntryLabel(entry);
+                                const kindLabel = formatCodexKindLabel(entry.exportKind);
                                 const relatedContext = getCodexRelatedContext(entry);
                                 const contextLabel = relatedContext.startsWith("Quest ·")
                                     ? relatedContext
                                     : relatedContext
-                                        ? `${formatCodexKindLabel(entry.exportKind)} / ${relatedContext}`
-                                        : formatCodexKindLabel(entry.exportKind);
-                                const accessibilityLabel = `${entryLabel} ${contextLabel}`;
+                                        ? `${kindLabel} / ${relatedContext}`
+                                        : kindLabel;
+                                const previewLine = getCodexReadablePreviewLine(entry) ||
+                                    getCodexDescriptionPreviewLine(entry.descriptionLines);
+                                const accessibilityLabel = [entryLabel, contextLabel, previewLine]
+                                    .filter(Boolean)
+                                    .join(" ");
 
                                 return (
                                     <button
@@ -108,12 +119,17 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
                                     >
                                         <CodexEntryIcon
                                             entry={entry}
-                                            label={formatCodexKindLabel(entry.exportKind)}
+                                            label={kindLabel}
                                             className="codex-kindIcon codex-kindIcon--relatedChip"
                                             size={16}
                                         />
-                                        <span className="codex-related__name">{renderCodexLabel(entryLabel)}</span>
-                                        <span className="codex-related__kind">{contextLabel}</span>
+                                        <span className="codex-related__copy">
+                                            <span className="codex-related__name">{renderCodexLabel(entryLabel)}</span>
+                                            <span className="codex-related__kind">{contextLabel}</span>
+                                            {previewLine ? (
+                                                <span className="codex-related__preview">{previewLine}</span>
+                                            ) : null}
+                                        </span>
                                     </button>
                                 );
                             })}

@@ -51,6 +51,10 @@ timeline values, and fallback description text. Autocomplete suggestions use
 the same structured preview logic as result rows so metadata-rich entries are
 not blank in first-contact discovery.
 
+Detail-page related entries now include structured preview text in each chip
+when useful metadata exists, so exact links explain what the target does before
+the player clicks through.
+
 Actionable next items:
 
 1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
@@ -65,8 +69,8 @@ Actionable next items:
 4. Keep current text-prefix parsing as fallback only for older exports.
 5. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-6. Continue related-entry product review with real imported data before
-   cross-link expansion.
+6. Continue product review on noisy or low-value related links with real
+   imported data before cross-link expansion.
 7. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:

@@ -1327,15 +1327,24 @@
 
 .codex-related__chip {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     padding: 8px 12px;
     border: 1px solid rgba(241, 234, 220, 0.055);
-    border-radius: 999px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.008);
     color: inherit;
     cursor: pointer;
+    max-width: min(100%, 380px);
     transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.codex-related__copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
 }
 
 .codex-related__name {
@@ -1349,6 +1358,12 @@
     color: var(--codex-ink-muted);
     text-transform: uppercase;
     letter-spacing: 0.14em;
+}
+
+.codex-related__preview {
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 12px;
+    line-height: 1.45;
 }
 
 .codex-controlBand,

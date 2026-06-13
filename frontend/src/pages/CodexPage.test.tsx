@@ -724,8 +724,14 @@ describe("CodexPage", () => {
                 exportKind: "improvements",
                 entryKey: "DistrictImprovement_Bridge_00",
                 displayName: "Bridge",
-                descriptionLines: ["River crossing."],
+                descriptionLines: [],
                 referenceKeys: [],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Allows units to cross river tiles."],
+                    },
+                ],
             },
         ];
 
@@ -754,6 +760,7 @@ describe("CodexPage", () => {
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
         expect(within(relatedSection).getByRole("button", { name: /engineer traits/i })).toBeInTheDocument();
         expect(within(relatedSection).getByRole("button", { name: /bridge improvements/i })).toBeInTheDocument();
+        expect(within(relatedSection).getByText("Allows units to cross river tiles.")).toBeInTheDocument();
         expect(within(relatedSection).queryByRole("button", { name: /build bridge actions/i })).not.toBeInTheDocument();
         expect(screen.queryByText("Missing_Public_Context_Key")).not.toBeInTheDocument();
         expect(screen.queryByText("EmpireActionTypeUnknown_TestAction")).not.toBeInTheDocument();
@@ -2071,7 +2078,8 @@ describe("CodexPage", () => {
         expect(screen.getByText("Faction")).toBeInTheDocument();
         expect(screen.getAllByText("Tahuk").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText("Related entries")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Tahuk Factions / Tahuk" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Tahuk Factions / Tahuk Affinity: Tahuk" }))
+            .toBeInTheDocument();
     });
 
     it("renders councilor effects as structured sections", async () => {
