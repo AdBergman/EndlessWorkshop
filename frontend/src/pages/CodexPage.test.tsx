@@ -44,6 +44,7 @@ describe("CodexPage", () => {
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(container.querySelector('img.codex-kindIcon--overview[src="/svg/factions/UI_Common_District.svg"]'))
             .toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 

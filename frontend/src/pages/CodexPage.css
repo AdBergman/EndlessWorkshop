@@ -349,6 +349,14 @@
     overflow: hidden;
 }
 
+.codex-workspace--overview {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.codex-workspace--overview .codex-detailPane__body {
+    width: min(100%, 1040px);
+}
+
 .codex-resultsPane {
     min-width: 0;
     min-height: 0;

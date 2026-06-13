@@ -177,6 +177,7 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
+    const showResultsPane = !isOverviewState;
     const isPlainRouteReset =
         location.pathname === "/codex" &&
         location.search === "" &&
@@ -428,29 +429,31 @@ export default function CodexPage() {
                     </div>
                 </header>
 
-                <div className="codex-workspace">
-                    <aside className="codex-resultsPane" aria-label="Codex results">
-                        <div className="codex-resultsPane__header">
-                            <div>
-                                <div className="codex-sectionLabel">Results</div>
-                                <div className="codex-resultsPane__title">
-                                    {activeKind === ALL_CODEX_KIND
-                                        ? "All encyclopedia entries"
-                                        : activeKindLabel}
+                <div className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""}`}>
+                    {showResultsPane ? (
+                        <aside className="codex-resultsPane" aria-label="Codex results">
+                            <div className="codex-resultsPane__header">
+                                <div>
+                                    <div className="codex-sectionLabel">Results</div>
+                                    <div className="codex-resultsPane__title">
+                                        {activeKind === ALL_CODEX_KIND
+                                            ? "All encyclopedia entries"
+                                            : activeKindLabel}
+                                    </div>
                                 </div>
+                                <div className="codex-resultsPane__count">{filteredEntries.length}</div>
                             </div>
-                            <div className="codex-resultsPane__count">{filteredEntries.length}</div>
-                        </div>
 
-                        <CodexResultList
-                            ref={resultListRef}
-                            entries={displayEntries}
-                            selectedEntryKey={selectedListItem?.entryKey ?? null}
-                            loading={loading}
-                            error={error}
-                            onSelect={(entry) => selectEntry(entry)}
-                        />
-                    </aside>
+                            <CodexResultList
+                                ref={resultListRef}
+                                entries={displayEntries}
+                                selectedEntryKey={selectedListItem?.entryKey ?? null}
+                                loading={loading}
+                                error={error}
+                                onSelect={(entry) => selectEntry(entry)}
+                            />
+                        </aside>
+                    ) : null}
 
                     <section
                         className="codex-detailPane"

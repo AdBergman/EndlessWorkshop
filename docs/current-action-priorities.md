@@ -55,6 +55,10 @@ Detail-page related entries now include structured preview text in each chip
 when useful metadata exists, so exact links explain what the target does before
 the player clicks through.
 
+The default all-category Codex overview now suppresses the giant mixed result
+pane until the player searches or chooses a category, keeping the first view
+focused on category discovery instead of a database-length record list.
+
 Actionable next items:
 
 1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
@@ -69,8 +73,8 @@ Actionable next items:
 4. Keep current text-prefix parsing as fallback only for older exports.
 5. Treat baseline Codex metadata preservation, rendering, category exposure,
    and category presentation polish as complete for the current local imports.
-6. Continue product review on noisy or low-value related links with real
-   imported data before cross-link expansion.
+6. Continue product review on noisy or low-value related links and category
+   labels with real imported data before cross-link expansion.
 7. Do not expose Modifiers in top-level Codex navigation without product review.
 
 Archived historical context:
