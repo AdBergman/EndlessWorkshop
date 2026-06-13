@@ -76,7 +76,11 @@ export default function CodexEntryDetail({
             {isFactionEntry ? (
                 <CodexFactionDetail entry={entry} />
             ) : (
-                <CodexStructuredDetail entry={entry} />
+                <CodexStructuredDetail
+                    entry={entry}
+                    relatedEntries={relatedEntries}
+                    onSelectInlineEntry={onSelectRelated}
+                />
             )}
 
             <RelatedEntries

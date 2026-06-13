@@ -372,6 +372,142 @@ describe("CodexPage", () => {
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
     });
 
+    it("links exact status mentions inline on ability details while keeping unresolved mentions plain", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_JinxedStrike",
+                displayName: "Jinxed Strike",
+                category: "Combat",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
+                publicContextKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Combat" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: [
+                            "[DoubleArrow] Restores [Health] Health, deals [Damage] Damage, grants [Shield] Shield, and spends [Focus] Focus",
+                            "[DoubleArrow] Applies Jinxed II Status to the attacked Units",
+                            "[DoubleArrow] Applies UnJinxed II Status to the attacker",
+                            "[DoubleArrow] Applies Ghosted Status if the target is already cursed",
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Jinxed",
+                displayName: "Jinxed",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["Jinxed lowers Accuracy for one turn."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Status" },
+                    { label: "Kind", value: "Status" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Jinxed_2",
+                displayName: "Jinxed II",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["Jinxed II lowers Accuracy for two turns."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Status" },
+                    { label: "Kind", value: "Status" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        items: [
+                            {
+                                label: "Accuracy",
+                                facts: [
+                                    { label: "Affected stat", value: "Accuracy" },
+                                    { label: "Change", value: "-20%" },
+                                ],
+                                lines: ["-20% [Accuracy] Accuracy"],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+                statuses: entries.filter((entry) => entry.exportKind === "statuses"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities&entry=UnitAbility_JinxedStrike"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Jinxed Strike" })).toBeInTheDocument();
+        const tokenLine = screen.getByText(/Restores/).closest("p");
+        expect(tokenLine).toHaveTextContent("Restores Health, deals Damage, grants Shield, and spends Focus");
+        expect(tokenLine).not.toHaveTextContent("[Health]");
+        expect(tokenLine).not.toHaveTextContent("[Damage]");
+        expect(tokenLine).not.toHaveTextContent("[Shield]");
+        expect(tokenLine).not.toHaveTextContent("[Focus]");
+
+        const inlineLink = screen.getByRole("button", { name: "Open Jinxed II in Codex" });
+        const linkedLine = inlineLink.closest("p");
+        expect(linkedLine).toHaveTextContent("Applies Jinxed II Status to the attacked Units");
+        expect(inlineLink).toHaveTextContent("Jinxed II");
+        expect(linkedLine).not.toHaveTextContent("Jinxed II lowers Accuracy for two turns.");
+
+        expect(screen.getByText(/Applies UnJinxed II Status to the attacker/)).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Open UnJinxed/i })).not.toBeInTheDocument();
+        expect(screen.getByText(/Applies Ghosted Status if the target is already cursed/)).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Open Ghosted/i })).not.toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /jinxed ii statuses/i })).toBeInTheDocument();
+
+        inlineLink.focus();
+        expect(inlineLink).toHaveFocus();
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Jinxed II");
+        inlineLink.blur();
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        await user.hover(inlineLink);
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Jinxed II");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Accuracy");
+
+        await user.click(inlineLink);
+        expect(await screen.findByRole("heading", { name: "Jinxed II" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {

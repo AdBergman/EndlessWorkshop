@@ -1374,6 +1374,55 @@
     line-height: 1.45;
 }
 
+.codex-inlineEntityLink {
+    display: inline;
+    padding: 0 1px;
+    border: 0;
+    border-bottom: 1px solid rgba(229, 198, 123, 0.56);
+    background: transparent;
+    color: #f0d68a;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.codex-inlineEntityLink:hover,
+.codex-inlineEntityLink:focus-visible {
+    border-bottom-color: #ffd977;
+    color: #ffe1a3;
+    outline: none;
+}
+
+.codex-inlineEntityLink:focus-visible {
+    box-shadow: 0 2px 0 rgba(255, 217, 119, 0.38);
+}
+
+.codex-inlineLinkTooltip {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 280px;
+}
+
+.codex-inlineLinkTooltip > strong {
+    color: #f1eadc;
+    font-size: 13px;
+}
+
+.codex-inlineLinkTooltip > span {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-inlineLinkTooltip > p {
+    margin: 2px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .codex-controlBand,
 .codex-resultsList,
 .codex-detailPane {
