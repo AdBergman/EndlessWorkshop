@@ -56,6 +56,21 @@ data is narrow, several treaties already have direct Effects text, and the
 risk of repeating or bloating treaty pages is higher than for granted
 Ability surfaces.
 
+## Current Data Constraints
+
+- Major faction Population thresholds often name a reward in player-facing
+  text but do not export an exact target ref. EWShop should leave those rewards
+  plain until exporter/editorial data supplies stable refs.
+- Tech Unlocks are often text-only, even when players would expect linked
+  unlock targets. Preview/link work should wait for exact unlock refs.
+- Extractor pages do not currently expose exact links to the extracted
+  resource, so resource previews are blocked by data shape.
+- Resource icons/tokens exist in text, but Resource Codex entries or a visible
+  Resource category are not currently established.
+- Some Actions and Diplomatic Treaties are technically valid entries but lack a
+  useful public gameplay summary. Preview UI should not invent impact where the
+  exported content is classification-only or too thin.
+
 ## Category And Subcategory Audit
 
 ### abilities

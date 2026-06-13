@@ -84,6 +84,12 @@ Population threshold reward target summaries, and Faction references ->
 one-line summary only. Unresolved Hero granted Ability refs remain
 exporter/editorial follow-up, not frontend inference work.
 
+Known preview-surface blockers: major faction Population thresholds and Tech
+Unlocks are often text-only instead of exact refs; Extractors do not yet link to
+their resources; Resource tokens/icons exist but a Resource Codex surface is not
+established; and some Actions/Treaties need exporter/editorial gameplay
+summaries before EWShop can present them as more than valid database entries.
+
 The default all-category Codex overview now suppresses the giant mixed result
 pane until the player searches or chooses a category, keeping the first view
 focused on category discovery instead of a database-length record list.
