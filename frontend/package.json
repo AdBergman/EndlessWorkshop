@@ -28,6 +28,7 @@
     "test": "vitest --config vitest.config.ts",
     "diagnostics:codex-content": "node --experimental-strip-types scripts/codex-content-quality-diagnostic.ts",
     "diagnostics:codex-preview-surfaces": "node --experimental-strip-types scripts/codex-preview-surface-audit.ts",
+    "diagnostics:codex-relationship-gaps": "node --experimental-strip-types scripts/codex-relationship-value-gap-audit.ts",
     "diagnostics:quests": "vite-node --config vite.config.ts scripts/quest-explorer-diagnostic.ts",
     "diagnostics:quests:lore-chronology": "vite-node --config vite.config.ts scripts/quest-lore-chronology-diagnostic.ts"
   },

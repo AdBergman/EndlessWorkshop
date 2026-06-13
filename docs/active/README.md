@@ -18,6 +18,9 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
   exporter/editorial follow-up from the latest content-quality diagnostic run.
 - `codex-preview-surface-audit.md` - current exact-key diagnostic report for
   future Codex inline, preview-row, and related-entry surface opportunities.
+- `codex-relationship-value-gap-audit.md` - current diagnostic report for
+  player-important Codex relationships that are missing, text-only, unresolved,
+  or not linkable.
 
 ## Archived Codex Context
 
