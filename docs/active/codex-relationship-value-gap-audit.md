@@ -58,13 +58,59 @@ Good entries already suitable for EWShop:
 - Daughter of Bor (Population_Minor_DaughterOfBor) resolves At 5 population to Bor’s Sparring Ring (DistrictImprovement_MinorFaction_06).
 - Inferior Imitation (Population_Minor_Horatio) resolves At 5 population to Horatio Clone (Unit_HoratioBeta).
 
-Blocked examples:
-- Aspect (Population_Aspect) says "Nutrient Extractor" but has no exact target ref.
-- Kin of Sheredyn (Population_KinOfSheredyn) says "Military Press"; Military Press (KinOfSheredyn_DistrictImprovement_01) exists but is not linked from the threshold item.
-- Last Lord (Population_LastLord) says "Altar of Channeling"; Altar of Channeling (LastLord_DistrictImprovement_03) exists but is not linked from the threshold item.
+Major faction blocker confirmed on 2026-06-13: major faction Population
+threshold rewards do not currently have a safe exact frontend resolver. Their
+threshold items contain text reward names only, with no threshold item
+`referenceKey`, no reward fact `referenceKey`, no `descriptionLineKeys`, and no
+`descriptorKeys`. Their population-level `referenceKeys` and
+`publicContextKeys` point to the owning faction, not the threshold reward
+target.
+
+Safe EWShop resolver rule:
+
+- resolve a threshold reward only when `sections[].items[].referenceKey` points
+  to an exact Codex `entryKey`; or
+- resolve a threshold reward only when the Reward fact has `referenceKey`
+  pointing to an exact Codex `entryKey`.
+
+Text-only reward names must remain plain. EWShop must not match by display name,
+fuzzy text, or prose.
+
+Blocked major faction examples:
+
+- Aspect (Population_Aspect) says "Nutrient Extractor"; no exact target ref is
+  exported and no matching Codex entry exists in current local imports.
+- Kin of Sheredyn (Population_KinOfSheredyn) says "Military Press"; Military
+  Press (KinOfSheredyn_DistrictImprovement_01) exists but is currently
+  display-name-only from the threshold reward.
+- Last Lord (Population_LastLord) says "Altar of Channeling"; Altar of
+  Channeling (LastLord_DistrictImprovement_03) exists but is currently
+  display-name-only from the threshold reward.
+- Necrophage (Population_Necrophage) says "Larval Pulp"; Larval Pulp
+  (Necrophage_DistrictImprovement_01) exists but is currently display-name-only
+  from the threshold reward.
+- Tahuk (Population_Mukag) says "Astronomy Club"; Astronomy Club
+  (Mukag_DistrictImprovement_06) exists but is currently display-name-only from
+  the threshold reward.
+
+Desired exporter shape, matching the working minor/special population model:
+
+```json
+{
+  "label": "At 5 population",
+  "referenceKey": "DistrictImprovement_MinorFaction_06",
+  "facts": [
+    {
+      "label": "Reward",
+      "value": "Bor’s Sparring Ring",
+      "referenceKey": "DistrictImprovement_MinorFaction_06"
+    }
+  ]
+}
+```
 
 EWShop frontend opportunity: already scoped to exact refs only; no prose inference.
-DB exporter/editorial request: add exact threshold reward refs where real targets exist.
+DB exporter/editorial request: add exact threshold reward refs on the threshold item and/or Reward fact where real targets exist.
 Product treatment: keep Population top-level; exact refs can be previewed, text-only rewards wait for exporter data.
 
 ### 3. Extractors And Resources

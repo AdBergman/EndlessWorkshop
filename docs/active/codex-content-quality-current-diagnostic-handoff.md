@@ -101,6 +101,49 @@ Public-safe examples:
 | councilors | quest reward councilor row | Public description field contains a generated description key. | Export resolved public copy or suppress the raw field. |
 | traits | public faction quest bundle trait | Section lines contain raw quest/action keys. | Export public labels or typed references for linked quest/action content. |
 
+### Add Exact Major Faction Population Threshold Reward Refs
+
+EWShop investigated major faction Population threshold reward targets on
+2026-06-13. These cannot be resolved safely in the frontend today. The current
+major faction Population threshold items expose plain reward names only: no
+threshold item `referenceKey`, no Reward fact `referenceKey`, no
+`descriptionLineKeys`, and no `descriptorKeys`.
+
+Expected exporter/editorial fixes:
+
+- Add exact target refs on `sections[].items[].referenceKey` when a threshold
+  reward unlocks or grants a Codex entry.
+- Also add the same exact target ref on the Reward fact as
+  `sections[].items[].facts[].referenceKey` when that fact names the reward.
+- Keep text-only rewards text-only if no exact public target exists.
+- Do not rely on EWShop display-name matching.
+
+Public-safe current examples:
+
+| Population | Text reward | Current target situation |
+| --- | --- | --- |
+| `Population_KinOfSheredyn` | Military Press | `KinOfSheredyn_DistrictImprovement_01` exists, but the threshold reward is display-name-only today. |
+| `Population_LastLord` | Altar of Channeling | `LastLord_DistrictImprovement_03` exists, but the threshold reward is display-name-only today. |
+| `Population_Necrophage` | Larval Pulp | `Necrophage_DistrictImprovement_01` exists, but the threshold reward is display-name-only today. |
+| `Population_Mukag` | Astronomy Club | `Mukag_DistrictImprovement_06` exists, but the threshold reward is display-name-only today. |
+| `Population_Aspect` | Nutrient Extractor | No matching Codex entry exists in current local imports. |
+
+Use the working minor/special Population shape as the model:
+
+```json
+{
+  "label": "At 5 population",
+  "referenceKey": "DistrictImprovement_MinorFaction_06",
+  "facts": [
+    {
+      "label": "Reward",
+      "value": "Bor’s Sparring Ring",
+      "referenceKey": "DistrictImprovement_MinorFaction_06"
+    }
+  ]
+}
+```
+
 ## EWShop Notes
 
 EWShop already handles the following locally:

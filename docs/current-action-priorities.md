@@ -90,6 +90,25 @@ their resources; Resource tokens/icons exist but a Resource Codex surface is not
 established; and some Actions/Treaties need exporter/editorial gameplay
 summaries before EWShop can present them as more than valid database entries.
 
+Major faction Population threshold decision, 2026-06-13: do not implement
+frontend reward-target resolution for major faction threshold rewards until the
+exporter provides exact metadata. Current major faction threshold items expose
+plain reward names only, with no threshold item `referenceKey`, no Reward fact
+`referenceKey`, no `descriptionLineKeys`, and no `descriptorKeys`.
+
+Safe EWShop resolver rule for Population threshold reward previews:
+
+- threshold item `referenceKey` resolves to an exact Codex `entryKey`; or
+- Reward fact `referenceKey` resolves to an exact Codex `entryKey`.
+
+Text-only reward names remain plain. EWShop must not match by display name,
+fuzzy text, or prose. Current display-name-only examples include Military Press
+-> `KinOfSheredyn_DistrictImprovement_01`, Altar of Channeling ->
+`LastLord_DistrictImprovement_03`, Larval Pulp ->
+`Necrophage_DistrictImprovement_01`, and Astronomy Club ->
+`Mukag_DistrictImprovement_06`. Nutrient Extractor currently has no matching
+Codex entry in local imports.
+
 The default all-category Codex overview now suppresses the giant mixed result
 pane until the player searches or chooses a category, keeping the first view
 focused on category discovery instead of a database-length record list.
@@ -134,6 +153,9 @@ Actionable next items:
 8. Use the content-quality diagnostic primarily to produce exporter/editorial
    follow-up until new current EWShop-owned findings appear.
 9. Do not expose Modifiers in top-level Codex navigation without product review.
+10. Include major faction Population threshold reward refs in exporter/editorial
+    follow-up; use the working Bor’s Sparring Ring /
+    `DistrictImprovement_MinorFaction_06` minor population shape as the model.
 
 Archived historical context:
 
