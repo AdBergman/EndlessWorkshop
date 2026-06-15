@@ -1,6 +1,6 @@
 # Archived Codex Documentation
 
-Current as of 2026-06-12.
+Current as of 2026-06-15.
 
 These files are historical evidence, completed implementation notes, or
 superseded exporter handoffs. Do not treat them as current source of truth.
@@ -32,3 +32,10 @@ Current Codex docs live in `docs/active/`.
 - `bonuses-mechanics-approval-label-cleanup-validation-2026-06-11.md` and
   `.json` - exporter validation snapshot for the bonuses/mechanics approval
   label cleanup.
+
+## Superseded Packet Inputs
+
+- `superseded-2026-06-13-exporter-packet-inputs/` - Codex category audits,
+  backlog-building prompts, validation snapshots, and pre-return handoffs that
+  fed the DB Exporter 2026-06-14 Codex metadata packet phase. Use the active
+  2026-06-14 exporter return bundle instead of these files for current work.

@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-13.
+Current as of 2026-06-15.
 
 This list reflects the current product focus:
 
@@ -8,160 +8,69 @@ This list reflects the current product focus:
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
 
-## P0 - Codex Content Quality DB Exporter Handoff
+## P0 - Codex Exporter Return Import And QA
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: EWShop baseline Codex metadata adoption and presentation polish are
-complete for the current local imports. Actions and Diplomatic Treaties are
-visible Codex categories, bonus-derived Statuses are visible, and bonus-derived
-Modifiers remain hidden from top-level navigation while staying
-searchable/linkable as exact targets. The latest exporter batch imported and
-served through the current Spring Boot/API path without a Codex importer
-migration. Current EWShop frontend polish is stopped unless real bug reports,
-browser QA issues, or release-safety concerns appear. The current Codex work is
-exporter/editorial player-facing content quality, not metadata plumbing,
-frontend polish, or broad EWShop scaffolding.
+Status: DB Exporter returned the 2026-06-14 Codex metadata packet phase.
+Multiple previously active 2026-06-13 gaps are now implemented or partially
+implemented in exported data and must be verified in EWShop before new frontend
+or exporter work is planned.
 
-Verified local Codex metadata coverage:
+Start here:
 
-| Codex export | Entries | With facts | With sections | With public context keys |
-| --- | ---: | ---: | ---: | ---: |
-| `abilities` | 336 | 336 | 310 | 336 |
-| `actions` | 139 | 139 | 52 | 139 |
-| `bonuses` | 585 | 585 | 552 | 585 |
-| `councilors` | 43 | 43 | 40 | 43 |
-| `diplomaticTreaties` | 22 | 22 | 8 | 22 |
-| `districts` | 167 | 167 | 76 | 167 |
-| `equipment` | 159 | 159 | 159 | 159 |
-| `factions` | 5 | 5 | 5 | 5 |
-| `heroes` | 79 | 79 | 79 | 79 |
-| `improvements` | 123 | 123 | 100 | 123 |
-| `minorFactions` | 16 | 16 | 16 | 16 |
-| `populations` | 26 | 26 | 25 | 26 |
-| `quests` | 292 | 292 | 292 | 292 |
-| `tech` | 133 | 133 | 97 | 133 |
-| `traits` | 178 | 178 | 130 | 178 |
-| `units` | 156 | 156 | 156 | 156 |
+- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`
+- Use packet-level files in
+  `docs/active/codex-db-exporter-implementation-packets/` only when exact
+  return detail is needed.
 
-`bonuses` remains a source export. EWShop presents bonus-derived Statuses as a
-visible category and keeps bonus-derived Modifiers hidden from top-level
-navigation while preserving search/link targets.
+The return bundle reports these notable changes:
 
-EWShop Codex search now indexes exported facts, sections, section items,
-timeline values, and fallback description text. Autocomplete suggestions use
-the same structured preview logic as result rows so metadata-rich entries are
-not blank in first-contact discovery.
+- Tech unlock exact refs implemented where canonical and public.
+- Major faction Population threshold reward exact refs implemented where
+  canonical and public.
+- Generic Codex `resources` export implemented, with extractor/resource links
+  where proven.
+- Actions, Diplomatic Treaties, Status scope metadata, Trait refs, Quest refs,
+  Modifier labels, and thin Ability context received safe subset improvements.
+- New generic Codex exportKinds `councilorEffects` and `partnerEffects`
+  landed, including a partner-effect one-hop mechanics follow-up.
 
-Detail-page related entries now include structured preview text in each chip
-when useful metadata exists, so exact links explain what the target does before
-the player clicks through.
+Known open decisions and gaps after the return:
 
-Codex preview surfaces:
-
-- Inline clarification: when an exact exported relation clarifies a word or
-  mechanic inside current prose, render the term as a compact inline link with
-  existing quick-preview behavior. Current example: Ability pages can inline-link
-  exact applied Status mentions from resolved related Status entries.
-- Compact rendered preview: when the relation explains what the current entry
-  does, render a small local preview instead of forcing the player to leave the
-  page. Current examples: Unit, Equipment, and Hero pages render resolved
-  Granted Abilities as compact clickable rows with icon, metadata, and one
-  exported effect line.
-- Large-subject summary/card: when the relation points to a broad encyclopedia
-  subject, keep the surface to a one-line summary/card and let the player click
-  through for depth. Current example: Faction references should stay summary
-  oriented rather than expanding into faction dossiers inline.
-- Related Entries remain exploration, not repetition. Current examples: Unit,
-  Equipment, and Hero pages hide Ability related-entry cards already represented
-  by shown Granted Ability preview rows, but keep unrelated Ability links and
-  non-Ability links.
-
-This is a product direction, not a generic renderer yet. Current code remains
-scoped to proven cases rather than a site-wide link/preview system. Future
-candidates worth product review: Diplomatic Treaty -> Status/effect preview,
-Population threshold reward target summaries, and Faction references ->
-one-line summary only. Unresolved Hero granted Ability refs remain
-exporter/editorial follow-up, not frontend inference work.
-
-Known preview-surface blockers: major faction Population thresholds and Tech
-Unlocks are often text-only instead of exact refs; Extractors do not yet link to
-their resources; Resource tokens/icons exist but a Resource Codex surface is not
-established; and some Actions/Treaties need exporter/editorial gameplay
-summaries before EWShop can present them as more than valid database entries.
-
-Major faction Population threshold decision, 2026-06-13: do not implement
-frontend reward-target resolution for major faction threshold rewards until the
-exporter provides exact metadata. Current major faction threshold items expose
-plain reward names only, with no threshold item `referenceKey`, no Reward fact
-`referenceKey`, no `descriptionLineKeys`, and no `descriptorKeys`.
-
-Safe EWShop resolver rule for Population threshold reward previews:
-
-- threshold item `referenceKey` resolves to an exact Codex `entryKey`; or
-- Reward fact `referenceKey` resolves to an exact Codex `entryKey`.
-
-Text-only reward names remain plain. EWShop must not match by display name,
-fuzzy text, or prose. Current display-name-only examples include Military Press
--> `KinOfSheredyn_DistrictImprovement_01`, Altar of Channeling ->
-`LastLord_DistrictImprovement_03`, Larval Pulp ->
-`Necrophage_DistrictImprovement_01`, and Astronomy Club ->
-`Mukag_DistrictImprovement_06`. Nutrient Extractor currently has no matching
-Codex entry in local imports.
-
-The default all-category Codex overview now suppresses the giant mixed result
-pane until the player searches or chooses a category, keeping the first view
-focused on category discovery instead of a database-length record list.
-
-Latest content-quality diagnostic run, 2026-06-13:
-
-- Command: `npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300`
-- Scope: 2459 current local Codex entries.
-- Result after diagnostic refinement: 250 high exporter/editorial findings and
-  no current EWShop-owned findings.
-- Interpretation: current EWShop rendering already prefers exported facts and
-  sections and suppresses duplicate fallback description lines for metadata-rich
-  entries, so the diagnostic no longer treats exact duplicate description lines
-  as current player-facing UI defects.
-- Current EWShop status: repeated exact structured preview taxonomy is
-  suppressed in compact summaries, so equipment and status previews spend more
-  space on player-useful differentiators.
-- Current UI wording status: Codex overview and category summary surfaces now
-  use encyclopedia-style "entries" and "category overview" language instead of
-  database-oriented "records" labels.
-- Current exporter/editorial opportunity: add player context to
-  classification-only entries and replace raw key-like values in public fields.
+- EWShop/product must decide browse visibility and grouping for `resources`,
+  `councilorEffects`, and `partnerEffects`.
+- Resource deposits / POI pages remain deferred.
+- Districts and Improvements thin context remains deferred.
+- Browse suppression/searchable-only treatment remains a product/navigation
+  decision.
+- Some Actions, Diplomatic Treaties, Statuses, and effect pages may still be
+  thin where no canonical public mechanics source exists.
+- `CouncilorEffectDefinition` gain values were not exported because they need
+  public-safety review.
 
 Actionable next items:
 
-1. Use `docs/active/ewshop-current-export-handoff.md` as the current batch
-   import/product review handoff.
-2. Use `docs/active/bonuses-descriptor-target-correction-final-20260613_validation.md`
-   as the latest exporter validation evidence for bonus descriptor/tag target
-   cleanup.
-3. Use `docs/active/codex-content-quality-diagnostics.md` to regenerate
-   evidence before creating new exporter requests. The old exporter handoff is
-   archived at
-   `docs/archive/codex/codex-content-quality-exporter-handoff-2026-06-12.md`.
-4. Use `docs/active/codex-content-quality-current-diagnostic-handoff.md` as the
-   current concise exporter/editorial follow-up from the latest diagnostic run.
-5. Keep current text-prefix parsing as fallback only for older exports.
-6. Treat baseline Codex metadata preservation, rendering, category exposure,
-   and category presentation polish as complete for the current local imports.
-7. Do not continue Codex frontend polish without a concrete bug or browser QA
-   issue.
-8. Use the content-quality diagnostic primarily to produce exporter/editorial
-   follow-up until new current EWShop-owned findings appear.
-9. Do not expose Modifiers in top-level Codex navigation without product review.
-10. Include major faction Population threshold reward refs in exporter/editorial
-    follow-up; use the working Bor’s Sparring Ring /
-    `DistrictImprovement_MinorFaction_06` minor population shape as the model.
+1. Import the latest DB Exporter Codex files into `local-imports/codex/`.
+2. Verify Spring Boot/API imports and serves the new generic exportKinds:
+   `resources`, `councilorEffects`, and `partnerEffects`.
+3. Re-run Codex relationship/content/preview diagnostics against the new local
+   imports before trusting archived 2026-06-13 numbers.
+4. Browser-QA player-facing pages for resources/extractors, councilors/effects,
+   tech unlocks, population thresholds, treaties, actions, statuses/modifiers,
+   traits, quests, and abilities.
+5. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
+   completed packet requests from archived docs without fresh evidence.
+6. Do not expose Modifiers in top-level Codex navigation without product review.
+7. Do not continue Codex frontend polish without a concrete bug, browser QA
+   finding, category visibility decision, or release-safety concern.
 
 Archived historical context:
 
 - `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
 - `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
 - `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`
+- `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
 
 ## P0 - Quest Documentation Cleanup Only
 
