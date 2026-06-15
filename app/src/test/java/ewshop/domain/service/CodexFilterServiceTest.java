@@ -91,6 +91,34 @@ class CodexFilterServiceTest {
     }
 
     @Test
+    void codexApiFilterKeepsMeaningfulPercentageDisplayNames() {
+        CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
+                codexBuilder("bonuses", "ActionCostModifier_CutForest_Decrease_00", "Cut Forest money cost -50%", List.of())
+                        .facts(List.of(
+                                new CodexMetadataFact("Category", "Cost Modifier", null),
+                                new CodexMetadataFact("Modifier", "-50%", null)
+                        ))
+                        .sections(List.of(new CodexMetadataSection(
+                                "Bonus mechanics",
+                                List.of(),
+                                List.of(new CodexMetadataSectionItem(
+                                        "Cut Forest money cost -50%",
+                                        "ActionTypeCutForest",
+                                        List.of(),
+                                        List.of()
+                                ))
+                        )))
+                        .build(),
+                codexEntry("bonuses", "Modifier_Placeholder", "%Placeholder Modifier", List.of("Should be filtered."))
+        ));
+
+        assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
+                .containsExactly("ActionCostModifier_CutForest_Decrease_00");
+        assertThat(result.skippedEntries()).extracting(CodexFilterResult.CodexFilterSkip::entryKey)
+                .containsExactly("Modifier_Placeholder");
+    }
+
+    @Test
     void keepsMetadataRichEntriesWithoutDescriptionLines() {
         CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
                 codexBuilder("actions", "Action_Facts", "Build Bridge", List.of())

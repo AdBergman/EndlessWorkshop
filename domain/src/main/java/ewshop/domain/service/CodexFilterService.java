@@ -230,7 +230,7 @@ public class CodexFilterService {
 
     private static boolean containsUnsafeDisplayNamePattern(String value) {
         String normalized = trimToEmpty(value);
-        return normalized.contains("%")
+        return normalized.startsWith("%")
                 || DIGIT_CLUSTER_PATTERN.matcher(normalized).find();
     }
 

@@ -15,6 +15,8 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 - `codex-content-quality-diagnostics.md` - current EWShop diagnostic workflow
   for separating EWShop presentation issues from exporter/editorial content
   issues.
+- `codex-exporter-return-progress.md` - current EWShop-side progress tracker
+  for the 2026-06-14 exporter return verification tickets.
 
 The latest exporter return bundle says the packet phase is implemented or
 partially implemented. Regenerate diagnostics against current local imports

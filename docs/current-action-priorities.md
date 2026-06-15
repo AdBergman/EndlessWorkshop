@@ -12,10 +12,10 @@ This list reflects the current product focus:
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: DB Exporter returned the 2026-06-14 Codex metadata packet phase.
-Multiple previously active 2026-06-13 gaps are now implemented or partially
-implemented in exported data and must be verified in EWShop before new frontend
-or exporter work is planned.
+Status: EWShop import/API verification, frontend searchable-only treatment,
+diagnostics refresh, and bounded browser QA are complete for the 2026-06-14
+Codex metadata packet return. Continue from evidence-backed issues only; do not
+restart old 2026-06-13 backlog assumptions.
 
 Start here:
 
@@ -38,31 +38,29 @@ The return bundle reports these notable changes:
 
 Known open decisions and gaps after the return:
 
-- EWShop/product must decide browse visibility and grouping for `resources`,
-  `councilorEffects`, and `partnerEffects`.
+- `resources`, `councilorEffects`, and `partnerEffects` are searchable/linkable
+  and intentionally remain out of top-level navigation after browser QA.
+- Product may later decide whether `resources` deserve top-level navigation,
+  but no promotion is currently approved.
 - Resource deposits / POI pages remain deferred.
 - Districts and Improvements thin context remains deferred.
-- Browse suppression/searchable-only treatment remains a product/navigation
-  decision.
 - Some Actions, Diplomatic Treaties, Statuses, and effect pages may still be
   thin where no canonical public mechanics source exists.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
+- Bonuses Codex local startup import still reports two failed rows. No visible
+  missing player-facing page was found in the bounded QA pass, but this should
+  be revisited if dead-ref diagnostics point to missing bonus/status/modifier
+  entries.
 
 Actionable next items:
 
-1. Import the latest DB Exporter Codex files into `local-imports/codex/`.
-2. Verify Spring Boot/API imports and serves the new generic exportKinds:
-   `resources`, `councilorEffects`, and `partnerEffects`.
-3. Re-run Codex relationship/content/preview diagnostics against the new local
-   imports before trusting archived 2026-06-13 numbers.
-4. Browser-QA player-facing pages for resources/extractors, councilors/effects,
-   tech unlocks, population thresholds, treaties, actions, statuses/modifiers,
-   traits, quests, and abilities.
-5. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
+1. Use `docs/active/codex-exporter-return-progress.md` for the completed
+   EWShop verification summary.
+2. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
    completed packet requests from archived docs without fresh evidence.
-6. Do not expose Modifiers in top-level Codex navigation without product review.
-7. Do not continue Codex frontend polish without a concrete bug, browser QA
+3. Do not expose Modifiers in top-level Codex navigation without product review.
+4. Do not continue Codex frontend polish without a concrete bug, browser QA
    finding, category visibility decision, or release-safety concern.
 
 Archived historical context:
