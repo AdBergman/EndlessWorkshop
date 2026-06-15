@@ -230,6 +230,27 @@ describe("CodexPage", () => {
                 referenceKeys: [],
                 facts: [{ label: "Kind", value: "Cost Modifier" }],
             },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Luxury01",
+                displayName: "Klax",
+                descriptionLines: ["Luxury resource."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_Defense21",
+                displayName: "Travels Well",
+                descriptionLines: ["Councilor effect."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_Hydracorn_PartnerTrait01",
+                displayName: "Hopeless Romantic",
+                descriptionLines: ["Partner effect."],
+                referenceKeys: [],
+            },
         ];
 
         useCodexStore.setState({
@@ -284,6 +305,124 @@ describe("CodexPage", () => {
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex kinds"))
+            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /councilor effects/i })).not.toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /partner effects/i })).not.toBeInTheDocument();
+    });
+
+    it("keeps exporter return kinds searchable and linkable without top-level navigation", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "councilors",
+                entryKey: "Councilor_Atea",
+                displayName: "Atea",
+                category: "Councilor",
+                kind: "Councilor",
+                descriptionLines: ["Public councilor."],
+                referenceKeys: [],
+                publicContextKeys: [
+                    "CouncilorEffect_Defense21",
+                    "PartnerEffect_Hydracorn_PartnerTrait01",
+                ],
+            },
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_Defense21",
+                displayName: "Travels Well",
+                category: "Defense",
+                kind: "Councilor Effect",
+                descriptionLines: [],
+                referenceKeys: ["Councilor_Atea"],
+                facts: [{ label: "Role", value: "Defense" }],
+                sections: [{ title: "Effects", lines: ["[Defense] Defense on Hero."] }],
+                publicContextKeys: ["CouncilorEffect_Defense21", "Councilor_Atea"],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_Hydracorn_PartnerTrait01",
+                displayName: "Hopeless Romantic",
+                category: "Hero",
+                kind: "Partner Effect",
+                descriptionLines: [],
+                referenceKeys: ["Councilor_Atea"],
+                facts: [{ label: "Scope", value: "Hero" }],
+                sections: [{ title: "Effects", lines: ["+1 [MovementPoints] Movement Points outside battle."] }],
+                publicContextKeys: ["PartnerEffect_Hydracorn_PartnerTrait01", "Councilor_Atea"],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Luxury01",
+                displayName: "Klax",
+                category: "Luxury",
+                kind: "Resource",
+                descriptionLines: [],
+                referenceKeys: ["Extractor_Luxury01"],
+                facts: [{ label: "Type", value: "Luxury" }],
+                sections: [{ title: "Effects", lines: ["Activates a booster effect."] }],
+                publicContextKeys: ["Resource_Luxury01", "Extractor_Luxury01"],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=councilors&entry=Councilor_Atea"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Atea" })).toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /councilor effects/i })).not.toBeInTheDocument();
+        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .queryByRole("button", { name: /partner effects/i })).not.toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByText("Councilor Effects")).toBeInTheDocument();
+        expect(within(relatedSection).getByText("Partner Effects")).toBeInTheDocument();
+        await user.click(within(relatedSection).getByRole("button", { name: /travels well councilor effects/i }));
+
+        expect(await screen.findByRole("heading", { name: "Travels Well" })).toBeInTheDocument();
+        expect(screen.getAllByText("Councilor Effects").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Defense / Councilor Effect").length).toBeGreaterThan(0);
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=CouncilorEffect_Defense21");
+
+        const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.clear(input);
+        await user.type(input, "Klax");
+
+        const searchSuggestions = await screen.findByRole("listbox");
+        expect(within(searchSuggestions).getByText("Klax")).toBeInTheDocument();
+        expect(within(searchSuggestions).getByText("Resources")).toBeInTheDocument();
+        expect(searchSuggestions).toHaveTextContent("Luxury / Resource");
     });
 
     it("renders status details while keeping related modifiers hidden from navigation but linkable", async () => {

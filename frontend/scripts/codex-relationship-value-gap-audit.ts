@@ -232,6 +232,14 @@ function formatMarkdown(entries: EntryWithKind[]): string {
     const techUnlockSections = tech.filter((entry) =>
         (entry.sections ?? []).some((section) => lower(section.title).includes("unlock"))
     );
+    const techUnlockItemRefs = techUnlockSections
+        .flatMap((entry) => entry.sections ?? [])
+        .filter((section) => lower(section.title).includes("unlock"))
+        .flatMap((section) => section.items ?? [])
+        .map((item) => normalize(item.referenceKey))
+        .filter(Boolean);
+    const uniqueTechUnlockRefs = unique(techUnlockItemRefs);
+    const resolvedTechUnlockRefs = uniqueTechUnlockRefs.filter((key) => keyToEntry.has(key));
     const techUnlockText = tech.filter((entry) =>
         allLines(entry).some((line) => /\bunlock/i.test(line))
     );
@@ -266,6 +274,8 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         .flatMap((entry) => relationshipKeys(entry).filter((key) => key !== entry.entryKey))
         .filter((key) => keyToEntry.has(key)).length;
     const resourceExportEntries = entries.filter((entry) => visibleCategory(entry) === "resources");
+    const resourcesWithEffects = resourceExportEntries.filter(hasDirectEffects);
+    const thinResources = resourceExportEntries.filter(isThin);
     const klaxExtractor = extractors.find((entry) => entry.entryKey === "Extractor_Luxury01");
     const advancedKlax = extractors.find((entry) => entry.entryKey === "Extractor_Luxury01_Tier2");
 
@@ -314,9 +324,9 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         {
             area: "Tech unlocks",
             playerQuestion: "What does this tech unlock?",
-            currentDataShape: `${tech.length} Tech entries; ${techUnlockLikeRefs.length} have unlock-like related targets, but only ${techUnlockSections.length} Unlocks section and ${techUnlockText.length} unlock-text entries.`,
-            owner: "DB exporter/editorial",
-            productTreatment: "Keep Tech top-level; add exact unlock refs before preview UI.",
+            currentDataShape: `${tech.length} Tech entries; ${techUnlockSections.length} have Unlocks sections; ${resolvedTechUnlockRefs.length}/${uniqueTechUnlockRefs.length} unique Unlock refs resolve; ${techUnlockText.length} have unlock text.`,
+            owner: "EWShop/product, with exporter/editorial for unresolved or text-only unlocks",
+            productTreatment: "Keep Tech top-level; review one-line unlock summaries using exact refs only.",
         },
         {
             area: "Major faction Population thresholds",
@@ -329,15 +339,15 @@ function formatMarkdown(entries: EntryWithKind[]): string {
             area: "Extractor -> Resource",
             playerQuestion: "Which resource does this extractor produce?",
             currentDataShape: `${extractors.length} Resource-category extractor Districts; ${extractorResolvedRefs} resolved extractor refs; ${resourceExportEntries.length} Resource export entries.`,
-            owner: "DB exporter/backend/editorial",
-            productTreatment: "Keep Extractors under Districts; do not promote Resource Codex until entries exist.",
+            owner: "EWShop/product, with exporter/editorial for thin entries",
+            productTreatment: "Keep Extractors under Districts; keep Resources searchable/linkable; defer top-level Resource promotion until browser QA.",
         },
         {
             area: "Resource Codex surface",
             playerQuestion: "What does this resource do?",
-            currentDataShape: "Resource tokens/icons exist in text, but no standalone Resource Codex export/category exists.",
-            owner: "DB exporter/backend/product",
-            productTreatment: "Wait for Resource entities before EWShop creates resource pages.",
+            currentDataShape: `${resourceExportEntries.length} Resource export entries; ${resourcesWithEffects.length} have direct Effects; ${thinResources.length} are facts-only/thin.`,
+            owner: "EWShop/product, with exporter/editorial for thin entries",
+            productTreatment: "Keep Resources searchable/linkable now; decide top-level navigation only after browser QA.",
         },
         {
             area: "Thin Actions",
@@ -387,7 +397,7 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "# Codex Relationship Value Gap Audit",
         "",
         "Status: active generated diagnostic report",
-        "Generated: 2026-06-13",
+        "Generated: current script run",
         "Source: current local Codex imports in `local-imports/codex/`",
         "",
         "## Purpose",
@@ -414,7 +424,7 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "",
         `Player question blocked: "If I research this, what new unit, district, improvement, action, or mechanic becomes available?"`,
         "",
-        `Current data shape: ${tech.length} Tech entries; ${techUnlockLikeRefs.length} have unlock-like related targets, ${techUnlockSections.length} have an Unlocks section, and ${techUnlockText.length} contain unlock text. Related entries cannot safely distinguish unlocked targets from broad context.`,
+        `Current data shape: ${tech.length} Tech entries; ${techUnlockLikeRefs.length} have unlock-like related targets, ${techUnlockSections.length} have an Unlocks section, ${resolvedTechUnlockRefs.length}/${uniqueTechUnlockRefs.length} unique Unlock refs resolve, and ${techUnlockText.length} contain unlock text.`,
         "",
         "Good or partially useful examples:",
         ...renderList([
@@ -428,10 +438,10 @@ function formatMarkdown(entries: EntryWithKind[]): string {
             `Observatory-like targets exist elsewhere (${targetLabel("ActionTypeBuildObservatory", keyToEntry)}, ${targetLabel("DistrictImprovement_Science_01", keyToEntry)}), but EWShop must not infer the link.`,
         ]),
         "",
-        "Missing exact refs or entity category: exact Unlocks section item refs and optional unlock type/classification.",
-        "EWShop frontend opportunity: one-line unlock summaries after exact refs exist.",
-        "DB exporter/editorial request: export exact unlock target refs inside Tech Unlocks sections.",
-        "Product treatment: keep top-level browseable; wait for exporter data before new preview surfaces.",
+        "Remaining exact-ref gap: unresolved or text-only Unlock targets and optional unlock type/classification.",
+        "EWShop frontend opportunity: product-review one-line unlock summaries for exact resolved Unlock refs.",
+        "DB exporter/editorial request: fill unresolved or text-only Unlock refs where public targets exist.",
+        "Product treatment: keep top-level browseable; do not infer unresolved unlocks from prose.",
         "",
         "### 2. Population Thresholds",
         "",
@@ -468,10 +478,10 @@ function formatMarkdown(entries: EntryWithKind[]): string {
             `${example(advancedKlax)} has no Effects lines.`,
         ]),
         "",
-        "Missing exact refs or entity category: Resource entities, Extractor -> Resource refs, and optional Resource -> Extractor reverse refs.",
-        "EWShop frontend opportunity: none until Resource entries or exact refs exist.",
-        "DB exporter/backend/editorial request: export Resource Codex entries or a backend-supported resource category, then connect extractors with exact refs.",
-        "Product treatment: keep Extractors as District entries; do not promote Resource Codex surfaces until data exists.",
+        "Resolved exact refs or entity category: Resource entries now exist, Extractor -> Resource refs resolve, and Resource -> Extractor reverse refs are present.",
+        "EWShop frontend opportunity: browser QA for Resources and Extractors; keep Resources searchable/linkable while top-level promotion stays deferred.",
+        "DB exporter/editorial request: fill thin Resource/Extractor entries where players need effect context.",
+        "Product treatment: keep Extractors as District entries; do not promote Resource Codex surfaces until browser QA confirms player value.",
         "",
         "### 4. Actions",
         "",
@@ -549,6 +559,7 @@ function formatMarkdown(entries: EntryWithKind[]): string {
             `Improvements: ${thinImprovements.length}/${improvements.length} thin (${exampleList(thinImprovements)}).`,
             `Abilities: ${thinAbilities.length}/${abilities.length} thin (${exampleList(thinAbilities)}).`,
             `Statuses: ${thinStatuses.length}/${statuses.length} thin (${exampleList(thinStatuses)}).`,
+            `Resources: ${thinResources.length}/${resourceExportEntries.length} thin (${exampleList(thinResources)}).`,
         ]),
         "",
         "EWShop frontend opportunity: none for missing mechanics. EWShop can avoid over-promoting thin rows, but it should not create placeholder gameplay text.",
@@ -558,9 +569,9 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "## Top 5 DB Exporter / Backend / Editorial Requests",
         "",
         ...renderNumbered([
-            "Export exact Tech Unlocks section refs for Units, Districts, Improvements, Actions, Traits, and upgrades.",
+            "Fill unresolved or text-only Tech Unlock refs where public targets exist.",
             "Export exact Population threshold reward refs for major faction and other text-only rewards where targets already exist.",
-            "Add Resource Codex entities or a backend-supported resource category, then link Extractors to Resources.",
+            "Fill thin Resource and Extractor entries where current facts do not explain player impact.",
             "Add concise gameplay summaries and affected-target refs for thin Actions.",
             "Add direct Effects summaries and fix incomplete public text for Diplomatic Treaties, especially surrender/tribute entries.",
         ]),
@@ -568,10 +579,10 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "## Top 5 EWShop Frontend Opportunities",
         "",
         ...renderNumbered([
-            "Tech unlock summaries after exact Unlock refs exist.",
+            "Tech unlock summaries after product review of exact Unlock refs.",
+            "Browser QA Resources and Extractors before deciding whether Resources deserve top-level navigation.",
             "Treaty -> Status preview prototype for exact high-value Status refs, limited to pages where prose does not already answer the question.",
             "Status grouping/filtering after exporter provides Status sub-kind/scope.",
-            "Extractor -> Resource summaries after Resource entries and exact refs exist.",
             "Continue suppressing duplicate Related Entries only when a local exact-ref preview already shows the target.",
         ]),
         "",
@@ -582,16 +593,16 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         ...renderList([
             "Generic thin Actions: keep searchable/linkable; avoid treating them as rich top-level browse destinations until summaries exist.",
             "Advanced/Grand Extractor entries with no Effects: keep under Districts; do not present as Resource pages.",
-            "Resource Codex category: do not create or promote until actual Resource entries exist.",
-            "Tech Unlock preview work: wait for exact Unlock refs.",
+            "Resource Codex category: keep searchable/linkable; do not top-level promote until browser QA confirms pages are useful.",
+            "Tech Unlock preview work: review row density first and never infer unresolved targets.",
             "Broad Status grouping redesign: wait for exported sub-kind/scope.",
             "Diplomatic Treaty preview expansion: avoid broad prototype; many pages need editorial Effects first.",
         ]),
         "",
         "## Suggested Next Path",
         "",
-        "Prepare an exporter/editorial handoff from this report, focused on exact Tech",
-        "Unlock refs, Population threshold refs, Resource entities/Extractor refs, and",
+        "Prepare an exporter/editorial handoff from this report, focused on unresolved",
+        "Tech Unlock refs, Population threshold refs, thin Resource/Extractor rows, and",
         "thin Action/Treaty gameplay summaries.",
         "",
         "EWShop should pause new preview-surface UI until one of those exact-ref data",

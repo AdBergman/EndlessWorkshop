@@ -328,7 +328,7 @@ function createCandidates(
             (_entry, _refKey, target) => !target || visibleCategory(target) === "abilities",
             true
         );
-        const alreadyImplemented = category === "units" || category === "equipment";
+        const alreadyImplemented = category === "units" || category === "equipment" || category === "heroes";
         const mostlyUnresolved = stats.resolved < Math.max(2, stats.total / 2);
         candidates.push({
             source: category,
@@ -512,7 +512,7 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "# Codex Preview-Surface Audit",
         "",
         "Status: active diagnostic report",
-        "Generated: 2026-06-13",
+        "Generated: current script run",
         "Source: current local Codex imports in `local-imports/codex/`",
         "",
         "## Purpose",
@@ -529,8 +529,8 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "- Related Entries remain exploration, not repetition.",
         "",
         "Already proven and covered: Ability -> applied Status inline links, Unit ->",
-        "granted Ability compact previews, and Equipment -> granted Ability compact",
-        "previews.",
+        "granted Ability compact previews, Equipment -> granted Ability compact",
+        "previews, and Hero -> granted Ability compact previews.",
         "",
         "## Top 10 Candidate Ranking",
         "",
@@ -540,11 +540,10 @@ function formatMarkdown(entries: CodexEntry[]): string {
             `| ${index + 1} | ${candidate.source} | ${candidate.relationship} | ${candidate.surface} | ${candidate.entries} | ${formatStats(candidate.refs)} | ${candidate.playerValue} | ${candidate.risk} | ${candidate.owner} | ${candidate.status} | ${exampleList(candidate.examples, 3)} |`
         ),
         "",
-        "## Recommended Next 3 Implementation Candidates After Equipment",
+        "## Recommended Next 3 Implementation Candidates",
         "",
-        "1. Heroes -> Granted abilities: compact preview rows. This reuses the proven",
-        "   granted-Ability pattern, has mostly resolved data, and answers what a hero",
-        "   actually brings to battle.",
+        "1. Tech -> unlock summaries: one-line summaries/cards for exact Unlocks",
+        "   section refs after a focused product review confirms the row density.",
         "2. Populations -> threshold reward targets: one-line summaries/cards for",
         "   exact reward refs. This helps players compare population breakpoints",
         "   without opening every reward target.",
@@ -606,10 +605,10 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "  keep them as one-line summaries/cards or related chips.",
         "- Modifiers top-level navigation or broad modifier preview work. Modifiers are",
         "  intentionally hidden from navigation and should stay exact-link targets.",
-        "- Traits -> granted Ability preview until exporter/editorial resolves more",
-        "  granted Ability keys. Current resolution is too low for a UI-first pass.",
-        "- Tech unlock previews until exact unlock target refs are exported in the",
-        "  Unlocks section. Current tech unlock text is useful but not linkable.",
+        "- Traits -> granted Ability preview unless future data shows a high-value",
+        "  exact structured ability relationship.",
+        "- Tech unlock previews until a focused product review confirms the one-line",
+        "  summary shape and row density for current exact Unlocks refs.",
         "- Diplomatic Treaty previews unless a focused browser review finds concrete",
         "  treaty pages where direct Effects plus related chips still fail the player.",
         "- Facts-only entries with no mechanics sections. Preview UI cannot manufacture",
@@ -620,7 +619,7 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "EWShop-owned opportunities:",
         "",
         "- Compact preview rows where exact structured refs are resolved and explain the",
-        "  current entry, especially Heroes -> granted Abilities.",
+        "  current entry.",
         "- One-line summary/card treatment for exact unlock targets where the player is",
         "  choosing a plan, especially Tech unlocks.",
         "- Suppressing duplicate related cards only when the same target is already",

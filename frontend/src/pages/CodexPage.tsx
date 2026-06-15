@@ -45,6 +45,7 @@ const PREFERRED_KIND_ORDER = [
     "units",
 ];
 const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "modifiers"]);
+const SEARCHABLE_ONLY_KINDS = new Set(["resources", "counciloreffects", "partnereffects"]);
 
 type SelectionIntent = "passive" | "related";
 
@@ -90,6 +91,7 @@ export default function CodexPage() {
         const extraKinds = Array.from(kindCounts.keys())
             .filter((kind) => !PREFERRED_KIND_ORDER.includes(kind))
             .filter((kind) => !HIDDEN_TOP_LEVEL_KINDS.has(kind))
+            .filter((kind) => !SEARCHABLE_ONLY_KINDS.has(kind.toLowerCase()))
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];
