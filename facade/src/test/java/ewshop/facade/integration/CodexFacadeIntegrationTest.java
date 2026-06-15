@@ -165,6 +165,119 @@ class CodexFacadeIntegrationTest extends BaseIT {
     }
 
     @Test
+    void importCodexThroughFacade_preservesReturnedExporterKindsAndModifiersThroughApiDto() {
+        codexImportAdminFacade.importCodex(batch("resources", List.of(
+                richEntry(
+                        "Resource_Luxury01",
+                        "Klax",
+                        "Luxury",
+                        "Resource",
+                        List.of("Luxury resource."),
+                        List.of("Extractor_Luxury01"),
+                        "Type",
+                        "Luxury",
+                        null,
+                        "Effects",
+                        "Activates a booster effect.",
+                        "Extractor_Luxury01",
+                        List.of("Resource_Luxury01", "Extractor_Luxury01")
+                )
+        )));
+        codexImportAdminFacade.importCodex(batch("councilorEffects", List.of(
+                richEntry(
+                        "CouncilorEffect_Defense21",
+                        "Travels Well",
+                        "Defense",
+                        "Councilor Effect",
+                        List.of("Improves appointed councilor output."),
+                        List.of("Councilor_Atea"),
+                        "Role",
+                        "Defense",
+                        null,
+                        "Effects",
+                        "[Defense] Defense on Hero.",
+                        "Councilor_Atea",
+                        List.of("CouncilorEffect_Defense21", "Councilor_Atea")
+                )
+        )));
+        codexImportAdminFacade.importCodex(batch("partnerEffects", List.of(
+                richEntry(
+                        "PartnerEffect_Hydracorn_PartnerTrait01",
+                        "Hopeless Romantic",
+                        "Hero",
+                        "Partner Effect",
+                        List.of("Partner effect applied while assigned."),
+                        List.of("Councilor_Atea"),
+                        "Scope",
+                        "Hero",
+                        null,
+                        "Effects",
+                        "+1 [MovementPoints] Movement Points outside battle on Units in Hero's Army",
+                        "Councilor_Atea",
+                        List.of("PartnerEffect_Hydracorn_PartnerTrait01", "Councilor_Atea")
+                )
+        )));
+        codexImportAdminFacade.importCodex(batch("modifiers", List.of(
+                richEntry(
+                        "ActionCostModifier_BuildBridge_Decrease_00",
+                        "Bridge Discount",
+                        "Cost Modifier",
+                        "Modifier",
+                        List.of("Bridge construction cost modifier."),
+                        List.of("ActionTypeBuildBridge"),
+                        "Display value",
+                        "-50%",
+                        null,
+                        "Effects",
+                        "Reduces bridge construction cost.",
+                        "ActionTypeBuildBridge",
+                        List.of("ActionCostModifier_BuildBridge_Decrease_00", "ActionTypeBuildBridge")
+                )
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        List<CodexDto> result = codexFacade.getAllCodexEntries();
+
+        assertReturnedKindDto(
+                findCodex(result, "Resource_Luxury01"),
+                "resources",
+                "Type",
+                "Effects",
+                "Extractor_Luxury01",
+                "Resource_Luxury01",
+                "Extractor_Luxury01"
+        );
+        assertReturnedKindDto(
+                findCodex(result, "CouncilorEffect_Defense21"),
+                "councilorEffects",
+                "Role",
+                "Effects",
+                "Councilor_Atea",
+                "CouncilorEffect_Defense21",
+                "Councilor_Atea"
+        );
+        assertReturnedKindDto(
+                findCodex(result, "PartnerEffect_Hydracorn_PartnerTrait01"),
+                "partnerEffects",
+                "Scope",
+                "Effects",
+                "Councilor_Atea",
+                "PartnerEffect_Hydracorn_PartnerTrait01",
+                "Councilor_Atea"
+        );
+        assertReturnedKindDto(
+                findCodex(result, "ActionCostModifier_BuildBridge_Decrease_00"),
+                "modifiers",
+                "Display value",
+                "Effects",
+                "ActionTypeBuildBridge",
+                "ActionCostModifier_BuildBridge_Decrease_00",
+                "ActionTypeBuildBridge"
+        );
+    }
+
+    @Test
     void importCodexThroughFacade_doesNotExposeUnavailableFactionOrEmpireActions() {
         codexImportAdminFacade.importCodex(batch("actions", List.of(
                 entry("FactionActionTypeMukag_PublicAction", "Public Faction Action", "Faction Action", "Action", List.of("Line"), List.of()),
@@ -295,6 +408,27 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 .orElseThrow();
     }
 
+    private static void assertReturnedKindDto(
+            CodexDto dto,
+            String exportKind,
+            String factLabel,
+            String sectionTitle,
+            String expectedReferenceKey,
+            String... expectedPublicContextKeys
+    ) {
+        assertThat(dto.exportKind()).isEqualTo(exportKind);
+        assertThat(dto.referenceKeys()).containsExactly(expectedReferenceKey);
+        assertThat(dto.facts()).extracting(ewshop.facade.dto.response.CodexMetadataFactDto::label)
+                .containsExactly(factLabel);
+        assertThat(dto.sections()).hasSize(1);
+        assertThat(dto.sections().getFirst().title()).isEqualTo(sectionTitle);
+        assertThat(dto.sections().getFirst().lines()).hasSize(1);
+        assertThat(dto.sections().getFirst().items()).hasSize(1);
+        assertThat(dto.sections().getFirst().items().getFirst().referenceKey())
+                .isEqualTo(expectedReferenceKey);
+        assertThat(dto.publicContextKeys()).containsExactly(expectedPublicContextKeys);
+    }
+
     private static CodexImportBatchDto batch(String exportKind, List<CodexImportEntryDto> entries) {
         return new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -321,6 +455,51 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 kind,
                 descriptionLines,
                 referenceKeys
+        );
+    }
+
+    private static CodexImportEntryDto richEntry(
+            String entryKey,
+            String displayName,
+            String category,
+            String kind,
+            List<String> descriptionLines,
+            List<String> referenceKeys,
+            String factLabel,
+            String factValue,
+            String factReferenceKey,
+            String sectionTitle,
+            String sectionLine,
+            String sectionItemReferenceKey,
+            List<String> publicContextKeys
+    ) {
+        return new CodexImportEntryDto(
+                entryKey,
+                displayName,
+                category,
+                kind,
+                descriptionLines,
+                referenceKeys,
+                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataFactDto(
+                        factLabel,
+                        factValue,
+                        factReferenceKey
+                )),
+                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionDto(
+                        sectionTitle,
+                        List.of(sectionLine),
+                        List.of(new ewshop.facade.dto.importing.codex.CodexMetadataSectionItemDto(
+                                "Related target",
+                                sectionItemReferenceKey,
+                                List.of(new ewshop.facade.dto.importing.codex.CodexMetadataFactDto(
+                                        "Target",
+                                        sectionItemReferenceKey,
+                                        sectionItemReferenceKey
+                                )),
+                                List.of("Resolved exact target.")
+                        ))
+                )),
+                publicContextKeys
         );
     }
 }

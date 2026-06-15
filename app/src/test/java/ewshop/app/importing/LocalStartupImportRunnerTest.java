@@ -33,7 +33,9 @@ import tools.jackson.databind.json.JsonMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,11 +64,59 @@ class LocalStartupImportRunnerTest {
         Files.writeString(tempDir.resolve("codex/ewshop_abilities_codex_export_0.78.json"), """
                 {"exportKind":"abilities","entries":[{"entryKey":"a","displayName":"Ability"}]}
                 """);
+        Files.writeString(tempDir.resolve("codex/ewshop_councilor_effects_codex_export_0.82.json"), """
+                {
+                  "exportKind":"councilorEffects",
+                  "entries":[
+                    {
+                      "entryKey":"CouncilorEffect_Defense21",
+                      "displayName":"Travels Well",
+                      "descriptionLines":["Improves appointed councilor output."],
+                      "referenceKeys":["Councilor_Atea"],
+                      "facts":[{"label":"Role","value":"Defense"}],
+                      "sections":[{"title":"Effects","lines":["[Defense] Defense on Hero."],"items":[]}],
+                      "publicContextKeys":["CouncilorEffect_Defense21","Councilor_Atea"]
+                    }
+                  ]
+                }
+                """);
         Files.writeString(tempDir.resolve("codex/ewshop_minor_factions_codex_export_0.78.json"), """
                 {"exportKind":"minorFactions","entries":[{"entryKey":"mf","displayName":"Minor Faction"}]}
                 """);
+        Files.writeString(tempDir.resolve("codex/ewshop_partner_effects_codex_export_0.82.json"), """
+                {
+                  "exportKind":"partnerEffects",
+                  "entries":[
+                    {
+                      "entryKey":"PartnerEffect_Hydracorn_PartnerTrait01",
+                      "displayName":"Hopeless Romantic",
+                      "descriptionLines":["Partner effect applied while assigned."],
+                      "referenceKeys":["Councilor_Atea"],
+                      "facts":[{"label":"Scope","value":"Hero"}],
+                      "sections":[{"title":"Effects","lines":["+1 [MovementPoints] Movement Points outside battle on Units in Hero's Army"],"items":[]}],
+                      "publicContextKeys":["PartnerEffect_Hydracorn_PartnerTrait01","Councilor_Atea"]
+                    }
+                  ]
+                }
+                """);
         Files.writeString(tempDir.resolve("codex/ewshop_quests_codex_export_0.78.json"), """
                 {"exportKind":"quests","entries":[{"entryKey":"quest","displayName":"Quest"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/ewshop_resources_codex_export_0.82.json"), """
+                {
+                  "exportKind":"resources",
+                  "entries":[
+                    {
+                      "entryKey":"Resource_Luxury01",
+                      "displayName":"Klax",
+                      "descriptionLines":["Luxury resource."],
+                      "referenceKeys":["Extractor_Luxury01"],
+                      "facts":[{"label":"Type","value":"Luxury"}],
+                      "sections":[{"title":"Effects","lines":["Activates a booster effect."],"items":[]}],
+                      "publicContextKeys":["Resource_Luxury01","Extractor_Luxury01"]
+                    }
+                  ]
+                }
                 """);
         Files.writeString(tempDir.resolve("codex/ewshop_traits_codex_export_0.78.json"), """
                 {"exportKind":"traits","entries":[{"entryKey":"trait","displayName":"Trait"}]}
@@ -84,11 +134,27 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.districtCalls).isEqualTo(1);
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
-        assertThat(facades.codexCalls).isEqualTo(5);
+        assertThat(facades.codexCalls).isEqualTo(8);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
-        assertThat(facades.codexKinds).containsExactly("abilities", "futureKind", "minorFactions", "quests", "traits");
-        assertThat(summary).isEqualTo(new LocalStartupImportSummary(9, 0, 0));
+        assertThat(facades.codexKinds).containsExactly(
+                "abilities",
+                "councilorEffects",
+                "futureKind",
+                "minorFactions",
+                "partnerEffects",
+                "quests",
+                "resources",
+                "traits"
+        );
+        assertThat(facades.codexByKind.keySet()).contains("resources", "councilorEffects", "partnerEffects");
+        assertThat(facades.codexByKind.get("resources").entries().getFirst().facts().getFirst().label())
+                .isEqualTo("Type");
+        assertThat(facades.codexByKind.get("councilorEffects").entries().getFirst().sections().getFirst().title())
+                .isEqualTo("Effects");
+        assertThat(facades.codexByKind.get("partnerEffects").entries().getFirst().publicContextKeys())
+                .containsExactly("PartnerEffect_Hydracorn_PartnerTrait01", "Councilor_Atea");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(12, 0, 0));
     }
 
     @Test
@@ -340,6 +406,7 @@ class LocalStartupImportRunnerTest {
         private CodexImportBatchDto codexDto;
         private QuestExplorerImportBatchDto questDto;
         private final List<String> codexKinds = new ArrayList<>();
+        private final Map<String, CodexImportBatchDto> codexByKind = new LinkedHashMap<>();
 
         @Override
         public ImportSummaryDto importTechs(TechImportBatchDto file) {
@@ -394,6 +461,7 @@ class LocalStartupImportRunnerTest {
             codexCalls++;
             codexDto = file;
             codexKinds.add(file.exportKind());
+            codexByKind.put(file.exportKind(), file);
             if (file.entries() == null || file.entries().isEmpty()) {
                 throw new IllegalArgumentException("Import file has no entries");
             }

@@ -35,25 +35,25 @@ class CodexControllerTest {
     @Test
     void getAllCodex_returnsJson() throws Exception {
         CodexDto dto = new CodexDto(
-                "abilities",
-                "Ability_A",
-                "Ability A",
-                "Combat",
-                "Ability",
+                "resources",
+                "Resource_Luxury01",
+                "Klax",
+                "Luxury",
+                "Resource",
                 List.of("Line 1", "Line 2"),
-                List.of("Unit_A"),
-                List.of(new CodexMetadataFactDto("Faction", "Faction_Aspect", "Faction_Aspect")),
+                List.of("Extractor_Luxury01"),
+                List.of(new CodexMetadataFactDto("Type", "Luxury", null)),
                 List.of(new CodexMetadataSectionDto(
-                        "Threshold rewards",
+                        "Extractors",
                         List.of(),
                         List.of(new CodexMetadataSectionItemDto(
-                                "At 5 population",
-                                null,
-                                List.of(new CodexMetadataFactDto("Reward", "Nutrient Extractor", null)),
+                                "Klax Extractor",
+                                "Extractor_Luxury01",
+                                List.of(new CodexMetadataFactDto("Tier", "1", null)),
                                 List.of()
                         ))
                 )),
-                List.of("Population_Aspect", "Faction_Aspect")
+                List.of("Resource_Luxury01", "Extractor_Luxury01")
         );
 
         when(codexFacade.getAllCodexEntries()).thenReturn(List.of(dto));
@@ -64,18 +64,19 @@ class CodexControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].length()").value(10))
-                .andExpect(jsonPath("$[0].exportKind").value("abilities"))
-                .andExpect(jsonPath("$[0].entryKey").value("Ability_A"))
-                .andExpect(jsonPath("$[0].displayName").value("Ability A"))
-                .andExpect(jsonPath("$[0].category").value("Combat"))
-                .andExpect(jsonPath("$[0].kind").value("Ability"))
+                .andExpect(jsonPath("$[0].exportKind").value("resources"))
+                .andExpect(jsonPath("$[0].entryKey").value("Resource_Luxury01"))
+                .andExpect(jsonPath("$[0].displayName").value("Klax"))
+                .andExpect(jsonPath("$[0].category").value("Luxury"))
+                .andExpect(jsonPath("$[0].kind").value("Resource"))
                 .andExpect(jsonPath("$[0].descriptionLines[0]").value("Line 1"))
                 .andExpect(jsonPath("$[0].descriptionLines[1]").value("Line 2"))
-                .andExpect(jsonPath("$[0].referenceKeys[0]").value("Unit_A"))
-                .andExpect(jsonPath("$[0].facts[0].label").value("Faction"))
-                .andExpect(jsonPath("$[0].facts[0].referenceKey").value("Faction_Aspect"))
-                .andExpect(jsonPath("$[0].sections[0].title").value("Threshold rewards"))
-                .andExpect(jsonPath("$[0].sections[0].items[0].label").value("At 5 population"))
-                .andExpect(jsonPath("$[0].publicContextKeys[0]").value("Population_Aspect"));
+                .andExpect(jsonPath("$[0].referenceKeys[0]").value("Extractor_Luxury01"))
+                .andExpect(jsonPath("$[0].facts[0].label").value("Type"))
+                .andExpect(jsonPath("$[0].facts[0].value").value("Luxury"))
+                .andExpect(jsonPath("$[0].sections[0].title").value("Extractors"))
+                .andExpect(jsonPath("$[0].sections[0].items[0].label").value("Klax Extractor"))
+                .andExpect(jsonPath("$[0].sections[0].items[0].referenceKey").value("Extractor_Luxury01"))
+                .andExpect(jsonPath("$[0].publicContextKeys[0]").value("Resource_Luxury01"));
     }
 }
