@@ -17,6 +17,10 @@ import {
     buildTechUnlockSummary,
     isTechUnlockSummarySection,
 } from "@/lib/codex/codexTechUnlockSummaries";
+import {
+    buildTreatyStatusSummary,
+    isTreatyAppliedStatusSummarySection,
+} from "@/lib/codex/codexTreatyStatusSummaries";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
@@ -24,6 +28,7 @@ import CodexInlineEntityLink from "./CodexInlineEntityLink";
 import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
 import CodexPopulationThresholdTargetSummary from "./CodexPopulationThresholdTargetSummary";
 import CodexTechUnlockSummary from "./CodexTechUnlockSummary";
+import CodexTreatyStatusSummary from "./CodexTreatyStatusSummary";
 
 type Props = {
     entry: CodexEntry;
@@ -127,6 +132,9 @@ function StructuredSectionItem({
     const techUnlockSummary = isTechUnlockSummarySection(entry, sectionLabel)
         ? buildTechUnlockSummary(item, relatedEntries)
         : null;
+    const treatyStatusSummary = isTreatyAppliedStatusSummarySection(entry, sectionLabel)
+        ? buildTreatyStatusSummary(item, relatedEntries)
+        : null;
 
     if (grantedAbilityPreview && onSelectInlineEntry) {
         return (
@@ -170,6 +178,13 @@ function StructuredSectionItem({
             {techUnlockSummary && onSelectInlineEntry ? (
                 <CodexTechUnlockSummary
                     summary={techUnlockSummary}
+                    onSelect={onSelectInlineEntry}
+                />
+            ) : null}
+
+            {treatyStatusSummary && onSelectInlineEntry ? (
+                <CodexTreatyStatusSummary
+                    summary={treatyStatusSummary}
                     onSelect={onSelectInlineEntry}
                 />
             ) : null}

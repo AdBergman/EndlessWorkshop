@@ -52,6 +52,9 @@ Known post-return decisions and gaps:
   `Population_Aspect` still has unresolved exact ref
   `Aspect_DistrictImprovement_00`, so `Nutrient Extractor` remains plain until
   that target is exported as a current Codex entry.
+- Diplomatic Treaty pages render exact applied Status mechanics summaries where
+  current metadata resolves, for example Close Borders now exposes its Public
+  Opinion impact without requiring a Related Entries click-through.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
 - Bonuses Codex local startup import still reports two failed rows. NEXT-006

@@ -20,6 +20,7 @@ story so future sessions can continue without reconstructing chat history.
 | Current audit ticket regeneration | completed | Regenerated diagnostics and created `docs/active/codex-current-audit-ticket-plan.md` |
 | `EW-CODEX-AUDIT-001` - Make Codex Diagnostics Implementation-Aware | completed | Generated diagnostics now mark completed exact-ref surfaces as implemented |
 | `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold Summaries | completed | Browser QA confirmed resolved exact refs render and unresolved/text-only rewards remain plain |
+| `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied Status Usefulness | completed | Exact applied Status refs now render compact treaty mechanics summaries |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -294,3 +295,54 @@ story so future sessions can continue without reconstructing chat history.
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-003` Diplomatic Treaty applied Status
     usefulness review if validation passes and the commit is clean.
+
+## 2026-06-16 - EW-CODEX-AUDIT-003 Diplomatic Treaty Applied Status Usefulness
+
+- Story ID/title: `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied
+  Status Usefulness.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - Browser QA for `Declaration_CloseBorders`,
+    `Declaration_EmbraceCoralSymbiosis`,
+    `Declaration_FactionQuest_Aspect_Chapter06AStep02`, and
+    `Treaty_SharedResearch`.
+  - Current local Codex Status metadata for exact treaty Status refs.
+- Changes made:
+  - Added a narrow Diplomatic Treaty Applied Status summary helper and
+    component.
+  - Applied Status section items now show a compact clickable Status mechanics
+    summary only when their `referenceKey` resolves to a Status entry.
+  - Related Entries remain unchanged.
+  - Updated diagnostics so treaty applied Status summaries are treated as
+    implemented, while broader Treaty preview work remains deferred.
+- Tests/diagnostics/browser QA run:
+  - Browser QA:
+    `/codex?category=diplomatictreaties&entry=Declaration_CloseBorders`
+    shows `Closed Borders declared` with `-25 Public Opinion`.
+  - Browser QA:
+    `/codex?category=diplomatictreaties&entry=Declaration_EmbraceCoralSymbiosis`
+    shows `You embraced Coral Symbiosis` with `+5 Public Opinion`.
+  - Browser QA:
+    `/codex?category=diplomatictreaties&entry=Declaration_FactionQuest_Aspect_Chapter06AStep02`
+    shows `Victim of the Coral Siphon Declaration` with
+    `-10 Public Opinion` while preserving the existing Effects text.
+  - Browser QA:
+    `/codex?category=diplomatictreaties&entry=Treaty_SharedResearch` remains
+    Effects-only with no extra Status summary.
+  - `npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md`
+  - `npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --output ../docs/active/codex-relationship-value-gap-audit.md`
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+- Review notes:
+  - This is intentionally not a generic preview renderer.
+  - No display-name/prose inference was added.
+  - Broader Treaty preview expansion remains deferred until exporter/editorial
+    Effects improve.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Continue with `EW-CODEX-AUDIT-004` Quest Strategy Codex preview
+    accessibility if validation passes and the commit is clean.

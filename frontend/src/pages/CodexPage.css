@@ -1228,7 +1228,8 @@
     color: rgba(229, 198, 123, 0.52);
 }
 
-.codex-unlockTarget {
+.codex-unlockTarget,
+.codex-statusTarget {
     display: inline-flex;
     align-items: baseline;
     min-width: 0;
@@ -1243,40 +1244,48 @@
 }
 
 .codex-unlockTarget:hover,
-.codex-unlockTarget:focus-visible {
+.codex-unlockTarget:focus-visible,
+.codex-statusTarget:hover,
+.codex-statusTarget:focus-visible {
     color: rgba(241, 234, 220, 0.94);
     outline: none;
 }
 
-.codex-unlockTarget:focus-visible {
+.codex-unlockTarget:focus-visible,
+.codex-statusTarget:focus-visible {
     border-radius: 3px;
     box-shadow: 0 0 0 2px rgba(255, 217, 119, 0.24);
 }
 
-.codex-unlockTarget__copy {
+.codex-unlockTarget__copy,
+.codex-statusTarget__copy {
     display: inline;
     min-width: 0;
     font-size: 13px;
     line-height: 1.55;
 }
 
-.codex-unlockTarget__name {
+.codex-unlockTarget__name,
+.codex-statusTarget__name {
     color: rgba(241, 234, 220, 0.9);
     font-weight: 700;
 }
 
-.codex-unlockTarget__meta {
+.codex-unlockTarget__meta,
+.codex-statusTarget__meta {
     color: rgba(91, 217, 236, 0.78);
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
-.codex-unlockTarget__preview {
+.codex-unlockTarget__preview,
+.codex-statusTarget__preview {
     color: rgba(241, 234, 220, 0.72);
 }
 
-.codex-unlockTarget__separator {
+.codex-unlockTarget__separator,
+.codex-statusTarget__separator {
     margin: 0 5px;
     color: rgba(229, 198, 123, 0.52);
 }

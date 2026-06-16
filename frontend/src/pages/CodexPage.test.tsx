@@ -3415,6 +3415,141 @@ describe("CodexPage", () => {
         expect(screen.getByText("One-sided")).toBeInTheDocument();
     });
 
+    it("renders exact Diplomatic Treaty applied Status refs as compact mechanics summaries", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_CloseBorders",
+                displayName: "Close Borders",
+                category: "Hostile Defense",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [],
+                referenceKeys: ["Status_PublicOpinion_YouClosedBorders"],
+                facts: [
+                    { label: "Category", value: "Hostile Defense" },
+                    { label: "Participation", value: "One-sided" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Applied statuses",
+                        items: [
+                            {
+                                label: "Closed Borders declared",
+                                referenceKey: "Status_PublicOpinion_YouClosedBorders",
+                                facts: [{ label: "Applies to", value: "Other empire" }],
+                                lines: [],
+                            },
+                        ],
+                    },
+                ],
+                publicContextKeys: ["Status_PublicOpinion_YouClosedBorders"],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_MissingStatus",
+                displayName: "Missing Status Treaty",
+                category: "Hostile Defense",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [],
+                referenceKeys: ["Status_Missing"],
+                sections: [
+                    {
+                        title: "Applied statuses",
+                        items: [
+                            {
+                                label: "Mystery Status",
+                                referenceKey: "Status_Missing",
+                                facts: [{ label: "Applies to", value: "Other empire" }],
+                                lines: [],
+                            },
+                        ],
+                    },
+                ],
+                publicContextKeys: ["Status_Missing"],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_PublicOpinion_YouClosedBorders",
+                displayName: "Closed Borders declared",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                    { label: "Duration", value: "10 turns" },
+                    { label: "Kind", value: "Status" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        items: [
+                            {
+                                label: "Public Opinion",
+                                facts: [
+                                    { label: "Affected stat", value: "Public Opinion" },
+                                    { label: "Change", value: "-25" },
+                                ],
+                                lines: ["-25 [PublicOpinion] Public Opinion"],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                diplomatictreaties: entries.filter((entry) => entry.exportKind === "diplomatictreaties"),
+                statuses: entries.filter((entry) => entry.exportKind === "statuses"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=diplomatictreaties&entry=Declaration_CloseBorders"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Close Borders" })).toBeInTheDocument();
+
+        const statusSummary = screen.getByRole("button", {
+            name: "Closed Borders declared Diplomatic Ambassy / 10 turns -25 Public Opinion",
+        });
+        expect(statusSummary).toHaveClass("codex-statusTarget");
+        expect(statusSummary).not.toHaveTextContent("[PublicOpinion]");
+
+        const detailPane = screen.getByRole("region", { name: "Selected codex entry" });
+        expect(within(detailPane).getByText("Related entries")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Statuses")).toBeInTheDocument();
+
+        await user.click(statusSummary);
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_PublicOpinion_YouClosedBorders");
+
+        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
+        await user.click(within(resultsPane).getByRole("button", { name: /missing status treaty/i }));
+        expect(await screen.findByRole("heading", { name: "Missing Status Treaty" })).toBeInTheDocument();
+        expect(screen.getByText("Mystery Status")).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Mystery Status.*Public Opinion/i })).not.toBeInTheDocument();
+    });
+
     it("browses and renders representative action entries with null descriptions", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [

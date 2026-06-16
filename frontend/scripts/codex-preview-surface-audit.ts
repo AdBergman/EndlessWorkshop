@@ -354,12 +354,12 @@ function createCandidates(
             (_entry, _refKey, target) => !target || visibleCategory(target) === "statuses"
         );
         const directEffects = statusRelatedEntries.filter((entry) => directEffectsLineCount(entry) > 0).length;
-        const alreadyImplemented = category === "abilities";
+        const alreadyImplemented = category === "abilities" || category === "diplomatictreaties";
         candidates.push({
             source: category,
             subcategory: commonSubcategory,
             relationship: "Related Status/effect entries",
-            surface: alreadyImplemented ? "inline clarification" : directEffects > statusRelatedEntries.length / 2 ? "one-line summary/card" : "compact rendered preview",
+            surface: category === "abilities" ? "inline clarification" : category === "diplomatictreaties" ? "one-line summary/card" : directEffects > statusRelatedEntries.length / 2 ? "one-line summary/card" : "compact rendered preview",
             entries: statusRelatedEntries.length,
             refs: {
                 ...stats,
@@ -368,7 +368,7 @@ function createCandidates(
             playerValue: alreadyImplemented ? 0 : category === "diplomatictreaties" ? 5 : 6,
             risk: alreadyImplemented ? 1 : category === "diplomatictreaties" ? 6 : 5,
             owner: alreadyImplemented ? "None" : "Both",
-            status: alreadyImplemented ? "Already covered for exact Ability prose mentions" : directEffects > 0 ? "Needs product review to avoid bloat" : "Needs exporter/editorial context first",
+            status: category === "abilities" ? "Already covered for exact Ability prose mentions" : category === "diplomatictreaties" ? "Implemented in EWShop for exact Applied statuses section refs" : directEffects > 0 ? "Needs product review to avoid bloat" : "Needs exporter/editorial context first",
             examples: statusRelatedEntries,
         });
     }
@@ -538,6 +538,7 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "- Population -> exact threshold reward target summaries.",
         "- Resource, Councilor Effect, and Partner Effect shallow reference category",
         "  lists.",
+        "- Diplomatic Treaty -> exact applied Status one-line summaries.",
         "",
         "## Top 10 Candidate Ranking",
         "",
@@ -549,20 +550,17 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "",
         "## Recommended Next 3 Implementation Candidates",
         "",
-        "1. Diplomatic Treaty -> related Status/effect entries: prototype only if a",
-        "   focused treaty review still shows player confusion after direct Effects",
-        "   text and related chips. Prefer one-line effect summaries over inline",
-        "   expansion.",
-        "2. Actions -> related Status/effect entries: review only the entries that",
+        "1. Actions -> related Status/effect entries: review only the entries that",
         "   already have useful mechanics sections. Most remaining Action gaps are",
         "   exporter/editorial-owned.",
-        "3. Faction and other large-subject references: keep as one-line summaries",
+        "2. Faction and other large-subject references: keep as one-line summaries",
         "   or related chips unless browser QA proves a specific hub needs promotion.",
+        "3. Status grouping/filtering: wait for exporter/editorial Status sub-kind",
+        "   data before adding grouping UI.",
         "",
-        "Diplomatic Treaty -> Status/effect preview remains lower priority: the local",
-        "data is narrow, several treaties already have direct Effects text, and the",
-        "risk of repeating or bloating treaty pages is higher than for granted",
-        "Ability surfaces.",
+        "Diplomatic Treaty -> exact applied Status summaries are implemented. Broader",
+        "Treaty preview expansion remains out of scope because several treaties already",
+        "have direct Effects text and others need editorial Effects first.",
         "",
         "## Category And Subcategory Audit",
         "",
@@ -616,8 +614,8 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "  exact structured ability relationship.",
         "- Tech unlock and Population exact threshold preview work except for browser",
         "  QA regressions. Those exact-ref surfaces are already implemented.",
-        "- Diplomatic Treaty previews unless a focused browser review finds concrete",
-        "  treaty pages where direct Effects plus related chips still fail the player.",
+        "- Broader Diplomatic Treaty previews beyond exact Applied statuses. Several",
+        "  treaty pages need editorial Effects before more UI work would help.",
         "- Facts-only entries with no mechanics sections. Preview UI cannot manufacture",
         "  missing player context.",
         "",

@@ -74,6 +74,8 @@ Still true:
    current exact refs. Completed in the current loop; resolved exact refs
    render, text-only and unresolved targets remain plain.
 3. `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty applied Status usefulness.
+   Completed in the current loop; exact applied Status refs now show compact
+   mechanics summaries.
 4. `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex preview accessibility.
 5. `EW-CODEX-AUDIT-005` - Browser-review Action mechanics presentation.
 
@@ -212,6 +214,7 @@ QA targets, findings, fixes if any, tests, player value, and commit hash.
 
 Owner: EWShop frontend/product  
 Priority: P2
+Status: completed
 
 Why this matters to a 4X player:
 Some Treaty pages have exact applied Status refs. A player may need the Status

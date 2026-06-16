@@ -24,7 +24,7 @@ EWShop should continue to use exact exported refs, `referenceKeys`,
 | 4 | Resource Codex surface | What does this resource do? | 24 Resource export entries; 16 have direct Effects; 2 are facts-only/thin. | EWShop/product, with exporter/editorial for thin entries | Resources are top-level shallow reference entries; thin entries need exporter/editorial context. |
 | 5 | Thin Actions | What does this action do and when should I use it? | 139 Actions; 87 have only facts and no public description/mechanics section. | DB exporter/editorial | Keep exact-link/search targets; avoid promoting thin Actions as rich browse content. |
 | 6 | Action cost/mechanic context | Why is this cost modifier relevant? | 52 Actions have sections, mostly cost modifiers or formula notes. | Both | Exporter summaries first; EWShop can later group/highlight useful mechanics. |
-| 7 | Diplomatic Treaty impact | What changes when I sign or declare this? | 22 Treaties; 8 direct Effects, 6 Status refs, 3 with both, 11 with neither. | Both | Keep browseable; preview only exact Status refs after product review. |
+| 7 | Diplomatic Treaty impact | What changes when I sign or declare this? | 22 Treaties; 8 direct Effects, 6 Status refs, 3 with both, 11 with neither. | Both | Exact Applied Status summaries are implemented; remaining gaps are mostly direct Effects/editorial text. |
 | 8 | Treaty placeholder/unfinished text | What tribute/cost/status is involved? | Some treaty text is incomplete, especially surrender tribute prose. | DB exporter/editorial | Fix public prose/data before EWShop polish. |
 | 9 | Status grouping | Which statuses are combat, city, empire, public opinion, or hero effects? | 337 derived Status entries; 303 have mechanics, 32 are thin, and current subcategory is Status. | DB exporter/editorial, then EWShop | Keep Status top-level; add exported sub-kind before grouping redesign. |
 | 10 | Thin browse rows | Why should I click or compare this entry? | actions: 87/139 thin (Army Steal Territory (ActionTypeArmyStealTerritory)<br>Banish Population From Settlement (ActionTypeBanishPopulationFromSettlement)<br>Boost Cultural Economic Gain (ActionTypeBoostCulturalEconomicGain)); districts: 41/167 thin (Temporary Bridge (District_Bridge)<br>Camp (District_Camp_BeforeCamp)<br>Dam (District_Dam)); improvements: 23/123 thin (Pile House (DistrictImprovement_Bridge_01)<br>Sentry Scopes (DistrictImprovement_Bridge_02)<br>Mirrored Defenses (DistrictImprovement_Bridge_03)); statuses: 32/337 thin (Hero Status Loss (HeroStatus_Loss)<br>Status Administrative Center Subjugation (Status_AdministrativeCenter_Subjugation)<br>Immobile (Status_Army_Map_Speed_Immobile)); resources: 2/24 thin (Corpses (Resource_Specific_Corpse)<br>Fallen Spirit (Resource_Specific_Spirit)); abilities: 19/336 thin (Vengeful Spirit (UnitAbility_AlwaysRetaliate)<br>Blossom I (UnitAbility_Blossom_1)<br>Blossom II (UnitAbility_Blossom_2)); diplomaticTreaties: 1/22 thin (Surrender Demand (Treaty_AskToSurrender)) | DB exporter/editorial | Valid searchable/linkable entities; avoid promoting thin subcategories as rich browse surfaces. |
@@ -119,9 +119,9 @@ Low-value or incomplete examples:
 - Surrender Offer (Treaty_ProposeSurrender) has incomplete tribute text.
 - Shared Victory (Treaty_SharedVictory) has useful prose but no Effects section or refs.
 
-EWShop frontend opportunity: potential exact Status preview prototype only where prose does not already answer the question.
+EWShop status: exact Applied Status summaries are implemented for treaty Status refs, while Related Entries remain exploration.
 DB exporter/editorial request: add direct Effects summaries and fix incomplete public text.
-Product treatment: keep Diplomatic Treaties browseable; avoid broad preview expansion.
+Product treatment: keep Diplomatic Treaties browseable; avoid broader preview expansion until editorial Effects improve.
 
 ### 6. Status Sub-Kinds
 
@@ -163,10 +163,10 @@ Product treatment: valid searchable/linkable entities; avoid promoting thin subc
 ## Top 5 EWShop Frontend Opportunities
 
 1. Browser-QA Population threshold summaries against current exact refs to catch regressions.
-2. Review Diplomatic Treaty applied Status usefulness before any Treaty preview prototype.
-3. Harden Quest Strategy Codex preview accessibility if keyboard or touch QA finds friction.
-4. Browser-review Action mechanics presentation for entries that already have useful mechanics sections.
-5. Continue keeping completed preview surfaces exact-ref-only and implementation-aware in diagnostics.
+2. Harden Quest Strategy Codex preview accessibility if keyboard or touch QA finds friction.
+3. Browser-review Action mechanics presentation for entries that already have useful mechanics sections.
+4. Continue keeping completed preview surfaces exact-ref-only and implementation-aware in diagnostics.
+5. Review Status grouping/filtering only after exporter provides usable Status sub-kind/scope data.
 
 Use `docs/active/codex-current-audit-ticket-plan.md` for the current EWShop story order. No completed exact-ref surface should be reopened solely because it appears in relationship counts.
 
@@ -177,14 +177,13 @@ Use `docs/active/codex-current-audit-ticket-plan.md` for the current EWShop stor
 - Resources: now top-level shallow references, not full dossier pages. Thin Resource rows remain exporter/editorial follow-up.
 - Tech Unlock preview work: exact-ref summaries are implemented; never infer unresolved targets.
 - Broad Status grouping redesign: wait for exported sub-kind/scope.
-- Diplomatic Treaty preview expansion: avoid broad prototype; many pages need editorial Effects first.
+- Diplomatic Treaty preview expansion beyond exact Applied statuses: avoid broad prototype; many pages need editorial Effects first.
 
 ## Suggested Next Path
 
 Continue the EWShop loop from `docs/active/codex-current-audit-ticket-plan.md`.
-The next implementation-backed checks are Population threshold summary browser QA,
-Diplomatic Treaty applied Status usefulness review, Quest Strategy preview
-accessibility, and Action mechanics browser review.
+The next implementation-backed checks are Quest Strategy preview accessibility
+and Action mechanics browser review.
 
 Exporter/editorial follow-up remains focused on unresolved/text-only Tech
 Unlock refs, Population threshold refs, thin Resource/Extractor rows, and

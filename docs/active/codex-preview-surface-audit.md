@@ -25,6 +25,7 @@ Already proven and covered:
 - Population -> exact threshold reward target summaries.
 - Resource, Councilor Effect, and Partner Effect shallow reference category
   lists.
+- Diplomatic Treaty -> exact applied Status one-line summaries.
 
 ## Top 10 Candidate Ranking
 
@@ -32,31 +33,28 @@ Already proven and covered:
 | ---: | --- | --- | --- | ---: | --- | ---: | ---: | --- | --- | --- |
 | 1 | actions | Related Status/effect entries | compact rendered preview | 3 | 6/42 resolved, 36 unresolved, 3 duplicate structured refs | 6 | 5 | Both | Needs exporter/editorial context first | Mukag Light01 (EmpireActionTypeMukag_Light01)<br>Mukag Light02 (EmpireActionTypeMukag_Light02)<br>Mukag Light03 (EmpireActionTypeMukag_Light03) |
 | 2 | factions | Related Status/effect entries | one-line summary/card | 1 | 2/6 resolved, 4 unresolved, 0 duplicate structured refs | 6 | 5 | Both | Needs product review to avoid bloat | Necrophages (Faction_Necrophage) |
-| 3 | diplomatictreaties | Related Status/effect entries | compact rendered preview | 6 | 14/14 resolved, 0 unresolved, 6 duplicate structured refs | 5 | 6 | Both | Needs product review to avoid bloat | Close Borders (Declaration_CloseBorders)<br>Embrace Symbiosis (Declaration_EmbraceCoralSymbiosis)<br>Coral Siphon (Declaration_FactionQuest_Aspect_Chapter06AStep02) |
-| 4 | units | Faction references | one-line summary/card | 101 | 202/202 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Skyscale (Unit_Aspect_Giant)<br>Brightscale (Unit_Aspect_Giant_SpecializationA)<br>Scales of Balance (Unit_Aspect_Giant_SpecializationA_Upgraded) |
-| 5 | tech | Faction references | one-line summary/card | 60 | 120/134 resolved, 14 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Asceticism (Aspect_Technology_00)<br>Foreign Affairs (Aspect_Technology_MinorFaction_Protectorate_00)<br>The Strength of Garin (KinOfSheredyn_Technology_04) |
-| 6 | heroes | Faction references | one-line summary/card | 41 | 82/82 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Polemephon, the Steadfast (Hero_Aspect_Archer_0)<br>Mitoxus of Agora (Hero_Aspect_Archer_1)<br>Xenos (Hero_Aspect_Archer_2) |
-| 7 | councilors | Faction references | one-line summary/card | 10 | 20/20 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Diogen, the Inquisitive (Notable_CityManagement_Event018_Reward)<br>Axios, the Possessed (Notable_EndGameNarrative_Event012_Puppet)<br>Rzeld (Notable_FactionQuest_KinOfSheredyn_Chapter03_Rzeld) |
-| 8 | populations | Faction references | one-line summary/card | 6 | 12/14 resolved, 2 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Aspect (Population_Aspect)<br>Kin of Sheredyn (Population_KinOfSheredyn)<br>Last Lord (Population_LastLord) |
-| 9 | factions | Unlock relationships | no action | 2 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 2 | 7 | Exporter/editorial | Needs exact exported unlock refs before UI work | Kin of Sheredyn (Faction_KinOfSheredyn)<br>Tahuk (Faction_Mukag) |
-| 10 | actions | Facts only, no player-facing mechanics | no action | 87 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context | Army Steal Territory (ActionTypeArmyStealTerritory)<br>Banish Population From Settlement (ActionTypeBanishPopulationFromSettlement)<br>Boost Cultural Economic Gain (ActionTypeBoostCulturalEconomicGain) |
+| 3 | units | Faction references | one-line summary/card | 101 | 202/202 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Skyscale (Unit_Aspect_Giant)<br>Brightscale (Unit_Aspect_Giant_SpecializationA)<br>Scales of Balance (Unit_Aspect_Giant_SpecializationA_Upgraded) |
+| 4 | tech | Faction references | one-line summary/card | 60 | 120/134 resolved, 14 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Asceticism (Aspect_Technology_00)<br>Foreign Affairs (Aspect_Technology_MinorFaction_Protectorate_00)<br>The Strength of Garin (KinOfSheredyn_Technology_04) |
+| 5 | heroes | Faction references | one-line summary/card | 41 | 82/82 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Polemephon, the Steadfast (Hero_Aspect_Archer_0)<br>Mitoxus of Agora (Hero_Aspect_Archer_1)<br>Xenos (Hero_Aspect_Archer_2) |
+| 6 | councilors | Faction references | one-line summary/card | 10 | 20/20 resolved, 0 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Diogen, the Inquisitive (Notable_CityManagement_Event018_Reward)<br>Axios, the Possessed (Notable_EndGameNarrative_Event012_Puppet)<br>Rzeld (Notable_FactionQuest_KinOfSheredyn_Chapter03_Rzeld) |
+| 7 | populations | Faction references | one-line summary/card | 6 | 12/14 resolved, 2 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers | Aspect (Population_Aspect)<br>Kin of Sheredyn (Population_KinOfSheredyn)<br>Last Lord (Population_LastLord) |
+| 8 | factions | Unlock relationships | no action | 2 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 2 | 7 | Exporter/editorial | Needs exact exported unlock refs before UI work | Kin of Sheredyn (Faction_KinOfSheredyn)<br>Tahuk (Faction_Mukag) |
+| 9 | actions | Facts only, no player-facing mechanics | no action | 87 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context | Army Steal Territory (ActionTypeArmyStealTerritory)<br>Banish Population From Settlement (ActionTypeBanishPopulationFromSettlement)<br>Boost Cultural Economic Gain (ActionTypeBoostCulturalEconomicGain) |
+| 10 | districts | Facts only, no player-facing mechanics | no action | 47 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context | Advanced Divined Monument (DistrictDefinition_District_Tier2_DivinePopMonument)<br>Grand Divined Monument (DistrictDefinition_District_Tier3_DivinePopMonument)<br>Temporary Bridge (District_Bridge) |
 
 ## Recommended Next 3 Implementation Candidates
 
-1. Diplomatic Treaty -> related Status/effect entries: prototype only if a
-   focused treaty review still shows player confusion after direct Effects
-   text and related chips. Prefer one-line effect summaries over inline
-   expansion.
-2. Actions -> related Status/effect entries: review only the entries that
+1. Actions -> related Status/effect entries: review only the entries that
    already have useful mechanics sections. Most remaining Action gaps are
    exporter/editorial-owned.
-3. Faction and other large-subject references: keep as one-line summaries
+2. Faction and other large-subject references: keep as one-line summaries
    or related chips unless browser QA proves a specific hub needs promotion.
+3. Status grouping/filtering: wait for exporter/editorial Status sub-kind
+   data before adding grouping UI.
 
-Diplomatic Treaty -> Status/effect preview remains lower priority: the local
-data is narrow, several treaties already have direct Effects text, and the
-risk of repeating or bloating treaty pages is higher than for granted
-Ability surfaces.
+Diplomatic Treaty -> exact applied Status summaries are implemented. Broader
+Treaty preview expansion remains out of scope because several treaties already
+have direct Effects text and others need editorial Effects first.
 
 ## Category And Subcategory Audit
 
@@ -210,7 +208,7 @@ Facts-only/no mechanics entries: 11/22 entries.
 
 | Candidate relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status |
 | --- | --- | ---: | --- | ---: | ---: | --- | --- |
-| Related Status/effect entries | compact rendered preview | 6 | 14/14 resolved, 0 unresolved, 6 duplicate structured refs | 5 | 6 | Both | Needs product review to avoid bloat |
+| Related Status/effect entries | one-line summary/card | 6 | 14/14 resolved, 0 unresolved, 6 duplicate structured refs | 0 | 1 | None | Implemented in EWShop for exact Applied statuses section refs |
 | Facts only, no player-facing mechanics | no action | 11 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context |
 
 ### districts
@@ -627,8 +625,8 @@ Facts-only/no mechanics entries: 0/156 entries.
   exact structured ability relationship.
 - Tech unlock and Population exact threshold preview work except for browser
   QA regressions. Those exact-ref surfaces are already implemented.
-- Diplomatic Treaty previews unless a focused browser review finds concrete
-  treaty pages where direct Effects plus related chips still fail the player.
+- Broader Diplomatic Treaty previews beyond exact Applied statuses. Several
+  treaty pages need editorial Effects before more UI work would help.
 - Facts-only entries with no mechanics sections. Preview UI cannot manufacture
   missing player context.
 
