@@ -1,88 +1,43 @@
-# Active DB Exporter Docs
+# DB Exporter Definitive Response Index
 
-Status: current AI working index
-Updated: 2026-06-14
+Status: current response index
+Updated: 2026-06-16
 
 ## Current Source Of Truth
 
-Use this document for the packet requests that DBExporter implemented during
-the 2026-06-14 phase:
+Use this document for the DB Exporter closeout record:
 
-- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-implementation-packets.md`
+- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
 
-It contains the original EWShop implementation packets, current/desired JSON
-shapes, validation expectations, and guardrails. Treat it as implemented phase
-context, not as a fresh active request list.
+It supersedes the 2026-06-13/2026-06-14 packet-return handoffs as active
+implementation guidance. It records what DB Exporter implemented, partially
+implemented, rejected as not canonical/public, deferred to product/export scope,
+or confirmed runtime-only.
 
-Use this document for the latest aggregate DB Exporter -> EWShop phase handoff:
+EWShop-facing follow-up docs:
 
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`
-
-It summarizes completed packet work only, including Resources, Councilor
-Effects, Partner Effects, and the partner effect one-hop mechanics follow-up. It
-does not mean Codex export quality is complete.
+- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
+- `docs/active/codex-db-exporter-response-import-qa-plan.md`
 
 ## For AI Agents
 
-- Start with `ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`
-  for EWShop import/browser-QA planning.
-- Treat `codex-db-exporter-implementation-packets.md` as packet-level context
-  only when you need exact requested JSON shapes or guardrails.
-- Do not resurrect archived metadata, reference-kind, content-quality, or
-  chronological handoff docs as active implementation instructions.
-- Read `../exporter-performance-playbook.md` before implementing exporter
-  changes that touch runtime export paths.
-- Read `../code-style-guidelines.md` before adding or refactoring exporter
-  classes.
-
-## Current Packet Status
-
-Latest aggregate handoff:
-
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`
-
-Give this aggregate handoff plus the specific return handoff files below to
-EWShop when they need phase context for importing and browser-QA.
-
-Current return handoffs:
-
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-packets-return-handoff-2026-06-13.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-referencekinds-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-actions-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-trait-refs-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-quest-refs-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-thin-entity-context-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-councilor-effects-return-handoff-2026-06-14.md`
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-resources-return-handoff-2026-06-14.md`
-
-- `CDEX-EXP-001` Tech Unlock Exact Refs: implemented for canonical public
-  unlock targets in tech Codex `Unlocks` section items.
-- `CDEX-EXP-002` Major Faction Population Threshold Reward Refs: implemented
-  for canonical public threshold reward targets, matching the minor population
-  section-item/fact reference shape.
-- `CDEX-EXP-004` Thin Actions Gameplay Summaries: safe subset implemented and
-  F8-validated from cached/proven mechanics only.
-- `CDEX-EXP-005` Diplomatic Treaty Effects And Public Text: safe subset
-  implemented. Public treaty descriptions are preserved when canonical and
-  incomplete runtime-parameter placeholders are suppressed.
-- `CDEX-EXP-006` Status Scope Metadata: safe subset implemented and
-  F8-validated.
-- `CDEX-EXP-007` Trait Unlock And Ability Refs: implemented and F8-validated.
-- `CDEX-EXP-008` Quest Reward And Requirement Public Refs: implemented and
-  F8-validated.
-- `CDEX-EXP-009` Modifier Public Labels: safe subset implemented and
-  F8-validated.
-- `CDEX-EXP-010` Thin Public Entity Context: Slice A ability residual context
-  implemented and F8-validated; districts/improvements remain deferred.
-- Councilor/Partner Effects Codex: implemented and F8-validated as new generic
-  Codex exportKinds `councilorEffects` and `partnerEffects`.
-- `CDEX-EXP-003` Resource Entities And Extractor Refs: implemented and
-  F8-validated as generic Codex exportKind `resources`.
+- Start with the definitive response and the EWShop reconciliation before any
+  import, browser QA, frontend work, or new ticket writing.
+- Use final accepted snapshot `20260616-210540` for the next EWShop import/QA
+  pass.
+- Do not revive archived packet requests or old diagnostic recommendations
+  without fresh evidence from the final accepted snapshot.
+- Do not infer links from names, prose, display labels, or key shapes.
+- Keep Modifiers hidden from top-level navigation.
+- Keep `resources`, `councilorEffects`, `partnerEffects`, and `traits` as
+  shallow reference categories unless product changes that decision.
 
 ## Archived Historical Context
 
-Superseded handoff/review docs are archived under:
+The old packet requests, return handoffs, generated audits, and active ticket
+plan that were superseded by the definitive response are archived under:
 
+- `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/`
 - `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
 
 Use archived docs only when a user explicitly asks for historical context.

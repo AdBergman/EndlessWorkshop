@@ -4,21 +4,22 @@ Status: active execution log
 Current as of 2026-06-16
 
 Use this log as historical evidence from the completed post-exporter-return
-Codex story loop. Current continuation should start from
-`docs/active/codex-category-ux-audit.md` and the current handoff in
-`docs/active/codex-db-exporter-definitive-handoff.md`.
+Codex story loop. Current continuation should start from the DB Exporter
+definitive response reconciliation and import/QA plan:
+`docs/active/codex-db-exporter-response-ewshop-reconciliation.md` and
+`docs/active/codex-db-exporter-response-import-qa-plan.md`.
 
 ## Story Status Snapshot
 
 | Story | Status | Evidence |
 | --- | --- | --- |
-| `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics | completed | Commit `ae9cfce7`; superseded by `docs/active/codex-db-exporter-definitive-handoff.md` |
+| `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics | completed | Commit `ae9cfce7`; superseded by the DB Exporter definitive response |
 | `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX | completed | Commit `5f695f5b`; Tech unlock summary helper/component/tests |
 | `EW-CODEX-NEXT-002` - Resource Top-Level Category Treatment | completed | Commits `c22a2ff8`, `5396e67e`, `0bab089d`; Resources, Councilor Effects, and Partner Effects are top-level shallow reference categories |
 | `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
 | `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | completed | Current startup import repro identified two deprecated placeholder bonus rows rejected by display-name normalization |
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | completed | Effect detail headers now prefer exported Role/Scope and suppress technical effect category strings |
-| Current audit ticket regeneration | completed | Regenerated diagnostics and created `docs/active/codex-current-audit-ticket-plan.md` |
+| Current audit ticket regeneration | completed | Regenerated diagnostics and created the now-archived `codex-current-audit-ticket-plan.md` |
 | `EW-CODEX-AUDIT-001` - Make Codex Diagnostics Implementation-Aware | completed | Generated diagnostics now mark completed exact-ref surfaces as implemented |
 | `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold Summaries | completed | Browser QA confirmed resolved exact refs render and unresolved/text-only rewards remain plain |
 | `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied Status Usefulness | completed | Exact applied Status refs now render compact treaty mechanics summaries |
@@ -36,7 +37,7 @@ Codex story loop. Current continuation should start from
   - `git status --short` clean at start.
   - Recent commits: `ae9cfce7`, `5f695f5b`, `c22a2ff8`, `5396e67e`, `0bab089d`.
   - `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-next-stories.md`.
-  - `docs/active/codex-exporter-return-progress.md`.
+  - `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/codex-exporter-return-progress.md`.
   - `docs/current-action-priorities.md`.
 - Changes made:
   - Created this worklog.
@@ -182,10 +183,10 @@ Codex story loop. Current continuation should start from
   - Regenerated content-quality, preview-surface, and relationship-gap
     diagnostics.
 - Changes made:
-  - Regenerated `docs/active/codex-preview-surface-audit.md`.
-  - Regenerated `docs/active/codex-relationship-value-gap-audit.md`.
-  - Created `docs/active/codex-current-audit-ticket-plan.md` with separate
-    EWShop and DB Exporter/editorial Jira-style ticket lists.
+  - Regenerated the now-archived `codex-preview-surface-audit.md`.
+  - Regenerated the now-archived `codex-relationship-value-gap-audit.md`.
+  - Created the now-archived `codex-current-audit-ticket-plan.md` with
+    separate EWShop and DB Exporter/editorial Jira-style ticket lists.
   - Updated active docs index and priorities to point the next self-sustaining
     loop at the refreshed audit-backed ticket plan.
 - Tests/diagnostics/browser QA run:
@@ -201,8 +202,8 @@ Codex story loop. Current continuation should start from
 - Commit hash if committed:
   - `d47b228f`
 - Next recommended action:
-  - Start the next self-sustaining loop with `EW-CODEX-AUDIT-001` from
-    `docs/active/codex-current-audit-ticket-plan.md`.
+  - Historical next step was `EW-CODEX-AUDIT-001`; this was completed before
+    the definitive response superseded the ticket plan.
 
 ## 2026-06-16 - EW-CODEX-AUDIT-001 Make Diagnostics Implementation-Aware
 
@@ -211,7 +212,7 @@ Codex story loop. Current continuation should start from
 - Start time/date: 2026-06-16.
 - Current status: completed.
 - Evidence used:
-  - `docs/active/codex-current-audit-ticket-plan.md`.
+  - `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/codex-current-audit-ticket-plan.md`.
   - Current local Codex JSON files in `local-imports/codex/`.
   - Existing diagnostic scripts:
     `frontend/scripts/codex-preview-surface-audit.ts` and

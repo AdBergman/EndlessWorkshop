@@ -285,6 +285,7 @@ Validation:
 No further EWShop-owned implementation item is currently ready from this audit.
 Continue only from new browser evidence or new exporter data. The remaining
 active tickets are DB Exporter/editorial-owned: Status sub-kind/scope, Action
-purpose/availability context, and thin construction row content. Use
-`docs/active/codex-db-exporter-definitive-handoff.md` for the outbound DB
-Exporter/editorial package.
+purpose/availability context, and thin construction row content. Use the
+definitive response reconciliation before creating any new outbound DB
+Exporter/editorial package:
+`docs/active/codex-db-exporter-response-ewshop-reconciliation.md`.

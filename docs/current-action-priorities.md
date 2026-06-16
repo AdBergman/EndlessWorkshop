@@ -8,86 +8,55 @@ This list reflects the current product focus:
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
 
-## P0 - Codex Exporter Return Import And QA
+## P0 - DB Exporter Definitive Response Import And QA
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: EWShop import/API verification, frontend category treatment,
-diagnostics refresh, bounded browser QA, and the category/subtype UX baseline
-are complete for the 2026-06-14 Codex metadata packet return. Continue from
-evidence-backed issues only; do not restart old 2026-06-13 backlog assumptions.
+Status: DB Exporter returned the cleaned definitive response for
+`DB-CODEX-DEF-*` and final accepted snapshot `20260616-210540`. EWShop has
+cleaned stale active docs and should next import that snapshot, rerun
+diagnostics, and perform bounded browser QA.
 
 Start here:
 
-- `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`
-- Use packet-level files in
-  `docs/active/codex-db-exporter-implementation-packets/` only when exact
-  return detail is needed.
-
-The return bundle reports these notable changes:
-
-- Tech unlock exact refs implemented where canonical and public.
-- Major faction Population threshold reward exact refs implemented where
-  canonical and public.
-- Generic Codex `resources` export implemented, with extractor/resource links
-  where proven.
-- Actions, Diplomatic Treaties, Status scope metadata, Trait refs, Quest refs,
-  Modifier labels, and thin Ability context received safe subset improvements.
-- New generic Codex exportKinds `councilorEffects` and `partnerEffects`
-  landed, including a partner-effect one-hop mechanics follow-up.
-
-Known post-return decisions and gaps:
-
-- `resources`, `councilorEffects`, `partnerEffects`, and `traits` are now
-  top-level shallow reference categories. Their list rows should carry the
-  at-a-glance value: differentiating context, full effect lines where exported,
-  and exact source/extractor links.
-- Modifiers remain hidden from top-level navigation and may only be reached by
-  search or exact links.
-- Resource deposits / POI pages remain deferred.
-- Districts and Improvements thin context remains deferred.
-- Some Actions, Diplomatic Treaties, Statuses, and effect pages may still be
-  thin where no canonical public mechanics source exists.
-- Major faction Population threshold summaries render for resolved exact refs.
-  `Population_Aspect` still has unresolved exact ref
-  `Aspect_DistrictImprovement_00`, so `Nutrient Extractor` remains plain until
-  that target is exported as a current Codex entry.
-- Diplomatic Treaty pages render exact applied Status mechanics summaries where
-  current metadata resolves, for example Close Borders now exposes its Public
-  Opinion impact without requiring a Related Entries click-through.
-- Quest Strategy exact Codex preview tooltips dismiss on outside click/tap and
-  Escape; resolver/link behavior remains exact-ref-only.
-- Action mechanics browser QA found existing structured rendering acceptable
-  for current mechanics-rich Actions. Facts-only/thin Actions remain
-  exporter/editorial-owned.
-- `CouncilorEffectDefinition` gain values were not exported because they need
-  public-safety review.
-- Bonuses Codex local startup import still reports two failed rows. NEXT-006
-  traced them to deprecated placeholder bonus entries whose display names are
-  exactly `[DEPRECATED]`; importing them would add Codex noise, so this is an
-  exporter/editorial cleanup item unless future dead-ref diagnostics prove a
-  missing public target.
+- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
+- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
+- `docs/active/codex-db-exporter-response-import-qa-plan.md`
 
 Actionable next items:
 
-1. Use `docs/active/codex-category-ux-audit.md` as the current category UX
-   loop source of truth. It currently has no safe EWShop-owned implementation
-   item left without new exporter/editorial data.
-2. Use `docs/active/codex-db-exporter-definitive-handoff.md` for the current
-   DB Exporter/editorial action list.
-3. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
-   completed packet requests from archived docs without fresh evidence.
-4. Do not expose Modifiers in top-level Codex navigation without product
-   review.
-5. Use `docs/active/codex-current-audit-ticket-plan.md` for ticket detail when
-   exact diagnostic counts or older completed EWShop story context is needed.
-   The previous post-exporter-return NEXT story list is archived as completed.
+1. Import final accepted DB Exporter snapshot `20260616-210540` into
+   `local-imports/codex/` using the local-only workflow.
+2. Run the diagnostics listed in the import/QA plan and regenerate active audit
+   reports from the imported final snapshot.
+3. Browser-QA the representative URLs in the import/QA plan.
+4. Verify exact refs now resolve or stay plain exactly as the definitive
+   response says.
+5. Do not create frontend/API work unless the fresh import proves EWShop is
+   failing to preserve, serve, or render exported generic Codex fields.
+
+Current decisions to preserve:
+
+- `resources`, `councilorEffects`, `partnerEffects`, and `traits` remain
+  top-level shallow reference categories.
+- Modifiers remain hidden from top-level navigation and may only be reached by
+  search or exact links.
+- Thin/plain entries are not EWShop bugs when DB Exporter marked their richer
+  data unavailable, unsafe, runtime-only, obsolete, internal, or deferred.
+- `Population_Aspect` should keep `Unlocks Nutrient Extractor` plain because
+  `Aspect_DistrictImprovement_00` is not a current public Codex target.
+- Deprecated `[DEPRECATED]` bonus/modifier rows should not import as public
+  Codex pages.
+- ResourceDeposit/POI pages remain product/export-scope deferred.
+- Surrender/tribute values for `Treaty_AskToSurrender` and
+  `Treaty_ProposeSurrender` remain runtime-only for static Codex export.
 
 Archived historical context:
 
 - `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
 - `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
 - `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`
+- `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/`
 - `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
 
 ## P0 - Quest Documentation Cleanup Only
