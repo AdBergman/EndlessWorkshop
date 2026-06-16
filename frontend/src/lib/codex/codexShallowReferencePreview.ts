@@ -46,19 +46,17 @@ function findFactValue(entry: CodexEntry, label: string): string {
 
 function formatResourceContext(entry: CodexEntry): string {
     const resourceType = findFactValue(entry, "Type").replace(/\s+resource$/i, "");
-    if (!resourceType) return "Resource";
-
-    return `${resourceType} / Resource`;
+    return resourceType;
 }
 
 function formatEffectContext(entry: CodexEntry): string {
     const kind = findFactValue(entry, "Kind") || normalizeText(entry.kind);
     const role = findFactValue(entry, "Role") || findFactValue(entry, "Scope");
 
-    if (role && kind) return `${role} / ${kind}`;
-    if (kind) return kind;
+    if (role) return role;
+    if (!/^(councilor effect|partner effect)$/i.test(kind)) return kind;
 
-    return normalizeKind(entry.exportKind) === "partnereffects" ? "Partner Effect" : "Councilor Effect";
+    return "";
 }
 
 function sectionItems(entry: CodexEntry, title: string): CodexMetadataSectionItem[] {

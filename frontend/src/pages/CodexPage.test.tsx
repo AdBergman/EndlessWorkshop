@@ -574,7 +574,8 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "All Resources" })).toBeInTheDocument();
         const resourceOverview = screen.getByLabelText("Resources overview");
-        expect(within(resourceOverview).getByText("Luxury / Resource")).toBeInTheDocument();
+        expect(within(resourceOverview).getByText("Luxury")).toBeInTheDocument();
+        expect(within(resourceOverview).queryByText("Luxury / Resource")).not.toBeInTheDocument();
         const klaxEffects = within(resourceOverview).getByLabelText("Klax effects");
         expect(klaxEffects).toHaveTextContent("+15 Approval on City");
         expect(within(klaxEffects).getByAltText("PublicOrderColored")).toBeInTheDocument();
@@ -582,14 +583,16 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
         expect(within(resourceOverview).queryByRole("button", { name: /Extractor: Advanced Klax Extractor/i }))
             .not.toBeInTheDocument();
-        expect(within(resourceOverview).getByText("Strategic / Resource")).toBeInTheDocument();
+        expect(within(resourceOverview).getByText("Strategic")).toBeInTheDocument();
+        expect(within(resourceOverview).queryByText("Strategic / Resource")).not.toBeInTheDocument();
         expect(within(resourceOverview).getByRole("button", { name: /Extractor: Titanium Extractor/i }))
             .toBeInTheDocument();
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /councilor effects 1/i }));
         const councilorEffectOverview = await screen.findByLabelText("Councilor Effects overview");
-        expect(within(councilorEffectOverview).getByText("Defense / Councilor Effect")).toBeInTheDocument();
+        expect(within(councilorEffectOverview).getByText("Defense")).toBeInTheDocument();
+        expect(within(councilorEffectOverview).queryByText("Defense / Councilor Effect")).not.toBeInTheDocument();
         const travelsWellEffects = within(councilorEffectOverview).getByLabelText("Travels Well effects");
         expect(travelsWellEffects).toHaveTextContent("+100% Health Regeneration in Guard stance");
         expect(travelsWellEffects).toHaveTextContent("+1 Movement Points outside battle");
@@ -600,7 +603,8 @@ describe("CodexPage", () => {
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /partner effects 1/i }));
         const partnerEffectOverview = await screen.findByLabelText("Partner Effects overview");
-        expect(within(partnerEffectOverview).getByText("Hero / Partner Effect")).toBeInTheDocument();
+        expect(within(partnerEffectOverview).getByText("Hero")).toBeInTheDocument();
+        expect(within(partnerEffectOverview).queryByText("Hero / Partner Effect")).not.toBeInTheDocument();
         const hopelessRomanticEffects = within(partnerEffectOverview).getByLabelText("Hopeless Romantic effects");
         expect(hopelessRomanticEffects).toHaveTextContent("+1 per Hero Level on Haven");
         expect(hopelessRomanticEffects).toHaveTextContent("+1 Movement Points outside battle");
