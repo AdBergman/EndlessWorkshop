@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
+    formatCodexMajorFactionText,
     getCodexEntryPreview,
     getCodexEntryLabel,
     getCodexSecondaryContext,
@@ -15,6 +16,7 @@ import {
 } from "@/lib/codex/codexFactionPresentation";
 import { getCodexShallowReferencePreview } from "@/lib/codex/codexShallowReferencePreview";
 import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
+import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
@@ -95,8 +97,70 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                             ? `Affinity: ${factionAffinity}`
                             : getCodexSecondaryContext(entry);
                         const shallowPreview = !isFactionEntry
-                            ? getCodexShallowReferencePreview(entry, allEntries, secondaryContext, preview)
+                            ? getCodexShallowReferencePreview(entry, allEntries, preview)
                             : null;
+
+                        if (shallowPreview) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--shallow"
+                                >
+                                    <div className="codex-summaryList__shallowHeader">
+                                        <button
+                                            type="button"
+                                            className="codex-summaryList__entryButton"
+                                            onClick={() => onSelectEntry(entry)}
+                                        >
+                                            <span className="codex-summaryList__name">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
+                                        </button>
+
+                                        <div className="codex-summaryList__shallowMeta">
+                                            {shallowPreview.context ? (
+                                                <span className="codex-summaryList__context">
+                                                    {shallowPreview.context}
+                                                </span>
+                                            ) : null}
+
+                                            {shallowPreview.links.map((link) => (
+                                                <button
+                                                    key={`${entry.entryKey}-${link.prefix}-${link.entry.entryKey}`}
+                                                    type="button"
+                                                    className="codex-summaryList__link"
+                                                    aria-label={`${link.prefix}: ${link.label}`}
+                                                    onClick={() => onSelectEntry(link.entry)}
+                                                >
+                                                    <span>{link.prefix}:</span>
+                                                    {renderCodexLabel(link.label)}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {shallowPreview.effectLines.length > 0 ? (
+                                        <div
+                                            className="codex-summaryList__effects"
+                                            aria-label={`${getCodexEntryLabel(entry)} effects`}
+                                        >
+                                            {shallowPreview.effectLines.map((line, index) => (
+                                                <span
+                                                    className="codex-summaryList__effectLine"
+                                                    key={`${entry.entryKey}-effect-${index}`}
+                                                >
+                                                    {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : shallowPreview.links.length === 0 ? (
+                                        <span className="codex-summaryList__description">
+                                            No public description has been added for this entry yet.
+                                        </span>
+                                    ) : null}
+                                </div>
+                            );
+                        }
 
                         return (
                             <button
@@ -108,13 +172,11 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                                 <span className="codex-summaryList__name">
                                     {renderCodexLabel(getCodexEntryLabel(entry))}
                                 </span>
-                                {shallowPreview?.context || secondaryContext ? (
-                                    <span className="codex-summaryList__context">
-                                        {shallowPreview?.context || secondaryContext}
-                                    </span>
+                                {secondaryContext ? (
+                                    <span className="codex-summaryList__context">{secondaryContext}</span>
                                 ) : null}
                                 <span className="codex-summaryList__description">
-                                    {shallowPreview?.preview || preview || "No public description has been added for this entry yet."}
+                                    {preview || "No public description has been added for this entry yet."}
                                 </span>
                             </button>
                         );

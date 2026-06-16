@@ -1,11 +1,17 @@
 import { getCodexEntryLabel, stripCodexDescriptionLine } from "@/lib/codex/codexPresentation";
 import { resolveCodexReference } from "@/lib/codex/codexRefs";
-import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
-import type { CodexEntry, CodexMetadataSectionItem } from "@/types/dataTypes";
+import type { CodexEntry, CodexMetadataSection, CodexMetadataSectionItem } from "@/types/dataTypes";
 
 type ShallowReferencePreview = {
     context: string;
-    preview: string;
+    effectLines: string[];
+    links: ShallowReferenceLink[];
+};
+
+export type ShallowReferenceLink = {
+    label: string;
+    entry: CodexEntry;
+    prefix: string;
 };
 
 const SHALLOW_REFERENCE_KINDS = new Set(["resources", "counciloreffects", "partnereffects"]);
@@ -18,7 +24,7 @@ function normalizeText(value: string | null | undefined): string {
     return (value ?? "").replace(/\s+/g, " ").trim();
 }
 
-function joinUnique(parts: readonly string[], separator = " · "): string {
+function uniqueValues(parts: readonly string[]): string[] {
     const seen = new Set<string>();
     const uniqueParts: string[] = [];
 
@@ -30,15 +36,29 @@ function joinUnique(parts: readonly string[], separator = " · "): string {
         uniqueParts.push(normalized);
     }
 
-    return uniqueParts.join(separator);
+    return uniqueParts;
 }
 
-function formatResourceContext(entry: CodexEntry, fallbackContext: string): string {
-    const typeFact = entry.facts?.find((fact) => normalizeText(fact.label).toLowerCase() === "type");
-    const resourceType = normalizeText(typeFact?.value);
-    if (!resourceType) return fallbackContext;
+function findFactValue(entry: CodexEntry, label: string): string {
+    return normalizeText(entry.facts?.find((fact) => normalizeText(fact.label).toLowerCase() === label.toLowerCase())
+        ?.value);
+}
 
-    return /resource/i.test(resourceType) ? resourceType : `${resourceType} / Resource`;
+function formatResourceContext(entry: CodexEntry): string {
+    const resourceType = findFactValue(entry, "Type").replace(/\s+resource$/i, "");
+    if (!resourceType) return "Resource";
+
+    return `${resourceType} / Resource`;
+}
+
+function formatEffectContext(entry: CodexEntry): string {
+    const kind = findFactValue(entry, "Kind") || normalizeText(entry.kind);
+    const role = findFactValue(entry, "Role") || findFactValue(entry, "Scope");
+
+    if (role && kind) return `${role} / ${kind}`;
+    if (kind) return kind;
+
+    return normalizeKind(entry.exportKind) === "partnereffects" ? "Partner Effect" : "Councilor Effect";
 }
 
 function sectionItems(entry: CodexEntry, title: string): CodexMetadataSectionItem[] {
@@ -46,19 +66,43 @@ function sectionItems(entry: CodexEntry, title: string): CodexMetadataSectionIte
         ?.items ?? [];
 }
 
-function formatExtractorSummary(entry: CodexEntry, entriesByKey: Record<string, CodexEntry>): string {
-    const extractors = sectionItems(entry, "Extractors")
+function sectionLines(entry: CodexEntry, title: string): string[] {
+    const matchingSections = entry.sections?.filter((section: CodexMetadataSection) => (
+        normalizeText(section.title).toLowerCase() === title.toLowerCase()
+    )) ?? [];
+
+    return uniqueValues(matchingSections.flatMap((section) => section.lines ?? []));
+}
+
+function fallbackEffectLines(entry: CodexEntry, fallbackPreview: string): string[] {
+    const effects = sectionLines(entry, "Effects");
+    return effects.length > 0 ? effects : uniqueValues([fallbackPreview]);
+}
+
+function extractorLinks(entry: CodexEntry, entriesByKey: Record<string, CodexEntry>): ShallowReferenceLink[] {
+    return sectionItems(entry, "Extractors")
         .map((item) => {
             const relatedEntry = resolveCodexReference(item.referenceKey, { entriesByKey });
-            return relatedEntry ? stripCodexDescriptionLine(getCodexEntryLabel(relatedEntry)) : "";
+            return relatedEntry
+                ? {
+                    label: stripCodexDescriptionLine(getCodexEntryLabel(relatedEntry)),
+                    entry: relatedEntry,
+                    prefix: "Extractor",
+                }
+                : null;
         })
-        .filter(Boolean);
+        .filter((link): link is ShallowReferenceLink => Boolean(link));
+}
 
-    if (extractors.length === 0) return "";
+function isTieredExtractor(entryKey: string): boolean {
+    return /_Tier\d+$/i.test(entryKey);
+}
 
-    const [first, second, ...rest] = extractors;
-    const visible = [first, second].filter(Boolean).join(", ");
-    return rest.length > 0 ? `Extractors: ${visible}, +${rest.length}` : `Extractors: ${visible}`;
+function primaryExtractorLinks(links: readonly ShallowReferenceLink[]): ShallowReferenceLink[] {
+    if (links.length <= 1) return [...links];
+
+    const baseExtractors = links.filter((link) => !isTieredExtractor(link.entry.entryKey));
+    return baseExtractors.length === 1 ? baseExtractors : [...links];
 }
 
 function hasReferenceTo(entry: CodexEntry, targetKey: string): boolean {
@@ -69,13 +113,19 @@ function hasReferenceTo(entry: CodexEntry, targetKey: string): boolean {
     ].some((referenceKey) => normalizeText(referenceKey) === targetKey);
 }
 
-function formatEffectSourceSummary(entry: CodexEntry, allEntries: readonly CodexEntry[]): string {
+function sourceLink(entry: CodexEntry, allEntries: readonly CodexEntry[]): ShallowReferenceLink | null {
     const source = allEntries.find((candidate) => (
         normalizeKind(candidate.exportKind) === "councilors" &&
         hasReferenceTo(candidate, entry.entryKey)
     ));
 
-    return source ? `Source: ${getCodexEntryLabel(source)}` : "";
+    return source
+        ? {
+            label: getCodexEntryLabel(source),
+            entry: source,
+            prefix: "Source",
+        }
+        : null;
 }
 
 export function isShallowReferenceKind(kind: string | null | undefined): boolean {
@@ -85,7 +135,6 @@ export function isShallowReferenceKind(kind: string | null | undefined): boolean
 export function getCodexShallowReferencePreview(
     entry: CodexEntry,
     allEntries: readonly CodexEntry[],
-    fallbackContext: string,
     fallbackPreview: string
 ): ShallowReferencePreview | null {
     const kind = normalizeKind(entry.exportKind);
@@ -98,20 +147,20 @@ export function getCodexShallowReferencePreview(
     }, {});
 
     if (kind === "resources") {
+        const links = extractorLinks(entry, entriesByKey);
+
         return {
-            context: formatResourceContext(entry, fallbackContext),
-            preview: joinUnique([
-                getCodexReadablePreviewLine(entry) || fallbackPreview,
-                formatExtractorSummary(entry, entriesByKey),
-            ]),
+            context: formatResourceContext(entry),
+            effectLines: fallbackEffectLines(entry, fallbackPreview),
+            links: primaryExtractorLinks(links),
         };
     }
 
+    const source = sourceLink(entry, allEntries);
+
     return {
-        context: fallbackContext,
-        preview: joinUnique([
-            getCodexReadablePreviewLine(entry) || fallbackPreview,
-            formatEffectSourceSummary(entry, allEntries),
-        ]),
+        context: formatEffectContext(entry),
+        effectLines: fallbackEffectLines(entry, fallbackPreview),
+        links: source ? [source] : [],
     };
 }

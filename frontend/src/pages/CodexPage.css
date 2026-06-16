@@ -1528,14 +1528,53 @@
 }
 
 .codex-summaryList__item:hover,
-.codex-summaryList__item:focus-visible {
+.codex-summaryList__item:focus-visible,
+.codex-summaryList__item:focus-within {
     border-left-color: rgba(195, 152, 77, 0.62);
     background: linear-gradient(90deg, rgba(255, 255, 255, 0.024), transparent 82%);
 }
 
 .codex-summaryList__item:hover .codex-summaryList__name,
-.codex-summaryList__item:focus-visible .codex-summaryList__name {
+.codex-summaryList__item:focus-visible .codex-summaryList__name,
+.codex-summaryList__item:focus-within .codex-summaryList__name {
     color: #f1eadc;
+}
+
+.codex-summaryList__item--shallow {
+    cursor: default;
+}
+
+.codex-summaryList__shallowHeader {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+}
+
+.codex-summaryList__shallowMeta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 7px;
+    min-width: 0;
+}
+
+.codex-summaryList__entryButton {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.codex-summaryList__entryButton:focus-visible,
+.codex-summaryList__link:focus-visible {
+    outline: 2px solid rgba(195, 152, 77, 0.55);
+    outline-offset: 3px;
 }
 
 .codex-summaryList__name {
@@ -1558,6 +1597,54 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
     line-height: 1.65;
+}
+
+.codex-summaryList__effects {
+    display: grid;
+    gap: 6px;
+}
+
+.codex-summaryList__effectLine {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.codex-summaryList__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: fit-content;
+    min-width: 0;
+    padding: 3px 7px;
+    border: 1px solid rgba(195, 152, 77, 0.18);
+    border-radius: 4px;
+    background: rgba(195, 152, 77, 0.055);
+    color: rgba(241, 234, 220, 0.82);
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.codex-summaryList__link:hover {
+    border-color: rgba(195, 152, 77, 0.36);
+    background: rgba(195, 152, 77, 0.11);
+    color: #f1eadc;
+}
+
+.codex-summaryList__link > span:first-child {
+    color: rgba(195, 152, 77, 0.82);
+}
+
+@media (max-width: 720px) {
+    .codex-summaryList__shallowHeader {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 7px;
+    }
+
+    .codex-summaryList__shallowMeta {
+        justify-content: flex-start;
+    }
 }
 
 .codex-related__list {

@@ -516,8 +516,17 @@ describe("CodexPage", () => {
                 kind: "Councilor Effect",
                 descriptionLines: [],
                 referenceKeys: [],
-                facts: [{ label: "Role", value: "Defense" }],
-                sections: [{ title: "Effects", lines: ["+100% [HealthRegen] Health Regeneration in Guard stance"] }],
+                facts: [
+                    { label: "Role", value: "Defense" },
+                    { label: "Kind", value: "Councilor Effect" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "+100% [HealthRegen] Health Regeneration in Guard stance",
+                        "+1 [MovementPoints] Movement Points outside battle",
+                    ],
+                }],
                 publicContextKeys: ["CouncilorEffect_Defense21"],
             },
             {
@@ -528,8 +537,17 @@ describe("CodexPage", () => {
                 kind: "Partner Effect",
                 descriptionLines: [],
                 referenceKeys: [],
-                facts: [{ label: "Scope", value: "Hero" }],
-                sections: [{ title: "Effects", lines: ["+1 [MovementPoints] Movement Points outside battle"] }],
+                facts: [
+                    { label: "Scope", value: "Hero" },
+                    { label: "Kind", value: "Partner Effect" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "+1 [FoodColored][IndustryColored][DustColored][ScienceColored][CultureColored] per Hero Level on Haven",
+                        "+1 [MovementPoints] Movement Points outside battle",
+                    ],
+                }],
                 publicContextKeys: ["PartnerEffect_Hydracorn_PartnerTrait01"],
             },
         ];
@@ -556,23 +574,39 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "All Resources" })).toBeInTheDocument();
         const resourceOverview = screen.getByLabelText("Resources overview");
-        expect(within(resourceOverview).getByText("Luxury resource")).toBeInTheDocument();
-        expect(within(resourceOverview).getByText(/15 .*Approval on City.*Extractors: Klax Extractor, Advanced Klax Extractor/i))
+        expect(within(resourceOverview).getByText("Luxury / Resource")).toBeInTheDocument();
+        const klaxEffects = within(resourceOverview).getByLabelText("Klax effects");
+        expect(klaxEffects).toHaveTextContent("+15 Approval on City");
+        expect(within(klaxEffects).getByAltText("PublicOrderColored")).toBeInTheDocument();
+        expect(within(resourceOverview).getByRole("button", { name: /Extractor: Klax Extractor/i }))
             .toBeInTheDocument();
-        expect(within(resourceOverview).getByText("Strategic resource")).toBeInTheDocument();
-        expect(within(resourceOverview).getByText(/Extractors: Titanium Extractor/i)).toBeInTheDocument();
+        expect(within(resourceOverview).queryByRole("button", { name: /Extractor: Advanced Klax Extractor/i }))
+            .not.toBeInTheDocument();
+        expect(within(resourceOverview).getByText("Strategic / Resource")).toBeInTheDocument();
+        expect(within(resourceOverview).getByRole("button", { name: /Extractor: Titanium Extractor/i }))
+            .toBeInTheDocument();
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /councilor effects 1/i }));
         const councilorEffectOverview = await screen.findByLabelText("Councilor Effects overview");
         expect(within(councilorEffectOverview).getByText("Defense / Councilor Effect")).toBeInTheDocument();
-        expect(within(councilorEffectOverview).getByText(/Health Regeneration.*Source: Atea/i)).toBeInTheDocument();
+        const travelsWellEffects = within(councilorEffectOverview).getByLabelText("Travels Well effects");
+        expect(travelsWellEffects).toHaveTextContent("+100% Health Regeneration in Guard stance");
+        expect(travelsWellEffects).toHaveTextContent("+1 Movement Points outside battle");
+        expect(within(travelsWellEffects).getByAltText("HealthRegen")).toBeInTheDocument();
+        expect(within(councilorEffectOverview).getByRole("button", { name: /Source: Atea/i }))
+            .toBeInTheDocument();
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /partner effects 1/i }));
         const partnerEffectOverview = await screen.findByLabelText("Partner Effects overview");
         expect(within(partnerEffectOverview).getByText("Hero / Partner Effect")).toBeInTheDocument();
-        expect(within(partnerEffectOverview).getByText(/Movement Points outside battle.*Source: Atea/i)).toBeInTheDocument();
+        const hopelessRomanticEffects = within(partnerEffectOverview).getByLabelText("Hopeless Romantic effects");
+        expect(hopelessRomanticEffects).toHaveTextContent("+1 per Hero Level on Haven");
+        expect(hopelessRomanticEffects).toHaveTextContent("+1 Movement Points outside battle");
+        expect(within(hopelessRomanticEffects).getByAltText("MovementPoints")).toBeInTheDocument();
+        expect(within(partnerEffectOverview).getByRole("button", { name: /Source: Atea/i }))
+            .toBeInTheDocument();
     });
 
     it("renders status details while keeping related modifiers hidden from navigation but linkable", async () => {
