@@ -67,7 +67,9 @@ Still true:
 
 ## Recommended EWShop Order
 
-1. `EW-CODEX-AUDIT-001` - Make diagnostics implementation-aware.
+1. `EW-CODEX-AUDIT-001` - Make diagnostics implementation-aware. Completed
+   in the current loop; generated reports now mark completed exact-ref
+   surfaces as implemented.
 2. `EW-CODEX-AUDIT-002` - Browser-QA Population threshold summaries against
    current exact refs.
 3. `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty applied Status usefulness.
@@ -83,6 +85,7 @@ changes, broad redesign, or display-name/prose inference.
 
 Owner: EWShop frontend/tooling  
 Priority: P1
+Status: completed
 
 Why this matters to a 4X player:
 The diagnostics currently keep recommending some already-implemented surfaces.
@@ -587,4 +590,3 @@ Do not:
 - Generic renderer: current patterns are scoped and should stay scoped.
 - Modifier promotion: explicitly out of scope.
 - SEO, graph visualization, Quest Explorer redesign, Units route work.
-

@@ -18,10 +18,10 @@ EWShop should continue to use exact exported refs, `referenceKeys`,
 
 | Rank | Area | Player question blocked | Current data shape | Owner | Product treatment |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | Tech unlocks | What does this tech unlock? | 133 Tech entries; 107 have Unlocks sections; 195/203 unique Unlock refs resolve; 107 have unlock text. | EWShop/product, with exporter/editorial for unresolved or text-only unlocks | Keep Tech top-level; review one-line unlock summaries using exact refs only. |
-| 2 | Major faction Population thresholds | What does this breakpoint reward actually unlock? | 74 threshold items; 22 exact unique refs are usable, 52 rewards remain text-only. | DB exporter/editorial | Keep Population top-level; EWShop can only summarize exact refs. |
-| 3 | Extractor -> Resource | Which resource does this extractor produce? | 67 Resource-category extractor Districts; 132 resolved extractor refs; 24 Resource export entries. | EWShop/product, with exporter/editorial for thin entries | Keep Extractors under Districts; keep Resources searchable/linkable; defer top-level Resource promotion until browser QA. |
-| 4 | Resource Codex surface | What does this resource do? | 24 Resource export entries; 16 have direct Effects; 2 are facts-only/thin. | EWShop/product, with exporter/editorial for thin entries | Keep Resources searchable/linkable now; decide top-level navigation only after browser QA. |
+| 1 | Tech unlocks | What does this tech unlock? | 133 Tech entries; 107 have Unlocks sections; 195/203 unique Unlock refs resolve; 107 have unlock text. | Exporter/editorial for unresolved or text-only unlocks; EWShop exact-ref summaries are implemented | Keep Tech top-level; exact Unlock summaries are implemented for resolved refs only. |
+| 2 | Major faction Population thresholds | What does this breakpoint reward actually unlock? | 74 threshold items; 22 exact unique refs are usable, 52 rewards remain text-only. | DB exporter/editorial for text-only rewards; EWShop exact-ref summaries are implemented | Keep Population top-level; exact threshold summaries are implemented for resolved refs only. |
+| 3 | Extractor -> Resource | Which resource does this extractor produce? | 67 Resource-category extractor Districts; 132 resolved extractor refs; 24 Resource export entries. | EWShop/product, with exporter/editorial for thin entries | Keep Extractors under Districts; Resources are top-level shallow reference entries. |
+| 4 | Resource Codex surface | What does this resource do? | 24 Resource export entries; 16 have direct Effects; 2 are facts-only/thin. | EWShop/product, with exporter/editorial for thin entries | Resources are top-level shallow reference entries; thin entries need exporter/editorial context. |
 | 5 | Thin Actions | What does this action do and when should I use it? | 139 Actions; 87 have only facts and no public description/mechanics section. | DB exporter/editorial | Keep exact-link/search targets; avoid promoting thin Actions as rich browse content. |
 | 6 | Action cost/mechanic context | Why is this cost modifier relevant? | 52 Actions have sections, mostly cost modifiers or formula notes. | Both | Exporter summaries first; EWShop can later group/highlight useful mechanics. |
 | 7 | Diplomatic Treaty impact | What changes when I sign or declare this? | 22 Treaties; 8 direct Effects, 6 Status refs, 3 with both, 11 with neither. | Both | Keep browseable; preview only exact Status refs after product review. |
@@ -46,7 +46,7 @@ Blocked examples:
 - Observatory-like targets exist elsewhere (Build Observatory (ActionTypeBuildObservatory), Observatory Point (DistrictImprovement_Science_01)), but EWShop must not infer the link.
 
 Remaining exact-ref gap: unresolved or text-only Unlock targets and optional unlock type/classification.
-EWShop frontend opportunity: product-review one-line unlock summaries for exact resolved Unlock refs.
+EWShop status: one-line summaries for exact resolved Unlock refs are implemented.
 DB exporter/editorial request: fill unresolved or text-only Unlock refs where public targets exist.
 Product treatment: keep top-level browseable; do not infer unresolved unlocks from prose.
 
@@ -63,7 +63,7 @@ Blocked examples:
 - Kin of Sheredyn (Population_KinOfSheredyn) says "Military Press"; Military Press (KinOfSheredyn_DistrictImprovement_01) exists but is not linked from the threshold item.
 - Last Lord (Population_LastLord) says "Altar of Channeling"; Altar of Channeling (LastLord_DistrictImprovement_03) exists but is not linked from the threshold item.
 
-EWShop frontend opportunity: already scoped to exact refs only; no prose inference.
+EWShop status: one-line threshold summaries for exact resolved reward refs are implemented.
 DB exporter/editorial request: add exact threshold reward refs where real targets exist.
 Product treatment: keep Population top-level; exact refs can be previewed, text-only rewards wait for exporter data.
 
@@ -78,9 +78,9 @@ Low-value/thin entries:
 - [Luxury01] Advanced Klax Extractor (Extractor_Luxury01_Tier2) has no Effects lines.
 
 Resolved exact refs or entity category: Resource entries now exist, Extractor -> Resource refs resolve, and Resource -> Extractor reverse refs are present.
-EWShop frontend opportunity: browser QA for Resources and Extractors; keep Resources searchable/linkable while top-level promotion stays deferred.
+EWShop status: Resources are top-level shallow reference entries and Extractor/Resource exact links are surfaced.
 DB exporter/editorial request: fill thin Resource/Extractor entries where players need effect context.
-Product treatment: keep Extractors as District entries; do not promote Resource Codex surfaces until browser QA confirms player value.
+Product treatment: keep Extractors as District entries; keep Resource rows dense and shallow rather than dossier-like.
 
 ### 4. Actions
 
@@ -159,31 +159,33 @@ Product treatment: valid searchable/linkable entities; avoid promoting thin subc
 
 ## Top 5 EWShop Frontend Opportunities
 
-1. Tech unlock summaries after product review of exact Unlock refs.
-2. Browser QA Resources and Extractors before deciding whether Resources deserve top-level navigation.
-3. Treaty -> Status preview prototype for exact high-value Status refs, limited to pages where prose does not already answer the question.
-4. Status grouping/filtering after exporter provides Status sub-kind/scope.
-5. Continue suppressing duplicate Related Entries only when a local exact-ref preview already shows the target.
+1. Browser-QA Population threshold summaries against current exact refs to catch regressions.
+2. Review Diplomatic Treaty applied Status usefulness before any Treaty preview prototype.
+3. Harden Quest Strategy Codex preview accessibility if keyboard or touch QA finds friction.
+4. Browser-review Action mechanics presentation for entries that already have useful mechanics sections.
+5. Continue keeping completed preview surfaces exact-ref-only and implementation-aware in diagnostics.
 
-No immediate frontend-only UI change is recommended from this audit. The remaining high-value work is mostly exporter/editorial data shape.
+Use `docs/active/codex-current-audit-ticket-plan.md` for the current EWShop story order. No completed exact-ref surface should be reopened solely because it appears in relationship counts.
 
 ## Demote Or Avoid Promoting While Thin
 
 - Generic thin Actions: keep searchable/linkable; avoid treating them as rich top-level browse destinations until summaries exist.
-- Advanced/Grand Extractor entries with no Effects: keep under Districts; do not present as Resource pages.
-- Resource Codex category: keep searchable/linkable; do not top-level promote until browser QA confirms pages are useful.
-- Tech Unlock preview work: review row density first and never infer unresolved targets.
+- Advanced/Grand Extractor entries with no Effects: keep under Districts or shallow Resource rows; do not invent missing mechanics.
+- Resources: now top-level shallow references, not full dossier pages. Thin Resource rows remain exporter/editorial follow-up.
+- Tech Unlock preview work: exact-ref summaries are implemented; never infer unresolved targets.
 - Broad Status grouping redesign: wait for exported sub-kind/scope.
 - Diplomatic Treaty preview expansion: avoid broad prototype; many pages need editorial Effects first.
 
 ## Suggested Next Path
 
-Prepare an exporter/editorial handoff from this report, focused on unresolved
-Tech Unlock refs, Population threshold refs, thin Resource/Extractor rows, and
-thin Action/Treaty gameplay summaries.
+Continue the EWShop loop from `docs/active/codex-current-audit-ticket-plan.md`.
+The next implementation-backed checks are Population threshold summary browser QA,
+Diplomatic Treaty applied Status usefulness review, Quest Strategy preview
+accessibility, and Action mechanics browser review.
 
-EWShop should pause new preview-surface UI until one of those exact-ref data
-improvements lands, except for small bug fixes or browser QA regressions.
+Exporter/editorial follow-up remains focused on unresolved/text-only Tech
+Unlock refs, Population threshold refs, thin Resource/Extractor rows, and
+thin Action/Treaty gameplay summaries.
 
 ## Regenerate
 

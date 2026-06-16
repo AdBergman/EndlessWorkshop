@@ -382,6 +382,7 @@ function createCandidates(
             true
         );
         const hasResolvedUnlockTargets = stats.resolved > 0;
+        const alreadyImplemented = category === "tech" && hasResolvedUnlockTargets;
         candidates.push({
             source: category,
             subcategory: commonSubcategory,
@@ -389,10 +390,10 @@ function createCandidates(
             surface: hasResolvedUnlockTargets ? "one-line summary/card" : "no action",
             entries: unlockEntries.length,
             refs: stats,
-            playerValue: hasResolvedUnlockTargets ? category === "tech" ? 7 : 5 : 2,
-            risk: hasResolvedUnlockTargets ? 4 : 7,
-            owner: hasResolvedUnlockTargets ? "EWShop" : "Exporter/editorial",
-            status: hasResolvedUnlockTargets ? "Candidate after preview-surface product review" : "Needs exact exported unlock refs before UI work",
+            playerValue: alreadyImplemented ? 0 : hasResolvedUnlockTargets ? category === "tech" ? 7 : 5 : 2,
+            risk: alreadyImplemented ? 1 : hasResolvedUnlockTargets ? 4 : 7,
+            owner: alreadyImplemented ? "None" : hasResolvedUnlockTargets ? "EWShop" : "Exporter/editorial",
+            status: alreadyImplemented ? "Implemented in EWShop for exact Tech Unlocks refs" : hasResolvedUnlockTargets ? "Candidate after preview-surface product review" : "Needs exact exported unlock refs before UI work",
             examples: unlockEntries,
         });
     }
@@ -405,6 +406,7 @@ function createCandidates(
             true
         );
         const hasResolvedRewardTargets = stats.resolved > 0;
+        const alreadyImplemented = category === "populations" && hasResolvedRewardTargets;
         candidates.push({
             source: category,
             subcategory: commonSubcategory,
@@ -412,10 +414,10 @@ function createCandidates(
             surface: hasResolvedRewardTargets ? "one-line summary/card" : "no action",
             entries: thresholdRewardEntries.length,
             refs: stats,
-            playerValue: hasResolvedRewardTargets ? 7 : 2,
-            risk: hasResolvedRewardTargets ? 4 : 7,
-            owner: hasResolvedRewardTargets ? "EWShop" : "Exporter/editorial",
-            status: hasResolvedRewardTargets ? "Candidate for exact reward-target summaries" : "Needs exact reward refs before UI work",
+            playerValue: alreadyImplemented ? 0 : hasResolvedRewardTargets ? 7 : 2,
+            risk: alreadyImplemented ? 1 : hasResolvedRewardTargets ? 4 : 7,
+            owner: alreadyImplemented ? "None" : hasResolvedRewardTargets ? "EWShop" : "Exporter/editorial",
+            status: alreadyImplemented ? "Implemented in EWShop for exact Population threshold refs" : hasResolvedRewardTargets ? "Candidate for exact reward-target summaries" : "Needs exact reward refs before UI work",
             examples: thresholdRewardEntries,
         });
     }
@@ -528,9 +530,14 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "- One-line summary/card: broad encyclopedia subjects such as factions or tech.",
         "- Related Entries remain exploration, not repetition.",
         "",
-        "Already proven and covered: Ability -> applied Status inline links, Unit ->",
-        "granted Ability compact previews, Equipment -> granted Ability compact",
-        "previews, and Hero -> granted Ability compact previews.",
+        "Already proven and covered:",
+        "",
+        "- Ability -> applied Status inline links.",
+        "- Unit, Equipment, and Hero -> granted Ability compact previews.",
+        "- Tech -> exact Unlocks one-line summaries.",
+        "- Population -> exact threshold reward target summaries.",
+        "- Resource, Councilor Effect, and Partner Effect shallow reference category",
+        "  lists.",
         "",
         "## Top 10 Candidate Ranking",
         "",
@@ -542,15 +549,15 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "",
         "## Recommended Next 3 Implementation Candidates",
         "",
-        "1. Tech -> unlock summaries: one-line summaries/cards for exact Unlocks",
-        "   section refs after a focused product review confirms the row density.",
-        "2. Populations -> threshold reward targets: one-line summaries/cards for",
-        "   exact reward refs. This helps players compare population breakpoints",
-        "   without opening every reward target.",
-        "3. Diplomatic Treaty -> related Status/effect entries: prototype only if a",
+        "1. Diplomatic Treaty -> related Status/effect entries: prototype only if a",
         "   focused treaty review still shows player confusion after direct Effects",
         "   text and related chips. Prefer one-line effect summaries over inline",
         "   expansion.",
+        "2. Actions -> related Status/effect entries: review only the entries that",
+        "   already have useful mechanics sections. Most remaining Action gaps are",
+        "   exporter/editorial-owned.",
+        "3. Faction and other large-subject references: keep as one-line summaries",
+        "   or related chips unless browser QA proves a specific hub needs promotion.",
         "",
         "Diplomatic Treaty -> Status/effect preview remains lower priority: the local",
         "data is narrow, several treaties already have direct Effects text, and the",
@@ -607,8 +614,8 @@ function formatMarkdown(entries: CodexEntry[]): string {
         "  intentionally hidden from navigation and should stay exact-link targets.",
         "- Traits -> granted Ability preview unless future data shows a high-value",
         "  exact structured ability relationship.",
-        "- Tech unlock previews until a focused product review confirms the one-line",
-        "  summary shape and row density for current exact Unlocks refs.",
+        "- Tech unlock and Population exact threshold preview work except for browser",
+        "  QA regressions. Those exact-ref surfaces are already implemented.",
         "- Diplomatic Treaty previews unless a focused browser review finds concrete",
         "  treaty pages where direct Effects plus related chips still fail the player.",
         "- Facts-only entries with no mechanics sections. Preview UI cannot manufacture",

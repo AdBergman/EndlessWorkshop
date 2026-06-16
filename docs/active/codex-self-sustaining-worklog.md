@@ -18,6 +18,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | completed | Current startup import repro identified two deprecated placeholder bonus rows rejected by display-name normalization |
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | completed | Effect detail headers now prefer exported Role/Scope and suppress technical effect category strings |
 | Current audit ticket regeneration | completed | Regenerated diagnostics and created `docs/active/codex-current-audit-ticket-plan.md` |
+| `EW-CODEX-AUDIT-001` - Make Codex Diagnostics Implementation-Aware | completed | Generated diagnostics now mark completed exact-ref surfaces as implemented |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -191,7 +192,43 @@ story so future sessions can continue without reconstructing chat history.
     completed EWShop features, so the ticket plan overlays current
     implementation status instead of copying generated rankings blindly.
 - Commit hash if committed:
-  - Pending.
+  - `d47b228f`
 - Next recommended action:
   - Start the next self-sustaining loop with `EW-CODEX-AUDIT-001` from
     `docs/active/codex-current-audit-ticket-plan.md`.
+
+## 2026-06-16 - EW-CODEX-AUDIT-001 Make Diagnostics Implementation-Aware
+
+- Story ID/title: `EW-CODEX-AUDIT-001` - Make Codex Diagnostics
+  Implementation-Aware.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - `docs/active/codex-current-audit-ticket-plan.md`.
+  - Current local Codex JSON files in `local-imports/codex/`.
+  - Existing diagnostic scripts:
+    `frontend/scripts/codex-preview-surface-audit.ts` and
+    `frontend/scripts/codex-relationship-value-gap-audit.ts`.
+- Changes made:
+  - Updated preview-surface diagnostics so exact Tech Unlock summaries and
+    exact Population threshold reward summaries are marked implemented instead
+    of recommended as future EWShop work.
+  - Updated relationship-gap diagnostics so Resources are treated as current
+    top-level shallow reference entries, not deferred searchable-only targets.
+  - Regenerated the active preview-surface and relationship-gap reports.
+- Tests/diagnostics/browser QA run:
+  - `npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md`
+  - `npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --output ../docs/active/codex-relationship-value-gap-audit.md`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `git diff --check`
+- Review notes:
+  - No Codex UI, release gate, Modifiers navigation, or exporter contract was
+    changed.
+  - Remaining diagnostics still show exporter/editorial gaps for text-only Tech
+    Unlocks, text-only Population rewards, thin Resource/Extractor entries, and
+    thin Action/Treaty content.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Continue with `EW-CODEX-AUDIT-002` Population threshold summary browser QA
+    if validation passes and the commit is clean.
