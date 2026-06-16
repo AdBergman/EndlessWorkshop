@@ -517,6 +517,16 @@ describe("StrategyDossier", () => {
         fireEvent.click(rewardPreviewTarget!);
         expect(await screen.findByRole("tooltip")).toBeInTheDocument();
         expect(onChoose).not.toHaveBeenCalled();
+        fireEvent.pointerDown(document.body);
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        fireEvent.click(rewardPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+        fireEvent.keyDown(document, { key: "Escape" });
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        fireEvent.click(rewardPreviewTarget!);
+        expect(await screen.findByRole("tooltip")).toBeInTheDocument();
         fireEvent.blur(rewardPreviewTarget!);
         await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
 

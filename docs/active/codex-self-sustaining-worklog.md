@@ -21,6 +21,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-AUDIT-001` - Make Codex Diagnostics Implementation-Aware | completed | Generated diagnostics now mark completed exact-ref surfaces as implemented |
 | `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold Summaries | completed | Browser QA confirmed resolved exact refs render and unresolved/text-only rewards remain plain |
 | `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied Status Usefulness | completed | Exact applied Status refs now render compact treaty mechanics summaries |
+| `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex Preview Accessibility | completed | Quest Codex preview tooltips now dismiss on outside click/tap and Escape |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -346,3 +347,35 @@ story so future sessions can continue without reconstructing chat history.
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-004` Quest Strategy Codex preview
     accessibility if validation passes and the commit is clean.
+
+## 2026-06-16 - EW-CODEX-AUDIT-004 Quest Strategy Codex Preview Accessibility
+
+- Story ID/title: `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex Preview
+  Accessibility.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - Browser QA on
+    `/quests/FactionQuest_Mukag_Chapter02_Step01?mode=strategy`.
+  - Existing Quest Strategy Codex reference tests.
+- Changes made:
+  - Added outside pointer-down and Escape-key dismissal for Quest Strategy
+    Codex preview tooltips.
+  - Kept exact Codex open links, resolver behavior, and Quest layout unchanged.
+- Tests/diagnostics/browser QA run:
+  - Browser QA confirmed exact Codex open links remain visible and in-bounds on
+    a 390px viewport.
+  - Browser QA confirmed `Build Bridge` preview opens on click/tap and now
+    dismisses on outside click/tap and Escape.
+  - `npm test -- --run src/features/quests/questCodexReference.test.ts src/components/Quests/StrategyDossier.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+- Review notes:
+  - No Quest Explorer redesign, Lore expansion, or inferred refs were added.
+  - The fix stays inside the Quest Codex reference link component.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Continue with `EW-CODEX-AUDIT-005` Action mechanics browser review if
+    validation passes and the commit is clean.

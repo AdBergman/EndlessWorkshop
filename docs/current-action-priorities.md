@@ -55,6 +55,8 @@ Known post-return decisions and gaps:
 - Diplomatic Treaty pages render exact applied Status mechanics summaries where
   current metadata resolves, for example Close Borders now exposes its Public
   Opinion impact without requiring a Related Entries click-through.
+- Quest Strategy exact Codex preview tooltips dismiss on outside click/tap and
+  Escape; resolver/link behavior remains exact-ref-only.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
 - Bonuses Codex local startup import still reports two failed rows. NEXT-006

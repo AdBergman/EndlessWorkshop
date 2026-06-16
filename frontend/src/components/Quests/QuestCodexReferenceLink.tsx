@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import { type FocusEvent, type MouseEvent, type ReactNode, useId, useMemo, useRef, useState } from "react";
+import { type FocusEvent, type MouseEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
 import { FaExternalLinkAlt } from "react-icons/fa";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
@@ -39,6 +39,7 @@ export function QuestCodexReferenceLink({
     const entry = resolveQuestCodexReference(source, { entriesByKey, entriesByKindKey });
     const [tooltipCoords, setTooltipCoords] = useState<TooltipCoords | null>(null);
     const hideTimerRef = useRef<number | null>(null);
+    const referenceRef = useRef<HTMLSpanElement | null>(null);
     const tooltipLines = useMemo(
         () => (entry?.descriptionLines ?? [])
             .map((line) => line.trim())
@@ -46,8 +47,6 @@ export function QuestCodexReferenceLink({
             .slice(0, 4),
         [entry?.descriptionLines]
     );
-
-    if (!entry) return <>{children}</>;
 
     const stopContainingAction = (event: MouseEvent<HTMLAnchorElement>) => {
         event.stopPropagation();
@@ -92,6 +91,35 @@ export function QuestCodexReferenceLink({
         hideTimerRef.current = window.setTimeout(() => setTooltipCoords(null), 120);
     };
 
+    useEffect(() => {
+        if (!tooltipCoords) return undefined;
+
+        const handlePointerDown = (event: PointerEvent) => {
+            if (!(event.target instanceof Node)) return;
+            if (referenceRef.current?.contains(event.target)) return;
+
+            const tooltipElement = document.getElementById(tooltipId);
+            if (tooltipElement?.contains(event.target)) return;
+
+            hideTooltip();
+        };
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                hideTooltip();
+            }
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("pointerdown", handlePointerDown);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [tooltipCoords, tooltipId]);
+
+    if (!entry) return <>{children}</>;
+
     const label = getCodexEntryLabel(entry);
     const textParts = referenceTextParts(source, label);
     const tooltip = showTooltip && tooltipCoords
@@ -121,7 +149,11 @@ export function QuestCodexReferenceLink({
             const compactKind = compactRewardKindLabel(source, textParts, entry.exportKind, entry.kind);
 
             return (
-                <span className="questExplorer-codexReference questExplorer-codexReference--compactReward" aria-label={source.displayText.trim()}>
+                <span
+                    className="questExplorer-codexReference questExplorer-codexReference--compactReward"
+                    aria-label={source.displayText.trim()}
+                    ref={referenceRef}
+                >
                     <span className="questExplorer-codexRewardText">
                         <span
                             className="questExplorer-codexPreviewTarget questExplorer-codexRewardTitle"
@@ -157,7 +189,11 @@ export function QuestCodexReferenceLink({
         }
 
         return (
-            <span className="questExplorer-codexReference" aria-label={source.displayText.trim()}>
+            <span
+                className="questExplorer-codexReference"
+                aria-label={source.displayText.trim()}
+                ref={referenceRef}
+            >
                 {textParts.prefix ? (
                     <span className="questExplorer-codexReferencePrefix">{textParts.prefix}</span>
                 ) : null}

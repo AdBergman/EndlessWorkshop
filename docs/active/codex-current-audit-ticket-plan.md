@@ -77,6 +77,8 @@ Still true:
    Completed in the current loop; exact applied Status refs now show compact
    mechanics summaries.
 4. `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex preview accessibility.
+   Completed in the current loop; Quest Codex preview tooltips now dismiss on
+   outside click/tap and Escape.
 5. `EW-CODEX-AUDIT-005` - Browser-review Action mechanics presentation.
 
 Stop the self-sustaining loop if a story requires exporter data, release-gate
@@ -274,6 +276,7 @@ Decision, evidence, fixes if any, remaining exporter blockers, and commit hash.
 
 Owner: EWShop frontend  
 Priority: P2
+Status: completed
 
 Why this matters to a 4X player:
 Quest Strategy now links exact Codex refs. The next player-value question is
