@@ -1,7 +1,12 @@
 # Codex Post-Exporter-Return Next Stories
 
-Status: active planning note  
+Status: archived completed planning note
 Current as of 2026-06-16
+
+Archived note: every EWShop-owned story in this plan is complete. Continue from
+`docs/active/codex-category-ux-audit.md` and use
+`docs/active/codex-db-exporter-definitive-handoff.md` for current DB
+Exporter/editorial work.
 
 This note captures the next practical EWShop Codex stories after the completed
 2026-06-14 DB Exporter return verification. Source evidence:
@@ -46,7 +51,7 @@ Post-plan updates:
 
 ## EW-CODEX-NEXT-001 - Review Tech Unlock Summary UX
 
-Owner: EWShop frontend/product  
+Owner: EWShop frontend/product
 Priority: P1
 
 Why it matters to a 4X player:
@@ -103,7 +108,7 @@ UX decision, files changed, tests run, risks, and suggested commit message.
 
 ## EW-CODEX-NEXT-002 - Decide Resource Top-Level Category Treatment
 
-Owner: EWShop product/frontend  
+Owner: EWShop product/frontend
 Priority: P1
 Status: completed
 
@@ -159,7 +164,7 @@ Completion evidence:
 
 ## EW-CODEX-NEXT-003 - Clean Effect Detail Context Labels
 
-Owner: EWShop frontend  
+Owner: EWShop frontend
 Priority: P2
 Status: completed
 
@@ -219,7 +224,7 @@ effect path, and git diff --check.
 
 ## EW-CODEX-NEXT-004 - Quest Strategy Codex Reference QA
 
-Owner: EWShop frontend/product  
+Owner: EWShop frontend/product
 Priority: P1
 Status: completed
 
@@ -277,7 +282,7 @@ Completion evidence:
 
 ## EW-CODEX-NEXT-005 - Exporter Feedback Handoff From Current Diagnostics
 
-Owner: EWShop docs/product; DB Exporter/editorial as consumer  
+Owner: EWShop docs/product; DB Exporter/editorial as consumer
 Priority: P1
 
 Why it matters to a 4X player:
@@ -340,7 +345,7 @@ message.
 
 ## EW-CODEX-NEXT-006 - Investigate Bonuses Import Failed Rows
 
-Owner: EWShop backend  
+Owner: EWShop backend
 Priority: P2
 Status: completed
 

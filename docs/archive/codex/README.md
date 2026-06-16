@@ -1,6 +1,6 @@
 # Archived Codex Documentation
 
-Current as of 2026-06-15.
+Current as of 2026-06-16.
 
 These files are historical evidence, completed implementation notes, or
 superseded exporter handoffs. Do not treat them as current source of truth.
@@ -24,6 +24,12 @@ Current Codex docs live in `docs/active/`.
 - `codex-content-quality-ewshop-backlog-2026-06-12.md` - EWShop-side content
   quality backlog snapshot. Several low-risk presentation items have since been
   implemented; use current diagnostics before reopening work.
+- `completed-2026-06-16/codex-post-exporter-return-next-stories.md` -
+  completed post-exporter-return EWShop story plan. Use
+  `docs/active/codex-category-ux-audit.md` for the current loop.
+- `completed-2026-06-16/codex-post-exporter-return-editorial-handoff-superseded.md`
+  - superseded concise DB Exporter/editorial handoff. Use
+  `docs/active/codex-db-exporter-definitive-handoff.md` instead.
 
 ## Evidence Snapshots
 
@@ -39,3 +45,5 @@ Current Codex docs live in `docs/active/`.
   backlog-building prompts, validation snapshots, and pre-return handoffs that
   fed the DB Exporter 2026-06-14 Codex metadata packet phase. Use the active
   2026-06-14 exporter return bundle instead of these files for current work.
+  See the folder README before following any links inside archived packet
+  inputs.

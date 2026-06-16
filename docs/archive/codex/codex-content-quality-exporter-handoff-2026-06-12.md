@@ -1,19 +1,20 @@
 # Codex Content Quality Exporter Handoff
 
-Status: active exporter/editorial handoff
+Status: archived superseded exporter/editorial handoff
 Created: 2026-06-12
 Source diagnostic: `npm run diagnostics:codex-content -- --limit 80`
 
-This is the current DB exporter/editorial Codex handoff. Older Codex metadata
-coverage and reference-kind handoffs are archived under `docs/archive/codex/`
-and should be treated as historical context only.
+Archived note: this handoff is superseded by
+`docs/active/codex-db-exporter-definitive-handoff.md`. Treat the
+counts and examples below as historical context only.
 
 Latest status, 2026-06-13: the current exporter batch supersedes several
 counts and examples below. EWShop import/API compatibility has been validated
 against the latest local exports, and the bonus descriptor/tag target cleanup no
 longer appears in product Codex output. Before sending a new exporter request,
 regenerate diagnostics against current local imports and use
-`docs/active/ewshop-current-export-handoff.md` for current batch context.
+`docs/active/codex-db-exporter-definitive-handoff.md` for current batch
+context.
 
 Latest diagnostic snapshot against current local imports:
 

@@ -6,8 +6,8 @@ Created: 2026-06-10
 
 Archived note: this handoff predates current EWShop support for Actions,
 Diplomatic Treaties, and bonus-derived Statuses. Use
-`docs/active/codex-content-quality-exporter-handoff.md` for the current DB
-exporter/editorial Codex handoff.
+`docs/active/codex-db-exporter-definitive-handoff.md` for the current
+DB exporter/editorial Codex handoff.
 
 ## Handoff Intent
 

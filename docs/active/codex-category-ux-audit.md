@@ -251,7 +251,7 @@ Validation:
 
 Owner: EWShop  
 Priority: P3  
-Status: completed in the current loop
+Status: completed in commit `2f9c4f75`
 Player value: Minor-faction trait comparison may be faster as dense effect
 rows than as individual dossiers.
 
@@ -277,7 +277,7 @@ Validation:
 
 - `EW-CAT-UX-001`: completed in `b7ecc475`. Shallow category summaries now say
   `Reference list`.
-- `EW-CAT-UX-005`: completed in the current loop. Traits now use shallow
+- `EW-CAT-UX-005`: completed in `2f9c4f75`. Traits now use shallow
   reference summary rows with exact Minor Faction links.
 
 ## Next Loop Guidance
@@ -285,4 +285,6 @@ Validation:
 No further EWShop-owned implementation item is currently ready from this audit.
 Continue only from new browser evidence or new exporter data. The remaining
 active tickets are DB Exporter/editorial-owned: Status sub-kind/scope, Action
-purpose/availability context, and thin construction row content.
+purpose/availability context, and thin construction row content. Use
+`docs/active/codex-db-exporter-definitive-handoff.md` for the outbound DB
+Exporter/editorial package.

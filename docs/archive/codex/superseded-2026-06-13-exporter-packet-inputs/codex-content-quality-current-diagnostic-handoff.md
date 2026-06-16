@@ -162,7 +162,7 @@ Do not request frontend hacks for the remaining 250 findings. They are
 exporter/editorial data-quality issues unless a new browser QA bug proves
 otherwise.
 
-## Remaining EWShop-Only Blockers
+## Historical EWShop-Only Blockers
 
 None known for the current local imports. Keep EWShop follow-up limited to real
 bug reports, release-safety issues, or browser QA regressions.

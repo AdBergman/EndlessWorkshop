@@ -1,10 +1,10 @@
 # Codex Exporter Return Progress
 
-Status: active QA tracker  
-Current as of 2026-06-15
+Status: completed QA tracker
+Current as of 2026-06-16
 
-Use this note for the bounded EWShop QA pass after the 2026-06-14 DB Exporter
-Codex metadata return. Source handoff:
+Use this note as evidence from the bounded EWShop QA pass after the 2026-06-14
+DB Exporter Codex metadata return, not as a current backlog. Source handoff:
 `docs/active/codex-db-exporter-implementation-packets/ewshop-db-exporter-codex-metadata-phase-handoff-2026-06-14.md`.
 
 ## Completed Baseline
@@ -12,12 +12,12 @@ Codex metadata return. Source handoff:
 - `EW-CODEX-RET-001`: backend/import/API compatibility for `resources`,
   `councilorEffects`, and `partnerEffects` verified by tests.
 - `EW-CODEX-RET-002`: frontend labels/searchability treatment implemented for
-  `resources`, `councilorEffects`, and `partnerEffects`; all three remain out
-  of top-level navigation.
+  `resources`, `councilorEffects`, and `partnerEffects`; later category UX
+  work promoted all three to top-level shallow reference categories.
 - `EW-CODEX-RET-003`: Codex diagnostics rerun against current local imports and
   updated where old static wording contradicted current exporter-return data.
 
-## Current Batch
+## Completed Batch
 
 ### EW-CODEX-RET-004 - Resources And Extractors Browser QA
 
@@ -27,12 +27,14 @@ Scope:
 - Verify resource detail pages are reachable by direct Codex selection/search.
 - Verify extractor district pages link to resource entries and resource pages
   link back to extractors where exact refs exist.
-- Keep Resources searchable/linkable only; do not promote top-level navigation.
+- Verify the original return behavior. Later category UX work promoted
+  Resources to a top-level shallow reference category.
 
 QA notes:
 - `Resource_Luxury01` / Klax renders as `Resources` with Extractors and
-  Related Entries for Klax extractors; Resources are not shown in top-level
-  navigation.
+  Related Entries for Klax extractors. At the time of this QA pass, Resources
+  were not shown in top-level navigation; later category UX work promoted them
+  as a shallow reference category.
 - `Resource_Strategic01` / Titanium renders as `Resources` with Titanium
   extractor links and readable resource facts.
 - `Extractor_Luxury01` / Klax Extractor renders an exact `Extracted resource`
@@ -48,8 +50,9 @@ Scope:
 - Verify Councilor pages expose linked `councilorEffects` and `partnerEffects`.
 - Verify effect detail pages render readable facts/sections and are reachable
   from Councilor related links/search.
-- Keep effect exportKinds searchable/linkable only; do not promote top-level
-  navigation.
+- Verify the original return behavior. Later category UX work promoted
+  Councilor Effects and Partner Effects to top-level shallow reference
+  categories.
 
 QA notes:
 - `Notable_Elder_MinorFaction_Hydracorn` / Atea renders linked Councilor

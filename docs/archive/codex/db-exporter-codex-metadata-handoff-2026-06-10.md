@@ -5,8 +5,9 @@ Audience: DB exporter team, backend/API team, EWShop frontend
 Created: 2026-06-10
 
 Archived note: this handoff predates the current local Codex imports with broad
-metadata coverage. Use `docs/active/codex-content-quality-exporter-handoff.md`
-for the current DB exporter/editorial Codex handoff.
+metadata coverage. Use
+`docs/active/codex-db-exporter-definitive-handoff.md` for the current
+DB exporter/editorial Codex handoff.
 
 ## Handoff Intent
 

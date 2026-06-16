@@ -3,15 +3,16 @@
 Status: active execution log  
 Current as of 2026-06-16
 
-Use this log for the post-exporter-return Codex story loop. It records the
-evidence used, changes made, validation, commits, and next action for each
-story so future sessions can continue without reconstructing chat history.
+Use this log as historical evidence from the completed post-exporter-return
+Codex story loop. Current continuation should start from
+`docs/active/codex-category-ux-audit.md` and the current handoff in
+`docs/active/codex-db-exporter-definitive-handoff.md`.
 
 ## Story Status Snapshot
 
 | Story | Status | Evidence |
 | --- | --- | --- |
-| `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics | completed | Commit `ae9cfce7`; `docs/active/codex-post-exporter-return-editorial-handoff.md` |
+| `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics | completed | Commit `ae9cfce7`; superseded by `docs/active/codex-db-exporter-definitive-handoff.md` |
 | `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX | completed | Commit `5f695f5b`; Tech unlock summary helper/component/tests |
 | `EW-CODEX-NEXT-002` - Resource Top-Level Category Treatment | completed | Commits `c22a2ff8`, `5396e67e`, `0bab089d`; Resources, Councilor Effects, and Partner Effects are top-level shallow reference categories |
 | `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
@@ -23,6 +24,8 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied Status Usefulness | completed | Exact applied Status refs now render compact treaty mechanics summaries |
 | `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex Preview Accessibility | completed | Quest Codex preview tooltips now dismiss on outside click/tap and Escape |
 | `EW-CODEX-AUDIT-005` - Browser-Review Action Mechanics Presentation | completed | Browser QA found current structured rendering sufficient; thin Actions stay exporter-owned |
+| `EW-CAT-UX-001` - Label shallow reference category summaries | completed | Commit `b7ecc475`; category summary labels distinguish reference lists |
+| `EW-CAT-UX-005` - Treat Traits as shallow reference rows | completed | Commit `2f9c4f75`; Traits use shallow rows with exact Minor Faction links |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -32,7 +35,7 @@ story so future sessions can continue without reconstructing chat history.
 - Evidence used:
   - `git status --short` clean at start.
   - Recent commits: `ae9cfce7`, `5f695f5b`, `c22a2ff8`, `5396e67e`, `0bab089d`.
-  - `docs/active/codex-post-exporter-return-next-stories.md`.
+  - `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-next-stories.md`.
   - `docs/active/codex-exporter-return-progress.md`.
   - `docs/current-action-priorities.md`.
 - Changes made:
@@ -59,7 +62,7 @@ story so future sessions can continue without reconstructing chat history.
 - Start time/date: 2026-06-16 08:37 CEST.
 - Current status: completed.
 - Evidence used:
-  - `docs/active/codex-post-exporter-return-next-stories.md`.
+  - `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-next-stories.md`.
   - `docs/current-action-priorities.md` P1 Quest Codex link guidance.
   - Existing Quest Strategy Codex reference tests and current browser QA.
   - Current local quest export has exact refs for `ArmyAction`,
@@ -129,7 +132,7 @@ story so future sessions can continue without reconstructing chat history.
 - Start time/date: 2026-06-16 08:52 CEST.
 - Current status: completed.
 - Evidence used:
-  - `docs/active/codex-post-exporter-return-next-stories.md`.
+  - `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-next-stories.md`.
   - Current local Codex effect entries:
     `CouncilorEffect_Defense21` and
     `PartnerEffect_Hydracorn_PartnerTrait01`.

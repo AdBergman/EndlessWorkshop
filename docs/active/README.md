@@ -1,6 +1,6 @@
 # Active Documentation
 
-Current as of 2026-06-15.
+Current as of 2026-06-16.
 
 This folder should contain only current workflows, handoffs, or decisions. Long
 completed investigations and superseded handoffs belong in `docs/archive/`.
@@ -22,19 +22,25 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 - `codex-current-audit-ticket-plan.md` - current EWShop and DB
   Exporter/editorial Jira-style ticket source generated from diagnostics,
   current implementation, and the 2026-06-14 exporter handoff.
-- `codex-exporter-return-progress.md` - current EWShop-side progress tracker
-  for the 2026-06-14 exporter return verification tickets.
-- `codex-post-exporter-return-next-stories.md` - current story plan for the
-  post-exporter-return Codex work that remains evidence-backed.
-- `codex-post-exporter-return-editorial-handoff.md` - current concise
-  DB Exporter/editorial follow-up from the completed RET-001 through RET-006
-  EWShop QA pass.
-- `codex-self-sustaining-worklog.md` - active execution log for the
+- `codex-db-exporter-definitive-handoff.md` - single active DB
+  Exporter/editorial handoff for current Codex data-quality gaps. Start here
+  when sending work back to DB Exporter.
+- `codex-category-ux-audit.md` - current source of truth for the Codex
+  category/subtype presentation audit. Continue the self-sustaining UI/UX loop
+  from this file.
+- `codex-exporter-return-progress.md` - completed EWShop-side progress tracker
+  for the 2026-06-14 exporter return verification tickets. Use as evidence,
+  not as a current backlog.
+- `codex-self-sustaining-worklog.md` - historical execution log for the
   post-exporter-return Codex story loop.
 
-The latest exporter return bundle says the packet phase is implemented or
-partially implemented. Regenerate diagnostics against current local imports
-before reopening any 2026-06-13 Codex backlog item.
+The latest EWShop Codex category UI loop has completed its safe frontend
+baseline. Resources, Councilor Effects, Partner Effects, and Traits are
+top-level shallow reference categories. Modifiers remain hidden from top-level
+navigation and are only searchable/linkable exact targets.
+
+Regenerate diagnostics against current local imports before reopening any
+2026-06-13 Codex backlog item or any completed post-exporter-return story.
 
 ## Archived Codex Context
 
@@ -42,6 +48,10 @@ Older Codex metadata adoption reports, reference-kind handoffs, validation
 snapshots, and EWShop implementation story docs are archived under:
 
 - `docs/archive/codex/`
+- `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-next-stories.md`
+  - completed post-exporter-return story plan.
+- `docs/archive/codex/completed-2026-06-16/codex-post-exporter-return-editorial-handoff-superseded.md`
+  - superseded concise handoff replaced by the definitive handoff.
 
 Treat those archived docs as historical evidence only. They may describe stale
 metadata coverage or already-completed EWShop implementation work.

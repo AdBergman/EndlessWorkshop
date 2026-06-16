@@ -42,15 +42,17 @@ Already proven and covered:
 | 9 | actions | Facts only, no player-facing mechanics | no action | 87 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context | Army Steal Territory (ActionTypeArmyStealTerritory)<br>Banish Population From Settlement (ActionTypeBanishPopulationFromSettlement)<br>Boost Cultural Economic Gain (ActionTypeBoostCulturalEconomicGain) |
 | 10 | districts | Facts only, no player-facing mechanics | no action | 47 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context | Advanced Divined Monument (DistrictDefinition_District_Tier2_DivinePopMonument)<br>Grand Divined Monument (DistrictDefinition_District_Tier3_DivinePopMonument)<br>Temporary Bridge (District_Bridge) |
 
-## Recommended Next 3 Implementation Candidates
+## Current Implementation Guidance
 
-1. Actions -> related Status/effect entries: review only the entries that
-   already have useful mechanics sections. Most remaining Action gaps are
-   exporter/editorial-owned.
-2. Faction and other large-subject references: keep as one-line summaries
-   or related chips unless browser QA proves a specific hub needs promotion.
-3. Status grouping/filtering: wait for exporter/editorial Status sub-kind
-   data before adding grouping UI.
+1. Actions -> related Status/effect entries: do not implement another preview
+   layer until exporter/editorial supplies public purpose/availability context
+   for currently thin Actions.
+2. Faction and other large-subject references: keep as one-line summaries or
+   related chips unless browser QA proves a specific hub needs promotion.
+3. Status grouping/filtering: wait for exporter/editorial Status sub-kind data
+   before adding grouping UI.
+4. Traits now use the same shallow reference-row model as Resources, Councilor
+   Effects, and Partner Effects.
 
 Diplomatic Treaty -> exact applied Status summaries are implemented. Broader
 Treaty preview expansion remains out of scope because several treaties already

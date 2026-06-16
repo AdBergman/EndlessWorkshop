@@ -31,8 +31,9 @@ Still active:
   still empty, so the frontend correctly relies on typed fallback resolution.
 - Codex quest rows still do not expose explicit owner links to Quest Explorer
   entries/aliases.
-- DB exporter Codex metadata beyond populations is still pending, so compact
-  previews mostly use description lines rather than structured facts/sections.
+- DB exporter Codex metadata is now broader, but Quest Strategy previews should
+  stay exact-ref-only and use exported facts/sections only when the resolved
+  target provides them.
 - Reward/resource SVG icons in Strategy rows should be investigated as a
   separate UI polish pass.
 

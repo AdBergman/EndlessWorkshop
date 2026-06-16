@@ -12,10 +12,10 @@ This list reflects the current product focus:
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: EWShop import/API verification, frontend searchable-only treatment,
-diagnostics refresh, and bounded browser QA are complete for the 2026-06-14
-Codex metadata packet return. Continue from evidence-backed issues only; do not
-restart old 2026-06-13 backlog assumptions.
+Status: EWShop import/API verification, frontend category treatment,
+diagnostics refresh, bounded browser QA, and the category/subtype UX baseline
+are complete for the 2026-06-14 Codex metadata packet return. Continue from
+evidence-backed issues only; do not restart old 2026-06-13 backlog assumptions.
 
 Start here:
 
@@ -38,10 +38,10 @@ The return bundle reports these notable changes:
 
 Known post-return decisions and gaps:
 
-- `resources`, `councilorEffects`, and `partnerEffects` are now top-level
-  shallow reference categories. Their list rows should carry the at-a-glance
-  value: differentiating context, full effect lines where exported, and exact
-  source/extractor links.
+- `resources`, `councilorEffects`, `partnerEffects`, and `traits` are now
+  top-level shallow reference categories. Their list rows should carry the
+  at-a-glance value: differentiating context, full effect lines where exported,
+  and exact source/extractor links.
 - Modifiers remain hidden from top-level navigation and may only be reached by
   search or exact links.
 - Resource deposits / POI pages remain deferred.
@@ -70,15 +70,18 @@ Known post-return decisions and gaps:
 
 Actionable next items:
 
-1. Use `docs/active/codex-exporter-return-progress.md` for the completed
-   EWShop verification summary.
-2. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
+1. Use `docs/active/codex-category-ux-audit.md` as the current category UX
+   loop source of truth. It currently has no safe EWShop-owned implementation
+   item left without new exporter/editorial data.
+2. Use `docs/active/codex-db-exporter-definitive-handoff.md` for the current
+   DB Exporter/editorial action list.
+3. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
    completed packet requests from archived docs without fresh evidence.
-3. Do not expose Modifiers in top-level Codex navigation without product review.
-4. Use `docs/active/codex-current-audit-ticket-plan.md` as the refreshed
-   source for the next self-sustaining Codex loop. The previous
-   post-exporter-return NEXT story list is complete, but current diagnostics
-   now define a new audit-backed EWShop/DB Exporter ticket plan.
+4. Do not expose Modifiers in top-level Codex navigation without product
+   review.
+5. Use `docs/active/codex-current-audit-ticket-plan.md` for ticket detail when
+   exact diagnostic counts or older completed EWShop story context is needed.
+   The previous post-exporter-return NEXT story list is archived as completed.
 
 Archived historical context:
 
@@ -91,34 +94,34 @@ Archived historical context:
 
 Owner: EWShop.
 
-Status: high priority, docs-only.
+Status: completed for the current documentation pass.
 
-Actionable next items:
+Current result:
 
-1. Mark active Quest docs with canonical-status banners where missing.
-2. Archive or mark superseded Quest docs that still imply the old
-   step/choice/path model is authoritative.
-3. Keep canonical Quest semantics docs intact.
-4. Do not change Quest Explorer UI, adapters, routes, or exporter contracts in
-   this pass.
+1. `docs/quest-explorer/README.md` is the current entry point.
+2. `docs/quest_explorer_canonical_semantics_v1.md` remains semantic authority.
+3. Active Quest design/architecture notes carry canonical-semantics caveats.
+4. Historical Quest design notes, handoff notes, contract baselines, and bundle
+   artifacts live under `docs/archive/quest-explorer/`.
+5. No Quest Explorer UI, adapter, route, or exporter contract changes are
+   implied by this cleanup.
 
 ## P0 - Routing And SEO Documentation Cleanup
 
 Owner: EWShop.
 
-Status: high priority because several docs still read like active backlogs even
-though most tickets are completed.
+Status: completed for the current documentation pass.
 
-Actionable next items:
+Current result:
 
-1. Convert `docs/frontend/routing-diagnosis.md` into a short status note.
-2. Move completed routing investigation detail to `docs/archive/` if still
-   useful.
-3. Convert `docs/backend/seo-backend-review.md` into a short current status and
-   remaining-risk note.
-4. Keep `docs/backend/seo-architecture.md` as the active SEO contract.
-5. Leave implementation alone unless a doc cleanup reveals a real stale
-   contract.
+1. `docs/frontend/routing-diagnosis.md` is a historical diagnosis and completed
+   cleanup record.
+2. `docs/backend/seo-backend-review.md` is a historical review and completed
+   cleanup record.
+3. `docs/backend/seo-architecture.md` remains the active SEO backend contract.
+4. `docs/frontend/public-route-contract.md` remains the active public route
+   ownership matrix.
+5. No implementation change is needed from the current doc cleanup.
 
 ## P1 - Codex Links For Quest Strategy View
 
@@ -159,8 +162,8 @@ Jira-style status:
   found and fixed exact `ArmyAction` refs staying plain; `Build Bridge`,
   Hydromatic Laboratory, and Mukag Monsoon Festival now expose Codex links in
   the checked Strategy page.
-- `QX-CODEX-007`: P1 - mobile/tap accessibility hardening for Codex previews
-  if the current hover/focus behavior is not sufficient.
+- `QX-CODEX-007`: Done - compact Codex previews dismiss on outside click/tap
+  and Escape.
 - `QX-CODEX-008`: P1 - verify resolver kind coverage with future real data,
   especially `MinorFaction` and other less common reference kinds not present
   in the current quest export.

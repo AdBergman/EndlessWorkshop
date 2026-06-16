@@ -53,7 +53,8 @@ Done in EWShop for current imports:
 - Ability inline Status links.
 - Population exact threshold reward summaries for exact resolved refs.
 - Tech exact unlock one-line summaries.
-- Resource, Councilor Effect, and Partner Effect shallow top-level categories.
+- Resource, Councilor Effect, Partner Effect, and Trait shallow top-level
+  categories.
 - Shallow row label cleanup and effect detail context-label cleanup.
 - Quest Strategy exact `ArmyAction` refs to Codex Actions.
 
@@ -85,6 +86,13 @@ Still true:
 
 Stop the self-sustaining loop if a story requires exporter data, release-gate
 changes, broad redesign, or display-name/prose inference.
+
+The current category/subtype UI/UX loop is tracked in
+`docs/active/codex-category-ux-audit.md`. Its EWShop-owned baseline items are
+complete; remaining ready work is DB Exporter/editorial unless fresh evidence
+identifies a smaller safe frontend slice. Use
+`docs/active/codex-db-exporter-definitive-handoff.md` as the current outbound
+handoff package.
 
 ## EWShop Tickets
 

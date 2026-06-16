@@ -23,17 +23,18 @@ Implemented:
 - Tests cover resolver precedence, typed kind mapping, asset fallback,
   formula-only rewards, unresolved rows, desktop hover/focus previews, Codex
   open links, and click isolation inside decision cards.
+- Compact Codex previews dismiss on outside click/tap and Escape.
 
 Still active:
 
-- Review the current browser UX before adding more surfaces.
-- Harden mobile/tap behavior if needed.
 - Verify less-common reference kinds against real data, especially
   `MinorFaction`.
 - Investigate SVG/resource icons in Strategy reward rows separately from Codex
   links.
-- Wait for DB exporter Codex metadata expansion before making tooltip content
-  richer than a compact description preview.
+- Keep Lore unchanged unless a separate product review asks for Codex previews
+  there.
+- Make tooltip content richer only from exact exported Codex facts/sections;
+  do not infer summaries from prose or display names.
 
 The original analysis below remains useful as rationale and historical context,
 but sections that say metadata is dropped or no tooltip behavior exists are

@@ -198,6 +198,6 @@ Likely next tickets, depending on EWShop feedback:
 
 Use these only if EWShop wants deeper background:
 
-- `docs/active/codex-content-quality-exporter-review.md`
-- `docs/active/codex-content-quality-exporter-handoff.md`
+- `docs/active/codex-content-quality-diagnostics.md`
+- `docs/active/codex-db-exporter-definitive-handoff.md`
 - `docs/active/unit-ability-spreadsheet-audit.md`

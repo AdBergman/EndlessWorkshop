@@ -162,11 +162,17 @@ Product treatment: valid searchable/linkable entities; avoid promoting thin subc
 
 ## Top 5 EWShop Frontend Opportunities
 
-1. Browser-QA Population threshold summaries against current exact refs to catch regressions.
-2. Harden Quest Strategy Codex preview accessibility if keyboard or touch QA finds friction.
-3. Browser-review Action mechanics presentation for entries that already have useful mechanics sections.
-4. Continue keeping completed preview surfaces exact-ref-only and implementation-aware in diagnostics.
-5. Review Status grouping/filtering only after exporter provides usable Status sub-kind/scope data.
+1. Continue keeping completed preview surfaces exact-ref-only and
+   implementation-aware in diagnostics.
+2. Review Status grouping/filtering only after exporter provides usable Status
+   sub-kind/scope data.
+3. Review Action mechanics grouping only after exporter provides player-facing
+   purpose/availability context for currently thin Actions.
+4. Keep Resources, Councilor Effects, Partner Effects, and Traits as shallow
+   reference categories unless new data proves a richer page has planning
+   value.
+5. Browser-QA exact-ref summaries after each exporter return that changes
+   Tech, Population, Treaty, Resource, Effect, Trait, Action, or Status data.
 
 Use `docs/active/codex-current-audit-ticket-plan.md` for the current EWShop story order. No completed exact-ref surface should be reopened solely because it appears in relationship counts.
 
@@ -181,13 +187,14 @@ Use `docs/active/codex-current-audit-ticket-plan.md` for the current EWShop stor
 
 ## Suggested Next Path
 
-Continue the EWShop loop from `docs/active/codex-current-audit-ticket-plan.md`.
-The next implementation-backed checks are Quest Strategy preview accessibility
-and Action mechanics browser review.
+Continue the Codex category UI/UX loop from
+`docs/active/codex-category-ux-audit.md`.
 
-Exporter/editorial follow-up remains focused on unresolved/text-only Tech
-Unlock refs, Population threshold refs, thin Resource/Extractor rows, and
-thin Action/Treaty gameplay summaries.
+There is no currently ready EWShop-owned implementation item in this report
+without new exporter/editorial data. Exporter/editorial follow-up remains
+focused on unresolved/text-only Tech Unlock refs, Population threshold refs,
+thin Resource/Extractor rows, thin Action/Treaty gameplay summaries, Status
+sub-kind/scope, thin Ability context, and deprecated bonus placeholders.
 
 ## Regenerate
 

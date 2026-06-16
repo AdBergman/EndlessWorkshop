@@ -6,8 +6,9 @@ Scope: user-facing Codex content only
 
 Archived note: this is a point-in-time manual audit. Use
 `docs/active/codex-content-quality-diagnostics.md` for current repeatable
-diagnostics and `docs/active/codex-content-quality-exporter-handoff.md` for the
-current DB exporter/editorial handoff.
+diagnostics and
+`docs/active/codex-db-exporter-definitive-handoff.md` for the current
+DB exporter/editorial handoff.
 
 ## Scope
 

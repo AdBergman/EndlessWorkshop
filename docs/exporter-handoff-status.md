@@ -1,6 +1,6 @@
 # Exporter Handoff Status
 
-Current as of 2026-06-12.
+Current as of 2026-06-16.
 
 ## Active Frontend Consumption
 
@@ -19,6 +19,8 @@ Current as of 2026-06-12.
 - Bonus-derived Statuses are visible Codex entries. Bonus-derived Modifiers stay
   hidden from top-level navigation while remaining searchable/linkable as exact
   targets.
+- Resources, Councilor Effects, Partner Effects, and Traits are visible
+  top-level shallow reference categories.
 
 ## Completed Handoff Areas
 
@@ -31,6 +33,8 @@ Current as of 2026-06-12.
 - Codex structured metadata preservation and generic rendering.
 - Actions, Diplomatic Treaties, Statuses, hidden/linkable Modifiers, and current
   Codex category presentation polish.
+- Resource, Councilor Effect, Partner Effect, and Trait shallow reference
+  presentation.
 - Export inventory diagnostics.
 
 ## Remaining Useful Follow-Ups
@@ -48,7 +52,7 @@ Current as of 2026-06-12.
   ability icon presentation, and faction accent consistency.
 
 See `docs/current-action-priorities.md` for the current product-priority view.
-Use `docs/active/codex-content-quality-exporter-handoff.md` for the current DB
+Use `docs/active/codex-db-exporter-definitive-handoff.md` for the current DB
 exporter/editorial Codex content-quality request.
 Use `docs/active/codex-content-quality-diagnostics.md` for the current
 diagnostic workflow.

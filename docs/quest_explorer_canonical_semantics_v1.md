@@ -639,9 +639,10 @@ Do not touch yet:
 
 Retire as canonical:
 
-- `docs/active/quest-explorer-domain-language.md`: the `questline -> chapter
-  -> step -> choice / branch variant -> continuation step` model is too
-  simplistic for 0.80.
+- `docs/archive/quest-explorer/quest-explorer-domain-language.md`: the
+  `questline -> chapter -> step -> choice / branch variant -> continuation
+  step` model is too simplistic for 0.80 and is archived as historical
+  vocabulary only.
 - `docs/archive/quest-explorer/quest_explorer_lore_design.md`: the
   `Step 1 lore -> choice -> selected Step 2 lore` model should become a
   historical design note.
