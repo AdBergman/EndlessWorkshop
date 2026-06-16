@@ -342,7 +342,7 @@ story so future sessions can continue without reconstructing chat history.
   - Broader Treaty preview expansion remains deferred until exporter/editorial
     Effects improve.
 - Commit hash if committed:
-  - Pending.
+  - `41a4ce9f`
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-004` Quest Strategy Codex preview
     accessibility if validation passes and the commit is clean.
