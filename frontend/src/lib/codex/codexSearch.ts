@@ -192,7 +192,7 @@ export function filterCodexEntries(
     const normalizedQuery = normalize(opts.query);
 
     const filtered = entries.filter((entry) => {
-        if (normalizedKind && normalizedKind !== ALL_CODEX_KIND && entry.exportKind !== normalizedKind) {
+        if (normalizedKind && normalizedKind !== ALL_CODEX_KIND && normalize(entry.exportKind) !== normalizedKind) {
             return false;
         }
 

@@ -29,8 +29,11 @@ const PREFERRED_KIND_ORDER = [
     "abilities",
     "actions",
     "councilors",
+    "counciloreffects",
+    "partnereffects",
     "districts",
     "extractors",
+    "resources",
     "equipment",
     "factions",
     "diplomatictreaties",
@@ -45,9 +48,12 @@ const PREFERRED_KIND_ORDER = [
     "units",
 ];
 const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "modifiers"]);
-const SEARCHABLE_ONLY_KINDS = new Set(["resources", "counciloreffects", "partnereffects"]);
 
 type SelectionIntent = "passive" | "related";
+
+function normalizeCodexKind(kind: string): string {
+    return kind.trim().toLowerCase();
+}
 
 export default function CodexPage() {
     const location = useLocation();
@@ -82,16 +88,18 @@ export default function CodexPage() {
 
     const filterOptions = useMemo(() => {
         const kindCounts = entries.reduce<Map<string, number>>((acc, entry) => {
-            const nextCount = (acc.get(entry.exportKind) ?? 0) + 1;
-            acc.set(entry.exportKind, nextCount);
+            const exportKind = normalizeCodexKind(entry.exportKind);
+            if (!exportKind) return acc;
+
+            const nextCount = (acc.get(exportKind) ?? 0) + 1;
+            acc.set(exportKind, nextCount);
             return acc;
         }, new Map<string, number>());
 
         const knownKinds = PREFERRED_KIND_ORDER.filter((kind) => kindCounts.has(kind));
         const extraKinds = Array.from(kindCounts.keys())
             .filter((kind) => !PREFERRED_KIND_ORDER.includes(kind))
-            .filter((kind) => !HIDDEN_TOP_LEVEL_KINDS.has(kind))
-            .filter((kind) => !SEARCHABLE_ONLY_KINDS.has(kind.toLowerCase()))
+            .filter((kind) => !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind)))
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];
@@ -252,11 +260,12 @@ export default function CodexPage() {
                 return;
             }
 
-            const nextCategory = activeKind !== ALL_CODEX_KIND && entry.exportKind === activeKind
+            const entryKind = normalizeCodexKind(entry.exportKind);
+            const nextCategory = activeKind !== ALL_CODEX_KIND && entryKind === activeKind
                 ? activeKind
                 : null;
 
-            if (activeKind !== ALL_CODEX_KIND && entry.exportKind !== activeKind) {
+            if (activeKind !== ALL_CODEX_KIND && entryKind !== activeKind) {
                 setSelectionIntent("passive");
             }
 
@@ -468,6 +477,7 @@ export default function CodexPage() {
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}
                                     entries={groupedFilteredEntries}
+                                    allEntries={entries}
                                     titleRef={detailTitleRef}
                                     onSelectEntry={(entry) => selectEntry(entry)}
                                 />

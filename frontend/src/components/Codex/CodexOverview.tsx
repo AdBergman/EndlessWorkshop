@@ -14,6 +14,7 @@ type Props = {
 const KIND_DESCRIPTIONS: Record<string, string> = {
     abilities: "Combat traits, passives, and tactical rules.",
     actions: "Army, empire, and faction actions.",
+    counciloreffects: "Reference list of councilor mechanics and bonuses.",
     councilors: "Governors, advisors, and political specialists.",
     districts: "City tiles, exploitations, and terrain infrastructure.",
     diplomatictreaties: "Diplomatic declarations, treaties, and war states.",
@@ -23,8 +24,10 @@ const KIND_DESCRIPTIONS: Record<string, string> = {
     heroes: "Named leaders, commanders, and recruitable champions.",
     improvements: "Constructed city upgrades and economic engines.",
     minorfactions: "Regional peoples, villages, and protectorates.",
+    partnereffects: "Reference list of companion and partnership bonuses.",
     populations: "Citizen groups and settlement identities.",
     quests: "Faction, world, and event questlines.",
+    resources: "Strategic and luxury resources with exact extractor links.",
     statuses: "Public conditions, reputation effects, and timed effects.",
     tech: "Technologies, unlocks, and progression systems.",
     traits: "Faction, hero, and systemic modifiers.",

@@ -280,6 +280,9 @@ describe("CodexPage", () => {
             "All",
             "Abilities",
             "Actions",
+            "Councilor Effects",
+            "Partner Effects",
+            "Resources",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
@@ -292,6 +295,9 @@ describe("CodexPage", () => {
         expect(overviewLabels).toEqual([
             "Abilities",
             "Actions",
+            "Councilor Effects",
+            "Partner Effects",
+            "Resources",
             "Factions",
             "Diplomatic Treaties",
             "Heroes",
@@ -306,16 +312,16 @@ describe("CodexPage", () => {
         expect(within(screen.getByLabelText("Codex kinds"))
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /resources 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
-            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /resources 1 strategic and luxury resources/i })).toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /councilor effects/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /partner effects/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
     });
 
-    it("keeps exporter return kinds searchable and linkable without top-level navigation", async () => {
+    it("keeps exporter return kinds searchable and linkable after top-level promotion", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [
             {
@@ -399,11 +405,11 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Atea" })).toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /resources/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /resources 1/i })).toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /councilor effects/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
         expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /partner effects/i })).not.toBeInTheDocument();
+            .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
         expect(within(relatedSection).getByText("Councilor Effects")).toBeInTheDocument();
@@ -423,6 +429,150 @@ describe("CodexPage", () => {
         expect(within(searchSuggestions).getByText("Klax")).toBeInTheDocument();
         expect(within(searchSuggestions).getByText("Resources")).toBeInTheDocument();
         expect(searchSuggestions).toHaveTextContent("Luxury / Resource");
+    });
+
+    it("renders shallow reference category lists with exact resource and effect context", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Luxury01",
+                displayName: "Klax",
+                category: null,
+                kind: "Resource",
+                descriptionLines: [],
+                referenceKeys: ["Extractor_Luxury01", "Extractor_Luxury01_Tier2"],
+                facts: [{ label: "Type", value: "Luxury resource" }],
+                sections: [
+                    { title: "Effects", lines: ["+15 [PublicOrderColored] Approval on City"] },
+                    {
+                        title: "Extractors",
+                        items: [
+                            { label: "[Luxury01] Klax Extractor", referenceKey: "Extractor_Luxury01" },
+                            { label: "Advanced [Luxury01] Klax Extractor", referenceKey: "Extractor_Luxury01_Tier2" },
+                        ],
+                    },
+                ],
+                publicContextKeys: ["Resource_Luxury01", "Extractor_Luxury01", "Extractor_Luxury01_Tier2"],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Strategic01",
+                displayName: "Titanium",
+                category: null,
+                kind: "Resource",
+                descriptionLines: [],
+                referenceKeys: ["Extractor_Strategic01"],
+                facts: [{ label: "Type", value: "Strategic resource" }],
+                sections: [
+                    {
+                        title: "Extractors",
+                        items: [
+                            { label: "[Strategic01Colored] Titanium Extractor", referenceKey: "Extractor_Strategic01" },
+                        ],
+                    },
+                ],
+                publicContextKeys: ["Resource_Strategic01", "Extractor_Strategic01"],
+            },
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Luxury01",
+                displayName: "[Luxury01] Klax Extractor",
+                descriptionLines: ["+1 [Luxury01] Klax per District Level"],
+                referenceKeys: ["Resource_Luxury01"],
+            },
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Luxury01_Tier2",
+                displayName: "Advanced [Luxury01] Klax Extractor",
+                descriptionLines: ["+2 [Luxury01] Klax per District Level"],
+                referenceKeys: ["Resource_Luxury01"],
+            },
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Strategic01",
+                displayName: "[Strategic01Colored] Titanium Extractor",
+                descriptionLines: ["+1 [Strategic01Colored] Titanium per District Level"],
+                referenceKeys: ["Resource_Strategic01"],
+            },
+            {
+                exportKind: "councilors",
+                entryKey: "Notable_Elder_MinorFaction_Hydracorn",
+                displayName: "Atea",
+                category: "Defense",
+                kind: "Councilor",
+                descriptionLines: ["Public councilor."],
+                referenceKeys: [],
+                publicContextKeys: [
+                    "CouncilorEffect_Defense21",
+                    "PartnerEffect_Hydracorn_PartnerTrait01",
+                ],
+            },
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_Defense21",
+                displayName: "Travels Well",
+                category: "Defense",
+                kind: "Councilor Effect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Role", value: "Defense" }],
+                sections: [{ title: "Effects", lines: ["+100% [HealthRegen] Health Regeneration in Guard stance"] }],
+                publicContextKeys: ["CouncilorEffect_Defense21"],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_Hydracorn_PartnerTrait01",
+                displayName: "Hopeless Romantic",
+                category: "Hero",
+                kind: "Partner Effect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Scope", value: "Hero" }],
+                sections: [{ title: "Effects", lines: ["+1 [MovementPoints] Movement Points outside battle"] }],
+                publicContextKeys: ["PartnerEffect_Hydracorn_PartnerTrait01"],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=resources"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Resources" })).toBeInTheDocument();
+        const resourceOverview = screen.getByLabelText("Resources overview");
+        expect(within(resourceOverview).getByText("Luxury resource")).toBeInTheDocument();
+        expect(within(resourceOverview).getByText(/15 .*Approval on City.*Extractors: Klax Extractor, Advanced Klax Extractor/i))
+            .toBeInTheDocument();
+        expect(within(resourceOverview).getByText("Strategic resource")).toBeInTheDocument();
+        expect(within(resourceOverview).getByText(/Extractors: Titanium Extractor/i)).toBeInTheDocument();
+
+        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .getByRole("button", { name: /councilor effects 1/i }));
+        const councilorEffectOverview = await screen.findByLabelText("Councilor Effects overview");
+        expect(within(councilorEffectOverview).getByText("Defense / Councilor Effect")).toBeInTheDocument();
+        expect(within(councilorEffectOverview).getByText(/Health Regeneration.*Source: Atea/i)).toBeInTheDocument();
+
+        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .getByRole("button", { name: /partner effects 1/i }));
+        const partnerEffectOverview = await screen.findByLabelText("Partner Effects overview");
+        expect(within(partnerEffectOverview).getByText("Hero / Partner Effect")).toBeInTheDocument();
+        expect(within(partnerEffectOverview).getByText(/Movement Points outside battle.*Source: Atea/i)).toBeInTheDocument();
     });
 
     it("renders status details while keeping related modifiers hidden from navigation but linkable", async () => {

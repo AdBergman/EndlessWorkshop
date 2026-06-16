@@ -13,16 +13,19 @@ import {
     getCodexFactionSummaryPreview,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
+import { getCodexShallowReferencePreview } from "@/lib/codex/codexShallowReferencePreview";
 import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
+import type { CodexEntry } from "@/types/dataTypes";
 
 type Props = {
     summaryEntry: CodexSummaryEntry;
     entries: CodexListItem[];
+    allEntries: CodexEntry[];
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectEntry: (entry: CodexListItem) => void;
 };
 
-export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, onSelectEntry }: Props) {
+export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, titleRef, onSelectEntry }: Props) {
     return (
         <article className="codex-detail codex-detail--summary">
             <div className="codex-summaryDossier">
@@ -91,6 +94,9 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                         const secondaryContext = factionAffinity
                             ? `Affinity: ${factionAffinity}`
                             : getCodexSecondaryContext(entry);
+                        const shallowPreview = !isFactionEntry
+                            ? getCodexShallowReferencePreview(entry, allEntries, secondaryContext, preview)
+                            : null;
 
                         return (
                             <button
@@ -102,11 +108,13 @@ export default function CodexSummaryDetail({ summaryEntry, entries, titleRef, on
                                 <span className="codex-summaryList__name">
                                     {renderCodexLabel(getCodexEntryLabel(entry))}
                                 </span>
-                                {secondaryContext ? (
-                                    <span className="codex-summaryList__context">{secondaryContext}</span>
+                                {shallowPreview?.context || secondaryContext ? (
+                                    <span className="codex-summaryList__context">
+                                        {shallowPreview?.context || secondaryContext}
+                                    </span>
                                 ) : null}
                                 <span className="codex-summaryList__description">
-                                    {preview || "No public description has been added for this entry yet."}
+                                    {shallowPreview?.preview || preview || "No public description has been added for this entry yet."}
                                 </span>
                             </button>
                         );
