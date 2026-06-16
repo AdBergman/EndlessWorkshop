@@ -48,6 +48,10 @@ Known post-return decisions and gaps:
 - Districts and Improvements thin context remains deferred.
 - Some Actions, Diplomatic Treaties, Statuses, and effect pages may still be
   thin where no canonical public mechanics source exists.
+- Major faction Population threshold summaries render for resolved exact refs.
+  `Population_Aspect` still has unresolved exact ref
+  `Aspect_DistrictImprovement_00`, so `Nutrient Extractor` remains plain until
+  that target is exported as a current Codex entry.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
 - Bonuses Codex local startup import still reports two failed rows. NEXT-006

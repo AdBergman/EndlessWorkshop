@@ -470,7 +470,7 @@ Facts-only/no mechanics entries: 1/26 entries.
 
 | Candidate relationship | Surface | Entries | Resolution | Player value | Risk | Owner | Status |
 | --- | --- | ---: | --- | ---: | ---: | --- | --- |
-| Threshold reward targets | one-line summary/card | 25 | 64/66 resolved, 2 unresolved, 66 duplicate structured refs | 0 | 1 | None | Implemented in EWShop for exact Population threshold refs |
+| Threshold reward targets | one-line summary/card | 25 | 64/66 resolved, 2 unresolved, 66 duplicate structured refs | 0 | 1 | None | Implemented in EWShop for resolved exact Population threshold refs; unresolved refs need exporter/editorial cleanup |
 | Faction references | one-line summary/card | 6 | 12/14 resolved, 2 unresolved, 0 duplicate structured refs | 3 | 3 | EWShop | Usually already served by related-entry chips; avoid inline dossiers |
 | Facts only, no player-facing mechanics | no action | 1 | 0/0 resolved, 0 unresolved, 0 duplicate structured refs | 1 | 8 | Exporter/editorial | Preview UI cannot create missing player context |
 

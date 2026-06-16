@@ -81,8 +81,10 @@ QA notes:
   `KinOfSheredyn_Technology_04` -> `Martial Discipline`.
 - Major faction Population first-threshold refs now render compact target
   summaries where exact refs exist. Examples: `Population_KinOfSheredyn`
-  shows `Military Press`; `Population_Aspect` now links the first threshold
-  target while later text-only rewards remain plain.
+  shows `Military Press`; `Population_Aspect` has exact ref
+  `Aspect_DistrictImprovement_00`, but that target is not present as a current
+  Codex entry, so `Nutrient Extractor` remains plain while later text-only
+  rewards remain plain.
 - `Declaration_CloseBorders` renders an Applied Status and related Status
   entry for `Status_PublicOpinion_YouClosedBorders`.
 - `Treaty_SharedResearch` remains facts/effects-only; no EWShop issue was found

@@ -48,7 +48,8 @@ Result:
 - Tech unlock refs render through EWShop structured metadata for examples such
   as `Aspect_Technology_00` and `KinOfSheredyn_Technology_04`.
 - Major faction Population threshold refs render compact summaries where exact
-  refs exist; text-only rewards remain plain by design.
+  refs resolve; unresolved exact refs and text-only rewards remain plain by
+  design.
 - Modifier pages remain hidden from top-level navigation but are searchable and
   linkable when exact public targets exist.
 

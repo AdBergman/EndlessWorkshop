@@ -259,11 +259,17 @@ function formatMarkdown(entries: EntryWithKind[]): string {
     const exactThresholdRows = populationThresholdRows.filter((item) => item.ref);
     const textThresholdRows = populationThresholdRows.filter((item) => !item.ref);
     const uniqueThresholdRefs = unique(exactThresholdRows.map((item) => item.ref));
+    const resolvedThresholdRefs = uniqueThresholdRefs.filter((key) => keyToEntry.has(key));
+    const unresolvedThresholdRefs = uniqueThresholdRefs.filter((key) => !keyToEntry.has(key));
+    const unresolvedThresholdText = `${unresolvedThresholdRefs.length} exact ${unresolvedThresholdRefs.length === 1 ? "ref is" : "refs are"} unresolved`;
     const aspectPopulation = populations.find((entry) => entry.entryKey === "Population_Aspect");
     const daughterOfBor = populations.find((entry) => entry.entryKey === "Population_Minor_DaughterOfBor");
     const horatio = populations.find((entry) => entry.entryKey === "Population_Minor_Horatio");
     const kin = populations.find((entry) => entry.entryKey === "Population_KinOfSheredyn");
     const lastLord = populations.find((entry) => entry.entryKey === "Population_LastLord");
+    const necrophage = populations.find((entry) => entry.entryKey === "Population_Necrophage");
+    const mukag = populations.find((entry) => entry.entryKey === "Population_Mukag");
+    const calledPopulation = populations.find((entry) => entry.entryKey === "Population_Called");
 
     const extractors = districts.filter((entry) =>
         lower(entry.category) === "resource" ||
@@ -331,8 +337,8 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         {
             area: "Major faction Population thresholds",
             playerQuestion: "What does this breakpoint reward actually unlock?",
-            currentDataShape: `${populationThresholdRows.length} threshold items; ${uniqueThresholdRefs.length} exact unique refs are usable, ${textThresholdRows.length} rewards remain text-only.`,
-            owner: "DB exporter/editorial for text-only rewards; EWShop exact-ref summaries are implemented",
+            currentDataShape: `${populationThresholdRows.length} threshold items; ${resolvedThresholdRefs.length}/${uniqueThresholdRefs.length} exact unique refs resolve, ${unresolvedThresholdText}, ${textThresholdRows.length} rewards remain text-only.`,
+            owner: "DB exporter/editorial for unresolved or text-only rewards; EWShop exact-ref summaries are implemented",
             productTreatment: "Keep Population top-level; exact threshold summaries are implemented for resolved refs only.",
         },
         {
@@ -445,23 +451,26 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "",
         "### 2. Population Thresholds",
         "",
-        `Current data shape: ${populations.length} Population entries; ${populationThresholdRows.length} threshold items; ${uniqueThresholdRefs.length} exact unique threshold refs; ${textThresholdRows.length} text-only threshold rewards.`,
+        `Current data shape: ${populations.length} Population entries; ${populationThresholdRows.length} threshold items; ${resolvedThresholdRefs.length}/${uniqueThresholdRefs.length} exact unique threshold refs resolve; ${unresolvedThresholdText}; ${textThresholdRows.length} text-only threshold rewards.`,
         "",
         "Good entries already suitable for EWShop:",
         ...renderList([
             `${example(daughterOfBor)} resolves At 5 population to ${targetLabel("DistrictImprovement_MinorFaction_06", keyToEntry)}.`,
             `${example(horatio)} resolves At 5 population to ${targetLabel("Unit_HoratioBeta", keyToEntry)}.`,
+            `${example(kin)} resolves At 5 population to ${targetLabel("KinOfSheredyn_DistrictImprovement_01", keyToEntry)}.`,
+            `${example(lastLord)} resolves At 5 population to ${targetLabel("LastLord_DistrictImprovement_03", keyToEntry)}.`,
+            `${example(necrophage)} resolves At 5 population to ${targetLabel("Necrophage_DistrictImprovement_01", keyToEntry)}.`,
+            `${example(mukag)} resolves At 5 population to ${targetLabel("Mukag_DistrictImprovement_06", keyToEntry)}.`,
         ]),
         "",
         "Blocked examples:",
         ...renderList([
-            `${example(aspectPopulation)} says "Nutrient Extractor" but has no exact target ref.`,
-            `${example(kin)} says "Military Press"; ${targetLabel("KinOfSheredyn_DistrictImprovement_01", keyToEntry)} exists but is not linked from the threshold item.`,
-            `${example(lastLord)} says "Altar of Channeling"; ${targetLabel("LastLord_DistrictImprovement_03", keyToEntry)} exists but is not linked from the threshold item.`,
+            `${example(aspectPopulation)} has exact ref Aspect_DistrictImprovement_00 for "Nutrient Extractor", but that target is not present as a current Codex entry.`,
+            `${example(calledPopulation)} still has text-only threshold rewards such as "Cost modifier" and "Sacred Flames Dust cost reduced to 30% of normal".`,
         ]),
         "",
         "EWShop status: one-line threshold summaries for exact resolved reward refs are implemented.",
-        "DB exporter/editorial request: add exact threshold reward refs where real targets exist.",
+        "DB exporter/editorial request: resolve missing exact threshold target entries and add exact threshold reward refs where text-only real targets exist.",
         "Product treatment: keep Population top-level; exact refs can be previewed, text-only rewards wait for exporter data.",
         "",
         "### 3. Extractors And Resources",
@@ -570,7 +579,7 @@ function formatMarkdown(entries: EntryWithKind[]): string {
         "",
         ...renderNumbered([
             "Fill unresolved or text-only Tech Unlock refs where public targets exist.",
-            "Export exact Population threshold reward refs for major faction and other text-only rewards where targets already exist.",
+            "Resolve missing Population threshold target entries and export exact refs for remaining text-only rewards where targets already exist.",
             "Fill thin Resource and Extractor entries where current facts do not explain player impact.",
             "Add concise gameplay summaries and affected-target refs for thin Actions.",
             "Add direct Effects summaries and fix incomplete public text for Diplomatic Treaties, especially surrender/tribute entries.",

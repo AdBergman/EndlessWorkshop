@@ -19,7 +19,7 @@ EWShop should continue to use exact exported refs, `referenceKeys`,
 | Rank | Area | Player question blocked | Current data shape | Owner | Product treatment |
 | ---: | --- | --- | --- | --- | --- |
 | 1 | Tech unlocks | What does this tech unlock? | 133 Tech entries; 107 have Unlocks sections; 195/203 unique Unlock refs resolve; 107 have unlock text. | Exporter/editorial for unresolved or text-only unlocks; EWShop exact-ref summaries are implemented | Keep Tech top-level; exact Unlock summaries are implemented for resolved refs only. |
-| 2 | Major faction Population thresholds | What does this breakpoint reward actually unlock? | 74 threshold items; 22 exact unique refs are usable, 52 rewards remain text-only. | DB exporter/editorial for text-only rewards; EWShop exact-ref summaries are implemented | Keep Population top-level; exact threshold summaries are implemented for resolved refs only. |
+| 2 | Major faction Population thresholds | What does this breakpoint reward actually unlock? | 74 threshold items; 21/22 exact unique refs resolve, 1 exact ref is unresolved, 52 rewards remain text-only. | DB exporter/editorial for unresolved or text-only rewards; EWShop exact-ref summaries are implemented | Keep Population top-level; exact threshold summaries are implemented for resolved refs only. |
 | 3 | Extractor -> Resource | Which resource does this extractor produce? | 67 Resource-category extractor Districts; 132 resolved extractor refs; 24 Resource export entries. | EWShop/product, with exporter/editorial for thin entries | Keep Extractors under Districts; Resources are top-level shallow reference entries. |
 | 4 | Resource Codex surface | What does this resource do? | 24 Resource export entries; 16 have direct Effects; 2 are facts-only/thin. | EWShop/product, with exporter/editorial for thin entries | Resources are top-level shallow reference entries; thin entries need exporter/editorial context. |
 | 5 | Thin Actions | What does this action do and when should I use it? | 139 Actions; 87 have only facts and no public description/mechanics section. | DB exporter/editorial | Keep exact-link/search targets; avoid promoting thin Actions as rich browse content. |
@@ -52,19 +52,22 @@ Product treatment: keep top-level browseable; do not infer unresolved unlocks fr
 
 ### 2. Population Thresholds
 
-Current data shape: 26 Population entries; 74 threshold items; 22 exact unique threshold refs; 52 text-only threshold rewards.
+Current data shape: 26 Population entries; 74 threshold items; 21/22 exact unique threshold refs resolve; 1 exact ref is unresolved; 52 text-only threshold rewards.
 
 Good entries already suitable for EWShop:
 - Daughter of Bor (Population_Minor_DaughterOfBor) resolves At 5 population to Bor’s Sparring Ring (DistrictImprovement_MinorFaction_06).
 - Inferior Imitation (Population_Minor_Horatio) resolves At 5 population to Horatio Clone (Unit_HoratioBeta).
+- Kin of Sheredyn (Population_KinOfSheredyn) resolves At 5 population to Military Press (KinOfSheredyn_DistrictImprovement_01).
+- Last Lord (Population_LastLord) resolves At 5 population to Altar of Channeling (LastLord_DistrictImprovement_03).
+- Necrophage (Population_Necrophage) resolves At 5 population to Larval Pulp (Necrophage_DistrictImprovement_01).
+- Tahuk (Population_Mukag) resolves At 5 population to Astronomy Club (Mukag_DistrictImprovement_06).
 
 Blocked examples:
-- Aspect (Population_Aspect) says "Nutrient Extractor" but has no exact target ref.
-- Kin of Sheredyn (Population_KinOfSheredyn) says "Military Press"; Military Press (KinOfSheredyn_DistrictImprovement_01) exists but is not linked from the threshold item.
-- Last Lord (Population_LastLord) says "Altar of Channeling"; Altar of Channeling (LastLord_DistrictImprovement_03) exists but is not linked from the threshold item.
+- Aspect (Population_Aspect) has exact ref Aspect_DistrictImprovement_00 for "Nutrient Extractor", but that target is not present as a current Codex entry.
+- Called Population (Population_Called) still has text-only threshold rewards such as "Cost modifier" and "Sacred Flames Dust cost reduced to 30% of normal".
 
 EWShop status: one-line threshold summaries for exact resolved reward refs are implemented.
-DB exporter/editorial request: add exact threshold reward refs where real targets exist.
+DB exporter/editorial request: resolve missing exact threshold target entries and add exact threshold reward refs where text-only real targets exist.
 Product treatment: keep Population top-level; exact refs can be previewed, text-only rewards wait for exporter data.
 
 ### 3. Extractors And Resources
@@ -152,7 +155,7 @@ Product treatment: valid searchable/linkable entities; avoid promoting thin subc
 ## Top 5 DB Exporter / Backend / Editorial Requests
 
 1. Fill unresolved or text-only Tech Unlock refs where public targets exist.
-2. Export exact Population threshold reward refs for major faction and other text-only rewards where targets already exist.
+2. Resolve missing Population threshold target entries and export exact refs for remaining text-only rewards where targets already exist.
 3. Fill thin Resource and Extractor entries where current facts do not explain player impact.
 4. Add concise gameplay summaries and affected-target refs for thin Actions.
 5. Add direct Effects summaries and fix incomplete public text for Diplomatic Treaties, especially surrender/tribute entries.

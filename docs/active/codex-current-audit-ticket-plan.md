@@ -71,7 +71,8 @@ Still true:
    in the current loop; generated reports now mark completed exact-ref
    surfaces as implemented.
 2. `EW-CODEX-AUDIT-002` - Browser-QA Population threshold summaries against
-   current exact refs.
+   current exact refs. Completed in the current loop; resolved exact refs
+   render, text-only and unresolved targets remain plain.
 3. `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty applied Status usefulness.
 4. `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex preview accessibility.
 5. `EW-CODEX-AUDIT-005` - Browser-review Action mechanics presentation.
@@ -150,6 +151,7 @@ and suggested commit message.
 
 Owner: EWShop frontend/product  
 Priority: P1
+Status: completed
 
 Why this matters to a 4X player:
 Population pages are breakpoint planning surfaces. The player should understand
@@ -456,10 +458,13 @@ threshold rewards block safe links and make pages feel like database output.
 
 Evidence:
 - Content diagnostic: 7 Population raw-internal-text findings.
-- Relationship audit: 74 threshold items; 22 exact unique refs usable, 52
-  rewards text-only.
+- Relationship audit: 74 threshold items; 21/22 exact unique refs resolve, 1
+  exact ref is unresolved, and 52 rewards remain text-only.
 - Examples:
   - `Population_Aspect` fact value exposes `Faction_Aspect`.
+  - `Population_Aspect` threshold reward exports exact ref
+    `Aspect_DistrictImprovement_00`, but that target is not present as a
+    current Codex entry, so `Nutrient Extractor` remains plain.
   - `Population_KinOfSheredyn` fact value exposes `Faction_KinOfSheredyn`.
   - `Population_Minor_MangroveOfHarmony` threshold fact value exposes
     `MangroveOfHarmony_District_Tier1_Money`.
@@ -467,7 +472,8 @@ Evidence:
 Expected fix:
 - Export public display labels for player-facing fact values.
 - Attach exact `referenceKey` to threshold items or reward facts where the
-  target is a public Codex entry.
+  target is a public Codex entry, and ensure referenced target entries are also
+  exported.
 
 Do not:
 - Do not rely on EWShop display-name matching.

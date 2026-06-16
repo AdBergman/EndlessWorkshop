@@ -417,7 +417,7 @@ function createCandidates(
             playerValue: alreadyImplemented ? 0 : hasResolvedRewardTargets ? 7 : 2,
             risk: alreadyImplemented ? 1 : hasResolvedRewardTargets ? 4 : 7,
             owner: alreadyImplemented ? "None" : hasResolvedRewardTargets ? "EWShop" : "Exporter/editorial",
-            status: alreadyImplemented ? "Implemented in EWShop for exact Population threshold refs" : hasResolvedRewardTargets ? "Candidate for exact reward-target summaries" : "Needs exact reward refs before UI work",
+            status: alreadyImplemented ? "Implemented in EWShop for resolved exact Population threshold refs; unresolved refs need exporter/editorial cleanup" : hasResolvedRewardTargets ? "Candidate for exact reward-target summaries" : "Needs exact reward refs before UI work",
             examples: thresholdRewardEntries,
         });
     }

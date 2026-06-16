@@ -19,6 +19,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | completed | Effect detail headers now prefer exported Role/Scope and suppress technical effect category strings |
 | Current audit ticket regeneration | completed | Regenerated diagnostics and created `docs/active/codex-current-audit-ticket-plan.md` |
 | `EW-CODEX-AUDIT-001` - Make Codex Diagnostics Implementation-Aware | completed | Generated diagnostics now mark completed exact-ref surfaces as implemented |
+| `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold Summaries | completed | Browser QA confirmed resolved exact refs render and unresolved/text-only rewards remain plain |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -228,7 +229,68 @@ story so future sessions can continue without reconstructing chat history.
     Unlocks, text-only Population rewards, thin Resource/Extractor entries, and
     thin Action/Treaty content.
 - Commit hash if committed:
-  - Pending.
+  - `efb5efe8`
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-002` Population threshold summary browser QA
     if validation passes and the commit is clean.
+
+## 2026-06-16 - EW-CODEX-AUDIT-002 Browser-QA Population Threshold Summaries
+
+- Story ID/title: `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold
+  Summaries.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - Current local Codex imports in `local-imports/codex/`.
+  - Browser QA against local backend/frontend with local Codex imports enabled.
+  - Existing focused Codex page tests for exact threshold Improvement and Unit
+    summaries.
+- Changes made:
+  - No frontend UI change was needed.
+  - Updated relationship-gap diagnostics to distinguish resolved exact
+    Population threshold refs, unresolved exact refs, and text-only rewards.
+  - Updated active progress/planning docs to record the current Aspect
+    unresolved-target evidence.
+- Tests/diagnostics/browser QA run:
+  - Browser QA:
+    `/codex?category=populations&entry=Population_KinOfSheredyn` rendered
+    `Military Press` as a threshold summary.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_LastLord` rendered
+    `Altar of Channeling` as a threshold summary.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Necrophage` rendered
+    `Larval Pulp` as a threshold summary.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Mukag` rendered
+    `Astronomy Club` as a threshold summary.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Minor_DaughterOfBor`
+    rendered `Bor’s Sparring Ring` and did not repeat its Improvement card in
+    Related Entries.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Minor_Horatio` rendered
+    `Horatio Clone` as a Unit threshold summary.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Aspect` left
+    `Nutrient Extractor` plain because exact ref
+    `Aspect_DistrictImprovement_00` is not present as a current Codex entry.
+  - Browser QA:
+    `/codex?category=populations&entry=Population_Called` left text-only
+    threshold rewards plain.
+  - `npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md`
+  - `npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --output ../docs/active/codex-relationship-value-gap-audit.md`
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `git diff --check`
+- Review notes:
+  - Exact resolved threshold refs behave as intended.
+  - No display-name/prose inference was added.
+  - Remaining issue is exporter/editorial/backend data: provide
+    `Aspect_DistrictImprovement_00` as a public Codex entry or change/remove
+    the unresolved ref.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Continue with `EW-CODEX-AUDIT-003` Diplomatic Treaty applied Status
+    usefulness review if validation passes and the commit is clean.
