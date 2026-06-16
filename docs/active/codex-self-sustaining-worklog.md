@@ -22,6 +22,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-AUDIT-002` - Browser-QA Population Threshold Summaries | completed | Browser QA confirmed resolved exact refs render and unresolved/text-only rewards remain plain |
 | `EW-CODEX-AUDIT-003` - Review Diplomatic Treaty Applied Status Usefulness | completed | Exact applied Status refs now render compact treaty mechanics summaries |
 | `EW-CODEX-AUDIT-004` - Harden Quest Strategy Codex Preview Accessibility | completed | Quest Codex preview tooltips now dismiss on outside click/tap and Escape |
+| `EW-CODEX-AUDIT-005` - Browser-Review Action Mechanics Presentation | completed | Browser QA found current structured rendering sufficient; thin Actions stay exporter-owned |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -379,3 +380,43 @@ story so future sessions can continue without reconstructing chat history.
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-005` Action mechanics browser review if
     validation passes and the commit is clean.
+
+## 2026-06-16 - EW-CODEX-AUDIT-005 Action Mechanics Browser Review
+
+- Story ID/title: `EW-CODEX-AUDIT-005` - Browser-Review Action Mechanics
+  Presentation.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - Browser QA for current Action pages with local Codex imports.
+- Changes made:
+  - No frontend UI change was needed.
+  - Updated active docs to record that current structured rendering is
+    sufficient for mechanics-rich Actions and that thin/facts-only Actions
+    remain exporter/editorial-owned.
+- Tests/diagnostics/browser QA run:
+  - Browser QA:
+    `/codex?category=actions&entry=ActionTypeAbsorbCity` renders its
+    Influence cost multiplier mechanics and related Modifier.
+  - Browser QA:
+    `/codex?category=actions&entry=ActionTypeCloseRift` renders multiple Turn
+    cost multiplier mechanics and related Modifiers.
+  - Browser QA:
+    `/codex?category=actions&entry=ConstructibleAction_RazeDistrict` renders
+    Production cost mechanics and explanatory current-game-state text.
+  - Browser QA:
+    `/codex?category=actions&entry=ActionTypeBuildObservatory` correctly stays
+    facts-only with the action-specific no-public-summary placeholder.
+  - `git diff --check`
+- Review notes:
+  - No summaries or mechanics were invented.
+  - No release-safety gates were changed.
+  - Cost modifier wording is still somewhat database-like, but improving it
+    safely requires exporter/editorial public gameplay summaries rather than a
+    frontend heuristic.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Stop this self-sustaining loop. All refreshed EWShop audit tickets are
+    completed, and remaining Codex value gaps are DB Exporter/editorial-owned
+    unless new browser QA or data evidence appears.

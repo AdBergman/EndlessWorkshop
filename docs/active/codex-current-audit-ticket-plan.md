@@ -80,6 +80,8 @@ Still true:
    Completed in the current loop; Quest Codex preview tooltips now dismiss on
    outside click/tap and Escape.
 5. `EW-CODEX-AUDIT-005` - Browser-review Action mechanics presentation.
+   Completed in the current loop; existing structured rendering is sufficient
+   for current mechanics-rich Actions, and thin Actions remain exporter-owned.
 
 Stop the self-sustaining loop if a story requires exporter data, release-gate
 changes, broad redesign, or display-name/prose inference.
@@ -330,6 +332,7 @@ QA notes, accessibility findings, fixes if any, tests, and commit hash.
 
 Owner: EWShop frontend/product  
 Priority: P3
+Status: completed
 
 Why this matters to a 4X player:
 Most Actions are exporter-thin, but 52 Actions do have mechanics sections.

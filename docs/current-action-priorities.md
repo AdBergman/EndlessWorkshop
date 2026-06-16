@@ -57,6 +57,9 @@ Known post-return decisions and gaps:
   Opinion impact without requiring a Related Entries click-through.
 - Quest Strategy exact Codex preview tooltips dismiss on outside click/tap and
   Escape; resolver/link behavior remains exact-ref-only.
+- Action mechanics browser QA found existing structured rendering acceptable
+  for current mechanics-rich Actions. Facts-only/thin Actions remain
+  exporter/editorial-owned.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
 - Bonuses Codex local startup import still reports two failed rows. NEXT-006
