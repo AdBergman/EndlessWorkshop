@@ -229,7 +229,7 @@ story so future sessions can continue without reconstructing chat history.
     Unlocks, text-only Population rewards, thin Resource/Extractor entries, and
     thin Action/Treaty content.
 - Commit hash if committed:
-  - `efb5efe8`
+  - `9ad93a33`
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-002` Population threshold summary browser QA
     if validation passes and the commit is clean.
@@ -290,7 +290,7 @@ story so future sessions can continue without reconstructing chat history.
     `Aspect_DistrictImprovement_00` as a public Codex entry or change/remove
     the unresolved ref.
 - Commit hash if committed:
-  - Pending.
+  - `82beedda`
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-003` Diplomatic Treaty applied Status
     usefulness review if validation passes and the commit is clean.
