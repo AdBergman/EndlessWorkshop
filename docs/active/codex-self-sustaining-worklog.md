@@ -153,7 +153,7 @@ story so future sessions can continue without reconstructing chat history.
   - Result-row context is unchanged; this story only targeted detail-page
     header roughness.
 - Commit hash if committed:
-  - Pending.
+  - `e1abfc45`
 - Next recommended action:
   - Stop the self-sustaining post-exporter-return Codex loop for now. The
     active NEXT story plan has no remaining actionable EWShop story backed by
