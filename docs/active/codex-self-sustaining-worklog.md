@@ -17,6 +17,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
 | `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | completed | Current startup import repro identified two deprecated placeholder bonus rows rejected by display-name normalization |
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | completed | Effect detail headers now prefer exported Role/Scope and suppress technical effect category strings |
+| Current audit ticket regeneration | completed | Regenerated diagnostics and created `docs/active/codex-current-audit-ticket-plan.md` |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -158,3 +159,39 @@ story so future sessions can continue without reconstructing chat history.
   - Stop the self-sustaining post-exporter-return Codex loop for now. The
     active NEXT story plan has no remaining actionable EWShop story backed by
     current evidence.
+
+## 2026-06-16 - Current Codex Audit Ticket Regeneration
+
+- Story ID/title: Current Codex implementation/data audit and ticket
+  regeneration.
+- Start time/date: 2026-06-16.
+- Current status: completed.
+- Evidence used:
+  - Current local Codex JSON files in `local-imports/codex/`.
+  - 2026-06-14 DB Exporter aggregate handoff and packet return docs.
+  - Current EWShop implementation state recorded in this worklog and
+    `docs/current-action-priorities.md`.
+  - Regenerated content-quality, preview-surface, and relationship-gap
+    diagnostics.
+- Changes made:
+  - Regenerated `docs/active/codex-preview-surface-audit.md`.
+  - Regenerated `docs/active/codex-relationship-value-gap-audit.md`.
+  - Created `docs/active/codex-current-audit-ticket-plan.md` with separate
+    EWShop and DB Exporter/editorial Jira-style ticket lists.
+  - Updated active docs index and priorities to point the next self-sustaining
+    loop at the refreshed audit-backed ticket plan.
+- Tests/diagnostics/browser QA run:
+  - `npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300`
+  - `npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md`
+  - `npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --output ../docs/active/codex-relationship-value-gap-audit.md`
+- Review notes:
+  - The content-quality diagnostic reports 178 high findings, all
+    Exporter/editorial-owned.
+  - Several generated preview/relationship recommendations point at already
+    completed EWShop features, so the ticket plan overlays current
+    implementation status instead of copying generated rankings blindly.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Start the next self-sustaining loop with `EW-CODEX-AUDIT-001` from
+    `docs/active/codex-current-audit-ticket-plan.md`.

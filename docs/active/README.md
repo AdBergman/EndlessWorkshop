@@ -15,6 +15,13 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 - `codex-content-quality-diagnostics.md` - current EWShop diagnostic workflow
   for separating EWShop presentation issues from exporter/editorial content
   issues.
+- `codex-preview-surface-audit.md` - regenerated preview-surface diagnostic
+  report against current local Codex imports.
+- `codex-relationship-value-gap-audit.md` - regenerated relationship/value gap
+  diagnostic report against current local Codex imports.
+- `codex-current-audit-ticket-plan.md` - current EWShop and DB
+  Exporter/editorial Jira-style ticket source generated from diagnostics,
+  current implementation, and the 2026-06-14 exporter handoff.
 - `codex-exporter-return-progress.md` - current EWShop-side progress tracker
   for the 2026-06-14 exporter return verification tickets.
 - `codex-post-exporter-return-next-stories.md` - current story plan for the

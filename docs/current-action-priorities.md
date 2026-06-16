@@ -63,9 +63,10 @@ Actionable next items:
 2. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
    completed packet requests from archived docs without fresh evidence.
 3. Do not expose Modifiers in top-level Codex navigation without product review.
-4. The post-exporter-return Codex NEXT story loop is complete for current
-   evidence. Resume Codex work only from new QA findings, exporter returns, or a
-   human product decision.
+4. Use `docs/active/codex-current-audit-ticket-plan.md` as the refreshed
+   source for the next self-sustaining Codex loop. The previous
+   post-exporter-return NEXT story list is complete, but current diagnostics
+   now define a new audit-backed EWShop/DB Exporter ticket plan.
 
 Archived historical context:
 
