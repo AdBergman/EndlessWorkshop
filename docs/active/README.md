@@ -17,6 +17,8 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
   issues.
 - `codex-exporter-return-progress.md` - current EWShop-side progress tracker
   for the 2026-06-14 exporter return verification tickets.
+- `codex-post-exporter-return-next-stories.md` - current story plan for the
+  post-exporter-return Codex work that remains evidence-backed.
 
 The latest exporter return bundle says the packet phase is implemented or
 partially implemented. Regenerate diagnostics against current local imports
