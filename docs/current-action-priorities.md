@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-15.
+Current as of 2026-06-16.
 
 This list reflects the current product focus:
 
@@ -36,12 +36,14 @@ The return bundle reports these notable changes:
 - New generic Codex exportKinds `councilorEffects` and `partnerEffects`
   landed, including a partner-effect one-hop mechanics follow-up.
 
-Known open decisions and gaps after the return:
+Known post-return decisions and gaps:
 
-- `resources`, `councilorEffects`, and `partnerEffects` are searchable/linkable
-  and intentionally remain out of top-level navigation after browser QA.
-- Product may later decide whether `resources` deserve top-level navigation,
-  but no promotion is currently approved.
+- `resources`, `councilorEffects`, and `partnerEffects` are now top-level
+  shallow reference categories. Their list rows should carry the at-a-glance
+  value: differentiating context, full effect lines where exported, and exact
+  source/extractor links.
+- Modifiers remain hidden from top-level navigation and may only be reached by
+  search or exact links.
 - Resource deposits / POI pages remain deferred.
 - Districts and Improvements thin context remains deferred.
 - Some Actions, Diplomatic Treaties, Statuses, and effect pages may still be
@@ -60,8 +62,9 @@ Actionable next items:
 2. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
    completed packet requests from archived docs without fresh evidence.
 3. Do not expose Modifiers in top-level Codex navigation without product review.
-4. Do not continue Codex frontend polish without a concrete bug, browser QA
-   finding, category visibility decision, or release-safety concern.
+4. Continue post-exporter-return Codex work from
+   `docs/active/codex-self-sustaining-worklog.md` and
+   `docs/active/codex-post-exporter-return-next-stories.md`.
 
 Archived historical context:
 

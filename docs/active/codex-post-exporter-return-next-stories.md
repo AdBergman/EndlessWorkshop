@@ -16,15 +16,25 @@ diagnostics, or browser QA reproduce the problem.
 
 ## Recommended Order
 
-1. `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics
-2. `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX
-3. `EW-CODEX-NEXT-002` - Decide Resource Top-Level Category Treatment
-4. `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
-5. `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
-6. `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
+1. Done - `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics
+2. Done - `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX
+3. Done - `EW-CODEX-NEXT-002` - Decide Resource Top-Level Category Treatment
+4. Next - `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
+5. Then - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
+6. Then - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
 
-Recommended first implementation story: `EW-CODEX-NEXT-005`. It closes the
-DB Exporter loop before EWShop starts another frontend value pass.
+Recommended next implementation story: `EW-CODEX-NEXT-004`.
+
+Post-plan updates:
+
+- `EW-CODEX-NEXT-002` was resolved by promoting `resources`,
+  `councilorEffects`, and `partnerEffects` to top-level shallow reference
+  categories. Modifiers remain hidden from top-level navigation.
+- Shallow reference list rows now emphasize at-a-glance effects and exact
+  source/extractor links instead of generic dossier previews.
+- The effect label cleanup already done for shallow list rows does not complete
+  `EW-CODEX-NEXT-003`; that story is specifically about effect detail-page
+  context labels.
 
 ## EW-CODEX-NEXT-001 - Review Tech Unlock Summary UX
 
@@ -87,6 +97,7 @@ UX decision, files changed, tests run, risks, and suggested commit message.
 
 Owner: EWShop product/frontend  
 Priority: P1
+Status: completed
 
 Why it matters to a 4X player:
 Resources are now real Codex entries, but top-level navigation only helps if
@@ -128,6 +139,15 @@ Report:
 Decision recommendation, browser evidence, player value score, and whether a
 follow-up implementation story is justified.
 ```
+
+Completion evidence:
+
+- Commit `c22a2ff8` promoted Resources, Councilor Effects, and Partner Effects
+  as top-level shallow reference categories.
+- Commit `5396e67e` improved shallow row hierarchy and exact source/extractor
+  presentation.
+- Commit `0bab089d` removed repeated category words from shallow row labels.
+- Modifiers remain hidden from top-level navigation.
 
 ## EW-CODEX-NEXT-003 - Clean Effect Detail Context Labels
 

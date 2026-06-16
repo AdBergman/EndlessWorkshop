@@ -36,9 +36,10 @@ Result:
 - Generic Codex import/API accepts and serves `resources`, `councilorEffects`,
   and `partnerEffects`.
 - `resources`, `councilorEffects`, and `partnerEffects` have readable frontend
-  labels and are searchable/linkable.
-- `resources`, `councilorEffects`, `partnerEffects`, and `modifiers` remain out
-  of top-level Codex navigation by product decision.
+  labels and are top-level shallow reference categories.
+- Shallow reference list rows now show differentiating context, full exported
+  effect lines where available, and exact source/extractor links.
+- `modifiers` remain out of top-level Codex navigation by product decision.
 - Resource and Extractor exact links work for QA examples such as
   `Resource_Luxury01`, `Resource_Strategic01`, and `Extractor_Luxury01`.
 - Councilor pages link to Councilor Effect and Partner Effect pages; QA examples
@@ -163,4 +164,3 @@ decisions or cosmetic improvements:
 - Decide whether Resources should remain searchable-only or become top-level.
 - Clean cosmetic effect context labels such as technical suffixes on effect
   detail pages.
-
