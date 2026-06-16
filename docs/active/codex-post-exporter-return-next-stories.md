@@ -21,9 +21,10 @@ diagnostics, or browser QA reproduce the problem.
 3. Done - `EW-CODEX-NEXT-002` - Decide Resource Top-Level Category Treatment
 4. Done - `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
 5. Done - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
-6. Next - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
+6. Done - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
 
-Recommended next implementation story: `EW-CODEX-NEXT-003`.
+Recommended next implementation story: none. The post-exporter-return NEXT
+story list is complete for current evidence.
 
 Post-plan updates:
 
@@ -39,6 +40,9 @@ Post-plan updates:
   deprecated placeholder entries with display name `[DEPRECATED]`. No EWShop
   code change was made because importing those rows would add low-value Codex
   noise.
+- `EW-CODEX-NEXT-003` cleaned effect detail-page context labels for
+  `councilorEffects` and `partnerEffects` without changing facts, mechanics,
+  search, Related Entries, or navigation.
 
 ## EW-CODEX-NEXT-001 - Review Tech Unlock Summary UX
 
@@ -157,6 +161,7 @@ Completion evidence:
 
 Owner: EWShop frontend  
 Priority: P2
+Status: completed
 
 Why it matters to a 4X player:
 Councilor Effect and Partner Effect pages render useful mechanics, but
@@ -172,6 +177,15 @@ Acceptance criteria:
 - Technical key suffixes are suppressed or replaced by exported role/kind
   context.
 - Search, direct links, Related Entries, and mechanics rendering are unchanged.
+
+Result:
+- Councilor Effect detail headers prefer exported `Role` / `Scope` facts where
+  present, for example `CouncilorEffect_Defense21` shows `Defense`.
+- Partner Effect detail headers suppress technical category strings when no
+  useful exported `Role` / `Scope` exists, for example
+  `PartnerEffect_Hydracorn_PartnerTrait01` keeps `Partner Effects` without a
+  raw event-like context suffix.
+- Structured facts and exported effect lines remain unchanged.
 
 Validation/browser targets:
 - `Notable_Elder_MinorFaction_Hydracorn`

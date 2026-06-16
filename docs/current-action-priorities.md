@@ -63,9 +63,9 @@ Actionable next items:
 2. Report only current, EWShop-proven gaps back to DB Exporter. Do not reopen
    completed packet requests from archived docs without fresh evidence.
 3. Do not expose Modifiers in top-level Codex navigation without product review.
-4. Continue post-exporter-return Codex work from
-   `docs/active/codex-self-sustaining-worklog.md` and
-   `docs/active/codex-post-exporter-return-next-stories.md`.
+4. The post-exporter-return Codex NEXT story loop is complete for current
+   evidence. Resume Codex work only from new QA findings, exporter returns, or a
+   human product decision.
 
 Archived historical context:
 

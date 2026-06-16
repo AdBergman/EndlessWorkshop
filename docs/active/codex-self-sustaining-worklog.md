@@ -16,7 +16,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-002` - Resource Top-Level Category Treatment | completed | Commits `c22a2ff8`, `5396e67e`, `0bab089d`; Resources, Councilor Effects, and Partner Effects are top-level shallow reference categories |
 | `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
 | `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | completed | Current startup import repro identified two deprecated placeholder bonus rows rejected by display-name normalization |
-| `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | planned | Still visible on detail pages; shallow row labels are cleaned but detail context labels remain separate |
+| `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | completed | Effect detail headers now prefer exported Role/Scope and suppress technical effect category strings |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
@@ -113,8 +113,48 @@ story so future sessions can continue without reconstructing chat history.
   - No exact public related link was proven missing from player-facing Codex
     pages.
 - Commit hash if committed:
+  - `915756aa`
+- Next recommended action:
+  - Continue with `EW-CODEX-NEXT-003` effect detail context-label cleanup.
+
+## 2026-06-16 - EW-CODEX-NEXT-003 Effect Detail Context Labels
+
+- Story ID/title: `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels.
+- Start time/date: 2026-06-16 08:52 CEST.
+- Current status: completed.
+- Evidence used:
+  - `docs/active/codex-post-exporter-return-next-stories.md`.
+  - Current local Codex effect entries:
+    `CouncilorEffect_Defense21` and
+    `PartnerEffect_Hydracorn_PartnerTrait01`.
+  - Browser QA for direct Codex detail URLs.
+- Changes made:
+  - Detail-page context labels for `councilorEffects` and `partnerEffects`
+    now prefer exact exported `Role` or `Scope` facts.
+  - Technical effect category strings such as `Effect_Defense21` and
+    `PartnerEffect...Event003...` are suppressed from the detail header.
+  - Structured facts and effect mechanics remain unchanged.
+- Tests/diagnostics/browser QA run:
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+  - Browser QA:
+    `/codex?category=counciloreffects&entry=CouncilorEffect_Defense21`
+    rendered detail meta `Councilor Effects`, `Defense` and preserved both
+    exported effect lines.
+  - Browser QA:
+    `/codex?category=partnereffects&entry=PartnerEffect_Hydracorn_PartnerTrait01`
+    rendered detail meta `Partner Effects` and preserved both exported effect
+    lines.
+- Review notes:
+  - Guardrails: no mechanics rewrite, no generic renderer, no search or
+    navigation changes, and Modifiers remain hidden from top-level navigation.
+  - Result-row context is unchanged; this story only targeted detail-page
+    header roughness.
+- Commit hash if committed:
   - Pending.
 - Next recommended action:
-  - Continue with `EW-CODEX-NEXT-003` effect detail context-label cleanup, unless
-    a human prefers to stop Codex work and hand this deprecated-row note back to
-    DB Exporter/editorial first.
+  - Stop the self-sustaining post-exporter-return Codex loop for now. The
+    active NEXT story plan has no remaining actionable EWShop story backed by
+    current evidence.

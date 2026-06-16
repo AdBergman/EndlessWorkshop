@@ -489,8 +489,41 @@ export function getCodexDetailContextLines(entry: CodexEntry): string[] {
     const questContext = parseCodexQuestContext(entry);
     if (questContext) return questContext.detailContextLines;
 
+    const effectContextLines = getEffectDetailContextLines(entry);
+    if (effectContextLines) return effectContextLines;
+
     const secondaryContext = getCodexSecondaryContext(entry);
     return secondaryContext ? [secondaryContext] : [];
+}
+
+function getEffectDetailContextLines(entry: CodexEntry): string[] | null {
+    const exportKind = compactWhitespace(entry.exportKind ?? "").toLowerCase();
+    if (exportKind !== "counciloreffects" && exportKind !== "partnereffects") return null;
+
+    const factContext = findCodexFactValue(entry, ["Role", "Scope"]);
+    if (factContext) return [humanizeContextToken(factContext)];
+
+    const category = compactWhitespace(entry.category ?? "");
+    if (category && !looksTechnicalEffectContext(category)) {
+        return [humanizeContextToken(category)];
+    }
+
+    return [];
+}
+
+function findCodexFactValue(entry: Pick<CodexEntry, "facts">, labels: readonly string[]): string | null {
+    const normalizedLabels = new Set(labels.map((label) => compactWhitespace(label).toLowerCase()));
+    const value = entry.facts?.find((fact) => normalizedLabels.has(compactWhitespace(fact.label).toLowerCase()))?.value;
+    const normalizedValue = compactWhitespace(value ?? "");
+    return normalizedValue || null;
+}
+
+function looksTechnicalEffectContext(value: string): boolean {
+    const normalized = compactWhitespace(value).replace(/[_\s-]+/g, "").toLowerCase();
+    return normalized.startsWith("counciloreffect") ||
+        normalized.startsWith("partnereffect") ||
+        /^effect[a-z]+\d+/.test(normalized) ||
+        /event\d+/.test(normalized);
 }
 
 export function getCodexQuestGroupDetailContextLines(entry: CodexEntry): string[] {

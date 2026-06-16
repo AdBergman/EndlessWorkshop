@@ -417,8 +417,11 @@ describe("CodexPage", () => {
         await user.click(within(relatedSection).getByRole("button", { name: /travels well councilor effects/i }));
 
         expect(await screen.findByRole("heading", { name: "Travels Well" })).toBeInTheDocument();
-        expect(screen.getAllByText("Councilor Effects").length).toBeGreaterThan(0);
-        expect(screen.getAllByText("Defense / Councilor Effect").length).toBeGreaterThan(0);
+        const detail = screen.getByRole("heading", { name: "Travels Well" }).closest(".codex-detail") as HTMLElement;
+        const detailMeta = detail.querySelector(".codex-detail__metaRow") as HTMLElement;
+        expect(within(detailMeta).getByText("Councilor Effects")).toBeInTheDocument();
+        expect(within(detailMeta).getByText("Defense")).toBeInTheDocument();
+        expect(within(detailMeta).queryByText("Defense / Councilor Effect")).not.toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=CouncilorEffect_Defense21");
 
         const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
@@ -429,6 +432,97 @@ describe("CodexPage", () => {
         expect(within(searchSuggestions).getByText("Klax")).toBeInTheDocument();
         expect(within(searchSuggestions).getByText("Resources")).toBeInTheDocument();
         expect(searchSuggestions).toHaveTextContent("Luxury / Resource");
+    });
+
+    it("cleans technical effect context labels on detail pages without rewriting mechanics", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_Defense21",
+                displayName: "Travels Well",
+                category: "Effect_Defense21",
+                kind: "Councilor Effect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Role", value: "Defense" },
+                    { label: "Kind", value: "Councilor Effect" },
+                ],
+                sections: [{ title: "Effects", lines: ["+4 [Defense] Defense on Hero."] }],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_Hydracorn_PartnerTrait01",
+                displayName: "Agile Politico",
+                category: "PartnerEffectCouncillorDisputeEvent003PartnerTrait",
+                kind: "Partner Effect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Kind", value: "Partner Effect" }],
+                sections: [{ title: "Effects", lines: ["+5 [Determination] Determination"] }],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=counciloreffects&entry=CouncilorEffect_Defense21"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Travels Well" })).toBeInTheDocument();
+        const councilorDetail = screen.getByRole("heading", { name: "Travels Well" }).closest(".codex-detail") as HTMLElement;
+        const councilorMeta = councilorDetail.querySelector(".codex-detail__metaRow") as HTMLElement;
+        expect(within(councilorMeta).getByText("Councilor Effects")).toBeInTheDocument();
+        expect(within(councilorMeta).getByText("Defense")).toBeInTheDocument();
+        expect(within(councilorMeta).queryByText(/Effect Defense21/i)).not.toBeInTheDocument();
+        expect(within(councilorMeta).queryByText(/Councilor Effect$/i)).not.toBeInTheDocument();
+        expect(within(councilorDetail).getByText("+4")).toBeInTheDocument();
+        expect(within(councilorDetail).getByText("Defense on Hero.")).toBeInTheDocument();
+
+        cleanup();
+        useCodexStore.getState().reset();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=partnereffects&entry=PartnerEffect_Hydracorn_PartnerTrait01"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Agile Politico" })).toBeInTheDocument();
+        const partnerDetail = screen.getByRole("heading", { name: "Agile Politico" }).closest(".codex-detail") as HTMLElement;
+        const partnerMeta = partnerDetail.querySelector(".codex-detail__metaRow") as HTMLElement;
+        expect(within(partnerMeta).getByText("Partner Effects")).toBeInTheDocument();
+        expect(within(partnerMeta).queryByText(/Partner Effect Councillor Dispute Event003 Partner Trait/i)).not.toBeInTheDocument();
+        expect(within(partnerMeta).queryByText(/^Partner Effect$/i)).not.toBeInTheDocument();
+        expect(within(partnerDetail).getByText("+5")).toBeInTheDocument();
+        expect(within(partnerDetail).getByText("Determination")).toBeInTheDocument();
     });
 
     it("renders shallow reference category lists with exact resource and effect context", async () => {
