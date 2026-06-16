@@ -415,7 +415,7 @@ story so future sessions can continue without reconstructing chat history.
     safely requires exporter/editorial public gameplay summaries rather than a
     frontend heuristic.
 - Commit hash if committed:
-  - Pending.
+  - `a0dc8d04`
 - Next recommended action:
   - Stop this self-sustaining loop. All refreshed EWShop audit tickets are
     completed, and remaining Codex value gaps are DB Exporter/editorial-owned
