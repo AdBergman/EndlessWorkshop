@@ -375,7 +375,7 @@ story so future sessions can continue without reconstructing chat history.
   - No Quest Explorer redesign, Lore expansion, or inferred refs were added.
   - The fix stays inside the Quest Codex reference link component.
 - Commit hash if committed:
-  - Pending.
+  - `ab4b6bee`
 - Next recommended action:
   - Continue with `EW-CODEX-AUDIT-005` Action mechanics browser review if
     validation passes and the commit is clean.
