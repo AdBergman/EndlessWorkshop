@@ -713,6 +713,11 @@
     border-bottom: 1px solid var(--codex-line);
 }
 
+.codex-summaryDossier--reference {
+    padding-left: 14px;
+    border-left: 2px solid rgba(195, 152, 77, 0.44);
+}
+
 .codex-summaryDossier::after {
     content: "";
     position: absolute;
@@ -721,6 +726,11 @@
     width: min(34%, 220px);
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(195, 152, 77, 0.62));
+}
+
+.codex-summaryDossier--reference::after {
+    width: min(42%, 270px);
+    background: linear-gradient(90deg, transparent, rgba(255, 127, 50, 0.52));
 }
 
 .codex-summaryDossier__hero {

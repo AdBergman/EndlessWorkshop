@@ -14,7 +14,10 @@ import {
     getCodexFactionSummaryPreview,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
-import { getCodexShallowReferencePreview } from "@/lib/codex/codexShallowReferencePreview";
+import {
+    getCodexShallowReferencePreview,
+    isShallowReferenceKind,
+} from "@/lib/codex/codexShallowReferencePreview";
 import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -28,12 +31,20 @@ type Props = {
 };
 
 export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, titleRef, onSelectEntry }: Props) {
+    const isShallowReferenceSummary = isShallowReferenceKind(summaryEntry.summaryKind);
+    const summaryContext = isShallowReferenceSummary ? "Reference list" : "Category overview";
+    const summaryLead = isShallowReferenceSummary
+        ? "Scan exported effect lines and exact linked entries in a compact reference list."
+        : summaryEntry.descriptionLines[0];
+
     return (
         <article className="codex-detail codex-detail--summary">
-            <div className="codex-summaryDossier">
+            <div
+                className={`codex-summaryDossier ${isShallowReferenceSummary ? "codex-summaryDossier--reference" : ""}`}
+            >
                 <div className="codex-detail__metaRow">
                     <span className="codex-detail__kind">{summaryEntry.summaryLabel}</span>
-                    <span className="codex-detail__context">Category overview</span>
+                    <span className="codex-detail__context">{summaryContext}</span>
                 </div>
 
                 <div className="codex-summaryDossier__hero">
@@ -41,7 +52,7 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                         <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
                             {renderCodexLabel(summaryEntry.displayName)}
                         </h2>
-                        <p className="codex-detail__summaryLead">{summaryEntry.descriptionLines[0]}</p>
+                        <p className="codex-detail__summaryLead">{summaryLead}</p>
                     </div>
 
                     <div

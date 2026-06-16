@@ -152,6 +152,10 @@ describe("CodexPage", () => {
 
         expect(screen.getByLabelText("2 entries in view")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /all districts/i })).toBeInTheDocument();
+        const districtsSummary = screen.getByRole("heading", { name: "All Districts" })
+            .closest(".codex-summaryDossier") as HTMLElement;
+        expect(within(districtsSummary).getByText("Category overview")).toBeInTheDocument();
+        expect(within(districtsSummary).queryByText("Reference list")).not.toBeInTheDocument();
         const summaryList = screen.getByLabelText("Districts overview");
         expect(within(summaryList).getByRole("button", { name: /market square/i })).toBeInTheDocument();
         expect(within(summaryList).getByRole("button", { name: /bloom harbor/i })).toBeInTheDocument();
@@ -667,6 +671,12 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Resources" })).toBeInTheDocument();
+        const resourcesSummary = screen.getByRole("heading", { name: "All Resources" })
+            .closest(".codex-summaryDossier") as HTMLElement;
+        expect(within(resourcesSummary).getByText("Reference list")).toBeInTheDocument();
+        expect(within(resourcesSummary).getByText("Scan exported effect lines and exact linked entries in a compact reference list."))
+            .toBeInTheDocument();
+        expect(within(resourcesSummary).queryByText("Category overview")).not.toBeInTheDocument();
         const resourceOverview = screen.getByLabelText("Resources overview");
         expect(within(resourceOverview).getByText("Luxury")).toBeInTheDocument();
         expect(within(resourceOverview).queryByText("Luxury / Resource")).not.toBeInTheDocument();
@@ -684,6 +694,9 @@ describe("CodexPage", () => {
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /councilor effects 1/i }));
+        const councilorEffectSummary = screen.getByRole("heading", { name: "All Councilor Effects" })
+            .closest(".codex-summaryDossier") as HTMLElement;
+        expect(within(councilorEffectSummary).getByText("Reference list")).toBeInTheDocument();
         const councilorEffectOverview = await screen.findByLabelText("Councilor Effects overview");
         expect(within(councilorEffectOverview).getByText("Defense")).toBeInTheDocument();
         expect(within(councilorEffectOverview).queryByText("Defense / Councilor Effect")).not.toBeInTheDocument();
@@ -696,6 +709,9 @@ describe("CodexPage", () => {
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
             .getByRole("button", { name: /partner effects 1/i }));
+        const partnerEffectSummary = screen.getByRole("heading", { name: "All Partner Effects" })
+            .closest(".codex-summaryDossier") as HTMLElement;
+        expect(within(partnerEffectSummary).getByText("Reference list")).toBeInTheDocument();
         const partnerEffectOverview = await screen.findByLabelText("Partner Effects overview");
         expect(within(partnerEffectOverview).getByText("Hero")).toBeInTheDocument();
         expect(within(partnerEffectOverview).queryByText("Hero / Partner Effect")).not.toBeInTheDocument();
