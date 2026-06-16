@@ -14,7 +14,7 @@ export type ShallowReferenceLink = {
     prefix: string;
 };
 
-const SHALLOW_REFERENCE_KINDS = new Set(["resources", "counciloreffects", "partnereffects"]);
+const SHALLOW_REFERENCE_KINDS = new Set(["resources", "counciloreffects", "partnereffects", "traits"]);
 
 function normalizeKind(value: string | null | undefined): string {
     return (value ?? "").trim().toLowerCase();
@@ -57,6 +57,10 @@ function formatEffectContext(entry: CodexEntry): string {
     if (!/^(councilor effect|partner effect)$/i.test(kind)) return kind;
 
     return "";
+}
+
+function formatTraitContext(entry: CodexEntry): string {
+    return findFactValue(entry, "Category") || normalizeText(entry.category);
 }
 
 function sectionItems(entry: CodexEntry, title: string): CodexMetadataSectionItem[] {
@@ -126,6 +130,33 @@ function sourceLink(entry: CodexEntry, allEntries: readonly CodexEntry[]): Shall
         : null;
 }
 
+function relatedLinkByKind(
+    entry: CodexEntry,
+    entriesByKey: Record<string, CodexEntry>,
+    kind: string,
+    prefix: string
+): ShallowReferenceLink | null {
+    const relationshipKeys = [
+        ...(entry.publicContextKeys ?? []),
+        ...(entry.referenceKeys ?? []),
+    ];
+
+    for (const referenceKey of relationshipKeys) {
+        if (normalizeText(referenceKey) === normalizeText(entry.entryKey)) continue;
+
+        const relatedEntry = resolveCodexReference(referenceKey, { entriesByKey });
+        if (!relatedEntry || normalizeKind(relatedEntry.exportKind) !== normalizeKind(kind)) continue;
+
+        return {
+            label: getCodexEntryLabel(relatedEntry),
+            entry: relatedEntry,
+            prefix,
+        };
+    }
+
+    return null;
+}
+
 export function isShallowReferenceKind(kind: string | null | undefined): boolean {
     return SHALLOW_REFERENCE_KINDS.has(normalizeKind(kind));
 }
@@ -151,6 +182,16 @@ export function getCodexShallowReferencePreview(
             context: formatResourceContext(entry),
             effectLines: fallbackEffectLines(entry, fallbackPreview),
             links: primaryExtractorLinks(links),
+        };
+    }
+
+    if (kind === "traits") {
+        const minorFaction = relatedLinkByKind(entry, entriesByKey, "minorfactions", "Minor Faction");
+
+        return {
+            context: formatTraitContext(entry),
+            effectLines: sectionLines(entry, "Effects"),
+            links: minorFaction ? [minorFaction] : [],
         };
     }
 

@@ -44,6 +44,7 @@ Representative URLs:
 - `/codex?category=equipment&entry=Equipment_Accessory_01_Definition`
 - `/codex?category=councilors&entry=Notable_Elder_MinorFaction_Hydracorn`
 - `/codex?category=traits&entry=ProtectorateTrait_DaughterOfBor_Trait01`
+- `/codex?category=traits&entry=ProtectorateTrait_MangroveOfHarmony_Trait01`
 - `/codex?entry=ActionCostModifier_CutForest_Decrease_00`
 
 Observed:
@@ -66,6 +67,11 @@ Observed:
 - Narrow viewport has no horizontal overflow in sampled pages. Very large
   categories create long single-column result/summary lists; this is most
   painful for `statuses` and all-entry views, not for shallow reference lists.
+- Follow-up Trait QA found all 30 current Trait rows are Protectorate minor
+  faction references with exact Minor Faction refs, 28 have Effects, and the
+  old overview hid useful comparison value behind repeated
+  `Protectorate / Trait` text. `ProtectorateTrait_MangroveOfHarmony_Trait01`
+  remains thin and should not receive invented effect text.
 
 ## Classification
 
@@ -82,7 +88,7 @@ Observed:
 | `abilities` | mixed rich category | mechanics glossary / reference lookup | partially works | Keep current detail model; consider subtype browsing only if exported grouping/data quality improves. |
 | rich `abilities` | rich detail category | mechanics glossary | works well | Keep current model. |
 | thin `abilities` | searchable/linkable only in practice | relationship/link target | too thin because exporter data is missing | Do not enrich locally; exporter/editorial handoff. |
-| `traits` | rich detail category | reference lookup | partially works | Candidate for shallow reference list if product wants denser minor-faction trait comparison; defer until after higher-noise categories. |
+| `traits` | shallow reference list | reference lookup | works well for effect comparison; two rows remain exporter-thin | Keep shallow reference list with exact Minor Faction links; no invented effect text for thin rows. |
 | `tech` | rich detail category | high planning surface | works well | Keep current model with exact Unlock summaries only. |
 | `units` | rich detail category | high planning surface | works well | Keep current model. |
 | `heroes` | rich detail category | high planning surface | works well | Keep current model. |
@@ -105,11 +111,10 @@ Best suited for shallow reference lists now:
 - `resources`
 - `councilorEffects`
 - `partnerEffects`
+- `traits`
 
 Possible future shallow-list candidates:
 
-- `traits`, if the desired player task is comparing minor-faction trait effects
-  rather than reading individual trait dossiers.
 - Thin/facts-only subgroups inside `actions`, `abilities`, `statuses`,
   `districts`, and `improvements`, but only as a demotion/search treatment after
   product review. EWShop should not create a fake shallow list that hides
@@ -131,6 +136,7 @@ New presentation type needed:
 
 Owner: EWShop  
 Priority: P1  
+Status: completed in commit `b7ecc475`
 Player value: Players can tell that Resources, Councilor Effects, and Partner
 Effects are dense reference lists, not full strategy dossiers.
 
@@ -245,6 +251,7 @@ Validation:
 
 Owner: EWShop  
 Priority: P3  
+Status: completed in the current loop
 Player value: Minor-faction trait comparison may be faster as dense effect
 rows than as individual dossiers.
 
@@ -253,8 +260,8 @@ Evidence/examples:
 - `ProtectorateTrait_DaughterOfBor_Trait01`
 
 Proposed UI model:
-- Consider the existing shallow-reference row pattern for `traits` only if
-  product review confirms comparison is the main task.
+- Use the existing shallow-reference row pattern for `traits`, with exported
+  Effects lines and exact Minor Faction links.
 
 Acceptance criteria:
 - A product decision is documented before code changes.
@@ -266,8 +273,16 @@ Explicit non-goals:
 Validation:
 - Browser QA before/after if implemented.
 
-## Chosen Baseline Item
+## Completed EWShop Baseline Items
 
-Implement `EW-CAT-UX-001`. It is the smallest EWShop-owned improvement with
-clear value and low risk: the shallow row model already exists and works, but
-the category summary still uses generic "Category overview" wording.
+- `EW-CAT-UX-001`: completed in `b7ecc475`. Shallow category summaries now say
+  `Reference list`.
+- `EW-CAT-UX-005`: completed in the current loop. Traits now use shallow
+  reference summary rows with exact Minor Faction links.
+
+## Next Loop Guidance
+
+No further EWShop-owned implementation item is currently ready from this audit.
+Continue only from new browser evidence or new exporter data. The remaining
+active tickets are DB Exporter/editorial-owned: Status sub-kind/scope, Action
+purpose/availability context, and thin construction row content.

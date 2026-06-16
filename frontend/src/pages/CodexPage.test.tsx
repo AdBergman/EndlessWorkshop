@@ -529,7 +529,7 @@ describe("CodexPage", () => {
         expect(within(partnerDetail).getByText("Determination")).toBeInTheDocument();
     });
 
-    it("renders shallow reference category lists with exact resource and effect context", async () => {
+    it("renders shallow reference category lists with exact resource, effect, and trait context", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [
             {
@@ -648,6 +648,63 @@ describe("CodexPage", () => {
                 }],
                 publicContextKeys: ["PartnerEffect_Hydracorn_PartnerTrait01"],
             },
+            {
+                exportKind: "traits",
+                entryKey: "ProtectorateTrait_DaughterOfBor_Trait01",
+                displayName: "Fierce Independence",
+                category: "Protectorate",
+                kind: "Trait",
+                descriptionLines: [
+                    "+3 [Defense] Defense on Unit",
+                    "+1 [Defense] Defense per Pacified Villages under Protectorate on Unit",
+                    "Protectorate: Daughters of Bor",
+                ],
+                referenceKeys: ["MinorFaction_DaughterOfBor"],
+                facts: [
+                    { label: "Kind", value: "Trait" },
+                    { label: "Category", value: "Protectorate" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "+3 [Defense] Defense on Unit",
+                        "+1 [Defense] Defense per Pacified Villages under Protectorate on Unit",
+                    ],
+                }],
+                publicContextKeys: ["ProtectorateTrait_DaughterOfBor_Trait01", "MinorFaction_DaughterOfBor"],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "ProtectorateTrait_MangroveOfHarmony_Trait01",
+                displayName: "Precious Seedlings",
+                category: "Protectorate",
+                kind: "Trait",
+                descriptionLines: ["Protectorate: Mangrove of Harmony"],
+                referenceKeys: ["MinorFaction_MangroveOfHarmony"],
+                facts: [
+                    { label: "Kind", value: "Trait" },
+                    { label: "Category", value: "Protectorate" },
+                ],
+                publicContextKeys: ["ProtectorateTrait_MangroveOfHarmony_Trait01", "MinorFaction_MangroveOfHarmony"],
+            },
+            {
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_DaughterOfBor",
+                displayName: "Daughters of Bor",
+                category: "DaughterOfBor",
+                kind: "MinorFaction",
+                descriptionLines: ["Hostile minor faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "minorfactions",
+                entryKey: "MinorFaction_MangroveOfHarmony",
+                displayName: "Mangrove of Harmony",
+                category: "MangroveOfHarmony",
+                kind: "MinorFaction",
+                descriptionLines: ["Pacifist minor faction."],
+                referenceKeys: [],
+            },
         ];
 
         useCodexStore.setState({
@@ -721,6 +778,25 @@ describe("CodexPage", () => {
         expect(within(hopelessRomanticEffects).getByAltText("MovementPoints")).toBeInTheDocument();
         expect(within(partnerEffectOverview).getByRole("button", { name: /Source: Atea/i }))
             .toBeInTheDocument();
+
+        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+            .getByRole("button", { name: /traits 2/i }));
+        const traitsSummary = screen.getByRole("heading", { name: "All Traits" })
+            .closest(".codex-summaryDossier") as HTMLElement;
+        expect(within(traitsSummary).getByText("Reference list")).toBeInTheDocument();
+        const traitsOverview = await screen.findByLabelText("Traits overview");
+        expect(within(traitsOverview).getAllByText("Protectorate")).toHaveLength(2);
+        const fierceIndependenceEffects = within(traitsOverview).getByLabelText("Fierce Independence effects");
+        expect(fierceIndependenceEffects).toHaveTextContent("+3 Defense on Unit");
+        expect(fierceIndependenceEffects)
+            .toHaveTextContent("+1 Defense per Pacified Villages under Protectorate on Unit");
+        expect(within(fierceIndependenceEffects).getAllByAltText("Defense")).toHaveLength(2);
+        expect(within(traitsOverview).getByRole("button", { name: /Minor Faction: Daughters of Bor/i }))
+            .toBeInTheDocument();
+        expect(within(traitsOverview).getByRole("button", { name: /Minor Faction: Mangrove of Harmony/i }))
+            .toBeInTheDocument();
+        expect(within(traitsOverview).queryByLabelText("Precious Seedlings effects")).not.toBeInTheDocument();
+        expect(within(traitsOverview).queryByText("Protectorate: Mangrove of Harmony")).not.toBeInTheDocument();
     });
 
     it("renders status details while keeping related modifiers hidden from navigation but linkable", async () => {
