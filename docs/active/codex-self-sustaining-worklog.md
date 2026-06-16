@@ -42,7 +42,7 @@ story so future sessions can continue without reconstructing chat history.
   - NEXT-003 remains open because it concerns detail-page context labels, not
     shallow list row labels.
 - Commit hash if committed:
-  - `be1b3627`
+  - `3c3062ae`
 - Next recommended action:
   - Continue with `EW-CODEX-NEXT-004` Quest Strategy Codex Reference QA unless
     validation of this docs reconciliation fails.
