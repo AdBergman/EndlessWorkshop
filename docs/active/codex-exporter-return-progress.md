@@ -100,7 +100,7 @@ QA notes:
 - No generic Codex `quests` exportKind is present in the current local Codex
   imports; Quest refs in the return bundle should be validated through Quest
   Explorer data/workflows, not Codex category browser QA.
-- Remaining risk: the bonuses Codex import still reports two failed rows during
-  local startup import. No player-visible missing page was identified in this
-  QA pass, but the failed-row detail should be checked if dead-ref diagnostics
-  point at missing bonus/status/modifier entries.
+- Follow-up complete: the bonuses Codex import failed-row count comes from two
+  deprecated placeholder bonus entries with display name `[DEPRECATED]`. No
+  player-visible missing page was identified; this remains exporter/editorial
+  cleanup unless dead-ref diagnostics prove a missing public target.

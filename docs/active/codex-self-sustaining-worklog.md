@@ -15,14 +15,14 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX | completed | Commit `5f695f5b`; Tech unlock summary helper/component/tests |
 | `EW-CODEX-NEXT-002` - Resource Top-Level Category Treatment | completed | Commits `c22a2ff8`, `5396e67e`, `0bab089d`; Resources, Councilor Effects, and Partner Effects are top-level shallow reference categories |
 | `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
-| `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | planned | Remaining risk from RET QA |
+| `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | completed | Current startup import repro identified two deprecated placeholder bonus rows rejected by display-name normalization |
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | planned | Still visible on detail pages; shallow row labels are cleaned but detail context labels remain separate |
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 
 - Story ID/title: Self-sustaining loop bootstrap / active story reconciliation.
 - Start time/date: 2026-06-16 08:37 CEST.
-- Current status: in progress.
+- Current status: completed.
 - Evidence used:
   - `git status --short` clean at start.
   - Recent commits: `ae9cfce7`, `5f695f5b`, `c22a2ff8`, `5396e67e`, `0bab089d`.
@@ -42,7 +42,7 @@ story so future sessions can continue without reconstructing chat history.
   - NEXT-003 remains open because it concerns detail-page context labels, not
     shallow list row labels.
 - Commit hash if committed:
-  - `3c3062ae`
+  - `3c90b833`
 - Next recommended action:
   - Continue with `EW-CODEX-NEXT-004` Quest Strategy Codex Reference QA unless
     validation of this docs reconciliation fails.
@@ -76,7 +76,45 @@ story so future sessions can continue without reconstructing chat history.
   - `Bonus` reference rows remain unresolved and move to
     `EW-CODEX-NEXT-006`; no local guessing was added.
 - Commit hash if committed:
+  - `3c3062ae` for the code/test change.
+  - `19a9b1d0` for the worklog commit-hash correction.
+- Next recommended action:
+  - Continue with `EW-CODEX-NEXT-006` bonuses failed-row investigation.
+
+## 2026-06-16 - EW-CODEX-NEXT-006 Bonuses Import Failed Rows
+
+- Story ID/title: `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows.
+- Start time/date: 2026-06-16 08:48 CEST.
+- Current status: completed.
+- Evidence used:
+  - Current local startup import repro:
+    `ewshop_bonuses_codex_export_0.82.json` reports `received=587`,
+    `inserted=583`, `failed=2`, while the overall local startup import
+    finishes with `0 failed`.
+  - `CodexImportAdminFacadeImpl` reports failed rows only when DTO rows cannot
+    be mapped into `CodexImportSnapshot` instances.
+  - `CodexDisplayNameNormalizer` strips leading bracket-token prefixes from
+    Codex display names and rejects names that become empty.
+  - Local bonuses JSON contains two rows whose display names are exactly
+    `[DEPRECATED]`: `ConstructibleCostModifier_UnitCostReduction03` and
+    `ConstructibleCostModifier_UnitMoneyCostReduction01`.
+- Changes made:
+  - No importer or UI change. Importing deprecated placeholder bonus rows would
+    add low-value Codex noise and is not a player-facing EWShop improvement.
+  - Updated active docs to classify this as exporter/editorial cleanup rather
+    than an EWShop blocker.
+- Tests/diagnostics/browser QA run:
+  - Restarted the local Spring Boot app with local imports enabled to reproduce
+    the current startup import summary.
+  - Read-only JSON checks against `local-imports/codex/ewshop_bonuses_codex_export_0.82.json`.
+- Review notes:
+  - No release-safety gate changes were made.
+  - No hidden/unreleased names were exposed.
+  - No exact public related link was proven missing from player-facing Codex
+    pages.
+- Commit hash if committed:
   - Pending.
 - Next recommended action:
-  - Run final validation and commit, then continue with
-    `EW-CODEX-NEXT-006` bonuses failed-row investigation.
+  - Continue with `EW-CODEX-NEXT-003` effect detail context-label cleanup, unless
+    a human prefers to stop Codex work and hand this deprecated-row note back to
+    DB Exporter/editorial first.

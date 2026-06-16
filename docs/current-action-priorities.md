@@ -50,10 +50,11 @@ Known post-return decisions and gaps:
   thin where no canonical public mechanics source exists.
 - `CouncilorEffectDefinition` gain values were not exported because they need
   public-safety review.
-- Bonuses Codex local startup import still reports two failed rows. No visible
-  missing player-facing page was found in the bounded QA pass, but this should
-  be revisited if dead-ref diagnostics point to missing bonus/status/modifier
-  entries.
+- Bonuses Codex local startup import still reports two failed rows. NEXT-006
+  traced them to deprecated placeholder bonus entries whose display names are
+  exactly `[DEPRECATED]`; importing them would add Codex noise, so this is an
+  exporter/editorial cleanup item unless future dead-ref diagnostics prove a
+  missing public target.
 
 Actionable next items:
 

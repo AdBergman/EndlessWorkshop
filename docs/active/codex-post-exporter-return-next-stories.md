@@ -20,10 +20,10 @@ diagnostics, or browser QA reproduce the problem.
 2. Done - `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX
 3. Done - `EW-CODEX-NEXT-002` - Decide Resource Top-Level Category Treatment
 4. Done - `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
-5. Next - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
-6. Then - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
+5. Done - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
+6. Next - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
 
-Recommended next implementation story: `EW-CODEX-NEXT-006`.
+Recommended next implementation story: `EW-CODEX-NEXT-003`.
 
 Post-plan updates:
 
@@ -35,6 +35,10 @@ Post-plan updates:
 - The effect label cleanup already done for shallow list rows does not complete
   `EW-CODEX-NEXT-003`; that story is specifically about effect detail-page
   context labels.
+- `EW-CODEX-NEXT-006` found that the two bonuses import failed rows are
+  deprecated placeholder entries with display name `[DEPRECATED]`. No EWShop
+  code change was made because importing those rows would add low-value Codex
+  noise.
 
 ## EW-CODEX-NEXT-001 - Review Tech Unlock Summary UX
 
@@ -324,6 +328,7 @@ message.
 
 Owner: EWShop backend  
 Priority: P2
+Status: completed
 
 Why it matters to a 4X player:
 The local startup import reports two failed bonus rows. If those rows are public
@@ -339,6 +344,18 @@ Acceptance criteria:
 - No hidden names are printed.
 - Fix is made only if the issue is public, low-risk, and not a release-safety
   gate change.
+
+Result:
+- Current startup import reproduces the bonuses line as `received=587`,
+  `inserted=583`, `failed=2`, while the overall local import still finishes
+  with `0 failed`.
+- The two rejected rows are deprecated placeholder bonus entries:
+  `ConstructibleCostModifier_UnitCostReduction03` and
+  `ConstructibleCostModifier_UnitMoneyCostReduction01`.
+- Their display names are exactly `[DEPRECATED]`; EWShop's display-name
+  normalizer strips bracket-token prefixes, leaving no player-facing name.
+- No EWShop importer/UI fix was made. These rows should remain non-player
+  facing unless DB Exporter/editorial gives them real public names and value.
 
 Validation/browser targets:
 - Targeted backend import test if code changes.

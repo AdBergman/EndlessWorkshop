@@ -119,14 +119,21 @@ Expected exporter/editorial fix:
 ### 5. Investigate Bonuses Import Failed-Row Risk
 
 Evidence:
-- EWShop local startup import still reports two failed bonus Codex rows.
-- RET QA found no player-visible missing page, so this is a risk, not a proven
-  broken public surface.
+- EWShop local startup import still reports two failed bonus Codex rows:
+  `received=587`, `inserted=583`, `failed=2`.
+- NEXT-006 traced the rejected rows to deprecated placeholder bonus entries:
+  `ConstructibleCostModifier_UnitCostReduction03` and
+  `ConstructibleCostModifier_UnitMoneyCostReduction01`.
+- Both rows have display name `[DEPRECATED]`. EWShop strips leading bracket
+  tokens from Codex display names, so these rows have no player-facing name
+  after normalization.
+- RET QA found no player-visible missing page, so this is not a proven broken
+  public surface.
 
 Expected follow-up:
-- If exporter logs can safely identify the failing public row keys and failure
-  reason, include that in the next return note.
-- Do not include hidden/unreleased names in shared diagnostics.
+- DB Exporter/editorial should either omit deprecated placeholder bonus rows
+  from public Codex exports or provide real player-facing names and context if
+  they are still useful.
 - EWShop should only treat this as player-facing if dead-ref diagnostics or
   browser QA reveal a missing public target.
 
