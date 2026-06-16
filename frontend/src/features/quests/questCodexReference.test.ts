@@ -127,6 +127,8 @@ describe("Quest Codex reference display metadata", () => {
         ["Improvement", "DistrictImprovement_Bridge_00", "improvements"],
         ["Action", "ActionTypeBuildBridge", "actions"],
         ["ActionType", "ActionTypeBuildDam", "actions"],
+        ["ArmyAction", "ActionTypeBuildBridge", "actions"],
+        ["ArmyActionType", "ActionTypeBuildTemporaryBridge", "actions"],
         ["FactionActionType", "FactionActionTypeMukag_MonsoonFestival", "actions"],
         ["EmpireActionType", "EmpireActionTypeMukag_Light01", "actions"],
         ["DiplomaticTreaty", "Treaty_VisionExchange", "diplomatictreaties"],

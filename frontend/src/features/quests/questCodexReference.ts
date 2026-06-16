@@ -15,6 +15,8 @@ export type QuestCodexReferenceSource = {
 const QUEST_REFERENCE_KIND_TO_CODEX_EXPORT_KINDS: Record<string, string[]> = {
     action: ["actions"],
     actiontype: ["actions"],
+    armyaction: ["actions"],
+    armyactiontype: ["actions"],
     declaration: ["diplomatictreaties"],
     district: ["districts"],
     equipment: ["equipment"],

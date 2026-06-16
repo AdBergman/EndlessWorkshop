@@ -19,11 +19,11 @@ diagnostics, or browser QA reproduce the problem.
 1. Done - `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics
 2. Done - `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX
 3. Done - `EW-CODEX-NEXT-002` - Decide Resource Top-Level Category Treatment
-4. Next - `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
-5. Then - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
+4. Done - `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA
+5. Next - `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows
 6. Then - `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels
 
-Recommended next implementation story: `EW-CODEX-NEXT-004`.
+Recommended next implementation story: `EW-CODEX-NEXT-006`.
 
 Post-plan updates:
 
@@ -203,6 +203,7 @@ effect path, and git diff --check.
 
 Owner: EWShop frontend/product  
 Priority: P1
+Status: completed
 
 Why it matters to a 4X player:
 Exporter quest refs are not visible as a generic Codex `quests` category in
@@ -243,6 +244,18 @@ Validation:
 Run relevant Quest/Codex tests, browser QA Strategy examples, and git diff
 --check.
 ```
+
+Completion evidence:
+
+- Browser QA on `/quests/FactionQuest_Mukag_Chapter02_Step01?mode=strategy`
+  found exact `ArmyAction` metadata for `ActionTypeBuildBridge` stayed plain
+  before the fix.
+- The Quest Codex resolver now maps exact `ArmyAction` / `ArmyActionType`
+  refs to Codex Actions.
+- Build Bridge, Hydromatic Laboratory, and Mukag Monsoon Festival all expose
+  exact Codex open links after the fix.
+- `Bonus` references remain unresolved and are tracked by
+  `EW-CODEX-NEXT-006`.
 
 ## EW-CODEX-NEXT-005 - Exporter Feedback Handoff From Current Diagnostics
 

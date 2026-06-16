@@ -690,7 +690,7 @@ describe("StrategyDossier", () => {
                 requirementLines: ["Use action: Build Bridge."],
                 requirementDetails: [{
                     ...requirementDisplaysFromText(["Use action: Build Bridge."])[0]!,
-                    referenceKind: "ActionType",
+                    referenceKind: "ArmyAction",
                     referenceKey: "ActionTypeBuildBridge",
                     referenceDisplayName: "Build Bridge",
                 }],

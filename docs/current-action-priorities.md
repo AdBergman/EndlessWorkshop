@@ -141,12 +141,15 @@ Jira-style status:
   rewards, and no fake links.
 - `QX-CODEX-005`: Done for desktop hover/focus - compact Codex previews exist
   for resolved Strategy references.
-- `QX-CODEX-006`: P1 - browser review of current Strategy Codex link UX,
-  including hover/focus behavior inside clickable decision cards.
+- `QX-CODEX-006`: Done - browser review of current Strategy Codex link UX
+  found and fixed exact `ArmyAction` refs staying plain; `Build Bridge`,
+  Hydromatic Laboratory, and Mukag Monsoon Festival now expose Codex links in
+  the checked Strategy page.
 - `QX-CODEX-007`: P1 - mobile/tap accessibility hardening for Codex previews
   if the current hover/focus behavior is not sufficient.
-- `QX-CODEX-008`: P1 - verify resolver kind coverage with real data,
-  especially `MinorFaction` and other less common reference kinds.
+- `QX-CODEX-008`: P1 - verify resolver kind coverage with future real data,
+  especially `MinorFaction` and other less common reference kinds not present
+  in the current quest export.
 - `QX-CODEX-009`: Done for current Strategy rows - reward SVG markers use known
   economy/strategic resource icons and exact Codex entry icons where available.
 - `QX-CODEX-010`: Future - consider explicit exporter-provided reward icon or

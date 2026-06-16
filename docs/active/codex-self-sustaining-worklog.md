@@ -14,7 +14,7 @@ story so future sessions can continue without reconstructing chat history.
 | `EW-CODEX-NEXT-005` - Exporter Feedback Handoff From Current Diagnostics | completed | Commit `ae9cfce7`; `docs/active/codex-post-exporter-return-editorial-handoff.md` |
 | `EW-CODEX-NEXT-001` - Review Tech Unlock Summary UX | completed | Commit `5f695f5b`; Tech unlock summary helper/component/tests |
 | `EW-CODEX-NEXT-002` - Resource Top-Level Category Treatment | completed | Commits `c22a2ff8`, `5396e67e`, `0bab089d`; Resources, Councilor Effects, and Partner Effects are top-level shallow reference categories |
-| `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | planned | Current next story in recommended order after completed work |
+| `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA | completed | Browser QA found and fixed missing exact `ArmyAction` -> Actions resolution |
 | `EW-CODEX-NEXT-006` - Investigate Bonuses Import Failed Rows | planned | Remaining risk from RET QA |
 | `EW-CODEX-NEXT-003` - Clean Effect Detail Context Labels | planned | Still visible on detail pages; shallow row labels are cleaned but detail context labels remain separate |
 
@@ -42,7 +42,41 @@ story so future sessions can continue without reconstructing chat history.
   - NEXT-003 remains open because it concerns detail-page context labels, not
     shallow list row labels.
 - Commit hash if committed:
-  - Pending.
+  - `be1b3627`
 - Next recommended action:
   - Continue with `EW-CODEX-NEXT-004` Quest Strategy Codex Reference QA unless
     validation of this docs reconciliation fails.
+
+## 2026-06-16 - EW-CODEX-NEXT-004 Quest Strategy Codex Reference QA
+
+- Story ID/title: `EW-CODEX-NEXT-004` - Quest Strategy Codex Reference QA.
+- Start time/date: 2026-06-16 08:37 CEST.
+- Current status: completed.
+- Evidence used:
+  - `docs/active/codex-post-exporter-return-next-stories.md`.
+  - `docs/current-action-priorities.md` P1 Quest Codex link guidance.
+  - Existing Quest Strategy Codex reference tests and current browser QA.
+  - Current local quest export has exact refs for `ArmyAction`,
+    `FactionAction`, `Tech`, and unresolved `Bonus` rows.
+- Changes made:
+  - Added exact `ArmyAction` / `ArmyActionType` mapping to Codex Actions in
+    the Quest Codex reference resolver.
+  - Added resolver and Strategy Dossier tests for the exact ArmyAction path.
+- Tests/diagnostics/browser QA run:
+  - `npm test -- --run src/features/quests/questCodexReference.test.ts src/components/Quests/StrategyDossier.test.tsx`
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - Browser QA:
+    `/quests/FactionQuest_Mukag_Chapter02_Step01?mode=strategy`.
+    Before fix, `Use Build Bridge twice` stayed plain while exact Tech and
+    FactionAction refs linked. After fix, Build Bridge, Hydromatic Laboratory,
+    and Mukag Monsoon Festival all expose exact Codex open links.
+- Review notes:
+  - Guardrails: exact exported metadata only; no Lore expansion; no inferred
+    links; no Quest Explorer redesign.
+  - `Bonus` reference rows remain unresolved and move to
+    `EW-CODEX-NEXT-006`; no local guessing was added.
+- Commit hash if committed:
+  - Pending.
+- Next recommended action:
+  - Run final validation and commit, then continue with
+    `EW-CODEX-NEXT-006` bonuses failed-row investigation.
