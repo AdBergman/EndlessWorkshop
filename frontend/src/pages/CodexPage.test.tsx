@@ -1092,6 +1092,154 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Quickfooted");
     });
 
+    it("previews exact Tech unlock targets while keeping unresolved unlocks plain and Related Entries available", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "tech",
+                entryKey: "Aspect_Technology_00",
+                displayName: "Asceticism",
+                kind: "Technology",
+                category: "Development",
+                descriptionLines: [],
+                referenceKeys: [
+                    "Faction_Aspect",
+                    "Aspect_DistrictImprovement_01",
+                    "Aspect_DistrictImprovement_RelatedOnly",
+                ],
+                facts: [
+                    { label: "Kind", value: "Technology" },
+                    { label: "Tier", value: "1" },
+                    { label: "Faction", value: "Aspect" },
+                    { label: "Era", value: "1" },
+                    { label: "Quadrant", value: "Development" },
+                ],
+                sections: [
+                    {
+                        title: "Unlocks",
+                        items: [
+                            {
+                                label: "Ascetic Existence",
+                                referenceKey: "Aspect_DistrictImprovement_01",
+                                facts: [{ label: "Unlock type", value: "Improvement unlock" }],
+                            },
+                            {
+                                label: "Text-only Observatory",
+                                facts: [{ label: "Unlock type", value: "Improvement unlock" }],
+                            },
+                            {
+                                label: "Missing Improvement",
+                                referenceKey: "Aspect_DistrictImprovement_Missing",
+                                facts: [{ label: "Unlock type", value: "Improvement unlock" }],
+                            },
+                        ],
+                    },
+                    {
+                        title: "Effects",
+                        lines: ["+10 [DustColored] Dust on Capital"],
+                    },
+                ],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Aspect_DistrictImprovement_01",
+                displayName: "Ascetic Existence",
+                category: "Industry",
+                kind: "Improvement",
+                descriptionLines: ["A focused capital improvement."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Industry" },
+                    { label: "Kind", value: "Improvement" },
+                ],
+                sections: [{ title: "Effects", lines: ["+10 [DustColored] Dust on Capital"] }],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Aspect_DistrictImprovement_RelatedOnly",
+                displayName: "Related Workshop",
+                category: "Industry",
+                kind: "Improvement",
+                descriptionLines: ["Related only."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Industry" },
+                    { label: "Kind", value: "Improvement" },
+                ],
+                sections: [{ title: "Effects", lines: ["+2 [IndustryColored] Industry"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Aspects",
+                category: "Aspects",
+                kind: "Faction",
+                descriptionLines: ["Faction overview."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                tech: entries.filter((entry) => entry.exportKind === "tech"),
+                improvements: entries.filter((entry) => entry.exportKind === "improvements"),
+                factions: entries.filter((entry) => entry.exportKind === "factions"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech&entry=Aspect_Technology_00"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Asceticism" })).toBeInTheDocument();
+
+        const unlockSummary = screen.getByRole("button", {
+            name: "Ascetic Existence Industry / Improvement +10 Dust on Capital",
+        });
+        expect(unlockSummary).toHaveClass("codex-unlockTarget");
+        expect(unlockSummary).toHaveTextContent("Ascetic Existence");
+        expect(unlockSummary).toHaveTextContent("Industry / Improvement");
+        expect(unlockSummary).toHaveTextContent("+10 Dust on Capital");
+        expect(unlockSummary).not.toHaveTextContent("[DustColored]");
+        unlockSummary.focus();
+        expect(unlockSummary).toHaveFocus();
+
+        expect(screen.getByRole("heading", { name: "Text-only Observatory" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /text-only observatory/i })).not.toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Missing Improvement" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /missing improvement/i })).not.toBeInTheDocument();
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", {
+            name: /ascetic existence improvements/i,
+        })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", {
+            name: /related workshop improvements/i,
+        })).toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /aspects factions/i })).toBeInTheDocument();
+
+        await user.click(unlockSummary);
+        expect(await screen.findByRole("heading", { name: "Ascetic Existence" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Aspect_DistrictImprovement_01");
+    });
+
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
         const entries: CodexEntry[] = [
             {

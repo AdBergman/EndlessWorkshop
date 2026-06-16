@@ -13,12 +13,17 @@ import {
 import {
     findPopulationThresholdTargetSummary,
 } from "@/lib/codex/codexPopulationThresholdTargets";
+import {
+    buildTechUnlockSummary,
+    isTechUnlockSummarySection,
+} from "@/lib/codex/codexTechUnlockSummaries";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
 import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
 import CodexPopulationThresholdTargetSummary from "./CodexPopulationThresholdTargetSummary";
+import CodexTechUnlockSummary from "./CodexTechUnlockSummary";
 
 type Props = {
     entry: CodexEntry;
@@ -119,6 +124,9 @@ function StructuredSectionItem({
     const grantedAbilityPreview = isGrantedAbilityPreviewSection(entry, sectionLabel)
         ? buildGrantedAbilityPreview(item, relatedEntries)
         : null;
+    const techUnlockSummary = isTechUnlockSummarySection(entry, sectionLabel)
+        ? buildTechUnlockSummary(item, relatedEntries)
+        : null;
 
     if (grantedAbilityPreview && onSelectInlineEntry) {
         return (
@@ -157,6 +165,13 @@ function StructuredSectionItem({
                         />
                     ))}
                 </div>
+            ) : null}
+
+            {techUnlockSummary && onSelectInlineEntry ? (
+                <CodexTechUnlockSummary
+                    summary={techUnlockSummary}
+                    onSelect={onSelectInlineEntry}
+                />
             ) : null}
         </article>
     );
