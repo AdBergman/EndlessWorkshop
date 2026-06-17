@@ -47,7 +47,8 @@ const PREFERRED_KIND_ORDER = [
     "traits",
     "units",
 ];
-const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "modifiers"]);
+const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "extractors", "modifiers"]);
+const VALID_HIDDEN_ROUTE_KINDS = new Set(["extractors"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects"]);
 
 type SelectionIntent = "passive" | "related";
@@ -58,6 +59,10 @@ function normalizeCodexKind(kind: string): string {
 
 function supportsFullWidthReferenceOverview(kind: string): boolean {
     return FULL_WIDTH_REFERENCE_OVERVIEW_KINDS.has(normalizeCodexKind(kind));
+}
+
+function isVisibleTopLevelKind(kind: string): boolean {
+    return !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind));
 }
 
 export default function CodexPage() {
@@ -101,10 +106,12 @@ export default function CodexPage() {
             return acc;
         }, new Map<string, number>());
 
-        const knownKinds = PREFERRED_KIND_ORDER.filter((kind) => kindCounts.has(kind));
+        const knownKinds = PREFERRED_KIND_ORDER
+            .filter((kind) => kindCounts.has(kind))
+            .filter(isVisibleTopLevelKind);
         const extraKinds = Array.from(kindCounts.keys())
             .filter((kind) => !PREFERRED_KIND_ORDER.includes(kind))
-            .filter((kind) => !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind)))
+            .filter(isVisibleTopLevelKind)
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];
@@ -324,11 +331,16 @@ export default function CodexPage() {
         if (loading) return;
         if (activeKind === ALL_CODEX_KIND) return;
 
-        const filterStillExists = filterOptions.some((option) => option.kind === activeKind);
+        const filterStillExists =
+            filterOptions.some((option) => option.kind === activeKind) ||
+            (
+                VALID_HIDDEN_ROUTE_KINDS.has(activeKind) &&
+                entries.some((entry) => normalizeCodexKind(entry.exportKind) === activeKind)
+            );
         if (!filterStillExists) {
             updateSelectedEntry(null, { category: null, replace: true });
         }
-    }, [activeKind, filterOptions, loading, updateSelectedEntry]);
+    }, [activeKind, entries, filterOptions, loading, updateSelectedEntry]);
 
     useEffect(() => {
         if (loading) return;

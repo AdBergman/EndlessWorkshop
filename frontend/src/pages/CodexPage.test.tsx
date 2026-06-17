@@ -254,7 +254,6 @@ describe("CodexPage", () => {
             "Councilor Effects",
             "Partner Effects",
             "Districts",
-            "Extractors",
             "Resources",
             "Equipment",
             "Factions",
@@ -270,6 +269,7 @@ describe("CodexPage", () => {
             "Units",
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
+        expect(categoryLabels).not.toContain("Extractors");
     });
 
     it("renders all visible categories in a wrapping category shelf on category pages", async () => {
@@ -337,7 +337,6 @@ describe("CodexPage", () => {
             "Councilor Effects",
             "Partner Effects",
             "Districts",
-            "Extractors",
             "Resources",
             "Equipment",
             "Factions",
@@ -353,6 +352,7 @@ describe("CodexPage", () => {
             "Units",
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
+        expect(categoryLabels).not.toContain("Extractors");
     });
 
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
@@ -636,7 +636,7 @@ describe("CodexPage", () => {
         }
     });
 
-    it("treats extractors as their own codex category instead of counting them as districts", async () => {
+    it("keeps extractors as hidden top-level data instead of visible category cards", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "districts",
@@ -678,8 +678,54 @@ describe("CodexPage", () => {
 
         const kindIndex = await screen.findByLabelText("Codex category index");
         expect(within(kindIndex).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
-        expect(within(kindIndex).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
-        expect(screen.getByText("Resource extraction districts and upgrades.")).toBeInTheDocument();
+        expect(within(kindIndex).queryByRole("button", { name: /extractors 1/i })).not.toBeInTheDocument();
+        expect(screen.queryByText("Resource extraction districts and upgrades.")).not.toBeInTheDocument();
+    });
+
+    it("keeps direct extractor routes available without showing Extractors in navigation", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Luxury01",
+                displayName: "Klax",
+                descriptionLines: ["Luxury resource."],
+                referenceKeys: ["Extractor_Luxury01_Tier2"],
+            },
+            {
+                exportKind: "extractors",
+                entryKey: "Extractor_Luxury01_Tier2",
+                displayName: "Advanced Klax Extractor",
+                category: "Extractors",
+                kind: "District",
+                descriptionLines: ["+2 [Luxury01] Klax per District Level"],
+                referenceKeys: ["Resource_Luxury01"],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                resources: entries.filter((entry) => entry.exportKind === "resources"),
+                extractors: entries.filter((entry) => entry.exportKind === "extractors"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=extractors&entry=Extractor_Luxury01_Tier2"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Advanced Klax Extractor" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /extractors/i })).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
     });
 
     it("shows a synthetic kind summary row and summary detail when filtering by kind", async () => {
