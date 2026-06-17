@@ -65,6 +65,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
+        expect(screen.getByRole("heading", { level: 2, name: "Encyclopedia" })).toBeInTheDocument();
         expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Codex Overview" })).not.toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex encyclopedia statistics")).getByText("categories")).toBeInTheDocument();
@@ -178,8 +179,127 @@ describe("CodexPage", () => {
         expect(categoryLabels).not.toContain("Modifiers");
     });
 
+    it("renders all visible categories in a wrapping category shelf on category pages", async () => {
+        seedCodexEntries([
+            { exportKind: "units", entryKey: "Unit_A", displayName: "Unit A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "statuses", entryKey: "Status_A", displayName: "Status A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "equipment", entryKey: "Equipment_A", displayName: "Equipment A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "tech", entryKey: "Tech_A", displayName: "Tech A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "districts", entryKey: "District_A", displayName: "District A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "improvements", entryKey: "Improvement_A", displayName: "Improvement A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "resources", entryKey: "Resource_A", displayName: "Resource A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "extractors", entryKey: "Extractor_A", displayName: "Extractor A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "actions", entryKey: "Action_A", displayName: "Action A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "factions", entryKey: "Faction_A", displayName: "Faction A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "minorFactions", entryKey: "MinorFaction_A", displayName: "Minor Faction A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "populations", entryKey: "Population_A", displayName: "Population A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "heroes", entryKey: "Hero_A", displayName: "Hero A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "councilors", entryKey: "Councilor_A", displayName: "Councilor A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "traits", entryKey: "Trait_A", displayName: "Trait A", descriptionLines: [], referenceKeys: [] },
+            {
+                exportKind: "diplomaticTreaties",
+                entryKey: "Treaty_A",
+                displayName: "Treaty A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            { exportKind: "quests", entryKey: "Quest_A", displayName: "Quest A", descriptionLines: [], referenceKeys: [] },
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_A",
+                displayName: "Councilor Effect A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_A",
+                displayName: "Partner Effect A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            { exportKind: "modifiers", entryKey: "Modifier_A", displayName: "Modifier A", descriptionLines: [], referenceKeys: [] },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "All Tech" });
+        const toolbar = getCategoryToolbar();
+        expect(toolbar).toHaveClass("codex-categoryShelf__chips--wrap");
+        const categoryLabels = within(toolbar).getAllByRole("button")
+            .map((button) => button.querySelector("span:not(.codex-kindFilter__count)")?.textContent?.trim());
+
+        expect(categoryLabels).toEqual([
+            "All",
+            "Abilities",
+            "Actions",
+            "Councilors",
+            "Councilor Effects",
+            "Partner Effects",
+            "Districts",
+            "Extractors",
+            "Resources",
+            "Equipment",
+            "Factions",
+            "Diplomatic Treaties",
+            "Heroes",
+            "Improvements",
+            "Minor Factions",
+            "Populations",
+            "Quests",
+            "Statuses",
+            "Tech",
+            "Traits",
+            "Units",
+        ]);
+        expect(categoryLabels).not.toContain("Modifiers");
+    });
+
+    it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            { exportKind: "tech", entryKey: "Tech_A", displayName: "Tech A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "actions", entryKey: "Action_A", displayName: "Action A", descriptionLines: [], referenceKeys: [] },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        const toolbar = getCategoryToolbar();
+        const allButton = within(toolbar).getByRole("button", { name: /all/i });
+        expect(allButton).toHaveAttribute("aria-pressed", "false");
+
+        await user.click(allButton);
+
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex");
+        expect(screen.queryByRole("toolbar", { name: /filter codex by category/i })).not.toBeInTheDocument();
+    });
+
     it("highlights category chips for category deep links", async () => {
         seedCodexEntries([
+            { exportKind: "actions", entryKey: "Action_A", displayName: "Action A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "equipment", entryKey: "Equipment_A", displayName: "Equipment A", descriptionLines: [], referenceKeys: [] },
             {
@@ -200,6 +320,10 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Partner Effects" })).toBeInTheDocument();
+        const partnerHeader = document.querySelector(".codex-header") as HTMLElement;
+        expect(partnerHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
+            .toHaveAttribute("aria-pressed", "false");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects/i }))
             .toHaveAttribute("aria-pressed", "true");
 
@@ -214,7 +338,29 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Equipment" })).toBeInTheDocument();
+        const equipmentHeader = document.querySelector(".codex-header") as HTMLElement;
+        expect(equipmentHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
+            .toHaveAttribute("aria-pressed", "false");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /equipment/i }))
+            .toHaveAttribute("aria-pressed", "true");
+
+        cleanup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Actions" })).toBeInTheDocument();
+        const actionsHeader = document.querySelector(".codex-header") as HTMLElement;
+        expect(actionsHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
+            .toHaveAttribute("aria-pressed", "false");
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /actions/i }))
             .toHaveAttribute("aria-pressed", "true");
     });
 
@@ -238,7 +384,12 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        const codexHeader = document.querySelector(".codex-header") as HTMLElement;
+        expect(codexHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
+        expect(within(codexHeader).queryByRole("heading", { name: "Tech" })).not.toBeInTheDocument();
         expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
+            .toHaveAttribute("aria-pressed", "false");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /tech/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(screen.queryByRole("heading", { name: "Encyclopedia Index" })).not.toBeInTheDocument();
@@ -602,10 +753,10 @@ describe("CodexPage", () => {
         await user.clear(input);
         await user.type(input, "Klax");
 
-        const searchSuggestions = await screen.findByRole("listbox");
-        expect(within(searchSuggestions).getByText("Klax")).toBeInTheDocument();
-        expect(within(searchSuggestions).getByText("Resources")).toBeInTheDocument();
-        expect(searchSuggestions).toHaveTextContent("Luxury / Resource");
+        expect(input).toHaveAttribute("aria-autocomplete", "none");
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
+        expect(await within(resultsPane).findByRole("button", { name: /klax resources/i })).toBeInTheDocument();
     });
 
     it("cleans technical effect context labels on detail pages without rewriting mechanics", async () => {
@@ -3942,6 +4093,10 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        const codexHeader = document.querySelector(".codex-header") as HTMLElement;
+        expect(codexHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
+        expect(within(codexHeader).queryByRole("heading", { name: "Actions" })).not.toBeInTheDocument();
+        expect(within(codexHeader).queryByRole("heading", { name: "Build Bridge" })).not.toBeInTheDocument();
         expect(screen.getByRole("button", { name: /all actions/i })).toBeInTheDocument();
         expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
@@ -4027,8 +4182,10 @@ describe("CodexPage", () => {
         const input = await screen.findByRole("combobox", { name: /search the encyclopedia/i });
         await user.type(input, "river tile");
         expect(await screen.findByRole("button", { name: /build bridge/i })).toBeInTheDocument();
-        expect(within(await screen.findByRole("listbox")).getByText("Builds a bridge over a river tile."))
-            .toBeInTheDocument();
+        expect(input).toHaveAttribute("aria-autocomplete", "none");
+        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
+            .toHaveAttribute("aria-pressed", "true");
 
         await user.clear(input);
         await user.type(input, "justified");

@@ -58,6 +58,18 @@
     padding: 10px 0 9px;
 }
 
+.codex-header--compact {
+    display: grid;
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, min(34vw, 460px)) max-content;
+    grid-template-areas:
+        "copy search stats"
+        "shelf shelf shelf";
+    align-items: center;
+    gap: 6px 14px;
+}
+
 .codex-header::after {
     content: "";
     position: absolute;
@@ -75,6 +87,12 @@
     gap: 20px;
 }
 
+.codex-header__top--compact {
+    display: contents;
+    align-items: center;
+    gap: 14px;
+}
+
 .codex-header__copy {
     min-width: 0;
 }
@@ -83,6 +101,15 @@
     display: inline-flex;
     align-items: stretch;
     gap: 8px;
+    flex: 0 0 auto;
+}
+
+.codex-header--compact .codex-header__copy {
+    grid-area: copy;
+}
+
+.codex-header--compact .codex-header__stats {
+    grid-area: stats;
 }
 
 .codex-header__stat {
@@ -300,6 +327,16 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.018);
 }
 
+.codex-header--compact .codex-controlBand {
+    grid-area: search;
+    min-width: 0;
+    margin-top: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+}
+
 .codex-kindFilter {
     display: flex;
     flex: 1 1 320px;
@@ -347,10 +384,21 @@
     max-width: 520px;
 }
 
+.codex-header--compact .codex-controlBand .codex-search {
+    max-width: 460px;
+}
+
 .codex-categoryShelf {
     display: grid;
+    min-width: 0;
+    max-width: 100%;
     gap: 4px;
     padding: 6px 0 0;
+    overflow-wrap: anywhere;
+}
+
+.codex-header--compact .codex-categoryShelf {
+    grid-area: shelf;
 }
 
 .codex-categoryShelf__label {
@@ -365,17 +413,31 @@
 .codex-categoryShelf__chips {
     display: flex;
     min-width: 0;
+    max-width: 100%;
     flex-wrap: wrap;
     gap: 4px 5px;
+    align-items: center;
+}
+
+.codex-categoryShelf__chips--wrap {
+    flex-wrap: wrap;
 }
 
 .codex-categoryShelf__chip {
+    min-width: 0;
+    max-width: 100%;
+    flex: 0 1 auto;
     min-height: 25px;
     gap: 6px;
     padding-inline: 7px;
     border-color: rgba(199, 189, 171, 0.044);
     background: rgba(255, 255, 255, 0.003);
     color: rgba(241, 234, 220, 0.62);
+}
+
+.codex-categoryShelf__chip > span:not(.codex-kindFilter__count) {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .codex-categoryShelf__chip:hover {
@@ -1919,6 +1981,19 @@
     .codex-header__stat {
         flex: 1 1 0;
         text-align: left;
+    }
+
+    .codex-header--compact {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "copy"
+            "search"
+            "stats"
+            "shelf";
+    }
+
+    .codex-header--compact .codex-controlBand .codex-search {
+        max-width: none;
     }
 
     .codex-workspace {

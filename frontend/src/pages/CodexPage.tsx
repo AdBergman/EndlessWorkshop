@@ -128,8 +128,8 @@ export default function CodexPage() {
         () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatCodexKindLabel(activeKind),
         [activeKind, filterOptions]
     );
-    const categoryOptions = useMemo(
-        () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
+    const categoryShelfOptions = useMemo(
+        () => filterOptions,
         [filterOptions]
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
@@ -191,6 +191,7 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
+    const useCompactHeader = activeKind !== ALL_CODEX_KIND || Boolean(selectedEntryParam);
     const showResultsPane = !isOverviewState;
     const isPlainRouteReset =
         location.pathname === "/codex" &&
@@ -390,20 +391,47 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
+    const searchControl = (
+        <CodexSearch
+            value={query}
+            onChange={setQuery}
+            resultCount={filteredEntries.length}
+            totalCount={entries.length}
+            suggestions={autocompleteEntries}
+            onSelectSuggestion={(entry) => {
+                setQuery(entry.displayName);
+                selectEntry(entry);
+            }}
+            onConfirmQuery={() => {
+                const firstVisibleEntry = filteredEntries[0];
+                if (firstVisibleEntry) {
+                    selectEntry(firstVisibleEntry);
+                }
+            }}
+            enableAutocomplete={false}
+        />
+    );
+
     return (
         <main className="codex-page">
             <h1 className="seo-hidden">
                 Endless Legend 2 Codex, Encyclopedia, and Workshop Reference Explorer
             </h1>
 
-            <section className="codex-surface" aria-labelledby="codex-page-title">
-                <header className="codex-header">
-                    <div className="codex-header__top">
+            <section
+                className="codex-surface"
+                aria-labelledby={useCompactHeader ? undefined : "codex-page-title"}
+                aria-label={useCompactHeader ? "Codex encyclopedia" : undefined}
+            >
+                <header className={`codex-header ${useCompactHeader ? "codex-header--compact" : ""}`}>
+                    <div className={`codex-header__top ${useCompactHeader ? "codex-header__top--compact" : ""}`}>
                         <div className="codex-header__copy">
                             <div className="codex-eyebrow">Endless Workshop archive</div>
-                            <h2 className="codex-pageTitle" id="codex-page-title">
-                                Encyclopedia
-                            </h2>
+                            {!useCompactHeader ? (
+                                <h2 className="codex-pageTitle" id="codex-page-title">
+                                    Encyclopedia
+                                </h2>
+                            ) : null}
                         </div>
 
                         <div className="codex-header__stats" aria-label="Codex encyclopedia statistics">
@@ -419,29 +447,17 @@ export default function CodexPage() {
                     </div>
 
                     <div className="codex-controlBand">
-                        <CodexSearch
-                            value={query}
-                            onChange={setQuery}
-                            resultCount={filteredEntries.length}
-                            totalCount={entries.length}
-                            suggestions={autocompleteEntries}
-                            onSelectSuggestion={(entry) => {
-                                setQuery(entry.displayName);
-                                selectEntry(entry);
-                            }}
-                            onConfirmQuery={() => {
-                                const firstVisibleEntry = filteredEntries[0];
-                                if (firstVisibleEntry) {
-                                    selectEntry(firstVisibleEntry);
-                                }
-                            }}
-                        />
+                        {searchControl}
                     </div>
                     {!isOverviewState ? (
                         <div className="codex-categoryShelf" aria-label="Codex categories">
                             <div className="codex-categoryShelf__label">Categories</div>
-                            <div className="codex-categoryShelf__chips" role="toolbar" aria-label="Filter codex by category">
-                                {categoryOptions.map((option) => {
+                            <div
+                                className="codex-categoryShelf__chips codex-categoryShelf__chips--wrap"
+                                role="toolbar"
+                                aria-label="Filter codex by category"
+                            >
+                                {categoryShelfOptions.map((option) => {
                                     const isActive = option.kind === activeKind;
 
                                     return (

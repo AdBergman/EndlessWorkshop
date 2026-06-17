@@ -19,6 +19,7 @@ type Props = {
     suggestions: CodexEntry[];
     onSelectSuggestion: (entry: CodexEntry) => void;
     onConfirmQuery: () => void;
+    enableAutocomplete?: boolean;
 };
 
 export default function CodexSearch({
@@ -29,13 +30,14 @@ export default function CodexSearch({
     suggestions,
     onSelectSuggestion,
     onConfirmQuery,
+    enableAutocomplete = true,
 }: Props) {
     const [isFocused, setIsFocused] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const listboxId = useId();
 
     const hasQuery = value.trim().length > 0;
-    const showSuggestions = isFocused && hasQuery && suggestions.length > 0;
+    const showSuggestions = enableAutocomplete && isFocused && hasQuery && suggestions.length > 0;
     const activeSuggestion = showSuggestions ? suggestions[highlightedIndex] : null;
 
     useEffect(() => {
@@ -49,7 +51,7 @@ export default function CodexSearch({
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "ArrowDown") {
-            if (suggestions.length === 0) return;
+            if (!enableAutocomplete || suggestions.length === 0) return;
             event.preventDefault();
             setIsFocused(true);
             setHighlightedIndex((current) => (current + 1) % suggestions.length);
@@ -57,7 +59,7 @@ export default function CodexSearch({
         }
 
         if (event.key === "ArrowUp") {
-            if (suggestions.length === 0) return;
+            if (!enableAutocomplete || suggestions.length === 0) return;
             event.preventDefault();
             setIsFocused(true);
             setHighlightedIndex((current) => (current - 1 + suggestions.length) % suggestions.length);
@@ -101,7 +103,7 @@ export default function CodexSearch({
                     autoComplete="off"
                     spellCheck={false}
                     role="combobox"
-                    aria-autocomplete="list"
+                    aria-autocomplete={enableAutocomplete ? "list" : "none"}
                     aria-expanded={showSuggestions}
                     aria-controls={showSuggestions ? listboxId : undefined}
                     aria-activedescendant={activeSuggestion ? `codex-suggestion-${activeSuggestion.entryKey}` : undefined}
