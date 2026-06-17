@@ -37,6 +37,16 @@ describe("CodexPage", () => {
         return screen.getByRole("toolbar", { name: /filter codex by category/i });
     }
 
+    function getLandingCategoryIndex() {
+        return screen.getByLabelText("Codex category index");
+    }
+
+    function getLandingCategoryLabels() {
+        return within(getLandingCategoryIndex())
+            .getAllByRole("button")
+            .map((button) => button.querySelector(".codex-overview__kind")?.textContent?.trim());
+    }
+
     it("stays on /codex and shows the overview when no entry is selected", async () => {
         const { container } = render(
             <MemoryRouter initialEntries={["/codex"]}>
@@ -55,19 +65,25 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex");
-        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
-        expect(screen.getByText("categories")).toBeInTheDocument();
-        expect(screen.getByText("Browse by category, then inspect descriptions and resolved related links.")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Categories" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Codex Overview" })).not.toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex encyclopedia statistics")).getByText("categories")).toBeInTheDocument();
+        expect(screen.getByText("Browse categories, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        const categoryIndex = screen.getByLabelText("Codex category index");
+        expect(categoryIndex).toBeInTheDocument();
+        expect(within(categoryIndex).getByRole("button", {
+            name: /districts 2 city tiles, exploitations, and terrain infrastructure/i,
+        })).toBeInTheDocument();
+        expect(getLandingCategoryLabels()).not.toContain("Modifiers");
         expect(screen.getByText("City tiles, exploitations, and terrain infrastructure.")).toBeInTheDocument();
         expect(container.querySelector('img.codex-kindIcon--overview[src="/svg/factions/UI_Common_District.svg"]'))
             .toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
-        expect(screen.getByRole("toolbar", { name: /filter codex by category/i })).toBeInTheDocument();
+        expect(screen.queryByRole("toolbar", { name: /filter codex by category/i })).not.toBeInTheDocument();
     });
 
-    it("renders direct category access on the default route", async () => {
+    it("uses landing category cards as category navigation on the default route", async () => {
         render(
             <MemoryRouter initialEntries={["/codex"]}>
                 <Routes>
@@ -76,14 +92,15 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
-        expect(getCategoryToolbar()).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        expect(getLandingCategoryIndex()).toBeInTheDocument();
+        expect(screen.queryByRole("toolbar", { name: /filter codex by category/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("group", { name: /war & units/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /war & units/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
     });
 
-    it("renders all visible categories directly in the top category shelf", async () => {
+    it("renders all visible categories directly in the landing category index", async () => {
         seedCodexEntries([
             { exportKind: "units", entryKey: "Unit_A", displayName: "Unit A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
@@ -134,9 +151,8 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const categoryLabels = within(await screen.findByRole("toolbar", { name: /filter codex by category/i }))
-            .getAllByRole("button")
-            .map((button) => button.textContent?.replace(/\d+$/u, "").trim());
+        await screen.findByRole("heading", { name: "Encyclopedia Index" });
+        const categoryLabels = getLandingCategoryLabels();
         expect(categoryLabels).toEqual([
             "Abilities",
             "Actions",
@@ -159,7 +175,7 @@ describe("CodexPage", () => {
             "Traits",
             "Units",
         ]);
-        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(categoryLabels).not.toContain("Modifiers");
     });
 
     it("highlights category chips for category deep links", async () => {
@@ -200,6 +216,32 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Equipment" })).toBeInTheDocument();
         expect(within(getCategoryToolbar()).getByRole("button", { name: /equipment/i }))
             .toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("keeps category routes on the existing category page layout", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "tech",
+                entryKey: "Technology_Test",
+                displayName: "Test Technology",
+                descriptionLines: ["Unlocks a test technology."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /tech/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        expect(screen.queryByRole("heading", { name: "Encyclopedia Index" })).not.toBeInTheDocument();
     });
 
     it("requests codex entries on page mount when the global bootstrap has not populated the store yet", async () => {
@@ -274,11 +316,8 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const categoryToolbar = await screen.findByRole("toolbar", { name: /filter codex by category/i });
-        expect(within(categoryToolbar).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
-        expect(within(categoryToolbar).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
-
-        const kindIndex = await screen.findByLabelText("Codex kinds");
+        const kindIndex = await screen.findByLabelText("Codex category index");
+        expect(within(kindIndex).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
         expect(within(kindIndex).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
         expect(screen.getByText("Resource extraction districts and upgrades.")).toBeInTheDocument();
     });
@@ -295,7 +334,7 @@ describe("CodexPage", () => {
         );
 
         await user.click(
-            within(getCategoryToolbar()).getByRole("button", {
+            within(getLandingCategoryIndex()).getByRole("button", {
                 name: /districts 2/i,
             })
         );
@@ -328,7 +367,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const kindIndex = await screen.findByLabelText("Codex kinds");
+        const kindIndex = await screen.findByLabelText("Codex category index");
         await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
 
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
@@ -431,24 +470,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const shelfLabels = within(getCategoryToolbar())
-            .getAllByRole("button")
-            .map((button) => button.textContent?.replace(/\d+$/u, "").trim());
-        expect(shelfLabels).toEqual([
-            "Abilities",
-            "Actions",
-            "Councilor Effects",
-            "Partner Effects",
-            "Resources",
-            "Factions",
-            "Diplomatic Treaties",
-            "Heroes",
-            "Statuses",
-        ]);
-
-        const overviewLabels = within(screen.getByLabelText("Codex kinds"))
-            .getAllByRole("button")
-            .map((button) => button.textContent?.replace(/\d+.*$/u, "").trim());
+        const overviewLabels = getLandingCategoryLabels();
         expect(overviewLabels).toEqual([
             "Abilities",
             "Actions",
@@ -460,20 +482,14 @@ describe("CodexPage", () => {
             "Heroes",
             "Statuses",
         ]);
-        expect(within(getCategoryToolbar())
-            .getByRole("button", { name: /statuses 1/i })).toBeInTheDocument();
-        expect(within(screen.getByLabelText("Codex kinds"))
+        expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /statuses 1 public conditions/i })).toBeInTheDocument();
-        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
-        expect(within(screen.getByLabelText("Codex kinds"))
-            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
-        expect(within(getCategoryToolbar())
-            .getByRole("button", { name: /resources 1/i })).toBeInTheDocument();
-        expect(within(screen.getByLabelText("Codex kinds"))
+        expect(overviewLabels).not.toContain("Modifiers");
+        expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /resources 1 strategic and luxury resources/i })).toBeInTheDocument();
-        expect(within(getCategoryToolbar())
+        expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
-        expect(within(getCategoryToolbar())
+        expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
     });
 
@@ -1825,7 +1841,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const kindIndex = await screen.findByLabelText("Codex kinds");
+        const kindIndex = await screen.findByLabelText("Codex category index");
         await user.click(within(kindIndex).getByRole("button", { name: /districts 2/i }));
 
         await waitFor(() => {
@@ -1853,7 +1869,7 @@ describe("CodexPage", () => {
         await waitFor(() => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex");
         });
-        expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
     });
 
     it("resets query, kind, and selection when navigating back to plain /codex", async () => {
@@ -1877,7 +1893,7 @@ describe("CodexPage", () => {
             </BrowserRouter>
         );
 
-        await user.click(within(getCategoryToolbar()).getByRole("button", {
+        await user.click(within(getLandingCategoryIndex()).getByRole("button", {
             name: /districts 2/i,
         }));
         await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "market");
@@ -1895,12 +1911,12 @@ describe("CodexPage", () => {
         await user.click(screen.getByRole("link", { name: "Codex" }));
 
         await waitFor(() => {
-            expect(screen.getByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+            expect(screen.getByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
         });
 
         expect(`${window.location.pathname}${window.location.search}`).toBe("/codex");
         expect(screen.getByRole("combobox", { name: /search the encyclopedia/i })).toHaveValue("");
-        expect(getCategoryToolbar()).toBeInTheDocument();
+        expect(screen.queryByRole("toolbar", { name: /filter codex by category/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "All Districts" })).not.toBeInTheDocument();
     });
 
@@ -1959,7 +1975,7 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
     });
 
@@ -2459,7 +2475,7 @@ describe("CodexPage", () => {
         );
 
         await user.click(
-            within(getCategoryToolbar()).getByRole("button", {
+            within(getLandingCategoryIndex()).getByRole("button", {
                 name: /quests 4/i,
             })
         );

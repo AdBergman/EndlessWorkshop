@@ -39,32 +39,24 @@ function descriptionFor(kind: string): string {
 }
 
 export default function CodexOverview({ options, onSelectKind }: Props) {
-    const totalCount = options.reduce((sum, option) => sum + option.count, 0);
-
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
-            <div className="codex-overview__hero">
+            <div className="codex-overview__header">
                 <div>
-                    <div className="codex-sectionLabel">Encyclopedia index</div>
-                    <h2 className="codex-detail__title codex-overview__title" id="codex-overview-title">
-                        Codex Overview
+                    <h2 className="codex-sectionLabel codex-overview__label" id="codex-overview-title">
+                        Encyclopedia Index
                     </h2>
+                    <p className="codex-overview__intro">
+                        Browse categories, then inspect descriptions and resolved related links.
+                    </p>
                 </div>
-                <div className="codex-overview__total">
-                    <span>{totalCount}</span>
-                    <small>entries</small>
+                <div className="codex-overview__categoryTotal" aria-label={`${options.length} categories`}>
+                    <span>{options.length}</span>
+                    <small>categories</small>
                 </div>
             </div>
-            <p className="codex-overview__intro">
-                Browse by category, then inspect descriptions and resolved related links.
-            </p>
 
-            <div className="codex-overview__indexHeader">
-                <h3>Categories</h3>
-                <span>{options.length}</span>
-            </div>
-
-            <div className="codex-overview__index" aria-label="Codex kinds">
+            <div className="codex-overview__index" aria-label="Codex category index">
                 {options.map((option) => (
                     <button
                         key={option.kind}

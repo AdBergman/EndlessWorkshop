@@ -14,6 +14,24 @@ const collator = new Intl.Collator(undefined, {
     sensitivity: "base",
 });
 
+type CodexSearchDocument = {
+    displayName: string;
+    publicDisplayName: string;
+    publicLabel: string;
+    entryKey: string;
+    publicEntryKey: string;
+    exportKind: string;
+    category: string;
+    publicCategory: string;
+    sourceKind: string;
+    publicSourceKind: string;
+    description: string;
+    publicDescription: string;
+    structuredMetadata: string;
+};
+
+const searchDocumentCache = new WeakMap<CodexEntry, CodexSearchDocument>();
+
 function normalize(value: string | null | undefined): string {
     return (value ?? "").trim().toLowerCase();
 }
@@ -57,6 +75,29 @@ function searchablePublicLabel(entry: Pick<CodexEntry, "displayName" | "entryKey
     return normalize(getCodexEntryLabel(entry));
 }
 
+function getSearchDocument(entry: CodexEntry): CodexSearchDocument {
+    const cached = searchDocumentCache.get(entry);
+    if (cached) return cached;
+
+    const document = {
+        displayName: normalize(entry.displayName),
+        publicDisplayName: normalizedPublicText(entry.displayName),
+        publicLabel: searchablePublicLabel(entry),
+        entryKey: normalize(entry.entryKey),
+        publicEntryKey: normalizedPublicText(entry.entryKey),
+        exportKind: normalize(entry.exportKind),
+        category: normalize(entry.category),
+        publicCategory: normalizedPublicText(entry.category),
+        sourceKind: normalize(entry.kind),
+        publicSourceKind: normalizedPublicText(entry.kind),
+        description: normalize(entry.descriptionLines.join(" ")),
+        publicDescription: searchableDescription(entry),
+        structuredMetadata: searchableStructuredMetadata(entry),
+    };
+    searchDocumentCache.set(entry, document);
+    return document;
+}
+
 export function sortCodexEntries(entries: readonly CodexEntry[]): CodexEntry[] {
     return [...entries].sort((left, right) => {
         const nameComparison = collator.compare(left.displayName, right.displayName);
@@ -68,87 +109,74 @@ export function sortCodexEntries(entries: readonly CodexEntry[]): CodexEntry[] {
 export function entryMatchesQuery(entry: CodexEntry, query: string): boolean {
     const normalizedQuery = normalize(query);
     if (!normalizedQuery) return true;
-    const structuredMetadata = searchableStructuredMetadata(entry);
+    const document = getSearchDocument(entry);
 
     return [
-        entry.displayName,
-        entry.entryKey,
-        entry.exportKind,
-        entry.category ?? "",
-        entry.kind ?? "",
-        entry.descriptionLines.join(" "),
-        structuredMetadata,
-    ].some((value) => normalize(value).includes(normalizedQuery)) ||
-        [
-            searchablePublicLabel(entry),
-            normalizedPublicText(entry.displayName),
-            normalizedPublicText(entry.entryKey),
-            normalizedPublicText(entry.category),
-            normalizedPublicText(entry.kind),
-            searchableDescription(entry),
-            structuredMetadata,
-        ].some((value) => value.includes(normalizedQuery));
+        document.displayName,
+        document.entryKey,
+        document.exportKind,
+        document.category,
+        document.sourceKind,
+        document.description,
+        document.structuredMetadata,
+        document.publicLabel,
+        document.publicDisplayName,
+        document.publicEntryKey,
+        document.publicCategory,
+        document.publicSourceKind,
+        document.publicDescription,
+    ].some((value) => value.includes(normalizedQuery));
 }
 
 export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
     const normalizedQuery = normalize(query);
     if (!normalizedQuery) return 0;
 
-    const displayName = normalize(entry.displayName);
-    const publicLabel = searchablePublicLabel(entry);
-    const entryKey = normalize(entry.entryKey);
-    const description = normalize(entry.descriptionLines.join(" "));
-    const publicDescription = searchableDescription(entry);
-    const structuredMetadata = searchableStructuredMetadata(entry);
-    const exportKind = normalize(entry.exportKind);
-    const category = normalize(entry.category);
-    const publicCategory = normalizedPublicText(entry.category);
-    const sourceKind = normalize(entry.kind);
-    const publicSourceKind = normalizedPublicText(entry.kind);
+    const document = getSearchDocument(entry);
 
     let score = -1;
 
-    if (displayName === normalizedQuery) {
+    if (document.displayName === normalizedQuery) {
         score = Math.max(score, 1200);
-    } else if (displayName.startsWith(normalizedQuery)) {
+    } else if (document.displayName.startsWith(normalizedQuery)) {
         score = Math.max(score, 960);
-    } else if (displayName.includes(normalizedQuery)) {
+    } else if (document.displayName.includes(normalizedQuery)) {
         score = Math.max(score, 840);
     }
 
-    if (publicLabel === normalizedQuery) {
+    if (document.publicLabel === normalizedQuery) {
         score = Math.max(score, 1180);
-    } else if (publicLabel.startsWith(normalizedQuery)) {
+    } else if (document.publicLabel.startsWith(normalizedQuery)) {
         score = Math.max(score, 940);
-    } else if (publicLabel.includes(normalizedQuery)) {
+    } else if (document.publicLabel.includes(normalizedQuery)) {
         score = Math.max(score, 820);
     }
 
-    if (entryKey === normalizedQuery) {
+    if (document.entryKey === normalizedQuery) {
         score = Math.max(score, 720);
-    } else if (entryKey.startsWith(normalizedQuery)) {
+    } else if (document.entryKey.startsWith(normalizedQuery)) {
         score = Math.max(score, 620);
-    } else if (entryKey.includes(normalizedQuery)) {
+    } else if (document.entryKey.includes(normalizedQuery)) {
         score = Math.max(score, 520);
     }
 
     if (
-        description.includes(normalizedQuery) ||
-        publicDescription.includes(normalizedQuery) ||
-        structuredMetadata.includes(normalizedQuery)
+        document.description.includes(normalizedQuery) ||
+        document.publicDescription.includes(normalizedQuery) ||
+        document.structuredMetadata.includes(normalizedQuery)
     ) {
         score = Math.max(score, 320);
     }
 
-    if (exportKind.includes(normalizedQuery)) {
+    if (document.exportKind.includes(normalizedQuery)) {
         score = Math.max(score, 180);
     }
 
     if (
-        category.includes(normalizedQuery) ||
-        sourceKind.includes(normalizedQuery) ||
-        publicCategory.includes(normalizedQuery) ||
-        publicSourceKind.includes(normalizedQuery)
+        document.category.includes(normalizedQuery) ||
+        document.sourceKind.includes(normalizedQuery) ||
+        document.publicCategory.includes(normalizedQuery) ||
+        document.publicSourceKind.includes(normalizedQuery)
     ) {
         score = Math.max(score, 220);
     }
@@ -157,14 +185,14 @@ export function scoreCodexEntryMatch(entry: CodexEntry, query: string): number {
         return score;
     }
 
-    const labelForBoost = publicLabel.includes(normalizedQuery) ? publicLabel : displayName;
+    const labelForBoost = document.publicLabel.includes(normalizedQuery) ? document.publicLabel : document.displayName;
     if (labelForBoost.includes(normalizedQuery)) {
         score += Math.max(0, 40 - labelForBoost.indexOf(normalizedQuery));
         score += Math.max(0, 24 - Math.min(labelForBoost.length, 24));
     }
 
-    if (entryKey.includes(normalizedQuery)) {
-        score += Math.max(0, 18 - entryKey.indexOf(normalizedQuery));
+    if (document.entryKey.includes(normalizedQuery)) {
+        score += Math.max(0, 18 - document.entryKey.indexOf(normalizedQuery));
     }
 
     return score;
@@ -191,19 +219,45 @@ export function filterCodexEntries(
     const normalizedKind = normalize(opts.kind);
     const normalizedQuery = normalize(opts.query);
 
-    const filtered = entries.filter((entry) => {
-        if (normalizedKind && normalizedKind !== ALL_CODEX_KIND && normalize(entry.exportKind) !== normalizedKind) {
-            return false;
-        }
-
-        return entryMatchesQuery(entry, normalizedQuery);
-    });
-
     if (!normalizedQuery) {
+        const filtered = entries.filter((entry) => {
+            if (normalizedKind && normalizedKind !== ALL_CODEX_KIND && normalize(entry.exportKind) !== normalizedKind) {
+                return false;
+            }
+
+            return true;
+        });
         return sortCodexEntries(filtered);
     }
 
-    return [...filtered].sort((left, right) => compareCodexEntryMatches(left, right, normalizedQuery));
+    const scored = entries.reduce<Array<{ entry: CodexEntry; score: number }>>((matches, entry) => {
+        if (normalizedKind && normalizedKind !== ALL_CODEX_KIND && normalize(entry.exportKind) !== normalizedKind) {
+            return matches;
+        }
+
+        const score = scoreCodexEntryMatch(entry, normalizedQuery);
+        if (score >= 0) {
+            matches.push({ entry, score });
+        }
+
+        return matches;
+    }, []);
+
+    return scored
+        .sort((left, right) => {
+            const scoreDelta = right.score - left.score;
+            if (scoreDelta !== 0) {
+                return scoreDelta;
+            }
+
+            const nameComparison = collator.compare(left.entry.displayName, right.entry.displayName);
+            if (nameComparison !== 0) {
+                return nameComparison;
+            }
+
+            return collator.compare(left.entry.entryKey, right.entry.entryKey);
+        })
+        .map(({ entry }) => entry);
 }
 
 export function getAutocompleteEntries(

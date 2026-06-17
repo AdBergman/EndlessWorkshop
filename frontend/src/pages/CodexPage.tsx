@@ -437,36 +437,38 @@ export default function CodexPage() {
                             }}
                         />
                     </div>
-                    <div className="codex-categoryShelf" aria-label="Codex categories">
-                        <div className="codex-categoryShelf__label">Categories</div>
-                        <div className="codex-categoryShelf__chips" role="toolbar" aria-label="Filter codex by category">
-                            {categoryOptions.map((option) => {
-                                const isActive = option.kind === activeKind;
+                    {!isOverviewState ? (
+                        <div className="codex-categoryShelf" aria-label="Codex categories">
+                            <div className="codex-categoryShelf__label">Categories</div>
+                            <div className="codex-categoryShelf__chips" role="toolbar" aria-label="Filter codex by category">
+                                {categoryOptions.map((option) => {
+                                    const isActive = option.kind === activeKind;
 
-                                return (
-                                    <button
-                                        key={option.kind}
-                                        type="button"
-                                        className={`codex-categoryShelf__chip codex-kindFilter__chip ${
-                                            isActive ? "is-active" : ""
-                                        }`}
-                                        onClick={() => selectKind(option.kind)}
-                                        aria-pressed={isActive}
-                                        aria-label={`${option.label} ${option.count}`}
-                                    >
-                                        <CodexKindIcon
-                                            kind={option.kind}
-                                            label={option.label}
-                                            className="codex-kindIcon codex-kindIcon--chip"
-                                            size={15}
-                                        />
-                                        <span>{option.label}</span>
-                                        <span className="codex-kindFilter__count">{option.count}</span>
-                                    </button>
-                                );
-                            })}
+                                    return (
+                                        <button
+                                            key={option.kind}
+                                            type="button"
+                                            className={`codex-categoryShelf__chip codex-kindFilter__chip ${
+                                                isActive ? "is-active" : ""
+                                            }`}
+                                            onClick={() => selectKind(option.kind)}
+                                            aria-pressed={isActive}
+                                            aria-label={`${option.label} ${option.count}`}
+                                        >
+                                            <CodexKindIcon
+                                                kind={option.kind}
+                                                label={option.label}
+                                                className="codex-kindIcon codex-kindIcon--chip"
+                                                size={15}
+                                            />
+                                            <span>{option.label}</span>
+                                            <span className="codex-kindFilter__count">{option.count}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    ) : null}
                 </header>
 
                 <div className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""}`}>
