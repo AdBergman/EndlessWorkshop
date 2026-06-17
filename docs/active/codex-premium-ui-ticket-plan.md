@@ -161,7 +161,8 @@ None unless a specific new shelf issue is identified.
 
 ## EW-CODEX-UI-004 — Shallow Reference Layout Review
 
-Status: active docs/design investigation.
+Status: implemented for the first effects slice; remaining shallow categories
+need separate product review.
 
 ### Goal
 
@@ -179,23 +180,28 @@ Decide whether shallow reference categories should use a full-width reference-li
 
 For Partner Effects, the right/main reference list is more useful than the compressed left result list. The left panel often duplicates the same information with less value.
 
-### First step
+### First implementation slice
 
-Docs/design investigation only. Use
-`docs/active/codex-shallow-reference-layout-review.md` as the active review
-record. Do not implement directly.
+`EW-CODEX-UI-004A` was implemented in commit `92e94047`.
 
-### Questions
+Final accepted behavior:
 
-- Which categories genuinely benefit from the left panel?
-- Which categories are list-first?
-- Should shallow categories hide/collapse the left panel on overview?
-- What happens when a single entry is selected?
-- How does search behave?
+- Partner Effects and Councilor Effects overview routes use a centered
+  full-width reference overview layout.
+- Selected Partner/Councilor Effect entry routes keep split/detail behavior.
+- Resources, Traits, Tech, and normal categories remain split-layout.
+- Extractors remain out of scope.
+- The layout is controlled by the explicit allow-list:
+  `counciloreffects`, `partnereffects`.
+- Future full-width shallow categories must be added deliberately through
+  `supportsFullWidthReferenceOverview(kind)`.
+- No generic content renderer was introduced.
+- Modifiers remain hidden.
 
-### Suggested commit for plan
+### Remaining decision
 
-`docs(codex): plan shallow reference layouts`
+Review Resources for similar shallow overview treatment, or defer Resources and
+move to `EW-CODEX-UI-005` Ability/Status refinement.
 
 ---
 
@@ -240,13 +246,10 @@ Statuses:
 
 ## Recommended next implementation
 
-Start with:
+Choose one:
 
-`EW-CODEX-UI-004A — Partner/Councilor Effects Full-Width Shallow Overview`
+1. Review Resources for the same full-width shallow overview treatment.
+2. Defer Resources and start `EW-CODEX-UI-005` Ability/Status refinement.
 
-Reason:
-`EW-CODEX-UI-001` is implemented, `EW-CODEX-UI-002` is deferred, and
-`EW-CODEX-UI-003` is covered by the accepted compact header work. The next
-useful slice is the smallest implementation that follows the shallow reference
-layout review: full-width overview only for Partner Effects and Councilor
-Effects, while preserving split layout for selected entries and search.
+Do not expand full-width shallow overview behavior beyond `counciloreffects`
+and `partnereffects` without a deliberate product decision.

@@ -1,6 +1,6 @@
 # Codex Shallow Reference Layout Review
 
-Status: active docs/design investigation
+Status: first implementation slice completed; remaining categories pending review
 Area: Codex / Encyclopedia
 Ticket: `EW-CODEX-UI-004` - Shallow Reference Layout Review
 
@@ -12,12 +12,13 @@ Current Codex code already treats `resources`, `councilorEffects`,
 list with exported effect lines, context labels, and exact links. The open UX
 question is whether these category overviews still need the left result panel.
 
-Recommendation: start with an overview-only layout change for Partner Effects
-and Councilor Effects. On their category overview routes, make the reference
-list use the full available width and hide the left result panel. Keep the
-current split layout for selected entries and search-active states.
+Implemented result: `EW-CODEX-UI-004A` landed in commit `92e94047`.
+Partner Effects and Councilor Effects now use a centered full-width reference
+overview on category overview routes. Their selected entry routes and
+search-active states keep the split layout.
 
-Do not include Extractors in the first implementation slice.
+Resources and Traits remain split-layout pending separate product review. Do
+not include Extractors without new evidence.
 
 ## Current Evidence
 
@@ -69,8 +70,8 @@ For Partner Effects and Councilor Effects:
 For Resources:
 
 - Keep current split layout until Partner/Councilor Effects prove the pattern.
-- Re-evaluate whether the Resources overview should become full-width after
-  checking real extractor/resource data in browser review.
+- Partner/Councilor Effects have now proven the pattern; Resources is the next
+  candidate for separate product review, not an automatic follow-up.
 
 For Traits:
 
@@ -98,10 +99,17 @@ For Traits:
 
 ## Implementation Risk
 
-Risk is moderate-low if limited to overview-only layout gating. The main risk is
-route state: the app currently uses selected summary entries and selected entry
-keys to decide whether the results pane is shown. The implementation should
-avoid changing deep-link hydration or selection behavior.
+Risk is moderate-low when limited to overview-only layout gating. The main risk
+is route state: the app uses selected summary entries and selected entry keys to
+decide whether the results pane is shown. The implemented slice kept deep-link
+hydration and selected-entry behavior unchanged.
+
+Current implementation guardrail:
+
+- full-width shallow overview is controlled by the explicit allow-list
+  `counciloreffects`, `partnereffects`;
+- `supportsFullWidthReferenceOverview(kind)` is the layout helper;
+- add Resources or any future category only after deliberate product review.
 
 Avoid:
 
@@ -112,9 +120,9 @@ Avoid:
 - Modifiers promotion;
 - changing selected-entry detail behavior.
 
-## Smallest Safe Implementation Slice
+## Completed Implementation Slice
 
-Implement full-width shallow overview only for:
+Implemented full-width shallow overview only for:
 
 - `counciloreffects`
 - `partnereffects`
@@ -125,7 +133,7 @@ Only apply it when:
 - the selected list item is the summary entry;
 - there is no active search query.
 
-Keep everything else as-is.
+Everything else remains split-layout.
 
 ## Test Plan
 
@@ -144,13 +152,9 @@ Keep everything else as-is.
 
 ## Suggested Next Implementation Prompt
 
-Implement `EW-CODEX-UI-004A` as a narrow Codex frontend slice:
+Decision prompt:
 
-- For `partnerEffects` and `councilorEffects` category overview routes only,
-  hide the left result panel and let the shallow reference overview use the
-  full content width.
-- Preserve split layout for selected entries and active search.
-- Do not change Resources, Traits, Extractors, detail pages, backend/importer,
-  DB Exporter contracts, Modifiers, or Ability/Status filters.
-- Add focused tests for overview full-width behavior, selected-entry split
-  behavior, search-active split behavior, and unchanged Resources/Traits.
+Review whether Resources should get the same full-width shallow overview
+treatment now that Partner/Councilor Effects are proven, or defer Resources and
+move to `EW-CODEX-UI-005` Ability/Status refinement. Do not expand the
+full-width allow-list without that product decision.

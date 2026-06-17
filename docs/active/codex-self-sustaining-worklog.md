@@ -12,8 +12,9 @@ Current Codex UI continuation should start from:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next recommended implementation ticket: `EW-CODEX-UI-004A` - Partner/Councilor
-Effects Full-Width Shallow Overview.
+Next recommended decision: review Resources for similar shallow overview
+treatment, or defer Resources and start `EW-CODEX-UI-005` Ability/Status
+refinement.
 
 Do not recommit the stashed Ability/Status filter work as-is. Browser/visual QA
 is user-owned unless explicitly requested.
@@ -39,7 +40,39 @@ is user-owned unless explicitly requested.
 | `EW-CODEX-UI-001` - Contextual Codex Header | completed | Commit `8b57d228`; landing keeps large `Encyclopedia`, category/search/entry views use compact archive/search header, `All` shelf escape hatch restored, autocomplete disabled |
 | `EW-CODEX-UI-002` - Landing Page Final Polish | deferred | Tiny CSS-only polish was manually rejected; landing is acceptable until a more deliberate redesign |
 | `EW-CODEX-UI-003` - Category Shelf Final Polish | covered | Accepted `EW-CODEX-UI-001` already restored `All`, wrapped the shelf, kept direct access/counts/active state, and hid Modifiers |
-| `EW-CODEX-UI-004` - Shallow Reference Layout Review | active | `docs/active/codex-shallow-reference-layout-review.md`; docs/design investigation only |
+| `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width Shallow Overview | completed | Commit `92e94047`; Partner/Councilor Effects overview routes use centered full-width reference layout through explicit allow-list |
+| `EW-CODEX-UI-004` - Shallow Reference Layout Review | partially completed | Effects slice proven; Resources and Traits remain split-layout pending separate product review; Extractors remain out of scope |
+
+## 2026-06-17 - EW-CODEX-UI-004A Effect Reference Overview Layout
+
+- Story ID/title: `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width
+  Shallow Overview.
+- Current status: completed.
+- Evidence used:
+  - `docs/active/codex-shallow-reference-layout-review.md`.
+  - Manual visual review accepted hiding the duplicate left results pane for
+    Partner/Councilor Effects overview routes after the reference panel was
+    centered and width-bounded.
+- Changes made:
+  - Partner Effects and Councilor Effects category overview routes now use a
+    centered full-width shallow reference overview.
+  - Selected effect entry routes keep split/detail behavior.
+  - Resources, Traits, Tech, and normal categories remain split-layout.
+  - Full-width behavior is controlled by the explicit allow-list
+    `counciloreffects`, `partnereffects` and helper
+    `supportsFullWidthReferenceOverview(kind)`.
+  - No generic renderer was introduced; Modifiers remain hidden.
+- Tests/diagnostics/browser QA run:
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+  - Browser/visual QA was user-owned.
+- Commit hash if committed:
+  - `92e94047`
+- Next recommended action:
+  - Review Resources for similar shallow overview treatment, or defer Resources
+    and move to `EW-CODEX-UI-005` Ability/Status refinement.
 
 ## 2026-06-17 - Codex Premium UI Ticket Status Closeout
 
@@ -56,15 +89,14 @@ is user-owned unless explicitly requested.
   - Marked `EW-CODEX-UI-003` covered by `EW-CODEX-UI-001` unless a specific new
     shelf issue appears.
   - Created `docs/active/codex-shallow-reference-layout-review.md`.
-  - Set next recommended implementation to `EW-CODEX-UI-004A`.
+  - At the time, set next recommended implementation to `EW-CODEX-UI-004A`.
 - Tests/diagnostics/browser QA run:
   - `git status --short`
   - `git diff --check`
   - Browser/visual QA was not run.
 - Next recommended action:
-  - Implement `EW-CODEX-UI-004A` only after review: full-width shallow overview
-    for Partner Effects and Councilor Effects category summaries, preserving
-    split layout for selected entries and search.
+  - Historical note: `EW-CODEX-UI-004A` has since been implemented in commit
+    `92e94047`.
 
 ## 2026-06-17 - EW-CODEX-UI-001 Contextual Codex Header
 

@@ -66,9 +66,10 @@ Start here, in order:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next implementation ticket:
+Next decision:
 
-- `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width Shallow Overview.
+- Review Resources for similar shallow overview treatment, or defer Resources
+  and move to `EW-CODEX-UI-005` Ability/Status refinement.
 
 Current rules:
 
@@ -80,6 +81,13 @@ Current rules:
 - `EW-CODEX-UI-002` is deferred after rejected tiny CSS-only landing polish.
 - `EW-CODEX-UI-003` is covered by the accepted compact category shelf behavior
   from `EW-CODEX-UI-001`.
+- `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
+  Councilor Effects overview routes use centered full-width reference overview
+  layout.
+- Resources and Traits remain split-layout pending separate product review.
+- Extractors remain out of scope.
+- Future full-width shallow categories must be added deliberately to the
+  explicit frontend allow-list.
 
 ## P0 - Quest Documentation Cleanup Only
 
