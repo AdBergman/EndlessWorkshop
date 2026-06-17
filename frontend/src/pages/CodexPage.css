@@ -342,6 +342,52 @@
     font-size: 12px;
 }
 
+.codex-controlBand .codex-search {
+    flex: 1 1 360px;
+    max-width: 520px;
+}
+
+.codex-categoryShelf {
+    display: grid;
+    gap: 5px;
+    padding: 8px 0 0;
+}
+
+.codex-categoryShelf__label {
+    color: rgba(195, 152, 77, 0.76);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.codex-categoryShelf__chips {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 5px 6px;
+}
+
+.codex-categoryShelf__chip {
+    min-height: 27px;
+    gap: 6px;
+    padding-inline: 8px;
+    border-color: rgba(199, 189, 171, 0.052);
+    background: rgba(255, 255, 255, 0.004);
+    color: rgba(241, 234, 220, 0.66);
+}
+
+.codex-categoryShelf__chip:hover {
+    border-color: rgba(199, 189, 171, 0.13);
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.codex-categoryShelf__chip .codex-kindFilter__count {
+    color: rgba(199, 189, 171, 0.52);
+    font-size: 11px;
+}
+
 .codex-workspace {
     display: grid;
     grid-template-columns: minmax(330px, 400px) minmax(0, 1fr);

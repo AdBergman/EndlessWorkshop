@@ -5,7 +5,7 @@ import CodexOverview from "@/components/Codex/CodexOverview";
 import CodexResultList from "@/components/Codex/CodexResultList";
 import CodexSearch from "@/components/Codex/CodexSearch";
 import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
-import KindFilter from "@/components/Codex/KindFilter";
+import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
 import {
     createCodexSummaryEntry,
     formatCodexKindLabel,
@@ -127,6 +127,10 @@ export default function CodexPage() {
     const activeKindLabel = useMemo(
         () => filterOptions.find((option) => option.kind === activeKind)?.label ?? formatCodexKindLabel(activeKind),
         [activeKind, filterOptions]
+    );
+    const categoryOptions = useMemo(
+        () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
+        [filterOptions]
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
 
@@ -432,11 +436,36 @@ export default function CodexPage() {
                                 }
                             }}
                         />
-                        <KindFilter
-                            options={filterOptions}
-                            activeKind={activeKind}
-                            onSelect={selectKind}
-                        />
+                    </div>
+                    <div className="codex-categoryShelf" aria-label="Codex categories">
+                        <div className="codex-categoryShelf__label">Categories</div>
+                        <div className="codex-categoryShelf__chips" role="toolbar" aria-label="Filter codex by category">
+                            {categoryOptions.map((option) => {
+                                const isActive = option.kind === activeKind;
+
+                                return (
+                                    <button
+                                        key={option.kind}
+                                        type="button"
+                                        className={`codex-categoryShelf__chip codex-kindFilter__chip ${
+                                            isActive ? "is-active" : ""
+                                        }`}
+                                        onClick={() => selectKind(option.kind)}
+                                        aria-pressed={isActive}
+                                        aria-label={`${option.label} ${option.count}`}
+                                    >
+                                        <CodexKindIcon
+                                            kind={option.kind}
+                                            label={option.label}
+                                            className="codex-kindIcon codex-kindIcon--chip"
+                                            size={15}
+                                        />
+                                        <span>{option.label}</span>
+                                        <span className="codex-kindFilter__count">{option.count}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </header>
 

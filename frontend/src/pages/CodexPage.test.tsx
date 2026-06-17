@@ -8,6 +8,20 @@ import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs"
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
 import type { CodexEntry } from "@/types/dataTypes";
 
+function seedCodexEntries(entries: CodexEntry[]) {
+    useCodexStore.setState({
+        entries,
+        entriesByKey: buildEntriesByKey(entries),
+        entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+            acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+            return acc;
+        }, {}),
+        entriesByKindKey: buildEntriesByKindKey(entries),
+        loading: false,
+        error: null,
+    });
+}
+
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
@@ -18,6 +32,10 @@ describe("CodexPage", () => {
         cleanup();
         useCodexStore.getState().reset();
     });
+
+    function getCategoryToolbar() {
+        return screen.getByRole("toolbar", { name: /filter codex by category/i });
+    }
 
     it("stays on /codex and shows the overview when no entry is selected", async () => {
         const { container } = render(
@@ -46,6 +64,142 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Market Square" })).not.toBeInTheDocument();
+        expect(screen.getByRole("toolbar", { name: /filter codex by category/i })).toBeInTheDocument();
+    });
+
+    it("renders direct category access on the default route", async () => {
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(getCategoryToolbar()).toBeInTheDocument();
+        expect(screen.queryByRole("group", { name: /war & units/i })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /war & units/i })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
+    });
+
+    it("renders all visible categories directly in the top category shelf", async () => {
+        seedCodexEntries([
+            { exportKind: "units", entryKey: "Unit_A", displayName: "Unit A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "statuses", entryKey: "Status_A", displayName: "Status A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "equipment", entryKey: "Equipment_A", displayName: "Equipment A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "tech", entryKey: "Tech_A", displayName: "Tech A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "districts", entryKey: "District_A", displayName: "District A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "improvements", entryKey: "Improvement_A", displayName: "Improvement A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "resources", entryKey: "Resource_A", displayName: "Resource A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "extractors", entryKey: "Extractor_A", displayName: "Extractor A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "actions", entryKey: "Action_A", displayName: "Action A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "factions", entryKey: "Faction_A", displayName: "Faction A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "minorFactions", entryKey: "MinorFaction_A", displayName: "Minor Faction A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "populations", entryKey: "Population_A", displayName: "Population A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "heroes", entryKey: "Hero_A", displayName: "Hero A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "councilors", entryKey: "Councilor_A", displayName: "Councilor A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "traits", entryKey: "Trait_A", displayName: "Trait A", descriptionLines: [], referenceKeys: [] },
+            {
+                exportKind: "diplomaticTreaties",
+                entryKey: "Treaty_A",
+                displayName: "Treaty A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            { exportKind: "quests", entryKey: "Quest_A", displayName: "Quest A", descriptionLines: [], referenceKeys: [] },
+            {
+                exportKind: "councilorEffects",
+                entryKey: "CouncilorEffect_A",
+                displayName: "Councilor Effect A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_A",
+                displayName: "Partner Effect A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            { exportKind: "modifiers", entryKey: "Modifier_A", displayName: "Modifier A", descriptionLines: [], referenceKeys: [] },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const categoryLabels = within(await screen.findByRole("toolbar", { name: /filter codex by category/i }))
+            .getAllByRole("button")
+            .map((button) => button.textContent?.replace(/\d+$/u, "").trim());
+        expect(categoryLabels).toEqual([
+            "Abilities",
+            "Actions",
+            "Councilors",
+            "Councilor Effects",
+            "Partner Effects",
+            "Districts",
+            "Extractors",
+            "Resources",
+            "Equipment",
+            "Factions",
+            "Diplomatic Treaties",
+            "Heroes",
+            "Improvements",
+            "Minor Factions",
+            "Populations",
+            "Quests",
+            "Statuses",
+            "Tech",
+            "Traits",
+            "Units",
+        ]);
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+    });
+
+    it("highlights category chips for category deep links", async () => {
+        seedCodexEntries([
+            { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "equipment", entryKey: "Equipment_A", displayName: "Equipment A", descriptionLines: [], referenceKeys: [] },
+            {
+                exportKind: "partnerEffects",
+                entryKey: "PartnerEffect_A",
+                displayName: "Partner Effect A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=partnereffects"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Partner Effects" })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects/i }))
+            .toHaveAttribute("aria-pressed", "true");
+
+        cleanup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Equipment" })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /equipment/i }))
+            .toHaveAttribute("aria-pressed", "true");
     });
 
     it("requests codex entries on page mount when the global bootstrap has not populated the store yet", async () => {
@@ -120,9 +274,9 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const toolbar = await screen.findByRole("toolbar", { name: /filter codex by kind/i });
-        expect(within(toolbar).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
-        expect(within(toolbar).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
+        const categoryToolbar = await screen.findByRole("toolbar", { name: /filter codex by category/i });
+        expect(within(categoryToolbar).getByRole("button", { name: /districts 1/i })).toBeInTheDocument();
+        expect(within(categoryToolbar).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
 
         const kindIndex = await screen.findByLabelText("Codex kinds");
         expect(within(kindIndex).getByRole("button", { name: /extractors 1/i })).toBeInTheDocument();
@@ -141,7 +295,7 @@ describe("CodexPage", () => {
         );
 
         await user.click(
-            within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+            within(getCategoryToolbar()).getByRole("button", {
                 name: /districts 2/i,
             })
         );
@@ -180,7 +334,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
     });
 
-    it("orders new Codex categories in taxonomy order while keeping modifiers out of top-level navigation", async () => {
+    it("orders new Codex categories in the direct shelf while keeping modifiers out of top-level navigation", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "abilities",
@@ -277,11 +431,10 @@ describe("CodexPage", () => {
             </MemoryRouter>
         );
 
-        const toolbarLabels = within(await screen.findByRole("toolbar", { name: /filter codex by kind/i }))
+        const shelfLabels = within(getCategoryToolbar())
             .getAllByRole("button")
             .map((button) => button.textContent?.replace(/\d+$/u, "").trim());
-        expect(toolbarLabels).toEqual([
-            "All",
+        expect(shelfLabels).toEqual([
             "Abilities",
             "Actions",
             "Councilor Effects",
@@ -307,21 +460,20 @@ describe("CodexPage", () => {
             "Heroes",
             "Statuses",
         ]);
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        expect(within(getCategoryToolbar())
             .getByRole("button", { name: /statuses 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
             .getByRole("button", { name: /statuses 1 public conditions/i })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
             .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        expect(within(getCategoryToolbar())
             .getByRole("button", { name: /resources 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex kinds"))
             .getByRole("button", { name: /resources 1 strategic and luxury resources/i })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        expect(within(getCategoryToolbar())
             .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        expect(within(getCategoryToolbar())
             .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
     });
 
@@ -408,12 +560,14 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Atea" })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .getByRole("button", { name: /resources 1/i })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilors 1/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /resources/i }))
+            .toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilor effects/i }))
+            .toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects/i }))
+            .toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
         expect(within(relatedSection).getByText("Councilor Effects")).toBeInTheDocument();
@@ -749,7 +903,7 @@ describe("CodexPage", () => {
         expect(within(resourceOverview).getByRole("button", { name: /Extractor: Titanium Extractor/i }))
             .toBeInTheDocument();
 
-        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        await user.click(within(getCategoryToolbar())
             .getByRole("button", { name: /councilor effects 1/i }));
         const councilorEffectSummary = screen.getByRole("heading", { name: "All Councilor Effects" })
             .closest(".codex-summaryDossier") as HTMLElement;
@@ -764,7 +918,7 @@ describe("CodexPage", () => {
         expect(within(councilorEffectOverview).getByRole("button", { name: /Source: Atea/i }))
             .toBeInTheDocument();
 
-        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        await user.click(within(getCategoryToolbar())
             .getByRole("button", { name: /partner effects 1/i }));
         const partnerEffectSummary = screen.getByRole("heading", { name: "All Partner Effects" })
             .closest(".codex-summaryDossier") as HTMLElement;
@@ -779,7 +933,7 @@ describe("CodexPage", () => {
         expect(within(partnerEffectOverview).getByRole("button", { name: /Source: Atea/i }))
             .toBeInTheDocument();
 
-        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
+        await user.click(within(getCategoryToolbar())
             .getByRole("button", { name: /traits 2/i }));
         const traitsSummary = screen.getByRole("heading", { name: "All Traits" })
             .closest(".codex-summaryDossier") as HTMLElement;
@@ -871,8 +1025,7 @@ describe("CodexPage", () => {
         expect(screen.getByText("10 turns")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Status mechanics" })).toBeInTheDocument();
         expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
         await user.click(within(relatedSection).getByRole("button", { name: /action cost modifier test modifiers/i }));
@@ -881,8 +1034,7 @@ describe("CodexPage", () => {
         expect(screen.getByText("Modifier dossier")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Modifier mechanics" })).toBeInTheDocument();
         expect(screen.getByText("Reduces the action Influence cost.")).toBeInTheDocument();
-        expect(within(screen.getByRole("toolbar", { name: /filter codex by kind/i }))
-            .queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
     });
 
     it("links exact status mentions inline on ability details while keeping unresolved mentions plain", async () => {
@@ -1725,14 +1877,14 @@ describe("CodexPage", () => {
             </BrowserRouter>
         );
 
-        await user.click(within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+        await user.click(within(getCategoryToolbar()).getByRole("button", {
             name: /districts 2/i,
         }));
         await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "market");
 
         await waitFor(() => {
             expect(
-                within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+                within(getCategoryToolbar()).getByRole("button", {
                     name: /districts 2/i,
                 })
             ).toHaveAttribute("aria-pressed", "true");
@@ -1748,11 +1900,7 @@ describe("CodexPage", () => {
 
         expect(`${window.location.pathname}${window.location.search}`).toBe("/codex");
         expect(screen.getByRole("combobox", { name: /search the encyclopedia/i })).toHaveValue("");
-        expect(
-            within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
-                name: /all 3/i,
-            })
-        ).toHaveAttribute("aria-pressed", "true");
+        expect(getCategoryToolbar()).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "All Districts" })).not.toBeInTheDocument();
     });
 
@@ -2311,7 +2459,7 @@ describe("CodexPage", () => {
         );
 
         await user.click(
-            within(screen.getByRole("toolbar", { name: /filter codex by kind/i })).getByRole("button", {
+            within(getCategoryToolbar()).getByRole("button", {
                 name: /quests 4/i,
             })
         );
