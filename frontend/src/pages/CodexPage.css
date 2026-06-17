@@ -463,8 +463,22 @@
     grid-template-columns: minmax(0, 1fr);
 }
 
+.codex-workspace--referenceOverview {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .codex-workspace--overview .codex-detailPane__body {
     width: 100%;
+}
+
+.codex-workspace--referenceOverview .codex-detailPane {
+    width: 100%;
+    padding-right: 0;
+}
+
+.codex-workspace--referenceOverview .codex-detailPane__body {
+    width: min(100%, 1080px);
+    margin-inline: auto;
 }
 
 .codex-resultsPane {

@@ -48,11 +48,16 @@ const PREFERRED_KIND_ORDER = [
     "units",
 ];
 const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "modifiers"]);
+const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects"]);
 
 type SelectionIntent = "passive" | "related";
 
 function normalizeCodexKind(kind: string): string {
     return kind.trim().toLowerCase();
+}
+
+function supportsFullWidthReferenceOverview(kind: string): boolean {
+    return FULL_WIDTH_REFERENCE_OVERVIEW_KINDS.has(normalizeCodexKind(kind));
 }
 
 export default function CodexPage() {
@@ -191,8 +196,13 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
+    const isFullWidthReferenceOverviewState =
+        supportsFullWidthReferenceOverview(activeKind) &&
+        !hasDeferredQuery &&
+        !selectedEntryParam &&
+        Boolean(selectedListItem && isCodexSummaryEntry(selectedListItem));
     const useCompactHeader = activeKind !== ALL_CODEX_KIND || Boolean(selectedEntryParam);
-    const showResultsPane = !isOverviewState;
+    const showResultsPane = !isOverviewState && !isFullWidthReferenceOverviewState;
     const isPlainRouteReset =
         location.pathname === "/codex" &&
         location.search === "" &&
@@ -487,7 +497,11 @@ export default function CodexPage() {
                     ) : null}
                 </header>
 
-                <div className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""}`}>
+                <div
+                    className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""} ${
+                        isFullWidthReferenceOverviewState ? "codex-workspace--referenceOverview" : ""
+                    }`}
+                >
                     {showResultsPane ? (
                         <aside className="codex-resultsPane" aria-label="Codex results">
                             <div className="codex-resultsPane__header">

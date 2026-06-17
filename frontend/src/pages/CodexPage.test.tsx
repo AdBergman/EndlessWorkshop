@@ -22,6 +22,99 @@ function seedCodexEntries(entries: CodexEntry[]) {
     });
 }
 
+function seedShallowReferenceLayoutEntries() {
+    seedCodexEntries([
+        {
+            exportKind: "councilors",
+            entryKey: "Councilor_Atea",
+            displayName: "Atea",
+            category: "Defense",
+            kind: "Councilor",
+            descriptionLines: ["Public councilor."],
+            referenceKeys: [],
+            publicContextKeys: [
+                "CouncilorEffect_Defense21",
+                "PartnerEffect_Hydracorn_PartnerTrait01",
+            ],
+        },
+        {
+            exportKind: "councilorEffects",
+            entryKey: "CouncilorEffect_Defense21",
+            displayName: "Travels Well",
+            category: "Defense",
+            kind: "Councilor Effect",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Role", value: "Defense" },
+                { label: "Kind", value: "Councilor Effect" },
+            ],
+            sections: [{
+                title: "Effects",
+                lines: ["+100% [HealthRegen] Health Regeneration in Guard stance"],
+            }],
+            publicContextKeys: ["CouncilorEffect_Defense21"],
+        },
+        {
+            exportKind: "partnerEffects",
+            entryKey: "PartnerEffect_Hydracorn_PartnerTrait01",
+            displayName: "Hopeless Romantic",
+            category: "Hero",
+            kind: "Partner Effect",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Scope", value: "Hero" },
+                { label: "Kind", value: "Partner Effect" },
+            ],
+            sections: [{
+                title: "Effects",
+                lines: ["+1 [MovementPoints] Movement Points outside battle"],
+            }],
+            publicContextKeys: ["PartnerEffect_Hydracorn_PartnerTrait01"],
+        },
+        {
+            exportKind: "resources",
+            entryKey: "Resource_Luxury01",
+            displayName: "Klax",
+            category: null,
+            kind: "Resource",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [{ label: "Type", value: "Luxury resource" }],
+            sections: [{ title: "Effects", lines: ["+15 [PublicOrderColored] Approval on City"] }],
+        },
+        {
+            exportKind: "traits",
+            entryKey: "Trait_DaughterOfBor",
+            displayName: "Fierce Independence",
+            category: "Protectorate",
+            kind: "Trait",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Trait" },
+                { label: "Category", value: "Protectorate" },
+            ],
+            sections: [{ title: "Effects", lines: ["+3 [Defense] Defense on Unit"] }],
+        },
+        {
+            exportKind: "tech",
+            entryKey: "Technology_Test",
+            displayName: "Test Technology",
+            descriptionLines: ["Unlocks a test technology."],
+            referenceKeys: [],
+        },
+        {
+            exportKind: "modifiers",
+            entryKey: "Modifier_Test",
+            displayName: "Hidden Modifier",
+            descriptionLines: [],
+            referenceKeys: [],
+        },
+    ]);
+}
+
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
@@ -393,6 +486,122 @@ describe("CodexPage", () => {
         expect(within(getCategoryToolbar()).getByRole("button", { name: /tech/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(screen.queryByRole("heading", { name: "Encyclopedia Index" })).not.toBeInTheDocument();
+    });
+
+    it("uses a full-width shallow overview for partner and councilor effect category routes", async () => {
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=partnereffects"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Partner Effects" })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects 1/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i }))
+            .not.toBeInTheDocument();
+
+        const partnerOverview = screen.getByLabelText("Partner Effects overview");
+        expect(within(partnerOverview).getByText("Hero")).toBeInTheDocument();
+        expect(within(partnerOverview).getByLabelText("Hopeless Romantic effects"))
+            .toHaveTextContent("+1 Movement Points outside battle");
+        expect(within(partnerOverview).getByRole("button", { name: /Source: Atea/i }))
+            .toBeInTheDocument();
+
+        cleanup();
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=counciloreffects"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Councilor Effects" })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilor effects 1/i }))
+            .toHaveAttribute("aria-pressed", "true");
+
+        const councilorOverview = screen.getByLabelText("Councilor Effects overview");
+        expect(within(councilorOverview).getByText("Defense")).toBeInTheDocument();
+        expect(within(councilorOverview).getByLabelText("Travels Well effects"))
+            .toHaveTextContent("+100% Health Regeneration in Guard stance");
+        expect(within(councilorOverview).getByRole("button", { name: /Source: Atea/i }))
+            .toBeInTheDocument();
+    });
+
+    it("keeps resources, traits, tech, and selected effect entries on the split layout", async () => {
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=resources"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Resources" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
+
+        cleanup();
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=traits"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Traits" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
+
+        cleanup();
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
+
+        cleanup();
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter
+                initialEntries={[
+                    "/codex?category=partnereffects&entry=PartnerEffect_Hydracorn_PartnerTrait01",
+                ]}
+            >
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Hopeless Romantic" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
     });
 
     it("requests codex entries on page mount when the global bootstrap has not populated the store yet", async () => {
