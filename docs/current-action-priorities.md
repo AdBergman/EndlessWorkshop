@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-16.
+Current as of 2026-06-17.
 
 This list reflects the current product focus:
 
@@ -12,28 +12,24 @@ This list reflects the current product focus:
 
 Owner: DB exporter team primarily; EWShop backend/frontend as consumers.
 
-Status: DB Exporter returned the cleaned definitive response for
-`DB-CODEX-DEF-*` and final accepted snapshot `20260616-210540`. EWShop has
-cleaned stale active docs and should next import that snapshot, rerun
-diagnostics, and perform bounded browser QA.
+Status: complete for the current definitive response/import QA pass.
 
 Start here:
 
 - `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
 - `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-- `docs/active/codex-db-exporter-response-import-qa-plan.md`
+- `docs/active/codex-db-exporter-response-import-qa-results.md`
 
-Actionable next items:
+Current result:
 
-1. Import final accepted DB Exporter snapshot `20260616-210540` into
-   `local-imports/codex/` using the local-only workflow.
-2. Run the diagnostics listed in the import/QA plan and regenerate active audit
-   reports from the imported final snapshot.
-3. Browser-QA the representative URLs in the import/QA plan.
-4. Verify exact refs now resolve or stay plain exactly as the definitive
-   response says.
-5. Do not create frontend/API work unless the fresh import proves EWShop is
-   failing to preserve, serve, or render exported generic Codex fields.
+1. DB Exporter returned the cleaned definitive response for `DB-CODEX-DEF-*`
+   and final accepted snapshot `20260616-210540`.
+2. EWShop import/diagnostics/browser QA passed for the final accepted snapshot.
+3. No EWShop-owned DB-exporter-response implementation issues are currently
+   open.
+4. Do not create frontend/API work from this response unless fresh import
+   evidence shows EWShop is failing to preserve, serve, or render exported
+   generic Codex fields.
 
 Current decisions to preserve:
 
@@ -51,13 +47,36 @@ Current decisions to preserve:
 - Surrender/tribute values for `Treaty_AskToSurrender` and
   `Treaty_ProposeSurrender` remain runtime-only for static Codex export.
 
-Archived historical context:
+DB Exporter archived historical context:
 
 - `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
 - `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
 - `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`
 - `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/`
 - `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
+
+## P0 - Codex Premium UI Work
+
+Owner: EWShop frontend/product.
+
+Status: active next Codex implementation direction.
+
+Start here, in order:
+
+1. `docs/active/codex-premium-ui-design-baseline.md`
+2. `docs/active/codex-premium-ui-ticket-plan.md`
+
+Next implementation ticket:
+
+- `EW-CODEX-UI-001` - Contextual Codex Header.
+
+Current rules:
+
+- Browser/visual QA is user-owned unless explicitly requested.
+- The stashed Ability/Status filter work must not be committed as-is.
+- Keep direct category access for 4X players.
+- Do not promote Modifiers.
+- Do not touch backend/import/exporter contracts for UI tickets.
 
 ## P0 - Quest Documentation Cleanup Only
 

@@ -1,7 +1,7 @@
 # DB Exporter Definitive Response Index
 
-Status: current response index
-Updated: 2026-06-16
+Status: current response index / closed DB Exporter response record
+Updated: 2026-06-17
 
 ## Current Source Of Truth
 
@@ -17,16 +17,20 @@ or confirmed runtime-only.
 EWShop-facing follow-up docs:
 
 - `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-- `docs/active/codex-db-exporter-response-import-qa-plan.md`
+- `docs/active/codex-db-exporter-response-import-qa-results.md`
+
+EWShop import/diagnostics/browser QA for final accepted snapshot
+`20260616-210540` is complete. No EWShop-owned DB-exporter-response
+implementation issues are currently open.
 
 ## For AI Agents
 
-- Start with the definitive response and the EWShop reconciliation before any
-  import, browser QA, frontend work, or new ticket writing.
-- Use final accepted snapshot `20260616-210540` for the next EWShop import/QA
-  pass.
+- Start with the definitive response, EWShop reconciliation, and import QA
+  result before reopening any DB-exporter-response issue.
+- Use `docs/active/codex-premium-ui-design-baseline.md` and
+  `docs/active/codex-premium-ui-ticket-plan.md` for current Codex UI work.
 - Do not revive archived packet requests or old diagnostic recommendations
-  without fresh evidence from the final accepted snapshot.
+  without fresh evidence from a new accepted snapshot or explicit user request.
 - Do not infer links from names, prose, display labels, or key shapes.
 - Keep Modifiers hidden from top-level navigation.
 - Keep `resources`, `councilorEffects`, `partnerEffects`, and `traits` as

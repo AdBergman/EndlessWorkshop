@@ -1,13 +1,22 @@
 # Codex Self-Sustaining Worklog
 
 Status: active execution log  
-Current as of 2026-06-16
+Current as of 2026-06-17
 
 Use this log as historical evidence from the completed post-exporter-return
-Codex story loop. Current continuation should start from the DB Exporter
-definitive response reconciliation and import/QA plan:
-`docs/active/codex-db-exporter-response-ewshop-reconciliation.md` and
-`docs/active/codex-db-exporter-response-import-qa-plan.md`.
+Codex story loop. DB Exporter definitive response/import QA is complete, and no
+EWShop-owned DB-exporter-response implementation issues are currently open.
+
+Current Codex UI continuation should start from:
+
+1. `docs/active/codex-premium-ui-design-baseline.md`
+2. `docs/active/codex-premium-ui-ticket-plan.md`
+
+Next recommended implementation ticket: `EW-CODEX-UI-001` - Contextual Codex
+Header.
+
+Do not recommit the stashed Ability/Status filter work as-is. Browser/visual QA
+is user-owned unless explicitly requested.
 
 ## Story Status Snapshot
 

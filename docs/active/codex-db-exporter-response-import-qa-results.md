@@ -1,8 +1,9 @@
 # DB Exporter Response Import QA Results
 
 Status: active QA result
-Current as of 2026-06-16
-Source plan: `docs/active/codex-db-exporter-response-import-qa-plan.md`
+Current as of 2026-06-17
+Source plan:
+`docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/codex-db-exporter-response-import-qa-plan.md`
 
 ## Summary
 
@@ -39,6 +40,10 @@ npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --
 npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md
 ```
 
+The generated audit outputs from this completed pass have since been archived
+under
+`docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/`.
+
 Content diagnostic result:
 
 - Entries scanned: 2573.
@@ -47,10 +52,10 @@ Content diagnostic result:
 - Categories: actions 84, districts 41, improvements 23, populations 7.
 - Top EWShop candidates: none.
 
-Generated active reports:
+Generated reports:
 
-- `docs/active/codex-relationship-value-gap-audit.md`
-- `docs/active/codex-preview-surface-audit.md`
+- `docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/codex-relationship-value-gap-audit.md`
+- `docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/codex-preview-surface-audit.md`
 
 Diagnostic note: the relationship-gap report now correctly shows 21/21
 Population exact threshold refs resolved and 0 unresolved exact refs, but one

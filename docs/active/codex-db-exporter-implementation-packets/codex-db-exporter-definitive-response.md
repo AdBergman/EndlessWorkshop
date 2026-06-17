@@ -1279,7 +1279,12 @@ Final validated export counts for the EWShop import snapshot:
 
 ## Final Validation State
 
-EWShop should use final accepted snapshot `20260616-210540` for import/QA.
+EWShop used final accepted snapshot `20260616-210540` for import/QA. The
+EWShop validation pass is complete; see
+`docs/active/codex-db-exporter-response-import-qa-results.md` for the active QA
+result. No EWShop-owned DB-exporter-response implementation issues are
+currently open.
+
 Snapshot `20260616-200204` is retained as the validated Action/Population
 deep-dive evidence point, but it was superseded as the final accepted snapshot
 by the ability metadata F8 export.
@@ -1298,16 +1303,6 @@ by the ability metadata F8 export.
   `succeeded=21, failed=0`.
 
 For the next runtime-affecting exporter change after this return, rebuild,
-install, run a new F8 export, snapshot, validate, diff, and inspect BepInEx
-logs before updating the final snapshot again.
-
-EWShop import/QA checklist:
-
-- `npm run diagnostics:codex-content -- --input ../local-imports/codex --limit 300`
-- `npm run diagnostics:codex-relationship-gaps -- --input ../local-imports/codex --output ../docs/active/codex-relationship-value-gap-audit.md`
-- `npm run diagnostics:codex-preview-surfaces -- --input ../local-imports/codex --output ../docs/active/codex-preview-surface-audit.md`
-- Browser QA representative URLs listed in
-  `docs/active/codex-db-exporter-response-import-qa-plan.md`.
-- Confirm shallow categories remain shallow: `resources`, `councilorEffects`,
-  `partnerEffects`, `traits`.
-- Confirm Modifiers remain hidden from top-level navigation.
+install, run a new F8 export, snapshot, validate, diff, inspect BepInEx logs,
+and create a fresh EWShop import/QA plan before updating the final snapshot
+again.
