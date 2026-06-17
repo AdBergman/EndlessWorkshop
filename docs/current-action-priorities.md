@@ -68,7 +68,7 @@ Start here, in order:
 
 Next implementation ticket:
 
-- `EW-CODEX-UI-001` - Contextual Codex Header.
+- `EW-CODEX-UI-002` - Landing Page Final Polish.
 
 Current rules:
 

@@ -18,23 +18,30 @@ Purpose: preserve the current design direction and implement safely in small sli
 
 ## EW-CODEX-UI-001 — Contextual Codex Header
 
+Status: implemented in commit `8b57d228`.
+
 ### Goal
 
 Make category pages feel like category pages instead of always starting with the generic `Encyclopedia` header.
 
-### Current problem
+### Final accepted outcome
 
-On category pages, the global header still says `Encyclopedia`, while the page content also says `All Actions`, `All Tech`, etc. This makes category pages feel generic/heavy and contributes to the “page inside a page” feeling.
+- `/codex` keeps the large `Encyclopedia` header, search, stats, and category cards.
+- Category and entry views use a compact archive/search header.
+- Category and entry views do not show a large repeated category title in the top header.
+- The direct category shelf remains visible on category/search views.
+- `All` is the first category-shelf control and returns to the landing/full encyclopedia state.
+- The category shelf wraps instead of overflowing horizontally.
+- Compact-header search is bounded in width.
+- Codex autocomplete popup is disabled for now.
+- Search filtering remains active and keeps the existing search performance behavior.
+- Modifiers remain hidden.
 
-### Desired behavior
+### Notes
 
-- `/codex`: large header remains `Encyclopedia`.
-- `/codex?category=actions`: large header becomes `Actions`.
-- `/codex?category=tech`: large header becomes `Tech`.
-- `/codex?category=partnereffects`: large header becomes `Partner Effects`.
-- Entry routes keep the category header behavior for now; entry title remains in the detail panel.
+Manual review rejected the intermediate version where the top header became the selected category name because it repeated the same category context already shown in the results panel and overview/detail panel.
 
-### Keep
+### Kept
 
 - landing category cards,
 - category page left results,
@@ -43,7 +50,7 @@ On category pages, the global header still says `Encyclopedia`, while the page c
 - search,
 - stats.
 
-### Do not
+### Did not
 
 - redesign landing cards,
 - redesign detail pages,
@@ -51,25 +58,17 @@ On category pages, the global header still says `Encyclopedia`, while the page c
 - add Ability/Status filters,
 - alter backend/import/exporter contracts.
 
-### Tests
-
-- `/codex` renders `Encyclopedia` as header.
-- `/codex?category=actions` renders `Actions` as header.
-- `/codex?category=partnereffects` renders `Partner Effects` as header.
-- landing cards still render on `/codex`.
-- Modifiers remain hidden.
-- Search still works.
-
 ### Validation
 
 - `npm test -- --run src/pages/CodexPage.test.tsx`
+- `npm test -- --run src/components/Codex/CodexSearch.test.tsx`
 - `npx tsc --noEmit --project tsconfig.json`
 - `npm run build`
 - `git diff --check`
 
-### Suggested commit
+### Commit
 
-`feat(codex): make category header contextual`
+`feat(codex): compact category page header`
 
 ---
 

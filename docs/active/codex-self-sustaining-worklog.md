@@ -12,8 +12,8 @@ Current Codex UI continuation should start from:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next recommended implementation ticket: `EW-CODEX-UI-001` - Contextual Codex
-Header.
+Next recommended implementation ticket: `EW-CODEX-UI-002` - Landing Page Final
+Polish.
 
 Do not recommit the stashed Ability/Status filter work as-is. Browser/visual QA
 is user-owned unless explicitly requested.
@@ -36,6 +36,38 @@ is user-owned unless explicitly requested.
 | `EW-CODEX-AUDIT-005` - Browser-Review Action Mechanics Presentation | completed | Browser QA found current structured rendering sufficient; thin Actions stay exporter-owned |
 | `EW-CAT-UX-001` - Label shallow reference category summaries | completed | Commit `b7ecc475`; category summary labels distinguish reference lists |
 | `EW-CAT-UX-005` - Treat Traits as shallow reference rows | completed | Commit `2f9c4f75`; Traits use shallow rows with exact Minor Faction links |
+| `EW-CODEX-UI-001` - Contextual Codex Header | completed | Commit `8b57d228`; landing keeps large `Encyclopedia`, category/search/entry views use compact archive/search header, `All` shelf escape hatch restored, autocomplete disabled |
+
+## 2026-06-17 - EW-CODEX-UI-001 Contextual Codex Header
+
+- Story ID/title: `EW-CODEX-UI-001` - Contextual Codex Header.
+- Current status: completed.
+- Evidence used:
+  - `docs/active/codex-premium-ui-design-baseline.md`.
+  - `docs/active/codex-premium-ui-ticket-plan.md`.
+  - Manual visual review feedback on the intermediate large category-title and
+    compact-header iterations.
+- Changes made:
+  - Kept `/codex` landing on the large `Encyclopedia` header with category-card
+    navigation.
+  - Replaced category/search/entry top headers with a compact archive/search
+    header instead of a repeated category title.
+  - Restored `All` as the first category-shelf control and full encyclopedia
+    escape hatch.
+  - Made the category shelf wrap inside the page.
+  - Bounded compact-header search width.
+  - Disabled the Codex autocomplete popup while preserving search filtering.
+- Tests/diagnostics/browser QA run:
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npm test -- --run src/components/Codex/CodexSearch.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+  - Browser/visual QA was user-owned.
+- Commit hash if committed:
+  - `8b57d228`
+- Next recommended action:
+  - Continue with `EW-CODEX-UI-002` - Landing Page Final Polish.
 
 ## 2026-06-16 - Loop Bootstrap And State Reconciliation
 

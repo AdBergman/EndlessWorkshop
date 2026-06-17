@@ -32,6 +32,7 @@ The category-card grid finally feels like a premium archive/index. It gives all 
 ### Category pages
 
 Category pages currently keep:
+- compact archive/search header,
 - compact direct category shelf at the top,
 - left result list,
 - right overview/detail panel,
@@ -41,6 +42,12 @@ Category pages currently keep:
 Accepted for now:
 - Direct all-category access is valuable for 4X players.
 - The category shelf should stay compact and visually quiet.
+- The category shelf includes `All` as the first escape-hatch control back to
+  the landing/full encyclopedia state.
+- The category shelf should wrap instead of overflowing horizontally.
+- Category and entry views should not repeat a large selected-category title in
+  the top header; the left results and right overview/detail panels carry the
+  category context.
 - Do not hide all categories behind group navigation for now.
 - Do not move all category navigation into the left panel for now.
 - The left panel remains the result/result-refinement surface, not the full category tree.
@@ -60,6 +67,10 @@ Accepted:
 Accepted:
 - Search is global/prominent and must stay fast.
 - Search performance was recently improved by caching search documents and scoring candidates once before sorting.
+- Codex search filters results directly; the autocomplete popup is disabled for
+  now because the cramped dropdown was noisy and low-value.
+- Compact-header search is bounded in width so it does not dominate category
+  pages.
 - Search behavior/result ordering should not change without explicit product decision.
 - Search visual/browser QA is user-owned unless explicitly requested.
 
@@ -131,12 +142,11 @@ Filters should wait until the surrounding category/header layout is more settled
 
 ## 4. Known current problems
 
-1. Category pages still use the global `Encyclopedia` header, which can feel generic/heavy.
-2. The category shelf on category pages is acceptable but still visually dense.
-3. The landing page may still need fine spacing polish.
-4. The left panel is useful for Tech/Abilities/Statuses, but questionable for shallow list categories like Partner Effects.
-5. Ability/Status filters are parked until layout hierarchy is clearer.
-6. Search performance must not regress.
+1. The landing page may still need fine spacing polish.
+2. The category shelf on category pages is compact and wraps, but may still need final hierarchy polish.
+3. The left panel is useful for Tech/Abilities/Statuses, but questionable for shallow list categories like Partner Effects.
+4. Ability/Status filters are parked until layout hierarchy is clearer.
+5. Search performance must not regress.
 
 ## 5. Current 10/10 target
 
@@ -161,26 +171,35 @@ Should not show:
 Purpose: browse one category.
 
 Should show:
-- contextual header for selected category in a future slice
-- search
-- compact category shelf
+- compact archive/search header
+- bounded-width search
+- compact category shelf with `All` first
 - left result list
 - right overview/detail panel
+
+Should not show:
+- large repeated category title in the top header
 
 ### Entry mode: `/codex?category=...&entry=...`
 Purpose: read one entry.
 
 Should show:
-- category context
+- compact archive/search header
+- category context in the left/right panels
 - left result list where useful
 - right entry detail
 
-Entry title should remain primarily in the detail card.
+Entry title should remain in the detail card, not the top header.
 
 ### Search-active mode
 Purpose: search results.
 
-Not fully designed yet. Do not redesign in the next small slice unless explicitly asked.
+Should show:
+- search filtering results directly
+- no autocomplete popup for now
+- category shelf with `All` available as the full-encyclopedia context
+
+Do not redesign search further unless explicitly asked.
 
 ## 6. Validation philosophy
 
