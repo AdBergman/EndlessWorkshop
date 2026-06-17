@@ -74,21 +74,27 @@ Manual review rejected the intermediate version where the top header became the 
 
 ## EW-CODEX-UI-002 — Landing Page Final Polish
 
+Status: no-op / deferred for now.
+
 ### Goal
 
 Make `/codex` feel like a premium encyclopedia index.
 
-### Current problem
+### Outcome
 
-The landing direction is good, but spacing and composition may still need manual tuning.
+The landing direction is acceptable for now. A tiny CSS-only polish pass was
+attempted after `EW-CODEX-UI-001`, but manual visual review found it did not
+meaningfully improve the page and made the landing feel worse. Do not commit or
+recreate that tiny polish.
 
-### Desired behavior
+Reopen only for a more deliberate landing redesign with a clear visual target.
+
+### Current behavior to preserve
 
 - Category cards are the primary navigation.
 - No duplicated top category shelf on landing.
 - No duplicated giant `Codex Overview` title.
-- Search and stats feel balanced.
-- Category card grid uses available width well.
+- Large `Encyclopedia` header, search, stats, and category cards remain.
 
 ### Do not
 
@@ -105,23 +111,29 @@ The landing direction is good, but spacing and composition may still need manual
 
 ### Suggested commit
 
-`feat(codex): polish encyclopedia landing index`
+None for now.
 
 ---
 
 ## EW-CODEX-UI-003 — Category Shelf Final Polish
 
+Status: covered by `EW-CODEX-UI-001` unless a specific new shelf issue is found.
+
 ### Goal
 
 Keep direct category access while making the category shelf as calm and compact as possible.
 
-### Current problem
+### Outcome
 
-The category shelf is better after recent compacting, but still visually dense on category pages.
+The accepted `EW-CODEX-UI-001` implementation already restored `All`, made the
+shelf wrap, kept all visible categories directly accessible, kept counts
+secondary, preserved active highlighting, and kept Modifiers hidden.
 
-### Desired behavior
+### Current behavior to preserve
 
 - All visible categories remain one-click accessible on category pages.
+- `All` is first and returns to the landing/full encyclopedia state.
+- The shelf wraps instead of overflowing.
 - Counts are secondary.
 - Active category is clear.
 - No grouped shelf.
@@ -143,11 +155,13 @@ The category shelf is better after recent compacting, but still visually dense o
 
 ### Suggested commit
 
-`feat(codex): refine category shelf hierarchy`
+None unless a specific new shelf issue is identified.
 
 ---
 
 ## EW-CODEX-UI-004 — Shallow Reference Layout Review
+
+Status: active docs/design investigation.
 
 ### Goal
 
@@ -167,7 +181,9 @@ For Partner Effects, the right/main reference list is more useful than the compr
 
 ### First step
 
-Docs/design investigation only. Do not implement directly.
+Docs/design investigation only. Use
+`docs/active/codex-shallow-reference-layout-review.md` as the active review
+record. Do not implement directly.
 
 ### Questions
 
@@ -226,7 +242,11 @@ Statuses:
 
 Start with:
 
-`EW-CODEX-UI-001 — Contextual Codex Header`
+`EW-CODEX-UI-004A — Partner/Councilor Effects Full-Width Shallow Overview`
 
 Reason:
-It is the smallest meaningful visual hierarchy improvement. It does not reopen navigation structure and should make category pages feel less generic immediately.
+`EW-CODEX-UI-001` is implemented, `EW-CODEX-UI-002` is deferred, and
+`EW-CODEX-UI-003` is covered by the accepted compact header work. The next
+useful slice is the smallest implementation that follows the shallow reference
+layout review: full-width overview only for Partner Effects and Councilor
+Effects, while preserving split layout for selected entries and search.

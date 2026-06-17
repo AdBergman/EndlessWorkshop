@@ -68,7 +68,7 @@ Start here, in order:
 
 Next implementation ticket:
 
-- `EW-CODEX-UI-002` - Landing Page Final Polish.
+- `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width Shallow Overview.
 
 Current rules:
 
@@ -77,6 +77,9 @@ Current rules:
 - Keep direct category access for 4X players.
 - Do not promote Modifiers.
 - Do not touch backend/import/exporter contracts for UI tickets.
+- `EW-CODEX-UI-002` is deferred after rejected tiny CSS-only landing polish.
+- `EW-CODEX-UI-003` is covered by the accepted compact category shelf behavior
+  from `EW-CODEX-UI-001`.
 
 ## P0 - Quest Documentation Cleanup Only
 

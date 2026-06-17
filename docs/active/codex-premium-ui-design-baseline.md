@@ -25,6 +25,9 @@ Accepted:
 - Category cards should show icon, category name, count, and a short description.
 - All visible categories should remain directly discoverable from the landing page.
 - Modifiers must remain hidden from visible category navigation.
+- The current landing is acceptable for now; the attempted tiny CSS-only polish
+  after `EW-CODEX-UI-001` was not visually meaningful enough and should not be
+  repeated as-is.
 
 Rationale:
 The category-card grid finally feels like a premium archive/index. It gives all categories direct visibility without the old chip-soup effect.
@@ -87,7 +90,9 @@ Accepted:
 - They are list-first reference categories, not heavy dossier pages.
 - Their list rows should show the useful effect/source/extractor information directly.
 - They should not get generic rich dossier treatment unless product direction changes.
-- For shallow categories, the left result panel may be less useful and is a future layout question, not solved yet.
+- For shallow categories, the left result panel may be less useful and is now
+  being investigated in
+  `docs/active/codex-shallow-reference-layout-review.md`.
 
 ### Modifiers
 
@@ -142,11 +147,9 @@ Filters should wait until the surrounding category/header layout is more settled
 
 ## 4. Known current problems
 
-1. The landing page may still need fine spacing polish.
-2. The category shelf on category pages is compact and wraps, but may still need final hierarchy polish.
-3. The left panel is useful for Tech/Abilities/Statuses, but questionable for shallow list categories like Partner Effects.
-4. Ability/Status filters are parked until layout hierarchy is clearer.
-5. Search performance must not regress.
+1. The left panel is useful for Tech/Abilities/Statuses, but questionable for shallow list categories like Partner Effects and Councilor Effects.
+2. Ability/Status filters are parked until layout hierarchy is clearer.
+3. Search performance must not regress.
 
 ## 5. Current 10/10 target
 

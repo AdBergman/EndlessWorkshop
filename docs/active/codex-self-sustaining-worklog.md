@@ -12,8 +12,8 @@ Current Codex UI continuation should start from:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next recommended implementation ticket: `EW-CODEX-UI-002` - Landing Page Final
-Polish.
+Next recommended implementation ticket: `EW-CODEX-UI-004A` - Partner/Councilor
+Effects Full-Width Shallow Overview.
 
 Do not recommit the stashed Ability/Status filter work as-is. Browser/visual QA
 is user-owned unless explicitly requested.
@@ -37,6 +37,34 @@ is user-owned unless explicitly requested.
 | `EW-CAT-UX-001` - Label shallow reference category summaries | completed | Commit `b7ecc475`; category summary labels distinguish reference lists |
 | `EW-CAT-UX-005` - Treat Traits as shallow reference rows | completed | Commit `2f9c4f75`; Traits use shallow rows with exact Minor Faction links |
 | `EW-CODEX-UI-001` - Contextual Codex Header | completed | Commit `8b57d228`; landing keeps large `Encyclopedia`, category/search/entry views use compact archive/search header, `All` shelf escape hatch restored, autocomplete disabled |
+| `EW-CODEX-UI-002` - Landing Page Final Polish | deferred | Tiny CSS-only polish was manually rejected; landing is acceptable until a more deliberate redesign |
+| `EW-CODEX-UI-003` - Category Shelf Final Polish | covered | Accepted `EW-CODEX-UI-001` already restored `All`, wrapped the shelf, kept direct access/counts/active state, and hid Modifiers |
+| `EW-CODEX-UI-004` - Shallow Reference Layout Review | active | `docs/active/codex-shallow-reference-layout-review.md`; docs/design investigation only |
+
+## 2026-06-17 - Codex Premium UI Ticket Status Closeout
+
+- Story ID/title: `EW-CODEX-UI-002` / `EW-CODEX-UI-003` closeout and
+  `EW-CODEX-UI-004` review start.
+- Current status: completed docs/status update.
+- Evidence used:
+  - Manual visual review rejected the tiny landing CSS-only polish.
+  - Accepted `EW-CODEX-UI-001` compact header/category shelf behavior.
+  - Current frontend shallow reference code and tests for Resources, Councilor
+    Effects, Partner Effects, and Traits.
+- Changes made:
+  - Marked `EW-CODEX-UI-002` no-op/deferred for now.
+  - Marked `EW-CODEX-UI-003` covered by `EW-CODEX-UI-001` unless a specific new
+    shelf issue appears.
+  - Created `docs/active/codex-shallow-reference-layout-review.md`.
+  - Set next recommended implementation to `EW-CODEX-UI-004A`.
+- Tests/diagnostics/browser QA run:
+  - `git status --short`
+  - `git diff --check`
+  - Browser/visual QA was not run.
+- Next recommended action:
+  - Implement `EW-CODEX-UI-004A` only after review: full-width shallow overview
+    for Partner Effects and Councilor Effects category summaries, preserving
+    split layout for selected entries and search.
 
 ## 2026-06-17 - EW-CODEX-UI-001 Contextual Codex Header
 
