@@ -103,7 +103,7 @@ describe("App route data hydration", () => {
 
         await user.click(screen.getByRole("link", { name: "Codex" }));
 
-        expect(await screen.findByRole("heading", { name: "Codex Overview" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Encyclopedia" })).toBeInTheDocument();
         expect(screen.getAllByRole("button", { name: /districts 1/i }).length).toBeGreaterThan(0);
         expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
     });

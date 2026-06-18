@@ -1,5 +1,15 @@
 import ReactDOM from "react-dom";
-import { type FocusEvent, type MouseEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+    type FocusEvent,
+    type MouseEvent,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useId,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { FaExternalLinkAlt } from "react-icons/fa";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
@@ -52,11 +62,11 @@ export function QuestCodexReferenceLink({
         event.stopPropagation();
     };
 
-    const clearHideTimer = () => {
+    const clearHideTimer = useCallback(() => {
         if (!hideTimerRef.current) return;
         window.clearTimeout(hideTimerRef.current);
         hideTimerRef.current = null;
-    };
+    }, []);
 
     const showTooltipForElement = (element: HTMLElement) => {
         if (!showTooltip) return;
@@ -81,10 +91,10 @@ export function QuestCodexReferenceLink({
         event.stopPropagation();
     };
 
-    const hideTooltip = () => {
+    const hideTooltip = useCallback(() => {
         clearHideTimer();
         setTooltipCoords(null);
-    };
+    }, [clearHideTimer]);
 
     const hideTooltipSoon = () => {
         clearHideTimer();
@@ -116,7 +126,7 @@ export function QuestCodexReferenceLink({
             document.removeEventListener("pointerdown", handlePointerDown);
             document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [tooltipCoords, tooltipId]);
+    }, [hideTooltip, tooltipCoords, tooltipId]);
 
     if (!entry) return <>{children}</>;
 
