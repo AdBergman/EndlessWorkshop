@@ -92,14 +92,32 @@ Accepted:
 - They should not get generic rich dossier treatment unless product direction changes.
 - Partner Effects and Councilor Effects are proven full-width shallow overview
   categories as of `92e94047`.
-- On Partner/Councilor Effects overview routes, the centered reference overview
-  replaces the left results panel.
-- Selected Partner/Councilor Effect entry routes still use the split
-  results/detail layout.
-- Resources and Traits remain split-layout pending separate product review.
-- Extractors remain out of scope.
+- Resources are also proven full-width shallow overview categories as of
+  `5bf7253d`.
+- On Partner/Councilor Effects/Resources overview routes, the centered
+  reference overview replaces the left results panel.
+- Selected Partner/Councilor Effect and Resource entry routes still use the
+  split results/detail layout.
+- Search-active shallow routes keep split layout so search results remain
+  visible.
+- Resource overview rows show icons when exact resource/extractor icon data is
+  available.
+- Resource overview ordering is Luxury A-Z, Strategic A-Z, then Other A-Z,
+  based on exported resource Type facts.
+- Traits remain split-layout unless future manual review proves a problem.
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list through `supportsFullWidthReferenceOverview(kind)`.
+
+### Extractors
+
+Accepted:
+- Extractors are hidden support/reference targets, not visible top-level Codex
+  destinations.
+- Extractors do not appear in the category shelf or `/codex` landing category
+  cards.
+- Extractor entries remain searchable, linkable, and direct-routable where
+  exact refs exist.
+- Resource -> Extractor links remain the primary discovery path.
 
 ### Modifiers
 
@@ -154,10 +172,9 @@ Filters should wait until the surrounding category/header layout is more settled
 
 ## 4. Known current problems
 
-1. Resources may be worth reviewing for a full-width shallow overview, but it
-   remains split-layout until a separate product decision.
-2. Ability/Status filters are parked until layout hierarchy is clearer.
-3. Search performance must not regress.
+1. Ability/Status filters are parked until layout hierarchy is clearer.
+2. Search performance must not regress.
+3. No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## 5. Current 10/10 target
 

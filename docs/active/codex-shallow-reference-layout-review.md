@@ -1,6 +1,6 @@
 # Codex Shallow Reference Layout Review
 
-Status: first implementation slice completed; remaining categories pending review
+Status: completed for Partner Effects, Councilor Effects, and Resources
 Area: Codex / Encyclopedia
 Ticket: `EW-CODEX-UI-004` - Shallow Reference Layout Review
 
@@ -14,11 +14,13 @@ question is whether these category overviews still need the left result panel.
 
 Implemented result: `EW-CODEX-UI-004A` landed in commit `92e94047`.
 Partner Effects and Councilor Effects now use a centered full-width reference
-overview on category overview routes. Their selected entry routes and
-search-active states keep the split layout.
+overview on category overview routes. Resources followed in commit `5bf7253d`
+with full-width overview, resource icons where available, and resource ordering
+by exported Type facts.
 
-Resources and Traits remain split-layout pending separate product review. Do
-not include Extractors without new evidence.
+Traits remain split-layout by design for now. Extractors are hidden
+support/reference targets after commit `0ab94ec9`, not visible top-level
+navigation destinations.
 
 ## Current Evidence
 
@@ -32,8 +34,8 @@ not include Extractors without new evidence.
   links.
 - Traits overview rows show category/context, exported effect lines, and exact
   Minor Faction links where available.
-- Extractors are a normal visible category today, not part of
-  `isShallowReferenceKind`.
+- Extractors are not visible top-level categories; they remain searchable,
+  linkable, and direct-routable where exact refs exist.
 - Current route behavior selects a category summary entry for category routes;
   selecting an individual entry opens the entry detail while preserving exact
   links and direct routes.
@@ -44,9 +46,9 @@ not include Extractors without new evidence.
 | --- | --- | --- |
 | Partner Effects | Full-width reference-list overview first | The overview list carries the useful payload: effect lines, scope/context, and source links. The left result panel duplicates names in a narrower, lower-value form. |
 | Councilor Effects | Full-width reference-list overview first | Same shape as Partner Effects. Rows are list-first mechanics references, and the source/effect context belongs in the main overview. |
-| Resources | Candidate for a later pass, not first slice | Resource rows are also list-first and link to Extractors, but Resources can be more navigational because extractor relationships may invite entry-by-entry inspection. Review after effects categories. |
+| Resources | Full-width reference-list overview implemented | Resource rows are list-first, show exact extractor links, show icons where exact icon data exists, and sort by exported resource Type facts: Luxury, Strategic, Other. |
 | Traits | Keep current split layout for now | Traits can be source/contextual and often participate in faction, hero, and minor-faction routes. The left panel may still help scanning and direct selection. |
-| Extractors | Do not include for now | Extractors are not shallow in current code and behave more like district/improvement infrastructure entries tied to Resources. Include only after separate evidence. |
+| Extractors | Hidden support/reference target | Extractors are discovered through Resources, search, direct routes, and exact Resource links instead of visible top-level navigation. |
 
 ## Proposed Layout Behavior
 
@@ -69,9 +71,16 @@ For Partner Effects and Councilor Effects:
 
 For Resources:
 
-- Keep current split layout until Partner/Councilor Effects prove the pattern.
-- Partner/Councilor Effects have now proven the pattern; Resources is the next
-  candidate for separate product review, not an automatic follow-up.
+- Category overview route, no search query, no selected concrete entry:
+  - use a centered full-width reference-list overview;
+  - hide the left result panel;
+  - show resource icons where exact icon data exists;
+  - order Luxury A-Z, Strategic A-Z, then Other A-Z using exported Type facts;
+  - keep exact Extractor links.
+- Selected entry route:
+  - keep current split layout.
+- Search-active route:
+  - keep current split layout.
 
 For Traits:
 
@@ -85,10 +94,15 @@ For Traits:
 - `/codex?category=partnereffects` and `/codex?category=counciloreffects`
   should show full-width overview only when the selected item is the category
   summary entry.
+- `/codex?category=resources` should show full-width overview only when the
+  selected item is the category summary entry.
 - `/codex?category=partnereffects&entry=...` and
   `/codex?category=counciloreffects&entry=...` should keep split layout.
+- `/codex?category=resources&entry=...` should keep split layout.
 - `All` should continue to return to `/codex`.
 - Modifiers remain hidden from visible category navigation.
+- Extractors remain hidden from visible category navigation but exact
+  `/codex?category=extractors&entry=...` routes may resolve.
 
 ## Search Behavior
 
@@ -107,9 +121,9 @@ hydration and selected-entry behavior unchanged.
 Current implementation guardrail:
 
 - full-width shallow overview is controlled by the explicit allow-list
-  `counciloreffects`, `partnereffects`;
+  `counciloreffects`, `partnereffects`, `resources`;
 - `supportsFullWidthReferenceOverview(kind)` is the layout helper;
-- add Resources or any future category only after deliberate product review.
+- add any future category only after deliberate product review.
 
 Avoid:
 
@@ -126,6 +140,7 @@ Implemented full-width shallow overview only for:
 
 - `counciloreffects`
 - `partnereffects`
+- `resources`
 
 Only apply it when:
 
@@ -133,7 +148,7 @@ Only apply it when:
 - the selected list item is the summary entry;
 - there is no active search query.
 
-Everything else remains split-layout.
+Traits and everything else remain split-layout.
 
 ## Test Plan
 
@@ -145,16 +160,18 @@ Everything else remains split-layout.
   page.
 - `/codex?category=counciloreffects&entry=...` keeps the split layout and detail
   page.
-- Search-active Partner/Councilor Effects routes keep the result panel.
-- Resources and Traits keep current split behavior.
+- `/codex?category=resources` renders the Resources overview without the left
+  result panel.
+- Search-active Partner/Councilor Effects/Resources routes keep the result
+  panel.
+- Traits keep current split behavior.
+- Extractors remain absent from visible top-level navigation but linkable.
 - `All` remains visible in category/search shelf and returns to `/codex`.
 - Modifiers remain hidden.
 
 ## Suggested Next Implementation Prompt
 
-Decision prompt:
+Next implementation prompt:
 
-Review whether Resources should get the same full-width shallow overview
-treatment now that Partner/Councilor Effects are proven, or defer Resources and
-move to `EW-CODEX-UI-005` Ability/Status refinement. Do not expand the
-full-width allow-list without that product decision.
+Move to `EW-CODEX-UI-005` Ability/Status refinement. The old Ability/Status
+stash must be reviewed and selectively reused, not applied wholesale.

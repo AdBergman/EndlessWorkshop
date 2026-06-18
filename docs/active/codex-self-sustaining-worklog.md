@@ -12,9 +12,8 @@ Current Codex UI continuation should start from:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next recommended decision: review Resources for similar shallow overview
-treatment, or defer Resources and start `EW-CODEX-UI-005` Ability/Status
-refinement.
+Next recommended implementation ticket: `EW-CODEX-UI-005` - Ability/Status
+refinement reintroduction.
 
 Do not recommit the stashed Ability/Status filter work as-is. Browser/visual QA
 is user-owned unless explicitly requested.
@@ -41,7 +40,43 @@ is user-owned unless explicitly requested.
 | `EW-CODEX-UI-002` - Landing Page Final Polish | deferred | Tiny CSS-only polish was manually rejected; landing is acceptable until a more deliberate redesign |
 | `EW-CODEX-UI-003` - Category Shelf Final Polish | covered | Accepted `EW-CODEX-UI-001` already restored `All`, wrapped the shelf, kept direct access/counts/active state, and hid Modifiers |
 | `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width Shallow Overview | completed | Commit `92e94047`; Partner/Councilor Effects overview routes use centered full-width reference layout through explicit allow-list |
-| `EW-CODEX-UI-004` - Shallow Reference Layout Review | partially completed | Effects slice proven; Resources and Traits remain split-layout pending separate product review; Extractors remain out of scope |
+| `EW-CODEX-UI-004` - Shallow Reference Layout Review | completed | Commits `92e94047`, `0ab94ec9`, `5bf7253d`; Partner Effects, Councilor Effects, and Resources use full-width overview; Extractors are hidden support/reference targets; Traits remain split-layout |
+| `EW-CODEX-UI-005` - Ability/Status Refine Reintroduction | not started | Ability/Status metadata work remains parked in `stash@{0}` and must be reviewed selectively |
+
+## 2026-06-18 - EW-CODEX-UI-004 Resource And Extractor Closeout
+
+- Story ID/title: `EW-CODEX-UI-004` resource/extractor closeout.
+- Current status: completed.
+- Evidence used:
+  - Commits `0ab94ec9` and `5bf7253d`.
+  - Manual review that Extractors are support/reference targets rather than
+    strong top-level destinations.
+  - Manual review that Resources benefit from the same centered full-width
+    shallow overview as Partner/Councilor Effects.
+- Changes made:
+  - Extractors are hidden from visible top-level navigation and `/codex`
+    landing cards.
+  - Extractor entries remain searchable, linkable, and direct-routable where
+    exact refs exist.
+  - Resources overview routes now use centered full-width shallow overview.
+  - Resource overview rows show icons where exact icon data is available.
+  - Resource overview rows sort Luxury A-Z, Strategic A-Z, then Other A-Z using
+    exported Type facts.
+  - Selected Resource entry routes and search-active Resources keep split
+    layout.
+  - Traits remain split-layout by design for now.
+- Tests/diagnostics/browser QA run:
+  - `npm test -- --run src/pages/CodexPage.test.tsx`
+  - `npx tsc --noEmit --project tsconfig.json`
+  - `npm run build`
+  - `git diff --check`
+  - Browser/visual QA was user-owned.
+- Commit hash if committed:
+  - `0ab94ec9`
+  - `5bf7253d`
+- Next recommended action:
+  - Start `EW-CODEX-UI-005` Ability/Status refinement reintroduction. Review
+    and selectively reuse the parked stash; do not apply it wholesale.
 
 ## 2026-06-17 - EW-CODEX-UI-004A Effect Reference Overview Layout
 
@@ -71,8 +106,8 @@ is user-owned unless explicitly requested.
 - Commit hash if committed:
   - `92e94047`
 - Next recommended action:
-  - Review Resources for similar shallow overview treatment, or defer Resources
-    and move to `EW-CODEX-UI-005` Ability/Status refinement.
+  - Historical note: Resources were later reviewed and implemented in commit
+    `5bf7253d`.
 
 ## 2026-06-17 - Codex Premium UI Ticket Status Closeout
 

@@ -66,10 +66,9 @@ Start here, in order:
 1. `docs/active/codex-premium-ui-design-baseline.md`
 2. `docs/active/codex-premium-ui-ticket-plan.md`
 
-Next decision:
+Next implementation ticket:
 
-- Review Resources for similar shallow overview treatment, or defer Resources
-  and move to `EW-CODEX-UI-005` Ability/Status refinement.
+- `EW-CODEX-UI-005` - Ability/Status refinement reintroduction.
 
 Current rules:
 
@@ -84,10 +83,14 @@ Current rules:
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.
-- Resources and Traits remain split-layout pending separate product review.
-- Extractors remain out of scope.
+- Resources full-width shallow overview, resource icons, and resource ordering
+  landed in commit `5bf7253d`.
+- Extractors are hidden support/reference targets as of commit `0ab94ec9`;
+  they remain searchable, linkable, and direct-routable where exact refs exist.
+- Traits remain split-layout unless future manual review proves a problem.
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list.
+- No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only
 

@@ -161,8 +161,7 @@ None unless a specific new shelf issue is identified.
 
 ## EW-CODEX-UI-004 — Shallow Reference Layout Review
 
-Status: implemented for the first effects slice; remaining shallow categories
-need separate product review.
+Status: complete for Partner Effects, Councilor Effects, and Resources.
 
 ### Goal
 
@@ -170,29 +169,40 @@ Decide whether shallow reference categories should use a full-width reference-li
 
 ### Candidate categories
 
-- Partner Effects
-- Councilor Effects
-- Resources
-- Traits
-- maybe Extractors
+- Partner Effects: full-width overview implemented.
+- Councilor Effects: full-width overview implemented.
+- Resources: full-width overview implemented.
+- Traits: remain split-layout by design for now.
+- Extractors: hidden support/reference targets, not visible top-level
+  destinations.
 
 ### Current observation
 
 For Partner Effects, the right/main reference list is more useful than the compressed left result list. The left panel often duplicates the same information with less value.
 
-### First implementation slice
+### Implemented outcomes
 
-`EW-CODEX-UI-004A` was implemented in commit `92e94047`.
+`EW-CODEX-UI-004A` was implemented in commit `92e94047`. Follow-up resource
+and extractor decisions landed in commits `0ab94ec9` and `5bf7253d`.
 
 Final accepted behavior:
 
 - Partner Effects and Councilor Effects overview routes use a centered
   full-width reference overview layout.
 - Selected Partner/Councilor Effect entry routes keep split/detail behavior.
-- Resources, Traits, Tech, and normal categories remain split-layout.
-- Extractors remain out of scope.
+- Resources overview routes use the same centered full-width reference overview
+  layout.
+- Resource overview rows show icons where exact resource/extractor icon data is
+  available.
+- Resource overview ordering is Luxury A-Z, Strategic A-Z, then Other A-Z,
+  based on exported resource Type facts.
+- Selected Resource entry routes and search-active Resources keep split/detail
+  behavior.
+- Traits remain split-layout unless future manual review proves a problem.
+- Extractors are hidden from visible top-level navigation and landing cards,
+  but remain searchable, linkable, and direct-routable where exact refs exist.
 - The layout is controlled by the explicit allow-list:
-  `counciloreffects`, `partnereffects`.
+  `counciloreffects`, `partnereffects`, `resources`.
 - Future full-width shallow categories must be added deliberately through
   `supportsFullWidthReferenceOverview(kind)`.
 - No generic content renderer was introduced.
@@ -200,8 +210,8 @@ Final accepted behavior:
 
 ### Remaining decision
 
-Review Resources for similar shallow overview treatment, or defer Resources and
-move to `EW-CODEX-UI-005` Ability/Status refinement.
+None for UI-004. Do not create `EW-CODEX-UI-006` without a new explicit product
+decision.
 
 ---
 
@@ -217,6 +227,9 @@ A technical implementation exists in stash:
 `stash@{0}: On main: park ability status metadata ux feature toggle work`
 
 It should not be committed as-is.
+
+Review and selectively reuse this stash only where it still fits the accepted
+Codex hierarchy.
 
 ### Desired direction
 
@@ -246,10 +259,9 @@ Statuses:
 
 ## Recommended next implementation
 
-Choose one:
+Start with:
 
-1. Review Resources for the same full-width shallow overview treatment.
-2. Defer Resources and start `EW-CODEX-UI-005` Ability/Status refinement.
+`EW-CODEX-UI-005` - Ability/Status refinement reintroduction.
 
-Do not expand full-width shallow overview behavior beyond `counciloreffects`
-and `partnereffects` without a deliberate product decision.
+There is no active `EW-CODEX-UI-006` ticket. Do not expand the ticket plan or
+apply the old Ability/Status stash wholesale without a new prompt.
