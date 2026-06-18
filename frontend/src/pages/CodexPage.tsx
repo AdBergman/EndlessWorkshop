@@ -22,6 +22,7 @@ import {
     getAutocompleteEntries,
 } from "@/lib/codex/codexSearch";
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
 import "./CodexPage.css";
 
@@ -49,7 +50,7 @@ const PREFERRED_KIND_ORDER = [
 ];
 const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "extractors", "modifiers"]);
 const VALID_HIDDEN_ROUTE_KINDS = new Set(["extractors"]);
-const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects"]);
+const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects", "resources"]);
 
 type SelectionIntent = "passive" | "related";
 
@@ -208,6 +209,14 @@ export default function CodexPage() {
         !hasDeferredQuery &&
         !selectedEntryParam &&
         Boolean(selectedListItem && isCodexSummaryEntry(selectedListItem));
+    const summaryDetailEntries = useMemo(
+        () => (
+            isFullWidthReferenceOverviewState && activeKind === "resources"
+                ? sortResourceReferenceEntries(groupedFilteredEntries)
+                : groupedFilteredEntries
+        ),
+        [activeKind, groupedFilteredEntries, isFullWidthReferenceOverviewState]
+    );
     const useCompactHeader = activeKind !== ALL_CODEX_KIND || Boolean(selectedEntryParam);
     const showResultsPane = !isOverviewState && !isFullWidthReferenceOverviewState;
     const isPlainRouteReset =
@@ -549,7 +558,7 @@ export default function CodexPage() {
                             ) : selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}
-                                    entries={groupedFilteredEntries}
+                                    entries={summaryDetailEntries}
                                     allEntries={entries}
                                     titleRef={detailTitleRef}
                                     onSelectEntry={(entry) => selectEntry(entry)}

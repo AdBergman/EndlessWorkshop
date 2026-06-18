@@ -1,10 +1,12 @@
-import { getCodexEntryLabel, stripCodexDescriptionLine } from "@/lib/codex/codexPresentation";
+import { getCodexEntryLabel, stripCodexDescriptionLine, type CodexListItem } from "@/lib/codex/codexPresentation";
 import { resolveCodexReference } from "@/lib/codex/codexRefs";
+import { getExtractorResourceIconPath } from "@/features/icons/resourceTokenIcons";
 import type { CodexEntry, CodexMetadataSection, CodexMetadataSectionItem } from "@/types/dataTypes";
 
 type ShallowReferencePreview = {
     context: string;
     effectLines: string[];
+    iconEntry?: CodexEntry;
     links: ShallowReferenceLink[];
 };
 
@@ -47,6 +49,13 @@ function findFactValue(entry: CodexEntry, label: string): string {
 function formatResourceContext(entry: CodexEntry): string {
     const resourceType = findFactValue(entry, "Type").replace(/\s+resource$/i, "");
     return resourceType;
+}
+
+function resourceTypeRank(entry: CodexEntry): number {
+    const resourceType = findFactValue(entry, "Type").toLowerCase();
+    if (resourceType.includes("luxury")) return 0;
+    if (resourceType.includes("strategic")) return 1;
+    return 2;
 }
 
 function formatEffectContext(entry: CodexEntry): string {
@@ -107,6 +116,10 @@ function primaryExtractorLinks(links: readonly ShallowReferenceLink[]): ShallowR
     return baseExtractors.length === 1 ? baseExtractors : [...links];
 }
 
+function resourceIconEntry(links: readonly ShallowReferenceLink[]): CodexEntry | undefined {
+    return links.find((link) => getExtractorResourceIconPath(link.entry.entryKey))?.entry;
+}
+
 function hasReferenceTo(entry: CodexEntry, targetKey: string): boolean {
     return [
         ...(entry.publicContextKeys ?? []),
@@ -161,6 +174,20 @@ export function isShallowReferenceKind(kind: string | null | undefined): boolean
     return SHALLOW_REFERENCE_KINDS.has(normalizeKind(kind));
 }
 
+export function sortResourceReferenceEntries(entries: readonly CodexListItem[]): CodexListItem[] {
+    return [...entries].sort((left, right) => {
+        const rankDelta = resourceTypeRank(left) - resourceTypeRank(right);
+        if (rankDelta !== 0) return rankDelta;
+
+        const leftLabel = getCodexEntryLabel(left);
+        const rightLabel = getCodexEntryLabel(right);
+        return leftLabel.localeCompare(rightLabel, undefined, {
+            numeric: true,
+            sensitivity: "base",
+        });
+    });
+}
+
 export function getCodexShallowReferencePreview(
     entry: CodexEntry,
     allEntries: readonly CodexEntry[],
@@ -177,11 +204,13 @@ export function getCodexShallowReferencePreview(
 
     if (kind === "resources") {
         const links = extractorLinks(entry, entriesByKey);
+        const primaryLinks = primaryExtractorLinks(links);
 
         return {
             context: formatResourceContext(entry),
             effectLines: fallbackEffectLines(entry, fallbackPreview),
-            links: primaryExtractorLinks(links),
+            iconEntry: resourceIconEntry(primaryLinks),
+            links: primaryLinks,
         };
     }
 

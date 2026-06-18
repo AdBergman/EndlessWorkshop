@@ -1671,12 +1671,18 @@
     display: inline-flex;
     width: fit-content;
     max-width: 100%;
+    align-items: center;
+    gap: 8px;
     padding: 0;
     border: 0;
     background: transparent;
     color: inherit;
     text-align: left;
     cursor: pointer;
+}
+
+.codex-kindIcon--summaryResource {
+    flex: 0 0 auto;
 }
 
 .codex-summaryList__entryButton:focus-visible,

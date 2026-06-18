@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexMajorFactionText,
@@ -123,6 +124,14 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                                             className="codex-summaryList__entryButton"
                                             onClick={() => onSelectEntry(entry)}
                                         >
+                                            {shallowPreview.iconEntry ? (
+                                                <CodexEntryIcon
+                                                    entry={shallowPreview.iconEntry}
+                                                    label={getCodexEntryLabel(entry)}
+                                                    className="codex-kindIcon codex-kindIcon--summaryResource"
+                                                    size={20}
+                                                />
+                                            ) : null}
                                             <span className="codex-summaryList__name">
                                                 {renderCodexLabel(getCodexEntryLabel(entry))}
                                             </span>
