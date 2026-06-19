@@ -35,6 +35,8 @@ type Props = {
     onSelectEntry: (entry: CodexListItem) => void;
     titleOverride?: string;
     contextOverride?: string;
+    searchQuery?: string;
+    hasActiveFilters?: boolean;
 };
 
 type OverviewMetadataConfig = {
@@ -120,42 +122,12 @@ function isAbilityTaxonomyOnlyLine(value: string, metadata: readonly OverviewMet
     return parts.every((part) => metadataValues.has(part) || ABILITY_TAXONOMY_TERMS.has(part));
 }
 
-function isAbilityInternalContextCode(value: string): boolean {
-    const compactValue = value.replace(/[\s_-]+/g, "");
-    return /^[a-z]+\d+[a-z0-9]*$/i.test(compactValue);
-}
-
-function isAbilityClassificationContextLine(value: string, metadata: readonly OverviewMetadataItem[]): boolean {
-    const normalizedValue = normalizeAbilityTaxonomyText(value);
-    if (!normalizedValue) return false;
-
-    const metadataValues = new Set(metadata.map((item) => normalizeAbilityTaxonomyText(item.value)));
-    const parts = normalizedValue
-        .split("/")
-        .map((part) => normalizeAbilityTaxonomyText(part))
-        .filter(Boolean);
-
-    if (parts.length === 0) return false;
-
-    return parts.every(
-        (part) =>
-            metadataValues.has(part) ||
-            ABILITY_TAXONOMY_TERMS.has(part) ||
-            isAbilityInternalContextCode(part)
-    );
-}
-
 function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMetadataItem[]): string | null {
     if (!preview) return "";
     return isAbilityTaxonomyOnlyLine(preview, metadata) ? null : preview;
 }
 
-function getAbilityCatalogContext(context: string, metadata: readonly OverviewMetadataItem[]): string {
-    if (!context) return "";
-    return isAbilityClassificationContextLine(context, metadata) ? "" : context;
-}
-
-function getAbilityCatalogEffectPreviewLines(entry: CodexEntry): string[] {
+function getAbilityCatalogEffectPreviewLines(entry: CodexEntry, searchQuery = ""): string[] {
     if (entry.exportKind.trim().toLowerCase() !== "abilities") return [];
 
     const parsed = parseCodexStructuredDescription(entry);
@@ -185,7 +157,28 @@ function getAbilityCatalogEffectPreviewLines(entry: CodexEntry): string[] {
         }
     }
 
-    return effectLines.slice(0, MAX_ABILITY_EFFECT_PREVIEW_LINES);
+    const normalizedSearchQuery = normalizeAbilityTaxonomyText(searchQuery);
+    if (!normalizedSearchQuery) {
+        return effectLines.slice(0, MAX_ABILITY_EFFECT_PREVIEW_LINES);
+    }
+
+    const selectedIndexes = new Set<number>();
+    effectLines.forEach((line, index) => {
+        if (
+            selectedIndexes.size < MAX_ABILITY_EFFECT_PREVIEW_LINES &&
+            normalizeAbilityTaxonomyText(line).includes(normalizedSearchQuery)
+        ) {
+            selectedIndexes.add(index);
+        }
+    });
+
+    for (let index = 0; index < effectLines.length && selectedIndexes.size < MAX_ABILITY_EFFECT_PREVIEW_LINES; index += 1) {
+        selectedIndexes.add(index);
+    }
+
+    return Array.from(selectedIndexes)
+        .sort((left, right) => left - right)
+        .map((index) => effectLines[index]);
 }
 
 function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
@@ -200,6 +193,8 @@ export default function CodexSummaryDetail({
     onSelectEntry,
     titleOverride,
     contextOverride,
+    searchQuery = "",
+    hasActiveFilters = false,
 }: Props) {
     const isShallowReferenceSummary = isShallowReferenceKind(summaryEntry.summaryKind);
     const summaryContext = contextOverride ?? (isShallowReferenceSummary ? "Reference list" : "Category overview");
@@ -280,11 +275,8 @@ export default function CodexSummaryDetail({
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
-                        const catalogSecondaryContext = useCatalogRowHierarchy
-                            ? getAbilityCatalogContext(secondaryContext, overviewMetadata)
-                            : secondaryContext;
                         const abilityEffectPreviewLines = useCatalogRowHierarchy
-                            ? getAbilityCatalogEffectPreviewLines(entry)
+                            ? getAbilityCatalogEffectPreviewLines(entry, searchQuery)
                             : [];
                         const visibleCatalogPreview = (
                             useCatalogRowHierarchy &&
@@ -430,9 +422,6 @@ export default function CodexSummaryDetail({
                                                 ))}
                                             </span>
                                         ) : null}
-                                        {catalogSecondaryContext ? (
-                                            <span className="codex-summaryList__context">{catalogSecondaryContext}</span>
-                                        ) : null}
                                     </>
                                 ) : (
                                     <>
@@ -464,6 +453,15 @@ export default function CodexSummaryDetail({
                             </button>
                         );
                     })
+                ) : summaryEntry.summaryKind.trim().toLowerCase() === "abilities" ? (
+                    <div className="codex-summaryList__empty">
+                        <strong>No abilities matched.</strong>
+                        <span>
+                            {hasActiveFilters || searchQuery.trim()
+                                ? "Clear filters or change the search query to browse the archive."
+                                : "No ability entries are available in this archive."}
+                        </span>
+                    </div>
                 ) : (
                     <p className="codex-detail__placeholder">
                         No {summaryEntry.summaryLabel.toLowerCase()} entries match the current search.

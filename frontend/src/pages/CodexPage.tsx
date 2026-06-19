@@ -663,6 +663,8 @@ export default function CodexPage() {
                                     onSelectEntry={(entry) => selectEntry(entry)}
                                     titleOverride={abilityArchiveSummary?.title}
                                     contextOverride={abilityArchiveSummary?.context}
+                                    searchQuery={deferredQuery}
+                                    hasActiveFilters={hasActiveFactFilters}
                                 />
                             ) : (
                                 <CodexEntryDetail

@@ -487,6 +487,128 @@ describe("CodexPage", () => {
         expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
     });
 
+    it("surfaces search-matched Ability effect lines and suppresses catalog taxonomy leakage", async () => {
+        const user = userEvent.setup();
+
+        seedCodexEntries([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_HiddenEffectStrike",
+                displayName: "Hidden Effect Strike",
+                category: "Tactical",
+                kind: "Ability",
+                descriptionLines: ["Tactical / Enemies / Range 3 / Cost 1 Battle Token"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Tactical" },
+                    { label: "Target", value: "Enemies" },
+                    { label: "Range", value: "3" },
+                    { label: "Cost", value: "1 Battle Token" },
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Damage, Status apply" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: [
+                            [
+                                "Ignores the Defense of targeted Units",
+                                "Deals 30% of the Hero's [Damage] Damage",
+                                "Deals 5 extra Damage per Determination",
+                                "Applies Weakened II Status to targeted Units",
+                            ].join("\n"),
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_LastLord_Chilling",
+                displayName: "Chilling Coup",
+                category: "Combat",
+                kind: "Ability",
+                descriptionLines: ["Combat"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Reaction" },
+                    { label: "Ability source", value: "Battle ability" },
+                    { label: "Combat role", value: "Status apply" },
+                ],
+                sections: [{ title: "Effects", lines: ["Applies Terrorized I Status to all enemy Units"] }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const abilitiesOverview = await screen.findByLabelText("Abilities overview");
+        const taxonomyLeakRow = within(abilitiesOverview).getByRole("button", { name: /chilling coup/i });
+        expect(within(taxonomyLeakRow).queryByText(/last lords \/ combat \/ ability/i)).not.toBeInTheDocument();
+        expect(within(taxonomyLeakRow).queryByText(/combat \/ ability/i)).not.toBeInTheDocument();
+        expect(within(taxonomyLeakRow).getByText("Applies Terrorized I Status to all enemy Units"))
+            .toBeInTheDocument();
+
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "weakened");
+
+        await waitFor(() => {
+            expect(screen.getByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
+            expect(within(abilitiesOverview).queryByRole("button", { name: /chilling coup/i })).not.toBeInTheDocument();
+        });
+        const searchMatchedRow = within(abilitiesOverview).getByRole("button", { name: /hidden effect strike/i });
+        const effectPreview = within(searchMatchedRow).getByLabelText("Effect preview");
+        const previewLines = Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine"))
+            .map((line) => line.textContent?.replace(/\s+/g, " ").trim());
+
+        expect(previewLines).toEqual([
+            "Ignores the Defense of targeted Units",
+            "Deals 30% of the Hero's Damage",
+            "Applies Weakened II Status to targeted Units",
+        ]);
+        expect(previewLines).toHaveLength(3);
+        expect(within(effectPreview).queryByText("Deals 5 extra Damage per Determination")).not.toBeInTheDocument();
+        expect(
+            within(effectPreview).queryByText(
+                "Ignores the Defense of targeted Units Deals 30% of the Hero's Damage Applies Weakened II Status to targeted Units"
+            )
+        ).not.toBeInTheDocument();
+    });
+
+    it("renders a quiet Ability Archive no-results state for empty search matches", async () => {
+        const user = userEvent.setup();
+
+        seedCodexEntries([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_AlwaysRetaliate",
+                displayName: "Always Retaliate",
+                descriptionLines: ["Always retaliates."],
+                referenceKeys: [],
+                facts: [{ label: "Ability mechanic", value: "Passive" }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "no ability should match this");
+
+        expect(await screen.findByText("No abilities matched.")).toBeInTheDocument();
+        expect(screen.getByText("Clear filters or change the search query to browse the archive.")).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
+    });
+
     it("renders Status overview metadata from exported facts while keeping left rows compact", async () => {
         seedCodexEntries([
             {

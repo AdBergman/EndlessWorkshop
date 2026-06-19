@@ -2126,6 +2126,22 @@
     line-height: 1.55;
 }
 
+.codex-summaryList__empty {
+    display: grid;
+    gap: 8px;
+    padding: 30px 18px;
+    border-top: 1px solid rgba(195, 152, 77, 0.14);
+    border-bottom: 1px solid var(--codex-line);
+    color: rgba(241, 234, 220, 0.68);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.codex-summaryList__empty strong {
+    color: rgba(241, 234, 220, 0.9);
+    font-size: 16px;
+}
+
 .codex-summaryList__link {
     display: inline-flex;
     align-items: center;
