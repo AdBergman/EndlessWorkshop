@@ -1863,12 +1863,11 @@
 .codex-summaryList {
     display: grid;
     gap: 0;
-    margin-top: 30px;
-    border-top: 1px solid var(--codex-line);
+    margin-top: 26px;
 }
 
 .codex-workspace--abilityCatalog .codex-summaryList {
-    margin-top: 34px;
+    margin-top: 28px;
 }
 
 .codex-summaryList__item {
