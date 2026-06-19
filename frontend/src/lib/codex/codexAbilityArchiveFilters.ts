@@ -44,6 +44,7 @@ const ABILITY_ARCHIVE_FILTERS: readonly CodexFactFilterConfig[] = [
             "Reactive skill",
         ],
         splitCommaSeparatedValues: true,
+        showZeroCountOptions: false,
     },
     {
         label: "Ability mechanic",
@@ -114,7 +115,11 @@ export function buildAbilityArchiveFilterOptions(
             const values = filter.allowedValues
                 ? filter.allowedValues
                     .map((value) => ({ value, count: counts.get(value) ?? 0 }))
-                    .filter((option) => hasActiveFilters || filter.showZeroCountOptions === true || option.count > 0)
+                    .filter((option) =>
+                        option.count > 0 ||
+                        activeFilters[filter.label] === option.value ||
+                        (hasActiveFilters && filter.showZeroCountOptions !== false)
+                    )
                 : Array.from(counts.entries())
                     .map(([value, count]) => ({ value, count }))
                     .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));

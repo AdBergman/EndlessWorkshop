@@ -580,6 +580,8 @@ describe("CodexPage", () => {
         expect(within(filters).getByRole("group", { name: "Ability Role" })).toBeInTheDocument();
         expect(within(filters).getByRole("group", { name: "Mechanics" })).toBeInTheDocument();
         expect(within(filters).getByRole("group", { name: "Sources" })).toBeInTheDocument();
+        expect(within(popularGroup).queryByRole("button", { name: /reactive skill\s+0/i }))
+            .not.toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
         expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
         expect(within(filters).queryByText("Current shelf")).not.toBeInTheDocument();

@@ -587,7 +587,7 @@
 .codex-resultsFilters {
     display: grid;
     gap: 24px;
-    padding: 24px 0 4px;
+    padding: 18px 0 4px 6px;
     border-bottom: 0;
     flex-shrink: 0;
 }
