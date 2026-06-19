@@ -539,6 +539,16 @@ describe("CodexPage", () => {
                 descriptionLines: ["Active battle skill and status apply appear in prose only."],
                 referenceKeys: [],
             },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_PassiveNoRole",
+                displayName: "Quiet Discipline",
+                descriptionLines: ["Passive support ability without a curated role."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Passive" },
+                ],
+            },
         ]);
 
         render(
@@ -559,7 +569,7 @@ describe("CodexPage", () => {
         expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i })).toBeInTheDocument();
         expect(within(popularGroup).queryByRole("button", { name: /heal\s+0/i })).not.toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
-        expect(within(mechanicGroup).queryByRole("button", { name: /passive\s+0/i })).not.toBeInTheDocument();
+        expect(within(mechanicGroup).getByRole("button", { name: /passive\s+1/i })).toBeInTheDocument();
         expect(within(sourceGroup).getByRole("button", { name: /battle skill\s+1/i })).toBeInTheDocument();
         expect(within(sourceGroup).queryByRole("button", { name: /unit ability event\s+0/i })).not.toBeInTheDocument();
         expect(within(filters).queryByRole("group", { name: "Role" })).not.toBeInTheDocument();
@@ -592,6 +602,16 @@ describe("CodexPage", () => {
         expect(within(abilitiesOverview).getByRole("button", { name: /always retaliate/i })).toBeInTheDocument();
         expect(within(abilitiesOverview).getByRole("button", { name: /active battle skill name only/i }))
             .toBeInTheDocument();
+
+        await user.click(within(mechanicGroup).getByRole("button", { name: /passive\s+1/i }));
+        expect(await screen.findByRole("heading", { name: "Passive Abilities" })).toBeInTheDocument();
+        expect(within(abilitiesOverview).getByRole("button", { name: /quiet discipline/i })).toBeInTheDocument();
+        expect(within(popularGroup).getByRole("button", { name: /damage\s+0/i })).toBeDisabled();
+        expect(within(popularGroup).getByRole("button", { name: /status apply\s+0/i })).toBeDisabled();
+        expect(within(popularGroup).queryByRole("button", { name: /reactive skill\s+0/i }))
+            .not.toBeInTheDocument();
+
+        await user.click(within(filters).getByRole("button", { name: "Clear" }));
 
         await user.click(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }));
         expect(await screen.findByRole("heading", { name: "Active Abilities" })).toBeInTheDocument();

@@ -139,7 +139,7 @@ describe("codexAbilityArchiveFilters", () => {
         ]);
     });
 
-    it("keeps a selected zero-count Ability Role visible without showing other empty role shelves", () => {
+    it("keeps a selected zero-count Ability Role visible alongside meaningful empty role shelves", () => {
         const entries = [
             ability("Ability_DamageActive", "Damage Active", [
                 { label: "Combat role", value: "Damage" },
@@ -155,7 +155,33 @@ describe("codexAbilityArchiveFilters", () => {
         const roleValues = options.find((filter) => filter.label === "Combat role")?.values ?? [];
 
         expect(roleValues).toEqual([
+            { value: "Damage", count: 0 },
             { value: "Reactive skill", count: 0 },
+        ]);
+    });
+
+    it("keeps meaningful Ability Role shelves visible when a structural filter has no role matches", () => {
+        const entries = [
+            ability("Ability_DamageActive", "Damage Active", [
+                { label: "Combat role", value: "Damage" },
+                { label: "Ability mechanic", value: "Active" },
+            ]),
+            ability("Ability_ShieldActive", "Shield Active", [
+                { label: "Combat role", value: "Shield" },
+                { label: "Ability mechanic", value: "Active" },
+            ]),
+            ability("Ability_PassiveNoRole", "Passive No Role", [
+                { label: "Ability mechanic", value: "Passive" },
+            ]),
+        ];
+        const activeFilters: ActiveCodexFactFilters = { "Ability mechanic": "Passive" };
+
+        const options = buildAbilityArchiveFilterOptions(entries, filters, activeFilters);
+        const roleValues = options.find((filter) => filter.label === "Combat role")?.values ?? [];
+
+        expect(roleValues).toEqual([
+            { value: "Damage", count: 0 },
+            { value: "Shield", count: 0 },
         ]);
     });
 

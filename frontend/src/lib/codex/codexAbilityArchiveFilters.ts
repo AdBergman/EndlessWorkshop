@@ -111,15 +111,29 @@ export function buildAbilityArchiveFilterOptions(
 
                 return acc;
             }, new Map<string, number>());
+            const baseCounts = entries.reduce<Map<string, number>>((acc, entry) => {
+                for (const value of uniqueEntryFactValues(entry, filter)) {
+                    acc.set(value, (acc.get(value) ?? 0) + 1);
+                }
+
+                return acc;
+            }, new Map<string, number>());
 
             const values = filter.allowedValues
                 ? filter.allowedValues
-                    .map((value) => ({ value, count: counts.get(value) ?? 0 }))
-                    .filter((option) =>
-                        option.count > 0 ||
-                        activeFilters[filter.label] === option.value ||
-                        (hasActiveFilters && filter.showZeroCountOptions !== false)
-                    )
+                    .map((value) => ({
+                        value,
+                        count: counts.get(value) ?? 0,
+                        baseCount: baseCounts.get(value) ?? 0,
+                    }))
+                    .filter((option) => {
+                        if (option.count > 0) return true;
+                        if (activeFilters[filter.label] === option.value) return true;
+                        if (!hasActiveFilters) return false;
+                        if (filter.showZeroCountOptions === false) return option.baseCount > 0;
+                        return true;
+                    })
+                    .map(({ value, count }) => ({ value, count }))
                 : Array.from(counts.entries())
                     .map(([value, count]) => ({ value, count }))
                     .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));
