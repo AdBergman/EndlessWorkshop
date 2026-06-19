@@ -1969,15 +1969,26 @@
 }
 
 .codex-summaryList__titleLine {
-    display: inline-flex;
+    display: flex;
     min-width: 0;
     width: fit-content;
     max-width: 100%;
     align-items: center;
+    justify-content: flex-start;
     gap: 8px;
 }
 
 .codex-summaryList__item--catalog .codex-summaryList__titleLine {
+    width: 100%;
+    gap: 18px;
+    justify-content: space-between;
+}
+
+.codex-summaryList__titleIdentity {
+    display: inline-flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: center;
     gap: 11px;
 }
 
@@ -2028,6 +2039,8 @@
 }
 
 .codex-summaryList__item--catalog .codex-summaryList__metadata {
+    flex: 0 1 min(46%, 520px);
+    justify-content: flex-end;
     gap: 10px;
 }
 

@@ -361,13 +361,29 @@ describe("CodexPage", () => {
                 exportKind: "abilities",
                 entryKey: "UnitAbility_AlwaysRetaliate",
                 displayName: "Always Retaliate",
-                descriptionLines: ["Counterattack when possible."],
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["Passive"],
                 referenceKeys: [],
                 facts: [
-                    { label: "Ability mechanic", value: "Reaction" },
+                    { label: "Ability mechanic", value: "Passive" },
                     { label: "Ability source", value: "Unit ability" },
                     { label: "Combat role", value: "Retaliation" },
                     { label: "Kind", value: "Ability" },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_ArcaneStrike",
+                displayName: "Arcane Strike",
+                category: "Tactical",
+                kind: "Ability",
+                descriptionLines: ["Tactical / Enemies / Range 3 / Cost 1 Battle Token"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Damage" },
                 ],
             },
             {
@@ -404,12 +420,21 @@ describe("CodexPage", () => {
             "/svg/unit-abilities/UI_UnitAbility_AlwaysRetaliate.svg"
         );
         const metadata = within(overviewRow).getByLabelText("Exported metadata");
+        expect(overviewRow.querySelector(".codex-summaryList__titleLine .codex-summaryList__metadata"))
+            .toBe(metadata);
         expect(within(metadata).getByText("Mechanic")).toBeInTheDocument();
-        expect(within(metadata).getByText("Reaction")).toBeInTheDocument();
+        expect(within(metadata).getByText("Passive")).toBeInTheDocument();
         expect(within(metadata).getByText("Source")).toBeInTheDocument();
         expect(within(metadata).getByText("Unit ability")).toBeInTheDocument();
         expect(within(metadata).getByText("Role")).toBeInTheDocument();
         expect(within(metadata).getByText("Retaliation")).toBeInTheDocument();
+        expect(overviewRow.querySelector(".codex-summaryList__description")).not.toBeInTheDocument();
+        expect(overviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
+
+        const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
+        expect(within(usefulPreviewRow).getByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
+            .toBeInTheDocument();
+        expect(usefulPreviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {
             name: /active battle skill name only/i,

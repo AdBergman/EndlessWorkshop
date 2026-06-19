@@ -56,6 +56,23 @@ const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     ],
 };
 const MAX_OVERVIEW_METADATA_ITEMS = 3;
+const ABILITY_TAXONOMY_TERMS = new Set([
+    "ability",
+    "abilities",
+    "active",
+    "combat",
+    "mixed",
+    "passive",
+    "reaction",
+    "tactical",
+]);
+
+function normalizeAbilityTaxonomyText(value: string): string {
+    return value
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
 
 function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
     const configs = OVERVIEW_METADATA_BY_KIND[entry.exportKind.trim().toLowerCase()] ?? [];
@@ -83,6 +100,31 @@ function supportsRichOverviewRow(entry: CodexEntry): boolean {
         OVERVIEW_METADATA_BY_KIND,
         entry.exportKind.trim().toLowerCase()
     );
+}
+
+function isAbilityTaxonomyOnlyLine(value: string, metadata: readonly OverviewMetadataItem[]): boolean {
+    const normalizedValue = normalizeAbilityTaxonomyText(value);
+    if (!normalizedValue) return false;
+
+    const metadataValues = new Set(metadata.map((item) => normalizeAbilityTaxonomyText(item.value)));
+    const parts = normalizedValue
+        .split("/")
+        .map((part) => normalizeAbilityTaxonomyText(part))
+        .filter(Boolean);
+
+    if (parts.length === 0) return false;
+
+    return parts.every((part) => metadataValues.has(part) || ABILITY_TAXONOMY_TERMS.has(part));
+}
+
+function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMetadataItem[]): string | null {
+    if (!preview) return "";
+    return isAbilityTaxonomyOnlyLine(preview, metadata) ? null : preview;
+}
+
+function getAbilityCatalogContext(context: string, metadata: readonly OverviewMetadataItem[]): string {
+    if (!context) return "";
+    return isAbilityTaxonomyOnlyLine(context, metadata) ? "" : context;
 }
 
 export default function CodexSummaryDetail({
@@ -175,6 +217,12 @@ export default function CodexSummaryDetail({
                         const showRichOverviewRow = supportsRichOverviewRow(entry);
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
+                        const catalogPreview = useCatalogRowHierarchy
+                            ? getAbilityCatalogPreview(preview, overviewMetadata)
+                            : preview;
+                        const catalogSecondaryContext = useCatalogRowHierarchy
+                            ? getAbilityCatalogContext(secondaryContext, overviewMetadata)
+                            : secondaryContext;
                         const shallowPreview = !isFactionEntry
                             ? getCodexShallowReferencePreview(entry, allEntries, preview)
                             : null;
@@ -259,42 +307,46 @@ export default function CodexSummaryDetail({
                                 onClick={() => onSelectEntry(entry)}
                             >
                                 <span className="codex-summaryList__titleLine">
-                                    {showRichOverviewRow ? (
-                                        <CodexEntryIcon
-                                            entry={entry}
-                                            label={getCodexEntryLabel(entry)}
-                                            className="codex-kindIcon codex-kindIcon--summaryEntry"
-                                            size={20}
-                                        />
-                                    ) : null}
-                                    <span className="codex-summaryList__name">
-                                        {renderCodexLabel(getCodexEntryLabel(entry))}
+                                    <span className="codex-summaryList__titleIdentity">
+                                        {showRichOverviewRow ? (
+                                            <CodexEntryIcon
+                                                entry={entry}
+                                                label={getCodexEntryLabel(entry)}
+                                                className="codex-kindIcon codex-kindIcon--summaryEntry"
+                                                size={20}
+                                            />
+                                        ) : null}
+                                        <span className="codex-summaryList__name">
+                                            {renderCodexLabel(getCodexEntryLabel(entry))}
+                                        </span>
                                     </span>
+                                    {useCatalogRowHierarchy && overviewMetadata.length > 0 ? (
+                                        <span className="codex-summaryList__metadata" aria-label="Exported metadata">
+                                            {overviewMetadata.map((item) => (
+                                                <span
+                                                    key={`${item.label}-${item.value}`}
+                                                    className="codex-summaryList__metadataChip"
+                                                >
+                                                    <span className="codex-summaryList__metadataLabel">
+                                                        {item.label}
+                                                    </span>
+                                                    <span className="codex-summaryList__metadataValue">
+                                                        {item.value}
+                                                    </span>
+                                                </span>
+                                            ))}
+                                        </span>
+                                    ) : null}
                                 </span>
                                 {useCatalogRowHierarchy ? (
                                     <>
-                                        <span className="codex-summaryList__description">
-                                            {preview || "No public description has been added for this entry yet."}
-                                        </span>
-                                        {overviewMetadata.length > 0 ? (
-                                            <span className="codex-summaryList__metadata" aria-label="Exported metadata">
-                                                {overviewMetadata.map((item) => (
-                                                    <span
-                                                        key={`${item.label}-${item.value}`}
-                                                        className="codex-summaryList__metadataChip"
-                                                    >
-                                                        <span className="codex-summaryList__metadataLabel">
-                                                            {item.label}
-                                                        </span>
-                                                        <span className="codex-summaryList__metadataValue">
-                                                            {item.value}
-                                                        </span>
-                                                    </span>
-                                                ))}
+                                        {catalogPreview !== null ? (
+                                            <span className="codex-summaryList__description">
+                                                {catalogPreview || "No public description has been added for this entry yet."}
                                             </span>
                                         ) : null}
-                                        {secondaryContext ? (
-                                            <span className="codex-summaryList__context">{secondaryContext}</span>
+                                        {catalogSecondaryContext ? (
+                                            <span className="codex-summaryList__context">{catalogSecondaryContext}</span>
                                         ) : null}
                                     </>
                                 ) : (
