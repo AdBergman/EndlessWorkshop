@@ -456,6 +456,15 @@ describe("CodexPage", () => {
         expect(within(effectPreview).getByText("Deals 80% of the Hero's Damage")).toBeInTheDocument();
         expect(within(effectPreview).getByText("Deals 6 extra Damage per Determination")).toBeInTheDocument();
         expect(within(effectPreview).queryByText("Applies Burning for 1 turn")).not.toBeInTheDocument();
+        expect(
+            Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).map((line) =>
+                line.textContent?.trim()
+            )
+        ).toEqual([
+            "Ignores the Defense of targeted Units",
+            "Deals 80% of the Hero's Damage",
+            "Deals 6 extra Damage per Determination",
+        ]);
         expect(usefulPreviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {

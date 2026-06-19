@@ -2070,16 +2070,6 @@
     font-size: 12px;
 }
 
-.codex-summaryList__item--catalog .codex-summaryList__metadataChip + .codex-summaryList__metadataChip::before {
-    align-self: center;
-    width: 3px;
-    height: 3px;
-    margin-right: 2px;
-    border-radius: 50%;
-    background: rgba(195, 152, 77, 0.38);
-    content: "";
-}
-
 .codex-summaryList__metadataLabel {
     flex: 0 0 auto;
     color: rgba(195, 152, 77, 0.72);
@@ -2122,22 +2112,14 @@
 }
 
 .codex-summaryList__effectPreviewLine {
-    position: relative;
+    display: block;
     min-width: 0;
     overflow: hidden;
-    padding-left: 15px;
     color: rgba(241, 234, 220, 0.74);
     font-size: 13.5px;
     line-height: 1.48;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-.codex-summaryList__effectPreviewLine::before {
-    position: absolute;
-    left: 1px;
-    color: rgba(230, 176, 82, 0.7);
-    content: "•";
 }
 
 .codex-summaryList__effects {
