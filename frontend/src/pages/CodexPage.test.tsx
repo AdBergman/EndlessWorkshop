@@ -388,14 +388,10 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
-        const resultsPane = screen.getByLabelText("Codex results");
-        const leftRow = within(resultsPane).getByRole("button", { name: /always retaliate/i });
-        expect(leftRow.querySelector("img.codex-kindIcon--result")).toHaveAttribute(
-            "src",
-            "/svg/unit-abilities/UI_UnitAbility_AlwaysRetaliate.svg"
-        );
-        expect(leftRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
-        expect(within(leftRow).queryByText("Reaction")).not.toBeInTheDocument();
+        const filterRail = screen.getByLabelText("Ability catalog filters");
+        expect(within(filterRail).getByText("Catalog navigation")).toBeInTheDocument();
+        expect(within(filterRail).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
 
         const abilitiesOverview = screen.getByLabelText("Abilities overview");
         const overviewRow = within(abilitiesOverview).getByRole("button", { name: /always retaliate/i });
@@ -411,9 +407,6 @@ describe("CodexPage", () => {
         expect(within(metadata).getByText("Role")).toBeInTheDocument();
         expect(within(metadata).getByText("Retaliation")).toBeInTheDocument();
 
-        const thinRow = within(resultsPane).getByRole("button", { name: /active battle skill name only/i });
-        expect(thinRow).toBeInTheDocument();
-        expect(thinRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {
             name: /active battle skill name only/i,
         });
@@ -505,6 +498,141 @@ describe("CodexPage", () => {
         expect(row.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
         const techOverview = screen.getByLabelText("Tech overview");
         expect(techOverview.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
+        expect(screen.queryByLabelText("Tech filters")).not.toBeInTheDocument();
+    });
+
+    it("filters the Ability catalog from the left rail using exported facts only", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_AlwaysRetaliate",
+                displayName: "Always Retaliate",
+                descriptionLines: ["Counterattack when possible."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Reaction" },
+                    { label: "Ability source", value: "Unit ability" },
+                    { label: "Combat role", value: "Retaliation" },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_PreciseVolley",
+                displayName: "Precise Volley",
+                descriptionLines: ["Applies a status from an active battle skill."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Status apply" },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ActiveBattleSkillNameOnly",
+                displayName: "Active Battle Skill Name Only",
+                descriptionLines: ["Active battle skill and status apply appear in prose only."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
+        const filters = screen.getByLabelText("Abilities filters");
+        expect(within(filters).queryByRole("button", { name: /all/i })).not.toBeInTheDocument();
+        const mechanicGroup = within(filters).getByRole("group", { name: "Mechanics" });
+        const sourceGroup = within(filters).getByRole("group", { name: "Sources" });
+        expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
+        expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
+        expect(within(sourceGroup).getByRole("button", { name: /battle skill\s+1/i })).toBeInTheDocument();
+        expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
+        expect(within(filters).queryByRole("group", { name: "Role" })).not.toBeInTheDocument();
+        expect(within(filters).queryByRole("button", { name: /status apply/i })).not.toBeInTheDocument();
+
+        await user.click(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }));
+
+        const abilitiesOverview = screen.getByLabelText("Abilities overview");
+        expect(within(abilitiesOverview).getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
+        expect(within(abilitiesOverview).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
+        expect(within(abilitiesOverview).queryByRole("button", { name: /active battle skill name only/i }))
+            .not.toBeInTheDocument();
+
+        expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        const activeFilters = within(filters).getByLabelText("Active filters");
+        expect(within(activeFilters).getByRole("button", { name: /remove mechanics: active/i })).toBeInTheDocument();
+        await user.click(within(activeFilters).getByRole("button", { name: /remove mechanics: active/i }));
+
+        expect(within(abilitiesOverview).getByRole("button", { name: /always retaliate/i })).toBeInTheDocument();
+        expect(within(abilitiesOverview).getByRole("button", { name: /active battle skill name only/i }))
+            .toBeInTheDocument();
+
+        await user.click(within(abilitiesOverview).getByRole("button", { name: /precise volley/i }));
+        expect(await screen.findByRole("heading", { name: "Precise Volley" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Ability catalog filters")).toBeInTheDocument();
+    });
+
+    it("does not apply catalog filters to Statuses in this prototype", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "statuses",
+                entryKey: "Status_PublicOpinion_Test",
+                displayName: "Public Opinion Status",
+                descriptionLines: ["A diplomatic status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                    { label: "Duration", value: "10 turns" },
+                    { label: "Status type", value: "Public Opinion" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Hobbled",
+                displayName: "Hobbled",
+                descriptionLines: ["A unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                    { label: "Duration", value: "1 turn" },
+                    { label: "Status type", value: "Land Speed" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_ProseOnly",
+                displayName: "Unit 10 turns Prose Only",
+                descriptionLines: ["Unit and 10 turns appear in prose only."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
+        expect(screen.queryByLabelText("Statuses filters")).not.toBeInTheDocument();
+        const resultsPane = screen.getByLabelText("Codex results");
+        expect(within(resultsPane).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
+        expect(within(resultsPane).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+        expect(within(resultsPane).getByRole("button", { name: /unit 10 turns prose only/i })).toBeInTheDocument();
+
+        const statusesOverview = screen.getByLabelText("Statuses overview");
+        expect(within(statusesOverview).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
     });
 
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {

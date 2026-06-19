@@ -21,9 +21,11 @@ import {
     filterCodexEntries,
     getAutocompleteEntries,
 } from "@/lib/codex/codexSearch";
+import { entryHasCodexFactValue, getCodexFactValues } from "@/lib/codex/codexFactValues";
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
+import type { CodexEntry } from "@/types/dataTypes";
 import "./CodexPage.css";
 
 const PREFERRED_KIND_ORDER = [
@@ -53,6 +55,30 @@ const VALID_HIDDEN_ROUTE_KINDS = new Set(["extractors"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects", "resources"]);
 
 type SelectionIntent = "passive" | "related";
+type CodexFactFilterConfig = {
+    label: string;
+    displayLabel: string;
+    allowedValues?: readonly string[];
+};
+type CodexFactFilterOption = CodexFactFilterConfig & {
+    values: { value: string; count: number }[];
+};
+type ActiveCodexFactFilters = Record<string, string>;
+
+const FACT_FILTERS_BY_KIND: Record<string, CodexFactFilterConfig[]> = {
+    abilities: [
+        {
+            label: "Ability mechanic",
+            displayLabel: "Mechanics",
+            allowedValues: ["Active", "Passive", "Reaction", "Mixed"],
+        },
+        {
+            label: "Ability source",
+            displayLabel: "Sources",
+            allowedValues: ["Battle skill", "Battle ability", "Unit ability event", "Mixed", "Battle reward"],
+        },
+    ],
+};
 
 function normalizeCodexKind(kind: string): string {
     return kind.trim().toLowerCase();
@@ -64,6 +90,73 @@ function supportsFullWidthReferenceOverview(kind: string): boolean {
 
 function isVisibleTopLevelKind(kind: string): boolean {
     return !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind));
+}
+
+function getFactFilterConfig(kind: string): CodexFactFilterConfig[] {
+    return FACT_FILTERS_BY_KIND[normalizeCodexKind(kind)] ?? [];
+}
+
+function uniqueEntryFactValues(entry: CodexEntry, label: string): string[] {
+    const seen = new Set<string>();
+    const values: string[] = [];
+
+    for (const value of getCodexFactValues(entry, label)) {
+        if (seen.has(value)) continue;
+
+        seen.add(value);
+        values.push(value);
+    }
+
+    return values;
+}
+
+function buildFactFilterOptions(
+    entries: readonly CodexEntry[],
+    filters: readonly CodexFactFilterConfig[],
+    activeFilters: ActiveCodexFactFilters
+): CodexFactFilterOption[] {
+    return filters
+        .map((filter) => {
+            const counts = entries.reduce<Map<string, number>>((acc, entry) => {
+                const filtersExceptCurrent = Object.fromEntries(
+                    Object.entries(activeFilters).filter(([label]) => label !== filter.label)
+                );
+                if (!entryMatchesFactFilters(entry, filtersExceptCurrent)) {
+                    return acc;
+                }
+
+                for (const value of uniqueEntryFactValues(entry, filter.label)) {
+                    acc.set(value, (acc.get(value) ?? 0) + 1);
+                }
+
+                return acc;
+            }, new Map<string, number>());
+
+            const values = filter.allowedValues
+                ? filter.allowedValues.map((value) => ({ value, count: counts.get(value) ?? 0 }))
+                : Array.from(counts.entries())
+                    .map(([value, count]) => ({ value, count }))
+                    .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));
+
+            return { ...filter, values };
+        })
+        .filter((filter) => filter.values.length > 0);
+}
+
+function entryMatchesFactFilters(entry: CodexEntry, filters: ActiveCodexFactFilters): boolean {
+    return Object.entries(filters).every(([label, value]) =>
+        entryHasCodexFactValue(entry, label, value)
+    );
+}
+
+function getActiveFactFilterItems(
+    activeFilters: ActiveCodexFactFilters,
+    filters: readonly CodexFactFilterConfig[]
+): { label: string; displayLabel: string; value: string }[] {
+    return filters.flatMap((filter) => {
+        const value = activeFilters[filter.label];
+        return value ? [{ label: filter.label, displayLabel: filter.displayLabel, value }] : [];
+    });
 }
 
 export default function CodexPage() {
@@ -78,6 +171,7 @@ export default function CodexPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
+    const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryParam = (searchParams.get("entry") ?? "").trim() || null;
@@ -127,9 +221,41 @@ export default function CodexPage() {
         ];
     }, [entries]);
 
-    const filteredEntries = useMemo(
+    const searchFilteredEntries = useMemo(
         () => filterCodexEntries(entries, { query: deferredQuery, kind: activeKind }),
         [entries, deferredQuery, activeKind]
+    );
+
+    const factFilterConfig = useMemo(
+        () => getFactFilterConfig(activeKind),
+        [activeKind]
+    );
+
+    const factFilterOptions = useMemo(
+        () => buildFactFilterOptions(searchFilteredEntries, factFilterConfig, activeFactFilters),
+        [activeFactFilters, factFilterConfig, searchFilteredEntries]
+    );
+
+    useEffect(() => {
+        const allowedLabels = new Set(factFilterConfig.map((filter) => filter.label));
+
+        setActiveFactFilters((current) => {
+            const next = Object.fromEntries(
+                Object.entries(current).filter(([label, value]) => allowedLabels.has(label) && value.trim())
+            );
+            return Object.keys(next).length === Object.keys(current).length ? current : next;
+        });
+    }, [factFilterConfig]);
+
+    const filteredEntries = useMemo(
+        () => {
+            if (Object.keys(activeFactFilters).length === 0) {
+                return searchFilteredEntries;
+            }
+
+            return searchFilteredEntries.filter((entry) => entryMatchesFactFilters(entry, activeFactFilters));
+        },
+        [activeFactFilters, searchFilteredEntries]
     );
 
     const autocompleteEntries = useMemo(
@@ -146,6 +272,12 @@ export default function CodexPage() {
         [filterOptions]
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
+    const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
+    const isAbilityCatalogMode = activeKind === "abilities";
+    const activeFactFilterItems = useMemo(
+        () => getActiveFactFilterItems(activeFactFilters, factFilterConfig),
+        [activeFactFilters, factFilterConfig]
+    );
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
         const groupedEntries = groupQuestListItems(filteredEntries);
@@ -524,27 +656,122 @@ export default function CodexPage() {
                     }`}
                 >
                     {showResultsPane ? (
-                        <aside className="codex-resultsPane" aria-label="Codex results">
+                        <aside
+                            className={`codex-resultsPane ${isAbilityCatalogMode ? "codex-resultsPane--catalog" : ""}`}
+                            aria-label={isAbilityCatalogMode ? "Ability catalog filters" : "Codex results"}
+                        >
                             <div className="codex-resultsPane__header">
                                 <div>
-                                    <div className="codex-sectionLabel">Results</div>
+                                    <div className="codex-sectionLabel">
+                                        {isAbilityCatalogMode ? "Abilities" : "Results"}
+                                    </div>
                                     <div className="codex-resultsPane__title">
-                                        {activeKind === ALL_CODEX_KIND
+                                        {isAbilityCatalogMode
+                                            ? "Catalog navigation"
+                                            : activeKind === ALL_CODEX_KIND
                                             ? "All encyclopedia entries"
                                             : activeKindLabel}
                                     </div>
                                 </div>
-                                <div className="codex-resultsPane__count">{filteredEntries.length}</div>
+                                <div className="codex-resultsPane__count">
+                                    {isAbilityCatalogMode ? `${filteredEntries.length} entries` : filteredEntries.length}
+                                </div>
                             </div>
 
-                            <CodexResultList
-                                ref={resultListRef}
-                                entries={displayEntries}
-                                selectedEntryKey={selectedListItem?.entryKey ?? null}
-                                loading={loading}
-                                error={error}
-                                onSelect={(entry) => selectEntry(entry)}
-                            />
+                            {factFilterOptions.length > 0 ? (
+                                <div className="codex-resultsFilters" aria-label={`${activeKindLabel} filters`}>
+                                    <div className="codex-resultsFilters__controls">
+                                        {activeFactFilterItems.length > 0 ? (
+                                            <div className="codex-resultsFilters__activeGroup">
+                                                <span className="codex-resultsFilters__groupLabel">Active filters</span>
+                                                <div
+                                                    className="codex-resultsFilters__active"
+                                                    aria-label="Active filters"
+                                                >
+                                                    {activeFactFilterItems.map((item) => (
+                                                        <button
+                                                            key={`${item.label}-${item.value}`}
+                                                            type="button"
+                                                            className="codex-resultsFilters__activeChip"
+                                                            onClick={() => {
+                                                                setActiveFactFilters((current) => {
+                                                                    const next = { ...current };
+                                                                    delete next[item.label];
+                                                                    return next;
+                                                                });
+                                                            }}
+                                                            aria-label={`Remove ${item.displayLabel}: ${item.value}`}
+                                                        >
+                                                            <span>{item.value}</span>
+                                                            <span aria-hidden="true">x</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : null}
+                                        {factFilterOptions.map((filter) => (
+                                            <div
+                                                key={filter.label}
+                                                className="codex-resultsFilters__group"
+                                                role="group"
+                                                aria-label={filter.displayLabel}
+                                            >
+                                                <span className="codex-resultsFilters__groupLabel">
+                                                    {filter.displayLabel}
+                                                </span>
+                                                <div className="codex-resultsFilters__chips">
+                                                    {filter.values.map((option) => {
+                                                        const isActive = activeFactFilters[filter.label] === option.value;
+                                                        const isDisabled = option.count === 0;
+
+                                                        return (
+                                                            <button
+                                                                key={option.value}
+                                                                type="button"
+                                                                className={`codex-resultsFilters__chip ${
+                                                                    isActive ? "is-active" : ""
+                                                                }`}
+                                                                onClick={() => {
+                                                                    if (isDisabled) return;
+
+                                                                    setActiveFactFilters((current) => {
+                                                                        const next = { ...current };
+                                                                        if (next[filter.label] === option.value) {
+                                                                            delete next[filter.label];
+                                                                        } else {
+                                                                            next[filter.label] = option.value;
+                                                                        }
+                                                                        return next;
+                                                                    });
+                                                                }}
+                                                                aria-pressed={isActive}
+                                                                aria-label={`${option.value} ${option.count}`}
+                                                                disabled={isDisabled}
+                                                            >
+                                                                <span>{option.value}</span>
+                                                                <span className="codex-resultsFilters__count">
+                                                                    {option.count}
+                                                                </span>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : null}
+
+                            {!isAbilityCatalogMode ? (
+                                <CodexResultList
+                                    ref={resultListRef}
+                                    entries={displayEntries}
+                                    selectedEntryKey={selectedListItem?.entryKey ?? null}
+                                    loading={loading}
+                                    error={error}
+                                    onSelect={(entry) => selectEntry(entry)}
+                                />
+                            ) : null}
                         </aside>
                     ) : null}
 

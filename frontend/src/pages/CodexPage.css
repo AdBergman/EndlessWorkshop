@@ -494,6 +494,11 @@
     overflow-x: hidden;
 }
 
+.codex-resultsPane--catalog {
+    gap: 0;
+    padding-right: 18px;
+}
+
 .codex-resultsPane__header {
     display: flex;
     align-items: end;
@@ -515,6 +520,163 @@
     color: var(--codex-gold-bright);
     font-size: 14px;
     font-variant-numeric: tabular-nums;
+}
+
+.codex-resultsFilters {
+    display: grid;
+    gap: 20px;
+    padding: 18px 0 4px;
+    border-bottom: 0;
+    flex-shrink: 0;
+}
+
+.codex-resultsFilters__controls {
+    display: grid;
+    gap: 22px;
+}
+
+.codex-resultsFilters__activeGroup {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(241, 234, 220, 0.07);
+}
+
+.codex-resultsFilters__active {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.codex-resultsFilters__activeChip {
+    display: inline-flex;
+    max-width: 100%;
+    min-height: 29px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 9px 0 10px;
+    border: 1px solid color-mix(in srgb, var(--codex-accent) 28%, transparent);
+    border-radius: 999px;
+    background: rgba(255, 127, 50, 0.075);
+    color: rgba(241, 234, 220, 0.9);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.codex-resultsFilters__activeChip > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-resultsFilters__activeChip:hover,
+.codex-resultsFilters__activeChip:focus-visible {
+    border-color: color-mix(in srgb, var(--codex-accent) 48%, transparent);
+    background: rgba(255, 127, 50, 0.11);
+}
+
+.codex-resultsFilters__group {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
+.codex-resultsFilters__groupLabel {
+    color: rgba(195, 152, 77, 0.78);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.codex-resultsFilters__chips {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-width: 0;
+    gap: 2px;
+}
+
+.codex-resultsFilters__chip {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
+    min-height: 37px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 8px 8px 28px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: rgba(241, 234, 220, 0.72);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.2;
+    text-align: left;
+    transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        color 140ms ease;
+}
+
+.codex-resultsFilters__chip > span:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-resultsFilters__chip:hover:not(:disabled),
+.codex-resultsFilters__chip:focus-visible {
+    border-color: rgba(195, 152, 77, 0.12);
+    background: rgba(255, 255, 255, 0.018);
+    color: rgba(241, 234, 220, 0.9);
+}
+
+.codex-resultsFilters__chip::before {
+    position: absolute;
+    left: 10px;
+    width: 8px;
+    height: 8px;
+    border: 1px solid rgba(195, 152, 77, 0.36);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.24);
+    content: "";
+}
+
+.codex-resultsFilters__chip.is-active {
+    border-color: color-mix(in srgb, var(--codex-accent) 24%, transparent);
+    background:
+        linear-gradient(90deg, rgba(255, 127, 50, 0.11), rgba(195, 152, 77, 0.026) 72%, transparent),
+        rgba(255, 255, 255, 0.016);
+    color: #f1eadc;
+}
+
+.codex-resultsFilters__chip.is-active::before {
+    border-color: var(--codex-accent);
+    background: var(--codex-accent);
+    box-shadow: 0 0 0 3px rgba(255, 127, 50, 0.11);
+}
+
+.codex-resultsFilters__chip:disabled {
+    cursor: default;
+    opacity: 0.36;
+}
+
+.codex-resultsFilters__count {
+    flex: 0 0 auto;
+    color: rgba(230, 176, 82, 0.74);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.codex-resultsFilters__chip.is-active .codex-resultsFilters__count {
+    color: rgba(255, 190, 92, 0.96);
 }
 
 .codex-resultsList {
@@ -2084,6 +2246,10 @@
 
     .codex-search {
         flex-basis: 100%;
+    }
+
+    .codex-resultsFilters__chips {
+        grid-template-columns: 1fr;
     }
 
     .codex-search__input {
