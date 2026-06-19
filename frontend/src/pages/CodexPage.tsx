@@ -480,12 +480,8 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
-    const removeFactFilter = useCallback((label: string) => {
-        setActiveFactFilters((current) => {
-            const next = { ...current };
-            delete next[label];
-            return next;
-        });
+    const clearFactFilters = useCallback(() => {
+        setActiveFactFilters({});
     }, []);
 
     const toggleFactFilter = useCallback((label: string, value: string) => {
@@ -632,9 +628,8 @@ export default function CodexPage() {
                             {isAbilityCatalogMode ? (
                                 <AbilityArchiveRail
                                     activeFilters={activeFactFilters}
-                                    activeFilterItems={activeFactFilterItems}
                                     filterOptions={factFilterOptions}
-                                    onRemoveFilter={removeFactFilter}
+                                    onClearFilters={clearFactFilters}
                                     onToggleFilter={toggleFactFilter}
                                 />
                             ) : null}

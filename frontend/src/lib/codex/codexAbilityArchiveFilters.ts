@@ -44,7 +44,6 @@ const ABILITY_ARCHIVE_FILTERS: readonly CodexFactFilterConfig[] = [
             "Reactive skill",
         ],
         splitCommaSeparatedValues: true,
-        showZeroCountOptions: false,
     },
     {
         label: "Ability mechanic",

@@ -81,7 +81,7 @@ describe("codexAbilityArchiveFilters", () => {
         expect(entryMatchesAbilityArchiveFilters(proseOnly, { Role: "Damage" }, filters)).toBe(true);
     });
 
-    it("builds dynamic counts from exported facts and hides absent curated role values", () => {
+    it("builds dynamic counts from exported facts and keeps curated role values visible", () => {
         const entries = [
             ability("Ability_Damage", "Damage Ability", [
                 { label: "Combat role", value: "Damage, Movement" },
@@ -100,10 +100,16 @@ describe("codexAbilityArchiveFilters", () => {
         const roleValues = options.find((filter) => filter.label === "Combat role")?.values ?? [];
         expect(roleValues).toEqual([
             { value: "Damage", count: 1 },
+            { value: "Status apply", count: 0 },
             { value: "Shield", count: 1 },
+            { value: "Heal", count: 0 },
             { value: "Movement", count: 1 },
+            { value: "Teleport", count: 0 },
+            { value: "Summon", count: 0 },
+            { value: "Push", count: 0 },
+            { value: "Status remove", count: 0 },
+            { value: "Reactive skill", count: 0 },
         ]);
-        expect(roleValues.some((option) => option.value === "Heal")).toBe(false);
     });
 
     it("recalculates option counts against other active filters", () => {
@@ -129,8 +135,15 @@ describe("codexAbilityArchiveFilters", () => {
 
         expect(roleValues).toEqual([
             { value: "Damage", count: 1 },
+            { value: "Status apply", count: 0 },
             { value: "Shield", count: 1 },
+            { value: "Heal", count: 0 },
             { value: "Movement", count: 1 },
+            { value: "Teleport", count: 0 },
+            { value: "Summon", count: 0 },
+            { value: "Push", count: 0 },
+            { value: "Status remove", count: 0 },
+            { value: "Reactive skill", count: 0 },
         ]);
         expect(mechanicValues).toEqual([
             { value: "Active", count: 2 },

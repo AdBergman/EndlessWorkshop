@@ -557,12 +557,14 @@ describe("CodexPage", () => {
         const sourceGroup = within(filters).getByRole("group", { name: "Sources" });
         expect(within(popularGroup).getByRole("button", { name: /damage\s+1/i })).toBeInTheDocument();
         expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i })).toBeInTheDocument();
-        expect(within(popularGroup).queryByRole("button", { name: /heal/i })).not.toBeInTheDocument();
+        expect(within(popularGroup).getByRole("button", { name: /heal\s+0/i })).toBeDisabled();
         expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
         expect(within(sourceGroup).getByRole("button", { name: /battle skill\s+1/i })).toBeInTheDocument();
         expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
         expect(within(filters).queryByRole("group", { name: "Role" })).not.toBeInTheDocument();
+        expect(within(filters).queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
+        expect(within(filters).queryByText("Current shelf")).not.toBeInTheDocument();
 
         await user.click(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }));
 
@@ -575,13 +577,14 @@ describe("CodexPage", () => {
 
         expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }))
             .toHaveAttribute("aria-pressed", "true");
-        const activeFilters = within(filters).getByLabelText("Active filters");
-        expect(within(activeFilters).getByRole("button", {
-            name: /remove popular \/ player-centric: status apply/i,
-        })).toBeInTheDocument();
-        await user.click(within(activeFilters).getByRole("button", {
-            name: /remove popular \/ player-centric: status apply/i,
-        }));
+        expect(within(filters).getByRole("group", { name: "Popular / Player-centric" })).toBeInTheDocument();
+        expect(within(filters).getByRole("group", { name: "Mechanics" })).toBeInTheDocument();
+        expect(within(filters).getByRole("group", { name: "Sources" })).toBeInTheDocument();
+        expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
+        expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
+        expect(within(filters).queryByText("Current shelf")).not.toBeInTheDocument();
+
+        await user.click(within(filters).getByRole("button", { name: "Clear" }));
 
         expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
         expect(within(abilitiesOverview).getByRole("button", { name: /always retaliate/i })).toBeInTheDocument();
