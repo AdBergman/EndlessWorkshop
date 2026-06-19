@@ -1,5 +1,6 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import AbilityArchiveRail from "@/components/Codex/AbilityArchiveRail";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
 import CodexOverview from "@/components/Codex/CodexOverview";
 import CodexResultList from "@/components/Codex/CodexResultList";
@@ -21,11 +22,17 @@ import {
     filterCodexEntries,
     getAutocompleteEntries,
 } from "@/lib/codex/codexSearch";
-import { entryHasCodexFactValue, getCodexFactValues } from "@/lib/codex/codexFactValues";
+import {
+    buildAbilityArchiveFilterOptions,
+    entryMatchesAbilityArchiveFilters,
+    getAbilityArchiveFactFilterConfig,
+    getAbilityArchiveSummary,
+    getActiveAbilityArchiveFilterItems,
+    type ActiveCodexFactFilters,
+} from "@/lib/codex/codexAbilityArchiveFilters";
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
-import type { CodexEntry } from "@/types/dataTypes";
 import "./CodexPage.css";
 
 const PREFERRED_KIND_ORDER = [
@@ -55,50 +62,6 @@ const VALID_HIDDEN_ROUTE_KINDS = new Set(["extractors"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects", "resources"]);
 
 type SelectionIntent = "passive" | "related";
-type CodexFactFilterConfig = {
-    label: string;
-    displayLabel: string;
-    allowedValues?: readonly string[];
-    splitCommaSeparatedValues?: boolean;
-    showZeroCountOptions?: boolean;
-};
-type CodexFactFilterOption = CodexFactFilterConfig & {
-    values: { value: string; count: number }[];
-};
-type ActiveCodexFactFilters = Record<string, string>;
-
-const FACT_FILTERS_BY_KIND: Record<string, CodexFactFilterConfig[]> = {
-    abilities: [
-        {
-            label: "Combat role",
-            displayLabel: "Popular / Player-centric",
-            allowedValues: [
-                "Damage",
-                "Status apply",
-                "Shield",
-                "Heal",
-                "Movement",
-                "Teleport",
-                "Summon",
-                "Push",
-                "Status remove",
-                "Reactive skill",
-            ],
-            splitCommaSeparatedValues: true,
-            showZeroCountOptions: false,
-        },
-        {
-            label: "Ability mechanic",
-            displayLabel: "Mechanics",
-            allowedValues: ["Active", "Passive", "Reaction", "Mixed"],
-        },
-        {
-            label: "Ability source",
-            displayLabel: "Sources",
-            allowedValues: ["Battle skill", "Battle ability", "Unit ability event", "Mixed", "Battle reward"],
-        },
-    ],
-};
 
 function normalizeCodexKind(kind: string): string {
     return kind.trim().toLowerCase();
@@ -110,126 +73,6 @@ function supportsFullWidthReferenceOverview(kind: string): boolean {
 
 function isVisibleTopLevelKind(kind: string): boolean {
     return !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind));
-}
-
-function getFactFilterConfig(kind: string): CodexFactFilterConfig[] {
-    return FACT_FILTERS_BY_KIND[normalizeCodexKind(kind)] ?? [];
-}
-
-function getEntryFactFilterValues(entry: CodexEntry, filter: CodexFactFilterConfig): string[] {
-    return getCodexFactValues(entry, filter.label).flatMap((value) => (
-        filter.splitCommaSeparatedValues
-            ? value.split(",").map((part) => part.trim()).filter(Boolean)
-            : [value]
-    ));
-}
-
-function uniqueEntryFactValues(entry: CodexEntry, filter: CodexFactFilterConfig): string[] {
-    const seen = new Set<string>();
-    const values: string[] = [];
-
-    for (const value of getEntryFactFilterValues(entry, filter)) {
-        if (seen.has(value)) continue;
-
-        seen.add(value);
-        values.push(value);
-    }
-
-    return values;
-}
-
-function buildFactFilterOptions(
-    entries: readonly CodexEntry[],
-    filters: readonly CodexFactFilterConfig[],
-    activeFilters: ActiveCodexFactFilters
-): CodexFactFilterOption[] {
-    return filters
-        .map((filter) => {
-            const counts = entries.reduce<Map<string, number>>((acc, entry) => {
-                const filtersExceptCurrent = Object.fromEntries(
-                    Object.entries(activeFilters).filter(([label]) => label !== filter.label)
-                );
-                if (!entryMatchesFactFilters(entry, filtersExceptCurrent, filters)) {
-                    return acc;
-                }
-
-                for (const value of uniqueEntryFactValues(entry, filter)) {
-                    acc.set(value, (acc.get(value) ?? 0) + 1);
-                }
-
-                return acc;
-            }, new Map<string, number>());
-
-            const values = filter.allowedValues
-                ? filter.allowedValues
-                    .map((value) => ({ value, count: counts.get(value) ?? 0 }))
-                    .filter((option) => filter.showZeroCountOptions !== false || option.count > 0)
-                : Array.from(counts.entries())
-                    .map(([value, count]) => ({ value, count }))
-                    .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));
-
-            return { ...filter, values };
-        })
-        .filter((filter) => filter.values.length > 0);
-}
-
-function entryMatchesFactFilters(
-    entry: CodexEntry,
-    activeFilters: ActiveCodexFactFilters,
-    filterConfigs: readonly CodexFactFilterConfig[]
-): boolean {
-    return Object.entries(activeFilters).every(([label, value]) => {
-        const filterConfig = filterConfigs.find((filter) => filter.label === label);
-        if (!filterConfig) {
-            return entryHasCodexFactValue(entry, label, value);
-        }
-
-        return getEntryFactFilterValues(entry, filterConfig).some((factValue) => factValue === value);
-    });
-}
-
-function getActiveFactFilterItems(
-    activeFilters: ActiveCodexFactFilters,
-    filters: readonly CodexFactFilterConfig[]
-): { label: string; displayLabel: string; value: string }[] {
-    return filters.flatMap((filter) => {
-        const value = activeFilters[filter.label];
-        return value ? [{ label: filter.label, displayLabel: filter.displayLabel, value }] : [];
-    });
-}
-
-function formatAbilityShelfValue(value: string): string {
-    return value
-        .split(/\s+/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(" ");
-}
-
-function getAbilityArchiveSummary(
-    activeFilters: { label: string; displayLabel: string; value: string }[],
-    count: number
-): { title: string; lead: string; context: string } | null {
-    if (activeFilters.length === 0) {
-        return {
-            title: "Ability Archive",
-            lead: "Browse combat and empire abilities by role, mechanic, and source.",
-            context: "Archive index",
-        };
-    }
-
-    const shelfNames = activeFilters.map((filter) => formatAbilityShelfValue(filter.value));
-    const title = shelfNames.length === 1
-        ? `${shelfNames[0]} Abilities`
-        : `${shelfNames.slice(0, 2).join(" + ")}${shelfNames.length > 2 ? ` + ${shelfNames.length - 2} more` : ""} Abilities`;
-    const shelfLabel = shelfNames.length === 1 ? "shelf" : "combined shelf";
-    const abilityLabel = count === 1 ? "ability" : "abilities";
-
-    return {
-        title,
-        lead: `A curated ${shelfLabel} containing ${count} ${abilityLabel}.`,
-        context: "Archive shelf",
-    };
 }
 
 export default function CodexPage() {
@@ -300,12 +143,12 @@ export default function CodexPage() {
     );
 
     const factFilterConfig = useMemo(
-        () => getFactFilterConfig(activeKind),
+        () => getAbilityArchiveFactFilterConfig(activeKind),
         [activeKind]
     );
 
     const factFilterOptions = useMemo(
-        () => buildFactFilterOptions(searchFilteredEntries, factFilterConfig, activeFactFilters),
+        () => buildAbilityArchiveFilterOptions(searchFilteredEntries, factFilterConfig, activeFactFilters),
         [activeFactFilters, factFilterConfig, searchFilteredEntries]
     );
 
@@ -327,7 +170,7 @@ export default function CodexPage() {
             }
 
             return searchFilteredEntries.filter((entry) =>
-                entryMatchesFactFilters(entry, activeFactFilters, factFilterConfig)
+                entryMatchesAbilityArchiveFilters(entry, activeFactFilters, factFilterConfig)
             );
         },
         [activeFactFilters, factFilterConfig, searchFilteredEntries]
@@ -350,7 +193,7 @@ export default function CodexPage() {
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
     const isAbilityCatalogMode = activeKind === "abilities";
     const activeFactFilterItems = useMemo(
-        () => getActiveFactFilterItems(activeFactFilters, factFilterConfig),
+        () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
     );
     const abilityArchiveSummary = useMemo(
@@ -637,6 +480,26 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
+    const removeFactFilter = useCallback((label: string) => {
+        setActiveFactFilters((current) => {
+            const next = { ...current };
+            delete next[label];
+            return next;
+        });
+    }, []);
+
+    const toggleFactFilter = useCallback((label: string, value: string) => {
+        setActiveFactFilters((current) => {
+            const next = { ...current };
+            if (next[label] === value) {
+                delete next[label];
+            } else {
+                next[label] = value;
+            }
+            return next;
+        });
+    }, []);
+
     const searchControl = (
         <CodexSearch
             value={query}
@@ -766,88 +629,14 @@ export default function CodexPage() {
                                 </div>
                             ) : null}
 
-                            {factFilterOptions.length > 0 ? (
-                                <div className="codex-resultsFilters" aria-label={`${activeKindLabel} filters`}>
-                                    <div className="codex-resultsFilters__controls">
-                                        {activeFactFilterItems.length > 0 ? (
-                                            <div className="codex-resultsFilters__activeGroup">
-                                                <span className="codex-resultsFilters__groupLabel">Current shelf</span>
-                                                <div
-                                                    className="codex-resultsFilters__active"
-                                                    aria-label="Active filters"
-                                                >
-                                                    {activeFactFilterItems.map((item) => (
-                                                        <button
-                                                            key={`${item.label}-${item.value}`}
-                                                            type="button"
-                                                            className="codex-resultsFilters__activeChip"
-                                                            onClick={() => {
-                                                                setActiveFactFilters((current) => {
-                                                                    const next = { ...current };
-                                                                    delete next[item.label];
-                                                                    return next;
-                                                                });
-                                                            }}
-                                                            aria-label={`Remove ${item.displayLabel}: ${item.value}`}
-                                                        >
-                                                            <span>{item.value}</span>
-                                                            <span aria-hidden="true">x</span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ) : null}
-                                        {factFilterOptions.map((filter) => (
-                                            <div
-                                                key={filter.label}
-                                                className="codex-resultsFilters__group"
-                                                role="group"
-                                                aria-label={filter.displayLabel}
-                                            >
-                                                <span className="codex-resultsFilters__groupLabel">
-                                                    {filter.displayLabel}
-                                                </span>
-                                                <div className="codex-resultsFilters__chips">
-                                                    {filter.values.map((option) => {
-                                                        const isActive = activeFactFilters[filter.label] === option.value;
-                                                        const isDisabled = option.count === 0;
-
-                                                        return (
-                                                            <button
-                                                                key={option.value}
-                                                                type="button"
-                                                                className={`codex-resultsFilters__chip ${
-                                                                    isActive ? "is-active" : ""
-                                                                }`}
-                                                                onClick={() => {
-                                                                    if (isDisabled) return;
-
-                                                                    setActiveFactFilters((current) => {
-                                                                        const next = { ...current };
-                                                                        if (next[filter.label] === option.value) {
-                                                                            delete next[filter.label];
-                                                                        } else {
-                                                                            next[filter.label] = option.value;
-                                                                        }
-                                                                        return next;
-                                                                    });
-                                                                }}
-                                                                aria-pressed={isActive}
-                                                                aria-label={`${option.value} ${option.count}`}
-                                                                disabled={isDisabled}
-                                                            >
-                                                                <span>{option.value}</span>
-                                                                <span className="codex-resultsFilters__count">
-                                                                    {option.count}
-                                                                </span>
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                            {isAbilityCatalogMode ? (
+                                <AbilityArchiveRail
+                                    activeFilters={activeFactFilters}
+                                    activeFilterItems={activeFactFilterItems}
+                                    filterOptions={factFilterOptions}
+                                    onRemoveFilter={removeFactFilter}
+                                    onToggleFilter={toggleFactFilter}
+                                />
                             ) : null}
 
                             {!isAbilityCatalogMode ? (
