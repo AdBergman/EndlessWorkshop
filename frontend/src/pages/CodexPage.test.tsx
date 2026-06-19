@@ -389,7 +389,7 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
         const filterRail = screen.getByLabelText("Ability catalog filters");
-        expect(within(filterRail).getByText("Catalog navigation")).toBeInTheDocument();
+        expect(within(filterRail).getByText("Browse by")).toBeInTheDocument();
         expect(within(filterRail).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
         expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
 

@@ -427,12 +427,13 @@
     min-width: 0;
     max-width: 100%;
     flex: 0 1 auto;
-    min-height: 25px;
+    min-height: 26px;
     gap: 6px;
-    padding-inline: 7px;
+    padding-inline: 8px;
     border-color: rgba(199, 189, 171, 0.044);
     background: rgba(255, 255, 255, 0.003);
     color: rgba(241, 234, 220, 0.62);
+    font-size: 12px;
 }
 
 .codex-categoryShelf__chip > span:not(.codex-kindFilter__count) {
@@ -446,8 +447,16 @@
 }
 
 .codex-categoryShelf__chip .codex-kindFilter__count {
-    color: rgba(199, 189, 171, 0.52);
-    font-size: 11px;
+    display: none;
+    color: rgba(230, 176, 82, 0.74);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-categoryShelf__chip.is-active .codex-kindFilter__count {
+    display: inline-flex;
+    margin-left: 1px;
 }
 
 .codex-workspace {
@@ -499,6 +508,35 @@
     padding-right: 18px;
 }
 
+.codex-resultsPane--catalog .codex-resultsPane__header {
+    align-items: start;
+    padding-bottom: 18px;
+}
+
+.codex-resultsPane--catalog .codex-sectionLabel {
+    color: rgba(230, 176, 82, 0.92);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+}
+
+.codex-resultsPane--catalog .codex-resultsPane__title {
+    margin-top: 12px;
+    color: rgba(241, 234, 220, 0.64);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+.codex-resultsPane--catalog .codex-resultsPane__count {
+    padding-top: 1px;
+    color: rgba(230, 176, 82, 0.86);
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.35;
+    text-align: right;
+}
+
 .codex-resultsPane__header {
     display: flex;
     align-items: end;
@@ -524,15 +562,15 @@
 
 .codex-resultsFilters {
     display: grid;
-    gap: 20px;
-    padding: 18px 0 4px;
+    gap: 24px;
+    padding: 22px 0 4px;
     border-bottom: 0;
     flex-shrink: 0;
 }
 
 .codex-resultsFilters__controls {
     display: grid;
-    gap: 22px;
+    gap: 26px;
 }
 
 .codex-resultsFilters__activeGroup {
@@ -581,15 +619,15 @@
 
 .codex-resultsFilters__group {
     display: grid;
-    gap: 8px;
+    gap: 10px;
     min-width: 0;
 }
 
 .codex-resultsFilters__groupLabel {
-    color: rgba(195, 152, 77, 0.78);
-    font-size: 10px;
+    color: rgba(195, 152, 77, 0.86);
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.16em;
     line-height: 1.35;
     text-transform: uppercase;
 }
@@ -598,24 +636,24 @@
     display: grid;
     grid-template-columns: 1fr;
     min-width: 0;
-    gap: 2px;
+    gap: 3px;
 }
 
 .codex-resultsFilters__chip {
     position: relative;
     display: inline-flex;
     max-width: 100%;
-    min-height: 37px;
+    min-height: 42px;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 8px 8px 8px 28px;
+    padding: 9px 10px 9px 30px;
     border: 1px solid transparent;
     border-radius: 6px;
     background: transparent;
-    color: rgba(241, 234, 220, 0.72);
+    color: rgba(241, 234, 220, 0.76);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.2;
     text-align: left;
     transition:
@@ -639,9 +677,9 @@
 
 .codex-resultsFilters__chip::before {
     position: absolute;
-    left: 10px;
-    width: 8px;
-    height: 8px;
+    left: 11px;
+    width: 9px;
+    height: 9px;
     border: 1px solid rgba(195, 152, 77, 0.36);
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.24);
@@ -669,8 +707,8 @@
 
 .codex-resultsFilters__count {
     flex: 0 0 auto;
-    color: rgba(230, 176, 82, 0.74);
-    font-size: 12px;
+    color: rgba(230, 176, 82, 0.72);
+    font-size: 13px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
 }
@@ -1797,6 +1835,12 @@
     transition: border-color 0.18s ease, background-color 0.18s ease;
 }
 
+.codex-summaryList__item--catalog {
+    gap: 9px;
+    padding-top: 19px;
+    padding-bottom: 19px;
+}
+
 .codex-summaryList__item:hover,
 .codex-summaryList__item:focus-visible,
 .codex-summaryList__item:focus-within {
@@ -1862,6 +1906,10 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--catalog .codex-summaryList__titleLine {
+    gap: 10px;
+}
+
 .codex-kindIcon--summaryEntry {
     flex: 0 0 auto;
 }
@@ -1874,6 +1922,13 @@
     transition: color 0.18s ease;
 }
 
+.codex-summaryList__item--catalog .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: 0.005em;
+    line-height: 1.35;
+}
+
 .codex-summaryList__context {
     color: rgba(195, 152, 77, 0.72);
     font-size: 11px;
@@ -1882,11 +1937,21 @@
     text-transform: uppercase;
 }
 
+.codex-summaryList__item--catalog .codex-summaryList__context {
+    color: rgba(195, 152, 77, 0.48);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+}
+
 .codex-summaryList__metadata {
     display: flex;
     min-width: 0;
     flex-wrap: wrap;
     gap: 6px;
+}
+
+.codex-summaryList__item--catalog .codex-summaryList__metadata {
+    gap: 9px;
 }
 
 .codex-summaryList__metadataChip {
@@ -1904,6 +1969,27 @@
     line-height: 1.35;
 }
 
+.codex-summaryList__item--catalog .codex-summaryList__metadataChip {
+    max-width: min(100%, 340px);
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(241, 234, 220, 0.56);
+    font-size: 12.5px;
+}
+
+.codex-summaryList__item--catalog .codex-summaryList__metadataChip + .codex-summaryList__metadataChip::before {
+    align-self: center;
+    width: 3px;
+    height: 3px;
+    margin-right: 2px;
+    border-radius: 50%;
+    background: rgba(195, 152, 77, 0.38);
+    content: "";
+}
+
 .codex-summaryList__metadataLabel {
     flex: 0 0 auto;
     color: rgba(195, 152, 77, 0.72);
@@ -1911,6 +1997,12 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
+}
+
+.codex-summaryList__item--catalog .codex-summaryList__metadataLabel {
+    color: rgba(195, 152, 77, 0.62);
+    font-size: 10px;
+    letter-spacing: 0.12em;
 }
 
 .codex-summaryList__metadataValue {
@@ -1924,6 +2016,13 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
     line-height: 1.65;
+}
+
+.codex-summaryList__item--catalog .codex-summaryList__description {
+    max-width: 78ch;
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 15px;
+    line-height: 1.58;
 }
 
 .codex-summaryList__effects {

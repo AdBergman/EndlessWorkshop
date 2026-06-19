@@ -641,7 +641,9 @@ export default function CodexPage() {
                                                 size={15}
                                             />
                                             <span>{option.label}</span>
-                                            <span className="codex-kindFilter__count">{option.count}</span>
+                                            <span className="codex-kindFilter__count">
+                                                {isActive ? `${option.count} entries` : option.count}
+                                            </span>
                                         </button>
                                     );
                                 })}
@@ -667,7 +669,7 @@ export default function CodexPage() {
                                     </div>
                                     <div className="codex-resultsPane__title">
                                         {isAbilityCatalogMode
-                                            ? "Catalog navigation"
+                                            ? "Browse by"
                                             : activeKind === ALL_CODEX_KIND
                                             ? "All encyclopedia entries"
                                             : activeKindLabel}
