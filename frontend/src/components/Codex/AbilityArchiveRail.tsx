@@ -34,11 +34,16 @@ export default function AbilityArchiveRail({
                             <span className="codex-resultsFilters__groupLabel">
                                 {filter.displayLabel}
                             </span>
-                            {index === 0 && hasActiveFilters ? (
+                            {index === 0 ? (
                                 <button
                                     type="button"
-                                    className="codex-resultsFilters__clear"
+                                    className={`codex-resultsFilters__clear ${
+                                        hasActiveFilters ? "" : "is-hidden"
+                                    }`}
                                     onClick={onClearFilters}
+                                    aria-hidden={!hasActiveFilters}
+                                    disabled={!hasActiveFilters}
+                                    tabIndex={hasActiveFilters ? undefined : -1}
                                 >
                                     Clear
                                 </button>

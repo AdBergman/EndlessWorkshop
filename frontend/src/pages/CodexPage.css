@@ -652,6 +652,11 @@
     box-shadow: 0 0 0 2px rgba(255, 127, 50, 0.075);
 }
 
+.codex-resultsFilters__clear.is-hidden {
+    pointer-events: none;
+    visibility: hidden;
+}
+
 .codex-resultsFilters__chips {
     display: grid;
     grid-template-columns: 1fr;

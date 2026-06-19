@@ -552,16 +552,16 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
         const filters = screen.getByLabelText("Abilities filters");
         expect(within(filters).queryByRole("button", { name: /all/i })).not.toBeInTheDocument();
-        const popularGroup = within(filters).getByRole("group", { name: "Popular / Player-centric" });
+        const popularGroup = within(filters).getByRole("group", { name: "Ability Role" });
         const mechanicGroup = within(filters).getByRole("group", { name: "Mechanics" });
         const sourceGroup = within(filters).getByRole("group", { name: "Sources" });
         expect(within(popularGroup).getByRole("button", { name: /damage\s+1/i })).toBeInTheDocument();
         expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i })).toBeInTheDocument();
-        expect(within(popularGroup).getByRole("button", { name: /heal\s+0/i })).toBeDisabled();
+        expect(within(popularGroup).queryByRole("button", { name: /heal\s+0/i })).not.toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
-        expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
+        expect(within(mechanicGroup).queryByRole("button", { name: /passive\s+0/i })).not.toBeInTheDocument();
         expect(within(sourceGroup).getByRole("button", { name: /battle skill\s+1/i })).toBeInTheDocument();
-        expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
+        expect(within(sourceGroup).queryByRole("button", { name: /unit ability event\s+0/i })).not.toBeInTheDocument();
         expect(within(filters).queryByRole("group", { name: "Role" })).not.toBeInTheDocument();
         expect(within(filters).queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
         expect(within(filters).queryByText("Current shelf")).not.toBeInTheDocument();
@@ -577,7 +577,7 @@ describe("CodexPage", () => {
 
         expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }))
             .toHaveAttribute("aria-pressed", "true");
-        expect(within(filters).getByRole("group", { name: "Popular / Player-centric" })).toBeInTheDocument();
+        expect(within(filters).getByRole("group", { name: "Ability Role" })).toBeInTheDocument();
         expect(within(filters).getByRole("group", { name: "Mechanics" })).toBeInTheDocument();
         expect(within(filters).getByRole("group", { name: "Sources" })).toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();

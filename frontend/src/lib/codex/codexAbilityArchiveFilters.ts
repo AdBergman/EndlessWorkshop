@@ -30,7 +30,7 @@ export type AbilityArchiveSummary = {
 const ABILITY_ARCHIVE_FILTERS: readonly CodexFactFilterConfig[] = [
     {
         label: "Combat role",
-        displayLabel: "Popular / Player-centric",
+        displayLabel: "Ability Role",
         allowedValues: [
             "Damage",
             "Status apply",
@@ -92,6 +92,8 @@ export function buildAbilityArchiveFilterOptions(
     filters: readonly CodexFactFilterConfig[],
     activeFilters: ActiveCodexFactFilters
 ): CodexFactFilterOption[] {
+    const hasActiveFilters = Object.keys(activeFilters).length > 0;
+
     return filters
         .map((filter) => {
             const counts = entries.reduce<Map<string, number>>((acc, entry) => {
@@ -112,14 +114,13 @@ export function buildAbilityArchiveFilterOptions(
             const values = filter.allowedValues
                 ? filter.allowedValues
                     .map((value) => ({ value, count: counts.get(value) ?? 0 }))
-                    .filter((option) => filter.showZeroCountOptions !== false || option.count > 0)
+                    .filter((option) => hasActiveFilters || filter.showZeroCountOptions === true || option.count > 0)
                 : Array.from(counts.entries())
                     .map(([value, count]) => ({ value, count }))
                     .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));
 
             return { ...filter, values };
-        })
-        .filter((filter) => filter.values.length > 0);
+        });
 }
 
 export function entryMatchesAbilityArchiveFilters(
@@ -167,16 +168,23 @@ export function getAbilityArchiveSummary(
         };
     }
 
-    const shelfNames = activeFilters.map((filter) => formatAbilityShelfValue(filter.value));
-    const title = shelfNames.length === 1
-        ? `${shelfNames[0]} Abilities`
-        : `${shelfNames.slice(0, 2).join(" + ")}${shelfNames.length > 2 ? ` + ${shelfNames.length - 2} more` : ""} Abilities`;
-    const shelfLabel = shelfNames.length === 1 ? "shelf" : "combined shelf";
+    if (activeFilters.length === 1) {
+        const shelfName = formatAbilityShelfValue(activeFilters[0].value);
+        const abilityLabel = count === 1 ? "ability" : "abilities";
+
+        return {
+            title: `${shelfName} Abilities`,
+            lead: `A curated shelf containing ${count} ${abilityLabel}.`,
+            context: "Archive shelf",
+        };
+    }
+
     const abilityLabel = count === 1 ? "ability" : "abilities";
+    const shelfLabel = activeFilters.length === 1 ? "shelf" : "shelves";
 
     return {
-        title,
-        lead: `A curated ${shelfLabel} containing ${count} ${abilityLabel}.`,
+        title: "Filtered Abilities",
+        lead: `${count} ${abilityLabel} matching ${activeFilters.length} selected ${shelfLabel}.`,
         context: "Archive shelf",
     };
 }

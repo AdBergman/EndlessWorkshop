@@ -32,7 +32,7 @@ describe("codexAbilityArchiveFilters", () => {
 
     it("exposes only the curated Ability Archive filter groups for abilities", () => {
         expect(filters.map((filter) => filter.displayLabel)).toEqual([
-            "Popular / Player-centric",
+            "Ability Role",
             "Mechanics",
             "Sources",
         ]);
@@ -81,7 +81,7 @@ describe("codexAbilityArchiveFilters", () => {
         expect(entryMatchesAbilityArchiveFilters(proseOnly, { Role: "Damage" }, filters)).toBe(true);
     });
 
-    it("builds dynamic counts from exported facts and keeps curated role values visible", () => {
+    it("builds dynamic counts from exported facts and hides zero-count rows at the archive root", () => {
         const entries = [
             ability("Ability_Damage", "Damage Ability", [
                 { label: "Combat role", value: "Damage, Movement" },
@@ -100,15 +100,8 @@ describe("codexAbilityArchiveFilters", () => {
         const roleValues = options.find((filter) => filter.label === "Combat role")?.values ?? [];
         expect(roleValues).toEqual([
             { value: "Damage", count: 1 },
-            { value: "Status apply", count: 0 },
             { value: "Shield", count: 1 },
-            { value: "Heal", count: 0 },
             { value: "Movement", count: 1 },
-            { value: "Teleport", count: 0 },
-            { value: "Summon", count: 0 },
-            { value: "Push", count: 0 },
-            { value: "Status remove", count: 0 },
-            { value: "Reactive skill", count: 0 },
         ]);
     });
 
@@ -160,7 +153,7 @@ describe("codexAbilityArchiveFilters", () => {
         );
 
         expect(activeItems).toEqual([
-            { label: "Combat role", displayLabel: "Popular / Player-centric", value: "Status apply" },
+            { label: "Combat role", displayLabel: "Ability Role", value: "Status apply" },
             { label: "Ability mechanic", displayLabel: "Mechanics", value: "Reaction" },
         ]);
         expect(getAbilityArchiveSummary([], 336)).toEqual({
@@ -169,8 +162,13 @@ describe("codexAbilityArchiveFilters", () => {
             context: "Archive index",
         });
         expect(getAbilityArchiveSummary(activeItems, 12)).toEqual({
-            title: "Status Apply + Reaction Abilities",
-            lead: "A curated combined shelf containing 12 abilities.",
+            title: "Filtered Abilities",
+            lead: "12 abilities matching 2 selected shelves.",
+            context: "Archive shelf",
+        });
+        expect(getAbilityArchiveSummary(activeItems.slice(0, 1), 1)).toEqual({
+            title: "Status Apply Abilities",
+            lead: "A curated shelf containing 1 ability.",
             context: "Archive shelf",
         });
     });
