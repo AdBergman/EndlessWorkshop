@@ -738,6 +738,8 @@ export default function CodexPage() {
                 <div
                     className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""} ${
                         isFullWidthReferenceOverviewState ? "codex-workspace--referenceOverview" : ""
+                    } ${
+                        isAbilityCatalogMode ? "codex-workspace--abilityCatalog" : ""
                     }`}
                 >
                     {showResultsPane ? (
