@@ -1691,6 +1691,19 @@
     outline-offset: 3px;
 }
 
+.codex-summaryList__titleLine {
+    display: inline-flex;
+    min-width: 0;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    gap: 8px;
+}
+
+.codex-kindIcon--summaryEntry {
+    flex: 0 0 auto;
+}
+
 .codex-summaryList__name {
     color: #f1eadc;
     font-size: 1rem;
@@ -1705,6 +1718,44 @@
     letter-spacing: 0.12em;
     line-height: 1.4;
     text-transform: uppercase;
+}
+
+.codex-summaryList__metadata {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.codex-summaryList__metadataChip {
+    display: inline-flex;
+    max-width: min(100%, 280px);
+    align-items: baseline;
+    gap: 5px;
+    overflow: hidden;
+    padding: 3px 8px;
+    border: 1px solid rgba(199, 189, 171, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.01);
+    color: rgba(241, 234, 220, 0.7);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.codex-summaryList__metadataLabel {
+    flex: 0 0 auto;
+    color: rgba(195, 152, 77, 0.72);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.codex-summaryList__metadataValue {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codex-summaryList__description {

@@ -19,6 +19,7 @@ import {
     getCodexShallowReferencePreview,
     isShallowReferenceKind,
 } from "@/lib/codex/codexShallowReferencePreview";
+import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -30,6 +31,56 @@ type Props = {
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectEntry: (entry: CodexListItem) => void;
 };
+
+type OverviewMetadataConfig = {
+    label: string;
+    displayLabel: string;
+};
+type OverviewMetadataItem = {
+    label: string;
+    value: string;
+};
+
+const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
+    abilities: [
+        { label: "Ability mechanic", displayLabel: "Mechanic" },
+        { label: "Ability source", displayLabel: "Source" },
+        { label: "Combat role", displayLabel: "Role" },
+    ],
+    statuses: [
+        { label: "Scope", displayLabel: "Scope" },
+        { label: "Duration", displayLabel: "Duration" },
+    ],
+};
+const MAX_OVERVIEW_METADATA_ITEMS = 3;
+
+function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
+    const configs = OVERVIEW_METADATA_BY_KIND[entry.exportKind.trim().toLowerCase()] ?? [];
+    const seenValues = new Set<string>();
+    const items: OverviewMetadataItem[] = [];
+
+    for (const config of configs) {
+        for (const value of getCodexFactValues(entry, config.label)) {
+            const normalizedValue = `${config.label}:${value}`.toLowerCase();
+            if (seenValues.has(normalizedValue)) continue;
+
+            seenValues.add(normalizedValue);
+            items.push({ label: config.displayLabel, value });
+            if (items.length >= MAX_OVERVIEW_METADATA_ITEMS) {
+                return items;
+            }
+        }
+    }
+
+    return items;
+}
+
+function supportsRichOverviewRow(entry: CodexEntry): boolean {
+    return Object.prototype.hasOwnProperty.call(
+        OVERVIEW_METADATA_BY_KIND,
+        entry.exportKind.trim().toLowerCase()
+    );
+}
 
 export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, titleRef, onSelectEntry }: Props) {
     const isShallowReferenceSummary = isShallowReferenceKind(summaryEntry.summaryKind);
@@ -108,6 +159,8 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                         const secondaryContext = factionAffinity
                             ? `Affinity: ${factionAffinity}`
                             : getCodexSecondaryContext(entry);
+                        const showRichOverviewRow = supportsRichOverviewRow(entry);
+                        const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const shallowPreview = !isFactionEntry
                             ? getCodexShallowReferencePreview(entry, allEntries, preview)
                             : null;
@@ -189,11 +242,34 @@ export default function CodexSummaryDetail({ summaryEntry, entries, allEntries, 
                                 className="codex-summaryList__item"
                                 onClick={() => onSelectEntry(entry)}
                             >
-                                <span className="codex-summaryList__name">
-                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                <span className="codex-summaryList__titleLine">
+                                    {showRichOverviewRow ? (
+                                        <CodexEntryIcon
+                                            entry={entry}
+                                            label={getCodexEntryLabel(entry)}
+                                            className="codex-kindIcon codex-kindIcon--summaryEntry"
+                                            size={20}
+                                        />
+                                    ) : null}
+                                    <span className="codex-summaryList__name">
+                                        {renderCodexLabel(getCodexEntryLabel(entry))}
+                                    </span>
                                 </span>
                                 {secondaryContext ? (
                                     <span className="codex-summaryList__context">{secondaryContext}</span>
+                                ) : null}
+                                {overviewMetadata.length > 0 ? (
+                                    <span className="codex-summaryList__metadata" aria-label="Exported metadata">
+                                        {overviewMetadata.map((item) => (
+                                            <span
+                                                key={`${item.label}-${item.value}`}
+                                                className="codex-summaryList__metadataChip"
+                                            >
+                                                <span className="codex-summaryList__metadataLabel">{item.label}</span>
+                                                <span className="codex-summaryList__metadataValue">{item.value}</span>
+                                            </span>
+                                        ))}
+                                    </span>
                                 ) : null}
                                 <span className="codex-summaryList__description">
                                     {preview || "No public description has been added for this entry yet."}

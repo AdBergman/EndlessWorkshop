@@ -355,6 +355,158 @@ describe("CodexPage", () => {
         expect(categoryLabels).not.toContain("Extractors");
     });
 
+    it("renders Ability overview metadata from exported facts while keeping left rows compact", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_AlwaysRetaliate",
+                displayName: "Always Retaliate",
+                descriptionLines: ["Counterattack when possible."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Reaction" },
+                    { label: "Ability source", value: "Unit ability" },
+                    { label: "Combat role", value: "Retaliation" },
+                    { label: "Kind", value: "Ability" },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_ActiveBattleSkillNameOnly",
+                displayName: "Active Battle Skill Name Only",
+                descriptionLines: ["Status apply appears in prose without exported metadata facts."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
+        const resultsPane = screen.getByLabelText("Codex results");
+        const leftRow = within(resultsPane).getByRole("button", { name: /always retaliate/i });
+        expect(leftRow.querySelector("img.codex-kindIcon--result")).toHaveAttribute(
+            "src",
+            "/svg/unit-abilities/UI_UnitAbility_AlwaysRetaliate.svg"
+        );
+        expect(leftRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        expect(within(leftRow).queryByText("Reaction")).not.toBeInTheDocument();
+
+        const abilitiesOverview = screen.getByLabelText("Abilities overview");
+        const overviewRow = within(abilitiesOverview).getByRole("button", { name: /always retaliate/i });
+        expect(overviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toHaveAttribute(
+            "src",
+            "/svg/unit-abilities/UI_UnitAbility_AlwaysRetaliate.svg"
+        );
+        const metadata = within(overviewRow).getByLabelText("Exported metadata");
+        expect(within(metadata).getByText("Mechanic")).toBeInTheDocument();
+        expect(within(metadata).getByText("Reaction")).toBeInTheDocument();
+        expect(within(metadata).getByText("Source")).toBeInTheDocument();
+        expect(within(metadata).getByText("Unit ability")).toBeInTheDocument();
+        expect(within(metadata).getByText("Role")).toBeInTheDocument();
+        expect(within(metadata).getByText("Retaliation")).toBeInTheDocument();
+
+        const thinRow = within(resultsPane).getByRole("button", { name: /active battle skill name only/i });
+        expect(thinRow).toBeInTheDocument();
+        expect(thinRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        const thinOverviewRow = within(abilitiesOverview).getByRole("button", {
+            name: /active battle skill name only/i,
+        });
+        expect(thinOverviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toBeInTheDocument();
+        expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
+    });
+
+    it("renders Status overview metadata from exported facts while keeping left rows compact", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "statuses",
+                entryKey: "Status_PublicOpinion_Test",
+                displayName: "Public Opinion Status",
+                descriptionLines: ["A diplomatic status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                    { label: "Duration", value: "10 turns" },
+                    { label: "Status type", value: "Public Opinion" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_UnitDurationNameOnly",
+                displayName: "Unit 10 turns Name Only",
+                descriptionLines: ["Unit scope and 10 turns appear in prose only."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
+        const resultsPane = screen.getByLabelText("Codex results");
+        const leftRow = within(resultsPane).getByRole("button", { name: /public opinion status/i });
+        expect(leftRow.querySelector("img.codex-kindIcon--result")).toBeInTheDocument();
+        expect(leftRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+
+        const statusesOverview = screen.getByLabelText("Statuses overview");
+        const overviewRow = within(statusesOverview).getByRole("button", { name: /public opinion status/i });
+        expect(overviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toBeInTheDocument();
+        const metadata = within(overviewRow).getByLabelText("Exported metadata");
+        expect(within(metadata).getByText("Scope")).toBeInTheDocument();
+        expect(within(metadata).getByText("Diplomatic Ambassy")).toBeInTheDocument();
+        expect(within(metadata).getByText("Duration")).toBeInTheDocument();
+        expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
+        expect(within(metadata).queryByText("Public Opinion")).not.toBeInTheDocument();
+
+        const thinRow = within(resultsPane).getByRole("button", { name: /unit 10 turns name only/i });
+        expect(thinRow).toBeInTheDocument();
+        expect(thinRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        const thinOverviewRow = within(statusesOverview).getByRole("button", { name: /unit 10 turns name only/i });
+        expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
+    });
+
+    it("does not render Ability or Status overview metadata chips for other Codex categories", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "tech",
+                entryKey: "Tech_MetadataTrap",
+                displayName: "Metadata Trap",
+                descriptionLines: ["A tech entry with tempting fact labels."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Scope", value: "Empire" },
+                    { label: "Duration", value: "10 turns" },
+                ],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        const resultsPane = screen.getByLabelText("Codex results");
+        const row = within(resultsPane).getByRole("button", { name: /metadata trap/i });
+        expect(row.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        const techOverview = screen.getByLabelText("Tech overview");
+        expect(techOverview.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
+    });
+
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
         const user = userEvent.setup();
         seedCodexEntries([
@@ -1621,7 +1773,7 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Public Opinion Status" })).toBeInTheDocument();
         expect(screen.getByText("Status dossier")).toBeInTheDocument();
-        expect(screen.getByText("10 turns")).toBeInTheDocument();
+        expect(screen.getAllByText("10 turns").length).toBeGreaterThan(0);
         expect(screen.getByRole("heading", { name: "Status mechanics" })).toBeInTheDocument();
         expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
