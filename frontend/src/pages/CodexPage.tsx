@@ -696,7 +696,12 @@ export default function CodexPage() {
                         {searchControl}
                     </div>
                     {!isOverviewState ? (
-                        <div className="codex-categoryShelf" aria-label="Codex categories">
+                        <div
+                            className={`codex-categoryShelf ${
+                                isAbilityCatalogMode ? "codex-categoryShelf--abilityCatalog" : ""
+                            }`}
+                            aria-label="Codex categories"
+                        >
                             <div className="codex-categoryShelf__label">Categories</div>
                             <div
                                 className="codex-categoryShelf__chips codex-categoryShelf__chips--wrap"
@@ -747,31 +752,19 @@ export default function CodexPage() {
                             className={`codex-resultsPane ${isAbilityCatalogMode ? "codex-resultsPane--catalog" : ""}`}
                             aria-label={isAbilityCatalogMode ? "Ability catalog filters" : "Codex results"}
                         >
-                            <div className="codex-resultsPane__header">
-                                {isAbilityCatalogMode ? (
-                                    <div className="codex-resultsPane__archiveIntro">
-                                        <div className="codex-sectionLabel">Ability archive</div>
-                                        <div className="codex-resultsPane__count">
-                                            {`${filteredEntries.length} ${
-                                                filteredEntries.length === 1 ? "ability" : "abilities"
-                                            }`}
+                            {!isAbilityCatalogMode ? (
+                                <div className="codex-resultsPane__header">
+                                    <div>
+                                        <div className="codex-sectionLabel">Results</div>
+                                        <div className="codex-resultsPane__title">
+                                            {activeKind === ALL_CODEX_KIND
+                                                ? "All encyclopedia entries"
+                                                : activeKindLabel}
                                         </div>
-                                        <p>Choose a shelf to browse combat and empire abilities.</p>
                                     </div>
-                                ) : (
-                                    <>
-                                        <div>
-                                            <div className="codex-sectionLabel">Results</div>
-                                            <div className="codex-resultsPane__title">
-                                                {activeKind === ALL_CODEX_KIND
-                                                    ? "All encyclopedia entries"
-                                                    : activeKindLabel}
-                                            </div>
-                                        </div>
-                                        <div className="codex-resultsPane__count">{filteredEntries.length}</div>
-                                    </>
-                                )}
-                            </div>
+                                    <div className="codex-resultsPane__count">{filteredEntries.length}</div>
+                                </div>
+                            ) : null}
 
                             {factFilterOptions.length > 0 ? (
                                 <div className="codex-resultsFilters" aria-label={`${activeKindLabel} filters`}>

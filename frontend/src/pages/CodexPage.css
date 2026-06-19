@@ -459,6 +459,50 @@
     margin-left: 1px;
 }
 
+.codex-categoryShelf--abilityCatalog {
+    gap: 3px;
+    padding-top: 4px;
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__label {
+    color: rgba(195, 152, 77, 0.58);
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chips {
+    gap: 3px 4px;
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip {
+    min-height: 24px;
+    border-color: rgba(199, 189, 171, 0.032);
+    background: rgba(255, 255, 255, 0.002);
+    color: rgba(241, 234, 220, 0.52);
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:hover,
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:focus-visible {
+    border-color: rgba(195, 152, 77, 0.14);
+    background: rgba(255, 255, 255, 0.014);
+    color: rgba(241, 234, 220, 0.76);
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip.is-active {
+    border-color: color-mix(in srgb, var(--codex-accent) 28%, transparent);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent),
+        rgba(255, 127, 50, 0.052);
+    color: rgba(241, 234, 220, 0.9);
+}
+
+.codex-categoryShelf--abilityCatalog .codex-kindIcon--chip {
+    opacity: 0.5;
+}
+
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip.is-active .codex-kindIcon--chip,
+.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:hover .codex-kindIcon--chip {
+    opacity: 0.82;
+}
+
 .codex-workspace {
     display: grid;
     grid-template-columns: minmax(330px, 400px) minmax(0, 1fr);
@@ -510,49 +554,11 @@
 
 .codex-resultsPane--catalog {
     gap: 0;
+    overflow-y: auto;
     padding-right: 20px;
-}
-
-.codex-resultsPane--catalog .codex-resultsPane__header {
-    align-items: start;
-    padding-bottom: 20px;
-}
-
-.codex-resultsPane__archiveIntro {
-    display: grid;
-    gap: 8px;
-    min-width: 0;
-}
-
-.codex-resultsPane--catalog .codex-sectionLabel {
-    color: rgba(230, 176, 82, 0.92);
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.22em;
-}
-
-.codex-resultsPane__archiveIntro p {
-    max-width: 28ch;
-    margin: 2px 0 0;
-    color: rgba(241, 234, 220, 0.66);
-    font-size: 14px;
-    line-height: 1.58;
-}
-
-.codex-resultsPane--catalog .codex-resultsPane__title {
-    margin-top: 12px;
-    color: rgba(241, 234, 220, 0.64);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-}
-
-.codex-resultsPane--catalog .codex-resultsPane__count {
-    color: rgba(230, 176, 82, 0.86);
-    font-size: 17px;
-    font-weight: 700;
-    line-height: 1.35;
-    text-align: left;
+    scrollbar-gutter: stable;
+    scrollbar-color: rgba(195, 152, 77, 0.24) rgba(255, 255, 255, 0.025);
+    scrollbar-width: thin;
 }
 
 .codex-resultsPane__header {
@@ -621,6 +627,10 @@
     font-size: 12px;
     font-weight: 600;
     line-height: 1;
+    transition:
+        border-color 140ms ease,
+        background 140ms ease,
+        color 140ms ease;
 }
 
 .codex-resultsFilters__activeChip > span:first-child {
@@ -633,6 +643,7 @@
 .codex-resultsFilters__activeChip:focus-visible {
     border-color: color-mix(in srgb, var(--codex-accent) 48%, transparent);
     background: rgba(255, 127, 50, 0.11);
+    color: #f1eadc;
 }
 
 .codex-resultsFilters__group {
@@ -693,6 +704,12 @@
     color: rgba(241, 234, 220, 0.9);
 }
 
+.codex-resultsFilters__chip:focus-visible,
+.codex-resultsFilters__activeChip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 127, 50, 0.075);
+}
+
 .codex-resultsFilters__chip::before {
     position: absolute;
     left: 11px;
@@ -710,6 +727,14 @@
         linear-gradient(90deg, rgba(255, 127, 50, 0.11), rgba(195, 152, 77, 0.026) 72%, transparent),
         rgba(255, 255, 255, 0.016);
     color: #f1eadc;
+}
+
+.codex-resultsFilters__chip.is-active:hover,
+.codex-resultsFilters__chip.is-active:focus-visible {
+    border-color: color-mix(in srgb, var(--codex-accent) 36%, transparent);
+    background:
+        linear-gradient(90deg, rgba(255, 127, 50, 0.13), rgba(195, 152, 77, 0.035) 72%, transparent),
+        rgba(255, 255, 255, 0.018);
 }
 
 .codex-resultsFilters__chip.is-active::before {
@@ -972,6 +997,8 @@
 
 .codex-workspace--abilityCatalog .codex-detailPane {
     padding-right: 8px;
+    scrollbar-color: rgba(195, 152, 77, 0.24) rgba(255, 255, 255, 0.025);
+    scrollbar-width: thin;
 }
 
 .codex-workspace--abilityCatalog .codex-detailPane__body {
@@ -1873,6 +1900,7 @@
 .codex-summaryList__item--catalog {
     gap: 10px;
     padding: 22px 12px 22px 18px;
+    border-left-width: 3px;
 }
 
 .codex-summaryList__item:hover,
@@ -1889,6 +1917,11 @@
     background:
         linear-gradient(90deg, rgba(255, 127, 50, 0.035), rgba(255, 255, 255, 0.014) 58%, transparent),
         rgba(255, 255, 255, 0.004);
+}
+
+.codex-summaryList__item--catalog:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 127, 50, 0.08);
 }
 
 .codex-summaryList__item:hover .codex-summaryList__name,
@@ -2283,6 +2316,31 @@
 .codex-resultsList::-webkit-scrollbar-thumb:hover,
 .codex-detailPane::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.28);
+    background-clip: padding-box;
+}
+
+.codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar,
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-track,
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.018);
+}
+
+.codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb,
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb {
+    border: 2px solid rgba(0, 0, 0, 0);
+    border-radius: 999px;
+    background: rgba(195, 152, 77, 0.24);
+    background-clip: padding-box;
+}
+
+.codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb:hover,
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb:hover {
+    background: rgba(230, 176, 82, 0.38);
     background-clip: padding-box;
 }
 

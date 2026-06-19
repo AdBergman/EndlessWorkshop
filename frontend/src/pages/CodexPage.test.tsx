@@ -389,8 +389,11 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
         const filterRail = screen.getByLabelText("Ability catalog filters");
-        expect(within(filterRail).getByText("Ability archive")).toBeInTheDocument();
-        expect(within(filterRail).getByText("Choose a shelf to browse combat and empire abilities.")).toBeInTheDocument();
+        expect(within(filterRail).queryByText("Ability archive")).not.toBeInTheDocument();
+        expect(within(filterRail).queryByText("Choose a shelf to browse combat and empire abilities."))
+            .not.toBeInTheDocument();
+        expect(within(filterRail).getByRole("group", { name: "Mechanics" })).toBeInTheDocument();
+        expect(within(filterRail).getByRole("group", { name: "Sources" })).toBeInTheDocument();
         expect(within(filterRail).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
         expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
 
