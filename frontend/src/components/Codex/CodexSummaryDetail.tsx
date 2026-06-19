@@ -164,14 +164,16 @@ function getAbilityCatalogEffectPreviewLines(entry: CodexEntry): string[] {
     const seen = new Set<string>();
 
     const addLine = (line: string) => {
-        const value = line.trim();
-        if (!value) return;
+        for (const rawValue of line.split(/\r?\n/)) {
+            const value = rawValue.trim();
+            if (!value) continue;
 
-        const normalized = normalizeAbilityTaxonomyText(value);
-        if (seen.has(normalized)) return;
+            const normalized = normalizeAbilityTaxonomyText(value);
+            if (seen.has(normalized)) continue;
 
-        seen.add(normalized);
-        effectLines.push(value);
+            seen.add(normalized);
+            effectLines.push(value);
+        }
     };
 
     for (const section of parsed.sections) {

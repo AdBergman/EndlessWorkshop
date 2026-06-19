@@ -393,10 +393,12 @@ describe("CodexPage", () => {
                     {
                         title: "Effects",
                         lines: [
-                            "Ignores the Defense of targeted Units",
-                            "Deals 80% of the Hero's Damage",
-                            "Deals 6 extra Damage per Determination",
-                            "Applies Burning for 1 turn",
+                            [
+                                "Ignores the Defense of targeted Units",
+                                "Deals 80% of the Hero's [Damage] Damage",
+                                "Deals 6 extra Damage per Determination",
+                                "Applies Burning for 1 turn",
+                            ].join("\n"),
                         ],
                     },
                 ],
@@ -453,18 +455,29 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
         const effectPreview = within(usefulPreviewRow).getByLabelText("Effect preview");
         expect(within(effectPreview).getByText("Ignores the Defense of targeted Units")).toBeInTheDocument();
-        expect(within(effectPreview).getByText("Deals 80% of the Hero's Damage")).toBeInTheDocument();
+        expect(within(effectPreview).getByAltText("Damage")).toBeInTheDocument();
         expect(within(effectPreview).getByText("Deals 6 extra Damage per Determination")).toBeInTheDocument();
         expect(within(effectPreview).queryByText("Applies Burning for 1 turn")).not.toBeInTheDocument();
         expect(
+            within(effectPreview).queryByText(
+                "Ignores the Defense of targeted Units Deals 80% of the Hero's Damage Deals 6 extra Damage per Determination"
+            )
+        ).not.toBeInTheDocument();
+        expect(
             Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).map((line) =>
-                line.textContent?.trim()
+                line.textContent?.replace(/\s+/g, " ").trim()
             )
         ).toEqual([
             "Ignores the Defense of targeted Units",
             "Deals 80% of the Hero's Damage",
             "Deals 6 extra Damage per Determination",
         ]);
+        expect(
+            Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).map((line) =>
+                line.tagName
+            )
+        ).toEqual(["SPAN", "SPAN", "SPAN"]);
+        expect(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).toHaveLength(3);
         expect(usefulPreviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {

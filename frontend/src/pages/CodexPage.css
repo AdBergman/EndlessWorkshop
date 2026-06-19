@@ -2113,6 +2113,7 @@
 
 .codex-summaryList__effectPreviewLine {
     display: block;
+    width: 100%;
     min-width: 0;
     overflow: hidden;
     color: rgba(241, 234, 220, 0.74);
