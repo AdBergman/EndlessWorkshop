@@ -198,6 +198,40 @@ function getActiveFactFilterItems(
     });
 }
 
+function formatAbilityShelfValue(value: string): string {
+    return value
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+}
+
+function getAbilityArchiveSummary(
+    activeFilters: { label: string; displayLabel: string; value: string }[],
+    count: number
+): { title: string; lead: string; context: string } | null {
+    if (activeFilters.length === 0) {
+        return {
+            title: "Ability Archive",
+            lead: "Browse combat and empire abilities by role, mechanic, and source.",
+            context: "Archive index",
+        };
+    }
+
+    const shelfNames = activeFilters.map((filter) => formatAbilityShelfValue(filter.value));
+    const title = shelfNames.length === 1
+        ? `${shelfNames[0]} Abilities`
+        : `${shelfNames.slice(0, 2).join(" + ")}${shelfNames.length > 2 ? ` + ${shelfNames.length - 2} more` : ""} Abilities`;
+    const shelfLabel = shelfNames.length === 1 ? "shelf" : "combined shelf";
+    const abilityLabel = count === 1 ? "ability" : "abilities";
+
+    return {
+        title,
+        lead: `A curated ${shelfLabel} containing ${count} ${abilityLabel}.`,
+        context: "Archive shelf",
+    };
+}
+
 export default function CodexPage() {
     const location = useLocation();
     const entries = useCodexStore((state) => state.entries);
@@ -318,6 +352,14 @@ export default function CodexPage() {
     const activeFactFilterItems = useMemo(
         () => getActiveFactFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
+    );
+    const abilityArchiveSummary = useMemo(
+        () => (
+            isAbilityCatalogMode
+                ? getAbilityArchiveSummary(activeFactFilterItems, filteredEntries.length)
+                : null
+        ),
+        [activeFactFilterItems, filteredEntries.length, isAbilityCatalogMode]
     );
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
@@ -712,7 +754,7 @@ export default function CodexPage() {
                                                 filteredEntries.length === 1 ? "ability" : "abilities"
                                             }`}
                                         </div>
-                                        <p>Browse combat and empire abilities.</p>
+                                        <p>Choose a shelf to browse combat and empire abilities.</p>
                                     </div>
                                 ) : (
                                     <>
@@ -734,7 +776,7 @@ export default function CodexPage() {
                                     <div className="codex-resultsFilters__controls">
                                         {activeFactFilterItems.length > 0 ? (
                                             <div className="codex-resultsFilters__activeGroup">
-                                                <span className="codex-resultsFilters__groupLabel">Active filters</span>
+                                                <span className="codex-resultsFilters__groupLabel">Current shelf</span>
                                                 <div
                                                     className="codex-resultsFilters__active"
                                                     aria-label="Active filters"
@@ -840,6 +882,9 @@ export default function CodexPage() {
                                     allEntries={entries}
                                     titleRef={detailTitleRef}
                                     onSelectEntry={(entry) => selectEntry(entry)}
+                                    titleOverride={abilityArchiveSummary?.title}
+                                    leadOverride={abilityArchiveSummary?.lead}
+                                    contextOverride={abilityArchiveSummary?.context}
                                 />
                             ) : (
                                 <CodexEntryDetail
