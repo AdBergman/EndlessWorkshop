@@ -513,11 +513,25 @@
     padding-bottom: 18px;
 }
 
+.codex-resultsPane__archiveIntro {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+}
+
 .codex-resultsPane--catalog .codex-sectionLabel {
     color: rgba(230, 176, 82, 0.92);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     letter-spacing: 0.22em;
+}
+
+.codex-resultsPane__archiveIntro p {
+    max-width: 28ch;
+    margin: 2px 0 0;
+    color: rgba(241, 234, 220, 0.62);
+    font-size: 13.5px;
+    line-height: 1.55;
 }
 
 .codex-resultsPane--catalog .codex-resultsPane__title {
@@ -529,12 +543,11 @@
 }
 
 .codex-resultsPane--catalog .codex-resultsPane__count {
-    padding-top: 1px;
     color: rgba(230, 176, 82, 0.86);
-    font-size: 13px;
-    font-weight: 650;
+    font-size: 16px;
+    font-weight: 700;
     line-height: 1.35;
-    text-align: right;
+    text-align: left;
 }
 
 .codex-resultsPane__header {

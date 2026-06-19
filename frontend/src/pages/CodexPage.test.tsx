@@ -389,7 +389,8 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
         const filterRail = screen.getByLabelText("Ability catalog filters");
-        expect(within(filterRail).getByText("Browse by")).toBeInTheDocument();
+        expect(within(filterRail).getByText("Ability archive")).toBeInTheDocument();
+        expect(within(filterRail).getByText("Browse combat and empire abilities.")).toBeInTheDocument();
         expect(within(filterRail).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
         expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
 
@@ -525,7 +526,7 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
-                    { label: "Combat role", value: "Status apply" },
+                    { label: "Combat role", value: "Damage, Movement, Status apply" },
                 ],
             },
             {
@@ -548,16 +549,19 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Abilities" })).toBeInTheDocument();
         const filters = screen.getByLabelText("Abilities filters");
         expect(within(filters).queryByRole("button", { name: /all/i })).not.toBeInTheDocument();
+        const popularGroup = within(filters).getByRole("group", { name: "Popular / Player-centric" });
         const mechanicGroup = within(filters).getByRole("group", { name: "Mechanics" });
         const sourceGroup = within(filters).getByRole("group", { name: "Sources" });
+        expect(within(popularGroup).getByRole("button", { name: /damage\s+1/i })).toBeInTheDocument();
+        expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i })).toBeInTheDocument();
+        expect(within(popularGroup).queryByRole("button", { name: /heal/i })).not.toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /passive\s+0/i })).toBeDisabled();
         expect(within(sourceGroup).getByRole("button", { name: /battle skill\s+1/i })).toBeInTheDocument();
         expect(within(sourceGroup).getByRole("button", { name: /unit ability event\s+0/i })).toBeDisabled();
         expect(within(filters).queryByRole("group", { name: "Role" })).not.toBeInTheDocument();
-        expect(within(filters).queryByRole("button", { name: /status apply/i })).not.toBeInTheDocument();
 
-        await user.click(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }));
+        await user.click(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }));
 
         const abilitiesOverview = screen.getByLabelText("Abilities overview");
         expect(within(abilitiesOverview).getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
@@ -565,15 +569,23 @@ describe("CodexPage", () => {
         expect(within(abilitiesOverview).queryByRole("button", { name: /active battle skill name only/i }))
             .not.toBeInTheDocument();
 
-        expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }))
+        expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }))
             .toHaveAttribute("aria-pressed", "true");
         const activeFilters = within(filters).getByLabelText("Active filters");
-        expect(within(activeFilters).getByRole("button", { name: /remove mechanics: active/i })).toBeInTheDocument();
-        await user.click(within(activeFilters).getByRole("button", { name: /remove mechanics: active/i }));
+        expect(within(activeFilters).getByRole("button", {
+            name: /remove popular \/ player-centric: status apply/i,
+        })).toBeInTheDocument();
+        await user.click(within(activeFilters).getByRole("button", {
+            name: /remove popular \/ player-centric: status apply/i,
+        }));
 
         expect(within(abilitiesOverview).getByRole("button", { name: /always retaliate/i })).toBeInTheDocument();
         expect(within(abilitiesOverview).getByRole("button", { name: /active battle skill name only/i }))
             .toBeInTheDocument();
+
+        await user.click(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }));
+        expect(within(abilitiesOverview).getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
+        expect(within(abilitiesOverview).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
 
         await user.click(within(abilitiesOverview).getByRole("button", { name: /precise volley/i }));
         expect(await screen.findByRole("heading", { name: "Precise Volley" })).toBeInTheDocument();

@@ -59,6 +59,8 @@ type CodexFactFilterConfig = {
     label: string;
     displayLabel: string;
     allowedValues?: readonly string[];
+    splitCommaSeparatedValues?: boolean;
+    showZeroCountOptions?: boolean;
 };
 type CodexFactFilterOption = CodexFactFilterConfig & {
     values: { value: string; count: number }[];
@@ -67,6 +69,24 @@ type ActiveCodexFactFilters = Record<string, string>;
 
 const FACT_FILTERS_BY_KIND: Record<string, CodexFactFilterConfig[]> = {
     abilities: [
+        {
+            label: "Combat role",
+            displayLabel: "Popular / Player-centric",
+            allowedValues: [
+                "Damage",
+                "Status apply",
+                "Shield",
+                "Heal",
+                "Movement",
+                "Teleport",
+                "Summon",
+                "Push",
+                "Status remove",
+                "Reactive skill",
+            ],
+            splitCommaSeparatedValues: true,
+            showZeroCountOptions: false,
+        },
         {
             label: "Ability mechanic",
             displayLabel: "Mechanics",
@@ -96,11 +116,19 @@ function getFactFilterConfig(kind: string): CodexFactFilterConfig[] {
     return FACT_FILTERS_BY_KIND[normalizeCodexKind(kind)] ?? [];
 }
 
-function uniqueEntryFactValues(entry: CodexEntry, label: string): string[] {
+function getEntryFactFilterValues(entry: CodexEntry, filter: CodexFactFilterConfig): string[] {
+    return getCodexFactValues(entry, filter.label).flatMap((value) => (
+        filter.splitCommaSeparatedValues
+            ? value.split(",").map((part) => part.trim()).filter(Boolean)
+            : [value]
+    ));
+}
+
+function uniqueEntryFactValues(entry: CodexEntry, filter: CodexFactFilterConfig): string[] {
     const seen = new Set<string>();
     const values: string[] = [];
 
-    for (const value of getCodexFactValues(entry, label)) {
+    for (const value of getEntryFactFilterValues(entry, filter)) {
         if (seen.has(value)) continue;
 
         seen.add(value);
@@ -121,11 +149,11 @@ function buildFactFilterOptions(
                 const filtersExceptCurrent = Object.fromEntries(
                     Object.entries(activeFilters).filter(([label]) => label !== filter.label)
                 );
-                if (!entryMatchesFactFilters(entry, filtersExceptCurrent)) {
+                if (!entryMatchesFactFilters(entry, filtersExceptCurrent, filters)) {
                     return acc;
                 }
 
-                for (const value of uniqueEntryFactValues(entry, filter.label)) {
+                for (const value of uniqueEntryFactValues(entry, filter)) {
                     acc.set(value, (acc.get(value) ?? 0) + 1);
                 }
 
@@ -133,7 +161,9 @@ function buildFactFilterOptions(
             }, new Map<string, number>());
 
             const values = filter.allowedValues
-                ? filter.allowedValues.map((value) => ({ value, count: counts.get(value) ?? 0 }))
+                ? filter.allowedValues
+                    .map((value) => ({ value, count: counts.get(value) ?? 0 }))
+                    .filter((option) => filter.showZeroCountOptions !== false || option.count > 0)
                 : Array.from(counts.entries())
                     .map(([value, count]) => ({ value, count }))
                     .sort((left, right) => right.count - left.count || left.value.localeCompare(right.value));
@@ -143,10 +173,19 @@ function buildFactFilterOptions(
         .filter((filter) => filter.values.length > 0);
 }
 
-function entryMatchesFactFilters(entry: CodexEntry, filters: ActiveCodexFactFilters): boolean {
-    return Object.entries(filters).every(([label, value]) =>
-        entryHasCodexFactValue(entry, label, value)
-    );
+function entryMatchesFactFilters(
+    entry: CodexEntry,
+    activeFilters: ActiveCodexFactFilters,
+    filterConfigs: readonly CodexFactFilterConfig[]
+): boolean {
+    return Object.entries(activeFilters).every(([label, value]) => {
+        const filterConfig = filterConfigs.find((filter) => filter.label === label);
+        if (!filterConfig) {
+            return entryHasCodexFactValue(entry, label, value);
+        }
+
+        return getEntryFactFilterValues(entry, filterConfig).some((factValue) => factValue === value);
+    });
 }
 
 function getActiveFactFilterItems(
@@ -253,9 +292,11 @@ export default function CodexPage() {
                 return searchFilteredEntries;
             }
 
-            return searchFilteredEntries.filter((entry) => entryMatchesFactFilters(entry, activeFactFilters));
+            return searchFilteredEntries.filter((entry) =>
+                entryMatchesFactFilters(entry, activeFactFilters, factFilterConfig)
+            );
         },
-        [activeFactFilters, searchFilteredEntries]
+        [activeFactFilters, factFilterConfig, searchFilteredEntries]
     );
 
     const autocompleteEntries = useMemo(
@@ -663,21 +704,29 @@ export default function CodexPage() {
                             aria-label={isAbilityCatalogMode ? "Ability catalog filters" : "Codex results"}
                         >
                             <div className="codex-resultsPane__header">
-                                <div>
-                                    <div className="codex-sectionLabel">
-                                        {isAbilityCatalogMode ? "Abilities" : "Results"}
+                                {isAbilityCatalogMode ? (
+                                    <div className="codex-resultsPane__archiveIntro">
+                                        <div className="codex-sectionLabel">Ability archive</div>
+                                        <div className="codex-resultsPane__count">
+                                            {`${filteredEntries.length} ${
+                                                filteredEntries.length === 1 ? "ability" : "abilities"
+                                            }`}
+                                        </div>
+                                        <p>Browse combat and empire abilities.</p>
                                     </div>
-                                    <div className="codex-resultsPane__title">
-                                        {isAbilityCatalogMode
-                                            ? "Browse by"
-                                            : activeKind === ALL_CODEX_KIND
-                                            ? "All encyclopedia entries"
-                                            : activeKindLabel}
-                                    </div>
-                                </div>
-                                <div className="codex-resultsPane__count">
-                                    {isAbilityCatalogMode ? `${filteredEntries.length} entries` : filteredEntries.length}
-                                </div>
+                                ) : (
+                                    <>
+                                        <div>
+                                            <div className="codex-sectionLabel">Results</div>
+                                            <div className="codex-resultsPane__title">
+                                                {activeKind === ALL_CODEX_KIND
+                                                    ? "All encyclopedia entries"
+                                                    : activeKindLabel}
+                                            </div>
+                                        </div>
+                                        <div className="codex-resultsPane__count">{filteredEntries.length}</div>
+                                    </>
+                                )}
                             </div>
 
                             {factFilterOptions.length > 0 ? (
