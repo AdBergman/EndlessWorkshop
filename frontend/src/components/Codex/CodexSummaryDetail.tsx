@@ -20,7 +20,10 @@ import {
     isShallowReferenceKind,
 } from "@/lib/codex/codexShallowReferencePreview";
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
-import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
+import {
+    getCodexReadablePreviewLine,
+    parseCodexStructuredDescription,
+} from "@/lib/codex/codexStructuredDescription";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 
@@ -56,6 +59,7 @@ const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     ],
 };
 const MAX_OVERVIEW_METADATA_ITEMS = 3;
+const MAX_ABILITY_EFFECT_PREVIEW_LINES = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -125,6 +129,41 @@ function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMe
 function getAbilityCatalogContext(context: string, metadata: readonly OverviewMetadataItem[]): string {
     if (!context) return "";
     return isAbilityTaxonomyOnlyLine(context, metadata) ? "" : context;
+}
+
+function getAbilityCatalogEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "abilities") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectLines: string[] = [];
+    const seen = new Set<string>();
+
+    const addLine = (line: string) => {
+        const value = line.trim();
+        if (!value) return;
+
+        const normalized = normalizeAbilityTaxonomyText(value);
+        if (seen.has(normalized)) return;
+
+        seen.add(normalized);
+        effectLines.push(value);
+    };
+
+    for (const section of parsed.sections) {
+        if (section.label.trim().toLowerCase() !== "effects") continue;
+
+        section.lines.forEach(addLine);
+        for (const item of section.items ?? []) {
+            item.lines.forEach(addLine);
+            item.facts.forEach((fact) => addLine(fact.value));
+        }
+    }
+
+    return effectLines.slice(0, MAX_ABILITY_EFFECT_PREVIEW_LINES);
+}
+
+function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
+    return normalizeAbilityTaxonomyText(left ?? "") === normalizeAbilityTaxonomyText(right);
 }
 
 export default function CodexSummaryDetail({
@@ -223,6 +262,16 @@ export default function CodexSummaryDetail({
                         const catalogSecondaryContext = useCatalogRowHierarchy
                             ? getAbilityCatalogContext(secondaryContext, overviewMetadata)
                             : secondaryContext;
+                        const abilityEffectPreviewLines = useCatalogRowHierarchy
+                            ? getAbilityCatalogEffectPreviewLines(entry)
+                            : [];
+                        const visibleCatalogPreview = (
+                            useCatalogRowHierarchy &&
+                            catalogPreview !== null &&
+                            abilityEffectPreviewLines.some((line) => isSameAbilityPreviewLine(catalogPreview, line))
+                        )
+                            ? null
+                            : catalogPreview;
                         const shallowPreview = !isFactionEntry
                             ? getCodexShallowReferencePreview(entry, allEntries, preview)
                             : null;
@@ -340,9 +389,24 @@ export default function CodexSummaryDetail({
                                 </span>
                                 {useCatalogRowHierarchy ? (
                                     <>
-                                        {catalogPreview !== null ? (
+                                        {visibleCatalogPreview !== null ? (
                                             <span className="codex-summaryList__description">
-                                                {catalogPreview || "No public description has been added for this entry yet."}
+                                                {visibleCatalogPreview || "No public description has been added for this entry yet."}
+                                            </span>
+                                        ) : null}
+                                        {abilityEffectPreviewLines.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__effectPreview"
+                                                aria-label="Effect preview"
+                                            >
+                                                {abilityEffectPreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__effectPreviewLine"
+                                                        key={`${entry.entryKey}-effect-preview-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))}
                                             </span>
                                         ) : null}
                                         {catalogSecondaryContext ? (

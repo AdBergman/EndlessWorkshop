@@ -381,9 +381,24 @@ describe("CodexPage", () => {
                 descriptionLines: ["Tactical / Enemies / Range 3 / Cost 1 Battle Token"],
                 referenceKeys: [],
                 facts: [
+                    { label: "Category", value: "Tactical" },
+                    { label: "Target", value: "Enemies" },
+                    { label: "Range", value: "3" },
+                    { label: "Cost", value: "1 Battle Token" },
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
                     { label: "Combat role", value: "Damage" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: [
+                            "Ignores the Defense of targeted Units",
+                            "Deals 80% of the Hero's Damage",
+                            "Deals 6 extra Damage per Determination",
+                            "Applies Burning for 1 turn",
+                        ],
+                    },
                 ],
             },
             {
@@ -434,6 +449,11 @@ describe("CodexPage", () => {
         const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
         expect(within(usefulPreviewRow).getByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
             .toBeInTheDocument();
+        const effectPreview = within(usefulPreviewRow).getByLabelText("Effect preview");
+        expect(within(effectPreview).getByText("Ignores the Defense of targeted Units")).toBeInTheDocument();
+        expect(within(effectPreview).getByText("Deals 80% of the Hero's Damage")).toBeInTheDocument();
+        expect(within(effectPreview).getByText("Deals 6 extra Damage per Determination")).toBeInTheDocument();
+        expect(within(effectPreview).queryByText("Applies Burning for 1 turn")).not.toBeInTheDocument();
         expect(usefulPreviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {

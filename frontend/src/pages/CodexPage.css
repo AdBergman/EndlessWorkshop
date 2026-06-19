@@ -2115,6 +2115,31 @@
     line-height: 1.62;
 }
 
+.codex-summaryList__effectPreview {
+    display: grid;
+    max-width: 88ch;
+    gap: 3px;
+}
+
+.codex-summaryList__effectPreviewLine {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    padding-left: 15px;
+    color: rgba(241, 234, 220, 0.74);
+    font-size: 13.5px;
+    line-height: 1.48;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-summaryList__effectPreviewLine::before {
+    position: absolute;
+    left: 1px;
+    color: rgba(230, 176, 82, 0.7);
+    content: "•";
+}
+
 .codex-summaryList__effects {
     display: grid;
     gap: 6px;
