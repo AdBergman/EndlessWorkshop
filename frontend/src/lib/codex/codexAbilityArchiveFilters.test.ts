@@ -197,17 +197,14 @@ describe("codexAbilityArchiveFilters", () => {
         ]);
         expect(getAbilityArchiveSummary([], 336)).toEqual({
             title: "Ability Archive",
-            lead: "Browse combat and empire abilities by role, mechanic, and source.",
             context: "Archive index",
         });
         expect(getAbilityArchiveSummary(activeItems, 12)).toEqual({
             title: "Filtered Abilities",
-            lead: "12 abilities matching 2 selected shelves.",
             context: "Archive shelf",
         });
         expect(getAbilityArchiveSummary(activeItems.slice(0, 1), 1)).toEqual({
             title: "Status Apply Abilities",
-            lead: "A curated shelf containing 1 ability.",
             context: "Archive shelf",
         });
     });

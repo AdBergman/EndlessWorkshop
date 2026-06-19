@@ -79,8 +79,9 @@ describe("codexPresentation", () => {
     });
 
     it("creates synthetic summary entries for kind overviews", () => {
-        const summaryEntry = createCodexSummaryEntry("districts", "Districts", 4, "");
+        const summaryEntry = createCodexSummaryEntry("districts", "Districts", 4);
         expect(summaryEntry.displayName).toBe("All Districts");
+        expect(summaryEntry.descriptionLines).toEqual([]);
         expect(isCodexSummaryEntry(summaryEntry)).toBe(true);
     });
 

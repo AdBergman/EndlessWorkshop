@@ -643,21 +643,15 @@ export function getCodexSummaryEntryKey(kind: string): string {
 export function createCodexSummaryEntry(
     kind: string,
     label: string,
-    count: number,
-    query: string
+    count: number
 ): CodexSummaryEntry {
-    const hasQuery = query.trim().length > 0;
-    const summaryLine = hasQuery
-        ? `${count} matching ${label.toLowerCase()} entries in the current search.`
-        : `Browse every ${label.toLowerCase()} entry in a compact catalog view.`;
-
     return {
         exportKind: kind,
         entryKey: getCodexSummaryEntryKey(kind),
         displayName: `All ${label}`,
         category: null,
         kind: null,
-        descriptionLines: [summaryLine],
+        descriptionLines: [],
         referenceKeys: [],
         isSummary: true,
         summaryKind: kind,

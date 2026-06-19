@@ -212,7 +212,7 @@ export default function CodexPage() {
             return groupedEntries;
         }
 
-        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length, query), ...groupedEntries];
+        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...groupedEntries];
     }, [activeKind, activeKindLabel, filteredEntries, query]);
 
     const groupedFilteredEntries = useMemo(
@@ -662,7 +662,6 @@ export default function CodexPage() {
                                     titleRef={detailTitleRef}
                                     onSelectEntry={(entry) => selectEntry(entry)}
                                     titleOverride={abilityArchiveSummary?.title}
-                                    leadOverride={abilityArchiveSummary?.lead}
                                     contextOverride={abilityArchiveSummary?.context}
                                 />
                             ) : (

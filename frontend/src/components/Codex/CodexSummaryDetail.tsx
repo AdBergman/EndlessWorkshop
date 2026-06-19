@@ -34,7 +34,6 @@ type Props = {
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectEntry: (entry: CodexListItem) => void;
     titleOverride?: string;
-    leadOverride?: string;
     contextOverride?: string;
 };
 
@@ -200,14 +199,10 @@ export default function CodexSummaryDetail({
     titleRef,
     onSelectEntry,
     titleOverride,
-    leadOverride,
     contextOverride,
 }: Props) {
     const isShallowReferenceSummary = isShallowReferenceKind(summaryEntry.summaryKind);
     const summaryContext = contextOverride ?? (isShallowReferenceSummary ? "Reference list" : "Category overview");
-    const summaryLead = isShallowReferenceSummary
-        ? "Scan exported effect lines and exact linked entries in a compact reference list."
-        : leadOverride ?? summaryEntry.descriptionLines[0];
     const summaryTitle = titleOverride ?? summaryEntry.displayName;
 
     return (
@@ -225,7 +220,6 @@ export default function CodexSummaryDetail({
                         <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
                             {renderCodexLabel(summaryTitle)}
                         </h2>
-                        <p className="codex-detail__summaryLead">{summaryLead}</p>
                     </div>
 
                     <div

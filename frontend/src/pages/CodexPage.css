@@ -1775,13 +1775,6 @@
     margin-top: 0;
 }
 
-.codex-detail__summaryLead {
-    margin-top: 14px;
-    color: rgba(241, 234, 220, 0.7);
-    font-size: 15px;
-    line-height: 1.7;
-}
-
 .codex-overview__intro {
     margin: 9px 0 0;
     max-width: 680px;

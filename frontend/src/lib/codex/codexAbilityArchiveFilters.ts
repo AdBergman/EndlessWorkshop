@@ -23,7 +23,6 @@ export type ActiveCodexFactFilterItem = {
 
 export type AbilityArchiveSummary = {
     title: string;
-    lead: string;
     context: string;
 };
 
@@ -182,28 +181,20 @@ export function getAbilityArchiveSummary(
     if (activeFilters.length === 0) {
         return {
             title: "Ability Archive",
-            lead: "Browse combat and empire abilities by role, mechanic, and source.",
             context: "Archive index",
         };
     }
 
     if (activeFilters.length === 1) {
         const shelfName = formatAbilityShelfValue(activeFilters[0].value);
-        const abilityLabel = count === 1 ? "ability" : "abilities";
-
         return {
             title: `${shelfName} Abilities`,
-            lead: `A curated shelf containing ${count} ${abilityLabel}.`,
             context: "Archive shelf",
         };
     }
 
-    const abilityLabel = count === 1 ? "ability" : "abilities";
-    const shelfLabel = activeFilters.length === 1 ? "shelf" : "shelves";
-
     return {
         title: "Filtered Abilities",
-        lead: `${count} ${abilityLabel} matching ${activeFilters.length} selected ${shelfLabel}.`,
         context: "Archive shelf",
     };
 }

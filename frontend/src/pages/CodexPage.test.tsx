@@ -1876,8 +1876,8 @@ describe("CodexPage", () => {
         const resourcesSummary = screen.getByRole("heading", { name: "All Resources" })
             .closest(".codex-summaryDossier") as HTMLElement;
         expect(within(resourcesSummary).getByText("Reference list")).toBeInTheDocument();
-        expect(within(resourcesSummary).getByText("Scan exported effect lines and exact linked entries in a compact reference list."))
-            .toBeInTheDocument();
+        expect(within(resourcesSummary).queryByText("Scan exported effect lines and exact linked entries in a compact reference list."))
+            .not.toBeInTheDocument();
         expect(within(resourcesSummary).queryByText("Category overview")).not.toBeInTheDocument();
         const resourceOverview = screen.getByLabelText("Resources overview");
         expect(within(resourceOverview).getByText("Luxury")).toBeInTheDocument();
