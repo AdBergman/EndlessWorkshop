@@ -121,6 +121,31 @@ function isAbilityTaxonomyOnlyLine(value: string, metadata: readonly OverviewMet
     return parts.every((part) => metadataValues.has(part) || ABILITY_TAXONOMY_TERMS.has(part));
 }
 
+function isAbilityInternalContextCode(value: string): boolean {
+    const compactValue = value.replace(/[\s_-]+/g, "");
+    return /^[a-z]+\d+[a-z0-9]*$/i.test(compactValue);
+}
+
+function isAbilityClassificationContextLine(value: string, metadata: readonly OverviewMetadataItem[]): boolean {
+    const normalizedValue = normalizeAbilityTaxonomyText(value);
+    if (!normalizedValue) return false;
+
+    const metadataValues = new Set(metadata.map((item) => normalizeAbilityTaxonomyText(item.value)));
+    const parts = normalizedValue
+        .split("/")
+        .map((part) => normalizeAbilityTaxonomyText(part))
+        .filter(Boolean);
+
+    if (parts.length === 0) return false;
+
+    return parts.every(
+        (part) =>
+            metadataValues.has(part) ||
+            ABILITY_TAXONOMY_TERMS.has(part) ||
+            isAbilityInternalContextCode(part)
+    );
+}
+
 function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMetadataItem[]): string | null {
     if (!preview) return "";
     return isAbilityTaxonomyOnlyLine(preview, metadata) ? null : preview;
@@ -128,7 +153,7 @@ function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMe
 
 function getAbilityCatalogContext(context: string, metadata: readonly OverviewMetadataItem[]): string {
     if (!context) return "";
-    return isAbilityTaxonomyOnlyLine(context, metadata) ? "" : context;
+    return isAbilityClassificationContextLine(context, metadata) ? "" : context;
 }
 
 function getAbilityCatalogEffectPreviewLines(entry: CodexEntry): string[] {

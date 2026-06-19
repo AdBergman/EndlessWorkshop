@@ -361,8 +361,8 @@ describe("CodexPage", () => {
                 exportKind: "abilities",
                 entryKey: "UnitAbility_AlwaysRetaliate",
                 displayName: "Always Retaliate",
-                category: "Passive",
-                kind: "Ability",
+                category: "COMMON02",
+                kind: "PASSIVE / ABILITY",
                 descriptionLines: ["Passive"],
                 referenceKeys: [],
                 facts: [
@@ -445,6 +445,8 @@ describe("CodexPage", () => {
         expect(within(metadata).getByText("Retaliation")).toBeInTheDocument();
         expect(overviewRow.querySelector(".codex-summaryList__description")).not.toBeInTheDocument();
         expect(overviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
+        expect(within(overviewRow).queryByText(/common02/i)).not.toBeInTheDocument();
+        expect(within(overviewRow).queryByText(/passive \/ ability/i)).not.toBeInTheDocument();
 
         const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
         expect(within(usefulPreviewRow).getByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
