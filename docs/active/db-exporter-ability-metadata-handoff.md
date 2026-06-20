@@ -67,8 +67,8 @@ Current known `Combat role` counts from the accepted snapshot:
 - Push: 12
 - Reactivate skill: 12
 - Shield: 48
-- Status apply: 70
-- Status remove: 15
+- Status apply: 70 (current label; target label is `Apply Status`)
+- Status remove: 15 (current label; target label is `Remove Status`)
 - Summon: 12
 - Teleport: 17
 - True damage: 59
@@ -116,6 +116,20 @@ General rules:
 - Keep comma-separated `Combat role` values only when each role is independently
   proven by public source data.
 
+Role cleanup must review both noisy extra roles and wrong or missing role
+categories. For example, abilities that visibly apply statuses should receive
+`Apply Status`; abilities that visibly remove, cleanse, or dispel statuses
+should receive `Remove Status`; neither status role should be assigned from
+hidden implementation effects alone.
+
+Use player-facing role labels. The canonical future labels should be:
+
+- `Apply Status`, not `Status apply`
+- `Remove Status`, not `Status remove`
+
+EWShop may temporarily map the older labels for compatibility while imports
+transition, but the exporter-owned target labels should be the canonical values.
+
 Recommended role taxonomy:
 
 - `Damage`
@@ -125,8 +139,8 @@ Recommended role taxonomy:
 - `Teleport`
 - `Push`
 - `Summon`
-- `Status apply`
-- `Status remove`
+- `Apply Status`
+- `Remove Status`
 - `Reactivate skill`
 
 Review before keeping as browse/filter roles:
@@ -152,8 +166,8 @@ Specific rule guidance:
 - `Teleport`: emit only for public teleport/reposition behavior.
 - `Push`: emit only for public push/knockback behavior.
 - `Summon`: emit only for public summon/spawn behavior.
-- `Status apply`: emit when public text/effect lines apply a status.
-- `Status remove`: emit when public text/effect lines remove, cleanse, or dispel
+- `Apply Status`: emit when public text/effect lines apply a status.
+- `Remove Status`: emit when public text/effect lines remove, cleanse, or dispel
   a status.
 - `Reactivate skill`: emit when public text/effect lines clearly reactivate,
   refresh, or grant another skill/action use.
@@ -165,9 +179,9 @@ Exporter validation should include a role audit report with:
 - role count before/after;
 - representative examples per role;
 - examples removed from noisy roles;
-- false-positive review for Movement, True damage, Shield, Status remove, and
+- false-positive review for Movement, True damage, Shield, Remove Status, and
   Reactivate skill;
-- false-negative review for Damage, Heal, Status apply, and Status remove.
+- false-negative review for Damage, Heal, Apply Status, and Remove Status.
 
 ## Problem 2: Ability Source Is Provenance, Not Role
 
@@ -246,6 +260,8 @@ faction icons by parsing keys or display text.
 Before returning the next ability metadata snapshot, provide:
 
 - `Combat role` count changes before/after cleanup.
+- Before/after counts for `Apply Status` and `Remove Status`, including any
+  mapping from current labels `Status apply` and `Status remove`.
 - A sampled role audit for each retained role.
 - Explicit examples for Choral Onslaught, Accusation, Power Slash variants,
   Second Wind, Rallying Cry, and Anti Cavalry.
