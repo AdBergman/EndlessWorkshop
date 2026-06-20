@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-17.
+Current as of 2026-06-20.
 
 This list reflects the current product focus:
 
@@ -30,6 +30,13 @@ Current result:
 4. Do not create frontend/API work from this response unless fresh import
    evidence shows EWShop is failing to preserve, serve, or render exported
    generic Codex fields.
+
+Active exporter follow-up:
+
+- `docs/active/db-exporter-ability-metadata-handoff.md` - focused Ability
+  metadata cleanup request for noisy `Combat role` assignments and explicit
+  ability ownership metadata. This is exporter-owned follow-up, not an
+  EWShop-owned DB-exporter-response implementation blocker.
 
 Current decisions to preserve:
 

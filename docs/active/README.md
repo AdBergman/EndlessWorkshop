@@ -1,6 +1,6 @@
 # Active Documentation
 
-Current as of 2026-06-17.
+Current as of 2026-06-20.
 
 This folder should contain only current workflows, handoffs, or decisions. Long
 completed investigations and superseded handoffs belong in `docs/archive/`.
@@ -14,7 +14,7 @@ completed investigations and superseded handoffs belong in `docs/archive/`.
 
 Next implementation ticket:
 
-- `EW-CODEX-UI-001` - Contextual Codex Header.
+- `EW-CODEX-UI-005` - Ability/Status refinement reintroduction.
 
 Current UI guardrails:
 
@@ -36,6 +36,11 @@ Current UI guardrails:
 
 DB Exporter definitive response/import QA is complete. No EWShop-owned
 DB-exporter-response implementation issues are currently open.
+
+Active exporter follow-up:
+
+- `db-exporter-ability-metadata-handoff.md` - focused DB Exporter handoff for
+  Ability `Combat role` cleanup and explicit ability ownership metadata.
 
 ## Current Codex Diagnostics And Logs
 
