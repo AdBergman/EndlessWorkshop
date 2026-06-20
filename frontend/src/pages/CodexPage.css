@@ -2056,12 +2056,6 @@
     opacity: 0.92;
 }
 
-.codex-summaryList__item--statusArchive .codex-kindIcon--summaryEntry {
-    width: 21px;
-    height: 21px;
-    opacity: 0.9;
-}
-
 .codex-summaryList__name {
     color: #f1eadc;
     font-size: 1rem;

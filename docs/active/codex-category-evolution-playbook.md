@@ -11,6 +11,27 @@ Purpose: Repeatable process for evolving Codex categories into premium player-fa
 - Update this document after each category so the next pass starts smarter.
 - Do not copy Ability UI blindly; each category earns its own shape.
 
+## Assertive Uncommitted Workflow
+
+Category evolution should move sequentially through safe, scoped slices. Do not stop after every small slice just to ask permission.
+
+Default workflow:
+- keep work uncommitted unless explicitly told to commit
+- after each slice, validate the touched behavior
+- run browser smoke review when visual/product behavior materially changed
+- update the category evolution document
+- continue to the next planned slice
+
+Stop only for:
+- failing validation that cannot be fixed within the slice
+- unclear product decisions
+- large architecture changes
+- backend/exporter contract changes
+- destructive changes
+- explicit user review checkpoints
+
+If something is visually imperfect but reversible, document it and continue unless it blocks the next slice. Manual review happens at the end or at explicit visual checkpoints.
+
 ## Core Principle
 
 Do not redesign a category. Understand the category first.
@@ -165,6 +186,13 @@ Do not create new exporter handoff docs for every category unless the current ba
 
 Frontend must continue to avoid inference from keys, names, prose, or SVG filenames while waiting for exporter fixes.
 
+Final closeout must verify exporter findings handling:
+- check whether exporter/data-quality findings were discovered during the category
+- if non-blocking findings exist, confirm they were appended to the active exporter backlog
+- if they were not appended, append them or explicitly report why not
+- do not start DB Exporter implementation from frontend category work
+- do not create new exporter handoff docs unless the active backlog is too large or structurally unsuitable
+
 ## Phase 8 - Premium Review
 
 Visual designer:
@@ -197,7 +225,9 @@ At the end of the category pass, Codex must:
 7. Validate with tests, typecheck, build, and `git diff --check`.
 8. Update the category evolution doc with final decisions, lessons, and follow-up work.
 9. Update this playbook if the process changed.
-10. Recommend commit/split strategy.
+10. Confirm exporter findings were checked and appended to the active exporter backlog when appropriate.
+11. Document whether the assertive uncommitted workflow was followed or where it intentionally deviated.
+12. Recommend commit/split strategy.
 
 This phase is required even when the UI feels visually accepted. Category evolution is not complete until product quality, architecture quality, documentation, and commit strategy are all closed out.
 
@@ -213,6 +243,8 @@ This phase is required even when the UI feels visually accepted. Category evolut
 - Visual review
 - Tech lead review
 - 4X gamer review
+- Assertive workflow followed or deviations documented
+- Exporter backlog checked or updated
 - Final category closeout
 
 ## Future Categories
@@ -239,7 +271,16 @@ Lessons:
 
 ### Statuses
 
-To be filled after category audit. Append non-blocking exporter findings to `docs/active/db-exporter-ability-metadata-handoff.md`.
+Lessons:
+- Scope was the strongest first browse model.
+- Tiny metadata buckets should be grouped only when it preserves orientation; `Other` worked for tiny Scope buckets.
+- Mechanics/effect lines are Status content.
+- Scope and Duration are orientation metadata and should not compete with mechanics.
+- Thin entries can stay valuable when they are exact search/link targets and have an honest empty-mechanics state.
+- Generic icons can be worse than no icon when they imply false specificity.
+- Exact inbound references belong in detail first; row source hints should wait for product need.
+- `Status type` looked tempting but was too noisy for primary navigation.
+- Non-blocking exporter findings should remain in the active exporter backlog.
 
 ### Equipment
 

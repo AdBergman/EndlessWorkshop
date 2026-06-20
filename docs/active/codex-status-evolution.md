@@ -14,12 +14,14 @@ Use this document together with the Codex Category Evolution Playbook. The playb
 
 ## Current State
 
-Statuses currently use the generic Codex split layout:
+Statuses now use a Status-specific Codex Archive layout:
 
 - top Codex search/category shelf
-- left results list
-- main overview/detail panel
-- generic status detail pages
+- left Scope navigation rail with dynamic `Other` grouping for tiny Scope buckets
+- mechanics/effect-first archive rows
+- Scope/Duration metadata aligned in the row header
+- effect-first inspection detail pages
+- exact inbound relationship links in detail
 
 Current strengths:
 
@@ -29,15 +31,16 @@ Current strengths:
 - Exact references exist from some Abilities, Diplomatic Treaties, Actions, and Factions.
 - Statuses remain searchable, linkable, and direct-routable.
 - Status archive rows now preview exported mechanics/effects when present.
+- Thin statuses remain visible with an honest missing-mechanics fallback.
+- Generic Status archive row icons are hidden until explicit icon metadata exists.
 
 Current weaknesses:
 
-- Statuses still feel like generic records rather than an archive.
 - `Status type` is noisy and incomplete.
 - Some status names are raw/debug-like.
 - Many entries lack public mechanics/effects.
-- Status archive rows hide generic kind icons because the repeated population/person icon looked misleading.
-- Detail pages expose useful mechanics but are not yet shaped around player inspection.
+- Some exact relationship coverage is partial.
+- Status archive rows do not yet show compact source hints by design.
 
 ## STATUS-UI-001 Findings
 
@@ -519,6 +522,14 @@ What did not change:
 - Status detail pages still render complete mechanics and Effects.
 - Status rail, search, routing, relationship sections, and Ability Archive behavior were not changed.
 
+Lesson:
+
+- For Statuses, archive rows should expose scan signals; detail pages should preserve explanation, trust, and complete inspection.
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-003A implementation. Existing non-blocking findings remain unchanged.
+
 ## STATUS-UI-003B Result - Scope Grouping and Status Row Icon Review
 
 Status: Implemented for review.
@@ -580,14 +591,6 @@ Lesson:
 Exporter findings discovered:
 
 - None new during STATUS-UI-003C implementation.
-
-Lesson:
-
-- For Statuses, archive rows should expose scan signals; detail pages should preserve explanation, trust, and complete inspection. This Status-specific lesson should be considered during final category closeout before changing the main playbook.
-
-Exporter findings discovered:
-
-- None new during STATUS-UI-003A implementation. Existing non-blocking findings remain unchanged.
 
 ## STATUS-UI-004 Result - Status Detail Effect-First Layout
 
@@ -659,6 +662,58 @@ Lessons:
 Exporter findings discovered:
 
 - None new during STATUS-UI-005 implementation. Existing non-blocking findings remain unchanged.
+
+## Final Category Closeout - Status Archive
+
+Status: Complete for the current Status category evolution pass.
+
+Final accepted behavior:
+
+- Statuses is a Codex Archive, not a Reference Sheet or Explorer.
+- Statuses use a Scope-only left rail based on exported `Scope` facts.
+- Scope buckets with four or fewer entries are grouped dynamically under `Other`; buckets with five or more entries remain standalone.
+- Status archive rows prioritize exported mechanics/effects as content.
+- Archive rows prefer `Status mechanics` over explanatory `Effects`; `Effects` are used when mechanics are absent.
+- Thin statuses remain visible with `No public mechanics exported yet.`
+- Scope and Duration are quiet right-side row metadata.
+- Status archive rows do not render the generic kind icon.
+- Status detail pages are effect-first inspection/permalink pages with compact Scope/Duration profile metadata.
+- Status detail pages surface exact inbound references grouped by source kind.
+- Relationship links use exact exported `publicContextKeys` / `referenceKeys` only.
+
+Product review result:
+
+- Visual designer: Statuses now read as a coherent archive and no longer as a generic record list. The row hierarchy is clear: name, mechanical effect, then quiet Scope/Duration orientation.
+- Frontend tech lead: The implementation is product-specific and follows existing Codex mode boundaries. No generic faceted framework was introduced.
+- 4X gamer: Scope browsing plus mechanics-first rows answer the main planning question: what does this condition do and where does it apply?
+
+Architecture closeout:
+
+- Status-specific derivation lives in `codexStatusArchiveFilters.ts` and `codexStatusRelationships.ts`.
+- Status left navigation lives in `StatusArchiveRail.tsx`.
+- Status archive row rendering is scoped to Status entries in `CodexSummaryDetail.tsx`.
+- Status detail rendering is scoped to Status entries in `CodexStructuredDetail.tsx`.
+- `CodexPage.tsx` still owns route/query orchestration and mode composition, which matches current frontend architecture guidance.
+- No key/name/prose/SVG filename inference was introduced.
+
+Validation closeout:
+
+- Page-level Codex tests cover Scope rail rendering, dynamic `Other` grouping, filtering, search/filter interaction, detail-route return-to-list behavior, row mechanics previews, thin fallback, right-side metadata placement, effect-first details, exact relationship links, and non-Status regressions.
+- Tests are still large and page-level, but they protect route/mode behavior. Split only when the next Status or Codex refactor makes the spec harder to review.
+
+Known remaining issues:
+
+- `Status type` taxonomy remains noisy and is not used for primary navigation.
+- `Diplomatic Ambassy` is display-mapped locally while exporter cleanup remains pending.
+- Some Status display names remain raw/debug-like.
+- Some statuses lack public mechanics/effects.
+- Status-specific icon mapping is not explicit, so archive row icons remain hidden.
+- Compact source hints in archive rows remain deferred.
+
+Closeout recommendation:
+
+- Statuses can be considered complete for this evolution pass.
+- Future Status work should be driven by exporter improvements or a deliberate product decision to add row source hints, not by further broad UI iteration.
 
 ## Open Questions
 
