@@ -14,6 +14,7 @@ type Props = {
     entries: CodexEntry[];
     onSelect: (entry: CodexEntry) => void;
     priorityMode?: "default" | "faction";
+    headingLabel?: string;
 };
 
 type RelatedEntryGroup = {
@@ -64,7 +65,7 @@ function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorit
     });
 }
 
-export default function RelatedEntries({ entries, onSelect, priorityMode = "default" }: Props) {
+export default function RelatedEntries({ entries, onSelect, priorityMode = "default", headingLabel = "Related entries" }: Props) {
     if (entries.length === 0) {
         return null;
     }
@@ -74,7 +75,7 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
     return (
         <section className="codex-related" aria-labelledby="codex-related-heading">
             <div className="codex-sectionLabel" id="codex-related-heading">
-                Related entries
+                {headingLabel}
             </div>
 
             <div className="codex-related__groups">

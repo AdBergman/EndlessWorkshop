@@ -2211,10 +2211,25 @@ describe("CodexPage", () => {
                 referenceKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
                 publicContextKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
                 facts: [
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Status apply" },
+                    { label: "Target", value: "Enemies" },
+                    { label: "Range", value: "3" },
+                    { label: "Cost", value: "1 Battle Token" },
                     { label: "Kind", value: "Ability" },
                     { label: "Category", value: "Combat" },
                 ],
                 sections: [
+                    {
+                        title: "Battle mechanics",
+                        items: [
+                            {
+                                label: "Applies status",
+                                referenceKey: "Status_Unit_Jinxed_2",
+                            },
+                        ],
+                    },
                     {
                         title: "Effects",
                         lines: [
@@ -2298,6 +2313,29 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Jinxed Strike" })).toBeInTheDocument();
+        expect(screen.getByText("Ability dossier")).toBeInTheDocument();
+        const effectsHeading = screen.getByRole("heading", { name: "Effects" });
+        const profile = screen.getByLabelText("Ability profile");
+        expect(Boolean(effectsHeading.compareDocumentPosition(profile) & Node.DOCUMENT_POSITION_FOLLOWING))
+            .toBe(true);
+        expect(within(profile).getByText("Mechanic")).toBeInTheDocument();
+        expect(within(profile).getByText("Active")).toBeInTheDocument();
+        expect(within(profile).getByText("Target")).toBeInTheDocument();
+        expect(within(profile).getByText("Enemies")).toBeInTheDocument();
+        expect(within(profile).getByText("Range")).toBeInTheDocument();
+        expect(within(profile).getByText("3")).toBeInTheDocument();
+        expect(within(profile).getByText("Cost")).toBeInTheDocument();
+        expect(within(profile).getByText("1 Battle Token")).toBeInTheDocument();
+        expect(within(profile).queryByText("Source")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Battle skill")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Role")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Status apply")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Kind")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Category")).not.toBeInTheDocument();
+        expect(screen.queryByText(/Combat \/ Ability/i)).not.toBeInTheDocument();
+
+        expect(screen.getByRole("heading", { name: "Battle mechanics" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Applies status" })).toBeInTheDocument();
         const tokenLine = screen.getByText(/Restores/).closest("p");
         expect(tokenLine).toHaveTextContent("Restores Health, deals Damage, grants Shield, and spends Focus");
         expect(tokenLine).not.toHaveTextContent("[Health]");
@@ -2316,7 +2354,7 @@ describe("CodexPage", () => {
         expect(screen.getByText(/Applies Ghosted Status if the target is already cursed/)).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /Open Ghosted/i })).not.toBeInTheDocument();
 
-        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        const relatedSection = screen.getByRole("region", { name: /linked statuses & references/i });
         expect(within(relatedSection).getByRole("button", { name: /jinxed ii statuses/i })).toBeInTheDocument();
 
         inlineLink.focus();
@@ -2332,6 +2370,67 @@ describe("CodexPage", () => {
         await user.click(inlineLink);
         expect(await screen.findByRole("heading", { name: "Jinxed II" })).toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
+    });
+
+    it("renders passive Ability details without empty target range or cost labels", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_PassiveShield",
+                displayName: "Chosen of the Chosen",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: ["+3 bonus [Shield] Shield when gaining [Shield] Shield per [Resilience] Resilience"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Ability mechanic", value: "Passive" },
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: [
+                            "+3 bonus [Shield] Shield when gaining [Shield] Shield per [Resilience] Resilience",
+                            "+2 bonus [Shield] Shield when gaining [Shield] Shield per [Might] Might",
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                abilities: entries,
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities&entry=UnitAbility_PassiveShield"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Chosen of the Chosen" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
+        const shieldLine = screen.getByText(/\+3 bonus/).closest("p");
+        expect(shieldLine)
+            .toHaveTextContent("+3 bonus Shield when gaining Shield per Resilience");
+        const profile = screen.getByLabelText("Ability profile");
+        expect(within(profile).getByText("Mechanic")).toBeInTheDocument();
+        expect(within(profile).getByText("Passive")).toBeInTheDocument();
+        expect(within(profile).queryByText("Target")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Range")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Cost")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Kind")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Category")).not.toBeInTheDocument();
     });
 
     it("previews resolved granted abilities on Unit details while keeping related entries available", async () => {

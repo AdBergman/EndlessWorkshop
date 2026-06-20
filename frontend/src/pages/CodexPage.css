@@ -1438,6 +1438,71 @@
     gap: 18px;
 }
 
+.codex-abilityDossier {
+    gap: 20px;
+}
+
+.codex-abilityProfile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.codex-abilityProfile__item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    max-width: 100%;
+    padding: 6px 10px;
+    border: 1px solid rgba(241, 234, 220, 0.06);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.012);
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.codex-abilityProfile__item--secondary {
+    color: rgba(241, 234, 220, 0.58);
+}
+
+.codex-abilityProfile__item dt {
+    color: rgba(195, 152, 77, 0.74);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.codex-abilityProfile__item dd {
+    min-width: 0;
+    margin: 0;
+}
+
+.codex-abilityEffects .codex-structuredBlock__lines {
+    gap: 10px;
+}
+
+.codex-abilityEffects__line {
+    color: rgba(241, 234, 220, 0.9);
+    font-size: 15.5px;
+}
+
+.codex-abilityMechanics {
+    gap: 12px;
+}
+
+.codex-structuredItems--abilityMechanics {
+    gap: 8px;
+}
+
+.codex-structuredItems--abilityMechanics .codex-structuredItem {
+    padding: 10px 12px;
+    border-color: rgba(190, 150, 73, 0.12);
+    background: rgba(12, 14, 15, 0.28);
+}
+
 .codex-structuredFacts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

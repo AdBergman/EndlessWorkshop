@@ -45,7 +45,8 @@ export default function CodexEntryDetail({
         );
     }
 
-    const detailContextLines = questGroup
+    const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
+    const detailContextLines = isAbilityEntry ? [] : questGroup
         ? getCodexQuestGroupDetailContextLines(entry)
         : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
@@ -106,6 +107,7 @@ export default function CodexEntryDetail({
                 entries={relatedEntriesForDisplay}
                 onSelect={onSelectRelated}
                 priorityMode={isFactionEntry ? "faction" : "default"}
+                headingLabel={isAbilityEntry ? "Linked Statuses & References" : "Related entries"}
             />
         </article>
     );
