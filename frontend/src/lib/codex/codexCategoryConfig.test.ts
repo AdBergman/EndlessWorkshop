@@ -18,6 +18,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode(" Heroes ")).toBe("heroArchive");
         expect(getCodexCategoryMode(" Improvements ")).toBe("improvementArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
+        expect(getCodexCategoryMode(" Tech ")).toBe("techArchive");
         expect(getCodexCategoryMode(" Units ")).toBe("unitArchive");
         expect(supportsFullWidthReferenceOverview(" Resources ")).toBe(true);
     });
@@ -39,6 +40,5 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode("counciloreffects")).toBe("referenceSheet");
         expect(getCodexCategoryMode("resources")).toBe("referenceSheet");
         expect(getCodexCategoryMode("traits")).toBe("traitArchive");
-        expect(getCodexCategoryMode("tech")).toBe("generic");
     });
 });

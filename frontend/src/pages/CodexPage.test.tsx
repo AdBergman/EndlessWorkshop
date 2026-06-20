@@ -974,12 +974,137 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
-        const resultsPane = screen.getByLabelText("Codex results");
-        const row = within(resultsPane).getByRole("button", { name: /metadata trap/i });
-        expect(row.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        expect(screen.getByLabelText("Tech filters")).toBeInTheDocument();
         const techOverview = screen.getByLabelText("Tech overview");
-        expect(techOverview.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
-        expect(screen.queryByLabelText("Tech filters")).not.toBeInTheDocument();
+        expect(techOverview).toHaveTextContent("Metadata Trap");
+        expect(techOverview).not.toHaveTextContent("Active");
+        expect(techOverview).not.toHaveTextContent("Empire");
+        expect(techOverview).not.toHaveTextContent("10 turns");
+    });
+
+    it("renders the Tech archive with fact filters, effect previews, compact exact unlock links, and detail-to-filter reset", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "tech",
+                entryKey: "Aspect_Technology_00",
+                displayName: "Asceticism",
+                kind: "Technology",
+                category: "Development",
+                descriptionLines: [],
+                referenceKeys: ["Aspect_DistrictImprovement_01"],
+                facts: [
+                    { label: "Kind", value: "Technology" },
+                    { label: "Tier", value: "1" },
+                    { label: "Faction", value: "Aspect" },
+                    { label: "Era", value: "1" },
+                    { label: "Quadrant", value: "Development" },
+                ],
+                sections: [
+                    {
+                        title: "Unlocks",
+                        items: [
+                            {
+                                label: "Ascetic Existence",
+                                referenceKey: "Aspect_DistrictImprovement_01",
+                            },
+                            {
+                                label: "Missing Improvement",
+                                referenceKey: "Aspect_DistrictImprovement_Missing",
+                            },
+                        ],
+                    },
+                    {
+                        title: "Effects",
+                        lines: ["+10 [DustColored] Dust on Capital"],
+                    },
+                ],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Common_Technology_Defense_02",
+                displayName: "Shield Doctrine",
+                kind: "Technology",
+                category: "Defense",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Technology" },
+                    { label: "Tier", value: "2" },
+                    { label: "Era", value: "2" },
+                    { label: "Quadrant", value: "Defense" },
+                ],
+                sections: [{ title: "Effects", lines: ["+20 [Defense] Defense on Units"] }],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Aspect_DistrictImprovement_01",
+                displayName: "Ascetic Existence",
+                category: "Industry",
+                kind: "Improvement",
+                descriptionLines: ["A focused capital improvement."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech&entry=Aspect_Technology_00"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Asceticism" })).toBeInTheDocument();
+
+        const techFilters = screen.getByLabelText("Tech filters");
+        expect(within(techFilters).getByRole("button", { name: "Era 1 1" })).toBeInTheDocument();
+        expect(within(techFilters).getByRole("button", { name: "Era 2 1" })).toBeInTheDocument();
+        expect(within(techFilters).getByRole("button", { name: "Development 1" })).toBeInTheDocument();
+        expect(within(techFilters).getByRole("button", { name: "Defense 1" })).toBeInTheDocument();
+        expect(within(techFilters).getByRole("button", { name: "Aspect 1" })).toBeInTheDocument();
+
+        await user.click(within(techFilters).getByRole("button", { name: "Development 1" }));
+
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=tech");
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+
+        const techOverview = screen.getByLabelText("Tech overview");
+        expect(techOverview).toHaveTextContent("Asceticism");
+        expect(techOverview).not.toHaveTextContent("Shield Doctrine");
+
+        const titleButton = within(techOverview).getByRole("button", { name: /asceticism/i });
+        const row = getSummaryRowForButton(titleButton);
+        const metadata = within(row).getByLabelText("Tech metadata");
+        expect(within(metadata).getByText("Era 1")).toBeInTheDocument();
+        expect(within(metadata).getByText("Development")).toBeInTheDocument();
+        expect(within(metadata).getByText("Aspect")).toBeInTheDocument();
+
+        const effects = within(row).getByLabelText("Tech effect preview");
+        expect(effects).toHaveTextContent("+10 Dust on Capital");
+        expect(effects).not.toHaveTextContent("[DustColored]");
+
+        const unlocks = within(row).getByLabelText("Tech unlocks");
+        expect(within(unlocks).getByRole("button", { name: "Open Ascetic Existence in Codex" }))
+            .toBeInTheDocument();
+        expect(within(unlocks).queryByText("Missing Improvement")).not.toBeInTheDocument();
+
+        await user.click(within(techFilters).getByRole("button", { name: "Development 1" }));
+        expect(await screen.findByText("Shield Doctrine")).toBeInTheDocument();
+
+        await user.click(within(techFilters).getByRole("button", { name: "Era 2 1" }));
+        expect(techOverview).not.toHaveTextContent("Asceticism");
+        expect(techOverview).toHaveTextContent("Shield Doctrine");
     });
 
     it("filters the Ability catalog from the left rail using exported facts only", async () => {
@@ -1602,7 +1727,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
-        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /tech archive filters/i })).toBeInTheDocument();
     });
 
     it("adds a Treaty Category rail while preserving Diplomatic Treaty rows and detail behavior", async () => {
@@ -2381,7 +2506,7 @@ describe("CodexPage", () => {
         const codexHeader = document.querySelector(".codex-header") as HTMLElement;
         expect(codexHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
         expect(within(codexHeader).queryByRole("heading", { name: "Tech" })).not.toBeInTheDocument();
-        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /tech archive filters/i })).toBeInTheDocument();
         expect(within(getCategoryToolbar()).getByRole("button", { name: /all/i }))
             .toHaveAttribute("aria-pressed", "false");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /tech/i }))
@@ -2709,7 +2834,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
-        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /tech archive filters/i })).toBeInTheDocument();
         expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
 
         cleanup();

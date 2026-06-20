@@ -1980,6 +1980,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--techArchive {
+    gap: 12px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item:hover,
 .codex-summaryList__item:focus-visible,
 .codex-summaryList__item:focus-within {
@@ -2061,6 +2067,13 @@
     gap: 10px;
 }
 
+.codex-summaryList__entryButton--tech {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    gap: 10px;
+}
+
 .codex-summaryList__entryButton--heroTitle,
 .codex-summaryList__entryButton--heroStats {
     width: 100%;
@@ -2116,7 +2129,8 @@
 .codex-summaryList__item--equipmentArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--heroArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--unitArchive .codex-summaryList__titleLine,
-.codex-summaryList__item--improvementArchive .codex-summaryList__titleLine {
+.codex-summaryList__item--improvementArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--techArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
     justify-content: space-between;
@@ -2205,6 +2219,12 @@
     line-height: 1.35;
 }
 
+.codex-summaryList__item--techArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .codex-summaryList__context {
     color: rgba(195, 152, 77, 0.72);
     font-size: 11px;
@@ -2274,6 +2294,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--techArchive .codex-summaryList__metadata {
+    flex: 0 1 min(44%, 420px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--catalog .codex-summaryList__metadata--ability {
     align-items: center;
     gap: 7px;
@@ -2331,6 +2357,14 @@
 }
 
 .codex-summaryList__metadata--improvement {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--tech {
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.52);
@@ -2523,12 +2557,19 @@
     gap: 4px;
 }
 
+.codex-summaryList__techEffects {
+    display: grid;
+    max-width: 84ch;
+    gap: 4px;
+}
+
 .codex-summaryList__statusEffectLine,
 .codex-summaryList__districtEffectLine,
 .codex-summaryList__equipmentEffectLine,
 .codex-summaryList__heroStatLine,
 .codex-summaryList__unitStatLine,
 .codex-summaryList__improvementEffectLine,
+.codex-summaryList__techEffectLine,
 .codex-summaryList__statusFallback {
     display: block;
     min-width: 0;

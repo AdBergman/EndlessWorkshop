@@ -118,6 +118,10 @@ Current rules:
 - Traits use a compact Trait Archive mode: Type rail (`All`, `Faction`,
   `Protectorate`) plus reference-style rows; selected Trait entries and
   search-active Traits stay split-layout.
+- Tech uses compact Technology Archive support inside Codex: Era/Quadrant/Faction
+  rail, effect-first rows, compact exact `Unlocks:` links, and quiet
+  Era/Quadrant/Faction metadata. The dedicated `/tech` route remains the
+  route-owned progression explorer.
 - Extractors are hidden support/reference targets as of commit `0ab94ec9`;
   they remain searchable, linkable, and direct-routable where exact refs exist.
 - Future full-width shallow categories must be added deliberately to the

@@ -29,6 +29,10 @@ import {
     isGrantedAbilityPreviewSection,
     type CodexGrantedAbilityPreview as GrantedAbilityPreview,
 } from "@/lib/codex/codexGrantedAbilityPreviews";
+import {
+    buildTechUnlockSummary,
+    type CodexTechUnlockSummary as TechUnlockSummary,
+} from "@/lib/codex/codexTechUnlockSummaries";
 import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
@@ -101,6 +105,10 @@ type DiplomacyArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type TechArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
 type DistrictArchiveMetadataItem = {
     key: string;
     value: string;
@@ -138,6 +146,8 @@ const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DISTRICT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
+const MAX_TECH_EFFECT_PREVIEW_LINES = 4;
+const MAX_TECH_UNLOCK_LINKS = 4;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -279,6 +289,35 @@ function getStatusArchiveMetadata(entry: CodexEntry): StatusArchiveMetadataItem[
     getCodexFactValues(entry, "Duration").forEach((value) =>
         addValue("duration", formatStatusDurationValue(value))
     );
+
+    return items;
+}
+
+function formatTechEraValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    return /^era\b/i.test(trimmedValue) ? trimmedValue : `Era ${trimmedValue}`;
+}
+
+function getTechArchiveMetadata(entry: CodexEntry): TechArchiveMetadataItem[] {
+    const items: TechArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Era").forEach((value) => addValue("era", formatTechEraValue(value)));
+    getCodexFactValues(entry, "Quadrant").forEach((value) => addValue("quadrant", value));
+    getCodexFactValues(entry, "Faction").forEach((value) => addValue("faction", value));
 
     return items;
 }
@@ -493,6 +532,35 @@ function getEquipmentArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
 
     return effectLines.slice(0, MAX_EQUIPMENT_EFFECT_PREVIEW_LINES);
+}
+
+function getTechArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "tech") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+
+    return effectLines.slice(0, MAX_TECH_EFFECT_PREVIEW_LINES);
+}
+
+function getTechArchiveUnlockLinks(
+    entry: CodexEntry,
+    relatedEntries: readonly CodexEntry[]
+): TechUnlockSummary[] {
+    if (entry.exportKind.trim().toLowerCase() !== "tech") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const unlocksSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "unlocks"
+    );
+    if (!unlocksSection?.items) return [];
+
+    return unlocksSection.items
+        .map((item) => buildTechUnlockSummary(item, relatedEntries))
+        .filter((item): item is TechUnlockSummary => item !== null);
 }
 
 function getHeroArchiveStatPreviewLines(entry: CodexEntry): string[] {
@@ -962,6 +1030,7 @@ export default function CodexSummaryDetail({
                         const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const useHeroArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "heroes";
+                        const useTechArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "tech";
                         const useUnitArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "units";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
@@ -980,6 +1049,21 @@ export default function CodexSummaryDetail({
                         const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
                             ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
                             : [];
+                        const techRelatedEntries = useTechArchiveRowHierarchy
+                            ? resolveRelatedEntries(entry, referenceIndexes)
+                            : [];
+                        const techArchiveMetadata = useTechArchiveRowHierarchy ? getTechArchiveMetadata(entry) : [];
+                        const techEffectPreviewLines = useTechArchiveRowHierarchy
+                            ? getTechArchiveEffectPreviewLines(entry)
+                            : [];
+                        const techUnlockLinks = useTechArchiveRowHierarchy
+                            ? getTechArchiveUnlockLinks(entry, techRelatedEntries)
+                            : [];
+                        const visibleTechUnlockLinks = techUnlockLinks.slice(0, MAX_TECH_UNLOCK_LINKS);
+                        const techUnlockOverflowCount = Math.max(
+                            0,
+                            techUnlockLinks.length - visibleTechUnlockLinks.length
+                        );
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -1757,6 +1841,103 @@ export default function CodexSummaryDetail({
                                         </span>
                                     ) : null}
                                 </button>
+                            );
+                        }
+
+                        if (useTechArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--techArchive"
+                                >
+                                    <button
+                                        type="button"
+                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--tech"
+                                        onClick={() => onSelectEntry(entry)}
+                                    >
+                                        <span className="codex-summaryList__titleLine">
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                            {techArchiveMetadata.length > 0 ? (
+                                                <span
+                                                    className="codex-summaryList__metadata codex-summaryList__metadata--tech"
+                                                    aria-label="Tech metadata"
+                                                >
+                                                    {techArchiveMetadata.map((item) => (
+                                                        <span
+                                                            key={`${item.key}-${item.value}`}
+                                                            className="codex-summaryList__metadataText"
+                                                        >
+                                                            {item.value}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            ) : null}
+                                        </span>
+
+                                        <span
+                                            className="codex-summaryList__techEffects"
+                                            aria-label="Tech effect preview"
+                                        >
+                                            {techEffectPreviewLines.length > 0 ? (
+                                                techEffectPreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__techEffectLine"
+                                                        key={`${entry.entryKey}-tech-preview-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="codex-summaryList__statusFallback">
+                                                    No public tech effects exported yet.
+                                                </span>
+                                            )}
+                                        </span>
+                                    </button>
+
+                                    {visibleTechUnlockLinks.length > 0 ? (
+                                        <div
+                                            className="codex-summaryList__grantedAbilityLinks"
+                                            aria-label="Tech unlocks"
+                                        >
+                                            <span className="codex-summaryList__grantedAbilityLinksLabel">
+                                                Unlocks:
+                                            </span>
+                                            <span className="codex-summaryList__grantedAbilityLinkList">
+                                                {visibleTechUnlockLinks.map((unlock, index) => (
+                                                    <span
+                                                        className="codex-summaryList__grantedAbilityLinkItem"
+                                                        key={`${entry.entryKey}-${unlock.target.entryKey}`}
+                                                    >
+                                                        {index > 0 ? (
+                                                            <span
+                                                                className="codex-summaryList__grantedAbilitySeparator"
+                                                                aria-hidden="true"
+                                                            >
+                                                                ·
+                                                            </span>
+                                                        ) : null}
+                                                        <CodexInlineEntityLink
+                                                            entry={unlock.target}
+                                                            onSelect={(unlockEntry) => onSelectEntry(unlockEntry)}
+                                                        >
+                                                            {renderCodexLabel(unlock.label)}
+                                                        </CodexInlineEntityLink>
+                                                    </span>
+                                                ))}
+                                                {techUnlockOverflowCount > 0 ? (
+                                                    <span className="codex-summaryList__grantedAbilityOverflow">
+                                                        +{techUnlockOverflowCount} more
+                                                    </span>
+                                                ) : null}
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                </div>
                             );
                         }
 

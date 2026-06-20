@@ -609,6 +609,29 @@ Request:
 - do not require EWShop to infer evolution chains from unit reference lists,
   keys, names, prose, or tier numbers.
 
+## Technologies Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Technologies
+category evolution pass. EWShop can continue using current exported `Era`,
+`Quadrant`, optional `Faction`, public `Effects`, and exact `Unlocks`
+references. The dedicated `/tech` route remains the progression explorer.
+
+### Technology Prerequisite And Progression Metadata
+
+The raw Tech export contains useful progression fields such as prerequisite and
+exclusive-prerequisite keys, but generic Codex Technology entries do not expose
+public prerequisite/progression facts or sections.
+
+Request:
+
+- if prerequisite/progression hints are intended for public Codex presentation,
+  emit them as explicit public Codex facts/sections/references using the
+  existing exporter style;
+- preserve relationship direction where possible, such as prerequisite,
+  exclusive prerequisite, or unlock progression;
+- do not require EWShop to infer technology progression from raw tech route
+  data, keys, names, prose, or tier numbers.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

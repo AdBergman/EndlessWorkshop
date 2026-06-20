@@ -55,7 +55,7 @@ export function isTechUnlockSummarySection(entry: CodexEntry, sectionLabel: stri
 
 export function buildTechUnlockSummary(
     item: CodexStructuredSectionItem,
-    relatedEntries: CodexEntry[]
+    relatedEntries: readonly CodexEntry[]
 ): CodexTechUnlockSummary | null {
     const referenceKey = item.referenceKey?.trim();
     if (!referenceKey) return null;

@@ -8,6 +8,7 @@ export type CodexCategoryMode =
     | "heroArchive"
     | "improvementArchive"
     | "statusArchive"
+    | "techArchive"
     | "traitArchive"
     | "unitArchive"
     | "referenceSheet";
@@ -80,6 +81,10 @@ export function getCodexCategoryMode(kind: string): CodexCategoryMode {
 
     if (normalizedKind === "statuses") {
         return "statusArchive";
+    }
+
+    if (normalizedKind === "tech") {
+        return "techArchive";
     }
 
     if (normalizedKind === "traits") {
