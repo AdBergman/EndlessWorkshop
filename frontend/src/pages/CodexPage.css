@@ -812,6 +812,18 @@
     padding-top: 26px;
 }
 
+.codex-detail--summary {
+    padding: 24px 34px 34px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.codex-workspace--abilityCatalog .codex-detail--summary {
+    padding-top: 24px;
+}
+
 .codex-overview {
     padding-top: 0;
 }
