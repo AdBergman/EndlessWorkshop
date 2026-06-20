@@ -182,6 +182,25 @@ Frontend tech lead:
 - planning value
 - trust
 
+## Final Category Closeout
+
+Mandatory before calling any long-running category evolution complete.
+
+At the end of the category pass, Codex must:
+
+1. Run a full browser/product review.
+2. Review the implementation against `AGENTS.md`.
+3. Review the implementation against `docs/frontend/frontend-architecture-guidelines.md`.
+4. Check project coding style and existing component patterns.
+5. Refactor obvious overgrown or duplicated category code.
+6. Remove stale or dead code introduced during the category pass.
+7. Validate with tests, typecheck, build, and `git diff --check`.
+8. Update the category evolution doc with final decisions, lessons, and follow-up work.
+9. Update this playbook if the process changed.
+10. Recommend commit/split strategy.
+
+This phase is required even when the UI feels visually accepted. Category evolution is not complete until product quality, architecture quality, documentation, and commit strategy are all closed out.
+
 ## Category Completion Checklist
 
 - Data audit
@@ -194,6 +213,7 @@ Frontend tech lead:
 - Visual review
 - Tech lead review
 - 4X gamer review
+- Final category closeout
 
 ## Future Categories
 
