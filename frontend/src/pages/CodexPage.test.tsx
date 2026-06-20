@@ -141,6 +141,109 @@ function seedShallowReferenceLayoutEntries() {
     ]);
 }
 
+function seedActionArchiveEntries() {
+    seedCodexEntries([
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeBuildBridge",
+            displayName: "Build Bridge",
+            category: "Action",
+            kind: "Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Action" },
+                { label: "Category", value: "Action" },
+            ],
+            sections: [{
+                title: "Action mechanics",
+                items: [{
+                    label: "Money cost multiplier",
+                    facts: [
+                        { label: "Affected cost", value: "Money" },
+                        { label: "Modifier", value: "-100%" },
+                    ],
+                }],
+            }],
+        },
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeKinBuildChosen",
+            displayName: "Kin Build Chosen",
+            category: "Faction Action",
+            kind: "Faction Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Faction Action" },
+                { label: "Category", value: "Faction Action" },
+            ],
+        },
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeMukagLight01",
+            displayName: "Mukag Light",
+            category: "Empire Action",
+            kind: "Empire Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Empire Action" },
+                { label: "Category", value: "Empire Action" },
+                { label: "UI category", value: "Light" },
+            ],
+        },
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeRepairDistrict",
+            displayName: "Repair District",
+            category: "Constructible Action",
+            kind: "Constructible Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Constructible Action" },
+                { label: "Category", value: "Constructible Action" },
+                { label: "Action type", value: "Repair District" },
+            ],
+        },
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeTerraformationEnrich",
+            displayName: "Terraformation Enrich",
+            category: "Terraforming Action",
+            kind: "Terraforming Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Terraforming Action" },
+                { label: "Category", value: "Terraforming Action" },
+                { label: "Action type", value: "Terraformation Enrich" },
+            ],
+        },
+        {
+            exportKind: "actions",
+            entryKey: "ActionTypeMove",
+            displayName: "Move",
+            category: "Army Action",
+            kind: "Army Action",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Army Action" },
+                { label: "Category", value: "Army Action" },
+            ],
+        },
+        {
+            exportKind: "tech",
+            entryKey: "Technology_Test",
+            displayName: "Test Technology",
+            descriptionLines: ["Unlocks a test technology."],
+            referenceKeys: [],
+        },
+    ]);
+}
+
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
@@ -1400,6 +1503,106 @@ describe("CodexPage", () => {
 
         expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses");
+    });
+
+    it("adds an Action Type rail while preserving generic Action rows and detail behavior", async () => {
+        const user = userEvent.setup();
+        seedActionArchiveEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Actions" })).toBeInTheDocument();
+        const actionRail = screen.getByRole("complementary", { name: /action archive filters/i });
+        expect(actionRail).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--actionArchive")).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "All 6" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(actionRail).getByRole("button", { name: "Action 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Faction 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Empire 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Constructible 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Terraforming 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Army 1" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Build Bridge")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Kin Build Chosen")).toBeInTheDocument();
+
+        await user.click(within(actionRail).getByRole("button", { name: "Faction 1" }));
+
+        expect(within(actionRail).getByRole("button", { name: "Faction 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(await screen.findByRole("heading", { name: "All Actions" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Kin Build Chosen")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).queryByText("Build Bridge")).not.toBeInTheDocument();
+
+        await user.click(within(actionRail).getByRole("button", { name: "Faction 1" }));
+
+        expect(within(actionRail).getByRole("button", { name: "All 6" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Build Bridge")).toBeInTheDocument();
+
+        const searchInput = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(searchInput, "bridge");
+
+        expect(within(actionRail).getByRole("button", { name: "All 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(actionRail).getByRole("button", { name: "Action 1" })).toBeInTheDocument();
+        expect(within(actionRail).getByRole("button", { name: "Faction 0" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Build Bridge")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Actions overview")).queryByText("Kin Build Chosen")).not.toBeInTheDocument();
+
+        cleanup();
+        seedActionArchiveEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeBuildBridge"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        const detailActionRail = screen.getByRole("complementary", { name: /action archive filters/i });
+
+        await user.click(within(detailActionRail).getByRole("button", { name: "Faction 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Actions" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Build Bridge" })).not.toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=actions");
+        expect(within(screen.getByLabelText("Actions overview")).getByText("Kin Build Chosen")).toBeInTheDocument();
+
+        cleanup();
+        seedActionArchiveEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
     });
 
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
@@ -5538,8 +5741,9 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /build bridge actions applies to bridge construction/i }))
-            .toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /action archive filters/i })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /build bridge actions applies to bridge construction/i }))
+            .not.toBeInTheDocument();
         expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByText("Constructible Action")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
@@ -6202,7 +6406,6 @@ describe("CodexPage", () => {
     });
 
     it("browses and renders representative action entries with null descriptions", async () => {
-        const user = userEvent.setup();
         const entries: CodexEntry[] = [
             {
                 exportKind: "actions",
@@ -6341,7 +6544,7 @@ describe("CodexPage", () => {
         expect(codexHeader.querySelector(".codex-pageTitle")).not.toBeInTheDocument();
         expect(within(codexHeader).queryByRole("heading", { name: "Actions" })).not.toBeInTheDocument();
         expect(within(codexHeader).queryByRole("heading", { name: "Build Bridge" })).not.toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /all actions/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /action archive filters/i })).toBeInTheDocument();
         expect(screen.getByText("Action dossier")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Cost modifiers" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Turn cost multiplier" })).toBeInTheDocument();
@@ -6349,18 +6552,68 @@ describe("CodexPage", () => {
         expect(screen.queryByText("ActionTypeBuildBridge")).not.toBeInTheDocument();
         expect(screen.queryByText("No public description has been added for this entry yet.")).not.toBeInTheDocument();
 
-        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
-        await user.click(within(resultsPane).getByRole("button", { name: /build dam/i }));
+        cleanup();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=ActionTypeBuildDam"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
         expect(await screen.findByRole("heading", { name: "Build Dam" })).toBeInTheDocument();
         expect(screen.getByText("0.90")).toBeInTheDocument();
         expect(screen.getAllByText(/Reduces the/).length).toBeGreaterThanOrEqual(1);
 
-        await user.click(within(resultsPane).getByRole("button", { name: /mukag monsoon festival/i }));
+        cleanup();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=FactionActionTypeMukag_MonsoonFestival"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
         expect(await screen.findByRole("heading", { name: "Mukag Monsoon Festival" })).toBeInTheDocument();
         expect(within(screen.getByRole("region", { name: /selected codex entry/i }))
             .getAllByText("Faction Action").length).toBeGreaterThanOrEqual(1);
 
-        await user.click(within(resultsPane).getByRole("button", { name: /mukag light01/i }));
+        cleanup();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: { actions: entries },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions&entry=EmpireActionTypeMukag_Light01"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
         expect(await screen.findByRole("heading", { name: "Mukag Light01" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Action mechanics" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Empire project cost" })).toBeInTheDocument();

@@ -320,4 +320,20 @@ Lessons:
 - Browser automation may be unavailable; record the limitation honestly and use
   route/API smoke plus tests instead of claiming visual verification.
 
+### Actions
+
+Lessons:
+
+- Sparse categories can still deserve Archive orientation. Actions had 128-139
+  rows, but many lacked public mechanics, so rail-first was safer than rich row
+  redesign.
+- Broad exported category/type facts can be enough for first-pass navigation
+  when deeper metadata is sparse.
+- Do not promote sparse facts such as partial `Action type` or `UI category`
+  into filters just because they exist.
+- Removing the generic left result list changes old detail-browsing tests; keep
+  detail coverage through direct routes and explicit route-reset behavior.
+- Complete-with-follow-up is the right closeout state when orientation is fixed
+  but richer row/detail presentation depends on exporter/product review.
+
 Update this history after every category evolution. The playbook is product memory.

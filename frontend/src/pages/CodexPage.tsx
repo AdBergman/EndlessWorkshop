@@ -21,6 +21,11 @@ import {
     getAutocompleteEntries,
 } from "@/lib/codex/codexSearch";
 import {
+    buildActionTypeFilterOptions,
+    filterActionEntriesByType,
+    type ActionArchiveType,
+} from "@/lib/codex/codexActionArchiveFilters";
+import {
     buildAbilityArchiveFilterOptions,
     entryMatchesAbilityArchiveFilters,
     getAbilityArchiveFactFilterConfig,
@@ -72,6 +77,7 @@ export default function CodexPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
+    const [activeActionType, setActiveActionType] = useState<ActionArchiveType | null>(null);
     const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
     const [activeEquipmentFilters, setActiveEquipmentFilters] = useState<ActiveEquipmentArchiveFilters>(
         EMPTY_EQUIPMENT_ARCHIVE_FILTERS
@@ -132,6 +138,7 @@ export default function CodexPage() {
         [entries, deferredQuery, activeKind]
     );
     const categoryMode = getCodexCategoryMode(activeKind);
+    const isActionArchiveMode = categoryMode === "actionArchive";
     const isAbilityCatalogMode = categoryMode === "abilityArchive";
     const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
@@ -140,6 +147,21 @@ export default function CodexPage() {
     const factFilterConfig = useMemo(
         () => getAbilityArchiveFactFilterConfig(activeKind),
         [activeKind]
+    );
+
+    useEffect(() => {
+        if (isActionArchiveMode) return;
+
+        setActiveActionType((current) => current ? null : current);
+    }, [isActionArchiveMode]);
+
+    const actionTypeOptions = useMemo(
+        () => (
+            isActionArchiveMode
+                ? buildActionTypeFilterOptions(searchFilteredEntries)
+                : []
+        ),
+        [isActionArchiveMode, searchFilteredEntries]
     );
 
     const factFilterOptions = useMemo(
@@ -207,6 +229,10 @@ export default function CodexPage() {
 
     const filteredEntries = useMemo(
         () => {
+            if (isActionArchiveMode) {
+                return filterActionEntriesByType(searchFilteredEntries, activeActionType);
+            }
+
             if (isAbilityCatalogMode) {
                 if (Object.keys(activeFactFilters).length === 0) {
                     return searchFilteredEntries;
@@ -238,11 +264,13 @@ export default function CodexPage() {
             return searchFilteredEntries;
         },
         [
+            activeActionType,
             activeEquipmentFilters,
             activeFactFilters,
             activeStatusScope,
             activeTraitType,
             factFilterConfig,
+            isActionArchiveMode,
             isAbilityCatalogMode,
             isEquipmentArchiveMode,
             isStatusArchiveMode,
@@ -554,6 +582,12 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
+    const returnActionFiltersToArchive = useCallback(() => {
+        if (!isActionArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isActionArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const returnAbilityFiltersToArchive = useCallback(() => {
         if (!isAbilityCatalogMode || !selectedEntryParam) return;
 
@@ -577,6 +611,16 @@ export default function CodexPage() {
 
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isEquipmentArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
+    const clearActionType = useCallback(() => {
+        setActiveActionType(null);
+        returnActionFiltersToArchive();
+    }, [returnActionFiltersToArchive]);
+
+    const toggleActionType = useCallback((type: ActionArchiveType) => {
+        setActiveActionType((current) => current === type ? null : type);
+        returnActionFiltersToArchive();
+    }, [returnActionFiltersToArchive]);
 
     const clearFactFilters = useCallback(() => {
         setActiveFactFilters({});
@@ -669,6 +713,8 @@ export default function CodexPage() {
                     className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""} ${
                         isFullWidthReferenceOverviewState ? "codex-workspace--referenceOverview" : ""
                     } ${
+                        isActionArchiveMode ? "codex-workspace--actionArchive" : ""
+                    } ${
                         isAbilityCatalogMode ? "codex-workspace--abilityCatalog" : ""
                     } ${
                         isEquipmentArchiveMode ? "codex-workspace--equipmentArchive" : ""
@@ -680,6 +726,9 @@ export default function CodexPage() {
                 >
                     <CodexLeftPane
                         ref={resultListRef}
+                        actionTotalCount={isActionArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
+                        actionTypeFilter={activeActionType}
+                        actionTypeOptions={actionTypeOptions}
                         activeFactFilters={activeFactFilters}
                         activeEquipmentFilters={activeEquipmentFilters}
                         activeKind={activeKind}
@@ -689,6 +738,7 @@ export default function CodexPage() {
                         error={error}
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
+                        isActionArchiveMode={isActionArchiveMode}
                         isAbilityCatalogMode={isAbilityCatalogMode}
                         isEquipmentArchiveMode={isEquipmentArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
@@ -701,11 +751,13 @@ export default function CodexPage() {
                         traitTotalCount={isTraitArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
                         traitTypeFilter={activeTraitType}
                         traitTypeOptions={traitTypeOptions}
+                        onClearActionType={clearActionType}
                         onClearFactFilters={clearFactFilters}
                         onClearEquipmentFilters={clearEquipmentFilters}
                         onClearStatusScope={clearStatusScope}
                         onClearTraitType={clearTraitType}
                         onSelectEntry={(entry) => selectEntry(entry)}
+                        onToggleActionType={toggleActionType}
                         onToggleEquipmentFilter={toggleEquipmentFilter}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTraitType={toggleTraitType}

@@ -87,6 +87,10 @@ Current rules:
 - `EW-CODEX-UI-002` is deferred after rejected tiny CSS-only landing polish.
 - `EW-CODEX-UI-003` is covered by the accepted compact category shelf behavior
   from `EW-CODEX-UI-001`.
+- Actions use compact Action Archive mode: Type rail (`All`, `Action`,
+  `Faction`, `Empire`, `Constructible`, `Terraforming`, `Army`) plus existing
+  generic Action rows/details. Rich Action rows remain deferred because current
+  public data is sparse.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.

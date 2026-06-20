@@ -1,5 +1,6 @@
 export type CodexCategoryMode =
     | "generic"
+    | "actionArchive"
     | "abilityArchive"
     | "equipmentArchive"
     | "statusArchive"
@@ -43,6 +44,10 @@ export function normalizeCodexKind(kind: string): string {
 
 export function getCodexCategoryMode(kind: string): CodexCategoryMode {
     const normalizedKind = normalizeCodexKind(kind);
+
+    if (normalizedKind === "actions") {
+        return "actionArchive";
+    }
 
     if (normalizedKind === "abilities") {
         return "abilityArchive";

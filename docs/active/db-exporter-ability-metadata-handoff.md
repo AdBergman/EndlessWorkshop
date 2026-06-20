@@ -374,6 +374,60 @@ Request:
 - do not require EWShop to infer trait icons from keys, display names, prose, or
   SVG filenames.
 
+## Action Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Actions category
+evolution pass. EWShop can continue using the current exported `Category` facts
+and exact references, but exporter cleanup would improve future Action
+presentation.
+
+### Action Ownership Metadata
+
+Current Action Codex data exposes broad categories such as `Faction Action` and
+`Empire Action`, but does not expose complete explicit ownership metadata for
+which faction or empire-state system owns an action.
+
+Request:
+
+- emit explicit Action ownership metadata only when source data proves
+  ownership;
+- include stable faction/reference keys using the existing Codex fact/reference
+  style;
+- leave ownership absent when it is unknown or not source-proven.
+
+### Action Reference Coverage
+
+Current Action references include unresolved public keys, especially action
+visual affinity and empire faction state references.
+
+Observed examples:
+
+- `Rebuild Village` -> `ActionVisualAffinity_RebuildVillage`
+- `Kin Of Sheredyn Economy01` -> `KinOfSheredyn_Economy01`
+- `Mukag Knowledge01` -> `EmpireActionCategory_Mukag_Knowledge`
+- `Mukag Knowledge01` -> `EmpireFactionState_MukagBalanced`
+- `Mukag Light01` -> `EmpireFactionState_MukagEnlighted`
+
+Request:
+
+- verify whether these references should resolve to public Codex entries;
+- otherwise omit or mark references as internal, obsolete, runtime-only, or not
+  public.
+
+### Action Browse Metadata Coverage
+
+Current `Action type` and `UI category` facts are too sparse for frontend
+navigation:
+
+- `Action type` appears on 12 entries.
+- `UI category` appears on 5 entries.
+
+Request:
+
+- verify whether these facts are intentionally sparse;
+- if they are intended as public browse metadata, emit them consistently enough
+  for EWShop to use without inference.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:
