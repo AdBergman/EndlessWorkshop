@@ -572,6 +572,43 @@ Request:
 - do not require EWShop to infer faction group, portrait, recruitment, or
   progression from keys, names, prose, or SVG filenames.
 
+## Units Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Units category
+evolution pass. EWShop can continue using current exported `Class`, `Faction`,
+`Tier`, `Stats`, and exact resolved granted ability references.
+
+### Unit Reference And Roster Coverage
+
+Local 0.82 data includes 2 Unit entries without exported `Faction` facts and a
+small set of references that do not resolve in the current public Codex data,
+including `Faction_Tormented`, `MinorFaction_Dungeon`,
+`MinorFaction_GreenScions`, and `Unit_MinorFaction_MangroveOfHarmony_Final`.
+
+Request:
+
+- keep absent metadata absent if it is not public, stable, or source-proven;
+- preserve exact Faction/Minor Faction references when source-proven;
+- resolve or intentionally omit public references that should not appear in
+  EWShop;
+- do not require EWShop to infer faction ownership from Unit keys, display
+  names, prose, or SVG filenames.
+
+### Unit Evolution Relationship Metadata
+
+The raw Units export contains useful progression fields such as
+`previousUnitKey`, `nextEvolutionUnitKeys`, and `evolutionTierIndex`, but generic
+Codex Unit entries do not expose a dedicated public evolution section/fact.
+
+Request:
+
+- if Unit evolution/progression is intended for public Codex presentation, emit
+  explicit evolution relationships using the existing Codex fact/section and
+  exact reference style;
+- preserve relationship direction where possible, such as previous/evolves into;
+- do not require EWShop to infer evolution chains from unit reference lists,
+  keys, names, prose, or tier numbers.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

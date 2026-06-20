@@ -7796,4 +7796,228 @@ describe("CodexPage", () => {
         });
         expect(screen.getByRole("heading", { name: "Flying" })).toBeInTheDocument();
     });
+
+    it("renders Units as an archive with Class, Faction, and Tier filters", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_Kin_Archer",
+                displayName: "Archer",
+                descriptionLines: [],
+                referenceKeys: ["Faction_KinOfSheredyn", "Ability_Ranged"],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "1" },
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Ranged" },
+                    { label: "Spawn type", value: "Land" },
+                ],
+                sections: [
+                    {
+                        title: "Granted abilities",
+                        items: [{ label: "Ranged III", referenceKey: "Ability_Ranged" }],
+                    },
+                    {
+                        title: "Stats",
+                        lines: [
+                            "+3 [AttackRange] Attack Range",
+                            "+140 [Health] Health",
+                            "+40 [Damage] Damage",
+                            "+3 [MovementPoints] Movement Points",
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Kin_Warrior",
+                displayName: "Warrior",
+                descriptionLines: [],
+                referenceKeys: ["Faction_KinOfSheredyn"],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "2" },
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Infantry" },
+                    { label: "Spawn type", value: "Land" },
+                ],
+                sections: [{ title: "Stats", lines: ["+200 [Health] Health", "+15 [Defense] Defense"] }],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Tahuk_Rider",
+                displayName: "Rider",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "1" },
+                    { label: "Faction", value: "Tahuk" },
+                    { label: "Class", value: "Cavalry" },
+                    { label: "Spawn type", value: "Land" },
+                ],
+                sections: [{ title: "Stats", lines: ["+180 [Health] Health", "+4 [MovementPoints] Movement Points"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_KinOfSheredyn",
+                displayName: "Kin of Sheredyn",
+                descriptionLines: ["Major faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Ranged",
+                displayName: "Ranged III",
+                descriptionLines: ["Ranged attack."],
+                referenceKeys: [],
+                facts: [{ label: "Ability mechanic", value: "Passive" }],
+                sections: [{ title: "Effects", lines: ["Can attack at range."] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Units" })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--unitArchive")).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /unit archive filters/i })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+
+        const unitRail = screen.getByRole("complementary", { name: /unit archive filters/i });
+        expect(within(unitRail).getByRole("button", { name: "Ranged 1" })).toBeInTheDocument();
+        expect(within(unitRail).getByRole("button", { name: "Kin of Sheredyn 2" })).toBeInTheDocument();
+        expect(within(unitRail).getByRole("button", { name: "Tier 1 2" })).toBeInTheDocument();
+
+        const summaryList = screen.getByLabelText("Units overview");
+        const archerRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /archer/i }));
+        expect(within(archerRow).getByLabelText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(archerRow).toHaveTextContent("Ranged");
+        expect(archerRow).toHaveTextContent("Tier 1");
+        expect(archerRow).toHaveTextContent("Attack Range");
+        expect(archerRow).toHaveTextContent("Health");
+        expect(within(archerRow).getByRole("button", { name: /open ranged iii in codex/i })).toBeInTheDocument();
+        expect(archerRow).not.toHaveTextContent("Spawn type");
+        expect(archerRow).not.toHaveTextContent("Kind Unit");
+
+        await user.click(within(unitRail).getByRole("button", { name: "Ranged 1" }));
+        expect(within(summaryList).getByRole("button", { name: /archer/i })).toBeInTheDocument();
+        expect(within(summaryList).queryByRole("button", { name: /warrior/i })).not.toBeInTheDocument();
+
+        await user.click(within(unitRail).getByRole("button", { name: "Kin of Sheredyn 1" }));
+        expect(within(summaryList).getByRole("button", { name: /archer/i })).toBeInTheDocument();
+        expect(within(summaryList).queryByRole("button", { name: /rider/i })).not.toBeInTheDocument();
+
+        await user.click(within(unitRail).getByRole("button", { name: "Clear" }));
+        expect(within(summaryList).getByRole("button", { name: /warrior/i })).toBeInTheDocument();
+        expect(within(summaryList).getByRole("button", { name: /rider/i })).toBeInTheDocument();
+    });
+
+    it("returns from Unit detail to the archive when Unit filters change", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_Kin_Archer",
+                displayName: "Archer",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "1" },
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Ranged" },
+                ],
+                sections: [{ title: "Stats", lines: ["+140 [Health] Health"] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units&entry=Unit_Kin_Archer"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Archer" })).toBeInTheDocument();
+        const unitRail = screen.getByRole("complementary", { name: /unit archive filters/i });
+        await user.click(within(unitRail).getByRole("button", { name: "Ranged 1" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=units");
+        });
+        expect(screen.getByRole("heading", { name: "All Units" })).toBeInTheDocument();
+    });
+
+    it("keeps unresolved Unit granted ability references out of archive rows", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_GreenScion_Swarm",
+                displayName: "Swarm Guard",
+                descriptionLines: [],
+                referenceKeys: ["Ability_Swarm", "UnitAbility_Unresolved"],
+                facts: [
+                    { label: "Kind", value: "Unit" },
+                    { label: "Tier", value: "2" },
+                    { label: "Faction", value: "Green Scion" },
+                    { label: "Class", value: "Swarm" },
+                ],
+                sections: [
+                    {
+                        title: "Granted abilities",
+                        items: [
+                            { label: "Swarm", referenceKey: "Ability_Swarm" },
+                            { label: "Missing Unit Gift", referenceKey: "UnitAbility_Unresolved" },
+                        ],
+                    },
+                    { title: "Stats", lines: ["+140 [Health] Health", "+3 [MovementPoints] Movement Points"] },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Swarm",
+                displayName: "Swarm",
+                descriptionLines: ["Swarm movement."],
+                referenceKeys: [],
+                facts: [{ label: "Ability mechanic", value: "Passive" }],
+                sections: [{ title: "Effects", lines: ["Moves as a swarm."] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const summaryList = await screen.findByLabelText("Units overview");
+        const unitRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /swarm guard/i }));
+        expect(within(unitRow).getByRole("button", { name: /open swarm in codex/i })).toBeInTheDocument();
+        expect(unitRow).not.toHaveTextContent("Missing Unit Gift");
+        expect(unitRow).not.toHaveTextContent("UnitAbility_Unresolved");
+    });
 });

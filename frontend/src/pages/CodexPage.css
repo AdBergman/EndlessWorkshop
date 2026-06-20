@@ -1968,6 +1968,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--unitArchive {
+    gap: 12px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item--improvementArchive {
     gap: 10px;
     padding: 18px 10px 18px 18px;
@@ -2069,6 +2075,20 @@
     display: grid;
 }
 
+.codex-summaryList__entryButton--unitTitle,
+.codex-summaryList__entryButton--unitStats {
+    width: 100%;
+    max-width: none;
+}
+
+.codex-summaryList__entryButton--unitTitle {
+    justify-self: start;
+}
+
+.codex-summaryList__entryButton--unitStats {
+    display: grid;
+}
+
 .codex-kindIcon--summaryResource {
     flex: 0 0 auto;
 }
@@ -2095,6 +2115,7 @@
 .codex-summaryList__item--districtArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--equipmentArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--heroArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--unitArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--improvementArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
@@ -2102,6 +2123,10 @@
 }
 
 .codex-summaryList__titleLine--hero {
+    align-items: flex-start;
+}
+
+.codex-summaryList__titleLine--unit {
     align-items: flex-start;
 }
 
@@ -2163,6 +2188,12 @@
 }
 
 .codex-summaryList__item--heroArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.codex-summaryList__item--unitArchive .codex-summaryList__name {
     font-size: 1.08rem;
     font-weight: 700;
     line-height: 1.35;
@@ -2231,6 +2262,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--unitArchive .codex-summaryList__metadata {
+    flex: 0 1 min(48%, 470px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--improvementArchive .codex-summaryList__metadata {
     flex: 0 1 min(34%, 320px);
     justify-content: flex-end;
@@ -2285,6 +2322,14 @@
     line-height: 1.45;
 }
 
+.codex-summaryList__metadata--unit {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
 .codex-summaryList__metadata--improvement {
     align-items: center;
     gap: 7px;
@@ -2324,8 +2369,16 @@
     font-weight: 700;
 }
 
+.codex-summaryList__metadata--unit .codex-inlineEntityLink {
+    color: rgba(241, 234, 220, 0.76);
+    font-size: 12px;
+    font-weight: 700;
+}
+
 .codex-summaryList__metadata--hero .codex-inlineEntityLink:hover,
-.codex-summaryList__metadata--hero .codex-inlineEntityLink:focus-visible {
+.codex-summaryList__metadata--hero .codex-inlineEntityLink:focus-visible,
+.codex-summaryList__metadata--unit .codex-inlineEntityLink:hover,
+.codex-summaryList__metadata--unit .codex-inlineEntityLink:focus-visible {
     color: rgba(255, 217, 119, 0.94);
 }
 
@@ -2451,6 +2504,13 @@
     gap: 4px;
 }
 
+.codex-summaryList__unitStats {
+    display: grid;
+    max-width: 84ch;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+}
+
 .codex-summaryList__districtEffects {
     display: grid;
     max-width: 84ch;
@@ -2467,6 +2527,7 @@
 .codex-summaryList__districtEffectLine,
 .codex-summaryList__equipmentEffectLine,
 .codex-summaryList__heroStatLine,
+.codex-summaryList__unitStatLine,
 .codex-summaryList__improvementEffectLine,
 .codex-summaryList__statusFallback {
     display: block;

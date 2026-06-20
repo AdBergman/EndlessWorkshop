@@ -74,6 +74,14 @@ import {
     type TraitArchiveType,
 } from "@/lib/codex/codexTraitArchiveFilters";
 import {
+    buildUnitArchiveFilterGroups,
+    EMPTY_UNIT_ARCHIVE_FILTERS,
+    entryMatchesUnitArchiveFilters,
+    hasActiveUnitArchiveFilters,
+    type ActiveUnitArchiveFilters,
+    type UnitArchiveFilterKey,
+} from "@/lib/codex/codexUnitArchiveFilters";
+import {
     getCodexCategoryMode,
     isDirectRoutableHiddenCodexKind,
     isVisibleTopLevelCodexKind,
@@ -109,6 +117,9 @@ export default function CodexPage() {
     );
     const [activeHeroFilters, setActiveHeroFilters] = useState<ActiveHeroArchiveFilters>(
         EMPTY_HERO_ARCHIVE_FILTERS
+    );
+    const [activeUnitFilters, setActiveUnitFilters] = useState<ActiveUnitArchiveFilters>(
+        EMPTY_UNIT_ARCHIVE_FILTERS
     );
     const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
@@ -176,6 +187,7 @@ export default function CodexPage() {
     const isImprovementArchiveMode = categoryMode === "improvementArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
     const isTraitArchiveMode = categoryMode === "traitArchive";
+    const isUnitArchiveMode = categoryMode === "unitArchive";
 
     const factFilterConfig = useMemo(
         () => getAbilityArchiveFactFilterConfig(activeKind),
@@ -275,6 +287,23 @@ export default function CodexPage() {
                 : []
         ),
         [activeHeroFilters, isHeroArchiveMode, searchFilteredEntries]
+    );
+
+    useEffect(() => {
+        if (isUnitArchiveMode) return;
+
+        setActiveUnitFilters((current) => (
+            hasActiveUnitArchiveFilters(current) ? EMPTY_UNIT_ARCHIVE_FILTERS : current
+        ));
+    }, [isUnitArchiveMode]);
+
+    const unitFilterGroups = useMemo(
+        () => (
+            isUnitArchiveMode
+                ? buildUnitArchiveFilterGroups(searchFilteredEntries, activeUnitFilters)
+                : []
+        ),
+        [activeUnitFilters, isUnitArchiveMode, searchFilteredEntries]
     );
 
     useEffect(() => {
@@ -378,6 +407,16 @@ export default function CodexPage() {
                 );
             }
 
+            if (isUnitArchiveMode) {
+                if (!hasActiveUnitArchiveFilters(activeUnitFilters)) {
+                    return searchFilteredEntries;
+                }
+
+                return searchFilteredEntries.filter((entry) =>
+                    entryMatchesUnitArchiveFilters(entry, activeUnitFilters)
+                );
+            }
+
             return searchFilteredEntries;
         },
         [
@@ -390,6 +429,7 @@ export default function CodexPage() {
             activeImprovementCategory,
             activeStatusScope,
             activeTraitType,
+            activeUnitFilters,
             factFilterConfig,
             isActionArchiveMode,
             isAbilityCatalogMode,
@@ -400,6 +440,7 @@ export default function CodexPage() {
             isImprovementArchiveMode,
             isStatusArchiveMode,
             isTraitArchiveMode,
+            isUnitArchiveMode,
             searchFilteredEntries,
         ]
     );
@@ -755,6 +796,12 @@ export default function CodexPage() {
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isHeroArchiveMode, selectedEntryParam, updateSelectedEntry]);
 
+    const returnUnitFiltersToArchive = useCallback(() => {
+        if (!isUnitArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isUnitArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const returnImprovementFiltersToArchive = useCallback(() => {
         if (!isImprovementArchiveMode || !selectedEntryParam) return;
 
@@ -834,6 +881,19 @@ export default function CodexPage() {
         }));
         returnHeroFiltersToArchive();
     }, [returnHeroFiltersToArchive]);
+
+    const clearUnitFilters = useCallback(() => {
+        setActiveUnitFilters(EMPTY_UNIT_ARCHIVE_FILTERS);
+        returnUnitFiltersToArchive();
+    }, [returnUnitFiltersToArchive]);
+
+    const toggleUnitFilter = useCallback((filterKey: UnitArchiveFilterKey, value: string) => {
+        setActiveUnitFilters((current) => ({
+            ...current,
+            [filterKey]: current[filterKey] === value ? null : value,
+        }));
+        returnUnitFiltersToArchive();
+    }, [returnUnitFiltersToArchive]);
 
     const clearImprovementCategory = useCallback(() => {
         setActiveImprovementCategory(null);
@@ -917,6 +977,8 @@ export default function CodexPage() {
                     } ${
                         isHeroArchiveMode ? "codex-workspace--heroArchive" : ""
                     } ${
+                        isUnitArchiveMode ? "codex-workspace--unitArchive" : ""
+                    } ${
                         isImprovementArchiveMode ? "codex-workspace--improvementArchive" : ""
                     } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
@@ -932,6 +994,7 @@ export default function CodexPage() {
                         activeFactFilters={activeFactFilters}
                         activeEquipmentFilters={activeEquipmentFilters}
                         activeHeroFilters={activeHeroFilters}
+                        activeUnitFilters={activeUnitFilters}
                         activeKind={activeKind}
                         activeKindLabel={activeKindLabel}
                         diplomacyCategoryFilter={activeDiplomacyCategory}
@@ -958,6 +1021,7 @@ export default function CodexPage() {
                         isImprovementArchiveMode={isImprovementArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isTraitArchiveMode={isTraitArchiveMode}
+                        isUnitArchiveMode={isUnitArchiveMode}
                         isVisible={showResultsPane}
                         loading={loading}
                         selectedEntryKey={selectedListItem?.entryKey ?? null}
@@ -966,12 +1030,14 @@ export default function CodexPage() {
                         traitTotalCount={isTraitArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
                         traitTypeFilter={activeTraitType}
                         traitTypeOptions={traitTypeOptions}
+                        unitFilterGroups={unitFilterGroups}
                         onClearActionType={clearActionType}
                         onClearDiplomacyCategory={clearDiplomacyCategory}
                         onClearDistrictCategory={clearDistrictCategory}
                         onClearFactFilters={clearFactFilters}
                         onClearEquipmentFilters={clearEquipmentFilters}
                         onClearHeroFilters={clearHeroFilters}
+                        onClearUnitFilters={clearUnitFilters}
                         onClearImprovementCategory={clearImprovementCategory}
                         onClearStatusScope={clearStatusScope}
                         onClearTraitType={clearTraitType}
@@ -981,6 +1047,7 @@ export default function CodexPage() {
                         onToggleDistrictCategory={toggleDistrictCategory}
                         onToggleEquipmentFilter={toggleEquipmentFilter}
                         onToggleHeroFilter={toggleHeroFilter}
+                        onToggleUnitFilter={toggleUnitFilter}
                         onToggleImprovementCategory={toggleImprovementCategory}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTraitType={toggleTraitType}

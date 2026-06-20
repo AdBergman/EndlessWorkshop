@@ -9,6 +9,7 @@ export type CodexCategoryMode =
     | "improvementArchive"
     | "statusArchive"
     | "traitArchive"
+    | "unitArchive"
     | "referenceSheet";
 
 export const PREFERRED_CODEX_KIND_ORDER = [
@@ -83,6 +84,10 @@ export function getCodexCategoryMode(kind: string): CodexCategoryMode {
 
     if (normalizedKind === "traits") {
         return "traitArchive";
+    }
+
+    if (normalizedKind === "units") {
+        return "unitArchive";
     }
 
     if (supportsFullWidthReferenceOverview(normalizedKind)) {

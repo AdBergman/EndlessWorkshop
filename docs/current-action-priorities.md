@@ -4,7 +4,7 @@ Current as of 2026-06-20.
 
 This list reflects the current product focus:
 
-- Do not work on Units or unit art right now.
+- Do not work on unit art right now.
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
 
@@ -106,6 +106,10 @@ Current rules:
   (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
   Resource, Bridge, Population, Trade) plus content-first rows from exported
   Effect lines.
+- Units use compact Unit Archive mode: Class/Faction/Tier rail plus stat-grid
+  comparison rows, Faction/Class/Tier metadata, and compact exact granted
+  ability links where references resolve. Rich evolution-chain UI remains
+  deferred until explicit Codex evolution metadata exists.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.
@@ -222,5 +226,5 @@ Actionable next items:
 
 ## Out Of Scope For Now
 
-- Units and unit art.
+- Unit art.
 - Large site-wide restyling passes.

@@ -18,6 +18,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode(" Heroes ")).toBe("heroArchive");
         expect(getCodexCategoryMode(" Improvements ")).toBe("improvementArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
+        expect(getCodexCategoryMode(" Units ")).toBe("unitArchive");
         expect(supportsFullWidthReferenceOverview(" Resources ")).toBe(true);
     });
 

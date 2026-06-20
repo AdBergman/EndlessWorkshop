@@ -9,6 +9,7 @@ import HeroArchiveRail from "@/components/Codex/HeroArchiveRail";
 import ImprovementArchiveRail from "@/components/Codex/ImprovementArchiveRail";
 import StatusArchiveRail from "@/components/Codex/StatusArchiveRail";
 import TraitArchiveRail from "@/components/Codex/TraitArchiveRail";
+import UnitArchiveRail from "@/components/Codex/UnitArchiveRail";
 import {
     type ActiveCodexFactFilters,
     type CodexFactFilterOption,
@@ -29,6 +30,11 @@ import type {
 } from "@/lib/codex/codexImprovementArchiveFilters";
 import type { StatusScopeFilterOption } from "@/lib/codex/codexStatusArchiveFilters";
 import type { TraitArchiveType, TraitTypeFilterOption } from "@/lib/codex/codexTraitArchiveFilters";
+import type {
+    ActiveUnitArchiveFilters,
+    UnitArchiveFilterGroup,
+    UnitArchiveFilterKey,
+} from "@/lib/codex/codexUnitArchiveFilters";
 import type { ActionArchiveType, ActionTypeFilterOption } from "@/lib/codex/codexActionArchiveFilters";
 import type {
     DiplomacyArchiveCategory,
@@ -58,6 +64,7 @@ type Props = {
     equipmentFilterGroups: readonly EquipmentArchiveFilterGroup[];
     activeEquipmentFilters: ActiveEquipmentArchiveFilters;
     activeHeroFilters: ActiveHeroArchiveFilters;
+    activeUnitFilters: ActiveUnitArchiveFilters;
     error: string | null;
     filteredEntryCount: number;
     filterOptions: readonly CodexFactFilterOption[];
@@ -73,6 +80,7 @@ type Props = {
     isDiplomacyArchiveMode: boolean;
     isStatusArchiveMode: boolean;
     isTraitArchiveMode: boolean;
+    isUnitArchiveMode: boolean;
     isVisible: boolean;
     loading: boolean;
     selectedEntryKey: string | null;
@@ -82,12 +90,14 @@ type Props = {
     traitTotalCount: number;
     traitTypeFilter: TraitArchiveType | null;
     traitTypeOptions: readonly TraitTypeFilterOption[];
+    unitFilterGroups: readonly UnitArchiveFilterGroup[];
     onClearActionType: () => void;
     onClearFactFilters: () => void;
     onClearDiplomacyCategory: () => void;
     onClearDistrictCategory: () => void;
     onClearEquipmentFilters: () => void;
     onClearHeroFilters: () => void;
+    onClearUnitFilters: () => void;
     onClearImprovementCategory: () => void;
     onClearStatusScope: () => void;
     onClearTraitType: () => void;
@@ -97,6 +107,7 @@ type Props = {
     onToggleDistrictCategory: (category: DistrictArchiveCategory) => void;
     onToggleEquipmentFilter: (filterKey: EquipmentArchiveFilterKey, value: string) => void;
     onToggleHeroFilter: (filterKey: HeroArchiveFilterKey, value: string) => void;
+    onToggleUnitFilter: (filterKey: UnitArchiveFilterKey, value: string) => void;
     onToggleImprovementCategory: (category: ImprovementArchiveCategory) => void;
     onToggleStatusScope: (scope: string) => void;
     onToggleTraitType: (type: TraitArchiveType) => void;
@@ -113,6 +124,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         activeKindLabel,
         activeEquipmentFilters,
         activeHeroFilters,
+        activeUnitFilters,
         diplomacyCategoryFilter,
         diplomacyCategoryOptions,
         diplomacyTotalCount,
@@ -137,6 +149,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         isImprovementArchiveMode,
         isStatusArchiveMode,
         isTraitArchiveMode,
+        isUnitArchiveMode,
         isVisible,
         loading,
         selectedEntryKey,
@@ -145,12 +158,14 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         traitTotalCount,
         traitTypeFilter,
         traitTypeOptions,
+        unitFilterGroups,
         onClearActionType,
         onClearDiplomacyCategory,
         onClearDistrictCategory,
         onClearFactFilters,
         onClearEquipmentFilters,
         onClearHeroFilters,
+        onClearUnitFilters,
         onClearImprovementCategory,
         onClearStatusScope,
         onClearTraitType,
@@ -160,6 +175,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         onToggleDistrictCategory,
         onToggleEquipmentFilter,
         onToggleHeroFilter,
+        onToggleUnitFilter,
         onToggleImprovementCategory,
         onToggleStatusScope,
         onToggleTraitType,
@@ -173,6 +189,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         <aside
             className={`codex-resultsPane ${
                 isActionArchiveMode || isAbilityCatalogMode || isDiplomacyArchiveMode || isDistrictArchiveMode || isEquipmentArchiveMode || isHeroArchiveMode || isImprovementArchiveMode || isStatusArchiveMode || isTraitArchiveMode
+                    || isUnitArchiveMode
                     ? "codex-resultsPane--catalog"
                     : ""
             }`}
@@ -189,6 +206,8 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                         ? "Equipment archive filters"
                     : isHeroArchiveMode
                         ? "Hero archive filters"
+                    : isUnitArchiveMode
+                        ? "Unit archive filters"
                     : isImprovementArchiveMode
                         ? "Improvement archive filters"
                     : isStatusArchiveMode
@@ -198,7 +217,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                         : "Codex results"
             }
         >
-            {!isActionArchiveMode && !isAbilityCatalogMode && !isDiplomacyArchiveMode && !isDistrictArchiveMode && !isEquipmentArchiveMode && !isHeroArchiveMode && !isImprovementArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
+            {!isActionArchiveMode && !isAbilityCatalogMode && !isDiplomacyArchiveMode && !isDistrictArchiveMode && !isEquipmentArchiveMode && !isHeroArchiveMode && !isUnitArchiveMode && !isImprovementArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
                 <div className="codex-resultsPane__header">
                     <div>
                         <div className="codex-sectionLabel">Results</div>
@@ -269,6 +288,15 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                 />
             ) : null}
 
+            {isUnitArchiveMode ? (
+                <UnitArchiveRail
+                    activeFilters={activeUnitFilters}
+                    groups={unitFilterGroups}
+                    onClearFilters={onClearUnitFilters}
+                    onToggleFilter={onToggleUnitFilter}
+                />
+            ) : null}
+
             {isImprovementArchiveMode ? (
                 <ImprovementArchiveRail
                     activeCategory={improvementCategoryFilter}
@@ -298,7 +326,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                 />
             ) : null}
 
-            {!isActionArchiveMode && !isAbilityCatalogMode && !isDiplomacyArchiveMode && !isDistrictArchiveMode && !isEquipmentArchiveMode && !isHeroArchiveMode && !isImprovementArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
+            {!isActionArchiveMode && !isAbilityCatalogMode && !isDiplomacyArchiveMode && !isDistrictArchiveMode && !isEquipmentArchiveMode && !isHeroArchiveMode && !isUnitArchiveMode && !isImprovementArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
                 <CodexResultList
                     ref={resultListRef}
                     entries={displayEntries}
