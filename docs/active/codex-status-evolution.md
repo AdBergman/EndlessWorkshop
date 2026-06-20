@@ -540,6 +540,40 @@ Exporter findings discovered:
 
 - None new during STATUS-UI-004 implementation. Existing non-blocking findings remain unchanged.
 
+## STATUS-UI-005 Result - Exact Status Relationship Links
+
+Status: Implemented for review.
+
+What changed:
+
+- Status detail pages now show a neutral `Exact Status References` section when exact inbound references exist.
+- Relationships are grouped by source kind through the existing related-entry card pattern.
+- Supported source groups:
+  - Abilities
+  - Diplomatic Treaties
+  - Actions
+  - Factions
+- Relationship discovery uses exported `publicContextKeys` and `referenceKeys` only, resolved through the existing Codex reference resolver.
+- No relationships are inferred from status names, ability prose, entry keys, SVG filenames, or display text.
+- Statuses without exact sources do not show empty relationship groups.
+
+What did not change:
+
+- Status archive rows do not show source hints yet.
+- Status left rail, search/filter behavior, and routing were not changed.
+- Ability Archive behavior was not changed.
+- Generic `Related entries` remains available for normal outbound references.
+
+Lessons:
+
+- Exact inbound source links make thin statuses more trustworthy without inventing missing mechanics.
+- Neutral labels are safer than `Applied by` until exporter data proves relationship direction consistently.
+- The existing related-entry card pattern is enough for this detail-page trust layer; no new relationship framework is needed.
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-005 implementation. Existing non-blocking findings remain unchanged.
+
 ## Open Questions
 
 - After mechanics-first rows are accepted, should rows show compact exact source hints?
@@ -636,6 +670,8 @@ Risk:
 ### STATUS-UI-005 - Exact Status Relationship Links
 
 Goal: Surface exact source relationships for statuses.
+
+Status: implemented for review.
 
 Scope:
 

@@ -9,6 +9,7 @@ import {
 } from "@/lib/codex/codexPresentation";
 import { getDisplayedGrantedAbilityKeys } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { getDisplayedPopulationThresholdTargetKeys } from "@/lib/codex/codexPopulationThresholdTargets";
+import { buildStatusRelationshipSourceEntries } from "@/lib/codex/codexStatusRelationships";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexQuestProgression from "./CodexQuestProgression";
@@ -46,6 +47,7 @@ export default function CodexEntryDetail({
     }
 
     const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
+    const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
     const detailContextLines = isAbilityEntry ? [] : questGroup
         ? getCodexQuestGroupDetailContextLines(entry)
         : getCodexDetailContextLines(entry);
@@ -63,6 +65,9 @@ export default function CodexEntryDetail({
             !hiddenRelatedEntryKeys.has(relatedEntry.entryKey)
         ))
         : relatedEntries;
+    const statusRelationshipSourceEntries = isStatusEntry
+        ? buildStatusRelationshipSourceEntries(entry, allEntries)
+        : [];
 
     return (
         <article className="codex-detail">
@@ -102,6 +107,14 @@ export default function CodexEntryDetail({
                     onSelectInlineEntry={onSelectRelated}
                 />
             )}
+
+            {isStatusEntry ? (
+                <RelatedEntries
+                    entries={statusRelationshipSourceEntries}
+                    onSelect={onSelectRelated}
+                    headingLabel="Exact Status References"
+                />
+            ) : null}
 
             <RelatedEntries
                 entries={relatedEntriesForDisplay}

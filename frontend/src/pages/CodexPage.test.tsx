@@ -2544,6 +2544,164 @@ describe("CodexPage", () => {
         expect(within(statusProfile).queryByText("Category")).not.toBeInTheDocument();
     });
 
+    it("shows grouped exact relationship sources on Status details without prose-only matches", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_VulnerableI",
+                displayName: "Vulnerable I",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Scope", value: "Unit" }],
+                sections: [{ title: "Status mechanics", lines: ["-30% [Defense] Defense"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_BreachingAttack",
+                displayName: "Breaching Attack",
+                category: "Tactical",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: ["Status_Unit_VulnerableI"],
+                facts: [{ label: "Ability mechanic", value: "Active" }],
+                sections: [{ title: "Effects", lines: ["Applies Vulnerable I Status to targeted Units."] }],
+            },
+            {
+                exportKind: "diplomaticTreaties",
+                entryKey: "DiplomaticTreaty_CloseBorders",
+                displayName: "Close Borders",
+                category: "Diplomacy",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [],
+                publicContextKeys: ["Status_Unit_VulnerableI"],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "Action_Intimidate",
+                displayName: "Intimidate",
+                category: "Diplomacy",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: ["Status_Unit_VulnerableI"],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Test",
+                displayName: "Test Faction",
+                category: "Faction",
+                kind: "Faction",
+                descriptionLines: [],
+                referenceKeys: ["Status_Unit_VulnerableI"],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_ProseOnly",
+                displayName: "Prose Only Vulnerable",
+                category: "Tactical",
+                kind: "Ability",
+                descriptionLines: ["Mentions Vulnerable I but has no exact reference."],
+                referenceKeys: [],
+                sections: [{ title: "Effects", lines: ["Mentions Vulnerable I in prose only."] }],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
+                acc[entry.exportKind] = [...(acc[entry.exportKind] ?? []), entry];
+                return acc;
+            }, {}),
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses&entry=Status_Unit_VulnerableI"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Vulnerable I" })).toBeInTheDocument();
+        const exactReferences = screen.getByRole("region", { name: /exact status references/i });
+        expect(within(exactReferences).getByText("Abilities")).toBeInTheDocument();
+        expect(within(exactReferences).getByText("Diplomatic Treaties")).toBeInTheDocument();
+        expect(within(exactReferences).getByText("Actions")).toBeInTheDocument();
+        expect(within(exactReferences).getByText("Factions")).toBeInTheDocument();
+        expect(within(exactReferences).getByRole("button", { name: /breaching attack abilities/i }))
+            .toBeInTheDocument();
+        expect(within(exactReferences).getByRole("button", { name: /close borders diplomatic treaties/i }))
+            .toBeInTheDocument();
+        expect(within(exactReferences).getByRole("button", { name: /intimidate actions/i }))
+            .toBeInTheDocument();
+        expect(within(exactReferences).getByRole("button", { name: /test faction factions/i }))
+            .toBeInTheDocument();
+        expect(within(exactReferences).queryByRole("button", { name: /prose only vulnerable/i }))
+            .not.toBeInTheDocument();
+
+        await user.click(within(exactReferences).getByRole("button", { name: /breaching attack abilities/i }));
+
+        expect(await screen.findByRole("heading", { name: "Breaching Attack" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack");
+    });
+
+    it("does not show empty exact relationship groups on Status details or source hints on Status archive rows", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Standalone",
+                displayName: "Standalone Status",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Scope", value: "Unit" }],
+                sections: [{ title: "Status mechanics", lines: ["+10 [Defense] Defense"] }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses&entry=Status_Unit_Standalone"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Standalone Status" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: /exact status references/i })).not.toBeInTheDocument();
+
+        cleanup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const statusesOverview = await screen.findByLabelText("Statuses overview");
+        const row = within(statusesOverview).getByRole("button", { name: /standalone status/i });
+        expect(within(row).queryByText(/exact status references/i)).not.toBeInTheDocument();
+        expect(within(row).queryByText(/referenced by/i)).not.toBeInTheDocument();
+    });
+
     it("links exact status mentions inline in Ability Archive previews while keeping unresolved mentions plain", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [

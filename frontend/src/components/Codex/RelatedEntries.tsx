@@ -1,3 +1,4 @@
+import { useId } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
@@ -66,6 +67,8 @@ function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorit
 }
 
 export default function RelatedEntries({ entries, onSelect, priorityMode = "default", headingLabel = "Related entries" }: Props) {
+    const headingId = useId();
+
     if (entries.length === 0) {
         return null;
     }
@@ -73,8 +76,8 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
     const groups = groupRelatedEntries(entries, priorityMode);
 
     return (
-        <section className="codex-related" aria-labelledby="codex-related-heading">
-            <div className="codex-sectionLabel" id="codex-related-heading">
+        <section className="codex-related" aria-labelledby={headingId}>
+            <div className="codex-sectionLabel" id={headingId}>
                 {headingLabel}
             </div>
 
