@@ -3729,7 +3729,7 @@ describe("CodexPage", () => {
         expect(screen.getAllByText("Bow").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Rare").length).toBeGreaterThan(0);
         expect(screen.getByText("Tier 2")).toBeInTheDocument();
-        expect(bloodmarkRow).not.toHaveTextContent("Value 400");
+        expect(screen.getByText("Value 400")).toBeInTheDocument();
         expect(bloodmarkRow).toHaveTextContent("Grants:");
         expect(within(bloodmarkRow).getByRole("button", { name: "Open Ranged IV in Codex" })).toBeInTheDocument();
         expect(within(bloodmarkRow).getByRole("button", { name: "Open Defense Expert II in Codex" })).toBeInTheDocument();
@@ -6674,7 +6674,7 @@ describe("CodexPage", () => {
         expect(dawnbladeRow).toHaveTextContent("One-Handed Weapon");
         expect(dawnbladeRow).toHaveTextContent("Rare");
         expect(dawnbladeRow).toHaveTextContent("Tier 2");
-        expect(dawnbladeRow).not.toHaveTextContent("Value 120");
+        expect(dawnbladeRow).toHaveTextContent("Value 120");
         expect(dawnbladeRow).toHaveTextContent("Might");
     });
 });

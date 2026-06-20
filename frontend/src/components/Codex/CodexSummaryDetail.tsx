@@ -243,6 +243,18 @@ function formatEquipmentTierValue(value: string): string {
     return trimmedValue === "0" ? "Base" : `Tier ${trimmedValue}`;
 }
 
+function formatEquipmentValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    const numericValue = Number(trimmedValue);
+    const displayValue = Number.isFinite(numericValue)
+        ? String(Number.parseFloat(numericValue.toFixed(2)))
+        : trimmedValue;
+
+    return `Value ${displayValue}`;
+}
+
 function getEquipmentArchiveMetadata(entry: CodexEntry): EquipmentArchiveMetadataItem[] {
     const items: EquipmentArchiveMetadataItem[] = [];
     const seenValues = new Set<string>();
@@ -261,6 +273,7 @@ function getEquipmentArchiveMetadata(entry: CodexEntry): EquipmentArchiveMetadat
     getCodexFactValues(entry, "Type").forEach((value) => addValue("type", value));
     getCodexFactValues(entry, "Rarity").forEach((value) => addValue("rarity", value));
     getCodexFactValues(entry, "Tier").forEach((value) => addValue("tier", formatEquipmentTierValue(value)));
+    getCodexFactValues(entry, "Value").forEach((value) => addValue("value", formatEquipmentValue(value)));
 
     return items;
 }

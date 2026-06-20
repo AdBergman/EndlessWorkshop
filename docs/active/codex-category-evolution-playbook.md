@@ -130,6 +130,13 @@ Determine:
 
 Content should dominate. Metadata should classify and support content.
 
+Primary entity must dominate linked entities. Archive rows may surface exact linked
+entities as compact inline affordances, but full relationship cards belong in
+detail pages unless the linked entity is the primary content of that category.
+Use exact references only, never infer linked entities, prefer existing
+link/tooltip affordances when available, and avoid lifting whole related-entry or
+preview-card sections into archive rows by default.
+
 ## Phase 5 - Detail Audit
 
 Ask: what additional value is gained by clicking?

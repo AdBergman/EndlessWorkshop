@@ -323,7 +323,7 @@ Result:
 - Granted ability links show the standard Codex hover/focus tooltip preview.
 - Granted ability links remain exact-reference navigation controls.
 - No new tooltip framework or Equipment-specific tooltip path was introduced.
-- `Value` was removed from Equipment archive row metadata.
+- Manual review confirmed Type, Rarity, Tier, and Value should remain quiet right-side row metadata.
 
 Decision:
 
@@ -331,7 +331,7 @@ Decision:
   - Type
   - Rarity
   - Tier/Base
-- `Value` remains detail/provenance data, not archive scan metadata.
+  - Value
 - When inline linked entities appear in archive rows, reuse existing Codex link/tooltip behavior before introducing new presentation systems.
 
 ## Lessons Learned
@@ -340,7 +340,7 @@ Decision:
 - For Equipment, granted ability references are content, not just related metadata.
 - Primary entities must dominate archive rows; linked entities should be compact unless they are the row's main content.
 - Inline linked entities should reuse existing Codex hover/click affordances where possible.
-- Administrative metadata such as `Value` should not appear in archive rows unless it improves player planning.
+- Administrative metadata such as `Value` should remain quiet metadata when retained; it should not become primary archive-row content.
 - Type is stronger than Slot as first browse model because Slot collapses most items into Weapon.
 - Rarity is useful as secondary navigation, but should not dominate the row.
 - Unresolved exact references should remain honest missing data rather than frontend-inferred cards.
