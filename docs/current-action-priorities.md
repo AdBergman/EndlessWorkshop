@@ -98,6 +98,10 @@ Current rules:
   City, Food, Industry, Dust, Science, Influence, Military, Resource, Bridge,
   Population, Trade, Foundation, Wonder, Anomaly) plus content-first rows from
   exported Effect lines and compact exact `Extracts:` resource links.
+- Heroes use compact Hero Archive mode: Class/Faction rail plus stat-grid rows,
+  Faction/Class metadata, exact faction icon identity where safely resolvable,
+  and compact exact granted ability links where references resolve. Repeated
+  generic Hero title icons were removed as visual noise.
 - Improvements use compact Improvement Archive mode: Improvement Focus rail
   (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
   Resource, Bridge, Population, Trade) plus content-first rows from exported

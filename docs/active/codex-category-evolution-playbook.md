@@ -130,12 +130,27 @@ Determine:
 
 Content should dominate. Metadata should classify and support content.
 
+Before designing archive rows, classify row elements as:
+- primary content
+- supporting metadata
+- compact relationships
+- exporter/internal noise
+
 Primary entity must dominate linked entities. Archive rows may surface exact linked
 entities as compact inline affordances, but full relationship cards belong in
 detail pages unless the linked entity is the primary content of that category.
 Use exact references only, never infer linked entities, prefer existing
 link/tooltip affordances when available, and avoid lifting whole related-entry or
 preview-card sections into archive rows by default.
+
+Do not render every exact relationship with equal prominence. Some exact
+relationships are row content, some are compact metadata/chips, and some belong
+only in detail.
+
+Repeated generic icons that add no category-specific information should be
+removed from archive rows. For stat-heavy categories, optimize rows for
+comparison: prefer compact stat grids over long vertical stat lists, preserve
+token/icon rendering, and avoid visual clutter.
 
 ## Phase 5 - Detail Audit
 
@@ -395,5 +410,25 @@ Lessons:
   inferred descriptions.
 - File-export audits and running-app browser snapshots may differ; record the
   data source used for counts instead of pretending they match.
+
+### Heroes
+
+Lessons:
+
+- Heroes are an Archive for the current export: exact `Faction` and `Class`
+  facts plus complete `Stats` sections support comparison, while no
+  progression/recruitment structure exists yet.
+- Faction can be a valid first-pass browse group, but major/minor faction
+  grouping needs explicit exported metadata or exact relationship confidence.
+- Stats are Hero primary row content and should use compact comparison grids
+  rather than long vertical lists.
+- Faction/Class are supporting metadata.
+- Exact ability/class tags such as `Flying` and `Swarm` are compact
+  metadata/relationship chips, not full `Grants:` row content.
+- The generic Hero icon repeated on every archive row was visual noise and was
+  removed. Per-Hero portraits/icons still require exporter-provided metadata.
+- Unresolved ability references should remain hidden.
+- Per-Hero portraits/icons and recruitment/progression browsing require
+  exporter-provided metadata, not frontend inference.
 
 Update this history after every category evolution. The playbook is product memory.

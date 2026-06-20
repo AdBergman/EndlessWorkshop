@@ -1,5 +1,7 @@
 import { useMemo, type RefObject } from "react";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
+import { IconImg } from "@/features/icons/IconImg";
+import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { buildAbilityInlineLinkCandidates } from "@/lib/codex/codexAbilityInlineLinks";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { getStatusScopeDisplayLabel } from "@/lib/codex/codexStatusArchiveFilters";
@@ -78,6 +80,14 @@ type EquipmentArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type HeroArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
+type HeroFactionIdentity = {
+    label: string;
+    iconPath: string | null;
+};
 type DiplomacyArchiveMetadataItem = {
     key: string;
     value: string;
@@ -111,6 +121,8 @@ const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
+const MAX_HERO_STAT_PREVIEW_LINES = 5;
+const MAX_HERO_GRANTED_ABILITY_LINKS = 3;
 const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DISTRICT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
@@ -472,6 +484,75 @@ function getEquipmentArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     return effectLines.slice(0, MAX_EQUIPMENT_EFFECT_PREVIEW_LINES);
 }
 
+function getHeroArchiveStatPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "heroes") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const statsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "stats"
+    );
+    const statLines = statsSection ? getStructuredSectionPreviewLines(statsSection) : [];
+
+    return statLines.slice(0, MAX_HERO_STAT_PREVIEW_LINES);
+}
+
+function getHeroClassMetadata(entry: CodexEntry): HeroArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "heroes") return [];
+
+    const items: HeroArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Class").forEach((value) => addValue("class", value));
+
+    return items;
+}
+
+function getHeroFactionIdentity(entry: CodexEntry, relatedEntries: readonly CodexEntry[]): HeroFactionIdentity | null {
+    if (entry.exportKind.trim().toLowerCase() !== "heroes") return null;
+
+    const relatedFaction = relatedEntries.find((relatedEntry) => {
+        const relatedKind = relatedEntry.exportKind.trim().toLowerCase();
+        return relatedKind === "factions" || relatedKind === "minorfactions";
+    });
+    if (relatedFaction) {
+        return {
+            label: getCodexEntryLabel(relatedFaction),
+            iconPath: getFactionIconPath(relatedFaction.entryKey),
+        };
+    }
+
+    const fallbackFaction = getCodexFactValues(entry, "Faction")[0]?.trim();
+    return fallbackFaction ? { label: fallbackFaction, iconPath: null } : null;
+}
+
+function getHeroGrantedAbilityLinks(entry: CodexEntry, relatedEntries: readonly CodexEntry[]): CodexEntry[] {
+    if (entry.exportKind.trim().toLowerCase() !== "heroes") return [];
+
+    const seenKeys = new Set<string>();
+    const abilityLinks: CodexEntry[] = [];
+
+    for (const relatedEntry of relatedEntries) {
+        if (relatedEntry.exportKind.trim().toLowerCase() !== "abilities") continue;
+        if (seenKeys.has(relatedEntry.entryKey)) continue;
+
+        seenKeys.add(relatedEntry.entryKey);
+        abilityLinks.push(relatedEntry);
+    }
+
+    return abilityLinks;
+}
+
 function getImprovementArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     if (entry.exportKind.trim().toLowerCase() !== "improvements") return [];
 
@@ -816,10 +897,18 @@ export default function CodexSummaryDetail({
                         const useImprovementArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "improvements";
                         const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
+                        const useHeroArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "heroes";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
                         const equipmentArchiveMetadata = useEquipmentArchiveRowHierarchy ? getEquipmentArchiveMetadata(entry) : [];
+                        const heroRelatedEntries = useHeroArchiveRowHierarchy
+                            ? resolveRelatedEntries(entry, referenceIndexes)
+                            : [];
+                        const heroFactionIdentity = useHeroArchiveRowHierarchy
+                            ? getHeroFactionIdentity(entry, heroRelatedEntries)
+                            : null;
+                        const heroClassMetadata = useHeroArchiveRowHierarchy ? getHeroClassMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
                         const districtArchiveMetadata = useDistrictArchiveRowHierarchy ? getDistrictArchiveMetadata(entry) : [];
                         const diplomacyArchiveMetadata = useDiplomacyArchiveRowHierarchy ? getDiplomacyArchiveMetadata(entry) : [];
@@ -841,6 +930,17 @@ export default function CodexSummaryDetail({
                         const equipmentEffectPreviewLines = useEquipmentArchiveRowHierarchy
                             ? getEquipmentArchiveEffectPreviewLines(entry)
                             : [];
+                        const heroStatPreviewLines = useHeroArchiveRowHierarchy
+                            ? getHeroArchiveStatPreviewLines(entry)
+                            : [];
+                        const heroGrantedAbilityLinks = useHeroArchiveRowHierarchy
+                            ? getHeroGrantedAbilityLinks(entry, heroRelatedEntries)
+                            : [];
+                        const visibleHeroGrantedAbilityLinks = heroGrantedAbilityLinks.slice(0, MAX_HERO_GRANTED_ABILITY_LINKS);
+                        const heroGrantedAbilityOverflowCount = Math.max(
+                            0,
+                            heroGrantedAbilityLinks.length - visibleHeroGrantedAbilityLinks.length
+                        );
                         const improvementEffectPreviewLines = useImprovementArchiveRowHierarchy
                             ? getImprovementArchiveEffectPreviewLines(entry)
                             : [];
@@ -1164,6 +1264,108 @@ export default function CodexSummaryDetail({
                                             </span>
                                         </div>
                                     ) : null}
+                                </div>
+                            );
+                        }
+
+                        if (useHeroArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--heroArchive"
+                                >
+                                    <span className="codex-summaryList__titleLine codex-summaryList__titleLine--hero">
+                                        <button
+                                            type="button"
+                                            className="codex-summaryList__entryButton codex-summaryList__entryButton--heroTitle"
+                                            onClick={() => onSelectEntry(entry)}
+                                        >
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                        </button>
+
+                                        <span
+                                            className="codex-summaryList__metadata codex-summaryList__metadata--hero"
+                                            aria-label="Hero metadata"
+                                        >
+                                            {heroFactionIdentity ? (
+                                                heroFactionIdentity.iconPath ? (
+                                                    <span
+                                                        className="codex-summaryList__metadataIcon"
+                                                        title={heroFactionIdentity.label}
+                                                        aria-label={heroFactionIdentity.label}
+                                                    >
+                                                        <IconImg
+                                                            path={heroFactionIdentity.iconPath}
+                                                            title={heroFactionIdentity.label}
+                                                            className="codex-kindIcon codex-kindIcon--summaryFaction"
+                                                            size={18}
+                                                            decorative
+                                                        />
+                                                    </span>
+                                                ) : (
+                                                    <span className="codex-summaryList__metadataText">
+                                                        {heroFactionIdentity.label}
+                                                    </span>
+                                                )
+                                            ) : null}
+                                            {heroClassMetadata.map((item) => (
+                                                <span
+                                                    key={`${item.key}-${item.value}`}
+                                                    className="codex-summaryList__metadataText"
+                                                >
+                                                    {item.value}
+                                                </span>
+                                            ))}
+                                            {visibleHeroGrantedAbilityLinks.map((abilityEntry) => (
+                                                <span
+                                                    className="codex-summaryList__metadataLink"
+                                                    key={`${entry.entryKey}-${abilityEntry.entryKey}`}
+                                                >
+                                                    <CodexInlineEntityLink
+                                                        entry={abilityEntry}
+                                                        onSelect={(ability) => onSelectEntry(ability)}
+                                                    >
+                                                        {renderCodexLabel(getCodexEntryLabel(abilityEntry))}
+                                                    </CodexInlineEntityLink>
+                                                </span>
+                                            ))}
+                                            {heroGrantedAbilityOverflowCount > 0 ? (
+                                                <span className="codex-summaryList__grantedAbilityOverflow">
+                                                    +{heroGrantedAbilityOverflowCount} more
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--heroStats"
+                                        onClick={() => onSelectEntry(entry)}
+                                    >
+                                        <span
+                                            className="codex-summaryList__heroStats"
+                                            aria-label="Hero stat preview"
+                                        >
+                                            {heroStatPreviewLines.length > 0 ? (
+                                                heroStatPreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__heroStatLine"
+                                                        key={`${entry.entryKey}-hero-stat-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="codex-summaryList__statusFallback">
+                                                    No public hero stats exported yet.
+                                                </span>
+                                            )}
+                                        </span>
+                                    </button>
                                 </div>
                             );
                         }

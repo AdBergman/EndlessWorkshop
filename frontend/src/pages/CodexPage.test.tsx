@@ -7386,7 +7386,8 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Uranpar" })).toBeInTheDocument();
-        expect(screen.getByText("Faction")).toBeInTheDocument();
+        const detailPane = screen.getByRole("region", { name: /selected codex entry/i });
+        expect(within(detailPane).getByText("Faction")).toBeInTheDocument();
         expect(screen.getAllByText("Tahuk").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText("Related entries")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Tahuk Factions / Tahuk Affinity: Tahuk" }))
@@ -7605,5 +7606,194 @@ describe("CodexPage", () => {
         expect(dawnbladeRow).toHaveTextContent("Tier 2");
         expect(dawnbladeRow).toHaveTextContent("Value 120");
         expect(dawnbladeRow).toHaveTextContent("Might");
+    });
+
+    it("renders Heroes as an archive with Class and Faction filters", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Kin_Archer",
+                displayName: "Aria",
+                descriptionLines: [],
+                referenceKeys: ["Faction_KinOfSheredyn"],
+                facts: [
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Ranged Hero" },
+                ],
+                sections: [{ title: "Stats", lines: ["+140 [Health] Health", "+40 [Damage] Damage"] }],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Kin_Warrior",
+                displayName: "Borin",
+                descriptionLines: [],
+                referenceKeys: ["Faction_KinOfSheredyn"],
+                facts: [
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Infantry Hero" },
+                ],
+                sections: [{ title: "Stats", lines: ["+200 [Health] Health", "+10 [Defense] Defense"] }],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Tahuk_Rider",
+                displayName: "Cala",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Faction", value: "Tahuk" },
+                    { label: "Class", value: "Cavalry Hero" },
+                ],
+                sections: [{ title: "Stats", lines: ["+180 [Health] Health", "+4 [MovementPoints] Movement Points"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_KinOfSheredyn",
+                displayName: "Kin of Sheredyn",
+                descriptionLines: ["Major faction."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Heroes" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /hero archive filters/i })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+
+        const heroRail = screen.getByRole("complementary", { name: /hero archive filters/i });
+        expect(within(heroRail).getByRole("button", { name: "Ranged Hero 1" })).toBeInTheDocument();
+        expect(within(heroRail).getByRole("button", { name: "Kin of Sheredyn 2" })).toBeInTheDocument();
+
+        const summaryList = screen.getByLabelText("Heroes overview");
+        const ariaRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /aria/i }));
+        expect(within(ariaRow).getByLabelText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(ariaRow).toHaveTextContent("Ranged Hero");
+        expect(ariaRow).toHaveTextContent("Health");
+        expect(ariaRow).toHaveTextContent("Damage");
+
+        await user.click(within(heroRail).getByRole("button", { name: "Ranged Hero 1" }));
+        expect(screen.getByRole("heading", { name: "All Heroes" })).toBeInTheDocument();
+        expect(within(summaryList).getByRole("button", { name: /aria/i })).toBeInTheDocument();
+        expect(within(summaryList).queryByRole("button", { name: /borin/i })).not.toBeInTheDocument();
+
+        await user.click(within(heroRail).getByRole("button", { name: "Kin of Sheredyn 1" }));
+        expect(within(summaryList).getByRole("button", { name: /aria/i })).toBeInTheDocument();
+        expect(within(summaryList).queryByRole("button", { name: /cala/i })).not.toBeInTheDocument();
+
+        await user.click(within(heroRail).getByRole("button", { name: "Clear" }));
+        expect(within(summaryList).getByRole("button", { name: /borin/i })).toBeInTheDocument();
+        expect(within(summaryList).getByRole("button", { name: /cala/i })).toBeInTheDocument();
+    });
+
+    it("returns from Hero detail to the archive when Hero filters change", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Kin_Archer",
+                displayName: "Aria",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Ranged Hero" },
+                ],
+                sections: [{ title: "Stats", lines: ["+140 [Health] Health"] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Kin_Archer"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Aria" })).toBeInTheDocument();
+        const heroRail = screen.getByRole("complementary", { name: /hero archive filters/i });
+        await user.click(within(heroRail).getByRole("button", { name: "Ranged Hero 1" }));
+
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=heroes");
+        });
+        expect(screen.getByRole("heading", { name: "All Heroes" })).toBeInTheDocument();
+    });
+
+    it("renders exact Hero granted ability links without unresolved reference leakage", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_GreenScion",
+                displayName: "Clar'usta",
+                descriptionLines: [],
+                referenceKeys: ["Ability_Fly", "UnitAbility_Hero_Unresolved"],
+                facts: [
+                    { label: "Faction", value: "Green Scion" },
+                    { label: "Class", value: "Flying Swarm Hero" },
+                ],
+                sections: [{ title: "Stats", lines: ["+140 [Health] Health", "+3 [MovementPoints] Movement Points"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_Fly",
+                displayName: "Flying",
+                descriptionLines: ["Can fly over terrain."],
+                referenceKeys: [],
+                facts: [{ label: "Ability mechanic", value: "Passive" }],
+                sections: [{ title: "Effects", lines: ["Can pass over blockers."] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const summaryList = await screen.findByLabelText("Heroes overview");
+        const heroRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /clar'usta/i }));
+        expect(heroRow).not.toHaveTextContent("Grants:");
+        expect(within(heroRow).getByRole("button", { name: /open flying in codex/i })).toBeInTheDocument();
+        expect(heroRow).not.toHaveTextContent("UnitAbility_Hero_Unresolved");
+
+        await user.click(within(heroRow).getByRole("button", { name: /open flying in codex/i }));
+        await waitFor(() => {
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Ability_Fly");
+        });
+        expect(screen.getByRole("heading", { name: "Flying" })).toBeInTheDocument();
     });
 });

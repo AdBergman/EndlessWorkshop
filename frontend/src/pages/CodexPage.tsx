@@ -52,6 +52,14 @@ import {
     type EquipmentArchiveFilterKey,
 } from "@/lib/codex/codexEquipmentArchiveFilters";
 import {
+    buildHeroArchiveFilterGroups,
+    EMPTY_HERO_ARCHIVE_FILTERS,
+    entryMatchesHeroArchiveFilters,
+    hasActiveHeroArchiveFilters,
+    type ActiveHeroArchiveFilters,
+    type HeroArchiveFilterKey,
+} from "@/lib/codex/codexHeroArchiveFilters";
+import {
     buildImprovementCategoryFilterOptions,
     filterImprovementEntriesByCategory,
     type ImprovementArchiveCategory,
@@ -98,6 +106,9 @@ export default function CodexPage() {
     const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
     const [activeEquipmentFilters, setActiveEquipmentFilters] = useState<ActiveEquipmentArchiveFilters>(
         EMPTY_EQUIPMENT_ARCHIVE_FILTERS
+    );
+    const [activeHeroFilters, setActiveHeroFilters] = useState<ActiveHeroArchiveFilters>(
+        EMPTY_HERO_ARCHIVE_FILTERS
     );
     const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
@@ -161,6 +172,7 @@ export default function CodexPage() {
     const isDiplomacyArchiveMode = categoryMode === "diplomacyArchive";
     const isDistrictArchiveMode = categoryMode === "districtArchive";
     const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
+    const isHeroArchiveMode = categoryMode === "heroArchive";
     const isImprovementArchiveMode = categoryMode === "improvementArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
     const isTraitArchiveMode = categoryMode === "traitArchive";
@@ -246,6 +258,23 @@ export default function CodexPage() {
                 : []
         ),
         [activeEquipmentFilters, isEquipmentArchiveMode, searchFilteredEntries]
+    );
+
+    useEffect(() => {
+        if (isHeroArchiveMode) return;
+
+        setActiveHeroFilters((current) => (
+            hasActiveHeroArchiveFilters(current) ? EMPTY_HERO_ARCHIVE_FILTERS : current
+        ));
+    }, [isHeroArchiveMode]);
+
+    const heroFilterGroups = useMemo(
+        () => (
+            isHeroArchiveMode
+                ? buildHeroArchiveFilterGroups(searchFilteredEntries, activeHeroFilters)
+                : []
+        ),
+        [activeHeroFilters, isHeroArchiveMode, searchFilteredEntries]
     );
 
     useEffect(() => {
@@ -339,6 +368,16 @@ export default function CodexPage() {
                 );
             }
 
+            if (isHeroArchiveMode) {
+                if (!hasActiveHeroArchiveFilters(activeHeroFilters)) {
+                    return searchFilteredEntries;
+                }
+
+                return searchFilteredEntries.filter((entry) =>
+                    entryMatchesHeroArchiveFilters(entry, activeHeroFilters)
+                );
+            }
+
             return searchFilteredEntries;
         },
         [
@@ -347,6 +386,7 @@ export default function CodexPage() {
             activeDistrictCategory,
             activeEquipmentFilters,
             activeFactFilters,
+            activeHeroFilters,
             activeImprovementCategory,
             activeStatusScope,
             activeTraitType,
@@ -356,6 +396,7 @@ export default function CodexPage() {
             isDiplomacyArchiveMode,
             isDistrictArchiveMode,
             isEquipmentArchiveMode,
+            isHeroArchiveMode,
             isImprovementArchiveMode,
             isStatusArchiveMode,
             isTraitArchiveMode,
@@ -708,6 +749,12 @@ export default function CodexPage() {
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isEquipmentArchiveMode, selectedEntryParam, updateSelectedEntry]);
 
+    const returnHeroFiltersToArchive = useCallback(() => {
+        if (!isHeroArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isHeroArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const returnImprovementFiltersToArchive = useCallback(() => {
         if (!isImprovementArchiveMode || !selectedEntryParam) return;
 
@@ -774,6 +821,19 @@ export default function CodexPage() {
         }));
         returnEquipmentFiltersToArchive();
     }, [returnEquipmentFiltersToArchive]);
+
+    const clearHeroFilters = useCallback(() => {
+        setActiveHeroFilters(EMPTY_HERO_ARCHIVE_FILTERS);
+        returnHeroFiltersToArchive();
+    }, [returnHeroFiltersToArchive]);
+
+    const toggleHeroFilter = useCallback((filterKey: HeroArchiveFilterKey, value: string) => {
+        setActiveHeroFilters((current) => ({
+            ...current,
+            [filterKey]: current[filterKey] === value ? null : value,
+        }));
+        returnHeroFiltersToArchive();
+    }, [returnHeroFiltersToArchive]);
 
     const clearImprovementCategory = useCallback(() => {
         setActiveImprovementCategory(null);
@@ -855,6 +915,8 @@ export default function CodexPage() {
                     } ${
                         isEquipmentArchiveMode ? "codex-workspace--equipmentArchive" : ""
                     } ${
+                        isHeroArchiveMode ? "codex-workspace--heroArchive" : ""
+                    } ${
                         isImprovementArchiveMode ? "codex-workspace--improvementArchive" : ""
                     } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
@@ -869,6 +931,7 @@ export default function CodexPage() {
                         actionTypeOptions={actionTypeOptions}
                         activeFactFilters={activeFactFilters}
                         activeEquipmentFilters={activeEquipmentFilters}
+                        activeHeroFilters={activeHeroFilters}
                         activeKind={activeKind}
                         activeKindLabel={activeKindLabel}
                         diplomacyCategoryFilter={activeDiplomacyCategory}
@@ -882,6 +945,7 @@ export default function CodexPage() {
                         error={error}
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
+                        heroFilterGroups={heroFilterGroups}
                         improvementCategoryFilter={activeImprovementCategory}
                         improvementCategoryOptions={improvementCategoryOptions}
                         improvementTotalCount={isImprovementArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
@@ -890,6 +954,7 @@ export default function CodexPage() {
                         isDiplomacyArchiveMode={isDiplomacyArchiveMode}
                         isDistrictArchiveMode={isDistrictArchiveMode}
                         isEquipmentArchiveMode={isEquipmentArchiveMode}
+                        isHeroArchiveMode={isHeroArchiveMode}
                         isImprovementArchiveMode={isImprovementArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isTraitArchiveMode={isTraitArchiveMode}
@@ -906,6 +971,7 @@ export default function CodexPage() {
                         onClearDistrictCategory={clearDistrictCategory}
                         onClearFactFilters={clearFactFilters}
                         onClearEquipmentFilters={clearEquipmentFilters}
+                        onClearHeroFilters={clearHeroFilters}
                         onClearImprovementCategory={clearImprovementCategory}
                         onClearStatusScope={clearStatusScope}
                         onClearTraitType={clearTraitType}
@@ -914,6 +980,7 @@ export default function CodexPage() {
                         onToggleDiplomacyCategory={toggleDiplomacyCategory}
                         onToggleDistrictCategory={toggleDistrictCategory}
                         onToggleEquipmentFilter={toggleEquipmentFilter}
+                        onToggleHeroFilter={toggleHeroFilter}
                         onToggleImprovementCategory={toggleImprovementCategory}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTraitType={toggleTraitType}

@@ -536,6 +536,42 @@ Request:
   emit them as explicit facts/sections/references;
 - do not emit inferred descriptions merely to fill archive rows.
 
+## Heroes Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Heroes category
+evolution pass. EWShop can continue using current exported `Faction`, `Class`,
+`Stats`, and exact resolved ability references.
+
+### Hero Reference And Granted Ability Coverage
+
+Local 0.82 data includes Hero references that do not resolve to current public
+Codex entries, such as `Faction_Hero` and several `UnitAbility_Hero_*` keys.
+Some `Granted abilities` sections are empty even when exact ability references
+exist in `referenceKeys`.
+
+Request:
+
+- preserve exact granted ability references when source-proven;
+- if granted abilities are intended as public Hero content, emit them in a
+  structured section as well as exact references using the existing Codex style;
+- keep unresolved/internal ability references absent from public Hero rows;
+- do not require EWShop to infer ability links from Hero names, keys, prose, or
+  SVG filenames.
+
+### Hero Presentation Metadata
+
+Current Hero data does not include explicit per-Hero icon/portrait metadata or
+recruitment/progression structure.
+
+Request:
+
+- if per-Hero icons or portraits are intended for public Codex presentation,
+  emit stable icon metadata using the existing Codex icon contract style;
+- if recruitment/progression data becomes public and source-proven, emit it as
+  normal facts/sections/references;
+- do not require EWShop to infer faction group, portrait, recruitment, or
+  progression from keys, names, prose, or SVG filenames.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:
