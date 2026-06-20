@@ -104,7 +104,9 @@ Accepted:
   available.
 - Resource overview ordering is Luxury A-Z, Strategic A-Z, then Other A-Z,
   based on exported resource Type facts.
-- Traits remain split-layout unless future manual review proves a problem.
+- Traits use a compact Trait Archive mode with Type rail (`All`, `Faction`,
+  `Protectorate`) and reference-style rows; selected Trait entries and
+  search-active Traits stay split-layout.
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list through `supportsFullWidthReferenceOverview(kind)`.
 

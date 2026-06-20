@@ -310,6 +310,70 @@ Request:
 - if unavailable, absence is acceptable, but the exporter should make that
   intentional.
 
+## Trait Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Traits category
+evolution pass. EWShop can continue using the current exported facts and exact
+references, but exporter cleanup would improve future Trait presentation.
+
+### Trait Ownership Metadata
+
+Current Trait Codex data does not expose explicit major-faction ownership for
+Faction traits. Some ownership may be suggested by keys or source data, but
+EWShop frontend must not infer ownership from keys, names, prose, or SVG paths.
+
+Request:
+
+- emit explicit Trait ownership metadata only when source data proves ownership;
+- include a stable faction reference key using the existing Codex fact/reference
+  style;
+- leave ownership absent when it is unknown or not source-proven.
+
+### Trait Category Semantics
+
+Current Trait facts use `Category` for both broad category values such as
+`Faction`/`Protectorate` and secondary browse/category values such as
+`Defense`, `Discovery`, or `Affinity - Tahuks`.
+
+Request:
+
+- review whether broad Trait type and secondary Trait category should be emitted
+  as distinct facts;
+- preserve current values if they are intentional, but make the distinction
+  explicit enough that EWShop does not need to interpret duplicate `Category`
+  facts.
+
+### Trait Reference Coverage
+
+Some Trait references in the current Codex export do not resolve to public Codex
+entries, especially custom district, improvement, and technology refs.
+
+Observed examples:
+
+- `Barter System` -> `Aspect_DistrictImprovement_01`
+- `Relic Seekers` -> `DistrictImprovement_Science_05`
+- `Relic Seekers` -> `DistrictImprovement_Science_08`
+- `Tower Defense` -> `Necrophage_District_Appendage01_Tier1_v2`
+- `Suburban Dream` -> `District_Tier1_Food_Custom_Specific24`
+
+Request:
+
+- verify whether unresolved Trait references should point to public Codex
+  entries;
+- otherwise omit or mark references as internal, obsolete, runtime-only, or not
+  public.
+
+### Trait Icon Metadata
+
+Current Trait data does not include explicit per-trait icon metadata.
+
+Request:
+
+- if per-trait icons are intended for public Codex presentation, emit a stable
+  icon reference using the existing Codex icon contract style;
+- do not require EWShop to infer trait icons from keys, display names, prose, or
+  SVG filenames.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

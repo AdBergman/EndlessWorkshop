@@ -198,7 +198,9 @@ Final accepted behavior:
   based on exported resource Type facts.
 - Selected Resource entry routes and search-active Resources keep split/detail
   behavior.
-- Traits remain split-layout unless future manual review proves a problem.
+- Traits use a compact Trait Archive mode with Type rail (`All`, `Faction`,
+  `Protectorate`) and reference-style rows; selected Trait entries and
+  search-active Traits keep split/detail behavior.
 - Extractors are hidden from visible top-level navigation and landing cards,
   but remain searchable, linkable, and direct-routable where exact refs exist.
 - The layout is controlled by the explicit allow-list:

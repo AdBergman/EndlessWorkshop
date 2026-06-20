@@ -40,7 +40,7 @@ is user-owned unless explicitly requested.
 | `EW-CODEX-UI-002` - Landing Page Final Polish | deferred | Tiny CSS-only polish was manually rejected; landing is acceptable until a more deliberate redesign |
 | `EW-CODEX-UI-003` - Category Shelf Final Polish | covered | Accepted `EW-CODEX-UI-001` already restored `All`, wrapped the shelf, kept direct access/counts/active state, and hid Modifiers |
 | `EW-CODEX-UI-004A` - Partner/Councilor Effects Full-Width Shallow Overview | completed | Commit `92e94047`; Partner/Councilor Effects overview routes use centered full-width reference layout through explicit allow-list |
-| `EW-CODEX-UI-004` - Shallow Reference Layout Review | completed | Commits `92e94047`, `0ab94ec9`, `5bf7253d`; Partner Effects, Councilor Effects, and Resources use full-width overview; Extractors are hidden support/reference targets; Traits remain split-layout |
+| `EW-CODEX-UI-004` - Shallow Reference Layout Review | completed | Commits `92e94047`, `0ab94ec9`, `5bf7253d`; Partner Effects, Councilor Effects, and Resources use full-width overview; Traits now use compact Type rail with reference-style rows; Extractors are hidden support/reference targets |
 | `EW-CODEX-UI-005` - Ability/Status Refine Reintroduction | not started | Ability/Status metadata work remains parked in `stash@{0}` and must be reviewed selectively |
 
 ## 2026-06-18 - EW-CODEX-UI-004 Resource And Extractor Closeout
@@ -64,7 +64,9 @@ is user-owned unless explicitly requested.
     exported Type facts.
   - Selected Resource entry routes and search-active Resources keep split
     layout.
-  - Traits remain split-layout by design for now.
+  - Historical note: Traits were kept split at this point, then later category
+    evolution moved them to a compact Trait Archive mode with Type rail and
+    reference-style rows.
 - Tests/diagnostics/browser QA run:
   - `npm test -- --run src/pages/CodexPage.test.tsx`
   - `npx tsc --noEmit --project tsconfig.json`

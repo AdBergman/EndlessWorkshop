@@ -304,4 +304,20 @@ Lessons:
 - Per-item Equipment icon identity needs explicit exporter metadata before frontend should show specific icons.
 - The assertive workflow worked well when durable execution docs were updated after each phase.
 
+### Traits
+
+Lessons:
+
+- Traits were already strong shallow-reference rows, but 122-178 entries were
+  too many for an unfiltered reference sheet.
+- A shallow-row category can still need a compact orientation rail. For Traits,
+  exported broad Type values (`Faction`, `Protectorate`) were enough for a
+  small rail without inventing a generic framework.
+- Selected entry routes and search-active routes should stay split when the
+  result list still helps direct navigation.
+- Missing explicit ownership metadata should not be patched with key/name/prose
+  inference.
+- Browser automation may be unavailable; record the limitation honestly and use
+  route/API smoke plus tests instead of claiming visual verification.
+
 Update this history after every category evolution. The playbook is product memory.

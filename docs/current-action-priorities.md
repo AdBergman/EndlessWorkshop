@@ -92,9 +92,11 @@ Current rules:
   layout.
 - Resources full-width shallow overview, resource icons, and resource ordering
   landed in commit `5bf7253d`.
+- Traits use a compact Trait Archive mode: Type rail (`All`, `Faction`,
+  `Protectorate`) plus reference-style rows; selected Trait entries and
+  search-active Traits stay split-layout.
 - Extractors are hidden support/reference targets as of commit `0ab94ec9`;
   they remain searchable, linkable, and direct-routable where exact refs exist.
-- Traits remain split-layout unless future manual review proves a problem.
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list.
 - No `EW-CODEX-UI-006` ticket is currently defined.

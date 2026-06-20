@@ -16,11 +16,12 @@ Implemented result: `EW-CODEX-UI-004A` landed in commit `92e94047`.
 Partner Effects and Councilor Effects now use a centered full-width reference
 overview on category overview routes. Resources followed in commit `5bf7253d`
 with full-width overview, resource icons where available, and resource ordering
-by exported Type facts.
+by exported Type facts. Traits later evolved separately into a compact Trait
+Archive mode with a Type rail and reference-style rows, rather than joining the
+full-width reference overview allow-list.
 
-Traits remain split-layout by design for now. Extractors are hidden
-support/reference targets after commit `0ab94ec9`, not visible top-level
-navigation destinations.
+Extractors are hidden support/reference targets after commit `0ab94ec9`, not
+visible top-level navigation destinations.
 
 ## Current Evidence
 
@@ -47,7 +48,7 @@ navigation destinations.
 | Partner Effects | Full-width reference-list overview first | The overview list carries the useful payload: effect lines, scope/context, and source links. The left result panel duplicates names in a narrower, lower-value form. |
 | Councilor Effects | Full-width reference-list overview first | Same shape as Partner Effects. Rows are list-first mechanics references, and the source/effect context belongs in the main overview. |
 | Resources | Full-width reference-list overview implemented | Resource rows are list-first, show exact extractor links, show icons where exact icon data exists, and sort by exported resource Type facts: Luxury, Strategic, Other. |
-| Traits | Keep current split layout for now | Traits can be source/contextual and often participate in faction, hero, and minor-faction routes. The left panel may still help scanning and direct selection. |
+| Traits | Compact Trait Archive mode | Trait overview rows carry useful payload, but 122-178 rows need orientation. Use a small Type rail (`All`, `Faction`, `Protectorate`) with reference-style rows. |
 | Extractors | Hidden support/reference target | Extractors are discovered through Resources, search, direct routes, and exact Resource links instead of visible top-level navigation. |
 
 ## Proposed Layout Behavior
@@ -84,9 +85,11 @@ For Resources:
 
 For Traits:
 
-- Keep current split layout.
-- Revisit only with evidence that the reference overview consistently replaces
-  result scanning.
+- Use a compact Trait Archive mode.
+- Replace the generic results list with a Type rail.
+- Keep reference-style overview rows as the main content.
+- Use only exported broad category facts: `Faction` and `Protectorate`.
+- Keep selected entry and search-active routes split/layout-oriented.
 
 ## Route Behavior
 
@@ -148,7 +151,7 @@ Only apply it when:
 - the selected list item is the summary entry;
 - there is no active search query.
 
-Traits and everything else remain split-layout.
+Everything else remains split-layout unless deliberately added to the allow-list.
 
 ## Test Plan
 
