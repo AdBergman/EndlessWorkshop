@@ -39,14 +39,13 @@ export default function CodexTopPanel({
     return (
         <header className={`codex-header ${useCompactHeader ? "codex-header--compact" : ""}`}>
             <div className={`codex-header__top ${useCompactHeader ? "codex-header__top--compact" : ""}`}>
-                <div className="codex-header__copy">
-                    <div className="codex-eyebrow">Endless Workshop archive</div>
-                    {!useCompactHeader ? (
+                {!useCompactHeader ? (
+                    <div className="codex-header__copy">
                         <h2 className="codex-pageTitle" id="codex-page-title">
                             Encyclopedia
                         </h2>
-                    ) : null}
-                </div>
+                    </div>
+                ) : null}
             </div>
 
             <div className="codex-controlBand">
@@ -66,7 +65,6 @@ export default function CodexTopPanel({
                     className="codex-categoryShelf"
                     aria-label="Codex categories"
                 >
-                    <div className="codex-categoryShelf__label">Categories</div>
                     <div
                         className="codex-categoryShelf__chips codex-categoryShelf__chips--wrap"
                         role="toolbar"

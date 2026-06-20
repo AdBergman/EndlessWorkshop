@@ -59,15 +59,15 @@
 }
 
 .codex-header--compact {
+    --codex-header-search-width: clamp(320px, 34vw, 460px);
+
     display: grid;
     min-width: 0;
     max-width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, min(34vw, 460px));
-    grid-template-areas:
-        "copy search"
-        "shelf shelf";
-    align-items: center;
-    gap: 6px 14px;
+    grid-template-columns: minmax(0, calc(100% - var(--codex-header-search-width) - 16px)) var(--codex-header-search-width);
+    grid-template-areas: "shelf search";
+    align-items: start;
+    gap: 6px 16px;
 }
 
 .codex-header::after {
@@ -290,6 +290,8 @@
 
 .codex-header--compact .codex-controlBand {
     grid-area: search;
+    justify-self: end;
+    width: 100%;
     min-width: 0;
     margin-top: 0;
     padding: 0;
@@ -346,15 +348,15 @@
 }
 
 .codex-header--compact .codex-controlBand .codex-search {
-    max-width: 460px;
+    width: 100%;
+    max-width: none;
 }
 
 .codex-categoryShelf {
     display: grid;
     min-width: 0;
     max-width: 100%;
-    gap: 4px;
-    padding: 6px 0 0;
+    padding: 0;
     overflow-wrap: anywhere;
 }
 
@@ -362,21 +364,12 @@
     grid-area: shelf;
 }
 
-.codex-categoryShelf__label {
-    color: rgba(195, 152, 77, 0.76);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
-    line-height: 1.4;
-    text-transform: uppercase;
-}
-
 .codex-categoryShelf__chips {
     display: flex;
     min-width: 0;
     max-width: 100%;
     flex-wrap: wrap;
-    gap: 4px 5px;
+    gap: 5px 6px;
     align-items: center;
 }
 
@@ -388,13 +381,13 @@
     min-width: 0;
     max-width: 100%;
     flex: 0 1 auto;
-    min-height: 26px;
-    gap: 6px;
-    padding-inline: 8px;
+    min-height: 30px;
+    gap: 7px;
+    padding-inline: 10px;
     border-color: rgba(199, 189, 171, 0.044);
     background: rgba(255, 255, 255, 0.003);
     color: rgba(241, 234, 220, 0.62);
-    font-size: 12px;
+    font-size: 13px;
 }
 
 .codex-categoryShelf__chip > span {
@@ -2748,7 +2741,6 @@
     .codex-header--compact {
         grid-template-columns: 1fr;
         grid-template-areas:
-            "copy"
             "search"
             "shelf";
     }
