@@ -382,7 +382,7 @@ describe("CodexPage", () => {
                 referenceKeys: [],
                 facts: [
                     { label: "Category", value: "Tactical" },
-                    { label: "Target", value: "Enemies" },
+                    { label: "Target", value: "EmptyTile,Allies,Enemies" },
                     { label: "Range", value: "3" },
                     { label: "Cost", value: "1 Battle Token" },
                     { label: "Ability mechanic", value: "Active" },
@@ -455,12 +455,12 @@ describe("CodexPage", () => {
         const metadata = within(overviewRow).getByLabelText("Exported metadata");
         expect(overviewRow.querySelector(".codex-summaryList__titleLine .codex-summaryList__metadata"))
             .toBe(metadata);
-        expect(within(metadata).getByText("Mechanic")).toBeInTheDocument();
         expect(within(metadata).getByText("Passive")).toBeInTheDocument();
-        expect(within(metadata).getByText("Source")).toBeInTheDocument();
-        expect(within(metadata).getByText("Unit ability")).toBeInTheDocument();
-        expect(within(metadata).getByText("Role")).toBeInTheDocument();
-        expect(within(metadata).getByText("Retaliation")).toBeInTheDocument();
+        expect(within(metadata).queryByText("Mechanic")).not.toBeInTheDocument();
+        expect(within(metadata).queryByText("Source")).not.toBeInTheDocument();
+        expect(within(metadata).queryByText("Unit ability")).not.toBeInTheDocument();
+        expect(within(metadata).queryByText("Role")).not.toBeInTheDocument();
+        expect(within(metadata).queryByText("Retaliation")).not.toBeInTheDocument();
         expect(overviewRow.querySelector(".codex-summaryList__description")).not.toBeInTheDocument();
         expect(overviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
         expect(within(overviewRow).queryByText(/common02/i)).not.toBeInTheDocument();
@@ -468,17 +468,16 @@ describe("CodexPage", () => {
 
         const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
         const usefulMetadata = within(usefulPreviewRow).getByLabelText("Exported metadata");
-        expect(within(usefulMetadata).getByText("Mechanic")).toBeInTheDocument();
         expect(within(usefulMetadata).getByText("Active")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Source")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Battle skill")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Target")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Enemies")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Role")).toBeInTheDocument();
-        expect(within(usefulMetadata).getByText("Damage")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Target: Empty Tile, Allies, Enemies")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Range 3")).toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Mechanic")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Source")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Battle skill")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Role")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Damage")).not.toBeInTheDocument();
         expect(within(usefulMetadata).queryByText("Cost")).not.toBeInTheDocument();
         expect(within(usefulMetadata).queryByText("1 Battle Token")).not.toBeInTheDocument();
-        expect(within(usefulMetadata).queryByText("Range")).not.toBeInTheDocument();
         expect(within(usefulPreviewRow).queryByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
             .not.toBeInTheDocument();
         const effectPreview = within(usefulPreviewRow).getByLabelText("Effect preview");
@@ -511,10 +510,14 @@ describe("CodexPage", () => {
 
         const freeCostRow = within(abilitiesOverview).getByRole("button", { name: /free guard/i });
         const freeCostMetadata = within(freeCostRow).getByLabelText("Exported metadata");
-        expect(within(freeCostMetadata).getByText("Target")).toBeInTheDocument();
-        expect(within(freeCostMetadata).getByText("Allies")).toBeInTheDocument();
-        expect(within(freeCostMetadata).getByText("Cost")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Active")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Target: Allies")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Range 1")).toBeInTheDocument();
         expect(within(freeCostMetadata).getByText("Free")).toBeInTheDocument();
+        expect(within(freeCostMetadata).queryByText("Source")).not.toBeInTheDocument();
+        expect(within(freeCostMetadata).queryByText("Battle skill")).not.toBeInTheDocument();
+        expect(within(freeCostMetadata).queryByText("Role")).not.toBeInTheDocument();
+        expect(within(freeCostMetadata).queryByText("Shield")).not.toBeInTheDocument();
         expect(within(freeCostRow).queryByText("Tactical / Allies / Range 1 / Cost Free")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {

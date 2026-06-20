@@ -48,13 +48,16 @@ type OverviewMetadataItem = {
     label: string;
     value: string;
 };
+type AbilityCatalogMetadataItem = {
+    key: string;
+    value: string;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
         { label: "Ability mechanic", displayLabel: "Mechanic" },
-        { label: "Ability source", displayLabel: "Source" },
         { label: "Target", displayLabel: "Target" },
-        { label: "Combat role", displayLabel: "Role" },
+        { label: "Range", displayLabel: "Range" },
         { label: "Cost", displayLabel: "Cost", shouldDisplayValue: isExceptionalAbilityCost },
     ],
     statuses: [
@@ -93,6 +96,34 @@ function isExceptionalAbilityCost(value: string): boolean {
     return true;
 }
 
+function formatAbilityTargetValue(value: string): string {
+    return value
+        .split(",")
+        .map((part) =>
+            part
+                .trim()
+                .replace(/\bEmptyTile\b/g, "Empty Tile")
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+        )
+        .filter(Boolean)
+        .join(", ");
+}
+
+function formatAbilityRangeValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    return /^range\b/i.test(trimmedValue) ? trimmedValue : `Range ${trimmedValue}`;
+}
+
+function formatAbilityCostValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    if (normalizeAbilityTaxonomyText(trimmedValue) === "free") return "Free";
+    return /^cost\b/i.test(trimmedValue) ? trimmedValue : `Cost ${trimmedValue}`;
+}
+
 function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
     const configs = OVERVIEW_METADATA_BY_KIND[entry.exportKind.trim().toLowerCase()] ?? [];
     const seenValues = new Set<string>();
@@ -112,6 +143,35 @@ function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
             }
         }
     }
+
+    return items;
+}
+
+function getAbilityCatalogMetadata(entry: CodexEntry): AbilityCatalogMetadataItem[] {
+    const items: AbilityCatalogMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Ability mechanic").forEach((value) => addValue("mechanic", value));
+    getCodexFactValues(entry, "Target").forEach((value) => {
+        const formattedValue = formatAbilityTargetValue(value);
+        addValue("target", formattedValue ? `Target: ${formattedValue}` : "");
+    });
+    getCodexFactValues(entry, "Range").forEach((value) => addValue("range", formatAbilityRangeValue(value)));
+    getCodexFactValues(entry, "Cost").forEach((value) => {
+        if (!isExceptionalAbilityCost(value)) return;
+        addValue("cost", formatAbilityCostValue(value));
+    });
 
     return items;
 }
@@ -296,6 +356,7 @@ export default function CodexSummaryDetail({
                         const showRichOverviewRow = supportsRichOverviewRow(entry);
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
+                        const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -406,19 +467,17 @@ export default function CodexSummaryDetail({
                                             {renderCodexLabel(getCodexEntryLabel(entry))}
                                         </span>
                                     </span>
-                                    {useCatalogRowHierarchy && overviewMetadata.length > 0 ? (
-                                        <span className="codex-summaryList__metadata" aria-label="Exported metadata">
-                                            {overviewMetadata.map((item) => (
+                                    {useCatalogRowHierarchy && abilityCatalogMetadata.length > 0 ? (
+                                        <span
+                                            className="codex-summaryList__metadata codex-summaryList__metadata--ability"
+                                            aria-label="Exported metadata"
+                                        >
+                                            {abilityCatalogMetadata.map((item) => (
                                                 <span
-                                                    key={`${item.label}-${item.value}`}
-                                                    className="codex-summaryList__metadataChip"
+                                                    key={`${item.key}-${item.value}`}
+                                                    className="codex-summaryList__metadataText"
                                                 >
-                                                    <span className="codex-summaryList__metadataLabel">
-                                                        {item.label}
-                                                    </span>
-                                                    <span className="codex-summaryList__metadataValue">
-                                                        {item.value}
-                                                    </span>
+                                                    {item.value}
                                                 </span>
                                             ))}
                                         </span>

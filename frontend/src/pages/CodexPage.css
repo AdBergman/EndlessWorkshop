@@ -2036,6 +2036,30 @@
     gap: 10px;
 }
 
+.codex-summaryList__item--catalog .codex-summaryList__metadata--ability {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.56);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadataText {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-summaryList__metadataText + .codex-summaryList__metadataText::before {
+    flex: 0 0 auto;
+    margin-right: 7px;
+    color: rgba(195, 152, 77, 0.45);
+    content: "·";
+}
+
 .codex-summaryList__metadataChip {
     display: inline-flex;
     max-width: min(100%, 280px);
