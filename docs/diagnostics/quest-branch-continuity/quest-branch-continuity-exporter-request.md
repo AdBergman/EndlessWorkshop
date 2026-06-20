@@ -5,7 +5,7 @@
 > semantics by the 0.80 canonical investigation. Do not treat this file as live
 > exporter requirements without checking
 > `../../quest_explorer_canonical_semantics_v1.md` and
-> `../../quest_explorer_documentation_audit_v1.md`.
+> `../../quest-explorer/README.md`.
 
 Audience: EL2.DBExporter
 

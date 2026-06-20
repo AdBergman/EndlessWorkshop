@@ -16,7 +16,7 @@ Use this package for historical evidence only:
 Current semantic authority lives in:
 
 1. `../../quest_explorer_canonical_semantics_v1.md`
-2. `../../quest_explorer_documentation_audit_v1.md`
+2. `../../quest-explorer/README.md`
 3. `../quest-explorer-diagnostic-taxonomy.md`
 
 Do not treat the counts, labels, or exporter request in this folder as current

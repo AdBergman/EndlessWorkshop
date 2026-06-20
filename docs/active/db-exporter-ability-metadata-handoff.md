@@ -44,8 +44,9 @@ Historical context already archived:
 - `docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/`
 
 No additional docs were archived in this pass. The older
-`docs/exporter-handoff-status.md` remains a general historical/status note, but
-its DB Exporter pointers are not the current source of truth for this handoff.
+`docs/archive/exporter-handoffs/exporter-handoff-status.md` remains a general
+historical/status note, but its DB Exporter pointers are not the current source
+of truth for this handoff.
 
 ## Current Ability Metadata Baseline
 

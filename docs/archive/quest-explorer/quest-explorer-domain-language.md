@@ -4,7 +4,7 @@
 > Status: SUPERSEDED for Quest Explorer semantics. This document preserves
 > historical implementation vocabulary, but it is not canonical. Use
 > `docs/quest_explorer_canonical_semantics_v1.md` as the semantic source of
-> truth and `docs/quest_explorer_documentation_audit_v1.md` for the documentation
+> truth and `quest_explorer_documentation_audit_v1.md` for the documentation
 > audit and deprecation plan.
 
 Status: SUPERSEDED - historical vocabulary reference only

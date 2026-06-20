@@ -7,7 +7,8 @@ Scope: backend-only review of the quest explorer import/read path against the EW
 Status note: keep this architecture review as backend/API context only. It is
 not the canonical Quest Explorer semantic model. For semantics, topology terms,
 and frontend interpretation, use `docs/quest_explorer_canonical_semantics_v1.md`;
-for documentation status, use `docs/quest_explorer_documentation_audit_v1.md`.
+for historical documentation status, use
+`docs/archive/quest-explorer/quest_explorer_documentation_audit_v1.md`.
 
 ## Executive Verdict
 

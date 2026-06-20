@@ -653,9 +653,9 @@ Retire as canonical:
 
 Revise or annotate:
 
-- `docs/quest-explorer-ux-design-template.md`: keep the premium UX direction,
-  but revise broad "branching progression flow", "choices", and "path"
-  language to distinguish tasks, continuations, forks, and true decisions.
+- `docs/archive/quest-explorer/quest-explorer-ux-design-template.md`: keep as
+  historical premium UX direction, but do not use broad "branching progression
+  flow", "choices", and "path" language as semantic authority.
 - `docs/archive/quest-explorer/quest-explorer-export-contract-final.md`: keep as the historical schema contract
   baseline, but update it or add a pointer to this document for live topology
   fields and objective ownership.

@@ -8,13 +8,18 @@ are not canonical semantic references.
 Authoritative Quest Explorer references:
 
 1. `../../quest_explorer_canonical_semantics_v1.md`
-2. `../../quest_explorer_documentation_audit_v1.md`
-3. the live `quest_explorer.v3` export topology
+2. the live `quest_explorer.v3` export topology
 
 Archived here:
 
 - `quest-explorer-domain-language.md`
 - `quest-explorer-export-contract-final.md`
+- `quest-explorer-rich-import-architecture-review.md`
+- `quest-explorer-ux-design-template.md`
+- `quest_explorer_codex_tooltips_feasibility_v1.md`
+- `quest_explorer_documentation_audit_v1.md`
+- `quest_explorer_live_0_80_semantic_gap_audit_v1.md`
+- `quest_explorer_vs_quest_codex_comparison_v1.md`
 - `quest_explorer_lore_design.md`
 - `quest_explorer_handoff.md`
 - `quest_explorer_design_bundle.docx`

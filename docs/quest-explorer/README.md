@@ -5,18 +5,19 @@ Status: current entry point
 Canonical Quest Explorer semantics now live in:
 
 1. `../quest_explorer_canonical_semantics_v1.md`
-2. `../quest_explorer_documentation_audit_v1.md`
 
-Active product-direction notes:
+Historical Quest Explorer design notes, handoff notes, contract baselines,
+audits, feasibility notes, and design bundle artifacts live in
+`../archive/quest-explorer/`.
 
-- `../quest-explorer-ux-design-template.md`
-- `../quest-explorer-rich-import-architecture-review.md`
-- `../quest_explorer_live_0_80_semantic_gap_audit_v1.md`
-- `../quest_explorer_vs_quest_codex_comparison_v1.md`
-- `../quest_explorer_codex_tooltips_feasibility_v1.md`
+Archived docs that may help reconstruct earlier decisions:
 
-Historical Quest Explorer design notes, handoff notes, contract baselines, and
-design bundle artifacts live in `../archive/quest-explorer/`.
+- `../archive/quest-explorer/quest_explorer_documentation_audit_v1.md`
+- `../archive/quest-explorer/quest-explorer-ux-design-template.md`
+- `../archive/quest-explorer/quest-explorer-rich-import-architecture-review.md`
+- `../archive/quest-explorer/quest_explorer_live_0_80_semantic_gap_audit_v1.md`
+- `../archive/quest-explorer/quest_explorer_vs_quest_codex_comparison_v1.md`
+- `../archive/quest-explorer/quest_explorer_codex_tooltips_feasibility_v1.md`
 
 Implementation note:
 

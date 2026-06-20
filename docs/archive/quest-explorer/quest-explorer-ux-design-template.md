@@ -11,7 +11,7 @@ Version: v1 Status: ACTIVE FRONTEND UX TEMPLATE Audience:
 This document complements:
 
 - `/docs/quest_explorer_canonical_semantics_v1.md`
-- `/docs/quest_explorer_documentation_audit_v1.md`
+- `/docs/archive/quest-explorer/quest_explorer_documentation_audit_v1.md`
 - `/docs/archive/quest-explorer/quest-explorer-export-contract-final.md`
 - `EWShop_Premium_UX_Design_Charter_v1.docx`
 - `EWShop_Quest_Explorer_Active_Design_Spec_v1.json`

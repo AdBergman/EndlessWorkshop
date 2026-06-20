@@ -3,7 +3,8 @@
 Status: historical feasibility note with current implementation status
 Date: 2026-05-26
 Canonical semantic reference: `docs/quest_explorer_canonical_semantics_v1.md`
-Related comparison: `docs/quest_explorer_vs_quest_codex_comparison_v1.md`
+Related comparison:
+`docs/archive/quest-explorer/quest_explorer_vs_quest_codex_comparison_v1.md`
 
 ## Current Status
 

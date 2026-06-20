@@ -7,7 +7,7 @@ Reference: `docs/frontend/frontend-architecture-guidelines.md`
 
 Quest Explorer semantic reference: future Quest Explorer refactors should use
 `docs/quest_explorer_canonical_semantics_v1.md` as the semantic authority and
-`docs/quest_explorer_documentation_audit_v1.md` for documentation status.
+`docs/quest-explorer/README.md` for current documentation status.
 Existing names such as `questPathFlow` are legacy implementation vocabulary and
 should not trigger behavior changes by themselves.
 

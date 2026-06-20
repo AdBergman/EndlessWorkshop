@@ -5,7 +5,7 @@
 > Status: SUPERSEDED for live Quest Explorer semantics. This document remains a
 > historical contract baseline, but it is not a complete 0.80 topology or
 > semantic reference. Use `../../quest_explorer_canonical_semantics_v1.md` for
-> canonical semantics and `../../quest_explorer_documentation_audit_v1.md` for
+> canonical semantics and `quest_explorer_documentation_audit_v1.md` for
 > documentation status.
 
 Version: v3
