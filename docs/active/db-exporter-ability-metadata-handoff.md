@@ -471,6 +471,37 @@ Request:
   icon metadata using the existing Codex icon contract style;
 - otherwise EWShop will keep generic diplomacy/category treatment.
 
+## Improvements Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Improvements
+category evolution pass. EWShop can continue using current exported `Category`
+facts and `Effects` sections.
+
+### Improvement Planning Metadata
+
+Current Improvement Codex facts expose `Kind` and `Category`, but do not expose
+era, construction progression, build cost, or unlock tier metadata.
+
+Request:
+
+- keep absent metadata absent if it is not public, stable, or source-proven;
+- if era/progression/build-cost metadata becomes public and source-proven, emit
+  it as normal Codex facts using existing exporter style;
+- do not require EWShop to infer progression from keys, names, tech unlocks, or
+  prose.
+
+### Thin Improvement Entries
+
+Local 0.82 data includes 23 Improvement entries with no public `Effects` lines
+or description. Existing DB Exporter notes indicate some thin
+District/Improvement rows are intentional when public data is unavailable.
+
+Request:
+
+- preserve public effect lines when source-proven;
+- keep entries thin when no public-safe mechanics are available;
+- do not emit inferred descriptions merely to fill archive rows.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

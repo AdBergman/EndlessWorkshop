@@ -14,6 +14,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode(" Actions ")).toBe("actionArchive");
         expect(getCodexCategoryMode(" DiplomaticTreaties ")).toBe("diplomacyArchive");
         expect(getCodexCategoryMode(" Equipment ")).toBe("equipmentArchive");
+        expect(getCodexCategoryMode(" Improvements ")).toBe("improvementArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
         expect(supportsFullWidthReferenceOverview(" Resources ")).toBe(true);
     });

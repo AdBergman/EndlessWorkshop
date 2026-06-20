@@ -366,4 +366,19 @@ Lessons:
 - Browser DOM smoke is useful after tests pass because it can reveal scan-value
   problems that are technically correct but visually/product-wise poor.
 
+### Improvements
+
+Lessons:
+
+- Improvements are an Archive because players compare city/district
+  infrastructure by planning focus and public effect lines.
+- Exported `Category` was strong enough for first navigation when paired with
+  player-facing display labels such as Dust and Approval.
+- Rail-only would have been insufficient because most Improvements already have
+  concise exported Effects that deserve row-level presentation.
+- Thin Improvement entries should stay visible with an honest fallback rather
+  than inferred descriptions.
+- Broad inbound relationships from Tech, Populations, Traits, Councilor Effects,
+  and Bonuses are detail/future-polish material, not first-pass row content.
+
 Update this history after every category evolution. The playbook is product memory.

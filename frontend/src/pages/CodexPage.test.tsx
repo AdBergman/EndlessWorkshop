@@ -1873,6 +1873,162 @@ describe("CodexPage", () => {
         expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Justified War")).toBeInTheDocument();
     });
 
+    it("renders Improvements as a category archive with focus navigation and effect-first rows", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Bridge_00",
+                displayName: "Flood Plain",
+                category: "Bridge",
+                kind: "Improvement",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "Bridge" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "Doubles [FoodColored] Food on Bridge when adjacent to Foundation",
+                        "Doubles [IndustryColored] Industry on Bridge when adjacent to Foundation",
+                        "Doubles [DustColored] Dust on Bridge when adjacent to Foundation",
+                        "Doubles [ScienceColored] Science on Bridge when adjacent to Foundation",
+                        "Doubles [CultureColored] Influence on Bridge when adjacent to Foundation",
+                    ],
+                }],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Money_00",
+                displayName: "Dust Refinery",
+                category: "Money",
+                kind: "Improvement",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "Money" },
+                ],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_PublicOrder_00",
+                displayName: "Traveler's Shrine",
+                category: "PublicOrder",
+                kind: "Improvement",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "PublicOrder" },
+                ],
+                sections: [{ title: "Effects", lines: ["+10 [PublicOrderColored] Approval"] }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Technology_City_01",
+                displayName: "City Planning",
+                descriptionLines: ["Unlocks city structures."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=improvements"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Improvements" })).toBeInTheDocument();
+        const improvementRail = screen.getByRole("complementary", { name: /improvement archive filters/i });
+        expect(improvementRail).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--improvementArchive")).toBeInTheDocument();
+        expect(within(improvementRail).getByRole("button", { name: "All 3" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(improvementRail).getByRole("button", { name: "Bridge 1" })).toBeInTheDocument();
+        expect(within(improvementRail).getByRole("button", { name: "Dust 1" })).toBeInTheDocument();
+        expect(within(improvementRail).getByRole("button", { name: "Approval 1" })).toBeInTheDocument();
+
+        const improvementsOverview = screen.getByLabelText("Improvements overview");
+        const floodPlainRow = getSummaryRowForButton(
+            within(improvementsOverview).getByRole("button", { name: /flood plain/i })
+        );
+        expect(floodPlainRow).toHaveTextContent("Doubles Food on Bridge when adjacent to Foundation");
+        expect(floodPlainRow).toHaveTextContent("Doubles Influence on Bridge when adjacent to Foundation");
+        expect(within(floodPlainRow).getByRole("img", { name: "FoodColored" })).toBeInTheDocument();
+        expect(floodPlainRow).toHaveTextContent("Bridge");
+        expect(floodPlainRow).not.toHaveTextContent("Kind Improvement");
+
+        const dustRefineryRow = getSummaryRowForButton(
+            within(improvementsOverview).getByRole("button", { name: /dust refinery/i })
+        );
+        expect(dustRefineryRow).toHaveTextContent("Dust");
+        expect(dustRefineryRow).toHaveTextContent("No public improvement effects exported yet.");
+
+        await user.click(within(improvementRail).getByRole("button", { name: "Dust 1" }));
+
+        expect(within(improvementRail).getByRole("button", { name: "Dust 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(improvementsOverview).getByText("Dust Refinery")).toBeInTheDocument();
+        expect(within(improvementsOverview).queryByText("Flood Plain")).not.toBeInTheDocument();
+
+        await user.click(within(improvementRail).getByRole("button", { name: "Dust 1" }));
+
+        expect(within(improvementRail).getByRole("button", { name: "All 3" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(improvementsOverview).getByText("Flood Plain")).toBeInTheDocument();
+
+        const searchInput = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(searchInput, "shrine");
+
+        expect(within(improvementRail).getByRole("button", { name: "All 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(improvementRail).getByRole("button", { name: "Approval 1" })).toBeInTheDocument();
+        expect(within(improvementRail).getByRole("button", { name: "Bridge 0" })).toBeInTheDocument();
+        expect(within(improvementsOverview).getByText("Traveler's Shrine")).toBeInTheDocument();
+        expect(within(improvementsOverview).queryByText("Dust Refinery")).not.toBeInTheDocument();
+
+        cleanup();
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=improvements&entry=DistrictImprovement_Bridge_00"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Flood Plain" })).toBeInTheDocument();
+        const detailImprovementRail = screen.getByRole("complementary", { name: /improvement archive filters/i });
+
+        await user.click(within(detailImprovementRail).getByRole("button", { name: "Dust 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Improvements" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Flood Plain" })).not.toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=improvements");
+        expect(within(screen.getByLabelText("Improvements overview")).getByText("Dust Refinery")).toBeInTheDocument();
+    });
+
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
         const user = userEvent.setup();
         seedCodexEntries([

@@ -47,6 +47,11 @@ import {
     type EquipmentArchiveFilterKey,
 } from "@/lib/codex/codexEquipmentArchiveFilters";
 import {
+    buildImprovementCategoryFilterOptions,
+    filterImprovementEntriesByCategory,
+    type ImprovementArchiveCategory,
+} from "@/lib/codex/codexImprovementArchiveFilters";
+import {
     buildStatusScopeFilterOptions,
     filterStatusEntriesByScope,
 } from "@/lib/codex/codexStatusArchiveFilters";
@@ -88,6 +93,7 @@ export default function CodexPage() {
     const [activeEquipmentFilters, setActiveEquipmentFilters] = useState<ActiveEquipmentArchiveFilters>(
         EMPTY_EQUIPMENT_ARCHIVE_FILTERS
     );
+    const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
     const [activeTraitType, setActiveTraitType] = useState<TraitArchiveType | null>(null);
 
@@ -148,6 +154,7 @@ export default function CodexPage() {
     const isAbilityCatalogMode = categoryMode === "abilityArchive";
     const isDiplomacyArchiveMode = categoryMode === "diplomacyArchive";
     const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
+    const isImprovementArchiveMode = categoryMode === "improvementArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
     const isTraitArchiveMode = categoryMode === "traitArchive";
 
@@ -220,6 +227,21 @@ export default function CodexPage() {
     );
 
     useEffect(() => {
+        if (isImprovementArchiveMode) return;
+
+        setActiveImprovementCategory((current) => current ? null : current);
+    }, [isImprovementArchiveMode]);
+
+    const improvementCategoryOptions = useMemo(
+        () => (
+            isImprovementArchiveMode
+                ? buildImprovementCategoryFilterOptions(searchFilteredEntries)
+                : []
+        ),
+        [isImprovementArchiveMode, searchFilteredEntries]
+    );
+
+    useEffect(() => {
         if (isStatusArchiveMode) return;
 
         setActiveStatusScope((current) => current ? null : current);
@@ -273,6 +295,10 @@ export default function CodexPage() {
                 return filterStatusEntriesByScope(searchFilteredEntries, activeStatusScope);
             }
 
+            if (isImprovementArchiveMode) {
+                return filterImprovementEntriesByCategory(searchFilteredEntries, activeImprovementCategory);
+            }
+
             if (isTraitArchiveMode) {
                 return filterTraitEntriesByType(searchFilteredEntries, activeTraitType);
             }
@@ -294,6 +320,7 @@ export default function CodexPage() {
             activeDiplomacyCategory,
             activeEquipmentFilters,
             activeFactFilters,
+            activeImprovementCategory,
             activeStatusScope,
             activeTraitType,
             factFilterConfig,
@@ -301,6 +328,7 @@ export default function CodexPage() {
             isAbilityCatalogMode,
             isDiplomacyArchiveMode,
             isEquipmentArchiveMode,
+            isImprovementArchiveMode,
             isStatusArchiveMode,
             isTraitArchiveMode,
             searchFilteredEntries,
@@ -646,6 +674,12 @@ export default function CodexPage() {
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isEquipmentArchiveMode, selectedEntryParam, updateSelectedEntry]);
 
+    const returnImprovementFiltersToArchive = useCallback(() => {
+        if (!isImprovementArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isImprovementArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const clearActionType = useCallback(() => {
         setActiveActionType(null);
         returnActionFiltersToArchive();
@@ -696,6 +730,16 @@ export default function CodexPage() {
         }));
         returnEquipmentFiltersToArchive();
     }, [returnEquipmentFiltersToArchive]);
+
+    const clearImprovementCategory = useCallback(() => {
+        setActiveImprovementCategory(null);
+        returnImprovementFiltersToArchive();
+    }, [returnImprovementFiltersToArchive]);
+
+    const toggleImprovementCategory = useCallback((category: ImprovementArchiveCategory) => {
+        setActiveImprovementCategory((current) => current === category ? null : category);
+        returnImprovementFiltersToArchive();
+    }, [returnImprovementFiltersToArchive]);
 
     const clearStatusScope = useCallback(() => {
         setActiveStatusScope(null);
@@ -765,6 +809,8 @@ export default function CodexPage() {
                     } ${
                         isEquipmentArchiveMode ? "codex-workspace--equipmentArchive" : ""
                     } ${
+                        isImprovementArchiveMode ? "codex-workspace--improvementArchive" : ""
+                    } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
                     } ${
                         isTraitArchiveMode ? "codex-workspace--traitArchive" : ""
@@ -787,10 +833,14 @@ export default function CodexPage() {
                         error={error}
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
+                        improvementCategoryFilter={activeImprovementCategory}
+                        improvementCategoryOptions={improvementCategoryOptions}
+                        improvementTotalCount={isImprovementArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
                         isActionArchiveMode={isActionArchiveMode}
                         isAbilityCatalogMode={isAbilityCatalogMode}
                         isDiplomacyArchiveMode={isDiplomacyArchiveMode}
                         isEquipmentArchiveMode={isEquipmentArchiveMode}
+                        isImprovementArchiveMode={isImprovementArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isTraitArchiveMode={isTraitArchiveMode}
                         isVisible={showResultsPane}
@@ -805,12 +855,14 @@ export default function CodexPage() {
                         onClearDiplomacyCategory={clearDiplomacyCategory}
                         onClearFactFilters={clearFactFilters}
                         onClearEquipmentFilters={clearEquipmentFilters}
+                        onClearImprovementCategory={clearImprovementCategory}
                         onClearStatusScope={clearStatusScope}
                         onClearTraitType={clearTraitType}
                         onSelectEntry={(entry) => selectEntry(entry)}
                         onToggleActionType={toggleActionType}
                         onToggleDiplomacyCategory={toggleDiplomacyCategory}
                         onToggleEquipmentFilter={toggleEquipmentFilter}
+                        onToggleImprovementCategory={toggleImprovementCategory}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTraitType={toggleTraitType}
                         onToggleFactFilter={toggleFactFilter}

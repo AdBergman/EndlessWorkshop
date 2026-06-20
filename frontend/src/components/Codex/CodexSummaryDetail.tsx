@@ -29,6 +29,7 @@ import {
 } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
+import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
 import {
     getCodexReadablePreviewLine,
     parseCodexStructuredDescription,
@@ -80,6 +81,10 @@ type DiplomacyArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type ImprovementArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
@@ -97,6 +102,7 @@ const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
+const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
@@ -456,6 +462,42 @@ function getEquipmentArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     return effectLines.slice(0, MAX_EQUIPMENT_EFFECT_PREVIEW_LINES);
 }
 
+function getImprovementArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "improvements") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+
+    return effectLines.slice(0, MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES);
+}
+
+function getImprovementArchiveMetadata(entry: CodexEntry): ImprovementArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "improvements") return [];
+
+    const items: ImprovementArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Category").forEach((value) =>
+        addValue("category", getImprovementCategoryDisplayLabel(value))
+    );
+
+    return items;
+}
+
 function compactDiplomacyPreviewLine(value: string): string {
     return formatCodexMajorFactionText(value.replace(/\s+/g, " ").trim());
 }
@@ -686,11 +728,13 @@ export default function CodexSummaryDetail({
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
                         const useEquipmentArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "equipment";
+                        const useImprovementArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "improvements";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
                         const equipmentArchiveMetadata = useEquipmentArchiveRowHierarchy ? getEquipmentArchiveMetadata(entry) : [];
+                        const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
                         const diplomacyArchiveMetadata = useDiplomacyArchiveRowHierarchy ? getDiplomacyArchiveMetadata(entry) : [];
                         const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
                             ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
@@ -709,6 +753,9 @@ export default function CodexSummaryDetail({
                             : [];
                         const equipmentEffectPreviewLines = useEquipmentArchiveRowHierarchy
                             ? getEquipmentArchiveEffectPreviewLines(entry)
+                            : [];
+                        const improvementEffectPreviewLines = useImprovementArchiveRowHierarchy
+                            ? getImprovementArchiveEffectPreviewLines(entry)
                             : [];
                         const equipmentGrantedAbilityPreviews = useEquipmentArchiveRowHierarchy
                             ? parseCodexStructuredDescription(entry).sections
@@ -1025,6 +1072,60 @@ export default function CodexSummaryDetail({
                                         </div>
                                     ) : null}
                                 </div>
+                            );
+                        }
+
+                        if (useImprovementArchiveRowHierarchy) {
+                            return (
+                                <button
+                                    key={entry.entryKey}
+                                    type="button"
+                                    className="codex-summaryList__item codex-summaryList__item--improvementArchive"
+                                    onClick={() => onSelectEntry(entry)}
+                                >
+                                    <span className="codex-summaryList__titleLine">
+                                        <span className="codex-summaryList__titleIdentity">
+                                            <span className="codex-summaryList__name">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
+                                        </span>
+                                        {improvementArchiveMetadata.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__metadata codex-summaryList__metadata--improvement"
+                                                aria-label="Improvement metadata"
+                                            >
+                                                {improvementArchiveMetadata.map((item) => (
+                                                    <span
+                                                        key={`${item.key}-${item.value}`}
+                                                        className="codex-summaryList__metadataText"
+                                                    >
+                                                        {item.value}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
+                                    </span>
+
+                                    <span
+                                        className="codex-summaryList__improvementEffects"
+                                        aria-label="Improvement effect preview"
+                                    >
+                                        {improvementEffectPreviewLines.length > 0 ? (
+                                            improvementEffectPreviewLines.map((line, index) => (
+                                                <span
+                                                    className="codex-summaryList__improvementEffectLine"
+                                                    key={`${entry.entryKey}-improvement-preview-${index}`}
+                                                >
+                                                    {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="codex-summaryList__statusFallback">
+                                                No public improvement effects exported yet.
+                                            </span>
+                                        )}
+                                    </span>
+                                </button>
                             );
                         }
 

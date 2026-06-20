@@ -94,6 +94,10 @@ Current rules:
 - Diplomacy uses compact Diplomacy Archive mode: Treaty Category rail
   (`All`, `War`, `Defense`, `Discovery`, `Society`, `Declarations`, `Economy`)
   plus treaty rows with quiet Category/Bilateral/Duration metadata.
+- Improvements use compact Improvement Archive mode: Improvement Focus rail
+  (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
+  Resource, Bridge, Population, Trade) plus content-first rows from exported
+  Effect lines.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.
