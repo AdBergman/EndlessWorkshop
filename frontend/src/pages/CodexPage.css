@@ -62,10 +62,10 @@
     display: grid;
     min-width: 0;
     max-width: 100%;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, min(34vw, 460px)) max-content;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, min(34vw, 460px));
     grid-template-areas:
-        "copy search stats"
-        "shelf shelf shelf";
+        "copy search"
+        "shelf shelf";
     align-items: center;
     gap: 6px 14px;
 }
@@ -97,44 +97,8 @@
     min-width: 0;
 }
 
-.codex-header__stats {
-    display: inline-flex;
-    align-items: stretch;
-    gap: 8px;
-    flex: 0 0 auto;
-}
-
 .codex-header--compact .codex-header__copy {
     grid-area: copy;
-}
-
-.codex-header--compact .codex-header__stats {
-    grid-area: stats;
-}
-
-.codex-header__stat {
-    display: grid;
-    min-width: 88px;
-    padding: 7px 11px;
-    border: 1px solid var(--codex-line);
-    border-radius: 6px;
-    background: rgba(13, 15, 16, 0.52);
-    text-align: right;
-}
-
-.codex-header__stat strong {
-    color: var(--codex-gold-bright);
-    font-size: 1.1rem;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-}
-
-.codex-header__stat span {
-    margin-top: 4px;
-    color: var(--codex-ink-muted);
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
 }
 
 .codex-eyebrow,
@@ -433,7 +397,7 @@
     font-size: 12px;
 }
 
-.codex-categoryShelf__chip > span:not(.codex-kindFilter__count) {
+.codex-categoryShelf__chip > span {
     min-width: 0;
     overflow-wrap: anywhere;
 }
@@ -441,19 +405,6 @@
 .codex-categoryShelf__chip:hover {
     border-color: rgba(199, 189, 171, 0.13);
     background: rgba(255, 255, 255, 0.018);
-}
-
-.codex-categoryShelf__chip .codex-kindFilter__count {
-    display: none;
-    color: rgba(230, 176, 82, 0.74);
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.codex-categoryShelf__chip.is-active .codex-kindFilter__count {
-    display: inline-flex;
-    margin-left: 1px;
 }
 
 .codex-workspace {
@@ -2794,21 +2745,11 @@
         flex-direction: column;
     }
 
-    .codex-header__stats {
-        width: 100%;
-    }
-
-    .codex-header__stat {
-        flex: 1 1 0;
-        text-align: left;
-    }
-
     .codex-header--compact {
         grid-template-columns: 1fr;
         grid-template-areas:
             "copy"
             "search"
-            "stats"
             "shelf";
     }
 

@@ -5,15 +5,12 @@ import type { CodexEntry } from "@/types/dataTypes";
 export type CodexCategoryShelfOption = {
     kind: string;
     label: string;
-    count: number;
 };
 
 type Props = {
     activeKind: string;
-    categoryCount: number;
     categoryShelfOptions: readonly CodexCategoryShelfOption[];
     enableCategoryShelf: boolean;
-    entryCount: number;
     resultCount: number;
     searchSuggestions: CodexEntry[];
     searchValue: string;
@@ -27,10 +24,8 @@ type Props = {
 
 export default function CodexTopPanel({
     activeKind,
-    categoryCount,
     categoryShelfOptions,
     enableCategoryShelf,
-    entryCount,
     resultCount,
     searchSuggestions,
     searchValue,
@@ -51,17 +46,6 @@ export default function CodexTopPanel({
                             Encyclopedia
                         </h2>
                     ) : null}
-                </div>
-
-                <div className="codex-header__stats" aria-label="Codex encyclopedia statistics">
-                    <span className="codex-header__stat">
-                        <strong>{entryCount}</strong>
-                        <span>entries</span>
-                    </span>
-                    <span className="codex-header__stat">
-                        <strong>{categoryCount}</strong>
-                        <span>categories</span>
-                    </span>
                 </div>
             </div>
 
@@ -100,7 +84,7 @@ export default function CodexTopPanel({
                                     }`}
                                     onClick={() => onSelectCategory(option.kind)}
                                     aria-pressed={isActive}
-                                    aria-label={`${option.label} ${option.count}`}
+                                    aria-label={option.label}
                                 >
                                     <CodexKindIcon
                                         kind={option.kind}
@@ -109,9 +93,6 @@ export default function CodexTopPanel({
                                         size={15}
                                     />
                                     <span>{option.label}</span>
-                                    <span className="codex-kindFilter__count">
-                                        {isActive ? `${option.count} entries` : option.count}
-                                    </span>
                                 </button>
                             );
                         })}

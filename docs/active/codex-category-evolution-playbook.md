@@ -117,6 +117,7 @@ Navigation should not contain:
 - effect previews
 - large metadata blocks
 - row content duplicated from the main panel
+- analytics counts that are already carried by landing cards, overview headers, or search results
 
 Rule: icons generally belong in content, not navigation.
 

@@ -87,6 +87,8 @@ Current rules:
 - `EW-CODEX-UI-002` is deferred after rejected tiny CSS-only landing polish.
 - `EW-CODEX-UI-003` is covered by the accepted compact category shelf behavior
   from `EW-CODEX-UI-001`.
+- The compact category shelf is navigation, not analytics: keep it count-free
+  while preserving counts in landing cards, overview headers, and search.
 - Actions use compact Action Archive mode: Type rail (`All`, `Action`,
   `Faction`, `Empire`, `Constructible`, `Terraforming`, `Army`) plus existing
   generic Action rows/details. Rich Action rows remain deferred because current

@@ -290,7 +290,7 @@ describe("CodexPage", () => {
         expect(screen.getByRole("heading", { level: 2, name: "Encyclopedia" })).toBeInTheDocument();
         expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Codex Overview" })).not.toBeInTheDocument();
-        expect(within(screen.getByLabelText("Codex encyclopedia statistics")).getByText("categories")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex encyclopedia statistics")).not.toBeInTheDocument();
         expect(screen.getByText("Browse categories, then inspect descriptions and resolved related links.")).toBeInTheDocument();
         const categoryIndex = screen.getByLabelText("Codex category index");
         expect(categoryIndex).toBeInTheDocument();
@@ -456,7 +456,7 @@ describe("CodexPage", () => {
         const toolbar = getCategoryToolbar();
         expect(toolbar).toHaveClass("codex-categoryShelf__chips--wrap");
         const categoryLabels = within(toolbar).getAllByRole("button")
-            .map((button) => button.querySelector("span:not(.codex-kindFilter__count)")?.textContent?.trim());
+            .map((button) => button.querySelector("span")?.textContent?.trim());
 
         expect(categoryLabels).toEqual([
             "All",
@@ -2528,7 +2528,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Partner Effects" })).toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
-        expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects 1/i }))
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /partner effects/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i }))
             .not.toBeInTheDocument();
@@ -2554,7 +2554,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "All Councilor Effects" })).toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
-        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilor effects 1/i }))
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilor effects/i }))
             .toHaveAttribute("aria-pressed", "true");
 
         const councilorOverview = screen.getByLabelText("Councilor Effects overview");
@@ -3342,7 +3342,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Atea" })).toBeInTheDocument();
-        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilors 1/i }))
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /councilors/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /resources/i }))
             .toBeInTheDocument();
@@ -3686,7 +3686,7 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
 
         await user.click(within(getCategoryToolbar())
-            .getByRole("button", { name: /councilor effects 1/i }));
+            .getByRole("button", { name: /councilor effects/i }));
         const councilorEffectSummary = screen.getByRole("heading", { name: "All Councilor Effects" })
             .closest(".codex-summaryDossier") as HTMLElement;
         expect(within(councilorEffectSummary).getByText("Reference list")).toBeInTheDocument();
@@ -3701,7 +3701,7 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
 
         await user.click(within(getCategoryToolbar())
-            .getByRole("button", { name: /partner effects 1/i }));
+            .getByRole("button", { name: /partner effects/i }));
         const partnerEffectSummary = screen.getByRole("heading", { name: "All Partner Effects" })
             .closest(".codex-summaryDossier") as HTMLElement;
         expect(within(partnerEffectSummary).getByText("Reference list")).toBeInTheDocument();
@@ -3716,7 +3716,7 @@ describe("CodexPage", () => {
             .toBeInTheDocument();
 
         await user.click(within(getCategoryToolbar())
-            .getByRole("button", { name: /traits 2/i }));
+            .getByRole("button", { name: /traits/i }));
         const traitsSummary = screen.getByRole("heading", { name: "All Traits" })
             .closest(".codex-summaryDossier") as HTMLElement;
         expect(within(traitsSummary).getByText("Reference list")).toBeInTheDocument();
@@ -5333,7 +5333,7 @@ describe("CodexPage", () => {
         await waitFor(() => {
             expect(
                 within(getCategoryToolbar()).getByRole("button", {
-                    name: /districts 2/i,
+                    name: /districts/i,
                 })
             ).toHaveAttribute("aria-pressed", "true");
         });
@@ -7005,7 +7005,7 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /diplomacy 3/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).getByRole("button", { name: /diplomacy/i })).toBeInTheDocument();
         expect(screen.getByRole("complementary", { name: /diplomacy archive filters/i })).toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(screen.getByText("Diplomatic treaty dossier")).toBeInTheDocument();

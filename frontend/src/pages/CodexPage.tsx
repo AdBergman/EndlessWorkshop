@@ -959,10 +959,8 @@ export default function CodexPage() {
             >
                 <CodexTopPanel
                     activeKind={activeKind}
-                    categoryCount={filterOptions.length - 1}
                     categoryShelfOptions={categoryShelfOptions}
                     enableCategoryShelf={!isOverviewState}
-                    entryCount={entries.length}
                     resultCount={filteredEntries.length}
                     searchSuggestions={autocompleteEntries}
                     searchValue={query}
