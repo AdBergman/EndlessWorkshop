@@ -2031,7 +2031,8 @@
     gap: 8px;
 }
 
-.codex-summaryList__item--catalog .codex-summaryList__titleLine {
+.codex-summaryList__item--catalog .codex-summaryList__titleLine,
+.codex-summaryList__item--statusArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
     justify-content: space-between;
@@ -2107,6 +2108,12 @@
     flex: 0 1 min(46%, 520px);
     justify-content: flex-end;
     gap: 10px;
+}
+
+.codex-summaryList__item--statusArchive .codex-summaryList__metadata {
+    flex: 0 1 min(38%, 360px);
+    justify-content: flex-end;
+    gap: 8px;
 }
 
 .codex-summaryList__item--catalog .codex-summaryList__metadata--ability {

@@ -553,6 +553,34 @@ Exporter findings discovered:
 
 - None new. Missing explicit Status icon mapping was already recorded as non-blocking.
 
+## STATUS-UI-003C Result - Status Archive Row Metadata Placement
+
+Status: Implemented for review.
+
+What changed:
+
+- Status archive row metadata moved from beneath the mechanics/effect preview into the row header area.
+- Rows now follow a content-left / metadata-right structure:
+  - left: Status name and mechanics/effect preview
+  - right: Scope and Duration when present
+- Scope and Duration remain visually quiet orientation metadata.
+- Duration is still omitted when absent.
+- Scope display cleanup and duration display cleanup remain unchanged.
+- Thin fallback rows still show `No public mechanics exported yet.`
+
+What did not change:
+
+- Status detail pages, relationship sections, left rail, search, routing, and Ability Archive behavior were not changed.
+
+Lesson:
+
+- Status rows now reuse the content-left / metadata-right principle learned from Abilities without copying Ability-specific navigation or metadata. This reinforces the category-evolution lesson that archive rows should separate scan content from orientation metadata.
+- Consider feeding this principle back into the main playbook during final Status closeout.
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-003C implementation.
+
 Lesson:
 
 - For Statuses, archive rows should expose scan signals; detail pages should preserve explanation, trust, and complete inspection. This Status-specific lesson should be considered during final category closeout before changing the main playbook.

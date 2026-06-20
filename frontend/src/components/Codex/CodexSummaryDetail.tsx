@@ -659,6 +659,21 @@ export default function CodexSummaryDetail({
                                                 {renderCodexLabel(getCodexEntryLabel(entry))}
                                             </span>
                                         </span>
+                                        {statusArchiveMetadata.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__metadata codex-summaryList__metadata--status"
+                                                aria-label="Status metadata"
+                                            >
+                                                {statusArchiveMetadata.map((item) => (
+                                                    <span
+                                                        key={`${item.key}-${item.value}`}
+                                                        className="codex-summaryList__metadataText"
+                                                    >
+                                                        {item.value}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
                                     </span>
 
                                     <span
@@ -680,22 +695,6 @@ export default function CodexSummaryDetail({
                                             </span>
                                         )}
                                     </span>
-
-                                    {statusArchiveMetadata.length > 0 ? (
-                                        <span
-                                            className="codex-summaryList__metadata codex-summaryList__metadata--status"
-                                            aria-label="Status metadata"
-                                        >
-                                            {statusArchiveMetadata.map((item) => (
-                                                <span
-                                                    key={`${item.key}-${item.value}`}
-                                                    className="codex-summaryList__metadataText"
-                                                >
-                                                    {item.value}
-                                                </span>
-                                            ))}
-                                        </span>
-                                    ) : null}
                                 </button>
                             );
                         }

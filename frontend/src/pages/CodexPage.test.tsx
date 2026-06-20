@@ -796,9 +796,14 @@ describe("CodexPage", () => {
         expect(effectPreview).not.toHaveTextContent("Diplomatic pressure while borders are closed.");
         expect(effectPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(1);
         const metadata = within(overviewRow).getByLabelText("Status metadata");
+        expect(metadata.closest(".codex-summaryList__titleLine")).toBeTruthy();
+        expect(Boolean(metadata.compareDocumentPosition(effectPreview) & Node.DOCUMENT_POSITION_FOLLOWING))
+            .toBe(true);
         expect(within(metadata).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
         expect(within(metadata).queryByText("Public Opinion")).not.toBeInTheDocument();
+        expect(within(effectPreview).queryByText("Diplomacy")).not.toBeInTheDocument();
+        expect(within(effectPreview).queryByText("10 turns")).not.toBeInTheDocument();
         expect(within(overviewRow).queryByText("Status type")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(statusesOverview).getByRole("button", { name: /unit 10 turns name only/i });
@@ -818,6 +823,10 @@ describe("CodexPage", () => {
         const effectsOnlyRow = within(statusesOverview).getByRole("button", { name: /effects only city status/i });
         const effectsOnlyPreview = within(effectsOnlyRow).getByLabelText("Status effect preview");
         expect(effectsOnlyPreview).toHaveTextContent("Will greatly improve Approval of this City.");
+        const effectsOnlyMetadata = within(effectsOnlyRow).getByLabelText("Status metadata");
+        expect(effectsOnlyMetadata.closest(".codex-summaryList__titleLine")).toBeTruthy();
+        expect(within(effectsOnlyMetadata).getByText("City")).toBeInTheDocument();
+        expect(within(effectsOnlyMetadata).queryByText(/turn/i)).not.toBeInTheDocument();
     });
 
     it("does not render Ability or Status overview metadata chips for other Codex categories", async () => {
