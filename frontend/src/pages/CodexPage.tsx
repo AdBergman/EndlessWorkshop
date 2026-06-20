@@ -1,12 +1,10 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import AbilityArchiveRail from "@/components/Codex/AbilityArchiveRail";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
+import CodexLeftPane from "@/components/Codex/CodexLeftPane";
 import CodexOverview from "@/components/Codex/CodexOverview";
-import CodexResultList from "@/components/Codex/CodexResultList";
-import CodexSearch from "@/components/Codex/CodexSearch";
 import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
-import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
+import CodexTopPanel from "@/components/Codex/CodexTopPanel";
 import {
     createCodexSummaryEntry,
     formatCodexKindLabel,
@@ -30,50 +28,20 @@ import {
     getActiveAbilityArchiveFilterItems,
     type ActiveCodexFactFilters,
 } from "@/lib/codex/codexAbilityArchiveFilters";
+import {
+    getCodexCategoryMode,
+    isDirectRoutableHiddenCodexKind,
+    isVisibleTopLevelCodexKind,
+    normalizeCodexKind,
+    PREFERRED_CODEX_KIND_ORDER,
+    supportsFullWidthReferenceOverview,
+} from "@/lib/codex/codexCategoryConfig";
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
 import "./CodexPage.css";
 
-const PREFERRED_KIND_ORDER = [
-    "abilities",
-    "actions",
-    "councilors",
-    "counciloreffects",
-    "partnereffects",
-    "districts",
-    "extractors",
-    "resources",
-    "equipment",
-    "factions",
-    "diplomatictreaties",
-    "heroes",
-    "improvements",
-    "minorfactions",
-    "populations",
-    "quests",
-    "statuses",
-    "tech",
-    "traits",
-    "units",
-];
-const HIDDEN_TOP_LEVEL_KINDS = new Set(["bonuses", "extractors", "modifiers"]);
-const VALID_HIDDEN_ROUTE_KINDS = new Set(["extractors"]);
-const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set(["counciloreffects", "partnereffects", "resources"]);
-
 type SelectionIntent = "passive" | "related";
-
-function normalizeCodexKind(kind: string): string {
-    return kind.trim().toLowerCase();
-}
-
-function supportsFullWidthReferenceOverview(kind: string): boolean {
-    return FULL_WIDTH_REFERENCE_OVERVIEW_KINDS.has(normalizeCodexKind(kind));
-}
-
-function isVisibleTopLevelKind(kind: string): boolean {
-    return !HIDDEN_TOP_LEVEL_KINDS.has(normalizeCodexKind(kind));
-}
 
 export default function CodexPage() {
     const location = useLocation();
@@ -117,12 +85,12 @@ export default function CodexPage() {
             return acc;
         }, new Map<string, number>());
 
-        const knownKinds = PREFERRED_KIND_ORDER
+        const knownKinds = PREFERRED_CODEX_KIND_ORDER
             .filter((kind) => kindCounts.has(kind))
-            .filter(isVisibleTopLevelKind);
+            .filter(isVisibleTopLevelCodexKind);
         const extraKinds = Array.from(kindCounts.keys())
-            .filter((kind) => !PREFERRED_KIND_ORDER.includes(kind))
-            .filter(isVisibleTopLevelKind)
+            .filter((kind) => !PREFERRED_CODEX_KIND_ORDER.includes(kind))
+            .filter(isVisibleTopLevelCodexKind)
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];
@@ -191,7 +159,8 @@ export default function CodexPage() {
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
-    const isAbilityCatalogMode = activeKind === "abilities";
+    const categoryMode = getCodexCategoryMode(activeKind);
+    const isAbilityCatalogMode = categoryMode === "abilityArchive";
     const activeFactFilterItems = useMemo(
         () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
@@ -401,7 +370,7 @@ export default function CodexPage() {
         const filterStillExists =
             filterOptions.some((option) => option.kind === activeKind) ||
             (
-                VALID_HIDDEN_ROUTE_KINDS.has(activeKind) &&
+                isDirectRoutableHiddenCodexKind(activeKind) &&
                 entries.some((entry) => normalizeCodexKind(entry.exportKind) === activeKind)
             );
         if (!filterStillExists) {
@@ -480,9 +449,16 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
+    const returnAbilityFiltersToArchive = useCallback(() => {
+        if (!isAbilityCatalogMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isAbilityCatalogMode, selectedEntryParam, updateSelectedEntry]);
+
     const clearFactFilters = useCallback(() => {
         setActiveFactFilters({});
-    }, []);
+        returnAbilityFiltersToArchive();
+    }, [returnAbilityFiltersToArchive]);
 
     const toggleFactFilter = useCallback((label: string, value: string) => {
         setActiveFactFilters((current) => {
@@ -494,28 +470,8 @@ export default function CodexPage() {
             }
             return next;
         });
-    }, []);
-
-    const searchControl = (
-        <CodexSearch
-            value={query}
-            onChange={setQuery}
-            resultCount={filteredEntries.length}
-            totalCount={entries.length}
-            suggestions={autocompleteEntries}
-            onSelectSuggestion={(entry) => {
-                setQuery(entry.displayName);
-                selectEntry(entry);
-            }}
-            onConfirmQuery={() => {
-                const firstVisibleEntry = filteredEntries[0];
-                if (firstVisibleEntry) {
-                    selectEntry(firstVisibleEntry);
-                }
-            }}
-            enableAutocomplete={false}
-        />
-    );
+        returnAbilityFiltersToArchive();
+    }, [returnAbilityFiltersToArchive]);
 
     return (
         <main className="codex-page">
@@ -528,76 +484,30 @@ export default function CodexPage() {
                 aria-labelledby={useCompactHeader ? undefined : "codex-page-title"}
                 aria-label={useCompactHeader ? "Codex encyclopedia" : undefined}
             >
-                <header className={`codex-header ${useCompactHeader ? "codex-header--compact" : ""}`}>
-                    <div className={`codex-header__top ${useCompactHeader ? "codex-header__top--compact" : ""}`}>
-                        <div className="codex-header__copy">
-                            <div className="codex-eyebrow">Endless Workshop archive</div>
-                            {!useCompactHeader ? (
-                                <h2 className="codex-pageTitle" id="codex-page-title">
-                                    Encyclopedia
-                                </h2>
-                            ) : null}
-                        </div>
-
-                        <div className="codex-header__stats" aria-label="Codex encyclopedia statistics">
-                            <span className="codex-header__stat">
-                                <strong>{entries.length}</strong>
-                                <span>entries</span>
-                            </span>
-                            <span className="codex-header__stat">
-                                <strong>{filterOptions.length - 1}</strong>
-                                <span>categories</span>
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="codex-controlBand">
-                        {searchControl}
-                    </div>
-                    {!isOverviewState ? (
-                        <div
-                            className={`codex-categoryShelf ${
-                                isAbilityCatalogMode ? "codex-categoryShelf--abilityCatalog" : ""
-                            }`}
-                            aria-label="Codex categories"
-                        >
-                            <div className="codex-categoryShelf__label">Categories</div>
-                            <div
-                                className="codex-categoryShelf__chips codex-categoryShelf__chips--wrap"
-                                role="toolbar"
-                                aria-label="Filter codex by category"
-                            >
-                                {categoryShelfOptions.map((option) => {
-                                    const isActive = option.kind === activeKind;
-
-                                    return (
-                                        <button
-                                            key={option.kind}
-                                            type="button"
-                                            className={`codex-categoryShelf__chip codex-kindFilter__chip ${
-                                                isActive ? "is-active" : ""
-                                            }`}
-                                            onClick={() => selectKind(option.kind)}
-                                            aria-pressed={isActive}
-                                            aria-label={`${option.label} ${option.count}`}
-                                        >
-                                            <CodexKindIcon
-                                                kind={option.kind}
-                                                label={option.label}
-                                                className="codex-kindIcon codex-kindIcon--chip"
-                                                size={15}
-                                            />
-                                            <span>{option.label}</span>
-                                            <span className="codex-kindFilter__count">
-                                                {isActive ? `${option.count} entries` : option.count}
-                                            </span>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    ) : null}
-                </header>
+                <CodexTopPanel
+                    activeKind={activeKind}
+                    categoryCount={filterOptions.length - 1}
+                    categoryShelfOptions={categoryShelfOptions}
+                    enableCategoryShelf={!isOverviewState}
+                    entryCount={entries.length}
+                    resultCount={filteredEntries.length}
+                    searchSuggestions={autocompleteEntries}
+                    searchValue={query}
+                    totalSearchCount={entries.length}
+                    useCompactHeader={useCompactHeader}
+                    onConfirmSearch={() => {
+                        const firstVisibleEntry = filteredEntries[0];
+                        if (firstVisibleEntry) {
+                            selectEntry(firstVisibleEntry);
+                        }
+                    }}
+                    onSearchChange={setQuery}
+                    onSelectCategory={selectKind}
+                    onSelectSearchSuggestion={(entry) => {
+                        setQuery(entry.displayName);
+                        selectEntry(entry);
+                    }}
+                />
 
                 <div
                     className={`codex-workspace ${isOverviewState ? "codex-workspace--overview" : ""} ${
@@ -606,46 +516,23 @@ export default function CodexPage() {
                         isAbilityCatalogMode ? "codex-workspace--abilityCatalog" : ""
                     }`}
                 >
-                    {showResultsPane ? (
-                        <aside
-                            className={`codex-resultsPane ${isAbilityCatalogMode ? "codex-resultsPane--catalog" : ""}`}
-                            aria-label={isAbilityCatalogMode ? "Ability catalog filters" : "Codex results"}
-                        >
-                            {!isAbilityCatalogMode ? (
-                                <div className="codex-resultsPane__header">
-                                    <div>
-                                        <div className="codex-sectionLabel">Results</div>
-                                        <div className="codex-resultsPane__title">
-                                            {activeKind === ALL_CODEX_KIND
-                                                ? "All encyclopedia entries"
-                                                : activeKindLabel}
-                                        </div>
-                                    </div>
-                                    <div className="codex-resultsPane__count">{filteredEntries.length}</div>
-                                </div>
-                            ) : null}
-
-                            {isAbilityCatalogMode ? (
-                                <AbilityArchiveRail
-                                    activeFilters={activeFactFilters}
-                                    filterOptions={factFilterOptions}
-                                    onClearFilters={clearFactFilters}
-                                    onToggleFilter={toggleFactFilter}
-                                />
-                            ) : null}
-
-                            {!isAbilityCatalogMode ? (
-                                <CodexResultList
-                                    ref={resultListRef}
-                                    entries={displayEntries}
-                                    selectedEntryKey={selectedListItem?.entryKey ?? null}
-                                    loading={loading}
-                                    error={error}
-                                    onSelect={(entry) => selectEntry(entry)}
-                                />
-                            ) : null}
-                        </aside>
-                    ) : null}
+                    <CodexLeftPane
+                        ref={resultListRef}
+                        activeFactFilters={activeFactFilters}
+                        activeKind={activeKind}
+                        activeKindLabel={activeKindLabel}
+                        displayEntries={displayEntries}
+                        error={error}
+                        filteredEntryCount={filteredEntries.length}
+                        filterOptions={factFilterOptions}
+                        isAbilityCatalogMode={isAbilityCatalogMode}
+                        isVisible={showResultsPane}
+                        loading={loading}
+                        selectedEntryKey={selectedListItem?.entryKey ?? null}
+                        onClearFactFilters={clearFactFilters}
+                        onSelectEntry={(entry) => selectEntry(entry)}
+                        onToggleFactFilter={toggleFactFilter}
+                    />
 
                     <section
                         className="codex-detailPane"

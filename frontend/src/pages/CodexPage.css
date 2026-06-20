@@ -459,50 +459,6 @@
     margin-left: 1px;
 }
 
-.codex-categoryShelf--abilityCatalog {
-    gap: 3px;
-    padding-top: 4px;
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__label {
-    color: rgba(195, 152, 77, 0.58);
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chips {
-    gap: 3px 4px;
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip {
-    min-height: 24px;
-    border-color: rgba(199, 189, 171, 0.032);
-    background: rgba(255, 255, 255, 0.002);
-    color: rgba(241, 234, 220, 0.52);
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:hover,
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:focus-visible {
-    border-color: rgba(195, 152, 77, 0.14);
-    background: rgba(255, 255, 255, 0.014);
-    color: rgba(241, 234, 220, 0.76);
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip.is-active {
-    border-color: color-mix(in srgb, var(--codex-accent) 28%, transparent);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent),
-        rgba(255, 127, 50, 0.052);
-    color: rgba(241, 234, 220, 0.9);
-}
-
-.codex-categoryShelf--abilityCatalog .codex-kindIcon--chip {
-    opacity: 0.5;
-}
-
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip.is-active .codex-kindIcon--chip,
-.codex-categoryShelf--abilityCatalog .codex-categoryShelf__chip:hover .codex-kindIcon--chip {
-    opacity: 0.82;
-}
-
 .codex-workspace {
     display: grid;
     grid-template-columns: minmax(330px, 400px) minmax(0, 1fr);

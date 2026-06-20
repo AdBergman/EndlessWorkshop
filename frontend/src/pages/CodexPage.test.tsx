@@ -793,7 +793,15 @@ describe("CodexPage", () => {
         render(
             <MemoryRouter initialEntries={["/codex?category=abilities"]}>
                 <Routes>
-                    <Route path="/codex" element={<CodexPage />} />
+                    <Route
+                        path="/codex"
+                        element={(
+                            <>
+                                <CodexPage />
+                                <LocationProbe />
+                            </>
+                        )}
+                    />
                 </Routes>
             </MemoryRouter>
         );
@@ -859,7 +867,30 @@ describe("CodexPage", () => {
 
         await user.click(within(abilitiesOverview).getByRole("button", { name: /precise volley/i }));
         expect(await screen.findByRole("heading", { name: "Precise Volley" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent(
+            "/codex?category=abilities&entry=UnitAbility_PreciseVolley"
+        );
         expect(screen.getByLabelText("Ability catalog filters")).toBeInTheDocument();
+
+        await user.click(within(mechanicGroup).getByRole("button", { name: /active\s+1/i }));
+        expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities");
+        expect(within(screen.getByLabelText("Abilities overview"))
+            .getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
+
+        await user.click(within(screen.getByRole("group", { name: "Ability Role" }))
+            .getByRole("button", { name: /status apply\s+1/i }));
+        expect(await screen.findByRole("heading", { name: "Status Apply Abilities" })).toBeInTheDocument();
+        await user.click(within(screen.getByLabelText("Abilities overview"))
+            .getByRole("button", { name: /precise volley/i }));
+        expect(await screen.findByRole("heading", { name: "Precise Volley" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent(
+            "/codex?category=abilities&entry=UnitAbility_PreciseVolley"
+        );
+
+        await user.click(within(filters).getByRole("button", { name: "Clear" }));
+        expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities");
     });
 
     it("does not apply catalog filters to Statuses in this prototype", async () => {
@@ -1017,6 +1048,55 @@ describe("CodexPage", () => {
             .toHaveAttribute("aria-pressed", "false");
         expect(within(getCategoryToolbar()).getByRole("button", { name: /actions/i }))
             .toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("uses the same compact top panel shell for Abilities and generic categories", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_A",
+                displayName: "Ability A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_A",
+                displayName: "Trait A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
+        const abilityHeader = document.querySelector(".codex-header") as HTMLElement;
+        const abilityShelf = document.querySelector(".codex-categoryShelf") as HTMLElement;
+        expect(abilityHeader).toHaveClass("codex-header--compact");
+        expect(abilityShelf).not.toHaveClass("codex-categoryShelf--abilityCatalog");
+
+        cleanup();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=traits"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Traits" })).toBeInTheDocument();
+        const traitsHeader = document.querySelector(".codex-header") as HTMLElement;
+        const traitsShelf = document.querySelector(".codex-categoryShelf") as HTMLElement;
+        expect(traitsHeader.className).toBe(abilityHeader.className);
+        expect(traitsShelf.className).toBe(abilityShelf.className);
     });
 
     it("keeps category routes on the existing category page layout", async () => {
