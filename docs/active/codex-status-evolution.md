@@ -503,6 +503,43 @@ Exporter findings discovered:
 
 - None new during STATUS-UI-003 implementation. Existing non-blocking findings remain unchanged.
 
+## STATUS-UI-004 Result - Status Detail Effect-First Layout
+
+Status: Implemented for review.
+
+What changed:
+
+- Status detail pages now use a Status-specific effect-first layout.
+- `Status mechanics` and `Effects` render before profile metadata.
+- The compact Status profile is limited to:
+  - Scope
+  - Duration, when present
+- Scope uses the accepted display cleanup:
+  - `Major Empire` -> `Empire`
+  - `Diplomatic Ambassy` -> `Diplomacy`
+- Duration uses the same light display cleanup as rows:
+  - `1 turns` -> `1 turn`
+- Thin Status detail pages show the honest fallback: `No public mechanics exported yet.`
+- Related entries remain unchanged and still provide exact permalink/navigation value.
+
+What did not change:
+
+- Status archive rows were not changed.
+- The Scope rail, search, route behavior, and Status detail URLs were not changed.
+- Status detail does not show row source hints.
+- Status detail does not add status icons or exporter-derived ownership/source guesses.
+- Generic non-Status detail pages still use the existing structured dossier path.
+
+Lessons:
+
+- Status details should be inspection pages, not generic fact grids.
+- Scope and Duration are useful profile facts, but Category/Kind/Status type should not lead the detail page.
+- Thin statuses need a trustworthy empty-mechanics state so exact links remain useful without inventing meaning.
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-004 implementation. Existing non-blocking findings remain unchanged.
+
 ## Open Questions
 
 - After mechanics-first rows are accepted, should rows show compact exact source hints?
@@ -579,6 +616,8 @@ Result notes:
 ### STATUS-UI-004 - Status Detail Effect-First Layout
 
 Goal: Make Status detail pages useful inspection/permalink pages.
+
+Status: implemented for review.
 
 Scope:
 

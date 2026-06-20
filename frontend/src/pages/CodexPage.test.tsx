@@ -2425,9 +2425,11 @@ describe("CodexPage", () => {
                 referenceKeys: [],
                 publicContextKeys: ["ActionCostModifier_Test"],
                 facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
                     { label: "Category", value: "Diplomacy" },
                     { label: "Kind", value: "Status" },
                     { label: "Duration", value: "10 turns" },
+                    { label: "Status type", value: "Public Opinion" },
                 ],
                 sections: [
                     {
@@ -2481,8 +2483,17 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Public Opinion Status" })).toBeInTheDocument();
         expect(screen.getByText("Status dossier")).toBeInTheDocument();
-        expect(screen.getAllByText("10 turns").length).toBeGreaterThan(0);
-        expect(screen.getByRole("heading", { name: "Status mechanics" })).toBeInTheDocument();
+        const mechanicsHeading = screen.getByRole("heading", { name: "Status mechanics" });
+        const statusProfile = screen.getByLabelText("Status profile");
+        expect(Boolean(mechanicsHeading.compareDocumentPosition(statusProfile) & Node.DOCUMENT_POSITION_FOLLOWING))
+            .toBe(true);
+        expect(within(statusProfile).getByText("Scope")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("Diplomacy")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("Duration")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("10 turns")).toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Kind")).not.toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Category")).not.toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Status type")).not.toBeInTheDocument();
         expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
 
@@ -2494,6 +2505,43 @@ describe("CodexPage", () => {
         expect(screen.getByRole("heading", { name: "Modifier mechanics" })).toBeInTheDocument();
         expect(screen.getByText("Reduces the action Influence cost.")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+    });
+
+    it("renders thin Status details with profile facts and no empty Duration label", async () => {
+        seedCodexEntries([
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Thin",
+                displayName: "Thin Unit Status",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                    { label: "Category", value: "Status" },
+                    { label: "Kind", value: "Status" },
+                ],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses&entry=Status_Unit_Thin"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Thin Unit Status" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Status mechanics" })).toBeInTheDocument();
+        expect(screen.getByText("No public mechanics exported yet.")).toBeInTheDocument();
+        const statusProfile = screen.getByLabelText("Status profile");
+        expect(within(statusProfile).getByText("Scope")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("Unit")).toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Duration")).not.toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Kind")).not.toBeInTheDocument();
+        expect(within(statusProfile).queryByText("Category")).not.toBeInTheDocument();
     });
 
     it("links exact status mentions inline in Ability Archive previews while keeping unresolved mentions plain", async () => {

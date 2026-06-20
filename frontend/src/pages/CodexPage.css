@@ -1398,6 +1398,10 @@
     gap: 20px;
 }
 
+.codex-statusDossier {
+    gap: 18px;
+}
+
 .codex-abilityProfile {
     display: flex;
     flex-wrap: wrap;
@@ -1405,7 +1409,15 @@
     margin: 0;
 }
 
-.codex-abilityProfile__item {
+.codex-statusProfile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.codex-abilityProfile__item,
+.codex-statusProfile__item {
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
@@ -1423,7 +1435,8 @@
     color: rgba(241, 234, 220, 0.58);
 }
 
-.codex-abilityProfile__item dt {
+.codex-abilityProfile__item dt,
+.codex-statusProfile__item dt {
     color: rgba(195, 152, 77, 0.74);
     font-size: 10px;
     font-weight: 700;
@@ -1431,7 +1444,8 @@
     text-transform: uppercase;
 }
 
-.codex-abilityProfile__item dd {
+.codex-abilityProfile__item dd,
+.codex-statusProfile__item dd {
     min-width: 0;
     margin: 0;
 }
@@ -1447,6 +1461,19 @@
 
 .codex-abilityMechanics {
     gap: 12px;
+}
+
+.codex-statusMechanics {
+    gap: 12px;
+}
+
+.codex-statusMechanics .codex-structuredBlock__lines {
+    gap: 10px;
+}
+
+.codex-statusMechanics__line {
+    color: rgba(241, 234, 220, 0.88);
+    font-size: 15.5px;
 }
 
 .codex-structuredItems--abilityMechanics {

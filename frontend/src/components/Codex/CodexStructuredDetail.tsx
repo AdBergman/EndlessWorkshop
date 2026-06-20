@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
+import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
+import { getStatusScopeDisplayLabel } from "@/lib/codex/codexStatusArchiveFilters";
 import {
     buildAbilityInlineLinkCandidates,
     type CodexAbilityInlineLinkCandidate,
@@ -216,6 +218,38 @@ function abilityProfileItems(parsed: ParsedCodexDescription): Array<{ label: str
     ].filter((item) => item.value.length > 0);
 }
 
+function formatStatusDurationValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    return trimmedValue.replace(/^1\s+turns$/i, "1 turn");
+}
+
+function statusProfileItems(entry: CodexEntry): Array<{ label: string; value: string }> {
+    const items: Array<{ label: string; value: string }> = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (label: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${label}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ label, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Scope").forEach((value) =>
+        addValue("Scope", getStatusScopeDisplayLabel(value))
+    );
+    getCodexFactValues(entry, "Duration").forEach((value) =>
+        addValue("Duration", formatStatusDurationValue(value))
+    );
+
+    return items;
+}
+
 function isSectionLabel(sectionLabel: string, expectedLabel: string): boolean {
     return sectionLabel.trim().toLowerCase() === expectedLabel.toLowerCase();
 }
@@ -226,6 +260,61 @@ function splitStructuredLines(lines: readonly string[]): string[] {
             .split(/\r?\n/)
             .map((value) => value.trim())
             .filter(Boolean)
+    );
+}
+
+function StructuredBlock({
+    entry,
+    section,
+    inlineLinkCandidates,
+    onSelectInlineEntry,
+    relatedEntries,
+    className,
+    lineClassName,
+    itemsClassName,
+}: {
+    entry: CodexEntry;
+    section: ParsedCodexDescription["sections"][number];
+    inlineLinkCandidates: CodexAbilityInlineLinkCandidate[];
+    onSelectInlineEntry?: (entry: CodexEntry) => void;
+    relatedEntries: CodexEntry[];
+    className?: string;
+    lineClassName?: string;
+    itemsClassName?: string;
+}) {
+    return (
+        <section className={["codex-structuredBlock", className].filter(Boolean).join(" ")} key={section.label}>
+            <h3 className="codex-structuredBlock__heading">{section.label}</h3>
+            {section.lines.length > 0 ? (
+                <div className="codex-structuredBlock__lines">
+                    {splitStructuredLines(section.lines).map((line, index) => (
+                        <RenderLine
+                            key={`${section.label}-${index}`}
+                            line={line}
+                            className={["codex-structuredBlock__line", lineClassName].filter(Boolean).join(" ")}
+                            inlineLinkCandidates={inlineLinkCandidates}
+                            onSelectInlineEntry={onSelectInlineEntry}
+                            lineKey={`${section.label}-${index}`}
+                        />
+                    ))}
+                </div>
+            ) : null}
+            {section.items?.length ? (
+                <div className={["codex-structuredItems", itemsClassName].filter(Boolean).join(" ")}>
+                    {section.items.map((item) => (
+                        <StructuredSectionItem
+                            item={item}
+                            inlineLinkCandidates={inlineLinkCandidates}
+                            onSelectInlineEntry={onSelectInlineEntry}
+                            entry={entry}
+                            sectionLabel={section.label}
+                            relatedEntries={relatedEntries}
+                            key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
+                        />
+                    ))}
+                </div>
+            ) : null}
+        </section>
     );
 }
 
@@ -278,38 +367,16 @@ function AbilityStructuredDetail({
 
             {effectsSections.length > 0 ? (
                 effectsSections.map((section) => (
-                    <section className="codex-structuredBlock codex-abilityEffects" key={section.label}>
-                        <h3 className="codex-structuredBlock__heading">{section.label}</h3>
-                        {section.lines.length > 0 ? (
-                            <div className="codex-structuredBlock__lines">
-                                {splitStructuredLines(section.lines).map((line, index) => (
-                                    <RenderLine
-                                        key={`${section.label}-${index}`}
-                                        line={line}
-                                        className="codex-structuredBlock__line codex-abilityEffects__line"
-                                        inlineLinkCandidates={inlineLinkCandidates}
-                                        onSelectInlineEntry={onSelectInlineEntry}
-                                        lineKey={`${section.label}-${index}`}
-                                    />
-                                ))}
-                            </div>
-                        ) : null}
-                        {section.items?.length ? (
-                            <div className="codex-structuredItems">
-                                {section.items.map((item) => (
-                                    <StructuredSectionItem
-                                        item={item}
-                                        inlineLinkCandidates={inlineLinkCandidates}
-                                        onSelectInlineEntry={onSelectInlineEntry}
-                                        entry={entry}
-                                        sectionLabel={section.label}
-                                        relatedEntries={relatedEntries}
-                                        key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
-                                    />
-                                ))}
-                            </div>
-                        ) : null}
-                    </section>
+                    <StructuredBlock
+                        key={section.label}
+                        entry={entry}
+                        section={section}
+                        inlineLinkCandidates={inlineLinkCandidates}
+                        onSelectInlineEntry={onSelectInlineEntry}
+                        relatedEntries={relatedEntries}
+                        className="codex-abilityEffects"
+                        lineClassName="codex-abilityEffects__line"
+                    />
                 ))
             ) : (
                 <p className="codex-detail__placeholder">{emptyMessageFor(entry.exportKind)}</p>
@@ -330,73 +397,139 @@ function AbilityStructuredDetail({
             ) : null}
 
             {battleMechanicsSections.map((section) => (
-                <section className="codex-structuredBlock codex-abilityMechanics" key={section.label}>
-                    <h3 className="codex-structuredBlock__heading">{section.label}</h3>
-                    {section.lines.length > 0 ? (
-                        <div className="codex-structuredBlock__lines">
-                            {splitStructuredLines(section.lines).map((line, index) => (
-                                <RenderLine
-                                    key={`${section.label}-${index}`}
-                                    line={line}
-                                    className="codex-structuredBlock__line"
-                                    inlineLinkCandidates={inlineLinkCandidates}
-                                    onSelectInlineEntry={onSelectInlineEntry}
-                                    lineKey={`${section.label}-${index}`}
-                                />
-                            ))}
-                        </div>
-                    ) : null}
-                    {section.items?.length ? (
-                        <div className="codex-structuredItems codex-structuredItems--abilityMechanics">
-                            {section.items.map((item) => (
-                                <StructuredSectionItem
-                                    item={item}
-                                    inlineLinkCandidates={inlineLinkCandidates}
-                                    onSelectInlineEntry={onSelectInlineEntry}
-                                    entry={entry}
-                                    sectionLabel={section.label}
-                                    relatedEntries={relatedEntries}
-                                    key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
-                                />
-                            ))}
-                        </div>
-                    ) : null}
-                </section>
+                <StructuredBlock
+                    key={section.label}
+                    entry={entry}
+                    section={section}
+                    inlineLinkCandidates={inlineLinkCandidates}
+                    onSelectInlineEntry={onSelectInlineEntry}
+                    relatedEntries={relatedEntries}
+                    className="codex-abilityMechanics"
+                    itemsClassName="codex-structuredItems--abilityMechanics"
+                />
             ))}
 
             {remainingSections.map((section) => (
-                <section className="codex-structuredBlock" key={section.label}>
-                    <h3 className="codex-structuredBlock__heading">{section.label}</h3>
-                    {section.lines.length > 0 ? (
-                        <div className="codex-structuredBlock__lines">
-                            {splitStructuredLines(section.lines).map((line, index) => (
-                                <RenderLine
-                                    key={`${section.label}-${index}`}
-                                    line={line}
-                                    className="codex-structuredBlock__line"
-                                    inlineLinkCandidates={inlineLinkCandidates}
-                                    onSelectInlineEntry={onSelectInlineEntry}
-                                    lineKey={`${section.label}-${index}`}
-                                />
-                            ))}
-                        </div>
-                    ) : null}
-                    {section.items?.length ? (
-                        <div className="codex-structuredItems">
-                            {section.items.map((item) => (
-                                <StructuredSectionItem
-                                    item={item}
-                                    inlineLinkCandidates={inlineLinkCandidates}
-                                    onSelectInlineEntry={onSelectInlineEntry}
-                                    entry={entry}
-                                    sectionLabel={section.label}
-                                    relatedEntries={relatedEntries}
-                                    key={`${section.label}-${item.label}-${item.referenceKey ?? ""}`}
-                                />
-                            ))}
-                        </div>
-                    ) : null}
+                <StructuredBlock
+                    key={section.label}
+                    entry={entry}
+                    section={section}
+                    inlineLinkCandidates={inlineLinkCandidates}
+                    onSelectInlineEntry={onSelectInlineEntry}
+                    relatedEntries={relatedEntries}
+                />
+            ))}
+
+            {parsed.bodyLines.length > 0 ? (
+                <section className="codex-structuredBlock">
+                    <h3 className="codex-structuredBlock__heading">Notes</h3>
+                    <div className="codex-detail__description codex-detail__description--structuredNotes">
+                        {parsed.bodyLines.map((line, index) => (
+                            <RenderLine
+                                key={`${entry.entryKey}-note-${index}`}
+                                line={line}
+                                className="codex-detail__line"
+                                inlineLinkCandidates={inlineLinkCandidates}
+                                onSelectInlineEntry={onSelectInlineEntry}
+                                lineKey={`${entry.entryKey}-note-${index}`}
+                            />
+                        ))}
+                    </div>
                 </section>
+            ) : null}
+        </section>
+    );
+}
+
+function StatusStructuredDetail({
+    entry,
+    parsed,
+    relatedEntries,
+    inlineLinkCandidates,
+    onSelectInlineEntry,
+}: {
+    entry: CodexEntry;
+    parsed: ParsedCodexDescription;
+    relatedEntries: CodexEntry[];
+    inlineLinkCandidates: CodexAbilityInlineLinkCandidate[];
+    onSelectInlineEntry?: (entry: CodexEntry) => void;
+}) {
+    const profileItems = statusProfileItems(entry);
+    const mechanicsSections = parsed.sections.filter((section) => isSectionLabel(section.label, "Status mechanics"));
+    const effectsSections = parsed.sections.filter((section) => isSectionLabel(section.label, "Effects"));
+    const remainingSections = parsed.sections.filter((section) => (
+        !isSectionLabel(section.label, "Status mechanics") &&
+        !isSectionLabel(section.label, "Effects")
+    ));
+    const primarySections = [...mechanicsSections, ...effectsSections];
+    const hasPrimaryContent = primarySections.some((section) =>
+        section.lines.length > 0 || (section.items?.length ?? 0) > 0
+    );
+    const hasUsefulStructuredContent = profileItems.length > 0 ||
+        hasPrimaryContent ||
+        remainingSections.length > 0 ||
+        parsed.bodyLines.length > 0;
+
+    if (!hasUsefulStructuredContent) {
+        return (
+            <section className="codex-detail__section" aria-labelledby="codex-status-detail-heading">
+                <div className="codex-sectionLabel" id="codex-status-detail-heading">
+                    Status dossier
+                </div>
+                <p className="codex-detail__placeholder">{emptyMessageFor(entry.exportKind)}</p>
+            </section>
+        );
+    }
+
+    return (
+        <section
+            className="codex-detail__section codex-structuredDossier codex-statusDossier"
+            aria-labelledby="codex-status-detail-heading"
+        >
+            <div className="codex-sectionLabel" id="codex-status-detail-heading">
+                Status dossier
+            </div>
+
+            {hasPrimaryContent ? (
+                primarySections.map((section) => (
+                    <StructuredBlock
+                        key={section.label}
+                        entry={entry}
+                        section={section}
+                        inlineLinkCandidates={inlineLinkCandidates}
+                        onSelectInlineEntry={onSelectInlineEntry}
+                        relatedEntries={relatedEntries}
+                        className="codex-statusMechanics"
+                        lineClassName="codex-statusMechanics__line"
+                    />
+                ))
+            ) : (
+                <section className="codex-structuredBlock codex-statusMechanics">
+                    <h3 className="codex-structuredBlock__heading">Status mechanics</h3>
+                    <p className="codex-detail__placeholder">No public mechanics exported yet.</p>
+                </section>
+            )}
+
+            {profileItems.length > 0 ? (
+                <dl className="codex-statusProfile" aria-label="Status profile">
+                    {profileItems.map((item) => (
+                        <div className="codex-statusProfile__item" key={`${item.label}-${item.value}`}>
+                            <dt>{item.label}</dt>
+                            <dd>{renderDescriptionLine(formatCodexMajorFactionText(item.value))}</dd>
+                        </div>
+                    ))}
+                </dl>
+            ) : null}
+
+            {remainingSections.map((section) => (
+                <StructuredBlock
+                    key={section.label}
+                    entry={entry}
+                    section={section}
+                    inlineLinkCandidates={inlineLinkCandidates}
+                    onSelectInlineEntry={onSelectInlineEntry}
+                    relatedEntries={relatedEntries}
+                />
             ))}
 
             {parsed.bodyLines.length > 0 ? (
@@ -437,10 +570,24 @@ export default function CodexStructuredDetail({
     const hasDescription = descriptionLines.some((line) => line.trim().length > 0);
     const hasOnlyClassificationMetadata = hasOnlyClassificationFacts(parsed);
     const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
+    const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
+    const hasStatusProfile = isStatusEntry && statusProfileItems(entry).length > 0;
 
     if (isAbilityEntry && parsed.hasStructuredContent) {
         return (
             <AbilityStructuredDetail
+                entry={entry}
+                parsed={parsed}
+                relatedEntries={relatedEntries}
+                inlineLinkCandidates={inlineLinkCandidates}
+                onSelectInlineEntry={onSelectInlineEntry}
+            />
+        );
+    }
+
+    if (isStatusEntry && (parsed.hasStructuredContent || hasStatusProfile)) {
+        return (
+            <StatusStructuredDetail
                 entry={entry}
                 parsed={parsed}
                 relatedEntries={relatedEntries}
