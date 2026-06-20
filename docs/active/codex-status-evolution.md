@@ -28,11 +28,11 @@ Current strengths:
 - Many entries include useful `Status mechanics` sections.
 - Exact references exist from some Abilities, Diplomatic Treaties, Actions, and Factions.
 - Statuses remain searchable, linkable, and direct-routable.
+- Status archive rows now preview exported mechanics/effects when present.
 
 Current weaknesses:
 
 - Statuses still feel like generic records rather than an archive.
-- The generic left result list does not support status planning.
 - `Status type` is noisy and incomplete.
 - Some status names are raw/debug-like.
 - Many entries lack public mechanics/effects.
@@ -460,6 +460,49 @@ Exporter findings discovered:
 
 - None new during STATUS-UI-002 implementation. Existing non-blocking Scope display cleanup remains tracked above.
 
+## STATUS-UI-003 Result - Status Archive Row Effect Preview Foundation
+
+Status: Implemented for review.
+
+What changed:
+
+- Status overview rows now use a Status-specific archive row treatment.
+- Rows render the generic Status icon, Status name, exported mechanics/effect previews, then Scope/Duration metadata.
+- Preview source priority:
+  1. `Status mechanics`
+  2. `Effects`
+  3. other structured sections, excluding relationship/provenance-style sections such as `Linked cost modifier`
+- Preview lines are capped at three lines.
+- Thin statuses remain visible and show: `No public mechanics exported yet.`
+- Scope display uses the same accepted map as the rail:
+  - `Major Empire` -> `Empire`
+  - `Diplomatic Ambassy` -> `Diplomacy`
+- Duration appears when present.
+- `1 turns` is display-cleaned to `1 turn` in archive rows only.
+
+What worked:
+
+- Existing exported `Status mechanics` and `Effects` data was enough for a useful first row enrichment.
+- Token/icon rendering could be preserved by reusing existing description-line rendering.
+- The row treatment stayed Status-specific and did not require a generic category row framework.
+
+What did not change:
+
+- Status detail pages remain unchanged.
+- Status type remains out of navigation and row prominence.
+- Relationship/source hints remain deferred.
+- Per-status icons remain deferred until explicit exporter metadata exists.
+
+New open questions:
+
+- Is three preview lines the right cap for rich Statuses after visual review on the full dataset?
+- Should future rows prefer mechanics over duplicate `Effects` more aggressively when both express the same public effect?
+- Should the archive row eventually show compact source hints after details get relationship grouping?
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-003 implementation. Existing non-blocking findings remain unchanged.
+
 ## Open Questions
 
 - After mechanics-first rows are accepted, should rows show compact exact source hints?
@@ -510,6 +553,8 @@ STATUS-EVOLUTION-002 found no need for another design pass before this slice.
 
 Goal: Make Status overview rows communicate what each status does.
 
+Status: implemented for review.
+
 Scope:
 
 - Status overview rows only.
@@ -524,6 +569,12 @@ Dependencies:
 Risk:
 
 - Medium, because thin entries need graceful presentation.
+
+Result notes:
+
+- Status rows now show up to three mechanics/effect preview lines.
+- Thin statuses remain visible with an honest missing-mechanics fallback.
+- Scope and Duration remain supporting metadata.
 
 ### STATUS-UI-004 - Status Detail Effect-First Layout
 

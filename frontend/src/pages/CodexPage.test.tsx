@@ -682,6 +682,23 @@ describe("CodexPage", () => {
                     { label: "Duration", value: "10 turns" },
                     { label: "Status type", value: "Public Opinion" },
                 ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        lines: ["-25 [PublicOpinion] Public Opinion"],
+                        items: [{
+                            label: "Public Opinion",
+                            facts: [
+                                { label: "Stat", value: "Public Opinion" },
+                                { label: "Value", value: "-25" },
+                            ],
+                        }],
+                    },
+                    {
+                        title: "Effects",
+                        lines: ["Diplomatic pressure while borders are closed."],
+                    },
+                ],
             },
             {
                 exportKind: "statuses",
@@ -689,6 +706,51 @@ describe("CodexPage", () => {
                 displayName: "Unit 10 turns Name Only",
                 descriptionLines: ["Unit scope and 10 turns appear in prose only."],
                 referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                    { label: "Duration", value: "1 turns" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Rich",
+                displayName: "Rich Unit Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        items: [
+                            {
+                                label: "Damage",
+                                lines: ["+25% [Damage] Damage"],
+                                facts: [
+                                    { label: "Stat", value: "Damage" },
+                                    { label: "Value", value: "+25%" },
+                                ],
+                            },
+                            {
+                                label: "Critical",
+                                lines: ["+20% [Focus] Critical"],
+                                facts: [
+                                    { label: "Stat", value: "Critical" },
+                                    { label: "Value", value: "+20%" },
+                                ],
+                            },
+                            {
+                                label: "Action Token",
+                                lines: ["Disables Action Token"],
+                            },
+                            {
+                                label: "Movement Points",
+                                lines: ["Disables [MovementPoints] Movement Points"],
+                            },
+                        ],
+                    },
+                ],
             },
         ]);
 
@@ -706,19 +768,35 @@ describe("CodexPage", () => {
         const statusFilters = screen.getByLabelText("Statuses filters");
         const scopeGroup = within(statusFilters).getByRole("group", { name: "Scope" });
         expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+1/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i })).toBeInTheDocument();
 
         const statusesOverview = screen.getByLabelText("Statuses overview");
         const overviewRow = within(statusesOverview).getByRole("button", { name: /public opinion status/i });
         expect(overviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toBeInTheDocument();
-        const metadata = within(overviewRow).getByLabelText("Exported metadata");
-        expect(within(metadata).getByText("Scope")).toBeInTheDocument();
-        expect(within(metadata).getByText("Diplomatic Ambassy")).toBeInTheDocument();
-        expect(within(metadata).getByText("Duration")).toBeInTheDocument();
+        const effectPreview = within(overviewRow).getByLabelText("Status effect preview");
+        expect(effectPreview).toHaveTextContent("-25");
+        expect(effectPreview).toHaveTextContent("Public Opinion");
+        expect(effectPreview).toHaveTextContent("Diplomatic pressure while borders are closed.");
+        expect(effectPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(2);
+        const metadata = within(overviewRow).getByLabelText("Status metadata");
+        expect(within(metadata).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
         expect(within(metadata).queryByText("Public Opinion")).not.toBeInTheDocument();
+        expect(within(overviewRow).queryByText("Status type")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(statusesOverview).getByRole("button", { name: /unit 10 turns name only/i });
-        expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
+        expect(within(thinOverviewRow).getByText("No public mechanics exported yet.")).toBeInTheDocument();
+        const thinMetadata = within(thinOverviewRow).getByLabelText("Status metadata");
+        expect(within(thinMetadata).getByText("Unit")).toBeInTheDocument();
+        expect(within(thinMetadata).getByText("1 turn")).toBeInTheDocument();
+
+        const richOverviewRow = within(statusesOverview).getByRole("button", { name: /rich unit status/i });
+        const richPreview = within(richOverviewRow).getByLabelText("Status effect preview");
+        expect(richPreview).toHaveTextContent("Damage");
+        expect(richPreview).toHaveTextContent("Critical");
+        expect(richPreview).toHaveTextContent("Disables Action Token");
+        expect(richPreview).not.toHaveTextContent("Disables Movement Points");
+        expect(richPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(3);
     });
 
     it("does not render Ability or Status overview metadata chips for other Codex categories", async () => {

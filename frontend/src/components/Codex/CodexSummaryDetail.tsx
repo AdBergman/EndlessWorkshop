@@ -2,6 +2,7 @@ import { useMemo, type RefObject } from "react";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 import { buildAbilityInlineLinkCandidates } from "@/lib/codex/codexAbilityInlineLinks";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
+import { getStatusScopeDisplayLabel } from "@/lib/codex/codexStatusArchiveFilters";
 import {
     formatCodexMajorFactionText,
     getCodexEntryPreview,
@@ -59,6 +60,10 @@ type AbilityCatalogMetadataItem = {
     key: string;
     value: string;
 };
+type StatusArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
@@ -74,6 +79,7 @@ const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
 };
 const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
+const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -83,6 +89,10 @@ const ABILITY_TAXONOMY_TERMS = new Set([
     "passive",
     "reaction",
     "tactical",
+]);
+const STATUS_ARCHIVE_PRIMARY_SECTIONS = ["status mechanics", "effects"];
+const STATUS_ARCHIVE_EXCLUDED_SECTIONS = new Set([
+    "linked cost modifier",
 ]);
 
 function normalizeAbilityTaxonomyText(value: string): string {
@@ -129,6 +139,13 @@ function formatAbilityCostValue(value: string): string {
 
     if (normalizeAbilityTaxonomyText(trimmedValue) === "free") return "Free";
     return /^cost\b/i.test(trimmedValue) ? trimmedValue : `Cost ${trimmedValue}`;
+}
+
+function formatStatusDurationValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    return trimmedValue.replace(/^1\s+turns$/i, "1 turn");
 }
 
 function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
@@ -179,6 +196,31 @@ function getAbilityCatalogMetadata(entry: CodexEntry): AbilityCatalogMetadataIte
         if (!isExceptionalAbilityCost(value)) return;
         addValue("cost", formatAbilityCostValue(value));
     });
+
+    return items;
+}
+
+function getStatusArchiveMetadata(entry: CodexEntry): StatusArchiveMetadataItem[] {
+    const items: StatusArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Scope").forEach((value) =>
+        addValue("scope", getStatusScopeDisplayLabel(value))
+    );
+    getCodexFactValues(entry, "Duration").forEach((value) =>
+        addValue("duration", formatStatusDurationValue(value))
+    );
 
     return items;
 }
@@ -270,6 +312,57 @@ function getAbilityCatalogEffectPreviewLines(entry: CodexEntry, searchQuery = ""
     return Array.from(selectedIndexes)
         .sort((left, right) => left - right)
         .map((index) => effectLines[index]);
+}
+
+function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "statuses") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const sectionsByPriority = [
+        ...STATUS_ARCHIVE_PRIMARY_SECTIONS
+            .map((label) => parsed.sections.find((section) => section.label.trim().toLowerCase() === label))
+            .filter((section): section is NonNullable<typeof section> => Boolean(section)),
+        ...parsed.sections.filter((section) => {
+            const normalizedLabel = section.label.trim().toLowerCase();
+            return (
+                !STATUS_ARCHIVE_PRIMARY_SECTIONS.includes(normalizedLabel) &&
+                !STATUS_ARCHIVE_EXCLUDED_SECTIONS.has(normalizedLabel)
+            );
+        }),
+    ];
+
+    const previewLines: string[] = [];
+    const seen = new Set<string>();
+    const addLine = (line: string) => {
+        for (const rawValue of line.split(/\r?\n/)) {
+            const value = rawValue.trim();
+            if (!value) continue;
+
+            const normalized = normalizeAbilityTaxonomyText(value);
+            if (seen.has(normalized)) continue;
+
+            seen.add(normalized);
+            previewLines.push(value);
+        }
+    };
+
+    for (const section of sectionsByPriority) {
+        section.lines.forEach(addLine);
+
+        if (section.lines.length === 0) {
+            for (const item of section.items ?? []) {
+                item.lines.forEach(addLine);
+
+                if (item.lines.length === 0) {
+                    item.facts.forEach((fact) => addLine(fact.value));
+                }
+            }
+        }
+
+        if (previewLines.length >= MAX_STATUS_EFFECT_PREVIEW_LINES) break;
+    }
+
+    return previewLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
 }
 
 function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
@@ -369,8 +462,10 @@ export default function CodexSummaryDetail({
                             : getCodexSecondaryContext(entry);
                         const showRichOverviewRow = supportsRichOverviewRow(entry);
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
+                        const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
+                        const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -379,6 +474,9 @@ export default function CodexSummaryDetail({
                             : [];
                         const abilityInlineLinkCandidates = useCatalogRowHierarchy
                             ? buildAbilityInlineLinkCandidates(entry, resolveRelatedEntries(entry, referenceIndexes))
+                            : [];
+                        const statusEffectPreviewLines = useStatusArchiveRowHierarchy
+                            ? getStatusArchiveEffectPreviewLines(entry)
                             : [];
                         const visibleCatalogPreview = (
                             useCatalogRowHierarchy &&
@@ -525,6 +623,67 @@ export default function CodexSummaryDetail({
                                         </span>
                                     ) : null}
                                 </div>
+                            );
+                        }
+
+                        if (useStatusArchiveRowHierarchy) {
+                            return (
+                                <button
+                                    key={entry.entryKey}
+                                    type="button"
+                                    className="codex-summaryList__item codex-summaryList__item--statusArchive"
+                                    onClick={() => onSelectEntry(entry)}
+                                >
+                                    <span className="codex-summaryList__titleLine">
+                                        <span className="codex-summaryList__titleIdentity">
+                                            <CodexEntryIcon
+                                                entry={entry}
+                                                label={getCodexEntryLabel(entry)}
+                                                className="codex-kindIcon codex-kindIcon--summaryEntry"
+                                                size={20}
+                                            />
+                                            <span className="codex-summaryList__name">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
+                                        </span>
+                                    </span>
+
+                                    <span
+                                        className="codex-summaryList__statusEffects"
+                                        aria-label="Status effect preview"
+                                    >
+                                        {statusEffectPreviewLines.length > 0 ? (
+                                            statusEffectPreviewLines.map((line, index) => (
+                                                <span
+                                                    className="codex-summaryList__statusEffectLine"
+                                                    key={`${entry.entryKey}-status-preview-${index}`}
+                                                >
+                                                    {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="codex-summaryList__statusFallback">
+                                                No public mechanics exported yet.
+                                            </span>
+                                        )}
+                                    </span>
+
+                                    {statusArchiveMetadata.length > 0 ? (
+                                        <span
+                                            className="codex-summaryList__metadata codex-summaryList__metadata--status"
+                                            aria-label="Status metadata"
+                                        >
+                                            {statusArchiveMetadata.map((item) => (
+                                                <span
+                                                    key={`${item.key}-${item.value}`}
+                                                    className="codex-summaryList__metadataText"
+                                                >
+                                                    {item.value}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    ) : null}
+                                </button>
                             );
                         }
 
