@@ -752,6 +752,22 @@ describe("CodexPage", () => {
                     },
                 ],
             },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_EffectsOnly",
+                displayName: "Effects Only City Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Will greatly improve Approval of this City."],
+                    },
+                ],
+            },
         ]);
 
         render(
@@ -767,17 +783,18 @@ describe("CodexPage", () => {
         expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
         const statusFilters = screen.getByLabelText("Statuses filters");
         const scopeGroup = within(statusFilters).getByRole("group", { name: "Scope" });
-        expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+1/i })).toBeInTheDocument();
-        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /other\s+4/i })).toBeInTheDocument();
+        expect(within(scopeGroup).queryByRole("button", { name: /diplomacy\s+1/i })).not.toBeInTheDocument();
+        expect(within(scopeGroup).queryByRole("button", { name: /unit\s+2/i })).not.toBeInTheDocument();
 
         const statusesOverview = screen.getByLabelText("Statuses overview");
         const overviewRow = within(statusesOverview).getByRole("button", { name: /public opinion status/i });
-        expect(overviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toBeInTheDocument();
+        expect(overviewRow.querySelector("img.codex-kindIcon--summaryEntry")).not.toBeInTheDocument();
         const effectPreview = within(overviewRow).getByLabelText("Status effect preview");
         expect(effectPreview).toHaveTextContent("-25");
         expect(effectPreview).toHaveTextContent("Public Opinion");
-        expect(effectPreview).toHaveTextContent("Diplomatic pressure while borders are closed.");
-        expect(effectPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(2);
+        expect(effectPreview).not.toHaveTextContent("Diplomatic pressure while borders are closed.");
+        expect(effectPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(1);
         const metadata = within(overviewRow).getByLabelText("Status metadata");
         expect(within(metadata).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
@@ -797,6 +814,10 @@ describe("CodexPage", () => {
         expect(richPreview).toHaveTextContent("Disables Action Token");
         expect(richPreview).not.toHaveTextContent("Disables Movement Points");
         expect(richPreview.querySelectorAll(".codex-summaryList__statusEffectLine")).toHaveLength(3);
+
+        const effectsOnlyRow = within(statusesOverview).getByRole("button", { name: /effects only city status/i });
+        const effectsOnlyPreview = within(effectsOnlyRow).getByLabelText("Status effect preview");
+        expect(effectsOnlyPreview).toHaveTextContent("Will greatly improve Approval of this City.");
     });
 
     it("does not render Ability or Status overview metadata chips for other Codex categories", async () => {
@@ -1031,6 +1052,136 @@ describe("CodexPage", () => {
             },
             {
                 exportKind: "statuses",
+                entryKey: "Status_Unit_Brace",
+                displayName: "Brace",
+                descriptionLines: ["Another unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Guarded",
+                displayName: "Guarded",
+                descriptionLines: ["Another unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Focused",
+                displayName: "Focused",
+                descriptionLines: ["Another unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Watch",
+                displayName: "City Watch",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Festival",
+                displayName: "Festival",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Garrison",
+                displayName: "Garrisoned",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Riot",
+                displayName: "Riot Watch",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Diplomacy_Rumor",
+                displayName: "Rumor Campaign",
+                descriptionLines: ["Another diplomacy status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Diplomacy_Embargo",
+                displayName: "Embargo Pressure",
+                descriptionLines: ["Another diplomacy status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Diplomacy_Favor",
+                displayName: "Diplomatic Favor",
+                descriptionLines: ["Another diplomacy status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Diplomacy_Grievance",
+                displayName: "Grievance",
+                descriptionLines: ["Another diplomacy status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Army_Routed",
+                displayName: "Routed Army",
+                descriptionLines: ["A small-scope army status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Army" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Population_Unrest",
+                displayName: "Population Unrest",
+                descriptionLines: ["A small-scope population status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Population" },
+                ],
+            },
+            {
+                exportKind: "statuses",
                 entryKey: "Status_ProseOnly",
                 displayName: "Unit 10 turns Prose Only",
                 descriptionLines: ["Unit and 10 turns appear in prose only."],
@@ -1059,9 +1210,12 @@ describe("CodexPage", () => {
         expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
         const filters = screen.getByLabelText("Statuses filters");
         const scopeGroup = within(filters).getByRole("group", { name: "Scope" });
-        expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+1/i })).toBeInTheDocument();
-        expect(within(scopeGroup).getByRole("button", { name: /city\s+1/i })).toBeInTheDocument();
-        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+5/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /city\s+5/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /unit\s+5/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /other\s+2/i })).toBeInTheDocument();
+        expect(within(scopeGroup).queryByRole("button", { name: /army\s+1/i })).not.toBeInTheDocument();
+        expect(within(scopeGroup).queryByRole("button", { name: /population\s+1/i })).not.toBeInTheDocument();
         expect(within(scopeGroup).queryByRole("button", { name: /unit 10 turns prose only/i }))
             .not.toBeInTheDocument();
 
@@ -1073,9 +1227,25 @@ describe("CodexPage", () => {
         expect(within(statusesOverview).getByRole("button", { name: /unit 10 turns prose only/i }))
             .toBeInTheDocument();
 
-        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+        await user.click(within(scopeGroup).getByRole("button", { name: /other\s+2/i }));
 
-        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }))
+        expect(within(scopeGroup).getByRole("button", { name: /other\s+2/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        expect(within(statusesOverview).getByRole("button", { name: /routed army/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /population unrest/i })).toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /hobbled/i })).not.toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /public opinion status/i }))
+            .not.toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /other\s+2/i }));
+
+        expect(within(statusesOverview).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /unit 10 turns prose only/i }))
+            .toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+5/i }));
+
+        expect(within(scopeGroup).getByRole("button", { name: /unit\s+5/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
         expect(within(statusesOverview).getByRole("button", { name: /shielded/i })).toBeInTheDocument();
@@ -1084,20 +1254,20 @@ describe("CodexPage", () => {
         expect(within(statusesOverview).queryByRole("button", { name: /unit 10 turns prose only/i }))
             .not.toBeInTheDocument();
 
-        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+5/i }));
 
         expect(within(statusesOverview).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
         expect(within(statusesOverview).getByRole("button", { name: /unit 10 turns prose only/i }))
             .toBeInTheDocument();
 
-        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+1/i }));
+        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+5/i }));
         expect(within(statusesOverview).getByRole("button", { name: /ahead in the polls/i })).toBeInTheDocument();
         expect(within(statusesOverview).queryByRole("button", { name: /hobbled/i })).not.toBeInTheDocument();
 
         await user.click(within(filters).getByRole("button", { name: "Clear" }));
         expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
 
-        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+5/i }));
         await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "hobbled");
 
         expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
@@ -1130,6 +1300,46 @@ describe("CodexPage", () => {
                     { label: "Scope", value: "City" },
                 ],
             },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Watch",
+                displayName: "City Watch",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Festival",
+                displayName: "Festival",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Garrison",
+                displayName: "Garrisoned",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Riot",
+                displayName: "Riot Watch",
+                descriptionLines: ["Another city status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
         ]);
 
         render(
@@ -1152,7 +1362,7 @@ describe("CodexPage", () => {
         const filters = screen.getByLabelText("Statuses filters");
         const scopeGroup = within(filters).getByRole("group", { name: "Scope" });
 
-        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+1/i }));
+        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+5/i }));
 
         expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses");
@@ -2436,6 +2646,10 @@ describe("CodexPage", () => {
                         title: "Status mechanics",
                         lines: ["Changes treaty Public Opinion while active."],
                     },
+                    {
+                        title: "Effects",
+                        lines: ["Diplomatic pressure while borders are closed."],
+                    },
                 ],
             },
             {
@@ -2495,6 +2709,8 @@ describe("CodexPage", () => {
         expect(within(statusProfile).queryByText("Category")).not.toBeInTheDocument();
         expect(within(statusProfile).queryByText("Status type")).not.toBeInTheDocument();
         expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
+        expect(screen.getByText("Diplomatic pressure while borders are closed.")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });

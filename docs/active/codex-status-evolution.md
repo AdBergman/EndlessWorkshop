@@ -36,7 +36,7 @@ Current weaknesses:
 - `Status type` is noisy and incomplete.
 - Some status names are raw/debug-like.
 - Many entries lack public mechanics/effects.
-- Status icons currently resolve through generic kind icon behavior.
+- Status archive rows hide generic kind icons because the repeated population/person icon looked misleading.
 - Detail pages expose useful mechanics but are not yet shaped around player inspection.
 
 ## STATUS-UI-001 Findings
@@ -191,7 +191,7 @@ Current data:
 
 Archive row should show:
 
-- name and generic status icon
+- name
 - Scope: Unit
 - both disable lines, because they are the status content
 - compact source hint only if it does not crowd the row
@@ -346,7 +346,7 @@ Rationale: sources are trust and exploration value, but row content should answe
 
 ### Icon Strategy
 
-Until explicit status icon metadata exists, use the generic Status icon.
+Until explicit status icon metadata exists, do not render a Status archive row icon.
 
 Do not use:
 
@@ -354,7 +354,7 @@ Do not use:
 - status-effect SVG filename matching
 - key/name/prose-derived icons
 
-Rationale: generic icon preserves visual consistency without implying unproven status identity.
+Rationale: hiding the generic archive-row icon is less misleading than repeating one unrelated-looking icon across every Status. Generic kind icons can still be used in shared/detail contexts until a better explicit contract exists.
 
 ### Archive vs Detail Model
 
@@ -392,12 +392,12 @@ Detail should prioritize:
 - No frontend inference from keys, names, prose, or SVG filenames.
 - Exporter findings go to the active exporter backlog instead of interrupting frontend category work.
 - Thin Status entries remain visible and valid.
-- Generic status icons are acceptable until explicit status icon metadata exists.
+- Status archive rows should hide generic status icons until explicit status icon metadata exists.
 - Status archive rows should be mechanics/effect-first.
 - Scope should appear in both the left rail and rows.
 - Duration should appear in rows when present, and in detail when present.
 - Full source relationship lists belong in detail first; row source hints are deferred.
-- Use the generic Status icon until explicit status icon metadata exists.
+- Do not use scope/status-effect/name/key-derived icons for Status archive rows.
 
 ## Exporter Findings Recorded
 
@@ -467,7 +467,7 @@ Status: Implemented for review.
 What changed:
 
 - Status overview rows now use a Status-specific archive row treatment.
-- Rows render the generic Status icon, Status name, exported mechanics/effect previews, then Scope/Duration metadata.
+- Rows render the Status name, exported mechanics/effect previews, then Scope/Duration metadata.
 - Preview source priority:
   1. `Status mechanics`
   2. `Effects`
@@ -491,7 +491,7 @@ What did not change:
 - Status detail pages remain unchanged.
 - Status type remains out of navigation and row prominence.
 - Relationship/source hints remain deferred.
-- Per-status icons remain deferred until explicit exporter metadata exists.
+- Status archive row icons remain hidden until explicit exporter metadata exists.
 
 New open questions:
 
@@ -502,6 +502,64 @@ New open questions:
 Exporter findings discovered:
 
 - None new during STATUS-UI-003 implementation. Existing non-blocking findings remain unchanged.
+
+## STATUS-UI-003A Result - Status Archive Preview De-Duplication
+
+Status: Implemented for review.
+
+What changed:
+
+- Status archive rows now prefer `Status mechanics` preview lines over explanatory `Effects` lines.
+- `Effects` lines are used in archive rows only when no usable `Status mechanics` lines exist.
+- Archive rows no longer mix mechanics and Effects in the same preview.
+- The three-line preview cap, token rendering, and thin fallback remain unchanged.
+
+What did not change:
+
+- Status detail pages still render complete mechanics and Effects.
+- Status rail, search, routing, relationship sections, and Ability Archive behavior were not changed.
+
+## STATUS-UI-003B Result - Scope Grouping and Status Row Icon Review
+
+Status: Implemented for review.
+
+What changed:
+
+- Status Scope rail now dynamically groups any exported Scope bucket with four or fewer entries under `Other`.
+- Scope buckets with five or more entries remain standalone rail shelves.
+- `Other` count is the sum of the grouped small Scope buckets.
+- Selecting `Other` filters to statuses whose exported Scope is currently part of the grouped small-scope set.
+- Existing Scope display cleanup still applies, including `Major Empire` -> `Empire` and `Diplomatic Ambassy` -> `Diplomacy`.
+- Status archive rows no longer render the generic kind icon.
+
+Icon investigation result:
+
+- The current frontend has a generic `statuses` kind icon and broader manifest/description-token status SVGs.
+- There is no explicit Status-entry icon mapping in the current Codex Status data.
+- Scope icons would imply meaning that Scope alone does not prove.
+- Status type/effect icons are not safe while `Status type` remains noisy and no explicit icon mapping exists.
+
+Decision:
+
+- Hide Status archive row icons for now.
+- Do not infer status icons from status names, keys, prose, Scope, Status type, or SVG filenames.
+- Revisit row icons only when exporter data provides explicit status icon metadata or a stable reference contract.
+
+New open questions:
+
+- Should final Status closeout append the missing explicit status icon mapping to the active exporter backlog, or leave it deferred until product decides row icons are needed?
+
+Exporter findings discovered:
+
+- None new. Missing explicit Status icon mapping was already recorded as non-blocking.
+
+Lesson:
+
+- For Statuses, archive rows should expose scan signals; detail pages should preserve explanation, trust, and complete inspection. This Status-specific lesson should be considered during final category closeout before changing the main playbook.
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-003A implementation. Existing non-blocking findings remain unchanged.
 
 ## STATUS-UI-004 Result - Status Detail Effect-First Layout
 
@@ -598,7 +656,7 @@ Scope:
 - Keep main panel mostly unchanged.
 - Do not add raw `Status type` filters.
 - Do not add row relationship hints yet.
-- Keep generic Status icon behavior.
+- Keep generic Status icon behavior outside Status archive rows.
 - Preserve current detail behavior.
 
 Dependencies:

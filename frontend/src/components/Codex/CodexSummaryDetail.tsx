@@ -314,25 +314,10 @@ function getAbilityCatalogEffectPreviewLines(entry: CodexEntry, searchQuery = ""
         .map((index) => effectLines[index]);
 }
 
-function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
-    if (entry.exportKind.trim().toLowerCase() !== "statuses") return [];
-
-    const parsed = parseCodexStructuredDescription(entry);
-    const sectionsByPriority = [
-        ...STATUS_ARCHIVE_PRIMARY_SECTIONS
-            .map((label) => parsed.sections.find((section) => section.label.trim().toLowerCase() === label))
-            .filter((section): section is NonNullable<typeof section> => Boolean(section)),
-        ...parsed.sections.filter((section) => {
-            const normalizedLabel = section.label.trim().toLowerCase();
-            return (
-                !STATUS_ARCHIVE_PRIMARY_SECTIONS.includes(normalizedLabel) &&
-                !STATUS_ARCHIVE_EXCLUDED_SECTIONS.has(normalizedLabel)
-            );
-        }),
-    ];
-
+function getStatusSectionPreviewLines(section: ReturnType<typeof parseCodexStructuredDescription>["sections"][number]): string[] {
     const previewLines: string[] = [];
     const seen = new Set<string>();
+
     const addLine = (line: string) => {
         for (const rawValue of line.split(/\r?\n/)) {
             const value = rawValue.trim();
@@ -346,23 +331,57 @@ function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
         }
     };
 
-    for (const section of sectionsByPriority) {
-        section.lines.forEach(addLine);
+    section.lines.forEach(addLine);
 
-        if (section.lines.length === 0) {
-            for (const item of section.items ?? []) {
-                item.lines.forEach(addLine);
+    if (section.lines.length === 0) {
+        for (const item of section.items ?? []) {
+            item.lines.forEach(addLine);
 
-                if (item.lines.length === 0) {
-                    item.facts.forEach((fact) => addLine(fact.value));
-                }
+            if (item.lines.length === 0) {
+                item.facts.forEach((fact) => addLine(fact.value));
             }
         }
-
-        if (previewLines.length >= MAX_STATUS_EFFECT_PREVIEW_LINES) break;
     }
 
-    return previewLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
+    return previewLines;
+}
+
+function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "statuses") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const mechanicsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "status mechanics"
+    );
+    const mechanicsLines = mechanicsSection ? getStatusSectionPreviewLines(mechanicsSection) : [];
+    if (mechanicsLines.length > 0) {
+        return mechanicsLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
+    }
+
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectsLines = effectsSection ? getStatusSectionPreviewLines(effectsSection) : [];
+    if (effectsLines.length > 0) {
+        return effectsLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
+    }
+
+    for (const section of parsed.sections) {
+        const normalizedLabel = section.label.trim().toLowerCase();
+        if (
+            STATUS_ARCHIVE_PRIMARY_SECTIONS.includes(normalizedLabel) ||
+            STATUS_ARCHIVE_EXCLUDED_SECTIONS.has(normalizedLabel)
+        ) {
+            continue;
+        }
+
+        const previewLines = getStatusSectionPreviewLines(section);
+        if (previewLines.length > 0) {
+            return previewLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
+        }
+    }
+
+    return [];
 }
 
 function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
@@ -636,12 +655,6 @@ export default function CodexSummaryDetail({
                                 >
                                     <span className="codex-summaryList__titleLine">
                                         <span className="codex-summaryList__titleIdentity">
-                                            <CodexEntryIcon
-                                                entry={entry}
-                                                label={getCodexEntryLabel(entry)}
-                                                className="codex-kindIcon codex-kindIcon--summaryEntry"
-                                                size={20}
-                                            />
                                             <span className="codex-summaryList__name">
                                                 {renderCodexLabel(getCodexEntryLabel(entry))}
                                             </span>
