@@ -32,7 +32,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode("partnereffects")).toBe("referenceSheet");
         expect(getCodexCategoryMode("counciloreffects")).toBe("referenceSheet");
         expect(getCodexCategoryMode("resources")).toBe("referenceSheet");
-        expect(getCodexCategoryMode("traits")).toBe("generic");
+        expect(getCodexCategoryMode("traits")).toBe("traitArchive");
         expect(getCodexCategoryMode("tech")).toBe("generic");
     });
 });

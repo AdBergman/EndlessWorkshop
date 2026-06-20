@@ -3,6 +3,7 @@ import AbilityArchiveRail from "@/components/Codex/AbilityArchiveRail";
 import CodexResultList from "@/components/Codex/CodexResultList";
 import EquipmentArchiveRail from "@/components/Codex/EquipmentArchiveRail";
 import StatusArchiveRail from "@/components/Codex/StatusArchiveRail";
+import TraitArchiveRail from "@/components/Codex/TraitArchiveRail";
 import {
     type ActiveCodexFactFilters,
     type CodexFactFilterOption,
@@ -13,6 +14,7 @@ import {
     type EquipmentArchiveFilterKey,
 } from "@/lib/codex/codexEquipmentArchiveFilters";
 import type { StatusScopeFilterOption } from "@/lib/codex/codexStatusArchiveFilters";
+import type { TraitArchiveType, TraitTypeFilterOption } from "@/lib/codex/codexTraitArchiveFilters";
 import type { CodexListItem } from "@/lib/codex/codexPresentation";
 import { ALL_CODEX_KIND } from "@/lib/codex/codexSearch";
 
@@ -29,17 +31,23 @@ type Props = {
     isAbilityCatalogMode: boolean;
     isEquipmentArchiveMode: boolean;
     isStatusArchiveMode: boolean;
+    isTraitArchiveMode: boolean;
     isVisible: boolean;
     loading: boolean;
     selectedEntryKey: string | null;
     statusScopeFilter: string | null;
     statusScopeOptions: readonly StatusScopeFilterOption[];
+    traitTotalCount: number;
+    traitTypeFilter: TraitArchiveType | null;
+    traitTypeOptions: readonly TraitTypeFilterOption[];
     onClearFactFilters: () => void;
     onClearEquipmentFilters: () => void;
     onClearStatusScope: () => void;
+    onClearTraitType: () => void;
     onSelectEntry: (entry: CodexListItem) => void;
     onToggleEquipmentFilter: (filterKey: EquipmentArchiveFilterKey, value: string) => void;
     onToggleStatusScope: (scope: string) => void;
+    onToggleTraitType: (type: TraitArchiveType) => void;
     onToggleFactFilter: (label: string, value: string) => void;
 };
 
@@ -57,17 +65,23 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         isAbilityCatalogMode,
         isEquipmentArchiveMode,
         isStatusArchiveMode,
+        isTraitArchiveMode,
         isVisible,
         loading,
         selectedEntryKey,
         statusScopeFilter,
         statusScopeOptions,
+        traitTotalCount,
+        traitTypeFilter,
+        traitTypeOptions,
         onClearFactFilters,
         onClearEquipmentFilters,
         onClearStatusScope,
+        onClearTraitType,
         onSelectEntry,
         onToggleEquipmentFilter,
         onToggleStatusScope,
+        onToggleTraitType,
         onToggleFactFilter,
     },
     resultListRef
@@ -77,7 +91,9 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
     return (
         <aside
             className={`codex-resultsPane ${
-                isAbilityCatalogMode || isEquipmentArchiveMode || isStatusArchiveMode ? "codex-resultsPane--catalog" : ""
+                isAbilityCatalogMode || isEquipmentArchiveMode || isStatusArchiveMode || isTraitArchiveMode
+                    ? "codex-resultsPane--catalog"
+                    : ""
             }`}
             aria-label={
                 isAbilityCatalogMode
@@ -86,10 +102,12 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                         ? "Equipment archive filters"
                     : isStatusArchiveMode
                         ? "Status archive filters"
+                    : isTraitArchiveMode
+                        ? "Trait archive filters"
                         : "Codex results"
             }
         >
-            {!isAbilityCatalogMode && !isEquipmentArchiveMode && !isStatusArchiveMode ? (
+            {!isAbilityCatalogMode && !isEquipmentArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
                 <div className="codex-resultsPane__header">
                     <div>
                         <div className="codex-sectionLabel">Results</div>
@@ -130,7 +148,17 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                 />
             ) : null}
 
-            {!isAbilityCatalogMode && !isEquipmentArchiveMode && !isStatusArchiveMode ? (
+            {isTraitArchiveMode ? (
+                <TraitArchiveRail
+                    activeType={traitTypeFilter}
+                    options={traitTypeOptions}
+                    totalCount={traitTotalCount}
+                    onClearType={onClearTraitType}
+                    onToggleType={onToggleTraitType}
+                />
+            ) : null}
+
+            {!isAbilityCatalogMode && !isEquipmentArchiveMode && !isStatusArchiveMode && !isTraitArchiveMode ? (
                 <CodexResultList
                     ref={resultListRef}
                     entries={displayEntries}

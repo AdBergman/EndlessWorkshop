@@ -108,6 +108,23 @@ function seedShallowReferenceLayoutEntries() {
             sections: [{ title: "Effects", lines: ["+3 [Defense] Defense on Unit"] }],
         },
         {
+            exportKind: "traits",
+            entryKey: "Trait_HarmoniousTactics",
+            displayName: "Harmonious Tactics",
+            category: "Faction",
+            kind: "Trait",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Trait" },
+                { label: "Category", value: "Faction" },
+            ],
+            sections: [{
+                title: "Effects",
+                lines: ["Allied Units get [Damage] Damage bonus until the end of the round."],
+            }],
+        },
+        {
             exportKind: "tech",
             entryKey: "Technology_Test",
             displayName: "Test Technology",
@@ -1810,7 +1827,8 @@ describe("CodexPage", () => {
             .getByRole("button", { name: /Extractor: Klax Extractor/i })).toBeInTheDocument();
     });
 
-    it("keeps traits, tech, and selected effect entries on the split layout", async () => {
+    it("adds a Trait Type rail while keeping Trait rows reference-focused", async () => {
+        const user = userEvent.setup();
         seedShallowReferenceLayoutEntries();
 
         render(
@@ -1822,8 +1840,57 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Traits" })).toBeInTheDocument();
-        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /trait archive filters/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--traitArchive")).toBeInTheDocument();
         expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: "Faction 1" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Protectorate 1" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Harmonious Tactics")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Fierce Independence")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Faction 1" }));
+
+        expect(screen.getByRole("button", { name: "Faction 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(await screen.findByRole("heading", { name: "All Traits" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Harmonious Tactics")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).queryByText("Fierce Independence")).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Faction 1" }));
+
+        expect(screen.getByRole("button", { name: "All 2" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Fierce Independence")).toBeInTheDocument();
+
+        const searchInput = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(searchInput, "Harmonious");
+
+        expect(screen.getByRole("button", { name: "All 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: "Faction 1" })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Protectorate 0" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Harmonious Tactics")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).queryByText("Fierce Independence")).not.toBeInTheDocument();
+
+        cleanup();
+        seedShallowReferenceLayoutEntries();
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=traits&entry=Trait_DaughterOfBor"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Fierce Independence" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /trait archive filters/i })).toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Faction 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Traits" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Fierce Independence" })).not.toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).getByText("Harmonious Tactics")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Traits overview")).queryByText("Fierce Independence")).not.toBeInTheDocument();
 
         cleanup();
         seedShallowReferenceLayoutEntries();
@@ -6535,7 +6602,7 @@ describe("CodexPage", () => {
             error: null,
         });
 
-        render(
+        const { container } = render(
             <MemoryRouter initialEntries={["/codex?category=traits&entry=Trait_Diplomat"]}>
                 <Routes>
                     <Route path="/codex" element={<CodexPage />} />
@@ -6544,11 +6611,13 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Diplomat" })).toBeInTheDocument();
-        expect(screen.getByText("Trait dossier")).toBeInTheDocument();
-        expect(screen.getByText("Category")).toBeInTheDocument();
-        expect(screen.getByText("Faction")).toBeInTheDocument();
-        expect(screen.getByText("Required affinity")).toBeInTheDocument();
-        expect(screen.getByText("Aspects")).toBeInTheDocument();
+        const traitDossier = container.querySelector(".codex-structuredDossier");
+        expect(traitDossier).toBeInTheDocument();
+        expect(within(traitDossier as HTMLElement).getByText("Trait dossier")).toBeInTheDocument();
+        expect(within(traitDossier as HTMLElement).getByText("Category")).toBeInTheDocument();
+        expect(within(traitDossier as HTMLElement).getByText("Faction")).toBeInTheDocument();
+        expect(within(traitDossier as HTMLElement).getByText("Required affinity")).toBeInTheDocument();
+        expect(within(traitDossier as HTMLElement).getByText("Aspects")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
         expect(screen.getByText("Improves diplomatic leverage.")).toBeInTheDocument();
     });
