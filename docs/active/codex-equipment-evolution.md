@@ -290,10 +290,57 @@ What did not change:
 - Per-item Equipment icons are not inferred from SVG filenames.
 - Backend/import/export contracts are unchanged.
 
+### EQUIPMENT-UI-003A - Granted Ability Presentation Polish
+
+Implemented as a focused archive-row polish slice after manual visual review.
+
+Problem:
+
+- Equipment archive rows rendered exact granted abilities as full preview cards.
+- The cards competed with the Equipment item itself.
+
+Result:
+
+- Equipment archive rows now render resolved granted abilities as a compact inline `Grants:` line.
+- Granted ability names remain exact-reference controls and navigate to the resolved Ability entry.
+- Visible granted ability links are capped to preserve row height.
+- Overflow renders as a quiet `+N more` indicator.
+- Unresolved granted ability references are still not rendered as fake links.
+- Full granted ability preview cards remain available in Equipment detail pages.
+
+Decision:
+
+- Archive rows may surface exact linked entities as compact inline affordances.
+- Full relationship cards should stay in detail pages unless the linked entity is the primary row content.
+
+### EQUIPMENT-UI-003B - Ability Tooltip Parity And Metadata Cleanup
+
+Implemented as a focused follow-up to the compact `Grants:` line.
+
+Result:
+
+- Compact granted ability links now reuse the existing Codex inline entity link component used by Ability effect links.
+- Granted ability links show the standard Codex hover/focus tooltip preview.
+- Granted ability links remain exact-reference navigation controls.
+- No new tooltip framework or Equipment-specific tooltip path was introduced.
+- `Value` was removed from Equipment archive row metadata.
+
+Decision:
+
+- Equipment archive row metadata now shows:
+  - Type
+  - Rarity
+  - Tier/Base
+- `Value` remains detail/provenance data, not archive scan metadata.
+- When inline linked entities appear in archive rows, reuse existing Codex link/tooltip behavior before introducing new presentation systems.
+
 ## Lessons Learned
 
 - Equipment confirms the Archive pattern can work without copying Ability or Status directly.
 - For Equipment, granted ability references are content, not just related metadata.
+- Primary entities must dominate archive rows; linked entities should be compact unless they are the row's main content.
+- Inline linked entities should reuse existing Codex hover/click affordances where possible.
+- Administrative metadata such as `Value` should not appear in archive rows unless it improves player planning.
 - Type is stronger than Slot as first browse model because Slot collapses most items into Weapon.
 - Rarity is useful as secondary navigation, but should not dominate the row.
 - Unresolved exact references should remain honest missing data rather than frontend-inferred cards.

@@ -290,6 +290,8 @@ Lessons:
 - `Rarity` works as secondary navigation and orientation metadata.
 - Equipment effects are row content; Type/Rarity/Tier/Value are supporting metadata.
 - Exact granted ability references are content for Equipment rows, not just relationship metadata.
+- Archive rows may surface exact linked entities as compact inline affordances, but full relationship cards should stay in detail pages unless the linked entity is the primary content.
+- Inline linked entities in archive rows should reuse existing Codex link/tooltip behavior before introducing new presentation systems.
 - Unresolved granted ability references should remain honest missing data, not frontend-inferred cards.
 - Inbound Quest/Trait relationships are better detail follow-ups than first-pass archive row content.
 - Per-item Equipment icon identity needs explicit exporter metadata before frontend should show specific icons.

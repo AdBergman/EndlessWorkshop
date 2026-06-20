@@ -3580,7 +3580,13 @@ describe("CodexPage", () => {
                 entryKey: "Equipment_BloodmarkBow",
                 displayName: "Bloodmark Bow",
                 descriptionLines: [],
-                referenceKeys: ["UnitAbility_Ranged_4", "UnitAbility_Missing"],
+                referenceKeys: [
+                    "UnitAbility_Ranged_4",
+                    "UnitAbility_DefenseExpert_2",
+                    "UnitAbility_Overwatch_1",
+                    "UnitAbility_SwiftDraw_1",
+                    "UnitAbility_Missing",
+                ],
                 facts: [
                     { label: "Type", value: "Bow" },
                     { label: "Slot", value: "Weapon" },
@@ -3597,6 +3603,9 @@ describe("CodexPage", () => {
                         title: "Granted abilities",
                         items: [
                             { label: "Ranged IV", referenceKey: "UnitAbility_Ranged_4" },
+                            { label: "Defense Expert II", referenceKey: "UnitAbility_DefenseExpert_2" },
+                            { label: "Overwatch I", referenceKey: "UnitAbility_Overwatch_1" },
+                            { label: "Swift Draw I", referenceKey: "UnitAbility_SwiftDraw_1" },
                             { label: "Unresolved Strike", referenceKey: "UnitAbility_Missing" },
                         ],
                     },
@@ -3654,6 +3663,34 @@ describe("CodexPage", () => {
                 ],
                 sections: [{ title: "Effects", lines: ["+20 [Defense] Defense"] }],
             },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Overwatch_1",
+                displayName: "Overwatch I",
+                category: "Reaction",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Reaction" },
+                ],
+                sections: [{ title: "Effects", lines: ["Retaliates against attackers"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_SwiftDraw_1",
+                displayName: "Swift Draw I",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["Acts earlier in battle"] }],
+            },
         ];
 
         seedCodexEntries(entries);
@@ -3661,7 +3698,15 @@ describe("CodexPage", () => {
         render(
             <MemoryRouter initialEntries={["/codex?category=equipment"]}>
                 <Routes>
-                    <Route path="/codex" element={<CodexPage />} />
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
                 </Routes>
             </MemoryRouter>
         );
@@ -3684,14 +3729,30 @@ describe("CodexPage", () => {
         expect(screen.getAllByText("Bow").length).toBeGreaterThan(0);
         expect(screen.getAllByText("Rare").length).toBeGreaterThan(0);
         expect(screen.getByText("Tier 2")).toBeInTheDocument();
-        expect(screen.getByText("Value 400")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: "Ranged IV Passive / Ability +4 Attack Range" })).toBeInTheDocument();
+        expect(bloodmarkRow).not.toHaveTextContent("Value 400");
+        expect(bloodmarkRow).toHaveTextContent("Grants:");
+        expect(within(bloodmarkRow).getByRole("button", { name: "Open Ranged IV in Codex" })).toBeInTheDocument();
+        expect(within(bloodmarkRow).getByRole("button", { name: "Open Defense Expert II in Codex" })).toBeInTheDocument();
+        expect(within(bloodmarkRow).getByRole("button", { name: "Open Overwatch I in Codex" })).toBeInTheDocument();
+        expect(bloodmarkRow).toHaveTextContent("+1 more");
+        expect(bloodmarkRow.querySelector(".codex-grantedAbilityPreview")).not.toBeInTheDocument();
         expect(screen.queryByText("Unresolved Strike")).not.toBeInTheDocument();
+
+        await user.hover(within(bloodmarkRow).getByRole("button", { name: "Open Ranged IV in Codex" }));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Ranged IV");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Attack Range");
 
         await user.click(within(typeGroup).getByRole("button", { name: "Bow 1" }));
 
         expect(screen.getByText("Bloodmark Bow")).toBeInTheDocument();
         expect(screen.queryByText("Archite Plate")).not.toBeInTheDocument();
+
+        const filteredBloodmarkRow = getSummaryRowForButton(screen.getByRole("button", { name: /bloodmark bow/i }));
+        await user.click(within(filteredBloodmarkRow).getByRole("button", { name: "Open Ranged IV in Codex" }));
+
+        expect(await screen.findByRole("heading", { name: "Ranged IV" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Ranged_4");
 
         await user.click(within(typeGroup).getByRole("button", { name: "Bow 1" }));
 
@@ -6613,7 +6674,7 @@ describe("CodexPage", () => {
         expect(dawnbladeRow).toHaveTextContent("One-Handed Weapon");
         expect(dawnbladeRow).toHaveTextContent("Rare");
         expect(dawnbladeRow).toHaveTextContent("Tier 2");
-        expect(dawnbladeRow).toHaveTextContent("Value 120");
+        expect(dawnbladeRow).not.toHaveTextContent("Value 120");
         expect(dawnbladeRow).toHaveTextContent("Might");
     });
 });

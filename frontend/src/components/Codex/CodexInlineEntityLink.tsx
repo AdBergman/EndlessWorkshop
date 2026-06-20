@@ -115,7 +115,7 @@ export default function CodexInlineEntityLink({ entry, children, onSelect }: Pro
 
 function getInlineTooltipPreview(entry: CodexEntry): string {
     const readablePreview = getCodexReadablePreviewLine(entry);
-    if (readablePreview && readablePreview.trim().toLowerCase() !== "status") {
+    if (readablePreview && !isInlineTooltipTaxonomyPreview(entry, readablePreview)) {
         return readablePreview;
     }
 
@@ -131,4 +131,22 @@ function getInlineTooltipPreview(entry: CodexEntry): string {
     }
 
     return readablePreview || getCodexDescriptionPreviewLine(entry.descriptionLines);
+}
+
+function isInlineTooltipTaxonomyPreview(entry: CodexEntry, value: string): boolean {
+    const normalizedKind = entry.exportKind.trim().toLowerCase();
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === "status") return true;
+
+    if (normalizedKind !== "abilities") return false;
+
+    return [
+        "active",
+        "combat",
+        "mixed",
+        "passive",
+        "reaction",
+        "tactical",
+    ].includes(normalizedValue);
 }

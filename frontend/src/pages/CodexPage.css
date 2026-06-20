@@ -2284,24 +2284,57 @@
     color: rgba(241, 234, 220, 0.48);
 }
 
-.codex-summaryList__grantedAbilityPreviews {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 8px;
-    max-width: 900px;
+.codex-summaryList__grantedAbilityLinks {
+    display: flex;
+    max-width: 84ch;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px 8px;
+    color: rgba(241, 234, 220, 0.66);
+    font-size: 13px;
+    line-height: 1.45;
 }
 
-.codex-summaryList__grantedAbilityPreviews .codex-grantedAbilityPreview {
-    min-height: 0;
-    padding: 9px 11px;
-    border-color: rgba(190, 150, 73, 0.16);
-    background: rgba(12, 14, 15, 0.28);
+.codex-summaryList__grantedAbilityLinksLabel {
+    color: rgba(229, 198, 123, 0.76);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
 }
 
-.codex-summaryList__grantedAbilityPreviews .codex-grantedAbilityPreview__effect {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.codex-summaryList__grantedAbilityLinkList {
+    display: inline-flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 7px;
+}
+
+.codex-summaryList__grantedAbilityLinkItem {
+    display: inline-flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 7px;
+}
+
+.codex-summaryList__grantedAbilitySeparator {
+    color: rgba(229, 198, 123, 0.44);
+}
+
+.codex-summaryList__grantedAbilityLinks .codex-inlineEntityLink {
+    color: rgba(241, 234, 220, 0.86);
+    font-weight: 700;
+}
+
+.codex-summaryList__grantedAbilityLinks .codex-inlineEntityLink:hover,
+.codex-summaryList__grantedAbilityLinks .codex-inlineEntityLink:focus-visible {
+    color: rgba(255, 217, 119, 0.95);
+}
+
+.codex-summaryList__grantedAbilityOverflow {
+    color: rgba(241, 234, 220, 0.44);
+    font-size: 12px;
 }
 
 .codex-summaryList__effects {

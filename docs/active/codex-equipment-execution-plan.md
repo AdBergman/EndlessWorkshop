@@ -1,12 +1,12 @@
 # Codex Equipment Execution Plan
 
-Status: Closeout complete; awaiting final validation report  
+Status: EQUIPMENT-UI-003B complete; awaiting review
 Target category: Equipment  
 Started: 2026-06-20
 
 ## Current Phase
 
-Final validation/reporting for implemented Equipment archive foundation.
+EQUIPMENT-UI-003B review/reporting.
 
 ## Planned Sequence
 
@@ -101,6 +101,10 @@ Rules:
 - [x] Validation complete.
 - [x] Browser smoke complete.
 - [x] Final category closeout complete.
+- [x] EQUIPMENT-UI-003A validation complete.
+- [x] EQUIPMENT-UI-003A browser smoke complete.
+- [x] EQUIPMENT-UI-003B validation complete.
+- [x] EQUIPMENT-UI-003B browser smoke complete.
 
 ## Running Decision Log
 
@@ -112,3 +116,7 @@ Rules:
 - 2026-06-20: Focused validation passed: `npm test -- --run src/pages/CodexPage.test.tsx src/lib/codex/codexCategoryConfig.test.ts`; `npx tsc --noEmit --project tsconfig.json`.
 - 2026-06-20: Browser smoke passed for Equipment root, Type/Rarity filtering, Equipment search/no-results, detail-to-filter return, and Abilities/Statuses/Resources sanity pages.
 - 2026-06-20: Final closeout completed. Equipment is complete for the first archive evolution pass; detail polish, inbound Quest/Trait relationships, and per-item icon metadata remain deferred follow-ups.
+- 2026-06-20: Started EQUIPMENT-UI-003A after manual visual review. Decision: Equipment archive rows should show exact granted abilities as compact inline `Grants:` links; full granted ability cards stay in detail pages.
+- 2026-06-20: EQUIPMENT-UI-003A validation passed. Browser smoke confirmed compact `Grants:` links in Equipment archive rows, no full granted ability cards in archive rows, exact Ability navigation from a grant link, and full granted ability cards still present in Equipment detail.
+- 2026-06-20: Started EQUIPMENT-UI-003B after manual visual review. Decision: compact granted ability links should reuse `CodexInlineEntityLink` for tooltip parity, and `Value` should be removed from Equipment archive row metadata.
+- 2026-06-20: EQUIPMENT-UI-003B validation passed. Browser smoke confirmed compact grant links, no full grant cards in archive rows, no `Value` metadata in archive rows, exact Ability navigation, detail cards preserved, and Abilities/Statuses sanity. Tooltip behavior is covered by the component/page test using the shared inline link path; headless synthetic mouse movement did not surface the portal tooltip reliably during smoke.

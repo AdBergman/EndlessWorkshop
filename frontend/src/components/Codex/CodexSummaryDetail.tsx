@@ -39,7 +39,7 @@ import {
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexAbilityEffectLine from "./CodexAbilityEffectLine";
-import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
+import CodexInlineEntityLink from "./CodexInlineEntityLink";
 
 type Props = {
     summaryEntry: CodexSummaryEntry;
@@ -91,7 +91,7 @@ const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
-const MAX_EQUIPMENT_GRANTED_ABILITY_PREVIEWS = 3;
+const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -243,18 +243,6 @@ function formatEquipmentTierValue(value: string): string {
     return trimmedValue === "0" ? "Base" : `Tier ${trimmedValue}`;
 }
 
-function formatEquipmentValue(value: string): string {
-    const trimmedValue = value.trim();
-    if (!trimmedValue) return "";
-
-    const numericValue = Number(trimmedValue);
-    const displayValue = Number.isFinite(numericValue)
-        ? String(Number.parseFloat(numericValue.toFixed(2)))
-        : trimmedValue;
-
-    return `Value ${displayValue}`;
-}
-
 function getEquipmentArchiveMetadata(entry: CodexEntry): EquipmentArchiveMetadataItem[] {
     const items: EquipmentArchiveMetadataItem[] = [];
     const seenValues = new Set<string>();
@@ -273,7 +261,6 @@ function getEquipmentArchiveMetadata(entry: CodexEntry): EquipmentArchiveMetadat
     getCodexFactValues(entry, "Type").forEach((value) => addValue("type", value));
     getCodexFactValues(entry, "Rarity").forEach((value) => addValue("rarity", value));
     getCodexFactValues(entry, "Tier").forEach((value) => addValue("tier", formatEquipmentTierValue(value)));
-    getCodexFactValues(entry, "Value").forEach((value) => addValue("value", formatEquipmentValue(value)));
 
     return items;
 }
@@ -573,8 +560,13 @@ export default function CodexSummaryDetail({
                                 .flatMap((section) => section.items ?? [])
                                 .map((item) => buildGrantedAbilityPreview(item, resolveRelatedEntries(entry, referenceIndexes)))
                                 .filter((item): item is GrantedAbilityPreview => item !== null)
-                                .slice(0, MAX_EQUIPMENT_GRANTED_ABILITY_PREVIEWS)
                             : [];
+                        const visibleEquipmentGrantedAbilityPreviews = equipmentGrantedAbilityPreviews
+                            .slice(0, MAX_EQUIPMENT_GRANTED_ABILITY_LINKS);
+                        const equipmentGrantedAbilityOverflowCount = Math.max(
+                            0,
+                            equipmentGrantedAbilityPreviews.length - visibleEquipmentGrantedAbilityPreviews.length
+                        );
                         const visibleCatalogPreview = (
                             useCatalogRowHierarchy &&
                             catalogPreview !== null &&
@@ -830,7 +822,7 @@ export default function CodexSummaryDetail({
                                                         {renderDescriptionLine(formatCodexMajorFactionText(line))}
                                                     </span>
                                                 ))
-                                            ) : equipmentGrantedAbilityPreviews.length === 0 ? (
+                                            ) : visibleEquipmentGrantedAbilityPreviews.length === 0 ? (
                                                 <span className="codex-summaryList__statusFallback">
                                                     No public equipment effects exported yet.
                                                 </span>
@@ -838,18 +830,42 @@ export default function CodexSummaryDetail({
                                         </span>
                                     </button>
 
-                                    {equipmentGrantedAbilityPreviews.length > 0 ? (
+                                    {visibleEquipmentGrantedAbilityPreviews.length > 0 ? (
                                         <div
-                                            className="codex-summaryList__grantedAbilityPreviews"
-                                            aria-label="Granted ability previews"
+                                            className="codex-summaryList__grantedAbilityLinks"
+                                            aria-label="Granted abilities"
                                         >
-                                            {equipmentGrantedAbilityPreviews.map((grantedPreview) => (
-                                                <CodexGrantedAbilityPreview
-                                                    key={`${entry.entryKey}-${grantedPreview.ability.entryKey}`}
-                                                    preview={grantedPreview}
-                                                    onSelect={(ability) => onSelectEntry(ability)}
-                                                />
-                                            ))}
+                                            <span className="codex-summaryList__grantedAbilityLinksLabel">
+                                                Grants:
+                                            </span>
+                                            <span className="codex-summaryList__grantedAbilityLinkList">
+                                                {visibleEquipmentGrantedAbilityPreviews.map((grantedPreview, index) => (
+                                                    <span
+                                                        className="codex-summaryList__grantedAbilityLinkItem"
+                                                        key={`${entry.entryKey}-${grantedPreview.ability.entryKey}`}
+                                                    >
+                                                        {index > 0 ? (
+                                                            <span
+                                                                className="codex-summaryList__grantedAbilitySeparator"
+                                                                aria-hidden="true"
+                                                            >
+                                                                ·
+                                                            </span>
+                                                        ) : null}
+                                                        <CodexInlineEntityLink
+                                                            entry={grantedPreview.ability}
+                                                            onSelect={(ability) => onSelectEntry(ability)}
+                                                        >
+                                                            {renderCodexLabel(grantedPreview.label)}
+                                                        </CodexInlineEntityLink>
+                                                    </span>
+                                                ))}
+                                                {equipmentGrantedAbilityOverflowCount > 0 ? (
+                                                    <span className="codex-summaryList__grantedAbilityOverflow">
+                                                        +{equipmentGrantedAbilityOverflowCount} more
+                                                    </span>
+                                                ) : null}
+                                            </span>
                                         </div>
                                     ) : null}
                                 </div>
