@@ -6,8 +6,8 @@ Owner process: `docs/active/codex-category-evolution-playbook.md`
 
 ## Progress
 
-Current Phase: Phase 6 - Closeout complete after `QUESTS-UI-002`  
-Completed: Phase 0 Plan, Phase 1 Audit, Phase 2 Proposal Review, `QUESTS-UI-001`, `QUESTS-UI-002`, validation, product review, stale-code review, closeout, Quest archive grouping investigation  
+Current Phase: Post-closeout polish complete after `QUESTS-UI-003`
+Completed: Phase 0 Plan, Phase 1 Audit, Phase 2 Proposal Review, `QUESTS-UI-001`, `QUESTS-UI-002`, validation, product review, stale-code review, closeout, Quest archive grouping investigation, `QUESTS-UI-003`
 Next: Commit review  
 Open Issues:
 
@@ -22,6 +22,9 @@ Open Issues:
 - Quest archive grouping remains deferred pending exporter metadata. Duplicate
   display titles are not safe identity; do not group by title, title plus
   chapter, or restored key-derived progression logic.
+- Quests are hidden from top-level Codex navigation until canonical archive
+  grouping metadata exists, but Quest records remain searchable and
+  direct-routeable.
 
 ## Planned Sequence
 
@@ -177,3 +180,6 @@ this frontend category pass.
   titles are not true duplicates. Frontend grouping would require title
   heuristics or key parsing, so grouping is deferred pending exporter-provided
   canonical archive identifiers.
+- 2026-06-20: Implemented `QUESTS-UI-003`: hide Quests from top-level Codex
+  navigation while preserving global search, direct `/codex?category=quests`
+  routes, selected Quest detail routes, and exact Quest links.

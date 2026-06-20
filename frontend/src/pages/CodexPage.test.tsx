@@ -391,7 +391,6 @@ describe("CodexPage", () => {
             "Improvements",
             "Minor Factions",
             "Populations",
-            "Quests",
             "Statuses",
             "Tech",
             "Traits",
@@ -399,6 +398,7 @@ describe("CodexPage", () => {
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
         expect(categoryLabels).not.toContain("Extractors");
+        expect(categoryLabels).not.toContain("Quests");
     });
 
     it("renders all visible categories in a wrapping category shelf on category pages", async () => {
@@ -474,7 +474,6 @@ describe("CodexPage", () => {
             "Improvements",
             "Minor Factions",
             "Populations",
-            "Quests",
             "Statuses",
             "Tech",
             "Traits",
@@ -482,6 +481,7 @@ describe("CodexPage", () => {
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
         expect(categoryLabels).not.toContain("Extractors");
+        expect(categoryLabels).not.toContain("Quests");
     });
 
     it("renders Ability overview metadata from exported facts while keeping left rows compact", async () => {
@@ -2979,6 +2979,112 @@ describe("CodexPage", () => {
         expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /extractors/i })).not.toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+    });
+
+    it("hides Quests from top-level navigation while keeping search and direct routes available", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_LastLord_Chapter01_Step01",
+                displayName: "A Fragile Dawn",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["The Last Lords awaken."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Quest" },
+                    { label: "Category", value: "MajorFaction" },
+                    { label: "Chapter", value: "1" },
+                    { label: "Mandatory", value: "Yes" },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_A",
+                displayName: "Guarded Advance",
+                descriptionLines: ["A public ability."],
+                referenceKeys: [],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries.filter((entry) => entry.exportKind === "quests"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const kindIndex = await screen.findByLabelText("Codex category index");
+        expect(within(kindIndex).queryByRole("button", { name: /quests 1/i })).not.toBeInTheDocument();
+
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "fragile");
+
+        expect(await screen.findByRole("button", { name: /a fragile dawn/i })).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex category index")).not.toBeInTheDocument();
+
+        cleanup();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries.filter((entry) => entry.exportKind === "quests"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=quests"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Quests" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /quest archive filters/i })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /quests/i })).not.toBeInTheDocument();
+
+        cleanup();
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                quests: entries.filter((entry) => entry.exportKind === "quests"),
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=quests&entry=FactionQuest_LastLord_Chapter01_Step01"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "A Fragile Dawn" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Selected codex entry")).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /quests/i })).not.toBeInTheDocument();
     });
 
     it("shows a synthetic kind summary row and summary detail when filtering by kind", async () => {

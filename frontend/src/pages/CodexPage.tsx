@@ -800,112 +800,46 @@ export default function CodexPage() {
         setSelectionIntent("passive");
     }, [selectionIntent, selectedEntry]);
 
-    const returnActionFiltersToArchive = useCallback(() => {
-        if (!isActionArchiveMode || !selectedEntryParam) return;
+    const returnFiltersToArchive = useCallback((isArchiveMode: boolean) => {
+        if (!isArchiveMode || !selectedEntryParam) return;
 
         updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isActionArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnDiplomacyFiltersToArchive = useCallback(() => {
-        if (!isDiplomacyArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isDiplomacyArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnDistrictFiltersToArchive = useCallback(() => {
-        if (!isDistrictArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isDistrictArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnAbilityFiltersToArchive = useCallback(() => {
-        if (!isAbilityCatalogMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isAbilityCatalogMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnStatusFiltersToArchive = useCallback(() => {
-        if (!isStatusArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isStatusArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnTechFiltersToArchive = useCallback(() => {
-        if (!isTechArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isTechArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnTraitFiltersToArchive = useCallback(() => {
-        if (!isTraitArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isTraitArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnEquipmentFiltersToArchive = useCallback(() => {
-        if (!isEquipmentArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isEquipmentArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnHeroFiltersToArchive = useCallback(() => {
-        if (!isHeroArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isHeroArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnUnitFiltersToArchive = useCallback(() => {
-        if (!isUnitArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isUnitArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnImprovementFiltersToArchive = useCallback(() => {
-        if (!isImprovementArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isImprovementArchiveMode, selectedEntryParam, updateSelectedEntry]);
-
-    const returnQuestFiltersToArchive = useCallback(() => {
-        if (!isQuestArchiveMode || !selectedEntryParam) return;
-
-        updateSelectedEntry(null, { category: activeKind });
-    }, [activeKind, isQuestArchiveMode, selectedEntryParam, updateSelectedEntry]);
+    }, [activeKind, selectedEntryParam, updateSelectedEntry]);
 
     const clearActionType = useCallback(() => {
         setActiveActionType(null);
-        returnActionFiltersToArchive();
-    }, [returnActionFiltersToArchive]);
+        returnFiltersToArchive(isActionArchiveMode);
+    }, [isActionArchiveMode, returnFiltersToArchive]);
 
     const toggleActionType = useCallback((type: ActionArchiveType) => {
         setActiveActionType((current) => current === type ? null : type);
-        returnActionFiltersToArchive();
-    }, [returnActionFiltersToArchive]);
+        returnFiltersToArchive(isActionArchiveMode);
+    }, [isActionArchiveMode, returnFiltersToArchive]);
 
     const clearDiplomacyCategory = useCallback(() => {
         setActiveDiplomacyCategory(null);
-        returnDiplomacyFiltersToArchive();
-    }, [returnDiplomacyFiltersToArchive]);
+        returnFiltersToArchive(isDiplomacyArchiveMode);
+    }, [isDiplomacyArchiveMode, returnFiltersToArchive]);
 
     const toggleDiplomacyCategory = useCallback((category: DiplomacyArchiveCategory) => {
         setActiveDiplomacyCategory((current) => current === category ? null : category);
-        returnDiplomacyFiltersToArchive();
-    }, [returnDiplomacyFiltersToArchive]);
+        returnFiltersToArchive(isDiplomacyArchiveMode);
+    }, [isDiplomacyArchiveMode, returnFiltersToArchive]);
 
     const clearDistrictCategory = useCallback(() => {
         setActiveDistrictCategory(null);
-        returnDistrictFiltersToArchive();
-    }, [returnDistrictFiltersToArchive]);
+        returnFiltersToArchive(isDistrictArchiveMode);
+    }, [isDistrictArchiveMode, returnFiltersToArchive]);
 
     const toggleDistrictCategory = useCallback((category: DistrictArchiveCategory) => {
         setActiveDistrictCategory((current) => current === category ? null : category);
-        returnDistrictFiltersToArchive();
-    }, [returnDistrictFiltersToArchive]);
+        returnFiltersToArchive(isDistrictArchiveMode);
+    }, [isDistrictArchiveMode, returnFiltersToArchive]);
 
     const clearFactFilters = useCallback(() => {
         setActiveFactFilters({});
-        returnAbilityFiltersToArchive();
-    }, [returnAbilityFiltersToArchive]);
+        returnFiltersToArchive(isAbilityCatalogMode);
+    }, [isAbilityCatalogMode, returnFiltersToArchive]);
 
     const toggleFactFilter = useCallback((label: string, value: string) => {
         setActiveFactFilters((current) => {
@@ -917,100 +851,100 @@ export default function CodexPage() {
             }
             return next;
         });
-        returnAbilityFiltersToArchive();
-    }, [returnAbilityFiltersToArchive]);
+        returnFiltersToArchive(isAbilityCatalogMode);
+    }, [isAbilityCatalogMode, returnFiltersToArchive]);
 
     const clearEquipmentFilters = useCallback(() => {
         setActiveEquipmentFilters(EMPTY_EQUIPMENT_ARCHIVE_FILTERS);
-        returnEquipmentFiltersToArchive();
-    }, [returnEquipmentFiltersToArchive]);
+        returnFiltersToArchive(isEquipmentArchiveMode);
+    }, [isEquipmentArchiveMode, returnFiltersToArchive]);
 
     const toggleEquipmentFilter = useCallback((filterKey: EquipmentArchiveFilterKey, value: string) => {
         setActiveEquipmentFilters((current) => ({
             ...current,
             [filterKey]: current[filterKey] === value ? null : value,
         }));
-        returnEquipmentFiltersToArchive();
-    }, [returnEquipmentFiltersToArchive]);
+        returnFiltersToArchive(isEquipmentArchiveMode);
+    }, [isEquipmentArchiveMode, returnFiltersToArchive]);
 
     const clearHeroFilters = useCallback(() => {
         setActiveHeroFilters(EMPTY_HERO_ARCHIVE_FILTERS);
-        returnHeroFiltersToArchive();
-    }, [returnHeroFiltersToArchive]);
+        returnFiltersToArchive(isHeroArchiveMode);
+    }, [isHeroArchiveMode, returnFiltersToArchive]);
 
     const toggleHeroFilter = useCallback((filterKey: HeroArchiveFilterKey, value: string) => {
         setActiveHeroFilters((current) => ({
             ...current,
             [filterKey]: current[filterKey] === value ? null : value,
         }));
-        returnHeroFiltersToArchive();
-    }, [returnHeroFiltersToArchive]);
+        returnFiltersToArchive(isHeroArchiveMode);
+    }, [isHeroArchiveMode, returnFiltersToArchive]);
 
     const clearUnitFilters = useCallback(() => {
         setActiveUnitFilters(EMPTY_UNIT_ARCHIVE_FILTERS);
-        returnUnitFiltersToArchive();
-    }, [returnUnitFiltersToArchive]);
+        returnFiltersToArchive(isUnitArchiveMode);
+    }, [isUnitArchiveMode, returnFiltersToArchive]);
 
     const toggleUnitFilter = useCallback((filterKey: UnitArchiveFilterKey, value: string) => {
         setActiveUnitFilters((current) => ({
             ...current,
             [filterKey]: current[filterKey] === value ? null : value,
         }));
-        returnUnitFiltersToArchive();
-    }, [returnUnitFiltersToArchive]);
+        returnFiltersToArchive(isUnitArchiveMode);
+    }, [isUnitArchiveMode, returnFiltersToArchive]);
 
     const clearImprovementCategory = useCallback(() => {
         setActiveImprovementCategory(null);
-        returnImprovementFiltersToArchive();
-    }, [returnImprovementFiltersToArchive]);
+        returnFiltersToArchive(isImprovementArchiveMode);
+    }, [isImprovementArchiveMode, returnFiltersToArchive]);
 
     const toggleImprovementCategory = useCallback((category: ImprovementArchiveCategory) => {
         setActiveImprovementCategory((current) => current === category ? null : category);
-        returnImprovementFiltersToArchive();
-    }, [returnImprovementFiltersToArchive]);
+        returnFiltersToArchive(isImprovementArchiveMode);
+    }, [isImprovementArchiveMode, returnFiltersToArchive]);
 
     const clearQuestCategory = useCallback(() => {
         setActiveQuestCategory(null);
-        returnQuestFiltersToArchive();
-    }, [returnQuestFiltersToArchive]);
+        returnFiltersToArchive(isQuestArchiveMode);
+    }, [isQuestArchiveMode, returnFiltersToArchive]);
 
     const toggleQuestCategory = useCallback((category: QuestArchiveFilterValue) => {
         setActiveQuestCategory((current) => current === category ? null : category);
-        returnQuestFiltersToArchive();
-    }, [returnQuestFiltersToArchive]);
+        returnFiltersToArchive(isQuestArchiveMode);
+    }, [isQuestArchiveMode, returnFiltersToArchive]);
 
     const clearStatusScope = useCallback(() => {
         setActiveStatusScope(null);
-        returnStatusFiltersToArchive();
-    }, [returnStatusFiltersToArchive]);
+        returnFiltersToArchive(isStatusArchiveMode);
+    }, [isStatusArchiveMode, returnFiltersToArchive]);
 
     const toggleStatusScope = useCallback((scope: string) => {
         setActiveStatusScope((current) => current === scope ? null : scope);
-        returnStatusFiltersToArchive();
-    }, [returnStatusFiltersToArchive]);
+        returnFiltersToArchive(isStatusArchiveMode);
+    }, [isStatusArchiveMode, returnFiltersToArchive]);
 
     const clearTechFilters = useCallback(() => {
         setActiveTechFilters(EMPTY_TECH_ARCHIVE_FILTERS);
-        returnTechFiltersToArchive();
-    }, [returnTechFiltersToArchive]);
+        returnFiltersToArchive(isTechArchiveMode);
+    }, [isTechArchiveMode, returnFiltersToArchive]);
 
     const toggleTechFilter = useCallback((filterKey: TechArchiveFilterKey, value: string) => {
         setActiveTechFilters((current) => ({
             ...current,
             [filterKey]: current[filterKey] === value ? null : value,
         }));
-        returnTechFiltersToArchive();
-    }, [returnTechFiltersToArchive]);
+        returnFiltersToArchive(isTechArchiveMode);
+    }, [isTechArchiveMode, returnFiltersToArchive]);
 
     const clearTraitType = useCallback(() => {
         setActiveTraitType(null);
-        returnTraitFiltersToArchive();
-    }, [returnTraitFiltersToArchive]);
+        returnFiltersToArchive(isTraitArchiveMode);
+    }, [isTraitArchiveMode, returnFiltersToArchive]);
 
     const toggleTraitType = useCallback((type: TraitArchiveType) => {
         setActiveTraitType((current) => current === type ? null : type);
-        returnTraitFiltersToArchive();
-    }, [returnTraitFiltersToArchive]);
+        returnFiltersToArchive(isTraitArchiveMode);
+    }, [isTraitArchiveMode, returnFiltersToArchive]);
 
     return (
         <main className="codex-page">

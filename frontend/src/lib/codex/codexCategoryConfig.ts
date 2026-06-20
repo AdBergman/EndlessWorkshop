@@ -37,8 +37,8 @@ export const PREFERRED_CODEX_KIND_ORDER = [
     "units",
 ];
 
-const HIDDEN_TOP_LEVEL_CODEX_KINDS = new Set(["bonuses", "extractors", "modifiers"]);
-const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors"]);
+const HIDDEN_TOP_LEVEL_CODEX_KINDS = new Set(["bonuses", "extractors", "modifiers", "quests"]);
+const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors", "quests"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set([
     "counciloreffects",
     "partnereffects",

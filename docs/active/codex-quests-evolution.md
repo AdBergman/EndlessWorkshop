@@ -620,3 +620,34 @@ Exporter follow-up:
 - `Quests - Canonical Archive Grouping Metadata` was appended to the active DB
   Exporter metadata backlog:
   `docs/active/db-exporter-ability-metadata-handoff.md`.
+
+## QUESTS-UI-003 - Hide Quest Archive From Top-Level Codex Navigation
+
+Implemented 2026-06-20.
+
+Rationale:
+
+- Top-level Codex Quest browsing is currently noisy because repeated Quest
+  titles are common and safe grouping is not available yet.
+- `/quests` already owns primary Quest browsing, lore, strategy, branching,
+  progression, paths, and questline exploration.
+- Codex Quest records still have value as searchable records, exact references,
+  direct links, and permalink/detail targets.
+
+What changed:
+
+- Quests are hidden from top-level Codex category navigation and landing
+  category cards.
+- Quest records remain available from global Codex search.
+- `/codex?category=quests` remains direct-routable and intentionally opens the
+  Quest archive support view.
+- Selected Quest detail routes remain direct-routable.
+- `/quests` remains untouched and continues to own the rich Quest Explorer
+  experience.
+
+Decision:
+
+- Keep Quest Codex data handling.
+- Do not delete Quest records from the store/API.
+- Do not implement title grouping, title-plus-chapter grouping, or key parsing.
+- Canonical Quest archive grouping remains exporter-backed follow-up work.

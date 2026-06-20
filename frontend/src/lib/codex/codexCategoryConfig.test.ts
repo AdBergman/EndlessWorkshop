@@ -29,10 +29,12 @@ describe("codexCategoryConfig", () => {
         expect(isVisibleTopLevelCodexKind("extractors")).toBe(false);
         expect(isVisibleTopLevelCodexKind("modifiers")).toBe(false);
         expect(isVisibleTopLevelCodexKind("bonuses")).toBe(false);
+        expect(isVisibleTopLevelCodexKind("quests")).toBe(false);
     });
 
     it("allows only approved hidden categories to remain direct-routable", () => {
         expect(isDirectRoutableHiddenCodexKind("extractors")).toBe(true);
+        expect(isDirectRoutableHiddenCodexKind("quests")).toBe(true);
         expect(isDirectRoutableHiddenCodexKind("modifiers")).toBe(false);
     });
 

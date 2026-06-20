@@ -385,6 +385,18 @@ Lessons:
 - Browser DOM smoke is useful after tests pass because it can reveal scan-value
   problems that are technically correct but visually/product-wise poor.
 
+### Quests
+
+Lessons:
+
+- Categories with a dedicated rich route can remain direct-linkable/searchable
+  in Codex without being top-level Codex browse destinations.
+- If duplicate display names make top-level browsing misleading and grouping
+  requires exporter metadata, hide the category from top-level navigation rather
+  than inventing frontend heuristics.
+- Direct routes and exact references can preserve permalink/search value while
+  the dedicated route owns the primary browsing experience.
+
 ### Improvements
 
 Lessons:
