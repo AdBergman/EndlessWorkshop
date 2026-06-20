@@ -386,6 +386,7 @@ Detail should prioritize:
 
 - Statuses is an Archive.
 - Scope is the strongest first browse model.
+- STATUS-UI-002 uses a Status-specific left rail with exported `Scope` only.
 - `Status type` is too noisy for primary navigation right now.
 - Exact references only.
 - No frontend inference from keys, names, prose, or SVG filenames.
@@ -418,6 +419,47 @@ Do not duplicate the full backlog here. Append detailed exporter follow-up there
 
 No exporter finding currently blocks Status UI planning if the first slice uses exported `Scope`.
 
+## STATUS-UI-002 Result - Scope Left Rail Prototype
+
+Status: Implemented for review.
+
+What changed:
+
+- `category=statuses` now uses a Status-specific left rail instead of the generic left result list.
+- The rail has one group: `Scope`.
+- Scope options and counts are built from exported `Scope` facts only.
+- Selecting a Scope filters the main Status overview after category/search filtering.
+- Selecting the same Scope clears it.
+- The `Clear` action resets the Scope filter.
+- Scope changes from a Status detail route remove `entry` and return the user to the Status archive list.
+- Display labels use the first accepted cleanup map:
+  - `Major Empire` -> `Empire`
+  - `Diplomatic Ambassy` -> `Diplomacy`
+
+What worked:
+
+- Exported `Scope` was sufficient for a safe first navigation prototype.
+- The existing Codex left-pane mode pattern was enough; no generic faceted framework was needed.
+- Search and Scope combine cleanly without URL params.
+- Status detail routes can preserve permalink behavior while allowing filter changes to return to browsing.
+
+What did not change:
+
+- Status rows remain generic overview rows for now.
+- Status detail pages remain unchanged.
+- `Status type` remains out of primary navigation.
+- Duration remains row/detail metadata only for later treatment.
+
+New open questions:
+
+- Does the single `Scope` group feel useful enough once reviewed with the full real dataset?
+- Should the Status rail eventually get an archive identity treatment, or stay quieter than Ability Archive?
+- Should `Diplomatic Ambassy` be display-mapped only in navigation, or also in future rows/detail until exporter cleanup lands?
+
+Exporter findings discovered:
+
+- None new during STATUS-UI-002 implementation. Existing non-blocking Scope display cleanup remains tracked above.
+
 ## Open Questions
 
 - After mechanics-first rows are accepted, should rows show compact exact source hints?
@@ -432,6 +474,8 @@ No exporter finding currently blocks Status UI planning if the first slice uses 
 ### STATUS-UI-002 - Scope Left Rail Prototype
 
 Goal: Add a Status-specific left rail using exported `Scope`.
+
+Status: implemented for review.
 
 Scope:
 
@@ -449,12 +493,18 @@ Dependencies:
 - Existing Codex left-pane mode patterns.
 - Existing Ability Archive rail extraction as a pattern, not a component to copy blindly.
 
+Result notes:
+
+- Statuses now use a Scope-only left rail.
+- Generic left result rows are removed for Statuses.
+- Status detail routes return to the archive list when Scope filters change.
+
 Risk:
 
 - Low data risk.
 - Medium visual risk if rail feels too similar to Ability rail.
 
-Ready: yes. STATUS-EVOLUTION-002 found no need for another design pass before STATUS-UI-002.
+STATUS-EVOLUTION-002 found no need for another design pass before this slice.
 
 ### STATUS-UI-003 - Status Archive Row Effect Preview
 

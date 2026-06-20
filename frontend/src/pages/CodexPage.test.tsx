@@ -669,7 +669,7 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
     });
 
-    it("renders Status overview metadata from exported facts while keeping left rows compact", async () => {
+    it("renders Status overview metadata from exported facts with a Scope rail", async () => {
         seedCodexEntries([
             {
                 exportKind: "statuses",
@@ -701,10 +701,11 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
-        const resultsPane = screen.getByLabelText("Codex results");
-        const leftRow = within(resultsPane).getByRole("button", { name: /public opinion status/i });
-        expect(leftRow.querySelector("img.codex-kindIcon--result")).toBeInTheDocument();
-        expect(leftRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
+        expect(screen.getByLabelText("Status archive filters")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
+        const statusFilters = screen.getByLabelText("Statuses filters");
+        const scopeGroup = within(statusFilters).getByRole("group", { name: "Scope" });
+        expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+1/i })).toBeInTheDocument();
 
         const statusesOverview = screen.getByLabelText("Statuses overview");
         const overviewRow = within(statusesOverview).getByRole("button", { name: /public opinion status/i });
@@ -716,9 +717,6 @@ describe("CodexPage", () => {
         expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
         expect(within(metadata).queryByText("Public Opinion")).not.toBeInTheDocument();
 
-        const thinRow = within(resultsPane).getByRole("button", { name: /unit 10 turns name only/i });
-        expect(thinRow).toBeInTheDocument();
-        expect(thinRow.querySelector(".codex-resultRow__factChips")).not.toBeInTheDocument();
         const thinOverviewRow = within(statusesOverview).getByRole("button", { name: /unit 10 turns name only/i });
         expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
     });
@@ -905,7 +903,8 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities");
     });
 
-    it("does not apply catalog filters to Statuses in this prototype", async () => {
+    it("filters the Status archive by exported Scope only", async () => {
+        const user = userEvent.setup();
         seedCodexEntries([
             {
                 exportKind: "statuses",
@@ -917,6 +916,17 @@ describe("CodexPage", () => {
                     { label: "Scope", value: "Diplomatic Ambassy" },
                     { label: "Duration", value: "10 turns" },
                     { label: "Status type", value: "Public Opinion" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Ahead",
+                displayName: "Ahead in the Polls",
+                descriptionLines: ["A city approval status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                    { label: "Duration", value: "10 turns" },
                 ],
             },
             {
@@ -933,6 +943,16 @@ describe("CodexPage", () => {
             },
             {
                 exportKind: "statuses",
+                entryKey: "Status_Unit_Shielded",
+                displayName: "Shielded",
+                descriptionLines: ["A unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+            },
+            {
+                exportKind: "statuses",
                 entryKey: "Status_ProseOnly",
                 displayName: "Unit 10 turns Prose Only",
                 descriptionLines: ["Unit and 10 turns appear in prose only."],
@@ -943,21 +963,129 @@ describe("CodexPage", () => {
         render(
             <MemoryRouter initialEntries={["/codex?category=statuses"]}>
                 <Routes>
-                    <Route path="/codex" element={<CodexPage />} />
+                    <Route
+                        path="/codex"
+                        element={(
+                            <>
+                                <CodexPage />
+                                <LocationProbe />
+                            </>
+                        )}
+                    />
                 </Routes>
             </MemoryRouter>
         );
 
         expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
-        expect(screen.queryByLabelText("Statuses filters")).not.toBeInTheDocument();
-        const resultsPane = screen.getByLabelText("Codex results");
-        expect(within(resultsPane).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
-        expect(within(resultsPane).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
-        expect(within(resultsPane).getByRole("button", { name: /unit 10 turns prose only/i })).toBeInTheDocument();
+        expect(screen.getByLabelText("Status archive filters")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
+        const filters = screen.getByLabelText("Statuses filters");
+        const scopeGroup = within(filters).getByRole("group", { name: "Scope" });
+        expect(within(scopeGroup).getByRole("button", { name: /diplomacy\s+1/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /city\s+1/i })).toBeInTheDocument();
+        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i })).toBeInTheDocument();
+        expect(within(scopeGroup).queryByRole("button", { name: /unit 10 turns prose only/i }))
+            .not.toBeInTheDocument();
 
         const statusesOverview = screen.getByLabelText("Statuses overview");
         expect(within(statusesOverview).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /ahead in the polls/i })).toBeInTheDocument();
         expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /shielded/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /unit 10 turns prose only/i }))
+            .toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+
+        expect(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }))
+            .toHaveAttribute("aria-pressed", "true");
+        expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /shielded/i })).toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /public opinion status/i }))
+            .not.toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /unit 10 turns prose only/i }))
+            .not.toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+
+        expect(within(statusesOverview).getByRole("button", { name: /public opinion status/i })).toBeInTheDocument();
+        expect(within(statusesOverview).getByRole("button", { name: /unit 10 turns prose only/i }))
+            .toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+1/i }));
+        expect(within(statusesOverview).getByRole("button", { name: /ahead in the polls/i })).toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /hobbled/i })).not.toBeInTheDocument();
+
+        await user.click(within(filters).getByRole("button", { name: "Clear" }));
+        expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /unit\s+2/i }));
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "hobbled");
+
+        expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /shielded/i })).not.toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /ahead in the polls/i }))
+            .not.toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses");
+    });
+
+    it("returns from Status detail routes to the Status archive when Scope filters change", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Hobbled",
+                displayName: "Hobbled",
+                descriptionLines: ["A unit status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Unit" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Ahead",
+                displayName: "Ahead in the Polls",
+                descriptionLines: ["A city approval status."],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                ],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=statuses&entry=Status_Unit_Hobbled"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={(
+                            <>
+                                <CodexPage />
+                                <LocationProbe />
+                            </>
+                        )}
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Hobbled" })).toBeInTheDocument();
+        const filters = screen.getByLabelText("Statuses filters");
+        const scopeGroup = within(filters).getByRole("group", { name: "Scope" });
+
+        await user.click(within(scopeGroup).getByRole("button", { name: /city\s+1/i }));
+
+        expect(await screen.findByRole("heading", { name: "All Statuses" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses");
+        const statusesOverview = screen.getByLabelText("Statuses overview");
+        expect(within(statusesOverview).getByRole("button", { name: /ahead in the polls/i })).toBeInTheDocument();
+        expect(within(statusesOverview).queryByRole("button", { name: /hobbled/i })).not.toBeInTheDocument();
+
+        await user.click(within(filters).getByRole("button", { name: "Clear" }));
+
+        expect(within(statusesOverview).getByRole("button", { name: /hobbled/i })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses");
     });
 
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {

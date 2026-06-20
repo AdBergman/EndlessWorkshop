@@ -1,4 +1,4 @@
-export type CodexCategoryMode = "generic" | "abilityArchive" | "referenceSheet";
+export type CodexCategoryMode = "generic" | "abilityArchive" | "statusArchive" | "referenceSheet";
 
 export const PREFERRED_CODEX_KIND_ORDER = [
     "abilities",
@@ -40,6 +40,10 @@ export function getCodexCategoryMode(kind: string): CodexCategoryMode {
 
     if (normalizedKind === "abilities") {
         return "abilityArchive";
+    }
+
+    if (normalizedKind === "statuses") {
+        return "statusArchive";
     }
 
     if (supportsFullWidthReferenceOverview(normalizedKind)) {

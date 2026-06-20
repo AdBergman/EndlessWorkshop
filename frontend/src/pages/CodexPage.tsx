@@ -29,6 +29,10 @@ import {
     type ActiveCodexFactFilters,
 } from "@/lib/codex/codexAbilityArchiveFilters";
 import {
+    buildStatusScopeFilterOptions,
+    filterStatusEntriesByScope,
+} from "@/lib/codex/codexStatusArchiveFilters";
+import {
     getCodexCategoryMode,
     isDirectRoutableHiddenCodexKind,
     isVisibleTopLevelCodexKind,
@@ -56,6 +60,7 @@ export default function CodexPage() {
     const [query, setQuery] = useState("");
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
     const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
+    const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryParam = (searchParams.get("entry") ?? "").trim() || null;
@@ -109,6 +114,9 @@ export default function CodexPage() {
         () => filterCodexEntries(entries, { query: deferredQuery, kind: activeKind }),
         [entries, deferredQuery, activeKind]
     );
+    const categoryMode = getCodexCategoryMode(activeKind);
+    const isAbilityCatalogMode = categoryMode === "abilityArchive";
+    const isStatusArchiveMode = categoryMode === "statusArchive";
 
     const factFilterConfig = useMemo(
         () => getAbilityArchiveFactFilterConfig(activeKind),
@@ -131,17 +139,47 @@ export default function CodexPage() {
         });
     }, [factFilterConfig]);
 
+    useEffect(() => {
+        if (isStatusArchiveMode) return;
+
+        setActiveStatusScope((current) => current ? null : current);
+    }, [isStatusArchiveMode]);
+
+    const statusScopeOptions = useMemo(
+        () => (
+            isStatusArchiveMode
+                ? buildStatusScopeFilterOptions(searchFilteredEntries)
+                : []
+        ),
+        [isStatusArchiveMode, searchFilteredEntries]
+    );
+
     const filteredEntries = useMemo(
         () => {
-            if (Object.keys(activeFactFilters).length === 0) {
-                return searchFilteredEntries;
+            if (isAbilityCatalogMode) {
+                if (Object.keys(activeFactFilters).length === 0) {
+                    return searchFilteredEntries;
+                }
+
+                return searchFilteredEntries.filter((entry) =>
+                    entryMatchesAbilityArchiveFilters(entry, activeFactFilters, factFilterConfig)
+                );
             }
 
-            return searchFilteredEntries.filter((entry) =>
-                entryMatchesAbilityArchiveFilters(entry, activeFactFilters, factFilterConfig)
-            );
+            if (isStatusArchiveMode) {
+                return filterStatusEntriesByScope(searchFilteredEntries, activeStatusScope);
+            }
+
+            return searchFilteredEntries;
         },
-        [activeFactFilters, factFilterConfig, searchFilteredEntries]
+        [
+            activeFactFilters,
+            activeStatusScope,
+            factFilterConfig,
+            isAbilityCatalogMode,
+            isStatusArchiveMode,
+            searchFilteredEntries,
+        ]
     );
 
     const autocompleteEntries = useMemo(
@@ -159,8 +197,6 @@ export default function CodexPage() {
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
-    const categoryMode = getCodexCategoryMode(activeKind);
-    const isAbilityCatalogMode = categoryMode === "abilityArchive";
     const activeFactFilterItems = useMemo(
         () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
@@ -455,6 +491,12 @@ export default function CodexPage() {
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isAbilityCatalogMode, selectedEntryParam, updateSelectedEntry]);
 
+    const returnStatusFiltersToArchive = useCallback(() => {
+        if (!isStatusArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isStatusArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const clearFactFilters = useCallback(() => {
         setActiveFactFilters({});
         returnAbilityFiltersToArchive();
@@ -472,6 +514,16 @@ export default function CodexPage() {
         });
         returnAbilityFiltersToArchive();
     }, [returnAbilityFiltersToArchive]);
+
+    const clearStatusScope = useCallback(() => {
+        setActiveStatusScope(null);
+        returnStatusFiltersToArchive();
+    }, [returnStatusFiltersToArchive]);
+
+    const toggleStatusScope = useCallback((scope: string) => {
+        setActiveStatusScope((current) => current === scope ? null : scope);
+        returnStatusFiltersToArchive();
+    }, [returnStatusFiltersToArchive]);
 
     return (
         <main className="codex-page">
@@ -514,6 +566,8 @@ export default function CodexPage() {
                         isFullWidthReferenceOverviewState ? "codex-workspace--referenceOverview" : ""
                     } ${
                         isAbilityCatalogMode ? "codex-workspace--abilityCatalog" : ""
+                    } ${
+                        isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
                     }`}
                 >
                     <CodexLeftPane
@@ -526,11 +580,16 @@ export default function CodexPage() {
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
                         isAbilityCatalogMode={isAbilityCatalogMode}
+                        isStatusArchiveMode={isStatusArchiveMode}
                         isVisible={showResultsPane}
                         loading={loading}
                         selectedEntryKey={selectedListItem?.entryKey ?? null}
+                        statusScopeFilter={activeStatusScope}
+                        statusScopeOptions={statusScopeOptions}
                         onClearFactFilters={clearFactFilters}
+                        onClearStatusScope={clearStatusScope}
                         onSelectEntry={(entry) => selectEntry(entry)}
+                        onToggleStatusScope={toggleStatusScope}
                         onToggleFactFilter={toggleFactFilter}
                     />
 

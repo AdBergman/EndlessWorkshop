@@ -11,6 +11,7 @@ describe("codexCategoryConfig", () => {
     it("normalizes kind keys before checking category behavior", () => {
         expect(normalizeCodexKind(" Abilities ")).toBe("abilities");
         expect(getCodexCategoryMode(" Abilities ")).toBe("abilityArchive");
+        expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
         expect(supportsFullWidthReferenceOverview(" Resources ")).toBe(true);
     });
 

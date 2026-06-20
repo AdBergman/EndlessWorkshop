@@ -1,10 +1,12 @@
 import React from "react";
 import AbilityArchiveRail from "@/components/Codex/AbilityArchiveRail";
 import CodexResultList from "@/components/Codex/CodexResultList";
+import StatusArchiveRail from "@/components/Codex/StatusArchiveRail";
 import {
     type ActiveCodexFactFilters,
     type CodexFactFilterOption,
 } from "@/lib/codex/codexAbilityArchiveFilters";
+import type { StatusScopeFilterOption } from "@/lib/codex/codexStatusArchiveFilters";
 import type { CodexListItem } from "@/lib/codex/codexPresentation";
 import { ALL_CODEX_KIND } from "@/lib/codex/codexSearch";
 
@@ -17,11 +19,16 @@ type Props = {
     filteredEntryCount: number;
     filterOptions: readonly CodexFactFilterOption[];
     isAbilityCatalogMode: boolean;
+    isStatusArchiveMode: boolean;
     isVisible: boolean;
     loading: boolean;
     selectedEntryKey: string | null;
+    statusScopeFilter: string | null;
+    statusScopeOptions: readonly StatusScopeFilterOption[];
     onClearFactFilters: () => void;
+    onClearStatusScope: () => void;
     onSelectEntry: (entry: CodexListItem) => void;
+    onToggleStatusScope: (scope: string) => void;
     onToggleFactFilter: (label: string, value: string) => void;
 };
 
@@ -35,11 +42,16 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         filteredEntryCount,
         filterOptions,
         isAbilityCatalogMode,
+        isStatusArchiveMode,
         isVisible,
         loading,
         selectedEntryKey,
+        statusScopeFilter,
+        statusScopeOptions,
         onClearFactFilters,
+        onClearStatusScope,
         onSelectEntry,
+        onToggleStatusScope,
         onToggleFactFilter,
     },
     resultListRef
@@ -48,10 +60,18 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
 
     return (
         <aside
-            className={`codex-resultsPane ${isAbilityCatalogMode ? "codex-resultsPane--catalog" : ""}`}
-            aria-label={isAbilityCatalogMode ? "Ability catalog filters" : "Codex results"}
+            className={`codex-resultsPane ${
+                isAbilityCatalogMode || isStatusArchiveMode ? "codex-resultsPane--catalog" : ""
+            }`}
+            aria-label={
+                isAbilityCatalogMode
+                    ? "Ability catalog filters"
+                    : isStatusArchiveMode
+                        ? "Status archive filters"
+                        : "Codex results"
+            }
         >
-            {!isAbilityCatalogMode ? (
+            {!isAbilityCatalogMode && !isStatusArchiveMode ? (
                 <div className="codex-resultsPane__header">
                     <div>
                         <div className="codex-sectionLabel">Results</div>
@@ -74,7 +94,16 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
                 />
             ) : null}
 
-            {!isAbilityCatalogMode ? (
+            {isStatusArchiveMode ? (
+                <StatusArchiveRail
+                    activeScope={statusScopeFilter}
+                    options={statusScopeOptions}
+                    onClearScope={onClearStatusScope}
+                    onToggleScope={onToggleStatusScope}
+                />
+            ) : null}
+
+            {!isAbilityCatalogMode && !isStatusArchiveMode ? (
                 <CodexResultList
                     ref={resultListRef}
                     entries={displayEntries}

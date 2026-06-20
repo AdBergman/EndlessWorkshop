@@ -2396,18 +2396,21 @@
 }
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar,
-.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar {
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar,
+.codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar {
     width: 8px;
     height: 8px;
 }
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-track,
-.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-track {
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-track,
+.codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.018);
 }
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb,
-.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb {
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb,
+.codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-thumb {
     border: 2px solid rgba(0, 0, 0, 0);
     border-radius: 999px;
     background: rgba(195, 152, 77, 0.24);
@@ -2415,7 +2418,8 @@
 }
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb:hover,
-.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb:hover {
+.codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb:hover,
+.codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-thumb:hover {
     background: rgba(230, 176, 82, 0.38);
     background-clip: padding-box;
 }
