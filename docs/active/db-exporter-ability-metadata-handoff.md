@@ -632,6 +632,59 @@ Request:
 - do not require EWShop to infer technology progression from raw tech route
   data, keys, names, prose, or tier numbers.
 
+## Quests Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Codex Quests
+category evolution pass. Current EWShop behavior remains correct, but the
+archive remains visually noisy when many exported records share a display title.
+
+### Canonical Archive Grouping Metadata
+
+Quest Codex export contains many records sharing the same display title.
+
+Observed example:
+
+- `A Bitter Truth` -> 18 records.
+
+These records are not duplicates. They differ in:
+
+- objectives;
+- requirements;
+- rewards;
+- references;
+- choices.
+
+Frontend cannot safely determine:
+
+- canonical quest identity;
+- variant identity;
+- archive grouping;
+- chapter ownership;
+- record role;
+
+without using title heuristics or key parsing. Both are rejected in EWShop's
+Codex category evolution workflow.
+
+Requested exporter metadata, using the existing Codex fact/reference style where
+possible:
+
+- `archiveGroupKey`;
+- `archiveGroupTitle`;
+- `questlineKey`;
+- `chapterKey`;
+- `variantKey`;
+- `recordRole`;
+- `factionKey`;
+- a stable archive grouping identifier.
+
+Goal:
+
+- allow Codex archive grouping without key parsing or title-based heuristics.
+
+Priority:
+
+- non-blocking. Current frontend behavior remains correct but visually noisy.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

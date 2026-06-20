@@ -130,6 +130,10 @@ Determine:
 
 Content should dominate. Metadata should classify and support content.
 
+Do not treat duplicate display names as identity. Archive grouping should use
+exported canonical identifiers whenever possible. If grouping requires title
+heuristics or key parsing, defer grouping and request exporter metadata instead.
+
 Before designing archive rows, classify row elements as:
 - primary content
 - supporting metadata

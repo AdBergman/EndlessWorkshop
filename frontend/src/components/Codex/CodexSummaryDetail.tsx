@@ -10,7 +10,6 @@ import {
     getCodexEntryPreview,
     getCodexEntryLabel,
     getCodexSecondaryContext,
-    isCodexQuestGroupEntry,
     type CodexListItem,
     type CodexSummaryEntry,
 } from "@/lib/codex/codexPresentation";
@@ -45,7 +44,9 @@ import {
 import {
     buildEntriesByKey,
     buildEntriesByKindKey,
+    resolveCodexReference,
     resolveRelatedEntries,
+    type CodexReferenceIndexes,
 } from "@/lib/codex/codexRefs";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -105,6 +106,10 @@ type DiplomacyArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type QuestArchiveLink = {
+    entry: CodexEntry;
+    label: string;
+};
 type TechArchiveMetadataItem = {
     key: string;
     value: string;
@@ -145,6 +150,8 @@ const MAX_UNIT_GRANTED_ABILITY_LINKS = 3;
 const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DISTRICT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
+const MAX_QUEST_PREVIEW_LINES = 3;
+const MAX_QUEST_INLINE_LINKS = 5;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const MAX_TECH_EFFECT_PREVIEW_LINES = 4;
 const MAX_TECH_UNLOCK_LINKS = 4;
@@ -161,6 +168,23 @@ const ABILITY_TAXONOMY_TERMS = new Set([
 const STATUS_ARCHIVE_PRIMARY_SECTIONS = ["status mechanics", "effects"];
 const STATUS_ARCHIVE_EXCLUDED_SECTIONS = new Set([
     "linked cost modifier",
+]);
+const QUEST_ARCHIVE_PREVIEW_SECTION_ORDER = [
+    "objective",
+    "requirements",
+    "rewards",
+    "effects",
+];
+const QUEST_ARCHIVE_LINK_KINDS = new Set([
+    "districts",
+    "equipment",
+    "heroes",
+    "improvements",
+    "resources",
+    "statuses",
+    "tech",
+    "traits",
+    "units",
 ]);
 
 function normalizeAbilityTaxonomyText(value: string): string {
@@ -482,6 +506,84 @@ function getStructuredSectionPreviewLines(section: ReturnType<typeof parseCodexS
     }
 
     return previewLines;
+}
+
+function normalizeQuestPreviewText(value: string): string {
+    return normalizeAbilityTaxonomyText(value)
+        .replace(/^objective:\s*/i, "")
+        .replace(/^requirements?:\s*/i, "")
+        .replace(/^rewards?:\s*/i, "")
+        .replace(/^effects?:\s*/i, "");
+}
+
+function getQuestArchivePreviewLines(entry: CodexEntry, fallbackPreview: string): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "quests") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const lines: string[] = [];
+    const seen = new Set<string>();
+    const normalizedFallback = normalizeQuestPreviewText(fallbackPreview);
+
+    const addLine = (label: string, line: string) => {
+        const value = line.trim();
+        if (!value) return;
+
+        const normalizedValue = normalizeQuestPreviewText(value);
+        if (!normalizedValue || normalizedValue === normalizedFallback || seen.has(normalizedValue)) return;
+
+        seen.add(normalizedValue);
+        lines.push(`${label}: ${value}`);
+    };
+
+    for (const wantedLabel of QUEST_ARCHIVE_PREVIEW_SECTION_ORDER) {
+        const section = parsed.sections.find((candidate) =>
+            candidate.label.trim().toLowerCase() === wantedLabel
+        );
+        if (!section) continue;
+
+        const displayLabel = section.label.trim();
+        getStructuredSectionPreviewLines(section).forEach((line) => addLine(displayLabel, line));
+        if (lines.length >= MAX_QUEST_PREVIEW_LINES) break;
+    }
+
+    return lines.slice(0, MAX_QUEST_PREVIEW_LINES);
+}
+
+function isQuestArchiveLinkKind(entry: CodexEntry): boolean {
+    return QUEST_ARCHIVE_LINK_KINDS.has(entry.exportKind.trim().toLowerCase());
+}
+
+function getQuestArchiveLinks(
+    entry: CodexEntry,
+    referenceIndexes: CodexReferenceIndexes
+): QuestArchiveLink[] {
+    if (entry.exportKind.trim().toLowerCase() !== "quests") return [];
+
+    const links: QuestArchiveLink[] = [];
+    const seenKeys = new Set<string>();
+
+    const addEntry = (target: CodexEntry | undefined, label?: string) => {
+        if (!target || !isQuestArchiveLinkKind(target) || seenKeys.has(target.entryKey)) return;
+
+        seenKeys.add(target.entryKey);
+        links.push({
+            entry: target,
+            label: label?.trim() || getCodexEntryLabel(target),
+        });
+    };
+
+    const parsed = parseCodexStructuredDescription(entry);
+    for (const section of parsed.sections) {
+        for (const item of section.items ?? []) {
+            addEntry(resolveCodexReference(item.referenceKey, referenceIndexes), item.label);
+        }
+    }
+
+    for (const relatedEntry of resolveRelatedEntries(entry, referenceIndexes)) {
+        addEntry(relatedEntry);
+    }
+
+    return links;
 }
 
 function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
@@ -982,35 +1084,6 @@ export default function CodexSummaryDetail({
             <div className="codex-summaryList" aria-label={`${summaryEntry.summaryLabel} overview`}>
                 {entries.length > 0 ? (
                     entries.map((entry) => {
-                        if (isCodexQuestGroupEntry(entry)) {
-                            const variantMeta = entry.variantCount > 1
-                                ? `${entry.variantCount} questlines`
-                                : entry.variants[0]?.isAlternate
-                                    ? entry.variants[0].variantLabel
-                                    : null;
-
-                            return (
-                                <button
-                                    key={entry.entryKey}
-                                    type="button"
-                                    className="codex-summaryList__item"
-                                    onClick={() => onSelectEntry(entry)}
-                                >
-                                    <span className="codex-summaryList__name">
-                                        {renderCodexLabel(getCodexEntryLabel(entry))}
-                                    </span>
-                                    <span className="codex-summaryList__context">
-                                        {[entry.groupContext, variantMeta, `${entry.nodeCount} quest nodes`]
-                                            .filter(Boolean)
-                                            .join(" · ")}
-                                    </span>
-                                    <span className="codex-summaryList__description">
-                                        A grouped quest chapter with compact progression in the detail view.
-                                    </span>
-                                </button>
-                            );
-                        }
-
                         const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
@@ -1030,6 +1103,7 @@ export default function CodexSummaryDetail({
                         const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const useHeroArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "heroes";
+                        const useQuestArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "quests";
                         const useTechArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "tech";
                         const useUnitArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "units";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
@@ -1049,6 +1123,17 @@ export default function CodexSummaryDetail({
                         const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
                             ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
                             : [];
+                        const questArchivePreviewLines = useQuestArchiveRowHierarchy
+                            ? getQuestArchivePreviewLines(entry, preview)
+                            : [];
+                        const questArchiveLinks = useQuestArchiveRowHierarchy
+                            ? getQuestArchiveLinks(entry, referenceIndexes)
+                            : [];
+                        const visibleQuestArchiveLinks = questArchiveLinks.slice(0, MAX_QUEST_INLINE_LINKS);
+                        const questArchiveLinkOverflowCount = Math.max(
+                            0,
+                            questArchiveLinks.length - visibleQuestArchiveLinks.length
+                        );
                         const techRelatedEntries = useTechArchiveRowHierarchy
                             ? resolveRelatedEntries(entry, referenceIndexes)
                             : [];
@@ -1841,6 +1926,88 @@ export default function CodexSummaryDetail({
                                         </span>
                                     ) : null}
                                 </button>
+                            );
+                        }
+
+                        if (useQuestArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--questArchive"
+                                >
+                                    <button
+                                        type="button"
+                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--quest"
+                                        onClick={() => onSelectEntry(entry)}
+                                    >
+                                        <span className="codex-summaryList__titleLine">
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                        </span>
+                                        <span className="codex-summaryList__description">
+                                            {preview
+                                                ? renderDescriptionLine(formatCodexMajorFactionText(preview))
+                                                : "No public description has been added for this entry yet."}
+                                        </span>
+                                        {questArchivePreviewLines.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__questSignals"
+                                                aria-label="Quest archive preview"
+                                            >
+                                                {questArchivePreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__questSignal"
+                                                        key={`${entry.entryKey}-quest-signal-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
+                                    </button>
+
+                                    {visibleQuestArchiveLinks.length > 0 ? (
+                                        <div
+                                            className="codex-summaryList__grantedAbilityLinks codex-summaryList__questLinks"
+                                            aria-label="Exact quest links"
+                                        >
+                                            <span className="codex-summaryList__grantedAbilityLinksLabel">
+                                                Links:
+                                            </span>
+                                            <span className="codex-summaryList__grantedAbilityLinkList">
+                                                {visibleQuestArchiveLinks.map((link, index) => (
+                                                    <span
+                                                        className="codex-summaryList__grantedAbilityLinkItem"
+                                                        key={`${entry.entryKey}-${link.entry.entryKey}`}
+                                                    >
+                                                        {index > 0 ? (
+                                                            <span
+                                                                className="codex-summaryList__grantedAbilitySeparator"
+                                                                aria-hidden="true"
+                                                            >
+                                                                ·
+                                                            </span>
+                                                        ) : null}
+                                                        <CodexInlineEntityLink
+                                                            entry={link.entry}
+                                                            onSelect={(linkedEntry) => onSelectEntry(linkedEntry)}
+                                                        >
+                                                            {renderCodexLabel(link.label)}
+                                                        </CodexInlineEntityLink>
+                                                    </span>
+                                                ))}
+                                                {questArchiveLinkOverflowCount > 0 ? (
+                                                    <span className="codex-summaryList__grantedAbilityOverflow">
+                                                        +{questArchiveLinkOverflowCount} more
+                                                    </span>
+                                                ) : null}
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                </div>
                             );
                         }
 

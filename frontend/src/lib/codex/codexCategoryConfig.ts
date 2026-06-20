@@ -7,6 +7,7 @@ export type CodexCategoryMode =
     | "equipmentArchive"
     | "heroArchive"
     | "improvementArchive"
+    | "questArchive"
     | "statusArchive"
     | "techArchive"
     | "traitArchive"
@@ -77,6 +78,10 @@ export function getCodexCategoryMode(kind: string): CodexCategoryMode {
 
     if (normalizedKind === "improvements") {
         return "improvementArchive";
+    }
+
+    if (normalizedKind === "quests") {
+        return "questArchive";
     }
 
     if (normalizedKind === "statuses") {

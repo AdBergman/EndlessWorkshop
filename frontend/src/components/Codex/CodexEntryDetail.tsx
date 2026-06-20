@@ -4,22 +4,18 @@ import {
     formatCodexKindLabel,
     getCodexDetailContextLines,
     getCodexEntryLabel,
-    getCodexQuestGroupDetailContextLines,
-    type CodexQuestGroupEntry,
 } from "@/lib/codex/codexPresentation";
 import { getDisplayedGrantedAbilityKeys } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { getDisplayedPopulationThresholdTargetKeys } from "@/lib/codex/codexPopulationThresholdTargets";
 import { buildStatusRelationshipSourceEntries } from "@/lib/codex/codexStatusRelationships";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
-import CodexQuestProgression from "./CodexQuestProgression";
 import CodexStructuredDetail from "./CodexStructuredDetail";
 import RelatedEntries from "./RelatedEntries";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
 type Props = {
     entry: CodexEntry | null;
-    questGroup: CodexQuestGroupEntry | null;
     allEntries: readonly CodexEntry[];
     relatedEntries: CodexEntry[];
     titleRef: RefObject<HTMLHeadingElement | null>;
@@ -28,7 +24,6 @@ type Props = {
 
 export default function CodexEntryDetail({
     entry,
-    questGroup,
     allEntries,
     relatedEntries,
     titleRef,
@@ -48,9 +43,7 @@ export default function CodexEntryDetail({
 
     const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
     const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
-    const detailContextLines = isAbilityEntry ? [] : questGroup
-        ? getCodexQuestGroupDetailContextLines(entry)
-        : getCodexDetailContextLines(entry);
+    const detailContextLines = isAbilityEntry ? [] : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
     const kindLabel = formatCodexKindLabel(entry.exportKind);
     const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
@@ -87,12 +80,6 @@ export default function CodexEntryDetail({
             <h2 className="codex-detail__title" ref={titleRef} tabIndex={-1}>
                 {renderCodexLabel(getCodexEntryLabel(entry))}
             </h2>
-
-            <CodexQuestProgression
-                group={questGroup}
-                selectedEntryKey={entry.entryKey}
-                onSelectNode={onSelectRelated}
-            />
 
             {isFactionEntry ? (
                 <CodexFactionDetail

@@ -17,6 +17,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode(" Equipment ")).toBe("equipmentArchive");
         expect(getCodexCategoryMode(" Heroes ")).toBe("heroArchive");
         expect(getCodexCategoryMode(" Improvements ")).toBe("improvementArchive");
+        expect(getCodexCategoryMode(" Quests ")).toBe("questArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
         expect(getCodexCategoryMode(" Tech ")).toBe("techArchive");
         expect(getCodexCategoryMode(" Units ")).toBe("unitArchive");

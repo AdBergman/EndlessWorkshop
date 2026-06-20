@@ -9,11 +9,9 @@ import {
     createCodexSummaryEntry,
     formatCodexKindLabel,
     getCodexSummaryEntryKey,
-    isCodexQuestGroupEntry,
     isCodexSummaryEntry,
     type CodexListItem,
 } from "@/lib/codex/codexPresentation";
-import { groupQuestListItems } from "@/lib/codex/codexQuestGrouping";
 import {
     ALL_CODEX_KIND,
     entryMatchesQuery,
@@ -64,6 +62,11 @@ import {
     filterImprovementEntriesByCategory,
     type ImprovementArchiveCategory,
 } from "@/lib/codex/codexImprovementArchiveFilters";
+import {
+    buildQuestCategoryFilterGroups,
+    filterQuestEntriesByCategory,
+    type QuestArchiveFilterValue,
+} from "@/lib/codex/codexQuestArchiveFilters";
 import {
     buildStatusScopeFilterOptions,
     filterStatusEntriesByScope,
@@ -130,6 +133,7 @@ export default function CodexPage() {
         EMPTY_UNIT_ARCHIVE_FILTERS
     );
     const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
+    const [activeQuestCategory, setActiveQuestCategory] = useState<QuestArchiveFilterValue | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
     const [activeTechFilters, setActiveTechFilters] = useState<ActiveTechArchiveFilters>(
         EMPTY_TECH_ARCHIVE_FILTERS
@@ -196,6 +200,7 @@ export default function CodexPage() {
     const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
     const isHeroArchiveMode = categoryMode === "heroArchive";
     const isImprovementArchiveMode = categoryMode === "improvementArchive";
+    const isQuestArchiveMode = categoryMode === "questArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
     const isTechArchiveMode = categoryMode === "techArchive";
     const isTraitArchiveMode = categoryMode === "traitArchive";
@@ -334,6 +339,26 @@ export default function CodexPage() {
     );
 
     useEffect(() => {
+        if (isQuestArchiveMode) return;
+
+        setActiveQuestCategory((current) => current ? null : current);
+    }, [isQuestArchiveMode]);
+
+    const codexReferenceIndexes = useMemo(
+        () => ({ entriesByKey, entriesByKindKey }),
+        [entriesByKey, entriesByKindKey]
+    );
+
+    const questCategoryGroups = useMemo(
+        () => (
+            isQuestArchiveMode
+                ? buildQuestCategoryFilterGroups(searchFilteredEntries, codexReferenceIndexes)
+                : []
+        ),
+        [codexReferenceIndexes, isQuestArchiveMode, searchFilteredEntries]
+    );
+
+    useEffect(() => {
         if (isStatusArchiveMode) return;
 
         setActiveStatusScope((current) => current ? null : current);
@@ -422,6 +447,10 @@ export default function CodexPage() {
                 return filterImprovementEntriesByCategory(searchFilteredEntries, activeImprovementCategory);
             }
 
+            if (isQuestArchiveMode) {
+                return filterQuestEntriesByCategory(searchFilteredEntries, activeQuestCategory, codexReferenceIndexes);
+            }
+
             if (isTraitArchiveMode) {
                 return filterTraitEntriesByType(searchFilteredEntries, activeTraitType);
             }
@@ -466,6 +495,8 @@ export default function CodexPage() {
             activeFactFilters,
             activeHeroFilters,
             activeImprovementCategory,
+            activeQuestCategory,
+            codexReferenceIndexes,
             activeStatusScope,
             activeTechFilters,
             activeTraitType,
@@ -478,6 +509,7 @@ export default function CodexPage() {
             isEquipmentArchiveMode,
             isHeroArchiveMode,
             isImprovementArchiveMode,
+            isQuestArchiveMode,
             isStatusArchiveMode,
             isTechArchiveMode,
             isTraitArchiveMode,
@@ -515,17 +547,15 @@ export default function CodexPage() {
     );
 
     const displayEntries = useMemo<CodexListItem[]>(() => {
-        const groupedEntries = groupQuestListItems(filteredEntries);
-
         if (activeKind === ALL_CODEX_KIND) {
-            return groupedEntries;
+            return filteredEntries;
         }
 
-        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...groupedEntries];
+        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...filteredEntries];
     }, [activeKind, activeKindLabel, filteredEntries]);
 
     const groupedFilteredEntries = useMemo(
-        () => groupQuestListItems(filteredEntries),
+        () => filteredEntries,
         [filteredEntries]
     );
 
@@ -534,10 +564,6 @@ export default function CodexPage() {
 
         for (const entry of displayEntries) {
             if (entry.entryKey === selectedEntryKey) return entry;
-            if (isCodexQuestGroupEntry(entry)) {
-                const matchingNode = entry.nodes.find((node) => node.entryKey === selectedEntryKey);
-                if (matchingNode) return matchingNode;
-            }
         }
 
         return null;
@@ -545,24 +571,12 @@ export default function CodexPage() {
 
     const selectedEntry = useMemo(
         () => (
-            selectedListItem && !isCodexSummaryEntry(selectedListItem) && !isCodexQuestGroupEntry(selectedListItem)
+            selectedListItem && !isCodexSummaryEntry(selectedListItem)
                 ? selectedListItem
                 : null
         ),
         [selectedListItem]
     );
-    const selectedQuestGroup = useMemo(() => {
-        if (!selectedEntryKey) return null;
-
-        for (const entry of displayEntries) {
-            if (!isCodexQuestGroupEntry(entry)) continue;
-            if (entry.nodes.some((node) => node.entryKey === selectedEntryKey)) {
-                return entry;
-            }
-        }
-
-        return null;
-    }, [displayEntries, selectedEntryKey]);
     const overviewOptions = useMemo(
         () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
         [filterOptions]
@@ -592,8 +606,8 @@ export default function CodexPage() {
         Boolean(codexResetNonce);
 
     const resolvedRelatedEntries = useMemo(
-        () => resolveRelatedEntries(selectedEntry, { entriesByKey, entriesByKindKey }),
-        [selectedEntry, entriesByKey, entriesByKindKey]
+        () => resolveRelatedEntries(selectedEntry, codexReferenceIndexes),
+        [codexReferenceIndexes, selectedEntry]
     );
 
     const updateSelectedEntry = useCallback(
@@ -628,9 +642,6 @@ export default function CodexPage() {
 
     const getSelectableEntryKey = useCallback((entry: CodexListItem | null): string | null => {
         if (!entry) return null;
-        if (isCodexQuestGroupEntry(entry)) {
-            return entry.nodes[0]?.entryKey ?? null;
-        }
         return entry.entryKey;
     }, []);
 
@@ -761,7 +772,7 @@ export default function CodexPage() {
     useEffect(() => {
         if (!selectedListItem) return;
 
-        const scrollEntryKey = selectedQuestGroup?.entryKey ?? selectedListItem.entryKey;
+        const scrollEntryKey = selectedListItem.entryKey;
         const rowButtons = Array.from(
             resultListRef.current?.querySelectorAll<HTMLElement>("[data-entry-key]") ?? []
         );
@@ -773,7 +784,7 @@ export default function CodexPage() {
                 inline: "nearest",
             });
         }
-    }, [selectedListItem, selectedQuestGroup]);
+    }, [selectedListItem]);
 
     useEffect(() => {
         if (selectionIntent !== "related" || !selectedEntry) return;
@@ -854,6 +865,12 @@ export default function CodexPage() {
 
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isImprovementArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
+    const returnQuestFiltersToArchive = useCallback(() => {
+        if (!isQuestArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isQuestArchiveMode, selectedEntryParam, updateSelectedEntry]);
 
     const clearActionType = useCallback(() => {
         setActiveActionType(null);
@@ -952,6 +969,16 @@ export default function CodexPage() {
         returnImprovementFiltersToArchive();
     }, [returnImprovementFiltersToArchive]);
 
+    const clearQuestCategory = useCallback(() => {
+        setActiveQuestCategory(null);
+        returnQuestFiltersToArchive();
+    }, [returnQuestFiltersToArchive]);
+
+    const toggleQuestCategory = useCallback((category: QuestArchiveFilterValue) => {
+        setActiveQuestCategory((current) => current === category ? null : category);
+        returnQuestFiltersToArchive();
+    }, [returnQuestFiltersToArchive]);
+
     const clearStatusScope = useCallback(() => {
         setActiveStatusScope(null);
         returnStatusFiltersToArchive();
@@ -1041,6 +1068,8 @@ export default function CodexPage() {
                     } ${
                         isImprovementArchiveMode ? "codex-workspace--improvementArchive" : ""
                     } ${
+                        isQuestArchiveMode ? "codex-workspace--questArchive" : ""
+                    } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
                     } ${
                         isTechArchiveMode ? "codex-workspace--techArchive" : ""
@@ -1082,12 +1111,16 @@ export default function CodexPage() {
                         isEquipmentArchiveMode={isEquipmentArchiveMode}
                         isHeroArchiveMode={isHeroArchiveMode}
                         isImprovementArchiveMode={isImprovementArchiveMode}
+                        isQuestArchiveMode={isQuestArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isTechArchiveMode={isTechArchiveMode}
                         isTraitArchiveMode={isTraitArchiveMode}
                         isUnitArchiveMode={isUnitArchiveMode}
                         isVisible={showResultsPane}
                         loading={loading}
+                        questCategoryFilter={activeQuestCategory}
+                        questCategoryGroups={questCategoryGroups}
+                        questTotalCount={isQuestArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
                         selectedEntryKey={selectedListItem?.entryKey ?? null}
                         statusScopeFilter={activeStatusScope}
                         statusScopeOptions={statusScopeOptions}
@@ -1104,6 +1137,7 @@ export default function CodexPage() {
                         onClearHeroFilters={clearHeroFilters}
                         onClearUnitFilters={clearUnitFilters}
                         onClearImprovementCategory={clearImprovementCategory}
+                        onClearQuestCategory={clearQuestCategory}
                         onClearStatusScope={clearStatusScope}
                         onClearTechFilters={clearTechFilters}
                         onClearTraitType={clearTraitType}
@@ -1115,6 +1149,7 @@ export default function CodexPage() {
                         onToggleHeroFilter={toggleHeroFilter}
                         onToggleUnitFilter={toggleUnitFilter}
                         onToggleImprovementCategory={toggleImprovementCategory}
+                        onToggleQuestCategory={toggleQuestCategory}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTechFilter={toggleTechFilter}
                         onToggleTraitType={toggleTraitType}
@@ -1141,10 +1176,9 @@ export default function CodexPage() {
                                     hasActiveFilters={hasActiveFactFilters}
                                 />
                             ) : (
-                                <CodexEntryDetail
-                                    entry={selectedEntry}
-                                    questGroup={selectedQuestGroup}
-                                    allEntries={entries}
+                            <CodexEntryDetail
+                                entry={selectedEntry}
+                                allEntries={entries}
                                     relatedEntries={resolvedRelatedEntries}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}

@@ -106,6 +106,11 @@ Current rules:
   (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
   Resource, Bridge, Population, Trade) plus content-first rows from exported
   Effect lines.
+- Quests use compact Quest Archive support inside Codex: Quest Category rail
+  plus exact major-faction shelves where exported facts/references prove
+  ownership, content-first rows, compact exact `Links:`, and no Codex
+  branch/path/progression UI. The dedicated `/quests` route remains the
+  route-owned Quest Explorer.
 - Units use compact Unit Archive mode: Class/Faction/Tier rail plus stat-grid
   comparison rows, Faction/Class/Tier metadata, and compact exact granted
   ability links where references resolve. Rich evolution-chain UI remains

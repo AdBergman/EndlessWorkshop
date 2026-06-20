@@ -5,11 +5,11 @@ import {
     getCodexDescriptionPreviewText,
     getCodexEntryLabel,
     getCodexEntryPreview,
-    getCodexQuestNodeLabel,
+    getCodexDetailContextLines,
+    getCodexRelatedContext,
     getCodexSecondaryContext,
     humanizeCodexEntryKey,
     isCodexSummaryEntry,
-    parseCodexQuestContext,
 } from "@/lib/codex/codexPresentation";
 
 describe("codexPresentation", () => {
@@ -104,17 +104,26 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomacy");
     });
 
-    it("adds stable quest step context for duplicate quest titles", () => {
-        expect(
-            getCodexSecondaryContext({
-                exportKind: "quests",
-                entryKey: "FactionQuest_Necrophage02_Chapter06_Step03_Choice01",
-                category: "MajorFaction",
-                kind: "Quest",
-                descriptionLines: [],
-                referenceKeys: [],
-            })
-        ).toBe("Necrophages Alternate Questline 2 / Chapter 06 Step 03 Choice 01 / Major Faction / Quest");
+    it("uses exported Quest facts for Codex context instead of key-derived step paths", () => {
+        const questEntry = {
+            exportKind: "quests",
+            entryKey: "FactionQuest_Necrophage02_Chapter06_Step03_Choice01",
+            displayName: "A Choice",
+            category: "MajorFaction",
+            kind: "Quest",
+            descriptionLines: [],
+            referenceKeys: [],
+            facts: [
+                { label: "Kind", value: "Quest" },
+                { label: "Category", value: "MajorFaction" },
+                { label: "Chapter", value: "6" },
+                { label: "Mandatory", value: "Yes" },
+            ],
+        };
+
+        expect(getCodexSecondaryContext(questEntry)).toBe("Major Faction / Chapter 6 / Mandatory");
+        expect(getCodexDetailContextLines(questEntry)).toEqual(["Major Faction", "Chapter 6", "Mandatory"]);
+        expect(getCodexRelatedContext(questEntry)).toBe("Quest · Major Faction · Chapter 6 · Mandatory");
     });
 
     it("normalizes inferred major faction context from codex keys and descriptions", () => {
@@ -128,72 +137,6 @@ describe("codexPresentation", () => {
                 referenceKeys: ["Faction_Mukag"],
             })
         ).toBe("Tahuk / Unit");
-    });
-
-    it("keeps the full nested choice path for branch quest nodes", () => {
-        const entry = {
-            exportKind: "quests",
-            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01_Choice02",
-            displayName: "Stirrings",
-            category: "MajorFaction",
-            kind: "Quest",
-        };
-
-        expect(getCodexQuestNodeLabel({ ...entry, descriptionLines: [], referenceKeys: [] })).toBe(
-            "Step 2 · Choice 1 · Choice 2"
-        );
-        expect(parseCodexQuestContext(entry)?.choiceKeys).toEqual(["01", "02"]);
-        expect(parseCodexQuestContext(entry)?.choiceLabels).toEqual(["Choice 1", "Choice 2"]);
-    });
-
-    it("uses readable labels for numbered faction quest roots", () => {
-        const context = parseCodexQuestContext({
-            exportKind: "quests",
-            entryKey: "FactionQuest_Necrophage02_Chapter06_Step01",
-            displayName: "A Bitter Truth",
-            category: "MajorFaction",
-            kind: "Quest",
-        });
-
-        expect(context?.groupContext).toBe("Necrophages · Chapter 6");
-        expect(context?.variantLabel).toBe("Alternate questline 2");
-        expect(context?.relatedContext).toBe("Quest · Necrophages · Chapter 6 · Alternate questline 2 · Step 1");
-    });
-
-    it("builds readable KinOfSheredyn variant context without raw numbered roots", () => {
-        const context = parseCodexQuestContext({
-            exportKind: "quests",
-            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01_Choice02",
-            displayName: "Stirrings",
-            category: "MajorFaction",
-            kind: "Quest",
-        });
-
-        expect(context?.groupContext).toBe("Kin of Sheredyn · Chapter 1");
-        expect(context?.variantLabel).toBe("Alternate questline 2");
-        expect(context?.nodeLabel).toBe("Step 2 · Choice 1 · Choice 2");
-        expect(context?.detailContextLines).toEqual([
-            "Kin of Sheredyn · Chapter 1",
-            "Alternate questline 2",
-            "Step 2 · Choice 1 · Choice 2",
-            "Major Faction Quest",
-        ]);
-    });
-
-    it("keeps quest keys raw while normalizing only public context labels", () => {
-        const context = parseCodexQuestContext({
-            exportKind: "quests",
-            entryKey: "FactionQuest_KinOfSheredyn02_Chapter01_Step02_Choice01",
-            displayName: "Stirrings",
-            category: "MajorFaction",
-            kind: "Quest",
-        });
-
-        expect(context?.questlineKey).toBe("KinOfSheredyn02");
-        expect(context?.baseQuestlineKey).toBe("KinOfSheredyn");
-        expect(context?.variantKey).toBe("quest:stirrings:kinofsheredyn:01:kinofsheredyn02");
-        expect(context?.groupKey).toBe("quest:stirrings:kinofsheredyn:01");
-        expect(context?.groupContext).toBe("Kin of Sheredyn · Chapter 1");
     });
 
     it("uses entry-key context when source kind is the only discriminator", () => {

@@ -1,7 +1,6 @@
 import React from "react";
-import { isCodexQuestGroupEntry, type CodexListItem } from "@/lib/codex/codexPresentation";
+import { type CodexListItem } from "@/lib/codex/codexPresentation";
 import CodexResultRow from "./CodexResultRow";
-import CodexQuestGroupRow from "./CodexQuestGroupRow";
 
 type Props = {
     entries: CodexListItem[];
@@ -24,27 +23,14 @@ const CodexResultList = React.forwardRef<HTMLDivElement, Props>(function CodexRe
     } else if (entries.length === 0) {
         body = <p className="codex-stateMessage">No entries match the current search.</p>;
     } else {
-        body = entries.map((entry) => {
-            if (isCodexQuestGroupEntry(entry)) {
-                return (
-                    <CodexQuestGroupRow
-                        key={entry.entryKey}
-                        group={entry}
-                        selectedEntryKey={selectedEntryKey}
-                        onSelect={onSelect}
-                    />
-                );
-            }
-
-            return (
-                <CodexResultRow
-                    key={entry.entryKey}
-                    entry={entry}
-                    isSelected={entry.entryKey === selectedEntryKey}
-                    onSelect={onSelect}
-                />
-            );
-        });
+        body = entries.map((entry) => (
+            <CodexResultRow
+                key={entry.entryKey}
+                entry={entry}
+                isSelected={entry.entryKey === selectedEntryKey}
+                onSelect={onSelect}
+            />
+        ));
     }
 
     return (
