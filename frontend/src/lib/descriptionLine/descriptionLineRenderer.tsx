@@ -76,9 +76,9 @@ function Icon({
             title={decorative ? undefined : title}
             aria-hidden={decorative ? true : undefined}
             style={{
-                width: 14,
-                height: 14,
-                verticalAlign: "-2px",
+                width: 15,
+                height: 15,
+                verticalAlign: "-2.5px",
                 marginRight: 4,
                 display: "inline-block",
             }}

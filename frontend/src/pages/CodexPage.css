@@ -55,7 +55,7 @@
 
 .codex-header {
     position: relative;
-    padding: 10px 0 9px;
+    padding: 10px 0 10px;
 }
 
 .codex-header--compact {
@@ -77,7 +77,7 @@
     right: 0;
     bottom: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--codex-line-strong) 8%, rgba(255, 255, 255, 0.055) 44%, var(--codex-line) 82%, transparent);
+    background: linear-gradient(90deg, rgba(195, 152, 77, 0.18), rgba(255, 255, 255, 0.04) 38%, rgba(195, 152, 77, 0.08) 74%, transparent);
 }
 
 .codex-header__top {
@@ -156,11 +156,11 @@
     width: 100%;
     min-height: 40px;
     padding: 0 82px 0 14px;
-    border: 1px solid rgba(199, 189, 171, 0.16);
+    border: 1px solid rgba(199, 189, 171, 0.105);
     border-radius: 8px;
     background:
-        linear-gradient(180deg, rgba(241, 234, 220, 0.016), rgba(241, 234, 220, 0.004)),
-        rgba(1, 10, 13, 0.88);
+        linear-gradient(180deg, rgba(241, 234, 220, 0.01), rgba(241, 234, 220, 0.002)),
+        rgba(1, 10, 13, 0.68);
     color: #f1eadc;
     font-size: 14px;
     letter-spacing: 0.01em;
@@ -172,7 +172,7 @@
 }
 
 .codex-search__input:hover {
-    border-color: var(--codex-border-strong);
+    border-color: rgba(199, 189, 171, 0.18);
 }
 
 .codex-search__input:focus-visible,
@@ -369,7 +369,7 @@
     min-width: 0;
     max-width: 100%;
     flex-wrap: wrap;
-    gap: 5px 6px;
+    gap: 6px 7px;
     align-items: center;
 }
 
@@ -381,13 +381,14 @@
     min-width: 0;
     max-width: 100%;
     flex: 0 1 auto;
-    min-height: 30px;
+    min-height: 32px;
     gap: 7px;
-    padding-inline: 10px;
-    border-color: rgba(199, 189, 171, 0.044);
-    background: rgba(255, 255, 255, 0.003);
-    color: rgba(241, 234, 220, 0.62);
+    padding-inline: 11px;
+    border-color: transparent;
+    background: rgba(255, 255, 255, 0.006);
+    color: rgba(241, 234, 220, 0.72);
     font-size: 13px;
+    font-weight: 500;
 }
 
 .codex-categoryShelf__chip > span {
@@ -396,8 +397,9 @@
 }
 
 .codex-categoryShelf__chip:hover {
-    border-color: rgba(199, 189, 171, 0.13);
-    background: rgba(255, 255, 255, 0.018);
+    border-color: rgba(199, 189, 171, 0.1);
+    background: rgba(255, 255, 255, 0.016);
+    color: rgba(241, 234, 220, 0.88);
 }
 
 .codex-workspace {
@@ -783,15 +785,15 @@
 .codex-detail {
     min-width: 0;
     padding: 30px 34px 34px;
-    border: 1px solid rgba(190, 150, 73, 0.16);
+    border: 1px solid rgba(190, 150, 73, 0.095);
     border-radius: 8px;
     background:
-        linear-gradient(180deg, rgba(241, 234, 220, 0.014), transparent 240px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.008), transparent 44%),
-        var(--codex-reader);
+        linear-gradient(180deg, rgba(241, 234, 220, 0.01), transparent 220px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.005), transparent 44%),
+        rgba(12, 14, 15, 0.62);
     box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.018),
-        0 22px 58px rgba(0, 0, 0, 0.38);
+        inset 0 1px 0 rgba(255, 255, 255, 0.012),
+        0 18px 46px rgba(0, 0, 0, 0.26);
 }
 
 .codex-detail--empty {
@@ -1667,7 +1669,7 @@
     padding: 16px 4px 16px 16px;
     border: 0;
     border-left: 2px solid transparent;
-    border-bottom: 1px solid var(--codex-line);
+    border-bottom: 1px solid rgba(190, 150, 73, 0.085);
     background: transparent;
     color: inherit;
     text-align: left;
@@ -1738,17 +1740,17 @@
 .codex-summaryList__item:hover,
 .codex-summaryList__item:focus-visible,
 .codex-summaryList__item:focus-within {
-    border-left-color: rgba(195, 152, 77, 0.62);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.024), transparent 82%);
+    border-left-color: rgba(195, 152, 77, 0.52);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.018), transparent 82%);
 }
 
 .codex-summaryList__item--catalog:hover,
 .codex-summaryList__item--catalog:focus-visible,
 .codex-summaryList__item--catalog:focus-within {
-    border-left-color: rgba(230, 176, 82, 0.72);
+    border-left-color: rgba(230, 176, 82, 0.64);
     background:
-        linear-gradient(90deg, rgba(255, 127, 50, 0.035), rgba(255, 255, 255, 0.014) 58%, transparent),
-        rgba(255, 255, 255, 0.004);
+        linear-gradient(90deg, rgba(255, 127, 50, 0.025), rgba(255, 255, 255, 0.01) 58%, transparent),
+        rgba(255, 255, 255, 0.002);
 }
 
 .codex-summaryList__item--catalog:focus-visible {
@@ -2192,11 +2194,11 @@
     align-items: baseline;
     gap: 5px;
     overflow: hidden;
-    padding: 3px 8px;
-    border: 1px solid rgba(199, 189, 171, 0.08);
+    padding: 2px 7px;
+    border: 1px solid rgba(199, 189, 171, 0.055);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.01);
-    color: rgba(241, 234, 220, 0.7);
+    background: rgba(255, 255, 255, 0.006);
+    color: rgba(241, 234, 220, 0.66);
     font-size: 12px;
     line-height: 1.35;
 }
@@ -2344,7 +2346,7 @@
     display: block;
     min-width: 0;
     overflow: hidden;
-    color: rgba(241, 234, 220, 0.78);
+    color: rgba(241, 234, 220, 0.82);
     font-size: 14px;
     line-height: 1.5;
     text-overflow: ellipsis;
