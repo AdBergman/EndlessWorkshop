@@ -91,6 +91,9 @@ Current rules:
   `Faction`, `Empire`, `Constructible`, `Terraforming`, `Army`) plus existing
   generic Action rows/details. Rich Action rows remain deferred because current
   public data is sparse.
+- Diplomacy uses compact Diplomacy Archive mode: Treaty Category rail
+  (`All`, `War`, `Defense`, `Discovery`, `Society`, `Declarations`, `Economy`)
+  plus treaty rows with quiet Category/Bilateral/Duration metadata.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.

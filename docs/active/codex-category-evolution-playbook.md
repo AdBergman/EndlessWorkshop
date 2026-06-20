@@ -221,6 +221,14 @@ Frontend tech lead:
 
 Mandatory before calling any long-running category evolution complete.
 
+Do not enter final closeout immediately after the first implementation slice,
+especially when that slice is navigation, rail, or filter work. First re-review
+the main archive rows, detail pages, relationship presentation, player-facing
+category naming, and refactor/stale-code needs. If UX designer, frontend tech
+lead, or 4X player review identifies a small high-value follow-up slice,
+implement it before closeout. Traits and Diplomacy both showed that orientation
+alone is not always enough.
+
 At the end of the category pass, Codex must:
 
 1. Run a full browser/product review.
@@ -250,6 +258,7 @@ This phase is required even when the UI feels visually accepted. Category evolut
 - Visual review
 - Tech lead review
 - 4X gamer review
+- Post-first-slice row/detail/relationship/naming review completed
 - Assertive workflow followed or deviations documented
 - Exporter backlog checked or updated
 - Final category closeout
@@ -335,5 +344,26 @@ Lessons:
   detail coverage through direct routes and explicit route-reset behavior.
 - Complete-with-follow-up is the right closeout state when orientation is fixed
   but richer row/detail presentation depends on exporter/product review.
+
+### Diplomacy
+
+Lessons:
+
+- Small categories can still need orientation when entries span distinct
+  strategic postures.
+- Player-facing category naming can be a separate product decision from the
+  first implementation slice. Diplomacy kept `diplomatictreaties` internally
+  while changing the visible label from `Diplomatic Treaties`.
+- Archive row previews should prefer player-facing public copy/effects before
+  section target facts. Exact applied Status target facts such as `Other empire`
+  can be useful in detail but weak as row preview content.
+- Exact linked mechanics may be surfaced as compact archive-row signal lines
+  when they improve planning value, but do not promote linked entities into full
+  cards unless the linked entity is the primary row content.
+- Do not close out a rail-only slice too early when the category has reliable
+  small row metadata. Diplomatic Treaties needed Category/Bilateral/Duration
+  metadata before the main archive felt intentional.
+- Browser DOM smoke is useful after tests pass because it can reveal scan-value
+  problems that are technically correct but visually/product-wise poor.
 
 Update this history after every category evolution. The playbook is product memory.

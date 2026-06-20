@@ -386,7 +386,7 @@ describe("CodexPage", () => {
             "Resources",
             "Equipment",
             "Factions",
-            "Diplomatic Treaties",
+            "Diplomacy",
             "Heroes",
             "Improvements",
             "Minor Factions",
@@ -469,7 +469,7 @@ describe("CodexPage", () => {
             "Resources",
             "Equipment",
             "Factions",
-            "Diplomatic Treaties",
+            "Diplomacy",
             "Heroes",
             "Improvements",
             "Minor Factions",
@@ -1605,6 +1605,274 @@ describe("CodexPage", () => {
         expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
     });
 
+    it("adds a Treaty Category rail while preserving Diplomatic Treaty rows and detail behavior", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Treaty_VisionExchange",
+                displayName: "Vision Exchange",
+                category: "Beneficial Discovery",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Signing this Treaty will show each Empire the Tiles over which the other has vision.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Beneficial Discovery" },
+                    { label: "Bilateral", value: "Yes" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_OpenBorders",
+                displayName: "Open Borders",
+                category: "Beneficial Defense",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Signing this Treaty will open the borders between the two Empires without affecting your [PublicOpinion] Public Opinion.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Beneficial Defense" },
+                    { label: "Bilateral", value: "Yes" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Units may enter allied territories without Public Opinion loss."],
+                    },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_CloseBorders",
+                displayName: "Close Borders",
+                category: "Hostile Defense",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Declare your borders closed to the other Empire.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Hostile Defense" },
+                    { label: "Bilateral", value: "No" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Applied statuses",
+                        items: [
+                            {
+                                label: "Closed Borders declared",
+                                referenceKey: "Status_PublicOpinion_YouClosedBorders",
+                                facts: [{ label: "Applies to", value: "Other empire" }],
+                                lines: [],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_JustifiedWar",
+                displayName: "Justified War",
+                category: "War",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Declare a Justified War on this Empire for free.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "War" },
+                    { label: "Bilateral", value: "No" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Only available when Public Opinion reaches a very low threshold."],
+                    },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Declaration_Compliment",
+                displayName: "Compliment",
+                category: "Repeatable Declaration",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Send a Compliment to improve Public Opinion.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Repeatable Declaration" },
+                    { label: "Bilateral", value: "No" },
+                    { label: "Duration", value: "5 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+            },
+            {
+                exportKind: "diplomatictreaties",
+                entryKey: "Treaty_ShareCoralExploitation",
+                displayName: "Share Coral Exploitation",
+                category: "Beneficial Economy",
+                kind: "Diplomatic Treaty",
+                descriptionLines: [
+                    "Signing this Treaty will give additional Dust and Influence incomes.",
+                ],
+                referenceKeys: [],
+                facts: [
+                    { label: "Category", value: "Beneficial Economy" },
+                    { label: "Bilateral", value: "Yes" },
+                    { label: "Duration", value: "30 turns" },
+                    { label: "Kind", value: "Diplomatic Treaty" },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_PublicOpinion_YouClosedBorders",
+                displayName: "Closed Borders declared",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "Diplomatic Ambassy" },
+                    { label: "Duration", value: "10 turns" },
+                    { label: "Kind", value: "Status" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        items: [
+                            {
+                                label: "Public Opinion",
+                                facts: [
+                                    { label: "Affected stat", value: "Public Opinion" },
+                                    { label: "Change", value: "-25" },
+                                ],
+                                lines: ["-25 [PublicOpinion] Public Opinion"],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=diplomatictreaties"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Diplomacy" })).toBeInTheDocument();
+        const diplomacyRail = screen.getByRole("complementary", { name: /diplomacy archive filters/i });
+        expect(diplomacyRail).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--diplomacyArchive")).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "All 6" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(diplomacyRail).getByRole("button", { name: "War 1" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Defense 2" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Discovery 1" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Society 0" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Declarations 1" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Economy 1" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Open Borders")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Close Borders")).toBeInTheDocument();
+        const openBordersRow = getSummaryRowForButton(
+            within(screen.getByLabelText("Diplomacy overview")).getByRole("button", { name: /open borders/i })
+        );
+        expect(openBordersRow).toHaveTextContent("Defense");
+        expect(openBordersRow).toHaveTextContent("Bilateral");
+        expect(openBordersRow).toHaveTextContent("30 turns");
+        expect(within(openBordersRow).getByRole("img", { name: "PublicOpinion" })).toBeInTheDocument();
+        expect(openBordersRow).not.toHaveTextContent("Beneficial Defense / Diplomatic Treaty");
+
+        await user.click(within(diplomacyRail).getByRole("button", { name: "Defense 2" }));
+
+        expect(within(diplomacyRail).getByRole("button", { name: "Defense 2" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Open Borders")).toBeInTheDocument();
+        const closeBordersRow = getSummaryRowForButton(
+            within(screen.getByLabelText("Diplomacy overview")).getByRole("button", { name: /close borders/i })
+        );
+        expect(closeBordersRow).toHaveTextContent("Defense");
+        expect(closeBordersRow).toHaveTextContent("One-sided");
+        expect(closeBordersRow).toHaveTextContent("30 turns");
+        expect(closeBordersRow).toHaveTextContent("Declare your borders closed to the other Empire.");
+        const closeBordersSignals = within(closeBordersRow).getByLabelText("Treaty effect signals");
+        expect(closeBordersSignals).toHaveTextContent("-25 Public Opinion");
+        expect(within(closeBordersSignals).getByRole("img", { name: "PublicOpinion" })).toBeInTheDocument();
+        expect(closeBordersRow).not.toHaveTextContent("Other empire");
+        expect(within(screen.getByLabelText("Diplomacy overview")).queryByText("Justified War")).not.toBeInTheDocument();
+
+        await user.click(within(diplomacyRail).getByRole("button", { name: "Defense 2" }));
+
+        expect(within(diplomacyRail).getByRole("button", { name: "All 6" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Justified War")).toBeInTheDocument();
+        const justifiedWarRow = getSummaryRowForButton(
+            within(screen.getByLabelText("Diplomacy overview")).getByRole("button", { name: /justified war/i })
+        );
+        expect(justifiedWarRow).toHaveTextContent("War");
+        expect(justifiedWarRow).toHaveTextContent("One-sided");
+        expect(justifiedWarRow).not.toHaveTextContent("Duration");
+
+        const searchInput = screen.getByRole("combobox", { name: /search the encyclopedia/i });
+        await user.type(searchInput, "vision");
+
+        expect(within(diplomacyRail).getByRole("button", { name: "All 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(diplomacyRail).getByRole("button", { name: "Discovery 1" })).toBeInTheDocument();
+        expect(within(diplomacyRail).getByRole("button", { name: "Defense 0" })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Vision Exchange")).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Diplomacy overview")).queryByText("Open Borders")).not.toBeInTheDocument();
+
+        cleanup();
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=diplomatictreaties&entry=Treaty_VisionExchange"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
+        const detailDiplomacyRail = screen.getByRole("complementary", { name: /diplomacy archive filters/i });
+
+        await user.click(within(detailDiplomacyRail).getByRole("button", { name: "War 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Diplomacy" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Vision Exchange" })).not.toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=diplomatictreaties");
+        expect(within(screen.getByLabelText("Diplomacy overview")).getByText("Justified War")).toBeInTheDocument();
+    });
+
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
         const user = userEvent.setup();
         seedCodexEntries([
@@ -2410,7 +2678,7 @@ describe("CodexPage", () => {
             "Partner Effects",
             "Resources",
             "Factions",
-            "Diplomatic Treaties",
+            "Diplomacy",
             "Heroes",
             "Statuses",
         ]);
@@ -3135,12 +3403,12 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Vulnerable I" })).toBeInTheDocument();
         const exactReferences = screen.getByRole("region", { name: /exact status references/i });
         expect(within(exactReferences).getByText("Abilities")).toBeInTheDocument();
-        expect(within(exactReferences).getByText("Diplomatic Treaties")).toBeInTheDocument();
+        expect(within(exactReferences).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(exactReferences).getByText("Actions")).toBeInTheDocument();
         expect(within(exactReferences).getByText("Factions")).toBeInTheDocument();
         expect(within(exactReferences).getByRole("button", { name: /breaching attack abilities/i }))
             .toBeInTheDocument();
-        expect(within(exactReferences).getByRole("button", { name: /close borders diplomatic treaties/i }))
+        expect(within(exactReferences).getByRole("button", { name: /close borders diplomacy/i }))
             .toBeInTheDocument();
         expect(within(exactReferences).getByRole("button", { name: /intimidate actions/i }))
             .toBeInTheDocument();
@@ -6252,21 +6520,25 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Vision Exchange" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /all diplomatic treaties/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /diplomacy 3/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /diplomacy archive filters/i })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(screen.getByText("Diplomatic treaty dossier")).toBeInTheDocument();
         expect(screen.getByText("Beneficial Discovery")).toBeInTheDocument();
         expect(screen.getByText("30 turns")).toBeInTheDocument();
 
-        const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
-        await user.click(within(resultsPane).getByRole("button", { name: /open borders/i }));
+        const diplomacyRail = screen.getByRole("complementary", { name: /diplomacy archive filters/i });
+        await user.click(within(diplomacyRail).getByRole("button", { name: "Defense 1" }));
+        await user.click(within(screen.getByLabelText("Diplomacy overview")).getByRole("button", { name: /open borders/i }));
         expect(await screen.findByRole("heading", { name: "Open Borders" })).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
         expect(screen.getAllByText("Units may enter allied territories without Public Opinion loss.").length)
             .toBeGreaterThanOrEqual(1);
 
-        await user.click(within(resultsPane).getByRole("button", { name: /justified war/i }));
+        await user.click(within(diplomacyRail).getByRole("button", { name: "War 1" }));
+        await user.click(within(screen.getByLabelText("Diplomacy overview")).getByRole("button", { name: /justified war/i }));
         expect(await screen.findByRole("heading", { name: "Justified War" })).toBeInTheDocument();
-        expect(screen.getByText("War")).toBeInTheDocument();
+        expect(screen.getAllByText("War").length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText("One-sided")).toBeInTheDocument();
     });
 
@@ -6688,7 +6960,7 @@ describe("CodexPage", () => {
         await user.type(input, "justified");
         expect(await screen.findByRole("button", { name: /justified war/i })).toBeInTheDocument();
         const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
-        expect(within(resultsPane).getByText("Diplomatic Treaties")).toBeInTheDocument();
+        expect(within(resultsPane).getByText("Diplomacy")).toBeInTheDocument();
 
         await user.clear(input);
         await user.type(input, "ActionTypeBuildBridge");

@@ -54,7 +54,7 @@ export function isTreatyAppliedStatusSummarySection(entry: CodexEntry, sectionLa
 
 export function buildTreatyStatusSummary(
     item: CodexStructuredSectionItem,
-    relatedEntries: CodexEntry[]
+    relatedEntries: readonly CodexEntry[]
 ): CodexTreatyStatusSummary | null {
     const referenceKey = item.referenceKey?.trim();
     if (!referenceKey) return null;

@@ -12,6 +12,7 @@ describe("codexCategoryConfig", () => {
         expect(normalizeCodexKind(" Abilities ")).toBe("abilities");
         expect(getCodexCategoryMode(" Abilities ")).toBe("abilityArchive");
         expect(getCodexCategoryMode(" Actions ")).toBe("actionArchive");
+        expect(getCodexCategoryMode(" DiplomaticTreaties ")).toBe("diplomacyArchive");
         expect(getCodexCategoryMode(" Equipment ")).toBe("equipmentArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
         expect(supportsFullWidthReferenceOverview(" Resources ")).toBe(true);

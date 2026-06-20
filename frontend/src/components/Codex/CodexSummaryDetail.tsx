@@ -27,6 +27,8 @@ import {
     isGrantedAbilityPreviewSection,
     type CodexGrantedAbilityPreview as GrantedAbilityPreview,
 } from "@/lib/codex/codexGrantedAbilityPreviews";
+import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
+import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import {
     getCodexReadablePreviewLine,
     parseCodexStructuredDescription,
@@ -74,6 +76,10 @@ type EquipmentArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type DiplomacyArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
@@ -91,6 +97,7 @@ const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
+const MAX_DIPLOMACY_SIGNAL_LINES = 2;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
@@ -449,6 +456,136 @@ function getEquipmentArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     return effectLines.slice(0, MAX_EQUIPMENT_EFFECT_PREVIEW_LINES);
 }
 
+function compactDiplomacyPreviewLine(value: string): string {
+    return formatCodexMajorFactionText(value.replace(/\s+/g, " ").trim());
+}
+
+function truncateDiplomacyPreviewLine(value: string, maxLength = 240): string {
+    if (value.length <= maxLength) return value;
+    return `${value.slice(0, maxLength).trimEnd()}…`;
+}
+
+function getDiplomacyDescriptionPreview(entry: CodexEntry): string {
+    const rawPreview = (entry.descriptionLines ?? [])
+        .map(compactDiplomacyPreviewLine)
+        .find((line) => line.length > 0);
+
+    return rawPreview ? truncateDiplomacyPreviewLine(rawPreview) : "";
+}
+
+function getDiplomacyArchivePreview(entry: CodexEntry, fallbackPreview: string): string {
+    if (entry.exportKind.trim().toLowerCase() !== "diplomatictreaties") {
+        return fallbackPreview;
+    }
+
+    const descriptionPreview = getDiplomacyDescriptionPreview(entry);
+    if (descriptionPreview) return descriptionPreview;
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectPreview = effectsSection ? getStructuredSectionPreviewLines(effectsSection)[0] : "";
+    if (effectPreview) return effectPreview;
+
+    const appliedStatusesSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "applied statuses"
+    );
+    const appliedStatusLabel = appliedStatusesSection?.items?.find((item) =>
+        item.label.trim().length > 0
+    )?.label.trim();
+
+    return appliedStatusLabel || fallbackPreview;
+}
+
+function isDiplomacyMechanicalSignal(line: string): boolean {
+    const trimmedLine = line.trim();
+
+    return /\[[^\]]+\]/.test(trimmedLine) || /^[+-]\s*\d/.test(trimmedLine);
+}
+
+function getDiplomacyArchiveSignalLines(
+    entry: CodexEntry,
+    allEntries: readonly CodexEntry[],
+    preview: string
+): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "diplomatictreaties") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const signalLines: string[] = [];
+    const seenSignals = new Set<string>();
+    const normalizedPreview = normalizeAbilityTaxonomyText(preview);
+
+    const addSignal = (line: string) => {
+        const compactLine = compactDiplomacyPreviewLine(line);
+        if (!compactLine || !isDiplomacyMechanicalSignal(compactLine)) return;
+
+        const normalizedLine = normalizeAbilityTaxonomyText(compactLine);
+        if (normalizedLine === normalizedPreview || seenSignals.has(normalizedLine)) return;
+
+        seenSignals.add(normalizedLine);
+        signalLines.push(compactLine);
+    };
+
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    if (effectsSection) {
+        getStructuredSectionPreviewLines(effectsSection).forEach(addSignal);
+    }
+
+    const appliedStatusesSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "applied statuses"
+    );
+    for (const item of appliedStatusesSection?.items ?? []) {
+        const summary = buildTreatyStatusSummary(item, allEntries);
+        if (summary?.previewLine) {
+            addSignal(summary.previewLine);
+        }
+    }
+
+    return signalLines.slice(0, MAX_DIPLOMACY_SIGNAL_LINES);
+}
+
+function formatDiplomacyBilateralValue(value: string): string {
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (normalizedValue === "yes") return "Bilateral";
+    if (normalizedValue === "no") return "One-sided";
+
+    return value.trim();
+}
+
+function getDiplomacyArchiveMetadata(entry: CodexEntry): DiplomacyArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "diplomatictreaties") return [];
+
+    const items: DiplomacyArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Category").forEach((value) =>
+        addValue("category", getDiplomacyCategoryDisplayLabel(value))
+    );
+    getCodexFactValues(entry, "Bilateral").forEach((value) =>
+        addValue("bilateral", formatDiplomacyBilateralValue(value))
+    );
+    getCodexFactValues(entry, "Duration").forEach((value) =>
+        addValue("duration", value)
+    );
+
+    return items;
+}
+
 function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
     return normalizeAbilityTaxonomyText(left ?? "") === normalizeAbilityTaxonomyText(right);
 }
@@ -538,9 +675,10 @@ export default function CodexSummaryDetail({
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
                         const readablePreview = !isFactionEntry ? getCodexReadablePreviewLine(entry) : "";
-                        const preview = isFactionEntry
+                        const basePreview = isFactionEntry
                             ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
                             : readablePreview || getCodexEntryPreview(entry, 240);
+                        const preview = getDiplomacyArchivePreview(entry, basePreview);
                         const secondaryContext = factionAffinity
                             ? `Affinity: ${factionAffinity}`
                             : getCodexSecondaryContext(entry);
@@ -548,10 +686,15 @@ export default function CodexSummaryDetail({
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
                         const useEquipmentArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "equipment";
+                        const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
                         const equipmentArchiveMetadata = useEquipmentArchiveRowHierarchy ? getEquipmentArchiveMetadata(entry) : [];
+                        const diplomacyArchiveMetadata = useDiplomacyArchiveRowHierarchy ? getDiplomacyArchiveMetadata(entry) : [];
+                        const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
+                            ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
+                            : [];
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -882,6 +1025,60 @@ export default function CodexSummaryDetail({
                                         </div>
                                     ) : null}
                                 </div>
+                            );
+                        }
+
+                        if (useDiplomacyArchiveRowHierarchy) {
+                            return (
+                                <button
+                                    key={entry.entryKey}
+                                    type="button"
+                                    className="codex-summaryList__item codex-summaryList__item--diplomacyArchive"
+                                    onClick={() => onSelectEntry(entry)}
+                                >
+                                    <span className="codex-summaryList__titleLine">
+                                        <span className="codex-summaryList__titleIdentity">
+                                            <span className="codex-summaryList__name">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
+                                        </span>
+                                        {diplomacyArchiveMetadata.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__metadata codex-summaryList__metadata--diplomacy"
+                                                aria-label="Treaty metadata"
+                                            >
+                                                {diplomacyArchiveMetadata.map((item) => (
+                                                    <span
+                                                        key={`${item.key}-${item.value}`}
+                                                        className="codex-summaryList__metadataText"
+                                                    >
+                                                        {item.value}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
+                                    </span>
+                                    <span className="codex-summaryList__description">
+                                        {preview
+                                            ? renderDescriptionLine(formatCodexMajorFactionText(preview))
+                                            : "No public description has been added for this entry yet."}
+                                    </span>
+                                    {diplomacyArchiveSignalLines.length > 0 ? (
+                                        <span
+                                            className="codex-summaryList__diplomacySignals"
+                                            aria-label="Treaty effect signals"
+                                        >
+                                            {diplomacyArchiveSignalLines.map((line, index) => (
+                                                <span
+                                                    className="codex-summaryList__diplomacySignal"
+                                                    key={`${entry.entryKey}-diplomacy-signal-${index}`}
+                                                >
+                                                    {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                </span>
+                                            ))}
+                                        </span>
+                                    ) : null}
+                                </button>
                             );
                         }
 

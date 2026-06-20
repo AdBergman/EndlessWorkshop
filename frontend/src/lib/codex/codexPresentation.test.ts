@@ -100,8 +100,8 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("resources")).toBe("Resources");
         expect(formatCodexKindLabel("councilorEffects")).toBe("Councilor Effects");
         expect(formatCodexKindLabel("partnerEffects")).toBe("Partner Effects");
-        expect(formatCodexKindLabel("diplomatictreaties")).toBe("Diplomatic Treaties");
-        expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomatic Treaties");
+        expect(formatCodexKindLabel("diplomatictreaties")).toBe("Diplomacy");
+        expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomacy");
     });
 
     it("adds stable quest step context for duplicate quest titles", () => {

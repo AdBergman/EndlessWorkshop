@@ -428,6 +428,49 @@ Request:
 - if they are intended as public browse metadata, emit them consistently enough
   for EWShop to use without inference.
 
+## Diplomacy Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Diplomatic
+Treaties category evolution pass. EWShop can continue using current exported
+`Category`, `Bilateral`, `Duration`, descriptions, effects, and applied Status
+sections.
+
+### Treaty Runtime Values
+
+Surrender/tribute values for `Treaty_AskToSurrender` and
+`Treaty_ProposeSurrender` remain absent from the static public export.
+
+Request:
+
+- keep them absent if they are genuinely runtime-only;
+- if a source-proven public static value becomes available, emit it as normal
+  treaty metadata/effects;
+- do not require EWShop to invent or infer tribute amounts.
+
+### Treaty Relationship Direction
+
+Current treaty data has exact applied Status sections, but broader relationship
+direction/outcome metadata is limited.
+
+Request:
+
+- preserve exact applied Status references;
+- if broader treaty relationships become public and source-proven, emit them as
+  explicit facts/sections/references;
+- do not rely on EWShop parsing treaty names or prose for relationship
+  direction.
+
+### Treaty Icon Metadata
+
+Current Diplomatic Treaty data does not include explicit per-treaty icon
+metadata.
+
+Request:
+
+- if per-treaty icons are intended for public Codex presentation, emit stable
+  icon metadata using the existing Codex icon contract style;
+- otherwise EWShop will keep generic diplomacy/category treatment.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

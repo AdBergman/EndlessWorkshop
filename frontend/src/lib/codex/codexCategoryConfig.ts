@@ -2,6 +2,7 @@ export type CodexCategoryMode =
     | "generic"
     | "actionArchive"
     | "abilityArchive"
+    | "diplomacyArchive"
     | "equipmentArchive"
     | "statusArchive"
     | "traitArchive"
@@ -51,6 +52,10 @@ export function getCodexCategoryMode(kind: string): CodexCategoryMode {
 
     if (normalizedKind === "abilities") {
         return "abilityArchive";
+    }
+
+    if (normalizedKind === "diplomatictreaties") {
+        return "diplomacyArchive";
     }
 
     if (normalizedKind === "equipment") {

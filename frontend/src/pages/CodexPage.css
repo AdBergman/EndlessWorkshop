@@ -1944,6 +1944,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--diplomacyArchive {
+    gap: 10px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item--equipmentArchive {
     gap: 12px;
     padding: 18px 10px 18px 18px;
@@ -2046,6 +2052,7 @@
 
 .codex-summaryList__item--catalog .codex-summaryList__titleLine,
 .codex-summaryList__item--statusArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--diplomacyArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--equipmentArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
@@ -2091,6 +2098,12 @@
     line-height: 1.35;
 }
 
+.codex-summaryList__item--diplomacyArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .codex-summaryList__item--equipmentArchive .codex-summaryList__name {
     font-size: 1.08rem;
     font-weight: 700;
@@ -2130,6 +2143,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--diplomacyArchive .codex-summaryList__metadata {
+    flex: 0 1 min(44%, 420px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--equipmentArchive .codex-summaryList__metadata {
     flex: 0 1 min(44%, 420px);
     justify-content: flex-end;
@@ -2148,6 +2167,14 @@
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.5);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--diplomacy {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
     font-size: 12px;
     line-height: 1.45;
 }
@@ -2228,6 +2255,23 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
     line-height: 1.65;
+}
+
+.codex-summaryList__diplomacySignals {
+    display: grid;
+    max-width: 86ch;
+    gap: 3px;
+}
+
+.codex-summaryList__diplomacySignal {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 13.5px;
+    line-height: 1.48;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codex-summaryList__item--catalog .codex-summaryList__description {
