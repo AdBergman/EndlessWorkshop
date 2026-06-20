@@ -410,6 +410,22 @@ describe("CodexPage", () => {
                 descriptionLines: ["Status apply appears in prose without exported metadata facts."],
                 referenceKeys: [],
             },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_FreeGuard",
+                displayName: "Free Guard",
+                descriptionLines: ["Tactical / Allies / Range 1 / Cost Free"],
+                referenceKeys: [],
+                facts: [
+                    { label: "Target", value: "Allies" },
+                    { label: "Range", value: "1" },
+                    { label: "Cost", value: "Free" },
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Shield" },
+                ],
+                sections: [{ title: "Effects", lines: ["Grants Shielded I Status to target Unit"] }],
+            },
         ]);
 
         render(
@@ -451,13 +467,25 @@ describe("CodexPage", () => {
         expect(within(overviewRow).queryByText(/passive \/ ability/i)).not.toBeInTheDocument();
 
         const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
-        expect(within(usefulPreviewRow).getByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
-            .toBeInTheDocument();
+        const usefulMetadata = within(usefulPreviewRow).getByLabelText("Exported metadata");
+        expect(within(usefulMetadata).getByText("Mechanic")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Active")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Source")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Battle skill")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Target")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Enemies")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Role")).toBeInTheDocument();
+        expect(within(usefulMetadata).getByText("Damage")).toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Cost")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("1 Battle Token")).not.toBeInTheDocument();
+        expect(within(usefulMetadata).queryByText("Range")).not.toBeInTheDocument();
+        expect(within(usefulPreviewRow).queryByText("Tactical / Enemies / Range 3 / Cost 1 Battle Token"))
+            .not.toBeInTheDocument();
         const effectPreview = within(usefulPreviewRow).getByLabelText("Effect preview");
         expect(within(effectPreview).getByText("Ignores the Defense of targeted Units")).toBeInTheDocument();
         expect(within(effectPreview).getByAltText("Damage")).toBeInTheDocument();
         expect(within(effectPreview).getByText("Deals 6 extra Damage per Determination")).toBeInTheDocument();
-        expect(within(effectPreview).queryByText("Applies Burning for 1 turn")).not.toBeInTheDocument();
+        expect(within(effectPreview).getByText("Applies Burning for 1 turn")).toBeInTheDocument();
         expect(
             within(effectPreview).queryByText(
                 "Ignores the Defense of targeted Units Deals 80% of the Hero's Damage Deals 6 extra Damage per Determination"
@@ -471,14 +499,23 @@ describe("CodexPage", () => {
             "Ignores the Defense of targeted Units",
             "Deals 80% of the Hero's Damage",
             "Deals 6 extra Damage per Determination",
+            "Applies Burning for 1 turn",
         ]);
         expect(
             Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).map((line) =>
                 line.tagName
             )
-        ).toEqual(["SPAN", "SPAN", "SPAN"]);
-        expect(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).toHaveLength(3);
+        ).toEqual(["SPAN", "SPAN", "SPAN", "SPAN"]);
+        expect(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine")).toHaveLength(4);
         expect(usefulPreviewRow.querySelector(".codex-summaryList__context")).not.toBeInTheDocument();
+
+        const freeCostRow = within(abilitiesOverview).getByRole("button", { name: /free guard/i });
+        const freeCostMetadata = within(freeCostRow).getByLabelText("Exported metadata");
+        expect(within(freeCostMetadata).getByText("Target")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Allies")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Cost")).toBeInTheDocument();
+        expect(within(freeCostMetadata).getByText("Free")).toBeInTheDocument();
+        expect(within(freeCostRow).queryByText("Tactical / Allies / Range 1 / Cost Free")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {
             name: /active battle skill name only/i,
@@ -516,6 +553,10 @@ describe("CodexPage", () => {
                                 "Ignores the Defense of targeted Units",
                                 "Deals 30% of the Hero's [Damage] Damage",
                                 "Deals 5 extra Damage per Determination",
+                                "Pushes targeted Units 1 tile",
+                                "Grants Focused I Status to the Hero",
+                                "Removes Shielded Status from targeted Units",
+                                "Applies Burning I Status to targeted Units",
                                 "Applies Weakened II Status to targeted Units",
                             ].join("\n"),
                         ],
@@ -568,10 +609,14 @@ describe("CodexPage", () => {
         expect(previewLines).toEqual([
             "Ignores the Defense of targeted Units",
             "Deals 30% of the Hero's Damage",
+            "Deals 5 extra Damage per Determination",
+            "Pushes targeted Units 1 tile",
+            "Grants Focused I Status to the Hero",
+            "Removes Shielded Status from targeted Units",
             "Applies Weakened II Status to targeted Units",
         ]);
-        expect(previewLines).toHaveLength(3);
-        expect(within(effectPreview).queryByText("Deals 5 extra Damage per Determination")).not.toBeInTheDocument();
+        expect(previewLines).toHaveLength(7);
+        expect(within(effectPreview).queryByText("Applies Burning I Status to targeted Units")).not.toBeInTheDocument();
         expect(
             within(effectPreview).queryByText(
                 "Ignores the Defense of targeted Units Deals 30% of the Hero's Damage Applies Weakened II Status to targeted Units"

@@ -42,6 +42,7 @@ type Props = {
 type OverviewMetadataConfig = {
     label: string;
     displayLabel: string;
+    shouldDisplayValue?: (value: string) => boolean;
 };
 type OverviewMetadataItem = {
     label: string;
@@ -52,15 +53,17 @@ const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
         { label: "Ability mechanic", displayLabel: "Mechanic" },
         { label: "Ability source", displayLabel: "Source" },
+        { label: "Target", displayLabel: "Target" },
         { label: "Combat role", displayLabel: "Role" },
+        { label: "Cost", displayLabel: "Cost", shouldDisplayValue: isExceptionalAbilityCost },
     ],
     statuses: [
         { label: "Scope", displayLabel: "Scope" },
         { label: "Duration", displayLabel: "Duration" },
     ],
 };
-const MAX_OVERVIEW_METADATA_ITEMS = 3;
-const MAX_ABILITY_EFFECT_PREVIEW_LINES = 3;
+const MAX_OVERVIEW_METADATA_ITEMS = 5;
+const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -79,6 +82,17 @@ function normalizeAbilityTaxonomyText(value: string): string {
         .replace(/\s+/g, " ");
 }
 
+function isExceptionalAbilityCost(value: string): boolean {
+    const normalizedValue = normalizeAbilityTaxonomyText(value);
+    if (!normalizedValue) return false;
+
+    if (normalizedValue === "free") return true;
+    if (/^0\s+battle\s+tokens?$/.test(normalizedValue)) return true;
+    if (/^[1-3]\s+battle\s+tokens?$/.test(normalizedValue)) return false;
+
+    return true;
+}
+
 function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
     const configs = OVERVIEW_METADATA_BY_KIND[entry.exportKind.trim().toLowerCase()] ?? [];
     const seenValues = new Set<string>();
@@ -86,6 +100,8 @@ function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
 
     for (const config of configs) {
         for (const value of getCodexFactValues(entry, config.label)) {
+            if (config.shouldDisplayValue && !config.shouldDisplayValue(value)) continue;
+
             const normalizedValue = `${config.label}:${value}`.toLowerCase();
             if (seenValues.has(normalizedValue)) continue;
 
@@ -98,6 +114,13 @@ function getOverviewMetadata(entry: CodexEntry): OverviewMetadataItem[] {
     }
 
     return items;
+}
+
+function isAbilitySetupPreviewLine(value: string): boolean {
+    const normalizedValue = normalizeAbilityTaxonomyText(value);
+    if (!normalizedValue) return false;
+
+    return /\brange\s+\d+\b/.test(normalizedValue) || /\bcost\s+/.test(normalizedValue);
 }
 
 function supportsRichOverviewRow(entry: CodexEntry): boolean {
@@ -124,6 +147,7 @@ function isAbilityTaxonomyOnlyLine(value: string, metadata: readonly OverviewMet
 
 function getAbilityCatalogPreview(preview: string, metadata: readonly OverviewMetadataItem[]): string | null {
     if (!preview) return "";
+    if (isAbilitySetupPreviewLine(preview)) return null;
     return isAbilityTaxonomyOnlyLine(preview, metadata) ? null : preview;
 }
 
