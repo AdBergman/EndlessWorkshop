@@ -1950,6 +1950,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--districtArchive {
+    gap: 10px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item--equipmentArchive {
     gap: 12px;
     padding: 18px 10px 18px 18px;
@@ -2036,6 +2042,13 @@
     gap: 10px;
 }
 
+.codex-summaryList__entryButton--district {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    gap: 10px;
+}
+
 .codex-kindIcon--summaryResource {
     flex: 0 0 auto;
 }
@@ -2059,6 +2072,7 @@
 .codex-summaryList__item--catalog .codex-summaryList__titleLine,
 .codex-summaryList__item--statusArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--diplomacyArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--districtArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--equipmentArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--improvementArchive .codex-summaryList__titleLine {
     width: 100%;
@@ -2106,6 +2120,12 @@
 }
 
 .codex-summaryList__item--diplomacyArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.codex-summaryList__item--districtArchive .codex-summaryList__name {
     font-size: 1.08rem;
     font-weight: 700;
     line-height: 1.35;
@@ -2162,6 +2182,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--districtArchive .codex-summaryList__metadata {
+    flex: 0 1 min(34%, 320px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--equipmentArchive .codex-summaryList__metadata {
     flex: 0 1 min(44%, 420px);
     justify-content: flex-end;
@@ -2191,6 +2217,14 @@
 }
 
 .codex-summaryList__metadata--diplomacy {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--district {
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.52);
@@ -2338,6 +2372,12 @@
     gap: 4px;
 }
 
+.codex-summaryList__districtEffects {
+    display: grid;
+    max-width: 84ch;
+    gap: 4px;
+}
+
 .codex-summaryList__improvementEffects {
     display: grid;
     max-width: 84ch;
@@ -2345,6 +2385,7 @@
 }
 
 .codex-summaryList__statusEffectLine,
+.codex-summaryList__districtEffectLine,
 .codex-summaryList__equipmentEffectLine,
 .codex-summaryList__improvementEffectLine,
 .codex-summaryList__statusFallback {

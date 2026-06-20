@@ -502,6 +502,40 @@ Request:
 - keep entries thin when no public-safe mechanics are available;
 - do not emit inferred descriptions merely to fill archive rows.
 
+## District Metadata Backlog
+
+These are non-blocking frontend findings discovered during the Districts
+category evolution pass. EWShop can continue using current exported `Category`,
+`Tier`, `Effects`, and exact `Extracted resource` references.
+
+### District Planning Metadata Coverage
+
+Local 0.82 data includes District entries with incomplete planning facts:
+
+- 8 District entries lack exported `Category`.
+- 29 District entries lack exported `Tier`.
+
+Request:
+
+- keep absent metadata absent if it is not public, stable, or source-proven;
+- if Category/Tier/progression metadata is public and source-proven, emit it as
+  normal Codex facts using the existing exporter style;
+- do not require EWShop to infer Category or Tier from keys, display names,
+  prose, or SVG filenames.
+
+### Thin District Entries And Upgrade Chains
+
+Many District upgrade/special entries have no public `Effects` lines, and no
+explicit District upgrade-chain/progression relationship is exported.
+
+Request:
+
+- preserve public effect lines when source-proven;
+- keep entries thin when no public-safe mechanics are available;
+- if upgrade-chain/progression relationships become public and source-proven,
+  emit them as explicit facts/sections/references;
+- do not emit inferred descriptions merely to fill archive rows.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

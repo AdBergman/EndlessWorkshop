@@ -2029,6 +2029,184 @@ describe("CodexPage", () => {
         expect(within(screen.getByLabelText("Improvements overview")).getByText("Dust Refinery")).toBeInTheDocument();
     });
 
+    it("renders Districts as a category archive with focus navigation, effect rows, and exact resource links", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "districts",
+                entryKey: "District_Tier1_Food",
+                displayName: "Farm",
+                kind: "District",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "District" },
+                    { label: "Category", value: "Food" },
+                    { label: "Tier", value: "1" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "+3 [FoodColored] Food per District Level",
+                        "+1 [FoodColored] on Tile producing [FoodColored] Food",
+                    ],
+                }],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "Extractor_Luxury01",
+                displayName: "[Luxury01] Klax Extractor",
+                kind: "District",
+                descriptionLines: [],
+                referenceKeys: ["Resource_Luxury01"],
+                facts: [
+                    { label: "Kind", value: "District" },
+                    { label: "Category", value: "Resource" },
+                ],
+                sections: [
+                    {
+                        title: "Extracted resource",
+                        items: [{ label: "Klax", referenceKey: "Resource_Luxury01" }],
+                    },
+                    {
+                        title: "Effects",
+                        lines: [
+                            "+1 [Luxury01] Klax per District Level",
+                            "+10 [Luxury01] Klax stock capacity per District Level",
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_Tier2_Military",
+                displayName: "Advanced Keep",
+                kind: "District",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "District" },
+                    { label: "Category", value: "Military" },
+                    { label: "Tier", value: "2" },
+                ],
+                sections: [],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Luxury01",
+                displayName: "Klax",
+                kind: "Resource",
+                descriptionLines: ["Luxury resource."],
+                referenceKeys: [],
+                facts: [{ label: "Resource type", value: "Luxury" }],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "DistrictImprovement_Food_00",
+                displayName: "Granary",
+                kind: "Improvement",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Improvement" },
+                    { label: "Category", value: "Food" },
+                ],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=districts"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+        const districtRail = screen.getByRole("complementary", { name: /district archive filters/i });
+        expect(districtRail).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--districtArchive")).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "All 3" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(districtRail).getByRole("button", { name: "Food 1" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Dust 0" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Resource 1" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Wonder 0" })).toBeInTheDocument();
+
+        const districtsOverview = screen.getByLabelText("Districts overview");
+        const farmRow = getSummaryRowForButton(
+            within(districtsOverview).getByRole("button", { name: /farm/i })
+        );
+        expect(farmRow).toHaveTextContent("+3 Food per District Level");
+        expect(farmRow).toHaveTextContent("Food");
+        expect(farmRow).toHaveTextContent("Tier 1");
+        expect(within(farmRow).getAllByRole("img", { name: "FoodColored" }).length).toBeGreaterThan(0);
+        expect(farmRow).not.toHaveTextContent("Kind District");
+
+        const extractorRow = getSummaryRowForButton(
+            within(districtsOverview).getByRole("button", { name: /klax extractor/i })
+        );
+        expect(extractorRow).toHaveTextContent("Extracts:");
+        expect(within(extractorRow).getByRole("button", { name: /open klax in codex/i })).toBeInTheDocument();
+
+        const keepRow = getSummaryRowForButton(
+            within(districtsOverview).getByRole("button", { name: /advanced keep/i })
+        );
+        expect(keepRow).toHaveTextContent("Military");
+        expect(keepRow).toHaveTextContent("Tier 2");
+        expect(keepRow).toHaveTextContent("No public district effects exported yet.");
+
+        await user.click(within(districtRail).getByRole("button", { name: "Resource 1" }));
+
+        expect(within(districtRail).getByRole("button", { name: "Resource 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(districtsOverview).getByRole("button", { name: /klax extractor/i })).toBeInTheDocument();
+        expect(within(districtsOverview).queryByText("Farm")).not.toBeInTheDocument();
+
+        await user.click(within(districtsOverview).getByRole("button", { name: /open klax in codex/i }));
+
+        expect(await screen.findByRole("heading", { name: "Klax" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Resource_Luxury01");
+
+        cleanup();
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=districts&entry=District_Tier1_Food"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Farm" })).toBeInTheDocument();
+        const detailDistrictRail = screen.getByRole("complementary", { name: /district archive filters/i });
+
+        await user.click(within(detailDistrictRail).getByRole("button", { name: "Military 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+        expect(screen.queryByRole("heading", { name: "Farm" })).not.toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=districts");
+        expect(within(screen.getByLabelText("Districts overview")).getByText("Advanced Keep")).toBeInTheDocument();
+    });
+
     it("returns to the full encyclopedia when selecting All from the category shelf", async () => {
         const user = userEvent.setup();
         seedCodexEntries([
@@ -2700,7 +2878,8 @@ describe("CodexPage", () => {
         });
 
         expect(screen.getByLabelText("2 entries in view")).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /all districts/i })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /district archive filters/i })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         const districtsSummary = screen.getByRole("heading", { name: "All Districts" })
             .closest(".codex-summaryDossier") as HTMLElement;
         expect(within(districtsSummary).getByText("Category overview")).toBeInTheDocument();

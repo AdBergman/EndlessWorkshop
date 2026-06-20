@@ -29,6 +29,7 @@ import {
 } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
+import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
 import {
     getCodexReadablePreviewLine,
@@ -81,6 +82,14 @@ type DiplomacyArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type DistrictArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
+type DistrictExtractedResourceLink = {
+    entry: CodexEntry;
+    label: string;
+};
 type ImprovementArchiveMetadataItem = {
     key: string;
     value: string;
@@ -103,6 +112,7 @@ const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
+const MAX_DISTRICT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
@@ -474,6 +484,81 @@ function getImprovementArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     return effectLines.slice(0, MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES);
 }
 
+function getDistrictArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+
+    return effectLines.slice(0, MAX_DISTRICT_EFFECT_PREVIEW_LINES);
+}
+
+function formatDistrictTierValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+    return trimmedValue === "0" ? "Tier 0" : `Tier ${trimmedValue}`;
+}
+
+function getDistrictArchiveMetadata(entry: CodexEntry): DistrictArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+
+    const items: DistrictArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Category").forEach((value) =>
+        addValue("category", getDistrictCategoryDisplayLabel(value))
+    );
+    getCodexFactValues(entry, "Tier").forEach((value) =>
+        addValue("tier", formatDistrictTierValue(value))
+    );
+
+    return items;
+}
+
+function getDistrictExtractedResourceLinks(
+    entry: CodexEntry,
+    referenceIndexes: { entriesByKey: Record<string, CodexEntry> }
+): DistrictExtractedResourceLink[] {
+    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const extractedResourceSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "extracted resource"
+    );
+    const links: DistrictExtractedResourceLink[] = [];
+    const seenKeys = new Set<string>();
+
+    for (const item of extractedResourceSection?.items ?? []) {
+        const referenceKey = item.referenceKey?.trim();
+        if (!referenceKey || seenKeys.has(referenceKey)) continue;
+
+        const linkedEntry = referenceIndexes.entriesByKey[referenceKey];
+        if (!linkedEntry) continue;
+
+        seenKeys.add(referenceKey);
+        links.push({
+            entry: linkedEntry,
+            label: item.label.trim() || getCodexEntryLabel(linkedEntry),
+        });
+    }
+
+    return links;
+}
+
 function getImprovementArchiveMetadata(entry: CodexEntry): ImprovementArchiveMetadataItem[] {
     if (entry.exportKind.trim().toLowerCase() !== "improvements") return [];
 
@@ -729,12 +814,14 @@ export default function CodexSummaryDetail({
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
                         const useEquipmentArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "equipment";
                         const useImprovementArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "improvements";
+                        const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
                         const equipmentArchiveMetadata = useEquipmentArchiveRowHierarchy ? getEquipmentArchiveMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
+                        const districtArchiveMetadata = useDistrictArchiveRowHierarchy ? getDistrictArchiveMetadata(entry) : [];
                         const diplomacyArchiveMetadata = useDiplomacyArchiveRowHierarchy ? getDiplomacyArchiveMetadata(entry) : [];
                         const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
                             ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
@@ -756,6 +843,12 @@ export default function CodexSummaryDetail({
                             : [];
                         const improvementEffectPreviewLines = useImprovementArchiveRowHierarchy
                             ? getImprovementArchiveEffectPreviewLines(entry)
+                            : [];
+                        const districtEffectPreviewLines = useDistrictArchiveRowHierarchy
+                            ? getDistrictArchiveEffectPreviewLines(entry)
+                            : [];
+                        const districtExtractedResourceLinks = useDistrictArchiveRowHierarchy
+                            ? getDistrictExtractedResourceLinks(entry, referenceIndexes)
                             : [];
                         const equipmentGrantedAbilityPreviews = useEquipmentArchiveRowHierarchy
                             ? parseCodexStructuredDescription(entry).sections
@@ -1126,6 +1219,98 @@ export default function CodexSummaryDetail({
                                         )}
                                     </span>
                                 </button>
+                            );
+                        }
+
+                        if (useDistrictArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--districtArchive"
+                                >
+                                    <button
+                                        type="button"
+                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--district"
+                                        onClick={() => onSelectEntry(entry)}
+                                    >
+                                        <span className="codex-summaryList__titleLine">
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                            {districtArchiveMetadata.length > 0 ? (
+                                                <span
+                                                    className="codex-summaryList__metadata codex-summaryList__metadata--district"
+                                                    aria-label="District metadata"
+                                                >
+                                                    {districtArchiveMetadata.map((item) => (
+                                                        <span
+                                                            key={`${item.key}-${item.value}`}
+                                                            className="codex-summaryList__metadataText"
+                                                        >
+                                                            {item.value}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            ) : null}
+                                        </span>
+
+                                        <span
+                                            className="codex-summaryList__districtEffects"
+                                            aria-label="District effect preview"
+                                        >
+                                            {districtEffectPreviewLines.length > 0 ? (
+                                                districtEffectPreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__districtEffectLine"
+                                                        key={`${entry.entryKey}-district-preview-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))
+                                            ) : (
+                                                <span className="codex-summaryList__statusFallback">
+                                                    No public district effects exported yet.
+                                                </span>
+                                            )}
+                                        </span>
+                                    </button>
+
+                                    {districtExtractedResourceLinks.length > 0 ? (
+                                        <div
+                                            className="codex-summaryList__grantedAbilityLinks"
+                                            aria-label="Extracted resource"
+                                        >
+                                            <span className="codex-summaryList__grantedAbilityLinksLabel">
+                                                Extracts:
+                                            </span>
+                                            <span className="codex-summaryList__grantedAbilityLinkList">
+                                                {districtExtractedResourceLinks.map((link, index) => (
+                                                    <span
+                                                        className="codex-summaryList__grantedAbilityLinkItem"
+                                                        key={`${entry.entryKey}-${link.entry.entryKey}`}
+                                                    >
+                                                        {index > 0 ? (
+                                                            <span
+                                                                className="codex-summaryList__grantedAbilitySeparator"
+                                                                aria-hidden="true"
+                                                            >
+                                                                ·
+                                                            </span>
+                                                        ) : null}
+                                                        <CodexInlineEntityLink
+                                                            entry={link.entry}
+                                                            onSelect={(resourceEntry) => onSelectEntry(resourceEntry)}
+                                                        >
+                                                            {renderCodexLabel(link.label)}
+                                                        </CodexInlineEntityLink>
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        </div>
+                                    ) : null}
+                                </div>
                             );
                         }
 

@@ -94,6 +94,10 @@ Current rules:
 - Diplomacy uses compact Diplomacy Archive mode: Treaty Category rail
   (`All`, `War`, `Defense`, `Discovery`, `Society`, `Declarations`, `Economy`)
   plus treaty rows with quiet Category/Bilateral/Duration metadata.
+- Districts use compact District Archive mode: District Focus rail (`All`,
+  City, Food, Industry, Dust, Science, Influence, Military, Resource, Bridge,
+  Population, Trade, Foundation, Wonder, Anomaly) plus content-first rows from
+  exported Effect lines and compact exact `Extracts:` resource links.
 - Improvements use compact Improvement Archive mode: Improvement Focus rail
   (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
   Resource, Bridge, Population, Trade) plus content-first rows from exported

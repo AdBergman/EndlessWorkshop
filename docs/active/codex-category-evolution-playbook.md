@@ -381,4 +381,19 @@ Lessons:
 - Broad inbound relationships from Tech, Populations, Traits, Councilor Effects,
   and Bonuses are detail/future-polish material, not first-pass row content.
 
+### Districts
+
+Lessons:
+
+- Districts are an Archive because players compare city tiles, exploitations,
+  resource extractors, and special infrastructure by planning focus and effects.
+- Exported `Category` is strong first navigation; `Tier` is useful row metadata
+  but not automatically a left-rail filter.
+- Exact linked resources can appear as compact `Extracts:` row affordances when
+  the reference resolves; full relationship presentation belongs in detail.
+- Thin District rows should stay visible with an honest fallback rather than
+  inferred descriptions.
+- File-export audits and running-app browser snapshots may differ; record the
+  data source used for counts instead of pretending they match.
+
 Update this history after every category evolution. The playbook is product memory.

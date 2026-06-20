@@ -13,6 +13,7 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode(" Abilities ")).toBe("abilityArchive");
         expect(getCodexCategoryMode(" Actions ")).toBe("actionArchive");
         expect(getCodexCategoryMode(" DiplomaticTreaties ")).toBe("diplomacyArchive");
+        expect(getCodexCategoryMode(" Districts ")).toBe("districtArchive");
         expect(getCodexCategoryMode(" Equipment ")).toBe("equipmentArchive");
         expect(getCodexCategoryMode(" Improvements ")).toBe("improvementArchive");
         expect(getCodexCategoryMode(" Statuses ")).toBe("statusArchive");
