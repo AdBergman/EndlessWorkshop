@@ -22,6 +22,15 @@ function seedCodexEntries(entries: CodexEntry[]) {
     });
 }
 
+function getSummaryRowForButton(button: HTMLElement): HTMLElement {
+    const row = button.closest(".codex-summaryList__item");
+    if (!(row instanceof HTMLElement)) {
+        throw new Error("Expected summary button to be inside a summary row.");
+    }
+
+    return row;
+}
+
 function seedShallowReferenceLayoutEntries() {
     seedCodexEntries([
         {
@@ -466,7 +475,8 @@ describe("CodexPage", () => {
         expect(within(overviewRow).queryByText(/common02/i)).not.toBeInTheDocument();
         expect(within(overviewRow).queryByText(/passive \/ ability/i)).not.toBeInTheDocument();
 
-        const usefulPreviewRow = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
+        const usefulPreviewButton = within(abilitiesOverview).getByRole("button", { name: /arcane strike/i });
+        const usefulPreviewRow = getSummaryRowForButton(usefulPreviewButton);
         const usefulMetadata = within(usefulPreviewRow).getByLabelText("Exported metadata");
         expect(within(usefulMetadata).getByText("Active")).toBeInTheDocument();
         expect(within(usefulMetadata).getByText("Target: Empty Tile, Allies, Enemies")).toBeInTheDocument();
@@ -592,7 +602,8 @@ describe("CodexPage", () => {
         );
 
         const abilitiesOverview = await screen.findByLabelText("Abilities overview");
-        const taxonomyLeakRow = within(abilitiesOverview).getByRole("button", { name: /chilling coup/i });
+        const taxonomyLeakButton = within(abilitiesOverview).getByRole("button", { name: /chilling coup/i });
+        const taxonomyLeakRow = getSummaryRowForButton(taxonomyLeakButton);
         expect(within(taxonomyLeakRow).queryByText(/last lords \/ combat \/ ability/i)).not.toBeInTheDocument();
         expect(within(taxonomyLeakRow).queryByText(/combat \/ ability/i)).not.toBeInTheDocument();
         expect(within(taxonomyLeakRow).getByText("Applies Terrorized I Status to all enemy Units"))
@@ -604,7 +615,8 @@ describe("CodexPage", () => {
             expect(screen.getByRole("heading", { name: "Ability Archive" })).toBeInTheDocument();
             expect(within(abilitiesOverview).queryByRole("button", { name: /chilling coup/i })).not.toBeInTheDocument();
         });
-        const searchMatchedRow = within(abilitiesOverview).getByRole("button", { name: /hidden effect strike/i });
+        const searchMatchedButton = within(abilitiesOverview).getByRole("button", { name: /hidden effect strike/i });
+        const searchMatchedRow = getSummaryRowForButton(searchMatchedButton);
         const effectPreview = within(searchMatchedRow).getByLabelText("Effect preview");
         const previewLines = Array.from(effectPreview.querySelectorAll(".codex-summaryList__effectPreviewLine"))
             .map((line) => line.textContent?.replace(/\s+/g, " ").trim());
@@ -2276,6 +2288,113 @@ describe("CodexPage", () => {
         expect(screen.getByRole("heading", { name: "Modifier mechanics" })).toBeInTheDocument();
         expect(screen.getByText("Reduces the action Influence cost.")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+    });
+
+    it("links exact status mentions inline in Ability Archive previews while keeping unresolved mentions plain", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_JinxedStrike",
+                displayName: "Jinxed Strike",
+                category: "Combat",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
+                publicContextKeys: ["Status_Unit_Jinxed", "Status_Unit_Jinxed_2"],
+                facts: [
+                    { label: "Ability mechanic", value: "Active" },
+                    { label: "Ability source", value: "Battle skill" },
+                    { label: "Combat role", value: "Status apply" },
+                    { label: "Target", value: "Enemies" },
+                    { label: "Range", value: "3" },
+                    { label: "Cost", value: "1 Battle Token" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: [
+                            "[DoubleArrow] Applies Jinxed II Status to the attacked Units",
+                            "[DoubleArrow] Applies UnJinxed II Status to the attacker",
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Jinxed",
+                displayName: "Jinxed",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["Jinxed lowers Accuracy for one turn."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_Unit_Jinxed_2",
+                displayName: "Jinxed II",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: ["Jinxed II lowers Accuracy for two turns."],
+                referenceKeys: [],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        lines: ["-20% [Accuracy] Accuracy"],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                abilities: entries.filter((entry) => entry.exportKind === "abilities"),
+                statuses: entries.filter((entry) => entry.exportKind === "statuses"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=abilities"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const abilitiesOverview = await screen.findByLabelText("Abilities overview");
+        const abilityButton = within(abilitiesOverview).getByRole("button", { name: /jinxed strike/i });
+        const abilityRow = getSummaryRowForButton(abilityButton);
+        const effectPreview = within(abilityRow).getByLabelText("Effect preview");
+        const inlineLink = within(effectPreview).getByRole("button", { name: "Open Jinxed II in Codex" });
+        const linkedLine = inlineLink.closest(".codex-summaryList__effectPreviewLine");
+
+        expect(linkedLine).toHaveTextContent("Applies Jinxed II Status to the attacked Units");
+        expect(inlineLink).toHaveTextContent("Jinxed II");
+        expect(within(effectPreview).getByText(/Applies UnJinxed II Status to the attacker/)).toBeInTheDocument();
+        expect(within(effectPreview).queryByRole("button", { name: /Open UnJinxed/i })).not.toBeInTheDocument();
+
+        inlineLink.focus();
+        expect(inlineLink).toHaveFocus();
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Jinxed II");
+        inlineLink.blur();
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        await user.click(inlineLink);
+        expect(await screen.findByRole("heading", { name: "Jinxed II" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
     });
 
     it("links exact status mentions inline on ability details while keeping unresolved mentions plain", async () => {

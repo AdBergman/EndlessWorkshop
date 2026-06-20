@@ -1971,6 +1971,13 @@
     cursor: pointer;
 }
 
+.codex-summaryList__entryButton--catalog {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    gap: 10px;
+}
+
 .codex-kindIcon--summaryResource {
     flex: 0 0 auto;
 }
