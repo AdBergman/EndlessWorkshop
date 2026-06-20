@@ -255,6 +255,61 @@ faction icons by parsing keys or display text.
 - No request to make every ability faction-owned.
 - No request to invent ownership where source data is ambiguous.
 
+## Equipment Metadata Backlog Additions
+
+Discovered during Equipment category evolution on 2026-06-20.
+
+These are non-blocking frontend findings. EWShop can continue the Equipment
+Archive using current exported facts and exact references, but exporter review
+would improve trust and presentation.
+
+### Equipment Granted Ability Reference Coverage
+
+Current Equipment Codex export includes `Granted abilities` section items whose
+`referenceKey` values do not resolve to current public Codex Ability entries.
+
+Observed examples:
+
+- `Talisman of Focus` -> `UnitAbility_Hero_BattleAbility_Equipment_Passive_52`
+- `Tear of the Lost` -> `UnitAbility_Hero_Equipment_Consumable09`
+- `Apotheosis Dirge` -> `UnitAbility_Hero_Equipment_Consumable10`
+- multiple Equipment entries granting `Heavy Strike` ->
+  `UnitAbility_PreparedBreakRetaliation`
+- `Keensight's Katana` -> `UnitAbility_Hero_ActiveSkill_Equipment_32`
+
+Request:
+
+- verify whether these granted abilities should be exported as public Codex
+  Ability entries;
+- or omit/mark the references if they are internal, obsolete, runtime-only, or
+  otherwise not public.
+
+EWShop frontend will not infer missing ability pages from keys or labels.
+
+### Equipment Icon Metadata
+
+Current frontend can safely render a generic Equipment kind icon, and can render
+Ability icons for exact granted Ability references. It does not have explicit
+per-item Equipment icon metadata.
+
+Request:
+
+- if per-item Equipment icons are intended for public Codex presentation, emit a
+  stable icon reference using the existing exporter/Codex icon contract style;
+- do not require EWShop to infer item icons from Equipment keys, display names,
+  or SVG filenames.
+
+### Equipment Access Pool Coverage
+
+`Apotheosis Dirge` currently lacks an `Access pool` fact while most Equipment
+entries emit one.
+
+Request:
+
+- verify whether `Access pool` should be emitted for this item;
+- if unavailable, absence is acceptable, but the exporter should make that
+  intentional.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

@@ -1944,6 +1944,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--equipmentArchive {
+    gap: 12px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item:hover,
 .codex-summaryList__item:focus-visible,
 .codex-summaryList__item:focus-within {
@@ -2011,6 +2017,13 @@
     gap: 10px;
 }
 
+.codex-summaryList__entryButton--equipment {
+    display: grid;
+    width: 100%;
+    max-width: none;
+    gap: 10px;
+}
+
 .codex-kindIcon--summaryResource {
     flex: 0 0 auto;
 }
@@ -2032,7 +2045,8 @@
 }
 
 .codex-summaryList__item--catalog .codex-summaryList__titleLine,
-.codex-summaryList__item--statusArchive .codex-summaryList__titleLine {
+.codex-summaryList__item--statusArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--equipmentArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
     justify-content: space-between;
@@ -2077,6 +2091,12 @@
     line-height: 1.35;
 }
 
+.codex-summaryList__item--equipmentArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .codex-summaryList__context {
     color: rgba(195, 152, 77, 0.72);
     font-size: 11px;
@@ -2110,6 +2130,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--equipmentArchive .codex-summaryList__metadata {
+    flex: 0 1 min(44%, 420px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--catalog .codex-summaryList__metadata--ability {
     align-items: center;
     gap: 7px;
@@ -2122,6 +2148,14 @@
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.5);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--equipment {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
     font-size: 12px;
     line-height: 1.45;
 }
@@ -2227,7 +2261,14 @@
     gap: 4px;
 }
 
+.codex-summaryList__equipmentEffects {
+    display: grid;
+    max-width: 84ch;
+    gap: 4px;
+}
+
 .codex-summaryList__statusEffectLine,
+.codex-summaryList__equipmentEffectLine,
 .codex-summaryList__statusFallback {
     display: block;
     min-width: 0;
@@ -2241,6 +2282,26 @@
 
 .codex-summaryList__statusFallback {
     color: rgba(241, 234, 220, 0.48);
+}
+
+.codex-summaryList__grantedAbilityPreviews {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 8px;
+    max-width: 900px;
+}
+
+.codex-summaryList__grantedAbilityPreviews .codex-grantedAbilityPreview {
+    min-height: 0;
+    padding: 9px 11px;
+    border-color: rgba(190, 150, 73, 0.16);
+    background: rgba(12, 14, 15, 0.28);
+}
+
+.codex-summaryList__grantedAbilityPreviews .codex-grantedAbilityPreview__effect {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .codex-summaryList__effects {
@@ -2473,6 +2534,7 @@
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar,
 .codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar,
+.codex-workspace--equipmentArchive .codex-resultsPane::-webkit-scrollbar,
 .codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -2480,12 +2542,14 @@
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-track,
 .codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-track,
+.codex-workspace--equipmentArchive .codex-resultsPane::-webkit-scrollbar-track,
 .codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.018);
 }
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb,
 .codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb,
+.codex-workspace--equipmentArchive .codex-resultsPane::-webkit-scrollbar-thumb,
 .codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-thumb {
     border: 2px solid rgba(0, 0, 0, 0);
     border-radius: 999px;
@@ -2495,6 +2559,7 @@
 
 .codex-workspace--abilityCatalog .codex-resultsPane::-webkit-scrollbar-thumb:hover,
 .codex-workspace--abilityCatalog .codex-detailPane::-webkit-scrollbar-thumb:hover,
+.codex-workspace--equipmentArchive .codex-resultsPane::-webkit-scrollbar-thumb:hover,
 .codex-workspace--statusArchive .codex-resultsPane::-webkit-scrollbar-thumb:hover {
     background: rgba(230, 176, 82, 0.38);
     background-clip: padding-box;

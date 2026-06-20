@@ -23,6 +23,11 @@ import {
 } from "@/lib/codex/codexShallowReferencePreview";
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import {
+    buildGrantedAbilityPreview,
+    isGrantedAbilityPreviewSection,
+    type CodexGrantedAbilityPreview as GrantedAbilityPreview,
+} from "@/lib/codex/codexGrantedAbilityPreviews";
+import {
     getCodexReadablePreviewLine,
     parseCodexStructuredDescription,
 } from "@/lib/codex/codexStructuredDescription";
@@ -34,6 +39,7 @@ import {
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexAbilityEffectLine from "./CodexAbilityEffectLine";
+import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
 
 type Props = {
     summaryEntry: CodexSummaryEntry;
@@ -64,6 +70,10 @@ type StatusArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type EquipmentArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
@@ -80,6 +90,8 @@ const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
 const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
+const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
+const MAX_EQUIPMENT_GRANTED_ABILITY_PREVIEWS = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -225,6 +237,47 @@ function getStatusArchiveMetadata(entry: CodexEntry): StatusArchiveMetadataItem[
     return items;
 }
 
+function formatEquipmentTierValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+    return trimmedValue === "0" ? "Base" : `Tier ${trimmedValue}`;
+}
+
+function formatEquipmentValue(value: string): string {
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return "";
+
+    const numericValue = Number(trimmedValue);
+    const displayValue = Number.isFinite(numericValue)
+        ? String(Number.parseFloat(numericValue.toFixed(2)))
+        : trimmedValue;
+
+    return `Value ${displayValue}`;
+}
+
+function getEquipmentArchiveMetadata(entry: CodexEntry): EquipmentArchiveMetadataItem[] {
+    const items: EquipmentArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Type").forEach((value) => addValue("type", value));
+    getCodexFactValues(entry, "Rarity").forEach((value) => addValue("rarity", value));
+    getCodexFactValues(entry, "Tier").forEach((value) => addValue("tier", formatEquipmentTierValue(value)));
+    getCodexFactValues(entry, "Value").forEach((value) => addValue("value", formatEquipmentValue(value)));
+
+    return items;
+}
+
 function isAbilitySetupPreviewLine(value: string): boolean {
     const normalizedValue = normalizeAbilityTaxonomyText(value);
     if (!normalizedValue) return false;
@@ -314,7 +367,7 @@ function getAbilityCatalogEffectPreviewLines(entry: CodexEntry, searchQuery = ""
         .map((index) => effectLines[index]);
 }
 
-function getStatusSectionPreviewLines(section: ReturnType<typeof parseCodexStructuredDescription>["sections"][number]): string[] {
+function getStructuredSectionPreviewLines(section: ReturnType<typeof parseCodexStructuredDescription>["sections"][number]): string[] {
     const previewLines: string[] = [];
     const seen = new Set<string>();
 
@@ -353,7 +406,7 @@ function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     const mechanicsSection = parsed.sections.find((section) =>
         section.label.trim().toLowerCase() === "status mechanics"
     );
-    const mechanicsLines = mechanicsSection ? getStatusSectionPreviewLines(mechanicsSection) : [];
+    const mechanicsLines = mechanicsSection ? getStructuredSectionPreviewLines(mechanicsSection) : [];
     if (mechanicsLines.length > 0) {
         return mechanicsLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
     }
@@ -361,7 +414,7 @@ function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
     const effectsSection = parsed.sections.find((section) =>
         section.label.trim().toLowerCase() === "effects"
     );
-    const effectsLines = effectsSection ? getStatusSectionPreviewLines(effectsSection) : [];
+    const effectsLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
     if (effectsLines.length > 0) {
         return effectsLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
     }
@@ -375,13 +428,25 @@ function getStatusArchiveEffectPreviewLines(entry: CodexEntry): string[] {
             continue;
         }
 
-        const previewLines = getStatusSectionPreviewLines(section);
+        const previewLines = getStructuredSectionPreviewLines(section);
         if (previewLines.length > 0) {
             return previewLines.slice(0, MAX_STATUS_EFFECT_PREVIEW_LINES);
         }
     }
 
     return [];
+}
+
+function getEquipmentArchiveEffectPreviewLines(entry: CodexEntry): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "equipment") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+
+    return effectLines.slice(0, MAX_EQUIPMENT_EFFECT_PREVIEW_LINES);
 }
 
 function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
@@ -482,9 +547,11 @@ export default function CodexSummaryDetail({
                         const showRichOverviewRow = supportsRichOverviewRow(entry);
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
+                        const useEquipmentArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "equipment";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
+                        const equipmentArchiveMetadata = useEquipmentArchiveRowHierarchy ? getEquipmentArchiveMetadata(entry) : [];
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -496,6 +563,17 @@ export default function CodexSummaryDetail({
                             : [];
                         const statusEffectPreviewLines = useStatusArchiveRowHierarchy
                             ? getStatusArchiveEffectPreviewLines(entry)
+                            : [];
+                        const equipmentEffectPreviewLines = useEquipmentArchiveRowHierarchy
+                            ? getEquipmentArchiveEffectPreviewLines(entry)
+                            : [];
+                        const equipmentGrantedAbilityPreviews = useEquipmentArchiveRowHierarchy
+                            ? parseCodexStructuredDescription(entry).sections
+                                .filter((section) => isGrantedAbilityPreviewSection(entry, section.label))
+                                .flatMap((section) => section.items ?? [])
+                                .map((item) => buildGrantedAbilityPreview(item, resolveRelatedEntries(entry, referenceIndexes)))
+                                .filter((item): item is GrantedAbilityPreview => item !== null)
+                                .slice(0, MAX_EQUIPMENT_GRANTED_ABILITY_PREVIEWS)
                             : [];
                         const visibleCatalogPreview = (
                             useCatalogRowHierarchy &&
@@ -696,6 +774,85 @@ export default function CodexSummaryDetail({
                                         )}
                                     </span>
                                 </button>
+                            );
+                        }
+
+                        if (useEquipmentArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--equipmentArchive"
+                                >
+                                    <button
+                                        type="button"
+                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--equipment"
+                                        onClick={() => onSelectEntry(entry)}
+                                    >
+                                        <span className="codex-summaryList__titleLine">
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <CodexEntryIcon
+                                                    entry={entry}
+                                                    label={getCodexEntryLabel(entry)}
+                                                    className="codex-kindIcon codex-kindIcon--summaryEntry"
+                                                    size={20}
+                                                />
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                            {equipmentArchiveMetadata.length > 0 ? (
+                                                <span
+                                                    className="codex-summaryList__metadata codex-summaryList__metadata--equipment"
+                                                    aria-label="Equipment metadata"
+                                                >
+                                                    {equipmentArchiveMetadata.map((item) => (
+                                                        <span
+                                                            key={`${item.key}-${item.value}`}
+                                                            className="codex-summaryList__metadataText"
+                                                        >
+                                                            {item.value}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            ) : null}
+                                        </span>
+
+                                        <span
+                                            className="codex-summaryList__equipmentEffects"
+                                            aria-label="Equipment effect preview"
+                                        >
+                                            {equipmentEffectPreviewLines.length > 0 ? (
+                                                equipmentEffectPreviewLines.map((line, index) => (
+                                                    <span
+                                                        className="codex-summaryList__equipmentEffectLine"
+                                                        key={`${entry.entryKey}-equipment-preview-${index}`}
+                                                    >
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                    </span>
+                                                ))
+                                            ) : equipmentGrantedAbilityPreviews.length === 0 ? (
+                                                <span className="codex-summaryList__statusFallback">
+                                                    No public equipment effects exported yet.
+                                                </span>
+                                            ) : null}
+                                        </span>
+                                    </button>
+
+                                    {equipmentGrantedAbilityPreviews.length > 0 ? (
+                                        <div
+                                            className="codex-summaryList__grantedAbilityPreviews"
+                                            aria-label="Granted ability previews"
+                                        >
+                                            {equipmentGrantedAbilityPreviews.map((grantedPreview) => (
+                                                <CodexGrantedAbilityPreview
+                                                    key={`${entry.entryKey}-${grantedPreview.ability.entryKey}`}
+                                                    preview={grantedPreview}
+                                                    onSelect={(ability) => onSelectEntry(ability)}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : null}
+                                </div>
                             );
                         }
 

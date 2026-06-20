@@ -29,6 +29,14 @@ import {
     type ActiveCodexFactFilters,
 } from "@/lib/codex/codexAbilityArchiveFilters";
 import {
+    buildEquipmentArchiveFilterGroups,
+    EMPTY_EQUIPMENT_ARCHIVE_FILTERS,
+    entryMatchesEquipmentArchiveFilters,
+    hasActiveEquipmentArchiveFilters,
+    type ActiveEquipmentArchiveFilters,
+    type EquipmentArchiveFilterKey,
+} from "@/lib/codex/codexEquipmentArchiveFilters";
+import {
     buildStatusScopeFilterOptions,
     filterStatusEntriesByScope,
 } from "@/lib/codex/codexStatusArchiveFilters";
@@ -60,6 +68,9 @@ export default function CodexPage() {
     const [query, setQuery] = useState("");
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
     const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
+    const [activeEquipmentFilters, setActiveEquipmentFilters] = useState<ActiveEquipmentArchiveFilters>(
+        EMPTY_EQUIPMENT_ARCHIVE_FILTERS
+    );
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
 
     const deferredQuery = useDeferredValue(query);
@@ -116,6 +127,7 @@ export default function CodexPage() {
     );
     const categoryMode = getCodexCategoryMode(activeKind);
     const isAbilityCatalogMode = categoryMode === "abilityArchive";
+    const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
 
     const factFilterConfig = useMemo(
@@ -138,6 +150,23 @@ export default function CodexPage() {
             return Object.keys(next).length === Object.keys(current).length ? current : next;
         });
     }, [factFilterConfig]);
+
+    useEffect(() => {
+        if (isEquipmentArchiveMode) return;
+
+        setActiveEquipmentFilters((current) => (
+            hasActiveEquipmentArchiveFilters(current) ? EMPTY_EQUIPMENT_ARCHIVE_FILTERS : current
+        ));
+    }, [isEquipmentArchiveMode]);
+
+    const equipmentFilterGroups = useMemo(
+        () => (
+            isEquipmentArchiveMode
+                ? buildEquipmentArchiveFilterGroups(searchFilteredEntries, activeEquipmentFilters)
+                : []
+        ),
+        [activeEquipmentFilters, isEquipmentArchiveMode, searchFilteredEntries]
+    );
 
     useEffect(() => {
         if (isStatusArchiveMode) return;
@@ -170,13 +199,25 @@ export default function CodexPage() {
                 return filterStatusEntriesByScope(searchFilteredEntries, activeStatusScope);
             }
 
+            if (isEquipmentArchiveMode) {
+                if (!hasActiveEquipmentArchiveFilters(activeEquipmentFilters)) {
+                    return searchFilteredEntries;
+                }
+
+                return searchFilteredEntries.filter((entry) =>
+                    entryMatchesEquipmentArchiveFilters(entry, activeEquipmentFilters)
+                );
+            }
+
             return searchFilteredEntries;
         },
         [
+            activeEquipmentFilters,
             activeFactFilters,
             activeStatusScope,
             factFilterConfig,
             isAbilityCatalogMode,
+            isEquipmentArchiveMode,
             isStatusArchiveMode,
             searchFilteredEntries,
         ]
@@ -218,7 +259,7 @@ export default function CodexPage() {
         }
 
         return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...groupedEntries];
-    }, [activeKind, activeKindLabel, filteredEntries, query]);
+    }, [activeKind, activeKindLabel, filteredEntries]);
 
     const groupedFilteredEntries = useMemo(
         () => groupQuestListItems(filteredEntries),
@@ -497,6 +538,12 @@ export default function CodexPage() {
         updateSelectedEntry(null, { category: activeKind });
     }, [activeKind, isStatusArchiveMode, selectedEntryParam, updateSelectedEntry]);
 
+    const returnEquipmentFiltersToArchive = useCallback(() => {
+        if (!isEquipmentArchiveMode || !selectedEntryParam) return;
+
+        updateSelectedEntry(null, { category: activeKind });
+    }, [activeKind, isEquipmentArchiveMode, selectedEntryParam, updateSelectedEntry]);
+
     const clearFactFilters = useCallback(() => {
         setActiveFactFilters({});
         returnAbilityFiltersToArchive();
@@ -514,6 +561,19 @@ export default function CodexPage() {
         });
         returnAbilityFiltersToArchive();
     }, [returnAbilityFiltersToArchive]);
+
+    const clearEquipmentFilters = useCallback(() => {
+        setActiveEquipmentFilters(EMPTY_EQUIPMENT_ARCHIVE_FILTERS);
+        returnEquipmentFiltersToArchive();
+    }, [returnEquipmentFiltersToArchive]);
+
+    const toggleEquipmentFilter = useCallback((filterKey: EquipmentArchiveFilterKey, value: string) => {
+        setActiveEquipmentFilters((current) => ({
+            ...current,
+            [filterKey]: current[filterKey] === value ? null : value,
+        }));
+        returnEquipmentFiltersToArchive();
+    }, [returnEquipmentFiltersToArchive]);
 
     const clearStatusScope = useCallback(() => {
         setActiveStatusScope(null);
@@ -567,19 +627,24 @@ export default function CodexPage() {
                     } ${
                         isAbilityCatalogMode ? "codex-workspace--abilityCatalog" : ""
                     } ${
+                        isEquipmentArchiveMode ? "codex-workspace--equipmentArchive" : ""
+                    } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
                     }`}
                 >
                     <CodexLeftPane
                         ref={resultListRef}
                         activeFactFilters={activeFactFilters}
+                        activeEquipmentFilters={activeEquipmentFilters}
                         activeKind={activeKind}
                         activeKindLabel={activeKindLabel}
                         displayEntries={displayEntries}
+                        equipmentFilterGroups={equipmentFilterGroups}
                         error={error}
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
                         isAbilityCatalogMode={isAbilityCatalogMode}
+                        isEquipmentArchiveMode={isEquipmentArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isVisible={showResultsPane}
                         loading={loading}
@@ -587,8 +652,10 @@ export default function CodexPage() {
                         statusScopeFilter={activeStatusScope}
                         statusScopeOptions={statusScopeOptions}
                         onClearFactFilters={clearFactFilters}
+                        onClearEquipmentFilters={clearEquipmentFilters}
                         onClearStatusScope={clearStatusScope}
                         onSelectEntry={(entry) => selectEntry(entry)}
+                        onToggleEquipmentFilter={toggleEquipmentFilter}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleFactFilter={toggleFactFilter}
                     />

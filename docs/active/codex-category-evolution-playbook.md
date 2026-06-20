@@ -284,6 +284,15 @@ Lessons:
 
 ### Equipment
 
-To be filled after category audit. Use the same exporter findings workflow.
+Lessons:
+- Equipment is an Archive, not a Reference Sheet, because players browse by gear type and compare rows.
+- `Type` is stronger than `Slot` as first navigation because `Slot` collapses most items into `Weapon`.
+- `Rarity` works as secondary navigation and orientation metadata.
+- Equipment effects are row content; Type/Rarity/Tier/Value are supporting metadata.
+- Exact granted ability references are content for Equipment rows, not just relationship metadata.
+- Unresolved granted ability references should remain honest missing data, not frontend-inferred cards.
+- Inbound Quest/Trait relationships are better detail follow-ups than first-pass archive row content.
+- Per-item Equipment icon identity needs explicit exporter metadata before frontend should show specific icons.
+- The assertive workflow worked well when durable execution docs were updated after each phase.
 
 Update this history after every category evolution. The playbook is product memory.

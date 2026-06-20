@@ -3572,6 +3572,193 @@ describe("CodexPage", () => {
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack_1");
     });
 
+    it("renders Equipment as an archive with Type and Rarity navigation", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_BloodmarkBow",
+                displayName: "Bloodmark Bow",
+                descriptionLines: [],
+                referenceKeys: ["UnitAbility_Ranged_4", "UnitAbility_Missing"],
+                facts: [
+                    { label: "Type", value: "Bow" },
+                    { label: "Slot", value: "Weapon" },
+                    { label: "Rarity", value: "Rare" },
+                    { label: "Tier", value: "2" },
+                    { label: "Value", value: "400.00" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["+1 [Might] Might", "+1 [Determination] Determination"],
+                    },
+                    {
+                        title: "Granted abilities",
+                        items: [
+                            { label: "Ranged IV", referenceKey: "UnitAbility_Ranged_4" },
+                            { label: "Unresolved Strike", referenceKey: "UnitAbility_Missing" },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_ArchitePlate",
+                displayName: "Archite Plate",
+                descriptionLines: [],
+                referenceKeys: ["UnitAbility_DefenseExpert_2"],
+                facts: [
+                    { label: "Type", value: "Armor" },
+                    { label: "Slot", value: "Armor" },
+                    { label: "Rarity", value: "Legendary" },
+                    { label: "Tier", value: "3" },
+                    { label: "Value", value: "1000.00" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["+20 [Defense] Defense on Hero"],
+                    },
+                    {
+                        title: "Granted abilities",
+                        items: [{ label: "Defense Expert II", referenceKey: "UnitAbility_DefenseExpert_2" }],
+                    },
+                ],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Ranged_4",
+                displayName: "Ranged IV",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+4 [AttackRange] Attack Range"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_DefenseExpert_2",
+                displayName: "Defense Expert II",
+                category: "Passive",
+                kind: "Ability",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Ability" },
+                    { label: "Category", value: "Passive" },
+                ],
+                sections: [{ title: "Effects", lines: ["+20 [Defense] Defense"] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Equipment" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Equipment filters")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex results")).not.toBeInTheDocument();
+
+        const typeGroup = screen.getByRole("group", { name: "Type" });
+        const rarityGroup = screen.getByRole("group", { name: "Rarity" });
+        expect(within(typeGroup).getByRole("button", { name: "Bow 1" })).toBeInTheDocument();
+        expect(within(typeGroup).getByRole("button", { name: "Armor 1" })).toBeInTheDocument();
+        expect(within(rarityGroup).getByRole("button", { name: "Rare 1" })).toBeInTheDocument();
+
+        const bloodmarkRow = getSummaryRowForButton(screen.getByRole("button", { name: /bloodmark bow/i }));
+        expect(bloodmarkRow).toHaveTextContent("Bloodmark Bow");
+        expect(bloodmarkRow).toHaveTextContent("+1");
+        expect(bloodmarkRow).toHaveTextContent("Might");
+        expect(bloodmarkRow).toHaveTextContent("Determination");
+        expect(screen.getAllByText("Bow").length).toBeGreaterThan(0);
+        expect(screen.getAllByText("Rare").length).toBeGreaterThan(0);
+        expect(screen.getByText("Tier 2")).toBeInTheDocument();
+        expect(screen.getByText("Value 400")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Ranged IV Passive / Ability +4 Attack Range" })).toBeInTheDocument();
+        expect(screen.queryByText("Unresolved Strike")).not.toBeInTheDocument();
+
+        await user.click(within(typeGroup).getByRole("button", { name: "Bow 1" }));
+
+        expect(screen.getByText("Bloodmark Bow")).toBeInTheDocument();
+        expect(screen.queryByText("Archite Plate")).not.toBeInTheDocument();
+
+        await user.click(within(typeGroup).getByRole("button", { name: "Bow 1" }));
+
+        expect(screen.getByText("Archite Plate")).toBeInTheDocument();
+    });
+
+    it("returns from Equipment detail to the archive list when a rail filter changes", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_BloodmarkBow",
+                displayName: "Bloodmark Bow",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Bow" },
+                    { label: "Rarity", value: "Rare" },
+                    { label: "Tier", value: "2" },
+                    { label: "Value", value: "400.00" },
+                ],
+                sections: [{ title: "Effects", lines: ["+1 [Might] Might"] }],
+            },
+            {
+                exportKind: "equipment",
+                entryKey: "Equipment_ArchitePlate",
+                displayName: "Archite Plate",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Armor" },
+                    { label: "Rarity", value: "Legendary" },
+                    { label: "Tier", value: "3" },
+                    { label: "Value", value: "1000.00" },
+                ],
+                sections: [{ title: "Effects", lines: ["+20 [Defense] Defense on Hero"] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=equipment&entry=Equipment_BloodmarkBow"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Bloodmark Bow" })).toBeInTheDocument();
+
+        await user.click(within(screen.getByRole("group", { name: "Rarity" })).getByRole("button", { name: "Rare 1" }));
+
+        expect(await screen.findByRole("heading", { name: "All Equipment" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=equipment");
+        expect(screen.getByText("Bloodmark Bow")).toBeInTheDocument();
+        expect(screen.queryByText("Archite Plate")).not.toBeInTheDocument();
+    });
+
     it("previews resolved granted abilities on Hero details without repeating them in Related Entries", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [
@@ -5121,9 +5308,9 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Dawnblade" })).toBeInTheDocument();
         expect(screen.getByText("Equipment dossier")).toBeInTheDocument();
-        expect(screen.getByText("Type")).toBeInTheDocument();
+        expect(screen.getAllByText("Type").length).toBeGreaterThan(0);
         expect(screen.getByText("Weapon")).toBeInTheDocument();
-        expect(screen.getByText("Rarity")).toBeInTheDocument();
+        expect(screen.getAllByText("Rarity").length).toBeGreaterThan(0);
         expect(screen.getByText("Rare")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Notes" })).toBeInTheDocument();
         expect(screen.getByText("Forged for close combat.")).toBeInTheDocument();
@@ -6385,19 +6572,22 @@ describe("CodexPage", () => {
         expect(screen.queryByText("Ability dossier")).not.toBeInTheDocument();
     });
 
-    it("uses structured facts in kind summaries when current lines support it", async () => {
+    it("uses Equipment archive rows instead of generic structured kind summaries", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "equipment",
                 entryKey: "Equipment_Weapon_02_Definition",
                 displayName: "Dawnblade",
-                descriptionLines: [
-                    "Type: Weapon",
-                    "Slot: Main hand",
-                    "Rarity: Rare",
-                    "Tier: 2",
-                ],
+                descriptionLines: [],
                 referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "One-Handed Weapon" },
+                    { label: "Slot", value: "Weapon" },
+                    { label: "Rarity", value: "Rare" },
+                    { label: "Tier", value: "2" },
+                    { label: "Value", value: "120.00" },
+                ],
+                sections: [{ title: "Effects", lines: ["+2 [Might] Might"] }],
             },
         ];
 
@@ -6419,8 +6609,11 @@ describe("CodexPage", () => {
         );
 
         const summaryList = await screen.findByLabelText("Equipment overview");
-        expect(within(summaryList).getByRole("button", { name: /dawnblade/i })).toHaveTextContent(
-            "Weapon / Main hand / Rare / Tier 2"
-        );
+        const dawnbladeRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /dawnblade/i }));
+        expect(dawnbladeRow).toHaveTextContent("One-Handed Weapon");
+        expect(dawnbladeRow).toHaveTextContent("Rare");
+        expect(dawnbladeRow).toHaveTextContent("Tier 2");
+        expect(dawnbladeRow).toHaveTextContent("Value 120");
+        expect(dawnbladeRow).toHaveTextContent("Might");
     });
 });
