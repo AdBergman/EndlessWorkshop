@@ -39,9 +39,10 @@ Active exporter follow-up:
   EWShop-owned DB-exporter-response implementation blocker.
 - `docs/active/codex-rich-vs-codex-import-architecture-decision.md` - active
   EWShop architecture decision for Codex export vs rich/domain import ownership.
-  The current recommendation is hybrid per-field ownership, with
-  `CODEX-RICH-001 - Tech Detail Prerequisite Enrichment` as the first
-  frontend-only resolver pilot.
+- `docs/active/codex-rich-enrichment-decision-template.md` - required gate
+  before any new Codex rich-import resolver. `CODEX-RICH-001` and
+  `CODEX-RICH-002` proved the architecture, but future resolver work should not
+  proceed unless player value clearly justifies the docs/tests/code cost.
 
 Current decisions to preserve:
 
@@ -124,7 +125,8 @@ Current rules:
   deferred until explicit Codex evolution metadata exists. `CODEX-RICH-002`
   adds Unit detail-only previous/evolves-into links from the existing rich Unit
   store when exact public Codex Unit targets resolve; archive rows and `/units`
-  remain unchanged.
+  remain unchanged. Do not expand rich Unit enrichment without using the
+  decision template.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.
@@ -138,7 +140,8 @@ Current rules:
   Era/Quadrant/Faction metadata. The dedicated `/tech` route remains the
   route-owned progression explorer. `CODEX-RICH-001` adds Tech detail-only
   prerequisite links from the existing rich Tech store when exact public Codex
-  Tech targets resolve; archive rows and `/tech` remain unchanged.
+  Tech targets resolve; archive rows and `/tech` remain unchanged. Do not expand
+  rich Tech enrichment without using the decision template.
 - Extractors are hidden support/reference targets as of commit `0ab94ec9`;
   they remain searchable, linkable, and direct-routable where exact refs exist.
 - Future full-width shallow categories must be added deliberately to the

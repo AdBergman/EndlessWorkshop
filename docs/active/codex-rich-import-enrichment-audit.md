@@ -7,6 +7,8 @@ Scope: compare local Codex exports with richer sibling exports under
 Boundary decision: `docs/active/codex-export-vs-rich-export-boundary.md`
 Architecture decision:
 `docs/active/codex-rich-vs-codex-import-architecture-decision.md`
+Decision template:
+`docs/active/codex-rich-enrichment-decision-template.md`
 
 ## Purpose
 
@@ -93,8 +95,12 @@ Open questions:
 Decision update:
 
 - Use the hybrid per-field ownership model from the architecture decision.
-- `CODEX-RICH-001 - Tech Detail Prerequisite Enrichment` remains the first
-  recommended implementation slice.
+- `CODEX-RICH-001 - Tech Detail Prerequisite Enrichment` and
+  `CODEX-RICH-002 - Unit Detail Evolution/Profile Enrichment` proved the
+  resolver pattern as bounded detail-only slices.
+- Do not start another rich resolver automatically; use
+  `docs/active/codex-rich-enrichment-decision-template.md` first and require
+  clear player value.
 - Districts and Improvements are already imported through rich/domain endpoints,
   but their resolver use should remain detail/profile-only unless public Codex
   facts are explicitly added by the exporter.
@@ -174,7 +180,7 @@ The best direction is a hybrid resolver layer:
 - Return optional `CodexEnrichment` view models to Codex row/detail components.
 - Do not let Codex components directly reach into route-owned rich page logic.
 
-Highest-value enrichment potential:
+Highest theoretical enrichment potential before the proof-of-pattern review:
 
 1. Tech - exact prerequisites, exclusive prerequisites, structured unlocks.
 2. Units - exact evolution fields and grouped ability keys for detail/profile
@@ -201,6 +207,13 @@ metadata, Hero references/presentation metadata, District/Improvement planning
 metadata, Equipment icons/reference coverage, Trait ownership/category semantics,
 Action ownership/reference/browse metadata, Diplomacy relationship/icon metadata,
 and Quest canonical archive grouping.
+
+Post-pilot update:
+
+- The Tech and Unit pilots are worth keeping, but their player value is modest.
+- Future rich enrichment should be gated by the decision template, not by rich
+  export availability alone.
+- The best next action may often be exporter metadata cleanup or no-op.
 
 ## Category Findings
 

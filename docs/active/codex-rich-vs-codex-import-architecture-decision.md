@@ -6,6 +6,7 @@ Related:
 
 - `docs/active/codex-export-vs-rich-export-boundary.md`
 - `docs/active/codex-rich-import-enrichment-audit.md`
+- `docs/active/codex-rich-enrichment-decision-template.md`
 - `docs/active/db-exporter-ability-metadata-handoff.md`
 
 ## Purpose
@@ -400,7 +401,16 @@ fail-closed behavior. DB Exporter backlog remains the right place for explicit
 ownership, grouping, identity, reference coverage, and stable public icon/art
 metadata.
 
-The first implementation slice should be `CODEX-RICH-001 - Tech Detail
-Prerequisite Enrichment`, because Tech is already imported, has exact key
-matching, has obvious detail value, and can prove the resolver pattern without
-backend/exporter changes.
+`CODEX-RICH-001` and `CODEX-RICH-002` proved the resolver architecture, but
+also showed that player value can be modest even when implementation risk is
+low. Keep those slices as bounded detail-only proof-of-pattern work.
+
+Before starting any additional rich resolver work, use
+`docs/active/codex-rich-enrichment-decision-template.md`.
+
+Default posture after the Tech and Unit pilots:
+
+- do not start another resolver simply because a rich export exists;
+- prefer exporter backlog items for canonical public metadata such as ownership,
+  grouping, identity, reference coverage, and icon contracts;
+- prefer defer/no-op when player value is below the template threshold.
