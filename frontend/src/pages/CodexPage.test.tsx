@@ -5,9 +5,10 @@ import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
 import { useTechStore } from "@/stores/techStore";
+import { useUnitStore } from "@/stores/unitStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
-import type { CodexEntry, Tech } from "@/types/dataTypes";
+import type { CodexEntry, Tech, Unit } from "@/types/dataTypes";
 
 function seedCodexEntries(entries: CodexEntry[]) {
     useCodexStore.setState({
@@ -45,6 +46,41 @@ const richTech = (overrides: Partial<Tech>): Tech => ({
     coords: { xPct: 0, yPct: 0 },
     ...overrides,
 });
+
+const richUnit = (overrides: Partial<Unit>): Unit => ({
+    unitKey: "Unit_Current",
+    displayName: "Current Unit",
+    artId: null,
+    faction: null,
+    isMajorFaction: true,
+    isHero: false,
+    isChosen: false,
+    spawnType: "Land",
+    previousUnitKey: null,
+    nextEvolutionUnitKeys: [],
+    evolutionTierIndex: 0,
+    unitClassKey: null,
+    unitClassDisplayName: null,
+    attackSkillKey: null,
+    abilityKeys: [],
+    descriptionLines: [],
+    ...overrides,
+});
+
+function seedRichUnits(units: Unit[]) {
+    useUnitStore.setState({
+        units,
+        unitsByKey: units.reduce<Record<string, Unit>>((acc, unit) => {
+            acc[unit.unitKey] = unit;
+            return acc;
+        }, {}),
+        unitKeys: units.map((unit) => unit.unitKey),
+        duplicateUnitKeys: [],
+        loading: false,
+        loaded: true,
+        error: null,
+    });
+}
 
 function seedShallowReferenceLayoutEntries() {
     seedCodexEntries([
@@ -263,6 +299,7 @@ describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         useTechStore.getState().reset();
+        useUnitStore.getState().reset();
         seedDefaultCodexStore();
     });
 
@@ -270,6 +307,7 @@ describe("CodexPage", () => {
         cleanup();
         useCodexStore.getState().reset();
         useTechStore.getState().reset();
+        useUnitStore.getState().reset();
     });
 
     function getCategoryToolbar() {
@@ -5373,6 +5411,160 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Current Tech" })).toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Prerequisites" })).not.toBeInTheDocument();
+    });
+
+    it("enriches Unit details with exact rich evolution links without changing archive rows", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_Current",
+                displayName: "Current Unit",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Tier", value: "2" },
+                    { label: "Class", value: "Infantry" },
+                ],
+                sections: [{ title: "Stats", lines: ["+120 [Health] Health"] }],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Previous",
+                displayName: "Previous Unit",
+                descriptionLines: ["Earlier battlefield form."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "1" }],
+                sections: [{ title: "Stats", lines: ["+80 [Health] Health"] }],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Evolved",
+                displayName: "Evolved Unit",
+                descriptionLines: ["Later battlefield form."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "3" }],
+                sections: [{ title: "Stats", lines: ["+180 [Health] Health"] }],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_HiddenHelper",
+                displayName: "Hidden Helper Ability",
+                descriptionLines: ["Internal helper."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichUnits([
+            richUnit({
+                unitKey: "Unit_Current",
+                previousUnitKey: "Unit_Previous",
+                nextEvolutionUnitKeys: ["Unit_Evolved"],
+                abilityKeys: ["Ability_HiddenHelper"],
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units&entry=Unit_Current"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Unit" })).toBeInTheDocument();
+
+        const evolutionSection = screen.getByRole("region", { name: "Evolution" });
+        expect(within(evolutionSection).getByText("Previous")).toBeInTheDocument();
+        expect(within(evolutionSection).getByText("Evolves into")).toBeInTheDocument();
+        const previousLink = within(evolutionSection).getByRole("button", {
+            name: "Open Previous Unit in Codex",
+        });
+        expect(previousLink).toHaveTextContent("Previous Unit");
+        expect(within(evolutionSection).getByRole("button", {
+            name: "Open Evolved Unit in Codex",
+        })).toHaveTextContent("Evolved Unit");
+        expect(evolutionSection).not.toHaveTextContent("Hidden Helper Ability");
+
+        previousLink.focus();
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Previous Unit");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("+80 Health");
+        previousLink.blur();
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        await user.click(previousLink);
+        expect(await screen.findByRole("heading", { name: "Previous Unit" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=units&entry=Unit_Previous");
+
+        await user.click(screen.getByRole("button", { name: /units/i }));
+        const unitsOverview = await screen.findByLabelText("Units overview");
+        expect(unitsOverview).toHaveTextContent("Current Unit");
+        expect(within(unitsOverview).queryByText("Previous")).not.toBeInTheDocument();
+        expect(within(unitsOverview).queryByText("Evolves into")).not.toBeInTheDocument();
+    });
+
+    it("hides Unit rich enrichment when rich data or exact evolution targets are unavailable", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "units",
+                entryKey: "Unit_Current",
+                displayName: "Current Unit",
+                descriptionLines: ["A public unit."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Unit_Missing",
+                displayName: "Wrong Kind",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichUnits([
+            richUnit({
+                unitKey: "Unit_Current",
+                previousUnitKey: "Unit_Missing",
+                nextEvolutionUnitKeys: ["Unit_Evolved_Missing"],
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units&entry=Unit_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Unit" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Evolution" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /wrong kind/i })).not.toBeInTheDocument();
+
+        useUnitStore.getState().reset();
+        cleanup();
+
+        seedCodexEntries(entries);
+        render(
+            <MemoryRouter initialEntries={["/codex?category=units&entry=Unit_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Unit" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Evolution" })).not.toBeInTheDocument();
     });
 
     it("renders the all-factions summary icon as a monochrome category icon", async () => {

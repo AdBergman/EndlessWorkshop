@@ -346,6 +346,24 @@ Implementation result:
 - Archive rows, the `/tech` route, and backend/exporter contracts remain
   unchanged.
 
+Second implementation result:
+
+- `CODEX-RICH-002` proved the same resolver pattern on Codex Unit detail pages.
+- The resolver reads the existing frontend `useUnitStore` data populated from
+  `/api/units`; Codex does not import local rich Unit JSON directly.
+- The runtime Unit DTO fields used are `unitKey`, `previousUnitKey`, and
+  `nextEvolutionUnitKeys`. `evolutionTierIndex` remains available in the DTO but
+  was not surfaced in this first slice because tier display has route-specific
+  nuance and existing Codex facts already carry public Tier.
+- Only exact public Codex Unit targets render as inline link/tooltip
+  affordances.
+- Rich Unit `abilityKeys` were intentionally not rendered in this first slice
+  because Unit Codex details already preview granted abilities from Codex
+  sections, and the current DTO does not expose the raw grouped helper ability
+  fields from the audit.
+- Archive rows, the `/units` route, and backend/exporter contracts remain
+  unchanged.
+
 ## No-Go / Deferred
 
 - Do not use Quest Explorer export to group Codex Quest rows.

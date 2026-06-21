@@ -975,14 +975,16 @@
     color: var(--codex-ink-muted);
 }
 
-.codex-techPrerequisites__groups {
+.codex-techPrerequisites__groups,
+.codex-unitProfile__groups {
     display: grid;
     gap: 12px;
     margin-top: 14px;
     max-width: 780px;
 }
 
-.codex-techPrerequisites__group {
+.codex-techPrerequisites__group,
+.codex-unitProfile__group {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
     align-items: baseline;
@@ -991,7 +993,8 @@
     border-left: 1px solid rgba(190, 150, 73, 0.16);
 }
 
-.codex-techPrerequisites__label {
+.codex-techPrerequisites__label,
+.codex-unitProfile__label {
     color: var(--codex-gold-bright);
     font-size: 11px;
     font-weight: 700;
@@ -1000,18 +1003,21 @@
     text-transform: uppercase;
 }
 
-.codex-techPrerequisites__links {
+.codex-techPrerequisites__links,
+.codex-unitProfile__links {
     min-width: 0;
     color: rgba(241, 234, 220, 0.86);
     font-size: 15px;
     line-height: 1.6;
 }
 
-.codex-techPrerequisites__linkWrap {
+.codex-techPrerequisites__linkWrap,
+.codex-unitProfile__linkWrap {
     display: inline;
 }
 
-.codex-techPrerequisites__separator {
+.codex-techPrerequisites__separator,
+.codex-unitProfile__separator {
     margin: 0 8px;
     color: rgba(195, 152, 77, 0.72);
 }

@@ -12,11 +12,17 @@ import {
     buildCodexTechRichEnrichment,
     hasCodexTechRichEnrichment,
 } from "@/lib/codex/codexTechRichEnrichment";
+import {
+    buildCodexUnitRichEnrichment,
+    hasCodexUnitRichEnrichment,
+} from "@/lib/codex/codexUnitRichEnrichment";
 import { useTechStore } from "@/stores/techStore";
+import { useUnitStore } from "@/stores/unitStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexStructuredDetail from "./CodexStructuredDetail";
 import CodexTechPrerequisiteSection from "./CodexTechPrerequisiteSection";
+import CodexUnitProfileSection from "./CodexUnitProfileSection";
 import RelatedEntries from "./RelatedEntries";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
@@ -36,11 +42,18 @@ export default function CodexEntryDetail({
     onSelectRelated,
 }: Props) {
     const richTechByKey = useTechStore((state) => state.techsByKey);
+    const richUnitByKey = useUnitStore((state) => state.unitsByKey);
     const techRichEnrichment = useMemo(
         () => entry
             ? buildCodexTechRichEnrichment(entry, richTechByKey, allEntries)
             : { prerequisites: [], exclusivePrerequisites: [] },
         [entry, richTechByKey, allEntries]
+    );
+    const unitRichEnrichment = useMemo(
+        () => entry
+            ? buildCodexUnitRichEnrichment(entry, richUnitByKey, allEntries)
+            : { previousUnit: null, evolvesInto: [] },
+        [entry, richUnitByKey, allEntries]
     );
 
     if (!entry) {
@@ -58,6 +71,7 @@ export default function CodexEntryDetail({
     const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
     const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
     const isTechEntry = entry.exportKind.trim().toLowerCase() === "tech";
+    const isUnitEntry = entry.exportKind.trim().toLowerCase() === "units";
     const detailContextLines = isAbilityEntry ? [] : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
     const kindLabel = formatCodexKindLabel(entry.exportKind);
@@ -77,6 +91,7 @@ export default function CodexEntryDetail({
         ? buildStatusRelationshipSourceEntries(entry, allEntries)
         : [];
     const showTechRichEnrichment = isTechEntry && hasCodexTechRichEnrichment(techRichEnrichment);
+    const showUnitRichEnrichment = isUnitEntry && hasCodexUnitRichEnrichment(unitRichEnrichment);
 
     return (
         <article className="codex-detail">
@@ -114,6 +129,13 @@ export default function CodexEntryDetail({
             {showTechRichEnrichment ? (
                 <CodexTechPrerequisiteSection
                     enrichment={techRichEnrichment}
+                    onSelect={onSelectRelated}
+                />
+            ) : null}
+
+            {showUnitRichEnrichment ? (
+                <CodexUnitProfileSection
+                    enrichment={unitRichEnrichment}
                     onSelect={onSelectRelated}
                 />
             ) : null}

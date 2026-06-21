@@ -121,7 +121,10 @@ Current rules:
 - Units use compact Unit Archive mode: Class/Faction/Tier rail plus stat-grid
   comparison rows, Faction/Class/Tier metadata, and compact exact granted
   ability links where references resolve. Rich evolution-chain UI remains
-  deferred until explicit Codex evolution metadata exists.
+  deferred until explicit Codex evolution metadata exists. `CODEX-RICH-002`
+  adds Unit detail-only previous/evolves-into links from the existing rich Unit
+  store when exact public Codex Unit targets resolve; archive rows and `/units`
+  remain unchanged.
 - `EW-CODEX-UI-004A` is implemented in commit `92e94047`: Partner Effects and
   Councilor Effects overview routes use centered full-width reference overview
   layout.

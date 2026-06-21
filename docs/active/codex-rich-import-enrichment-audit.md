@@ -1034,3 +1034,29 @@ Implemented as a frontend-only Tech detail resolver.
 The current EWShop Tech API DTO carries one `prereq` and one `excludes` field.
 The resolver is compatible with those fields and with future richer prerequisite
 arrays if the existing API/store boundary is expanded later.
+
+## CODEX-RICH-002 Result
+
+Implemented as a frontend-only Unit detail resolver.
+
+- Runtime source: existing `useUnitStore` records from `/api/units`.
+- Matching rule: selected Codex Unit `entryKey` must exactly match the rich Unit
+  `unitKey`.
+- Runtime DTO fields used: `previousUnitKey` and `nextEvolutionUnitKeys`.
+  `evolutionTierIndex` was inspected but not surfaced because the current
+  detail value is better carried by existing public Codex Tier facts and the
+  dedicated `/units` route owns nuanced tier/evolution display.
+- Target rule: previous/evolves-into targets render only when they resolve to
+  exact public Codex Unit entries.
+- Rendering: compact Codex detail `Evolution` section with existing inline
+  link/tooltip behavior.
+- Fail-closed behavior: no section appears when rich Unit data is unavailable or
+  targets do not resolve.
+- Intentionally not implemented: Unit archive row changes, `/units` changes,
+  evolution tree/graph rendering, grouped ability enrichment, generic resolver
+  framework, and local JSON imports.
+
+The current EWShop Unit API DTO exposes a merged `abilityKeys` field, but not
+the raw grouped helper/internal ability fields from the rich export audit. This
+slice therefore leaves ability grouping to existing Codex `Granted abilities`
+detail rendering instead of duplicating it from rich Unit data.

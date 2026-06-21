@@ -340,6 +340,9 @@ Frontend tech lead:
 - Faction/Class/Tier are supporting metadata.
 - Exact granted abilities may be compact metadata/relationship links.
 - Do not infer unit roles or evolution chains.
+- Unit detail pages may use exact rich Unit resolver data for compact
+  previous/evolves-into inspection, but Codex must not recreate the dedicated
+  `/units` evolution explorer.
 
 ## Implementation Results
 
@@ -373,6 +376,43 @@ Browser/product smoke:
 - Starting the local backend jar failed because another local process owns H2
   TCP port `9092`.
 - No pixel-level browser review is claimed for this pass.
+
+### CODEX-RICH-002 - Unit Detail Evolution Enrichment
+
+Implemented:
+
+- Added a Unit-specific Codex rich resolver over existing `useUnitStore` data
+  from `/api/units`.
+- Exact matching uses selected Codex Unit `entryKey` to rich Unit `unitKey`.
+- Runtime Unit DTO fields used:
+  - `previousUnitKey`
+  - `nextEvolutionUnitKeys`
+  - `evolutionTierIndex` inspected but not surfaced
+  - `abilityKeys` intentionally not rendered by this slice
+- Added a compact Unit detail `Evolution` section with:
+  - `Previous`
+  - `Evolves into`
+- Links render only when exact public Codex Unit targets resolve.
+- Existing Codex inline link/tooltip behavior is reused.
+- Missing rich data or unresolved targets fail closed with no placeholder.
+- Unit archive rows, Unit filters, `/units`, backend/API/importer/exporter
+  contracts, and local JSON import boundaries are unchanged.
+
+Intentionally not implemented:
+
+- no Unit archive row changes
+- no evolution tree/graph inside Codex
+- no key parsing or inferred evolution
+- no rich ability grouping, because Codex detail already renders public
+  `Granted abilities` and the current Unit DTO does not expose raw grouped
+  helper/internal ability fields safely
+- no generic rich resolver framework
+
+Validation:
+
+- `npm test -- --run src/lib/codex/codexUnitRichEnrichment.test.ts src/pages/CodexPage.test.tsx`
+  passed during implementation.
+- `npx tsc --noEmit --project tsconfig.json` passed during implementation.
 
 ## Product Review
 

@@ -2,14 +2,17 @@
 
 Target category: Units  
 Internal kind: `units`  
-Status: closeout complete, uncommitted
+Status: CODEX-RICH-002 implemented, uncommitted
 
 ## Status
 
-Current Phase: Phase 6 - Closeout complete  
-Completed: Required docs read; durable evolution document created; durable execution plan created; local data audit completed; browse/navigation/main/detail/relationship/exporter audits completed; proposal review completed; `UNITS-UI-001` implemented; targeted tests, TypeScript, and build passed; product review completed; refactor/stale-code review completed; exporter backlog updated.  
-Next: User review and commit decision.  
-Open Issues: Full progression/evolution-tree UI is deferred because progression fields are not exported as structured Codex facts; pixel-level browser review did not complete because local backend/frontend smoke was blocked by local port state.
+Current Phase: CODEX-RICH-002 validation/browser smoke
+
+Completed: Required docs read; durable evolution document created; durable execution plan created; local data audit completed; browse/navigation/main/detail/relationship/exporter audits completed; proposal review completed; `UNITS-UI-001` implemented; closeout completed; `CODEX-RICH-002` Unit detail rich resolver implemented with focused helper/page tests and TypeScript passing.
+
+Next: Full validation, browser/product smoke if local services cooperate, final report.
+
+Open Issues: Full progression/evolution-tree UI remains deferred because Codex should not duplicate `/units`; pixel-level browser smoke may still be limited by local service/port state.
 
 ## Stop Conditions
 
@@ -100,3 +103,10 @@ git diff --check
   architecture cleanup.
 - Phase 6: Exporter backlog was updated with non-blocking Units findings.
   Completion decision: complete with follow-up recommended.
+- CODEX-RICH-002: Reopened Units for rich-import detail enrichment. Added
+  compact Codex Unit detail `Evolution` links from existing `useUnitStore`
+  records. Runtime fields used are `unitKey`, `previousUnitKey`, and
+  `nextEvolutionUnitKeys`; `evolutionTierIndex` was inspected but not surfaced.
+  Rich `abilityKeys` were intentionally not rendered because existing Codex
+  detail already owns public granted ability previews and the current API DTO
+  does not expose raw grouped/helper ability buckets safely.
