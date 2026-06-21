@@ -4,6 +4,8 @@ Status: active exporter follow-up
 Created: 2026-06-20
 Owner: DB Exporter team primarily; EWShop frontend as metadata consumer
 Boundary reference: `docs/active/codex-export-vs-rich-export-boundary.md`
+Codex-vs-rich contract summary:
+`docs/active/db-exporter-codex-vs-rich-contract-summary.md`
 Architecture decision:
 `docs/active/codex-rich-vs-codex-import-architecture-decision.md`
 
@@ -18,6 +20,12 @@ Ability Archive UI work exposed two exporter-owned metadata issues:
 This is a focused follow-up. It does not reopen the completed
 `DB-CODEX-DEF-*` response/import QA pass, and it does not request frontend-side
 inference from ability keys, display names, old context strings, or prose.
+
+For DB Exporter work that overlaps rich/domain source-truth exports and Codex
+projection exports, use
+`docs/active/db-exporter-codex-vs-rich-contract-summary.md`. That packet is the
+current guide for deciding whether a finding is a rich export source-truth gap,
+a Codex projection gap, a split item, or an EWShop resolver opportunity.
 
 ## Current Source Documents Audited
 
@@ -726,6 +734,81 @@ Goal:
 Priority:
 
 - non-blocking. Current frontend behavior remains correct but visually noisy.
+
+## Rich Export Source-Truth Gap Review
+
+Added on 2026-06-21 from
+`docs/active/db-exporter-codex-vs-rich-contract-summary.md`.
+
+This section is intentionally short. The contract packet is the source of truth
+for the full rich-vs-Codex boundary and inventory.
+
+### Heroes And Skills Rich Export Readiness
+
+Classification: rich export source-truth gap.
+
+Hero and Skills rich exports are promising, but they are not imported by EWShop
+today. Hero profile enrichment depends on both files being source-truth ready.
+
+Request:
+
+- preserve exact Hero identity, origin/faction, class, default-skill, applicable
+  skill-tree, and grouped ability data;
+- make public skill labels explicit and stable, especially where `displayName`
+  currently remains a raw skill key and `resolvedDisplayName` is the usable
+  player-facing label;
+- confirm whether sparse skill prerequisite/inhibited relationships are
+  source-true;
+- add explicit portrait/icon keys only if those are stable public/domain asset
+  contracts.
+
+### Ability Rich/Public Split
+
+Classification: split: rich export source-truth gap plus Codex projection gap.
+
+The rich Ability export contains tactical profiles and battle summaries, but it
+also contains internal/helper rows and low-level effect categories. Those fields
+are valuable source truth, but they must not become player-facing browse roles
+without cleanup.
+
+Request:
+
+- keep tactical profile and battle summary data structured in rich export;
+- keep public/internal/helper separation explicit;
+- add explicit ability origin/ownership metadata only when source-proven;
+- keep `Combat role` cleanup as a Codex projection/public metadata task, not a
+  frontend interpretation of low-level rich effect categories.
+
+### Quest Canonical Archive Grouping
+
+Classification: Codex projection gap backed by exporter source truth.
+
+Quest Explorer rich export owns route navigation/branching, but it is not a safe
+1:1 grouping source for Codex Quest records. The Quest archive still needs
+exporter-provided canonical grouping metadata before EWShop can safely group
+duplicate titles.
+
+Request:
+
+- keep `/quests` route semantics in Quest Explorer rich export;
+- emit canonical Codex archive grouping identifiers in the Codex projection if
+  Quest archive grouping is revived;
+- do not rely on title grouping, title+chapter grouping, or key parsing.
+
+### Art/Icon/Portrait Contracts
+
+Classification: future split packet.
+
+Many rich exports lack explicit icon/art/portrait references. This should be a
+separate focused asset-contract packet unless a route implementation needs it
+immediately.
+
+Request:
+
+- when public icons, portraits, or art are intended for EWShop presentation,
+  emit stable semantic asset keys or domain art IDs;
+- do not require EWShop to infer assets from display names, raw keys, or SVG
+  filenames.
 
 ## Expected Exporter Validation
 

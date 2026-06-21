@@ -163,6 +163,13 @@ Status: active durable task memory. Update them when reopening those categories.
     category evolution.
   - Status: active exporter backlog/handoff.
 
+- `docs/active/db-exporter-codex-vs-rich-contract-summary.md`
+  - Purpose: DB-exporter-facing contract summary for rich/domain exports versus
+    Codex projection exports, including the current rich export gap review.
+  - Read when: deciding whether a finding belongs in rich source-truth export,
+    Codex projection export, EWShop resolver work, or exporter backlog.
+  - Status: active contract packet.
+
 - `docs/active/codex-db-exporter-implementation-packets/README.md`
   - Purpose: index for the definitive DB exporter response closeout packet.
   - Read when: reopening a DB exporter definitive-response question.

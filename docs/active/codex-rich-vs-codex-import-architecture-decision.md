@@ -5,6 +5,7 @@ Created: 2026-06-21
 Related:
 
 - `docs/active/codex-export-vs-rich-export-boundary.md`
+- `docs/active/db-exporter-codex-vs-rich-contract-summary.md`
 - `docs/active/codex-rich-import-enrichment-audit.md`
 - `docs/active/codex-rich-enrichment-decision-template.md`
 - `docs/active/db-exporter-ability-metadata-handoff.md`

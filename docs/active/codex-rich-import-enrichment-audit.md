@@ -9,6 +9,8 @@ Architecture decision:
 `docs/active/codex-rich-vs-codex-import-architecture-decision.md`
 Decision template:
 `docs/active/codex-rich-enrichment-decision-template.md`
+DB Exporter contract packet:
+`docs/active/db-exporter-codex-vs-rich-contract-summary.md`
 
 ## Purpose
 
@@ -95,6 +97,8 @@ Open questions:
 Decision update:
 
 - Use the hybrid per-field ownership model from the architecture decision.
+- For DB Exporter-facing ownership and current rich export gap priorities, use
+  `docs/active/db-exporter-codex-vs-rich-contract-summary.md`.
 - `CODEX-RICH-001 - Tech Detail Prerequisite Enrichment` and
   `CODEX-RICH-002 - Unit Detail Evolution/Profile Enrichment` proved the
   resolver pattern as bounded detail-only slices.

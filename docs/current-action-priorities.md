@@ -39,6 +39,9 @@ Active exporter follow-up:
   metadata cleanup request for noisy `Combat role` assignments and explicit
   ability ownership metadata. This is exporter-owned follow-up, not an
   EWShop-owned DB-exporter-response implementation blocker.
+- `docs/active/db-exporter-codex-vs-rich-contract-summary.md` - active
+  DB-exporter-facing contract packet for deciding what belongs in rich/domain
+  source-truth exports versus Codex projection exports.
 - `docs/active/codex-rich-vs-codex-import-architecture-decision.md` - active
   EWShop architecture decision for Codex export vs rich/domain import ownership.
 - `docs/active/codex-rich-enrichment-decision-template.md` - required gate
