@@ -50,6 +50,8 @@ export interface Tech {
     prereq: string | null;
     factions: string[];
     excludes: string | null;
+    technologyPrerequisiteTechKeys?: string[] | null;
+    exclusiveTechnologyPrerequisiteTechKeys?: string[] | null;
 
     coords: TechCoords;
 }

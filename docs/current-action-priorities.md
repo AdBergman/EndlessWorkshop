@@ -37,6 +37,11 @@ Active exporter follow-up:
   metadata cleanup request for noisy `Combat role` assignments and explicit
   ability ownership metadata. This is exporter-owned follow-up, not an
   EWShop-owned DB-exporter-response implementation blocker.
+- `docs/active/codex-rich-vs-codex-import-architecture-decision.md` - active
+  EWShop architecture decision for Codex export vs rich/domain import ownership.
+  The current recommendation is hybrid per-field ownership, with
+  `CODEX-RICH-001 - Tech Detail Prerequisite Enrichment` as the first
+  frontend-only resolver pilot.
 
 Current decisions to preserve:
 
@@ -128,7 +133,9 @@ Current rules:
 - Tech uses compact Technology Archive support inside Codex: Era/Quadrant/Faction
   rail, effect-first rows, compact exact `Unlocks:` links, and quiet
   Era/Quadrant/Faction metadata. The dedicated `/tech` route remains the
-  route-owned progression explorer.
+  route-owned progression explorer. `CODEX-RICH-001` adds Tech detail-only
+  prerequisite links from the existing rich Tech store when exact public Codex
+  Tech targets resolve; archive rows and `/tech` remain unchanged.
 - Extractors are hidden support/reference targets as of commit `0ab94ec9`;
   they remain searchable, linkable, and direct-routable where exact refs exist.
 - Future full-width shallow categories must be added deliberately to the

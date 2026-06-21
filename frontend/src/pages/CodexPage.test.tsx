@@ -4,9 +4,10 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
+import { useTechStore } from "@/stores/techStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, Tech } from "@/types/dataTypes";
 
 function seedCodexEntries(entries: CodexEntry[]) {
     useCodexStore.setState({
@@ -30,6 +31,20 @@ function getSummaryRowForButton(button: HTMLElement): HTMLElement {
 
     return row;
 }
+
+const richTech = (overrides: Partial<Tech>): Tech => ({
+    techKey: "Tech_Current",
+    name: "Current Tech",
+    era: 1,
+    type: "Discovery",
+    unlocks: [],
+    descriptionLines: [],
+    prereq: null,
+    factions: [],
+    excludes: null,
+    coords: { xPct: 0, yPct: 0 },
+    ...overrides,
+});
 
 function seedShallowReferenceLayoutEntries() {
     seedCodexEntries([
@@ -247,12 +262,14 @@ function seedActionArchiveEntries() {
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
+        useTechStore.getState().reset();
         seedDefaultCodexStore();
     });
 
     afterEach(() => {
         cleanup();
         useCodexStore.getState().reset();
+        useTechStore.getState().reset();
     });
 
     function getCategoryToolbar() {
@@ -5212,6 +5229,150 @@ describe("CodexPage", () => {
         await user.click(unlockSummary);
         expect(await screen.findByRole("heading", { name: "Ascetic Existence" })).toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Aspect_DistrictImprovement_01");
+    });
+
+    it("enriches Tech details with exact rich prerequisite links without changing archive rows", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Current",
+                displayName: "Current Tech",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Era", value: "3" },
+                    { label: "Quadrant", value: "Discovery" },
+                ],
+                sections: [{ title: "Effects", lines: ["+20 [ScienceColored] Science"] }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Prereq",
+                displayName: "Prerequisite Tech",
+                descriptionLines: ["Required foundation."],
+                referenceKeys: [],
+                facts: [{ label: "Era", value: "2" }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Exclusive",
+                displayName: "Exclusive Tech",
+                descriptionLines: ["An alternate path."],
+                referenceKeys: [],
+                facts: [{ label: "Era", value: "2" }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        useTechStore.getState().replaceTechs([
+            richTech({
+                techKey: "Tech_Current",
+                prereq: "Tech_Prereq",
+                excludes: "Tech_Exclusive",
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech&entry=Tech_Current"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Tech" })).toBeInTheDocument();
+
+        const prerequisiteSection = screen.getByRole("region", { name: "Prerequisites" });
+        expect(within(prerequisiteSection).getByText("Requires")).toBeInTheDocument();
+        expect(within(prerequisiteSection).getByText("Exclusive with")).toBeInTheDocument();
+
+        const prerequisiteLink = within(prerequisiteSection).getByRole("button", {
+            name: "Open Prerequisite Tech in Codex",
+        });
+        expect(prerequisiteLink).toHaveTextContent("Prerequisite Tech");
+        expect(within(prerequisiteSection).getByRole("button", {
+            name: "Open Exclusive Tech in Codex",
+        })).toHaveTextContent("Exclusive Tech");
+
+        prerequisiteLink.focus();
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Prerequisite Tech");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Required foundation.");
+        prerequisiteLink.blur();
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        await user.click(prerequisiteLink);
+        expect(await screen.findByRole("heading", { name: "Prerequisite Tech" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=tech&entry=Tech_Prereq");
+
+        await user.click(screen.getByRole("button", { name: /tech/i }));
+        const techOverview = await screen.findByLabelText("Tech overview");
+        expect(techOverview).toHaveTextContent("Current Tech");
+        expect(within(techOverview).queryByText("Requires")).not.toBeInTheDocument();
+        expect(within(techOverview).queryByText("Exclusive with")).not.toBeInTheDocument();
+    });
+
+    it("hides Tech prerequisite enrichment when rich data or exact target entries are unavailable", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Current",
+                displayName: "Current Tech",
+                descriptionLines: ["A public technology."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "Tech_Missing",
+                displayName: "Wrong Kind",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        useTechStore.getState().replaceTechs([
+            richTech({
+                techKey: "Tech_Current",
+                prereq: "Tech_Missing",
+                excludes: "Tech_Exclusive_Missing",
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech&entry=Tech_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Tech" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Prerequisites" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /wrong kind/i })).not.toBeInTheDocument();
+
+        useTechStore.getState().reset();
+        cleanup();
+
+        seedCodexEntries(entries);
+        render(
+            <MemoryRouter initialEntries={["/codex?category=tech&entry=Tech_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Tech" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Prerequisites" })).not.toBeInTheDocument();
     });
 
     it("renders the all-factions summary icon as a monochrome category icon", async () => {

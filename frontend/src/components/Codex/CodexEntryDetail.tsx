@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useMemo, type RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
@@ -8,9 +8,15 @@ import {
 import { getDisplayedGrantedAbilityKeys } from "@/lib/codex/codexGrantedAbilityPreviews";
 import { getDisplayedPopulationThresholdTargetKeys } from "@/lib/codex/codexPopulationThresholdTargets";
 import { buildStatusRelationshipSourceEntries } from "@/lib/codex/codexStatusRelationships";
+import {
+    buildCodexTechRichEnrichment,
+    hasCodexTechRichEnrichment,
+} from "@/lib/codex/codexTechRichEnrichment";
+import { useTechStore } from "@/stores/techStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexStructuredDetail from "./CodexStructuredDetail";
+import CodexTechPrerequisiteSection from "./CodexTechPrerequisiteSection";
 import RelatedEntries from "./RelatedEntries";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 
@@ -29,6 +35,14 @@ export default function CodexEntryDetail({
     titleRef,
     onSelectRelated,
 }: Props) {
+    const richTechByKey = useTechStore((state) => state.techsByKey);
+    const techRichEnrichment = useMemo(
+        () => entry
+            ? buildCodexTechRichEnrichment(entry, richTechByKey, allEntries)
+            : { prerequisites: [], exclusivePrerequisites: [] },
+        [entry, richTechByKey, allEntries]
+    );
+
     if (!entry) {
         return (
             <section className="codex-detail codex-detail--empty" aria-live="polite">
@@ -43,6 +57,7 @@ export default function CodexEntryDetail({
 
     const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
     const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
+    const isTechEntry = entry.exportKind.trim().toLowerCase() === "tech";
     const detailContextLines = isAbilityEntry ? [] : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
     const kindLabel = formatCodexKindLabel(entry.exportKind);
@@ -61,6 +76,7 @@ export default function CodexEntryDetail({
     const statusRelationshipSourceEntries = isStatusEntry
         ? buildStatusRelationshipSourceEntries(entry, allEntries)
         : [];
+    const showTechRichEnrichment = isTechEntry && hasCodexTechRichEnrichment(techRichEnrichment);
 
     return (
         <article className="codex-detail">
@@ -94,6 +110,13 @@ export default function CodexEntryDetail({
                     onSelectInlineEntry={onSelectRelated}
                 />
             )}
+
+            {showTechRichEnrichment ? (
+                <CodexTechPrerequisiteSection
+                    enrichment={techRichEnrichment}
+                    onSelect={onSelectRelated}
+                />
+            ) : null}
 
             {isStatusEntry ? (
                 <RelatedEntries

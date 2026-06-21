@@ -6,7 +6,7 @@ Technologies
 
 ## Current Phase
 
-PHASE 6 — Closeout complete
+CODEX-RICH-001 — Detail enrichment validated
 
 ## Completed
 
@@ -26,6 +26,10 @@ PHASE 6 — Closeout complete
 
 - No blockers.
 - Browser smoke was attempted but not completed because the in-app browser connector failed during setup and the local `127.0.0.1:5173` app refused connection during headless Chrome fallback.
+- Current Tech API/store data exposes one `prereq` and one `excludes` field;
+  full prerequisite arrays remain a future API/store boundary question.
+- Browser smoke for Codex Tech detail passed through headless DOM review.
+  `/tech` route smoke timed out before producing a useful signal.
 
 ## Planned Sequence
 
@@ -113,6 +117,9 @@ Players want to answer: what era is this, what branch/quadrant is it in, what do
 - Do not expose prerequisites in Codex archive rows unless exporter later provides explicit Codex facts.
 - TECHNOLOGIES-UI-001 added Tech Archive mode, Era/Quadrant/Faction rail filters, effect-first rows, and compact exact `Unlocks:` links.
 - Completion decision: complete with follow-up recommended.
+- CODEX-RICH-001 added detail-only prerequisite enrichment from existing
+  `useTechStore` data. It uses exact Codex Tech `entryKey` resolution, fails
+  closed, and leaves archive rows plus `/tech` unchanged.
 
 ## Validation Result
 
@@ -120,6 +127,14 @@ Players want to answer: what era is this, what branch/quadrant is it in, what do
 - `npx tsc --noEmit --project tsconfig.json`: passed.
 - `npm run build`: passed.
 - `git diff --check`: pending final run.
+
+CODEX-RICH-001 validation result:
+
+- `npm test -- --run src/lib/codex/codexTechRichEnrichment.test.ts src/pages/CodexPage.test.tsx`: passed.
+- `npm test -- --run src/pages/CodexPage.test.tsx src/lib/codex/codexCategoryConfig.test.ts src/lib/codex/codexPresentation.test.ts src/lib/codex/codexTechRichEnrichment.test.ts`: passed.
+- `npx tsc --noEmit --project tsconfig.json`: passed.
+- `npm run build`: passed.
+- `git diff --check`: passed.
 
 ## Refactor Review
 

@@ -196,6 +196,11 @@ During category audits, acknowledge and record exporter/data-quality issues.
 
 Do not switch into DB Exporter implementation work during frontend category evolution unless the issue is a hard blocker.
 
+Before adding exporter requests for fields that might already exist in rich or
+domain exports, check `docs/active/codex-export-vs-rich-export-boundary.md`.
+Use that boundary to decide whether the finding belongs to Codex export, rich
+export, frontend enrichment resolver work, or the DB exporter backlog.
+
 If the issue does not block current frontend progress, append it to the active exporter backlog:
 
 `docs/active/db-exporter-ability-metadata-handoff.md`

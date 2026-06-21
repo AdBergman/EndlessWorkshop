@@ -3,6 +3,9 @@
 Status: active exporter follow-up
 Created: 2026-06-20
 Owner: DB Exporter team primarily; EWShop frontend as metadata consumer
+Boundary reference: `docs/active/codex-export-vs-rich-export-boundary.md`
+Architecture decision:
+`docs/active/codex-rich-vs-codex-import-architecture-decision.md`
 
 ## Purpose
 
@@ -255,6 +258,14 @@ faction icons by parsing keys or display text.
 - No request to make every ability faction-owned.
 - No request to invent ownership where source data is ambiguous.
 
+Boundary note:
+
+- Rich Ability exports may later enrich Ability detail pages with exact
+  tactical/profile inspection, but they do not replace exporter-owned
+  `Combat role` cleanup or explicit ability ownership metadata.
+- Role labels and ownership are canonical public Codex facts, not resolver-only
+  UI details.
+
 ## Equipment Metadata Backlog Additions
 
 Discovered during Equipment category evolution on 2026-06-20.
@@ -490,6 +501,12 @@ Request:
 - do not require EWShop to infer progression from keys, names, tech unlocks, or
   prose.
 
+Boundary note:
+
+- Exact rich Improvement records may support future EWShop-only detail/profile
+  enrichment, but public planning metadata still belongs here if it should be
+  canonical Codex/API data.
+
 ### Thin Improvement Entries
 
 Local 0.82 data includes 23 Improvement entries with no public `Effects` lines
@@ -522,6 +539,12 @@ Request:
   normal Codex facts using the existing exporter style;
 - do not require EWShop to infer Category or Tier from keys, display names,
   prose, or SVG filenames.
+
+Boundary note:
+
+- Exact rich District records may support future EWShop-only detail/profile
+  enrichment, but public Category/Tier/progression facts remain exporter-owned
+  when they are intended as canonical Codex/API metadata.
 
 ### Thin District Entries And Upgrade Chains
 
@@ -557,6 +580,13 @@ Request:
 - keep unresolved/internal ability references absent from public Hero rows;
 - do not require EWShop to infer ability links from Hero names, keys, prose, or
   SVG filenames.
+
+Boundary note:
+
+- Exact rich Hero and Skills exports may enrich EWShop Hero detail/profile
+  pages, but public granted ability coverage and stable presentation metadata
+  remain exporter-owned when they should appear in Codex exports or backend API
+  consumers.
 
 ### Hero Presentation Metadata
 
@@ -609,6 +639,12 @@ Request:
 - do not require EWShop to infer evolution chains from unit reference lists,
   keys, names, prose, or tier numbers.
 
+Boundary note:
+
+- A frontend rich-import resolver may use exact raw Unit export records for
+  EWShop-only detail enrichment. This backlog item remains exporter-owned for
+  canonical public Codex/API evolution metadata.
+
 ## Technologies Metadata Backlog
 
 These are non-blocking frontend findings discovered during the Technologies
@@ -631,6 +667,12 @@ Request:
   exclusive prerequisite, or unlock progression;
 - do not require EWShop to infer technology progression from raw tech route
   data, keys, names, prose, or tier numbers.
+
+Boundary note:
+
+- `CODEX-RICH-001` may use exact rich Tech export records to enrich EWShop Tech
+  detail pages without exporter changes. This backlog item remains valid if
+  prerequisite/progression metadata should be canonical public Codex/API data.
 
 ## Quests Metadata Backlog
 

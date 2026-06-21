@@ -48,6 +48,11 @@ The dedicated `/tech` route remains the proper Explorer for progression. Codex s
 - Faction is optional and must remain based on the exported `Faction` fact only.
 - Do not infer prerequisites, progression, faction ownership, or icons from names, keys, prose, or SVG filenames.
 - Detail pages keep the existing structured unlock summaries.
+- Tech detail pages may show prerequisite links from the existing rich Tech
+  store when the selected Codex Tech entry exactly matches a rich Tech record and
+  target prerequisite keys resolve to public Codex Tech entries.
+- This detail enrichment is EWShop resolver-owned; archive rows still do not
+  show prerequisite/progression hints.
 
 ## Proposed UI Model
 
@@ -81,6 +86,8 @@ Technology detail pages should continue to provide:
 
 - Complete exported facts/sections.
 - Existing exact unlock summary cards.
+- Compact exact prerequisite links when available from the imported rich Tech
+  store.
 - Related entries.
 - Shareable URL/permalink inspection value.
 
@@ -113,7 +120,8 @@ Recorded in the active exporter backlog:
 
 ### Future Follow-Ups
 
-- Consider prerequisite/progression hints only if exported as public Codex facts.
+- Consider prerequisite/progression hints in archive rows only if exported as
+  public Codex facts.
 - Consider improved faction identity only with explicit references/icons.
 
 ## Closeout Notes
@@ -144,3 +152,33 @@ Completion decision:
 
 - Complete with follow-up recommended.
 - Follow-up only if exporter later provides explicit public prerequisite/progression metadata or if product review wants stronger faction identity.
+
+## CODEX-RICH-001 — Tech Detail Prerequisite Enrichment
+
+Implemented after the rich-import boundary decision.
+
+- Added a Tech-specific Codex enrichment helper that reads the existing rich
+  Tech store data from `/api/techs`.
+- Exact-match rule: selected Codex Tech `entryKey` must match rich Tech
+  `techKey`.
+- Exact-link rule: prerequisite targets render only when the target key resolves
+  to a public Codex Tech entry.
+- Added a compact Tech detail `Prerequisites` section using existing Codex
+  inline link and tooltip behavior.
+- The resolver fails closed when rich Tech data is missing or target keys are
+  unresolved.
+- Codex Tech archive rows and the dedicated `/tech` route remain unchanged.
+- No local JSON import, backend contract change, exporter change, or generic
+  resolver framework was added.
+
+Current limitation:
+
+- The current `/api/techs` DTO exposes one `prereq` and one `excludes` field.
+  The frontend resolver also accepts future prerequisite array fields if the
+  existing API/store boundary is expanded.
+
+Lesson:
+
+- Rich-import enrichment works best as small detail-only slices that improve
+  trust and permalink inspection while leaving route-owned explorers in charge
+  of deep graph UI.
