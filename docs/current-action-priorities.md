@@ -119,10 +119,12 @@ Current rules:
   (`All`, City, Food, Industry, Dust, Science, Influence, Approval, Military,
   Resource, Bridge, Population, Trade) plus content-first rows from exported
   Effect lines.
-- Quests are hidden from top-level Codex browsing for now because repeated
-  titles need exporter-provided canonical grouping metadata. Quest Codex
+- Quests are hidden from top-level Codex browsing because repeated titles are
+  not safe identity and Codex should not recreate Quest Explorer. Quest Codex
   records remain searchable/direct-linkable, and `/codex?category=quests` still
-  works intentionally. The dedicated `/quests` route remains the route-owned
+  works intentionally. If Quests return to top-level Codex, the current
+  direction is encyclopedia-style Questline entries backed by exporter-provided
+  source-truth metadata. The dedicated `/quests` route remains the route-owned
   Quest Explorer.
 - Units use compact Unit Archive mode: Class/Faction/Tier rail plus stat-grid
   comparison rows, Faction/Class/Tier metadata, and compact exact granted

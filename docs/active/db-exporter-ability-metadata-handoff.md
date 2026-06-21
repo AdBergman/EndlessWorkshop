@@ -685,10 +685,12 @@ Boundary note:
 ## Quests Metadata Backlog
 
 These are non-blocking frontend findings discovered during the Codex Quests
-category evolution pass. Current EWShop behavior remains correct, but the
-archive remains visually noisy when many exported records share a display title.
+category evolution pass. Current EWShop behavior remains correct: the dedicated
+`/quests` route is the authoritative quest experience, and Quest Codex records
+remain hidden from top-level Codex browsing while staying searchable and
+direct-linkable.
 
-### Canonical Archive Grouping Metadata
+### Questline Encyclopedia Metadata
 
 Quest Codex export contains many records sharing the same display title.
 
@@ -706,34 +708,61 @@ These records are not duplicates. They differ in:
 
 Frontend cannot safely determine:
 
-- canonical quest identity;
+- canonical questline identity;
 - variant identity;
-- archive grouping;
+- public questline grouping;
 - chapter ownership;
 - record role;
 
 without using title heuristics or key parsing. Both are rejected in EWShop's
 Codex category evolution workflow.
 
-Requested exporter metadata, using the existing Codex fact/reference style where
-possible:
+Product boundary:
 
-- `archiveGroupKey`;
-- `archiveGroupTitle`;
+- Quest Explorer owns progression, chapter navigation, branching, choices,
+  strategy view, lore view, chronology, and graph/tree exploration.
+- Codex should not reproduce Quest Explorer or become a second quest browser.
+- If Quests return to top-level Codex, they should appear as encyclopedia-style
+  Questline entries, not individual quest-step records.
+
+Exporter-owned source-truth metadata, using the existing Codex fact/reference
+style where possible:
+
 - `questlineKey`;
-- `chapterKey`;
-- `variantKey`;
-- `recordRole`;
+- `questlineTitle`;
 - `factionKey`;
-- a stable archive grouping identifier.
+- public/non-public visibility;
+- prototype/debug/internal content flag;
+- chapter count;
+- quest/record count;
+- high-level public questline summary or description;
+- stable Quest Explorer route/link target;
+- optional chapter identifiers only when they are canonical public metadata,
+  not branch/path reconstruction data.
+
+EWShop-owned projection concerns:
+
+- deciding whether to show Questline entries in top-level Codex;
+- rendering summary rows/details from exported questline facts;
+- linking from a Codex Questline entry to Quest Explorer;
+- keeping individual Quest Codex records searchable/direct-linkable if useful.
+
+Removed/downgraded from exporter ask:
+
+- Codex archive grouping of individual quest-step records;
+- branch, path, progression, chronology, strategy, or lore-view reconstruction
+  for Codex;
+- frontend grouping by title, title + chapter, or parsed keys.
 
 Goal:
 
-- allow Codex archive grouping without key parsing or title-based heuristics.
+- allow future Codex Questline encyclopedia entries without key parsing,
+  title-based grouping, or Quest Explorer duplication.
 
 Priority:
 
-- non-blocking. Current frontend behavior remains correct but visually noisy.
+- non-blocking. Current frontend behavior remains correct: `/quests` owns quest
+  browsing, and Codex Quests remain hidden from top-level navigation.
 
 ## Rich Export Source-Truth Gap Review
 
@@ -779,21 +808,27 @@ Request:
 - keep `Combat role` cleanup as a Codex projection/public metadata task, not a
   frontend interpretation of low-level rich effect categories.
 
-### Quest Canonical Archive Grouping
+### Questline Encyclopedia Metadata
 
-Classification: Codex projection gap backed by exporter source truth.
+Classification: split: exporter-owned source-truth metadata plus EWShop-owned
+Codex projection if Questline encyclopedia entries are approved.
 
-Quest Explorer rich export owns route navigation/branching, but it is not a safe
-1:1 grouping source for Codex Quest records. The Quest archive still needs
-exporter-provided canonical grouping metadata before EWShop can safely group
-duplicate titles.
+Quest Explorer rich export owns route navigation, branching, choices, strategy,
+lore, chronology, and graph/tree exploration. Codex should not rebuild those
+surfaces. If Quests return to top-level Codex, they should be high-level
+Questline encyclopedia entries backed by source-truth metadata.
 
 Request:
 
 - keep `/quests` route semantics in Quest Explorer rich export;
-- emit canonical Codex archive grouping identifiers in the Codex projection if
-  Quest archive grouping is revived;
-- do not rely on title grouping, title+chapter grouping, or key parsing.
+- emit stable questline identity, public visibility, faction, chapter/quest
+  counts, public summary, and Quest Explorer link targets if Codex Questline
+  entries are approved;
+- keep prototype/debug/internal quest visibility explicit;
+- do not ask EWShop to rely on title grouping, title+chapter grouping, or key
+  parsing;
+- do not export branch/path/progression reconstruction metadata solely for
+  Codex. Quest Explorer remains the owner of those systems.
 
 ### Art/Icon/Portrait Contracts
 

@@ -79,7 +79,7 @@ titles, or old footer/context strings.
 | Improvements | Split/defer. Rich export can help future detail/profile faction or constructible metadata. Exporter remains owner of missing public planning facts and thin public effect coverage. |
 | Districts | Split/defer. Rich export can help future detail/profile faction/progression inspection. Exporter remains owner of public Category/Tier coverage and any canonical upgrade-chain metadata. |
 | Populations | Rich resolver candidate. Exact rich population data can power future row/detail enrichment. No new exporter backlog is needed unless canonical public metadata is missing after category evolution. |
-| Quests | Exporter-owned for Codex grouping. Quest Explorer export is route-owned and not 1:1 with Codex Quest records. Do not use it to group Codex rows. |
+| Quests | Split/defer. Quest Explorer export is route-owned; exporter owns source-truth Questline Encyclopedia metadata only if Quests return to top-level Codex. Do not group Codex rows from titles, keys, or Quest Explorer route data. |
 | Equipment | Exporter-owned. No rich sibling exists; reference coverage and icon metadata stay in backlog. |
 | Traits | Exporter-owned. No rich sibling exists; ownership, category semantics, reference coverage, and icon metadata stay in backlog. |
 | Actions | Exporter-owned. No rich sibling exists; ownership, reference coverage, and browse metadata stay in backlog. |
@@ -96,7 +96,8 @@ titles, or old footer/context strings.
 - Trait ownership/category semantics/reference coverage/icon metadata.
 - Action ownership/reference/browse metadata.
 - Diplomacy runtime values, relationship direction, and treaty icon metadata.
-- Quest canonical archive grouping metadata.
+- Questline encyclopedia source-truth metadata if Quests ever return to
+  top-level Codex.
 
 These require canonical public metadata or have no rich sibling source.
 

@@ -19,12 +19,13 @@ Open Issues:
   affected.
 - `QUESTS-UI-001` was good but incomplete; `QUESTS-UI-002` finished the safe
   archive browse/row polish pass.
-- Quest archive grouping remains deferred pending exporter metadata. Duplicate
-  display titles are not safe identity; do not group by title, title plus
-  chapter, or restored key-derived progression logic.
-- Quests are hidden from top-level Codex navigation until canonical archive
-  grouping metadata exists, but Quest records remain searchable and
-  direct-routeable.
+- Quest-step archive grouping remains rejected. Duplicate display titles are not
+  safe identity; do not group by title, title plus chapter, or restored
+  key-derived progression logic.
+- Quests are hidden from top-level Codex navigation because `/quests` owns rich
+  quest browsing. If Quests return to top-level Codex, use encyclopedia-style
+  Questline entries backed by exporter source-truth metadata. Quest records
+  remain searchable and direct-routeable.
 
 ## Planned Sequence
 
@@ -178,8 +179,8 @@ this frontend category pass.
 - 2026-06-20: Closeout decision is complete with follow-up recommended.
 - 2026-06-20: Quest archive grouping investigation confirmed repeated display
   titles are not true duplicates. Frontend grouping would require title
-  heuristics or key parsing, so grouping is deferred pending exporter-provided
-  canonical archive identifiers.
+  heuristics or key parsing, so grouping is rejected. Later follow-up should be
+  Questline encyclopedia metadata, not Codex reconstruction of quest steps.
 - 2026-06-20: Implemented `QUESTS-UI-003`: hide Quests from top-level Codex
   navigation while preserving global search, direct `/codex?category=quests`
   routes, selected Quest detail routes, and exact Quest links.

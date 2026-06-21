@@ -61,8 +61,8 @@ explicitly added.
 - it does not require importing a full domain graph.
 
 Examples: ownership facts, category/type/filter facts, row-ready public effects,
-exact public links, stable Codex icon references, and canonical archive grouping
-metadata such as Quest grouping identifiers.
+exact public links, stable Codex icon references, and canonical public identity
+metadata such as future Questline encyclopedia identifiers.
 
 ### Put Data In Rich/Domain Export When
 
@@ -103,10 +103,10 @@ Hero/Skill import exists.
 - rich import cannot safely solve it;
 - the alternative would be frontend key/prose/title/SVG inference.
 
-Examples: Ability ownership, Quest canonical archive grouping, Equipment icon
-and reference coverage, Trait ownership/category semantics, Action ownership and
-reference metadata, and Diplomacy relationship direction/runtime/static
-metadata.
+Examples: Ability ownership, future Questline encyclopedia identity/visibility
+metadata, Equipment icon and reference coverage, Trait ownership/category
+semantics, Action ownership and reference metadata, and Diplomacy relationship
+direction/runtime/static metadata.
 
 ## Category Decision Matrix
 
@@ -123,7 +123,7 @@ metadata.
 | Heroes | Mature archive; no rich import | Hero + Skills rich exports exist | No | Skill/default skill detail, maybe profile data | Add rich importer/store before resolver; exporter for public refs/icons | Importer scope larger than UI polish | Defer until Hero detail value justifies importer. |
 | Units | Mature archive; route-owned Units page exists | Rich Unit export exists and is imported | Yes | Detail evolution/profile/grouped abilities | Resolver for UI-only detail; exporter for canonical public evolution if needed | Recreating Unit Explorer inside Codex | Candidate after Tech if detail need is high. |
 | Tech | Mature archive; route-owned Tech page exists | Rich Tech export exists and is imported | Yes | Detail prerequisites/exclusive prerequisites | Resolver first; exporter only if canonical API metadata is needed | Duplicating `/tech` tree UI | `CODEX-RICH-001`: Tech detail prerequisite enrichment. |
-| Quests | Hidden from top-level Codex; direct/search works | Quest Explorer rich export imported | Yes, but route-owned | Canonical archive grouping | Exporter backlog | Title/key heuristics would reintroduce Quest Explorer logic | Do not use rich Quest export for Codex grouping. |
+| Quests | Hidden from top-level Codex; direct/search works | Quest Explorer rich export imported | Yes, but route-owned | Future Questline Encyclopedia metadata only if Quests return to top-level Codex | Exporter backlog for source-truth questline facts; EWShop owns projection | Title/key heuristics would reintroduce Quest Explorer logic | Do not use rich Quest export for Codex grouping. |
 | Populations | Codex category/reference data | Rich export exists | No | Threshold/worker profile if category evolves | Rich importer + resolver if future UI asks for it | Importer work for small category | Defer. |
 | Resources | Shallow reference sheet | None | No | Current data sufficient | Codex export | Low | No action. |
 | Factions | Codex entries | None | No | Current data/icon refs mostly sufficient | Codex export/icon manifest | Ownership facts may be missing in other categories | No action. |
@@ -170,14 +170,19 @@ add bounded Hero/Skills rich import only when a Hero detail/profile slice needs
 it, then build a resolver over the normalized store. Do not copy skill trees into
 Codex export unless they become shallow public Codex facts.
 
-### Quest Grouping
+### Questline Encyclopedia Metadata
 
-Decision: exporter-owned; do not use Quest Explorer rich export.
+Decision: exporter-owned for source-truth questline identity/visibility; EWShop
+owns any future Codex projection. Do not use Quest Explorer rich export to make
+Codex a second quest browser.
 
 Quest Explorer data is imported but route-owned and not 1:1 with Codex Quest
-records. Codex duplicate-title grouping needs canonical archive grouping
-metadata from the exporter. Title grouping, title+chapter grouping, key parsing,
-or Quest Explorer branch/path reconstruction are rejected.
+records. Codex duplicate-title grouping remains rejected. If Quests return to
+top-level Codex, they should become high-level Questline encyclopedia entries
+backed by exporter source truth: questline identity, public visibility, faction,
+chapter/quest counts, summary, and a stable Quest Explorer link. Title grouping,
+title+chapter grouping, key parsing, or Quest Explorer branch/path reconstruction
+are rejected.
 
 ### Ability Ownership And Role Cleanup
 
@@ -327,7 +332,7 @@ heavy cards or route-specific widgets into archive rows.
 | 4 | Hero/Skills rich import spike | EWShop fullstack/frontend | `heroes_export`, `skills_export` | Import/API/store design only | Medium/high: Hero detail skill trust | Higher: new import path | No for spike | Yes | No | Backend import tests + store tests. |
 | 5 | Population rich import/resolver | EWShop fullstack/frontend | `populations_export` | Import/API/store + detail resolver | Medium: small category enrichment | Medium: new import for small scope | Maybe later | Yes | No | Import/store/detail tests. |
 | 6 | Ability rich import/resolver investigation | EWShop frontend/fullstack | `abilities_export` | Investigation first | Medium: detail tactical trust | High: internal data leakage | Role/ownership remains exporter-owned | Likely yes | No | Audit before code. |
-| 7 | Quest canonical archive grouping | DB Exporter | Codex Quest export | Exporter metadata | High visual cleanup | Requires source authority | Yes | Maybe Codex import only | No | Import + Codex route tests. |
+| 7 | Questline encyclopedia metadata | DB Exporter for source truth; EWShop for projection | Codex Quest/Questline projection | Exporter metadata + optional Codex projection | Medium: future clean Questline entries | Must not recreate Quest Explorer | Yes | Maybe Codex import only | No | Import + Codex route tests if approved. |
 | 8 | Equipment/Traits/Actions/Diplomacy metadata backlog | DB Exporter | Codex exports | Exporter cleanup | Medium | Data-source dependent | Yes | Maybe Codex import only | No | Category tests after new metadata. |
 | 9 | Art asset contract cleanup | EWShop + DB Exporter | Codex facts/rich art IDs/icon manifest | Explicit semantic icon/portrait contract | Medium/long-term | Asset naming ambiguity | Split | Maybe | No | Icon resolver tests. |
 

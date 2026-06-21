@@ -210,7 +210,7 @@ Ability ownership/role cleanup, Unit evolution metadata, Tech prerequisite
 metadata, Hero references/presentation metadata, District/Improvement planning
 metadata, Equipment icons/reference coverage, Trait ownership/category semantics,
 Action ownership/reference/browse metadata, Diplomacy relationship/icon metadata,
-and Quest canonical archive grouping.
+and future Questline encyclopedia source-truth metadata.
 
 Post-pilot update:
 
@@ -706,8 +706,10 @@ Unsafe/risky candidates:
 
 Row opportunities:
 
-- Low until exporter provides canonical archive grouping metadata. Quests are
-  intentionally hidden from top-level Codex browsing for now.
+- Low for individual quest records. Quests are intentionally hidden from
+  top-level Codex browsing for now. If they return, the safer shape is
+  high-level Questline encyclopedia entries backed by exporter source-truth
+  metadata, not grouped quest-step rows.
 
 Detail opportunities:
 
@@ -721,8 +723,8 @@ Rich route boundary:
 
 Exporter backlog findings:
 
-- Existing Quest backlog already covers canonical archive grouping metadata. No
-  new item added.
+- Existing Quest backlog now covers narrower Questline encyclopedia metadata.
+  No new item added.
 
 Recommendation:
 
@@ -961,8 +963,8 @@ Resolver rules:
 
 6. Defer Quests rich enrichment.
    - Keep `/quests` route-owned.
-   - Wait for exporter canonical archive grouping metadata before revisiting
-     top-level Quest archive behavior.
+   - Wait for exporter Questline encyclopedia metadata before revisiting
+     top-level Quest Codex behavior.
 
 ## Exporter Backlog Additions
 
@@ -981,7 +983,7 @@ here:
 - Hero reference/granted ability coverage and presentation metadata.
 - Unit reference/roster coverage and evolution relationship metadata.
 - Technology prerequisite/progression metadata.
-- Quest canonical archive grouping metadata.
+- Questline encyclopedia source-truth metadata.
 
 See `docs/active/codex-export-vs-rich-export-boundary.md` for the overlap
 decision. Several items are split ownership: a rich resolver can solve EWShop

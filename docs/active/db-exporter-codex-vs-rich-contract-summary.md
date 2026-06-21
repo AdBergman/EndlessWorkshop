@@ -94,7 +94,7 @@ debug views into Codex.
 | Abilities | Rich file exists but is not imported; tactical profiles and battle summaries are mixed with internal diagnostics. | Mature public archive; role/ownership gaps remain. | Split. Rich should own tactical source truth; Codex/exporter owns public roles, ownership, references. |
 | Districts | Imported rich file with category/tier/faction flags, diagnostics, descriptors. | Good archive rows from Effects and Extracted resource. | Split. Rich owns source truth and diagnostics; exporter owns public planning facts/progression if they become canonical. |
 | Improvements | Imported rich file with constructible/faction/category/effects. | Good archive rows from Effects. | Split. Rich owns constructible source truth; exporter owns public planning facts if source-proven. |
-| Quests | Quest Explorer rich route export exists and is imported, but it is not 1:1 with Codex records. | Codex Quest records are direct/search only; duplicate titles remain. | Route export owns `/quests`; Codex grouping needs exporter-provided canonical archive grouping metadata. |
+| Quests | Quest Explorer rich route export exists and is imported, but it is route-owned rather than Codex-owned. | Codex Quest records are hidden from top-level browsing and remain direct/search only. | Route export owns `/quests`; exporter should only provide source-truth questline/visibility metadata if Codex later adds encyclopedia-style Questline entries. |
 | Equipment | No rich export. | Codex-only archive. | Exporter backlog owns public item icons and unresolved granted ability reference coverage. |
 | Traits | No rich export. | Codex-only archive. | Exporter backlog owns public ownership/type/category semantics and reference coverage. |
 | Actions | No rich export. | Codex-only archive. | Exporter backlog owns sparse public browse/ownership/reference metadata if source-proven. |
@@ -229,9 +229,14 @@ and choices.
 Gaps/weaknesses:
 
 - It is not a 1:1 sibling of Codex Quest records.
-- It does not safely solve Codex Quest duplicate-title grouping by itself.
-- Codex needs canonical archive grouping metadata from exporter source truth if
-  Quest archive grouping is revived.
+- It should not be used to solve Codex duplicate-title grouping by itself.
+- Codex should not recreate Quest Explorer. If Quests return to top-level
+  Codex, they should be encyclopedia-style Questline entries backed by
+  exporter source truth, not grouped quest-step records.
+- EWShop owns any future projection from exported questline metadata into
+  Codex rows/detail links. Exporter-owned fields should stay limited to
+  canonical questline identity, public visibility, faction/chapter/count
+  summaries, and stable links into Quest Explorer.
 
 ### Missing Rich Exports
 
@@ -252,7 +257,7 @@ rich route/profile need justifies source-truth exports.
 | Populations | Labels/lore/icon coverage weak. | Current Codex projection is already useful. | Yes before richer Population UI. | Minor. | Small dataset; defer unless category evolves. |
 | Districts | Missing adjacency/placement/upgrade-chain/art if future planner needs it. | Category/tier/effect projection is mostly useful. | Yes for future planner. | Maybe for public progression facts. | Current archive good enough. |
 | Improvements | Missing build cost/unlock timing/placement/art. | Current Effect projection good; thin rows remain. | Yes for future planning UI. | Maybe for public planning facts. | Current archive good enough. |
-| Quests | Route export rich but not Codex sibling. | Canonical archive grouping missing. | Split: source grouping in exporter. | Yes, if Quest archive returns. | Do not use title/key grouping. |
+| Quests | Route export rich but not Codex sibling. | Future Questline encyclopedia metadata missing. | No; `/quests` already owns rich browsing. | Yes, only for source-truth public questline metadata. | Do not use title/key grouping or rebuild Quest Explorer in Codex. |
 
 ## Priority Requests For DB Exporter
 
@@ -266,9 +271,10 @@ rich route/profile need justifies source-truth exports.
    source truth, but add explicit ability ownership/origin metadata where
    source-proven and keep internal/helper rows clearly separated from public
    ability records.
-3. Quest canonical archive grouping: export source-truth grouping identifiers
-   for Codex Quest archive use; do not expect EWShop to group by title or parse
-   keys.
+3. Questline encyclopedia metadata: if Quests return to top-level Codex, export
+   source-truth public questline identity, visibility, faction, chapter/count
+   summaries, and Quest Explorer link targets. Do not expect EWShop to group by
+   title, parse keys, or recreate Quest Explorer behavior in Codex.
 
 ### P1 - Codex Projection Gaps
 
@@ -311,8 +317,9 @@ rich route/profile need justifies source-truth exports.
 2. Keep Ability role/ownership cleanup as an exporter-owned Codex projection
    request, but clarify that rich Ability tactical data is a separate
    source-truth concern.
-3. Keep Quest canonical archive grouping in exporter backlog; do not implement
-   frontend grouping without exported identifiers.
+3. Replace Quest archive-grouping asks with a narrower Questline encyclopedia
+   metadata request; do not implement frontend grouping without exported
+   questline identifiers, and do not recreate Quest Explorer in Codex.
 4. Pause additional EWShop rich resolver work unless the decision template
    scores player value at least 6/10.
 5. Keep Equipment, Traits, Actions, Diplomacy, Resources, and Statuses

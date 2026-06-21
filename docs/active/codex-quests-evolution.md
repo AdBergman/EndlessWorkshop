@@ -596,9 +596,10 @@ Summary:
 - These rows are not true duplicates. They differ in objectives, requirements,
   rewards, references, and choice content.
 - Display name is not a canonical grouping key.
-- The current Codex Quest export does not provide canonical archive grouping
-  metadata such as stable questline, chapter, variant, record-role, or archive
-  group identifiers.
+- The current Codex Quest export does not provide source-truth metadata for
+  high-level Questline encyclopedia entries, such as stable questline identity,
+  public visibility, faction, chapter/quest counts, summary, or Quest Explorer
+  link targets.
 - Frontend grouping would require title heuristics, title-plus-chapter
   heuristics, or key parsing.
 - Restoring the previous grouping behavior would reintroduce key-derived
@@ -611,13 +612,13 @@ Decision:
 - Do not group by title.
 - Do not group by title plus chapter.
 - Do not restore key-derived progression logic.
-- Leave Quest archive rows as exported records.
-- Defer cleaner archive grouping until exporter metadata provides stable
-  canonical grouping identifiers.
+- Leave Quest archive rows as exported records when direct-routed.
+- Defer any top-level Codex return until exporter metadata can support
+  encyclopedia-style Questline entries, not grouped quest-step records.
 
 Exporter follow-up:
 
-- `Quests - Canonical Archive Grouping Metadata` was appended to the active DB
+- `Quests - Questline Encyclopedia Metadata` is tracked in the active DB
   Exporter metadata backlog:
   `docs/active/db-exporter-ability-metadata-handoff.md`.
 
@@ -650,4 +651,5 @@ Decision:
 - Keep Quest Codex data handling.
 - Do not delete Quest records from the store/API.
 - Do not implement title grouping, title-plus-chapter grouping, or key parsing.
-- Canonical Quest archive grouping remains exporter-backed follow-up work.
+- Future top-level Quest Codex browsing remains deferred unless exporter-backed
+  Questline encyclopedia metadata is approved.

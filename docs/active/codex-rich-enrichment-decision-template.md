@@ -202,7 +202,7 @@ Stop or defer when any apply:
 | Abilities | Exporter for ownership/roles; rich resolver only for detail tactical inspection later. | Not now. Current Ability archive already has strong effect rows. | Exporter backlog first. |
 | Districts | Split: Codex/exporter for public facts; existing rich store for optional detail profile. | Low-medium. Current archive is already useful. | Defer unless detail profile value scores high. |
 | Improvements | Split: Codex/exporter for public facts; existing rich store for optional detail profile. | Low-medium. Current archive is already useful. | Defer unless detail profile value scores high. |
-| Quests | Exporter-owned for canonical grouping. | No for Codex grouping. Quest Explorer data is route-owned and not 1:1. | Exporter backlog only. |
+| Quests | Exporter-owned for source-truth Questline Encyclopedia metadata if Quests return to top-level Codex. | No for Codex grouping. Quest Explorer data is route-owned and not 1:1. | Keep hidden from top-level Codex; exporter backlog only for public questline facts. |
 | Equipment | Codex/exporter-owned. | No rich sibling today. | Exporter backlog for icons/reference coverage. |
 | Traits | Codex/exporter-owned. | No rich sibling today. | Exporter backlog for ownership/category semantics. |
 | Actions | Codex/exporter-owned. | No rich sibling today. | Exporter backlog only if public metadata is source-proven. |
