@@ -4,6 +4,10 @@
 
 Prefer small, bounded changes that follow existing architecture. Do not perform broad refactors unless explicitly requested.
 
+For active project documentation, start with `docs/active/README.md`. Do not
+read all active docs by default; use its task-type table to select relevant
+docs.
+
 ## Backend/Frontend Contract Discipline
 
 - Frontend changes using backend DTO fields should verify frontend types/API client/store usage against backend response DTOs.

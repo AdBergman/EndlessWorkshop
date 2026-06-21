@@ -7,6 +7,8 @@ This list reflects the current product focus:
 - Do not work on unit art right now.
 - Avoid broad site-wide visual rewrites. Visual work should happen only in
   areas already being touched, and in small independently reviewable passes.
+- For the active documentation map and task-specific reading strategy, use
+  `docs/active/README.md`.
 
 ## P0 - DB Exporter Definitive Response Import And QA
 
