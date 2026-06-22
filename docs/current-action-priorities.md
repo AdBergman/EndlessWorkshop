@@ -160,8 +160,11 @@ Current rules:
   explicit frontend allow-list.
 - Final snapshot Codex compatibility follow-up is tracked in
   `docs/active/final-snapshot-codex-ticket-plan.md`; the recommended next slice
-  is Victory Conditions compact reference rows, followed by Heroes + Skills
-  rich import investigation.
+  is Victory Conditions compact reference rows, followed by Rich Factions import
+  investigation. Heroes + Skills remains very high value, but follows Factions;
+  Natural Wonders remains easy but lower strategic value. Do not mechanically
+  adopt exported fields unless they improve player planning, comparison,
+  discovery, or trust.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only

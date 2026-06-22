@@ -15,10 +15,14 @@ not a broad DTO rewrite. The highest-value public fix is Victory Conditions,
 because it directly answers a central 4X planning question: how do I win?
 
 Rich/source-truth exports are still gated by explicit importer/API/store work,
-but the final snapshot makes Heroes + Skills and Factions the most important
-near-term investigation tracks after the first public Codex compatibility slice.
-Any rich import work must go through the existing Codex rich enrichment decision
-process.
+but the accepted value review makes Factions the next investigation after the
+first public Codex compatibility slice. Heroes + Skills remains very high value,
+but follows Factions because Factions is the stronger cross-category strategy
+hub. Any rich import work must go through the existing Codex rich enrichment
+decision process.
+
+Do not mechanically adopt every exported field just because it exists. Final
+snapshot work should prioritize player planning value over exporter coverage.
 
 ## Current Accepted State
 
@@ -40,8 +44,8 @@ process.
 | Ticket ID | Title | Category | Priority | Owner Area | Scope | Acceptance Criteria | Validation | Dependencies | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | FS-CODEX-002 | Victory Conditions Compact Reference Rows | Victory Conditions | P1 | Frontend | Add compact rows using exported objective, current value, hold duration, caveat/threshold note, and source refs where exact. | Rows communicate victory objective and exported current values without derived map-size examples; detail still shows full facts/sections; no frontend threshold derivation. | Codex page tests; presentation tests if helper added; typecheck; build; browser smoke. | Public `victoryconditions-codex` imported. | Ready |
-| FS-CODEX-010 | Heroes And Skills Import Investigation | Heroes / Skills / Rich Imports | P1 | Fullstack | Investigate rich `heroes` and `skills` exports for hero detail/profile enrichment and skill relationship use. | Report identifies supported fields, dropped fields, DTO gaps, and player-value slices; public Skills Codex category remains product-decision gated. | Investigation only; if code later, backend/API/frontend tests. | Rich enrichment decision template; Heroes Archive current state. | Ready |
 | FS-CODEX-009 | Rich Factions Import Investigation | Factions / Rich Imports | P1 | Fullstack | Investigate importer/API/store needs for rich `factions` export as a future join point for faction pages and resolvers. | Report classifies backend/API/store/frontend changes; no UI implementation; no SVG/art inference; exact refs only. | Investigation only; if code later, backend and frontend contract tests. | Rich enrichment decision template. | Ready |
+| FS-CODEX-010 | Heroes And Skills Import Investigation | Heroes / Skills / Rich Imports | P1 | Fullstack | Investigate rich `heroes` and `skills` exports for hero detail/profile enrichment and skill relationship use. | Report identifies supported fields, dropped fields, DTO gaps, and player-value slices; public Skills Codex category remains product-decision gated. | Investigation only; if code later, backend/API/frontend tests. | Rich enrichment decision template; Heroes Archive current state. | Ready |
 | FS-CODEX-003 | Population Archive Foundation | Populations | P1 | Frontend/Product | Establish first Population archive row model from exported `Type`, `Worker effects`, `Threshold rewards`, base food cost, and exact refs. | Rows answer what the population does; threshold rewards remain exact; no inference from population keys/names; no faction icon/art assumptions. | Codex page tests; typecheck; build; browser smoke for major/minor/action-created populations. | Product agreement on whether a Type rail is included in this slice or deferred. | Ready |
 | FS-CODEX-001 | Natural Wonders Row Compatibility | Natural Wonders | P1 | Frontend | Add category-specific archive row preview from exported `Effects`; show quiet `Footprint` metadata; keep generic detail behavior. | `/codex?category=naturalwonders` rows show useful effect lines; footprint displays when exported; no live placement/owner/discovery data is shown; no new filters. | Codex page tests; category config tests; typecheck; build; `git diff --check`; browser smoke for Natural Wonders. | Public `naturalwonders-codex` imported. | Ready |
 | FS-CODEX-011 | Rich Constructible Planning Investigation | Districts / Improvements / Rich Imports | P1 | Fullstack | Investigate rich district/improvement fields: construction cost, unlock technologies, placement prerequisites, family/level data. | Report separates Codex row/detail opportunities from route-owned planning UI; no RPN execution or inferred unlock timing. | Investigation only; if code later, relevant backend/API/frontend tests. | Rich exports for districts/improvements. | Ready |
@@ -63,7 +67,11 @@ exported-game value, hold duration, scaling inputs, source refs, and caveats.
 This is the best value/risk public Codex compatibility slice because it helps
 players understand victory planning without backend or rich-import work.
 
-The recommended second slice is `FS-CODEX-010 - Heroes And Skills Import
-Investigation`, because the new rich exports appear to unlock higher-value hero
-planning work but require explicit fullstack import/API/store decisions before
-UI implementation.
+The recommended next investigation is `FS-CODEX-009 - Rich Factions Import
+Investigation`, because Factions can become the cross-category strategy hub that
+connects traits, populations, units, heroes, gated technologies, quests, and
+public identity. `FS-CODEX-010 - Heroes And Skills Import Investigation` remains
+the following high-value investigation, but should come after Factions.
+
+Natural Wonders remain an easy compatibility win, but lower strategic value than
+Victory, Factions, Heroes + Skills, and Populations.
