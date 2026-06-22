@@ -1,5 +1,10 @@
-import { useMemo, type RefObject } from "react";
+import { useEffect, useMemo, type RefObject } from "react";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
+import {
+    buildCodexFactionPackageGroups,
+    buildCodexRichFactionPackageGroups,
+    getCodexFactionPackageEntryKeys,
+} from "@/lib/codex/codexFactionPackage";
 import {
     formatCodexKindLabel,
     getCodexDetailContextLines,
@@ -16,10 +21,17 @@ import {
     buildCodexUnitRichEnrichment,
     hasCodexUnitRichEnrichment,
 } from "@/lib/codex/codexUnitRichEnrichment";
+import {
+    selectFactionByKey,
+    selectFactionLoaded,
+    selectFactionLoading,
+    useFactionStore,
+} from "@/stores/factionStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
+import CodexFactionPackage from "./CodexFactionPackage";
 import CodexStructuredDetail from "./CodexStructuredDetail";
 import CodexTechPrerequisiteSection from "./CodexTechPrerequisiteSection";
 import CodexUnitProfileSection from "./CodexUnitProfileSection";
@@ -43,6 +55,11 @@ export default function CodexEntryDetail({
 }: Props) {
     const richTechByKey = useTechStore((state) => state.techsByKey);
     const richUnitByKey = useUnitStore((state) => state.unitsByKey);
+    const normalizedEntryKey = entry?.entryKey.trim() ?? "";
+    const richFaction = useFactionStore(selectFactionByKey(normalizedEntryKey));
+    const factionsLoaded = useFactionStore(selectFactionLoaded);
+    const factionsLoading = useFactionStore(selectFactionLoading);
+    const loadFactions = useFactionStore((state) => state.loadFactions);
     const techRichEnrichment = useMemo(
         () => entry
             ? buildCodexTechRichEnrichment(entry, richTechByKey, allEntries)
@@ -55,6 +72,28 @@ export default function CodexEntryDetail({
             : { previousUnit: null, evolvesInto: [] },
         [entry, richUnitByKey, allEntries]
     );
+    const normalizedExportKind = entry?.exportKind.trim().toLowerCase() ?? "";
+    const isFactionEntry = normalizedExportKind === "factions";
+    const isMinorFactionEntry = normalizedExportKind === "minorfactions";
+    const isFactionLikeEntry = isFactionEntry || isMinorFactionEntry;
+    const factionPackageGroups = useMemo(() => {
+        if (!entry || !isFactionLikeEntry) return [];
+
+        const richGroups = buildCodexRichFactionPackageGroups(entry, richFaction, allEntries);
+        if (richGroups.length > 0) return richGroups;
+
+        return isFactionEntry ? buildCodexFactionPackageGroups(entry, allEntries) : [];
+    }, [allEntries, entry, isFactionEntry, isFactionLikeEntry, richFaction]);
+    const richFactionPackageEntryKeys = useMemo(
+        () => (richFaction ? getCodexFactionPackageEntryKeys(factionPackageGroups) : []),
+        [factionPackageGroups, richFaction]
+    );
+
+    useEffect(() => {
+        if (!isFactionLikeEntry || factionsLoaded || factionsLoading) return;
+
+        void loadFactions();
+    }, [factionsLoaded, factionsLoading, isFactionLikeEntry, loadFactions]);
 
     if (!entry) {
         return (
@@ -68,19 +107,19 @@ export default function CodexEntryDetail({
         );
     }
 
-    const isAbilityEntry = entry.exportKind.trim().toLowerCase() === "abilities";
-    const isStatusEntry = entry.exportKind.trim().toLowerCase() === "statuses";
-    const isTechEntry = entry.exportKind.trim().toLowerCase() === "tech";
-    const isUnitEntry = entry.exportKind.trim().toLowerCase() === "units";
+    const isAbilityEntry = normalizedExportKind === "abilities";
+    const isStatusEntry = normalizedExportKind === "statuses";
+    const isTechEntry = normalizedExportKind === "tech";
+    const isUnitEntry = normalizedExportKind === "units";
     const detailContextLines = isAbilityEntry ? [] : getCodexDetailContextLines(entry);
     const showKind = entry.exportKind !== "quests";
     const kindLabel = formatCodexKindLabel(entry.exportKind);
-    const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
     const displayedGrantedAbilityKeys = getDisplayedGrantedAbilityKeys(entry, relatedEntries);
     const displayedThresholdTargetKeys = getDisplayedPopulationThresholdTargetKeys(entry, relatedEntries);
     const hiddenRelatedEntryKeys = new Set([
         ...displayedGrantedAbilityKeys,
         ...displayedThresholdTargetKeys,
+        ...richFactionPackageEntryKeys,
     ]);
     const relatedEntriesForDisplay = hiddenRelatedEntryKeys.size > 0
         ? relatedEntries.filter((relatedEntry) => (
@@ -115,7 +154,7 @@ export default function CodexEntryDetail({
             {isFactionEntry ? (
                 <CodexFactionDetail
                     entry={entry}
-                    allEntries={allEntries}
+                    packageGroups={factionPackageGroups}
                     onSelectEntry={onSelectRelated}
                 />
             ) : (
@@ -125,6 +164,10 @@ export default function CodexEntryDetail({
                     onSelectInlineEntry={onSelectRelated}
                 />
             )}
+
+            {isMinorFactionEntry ? (
+                <CodexFactionPackage groups={factionPackageGroups} onSelectEntry={onSelectRelated} />
+            ) : null}
 
             {showTechRichEnrichment ? (
                 <CodexTechPrerequisiteSection

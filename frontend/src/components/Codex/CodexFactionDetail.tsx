@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { parseCodexFactionDescription, type CodexFactionTrait } from "@/lib/codex/codexFactionPresentation";
-import { buildCodexFactionPackageGroups } from "@/lib/codex/codexFactionPackage";
+import type { CodexFactionPackageGroup } from "@/lib/codex/codexFactionPackage";
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -8,7 +8,7 @@ import CodexFactionPackage from "./CodexFactionPackage";
 
 type Props = {
     entry: CodexEntry;
-    allEntries: readonly CodexEntry[];
+    packageGroups: CodexFactionPackageGroup[];
     onSelectEntry: (entry: CodexEntry) => void;
 };
 
@@ -48,7 +48,7 @@ function getExportedSectionLines(entry: CodexEntry, title: string): string[] {
         .filter(Boolean) ?? [];
 }
 
-export default function CodexFactionDetail({ entry, allEntries, onSelectEntry }: Props) {
+export default function CodexFactionDetail({ entry, packageGroups, onSelectEntry }: Props) {
     const parsed = useMemo(
         () => parseCodexFactionDescription(entry.descriptionLines),
         [entry.descriptionLines]
@@ -57,11 +57,6 @@ export default function CodexFactionDetail({ entry, allEntries, onSelectEntry }:
         () => getExportedSectionLines(entry, "Unlocks"),
         [entry]
     );
-    const packageGroups = useMemo(
-        () => buildCodexFactionPackageGroups(entry, allEntries),
-        [entry, allEntries]
-    );
-
     const affinityId = sectionId(entry, "affinity");
     const unlocksId = sectionId(entry, "unlocks");
     const traitsId = sectionId(entry, "traits");

@@ -1,4 +1,4 @@
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, RichFaction } from "@/types/dataTypes";
 
 export type CodexFactionPackageGroup = {
     id: string;
@@ -10,6 +10,7 @@ export type CodexFactionPackageGroup = {
 };
 
 const GROUP_CAPS = {
+    traits: 4,
     population: 2,
     units: 4,
     tech: 4,
@@ -80,6 +81,36 @@ function createGroup(
     };
 }
 
+function resolveExactEntries(
+    keys: readonly string[] | null | undefined,
+    entryByKey: Map<string, CodexEntry>,
+    expectedKind: string
+): CodexEntry[] {
+    const seen = new Set<string>();
+    const entries: CodexEntry[] = [];
+
+    for (const rawKey of keys ?? []) {
+        const key = rawKey.trim();
+        if (!key || seen.has(key)) continue;
+
+        const entry = entryByKey.get(key);
+        if (!entry || normalizeKind(entry.exportKind) !== expectedKind) continue;
+
+        seen.add(key);
+        entries.push(entry);
+    }
+
+    return entries;
+}
+
+function resolveExactEntry(
+    key: string | null | undefined,
+    entryByKey: Map<string, CodexEntry>,
+    expectedKind: string
+): CodexEntry[] {
+    return resolveExactEntries(key ? [key] : [], entryByKey, expectedKind);
+}
+
 function questExampleEntries(entries: CodexEntry[]): CodexEntry[] {
     const seen = new Set<string>();
     const examples: CodexEntry[] = [];
@@ -145,4 +176,55 @@ export function buildCodexFactionPackageGroups(
             byCategory(reverseEntries, "statuses")
         )),
     ].filter((group): group is CodexFactionPackageGroup => Boolean(group));
+}
+
+export function buildCodexRichFactionPackageGroups(
+    faction: CodexEntry,
+    richFaction: RichFaction | null | undefined,
+    allEntries: readonly CodexEntry[]
+): CodexFactionPackageGroup[] {
+    if (!richFaction || faction.entryKey.trim() !== richFaction.factionKey.trim()) return [];
+
+    const entryByKey = new Map(allEntries.map((entry) => [entry.entryKey.trim(), entry]));
+    const factionKind = normalizeKind(richFaction.factionKind);
+
+    if (factionKind === "minor") {
+        return [
+            createGroup("population", "Population", resolveExactEntries(richFaction.populationKeys, entryByKey, "populations")),
+            createGroup("units", "Core Unit", resolveExactEntries(richFaction.baseUnitKeys, entryByKey, "units")),
+            createGroup("heroes", "Heroes", resolveExactEntries(richFaction.heroKeys, entryByKey, "heroes")),
+            createGroup(
+                "traits",
+                "Protectorate Traits",
+                resolveExactEntries(richFaction.protectorateTraitKeys, entryByKey, "traits")
+            ),
+            createGroup("quests", "Quest", resolveExactEntries(richFaction.specificQuestKeys, entryByKey, "quests")),
+        ].filter((group): group is CodexFactionPackageGroup => Boolean(group));
+    }
+
+    return [
+        createGroup("traits", "Faction Traits", resolveExactEntries(richFaction.traitKeys, entryByKey, "traits")),
+        createGroup("population", "Population", resolveExactEntries(richFaction.populationKeys, entryByKey, "populations")),
+        createGroup("units", "Core Units", resolveExactEntries(richFaction.baseUnitKeys, entryByKey, "units")),
+        createGroup("heroes", "Heroes", resolveExactEntries(richFaction.heroKeys, entryByKey, "heroes")),
+        createGroup("tech", "Faction Techs", resolveExactEntries(richFaction.gatedTechnologyKeys, entryByKey, "tech")),
+        createGroup("quests", "Questline", resolveExactEntry(richFaction.startingFactionQuestKey, entryByKey, "quests")),
+    ].filter((group): group is CodexFactionPackageGroup => Boolean(group));
+}
+
+export function getCodexFactionPackageEntryKeys(groups: readonly CodexFactionPackageGroup[]): string[] {
+    const seen = new Set<string>();
+    const keys: string[] = [];
+
+    for (const group of groups) {
+        for (const entry of group.visibleEntries) {
+            const key = entry.entryKey.trim();
+            if (!key || seen.has(key)) continue;
+
+            seen.add(key);
+            keys.push(key);
+        }
+    }
+
+    return keys;
 }

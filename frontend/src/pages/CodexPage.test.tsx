@@ -4,11 +4,12 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
+import { useFactionStore } from "@/stores/factionStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
-import type { CodexEntry, Tech, Unit } from "@/types/dataTypes";
+import type { CodexEntry, RichFaction, Tech, Unit } from "@/types/dataTypes";
 
 function seedCodexEntries(entries: CodexEntry[]) {
     useCodexStore.setState({
@@ -67,6 +68,25 @@ const richUnit = (overrides: Partial<Unit>): Unit => ({
     ...overrides,
 });
 
+const richFaction = (overrides: Partial<RichFaction>): RichFaction => ({
+    factionKey: "Faction_Aspect",
+    publicDisplayName: "Aspects",
+    lore: null,
+    factionKind: "major",
+    affinityKey: null,
+    affinityType: null,
+    traitKeys: [],
+    populationKeys: [],
+    unitKeys: [],
+    baseUnitKeys: [],
+    heroKeys: [],
+    gatedTechnologyKeys: [],
+    startingFactionQuestKey: null,
+    specificQuestKeys: [],
+    protectorateTraitKeys: [],
+    ...overrides,
+});
+
 function seedRichUnits(units: Unit[]) {
     useUnitStore.setState({
         units,
@@ -80,6 +100,10 @@ function seedRichUnits(units: Unit[]) {
         loaded: true,
         error: null,
     });
+}
+
+function seedRichFactions(factions: RichFaction[]) {
+    useFactionStore.getState().replaceFactions(factions);
 }
 
 function seedShallowReferenceLayoutEntries() {
@@ -298,14 +322,17 @@ function seedActionArchiveEntries() {
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
+        useFactionStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
+        seedRichFactions([]);
         seedDefaultCodexStore();
     });
 
     afterEach(() => {
         cleanup();
         useCodexStore.getState().reset();
+        useFactionStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
     });
@@ -6813,6 +6840,212 @@ describe("CodexPage", () => {
         expect(within(packageSection).queryByRole("button", { name: /Ashen Dream/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /Call the Mist/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /Glasssteel/ })).not.toBeInTheDocument();
+    });
+
+    it("enriches major Faction details from exact rich faction keys and hides surfaced package links from generic related entries", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Aspect",
+                displayName: "Aspects",
+                descriptionLines: ["Affinity: Aspects"],
+                referenceKeys: ["Trait_Diplomat", "Unit_Sentry", "Tech_Aspect", "Hero_Aspect"],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Diplomat",
+                displayName: "Diplomat",
+                descriptionLines: ["Treaties are easier."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspect",
+                displayName: "Aspects",
+                descriptionLines: ["Symbiotic population."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Sentry",
+                displayName: "Sentry",
+                descriptionLines: ["Opening army unit."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Aspect",
+                displayName: "Polemephon",
+                descriptionLines: ["Faction hero."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Aspect",
+                displayName: "Symbiotic Research",
+                descriptionLines: ["Faction technology."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "FactionQuest_Aspect_Chapter01_Step01",
+                displayName: "Aspect Awakening",
+                category: "MajorFaction",
+                kind: "Quest",
+                descriptionLines: ["Quest opener."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_UnresolvedByRich",
+                displayName: "Unresolved by Rich",
+                descriptionLines: ["Only a public reference."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichFactions([
+            richFaction({
+                factionKey: "Faction_Aspect",
+                traitKeys: ["Trait_Diplomat", "Trait_Missing"],
+                populationKeys: ["Population_Aspect"],
+                baseUnitKeys: ["Unit_Sentry"],
+                unitKeys: ["Unit_Sentry", "Unit_RosterOnly"],
+                heroKeys: ["Hero_Aspect"],
+                gatedTechnologyKeys: ["Tech_Aspect"],
+                startingFactionQuestKey: "FactionQuest_Aspect_Chapter01_Step01",
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?entry=Faction_Aspect"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(packageSection).getByText("Faction Traits")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Population")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
+        expect(within(packageSection).getAllByText("Heroes").length).toBeGreaterThan(0);
+        expect(within(packageSection).getByText("Faction Techs")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Questline")).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Diplomat/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Sentry/ })).toBeInTheDocument();
+        expect(within(packageSection).queryByRole("button", { name: /Unit_RosterOnly/ })).not.toBeInTheDocument();
+
+        const relatedSection = within(detailPane).queryByRole("region", { name: /related entries/i });
+        expect(relatedSection).toBeNull();
+
+        await user.click(within(packageSection).getByRole("button", { name: /Sentry/ }));
+        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_Sentry");
+    });
+
+    it("enriches Minor Faction details with exact rich protectorate package links", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_Ametrine",
+                displayName: "Ametrine",
+                category: null,
+                kind: "MinorFaction",
+                descriptionLines: [
+                    "Disposition: Pacifist",
+                    "Faction affinity: Ametrine",
+                    "Ametrine lore.",
+                ],
+                referenceKeys: ["Population_Ametrine", "Unit_Ametrine", "Trait_Ametrine"],
+                facts: [
+                    { label: "Kind", value: "MinorFaction" },
+                    { label: "Disposition", value: "Pacifist" },
+                    { label: "Faction affinity", value: "Ametrine" },
+                ],
+                sections: [{ title: "Identity", lines: ["Ametrine lore."] }],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: ["Population."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Ametrine",
+                displayName: "Crusher",
+                descriptionLines: ["Minor faction unit."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Ametrine",
+                displayName: "Ametrine Elder",
+                descriptionLines: ["Minor faction notable."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_Ametrine",
+                displayName: "Chant of the Rocks",
+                descriptionLines: ["Protectorate trait."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "quests",
+                entryKey: "MinorFaction_SpecificQuest_Ametrine01",
+                displayName: "Ametrine Quest",
+                category: "MinorFaction",
+                kind: "Quest",
+                descriptionLines: ["Quest."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichFactions([
+            richFaction({
+                factionKey: "MinorFaction_Ametrine",
+                publicDisplayName: "Ametrine",
+                factionKind: "minor",
+                populationKeys: ["Population_Ametrine"],
+                baseUnitKeys: ["Unit_Ametrine"],
+                heroKeys: ["Hero_Ametrine"],
+                protectorateTraitKeys: ["Trait_Ametrine"],
+                specificQuestKeys: ["MinorFaction_SpecificQuest_Ametrine01"],
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=minorfactions&entry=MinorFaction_Ametrine"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const detailPane = await screen.findByLabelText(/selected codex entry/i);
+        expect(within(detailPane).getByText("Identity")).toBeInTheDocument();
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(packageSection).getByText("Core Unit")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Protectorate Traits")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Quest")).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Crusher/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Chant of the Rocks/ })).toBeInTheDocument();
+        expect(within(packageSection).getByRole("button", { name: /Ametrine Quest/ })).toBeInTheDocument();
+        expect(within(detailPane).queryByRole("region", { name: /related entries/i })).toBeNull();
     });
 
     it("renders equipment codex entries as structured dossiers from current description lines", async () => {
