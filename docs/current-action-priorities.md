@@ -35,6 +35,11 @@ Current result:
 
 Active exporter follow-up:
 
+- `docs/active/final-snapshot-codex-ticket-plan.md` - active EWShop ticket
+  plan for final snapshot Codex compatibility work. Start there when deciding
+  which public Codex category needs the next small frontend/fullstack slice.
+- `docs/active/final-snapshot-ticket-execution-playbook.md` - lightweight
+  execution workflow for `FS-CODEX-*` tickets.
 - `docs/active/db-exporter-ability-metadata-handoff.md` - focused Ability
   metadata cleanup request for noisy `Combat role` assignments and explicit
   ability ownership metadata. This is exporter-owned follow-up, not an
@@ -153,6 +158,10 @@ Current rules:
   they remain searchable, linkable, and direct-routable where exact refs exist.
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list.
+- Final snapshot Codex compatibility follow-up is tracked in
+  `docs/active/final-snapshot-codex-ticket-plan.md`; the recommended next slice
+  is Victory Conditions compact reference rows, followed by Heroes + Skills
+  rich import investigation.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only

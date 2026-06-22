@@ -40,6 +40,7 @@ index, then select the smallest relevant doc set for the task type.
 | --- | --- | --- |
 | Any task | `AGENTS.md`, `docs/current-action-priorities.md`, `docs/active/README.md` | Area-specific docs only |
 | Codex category evolution | `docs/active/codex-category-evolution-playbook.md` | Target category evolution doc and execution plan |
+| Final snapshot Codex ticket | `docs/active/final-snapshot-codex-ticket-plan.md` | `docs/active/final-snapshot-ticket-execution-playbook.md`, final exporter handoff/context docs |
 | Codex rich enrichment | `docs/active/codex-rich-enrichment-decision-template.md` | Architecture decision, boundary doc, relevant category docs |
 | DB exporter metadata issue | `docs/active/db-exporter-ability-metadata-handoff.md` | Related category evolution doc |
 | Quest Explorer work | `docs/quest-explorer/README.md` | `docs/quest_explorer_canonical_semantics_v1.md` |
@@ -109,6 +110,20 @@ index, then select the smallest relevant doc set for the task type.
   - Read when: evaluating future enrichment candidates after using the decision
     template.
   - Status: active audit with post-pilot notes.
+
+- `docs/active/final-snapshot-codex-ticket-plan.md`
+  - Purpose: Jira-style plan for EWShop public Codex compatibility work after
+    the final DB Exporter snapshot.
+  - Read when: choosing the next small Codex compatibility slice for newly
+    available public metadata.
+  - Status: active implementation plan.
+
+- `docs/active/final-snapshot-ticket-execution-playbook.md`
+  - Purpose: lightweight workflow for starting, scoping, validating, and
+    documenting `FS-CODEX-*` tickets.
+  - Read when: implementing or investigating a final snapshot compatibility,
+    polish, or rich-import adoption ticket.
+  - Status: active process guide.
 
 - `docs/active/codex-self-sustaining-worklog.md`
   - Purpose: execution log for an earlier Codex workstream.
