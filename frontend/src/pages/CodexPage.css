@@ -1808,6 +1808,12 @@
     border-left-width: 3px;
 }
 
+.codex-summaryList__item--victoryConditionArchive {
+    gap: 10px;
+    padding: 18px 10px 18px 18px;
+    border-left-width: 3px;
+}
+
 .codex-summaryList__item:hover,
 .codex-summaryList__item:focus-visible,
 .codex-summaryList__item:focus-within {
@@ -1960,7 +1966,8 @@
 .codex-summaryList__item--unitArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--improvementArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--questArchive .codex-summaryList__titleLine,
-.codex-summaryList__item--techArchive .codex-summaryList__titleLine {
+.codex-summaryList__item--techArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--victoryConditionArchive .codex-summaryList__titleLine {
     width: 100%;
     gap: 18px;
     justify-content: space-between;
@@ -2061,6 +2068,12 @@
     line-height: 1.35;
 }
 
+.codex-summaryList__item--victoryConditionArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
 .codex-summaryList__context {
     color: rgba(195, 152, 77, 0.72);
     font-size: 11px;
@@ -2136,6 +2149,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--victoryConditionArchive .codex-summaryList__metadata {
+    flex: 0 1 min(44%, 420px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--catalog .codex-summaryList__metadata--ability {
     align-items: center;
     gap: 7px;
@@ -2204,6 +2223,14 @@
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.52);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--victoryCondition {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.54);
     font-size: 12px;
     line-height: 1.45;
 }
@@ -2326,6 +2353,43 @@
     color: rgba(241, 234, 220, 0.78);
     font-size: 13.5px;
     line-height: 1.48;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-summaryList__victoryConditionSignals {
+    display: grid;
+    max-width: 92ch;
+    gap: 4px;
+}
+
+.codex-summaryList__victoryConditionSignal {
+    display: inline-flex;
+    min-width: 0;
+    gap: 7px;
+    overflow: hidden;
+    color: rgba(241, 234, 220, 0.78);
+    font-size: 13.5px;
+    line-height: 1.48;
+}
+
+.codex-summaryList__victoryConditionSignal--note {
+    color: rgba(241, 234, 220, 0.58);
+    font-size: 12.5px;
+}
+
+.codex-summaryList__victoryConditionSignalLabel {
+    flex: 0 0 auto;
+    color: rgba(195, 152, 77, 0.72);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-summaryList__victoryConditionSignalValue {
+    min-width: 0;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }

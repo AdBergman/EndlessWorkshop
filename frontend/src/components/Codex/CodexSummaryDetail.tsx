@@ -114,6 +114,15 @@ type TechArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type VictoryConditionArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
+type VictoryConditionArchivePreviewLine = {
+    key: string;
+    label: string;
+    value: string;
+};
 type DistrictArchiveMetadataItem = {
     key: string;
     value: string;
@@ -155,6 +164,7 @@ const MAX_QUEST_INLINE_LINKS = 5;
 const MAX_EQUIPMENT_GRANTED_ABILITY_LINKS = 3;
 const MAX_TECH_EFFECT_PREVIEW_LINES = 4;
 const MAX_TECH_UNLOCK_LINKS = 4;
+const MAX_VICTORY_CONDITION_PREVIEW_LINES = 3;
 const ABILITY_TAXONOMY_TERMS = new Set([
     "ability",
     "abilities",
@@ -665,6 +675,85 @@ function getTechArchiveUnlockLinks(
         .filter((item): item is TechUnlockSummary => item !== null);
 }
 
+function getVictoryConditionRequiredFormula(entry: CodexEntry): string {
+    if (entry.exportKind.trim().toLowerCase() !== "victoryconditions") return "";
+
+    const formulaFact = (entry.facts ?? []).find((fact) => {
+        const normalizedLabel = fact.label.trim().toLowerCase();
+        return normalizedLabel.startsWith("required ") &&
+            normalizedLabel.endsWith(" formula") &&
+            normalizedLabel !== "required hold duration formula";
+    });
+
+    return formulaFact?.value.trim() ?? "";
+}
+
+function getVictoryConditionArchiveDescription(entry: CodexEntry, fallbackPreview: string): string {
+    if (entry.exportKind.trim().toLowerCase() !== "victoryconditions") {
+        return fallbackPreview;
+    }
+
+    return (entry.descriptionLines ?? [])
+        .map((line) => formatCodexMajorFactionText(line.replace(/\s+/g, " ").trim()))
+        .find((line) => line.length > 0) ?? fallbackPreview;
+}
+
+function getVictoryConditionArchiveMetadata(entry: CodexEntry): VictoryConditionArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "victoryconditions") return [];
+
+    const items: VictoryConditionArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Current exported-game value").forEach((value) =>
+        addValue("current", `Current ${value}`)
+    );
+    getCodexFactValues(entry, "Current exported-game hold duration").forEach((value) =>
+        addValue("hold", `Hold ${value}`)
+    );
+    getCodexFactValues(entry, "Victory path").forEach((value) => addValue("path", value));
+
+    return items;
+}
+
+function getVictoryConditionArchivePreviewLines(entry: CodexEntry): VictoryConditionArchivePreviewLine[] {
+    if (entry.exportKind.trim().toLowerCase() !== "victoryconditions") return [];
+
+    const lines: VictoryConditionArchivePreviewLine[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, label: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        lines.push({ key, label, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Objective").forEach((value) =>
+        addValue("objective", "Objective", value)
+    );
+    addValue("requirement", "Requirement", getVictoryConditionRequiredFormula(entry));
+    getCodexFactValues(entry, "Threshold note").forEach((value) =>
+        addValue("note", "Note", value)
+    );
+
+    return lines.slice(0, MAX_VICTORY_CONDITION_PREVIEW_LINES);
+}
+
 function getHeroArchiveStatPreviewLines(entry: CodexEntry): string[] {
     if (entry.exportKind.trim().toLowerCase() !== "heroes") return [];
 
@@ -1106,6 +1195,7 @@ export default function CodexSummaryDetail({
                         const useQuestArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "quests";
                         const useTechArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "tech";
                         const useUnitArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "units";
+                        const useVictoryConditionArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "victoryconditions";
                         const overviewMetadata = showRichOverviewRow ? getOverviewMetadata(entry) : [];
                         const abilityCatalogMetadata = useCatalogRowHierarchy ? getAbilityCatalogMetadata(entry) : [];
                         const statusArchiveMetadata = useStatusArchiveRowHierarchy ? getStatusArchiveMetadata(entry) : [];
@@ -1149,6 +1239,15 @@ export default function CodexSummaryDetail({
                             0,
                             techUnlockLinks.length - visibleTechUnlockLinks.length
                         );
+                        const victoryConditionArchiveMetadata = useVictoryConditionArchiveRowHierarchy
+                            ? getVictoryConditionArchiveMetadata(entry)
+                            : [];
+                        const victoryConditionArchiveDescription = useVictoryConditionArchiveRowHierarchy
+                            ? getVictoryConditionArchiveDescription(entry, preview)
+                            : "";
+                        const victoryConditionArchivePreviewLines = useVictoryConditionArchiveRowHierarchy
+                            ? getVictoryConditionArchivePreviewLines(entry)
+                            : [];
                         const catalogPreview = useCatalogRowHierarchy
                             ? getAbilityCatalogPreview(preview, overviewMetadata)
                             : preview;
@@ -1418,6 +1517,71 @@ export default function CodexSummaryDetail({
                                             </span>
                                         )}
                                     </span>
+                                </button>
+                            );
+                        }
+
+                        if (useVictoryConditionArchiveRowHierarchy) {
+                            return (
+                                <button
+                                    key={entry.entryKey}
+                                    type="button"
+                                    className="codex-summaryList__item codex-summaryList__item--victoryConditionArchive"
+                                    onClick={() => onSelectEntry(entry)}
+                                >
+                                    <span className="codex-summaryList__titleLine">
+                                        <span className="codex-summaryList__titleIdentity">
+                                            <span className="codex-summaryList__name">
+                                                {renderCodexLabel(getCodexEntryLabel(entry))}
+                                            </span>
+                                        </span>
+                                        {victoryConditionArchiveMetadata.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__metadata codex-summaryList__metadata--victoryCondition"
+                                                aria-label="Victory condition metadata"
+                                            >
+                                                {victoryConditionArchiveMetadata.map((item) => (
+                                                    <span
+                                                        key={`${item.key}-${item.value}`}
+                                                        className="codex-summaryList__metadataText"
+                                                    >
+                                                        {item.value}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
+                                    </span>
+
+                                    {victoryConditionArchiveDescription ? (
+                                        <span className="codex-summaryList__description">
+                                            {renderDescriptionLine(formatCodexMajorFactionText(victoryConditionArchiveDescription))}
+                                        </span>
+                                    ) : null}
+
+                                    {victoryConditionArchivePreviewLines.length > 0 ? (
+                                        <span
+                                            className="codex-summaryList__victoryConditionSignals"
+                                            aria-label="Victory condition planning summary"
+                                        >
+                                            {victoryConditionArchivePreviewLines.map((line) => (
+                                                <span
+                                                    className={`codex-summaryList__victoryConditionSignal codex-summaryList__victoryConditionSignal--${line.key}`}
+                                                    key={`${entry.entryKey}-victory-condition-${line.key}`}
+                                                >
+                                                    <span className="codex-summaryList__victoryConditionSignalLabel">
+                                                        {line.label}:
+                                                    </span>
+                                                    <span className="codex-summaryList__victoryConditionSignalValue">
+                                                        {renderDescriptionLine(formatCodexMajorFactionText(line.value))}
+                                                    </span>
+                                                </span>
+                                            ))}
+                                        </span>
+                                    ) : (
+                                        <span className="codex-summaryList__statusFallback">
+                                            No public victory condition facts exported yet.
+                                        </span>
+                                    )}
                                 </button>
                             );
                         }

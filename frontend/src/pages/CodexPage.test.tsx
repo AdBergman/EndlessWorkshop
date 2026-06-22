@@ -551,6 +551,70 @@ describe("CodexPage", () => {
         expect(categoryLabels).not.toContain("Quests");
     });
 
+    it("renders Victory Conditions as compact planning reference rows from exported facts", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "victoryconditions",
+                entryKey: "VictoryCondition_EndGameDefinition_Standard_AllResearchesDone_05",
+                displayName: "Enlightenment",
+                category: "Victory",
+                kind: "Victory condition",
+                descriptionLines: ["Science Victory"],
+                referenceKeys: ["VictoryPath_Enrich"],
+                facts: [
+                    { label: "Type", value: "Victory condition" },
+                    { label: "Objective", value: "Final era technologies" },
+                    { label: "Required technologies formula", value: "Min(6, Max(2, World Difficulty))" },
+                    { label: "Current exported-game value", value: "6" },
+                    { label: "Victory path", value: "Impress", referenceKey: "VictoryPath_Enrich" },
+                    { label: "Required hold duration formula", value: "Game Speed Multiplier * 10" },
+                    { label: "Current exported-game hold duration", value: "10 turns" },
+                    { label: "Threshold note", value: "Exact threshold depends on game setup." },
+                    { label: "Kind", value: "Victory condition" },
+                    { label: "Category", value: "Victory" },
+                ],
+                sections: [{
+                    title: "Source references",
+                    items: [{
+                        label: "Arcana of the Ancients",
+                        referenceKey: "Technology_Science_00",
+                        facts: [{ label: "Type", value: "Required technology" }],
+                    }],
+                }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=victoryconditions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "All Victory Conditions" });
+        const summaryList = screen.getByLabelText("Victory Conditions overview");
+        const row = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /Enlightenment/i }));
+        expect(row).toHaveClass("codex-summaryList__item--victoryConditionArchive");
+        expect(within(row).getByText("Science Victory")).toBeInTheDocument();
+        expect(within(row).getByText("Objective:")).toBeInTheDocument();
+        expect(within(row).getByText("Final era technologies")).toBeInTheDocument();
+        expect(within(row).getByText("Requirement:")).toBeInTheDocument();
+        expect(within(row).getByText("Min(6, Max(2, World Difficulty))")).toBeInTheDocument();
+        expect(within(row).getByText("Current 6")).toBeInTheDocument();
+        expect(within(row).getByText("Hold 10 turns")).toBeInTheDocument();
+        expect(within(row).getByText("Impress")).toBeInTheDocument();
+        expect(within(row).getByText("Note:")).toBeInTheDocument();
+        expect(within(row).getByText("Exact threshold depends on game setup.")).toBeInTheDocument();
+
+        await user.click(row);
+
+        expect(await screen.findByRole("heading", { name: "Enlightenment" })).toBeInTheDocument();
+        expect(screen.getByText("Required technologies formula")).toBeInTheDocument();
+        expect(screen.getByText("Game Speed Multiplier * 10")).toBeInTheDocument();
+    });
+
     it("renders Ability overview metadata from exported facts while keeping left rows compact", async () => {
         seedCodexEntries([
             {
