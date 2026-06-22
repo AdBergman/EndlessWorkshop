@@ -6,6 +6,7 @@ import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportEntryDto;
@@ -18,6 +19,7 @@ import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
@@ -51,6 +53,7 @@ class ImportAdminControllerTest {
     private RecordingDistrictImportAdminFacade districtFacade;
     private RecordingImprovementImportAdminFacade improvementFacade;
     private RecordingUnitImportAdminFacade unitFacade;
+    private RecordingFactionImportAdminFacade factionFacade;
     private RecordingQuestExplorerImportAdminFacade questFacade;
     private RecordingCodexImportAdminFacade codexFacade;
     private MockMvc mockMvc;
@@ -61,6 +64,7 @@ class ImportAdminControllerTest {
         districtFacade = new RecordingDistrictImportAdminFacade();
         improvementFacade = new RecordingImprovementImportAdminFacade();
         unitFacade = new RecordingUnitImportAdminFacade();
+        factionFacade = new RecordingFactionImportAdminFacade();
         questFacade = new RecordingQuestExplorerImportAdminFacade();
         codexFacade = new RecordingCodexImportAdminFacade();
         ImportAdminController controller = new ImportAdminController(
@@ -68,6 +72,7 @@ class ImportAdminControllerTest {
                 districtFacade,
                 improvementFacade,
                 unitFacade,
+                factionFacade,
                 codexFacade,
                 questFacade
         );
@@ -307,6 +312,50 @@ class ImportAdminControllerTest {
         assertNotNull(unitFacade.lastImportDto);
         assertEquals("Unit_A", unitFacade.lastImportDto.units().getFirst().unitKey());
         assertEquals("UnitAbility_A", unitFacade.lastImportDto.units().getFirst().abilityKeys().getFirst());
+    }
+
+    @Test
+    void importFactions_ignoresUnknownExporterFields() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.82",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "factions",
+                  "ignoredExporterBatchField": true,
+                  "factions": [
+                    {
+                      "entryKey": "Faction_Aspect",
+                      "factionKey": "Faction_Aspect",
+                      "factionKind": "major",
+                      "publicDisplayName": "Aspects",
+                      "lore": "Harmony through coral.",
+                      "affinityKey": "FactionAffinity_Aspect",
+                      "traitKeys": ["FactionTrait_Aspects_Cohabitation"],
+                      "populationKeys": ["Population_Aspect"],
+                      "unitKeys": ["Unit_Aspect_Scout"],
+                      "baseUnitKeys": ["Unit_Aspect_Scout"],
+                      "heroKeys": ["Hero_Aspect_Archer_0"],
+                      "gatedTechnologyKeys": ["Aspect_Technology_00"],
+                      "startingFactionQuestKey": "FactionQuest_Aspect_Chapter01_Step01",
+                      "specificQuestKeys": [],
+                      "protectorateTraitKeys": [],
+                      "ignoredExporterFactionField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/factions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(factionFacade.lastDto);
+        assertEquals("Faction_Aspect", factionFacade.lastDto.factions().getFirst().factionKey());
+        assertEquals("FactionTrait_Aspects_Cohabitation", factionFacade.lastDto.factions().getFirst().traitKeys().getFirst());
+        assertEquals("Aspect_Technology_00", factionFacade.lastDto.factions().getFirst().gatedTechnologyKeys().getFirst());
     }
 
     @Test
@@ -836,6 +885,20 @@ class ImportAdminControllerTest {
         public ImportPreviewSummaryDto smokeTestUnits(UnitImportBatchDto dto) {
             lastSmokeDto = dto;
             return okSmokeSummary("units");
+        }
+    }
+
+    private static final class RecordingFactionImportAdminFacade implements FactionImportAdminFacade {
+        private FactionImportBatchDto lastDto;
+        private RuntimeException rejection;
+
+        @Override
+        public ImportSummaryDto importFactions(FactionImportBatchDto file) {
+            if (rejection != null) {
+                throw rejection;
+            }
+            lastDto = file;
+            return okSummary("factions");
         }
     }
 }

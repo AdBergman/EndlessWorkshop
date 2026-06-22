@@ -4,12 +4,14 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
@@ -25,6 +27,7 @@ public class ImportAdminController {
     private final DistrictImportAdminFacade districtImportAdminFacade;
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
+    private final FactionImportAdminFacade factionImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
     private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
 
@@ -33,6 +36,7 @@ public class ImportAdminController {
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
+            FactionImportAdminFacade factionImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
             QuestExplorerImportAdminFacade questExplorerImportAdminFacade
     ) {
@@ -40,6 +44,7 @@ public class ImportAdminController {
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
+        this.factionImportAdminFacade = factionImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
         this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
     }
@@ -78,6 +83,11 @@ public class ImportAdminController {
     @PostMapping(value = "/units/smoke", consumes = "application/json", produces = "application/json")
     public ImportPreviewSummaryDto smokeTestUnits(@RequestBody UnitImportBatchDto dto) {
         return unitImportAdminFacade.smokeTestUnits(dto);
+    }
+
+    @PostMapping(value = "/factions", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importFactions(@RequestBody FactionImportBatchDto dto) {
+        return factionImportAdminFacade.importFactions(dto);
     }
 
     @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")

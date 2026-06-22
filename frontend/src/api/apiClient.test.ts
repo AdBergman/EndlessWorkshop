@@ -44,6 +44,7 @@ describe("apiClient contract", () => {
         ["getImprovements", () => apiClient.getImprovements(), "/api/improvements"],
         ["getTechs", () => apiClient.getTechs(), "/api/techs"],
         ["getUnits", () => apiClient.getUnits(), "/api/units"],
+        ["getFactions", () => apiClient.getFactions(), "/api/factions"],
         ["getCodex", () => apiClient.getCodex(), "/api/codex"],
         ["getQuestExplorer", () => apiClient.getQuestExplorer(), "/api/quests/explorer"],
         ["getSavedBuild", () => apiClient.getSavedBuild("saved-build-id"), "/api/builds/saved-build-id"],

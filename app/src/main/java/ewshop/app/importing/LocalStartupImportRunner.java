@@ -4,12 +4,14 @@ import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
@@ -56,6 +58,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private final DistrictImportAdminFacade districtImportAdminFacade;
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
+    private final FactionImportAdminFacade factionImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
     private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
 
@@ -66,6 +69,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
+            FactionImportAdminFacade factionImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
             QuestExplorerImportAdminFacade questExplorerImportAdminFacade
     ) {
@@ -75,6 +79,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
+        this.factionImportAdminFacade = factionImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
         this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
     }
@@ -226,12 +231,15 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         if ("units".equals(exportKind) || shouldLetAdminValidationReport(json, "units", exportKind)) {
             return unitImportAdminFacade.importUnits(objectMapper.treeToValue(json, UnitImportBatchDto.class));
         }
+        if ("factions".equals(exportKind) || shouldLetAdminValidationReport(json, "factions", exportKind)) {
+            return factionImportAdminFacade.importFactions(objectMapper.treeToValue(json, FactionImportBatchDto.class));
+        }
         if ("quest_explorer".equals(exportKind)) {
             return questExplorerImportAdminFacade.importQuestExplorer(objectMapper.treeToValue(json, QuestExplorerImportBatchDto.class));
         }
 
         log.warn(
-                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, tech, and quest_explorer.",
+                "Local startup import skipped unsupported exports file {} with exportKind='{}'. Supported exports kinds are: districts, improvements, units, factions, tech, and quest_explorer.",
                 file.toAbsolutePath().normalize(),
                 exportKind == null ? "missing" : exportKind
         );

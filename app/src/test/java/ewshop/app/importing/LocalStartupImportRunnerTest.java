@@ -6,12 +6,14 @@ import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
+import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
+import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
@@ -54,6 +56,9 @@ class LocalStartupImportRunnerTest {
                 """);
         Files.writeString(tempDir.resolve("exports/ewshop_units_export_0.78.json"), """
                 {"exportKind":"units","units":[{"unitKey":"u","displayName":"Unit"}]}
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_factions_export_0.82.json"), """
+                {"exportKind":"factions","factions":[{"factionKey":"Faction_Aspect","publicDisplayName":"Aspects"}]}
                 """);
         Files.writeString(tempDir.resolve("exports/ewshop_districts_export_0.78.json"), """
                 {"exportKind":"districts","districts":[{"districtKey":"d","displayName":"District"}]}
@@ -134,9 +139,11 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.districtCalls).isEqualTo(1);
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
+        assertThat(facades.factionCalls).isEqualTo(1);
         assertThat(facades.codexCalls).isEqualTo(8);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
+        assertThat(facades.factionDto.exportKind()).isEqualTo("factions");
         assertThat(facades.codexKinds).containsExactly(
                 "abilities",
                 "councilorEffects",
@@ -154,7 +161,7 @@ class LocalStartupImportRunnerTest {
                 .isEqualTo("Effects");
         assertThat(facades.codexByKind.get("partnerEffects").entries().getFirst().publicContextKeys())
                 .containsExactly("PartnerEffect_Hydracorn_PartnerTrait01", "Councilor_Atea");
-        assertThat(summary).isEqualTo(new LocalStartupImportSummary(12, 0, 0));
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(13, 0, 0));
     }
 
     @Test
@@ -396,6 +403,7 @@ class LocalStartupImportRunnerTest {
                 facades,
                 facades,
                 facades,
+                facades,
                 facades
         );
     }
@@ -423,6 +431,7 @@ class LocalStartupImportRunnerTest {
             DistrictImportAdminFacade,
             ImprovementImportAdminFacade,
             UnitImportAdminFacade,
+            FactionImportAdminFacade,
             CodexImportAdminFacade,
             QuestExplorerImportAdminFacade {
 
@@ -430,10 +439,12 @@ class LocalStartupImportRunnerTest {
         private int districtCalls;
         private int improvementCalls;
         private int unitCalls;
+        private int factionCalls;
         private int codexCalls;
         private int questCalls;
         private TechImportBatchDto techDto;
         private UnitImportBatchDto unitDto;
+        private FactionImportBatchDto factionDto;
         private CodexImportBatchDto codexDto;
         private QuestExplorerImportBatchDto questDto;
         private final List<String> codexKinds = new ArrayList<>();
@@ -488,6 +499,16 @@ class LocalStartupImportRunnerTest {
         }
 
         @Override
+        public ImportSummaryDto importFactions(FactionImportBatchDto file) {
+            factionCalls++;
+            factionDto = file;
+            if (file.factions() == null || file.factions().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no factions");
+            }
+            return summary("factions", file.factions().size());
+        }
+
+        @Override
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
             codexCalls++;
             codexDto = file;
@@ -510,7 +531,7 @@ class LocalStartupImportRunnerTest {
         }
 
         private int totalCalls() {
-            return techCalls + districtCalls + improvementCalls + unitCalls + codexCalls + questCalls;
+            return techCalls + districtCalls + improvementCalls + unitCalls + factionCalls + codexCalls + questCalls;
         }
     }
 
@@ -565,6 +586,11 @@ class LocalStartupImportRunnerTest {
                     return previewSummary("units", dto.units().size());
                 }
             };
+        }
+
+        @Bean
+        FactionImportAdminFacade factionImportAdminFacade() {
+            return file -> summary("factions", file.factions().size());
         }
 
         @Bean

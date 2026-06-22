@@ -71,6 +71,21 @@ public class FacadeConfig {
     }
 
     @Bean
+    public FactionFacade factionFacade(
+            FactionService factionService
+    ) {
+        return new FactionFacadeImpl(factionService);
+    }
+
+    @Bean
+    public FactionImportAdminFacade factionImportAdminFacade(
+            FactionImportService factionImportService,
+            FactionService factionService
+    ) {
+        return new FactionImportAdminFacadeImpl(factionImportService, factionService);
+    }
+
+    @Bean
     public QuestExplorerFacade questExplorerFacade(QuestExplorerReadService questExplorerReadService) {
         return new QuestExplorerFacadeImpl(questExplorerReadService);
     }

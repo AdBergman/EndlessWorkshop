@@ -110,6 +110,24 @@ export interface Codex {
 
 export type CodexEntry = Codex;
 
+export interface RichFaction {
+    factionKey: string;
+    publicDisplayName: string;
+    lore: string | null;
+    factionKind: string | null;
+    affinityKey: string | null;
+    affinityType: string | null;
+    traitKeys: string[];
+    populationKeys: string[];
+    unitKeys: string[];
+    baseUnitKeys: string[];
+    heroKeys: string[];
+    gatedTechnologyKeys: string[];
+    startingFactionQuestKey: string | null;
+    specificQuestKeys: string[];
+    protectorateTraitKeys: string[];
+}
+
 export const ERA_THRESHOLDS: Record<number, number> = {
     1: 0,
     2: 8,
