@@ -86,6 +86,32 @@ public class FacadeConfig {
     }
 
     @Bean
+    public RichHeroFacade richHeroFacade(RichHeroService richHeroService) {
+        return new RichHeroFacadeImpl(richHeroService);
+    }
+
+    @Bean
+    public RichHeroImportAdminFacade richHeroImportAdminFacade(
+            RichHeroImportService richHeroImportService,
+            RichHeroService richHeroService
+    ) {
+        return new RichHeroImportAdminFacadeImpl(richHeroImportService, richHeroService);
+    }
+
+    @Bean
+    public RichSkillFacade richSkillFacade(RichSkillService richSkillService) {
+        return new RichSkillFacadeImpl(richSkillService);
+    }
+
+    @Bean
+    public RichSkillImportAdminFacade richSkillImportAdminFacade(
+            RichSkillImportService richSkillImportService,
+            RichSkillService richSkillService
+    ) {
+        return new RichSkillImportAdminFacadeImpl(richSkillImportService, richSkillService);
+    }
+
+    @Bean
     public QuestExplorerFacade questExplorerFacade(QuestExplorerReadService questExplorerReadService) {
         return new QuestExplorerFacadeImpl(questExplorerReadService);
     }

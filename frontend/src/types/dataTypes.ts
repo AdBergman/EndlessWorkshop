@@ -128,6 +128,102 @@ export interface RichFaction {
     protectorateTraitKeys: string[];
 }
 
+export interface RichHero {
+    unitKey: string;
+    displayName: string;
+    faction: string | null;
+    factionKey: string | null;
+    isMajorFaction: boolean | null;
+    heroKey: string | null;
+    heroClassKey: string | null;
+    originKind: string | null;
+    originFactionKey: string | null;
+    minorFactionKey: string | null;
+    unitClassKey: string | null;
+    attackSkillKey: string | null;
+    ownAbilityKeys: string[];
+    abilityKeys: string[];
+    combatAbilityKeys: string[];
+    tacticalAbilityKeys: string[];
+    passiveAbilityKeys: string[];
+    mechanicalAbilityKeys: string[];
+    classRuleAbilityKeys: string[];
+    hiddenHelperAbilityKeys: string[];
+    defaultSkillKeys: string[];
+    applicableSkillTreeKeys: string[];
+    descriptionLines: string[];
+    referenceKeys: string[];
+}
+
+export interface RichSkillTree {
+    treeKey: string;
+    treeType: string | null;
+    isHidden: boolean | null;
+    tierPlacementKeys: string[];
+    tierKeys: string[];
+    skillKeys: string[];
+    referenceKeys: string[];
+    classPrerequisiteKey: string | null;
+    factionPrerequisiteKey: string | null;
+}
+
+export interface RichSkillTier {
+    tierPlacementKey: string;
+    tierKey: string | null;
+    treeKey: string | null;
+    treeType: string | null;
+    tierIndex: number | null;
+    levelPrerequisite: number | null;
+    skillKeys: string[];
+    referenceKeys: string[];
+}
+
+export interface RichHeroSkill {
+    skillKey: string;
+    entryKey: string | null;
+    kind: string | null;
+    displayName: string | null;
+    publicDisplayName: string | null;
+    primaryAbilityKey: string | null;
+    descriptionLines: string[];
+    resolvedDisplayName: string | null;
+    resolvedSummaryLines: string[];
+    resolvedMechanicKind: string | null;
+    resolvedMechanicTags: string[];
+    isObsolete: boolean | null;
+    isActive: boolean | null;
+    isPassive: boolean | null;
+    placements: Array<Record<string, unknown>>;
+    prerequisiteSkillKeys: string[];
+    inhibitedBySkillKeys: string[];
+    lockedBySkillKeys: string[];
+    effects: Array<Record<string, unknown>>;
+    unitAbilityKeys: string[];
+    battleSkillKeys: string[];
+    battleAbilityKeys: string[];
+    descriptorKeys: string[];
+    unitAbilityEventKeys: string[];
+    rewardPerKillInBattleEffectKeys: string[];
+    statAffinityNames: string[];
+    defaultForHeroKeys: string[];
+    referenceKeys: string[];
+}
+
+export interface RichHeroSkillDefault {
+    heroKey: string;
+    defaultSkillKeys: string[];
+    referenceKeys: string[];
+    factionKey: string | null;
+    classKey: string | null;
+}
+
+export interface RichSkills {
+    skillTrees: RichSkillTree[];
+    skillTiers: RichSkillTier[];
+    skills: RichHeroSkill[];
+    heroSkillDefaults: RichHeroSkillDefault[];
+}
+
 export const ERA_THRESHOLDS: Record<number, number> = {
     1: 0,
     2: 8,

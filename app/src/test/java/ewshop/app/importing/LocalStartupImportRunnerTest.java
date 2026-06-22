@@ -7,8 +7,10 @@ import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
+import ewshop.facade.dto.importing.heroes.HeroImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
+import ewshop.facade.dto.importing.skills.SkillImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
@@ -16,6 +18,8 @@ import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
+import ewshop.facade.interfaces.RichHeroImportAdminFacade;
+import ewshop.facade.interfaces.RichSkillImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
@@ -59,6 +63,18 @@ class LocalStartupImportRunnerTest {
                 """);
         Files.writeString(tempDir.resolve("exports/ewshop_factions_export_0.82.json"), """
                 {"exportKind":"factions","factions":[{"factionKey":"Faction_Aspect","publicDisplayName":"Aspects"}]}
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_heroes_export_0.82.json"), """
+                {"exportKind":"heroes","units":[{"unitKey":"Hero_KinOfSheredyn_Archer_2","displayName":"Lieutenant Brezvez"}]}
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_skills_export_0.82.json"), """
+                {
+                  "exportKind":"skills",
+                  "skillTrees":[{"treeKey":"HeroSkillTree_Archer"}],
+                  "skillTiers":[{"tierPlacementKey":"HeroSkillTree_Archer::HeroSkillTier_Archer_1"}],
+                  "skills":[{"skillKey":"HeroSkill_Archer02","publicDisplayName":"Terrain Logistics"}],
+                  "heroSkillDefaults":[{"heroKey":"Hero_KinOfSheredyn_Archer_2","defaultSkillKeys":["HeroSkill_Archer02"]}]
+                }
                 """);
         Files.writeString(tempDir.resolve("exports/ewshop_districts_export_0.78.json"), """
                 {"exportKind":"districts","districts":[{"districtKey":"d","displayName":"District"}]}
@@ -140,10 +156,17 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.improvementCalls).isEqualTo(1);
         assertThat(facades.unitCalls).isEqualTo(1);
         assertThat(facades.factionCalls).isEqualTo(1);
+        assertThat(facades.heroCalls).isEqualTo(1);
+        assertThat(facades.skillCalls).isEqualTo(1);
         assertThat(facades.codexCalls).isEqualTo(8);
         assertThat(facades.techDto.exportKind()).isEqualTo("tech");
         assertThat(facades.unitDto.exportKind()).isEqualTo("units");
         assertThat(facades.factionDto.exportKind()).isEqualTo("factions");
+        assertThat(facades.heroDto.exportKind()).isEqualTo("heroes");
+        assertThat(facades.heroDto.units()).hasSize(1);
+        assertThat(facades.heroDto.units().getFirst().unitKey()).isEqualTo("Hero_KinOfSheredyn_Archer_2");
+        assertThat(facades.skillDto.exportKind()).isEqualTo("skills");
+        assertThat(facades.skillDto.skills().getFirst().publicDisplayName()).isEqualTo("Terrain Logistics");
         assertThat(facades.codexKinds).containsExactly(
                 "abilities",
                 "councilorEffects",
@@ -161,7 +184,7 @@ class LocalStartupImportRunnerTest {
                 .isEqualTo("Effects");
         assertThat(facades.codexByKind.get("partnerEffects").entries().getFirst().publicContextKeys())
                 .containsExactly("PartnerEffect_Hydracorn_PartnerTrait01", "Councilor_Atea");
-        assertThat(summary).isEqualTo(new LocalStartupImportSummary(13, 0, 0));
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(15, 0, 0));
     }
 
     @Test
@@ -404,6 +427,8 @@ class LocalStartupImportRunnerTest {
                 facades,
                 facades,
                 facades,
+                facades,
+                facades,
                 facades
         );
     }
@@ -432,6 +457,8 @@ class LocalStartupImportRunnerTest {
             ImprovementImportAdminFacade,
             UnitImportAdminFacade,
             FactionImportAdminFacade,
+            RichHeroImportAdminFacade,
+            RichSkillImportAdminFacade,
             CodexImportAdminFacade,
             QuestExplorerImportAdminFacade {
 
@@ -440,11 +467,15 @@ class LocalStartupImportRunnerTest {
         private int improvementCalls;
         private int unitCalls;
         private int factionCalls;
+        private int heroCalls;
+        private int skillCalls;
         private int codexCalls;
         private int questCalls;
         private TechImportBatchDto techDto;
         private UnitImportBatchDto unitDto;
         private FactionImportBatchDto factionDto;
+        private HeroImportBatchDto heroDto;
+        private SkillImportBatchDto skillDto;
         private CodexImportBatchDto codexDto;
         private QuestExplorerImportBatchDto questDto;
         private final List<String> codexKinds = new ArrayList<>();
@@ -509,6 +540,26 @@ class LocalStartupImportRunnerTest {
         }
 
         @Override
+        public ImportSummaryDto importHeroes(HeroImportBatchDto file) {
+            heroCalls++;
+            heroDto = file;
+            if (file.units() == null || file.units().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no heroes in units[]");
+            }
+            return summary("heroes", file.units().size());
+        }
+
+        @Override
+        public ImportSummaryDto importSkills(SkillImportBatchDto file) {
+            skillCalls++;
+            skillDto = file;
+            if (file.skills() == null || file.skills().isEmpty()) {
+                throw new IllegalArgumentException("Import file has no skills");
+            }
+            return summary("skills", file.skills().size());
+        }
+
+        @Override
         public ImportSummaryDto importCodex(CodexImportBatchDto file) {
             codexCalls++;
             codexDto = file;
@@ -531,7 +582,8 @@ class LocalStartupImportRunnerTest {
         }
 
         private int totalCalls() {
-            return techCalls + districtCalls + improvementCalls + unitCalls + factionCalls + codexCalls + questCalls;
+            return techCalls + districtCalls + improvementCalls + unitCalls + factionCalls + heroCalls + skillCalls
+                    + codexCalls + questCalls;
         }
     }
 
@@ -591,6 +643,16 @@ class LocalStartupImportRunnerTest {
         @Bean
         FactionImportAdminFacade factionImportAdminFacade() {
             return file -> summary("factions", file.factions().size());
+        }
+
+        @Bean
+        RichHeroImportAdminFacade richHeroImportAdminFacade() {
+            return file -> summary("heroes", file.units().size());
+        }
+
+        @Bean
+        RichSkillImportAdminFacade richSkillImportAdminFacade() {
+            return file -> summary("skills", file.skills().size());
         }
 
         @Bean

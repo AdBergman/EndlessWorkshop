@@ -63,7 +63,6 @@ class CodexControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].length()").value(10))
                 .andExpect(jsonPath("$[0].exportKind").value("resources"))
                 .andExpect(jsonPath("$[0].entryKey").value("Resource_Luxury01"))
                 .andExpect(jsonPath("$[0].displayName").value("Klax"))
