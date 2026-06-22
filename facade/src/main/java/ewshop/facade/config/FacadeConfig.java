@@ -86,29 +86,29 @@ public class FacadeConfig {
     }
 
     @Bean
-    public RichHeroFacade richHeroFacade(RichHeroService richHeroService) {
-        return new RichHeroFacadeImpl(richHeroService);
+    public HeroFacade heroFacade(HeroService heroService) {
+        return new HeroFacadeImpl(heroService);
     }
 
     @Bean
-    public RichHeroImportAdminFacade richHeroImportAdminFacade(
-            RichHeroImportService richHeroImportService,
-            RichHeroService richHeroService
+    public HeroImportAdminFacade heroImportAdminFacade(
+            HeroImportService heroImportService,
+            HeroService heroService
     ) {
-        return new RichHeroImportAdminFacadeImpl(richHeroImportService, richHeroService);
+        return new HeroImportAdminFacadeImpl(heroImportService, heroService);
     }
 
     @Bean
-    public RichSkillFacade richSkillFacade(RichSkillService richSkillService) {
-        return new RichSkillFacadeImpl(richSkillService);
+    public SkillFacade skillFacade(SkillService skillService) {
+        return new SkillFacadeImpl(skillService);
     }
 
     @Bean
-    public RichSkillImportAdminFacade richSkillImportAdminFacade(
-            RichSkillImportService richSkillImportService,
-            RichSkillService richSkillService
+    public SkillImportAdminFacade skillImportAdminFacade(
+            SkillImportService skillImportService,
+            SkillService skillService
     ) {
-        return new RichSkillImportAdminFacadeImpl(richSkillImportService, richSkillService);
+        return new SkillImportAdminFacadeImpl(skillImportService, skillService);
     }
 
     @Bean

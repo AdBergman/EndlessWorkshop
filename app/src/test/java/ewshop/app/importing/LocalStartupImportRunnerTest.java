@@ -18,8 +18,8 @@ import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
-import ewshop.facade.interfaces.RichHeroImportAdminFacade;
-import ewshop.facade.interfaces.RichSkillImportAdminFacade;
+import ewshop.facade.interfaces.HeroImportAdminFacade;
+import ewshop.facade.interfaces.SkillImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.Test;
@@ -457,8 +457,8 @@ class LocalStartupImportRunnerTest {
             ImprovementImportAdminFacade,
             UnitImportAdminFacade,
             FactionImportAdminFacade,
-            RichHeroImportAdminFacade,
-            RichSkillImportAdminFacade,
+            HeroImportAdminFacade,
+            SkillImportAdminFacade,
             CodexImportAdminFacade,
             QuestExplorerImportAdminFacade {
 
@@ -646,12 +646,12 @@ class LocalStartupImportRunnerTest {
         }
 
         @Bean
-        RichHeroImportAdminFacade richHeroImportAdminFacade() {
+        HeroImportAdminFacade heroImportAdminFacade() {
             return file -> summary("heroes", file.units().size());
         }
 
         @Bean
-        RichSkillImportAdminFacade richSkillImportAdminFacade() {
+        SkillImportAdminFacade skillImportAdminFacade() {
             return file -> summary("skills", file.skills().size());
         }
 

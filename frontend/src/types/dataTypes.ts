@@ -128,7 +128,7 @@ export interface RichFaction {
     protectorateTraitKeys: string[];
 }
 
-export interface RichHero {
+export interface Hero {
     unitKey: string;
     displayName: string;
     faction: string | null;
@@ -155,7 +155,7 @@ export interface RichHero {
     referenceKeys: string[];
 }
 
-export interface RichSkillTree {
+export interface SkillTree {
     treeKey: string;
     treeType: string | null;
     isHidden: boolean | null;
@@ -167,7 +167,7 @@ export interface RichSkillTree {
     factionPrerequisiteKey: string | null;
 }
 
-export interface RichSkillTier {
+export interface SkillTier {
     tierPlacementKey: string;
     tierKey: string | null;
     treeKey: string | null;
@@ -178,7 +178,7 @@ export interface RichSkillTier {
     referenceKeys: string[];
 }
 
-export interface RichHeroSkill {
+export interface HeroSkill {
     skillKey: string;
     entryKey: string | null;
     kind: string | null;
@@ -209,7 +209,7 @@ export interface RichHeroSkill {
     referenceKeys: string[];
 }
 
-export interface RichHeroSkillDefault {
+export interface HeroSkillDefault {
     heroKey: string;
     defaultSkillKeys: string[];
     referenceKeys: string[];
@@ -217,11 +217,11 @@ export interface RichHeroSkillDefault {
     classKey: string | null;
 }
 
-export interface RichSkills {
-    skillTrees: RichSkillTree[];
-    skillTiers: RichSkillTier[];
-    skills: RichHeroSkill[];
-    heroSkillDefaults: RichHeroSkillDefault[];
+export interface Skills {
+    skillTrees: SkillTree[];
+    skillTiers: SkillTier[];
+    skills: HeroSkill[];
+    heroSkillDefaults: HeroSkillDefault[];
 }
 
 export const ERA_THRESHOLDS: Record<number, number> = {
