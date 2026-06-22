@@ -1,0 +1,454 @@
+{
+  "project": "EL2.DBExporter",
+  "handoffPurpose": "Final EWShop import/backend/frontend/QA context for completed DB Exporter enhancement cycle.",
+  "authoritativeDocs": [
+    "docs/active/db-exporter-codex-vs-rich-contract-summary.md",
+    "docs/active/db-exporter-next-phase-priorities.md",
+    "docs/active/db-exporter-remaining-work-audit.md"
+  ],
+  "finalSnapshot": {
+    "snapshotId": "20260622-055736",
+    "gameVersion": "0.82",
+    "validationReport": "export-reports/20260622-055736_validation.md",
+    "allRegisteredChecksPassed": true,
+    "validationErrors": 0,
+    "knownWarningsOrInfoRemain": true,
+    "lastExportStatus": {
+      "succeeded": true,
+      "succeededCount": 25,
+      "failedCount": 0,
+      "durationMs": 4849
+    },
+    "f8Needed": false
+  },
+  "importKinds": {
+    "richSourceTruth": [
+      "districts",
+      "improvements",
+      "tech",
+      "units",
+      "heroes",
+      "populations",
+      "abilities",
+      "skills",
+      "factions",
+      "quest_explorer"
+    ],
+    "publicCodex": [
+      "districts-codex",
+      "improvements-codex",
+      "tech-codex",
+      "units-codex",
+      "heroes-codex",
+      "populations-codex",
+      "abilities-codex",
+      "equipment-codex",
+      "councilors-codex",
+      "councilorEffects-codex",
+      "partnerEffects-codex",
+      "resources-codex",
+      "victorypaths-codex",
+      "victoryconditions-codex",
+      "naturalwonders-codex",
+      "minorFactions-codex",
+      "traits-codex",
+      "quests-codex",
+      "actions-codex",
+      "bonuses-codex",
+      "diplomaticTreaties-codex"
+    ],
+    "diagnosticsOnly": [
+      "quest_explorer_branch_diagnostics",
+      "actions-codex-inventory",
+      "bonuses-codex-mechanics",
+      "victorycondition-threshold-diagnostics",
+      "BepInEx/reports/diagnostics/last-export-status.json"
+    ]
+  },
+  "changedExportKinds": {
+    "richSourceTruth": {
+      "heroes": [
+        "explicit source-backed origin handling",
+        "defaultSkillKeys",
+        "applicableSkillTreeKeys",
+        "grouped ability key arrays"
+      ],
+      "skills": [
+        "publicDisplayName",
+        "relationship diagnostics for prerequisites/inhibited/locked refs"
+      ],
+      "units": [
+        "stats",
+        "dustUpkeep",
+        "trimmed source keys",
+        "validated grouped ability refs",
+        "evolution target suppression",
+        "retaliation guardrails"
+      ],
+      "tech": [
+        "factionKeys",
+        "factionGateKind",
+        "requiredFactionTraitKeys",
+        "excludedFactionTraitKeys",
+        "exact unlock target kinds"
+      ],
+      "factions": [
+        "new rich join-point export",
+        "traits",
+        "populations",
+        "units",
+        "heroes",
+        "gatedTechnologyKeys",
+        "startingFactionQuestKey",
+        "specificQuestKeys",
+        "protectorateTraitKeys"
+      ],
+      "populations": [
+        "entryKey",
+        "populationKind",
+        "publicDisplayName",
+        "growthFoodCost",
+        "factionReferenceKey",
+        "factionKind",
+        "factionAffinityKey",
+        "workerDescriptorKeys",
+        "threshold reward classifications"
+      ],
+      "districts": [
+        "familyKey",
+        "constructibleLevel",
+        "constructionCost",
+        "unlockTechnologyKeys",
+        "placementPrerequisites",
+        "levelUp"
+      ],
+      "improvements": [
+        "familyKey",
+        "constructibleLevel",
+        "constructionCost",
+        "unlockTechnologyKeys",
+        "placementPrerequisites"
+      ],
+      "quest_explorer": [
+        "chapterRootEvidence.chapters",
+        "chapterRootEvidence.majorFactionRoots",
+        "chapterRootEvidence.minorFactionSpecificRoots",
+        "chapterRootEvidence.scenarioRootSlots",
+        "chapterRootEvidence.legacyInferredFields",
+        "chapterRootEvidence.evidenceCounts"
+      ]
+    },
+    "publicCodex": {
+      "abilities-codex": [
+        "public-text-derived Combat role",
+        "canonical Apply Status/Remove Status labels",
+        "ability svgIcon metadata for exact AssetExporter ability-icons matches"
+      ],
+      "equipment-codex": [
+        "suppressed non-public granted ability refs",
+        "registered Equipment-to-Ability validation"
+      ],
+      "traits-codex": [
+        "Trait type",
+        "secondary Category",
+        "Origin faction",
+        "public ref cleanup"
+      ],
+      "actions-codex": [
+        "Action type",
+        "UI category where source-backed",
+        "Origin faction where source-proven",
+        "public ref cleanup"
+      ],
+      "bonuses-codex": [
+        "Status Polarity",
+        "Status interactions"
+      ],
+      "victorypaths-codex": [
+        "new public Victory Path rows"
+      ],
+      "victoryconditions-codex": [
+        "public formula facts",
+        "scaling input facts",
+        "current exported-game value facts",
+        "hold duration formula/value facts",
+        "threshold caveats"
+      ],
+      "naturalwonders-codex": [
+        "new public Natural Wonder rows"
+      ]
+    }
+  },
+  "frontendBackendFieldMap": [
+    {
+      "exportKind": "abilities-codex",
+      "fields": [
+        "svgIcon",
+        "Combat role facts"
+      ],
+      "consumerGuidance": "Use emitted svgIcon only when source=ability-icons and key is present; render Combat role as public browse/filter metadata.",
+      "fallbackRule": "If svgIcon is absent, show no inferred icon."
+    },
+    {
+      "exportKind": "units",
+      "fields": [
+        "stats",
+        "stats.dustUpkeep",
+        "combatAbilityKeys",
+        "hiddenHelperAbilityKeys",
+        "nextEvolutionUnitKeys"
+      ],
+      "consumerGuidance": "Use rich stats for roster/profile display and rich evolution refs for upgrade navigation.",
+      "fallbackRule": "Do not compute live upkeep or infer missing evolution targets."
+    },
+    {
+      "exportKind": "skills",
+      "fields": [
+        "publicDisplayName",
+        "primaryAbilityKey",
+        "prerequisiteSkillKeys",
+        "inhibitedBySkillKeys"
+      ],
+      "consumerGuidance": "Use publicDisplayName for Hero skill UI; keep displayName as source key/diagnostic.",
+      "fallbackRule": "Do not parse skill keys into labels."
+    },
+    {
+      "exportKind": "factions",
+      "fields": [
+        "populationKeys",
+        "unitKeys",
+        "heroKeys",
+        "gatedTechnologyKeys",
+        "startingFactionQuestKey",
+        "specificQuestKeys",
+        "protectorateTraitKeys"
+      ],
+      "consumerGuidance": "Use factions as the central rich join point for faction details and resolver enrichment.",
+      "fallbackRule": "Do not backfill missing joins from key prefixes."
+    },
+    {
+      "exportKind": "districts/improvements",
+      "fields": [
+        "constructionCost",
+        "unlockTechnologyKeys",
+        "placementPrerequisites",
+        "levelUp"
+      ],
+      "consumerGuidance": "Use rich data for planning/resolver enrichment; public Codex can stay shallow unless product asks for planning facts.",
+      "fallbackRule": "Do not execute RPN costs or infer unlock timing from era/tier/prose."
+    },
+    {
+      "exportKind": "quest_explorer",
+      "fields": [
+        "chapterRootEvidence"
+      ],
+      "consumerGuidance": "Use chapter/root evidence in Quest Explorer and route linking only.",
+      "fallbackRule": "Do not create generic Questline identity from duplicate titles or parsed quest keys."
+    },
+    {
+      "exportKind": "victoryconditions-codex",
+      "fields": [
+        "formula facts",
+        "Requirement scaling inputs",
+        "Current exported-game value",
+        "Required hold duration formula",
+        "Current exported-game hold duration",
+        "Threshold note"
+      ],
+      "consumerGuidance": "Render formulas, current exported-game values, hold duration, and caveat clearly.",
+      "fallbackRule": "Do not create exact map-size tables unless future source-proven exports provide them."
+    },
+    {
+      "exportKind": "naturalwonders-codex",
+      "fields": [
+        "facts",
+        "Effects section"
+      ],
+      "consumerGuidance": "Render as public reference pages from definition data.",
+      "fallbackRule": "Do not show live placement, owner, discovery, settlement, territory, GUID, or tile data."
+    },
+    {
+      "exportKind": "bonuses-codex",
+      "fields": [
+        "Polarity",
+        "Status interactions"
+      ],
+      "consumerGuidance": "Render Status polarity and public-safe status-to-status relationships where present.",
+      "fallbackRule": "Thin Status rows remain thin."
+    },
+    {
+      "exportKind": "traits-codex",
+      "fields": [
+        "Trait type",
+        "Category",
+        "Origin faction"
+      ],
+      "consumerGuidance": "Use Trait type as broad type and Category as secondary source category.",
+      "fallbackRule": "Do not infer missing Origin faction."
+    },
+    {
+      "exportKind": "actions-codex",
+      "fields": [
+        "Action type",
+        "UI category",
+        "Origin faction"
+      ],
+      "consumerGuidance": "Use Action type for consistent display/filtering and Origin faction only when emitted with a ref.",
+      "fallbackRule": "Do not infer owner/category from raw action names or implementation refs."
+    }
+  ],
+  "sampleSnippetCoverage": [
+    "ability svgIcon",
+    "unit stats",
+    "skills publicDisplayName",
+    "factions join data",
+    "constructible constructionCost/unlockTechnologyKeys",
+    "quest chapterRootEvidence",
+    "victory condition formula/value/caveat",
+    "natural wonder row",
+    "status polarity/interactions",
+    "trait Trait type/Origin faction",
+    "action Action type/Origin faction"
+  ],
+  "victoryConditions": {
+    "publicAgain": true,
+    "exactMapSizeTablesExported": false,
+    "rawRpnDiagnosticsOnly": true,
+    "frontendGuidance": "Render formula, scaling inputs, current exported-game value, hold duration, and caveat. Any frontend-derived map-size examples must be labeled as examples or approximations.",
+    "conditions": {
+      "Enlightenment": {
+        "scalingInputs": [
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 6,
+        "currentHoldDurationTurns": 10
+      },
+      "Stature": {
+        "scalingInputs": [
+          "Map Territories Count",
+          "Major Empires Count",
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 64,
+        "currentHoldDurationTurns": 10
+      },
+      "Multitudes": {
+        "scalingInputs": [
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 190,
+        "currentHoldDurationTurns": 10
+      },
+      "Supremacy": {
+        "scalingInputs": [
+          "Map Territories Count",
+          "Major Empires Count",
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 85,
+        "currentHoldDurationTurns": 10
+      },
+      "Insights": {
+        "scalingInputs": [
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 23,
+        "currentHoldDurationTurns": 10
+      },
+      "Acclaim": {
+        "scalingInputs": [
+          "World Difficulty"
+        ],
+        "currentExportedGameValue": 15,
+        "currentHoldDurationTurns": 10
+      }
+    }
+  },
+  "assetIconNotes": {
+    "dbExporterCurrentlyEmits": [
+      "abilities-codex svgIcon with source=ability-icons and key=<UnitAbility entryKey>"
+    ],
+    "deferredToAssetExporter": [
+      "hero portraits",
+      "unit art",
+      "skill icons",
+      "faction icons",
+      "equipment item art",
+      "trait icons",
+      "action icons",
+      "status icons",
+      "resource semantic icons",
+      "diplomacy icons",
+      "councilor portraits",
+      "population art",
+      "technology art",
+      "constructible art"
+    ]
+  },
+  "deferredItems": {
+    "ewshopProductDecision": [
+      "public Skills Codex category",
+      "Equipment rich export",
+      "Trait rich export",
+      "Actions rich export",
+      "richer public constructible planning facts",
+      "ResourceDeposit/POI/anomaly/terrain/biome pages",
+      "separate buildable-wonder pages",
+      "top-level Questline Codex route"
+    ],
+    "assetExporterArtContract": [
+      "all non-ability icons/art/portraits until a stable semantic asset contract exists"
+    ],
+    "runtimeOnly": [
+      "live victory progress/countdown/enabled state",
+      "live natural wonder placement/discovery/ownership",
+      "live status duration/initiator/target state",
+      "action pathfinding/cooldown/failure/availability",
+      "treaty surrender/tribute values",
+      "researched/queue state",
+      "live costs/upkeep/population counts"
+    ],
+    "blockedByMissingSourceEvidence": [
+      "ability ownership/origin without direct owner fields",
+      "generic questline identity/title/faction ownership",
+      "Small/Normal/Huge victory threshold tables",
+      "any inferred ownership/grouping/progression/mechanics/labels/icons/art/refs"
+    ],
+    "monitorQaOnly": [
+      "thin Action rows",
+      "thin Status rows",
+      "known duplicate display-name info",
+      "validation warnings with 0 errors"
+    ]
+  },
+  "noInferenceRules": [
+    "Do not infer ownership, origin, grouping, progression, labels, mechanics, icons, portraits, art, references, questline identity, or victory thresholds from keys.",
+    "Do not infer from names, prose, duplicate titles, raw key fragments, SVG filenames, Unity paths, GUIDs, mapper names, or fuzzy matching.",
+    "Diagnostics-only exports are not normal public Codex imports.",
+    "Absence should remain absence unless DBExporter or AssetExporter emits source-proven data."
+  ],
+  "backendNotes": [
+    "Register public Codex kinds including victorypaths-codex, victoryconditions-codex, and naturalwonders-codex.",
+    "Register/import factions rich export and expanded rich fields for resolver use.",
+    "Do not public-import diagnostics-only files by default.",
+    "Handle intentionally absent owner/icon/art fields null-safely.",
+    "Guard against empty public export kinds causing deletion; victoryconditions-codex now has 6 rows."
+  ],
+  "frontendNotes": [
+    "Render Victory Condition formula/scaling/current-value/caveat facts clearly.",
+    "Use skills.publicDisplayName for Hero skill displays.",
+    "Use factions rich joins for faction detail enrichment.",
+    "Quest Explorer owns quest browsing; do not recreate branch/chapter navigation in Codex.",
+    "Prefer exact exported refs over resolver inference."
+  ],
+  "suggestedQaChecklist": [
+    "Import all public Codex exports.",
+    "Import rich exports used by resolvers.",
+    "Exclude diagnostics-only exports from normal public import.",
+    "Verify relationship refs resolve.",
+    "Verify ability svgIcon refs resolve against AssetExporter ability-icons.",
+    "Verify Victory Conditions render formulas, current exported-game values, hold durations, and caveats.",
+    "Verify Quest Explorer chapter/root evidence without generic Questline Codex pages.",
+    "Verify sample pages for Ability, Equipment, Trait, Action, Status, Victory Condition, Natural Wonder, Faction, Unit, and Quest Explorer."
+  ]
+}

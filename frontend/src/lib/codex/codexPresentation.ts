@@ -56,6 +56,8 @@ const CODEX_KIND_LABELS: Record<string, string> = {
     population: "Populations",
     quests: "Quests",
     quest: "Quests",
+    naturalwonders: "Natural Wonders",
+    naturalwonder: "Natural Wonders",
     resources: "Resources",
     resource: "Resources",
     statuses: "Statuses",
@@ -66,6 +68,10 @@ const CODEX_KIND_LABELS: Record<string, string> = {
     trait: "Traits",
     units: "Units",
     unit: "Units",
+    victoryconditions: "Victory Conditions",
+    victorycondition: "Victory Conditions",
+    victorypaths: "Victory Paths",
+    victorypath: "Victory Paths",
 };
 
 const CODEX_MAJOR_FACTION_LABELS: Record<string, string> = {

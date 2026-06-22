@@ -281,10 +281,41 @@ class LocalStartupImportRunnerTest {
 
         assertThat(facades.totalCalls()).isZero();
         assertThat(output)
-                .contains("skipped quest explorer diagnostics file")
+                .contains("skipped diagnostics-only codex file")
                 .contains("diagnostics are validation evidence")
                 .contains("Local startup import finished: 0 imported, 1 skipped, 0 failed.");
         assertThat(summary).isEqualTo(new LocalStartupImportSummary(0, 1, 0));
+    }
+
+    @Test
+    void finalSnapshotDiagnosticsOnlyCodexFilesAreSkipped(CapturedOutput output) throws Exception {
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("codex/actions-codex-inventory.json"), """
+                {"exportKind":"actions-codex-inventory","entries":[{"entryKey":"debug-action","displayName":"Debug Action"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/bonuses-codex-mechanics.json"), """
+                {"exportKind":"bonuses-codex-mechanics","entries":[{"entryKey":"debug-bonus","displayName":"Debug Bonus"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/victorycondition-threshold-diagnostics.json"), """
+                {"exportKind":"victorycondition-threshold-diagnostics","entries":[{"entryKey":"debug-victory","displayName":"Debug Victory"}]}
+                """);
+        Files.writeString(tempDir.resolve("codex/last-export-status.json"), """
+                {"succeeded":true,"succeededCount":25,"failedCount":0}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        LocalStartupImportRunner runner = newRunner(facades, true);
+
+        LocalStartupImportSummary summary = runner.runStartupImport();
+
+        assertThat(facades.totalCalls()).isZero();
+        assertThat(output)
+                .contains("exportKind='actions-codex-inventory'")
+                .contains("exportKind='bonuses-codex-mechanics'")
+                .contains("exportKind='victorycondition-threshold-diagnostics'")
+                .contains("skipped diagnostics-only status file")
+                .contains("Local startup import finished: 0 imported, 4 skipped, 0 failed.");
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(0, 4, 0));
     }
 
     @Test

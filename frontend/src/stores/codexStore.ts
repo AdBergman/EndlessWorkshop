@@ -4,7 +4,7 @@ import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
 import { buildEntriesByKey, buildEntriesByKindKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
-import type { CodexEntry, CodexMetadataFact, CodexMetadataSection, CodexMetadataSectionItem } from "@/types/dataTypes";
+import type { CodexEntry, CodexMetadataFact, CodexMetadataSection, CodexMetadataSectionItem, CodexSvgIcon } from "@/types/dataTypes";
 
 type Store = {
     entries: CodexEntry[];
@@ -93,6 +93,15 @@ function cleanSections(values: unknown): CodexMetadataSection[] {
         .filter((section): section is CodexMetadataSection => section !== null);
 }
 
+function cleanSvgIcon(value: unknown): CodexSvgIcon | null {
+    const candidate = value as CodexSvgIcon | null | undefined;
+    if (!candidate || typeof candidate.source !== "string" || typeof candidate.key !== "string") return null;
+
+    const source = candidate.source.trim();
+    const key = candidate.key.trim();
+    return source && key ? { source, key } : null;
+}
+
 function isBonusStatusEntry(entry: CodexEntry): boolean {
     const category = (entry.category ?? "").trim().toLowerCase();
     const kind = (entry.kind ?? "").trim().toLowerCase();
@@ -135,6 +144,7 @@ function normalizeEntry(entry: CodexEntry): CodexEntry {
         facts: cleanFacts(entry.facts),
         sections: cleanSections(entry.sections),
         publicContextKeys: cleanStrings(entry.publicContextKeys),
+        svgIcon: cleanSvgIcon(entry.svgIcon),
     };
 }
 

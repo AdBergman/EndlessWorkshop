@@ -15,6 +15,7 @@ public class Codex {
     private final List<CodexMetadataFact> facts;
     private final List<CodexMetadataSection> sections;
     private final List<String> publicContextKeys;
+    private final CodexSvgIcon svgIcon;
 
     private Codex(Builder b) {
         this.exportKind = b.exportKind;
@@ -27,6 +28,7 @@ public class Codex {
         this.facts = List.copyOf(b.facts);
         this.sections = List.copyOf(b.sections);
         this.publicContextKeys = List.copyOf(b.publicContextKeys);
+        this.svgIcon = b.svgIcon;
     }
 
     public String getExportKind() { return exportKind; }
@@ -39,6 +41,7 @@ public class Codex {
     public List<CodexMetadataFact> getFacts() { return facts; }
     public List<CodexMetadataSection> getSections() { return sections; }
     public List<String> getPublicContextKeys() { return publicContextKeys; }
+    public CodexSvgIcon getSvgIcon() { return svgIcon; }
 
     public static Builder builder() { return new Builder(); }
 
@@ -53,6 +56,7 @@ public class Codex {
         private final ArrayList<CodexMetadataFact> facts = new ArrayList<>();
         private final ArrayList<CodexMetadataSection> sections = new ArrayList<>();
         private final ArrayList<String> publicContextKeys = new ArrayList<>();
+        private CodexSvgIcon svgIcon;
 
         public Builder exportKind(String v) { this.exportKind = v; return this; }
         public Builder entryKey(String v) { this.entryKey = v; return this; }
@@ -87,6 +91,11 @@ public class Codex {
         public Builder publicContextKeys(List<String> v) {
             this.publicContextKeys.clear();
             if (v != null) this.publicContextKeys.addAll(v);
+            return this;
+        }
+
+        public Builder svgIcon(CodexSvgIcon v) {
+            this.svgIcon = v;
             return this;
         }
 

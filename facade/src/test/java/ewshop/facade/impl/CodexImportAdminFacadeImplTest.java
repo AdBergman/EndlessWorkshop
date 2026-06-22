@@ -107,6 +107,41 @@ class CodexImportAdminFacadeImplTest {
     }
 
     @Test
+    void importCodex_preservesOptionalAbilitySvgIconMetadata() {
+        ImportResult result = new ImportResult();
+        result.incrementInserted();
+
+        RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
+        RecordingCodexService codexService = new RecordingCodexService();
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+
+        facade.importCodex(new CodexImportBatchDto(
+                "Endless Legend 2",
+                "0.82",
+                "0.4.0",
+                "2026-06-22T05:57:36Z",
+                "abilities",
+                List.of(new CodexImportEntryDto(
+                        "UnitAbility_AlwaysRetaliate",
+                        "Always Retaliate",
+                        "Passive",
+                        "Ability",
+                        List.of("Counterattack after being hit."),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        new ewshop.facade.dto.importing.codex.CodexSvgIconDto("ability-icons", "UnitAbility_AlwaysRetaliate")
+                ))
+        ));
+
+        CodexImportSnapshot snapshot = codexImportService.capturedSnapshots.getFirst();
+        assertEquals("UnitAbility_AlwaysRetaliate", snapshot.entryKey());
+        assertEquals("ability-icons", snapshot.svgIcon().source());
+        assertEquals("UnitAbility_AlwaysRetaliate", snapshot.svgIcon().key());
+    }
+
+    @Test
     void importCodex_acceptsArbitraryNonBlankExportKind() {
         ImportResult result = new ImportResult();
         result.incrementInserted();

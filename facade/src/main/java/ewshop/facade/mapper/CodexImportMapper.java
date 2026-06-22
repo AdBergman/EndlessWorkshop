@@ -4,6 +4,7 @@ import ewshop.domain.command.CodexImportSnapshot;
 import ewshop.domain.model.CodexMetadataFact;
 import ewshop.domain.model.CodexMetadataSection;
 import ewshop.domain.model.CodexMetadataSectionItem;
+import ewshop.domain.model.CodexSvgIcon;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
 import ewshop.facade.dto.importing.codex.CodexMetadataFactDto;
 import ewshop.facade.dto.importing.codex.CodexMetadataSectionDto;
@@ -46,6 +47,7 @@ public final class CodexImportMapper {
         List<CodexMetadataFact> facts = cleanFacts(dto.facts());
         List<CodexMetadataSection> sections = cleanSections(dto.sections());
         List<String> publicContextKeys = cleanDistinctLines(dto.publicContextKeys());
+        CodexSvgIcon svgIcon = cleanSvgIcon(dto.svgIcon());
 
         return new CodexImportSnapshot(
                 key,
@@ -57,7 +59,8 @@ public final class CodexImportMapper {
                 referenceKeys,
                 facts,
                 sections,
-                publicContextKeys
+                publicContextKeys,
+                svgIcon
         );
     }
 
@@ -164,5 +167,13 @@ public final class CodexImportMapper {
             out.add(new CodexMetadataSectionItem(label, referenceKey, facts, lines));
         }
         return out;
+    }
+
+    private static CodexSvgIcon cleanSvgIcon(ewshop.facade.dto.importing.codex.CodexSvgIconDto icon) {
+        if (icon == null) return null;
+
+        String source = trimToNull(icon.source());
+        String key = trimToNull(icon.key());
+        return source == null || key == null ? null : new CodexSvgIcon(source, key);
     }
 }

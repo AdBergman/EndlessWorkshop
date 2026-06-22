@@ -36,6 +36,12 @@ const CODEX_KIND_ICON_RAW_KEYS: Record<string, string> = {
     trait: "breakdownSourcesTypesDeeds",
     units: "resourceUnit",
     unit: "resourceUnit",
+    naturalwonders: "constructibleCategoryArtificialWonder",
+    naturalwonder: "constructibleCategoryArtificialWonder",
+    victoryconditions: "endGameNarrative_Event000",
+    victorycondition: "endGameNarrative_Event000",
+    victorypaths: "factionTrait_VictoryCondition_Glorify",
+    victorypath: "factionTrait_VictoryCondition_Glorify",
 };
 
 function normalizeCodexKind(kind: string): string {

@@ -33,14 +33,25 @@ describe("codexEntryIcons", () => {
         ).toBe("/svg/constructibles/UI_Resource_Strategic_Titanium.svg");
     });
 
-    it("uses ability icons for ability entries when a safe raw match exists", () => {
+    it("uses explicit exported ability svgIcon metadata for ability entries", () => {
+        expect(
+            getCodexEntryIconPath(entry({
+                exportKind: "abilities",
+                entryKey: "Ability_DisplayKeyDoesNotMatter",
+                displayName: "Fly",
+                svgIcon: { source: "ability-icons", key: "UnitAbility_Fly" },
+            }))
+        ).toBe("/svg/unit-abilities/UI_UnitAbility_Fly.svg");
+    });
+
+    it("does not infer ability entry icons from the entry key without exported svgIcon metadata", () => {
         expect(
             getCodexEntryIconPath(entry({
                 exportKind: "abilities",
                 entryKey: "UnitAbility_Fly",
                 displayName: "Fly",
             }))
-        ).toBe("/svg/unit-abilities/UI_UnitAbility_Fly.svg");
+        ).toBeNull();
     });
 
     it("does not let generic yield tokens replace entity kind icons", () => {

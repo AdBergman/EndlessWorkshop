@@ -89,6 +89,11 @@ export interface CodexMetadataSection {
     items?: CodexMetadataSectionItem[];
 }
 
+export interface CodexSvgIcon {
+    source: string;
+    key: string;
+}
+
 export interface Codex {
     exportKind: string;
     entryKey: string;
@@ -100,6 +105,7 @@ export interface Codex {
     facts?: CodexMetadataFact[];
     sections?: CodexMetadataSection[];
     publicContextKeys?: string[];
+    svgIcon?: CodexSvgIcon | null;
 }
 
 export type CodexEntry = Codex;

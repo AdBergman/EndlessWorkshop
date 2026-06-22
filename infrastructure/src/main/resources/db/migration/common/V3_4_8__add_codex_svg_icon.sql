@@ -1,0 +1,5 @@
+ALTER TABLE codex
+    ADD COLUMN IF NOT EXISTS svg_icon_source VARCHAR(120);
+
+ALTER TABLE codex
+    ADD COLUMN IF NOT EXISTS svg_icon_key VARCHAR(300);

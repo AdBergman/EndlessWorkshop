@@ -3,7 +3,7 @@ import { IconImg } from "./IconImg";
 import { getCodexEntryIconPath } from "./codexEntryIcons";
 
 type CodexEntryIconProps = {
-    entry: Pick<CodexEntry, "exportKind" | "entryKey" | "displayName">;
+    entry: Pick<CodexEntry, "exportKind" | "entryKey" | "displayName" | "svgIcon">;
     label: string;
     className?: string;
     size?: number;

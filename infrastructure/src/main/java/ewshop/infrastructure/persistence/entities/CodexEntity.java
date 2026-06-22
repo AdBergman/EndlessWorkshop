@@ -34,6 +34,12 @@ public class CodexEntity {
     @Column(name = "source_kind", length = 160)
     private String kind;
 
+    @Column(name = "svg_icon_source", length = 120)
+    private String svgIconSource;
+
+    @Column(name = "svg_icon_key", length = 300)
+    private String svgIconKey;
+
     @ElementCollection
     @CollectionTable(name = "codex_description_lines", joinColumns = @JoinColumn(name = "codex_id"))
     @OrderColumn(name = "line_index")
@@ -77,6 +83,12 @@ public class CodexEntity {
 
     public String getKind() { return kind; }
     public void setKind(String kind) { this.kind = kind; }
+
+    public String getSvgIconSource() { return svgIconSource; }
+    public void setSvgIconSource(String svgIconSource) { this.svgIconSource = svgIconSource; }
+
+    public String getSvgIconKey() { return svgIconKey; }
+    public void setSvgIconKey(String svgIconKey) { this.svgIconKey = svgIconKey; }
 
     public List<String> getDescriptionLines() { return descriptionLines; }
     public void setDescriptionLines(List<String> descriptionLines) {

@@ -64,7 +64,8 @@ public class CodexImportService {
                 cleanPublicRelationshipKeys(snapshot.referenceKeys()),
                 snapshot.facts(),
                 snapshot.sections(),
-                cleanPublicRelationshipKeys(snapshot.publicContextKeys())
+                cleanPublicRelationshipKeys(snapshot.publicContextKeys()),
+                snapshot.svgIcon()
         );
     }
 

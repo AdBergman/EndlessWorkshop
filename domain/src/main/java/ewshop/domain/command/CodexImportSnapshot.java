@@ -2,6 +2,7 @@ package ewshop.domain.command;
 
 import ewshop.domain.model.CodexMetadataFact;
 import ewshop.domain.model.CodexMetadataSection;
+import ewshop.domain.model.CodexSvgIcon;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public final class CodexImportSnapshot {
     private final List<CodexMetadataFact> facts;
     private final List<CodexMetadataSection> sections;
     private final List<String> publicContextKeys;
+    private final CodexSvgIcon svgIcon;
 
     public CodexImportSnapshot(
             String entryKey,
@@ -27,7 +29,7 @@ public final class CodexImportSnapshot {
             List<String> descriptionLines,
             List<String> referenceKeys
     ) {
-        this(entryKey, displayName, exportKind, category, kind, descriptionLines, referenceKeys, List.of(), List.of(), List.of());
+        this(entryKey, displayName, exportKind, category, kind, descriptionLines, referenceKeys, List.of(), List.of(), List.of(), null);
     }
 
     public CodexImportSnapshot(
@@ -42,6 +44,22 @@ public final class CodexImportSnapshot {
             List<CodexMetadataSection> sections,
             List<String> publicContextKeys
     ) {
+        this(entryKey, displayName, exportKind, category, kind, descriptionLines, referenceKeys, facts, sections, publicContextKeys, null);
+    }
+
+    public CodexImportSnapshot(
+            String entryKey,
+            String displayName,
+            String exportKind,
+            String category,
+            String kind,
+            List<String> descriptionLines,
+            List<String> referenceKeys,
+            List<CodexMetadataFact> facts,
+            List<CodexMetadataSection> sections,
+            List<String> publicContextKeys,
+            CodexSvgIcon svgIcon
+    ) {
         this.entryKey = entryKey;
         this.displayName = displayName;
         this.exportKind = exportKind;
@@ -52,6 +70,7 @@ public final class CodexImportSnapshot {
         this.facts = facts == null ? List.of() : List.copyOf(facts);
         this.sections = sections == null ? List.of() : List.copyOf(sections);
         this.publicContextKeys = publicContextKeys == null ? List.of() : List.copyOf(publicContextKeys);
+        this.svgIcon = svgIcon;
     }
 
     public String entryKey() { return entryKey; }
@@ -64,4 +83,5 @@ public final class CodexImportSnapshot {
     public List<CodexMetadataFact> facts() { return facts; }
     public List<CodexMetadataSection> sections() { return sections; }
     public List<String> publicContextKeys() { return publicContextKeys; }
+    public CodexSvgIcon svgIcon() { return svgIcon; }
 }

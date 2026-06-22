@@ -38,14 +38,14 @@ describe("codexAbilityArchiveFilters", () => {
         ]);
         expect(roleFilter?.allowedValues).toEqual([
             "Damage",
-            "Status apply",
+            "Apply Status",
             "Shield",
             "Heal",
             "Movement",
             "Teleport",
             "Summon",
             "Push",
-            "Status remove",
+            "Remove Status",
             "Reactive skill",
         ]);
         expect(getAbilityArchiveFactFilterConfig("statuses")).toEqual([]);
@@ -56,14 +56,14 @@ describe("codexAbilityArchiveFilters", () => {
         const entry = ability(
             "Ability_DamageNameOnly",
             "Damage Name Only",
-            [{ label: "Combat role", value: "Damage, Movement, Status apply" }],
+            [{ label: "Combat role", value: "Damage, Movement, Apply Status" }],
             ["Heal appears in prose only."]
         );
 
         expect(getEntryFactFilterValues(entry, roleFilter!)).toEqual([
             "Damage",
             "Movement",
-            "Status apply",
+            "Apply Status",
         ]);
         expect(entryMatchesAbilityArchiveFilters(entry, { "Combat role": "Movement" }, filters)).toBe(true);
         expect(entryMatchesAbilityArchiveFilters(entry, { "Combat role": "Heal" }, filters)).toBe(false);
@@ -74,7 +74,7 @@ describe("codexAbilityArchiveFilters", () => {
             "Ability_Damage_StatusApply",
             "Damage Status Apply",
             [{ label: "Role", value: "Damage" }],
-            ["Status apply and Damage appear here only."]
+            ["Apply Status and Damage appear here only."]
         );
 
         expect(entryMatchesAbilityArchiveFilters(proseOnly, { "Combat role": "Damage" }, filters)).toBe(false);
@@ -187,12 +187,12 @@ describe("codexAbilityArchiveFilters", () => {
 
     it("builds active shelf labels and Ability Archive summaries", () => {
         const activeItems = getActiveAbilityArchiveFilterItems(
-            { "Combat role": "Status apply", "Ability mechanic": "Reaction" },
+            { "Combat role": "Apply Status", "Ability mechanic": "Reaction" },
             filters
         );
 
         expect(activeItems).toEqual([
-            { label: "Combat role", displayLabel: "Ability Role", value: "Status apply" },
+            { label: "Combat role", displayLabel: "Ability Role", value: "Apply Status" },
             { label: "Ability mechanic", displayLabel: "Mechanics", value: "Reaction" },
         ]);
         expect(getAbilityArchiveSummary([], 336)).toEqual({
@@ -204,7 +204,7 @@ describe("codexAbilityArchiveFilters", () => {
             context: "Archive shelf",
         });
         expect(getAbilityArchiveSummary(activeItems.slice(0, 1), 1)).toEqual({
-            title: "Status Apply Abilities",
+            title: "Apply Status Abilities",
             context: "Archive shelf",
         });
     });

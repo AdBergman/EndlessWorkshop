@@ -99,6 +99,32 @@ class CodexFacadeIntegrationTest extends BaseIT {
     }
 
     @Test
+    void importCodexThroughFacade_preservesAbilitySvgIconMetadata() {
+        codexImportAdminFacade.importCodex(batch("abilities", List.of(
+                new CodexImportEntryDto(
+                        "UnitAbility_AlwaysRetaliate",
+                        "Always Retaliate",
+                        "Passive",
+                        "Ability",
+                        List.of("Counterattack after being hit."),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        List.of(),
+                        new ewshop.facade.dto.importing.codex.CodexSvgIconDto("ability-icons", "UnitAbility_AlwaysRetaliate")
+                )
+        )));
+        entityManager.flush();
+        entityManager.clear();
+
+        CodexDto ability = findCodex(codexFacade.getAllCodexEntries(), "UnitAbility_AlwaysRetaliate");
+
+        assertThat(ability.svgIcon()).isNotNull();
+        assertThat(ability.svgIcon().source()).isEqualTo("ability-icons");
+        assertThat(ability.svgIcon().key()).isEqualTo("UnitAbility_AlwaysRetaliate");
+    }
+
+    @Test
     void importCodexThroughFacade_preservesNestedMetadataForArbitraryCodexKinds() {
         codexImportAdminFacade.importCodex(batch("actions", List.of(
                 new CodexImportEntryDto(

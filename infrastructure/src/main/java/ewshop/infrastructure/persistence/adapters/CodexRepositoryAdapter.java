@@ -130,6 +130,18 @@ public class CodexRepositoryAdapter implements CodexRepository {
             changed = true;
         }
 
+        String newSvgIconSource = update.svgIcon() == null ? null : update.svgIcon().source();
+        if (!Objects.equals(entity.getSvgIconSource(), newSvgIconSource)) {
+            entity.setSvgIconSource(newSvgIconSource);
+            changed = true;
+        }
+
+        String newSvgIconKey = update.svgIcon() == null ? null : update.svgIcon().key();
+        if (!Objects.equals(entity.getSvgIconKey(), newSvgIconKey)) {
+            entity.setSvgIconKey(newSvgIconKey);
+            changed = true;
+        }
+
         List<String> newLines = update.descriptionLines() == null ? List.of() : new ArrayList<>(update.descriptionLines());
         if (!Objects.equals(entity.getDescriptionLines(), newLines)) {
             entity.setDescriptionLines(newLines);

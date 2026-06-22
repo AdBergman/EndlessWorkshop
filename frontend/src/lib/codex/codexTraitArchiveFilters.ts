@@ -9,7 +9,7 @@ export type TraitTypeFilterOption = {
     count: number;
 };
 
-export const TRAIT_TYPE_FACT_LABEL = "Category";
+export const TRAIT_TYPE_FACT_LABEL = "Trait type";
 
 const TRAIT_TYPE_ORDER: TraitArchiveType[] = ["Faction", "Protectorate"];
 

@@ -154,7 +154,7 @@ function seedShallowReferenceLayoutEntries() {
             referenceKeys: [],
             facts: [
                 { label: "Kind", value: "Trait" },
-                { label: "Category", value: "Protectorate" },
+                { label: "Trait type", value: "Protectorate" },
             ],
             sections: [{ title: "Effects", lines: ["+3 [Defense] Defense on Unit"] }],
         },
@@ -168,7 +168,7 @@ function seedShallowReferenceLayoutEntries() {
             referenceKeys: [],
             facts: [
                 { label: "Kind", value: "Trait" },
-                { label: "Category", value: "Faction" },
+                { label: "Trait type", value: "Faction" },
             ],
             sections: [{
                 title: "Effects",
@@ -403,7 +403,10 @@ describe("CodexPage", () => {
                 descriptionLines: [],
                 referenceKeys: [],
             },
+            { exportKind: "victorypaths", entryKey: "VictoryPath_A", displayName: "Victory Path A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "victoryconditions", entryKey: "VictoryCondition_A", displayName: "Victory Condition A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "quests", entryKey: "Quest_A", displayName: "Quest A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "naturalwonders", entryKey: "NaturalWonder_A", displayName: "Natural Wonder A", descriptionLines: [], referenceKeys: [] },
             {
                 exportKind: "councilorEffects",
                 entryKey: "CouncilorEffect_A",
@@ -442,9 +445,12 @@ describe("CodexPage", () => {
             "Equipment",
             "Factions",
             "Diplomacy",
+            "Victory Paths",
+            "Victory Conditions",
             "Heroes",
             "Improvements",
             "Minor Factions",
+            "Natural Wonders",
             "Populations",
             "Statuses",
             "Tech",
@@ -481,7 +487,10 @@ describe("CodexPage", () => {
                 descriptionLines: [],
                 referenceKeys: [],
             },
+            { exportKind: "victorypaths", entryKey: "VictoryPath_A", displayName: "Victory Path A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "victoryconditions", entryKey: "VictoryCondition_A", displayName: "Victory Condition A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "quests", entryKey: "Quest_A", displayName: "Quest A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "naturalwonders", entryKey: "NaturalWonder_A", displayName: "Natural Wonder A", descriptionLines: [], referenceKeys: [] },
             {
                 exportKind: "councilorEffects",
                 entryKey: "CouncilorEffect_A",
@@ -525,9 +534,12 @@ describe("CodexPage", () => {
             "Equipment",
             "Factions",
             "Diplomacy",
+            "Victory Paths",
+            "Victory Conditions",
             "Heroes",
             "Improvements",
             "Minor Factions",
+            "Natural Wonders",
             "Populations",
             "Statuses",
             "Tech",
@@ -555,6 +567,7 @@ describe("CodexPage", () => {
                     { label: "Combat role", value: "Retaliation" },
                     { label: "Kind", value: "Ability" },
                 ],
+                svgIcon: { source: "ability-icons", key: "UnitAbility_AlwaysRetaliate" },
             },
             {
                 exportKind: "abilities",
@@ -591,7 +604,7 @@ describe("CodexPage", () => {
                 exportKind: "abilities",
                 entryKey: "Ability_ActiveBattleSkillNameOnly",
                 displayName: "Active Battle Skill Name Only",
-                descriptionLines: ["Status apply appears in prose without exported metadata facts."],
+                descriptionLines: ["Apply Status appears in prose without exported metadata facts."],
                 referenceKeys: [],
             },
             {
@@ -708,7 +721,7 @@ describe("CodexPage", () => {
         const thinOverviewRow = within(abilitiesOverview).getByRole("button", {
             name: /active battle skill name only/i,
         });
-        expect(thinOverviewRow.querySelector("img.codex-kindIcon--summaryEntry")).toBeInTheDocument();
+        expect(thinOverviewRow.querySelector("img.codex-kindIcon--summaryEntry")).not.toBeInTheDocument();
         expect(thinOverviewRow.querySelector(".codex-summaryList__metadata")).not.toBeInTheDocument();
     });
 
@@ -731,7 +744,7 @@ describe("CodexPage", () => {
                     { label: "Cost", value: "1 Battle Token" },
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
-                    { label: "Combat role", value: "Damage, Status apply" },
+                    { label: "Combat role", value: "Damage, Apply Status" },
                 ],
                 sections: [
                     {
@@ -762,7 +775,7 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Ability mechanic", value: "Reaction" },
                     { label: "Ability source", value: "Battle ability" },
-                    { label: "Combat role", value: "Status apply" },
+                    { label: "Combat role", value: "Apply Status" },
                 ],
                 sections: [{ title: "Effects", lines: ["Applies Terrorized I Status to all enemy Units"] }],
             },
@@ -1186,14 +1199,14 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
-                    { label: "Combat role", value: "Damage, Movement, Status apply" },
+                    { label: "Combat role", value: "Damage, Movement, Apply Status" },
                 ],
             },
             {
                 exportKind: "abilities",
                 entryKey: "Ability_ActiveBattleSkillNameOnly",
                 displayName: "Active Battle Skill Name Only",
-                descriptionLines: ["Active battle skill and status apply appear in prose only."],
+                descriptionLines: ["Active battle skill and Apply Status appear in prose only."],
                 referenceKeys: [],
             },
             {
@@ -1231,7 +1244,7 @@ describe("CodexPage", () => {
         const mechanicGroup = within(filters).getByRole("group", { name: "Mechanics" });
         const sourceGroup = within(filters).getByRole("group", { name: "Sources" });
         expect(within(popularGroup).getByRole("button", { name: /damage\s+1/i })).toBeInTheDocument();
-        expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i })).toBeInTheDocument();
+        expect(within(popularGroup).getByRole("button", { name: /apply status\s+1/i })).toBeInTheDocument();
         expect(within(popularGroup).queryByRole("button", { name: /heal\s+0/i })).not.toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /active\s+1/i })).toBeInTheDocument();
         expect(within(mechanicGroup).getByRole("button", { name: /passive\s+1/i })).toBeInTheDocument();
@@ -1241,16 +1254,16 @@ describe("CodexPage", () => {
         expect(within(filters).queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
         expect(within(filters).queryByText("Current shelf")).not.toBeInTheDocument();
 
-        await user.click(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }));
+        await user.click(within(popularGroup).getByRole("button", { name: /apply status\s+1/i }));
 
         const abilitiesOverview = screen.getByLabelText("Abilities overview");
-        expect(await screen.findByRole("heading", { name: "Status Apply Abilities" })).toBeInTheDocument();
+        expect(await screen.findByRole("heading", { name: "Apply Status Abilities" })).toBeInTheDocument();
         expect(within(abilitiesOverview).getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
         expect(within(abilitiesOverview).queryByRole("button", { name: /always retaliate/i })).not.toBeInTheDocument();
         expect(within(abilitiesOverview).queryByRole("button", { name: /active battle skill name only/i }))
             .not.toBeInTheDocument();
 
-        expect(within(popularGroup).getByRole("button", { name: /status apply\s+1/i }))
+        expect(within(popularGroup).getByRole("button", { name: /apply status\s+1/i }))
             .toHaveAttribute("aria-pressed", "true");
         expect(within(filters).getByRole("group", { name: "Ability Role" })).toBeInTheDocument();
         expect(within(filters).getByRole("group", { name: "Mechanics" })).toBeInTheDocument();
@@ -1272,7 +1285,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Passive Abilities" })).toBeInTheDocument();
         expect(within(abilitiesOverview).getByRole("button", { name: /quiet discipline/i })).toBeInTheDocument();
         expect(within(popularGroup).getByRole("button", { name: /damage\s+0/i })).toBeDisabled();
-        expect(within(popularGroup).getByRole("button", { name: /status apply\s+0/i })).toBeDisabled();
+        expect(within(popularGroup).getByRole("button", { name: /apply status\s+0/i })).toBeDisabled();
         expect(within(popularGroup).queryByRole("button", { name: /reactive skill\s+0/i }))
             .not.toBeInTheDocument();
 
@@ -1297,8 +1310,8 @@ describe("CodexPage", () => {
             .getByRole("button", { name: /precise volley/i })).toBeInTheDocument();
 
         await user.click(within(screen.getByRole("group", { name: "Ability Role" }))
-            .getByRole("button", { name: /status apply\s+1/i }));
-        expect(await screen.findByRole("heading", { name: "Status Apply Abilities" })).toBeInTheDocument();
+            .getByRole("button", { name: /apply status\s+1/i }));
+        expect(await screen.findByRole("heading", { name: "Apply Status Abilities" })).toBeInTheDocument();
         await user.click(within(screen.getByLabelText("Abilities overview"))
             .getByRole("button", { name: /precise volley/i }));
         expect(await screen.findByRole("heading", { name: "Precise Volley" })).toBeInTheDocument();
@@ -3226,6 +3239,20 @@ describe("CodexPage", () => {
                 referenceKeys: [],
             },
             {
+                exportKind: "victorypaths",
+                entryKey: "VictoryPath_A",
+                displayName: "Victory Path A",
+                descriptionLines: ["Victory path."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "victoryconditions",
+                entryKey: "VictoryCondition_A",
+                displayName: "Victory Condition A",
+                descriptionLines: ["Victory condition."],
+                referenceKeys: [],
+            },
+            {
                 exportKind: "heroes",
                 entryKey: "Hero_A",
                 displayName: "Hero A",
@@ -3253,6 +3280,13 @@ describe("CodexPage", () => {
                 entryKey: "Resource_Luxury01",
                 displayName: "Klax",
                 descriptionLines: ["Luxury resource."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "naturalwonders",
+                entryKey: "NaturalWonder_A",
+                displayName: "Natural Wonder A",
+                descriptionLines: ["Natural wonder."],
                 referenceKeys: [],
             },
             {
@@ -3300,7 +3334,10 @@ describe("CodexPage", () => {
             "Resources",
             "Factions",
             "Diplomacy",
+            "Victory Paths",
+            "Victory Conditions",
             "Heroes",
+            "Natural Wonders",
             "Statuses",
         ]);
         expect(within(screen.getByLabelText("Codex category index"))
@@ -3312,6 +3349,12 @@ describe("CodexPage", () => {
             .getByRole("button", { name: /councilor effects 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /partner effects 1/i })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex category index"))
+            .getByRole("button", { name: /victory paths 1/i })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex category index"))
+            .getByRole("button", { name: /victory conditions 1/i })).toBeInTheDocument();
+        expect(within(screen.getByLabelText("Codex category index"))
+            .getByRole("button", { name: /natural wonders 1/i })).toBeInTheDocument();
     });
 
     it("keeps exporter return kinds searchable and linkable after top-level promotion", async () => {
@@ -3653,7 +3696,7 @@ describe("CodexPage", () => {
                 referenceKeys: ["MinorFaction_DaughterOfBor"],
                 facts: [
                     { label: "Kind", value: "Trait" },
-                    { label: "Category", value: "Protectorate" },
+                    { label: "Trait type", value: "Protectorate" },
                 ],
                 sections: [{
                     title: "Effects",
@@ -3674,7 +3717,7 @@ describe("CodexPage", () => {
                 referenceKeys: ["MinorFaction_MangroveOfHarmony"],
                 facts: [
                     { label: "Kind", value: "Trait" },
-                    { label: "Category", value: "Protectorate" },
+                    { label: "Trait type", value: "Protectorate" },
                 ],
                 publicContextKeys: ["ProtectorateTrait_MangroveOfHarmony_Trait01", "MinorFaction_MangroveOfHarmony"],
             },
@@ -4101,7 +4144,7 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
-                    { label: "Combat role", value: "Status apply" },
+                    { label: "Combat role", value: "Apply Status" },
                     { label: "Target", value: "Enemies" },
                     { label: "Range", value: "3" },
                     { label: "Cost", value: "1 Battle Token" },
@@ -4208,7 +4251,7 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Ability mechanic", value: "Active" },
                     { label: "Ability source", value: "Battle skill" },
-                    { label: "Combat role", value: "Status apply" },
+                    { label: "Combat role", value: "Apply Status" },
                     { label: "Target", value: "Enemies" },
                     { label: "Range", value: "3" },
                     { label: "Cost", value: "1 Battle Token" },
@@ -4324,7 +4367,7 @@ describe("CodexPage", () => {
         expect(within(profile).queryByText("Source")).not.toBeInTheDocument();
         expect(within(profile).queryByText("Battle skill")).not.toBeInTheDocument();
         expect(within(profile).queryByText("Role")).not.toBeInTheDocument();
-        expect(within(profile).queryByText("Status apply")).not.toBeInTheDocument();
+        expect(within(profile).queryByText("Apply Status")).not.toBeInTheDocument();
         expect(within(profile).queryByText("Kind")).not.toBeInTheDocument();
         expect(within(profile).queryByText("Category")).not.toBeInTheDocument();
         expect(screen.queryByText(/Combat \/ Ability/i)).not.toBeInTheDocument();
@@ -4482,6 +4525,7 @@ describe("CodexPage", () => {
                     { label: "Category", value: "Passive" },
                 ],
                 sections: [{ title: "Effects", lines: ["+3 [AttackRange] Attack Range"] }],
+                svgIcon: { source: "ability-icons", key: "UnitAbility_Ranged_3" },
             },
             {
                 exportKind: "abilities",

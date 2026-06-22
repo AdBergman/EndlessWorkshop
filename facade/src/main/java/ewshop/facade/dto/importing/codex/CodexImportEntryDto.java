@@ -11,8 +11,23 @@ public record CodexImportEntryDto(
         List<String> referenceKeys,
         List<CodexMetadataFactDto> facts,
         List<CodexMetadataSectionDto> sections,
-        List<String> publicContextKeys
+        List<String> publicContextKeys,
+        CodexSvgIconDto svgIcon
 ) {
+    public CodexImportEntryDto(
+            String entryKey,
+            String displayName,
+            String category,
+            String kind,
+            List<String> descriptionLines,
+            List<String> referenceKeys,
+            List<CodexMetadataFactDto> facts,
+            List<CodexMetadataSectionDto> sections,
+            List<String> publicContextKeys
+    ) {
+        this(entryKey, displayName, category, kind, descriptionLines, referenceKeys, facts, sections, publicContextKeys, null);
+    }
+
     public CodexImportEntryDto(
             String entryKey,
             String displayName,
@@ -21,7 +36,7 @@ public record CodexImportEntryDto(
             List<String> descriptionLines,
             List<String> referenceKeys
     ) {
-        this(entryKey, displayName, category, kind, descriptionLines, referenceKeys, List.of(), List.of(), List.of());
+        this(entryKey, displayName, category, kind, descriptionLines, referenceKeys, List.of(), List.of(), List.of(), null);
     }
 
     public CodexImportEntryDto(
@@ -30,6 +45,6 @@ public record CodexImportEntryDto(
             List<String> descriptionLines,
             List<String> referenceKeys
     ) {
-        this(entryKey, displayName, null, null, descriptionLines, referenceKeys, List.of(), List.of(), List.of());
+        this(entryKey, displayName, null, null, descriptionLines, referenceKeys, List.of(), List.of(), List.of(), null);
     }
 }

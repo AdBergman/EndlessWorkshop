@@ -4,10 +4,12 @@ import ewshop.domain.model.Codex;
 import ewshop.domain.model.CodexMetadataFact;
 import ewshop.domain.model.CodexMetadataSection;
 import ewshop.domain.model.CodexMetadataSectionItem;
+import ewshop.domain.model.CodexSvgIcon;
 import ewshop.facade.dto.response.CodexDto;
 import ewshop.facade.dto.response.CodexMetadataFactDto;
 import ewshop.facade.dto.response.CodexMetadataSectionDto;
 import ewshop.facade.dto.response.CodexMetadataSectionItemDto;
+import ewshop.facade.dto.response.CodexSvgIconDto;
 
 import java.util.List;
 
@@ -40,8 +42,13 @@ public class CodexMapper {
                 refs,
                 facts,
                 sections,
-                publicContextKeys
+                publicContextKeys,
+                toSvgIconDto(domain.getSvgIcon())
         );
+    }
+
+    private static CodexSvgIconDto toSvgIconDto(CodexSvgIcon icon) {
+        return icon == null ? null : new CodexSvgIconDto(icon.source(), icon.key());
     }
 
     private static List<CodexMetadataFactDto> toFactDtos(List<CodexMetadataFact> facts) {

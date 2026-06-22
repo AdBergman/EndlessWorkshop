@@ -44,6 +44,12 @@ import java.util.stream.Stream;
 public class LocalStartupImportRunner implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LocalStartupImportRunner.class);
+    private static final Set<String> DIAGNOSTICS_ONLY_CODEX_EXPORT_KINDS = Set.of(
+            "quest_explorer_branch_diagnostics",
+            "actions-codex-inventory",
+            "bonuses-codex-mechanics",
+            "victorycondition-threshold-diagnostics"
+    );
     private final LocalStartupImportProperties properties;
     private final ObjectMapper objectMapper;
     private final TechImportAdminFacade techImportAdminFacade;
@@ -268,9 +274,18 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     private @Nullable ImportSummaryDto importCodexFile(Path file, JsonNode json) throws IOException {
         String exportKind = normalizedExportKind(json);
 
-        if ("quest_explorer_branch_diagnostics".equals(exportKind)) {
+        if (exportKind != null && DIAGNOSTICS_ONLY_CODEX_EXPORT_KINDS.contains(exportKind)) {
             log.warn(
-                    "Local startup import skipped quest explorer diagnostics file {}; diagnostics are validation evidence and are not runtime import data.",
+                    "Local startup import skipped diagnostics-only codex file {} with exportKind='{}'; diagnostics are validation evidence and are not runtime import data.",
+                    file.toAbsolutePath().normalize(),
+                    exportKind
+            );
+            return null;
+        }
+
+        if (file.getFileName().toString().equalsIgnoreCase("last-export-status.json")) {
+            log.warn(
+                    "Local startup import skipped diagnostics-only status file {}; diagnostics are validation evidence and are not runtime import data.",
                     file.toAbsolutePath().normalize()
             );
             return null;

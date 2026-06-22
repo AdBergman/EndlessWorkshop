@@ -26,6 +26,9 @@ describe("codexCategoryConfig", () => {
 
     it("keeps only player-facing categories visible in top-level navigation", () => {
         expect(isVisibleTopLevelCodexKind("abilities")).toBe(true);
+        expect(isVisibleTopLevelCodexKind("victorypaths")).toBe(true);
+        expect(isVisibleTopLevelCodexKind("victoryconditions")).toBe(true);
+        expect(isVisibleTopLevelCodexKind("naturalwonders")).toBe(true);
         expect(isVisibleTopLevelCodexKind("extractors")).toBe(false);
         expect(isVisibleTopLevelCodexKind("modifiers")).toBe(false);
         expect(isVisibleTopLevelCodexKind("bonuses")).toBe(false);

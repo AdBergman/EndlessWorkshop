@@ -71,7 +71,8 @@ public class CodexFacadeImpl implements CodexFacade {
                 referenceKeys,
                 dto.facts(),
                 dto.sections(),
-                dto.publicContextKeys()
+                dto.publicContextKeys(),
+                dto.svgIcon()
         );
     }
 
