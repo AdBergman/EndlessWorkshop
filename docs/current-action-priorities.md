@@ -63,9 +63,12 @@ Current decisions to preserve:
 - Victory Paths and Victory Conditions are local/dev-visible Codex categories:
   keep their imports and direct routes available for QA, but hide them from
   public top-level navigation until their missing/friendly-presentation issues
-  are resolved. Run `FS-CODEX-014 - Victory Data Quality Investigation` before
-  drafting exporter follow-up or returning Victory categories to public
-  top-level browsing.
+  are resolved. `FS-CODEX-014 - Victory Data Quality Investigation` found that
+  `Master` appears as a Victory path value for Supremacy and Insights, but no
+  matching `VictoryPath_*` public entry/reference exists in
+  `victorypaths-codex`. This is not an EWShop import/config issue; DB Exporter
+  should clarify whether `Master` is public and either emit a public Victory
+  Path row/exact refs or mark/document it as non-public.
 - Thin/plain entries are not EWShop bugs when DB Exporter marked their richer
   data unavailable, unsafe, runtime-only, obsolete, internal, or deferred.
 - `Population_Aspect` should keep `Unlocks Nutrient Extractor` plain because
@@ -167,11 +170,11 @@ Current rules:
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list.
 - Final snapshot Codex compatibility follow-up is tracked in
-  `docs/active/final-snapshot-codex-ticket-plan.md`; the recommended Victory
-  follow-up is `FS-CODEX-014 - Victory Data Quality Investigation`, because
-  Victory Paths/Conditions remain local-only pending data-quality and
-  presentation review. Do not mechanically adopt exported fields unless they
-  improve player planning, comparison, discovery, or trust.
+  `docs/active/final-snapshot-codex-ticket-plan.md`; Victory Paths/Conditions
+  remain local-only after `FS-CODEX-014` pending the `Master` Victory Path
+  exporter clarification and any later presentation review. Do not mechanically
+  adopt exported fields unless they improve player planning, comparison,
+  discovery, or trust.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only

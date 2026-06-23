@@ -44,7 +44,7 @@ snapshot work should prioritize player planning value over exporter coverage.
 | Ticket ID | Title | Category | Priority | Owner Area | Scope | Acceptance Criteria | Validation | Dependencies | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | FS-CODEX-002 | Victory Conditions Compact Reference Rows | Victory Conditions | P1 | Frontend | Add compact rows using exported objective, current value, hold duration, caveat/threshold note, and source refs where exact. | Rows communicate victory objective and exported current values without derived map-size examples; detail still shows full facts/sections; no frontend threshold derivation. | Codex page tests; presentation tests if helper added; typecheck; build; browser smoke. | Public `victoryconditions-codex` imported. | Ready |
-| FS-CODEX-014 | Victory Data Quality Investigation | Victory Paths / Victory Conditions | P1 | Product/Frontend | Compare `victorypaths-codex` and `victoryconditions-codex` JSON against EWShop import/rendering before creating exporter follow-up. Determine whether the missing Victory Path is absent from JSON, imported but hidden, frontend-filtered, direct/search-only, or malformed. Audit exported Victory Condition fields and why current presentation is not public-friendly. | Report classifies each issue as exporter data gap, EWShop presentation problem, product decision, or expected source-data limitation; DB Exporter follow-up is drafted only if source/exporter gaps are proven; Victory categories remain local-only. | Investigation only; `git diff --check` for docs. | Final snapshot Victory exports; local-only category visibility. | Ready |
+| FS-CODEX-014 | Victory Data Quality Investigation | Victory Paths / Victory Conditions | P1 | Product/Frontend | Compared `victorypaths-codex` and `victoryconditions-codex` JSON against EWShop import/rendering before creating exporter follow-up. | Investigation found `Master` appears as a Victory path value for Supremacy and Insights, but no matching `VictoryPath_*` public entry/reference exists in `victorypaths-codex`; this is not an EWShop import/config issue. Victory categories remain local-only. | Investigation complete; docs-only `git diff --check`. | Final snapshot Victory exports; local-only category visibility. | Done |
 | FS-CODEX-009 | Rich Factions Import Investigation | Factions / Rich Imports | P1 | Fullstack | Investigate importer/API/store needs for rich `factions` export as a future join point for faction pages and resolvers. | Report classifies backend/API/store/frontend changes; no UI implementation; no SVG/art inference; exact refs only. | Investigation only; if code later, backend and frontend contract tests. | Rich enrichment decision template. | Ready |
 | FS-CODEX-010 | Heroes And Skills Import Investigation | Heroes / Skills / Rich Imports | P1 | Fullstack | Investigate rich `heroes` and `skills` exports for hero detail/profile enrichment and skill relationship use. | Report identifies supported fields, dropped fields, DTO gaps, and player-value slices; public Skills Codex category remains product-decision gated. | Investigation only; if code later, backend/API/frontend tests. | Rich enrichment decision template; Heroes Archive current state. | Ready |
 | FS-CODEX-003 | Population Archive Foundation | Populations | P1 | Frontend/Product | Establish first Population archive row model from exported `Type`, `Worker effects`, `Threshold rewards`, base food cost, and exact refs. | Rows answer what the population does; threshold rewards remain exact; no inference from population keys/names; no faction icon/art assumptions. | Codex page tests; typecheck; build; browser smoke for major/minor/action-created populations. | Product agreement on whether a Type rail is included in this slice or deferred. | Ready |
@@ -61,15 +61,15 @@ snapshot work should prioritize player planning value over exporter coverage.
 
 ## Recommended Next Ticket
 
-Start with `FS-CODEX-014 - Victory Data Quality Investigation` before any
-further public Victory browsing work.
+`FS-CODEX-014 - Victory Data Quality Investigation` is complete. Victory Paths
+and Victory Conditions remain local/dev-visible because `Master` appears as a
+Victory path value for Supremacy and Insights, but no matching `VictoryPath_*`
+public entry/reference exists in `victorypaths-codex`. This is not an EWShop
+import/config issue.
 
-Reason: Victory Paths and Victory Conditions are local/dev-visible because one
-Victory Path appears missing and Victory Conditions are not yet friendly enough
-for public 4X browsing. EWShop should first determine whether the issues are
-exporter data gaps, EWShop presentation problems, product decisions, or expected
-source-data limits. Draft a DB Exporter follow-up only after source/exporter
-gaps are proven.
+DB Exporter follow-up: clarify whether `Master` is public. If public, emit a
+Victory Path row and exact refs from the affected Victory Conditions; if
+non-public, mark/document it as such.
 
 The recommended next investigation is `FS-CODEX-009 - Rich Factions Import
 Investigation`, because Factions can become the cross-category strategy hub that

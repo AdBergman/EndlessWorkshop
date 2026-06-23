@@ -885,6 +885,31 @@ Request:
 - do not require EWShop to infer assets from display names, raw keys, or SVG
   filenames.
 
+### Victory Path Master Clarification
+
+Classification: Codex projection data-quality gap.
+
+EWShop `FS-CODEX-014` found that `Master` appears as a Victory path value for
+Supremacy and Insights in `victoryconditions-codex`, but no matching
+`VictoryPath_*` public entry/reference exists in `victorypaths-codex`. This is
+not an EWShop import/config issue: the generic Codex import preserves the
+Victory facts and `victorypaths-codex` currently contains only Impress and
+Worship public path rows.
+
+Request:
+
+- clarify whether `Master` is intended to be a public Victory Path;
+- if public, emit a public Victory Path row for `Master` and exact
+  `referenceKey` values from the affected Victory Condition facts;
+- if non-public, mark or document `Master` as non-public so EWShop does not
+  expose it as a missing public path.
+
+Priority:
+
+- non-blocking but required before EWShop returns Victory Paths/Conditions to
+  public top-level Codex browsing. Current EWShop behavior remains local/dev
+  visibility with direct routes available for QA.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:
