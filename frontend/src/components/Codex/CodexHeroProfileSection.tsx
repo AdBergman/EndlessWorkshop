@@ -7,6 +7,7 @@ import type {
     CodexHeroSkillUnlockGroup,
     CodexHeroSkillTree,
 } from "@/lib/codex/codexHeroRichEnrichment";
+import type { CodexHeroStatGroup } from "@/lib/codex/codexHeroStats";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { ReactNode } from "react";
@@ -14,13 +15,15 @@ import CodexInlineEntityLink from "./CodexInlineEntityLink";
 
 type Props = {
     enrichment: CodexHeroRichEnrichment;
+    statGroups: CodexHeroStatGroup[];
     onSelect: (entry: CodexEntry) => void;
 };
 
-export default function CodexHeroProfileSection({ enrichment, onSelect }: Props) {
+export default function CodexHeroProfileSection({ enrichment, statGroups, onSelect }: Props) {
     if (
         !enrichment.origin &&
         !enrichment.classLabel &&
+        statGroups.length === 0 &&
         enrichment.skillPathTypes.length === 0 &&
         enrichment.startingSkills.length === 0 &&
         enrichment.skillOptions.length === 0
@@ -36,7 +39,7 @@ export default function CodexHeroProfileSection({ enrichment, onSelect }: Props)
 
             <div className="codex-heroProfile__groups">
                 {enrichment.origin ? (
-                    <HeroProfileGroup label="Origin">
+                    <HeroProfileGroup label="Faction">
                         <HeroProfileLink link={enrichment.origin} onSelect={onSelect} />
                     </HeroProfileGroup>
                 ) : null}
@@ -44,6 +47,12 @@ export default function CodexHeroProfileSection({ enrichment, onSelect }: Props)
                 {enrichment.classLabel ? (
                     <HeroProfileGroup label="Class">
                         {renderCodexLabel(enrichment.classLabel)}
+                    </HeroProfileGroup>
+                ) : null}
+
+                {statGroups.length > 0 ? (
+                    <HeroProfileGroup label="Stats">
+                        <HeroStatGroups statGroups={statGroups} />
                     </HeroProfileGroup>
                 ) : null}
 
@@ -85,6 +94,29 @@ export default function CodexHeroProfileSection({ enrichment, onSelect }: Props)
                 ) : null}
             </div>
         </section>
+    );
+}
+
+function HeroStatGroups({ statGroups }: { statGroups: readonly CodexHeroStatGroup[] }) {
+    return (
+        <div className="codex-heroProfile__statGroups">
+            {statGroups.map((group) => (
+                <section
+                    className="codex-heroProfile__statGroup"
+                    aria-label={group.label}
+                    key={group.key}
+                >
+                    <div className="codex-heroProfile__statGroupLabel">{group.label}</div>
+                    <div className="codex-heroProfile__statGrid">
+                        {group.lines.map((line, index) => (
+                            <span className="codex-heroProfile__statLine" key={`${group.key}-${index}`}>
+                                {renderDescriptionLine(line)}
+                            </span>
+                        ))}
+                    </div>
+                </section>
+            ))}
+        </div>
     );
 }
 

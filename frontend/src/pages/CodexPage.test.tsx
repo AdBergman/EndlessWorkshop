@@ -6586,7 +6586,15 @@ describe("CodexPage", () => {
                     { label: "Faction", value: "Kin of Sheredyn" },
                     { label: "Class", value: "Archer" },
                 ],
-                sections: [{ title: "Stats", lines: ["+40 [Damage] Damage"] }],
+                sections: [{
+                    title: "Stats",
+                    lines: [
+                        "+140 [Health] Health",
+                        "+40 [Damage] Damage",
+                        "+3 [MovementPoints] Movement Points",
+                        "+5% [Experience] Experience gain per [Intuition] Intuition",
+                    ],
+                }],
             },
             {
                 exportKind: "factions",
@@ -6696,11 +6704,19 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Lieutenant Brezvez" })).toBeInTheDocument();
 
         const heroProfile = screen.getByRole("region", { name: "Hero profile" });
-        expect(within(heroProfile).getByText("Origin")).toBeInTheDocument();
+        expect(within(heroProfile).queryByText("Origin")).not.toBeInTheDocument();
+        expect(within(heroProfile).getAllByText("Faction").length).toBeGreaterThanOrEqual(1);
         const originLink = within(heroProfile).getByRole("button", { name: "Open Kin of Sheredyn in Codex" });
         expect(originLink).toHaveTextContent("Kin of Sheredyn");
         expect(within(heroProfile).getAllByText("Class").length).toBeGreaterThanOrEqual(2);
         expect(within(heroProfile).getByText("Archer")).toBeInTheDocument();
+        const baseStats = within(heroProfile).getByRole("region", { name: "Base stats" });
+        expect(baseStats).toHaveTextContent("Damage");
+        expect(baseStats).toHaveTextContent("Health");
+        expect(baseStats).toHaveTextContent("Movement Points");
+        expect(within(heroProfile).getByRole("region", { name: "Scaling" })).toHaveTextContent(
+            "Experience gain per Intuition"
+        );
         expect(within(heroProfile).getByText("Skill paths")).toBeInTheDocument();
         expect(heroProfile).toHaveTextContent("Class");
         expect(heroProfile).toHaveTextContent("Faction");
@@ -6734,6 +6750,7 @@ describe("CodexPage", () => {
         await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
 
         expect(screen.queryByRole("region", { name: /related entries/i })).not.toBeInTheDocument();
+        expect(screen.queryByText("Hero dossier")).not.toBeInTheDocument();
 
         await user.click(abilityLink);
         expect(await screen.findByRole("heading", { name: "Terrain Logistics" })).toBeInTheDocument();

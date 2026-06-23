@@ -23,6 +23,7 @@ import {
     getCodexHeroRichEnrichmentEntryKeys,
     hasCodexHeroRichEnrichment,
 } from "@/lib/codex/codexHeroRichEnrichment";
+import { getCodexHeroStatGroups } from "@/lib/codex/codexHeroStats";
 import {
     buildCodexTechRichEnrichment,
     hasCodexTechRichEnrichment,
@@ -221,6 +222,8 @@ export default function CodexEntryDetail({
     const showTechRichEnrichment = isTechEntry && hasCodexTechRichEnrichment(techRichEnrichment);
     const showUnitRichEnrichment = isUnitEntry && hasCodexUnitRichEnrichment(unitRichEnrichment);
     const showHeroRichEnrichment = isHeroEntry && hasCodexHeroRichEnrichment(heroRichEnrichment);
+    const heroStatGroups = isHeroEntry ? getCodexHeroStatGroups(entry) : [];
+    const showHeroProfile = isHeroEntry && (showHeroRichEnrichment || heroStatGroups.length > 0);
     const showConstructibleRichEnrichment = (isDistrictEntry || isImprovementEntry) &&
         hasCodexConstructibleRichEnrichment(constructibleRichEnrichment);
 
@@ -249,7 +252,7 @@ export default function CodexEntryDetail({
                     packageGroups={factionPackageGroups}
                     onSelectEntry={onSelectRelated}
                 />
-            ) : (
+            ) : showHeroRichEnrichment ? null : (
                 <CodexStructuredDetail
                     entry={entry}
                     allEntries={allEntries}
@@ -276,9 +279,10 @@ export default function CodexEntryDetail({
                 />
             ) : null}
 
-            {showHeroRichEnrichment ? (
+            {showHeroProfile ? (
                 <CodexHeroProfileSection
                     enrichment={heroRichEnrichment}
+                    statGroups={heroStatGroups}
                     onSelect={onSelectRelated}
                 />
             ) : null}

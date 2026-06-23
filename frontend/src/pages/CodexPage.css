@@ -977,7 +977,6 @@
 
 .codex-techPrerequisites__groups,
 .codex-unitProfile__groups,
-.codex-heroProfile__groups,
 .codex-constructiblePlanning__groups {
     display: grid;
     gap: 12px;
@@ -985,9 +984,15 @@
     max-width: 780px;
 }
 
+.codex-heroProfile__groups {
+    display: grid;
+    gap: 18px;
+    margin-top: 14px;
+    max-width: 820px;
+}
+
 .codex-techPrerequisites__group,
 .codex-unitProfile__group,
-.codex-heroProfile__group,
 .codex-constructiblePlanning__group {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
@@ -995,6 +1000,14 @@
     gap: 14px;
     padding: 10px 0 10px 18px;
     border-left: 1px solid rgba(190, 150, 73, 0.16);
+}
+
+.codex-heroProfile__group {
+    display: grid;
+    grid-template-columns: minmax(118px, max-content) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+    padding: 0;
 }
 
 .codex-techPrerequisites__label,
@@ -1043,6 +1056,38 @@
 
 .codex-heroProfile__inlineList {
     display: inline;
+}
+
+.codex-heroProfile__statGroups {
+    display: grid;
+    gap: 12px;
+}
+
+.codex-heroProfile__statGroup {
+    display: grid;
+    gap: 7px;
+}
+
+.codex-heroProfile__statGroupLabel {
+    color: rgba(229, 198, 123, 0.68);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.codex-heroProfile__statGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px 14px;
+}
+
+.codex-heroProfile__statLine {
+    min-width: 0;
+    color: rgba(241, 234, 220, 0.84);
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .codex-heroProfile__skillList {
@@ -3176,6 +3221,15 @@
 
     .codex-detail__description {
         padding-left: 12px;
+    }
+
+    .codex-heroProfile__group {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+
+    .codex-heroProfile__statGrid {
+        grid-template-columns: 1fr;
     }
 
     .codex-structuredTimeline__item {

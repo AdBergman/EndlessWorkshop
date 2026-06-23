@@ -160,6 +160,11 @@ Open gap:
 - Exporter should clarify what `tierIndex` means, what `levelPrerequisite`
   means, and what source-backed projection should be used for canonical
   player-facing `T1/T2/T3` hero skill groups.
+- Browser QA expected a common/general/shared skill path, but the current rich
+  Skills export exposes only `Class`, `Faction`, and `Synergy` tree types for
+  applicable Hero skill trees. Exporter should clarify whether general/shared
+  skills are represented by `Synergy`, intentionally absent, or missing from
+  the public projection.
 - Full hero progression, explicit quadrant/source slot beyond exported tree
   type, point-cost/investment rules, stat-vs-skill spending, recruitment,
   portraits/icons, or skill-tree planning require explicit source-backed
