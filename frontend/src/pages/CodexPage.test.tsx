@@ -9941,7 +9941,10 @@ describe("CodexPage", () => {
 
         const summaryList = screen.getByLabelText("Units overview");
         const archerRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /archer/i }));
+        const archerMetadata = within(archerRow).getByLabelText("Unit metadata");
         expect(within(archerRow).getByLabelText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(within(archerMetadata).getByLabelText("Unit type")).toHaveTextContent("Ranged");
+        expect(within(archerMetadata).getByLabelText("Unit tags")).toHaveTextContent("Ranged III");
         expect(archerRow).toHaveTextContent("Ranged");
         expect(archerRow).toHaveTextContent("Tier 1");
         expect(archerRow).toHaveTextContent("Attack Range");

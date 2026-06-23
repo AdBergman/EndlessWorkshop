@@ -2046,27 +2046,72 @@ export default function CodexSummaryDetail({
                                     key={entry.entryKey}
                                     className="codex-summaryList__item codex-summaryList__item--unitArchive"
                                 >
-                                    <span className="codex-summaryList__titleLine codex-summaryList__titleLine--unit">
+                                    <span className="codex-summaryList__unitArchiveMain">
+                                        <span className="codex-summaryList__titleLine codex-summaryList__titleLine--unit">
+                                            <button
+                                                type="button"
+                                                className="codex-summaryList__entryButton codex-summaryList__entryButton--unitTitle"
+                                                onClick={() => onSelectEntry(entry)}
+                                            >
+                                                <span className="codex-summaryList__titleIdentity">
+                                                    <span className="codex-summaryList__name">
+                                                        {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                    </span>
+                                                </span>
+                                            </button>
+                                        </span>
+
                                         <button
                                             type="button"
-                                            className="codex-summaryList__entryButton codex-summaryList__entryButton--unitTitle"
+                                            className="codex-summaryList__entryButton codex-summaryList__entryButton--unitStats"
                                             onClick={() => onSelectEntry(entry)}
                                         >
-                                            <span className="codex-summaryList__titleIdentity">
-                                                <span className="codex-summaryList__name">
-                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
-                                                </span>
+                                            <span
+                                                className="codex-summaryList__unitStats"
+                                                aria-label="Unit stat preview"
+                                            >
+                                                {unitStatPreviewLines.length > 0 ? (
+                                                    unitStatPreviewLines.map((line, index) => (
+                                                        <span
+                                                            className="codex-summaryList__unitStatLine"
+                                                            key={`${entry.entryKey}-unit-stat-${index}`}
+                                                        >
+                                                            {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="codex-summaryList__statusFallback">
+                                                        No public unit stats exported yet.
+                                                    </span>
+                                                )}
                                             </span>
                                         </button>
+                                    </span>
 
-                                        <span
-                                            className="codex-summaryList__metadata codex-summaryList__metadata--unit"
-                                            aria-label="Unit metadata"
-                                        >
+                                    <span
+                                        className="codex-summaryList__metadata codex-summaryList__metadata--unit"
+                                        aria-label="Unit metadata"
+                                    >
+                                        <span className="codex-summaryList__unitMetaTop">
+                                            {unitArchiveMetadata.length > 0 ? (
+                                                <span
+                                                    className="codex-summaryList__unitMetadataLine"
+                                                    aria-label="Unit type"
+                                                >
+                                                    {unitArchiveMetadata.map((item) => (
+                                                        <span
+                                                            key={`${item.key}-${item.value}`}
+                                                            className="codex-summaryList__metadataText"
+                                                        >
+                                                            {item.value}
+                                                        </span>
+                                                    ))}
+                                                </span>
+                                            ) : null}
                                             {unitFactionIdentity ? (
                                                 unitFactionIdentity.iconPath ? (
                                                     <span
-                                                        className="codex-summaryList__metadataIcon"
+                                                        className="codex-summaryList__metadataIcon codex-summaryList__metadataIcon--unitFaction"
                                                         title={unitFactionIdentity.label}
                                                         aria-label={unitFactionIdentity.label}
                                                     >
@@ -2079,65 +2124,42 @@ export default function CodexSummaryDetail({
                                                         />
                                                     </span>
                                                 ) : (
-                                                    <span className="codex-summaryList__metadataText">
+                                                    <span
+                                                        className="codex-summaryList__metadataText codex-summaryList__metadataText--unitFaction"
+                                                        aria-label="Unit faction"
+                                                    >
                                                         {unitFactionIdentity.label}
                                                     </span>
                                                 )
                                             ) : null}
-                                            {unitArchiveMetadata.map((item) => (
-                                                <span
-                                                    key={`${item.key}-${item.value}`}
-                                                    className="codex-summaryList__metadataText"
-                                                >
-                                                    {item.value}
-                                                </span>
-                                            ))}
-                                            {visibleUnitGrantedAbilityPreviews.map((grantedPreview) => (
-                                                <span
-                                                    className="codex-summaryList__metadataLink"
-                                                    key={`${entry.entryKey}-${grantedPreview.ability.entryKey}`}
-                                                >
-                                                    <CodexInlineEntityLink
-                                                        entry={grantedPreview.ability}
-                                                        onSelect={(ability) => onSelectEntry(ability)}
-                                                    >
-                                                        {renderCodexLabel(grantedPreview.label)}
-                                                    </CodexInlineEntityLink>
-                                                </span>
-                                            ))}
-                                            {unitGrantedAbilityOverflowCount > 0 ? (
-                                                <span className="codex-summaryList__grantedAbilityOverflow">
-                                                    +{unitGrantedAbilityOverflowCount} more
-                                                </span>
-                                            ) : null}
                                         </span>
-                                    </span>
 
-                                    <button
-                                        type="button"
-                                        className="codex-summaryList__entryButton codex-summaryList__entryButton--unitStats"
-                                        onClick={() => onSelectEntry(entry)}
-                                    >
-                                        <span
-                                            className="codex-summaryList__unitStats"
-                                            aria-label="Unit stat preview"
-                                        >
-                                            {unitStatPreviewLines.length > 0 ? (
-                                                unitStatPreviewLines.map((line, index) => (
+                                        {visibleUnitGrantedAbilityPreviews.length > 0 || unitGrantedAbilityOverflowCount > 0 ? (
+                                            <span
+                                                className="codex-summaryList__unitTagLine"
+                                                aria-label="Unit tags"
+                                            >
+                                                {visibleUnitGrantedAbilityPreviews.map((grantedPreview) => (
                                                     <span
-                                                        className="codex-summaryList__unitStatLine"
-                                                        key={`${entry.entryKey}-unit-stat-${index}`}
+                                                        className="codex-summaryList__metadataLink"
+                                                        key={`${entry.entryKey}-${grantedPreview.ability.entryKey}`}
                                                     >
-                                                        {renderDescriptionLine(formatCodexMajorFactionText(line))}
+                                                        <CodexInlineEntityLink
+                                                            entry={grantedPreview.ability}
+                                                            onSelect={(ability) => onSelectEntry(ability)}
+                                                        >
+                                                            {renderCodexLabel(grantedPreview.label)}
+                                                        </CodexInlineEntityLink>
                                                     </span>
-                                                ))
-                                            ) : (
-                                                <span className="codex-summaryList__statusFallback">
-                                                    No public unit stats exported yet.
-                                                </span>
-                                            )}
-                                        </span>
-                                    </button>
+                                                ))}
+                                                {unitGrantedAbilityOverflowCount > 0 ? (
+                                                    <span className="codex-summaryList__grantedAbilityOverflow">
+                                                        +{unitGrantedAbilityOverflowCount} more
+                                                    </span>
+                                                ) : null}
+                                            </span>
+                                        ) : null}
+                                    </span>
                                 </div>
                             );
                         }

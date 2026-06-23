@@ -2005,9 +2005,18 @@
 }
 
 .codex-summaryList__item--unitArchive {
+    grid-template-columns: minmax(0, 1fr) minmax(172px, 252px);
+    align-items: start;
+    column-gap: 18px;
     gap: 12px;
     padding: 18px 10px 18px 18px;
     border-left-width: 3px;
+}
+
+.codex-summaryList__unitArchiveMain {
+    display: grid;
+    min-width: 0;
+    gap: 10px;
 }
 
 .codex-summaryList__item--improvementArchive {
@@ -2360,7 +2369,8 @@
 }
 
 .codex-summaryList__item--unitArchive .codex-summaryList__metadata {
-    flex: 0 1 min(48%, 470px);
+    width: 100%;
+    justify-self: end;
     justify-content: flex-end;
     gap: 8px;
 }
@@ -2476,11 +2486,49 @@
 }
 
 .codex-summaryList__metadata--unit {
-    align-items: center;
+    display: grid;
+    align-items: stretch;
+    justify-content: stretch;
     gap: 7px;
     color: rgba(241, 234, 220, 0.52);
     font-size: 12px;
     line-height: 1.45;
+}
+
+.codex-summaryList__unitMetaTop {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.codex-summaryList__unitMetadataLine {
+    display: inline-flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0 7px;
+    overflow: hidden;
+    text-align: right;
+    justify-self: end;
+}
+
+.codex-summaryList__metadataIcon--unitFaction,
+.codex-summaryList__metadataText--unitFaction {
+    grid-column: 2;
+    justify-self: end;
+}
+
+.codex-summaryList__unitTagLine {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 4px 8px;
+    text-align: right;
 }
 
 .codex-summaryList__metadata--improvement {
@@ -3218,11 +3266,13 @@
         padding-right: 8px;
     }
 
-    .codex-summaryList__item--heroArchive {
+    .codex-summaryList__item--heroArchive,
+    .codex-summaryList__item--unitArchive {
         grid-template-columns: minmax(0, 1fr);
     }
 
-    .codex-summaryList__item--heroArchive .codex-summaryList__metadata {
+    .codex-summaryList__item--heroArchive .codex-summaryList__metadata,
+    .codex-summaryList__item--unitArchive .codex-summaryList__metadata {
         justify-self: stretch;
     }
 
