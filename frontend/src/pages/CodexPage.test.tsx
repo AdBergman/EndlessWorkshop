@@ -1,6 +1,7 @@
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
+import { apiClient } from "@/api/apiClient";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
@@ -501,10 +502,23 @@ describe("CodexPage", () => {
         seedHeroes([]);
         seedSkills({});
         seedDefaultCodexStore();
+        vi.spyOn(apiClient, "getDataFreshness").mockResolvedValue({
+            available: false,
+            latestImportAtUtc: null,
+            game: null,
+            gameVersion: null,
+            exporterVersion: null,
+            exportedAtUtc: null,
+            sourceLabel: null,
+            importedFileCount: 0,
+            importedKinds: [],
+            note: null,
+        });
     });
 
     afterEach(() => {
         cleanup();
+        vi.restoreAllMocks();
         vi.unstubAllEnvs();
         useCodexStore.getState().reset();
         useDistrictStore.getState().reset();
@@ -582,6 +596,55 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("group", { name: /war & units/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /war & units/i })).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
+    });
+
+    it("shows the game data version block on the landing page when freshness is available", async () => {
+        vi.mocked(apiClient.getDataFreshness).mockResolvedValueOnce({
+            available: true,
+            latestImportAtUtc: "2026-06-23T10:30:00Z",
+            game: "Endless Legend 2",
+            gameVersion: "0.82",
+            exporterVersion: "0.1.0",
+            exportedAtUtc: "2026-06-22T05:57:36Z",
+            sourceLabel: "local-imports",
+            importedFileCount: 22,
+            importedKinds: ["abilities", "tech"],
+            note: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const freshnessBlock = await screen.findByLabelText("Game data version");
+        expect(within(freshnessBlock).getByText("Game Data Version")).toBeInTheDocument();
+        expect(within(freshnessBlock).getByText("Endless Legend 2 v0.82")).toBeInTheDocument();
+        expect(within(freshnessBlock).getByText("Snapshot date: 22 Jun 2026")).toBeInTheDocument();
+        expect(within(freshnessBlock).getByText(
+            "Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this data was last extracted from the game."
+        )).toBeInTheDocument();
+        expect(within(freshnessBlock).queryByText(/exporter version/i)).not.toBeInTheDocument();
+        expect(within(freshnessBlock).queryByText(/local-imports/i)).not.toBeInTheDocument();
+    });
+
+    it("hides the game data version block quietly when freshness is unavailable or fails", async () => {
+        vi.mocked(apiClient.getDataFreshness).mockRejectedValueOnce(new Error("freshness unavailable"));
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        await waitFor(() => expect(apiClient.getDataFreshness).toHaveBeenCalled());
+        expect(screen.queryByLabelText("Game data version")).not.toBeInTheDocument();
     });
 
     it("renders local-visible categories directly in the landing category index during development", async () => {

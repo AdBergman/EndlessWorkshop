@@ -58,6 +58,19 @@ export type SeoRegenerationResult = {
     sitemapUpdated: boolean;
 };
 
+export type DataFreshness = {
+    available: boolean;
+    latestImportAtUtc: string | null;
+    game: string | null;
+    gameVersion: string | null;
+    exporterVersion: string | null;
+    exportedAtUtc: string | null;
+    sourceLabel: string | null;
+    importedFileCount: number;
+    importedKinds: string[];
+    note: string | null;
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 async function fetcherJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -96,6 +109,7 @@ export const apiClient = {
     getSkills: () => fetcherJson<Skills>("/skills"),
     getCodex: () => fetcherJson<Codex[]>("/codex"),
     getQuestExplorer: () => fetcherJson<QuestExplorerResponse>("/quests/explorer"),
+    getDataFreshness: () => fetcherJson<DataFreshness>("/data-freshness"),
 
     getSavedBuild: (uuid: string) => fetcherJson<SavedTechBuild>(`/builds/${uuid}`),
 

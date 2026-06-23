@@ -49,6 +49,7 @@ describe("apiClient contract", () => {
         ["getSkills", () => apiClient.getSkills(), "/api/skills"],
         ["getCodex", () => apiClient.getCodex(), "/api/codex"],
         ["getQuestExplorer", () => apiClient.getQuestExplorer(), "/api/quests/explorer"],
+        ["getDataFreshness", () => apiClient.getDataFreshness(), "/api/data-freshness"],
         ["getSavedBuild", () => apiClient.getSavedBuild("saved-build-id"), "/api/builds/saved-build-id"],
     ])("fetches %s from the expected read endpoint", async (_name, callClient, expectedUrl) => {
         const payload = [{ id: "payload" }];

@@ -6,7 +6,13 @@ type CodexOverviewOption = {
     count: number;
 };
 
+export type CodexOverviewFreshness = {
+    mainLine: string;
+    snapshotDate: string;
+};
+
 type Props = {
+    dataFreshness?: CodexOverviewFreshness | null;
     options: CodexOverviewOption[];
     onSelectKind: (kind: string) => void;
 };
@@ -38,7 +44,7 @@ function descriptionFor(kind: string): string {
     return KIND_DESCRIPTIONS[kind] ?? "Indexed game entries.";
 }
 
-export default function CodexOverview({ options, onSelectKind }: Props) {
+export default function CodexOverview({ dataFreshness, options, onSelectKind }: Props) {
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
             <div className="codex-overview__header">
@@ -55,6 +61,20 @@ export default function CodexOverview({ options, onSelectKind }: Props) {
                     <small>categories</small>
                 </div>
             </div>
+
+            {dataFreshness ? (
+                <aside className="codex-overview__freshness" aria-label="Game data version">
+                    <div className="codex-overview__freshnessPrimary">
+                        <span className="codex-overview__freshnessLabel">Game Data Version</span>
+                        <strong>{dataFreshness.mainLine}</strong>
+                        <span>Snapshot date: {dataFreshness.snapshotDate}</span>
+                    </div>
+                    <p>
+                        Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this
+                        data was last extracted from the game.
+                    </p>
+                </aside>
+            ) : null}
 
             <div className="codex-overview__index" aria-label="Codex category index">
                 {options.map((option) => (

@@ -1,8 +1,9 @@
 import React, { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { apiClient, type DataFreshness } from "@/api/apiClient";
 import CodexEntryDetail from "@/components/Codex/CodexEntryDetail";
 import CodexLeftPane from "@/components/Codex/CodexLeftPane";
-import CodexOverview from "@/components/Codex/CodexOverview";
+import CodexOverview, { type CodexOverviewFreshness } from "@/components/Codex/CodexOverview";
 import CodexSummaryDetail from "@/components/Codex/CodexSummaryDetail";
 import CodexTopPanel from "@/components/Codex/CodexTopPanel";
 import {
@@ -113,6 +114,37 @@ import "./CodexPage.css";
 
 type SelectionIntent = "passive" | "related";
 
+function formatCodexSnapshotDate(value: string): string | null {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        timeZone: "UTC",
+        year: "numeric",
+    }).format(date);
+}
+
+function toCodexOverviewFreshness(dataFreshness: DataFreshness | null | undefined): CodexOverviewFreshness | null {
+    if (
+        !dataFreshness?.available ||
+        !dataFreshness.game ||
+        !dataFreshness.gameVersion ||
+        !dataFreshness.exportedAtUtc
+    ) {
+        return null;
+    }
+
+    const snapshotDate = formatCodexSnapshotDate(dataFreshness.exportedAtUtc);
+    if (!snapshotDate) return null;
+
+    return {
+        mainLine: `${dataFreshness.game} v${dataFreshness.gameVersion}`,
+        snapshotDate,
+    };
+}
+
 export default function CodexPage() {
     const location = useLocation();
     const entries = useCodexStore((state) => state.entries);
@@ -146,6 +178,7 @@ export default function CodexPage() {
         EMPTY_TECH_ARCHIVE_FILTERS
     );
     const [activeTraitType, setActiveTraitType] = useState<TraitArchiveType | null>(null);
+    const [dataFreshness, setDataFreshness] = useState<CodexOverviewFreshness | null>(null);
 
     const deferredQuery = useDeferredValue(query);
     const selectedEntryParam = (searchParams.get("entry") ?? "").trim() || null;
@@ -164,6 +197,26 @@ export default function CodexPage() {
     useEffect(() => {
         void loadEntries();
     }, [loadEntries]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        apiClient.getDataFreshness()
+            .then((nextDataFreshness) => {
+                if (cancelled) return;
+
+                setDataFreshness(toCodexOverviewFreshness(nextDataFreshness));
+            })
+            .catch(() => {
+                if (cancelled) return;
+
+                setDataFreshness(null);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const includeLocalOnlyCategories = isLocalCodexTopLevelVisibilityEnabled();
 
@@ -1147,7 +1200,11 @@ export default function CodexPage() {
                     >
                         <div className="codex-detailPane__body">
                             {isOverviewState ? (
-                                <CodexOverview options={overviewOptions} onSelectKind={selectKind} />
+                                <CodexOverview
+                                    dataFreshness={dataFreshness}
+                                    options={overviewOptions}
+                                    onSelectKind={selectKind}
+                                />
                             ) : selectedListItem && isCodexSummaryEntry(selectedListItem) ? (
                                 <CodexSummaryDetail
                                     summaryEntry={selectedListItem}
