@@ -1,6 +1,7 @@
 package ewshop.facade.config;
 
 import ewshop.domain.service.*;
+import ewshop.domain.repository.ImportHistoryRepository;
 import ewshop.facade.impl.*;
 import ewshop.facade.interfaces.*;
 import org.springframework.context.annotation.Bean;
@@ -114,6 +115,11 @@ public class FacadeConfig {
     @Bean
     public QuestExplorerFacade questExplorerFacade(QuestExplorerReadService questExplorerReadService) {
         return new QuestExplorerFacadeImpl(questExplorerReadService);
+    }
+
+    @Bean
+    public ImportHistoryFacade importHistoryFacade(ImportHistoryRepository importHistoryRepository) {
+        return new ImportHistoryFacadeImpl(importHistoryRepository);
     }
 
     @Bean

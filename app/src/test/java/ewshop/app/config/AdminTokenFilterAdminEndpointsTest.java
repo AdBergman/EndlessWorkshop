@@ -12,6 +12,7 @@ import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
@@ -71,6 +72,10 @@ class AdminTokenFilterAdminEndpointsTest {
                         .header("X-Admin-Token", "secret-token"))
                 .andExpect(status().isNoContent());
 
+        mockMvc.perform(get("/api/admin/import/latest")
+                        .header("X-Admin-Token", "secret-token"))
+                .andExpect(status().isOk());
+
         mockMvc.perform(post("/api/admin/techs/placements")
                         .header("X-Admin-Token", "secret-token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,6 +97,10 @@ class AdminTokenFilterAdminEndpointsTest {
                 get("/api/admin/import/check-token"),
                 token
         );
+        RequestBuilder importLatest = withOptionalToken(
+                get("/api/admin/import/latest"),
+                token
+        );
         RequestBuilder techPlacement = withOptionalToken(
                 post("/api/admin/techs/placements")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,7 +113,7 @@ class AdminTokenFilterAdminEndpointsTest {
                 token
         );
 
-        return new RequestBuilder[]{importCheck, techPlacement, seoRegenerate};
+        return new RequestBuilder[]{importCheck, importLatest, techPlacement, seoRegenerate};
     }
 
     private static RequestBuilder withOptionalToken(
@@ -135,7 +144,8 @@ class AdminTokenFilterAdminEndpointsTest {
                 mock(UnitImportAdminFacade.class),
                 mock(FactionImportAdminFacade.class),
                 mock(CodexImportAdminFacade.class),
-                mock(QuestExplorerImportAdminFacade.class)
+                mock(QuestExplorerImportAdminFacade.class),
+                mock(ImportHistoryFacade.class)
         );
     }
 

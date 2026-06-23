@@ -10,6 +10,9 @@ import ewshop.infrastructure.persistence.repositories.ImportRunJpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.Optional;
+
 @Repository
 public class ImportHistoryRepositoryAdapter implements ImportHistoryRepository {
 
@@ -26,6 +29,20 @@ public class ImportHistoryRepositoryAdapter implements ImportHistoryRepository {
 
         ImportRunEntity entity = toEntity(run);
         importRunJpaRepository.save(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ImportRun> findLatestSuccessfulImportRun() {
+        return importRunJpaRepository.findFirstByStatusOrderByCompletedAtUtcDescIdDesc("SUCCESS")
+                .map(ImportHistoryRepositoryAdapter::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ImportRun> findLatestImportRun() {
+        return importRunJpaRepository.findFirstByOrderByCompletedAtUtcDescIdDesc()
+                .map(ImportHistoryRepositoryAdapter::toDomain);
     }
 
     private static ImportRunEntity toEntity(ImportRun run) {
@@ -64,6 +81,67 @@ public class ImportHistoryRepositoryAdapter implements ImportHistoryRepository {
         }
 
         return entity;
+    }
+
+    private static ImportRun toDomain(ImportRunEntity entity) {
+        return new ImportRun(
+                entity.runKey,
+                ewshop.domain.model.importing.ImportTrigger.valueOf(entity.trigger),
+                ewshop.domain.model.importing.ImportRunStatus.valueOf(entity.status),
+                entity.startedAtUtc,
+                entity.completedAtUtc,
+                entity.sourceLabel,
+                entity.profile,
+                entity.fileCount,
+                entity.importedFileCount,
+                entity.skippedFileCount,
+                entity.failedFileCount,
+                new ImportHistoryCounts(
+                        entity.receivedCount,
+                        entity.insertedCount,
+                        entity.updatedCount,
+                        entity.unchangedCount,
+                        entity.deletedCount,
+                        entity.failedCount
+                ),
+                entity.game,
+                entity.gameVersion,
+                entity.exporterVersion,
+                entity.exportedAtUtc,
+                entity.notes,
+                entity.fileResults.stream()
+                        .sorted(Comparator.comparingInt(result -> result.fileOrder))
+                        .map(ImportHistoryRepositoryAdapter::toFileDomain)
+                        .toList()
+        );
+    }
+
+    private static ImportFileResult toFileDomain(ImportFileResultEntity entity) {
+        return new ImportFileResult(
+                entity.folder,
+                entity.filename,
+                entity.sourcePathHash,
+                entity.fileSha256,
+                entity.exportKind,
+                entity.importKind,
+                entity.game,
+                entity.gameVersion,
+                entity.exporterVersion,
+                entity.exportedAtUtc,
+                entity.schemaVersion,
+                ewshop.domain.model.importing.ImportFileStatus.valueOf(entity.status),
+                entity.skipReason,
+                entity.errorMessage,
+                new ImportHistoryCounts(
+                        entity.receivedCount,
+                        entity.insertedCount,
+                        entity.updatedCount,
+                        entity.unchangedCount,
+                        entity.deletedCount,
+                        entity.failedCount
+                ),
+                entity.durationMs
+        );
     }
 
     private static ImportFileResultEntity toFileEntity(ImportFileResult result, int order) {

@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -702,6 +703,18 @@ class LocalStartupImportRunnerTest {
         public void saveImportRun(ImportRun run) {
             runs.add(run);
         }
+
+        @Override
+        public Optional<ImportRun> findLatestSuccessfulImportRun() {
+            return runs.stream()
+                    .filter(run -> run.status() == ImportRunStatus.SUCCESS)
+                    .findFirst();
+        }
+
+        @Override
+        public Optional<ImportRun> findLatestImportRun() {
+            return runs.stream().findFirst();
+        }
     }
 
     @Configuration
@@ -784,7 +797,7 @@ class LocalStartupImportRunnerTest {
 
         @Bean
         ImportHistoryRepository importHistoryRepository() {
-            return run -> {};
+            return new RecordingImportHistoryRepository();
         }
 
     }

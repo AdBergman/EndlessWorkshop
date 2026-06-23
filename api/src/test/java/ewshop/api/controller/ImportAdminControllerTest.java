@@ -4,6 +4,9 @@ import ewshop.facade.dto.importing.ImportCountsDto;
 import ewshop.facade.dto.importing.ImportDiagnosticsDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.response.importing.AdminImportFileResultDto;
+import ewshop.facade.dto.response.importing.AdminLatestImportDto;
+import ewshop.facade.dto.response.importing.DataFreshnessDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
@@ -21,6 +24,7 @@ import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
@@ -39,6 +43,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -56,6 +61,7 @@ class ImportAdminControllerTest {
     private RecordingFactionImportAdminFacade factionFacade;
     private RecordingQuestExplorerImportAdminFacade questFacade;
     private RecordingCodexImportAdminFacade codexFacade;
+    private RecordingImportHistoryFacade importHistoryFacade;
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -67,6 +73,7 @@ class ImportAdminControllerTest {
         factionFacade = new RecordingFactionImportAdminFacade();
         questFacade = new RecordingQuestExplorerImportAdminFacade();
         codexFacade = new RecordingCodexImportAdminFacade();
+        importHistoryFacade = new RecordingImportHistoryFacade();
         ImportAdminController controller = new ImportAdminController(
                 techFacade,
                 districtFacade,
@@ -74,12 +81,72 @@ class ImportAdminControllerTest {
                 unitFacade,
                 factionFacade,
                 codexFacade,
-                questFacade
+                questFacade,
+                importHistoryFacade
         );
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(jsonMapper))
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
+    }
+
+    @Test
+    void latestImportReturnsAdminRunAndFileDetails() throws Exception {
+        importHistoryFacade.latestImport = new AdminLatestImportDto(
+                true,
+                "run-1",
+                "LOCAL_STARTUP",
+                "PARTIAL_SUCCESS",
+                "2026-06-23T09:00:00Z",
+                "2026-06-23T09:00:02Z",
+                "local-imports",
+                2,
+                1,
+                1,
+                0,
+                new ImportCountsDto(1, 1, 0, 0, 0, 0),
+                "Endless Legend 2",
+                "0.82",
+                "1.2.3",
+                "2026-06-22T05:57:36Z",
+                "Imported 1, skipped 1, failed 0.",
+                List.of(
+                        new AdminImportFileResultDto(
+                                "ewshop_tech_export_0.82.json",
+                                "exports",
+                                "tech",
+                                "tech",
+                                "IMPORTED",
+                                null,
+                                null,
+                                new ImportCountsDto(1, 1, 0, 0, 0, 0),
+                                25L,
+                                "abcdef123456"
+                        ),
+                        new AdminImportFileResultDto(
+                                "last-export-status.json",
+                                "codex",
+                                null,
+                                null,
+                                "SKIPPED",
+                                "diagnostics-only",
+                                null,
+                                new ImportCountsDto(0, 0, 0, 0, 0, 0),
+                                null,
+                                null
+                        )
+                )
+        );
+
+        mockMvc.perform(get("/api/admin/import/latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.available").value(true))
+                .andExpect(jsonPath("$.runKey").value("run-1"))
+                .andExpect(jsonPath("$.status").value("PARTIAL_SUCCESS"))
+                .andExpect(jsonPath("$.counts.inserted").value(1))
+                .andExpect(jsonPath("$.fileResults[0].filename").value("ewshop_tech_export_0.82.json"))
+                .andExpect(jsonPath("$.fileResults[0].fileSha256Short").value("abcdef123456"))
+                .andExpect(jsonPath("$.fileResults[1].skipReason").value("diagnostics-only"));
     }
 
     @Test
@@ -811,6 +878,20 @@ class ImportAdminControllerTest {
             }
             lastDto = file;
             return okSummary("codex");
+        }
+    }
+
+    private static final class RecordingImportHistoryFacade implements ImportHistoryFacade {
+        private AdminLatestImportDto latestImport = AdminLatestImportDto.unavailable();
+
+        @Override
+        public DataFreshnessDto getLatestDataFreshness() {
+            return DataFreshnessDto.unavailable();
+        }
+
+        @Override
+        public AdminLatestImportDto getLatestImport() {
+            return latestImport;
         }
     }
 

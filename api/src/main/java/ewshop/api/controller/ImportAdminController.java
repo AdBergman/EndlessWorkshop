@@ -2,6 +2,7 @@ package ewshop.api.controller;
 
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.ImportPreviewSummaryDto;
+import ewshop.facade.dto.response.importing.AdminLatestImportDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
@@ -13,6 +14,7 @@ import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
+import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
@@ -30,6 +32,7 @@ public class ImportAdminController {
     private final FactionImportAdminFacade factionImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
     private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
+    private final ImportHistoryFacade importHistoryFacade;
 
     public ImportAdminController(
             TechImportAdminFacade techImportAdminFacade,
@@ -38,7 +41,8 @@ public class ImportAdminController {
             UnitImportAdminFacade unitImportAdminFacade,
             FactionImportAdminFacade factionImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
-            QuestExplorerImportAdminFacade questExplorerImportAdminFacade
+            QuestExplorerImportAdminFacade questExplorerImportAdminFacade,
+            ImportHistoryFacade importHistoryFacade
     ) {
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
@@ -47,12 +51,18 @@ public class ImportAdminController {
         this.factionImportAdminFacade = factionImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
         this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
+        this.importHistoryFacade = importHistoryFacade;
     }
 
     @GetMapping("/check-token")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void checkAdminToken() {
         // Auth enforced before controller
+    }
+
+    @GetMapping(value = "/latest", produces = "application/json")
+    public AdminLatestImportDto latestImport() {
+        return importHistoryFacade.getLatestImport();
     }
 
     @PostMapping(value = "/techs", consumes = "application/json", produces = "application/json")
