@@ -2420,11 +2420,44 @@
 }
 
 .codex-summaryList__metadata--hero {
-    align-items: center;
-    gap: 7px;
+    display: grid;
+    align-items: start;
+    justify-content: stretch;
+    gap: 4px;
     color: rgba(241, 234, 220, 0.52);
     font-size: 12px;
     line-height: 1.45;
+}
+
+.codex-summaryList__heroMetaTop {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.codex-summaryList__heroClassLine {
+    display: inline-flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 7px;
+    overflow: hidden;
+}
+
+.codex-summaryList__metadataIcon--heroFaction,
+.codex-summaryList__metadataText--heroFaction {
+    justify-self: end;
+}
+
+.codex-summaryList__heroTagLine {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: flex-start;
+    gap: 4px 8px;
 }
 
 .codex-summaryList__metadata--unit {

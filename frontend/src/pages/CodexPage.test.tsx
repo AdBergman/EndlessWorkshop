@@ -9646,7 +9646,16 @@ describe("CodexPage", () => {
                     { label: "Faction", value: "Kin of Sheredyn" },
                     { label: "Class", value: "Ranged Hero" },
                 ],
-                sections: [{ title: "Stats", lines: ["+140 [Health] Health", "+40 [Damage] Damage"] }],
+                sections: [{
+                    title: "Stats",
+                    lines: [
+                        "+140 [Health] Health",
+                        "+40 [Damage] Damage",
+                        "+3 [MovementPoints] Movement Points",
+                        "+5% [Focus] Critical",
+                        "+3 [VisionRange] Vision Range",
+                    ],
+                }],
             },
             {
                 exportKind: "heroes",
@@ -9701,10 +9710,17 @@ describe("CodexPage", () => {
 
         const summaryList = screen.getByLabelText("Heroes overview");
         const ariaRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /aria/i }));
-        expect(within(ariaRow).getByLabelText("Kin of Sheredyn")).toBeInTheDocument();
-        expect(ariaRow).toHaveTextContent("Ranged Hero");
+        const ariaMetadata = within(ariaRow).getByLabelText("Hero metadata");
+        expect(within(ariaMetadata).getByLabelText("Hero class")).toHaveTextContent("Ranged Hero");
+        expect(within(ariaMetadata).getByLabelText("Kin of Sheredyn")).toHaveClass(
+            "codex-summaryList__metadataIcon--heroFaction"
+        );
         expect(ariaRow).toHaveTextContent("Health");
         expect(ariaRow).toHaveTextContent("Damage");
+        expect(ariaRow).toHaveTextContent("0 Defense");
+        expect(ariaRow).toHaveTextContent("Vision Range");
+        expect(within(ariaRow).getByLabelText("Hero stat preview").querySelectorAll(".codex-summaryList__heroStatLine"))
+            .toHaveLength(6);
 
         await user.click(within(heroRail).getByRole("button", { name: "Ranged Hero 1" }));
         expect(screen.getByRole("heading", { name: "All Heroes" })).toBeInTheDocument();
@@ -9812,10 +9828,11 @@ describe("CodexPage", () => {
         const summaryList = await screen.findByLabelText("Heroes overview");
         const heroRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: /clar'usta/i }));
         expect(heroRow).not.toHaveTextContent("Grants:");
-        expect(within(heroRow).getByRole("button", { name: /open flying in codex/i })).toBeInTheDocument();
+        const heroTags = within(heroRow).getByLabelText("Hero tags");
+        expect(within(heroTags).getByRole("button", { name: /open flying in codex/i })).toBeInTheDocument();
         expect(heroRow).not.toHaveTextContent("UnitAbility_Hero_Unresolved");
 
-        await user.click(within(heroRow).getByRole("button", { name: /open flying in codex/i }));
+        await user.click(within(heroTags).getByRole("button", { name: /open flying in codex/i }));
         await waitFor(() => {
             expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Ability_Fly");
         });

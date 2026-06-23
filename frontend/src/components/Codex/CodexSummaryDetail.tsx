@@ -163,7 +163,7 @@ const MAX_OVERVIEW_METADATA_ITEMS = 5;
 const MAX_ABILITY_EFFECT_PREVIEW_LINES = 7;
 const MAX_STATUS_EFFECT_PREVIEW_LINES = 3;
 const MAX_EQUIPMENT_EFFECT_PREVIEW_LINES = 5;
-const MAX_HERO_STAT_PREVIEW_LINES = 5;
+const MAX_HERO_STAT_PREVIEW_LINES = 6;
 const MAX_HERO_GRANTED_ABILITY_LINKS = 3;
 const MAX_UNIT_STAT_PREVIEW_LINES = 6;
 const MAX_UNIT_GRANTED_ABILITY_LINKS = 3;
@@ -1940,51 +1940,70 @@ export default function CodexSummaryDetail({
                                             className="codex-summaryList__metadata codex-summaryList__metadata--hero"
                                             aria-label="Hero metadata"
                                         >
-                                            {heroFactionIdentity ? (
-                                                heroFactionIdentity.iconPath ? (
+                                            <span className="codex-summaryList__heroMetaTop">
+                                                {heroClassMetadata.length > 0 ? (
                                                     <span
-                                                        className="codex-summaryList__metadataIcon"
-                                                        title={heroFactionIdentity.label}
-                                                        aria-label={heroFactionIdentity.label}
+                                                        className="codex-summaryList__heroClassLine"
+                                                        aria-label="Hero class"
                                                     >
-                                                        <IconImg
-                                                            path={heroFactionIdentity.iconPath}
+                                                        {heroClassMetadata.map((item) => (
+                                                            <span
+                                                                key={`${item.key}-${item.value}`}
+                                                                className="codex-summaryList__metadataText"
+                                                            >
+                                                                {item.value}
+                                                            </span>
+                                                        ))}
+                                                    </span>
+                                                ) : null}
+                                                {heroFactionIdentity ? (
+                                                    heroFactionIdentity.iconPath ? (
+                                                        <span
+                                                            className="codex-summaryList__metadataIcon codex-summaryList__metadataIcon--heroFaction"
                                                             title={heroFactionIdentity.label}
-                                                            className="codex-kindIcon codex-kindIcon--summaryFaction"
-                                                            size={18}
-                                                            decorative
-                                                        />
-                                                    </span>
-                                                ) : (
-                                                    <span className="codex-summaryList__metadataText">
-                                                        {heroFactionIdentity.label}
-                                                    </span>
-                                                )
-                                            ) : null}
-                                            {heroClassMetadata.map((item) => (
+                                                            aria-label={heroFactionIdentity.label}
+                                                        >
+                                                            <IconImg
+                                                                path={heroFactionIdentity.iconPath}
+                                                                title={heroFactionIdentity.label}
+                                                                className="codex-kindIcon codex-kindIcon--summaryFaction"
+                                                                size={18}
+                                                                decorative
+                                                            />
+                                                        </span>
+                                                    ) : (
+                                                        <span
+                                                            className="codex-summaryList__metadataText codex-summaryList__metadataText--heroFaction"
+                                                            aria-label="Hero faction"
+                                                        >
+                                                            {heroFactionIdentity.label}
+                                                        </span>
+                                                    )
+                                                ) : null}
+                                            </span>
+                                            {visibleHeroGrantedAbilityLinks.length > 0 || heroGrantedAbilityOverflowCount > 0 ? (
                                                 <span
-                                                    key={`${item.key}-${item.value}`}
-                                                    className="codex-summaryList__metadataText"
+                                                    className="codex-summaryList__heroTagLine"
+                                                    aria-label="Hero tags"
                                                 >
-                                                    {item.value}
-                                                </span>
-                                            ))}
-                                            {visibleHeroGrantedAbilityLinks.map((abilityEntry) => (
-                                                <span
-                                                    className="codex-summaryList__metadataLink"
-                                                    key={`${entry.entryKey}-${abilityEntry.entryKey}`}
-                                                >
-                                                    <CodexInlineEntityLink
-                                                        entry={abilityEntry}
-                                                        onSelect={(ability) => onSelectEntry(ability)}
-                                                    >
-                                                        {renderCodexLabel(getCodexEntryLabel(abilityEntry))}
-                                                    </CodexInlineEntityLink>
-                                                </span>
-                                            ))}
-                                            {heroGrantedAbilityOverflowCount > 0 ? (
-                                                <span className="codex-summaryList__grantedAbilityOverflow">
-                                                    +{heroGrantedAbilityOverflowCount} more
+                                                    {visibleHeroGrantedAbilityLinks.map((abilityEntry) => (
+                                                        <span
+                                                            className="codex-summaryList__metadataLink"
+                                                            key={`${entry.entryKey}-${abilityEntry.entryKey}`}
+                                                        >
+                                                            <CodexInlineEntityLink
+                                                                entry={abilityEntry}
+                                                                onSelect={(ability) => onSelectEntry(ability)}
+                                                            >
+                                                                {renderCodexLabel(getCodexEntryLabel(abilityEntry))}
+                                                            </CodexInlineEntityLink>
+                                                        </span>
+                                                    ))}
+                                                    {heroGrantedAbilityOverflowCount > 0 ? (
+                                                        <span className="codex-summaryList__grantedAbilityOverflow">
+                                                            +{heroGrantedAbilityOverflowCount} more
+                                                        </span>
+                                                    ) : null}
                                                 </span>
                                             ) : null}
                                         </span>
