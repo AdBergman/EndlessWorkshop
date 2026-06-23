@@ -150,9 +150,16 @@ Status: open, non-blocking.
 Open gap:
 
 - EWShop currently renders Hero starting/default skills, applicable skill paths,
-  and exported skill options grouped by rich skill tree/tier data.
+  and exported skill options grouped by rich skill tree unlock threshold data.
+- EWShop does not render exported `tierIndex` as a player-facing `T1/T2/T3`
+  label. Final snapshot QA found Faction skill trees with six structural tier
+  rows and repeated thresholds `0/4/8`, so `tierIndex` appears unsafe as a
+  canonical player-facing tier without exporter clarification.
 - Exported `levelPrerequisite` is rendered only as a conservative unlock
   threshold because its exact gameplay semantics are not yet confirmed.
+- Exporter should clarify what `tierIndex` means, what `levelPrerequisite`
+  means, and what source-backed projection should be used for canonical
+  player-facing `T1/T2/T3` hero skill groups.
 - Full hero progression, explicit quadrant/source slot beyond exported tree
   type, point-cost/investment rules, stat-vs-skill spending, recruitment,
   portraits/icons, or skill-tree planning require explicit source-backed

@@ -52,9 +52,8 @@ export type CodexHeroStartingSkill = {
 
 export type CodexHeroSkillOption = CodexHeroStartingSkill;
 
-export type CodexHeroSkillTier = {
+export type CodexHeroSkillUnlockGroup = {
     key: string;
-    tierIndex: number | null;
     unlockThreshold: number | null;
     skills: CodexHeroSkillOption[];
 };
@@ -62,7 +61,7 @@ export type CodexHeroSkillTier = {
 export type CodexHeroSkillTree = {
     key: string;
     label: string;
-    tiers: CodexHeroSkillTier[];
+    unlockGroups: CodexHeroSkillUnlockGroup[];
 };
 
 export type CodexHeroRichEnrichment = {
@@ -280,37 +279,57 @@ function resolveSkillOptions(
         const label = tree?.treeType?.trim() ?? "";
         if (!tree || tree.isHidden === true || !label) continue;
 
-        const tiers = uniqueKeys(tree.tierPlacementKeys ?? [])
+        const tierRows = uniqueKeys(tree.tierPlacementKeys ?? [])
             .map((tierKey) => skillTiersByKey[tierKey])
             .filter((tier): tier is SkillTierSource => tier !== undefined)
             .sort((a, b) => (
                 (a.tierIndex ?? Number.MAX_SAFE_INTEGER) -
                 (b.tierIndex ?? Number.MAX_SAFE_INTEGER)
-            ))
-            .map((tier): CodexHeroSkillTier | null => {
-                const skills = uniqueKeys(tier.skillKeys ?? [])
-                    .map((skillKey) => buildSkillOption(
-                        skillKey,
-                        hiddenAbilityKeys,
-                        skillsByKey,
-                        publicEntryByKey
-                    ))
-                    .filter((skill): skill is CodexHeroSkillOption => skill !== null);
+            ));
 
-                if (skills.length === 0) return null;
+        const groups: CodexHeroSkillUnlockGroup[] = [];
+        const groupByThreshold = new Map<string, CodexHeroSkillUnlockGroup>();
+        const seenSkillKeysByGroup = new Map<string, Set<string>>();
 
-                return {
-                    key: normalizeKey(tier.tierPlacementKey),
-                    tierIndex: Number.isFinite(tier.tierIndex) ? tier.tierIndex : null,
-                    unlockThreshold: Number.isFinite(tier.levelPrerequisite) ? tier.levelPrerequisite : null,
-                    skills,
+        for (const tierRow of tierRows) {
+            const unlockThreshold = Number.isFinite(tierRow.levelPrerequisite) ? tierRow.levelPrerequisite : null;
+            const groupKey = unlockThreshold === null
+                ? `tier:${normalizeKey(tierRow.tierPlacementKey)}`
+                : `threshold:${unlockThreshold}`;
+            let group = groupByThreshold.get(groupKey);
+
+            if (!group) {
+                group = {
+                    key: `${treeKey}:${groupKey}`,
+                    unlockThreshold,
+                    skills: [],
                 };
-            })
-            .filter((tier): tier is CodexHeroSkillTier => tier !== null);
+                groupByThreshold.set(groupKey, group);
+                groups.push(group);
+                seenSkillKeysByGroup.set(groupKey, new Set<string>());
+            }
 
-        if (tiers.length === 0) continue;
+            const seenSkillKeys = seenSkillKeysByGroup.get(groupKey);
+            for (const skillKey of uniqueKeys(tierRow.skillKeys ?? [])) {
+                if (seenSkillKeys?.has(skillKey)) continue;
 
-        trees.push({ key: treeKey, label, tiers });
+                const option = buildSkillOption(
+                    skillKey,
+                    hiddenAbilityKeys,
+                    skillsByKey,
+                    publicEntryByKey
+                );
+                if (!option) continue;
+
+                seenSkillKeys?.add(skillKey);
+                group.skills.push(option);
+            }
+        }
+
+        const unlockGroups = groups.filter((group) => group.skills.length > 0);
+        if (unlockGroups.length === 0) continue;
+
+        trees.push({ key: treeKey, label, unlockGroups });
     }
 
     return trees;
@@ -381,8 +400,8 @@ export function getCodexHeroRichEnrichmentEntryKeys(enrichment: CodexHeroRichEnr
         addKey(skill.primaryAbility?.entry);
     }
     for (const tree of enrichment.skillOptions) {
-        for (const tier of tree.tiers) {
-            for (const skill of tier.skills) {
+        for (const group of tree.unlockGroups) {
+            for (const skill of group.skills) {
                 addKey(skill.primaryAbility?.entry);
             }
         }

@@ -1069,19 +1069,19 @@
     text-transform: uppercase;
 }
 
-.codex-heroProfile__tierList {
+.codex-heroProfile__unlockGroupList {
     display: grid;
     gap: 10px;
 }
 
-.codex-heroProfile__tier {
+.codex-heroProfile__unlockGroup {
     display: grid;
     gap: 8px;
     padding: 10px 0 10px 12px;
     border-left: 1px solid rgba(190, 150, 73, 0.14);
 }
 
-.codex-heroProfile__tierHeader {
+.codex-heroProfile__unlockGroupHeader {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;

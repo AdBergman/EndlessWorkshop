@@ -6712,8 +6712,14 @@ describe("CodexPage", () => {
         expect(within(heroProfile).getByText("Skill options")).toBeInTheDocument();
         expect(within(heroProfile).getByRole("region", { name: "Class skill options" })).toBeInTheDocument();
         expect(within(heroProfile).getByRole("region", { name: "Faction skill options" })).toBeInTheDocument();
-        expect(within(heroProfile).getByRole("region", { name: "T1 skills" })).toHaveTextContent("Unlock threshold: 0");
-        expect(within(heroProfile).getByRole("region", { name: "T2 skills" })).toHaveTextContent("Unlock threshold: 4");
+        expect(within(heroProfile).getByRole("region", { name: "Unlock threshold 0" })).toHaveTextContent(
+            "Unlock threshold: 0"
+        );
+        expect(within(heroProfile).getByRole("region", { name: "Unlock threshold 4" })).toHaveTextContent(
+            "Unlock threshold: 4"
+        );
+        expect(within(heroProfile).queryByRole("region", { name: "T1 skills" })).not.toBeInTheDocument();
+        expect(within(heroProfile).queryByRole("region", { name: "T4 skills" })).not.toBeInTheDocument();
         expect(heroProfile).toHaveTextContent("Patient Mentor");
         expect(heroProfile).not.toHaveTextContent("UnitAbility_Missing");
 

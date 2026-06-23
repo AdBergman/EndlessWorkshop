@@ -138,7 +138,10 @@ describe("codexHeroRichEnrichment", () => {
                 HeroSkillTree_Faction: skillTree({
                     treeKey: "HeroSkillTree_Faction",
                     treeType: "Faction",
-                    tierPlacementKeys: ["HeroSkillTree_Faction::HeroSkillTier_Faction_2"],
+                    tierPlacementKeys: [
+                        "HeroSkillTree_Faction::HeroSkillTier_Faction_2",
+                        "HeroSkillTree_Faction::HeroSkillTier_Common_2",
+                    ],
                 }),
                 HeroSkillTree_Synergy: skillTree({
                     treeKey: "HeroSkillTree_Synergy",
@@ -157,6 +160,15 @@ describe("codexHeroRichEnrichment", () => {
                     levelPrerequisite: 4,
                     skillKeys: ["HeroSkill_Faction02"],
                 }),
+                "HeroSkillTree_Faction::HeroSkillTier_Common_2": skillTier({
+                    tierPlacementKey: "HeroSkillTree_Faction::HeroSkillTier_Common_2",
+                    tierKey: "HeroSkillTier_Common_2",
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierIndex: 4,
+                    levelPrerequisite: 4,
+                    skillKeys: ["HeroSkill_Common02"],
+                }),
             },
             {
                 HeroSkill_Archer02: skill({}),
@@ -165,6 +177,12 @@ describe("codexHeroRichEnrichment", () => {
                     publicDisplayName: "Patient Mentor",
                     primaryAbilityKey: "UnitAbility_Missing",
                     resolvedSummaryLines: ["Gain 5 [Experience] Experience"],
+                }),
+                HeroSkill_Common02: skill({
+                    skillKey: "HeroSkill_Common02",
+                    publicDisplayName: "Tireless Pace",
+                    primaryAbilityKey: null,
+                    resolvedSummaryLines: ["Gain 1 [Movement] Movement"],
                 }),
             },
             {
@@ -179,16 +197,19 @@ describe("codexHeroRichEnrichment", () => {
         expect(enrichment.startingSkills.map((defaultSkill) => defaultSkill.label)).toEqual(["Terrain Logistics"]);
         expect(enrichment.startingSkills[0]?.primaryAbility?.label).toBe("Terrain Logistics");
         expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Class", "Faction"]);
-        expect(enrichment.skillOptions[0]?.tiers[0]).toMatchObject({
-            tierIndex: 0,
+        expect(enrichment.skillOptions[0]?.unlockGroups[0]).toMatchObject({
             unlockThreshold: 0,
         });
-        expect(enrichment.skillOptions[0]?.tiers[0]?.skills[0]?.label).toBe("Terrain Logistics");
-        expect(enrichment.skillOptions[1]?.tiers[0]).toMatchObject({
-            tierIndex: 1,
+        expect(enrichment.skillOptions[0]?.unlockGroups[0]?.skills[0]?.label).toBe("Terrain Logistics");
+        expect(enrichment.skillOptions[1]?.unlockGroups).toHaveLength(1);
+        expect(enrichment.skillOptions[1]?.unlockGroups[0]).toMatchObject({
             unlockThreshold: 4,
         });
-        expect(enrichment.skillOptions[1]?.tiers[0]?.skills[0]?.primaryAbility).toBeNull();
+        expect(enrichment.skillOptions[1]?.unlockGroups[0]?.skills.map((option) => option.label)).toEqual([
+            "Patient Mentor",
+            "Tireless Pace",
+        ]);
+        expect(enrichment.skillOptions[1]?.unlockGroups[0]?.skills[0]?.primaryAbility).toBeNull();
         expect(hasCodexHeroRichEnrichment(enrichment)).toBe(true);
         expect(getCodexHeroRichEnrichmentEntryKeys(enrichment)).toEqual([
             "Faction_Kin",
@@ -252,9 +273,9 @@ describe("codexHeroRichEnrichment", () => {
         expect(enrichment.startingSkills.map((defaultSkill) => defaultSkill.label)).toEqual(["Terrain Logistics"]);
         expect(enrichment.startingSkills[0]?.primaryAbility).toBeNull();
         expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Class"]);
-        expect(enrichment.skillOptions[0]?.tiers[0]?.skills.map((option) => option.label)).toEqual([
+        expect(enrichment.skillOptions[0]?.unlockGroups[0]?.skills.map((option) => option.label)).toEqual([
             "Terrain Logistics",
         ]);
-        expect(enrichment.skillOptions[0]?.tiers[0]?.skills[0]?.primaryAbility).toBeNull();
+        expect(enrichment.skillOptions[0]?.unlockGroups[0]?.skills[0]?.primaryAbility).toBeNull();
     });
 });

@@ -4,7 +4,7 @@ import type {
     CodexHeroLink,
     CodexHeroRichEnrichment,
     CodexHeroSkillOption,
-    CodexHeroSkillTier,
+    CodexHeroSkillUnlockGroup,
     CodexHeroSkillTree,
 } from "@/lib/codex/codexHeroRichEnrichment";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
@@ -163,11 +163,11 @@ function HeroSkillTreeOptions({
     return (
         <section className="codex-heroProfile__tree" aria-label={`${tree.label} skill options`}>
             <div className="codex-heroProfile__treeTitle">{renderCodexLabel(tree.label)}</div>
-            <div className="codex-heroProfile__tierList">
-                {tree.tiers.map((tier) => (
-                    <HeroSkillTierOptions
-                        key={tier.key}
-                        tier={tier}
+            <div className="codex-heroProfile__unlockGroupList">
+                {tree.unlockGroups.map((group) => (
+                    <HeroSkillUnlockGroupOptions
+                        key={group.key}
+                        group={group}
                         onSelect={onSelect}
                     />
                 ))}
@@ -176,25 +176,28 @@ function HeroSkillTreeOptions({
     );
 }
 
-function HeroSkillTierOptions({
-    tier,
+function HeroSkillUnlockGroupOptions({
+    group,
     onSelect,
 }: {
-    tier: CodexHeroSkillTier;
+    group: CodexHeroSkillUnlockGroup;
     onSelect: (entry: CodexEntry) => void;
 }) {
-    const tierLabel = typeof tier.tierIndex === "number" ? `T${tier.tierIndex + 1}` : "Tier";
+    const ariaLabel = typeof group.unlockThreshold === "number"
+        ? `Unlock threshold ${group.unlockThreshold}`
+        : "Skill option group";
 
     return (
-        <section className="codex-heroProfile__tier" aria-label={`${tierLabel} skills`}>
-            <div className="codex-heroProfile__tierHeader">
-                <span>{tierLabel}</span>
-                {typeof tier.unlockThreshold === "number" ? (
-                    <span>Unlock threshold: {tier.unlockThreshold}</span>
-                ) : null}
+        <section className="codex-heroProfile__unlockGroup" aria-label={ariaLabel}>
+            <div className="codex-heroProfile__unlockGroupHeader">
+                {typeof group.unlockThreshold === "number" ? (
+                    <span>Unlock threshold: {group.unlockThreshold}</span>
+                ) : (
+                    <span>Unlock threshold unavailable</span>
+                )}
             </div>
             <div className="codex-heroProfile__optionList">
-                {tier.skills.map((skill) => (
+                {group.skills.map((skill) => (
                     <HeroSkillOption key={skill.key} skill={skill} onSelect={onSelect} />
                 ))}
             </div>

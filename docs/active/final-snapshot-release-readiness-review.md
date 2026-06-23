@@ -95,10 +95,12 @@ Validated non-blocking exporter findings:
   `sourceDisplayName`, and `sourceReferenceKey` only when source data proves it.
 - **Hero progression / skill-path gaps**: Current Hero detail enrichment is
   honest about starting/default skills, applicable skill paths, and exported
-  skill options grouped by tree/tier. Full hero progression, point-cost rules,
-  stat-vs-skill spending, recruitment, portraits/icons, or planner behavior
-  require explicit source-backed metadata/art contracts and should not be
-  inferred.
+  skill options grouped by tree and conservative unlock threshold. Exported
+  `tierIndex` is not treated as player-facing `T1/T2/T3`; exporter
+  clarification is needed before showing canonical hero skill tiers. Full hero
+  progression, point-cost rules, stat-vs-skill spending, recruitment,
+  portraits/icons, or planner behavior require explicit source-backed
+  metadata/art contracts and should not be inferred.
 - **Ability role and ownership cleanup**: Ability `Combat role` still has
   exporter-owned quality follow-up, and explicit ability ownership remains
   missing unless source-proven facts/refs are emitted.
