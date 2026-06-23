@@ -41,7 +41,10 @@ export const PREFERRED_CODEX_KIND_ORDER = [
     "naturalwonders",
 ];
 
+export type CodexTopLevelVisibility = "public" | "localOnly" | "hidden";
+
 const HIDDEN_TOP_LEVEL_CODEX_KINDS = new Set(["bonuses", "extractors", "modifiers", "quests"]);
+const LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS = new Set(["victoryconditions", "victorypaths"]);
 const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors", "quests"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set([
     "counciloreffects",
@@ -120,10 +123,36 @@ export function supportsFullWidthReferenceOverview(kind: string): boolean {
     return FULL_WIDTH_REFERENCE_OVERVIEW_KINDS.has(normalizeCodexKind(kind));
 }
 
-export function isVisibleTopLevelCodexKind(kind: string): boolean {
-    return !HIDDEN_TOP_LEVEL_CODEX_KINDS.has(normalizeCodexKind(kind));
+export function getCodexTopLevelVisibility(kind: string): CodexTopLevelVisibility {
+    const normalizedKind = normalizeCodexKind(kind);
+
+    if (HIDDEN_TOP_LEVEL_CODEX_KINDS.has(normalizedKind)) {
+        return "hidden";
+    }
+
+    if (LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS.has(normalizedKind)) {
+        return "localOnly";
+    }
+
+    return "public";
+}
+
+export function isLocalCodexTopLevelVisibilityEnabled(): boolean {
+    return import.meta.env.DEV;
+}
+
+export function isVisibleTopLevelCodexKind(
+    kind: string,
+    options: { includeLocalOnly?: boolean } = {}
+): boolean {
+    const visibility = getCodexTopLevelVisibility(kind);
+
+    return visibility === "public" || (visibility === "localOnly" && options.includeLocalOnly === true);
 }
 
 export function isDirectRoutableHiddenCodexKind(kind: string): boolean {
-    return DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS.has(normalizeCodexKind(kind));
+    const normalizedKind = normalizeCodexKind(kind);
+
+    return DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS.has(normalizedKind) ||
+        LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS.has(normalizedKind);
 }

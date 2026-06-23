@@ -99,6 +99,7 @@ import {
 } from "@/lib/codex/codexUnitArchiveFilters";
 import {
     getCodexCategoryMode,
+    isLocalCodexTopLevelVisibilityEnabled,
     isDirectRoutableHiddenCodexKind,
     isVisibleTopLevelCodexKind,
     normalizeCodexKind,
@@ -164,6 +165,8 @@ export default function CodexPage() {
         void loadEntries();
     }, [loadEntries]);
 
+    const includeLocalOnlyCategories = isLocalCodexTopLevelVisibilityEnabled();
+
     const filterOptions = useMemo(() => {
         const kindCounts = entries.reduce<Map<string, number>>((acc, entry) => {
             const exportKind = normalizeCodexKind(entry.exportKind);
@@ -176,10 +179,14 @@ export default function CodexPage() {
 
         const knownKinds = PREFERRED_CODEX_KIND_ORDER
             .filter((kind) => kindCounts.has(kind))
-            .filter(isVisibleTopLevelCodexKind);
+            .filter((kind) => isVisibleTopLevelCodexKind(kind, {
+                includeLocalOnly: includeLocalOnlyCategories,
+            }));
         const extraKinds = Array.from(kindCounts.keys())
             .filter((kind) => !PREFERRED_CODEX_KIND_ORDER.includes(kind))
-            .filter(isVisibleTopLevelCodexKind)
+            .filter((kind) => isVisibleTopLevelCodexKind(kind, {
+                includeLocalOnly: includeLocalOnlyCategories,
+            }))
             .sort((left, right) => left.localeCompare(right));
 
         const orderedKinds = [...knownKinds, ...extraKinds];
@@ -192,7 +199,7 @@ export default function CodexPage() {
                 count: kindCounts.get(kind) ?? 0,
             })),
         ];
-    }, [entries]);
+    }, [entries, includeLocalOnlyCategories]);
 
     const searchFilteredEntries = useMemo(
         () => filterCodexEntries(entries, { query: deferredQuery, kind: activeKind }),

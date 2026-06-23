@@ -60,6 +60,10 @@ Current decisions to preserve:
   top-level shallow reference categories.
 - Modifiers remain hidden from top-level navigation and may only be reached by
   search or exact links.
+- Victory Paths and Victory Conditions are local/dev-visible Codex categories:
+  keep their imports and direct routes available for QA, but hide them from
+  public top-level navigation until their missing/friendly-presentation issues
+  are resolved.
 - Thin/plain entries are not EWShop bugs when DB Exporter marked their richer
   data unavailable, unsafe, runtime-only, obsolete, internal, or deferred.
 - `Population_Aspect` should keep `Unlocks Nutrient Extractor` plain because

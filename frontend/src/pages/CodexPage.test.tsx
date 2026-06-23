@@ -424,6 +424,7 @@ describe("CodexPage", () => {
 
     afterEach(() => {
         cleanup();
+        vi.unstubAllEnvs();
         useCodexStore.getState().reset();
         useFactionStore.getState().reset();
         useHeroStore.getState().reset();
@@ -500,7 +501,7 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
     });
 
-    it("renders all visible categories directly in the landing category index", async () => {
+    it("renders local-visible categories directly in the landing category index during development", async () => {
         seedCodexEntries([
             { exportKind: "units", entryKey: "Unit_A", displayName: "Unit A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
@@ -584,7 +585,65 @@ describe("CodexPage", () => {
         expect(categoryLabels).not.toContain("Quests");
     });
 
-    it("renders all visible categories in a wrapping category shelf on category pages", async () => {
+    it("hides local-only categories from production navigation while keeping direct routes available", async () => {
+        vi.stubEnv("DEV", false);
+
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "victoryconditions",
+                entryKey: "VictoryCondition_A",
+                displayName: "Victory Condition A",
+                descriptionLines: ["Hold a decisive advantage."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "victorypaths",
+                entryKey: "VictoryPath_A",
+                displayName: "Victory Path A",
+                descriptionLines: ["Pursue a strategic victory path."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_A",
+                displayName: "Ability A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "Encyclopedia Index" });
+        const categoryLabels = getLandingCategoryLabels();
+        expect(categoryLabels).toContain("Abilities");
+        expect(categoryLabels).not.toContain("Victory Conditions");
+        expect(categoryLabels).not.toContain("Victory Paths");
+
+        cleanup();
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=victoryconditions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Victory Conditions" })).toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /victory conditions/i }))
+            .not.toBeInTheDocument();
+    });
+
+    it("renders local-visible categories in a wrapping category shelf on category pages during development", async () => {
         seedCodexEntries([
             { exportKind: "units", entryKey: "Unit_A", displayName: "Unit A", descriptionLines: [], referenceKeys: [] },
             { exportKind: "abilities", entryKey: "Ability_A", displayName: "Ability A", descriptionLines: [], referenceKeys: [] },
