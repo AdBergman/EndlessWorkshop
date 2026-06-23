@@ -68,6 +68,11 @@ import {
     type QuestArchiveFilterValue,
 } from "@/lib/codex/codexQuestArchiveFilters";
 import {
+    buildPopulationTypeFilterOptions,
+    filterPopulationEntriesByType,
+    type PopulationArchiveType,
+} from "@/lib/codex/codexPopulationArchiveFilters";
+import {
     buildStatusScopeFilterOptions,
     filterStatusEntriesByScope,
 } from "@/lib/codex/codexStatusArchiveFilters";
@@ -133,6 +138,7 @@ export default function CodexPage() {
         EMPTY_UNIT_ARCHIVE_FILTERS
     );
     const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
+    const [activePopulationType, setActivePopulationType] = useState<PopulationArchiveType | null>(null);
     const [activeQuestCategory, setActiveQuestCategory] = useState<QuestArchiveFilterValue | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
     const [activeTechFilters, setActiveTechFilters] = useState<ActiveTechArchiveFilters>(
@@ -200,6 +206,7 @@ export default function CodexPage() {
     const isEquipmentArchiveMode = categoryMode === "equipmentArchive";
     const isHeroArchiveMode = categoryMode === "heroArchive";
     const isImprovementArchiveMode = categoryMode === "improvementArchive";
+    const isPopulationArchiveMode = categoryMode === "populationArchive";
     const isQuestArchiveMode = categoryMode === "questArchive";
     const isStatusArchiveMode = categoryMode === "statusArchive";
     const isTechArchiveMode = categoryMode === "techArchive";
@@ -339,6 +346,21 @@ export default function CodexPage() {
     );
 
     useEffect(() => {
+        if (isPopulationArchiveMode) return;
+
+        setActivePopulationType((current) => current ? null : current);
+    }, [isPopulationArchiveMode]);
+
+    const populationTypeOptions = useMemo(
+        () => (
+            isPopulationArchiveMode
+                ? buildPopulationTypeFilterOptions(searchFilteredEntries)
+                : []
+        ),
+        [isPopulationArchiveMode, searchFilteredEntries]
+    );
+
+    useEffect(() => {
         if (isQuestArchiveMode) return;
 
         setActiveQuestCategory((current) => current ? null : current);
@@ -447,6 +469,10 @@ export default function CodexPage() {
                 return filterImprovementEntriesByCategory(searchFilteredEntries, activeImprovementCategory);
             }
 
+            if (isPopulationArchiveMode) {
+                return filterPopulationEntriesByType(searchFilteredEntries, activePopulationType);
+            }
+
             if (isQuestArchiveMode) {
                 return filterQuestEntriesByCategory(searchFilteredEntries, activeQuestCategory, codexReferenceIndexes);
             }
@@ -495,6 +521,7 @@ export default function CodexPage() {
             activeFactFilters,
             activeHeroFilters,
             activeImprovementCategory,
+            activePopulationType,
             activeQuestCategory,
             codexReferenceIndexes,
             activeStatusScope,
@@ -509,6 +536,7 @@ export default function CodexPage() {
             isEquipmentArchiveMode,
             isHeroArchiveMode,
             isImprovementArchiveMode,
+            isPopulationArchiveMode,
             isQuestArchiveMode,
             isStatusArchiveMode,
             isTechArchiveMode,
@@ -903,6 +931,16 @@ export default function CodexPage() {
         returnFiltersToArchive(isImprovementArchiveMode);
     }, [isImprovementArchiveMode, returnFiltersToArchive]);
 
+    const clearPopulationType = useCallback(() => {
+        setActivePopulationType(null);
+        returnFiltersToArchive(isPopulationArchiveMode);
+    }, [isPopulationArchiveMode, returnFiltersToArchive]);
+
+    const togglePopulationType = useCallback((type: PopulationArchiveType) => {
+        setActivePopulationType((current) => current === type ? null : type);
+        returnFiltersToArchive(isPopulationArchiveMode);
+    }, [isPopulationArchiveMode, returnFiltersToArchive]);
+
     const clearQuestCategory = useCallback(() => {
         setActiveQuestCategory(null);
         returnFiltersToArchive(isQuestArchiveMode);
@@ -1000,6 +1038,8 @@ export default function CodexPage() {
                     } ${
                         isImprovementArchiveMode ? "codex-workspace--improvementArchive" : ""
                     } ${
+                        isPopulationArchiveMode ? "codex-workspace--populationArchive" : ""
+                    } ${
                         isQuestArchiveMode ? "codex-workspace--questArchive" : ""
                     } ${
                         isStatusArchiveMode ? "codex-workspace--statusArchive" : ""
@@ -1036,6 +1076,9 @@ export default function CodexPage() {
                         improvementCategoryFilter={activeImprovementCategory}
                         improvementCategoryOptions={improvementCategoryOptions}
                         improvementTotalCount={isImprovementArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
+                        populationTypeFilter={activePopulationType}
+                        populationTypeOptions={populationTypeOptions}
+                        populationTotalCount={isPopulationArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
                         isActionArchiveMode={isActionArchiveMode}
                         isAbilityCatalogMode={isAbilityCatalogMode}
                         isDiplomacyArchiveMode={isDiplomacyArchiveMode}
@@ -1043,6 +1086,7 @@ export default function CodexPage() {
                         isEquipmentArchiveMode={isEquipmentArchiveMode}
                         isHeroArchiveMode={isHeroArchiveMode}
                         isImprovementArchiveMode={isImprovementArchiveMode}
+                        isPopulationArchiveMode={isPopulationArchiveMode}
                         isQuestArchiveMode={isQuestArchiveMode}
                         isStatusArchiveMode={isStatusArchiveMode}
                         isTechArchiveMode={isTechArchiveMode}
@@ -1069,6 +1113,7 @@ export default function CodexPage() {
                         onClearHeroFilters={clearHeroFilters}
                         onClearUnitFilters={clearUnitFilters}
                         onClearImprovementCategory={clearImprovementCategory}
+                        onClearPopulationType={clearPopulationType}
                         onClearQuestCategory={clearQuestCategory}
                         onClearStatusScope={clearStatusScope}
                         onClearTechFilters={clearTechFilters}
@@ -1081,6 +1126,7 @@ export default function CodexPage() {
                         onToggleHeroFilter={toggleHeroFilter}
                         onToggleUnitFilter={toggleUnitFilter}
                         onToggleImprovementCategory={toggleImprovementCategory}
+                        onTogglePopulationType={togglePopulationType}
                         onToggleQuestCategory={toggleQuestCategory}
                         onToggleStatusScope={toggleStatusScope}
                         onToggleTechFilter={toggleTechFilter}

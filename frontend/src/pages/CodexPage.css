@@ -2036,6 +2036,7 @@
 .codex-summaryList__item--heroArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--unitArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--improvementArchive .codex-summaryList__titleLine,
+.codex-summaryList__item--populationArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--questArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--techArchive .codex-summaryList__titleLine,
 .codex-summaryList__item--victoryConditionArchive .codex-summaryList__titleLine {
@@ -2122,6 +2123,12 @@
 }
 
 .codex-summaryList__item--improvementArchive .codex-summaryList__name {
+    font-size: 1.08rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.codex-summaryList__item--populationArchive .codex-summaryList__name {
     font-size: 1.08rem;
     font-weight: 700;
     line-height: 1.35;
@@ -2214,6 +2221,12 @@
     gap: 8px;
 }
 
+.codex-summaryList__item--populationArchive .codex-summaryList__metadata {
+    flex: 0 1 min(46%, 440px);
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .codex-summaryList__item--techArchive .codex-summaryList__metadata {
     flex: 0 1 min(44%, 420px);
     justify-content: flex-end;
@@ -2283,6 +2296,14 @@
 }
 
 .codex-summaryList__metadata--improvement {
+    align-items: center;
+    gap: 7px;
+    color: rgba(241, 234, 220, 0.52);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.codex-summaryList__metadata--population {
     align-items: center;
     gap: 7px;
     color: rgba(241, 234, 220, 0.52);
@@ -2528,6 +2549,12 @@
     gap: 4px;
 }
 
+.codex-summaryList__populationEffects {
+    display: grid;
+    max-width: 86ch;
+    gap: 4px;
+}
+
 .codex-summaryList__techEffects {
     display: grid;
     max-width: 84ch;
@@ -2546,6 +2573,7 @@
 .codex-summaryList__heroStatLine,
 .codex-summaryList__unitStatLine,
 .codex-summaryList__improvementEffectLine,
+.codex-summaryList__populationEffectLine,
 .codex-summaryList__questSignal,
 .codex-summaryList__techEffectLine,
 .codex-summaryList__statusFallback {
@@ -2557,6 +2585,42 @@
     line-height: 1.5;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.codex-summaryList__populationEffectLine {
+    display: inline-flex;
+    gap: 7px;
+}
+
+.codex-summaryList__populationEffectLabel {
+    flex: 0 0 auto;
+    color: rgba(195, 152, 77, 0.72);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-summaryList__populationEffectValue {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-summaryList__populationEffectLine .codex-inlineEntityLink {
+    min-width: 0;
+    overflow: hidden;
+    color: rgba(241, 234, 220, 0.86);
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.codex-summaryList__populationEffectLine .codex-inlineEntityLink:hover,
+.codex-summaryList__populationEffectLine .codex-inlineEntityLink:focus-visible {
+    color: rgba(255, 217, 119, 0.95);
 }
 
 .codex-summaryList__statusFallback {

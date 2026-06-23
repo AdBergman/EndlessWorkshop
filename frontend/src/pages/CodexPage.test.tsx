@@ -737,6 +737,219 @@ describe("CodexPage", () => {
         expect(screen.getByText("Game Speed Multiplier * 10")).toBeInTheDocument();
     });
 
+    it("renders Population archive rows from worker effects, threshold rewards, and quiet metadata", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "populations",
+                entryKey: "Population_KinOfSheredyn",
+                displayName: "Kin of Sheredyn",
+                descriptionLines: ["Faction: Faction_KinOfSheredyn", "At 5 population: Fallback should not win"],
+                referenceKeys: ["Faction_KinOfSheredyn", "KinOfSheredyn_DistrictImprovement_01"],
+                facts: [
+                    { label: "Faction", value: "Faction_KinOfSheredyn", referenceKey: "Faction_KinOfSheredyn" },
+                    { label: "Type", value: "Major faction population" },
+                    { label: "Default population", value: "Yes" },
+                    { label: "Custom faction availability", value: "Available" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [
+                    {
+                        title: "Worker effects",
+                        lines: ["+2 [IndustryColored] Industry on [PopulationCategory_02] Artisans"],
+                    },
+                    {
+                        title: "Threshold rewards",
+                        items: [
+                            {
+                                label: "At 5 population",
+                                referenceKey: "KinOfSheredyn_DistrictImprovement_01",
+                                facts: [{
+                                    label: "Reward",
+                                    value: "Military Press",
+                                    referenceKey: "KinOfSheredyn_DistrictImprovement_01",
+                                }],
+                            },
+                            {
+                                label: "At 15 population",
+                                lines: ["+1 [IndustryColored] Industry on Kin of Sheredyn Population"],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Minor_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Faction", value: "Ametrine", referenceKey: "MinorFaction_Ametrine" },
+                    { label: "Type", value: "Minor faction population" },
+                    { label: "Default population", value: "No" },
+                    { label: "Custom faction availability", value: "Available" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [{
+                    title: "Worker effects",
+                    lines: ["+2 [ScienceColored] Science on [PopulationCategory_02] Artisans"],
+                }],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Called",
+                displayName: "Called Population",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Created by action" },
+                    { label: "Default population", value: "No" },
+                    { label: "Custom faction availability", value: "Not available" },
+                    { label: "Base food cost", value: "0" },
+                ],
+                sections: [],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_KinOfSheredyn",
+                displayName: "Kin of Sheredyn",
+                descriptionLines: ["Major faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: ["Minor faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "improvements",
+                entryKey: "KinOfSheredyn_DistrictImprovement_01",
+                displayName: "Military Press",
+                descriptionLines: ["+1 [IndustryColored] Industry."],
+                referenceKeys: [],
+                facts: [{ label: "Category", value: "Military" }],
+                sections: [{ title: "Effects", lines: ["+1 [IndustryColored] Industry."] }],
+            },
+        ];
+        seedCodexEntries(entries);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "All Populations" });
+        const rail = screen.getByRole("complementary", { name: /population archive filters/i });
+        expect(within(rail).getByRole("button", { name: /all 3/i })).toBeInTheDocument();
+        expect(within(rail).getByRole("button", { name: /major faction 1/i })).toBeInTheDocument();
+        expect(within(rail).getByRole("button", { name: /minor faction 1/i })).toBeInTheDocument();
+        expect(within(rail).getByRole("button", { name: /created by action 1/i })).toBeInTheDocument();
+
+        const summaryList = screen.getByLabelText("Populations overview");
+        const row = getSummaryRowForButton(within(summaryList).getByRole("button", { name: "Kin of Sheredyn" }));
+        expect(row).toHaveClass("codex-summaryList__item--populationArchive");
+        expect(within(row).getByText("Major Faction")).toBeInTheDocument();
+        expect(within(row).getByText("Default")).toBeInTheDocument();
+        expect(within(row).getByText("Custom")).toBeInTheDocument();
+        expect(within(row).getByText("Food 60")).toBeInTheDocument();
+        expect(within(row).getByText("Worker:")).toBeInTheDocument();
+        expect(within(row).getByText(/\+2/)).toBeInTheDocument();
+        expect(within(row).getByText("5 population:")).toBeInTheDocument();
+        expect(within(row).getByRole("button", { name: "Open Military Press in Codex" })).toBeInTheDocument();
+        expect(within(row).queryByText("Fallback should not win")).not.toBeInTheDocument();
+
+        const calledRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: "Called Population" }));
+        expect(within(calledRow).getByText("Created by Action")).toBeInTheDocument();
+        expect(within(calledRow).getByText("No Custom")).toBeInTheDocument();
+        expect(within(calledRow).getByText("Food 0")).toBeInTheDocument();
+        expect(within(calledRow).getByText("No public population effects exported yet.")).toBeInTheDocument();
+
+        await user.click(within(row).getByRole("button", { name: "Open Military Press in Codex" }));
+        expect(await screen.findByRole("heading", { name: "Military Press" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=KinOfSheredyn_DistrictImprovement_01");
+    });
+
+    it("filters Population rows by exported Type and returns detail routes to the archive", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "populations",
+                entryKey: "Population_Aspect",
+                displayName: "Aspect",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Major faction population" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [{
+                    title: "Worker effects",
+                    lines: ["+1 [CultureColored] Influence"],
+                }],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Minor_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Minor faction population" },
+                    { label: "Base food cost", value: "60" },
+                ],
+                sections: [{
+                    title: "Worker effects",
+                    lines: ["+2 [ScienceColored] Science on Artisans"],
+                }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=populations&entry=Population_Aspect"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Aspects" })).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /minor faction 1/i }));
+
+        expect(await screen.findByRole("heading", { name: "All Populations" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=populations");
+        expect(screen.getByRole("button", { name: "Ametrine" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Aspects" })).not.toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /minor faction 1/i }));
+        expect(screen.getByRole("button", { name: "Aspects" })).toBeInTheDocument();
+
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "science");
+        expect(screen.getByRole("button", { name: "Ametrine" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Aspects" })).not.toBeInTheDocument();
+    });
+
     it("renders Ability overview metadata from exported facts while keeping left rows compact", async () => {
         seedCodexEntries([
             {

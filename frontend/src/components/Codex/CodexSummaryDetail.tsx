@@ -36,6 +36,7 @@ import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
+import { getPopulationTypeDisplayLabel } from "@/lib/codex/codexPopulationArchiveFilters";
 import { formatUnitTierLabel } from "@/lib/codex/codexUnitArchiveFilters";
 import {
     getCodexReadablePreviewLine,
@@ -135,6 +136,16 @@ type ImprovementArchiveMetadataItem = {
     key: string;
     value: string;
 };
+type PopulationArchiveMetadataItem = {
+    key: string;
+    value: string;
+};
+type PopulationArchivePreviewLine = {
+    key: string;
+    label: string;
+    value: string;
+    linkedEntry?: CodexEntry;
+};
 
 const OVERVIEW_METADATA_BY_KIND: Record<string, OverviewMetadataConfig[]> = {
     abilities: [
@@ -158,6 +169,8 @@ const MAX_UNIT_STAT_PREVIEW_LINES = 6;
 const MAX_UNIT_GRANTED_ABILITY_LINKS = 3;
 const MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES = 5;
 const MAX_DISTRICT_EFFECT_PREVIEW_LINES = 5;
+const MAX_POPULATION_WORKER_PREVIEW_LINES = 3;
+const MAX_POPULATION_THRESHOLD_PREVIEW_LINES = 3;
 const MAX_DIPLOMACY_SIGNAL_LINES = 2;
 const MAX_QUEST_PREVIEW_LINES = 3;
 const MAX_QUEST_INLINE_LINKS = 5;
@@ -987,6 +1000,137 @@ function getImprovementArchiveMetadata(entry: CodexEntry): ImprovementArchiveMet
     return items;
 }
 
+function getPopulationAvailabilityLabel(label: string, value: string): string {
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (label === "Default population") {
+        return normalizedValue === "yes" ? "Default" : "";
+    }
+
+    if (label === "Custom faction availability") {
+        if (normalizedValue === "available") return "Custom";
+        if (normalizedValue === "not available") return "No Custom";
+    }
+
+    return value.trim();
+}
+
+function getPopulationFactionLabel(entry: CodexEntry, referenceIndexes: CodexReferenceIndexes): string {
+    const factionFact = (entry.facts ?? []).find((fact) =>
+        fact.label.trim().toLowerCase() === "faction" && fact.value.trim()
+    );
+    if (!factionFact) return "";
+
+    const linkedFaction = resolveCodexReference(factionFact.referenceKey, referenceIndexes);
+    if (linkedFaction) {
+        return getCodexEntryLabel(linkedFaction);
+    }
+
+    return formatCodexMajorFactionText(factionFact.value.trim());
+}
+
+function getPopulationArchiveMetadata(
+    entry: CodexEntry,
+    referenceIndexes: CodexReferenceIndexes
+): PopulationArchiveMetadataItem[] {
+    if (entry.exportKind.trim().toLowerCase() !== "populations") return [];
+
+    const items: PopulationArchiveMetadataItem[] = [];
+    const seenValues = new Set<string>();
+
+    const addValue = (key: string, value: string) => {
+        const trimmedValue = value.trim();
+        if (!trimmedValue) return;
+
+        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
+        if (seenValues.has(normalizedValue)) return;
+
+        seenValues.add(normalizedValue);
+        items.push({ key, value: trimmedValue });
+    };
+
+    getCodexFactValues(entry, "Type").forEach((value) =>
+        addValue("type", getPopulationTypeDisplayLabel(value))
+    );
+    addValue("faction", getPopulationFactionLabel(entry, referenceIndexes));
+    getCodexFactValues(entry, "Default population").forEach((value) =>
+        addValue("default", getPopulationAvailabilityLabel("Default population", value))
+    );
+    getCodexFactValues(entry, "Custom faction availability").forEach((value) =>
+        addValue("custom", getPopulationAvailabilityLabel("Custom faction availability", value))
+    );
+    getCodexFactValues(entry, "Base food cost").forEach((value) =>
+        addValue("food", `Food ${value}`)
+    );
+
+    return items;
+}
+
+function getPopulationWorkerPreviewLines(entry: CodexEntry): PopulationArchivePreviewLine[] {
+    if (entry.exportKind.trim().toLowerCase() !== "populations") return [];
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const workerSection = parsed.sections.find((section) => {
+        const label = section.label.trim().toLowerCase();
+        return label === "worker" || label === "worker effects";
+    });
+    const workerLines = workerSection ? getStructuredSectionPreviewLines(workerSection) : [];
+
+    return workerLines.slice(0, MAX_POPULATION_WORKER_PREVIEW_LINES).map((value, index) => ({
+        key: `worker-${index}`,
+        label: "Worker",
+        value,
+    }));
+}
+
+function getPopulationThresholdRewardPreviewLines(
+    entry: CodexEntry,
+    referenceIndexes: CodexReferenceIndexes
+): PopulationArchivePreviewLine[] {
+    if (entry.exportKind.trim().toLowerCase() !== "populations") return [];
+
+    const thresholdSection = (entry.sections ?? []).find((section) =>
+        section.title?.trim().toLowerCase().includes("threshold")
+    );
+    const previewLines: PopulationArchivePreviewLine[] = [];
+
+    for (const item of thresholdSection?.items ?? []) {
+        const label = item.label?.trim();
+        if (!label) continue;
+
+        const rewardFact = (item.facts ?? []).find((fact) =>
+            fact.label?.trim().toLowerCase() === "reward" && fact.value?.trim()
+        );
+        const referenceKey = item.referenceKey?.trim() || rewardFact?.referenceKey?.trim() || "";
+        const linkedEntry = resolveCodexReference(referenceKey, referenceIndexes);
+        const value = rewardFact?.value?.trim() || (item.lines ?? []).find((line) => line.trim())?.trim() || "";
+        if (!value) continue;
+
+        previewLines.push({
+            key: `threshold-${label}-${referenceKey || value}`,
+            label: label.replace(/^At\s+/i, ""),
+            value,
+            ...(linkedEntry ? { linkedEntry } : {}),
+        });
+
+        if (previewLines.length >= MAX_POPULATION_THRESHOLD_PREVIEW_LINES) break;
+    }
+
+    return previewLines;
+}
+
+function getPopulationArchivePreviewLines(
+    entry: CodexEntry,
+    referenceIndexes: CodexReferenceIndexes
+): PopulationArchivePreviewLine[] {
+    if (entry.exportKind.trim().toLowerCase() !== "populations") return [];
+
+    return [
+        ...getPopulationWorkerPreviewLines(entry),
+        ...getPopulationThresholdRewardPreviewLines(entry, referenceIndexes),
+    ];
+}
+
 function compactDiplomacyPreviewLine(value: string): string {
     return formatCodexMajorFactionText(value.replace(/\s+/g, " ").trim());
 }
@@ -1192,6 +1336,7 @@ export default function CodexSummaryDetail({
                         const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const useHeroArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "heroes";
+                        const usePopulationArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "populations";
                         const useQuestArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "quests";
                         const useTechArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "tech";
                         const useUnitArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "units";
@@ -1209,6 +1354,12 @@ export default function CodexSummaryDetail({
                         const heroClassMetadata = useHeroArchiveRowHierarchy ? getHeroClassMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
                         const districtArchiveMetadata = useDistrictArchiveRowHierarchy ? getDistrictArchiveMetadata(entry) : [];
+                        const populationArchiveMetadata = usePopulationArchiveRowHierarchy
+                            ? getPopulationArchiveMetadata(entry, referenceIndexes)
+                            : [];
+                        const populationArchivePreviewLines = usePopulationArchiveRowHierarchy
+                            ? getPopulationArchivePreviewLines(entry, referenceIndexes)
+                            : [];
                         const diplomacyArchiveMetadata = useDiplomacyArchiveRowHierarchy ? getDiplomacyArchiveMetadata(entry) : [];
                         const diplomacyArchiveSignalLines = useDiplomacyArchiveRowHierarchy
                             ? getDiplomacyArchiveSignalLines(entry, allEntries, preview)
@@ -1583,6 +1734,79 @@ export default function CodexSummaryDetail({
                                         </span>
                                     )}
                                 </button>
+                            );
+                        }
+
+                        if (usePopulationArchiveRowHierarchy) {
+                            return (
+                                <div
+                                    key={entry.entryKey}
+                                    className="codex-summaryList__item codex-summaryList__item--populationArchive"
+                                >
+                                    <span className="codex-summaryList__titleLine">
+                                        <button
+                                            type="button"
+                                            className="codex-summaryList__entryButton codex-summaryList__entryButton--populationTitle"
+                                            onClick={() => onSelectEntry(entry)}
+                                        >
+                                            <span className="codex-summaryList__titleIdentity">
+                                                <span className="codex-summaryList__name">
+                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                </span>
+                                            </span>
+                                        </button>
+
+                                        {populationArchiveMetadata.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__metadata codex-summaryList__metadata--population"
+                                                aria-label="Population metadata"
+                                            >
+                                                {populationArchiveMetadata.map((item) => (
+                                                    <span
+                                                        key={`${item.key}-${item.value}`}
+                                                        className="codex-summaryList__metadataText"
+                                                    >
+                                                        {item.value}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
+                                    </span>
+
+                                    <div
+                                        className="codex-summaryList__populationEffects"
+                                        aria-label="Population planning preview"
+                                    >
+                                        {populationArchivePreviewLines.length > 0 ? (
+                                            populationArchivePreviewLines.map((line) => (
+                                                <span
+                                                    className={`codex-summaryList__populationEffectLine codex-summaryList__populationEffectLine--${line.key.startsWith("worker") ? "worker" : "threshold"}`}
+                                                    key={`${entry.entryKey}-${line.key}`}
+                                                >
+                                                    <span className="codex-summaryList__populationEffectLabel">
+                                                        {line.label}:
+                                                    </span>
+                                                    {line.linkedEntry ? (
+                                                        <CodexInlineEntityLink
+                                                            entry={line.linkedEntry}
+                                                            onSelect={(linkedEntry) => onSelectEntry(linkedEntry)}
+                                                        >
+                                                            {renderCodexLabel(line.value)}
+                                                        </CodexInlineEntityLink>
+                                                    ) : (
+                                                        <span className="codex-summaryList__populationEffectValue">
+                                                            {renderDescriptionLine(formatCodexMajorFactionText(line.value))}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="codex-summaryList__statusFallback">
+                                                No public population effects exported yet.
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
                             );
                         }
 
