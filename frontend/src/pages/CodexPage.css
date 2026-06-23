@@ -1990,9 +1990,18 @@
 }
 
 .codex-summaryList__item--heroArchive {
+    grid-template-columns: minmax(0, 1fr) minmax(172px, 252px);
+    align-items: start;
+    column-gap: 18px;
     gap: 12px;
     padding: 18px 10px 18px 18px;
     border-left-width: 3px;
+}
+
+.codex-summaryList__heroArchiveMain {
+    display: grid;
+    min-width: 0;
+    gap: 10px;
 }
 
 .codex-summaryList__item--unitArchive {
@@ -2344,7 +2353,8 @@
 }
 
 .codex-summaryList__item--heroArchive .codex-summaryList__metadata {
-    flex: 0 1 min(44%, 420px);
+    width: 100%;
+    justify-self: end;
     justify-content: flex-end;
     gap: 8px;
 }
@@ -2442,12 +2452,16 @@
     min-width: 0;
     flex-wrap: wrap;
     align-items: center;
+    justify-content: flex-end;
     gap: 0 7px;
     overflow: hidden;
+    text-align: right;
+    justify-self: end;
 }
 
 .codex-summaryList__metadataIcon--heroFaction,
 .codex-summaryList__metadataText--heroFaction {
+    grid-column: 2;
     justify-self: end;
 }
 
@@ -2456,8 +2470,9 @@
     min-width: 0;
     flex-wrap: wrap;
     align-items: baseline;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: 4px 8px;
+    text-align: right;
 }
 
 .codex-summaryList__metadata--unit {
@@ -3201,6 +3216,14 @@
     .codex-resultRow {
         padding-left: 14px;
         padding-right: 8px;
+    }
+
+    .codex-summaryList__item--heroArchive {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .codex-summaryList__item--heroArchive .codex-summaryList__metadata {
+        justify-self: stretch;
     }
 
     .codex-search__optionTop {
