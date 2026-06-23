@@ -34,7 +34,7 @@ type SkillTreeSource = Pick<
 >;
 type SkillTierSource = Pick<
     SkillTier,
-    "tierPlacementKey" | "tierIndex" | "levelPrerequisite" | "skillKeys"
+    "tierPlacementKey" | "tierKey" | "tierIndex" | "levelPrerequisite" | "skillKeys"
 >;
 
 export type CodexHeroLink = {
@@ -79,6 +79,8 @@ const EMPTY_HERO_RICH_ENRICHMENT: CodexHeroRichEnrichment = {
     startingSkills: [],
     skillOptions: [],
 };
+
+const SKILL_GROUP_ORDER = ["Synergy", "Faction", "Class", "Common"];
 
 function normalizeKey(value: unknown): string {
     return typeof value === "string" ? value.trim() : "";
@@ -139,6 +141,24 @@ function uniqueLabels(labels: readonly string[]): string[] {
     return out;
 }
 
+function skillGroupOrder(label: string): number {
+    const index = SKILL_GROUP_ORDER.indexOf(label);
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function sortSkillGroupLabels(labels: readonly string[]): string[] {
+    return [...labels].sort((a, b) => {
+        const indexA = skillGroupOrder(a);
+        const indexB = skillGroupOrder(b);
+
+        if (indexA !== indexB) {
+            return indexA - indexB;
+        }
+
+        return a.localeCompare(b);
+    });
+}
+
 function resolveOrigin(
     hero: HeroEnrichmentSource,
     publicEntryByKey: Record<string, CodexEntry>
@@ -168,15 +188,30 @@ function getClassLabel(entry: CodexEntry): string | null {
 
 function resolveSkillPathTypes(
     hero: HeroEnrichmentSource,
-    skillTreesByKey: Readonly<Record<string, SkillTreeSource | undefined>>
+    skillTreesByKey: Readonly<Record<string, SkillTreeSource | undefined>>,
+    skillTiersByKey: Readonly<Record<string, SkillTierSource | undefined>>
 ): string[] {
-    const labels = uniqueKeys(hero.applicableSkillTreeKeys ?? [])
-        .map((key) => skillTreesByKey[key])
-        .filter((tree): tree is SkillTreeSource => tree !== undefined && tree.isHidden !== true)
-        .map((tree) => tree.treeType?.trim() ?? "")
-        .filter(Boolean);
+    const labels: string[] = [];
 
-    return uniqueLabels(labels);
+    for (const treeKey of uniqueKeys(hero.applicableSkillTreeKeys ?? [])) {
+        const tree = skillTreesByKey[treeKey];
+        if (!tree || tree.isHidden === true) continue;
+
+        const label = tree.treeType?.trim() ?? "";
+        if (label) labels.push(label);
+
+        const hasCommonTier = uniqueKeys(tree.tierPlacementKeys ?? [])
+            .map((tierKey) => skillTiersByKey[tierKey])
+            .some((tier): tier is SkillTierSource => (
+                tier !== undefined &&
+                uniqueKeys(tier.skillKeys ?? []).length > 0 &&
+                isCommonSkillTier(tier)
+            ));
+
+        if (hasCommonTier) labels.push("Common");
+    }
+
+    return sortSkillGroupLabels(uniqueLabels(labels));
 }
 
 function skillLabel(skill: HeroSkillSource): string {
@@ -264,6 +299,82 @@ function buildSkillOption(
     };
 }
 
+function isCommonSkillKey(key: string): boolean {
+    return normalizeKey(key).startsWith("HeroSkill_Common");
+}
+
+function isCommonSkillTier(tier: SkillTierSource): boolean {
+    const tierKey = normalizeKey(tier.tierKey);
+    const tierPlacementKey = normalizeKey(tier.tierPlacementKey);
+
+    return tierKey.startsWith("HeroSkillTier_Common") ||
+        tierPlacementKey.includes("HeroSkillTier_Common") ||
+        uniqueKeys(tier.skillKeys ?? []).some(isCommonSkillKey);
+}
+
+function getSkillGroupLabel(treeLabel: string, tier: SkillTierSource, skillKey: string): string {
+    if (isCommonSkillTier(tier) || isCommonSkillKey(skillKey)) {
+        return "Common";
+    }
+
+    return treeLabel;
+}
+
+type MutableSkillTreeGroup = CodexHeroSkillTree & {
+    groupByThreshold: Map<string, CodexHeroSkillUnlockGroup>;
+    seenSkillKeysByGroup: Map<string, Set<string>>;
+};
+
+function getOrCreateSkillTreeGroup(
+    treesByLabel: Map<string, MutableSkillTreeGroup>,
+    label: string,
+    treeKey: string
+): MutableSkillTreeGroup {
+    let tree = treesByLabel.get(label);
+    if (!tree) {
+        tree = {
+            key: label === "Common" ? "HeroSkillTree_Common" : treeKey,
+            label,
+            unlockGroups: [],
+            groupByThreshold: new Map<string, CodexHeroSkillUnlockGroup>(),
+            seenSkillKeysByGroup: new Map<string, Set<string>>(),
+        };
+        treesByLabel.set(label, tree);
+    }
+
+    return tree;
+}
+
+function addSkillOptionToTreeGroup(
+    tree: MutableSkillTreeGroup,
+    sourceTreeKey: string,
+    tierRow: SkillTierSource,
+    option: CodexHeroSkillOption
+) {
+    const unlockThreshold = Number.isFinite(tierRow.levelPrerequisite) ? tierRow.levelPrerequisite : null;
+    const groupKey = unlockThreshold === null
+        ? `tier:${normalizeKey(tierRow.tierPlacementKey)}`
+        : `threshold:${unlockThreshold}`;
+    let group = tree.groupByThreshold.get(groupKey);
+
+    if (!group) {
+        group = {
+            key: `${sourceTreeKey}:${tree.label}:${groupKey}`,
+            unlockThreshold,
+            skills: [],
+        };
+        tree.groupByThreshold.set(groupKey, group);
+        tree.unlockGroups.push(group);
+        tree.seenSkillKeysByGroup.set(groupKey, new Set<string>());
+    }
+
+    const seenSkillKeys = tree.seenSkillKeysByGroup.get(groupKey);
+    if (seenSkillKeys?.has(option.key)) return;
+
+    seenSkillKeys?.add(option.key);
+    group.skills.push(option);
+}
+
 function resolveSkillOptions(
     hero: HeroEnrichmentSource,
     skillTreesByKey: Readonly<Record<string, SkillTreeSource | undefined>>,
@@ -272,7 +383,7 @@ function resolveSkillOptions(
     publicEntryByKey: Record<string, CodexEntry>
 ): CodexHeroSkillTree[] {
     const hiddenAbilityKeys = new Set(uniqueKeys(hero.hiddenHelperAbilityKeys ?? []));
-    const trees: CodexHeroSkillTree[] = [];
+    const treesByLabel = new Map<string, MutableSkillTreeGroup>();
 
     for (const treeKey of uniqueKeys(hero.applicableSkillTreeKeys ?? [])) {
         const tree = skillTreesByKey[treeKey];
@@ -287,32 +398,8 @@ function resolveSkillOptions(
                 (b.tierIndex ?? Number.MAX_SAFE_INTEGER)
             ));
 
-        const groups: CodexHeroSkillUnlockGroup[] = [];
-        const groupByThreshold = new Map<string, CodexHeroSkillUnlockGroup>();
-        const seenSkillKeysByGroup = new Map<string, Set<string>>();
-
         for (const tierRow of tierRows) {
-            const unlockThreshold = Number.isFinite(tierRow.levelPrerequisite) ? tierRow.levelPrerequisite : null;
-            const groupKey = unlockThreshold === null
-                ? `tier:${normalizeKey(tierRow.tierPlacementKey)}`
-                : `threshold:${unlockThreshold}`;
-            let group = groupByThreshold.get(groupKey);
-
-            if (!group) {
-                group = {
-                    key: `${treeKey}:${groupKey}`,
-                    unlockThreshold,
-                    skills: [],
-                };
-                groupByThreshold.set(groupKey, group);
-                groups.push(group);
-                seenSkillKeysByGroup.set(groupKey, new Set<string>());
-            }
-
-            const seenSkillKeys = seenSkillKeysByGroup.get(groupKey);
             for (const skillKey of uniqueKeys(tierRow.skillKeys ?? [])) {
-                if (seenSkillKeys?.has(skillKey)) continue;
-
                 const option = buildSkillOption(
                     skillKey,
                     hiddenAbilityKeys,
@@ -321,18 +408,29 @@ function resolveSkillOptions(
                 );
                 if (!option) continue;
 
-                seenSkillKeys?.add(skillKey);
-                group.skills.push(option);
+                const groupLabel = getSkillGroupLabel(label, tierRow, skillKey);
+                const skillTreeGroup = getOrCreateSkillTreeGroup(treesByLabel, groupLabel, treeKey);
+                addSkillOptionToTreeGroup(skillTreeGroup, treeKey, tierRow, option);
             }
         }
-
-        const unlockGroups = groups.filter((group) => group.skills.length > 0);
-        if (unlockGroups.length === 0) continue;
-
-        trees.push({ key: treeKey, label, unlockGroups });
     }
 
-    return trees;
+    return [...treesByLabel.values()]
+        .map((tree) => ({
+            key: tree.key,
+            label: tree.label,
+            unlockGroups: tree.unlockGroups
+                .filter((group) => group.skills.length > 0)
+                .sort((a, b) => (
+                    (a.unlockThreshold ?? Number.MAX_SAFE_INTEGER) -
+                    (b.unlockThreshold ?? Number.MAX_SAFE_INTEGER)
+                )),
+        }))
+        .filter((tree) => tree.unlockGroups.length > 0)
+        .sort((a, b) => {
+            const orderDelta = skillGroupOrder(a.label) - skillGroupOrder(b.label);
+            return orderDelta === 0 ? a.label.localeCompare(b.label) : orderDelta;
+        });
 }
 
 export function buildCodexHeroRichEnrichment(
@@ -357,7 +455,7 @@ export function buildCodexHeroRichEnrichment(
     return {
         origin: resolveOrigin(hero, publicEntryByKey),
         classLabel: getClassLabel(entry),
-        skillPathTypes: resolveSkillPathTypes(hero, skillTreesByKey),
+        skillPathTypes: resolveSkillPathTypes(hero, skillTreesByKey, skillTiersByKey),
         startingSkills: resolveStartingSkills(
             hero,
             skillDefaultsByHeroKey[currentEntryKey],

@@ -6632,9 +6632,12 @@ describe("CodexPage", () => {
                 heroSkillTree({
                     treeKey: "HeroSkillTree_Faction",
                     treeType: "Faction",
-                    tierPlacementKeys: ["HeroSkillTree_Faction::HeroSkillTier_Faction_2"],
-                    tierKeys: ["HeroSkillTier_Faction_2"],
-                    skillKeys: ["HeroSkill_Faction02"],
+                    tierPlacementKeys: [
+                        "HeroSkillTree_Faction::HeroSkillTier_Faction_2",
+                        "HeroSkillTree_Faction::HeroSkillTier_Common_2",
+                    ],
+                    tierKeys: ["HeroSkillTier_Faction_2", "HeroSkillTier_Common_2"],
+                    skillKeys: ["HeroSkill_Faction02", "HeroSkill_Common02"],
                 }),
                 heroSkillTree({
                     treeKey: "HeroSkillTree_Synergy",
@@ -6655,6 +6658,15 @@ describe("CodexPage", () => {
                     levelPrerequisite: 4,
                     skillKeys: ["HeroSkill_Faction02"],
                 }),
+                heroSkillTier({
+                    tierPlacementKey: "HeroSkillTree_Faction::HeroSkillTier_Common_2",
+                    tierKey: "HeroSkillTier_Common_2",
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierIndex: 4,
+                    levelPrerequisite: 4,
+                    skillKeys: ["HeroSkill_Common02"],
+                }),
             ],
             skills: [
                 heroSkill({
@@ -6671,6 +6683,14 @@ describe("CodexPage", () => {
                     primaryAbilityKey: "UnitAbility_Missing",
                     resolvedSummaryLines: [
                         "Gain 5 [Experience] Experience to non-Hero Units of the Army",
+                    ],
+                }),
+                heroSkill({
+                    skillKey: "HeroSkill_Common02",
+                    publicDisplayName: "Tireless Pace",
+                    primaryAbilityKey: null,
+                    resolvedSummaryLines: [
+                        "Gain 1 [MovementPoints] Movement Points",
                     ],
                 }),
             ],
@@ -6721,19 +6741,28 @@ describe("CodexPage", () => {
         expect(heroProfile).toHaveTextContent("Class");
         expect(heroProfile).toHaveTextContent("Faction");
         expect(heroProfile).toHaveTextContent("Synergy");
+        expect(heroProfile).toHaveTextContent("Common");
         expect(within(heroProfile).getByText("Starting skills")).toBeInTheDocument();
         expect(within(heroProfile).getAllByText("Terrain Logistics").length).toBeGreaterThanOrEqual(2);
         expect(heroProfile).toHaveTextContent("Gain 5");
         expect(heroProfile).toHaveTextContent("Experience to all Units of the Army");
         expect(within(heroProfile).getByText("Skill options")).toBeInTheDocument();
-        expect(within(heroProfile).getByRole("region", { name: "Class skill options" })).toBeInTheDocument();
-        expect(within(heroProfile).getByRole("region", { name: "Faction skill options" })).toBeInTheDocument();
+        const classSkillOptions = within(heroProfile).getByRole("region", { name: "Class skill options" });
+        expect(classSkillOptions).toBeInTheDocument();
+        expect(within(classSkillOptions).getAllByText("Terrain Logistics")).toHaveLength(1);
+        expect(within(classSkillOptions).getByRole("button", {
+            name: "Open Terrain Logistics in Codex",
+        })).toHaveTextContent("Terrain Logistics");
+        const factionSkillOptions = within(heroProfile).getByRole("region", { name: "Faction skill options" });
+        expect(factionSkillOptions).toBeInTheDocument();
+        expect(factionSkillOptions).toHaveTextContent("Patient Mentor");
+        expect(factionSkillOptions).not.toHaveTextContent("Tireless Pace");
+        const commonSkillOptions = within(heroProfile).getByRole("region", { name: "Common skill options" });
+        expect(commonSkillOptions).toHaveTextContent("Tireless Pace");
         expect(within(heroProfile).getByRole("region", { name: "Unlock threshold 0" })).toHaveTextContent(
             "Unlock threshold: 0"
         );
-        expect(within(heroProfile).getByRole("region", { name: "Unlock threshold 4" })).toHaveTextContent(
-            "Unlock threshold: 4"
-        );
+        expect(within(heroProfile).getAllByRole("region", { name: "Unlock threshold 4" })).toHaveLength(2);
         expect(within(heroProfile).queryByRole("region", { name: "T1 skills" })).not.toBeInTheDocument();
         expect(within(heroProfile).queryByRole("region", { name: "T4 skills" })).not.toBeInTheDocument();
         expect(heroProfile).toHaveTextContent("Patient Mentor");

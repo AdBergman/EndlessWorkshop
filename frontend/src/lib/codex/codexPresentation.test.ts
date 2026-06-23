@@ -37,6 +37,13 @@ describe("codexPresentation", () => {
 
         expect(
             getCodexEntryLabel({
+                displayName: "Among-the-Dead",
+                entryKey: "Hero_Necrophage_Archer_0",
+            })
+        ).toBe("Among-the-Dead");
+
+        expect(
+            getCodexEntryLabel({
                 displayName: "Necrophage",
                 entryKey: "Faction_Necrophage",
             })

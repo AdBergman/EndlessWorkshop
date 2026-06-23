@@ -146,11 +146,20 @@ describe("codexHeroRichEnrichment", () => {
                 HeroSkillTree_Synergy: skillTree({
                     treeKey: "HeroSkillTree_Synergy",
                     treeType: "Synergy",
-                    tierPlacementKeys: [],
+                    tierPlacementKeys: ["HeroSkillTree_Synergy::HeroSkillTier_Synergy_1"],
                 }),
             },
             {
                 "HeroSkillTree_Archer::HeroSkillTier_Archer_1": skillTier({}),
+                "HeroSkillTree_Synergy::HeroSkillTier_Synergy_1": skillTier({
+                    tierPlacementKey: "HeroSkillTree_Synergy::HeroSkillTier_Synergy_1",
+                    tierKey: "HeroSkillTier_Synergy_1",
+                    treeKey: "HeroSkillTree_Synergy",
+                    treeType: "Synergy",
+                    tierIndex: 0,
+                    levelPrerequisite: 0,
+                    skillKeys: ["HeroSkill_Synergy01"],
+                }),
                 "HeroSkillTree_Faction::HeroSkillTier_Faction_2": skillTier({
                     tierPlacementKey: "HeroSkillTree_Faction::HeroSkillTier_Faction_2",
                     tierKey: "HeroSkillTier_Faction_2",
@@ -178,6 +187,12 @@ describe("codexHeroRichEnrichment", () => {
                     primaryAbilityKey: "UnitAbility_Missing",
                     resolvedSummaryLines: ["Gain 5 [Experience] Experience"],
                 }),
+                HeroSkill_Synergy01: skill({
+                    skillKey: "HeroSkill_Synergy01",
+                    publicDisplayName: "Mutual Caution",
+                    primaryAbilityKey: null,
+                    resolvedSummaryLines: ["Gain 2 [Defense] Defense"],
+                }),
                 HeroSkill_Common02: skill({
                     skillKey: "HeroSkill_Common02",
                     publicDisplayName: "Tireless Pace",
@@ -193,23 +208,26 @@ describe("codexHeroRichEnrichment", () => {
 
         expect(enrichment.origin?.label).toBe("Kin of Sheredyn");
         expect(enrichment.classLabel).toBe("Archer");
-        expect(enrichment.skillPathTypes).toEqual(["Class", "Faction", "Synergy"]);
+        expect(enrichment.skillPathTypes).toEqual(["Synergy", "Faction", "Class", "Common"]);
         expect(enrichment.startingSkills.map((defaultSkill) => defaultSkill.label)).toEqual(["Terrain Logistics"]);
         expect(enrichment.startingSkills[0]?.primaryAbility?.label).toBe("Terrain Logistics");
-        expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Class", "Faction"]);
+        expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Synergy", "Faction", "Class", "Common"]);
         expect(enrichment.skillOptions[0]?.unlockGroups[0]).toMatchObject({
             unlockThreshold: 0,
         });
-        expect(enrichment.skillOptions[0]?.unlockGroups[0]?.skills[0]?.label).toBe("Terrain Logistics");
+        expect(enrichment.skillOptions[0]?.unlockGroups[0]?.skills[0]?.label).toBe("Mutual Caution");
         expect(enrichment.skillOptions[1]?.unlockGroups).toHaveLength(1);
         expect(enrichment.skillOptions[1]?.unlockGroups[0]).toMatchObject({
             unlockThreshold: 4,
         });
         expect(enrichment.skillOptions[1]?.unlockGroups[0]?.skills.map((option) => option.label)).toEqual([
             "Patient Mentor",
-            "Tireless Pace",
         ]);
         expect(enrichment.skillOptions[1]?.unlockGroups[0]?.skills[0]?.primaryAbility).toBeNull();
+        expect(enrichment.skillOptions[2]?.unlockGroups[0]?.skills[0]?.label).toBe("Terrain Logistics");
+        expect(enrichment.skillOptions[3]?.unlockGroups[0]?.skills.map((option) => option.label)).toEqual([
+            "Tireless Pace",
+        ]);
         expect(hasCodexHeroRichEnrichment(enrichment)).toBe(true);
         expect(getCodexHeroRichEnrichmentEntryKeys(enrichment)).toEqual([
             "Faction_Kin",

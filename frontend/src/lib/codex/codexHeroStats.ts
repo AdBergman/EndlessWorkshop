@@ -17,6 +17,9 @@ const HERO_CORE_STAT_ORDER: Array<{ key: string; pattern: RegExp }> = [
     { key: "vision", pattern: /\[VisionRange\]|\bVision\b/i },
 ];
 
+const HERO_ZERO_DEFENSE_LINE = "0 [Defense] Defense";
+const HERO_DEFENSE_PATTERN = /\[Defense\]|\bDefense\b/i;
+
 function isHeroEntry(entry: CodexEntry): boolean {
     return entry.exportKind.trim().toLowerCase() === "heroes";
 }
@@ -39,6 +42,15 @@ function sortCoreStats(lines: readonly string[]): string[] {
     return [...lines].sort((left, right) => statSortIndex(left) - statSortIndex(right));
 }
 
+function ensureComparableDefense(lines: readonly string[]): string[] {
+    const hasBaseStat = lines.some((line) => !/\bper\b/i.test(line));
+    if (!hasBaseStat || lines.some((line) => HERO_DEFENSE_PATTERN.test(line))) {
+        return [...lines];
+    }
+
+    return [...lines, HERO_ZERO_DEFENSE_LINE];
+}
+
 export function getCodexHeroStatLines(entry: CodexEntry): string[] {
     if (!isHeroEntry(entry)) return [];
 
@@ -47,7 +59,7 @@ export function getCodexHeroStatLines(entry: CodexEntry): string[] {
         section.label.trim().toLowerCase() === "stats"
     );
 
-    return statsSection ? splitStatLines(statsSection.lines) : [];
+    return statsSection ? ensureComparableDefense(splitStatLines(statsSection.lines)) : [];
 }
 
 export function getCodexHeroStatGroups(entry: CodexEntry): CodexHeroStatGroup[] {

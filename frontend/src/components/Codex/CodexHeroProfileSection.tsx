@@ -159,7 +159,7 @@ function HeroStartingSkill({
     return (
         <article className="codex-heroProfile__skill">
             <div className="codex-heroProfile__skillHeader">
-                <span className="codex-heroProfile__skillName">{renderCodexLabel(skill.label)}</span>
+                <HeroSkillTitle skill={skill} onSelect={onSelect} />
                 {skill.mechanicKind ? (
                     <span className="codex-heroProfile__skillKind">{skill.mechanicKind}</span>
                 ) : null}
@@ -175,13 +175,27 @@ function HeroStartingSkill({
                 </div>
             ) : null}
 
-            {skill.primaryAbility ? (
-                <div className="codex-heroProfile__ability">
-                    <span>Ability</span>
-                    <HeroProfileLink link={skill.primaryAbility} onSelect={onSelect} />
-                </div>
-            ) : null}
         </article>
+    );
+}
+
+function HeroSkillTitle({
+    skill,
+    onSelect,
+}: {
+    skill: CodexHeroStartingSkill;
+    onSelect: (entry: CodexEntry) => void;
+}) {
+    return (
+        <span className="codex-heroProfile__skillName">
+            {skill.primaryAbility ? (
+                <CodexInlineEntityLink entry={skill.primaryAbility.entry} onSelect={onSelect}>
+                    {renderCodexLabel(skill.label)}
+                </CodexInlineEntityLink>
+            ) : (
+                renderCodexLabel(skill.label)
+            )}
+        </span>
     );
 }
 
@@ -247,10 +261,7 @@ function HeroSkillOption({
     return (
         <article className="codex-heroProfile__option">
             <div className="codex-heroProfile__optionHeader">
-                <span className="codex-heroProfile__skillName">{renderCodexLabel(skill.label)}</span>
-                {skill.primaryAbility ? (
-                    <HeroProfileLink link={skill.primaryAbility} onSelect={onSelect} />
-                ) : null}
+                <HeroSkillTitle skill={skill} onSelect={onSelect} />
             </div>
 
             {skill.summaryLines.length > 0 ? (

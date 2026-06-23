@@ -22,7 +22,7 @@ import {
     getCodexShallowReferencePreview,
     isShallowReferenceKind,
 } from "@/lib/codex/codexShallowReferencePreview";
-import { getCodexHeroStatLines } from "@/lib/codex/codexHeroStats";
+import { getCodexHeroStatGroups } from "@/lib/codex/codexHeroStats";
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import {
     buildGrantedAbilityPreview,
@@ -786,7 +786,9 @@ function getVictoryConditionArchivePreviewLines(entry: CodexEntry): VictoryCondi
 }
 
 function getHeroArchiveStatPreviewLines(entry: CodexEntry): string[] {
-    return getCodexHeroStatLines(entry).slice(0, MAX_HERO_STAT_PREVIEW_LINES);
+    return getCodexHeroStatGroups(entry)
+        .flatMap((group) => group.lines)
+        .slice(0, MAX_HERO_STAT_PREVIEW_LINES);
 }
 
 function getHeroClassMetadata(entry: CodexEntry): HeroArchiveMetadataItem[] {

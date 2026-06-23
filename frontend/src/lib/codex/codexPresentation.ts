@@ -178,7 +178,7 @@ function looksTechnicalDisplayName(displayName: string, entryKey: string): boole
 
     if (normalizedName === normalizedEntryKey) return true;
 
-    return /^[A-Za-z0-9]+(?:[_-][A-Za-z0-9]+)+$/.test(normalizedName);
+    return /^[A-Za-z0-9]+(?:_[A-Za-z0-9]+)+$/.test(normalizedName);
 }
 
 export function humanizeCodexEntryKey(entryKey: string): string {

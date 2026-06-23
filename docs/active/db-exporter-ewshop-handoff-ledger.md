@@ -160,17 +160,38 @@ Open gap:
 - Exporter should clarify what `tierIndex` means, what `levelPrerequisite`
   means, and what source-backed projection should be used for canonical
   player-facing `T1/T2/T3` hero skill groups.
-- Browser QA expected a common/general/shared skill path, but the current rich
-  Skills export exposes only `Class`, `Faction`, and `Synergy` tree types for
-  applicable Hero skill trees. Exporter should clarify whether general/shared
-  skills are represented by `Synergy`, intentionally absent, or missing from
-  the public projection.
+- Browser QA expected a common/general/shared skill path. Follow-up
+  investigation found Common skills are present in the current rich Skills
+  export as `HeroSkillTier_Common_*` / `HeroSkill_Common*` rows embedded inside
+  Faction skill trees. This is EWShop presentation-owned: Hero detail now splits
+  those exact Common rows into a separate Common group. No exporter follow-up is
+  currently open for Common path presence.
 - Full hero progression, explicit quadrant/source slot beyond exported tree
   type, point-cost/investment rules, stat-vs-skill spending, recruitment,
   portraits/icons, or skill-tree planning require explicit source-backed
   metadata/art contracts.
 - EWShop must not imply that starting/default skills or current skill options
   are a complete leveling planner.
+
+### Hero Defense Zero Semantics
+
+Sources:
+
+- Hero Codex browser QA after Hero Skill Options/detail polish
+- `frontend/src/lib/codex/codexHeroStats.ts`
+
+Status: open, low priority; non-blocking.
+
+Open ask:
+
+- EWShop currently treats missing Hero `Defense` in exported Hero stat blocks as
+  `0 Defense` for comparable Hero/Unit stat presentation.
+- Heroes with exported nonzero Defense keep the exported value.
+- EWShop does not synthesize Armor.
+- DB Exporter should confirm whether omitted Hero Defense is a stable zero-value
+  convention.
+- If source data proves Defense is zero, exporter may alternatively emit an
+  explicit `0 [Defense] Defense` public stat line.
 
 ### Constructible Resource Prerequisite Public References
 

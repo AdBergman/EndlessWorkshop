@@ -1156,10 +1156,6 @@
     gap: 8px;
 }
 
-.codex-heroProfile__optionHeader .codex-inlineEntityLink {
-    font-size: 13px;
-}
-
 .codex-heroProfile__skill {
     display: grid;
     gap: 8px;
@@ -1196,24 +1192,6 @@
     color: rgba(241, 234, 220, 0.74);
     font-size: 14px;
     line-height: 1.55;
-}
-
-.codex-heroProfile__ability {
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 7px;
-    color: rgba(229, 198, 123, 0.7);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.codex-heroProfile__ability .codex-inlineEntityLink {
-    font-size: 13px;
-    letter-spacing: 0;
-    text-transform: none;
 }
 
 .codex-factionDossier {
