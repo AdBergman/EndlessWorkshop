@@ -447,6 +447,46 @@ Request:
 - if they are intended as public browse metadata, emit them consistently enough
   for EWShop to use without inference.
 
+### Modifier Provenance Metadata
+
+EWShop can currently resolve exact Action -> Modifier and Modifier -> affected
+Action relationships from exported references. EWShop cannot safely determine
+what grants, unlocks, or owns a Modifier, such as whether it comes from a
+Technology, Trait, Improvement, District, Faction, Diplomacy item, Quest, or
+other source.
+
+Current public data is insufficient for safe provenance display without key
+parsing, naming heuristics, prose interpretation, or fuzzy matching. Those are
+rejected frontend behaviors.
+
+Request:
+
+- when source data proves modifier provenance, emit explicit source metadata
+  using the existing Codex fact/reference style where possible;
+- include `sourceKind`;
+- include `sourceKey`;
+- include `sourceDisplayName`;
+- include `sourceReferenceKey`;
+- optionally include target metadata such as `targetKind`, `targetKey`, and
+  `targetReferenceKey` when that is useful and source-proven.
+
+Goal:
+
+- allow EWShop to render player-facing provenance such as
+  `Comes from Technology X`, `Granted by Trait Y`, or
+  `Unlocked by Improvement Z` without frontend inference.
+
+Non-goals:
+
+- no reverse-engineering from entry keys;
+- no frontend provenance guessing;
+- no requirement for current Action Archive or hidden Modifier behavior.
+
+Priority:
+
+- low-medium. This is not required for current Action or Modifier behavior, but
+  it is valuable for future inspection and strategy tooling.
+
 ## Diplomacy Metadata Backlog
 
 These are non-blocking frontend findings discovered during the Diplomatic

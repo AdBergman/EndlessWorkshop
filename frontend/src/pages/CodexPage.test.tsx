@@ -2280,8 +2280,11 @@ describe("CodexPage", () => {
         expect(within(actionRail).getByRole("button", { name: "Constructible 1" })).toBeInTheDocument();
         expect(within(actionRail).getByRole("button", { name: "Terraforming 1" })).toBeInTheDocument();
         expect(within(actionRail).getByRole("button", { name: "Army 1" })).toBeInTheDocument();
-        expect(within(screen.getByLabelText("Actions overview")).getByText("Build Bridge")).toBeInTheDocument();
-        expect(within(screen.getByLabelText("Actions overview")).getByText("Kin Build Chosen")).toBeInTheDocument();
+        const actionsOverview = screen.getByLabelText("Actions overview");
+        expect(within(actionsOverview).getByText("Build Bridge")).toBeInTheDocument();
+        expect(within(actionsOverview).getByText("Kin Build Chosen")).toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Money")).not.toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Action / Action")).not.toBeInTheDocument();
 
         await user.click(within(actionRail).getByRole("button", { name: "Faction 1" }));
 
@@ -2346,6 +2349,120 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "All Tech" })).toBeInTheDocument();
         expect(screen.getByRole("complementary", { name: /tech archive filters/i })).toBeInTheDocument();
+    });
+
+    it("keeps Action archive rows shallow while preserving detail mechanics and related modifiers", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypeBuildBridge",
+                displayName: "Build Bridge",
+                category: "Action",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: ["ActionCostModifier_Test"],
+                publicContextKeys: ["ActionCostModifier_Test"],
+                facts: [
+                    { label: "Kind", value: "Action" },
+                    { label: "Category", value: "Action" },
+                ],
+                sections: [
+                    {
+                        title: "Action mechanics",
+                        items: [
+                            {
+                                label: "Money cost multiplier",
+                                facts: [
+                                    { label: "Affected cost", value: "Money" },
+                                    { label: "Modifier", value: "-100%" },
+                                ],
+                                lines: ["Modifier-heavy construction cost output."],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "actions",
+                entryKey: "ActionTypePublicEffect",
+                displayName: "Public Effect Action",
+                category: "Action",
+                kind: "Action",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Action" },
+                    { label: "Category", value: "Action" },
+                ],
+                sections: [
+                    {
+                        title: "Effects",
+                        lines: ["Creates a bridge over a river tile."],
+                    },
+                ],
+            },
+            {
+                exportKind: "modifiers",
+                entryKey: "ActionCostModifier_Test",
+                displayName: "Action Cost Modifier Test",
+                category: "Cost Modifier",
+                kind: "Cost Modifier",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Kind", value: "Action Cost Modifier" },
+                    { label: "Category", value: "Cost Modifier" },
+                ],
+                sections: [
+                    {
+                        title: "Modifier mechanics",
+                        lines: ["Reduces the action Dust cost."],
+                    },
+                ],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                actions: entries.filter((entry) => entry.exportKind === "actions"),
+                modifiers: entries.filter((entry) => entry.exportKind === "modifiers"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=actions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Actions" })).toBeInTheDocument();
+        const actionsOverview = screen.getByLabelText("Actions overview");
+        expect(within(actionsOverview).getByText("Build Bridge")).toBeInTheDocument();
+        expect(within(actionsOverview).getByText("Public Effect Action")).toBeInTheDocument();
+        expect(within(actionsOverview).getByText("Creates a bridge over a river tile.")).toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Money cost multiplier")).not.toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Modifier-heavy construction cost output.")).not.toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Action Cost Modifier Test")).not.toBeInTheDocument();
+        expect(within(actionsOverview).queryByText("Money")).not.toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
+
+        await user.click(within(actionsOverview).getByRole("button", { name: /build bridge/i }));
+
+        expect(await screen.findByRole("heading", { name: "Build Bridge" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Action mechanics" })).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Money cost multiplier" })).toBeInTheDocument();
+        expect(screen.getByText("Modifier-heavy construction cost output.")).toBeInTheDocument();
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).getByRole("button", { name: /action cost modifier test modifiers/i }))
+            .toBeInTheDocument();
     });
 
     it("adds a Treaty Category rail while preserving Diplomatic Treaty rows and detail behavior", async () => {

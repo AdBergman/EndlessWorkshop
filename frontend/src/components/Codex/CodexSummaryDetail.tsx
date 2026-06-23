@@ -209,6 +209,21 @@ const QUEST_ARCHIVE_LINK_KINDS = new Set([
     "units",
 ]);
 
+function getActionArchivePreview(entry: CodexEntry): string {
+    if (entry.exportKind.trim().toLowerCase() !== "actions") return "";
+
+    const descriptionPreview = getCodexEntryPreview(entry, 240);
+    if (descriptionPreview) return descriptionPreview;
+
+    const parsed = parseCodexStructuredDescription(entry);
+    const effectsSection = parsed.sections.find((section) =>
+        section.label.trim().toLowerCase() === "effects"
+    );
+    const effectPreview = effectsSection ? getStructuredSectionPreviewLines(effectsSection)[0] : "";
+
+    return effectPreview ? formatCodexMajorFactionText(effectPreview) : "";
+}
+
 function normalizeAbilityTaxonomyText(value: string): string {
     return value
         .trim()
@@ -1292,17 +1307,26 @@ export default function CodexSummaryDetail({
             <div className="codex-summaryList" aria-label={`${summaryEntry.summaryLabel} overview`}>
                 {entries.length > 0 ? (
                     entries.map((entry) => {
+                        const isActionEntry = entry.exportKind.trim().toLowerCase() === "actions";
                         const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
-                        const readablePreview = !isFactionEntry ? getCodexReadablePreviewLine(entry) : "";
+                        const readablePreview = !isFactionEntry && !isActionEntry
+                            ? getCodexReadablePreviewLine(entry)
+                            : "";
                         const basePreview = isFactionEntry
                             ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
                             : readablePreview || getCodexEntryPreview(entry, 240);
-                        const preview = getDiplomacyArchivePreview(entry, basePreview);
-                        const secondaryContext = factionAffinity
-                            ? `Affinity: ${factionAffinity}`
-                            : getCodexSecondaryContext(entry);
+                        const preview = isActionEntry
+                            ? getActionArchivePreview(entry)
+                            : getDiplomacyArchivePreview(entry, basePreview);
+                        const secondaryContext = isActionEntry
+                            ? ""
+                            : (
+                                factionAffinity
+                                    ? `Affinity: ${factionAffinity}`
+                                    : getCodexSecondaryContext(entry)
+                            );
                         const showRichOverviewRow = supportsRichOverviewRow(entry);
                         const useCatalogRowHierarchy = entry.exportKind.trim().toLowerCase() === "abilities";
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";

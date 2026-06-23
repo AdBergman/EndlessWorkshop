@@ -63,7 +63,9 @@ Current decisions to preserve:
 - Victory Paths and Victory Conditions are local/dev-visible Codex categories:
   keep their imports and direct routes available for QA, but hide them from
   public top-level navigation until their missing/friendly-presentation issues
-  are resolved.
+  are resolved. Run `FS-CODEX-014 - Victory Data Quality Investigation` before
+  drafting exporter follow-up or returning Victory categories to public
+  top-level browsing.
 - Thin/plain entries are not EWShop bugs when DB Exporter marked their richer
   data unavailable, unsafe, runtime-only, obsolete, internal, or deferred.
 - `Population_Aspect` should keep `Unlocks Nutrient Extractor` plain because
@@ -110,9 +112,11 @@ Current rules:
 - The compact category shelf is navigation, not analytics: keep it count-free
   while preserving counts in landing cards, overview headers, and search.
 - Actions use compact Action Archive mode: Type rail (`All`, `Action`,
-  `Faction`, `Empire`, `Constructible`, `Terraforming`, `Army`) plus existing
-  generic Action rows/details. Rich Action rows remain deferred because current
-  public data is sparse.
+  `Faction`, `Empire`, `Constructible`, `Terraforming`, `Army`) plus shallow
+  reference-style rows/details. Mechanic-first Action rows are rejected for the
+  current snapshot because exported Action mechanics are too modifier-heavy and
+  implementation-oriented; archive rows should only show exported description or
+  `Effects` text when present.
 - Diplomacy uses compact Diplomacy Archive mode: Treaty Category rail
   (`All`, `War`, `Defense`, `Discovery`, `Society`, `Declarations`, `Economy`)
   plus treaty rows with quiet Category/Bilateral/Duration metadata.
@@ -163,12 +167,11 @@ Current rules:
 - Future full-width shallow categories must be added deliberately to the
   explicit frontend allow-list.
 - Final snapshot Codex compatibility follow-up is tracked in
-  `docs/active/final-snapshot-codex-ticket-plan.md`; the recommended next slice
-  is Victory Conditions compact reference rows, followed by Rich Factions import
-  investigation. Heroes + Skills remains very high value, but follows Factions;
-  Natural Wonders remains easy but lower strategic value. Do not mechanically
-  adopt exported fields unless they improve player planning, comparison,
-  discovery, or trust.
+  `docs/active/final-snapshot-codex-ticket-plan.md`; the recommended Victory
+  follow-up is `FS-CODEX-014 - Victory Data Quality Investigation`, because
+  Victory Paths/Conditions remain local-only pending data-quality and
+  presentation review. Do not mechanically adopt exported fields unless they
+  improve player planning, comparison, discovery, or trust.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only
