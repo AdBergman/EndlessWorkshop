@@ -976,7 +976,8 @@
 }
 
 .codex-techPrerequisites__groups,
-.codex-unitProfile__groups {
+.codex-unitProfile__groups,
+.codex-heroProfile__groups {
     display: grid;
     gap: 12px;
     margin-top: 14px;
@@ -984,7 +985,8 @@
 }
 
 .codex-techPrerequisites__group,
-.codex-unitProfile__group {
+.codex-unitProfile__group,
+.codex-heroProfile__group {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
     align-items: baseline;
@@ -994,7 +996,8 @@
 }
 
 .codex-techPrerequisites__label,
-.codex-unitProfile__label {
+.codex-unitProfile__label,
+.codex-heroProfile__label {
     color: var(--codex-gold-bright);
     font-size: 11px;
     font-weight: 700;
@@ -1004,7 +1007,8 @@
 }
 
 .codex-techPrerequisites__links,
-.codex-unitProfile__links {
+.codex-unitProfile__links,
+.codex-heroProfile__value {
     min-width: 0;
     color: rgba(241, 234, 220, 0.86);
     font-size: 15px;
@@ -1012,14 +1016,81 @@
 }
 
 .codex-techPrerequisites__linkWrap,
-.codex-unitProfile__linkWrap {
+.codex-unitProfile__linkWrap,
+.codex-heroProfile__inlineItem {
     display: inline;
 }
 
 .codex-techPrerequisites__separator,
-.codex-unitProfile__separator {
+.codex-unitProfile__separator,
+.codex-heroProfile__separator {
     margin: 0 8px;
     color: rgba(195, 152, 77, 0.72);
+}
+
+.codex-heroProfile__inlineList {
+    display: inline;
+}
+
+.codex-heroProfile__skillList {
+    display: grid;
+    gap: 10px;
+}
+
+.codex-heroProfile__skill {
+    display: grid;
+    gap: 8px;
+    max-width: 640px;
+    padding: 2px 0 4px;
+}
+
+.codex-heroProfile__skillHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.codex-heroProfile__skillName {
+    color: rgba(241, 234, 220, 0.94);
+    font-weight: 700;
+}
+
+.codex-heroProfile__skillKind {
+    color: rgba(229, 198, 123, 0.68);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.codex-heroProfile__skillLines {
+    display: grid;
+    gap: 4px;
+}
+
+.codex-heroProfile__skillLine {
+    color: rgba(241, 234, 220, 0.74);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.codex-heroProfile__ability {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 7px;
+    color: rgba(229, 198, 123, 0.7);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-heroProfile__ability .codex-inlineEntityLink {
+    font-size: 13px;
+    letter-spacing: 0;
+    text-transform: none;
 }
 
 .codex-factionDossier {

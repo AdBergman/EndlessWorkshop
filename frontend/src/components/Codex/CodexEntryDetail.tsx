@@ -14,6 +14,11 @@ import { getDisplayedGrantedAbilityKeys } from "@/lib/codex/codexGrantedAbilityP
 import { getDisplayedPopulationThresholdTargetKeys } from "@/lib/codex/codexPopulationThresholdTargets";
 import { buildStatusRelationshipSourceEntries } from "@/lib/codex/codexStatusRelationships";
 import {
+    buildCodexHeroRichEnrichment,
+    getCodexHeroRichEnrichmentEntryKeys,
+    hasCodexHeroRichEnrichment,
+} from "@/lib/codex/codexHeroRichEnrichment";
+import {
     buildCodexTechRichEnrichment,
     hasCodexTechRichEnrichment,
 } from "@/lib/codex/codexTechRichEnrichment";
@@ -27,11 +32,14 @@ import {
     selectFactionLoading,
     useFactionStore,
 } from "@/stores/factionStore";
+import { useHeroStore } from "@/stores/heroStore";
+import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexFactionPackage from "./CodexFactionPackage";
+import CodexHeroProfileSection from "./CodexHeroProfileSection";
 import CodexStructuredDetail from "./CodexStructuredDetail";
 import CodexTechPrerequisiteSection from "./CodexTechPrerequisiteSection";
 import CodexUnitProfileSection from "./CodexUnitProfileSection";
@@ -55,7 +63,19 @@ export default function CodexEntryDetail({
 }: Props) {
     const richTechByKey = useTechStore((state) => state.techsByKey);
     const richUnitByKey = useUnitStore((state) => state.unitsByKey);
+    const heroByKey = useHeroStore((state) => state.heroesByKey);
+    const heroStoreLoaded = useHeroStore((state) => state.loaded);
+    const heroStoreLoading = useHeroStore((state) => state.loading);
+    const loadHeroes = useHeroStore((state) => state.loadHeroes);
+    const skillTreesByKey = useSkillStore((state) => state.skillTreesByKey);
+    const skillsByKey = useSkillStore((state) => state.skillsByKey);
+    const skillDefaultsByHeroKey = useSkillStore((state) => state.heroSkillDefaultsByHeroKey);
+    const skillStoreLoaded = useSkillStore((state) => state.loaded);
+    const skillStoreLoading = useSkillStore((state) => state.loading);
+    const loadSkills = useSkillStore((state) => state.loadSkills);
     const normalizedEntryKey = entry?.entryKey.trim() ?? "";
+    const normalizedExportKind = entry?.exportKind.trim().toLowerCase() ?? "";
+    const isHeroEntry = normalizedExportKind === "heroes";
     const richFaction = useFactionStore(selectFactionByKey(normalizedEntryKey));
     const factionsLoaded = useFactionStore(selectFactionLoaded);
     const factionsLoading = useFactionStore(selectFactionLoading);
@@ -72,7 +92,19 @@ export default function CodexEntryDetail({
             : { previousUnit: null, evolvesInto: [] },
         [entry, richUnitByKey, allEntries]
     );
-    const normalizedExportKind = entry?.exportKind.trim().toLowerCase() ?? "";
+    const heroRichEnrichment = useMemo(
+        () => entry
+            ? buildCodexHeroRichEnrichment(
+                    entry,
+                    heroByKey,
+                    skillTreesByKey,
+                    skillsByKey,
+                    skillDefaultsByHeroKey,
+                    allEntries
+                )
+            : { origin: null, classLabel: null, skillPathTypes: [], startingSkills: [] },
+        [allEntries, entry, heroByKey, skillDefaultsByHeroKey, skillTreesByKey, skillsByKey]
+    );
     const isFactionEntry = normalizedExportKind === "factions";
     const isMinorFactionEntry = normalizedExportKind === "minorfactions";
     const isFactionLikeEntry = isFactionEntry || isMinorFactionEntry;
@@ -94,6 +126,18 @@ export default function CodexEntryDetail({
 
         void loadFactions();
     }, [factionsLoaded, factionsLoading, isFactionLikeEntry, loadFactions]);
+
+    useEffect(() => {
+        if (!isHeroEntry || heroStoreLoaded || heroStoreLoading) return;
+
+        void loadHeroes();
+    }, [heroStoreLoaded, heroStoreLoading, isHeroEntry, loadHeroes]);
+
+    useEffect(() => {
+        if (!isHeroEntry || skillStoreLoaded || skillStoreLoading) return;
+
+        void loadSkills();
+    }, [isHeroEntry, loadSkills, skillStoreLoaded, skillStoreLoading]);
 
     if (!entry) {
         return (
@@ -120,6 +164,7 @@ export default function CodexEntryDetail({
         ...displayedGrantedAbilityKeys,
         ...displayedThresholdTargetKeys,
         ...richFactionPackageEntryKeys,
+        ...getCodexHeroRichEnrichmentEntryKeys(heroRichEnrichment),
     ]);
     const relatedEntriesForDisplay = hiddenRelatedEntryKeys.size > 0
         ? relatedEntries.filter((relatedEntry) => (
@@ -131,6 +176,7 @@ export default function CodexEntryDetail({
         : [];
     const showTechRichEnrichment = isTechEntry && hasCodexTechRichEnrichment(techRichEnrichment);
     const showUnitRichEnrichment = isUnitEntry && hasCodexUnitRichEnrichment(unitRichEnrichment);
+    const showHeroRichEnrichment = isHeroEntry && hasCodexHeroRichEnrichment(heroRichEnrichment);
 
     return (
         <article className="codex-detail">
@@ -179,6 +225,13 @@ export default function CodexEntryDetail({
             {showUnitRichEnrichment ? (
                 <CodexUnitProfileSection
                     enrichment={unitRichEnrichment}
+                    onSelect={onSelectRelated}
+                />
+            ) : null}
+
+            {showHeroRichEnrichment ? (
+                <CodexHeroProfileSection
+                    enrichment={heroRichEnrichment}
                     onSelect={onSelectRelated}
                 />
             ) : null}

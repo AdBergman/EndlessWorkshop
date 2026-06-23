@@ -5,11 +5,13 @@ import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
 import { useFactionStore } from "@/stores/factionStore";
+import { useHeroStore } from "@/stores/heroStore";
+import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
-import type { CodexEntry, RichFaction, Tech, Unit } from "@/types/dataTypes";
+import type { CodexEntry, Hero, HeroSkill, RichFaction, Skills, SkillTree, Tech, Unit } from "@/types/dataTypes";
 
 function seedCodexEntries(entries: CodexEntry[]) {
     useCodexStore.setState({
@@ -87,6 +89,79 @@ const richFaction = (overrides: Partial<RichFaction>): RichFaction => ({
     ...overrides,
 });
 
+const heroFixture = (overrides: Partial<Hero>): Hero => ({
+    unitKey: "Hero_Current",
+    displayName: "Current Hero",
+    faction: null,
+    factionKey: null,
+    isMajorFaction: true,
+    heroKey: "Hero_Current",
+    heroClassKey: "HeroClass_Archer",
+    originKind: "majorFaction",
+    originFactionKey: "Faction_Kin",
+    minorFactionKey: null,
+    unitClassKey: "UnitClass_Ranged_Hero",
+    attackSkillKey: null,
+    ownAbilityKeys: [],
+    abilityKeys: [],
+    combatAbilityKeys: [],
+    tacticalAbilityKeys: [],
+    passiveAbilityKeys: [],
+    mechanicalAbilityKeys: [],
+    classRuleAbilityKeys: [],
+    hiddenHelperAbilityKeys: [],
+    defaultSkillKeys: [],
+    applicableSkillTreeKeys: [],
+    descriptionLines: [],
+    referenceKeys: [],
+    ...overrides,
+});
+
+const heroSkillTree = (overrides: Partial<SkillTree>): SkillTree => ({
+    treeKey: "HeroSkillTree_Archer",
+    treeType: "Class",
+    isHidden: false,
+    tierPlacementKeys: [],
+    tierKeys: [],
+    skillKeys: [],
+    referenceKeys: [],
+    classPrerequisiteKey: null,
+    factionPrerequisiteKey: null,
+    ...overrides,
+});
+
+const heroSkill = (overrides: Partial<HeroSkill>): HeroSkill => ({
+    skillKey: "HeroSkill_Archer02",
+    entryKey: "HeroSkill_Archer02",
+    kind: "HeroSkill",
+    displayName: "HeroSkill_Archer02",
+    publicDisplayName: "Terrain Logistics",
+    primaryAbilityKey: "UnitAbility_Hero_Archer02",
+    descriptionLines: [],
+    resolvedDisplayName: "Terrain Logistics",
+    resolvedSummaryLines: ["Gain 5 [Experience] Experience to all Units of the Army"],
+    resolvedMechanicKind: "reaction",
+    resolvedMechanicTags: [],
+    isObsolete: false,
+    isActive: false,
+    isPassive: true,
+    placements: [],
+    prerequisiteSkillKeys: [],
+    inhibitedBySkillKeys: [],
+    lockedBySkillKeys: [],
+    effects: [],
+    unitAbilityKeys: [],
+    battleSkillKeys: [],
+    battleAbilityKeys: [],
+    descriptorKeys: [],
+    unitAbilityEventKeys: [],
+    rewardPerKillInBattleEffectKeys: [],
+    statAffinityNames: [],
+    defaultForHeroKeys: [],
+    referenceKeys: [],
+    ...overrides,
+});
+
 function seedRichUnits(units: Unit[]) {
     useUnitStore.setState({
         units,
@@ -104,6 +179,20 @@ function seedRichUnits(units: Unit[]) {
 
 function seedRichFactions(factions: RichFaction[]) {
     useFactionStore.getState().replaceFactions(factions);
+}
+
+function seedHeroes(heroes: Hero[]) {
+    useHeroStore.getState().replaceHeroes(heroes);
+}
+
+function seedSkills(skills: Partial<Skills>) {
+    useSkillStore.getState().replaceSkills({
+        skillTrees: [],
+        skillTiers: [],
+        skills: [],
+        heroSkillDefaults: [],
+        ...skills,
+    });
 }
 
 function seedShallowReferenceLayoutEntries() {
@@ -323,9 +412,13 @@ describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         useFactionStore.getState().reset();
+        useHeroStore.getState().reset();
+        useSkillStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
         seedRichFactions([]);
+        seedHeroes([]);
+        seedSkills({});
         seedDefaultCodexStore();
     });
 
@@ -333,6 +426,8 @@ describe("CodexPage", () => {
         cleanup();
         useCodexStore.getState().reset();
         useFactionStore.getState().reset();
+        useHeroStore.getState().reset();
+        useSkillStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
     });
@@ -5700,6 +5795,221 @@ describe("CodexPage", () => {
 
         expect(await screen.findByRole("heading", { name: "Current Unit" })).toBeInTheDocument();
         expect(screen.queryByRole("region", { name: "Evolution" })).not.toBeInTheDocument();
+    });
+
+    it("enriches Hero details with exact origin, skill paths, and default skill ability links", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Current",
+                displayName: "Lieutenant Brezvez",
+                descriptionLines: ["Faction: Kin of Sheredyn", "Class: Archer"],
+                referenceKeys: ["Faction_Kin", "UnitAbility_Hero_Archer02"],
+                facts: [
+                    { label: "Faction", value: "Kin of Sheredyn" },
+                    { label: "Class", value: "Archer" },
+                ],
+                sections: [{ title: "Stats", lines: ["+40 [Damage] Damage"] }],
+            },
+            {
+                exportKind: "factions",
+                entryKey: "Faction_Kin",
+                displayName: "Kin of Sheredyn",
+                descriptionLines: ["Ranged major faction."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Hero_Archer02",
+                displayName: "Terrain Logistics",
+                descriptionLines: ["Gain experience for the army."],
+                referenceKeys: [],
+                facts: [{ label: "Ability mechanic", value: "Passive" }],
+                sections: [{ title: "Effects", lines: ["Gain 5 [Experience] Experience"] }],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedHeroes([
+            heroFixture({
+                unitKey: "Hero_Current",
+                originFactionKey: "Faction_Kin",
+                applicableSkillTreeKeys: [
+                    "HeroSkillTree_Archer",
+                    "HeroSkillTree_Faction",
+                    "HeroSkillTree_Synergy",
+                ],
+            }),
+        ]);
+        seedSkills({
+            skillTrees: [
+                heroSkillTree({ treeKey: "HeroSkillTree_Archer", treeType: "Class" }),
+                heroSkillTree({ treeKey: "HeroSkillTree_Faction", treeType: "Faction" }),
+                heroSkillTree({ treeKey: "HeroSkillTree_Synergy", treeType: "Synergy" }),
+            ],
+            skills: [
+                heroSkill({
+                    skillKey: "HeroSkill_Archer02",
+                    publicDisplayName: "Terrain Logistics",
+                    primaryAbilityKey: "UnitAbility_Hero_Archer02",
+                    resolvedSummaryLines: [
+                        "Gain 5 [Experience] Experience to all Units of the Army",
+                    ],
+                }),
+            ],
+            heroSkillDefaults: [
+                {
+                    heroKey: "Hero_Current",
+                    defaultSkillKeys: ["HeroSkill_Archer02"],
+                    referenceKeys: ["HeroSkill_Archer02"],
+                    factionKey: "Faction_Kin",
+                    classKey: "HeroClass_Archer",
+                },
+            ],
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Current"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Lieutenant Brezvez" })).toBeInTheDocument();
+
+        const heroProfile = screen.getByRole("region", { name: "Hero profile" });
+        expect(within(heroProfile).getByText("Origin")).toBeInTheDocument();
+        const originLink = within(heroProfile).getByRole("button", { name: "Open Kin of Sheredyn in Codex" });
+        expect(originLink).toHaveTextContent("Kin of Sheredyn");
+        expect(within(heroProfile).getAllByText("Class").length).toBeGreaterThanOrEqual(2);
+        expect(within(heroProfile).getByText("Archer")).toBeInTheDocument();
+        expect(within(heroProfile).getByText("Skill paths")).toBeInTheDocument();
+        expect(heroProfile).toHaveTextContent("Class");
+        expect(heroProfile).toHaveTextContent("Faction");
+        expect(heroProfile).toHaveTextContent("Synergy");
+        expect(within(heroProfile).getByText("Starting skills")).toBeInTheDocument();
+        expect(within(heroProfile).getAllByText("Terrain Logistics").length).toBeGreaterThanOrEqual(2);
+        expect(heroProfile).toHaveTextContent("Gain 5");
+        expect(heroProfile).toHaveTextContent("Experience to all Units of the Army");
+
+        const abilityLink = within(heroProfile).getByRole("button", { name: "Open Terrain Logistics in Codex" });
+        await user.hover(abilityLink);
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Terrain Logistics");
+        await user.unhover(abilityLink);
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        expect(screen.queryByRole("region", { name: /related entries/i })).not.toBeInTheDocument();
+
+        await user.click(abilityLink);
+        expect(await screen.findByRole("heading", { name: "Terrain Logistics" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Hero_Archer02");
+
+        await user.click(within(getCategoryToolbar()).getByRole("button", { name: "Heroes" }));
+        const heroesOverview = await screen.findByLabelText("Heroes overview");
+        expect(heroesOverview).toHaveTextContent("Lieutenant Brezvez");
+        expect(within(heroesOverview).queryByText("Hero profile")).not.toBeInTheDocument();
+        expect(within(heroesOverview).queryByText("Starting skills")).not.toBeInTheDocument();
+    });
+
+    it("hides Hero rich enrichment when rich data or exact targets are unavailable", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "heroes",
+                entryKey: "Hero_Current",
+                displayName: "Current Hero",
+                descriptionLines: ["A public hero."],
+                referenceKeys: [],
+                facts: [{ label: "Class", value: "Archer" }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Faction_Kin",
+                displayName: "Wrong Kind Origin",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "UnitAbility_Hero_Archer02",
+                displayName: "Wrong Kind Ability",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Hero" })).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: "Hero profile" })).not.toBeInTheDocument();
+
+        cleanup();
+        seedCodexEntries(entries);
+        seedHeroes([
+            heroFixture({
+                unitKey: "Hero_Current",
+                originFactionKey: "Faction_Kin",
+                hiddenHelperAbilityKeys: ["UnitAbility_Hero_Archer02"],
+                applicableSkillTreeKeys: ["HeroSkillTree_Hidden"],
+            }),
+        ]);
+        seedSkills({
+            skillTrees: [
+                heroSkillTree({
+                    treeKey: "HeroSkillTree_Hidden",
+                    treeType: "Hidden",
+                    isHidden: true,
+                }),
+            ],
+            skills: [
+                heroSkill({
+                    skillKey: "HeroSkill_Raw",
+                    publicDisplayName: null,
+                    resolvedDisplayName: "HeroSkill_Raw",
+                    primaryAbilityKey: "UnitAbility_Hero_Archer02",
+                }),
+            ],
+            heroSkillDefaults: [
+                {
+                    heroKey: "Hero_Current",
+                    defaultSkillKeys: ["HeroSkill_Raw"],
+                    referenceKeys: [],
+                    factionKey: null,
+                    classKey: null,
+                },
+            ],
+        });
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=heroes&entry=Hero_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Current Hero" })).toBeInTheDocument();
+        const heroProfile = screen.getByRole("region", { name: "Hero profile" });
+        expect(within(heroProfile).getByText("Class")).toBeInTheDocument();
+        expect(heroProfile).not.toHaveTextContent("Wrong Kind Origin");
+        expect(heroProfile).not.toHaveTextContent("Wrong Kind Ability");
+        expect(heroProfile).not.toHaveTextContent("HeroSkill_Raw");
     });
 
     it("renders the all-factions summary icon as a monochrome category icon", async () => {
