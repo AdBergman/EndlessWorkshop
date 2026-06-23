@@ -147,6 +147,13 @@ index, then select the smallest relevant doc set for the task type.
     frontend-consumed, or player-visible.
   - Status: active release-support audit.
 
+- `docs/active/import-history-and-data-freshness-design.md`
+  - Purpose: v1 design for durable import run/file-result history and
+    player-facing data freshness display.
+  - Read when: implementing or reviewing import history, startup/manual import
+    tracking, Admin Import history, or Codex data freshness UI.
+  - Status: active implementation design.
+
 - `docs/active/codex-self-sustaining-worklog.md`
   - Purpose: execution log for an earlier Codex workstream.
   - Read when: reconstructing how previous Codex UI/exporter tasks landed.

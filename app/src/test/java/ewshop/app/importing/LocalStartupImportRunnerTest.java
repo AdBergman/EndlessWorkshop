@@ -22,6 +22,11 @@ import ewshop.facade.interfaces.HeroImportAdminFacade;
 import ewshop.facade.interfaces.SkillImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
+import ewshop.domain.model.importing.ImportFileStatus;
+import ewshop.domain.model.importing.ImportRun;
+import ewshop.domain.model.importing.ImportRunStatus;
+import ewshop.domain.model.importing.ImportTrigger;
+import ewshop.domain.repository.ImportHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -371,6 +376,99 @@ class LocalStartupImportRunnerTest {
     }
 
     @Test
+    void recordsStartupImportHistoryForImportedSkippedAndFailedFiles() throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.createDirectories(tempDir.resolve("codex"));
+        Files.writeString(tempDir.resolve("exports/ewshop_tech_export_0.82.json"), """
+                {
+                  "game":"Endless Legend 2",
+                  "gameVersion":"0.82",
+                  "exporterVersion":"1.2.3",
+                  "exportedAtUtc":"2026-06-22T05:57:36Z",
+                  "exportKind":"tech",
+                  "techs":[{"techKey":"t","displayName":"Tech"}]
+                }
+                """);
+        Files.writeString(tempDir.resolve("exports/ewshop_bad_tech_export_0.82.json"), """
+                {
+                  "game":"Endless Legend 2",
+                  "gameVersion":"0.82",
+                  "exporterVersion":"1.2.3",
+                  "exportedAtUtc":"2026-06-22T05:57:36Z",
+                  "exportKind":"tech",
+                  "techs":[]
+                }
+                """);
+        Files.writeString(tempDir.resolve("codex/actions-codex-inventory.json"), """
+                {
+                  "game":"Endless Legend 2",
+                  "gameVersion":"0.82",
+                  "exporterVersion":"1.2.3",
+                  "exportedAtUtc":"2026-06-22T05:57:36Z",
+                  "exportKind":"actions-codex-inventory",
+                  "entries":[{"entryKey":"debug-action","displayName":"Debug Action"}]
+                }
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        RecordingImportHistoryRepository historyRepository = new RecordingImportHistoryRepository();
+        LocalStartupImportRunner runner = newRunner(facades, true, historyRepository);
+
+        LocalStartupImportSummary summary = runner.runStartupImport();
+
+        assertThat(summary).isEqualTo(new LocalStartupImportSummary(1, 1, 1));
+        assertThat(historyRepository.runs).hasSize(1);
+
+        ImportRun run = historyRepository.runs.getFirst();
+        assertThat(run.trigger()).isEqualTo(ImportTrigger.LOCAL_STARTUP);
+        assertThat(run.status()).isEqualTo(ImportRunStatus.PARTIAL_SUCCESS);
+        assertThat(run.fileCount()).isEqualTo(3);
+        assertThat(run.importedFileCount()).isEqualTo(1);
+        assertThat(run.skippedFileCount()).isEqualTo(1);
+        assertThat(run.failedFileCount()).isEqualTo(1);
+        assertThat(run.counts().received()).isEqualTo(1);
+        assertThat(run.counts().inserted()).isEqualTo(1);
+        assertThat(run.game()).isEqualTo("Endless Legend 2");
+        assertThat(run.gameVersion()).isEqualTo("0.82");
+        assertThat(run.exporterVersion()).isEqualTo("1.2.3");
+        assertThat(run.exportedAtUtc()).isEqualTo("2026-06-22T05:57:36Z");
+        assertThat(run.notes()).isEqualTo("Imported 1, skipped 1, failed 1.");
+
+        assertThat(run.fileResults())
+                .extracting(result -> result.filename())
+                .containsExactly(
+                        "ewshop_bad_tech_export_0.82.json",
+                        "ewshop_tech_export_0.82.json",
+                        "actions-codex-inventory.json"
+                );
+        assertThat(run.fileResults())
+                .allSatisfy(result -> {
+                    assertThat(result.filename()).doesNotContain(tempDir.toString());
+                    assertThat(result.fileSha256()).hasSize(64);
+                    assertThat(result.sourcePathHash()).hasSize(64);
+                });
+
+        var failed = run.fileResults().get(0);
+        assertThat(failed.status()).isEqualTo(ImportFileStatus.FAILED);
+        assertThat(failed.exportKind()).isEqualTo("tech");
+        assertThat(failed.errorMessage()).contains("Import file has no techs");
+
+        var imported = run.fileResults().get(1);
+        assertThat(imported.status()).isEqualTo(ImportFileStatus.IMPORTED);
+        assertThat(imported.folder()).isEqualTo("exports");
+        assertThat(imported.exportKind()).isEqualTo("tech");
+        assertThat(imported.importKind()).isEqualTo("tech");
+        assertThat(imported.counts().received()).isEqualTo(1);
+        assertThat(imported.durationMs()).isEqualTo(1);
+
+        var skipped = run.fileResults().get(2);
+        assertThat(skipped.status()).isEqualTo(ImportFileStatus.SKIPPED);
+        assertThat(skipped.folder()).isEqualTo("codex");
+        assertThat(skipped.exportKind()).isEqualTo("actions-codex-inventory");
+        assertThat(skipped.skipReason()).isEqualTo("diagnostics-only");
+    }
+
+    @Test
     void missingFoldersDoNotImportOrFail() {
         RecordingFacades facades = new RecordingFacades();
         LocalStartupImportRunner runner = newRunner(facades, true);
@@ -414,6 +512,14 @@ class LocalStartupImportRunnerTest {
     }
 
     private LocalStartupImportRunner newRunner(RecordingFacades facades, boolean enabled) {
+        return newRunner(facades, enabled, new RecordingImportHistoryRepository());
+    }
+
+    private LocalStartupImportRunner newRunner(
+            RecordingFacades facades,
+            boolean enabled,
+            ImportHistoryRepository importHistoryRepository
+    ) {
         LocalStartupImportProperties properties = new LocalStartupImportProperties();
         properties.setEnabled(enabled);
         properties.setRoot(tempDir);
@@ -429,7 +535,8 @@ class LocalStartupImportRunnerTest {
                 facades,
                 facades,
                 facades,
-                facades
+                facades,
+                importHistoryRepository
         );
     }
 
@@ -587,6 +694,16 @@ class LocalStartupImportRunnerTest {
         }
     }
 
+    private static final class RecordingImportHistoryRepository implements ImportHistoryRepository {
+
+        private final List<ImportRun> runs = new ArrayList<>();
+
+        @Override
+        public void saveImportRun(ImportRun run) {
+            runs.add(run);
+        }
+    }
+
     @Configuration
     static class TestConfiguration {
 
@@ -663,6 +780,11 @@ class LocalStartupImportRunnerTest {
         @Bean
         QuestExplorerImportAdminFacade questImportAdminFacade() {
             return file -> summary("quest_explorer", file.entries().size());
+        }
+
+        @Bean
+        ImportHistoryRepository importHistoryRepository() {
+            return run -> {};
         }
 
     }
