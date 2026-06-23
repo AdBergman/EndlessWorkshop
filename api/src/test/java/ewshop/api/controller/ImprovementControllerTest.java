@@ -1,6 +1,8 @@
 package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
+import ewshop.facade.dto.response.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.response.ConstructiblePlacementPrerequisitesDto;
 import ewshop.facade.dto.response.ImprovementDto;
 import ewshop.facade.interfaces.ImprovementFacade;
 import org.junit.jupiter.api.Test;
@@ -33,7 +35,11 @@ class ImprovementControllerTest {
                 "DistrictImprovement_TravelersShrine",
                 "Traveler's Shrine",
                 "Economy",
-                List.of("+15 Approval")
+                List.of("+15 Approval"),
+                List.of("Technology_Economy_01"),
+                new ConstructiblePlacementPrerequisitesDto(
+                        new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", false)
+                )
         );
 
         when(improvementFacade.getAllImprovements()).thenReturn(List.of(i1));
@@ -43,10 +49,14 @@ class ImprovementControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].length()").value(4))
+                .andExpect(jsonPath("$[0].length()").value(6))
                 .andExpect(jsonPath("$[0].improvementKey").value("DistrictImprovement_TravelersShrine"))
                 .andExpect(jsonPath("$[0].displayName").value("Traveler's Shrine"))
                 .andExpect(jsonPath("$[0].category").value("Economy"))
-                .andExpect(jsonPath("$[0].descriptionLines[0]").value("+15 Approval"));
+                .andExpect(jsonPath("$[0].descriptionLines[0]").value("+15 Approval"))
+                .andExpect(jsonPath("$[0].unlockTechnologyKeys[0]").value("Technology_Economy_01"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.operator").value("AnyTile"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.territoryConstraint").value("SameRegion"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.ignoreCliff").value(false));
     }
 }

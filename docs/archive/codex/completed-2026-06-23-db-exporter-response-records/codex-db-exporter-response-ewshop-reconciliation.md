@@ -1,9 +1,9 @@
 # DB Exporter Response EWShop Reconciliation
 
-Status: active closed reconciliation record
+Status: archived closed reconciliation record
 Current as of 2026-06-17
 Source:
-`docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
+`docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
 
 This note translates the DB Exporter definitive response into EWShop import,
 QA, and ownership decisions. It is not a new exporter request list. Do not
@@ -13,8 +13,8 @@ runtime-only, or product/export-scope deferred without new source evidence.
 Final accepted snapshot for EWShop import/QA: `20260616-210540`.
 Import/QA result: pass. No EWShop-owned DB-exporter-response implementation
 issues are currently open; use
-`docs/active/codex-db-exporter-response-import-qa-results.md` for the validation
-outcome.
+`docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-import-qa-results.md`
+for the validation outcome.
 
 ## DB-CODEX-DEF-001 - Thin Actions
 

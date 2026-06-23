@@ -40,6 +40,19 @@ public class ImprovementEntity {
     @Column(name = "line", nullable = false, columnDefinition = "text")
     private List<String> descriptionLines = new ArrayList<>();
 
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "unlock_technology_keys", columnDefinition = "text")
+    private List<String> unlockTechnologyKeys = new ArrayList<>();
+
+    @Column(name = "placement_neighbour_operator")
+    private String placementNeighbourOperator;
+
+    @Column(name = "placement_neighbour_territory_constraint")
+    private String placementNeighbourTerritoryConstraint;
+
+    @Column(name = "placement_neighbour_ignore_cliff")
+    private Boolean placementNeighbourIgnoreCliff;
+
     public ImprovementEntity() {}
 
     public Long getId() {
@@ -78,5 +91,39 @@ public class ImprovementEntity {
         this.descriptionLines = (descriptionLines == null)
                 ? new ArrayList<>()
                 : new ArrayList<>(descriptionLines);
+    }
+
+    public List<String> getUnlockTechnologyKeys() {
+        return unlockTechnologyKeys;
+    }
+
+    public void setUnlockTechnologyKeys(List<String> unlockTechnologyKeys) {
+        this.unlockTechnologyKeys = (unlockTechnologyKeys == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(unlockTechnologyKeys);
+    }
+
+    public String getPlacementNeighbourOperator() {
+        return placementNeighbourOperator;
+    }
+
+    public void setPlacementNeighbourOperator(String placementNeighbourOperator) {
+        this.placementNeighbourOperator = placementNeighbourOperator;
+    }
+
+    public String getPlacementNeighbourTerritoryConstraint() {
+        return placementNeighbourTerritoryConstraint;
+    }
+
+    public void setPlacementNeighbourTerritoryConstraint(String placementNeighbourTerritoryConstraint) {
+        this.placementNeighbourTerritoryConstraint = placementNeighbourTerritoryConstraint;
+    }
+
+    public Boolean getPlacementNeighbourIgnoreCliff() {
+        return placementNeighbourIgnoreCliff;
+    }
+
+    public void setPlacementNeighbourIgnoreCliff(Boolean placementNeighbourIgnoreCliff) {
+        this.placementNeighbourIgnoreCliff = placementNeighbourIgnoreCliff;
     }
 }

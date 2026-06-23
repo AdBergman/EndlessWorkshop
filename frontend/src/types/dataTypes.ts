@@ -62,12 +62,32 @@ export interface Improvement {
     descriptionLines: string[];
     unique: "City" | "District";
     cost: string[];
+    unlockTechnologyKeys?: string[];
+    placementPrerequisites?: ConstructiblePlacementPrerequisites | null;
 }
 
 export interface District {
     districtKey: string;
     displayName: string;
     descriptionLines: string[];
+    unlockTechnologyKeys?: string[];
+    levelUp?: DistrictLevelUp | null;
+    placementPrerequisites?: ConstructiblePlacementPrerequisites | null;
+}
+
+export interface ConstructibleNeighbourPlacement {
+    operator: string | null;
+    territoryConstraint: string | null;
+    ignoreCliff: boolean | null;
+}
+
+export interface ConstructiblePlacementPrerequisites {
+    neighbourTiles?: ConstructibleNeighbourPlacement | null;
+}
+
+export interface DistrictLevelUp {
+    targetDistrictKey: string | null;
+    requiredAdjacentDistrictCount: number | null;
 }
 
 export interface CodexMetadataFact {

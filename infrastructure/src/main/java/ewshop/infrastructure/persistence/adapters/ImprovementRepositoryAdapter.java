@@ -1,6 +1,8 @@
 package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.command.ImprovementImportSnapshot;
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
 import ewshop.domain.model.Improvement;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.ImprovementRepository;
@@ -116,6 +118,13 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getUnlockTechnologyKeys(), update.unlockTechnologyKeys())) {
+            entity.setUnlockTechnologyKeys(update.unlockTechnologyKeys());
+            changed = true;
+        }
+
+        changed |= setPlacementIfChanged(entity, update.placementPrerequisites());
+
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
@@ -126,6 +135,47 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
                 .displayName(e.getDisplayName())
                 .category(e.getCategory())
                 .descriptionLines(e.getDescriptionLines())
+                .unlockTechnologyKeys(e.getUnlockTechnologyKeys())
+                .placementPrerequisites(toPlacement(e))
                 .build();
+    }
+
+    private static boolean setPlacementIfChanged(
+            ImprovementEntity entity,
+            ConstructiblePlacementPrerequisites placement
+    ) {
+        ConstructibleNeighbourPlacement neighbour = placement == null ? null : placement.neighbourTiles();
+        String operator = neighbour == null ? null : neighbour.operator();
+        String territoryConstraint = neighbour == null ? null : neighbour.territoryConstraint();
+        Boolean ignoreCliff = neighbour == null ? null : neighbour.ignoreCliff();
+        boolean changed = false;
+
+        if (!Objects.equals(entity.getPlacementNeighbourOperator(), operator)) {
+            entity.setPlacementNeighbourOperator(operator);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementNeighbourTerritoryConstraint(), territoryConstraint)) {
+            entity.setPlacementNeighbourTerritoryConstraint(territoryConstraint);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementNeighbourIgnoreCliff(), ignoreCliff)) {
+            entity.setPlacementNeighbourIgnoreCliff(ignoreCliff);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static ConstructiblePlacementPrerequisites toPlacement(ImprovementEntity entity) {
+        ConstructiblePlacementPrerequisites placement = new ConstructiblePlacementPrerequisites(
+                new ConstructibleNeighbourPlacement(
+                        entity.getPlacementNeighbourOperator(),
+                        entity.getPlacementNeighbourTerritoryConstraint(),
+                        entity.getPlacementNeighbourIgnoreCliff()
+                )
+        );
+        return placement.isEmpty() ? null : placement;
     }
 }

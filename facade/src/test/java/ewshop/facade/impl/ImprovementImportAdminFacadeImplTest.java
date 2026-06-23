@@ -6,6 +6,8 @@ import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.ImprovementImportService;
 import ewshop.domain.service.ImprovementService;
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.importing.constructibles.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructiblePlacementPrerequisitesDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportImprovementDto;
 import org.junit.jupiter.api.Test;
@@ -34,7 +36,11 @@ class ImprovementImportAdminFacadeImplTest {
                         "Improvement_A",
                         "Improvement A",
                         "",
-                        List.of()
+                        List.of(),
+                        List.of("Technology_Improvement_A"),
+                        new ConstructiblePlacementPrerequisitesDto(
+                                new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", false)
+                        )
                 ))
         ));
 
@@ -52,6 +58,12 @@ class ImprovementImportAdminFacadeImplTest {
         assertThat(summary.diagnostics().details().receivedDistinctKeys()).isEqualTo(1);
         assertThat(summary.diagnostics().details().duplicatesInFile()).isZero();
         assertThat(importService.snapshots).hasSize(1);
+        ImprovementImportSnapshot snapshot = importService.snapshots.getFirst();
+        assertThat(snapshot.unlockTechnologyKeys()).containsExactly("Technology_Improvement_A");
+        assertThat(snapshot.placementPrerequisites()).isNotNull();
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().ignoreCliff()).isFalse();
         assertThat(improvementService.getAllCalls).isEqualTo(1);
     }
 

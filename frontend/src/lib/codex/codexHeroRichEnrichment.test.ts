@@ -3,7 +3,7 @@ import {
     getCodexHeroRichEnrichmentEntryKeys,
     hasCodexHeroRichEnrichment,
 } from "@/lib/codex/codexHeroRichEnrichment";
-import type { CodexEntry, Hero, HeroSkill, HeroSkillDefault, SkillTree } from "@/types/dataTypes";
+import type { CodexEntry, Hero, HeroSkill, HeroSkillDefault, SkillTier, SkillTree } from "@/types/dataTypes";
 
 const codexHero = (entryKey: string, displayName: string): CodexEntry => ({
     exportKind: "heroes",
@@ -54,12 +54,24 @@ const skillTree = (overrides: Partial<SkillTree>): SkillTree => ({
     treeKey: "HeroSkillTree_Archer",
     treeType: "Class",
     isHidden: false,
-    tierPlacementKeys: [],
-    tierKeys: [],
-    skillKeys: [],
+    tierPlacementKeys: ["HeroSkillTree_Archer::HeroSkillTier_Archer_1"],
+    tierKeys: ["HeroSkillTier_Archer_1"],
+    skillKeys: ["HeroSkill_Archer02"],
     referenceKeys: [],
     classPrerequisiteKey: null,
     factionPrerequisiteKey: null,
+    ...overrides,
+});
+
+const skillTier = (overrides: Partial<SkillTier>): SkillTier => ({
+    tierPlacementKey: "HeroSkillTree_Archer::HeroSkillTier_Archer_1",
+    tierKey: "HeroSkillTier_Archer_1",
+    treeKey: "HeroSkillTree_Archer",
+    treeType: "Class",
+    tierIndex: 0,
+    levelPrerequisite: 0,
+    skillKeys: ["HeroSkill_Archer02"],
+    referenceKeys: [],
     ...overrides,
 });
 
@@ -123,11 +135,37 @@ describe("codexHeroRichEnrichment", () => {
             },
             {
                 HeroSkillTree_Archer: skillTree({ treeKey: "HeroSkillTree_Archer", treeType: "Class" }),
-                HeroSkillTree_Faction: skillTree({ treeKey: "HeroSkillTree_Faction", treeType: "Faction" }),
-                HeroSkillTree_Synergy: skillTree({ treeKey: "HeroSkillTree_Synergy", treeType: "Synergy" }),
+                HeroSkillTree_Faction: skillTree({
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierPlacementKeys: ["HeroSkillTree_Faction::HeroSkillTier_Faction_2"],
+                }),
+                HeroSkillTree_Synergy: skillTree({
+                    treeKey: "HeroSkillTree_Synergy",
+                    treeType: "Synergy",
+                    tierPlacementKeys: [],
+                }),
+            },
+            {
+                "HeroSkillTree_Archer::HeroSkillTier_Archer_1": skillTier({}),
+                "HeroSkillTree_Faction::HeroSkillTier_Faction_2": skillTier({
+                    tierPlacementKey: "HeroSkillTree_Faction::HeroSkillTier_Faction_2",
+                    tierKey: "HeroSkillTier_Faction_2",
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierIndex: 1,
+                    levelPrerequisite: 4,
+                    skillKeys: ["HeroSkill_Faction02"],
+                }),
             },
             {
                 HeroSkill_Archer02: skill({}),
+                HeroSkill_Faction02: skill({
+                    skillKey: "HeroSkill_Faction02",
+                    publicDisplayName: "Patient Mentor",
+                    primaryAbilityKey: "UnitAbility_Missing",
+                    resolvedSummaryLines: ["Gain 5 [Experience] Experience"],
+                }),
             },
             {
                 Hero_Current: skillDefault({}),
@@ -140,6 +178,17 @@ describe("codexHeroRichEnrichment", () => {
         expect(enrichment.skillPathTypes).toEqual(["Class", "Faction", "Synergy"]);
         expect(enrichment.startingSkills.map((defaultSkill) => defaultSkill.label)).toEqual(["Terrain Logistics"]);
         expect(enrichment.startingSkills[0]?.primaryAbility?.label).toBe("Terrain Logistics");
+        expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Class", "Faction"]);
+        expect(enrichment.skillOptions[0]?.tiers[0]).toMatchObject({
+            tierIndex: 0,
+            unlockThreshold: 0,
+        });
+        expect(enrichment.skillOptions[0]?.tiers[0]?.skills[0]?.label).toBe("Terrain Logistics");
+        expect(enrichment.skillOptions[1]?.tiers[0]).toMatchObject({
+            tierIndex: 1,
+            unlockThreshold: 4,
+        });
+        expect(enrichment.skillOptions[1]?.tiers[0]?.skills[0]?.primaryAbility).toBeNull();
         expect(hasCodexHeroRichEnrichment(enrichment)).toBe(true);
         expect(getCodexHeroRichEnrichmentEntryKeys(enrichment)).toEqual([
             "Faction_Kin",
@@ -153,7 +202,7 @@ describe("codexHeroRichEnrichment", () => {
         const wrongKindAbility = codexEntry("UnitAbility_Hero_Archer02", "Wrong Kind Ability", "statuses");
 
         expect(
-            hasCodexHeroRichEnrichment(buildCodexHeroRichEnrichment(current, {}, {}, {}, {}, [current]))
+            hasCodexHeroRichEnrichment(buildCodexHeroRichEnrichment(current, {}, {}, {}, {}, {}, [current]))
         ).toBe(false);
 
         const enrichment = buildCodexHeroRichEnrichment(
@@ -170,7 +219,18 @@ describe("codexHeroRichEnrichment", () => {
                     treeType: "Hidden",
                     isHidden: true,
                 }),
-                HeroSkillTree_Class: skillTree({ treeKey: "HeroSkillTree_Class", treeType: "Class" }),
+                HeroSkillTree_Class: skillTree({
+                    treeKey: "HeroSkillTree_Class",
+                    treeType: "Class",
+                    tierPlacementKeys: ["HeroSkillTree_Class::HeroSkillTier_Class_1"],
+                }),
+            },
+            {
+                "HeroSkillTree_Class::HeroSkillTier_Class_1": skillTier({
+                    tierPlacementKey: "HeroSkillTree_Class::HeroSkillTier_Class_1",
+                    treeKey: "HeroSkillTree_Class",
+                    skillKeys: ["HeroSkill_Raw", "HeroSkill_Archer02"],
+                }),
             },
             {
                 HeroSkill_Raw: skill({
@@ -191,5 +251,10 @@ describe("codexHeroRichEnrichment", () => {
         expect(enrichment.skillPathTypes).toEqual(["Class"]);
         expect(enrichment.startingSkills.map((defaultSkill) => defaultSkill.label)).toEqual(["Terrain Logistics"]);
         expect(enrichment.startingSkills[0]?.primaryAbility).toBeNull();
+        expect(enrichment.skillOptions.map((tree) => tree.label)).toEqual(["Class"]);
+        expect(enrichment.skillOptions[0]?.tiers[0]?.skills.map((option) => option.label)).toEqual([
+            "Terrain Logistics",
+        ]);
+        expect(enrichment.skillOptions[0]?.tiers[0]?.skills[0]?.primaryAbility).toBeNull();
     });
 });

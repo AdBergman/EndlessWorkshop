@@ -38,6 +38,8 @@ const normalizeImprovement = (improvement: Improvement): Improvement => ({
         (line): line is string => typeof line === "string"
     ),
     cost: (improvement.cost ?? []).filter((line): line is string => typeof line === "string"),
+    unlockTechnologyKeys: stringList(improvement.unlockTechnologyKeys),
+    placementPrerequisites: normalizePlacement(improvement.placementPrerequisites),
 });
 
 const initialState = {
@@ -54,6 +56,36 @@ const initialState = {
 
 const formatLoadError = (reason: unknown) =>
     `Failed to load improvements: ${(reason as Error)?.message ?? String(reason)}`;
+
+function stringList(values: readonly unknown[] | null | undefined): string[] {
+    return (values ?? [])
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean);
+}
+
+function normalizePlacement(
+    placement: Improvement["placementPrerequisites"]
+): Improvement["placementPrerequisites"] {
+    const neighbourTiles = placement?.neighbourTiles;
+    if (!neighbourTiles) return null;
+
+    const operator = typeof neighbourTiles.operator === "string" ? neighbourTiles.operator.trim() : "";
+    const territoryConstraint = typeof neighbourTiles.territoryConstraint === "string"
+        ? neighbourTiles.territoryConstraint.trim()
+        : "";
+    const ignoreCliff = typeof neighbourTiles.ignoreCliff === "boolean" ? neighbourTiles.ignoreCliff : null;
+
+    return operator || territoryConstraint || ignoreCliff !== null
+        ? {
+                neighbourTiles: {
+                    operator: operator || null,
+                    territoryConstraint: territoryConstraint || null,
+                    ignoreCliff,
+                },
+            }
+        : null;
+}
 
 export const useImprovementStore = create<ImprovementStore>((set, get) => ({
     ...initialState,

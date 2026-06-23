@@ -4,14 +4,28 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import TopContainer from "@/components/TopContainer/TopContainer";
 import CodexPage from "./CodexPage";
 import { useCodexStore } from "@/stores/codexStore";
+import { useDistrictStore } from "@/stores/districtStore";
 import { useFactionStore } from "@/stores/factionStore";
 import { useHeroStore } from "@/stores/heroStore";
+import { useImprovementStore } from "@/stores/improvementStore";
 import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
-import type { CodexEntry, Hero, HeroSkill, RichFaction, Skills, SkillTree, Tech, Unit } from "@/types/dataTypes";
+import type {
+    CodexEntry,
+    District,
+    Hero,
+    HeroSkill,
+    Improvement,
+    RichFaction,
+    Skills,
+    SkillTier,
+    SkillTree,
+    Tech,
+    Unit,
+} from "@/types/dataTypes";
 
 function seedCodexEntries(entries: CodexEntry[]) {
     useCodexStore.setState({
@@ -70,6 +84,27 @@ const richUnit = (overrides: Partial<Unit>): Unit => ({
     ...overrides,
 });
 
+const richDistrict = (overrides: Partial<District>): District => ({
+    districtKey: "District_Current",
+    displayName: "Current District",
+    descriptionLines: [],
+    unlockTechnologyKeys: [],
+    levelUp: null,
+    placementPrerequisites: null,
+    ...overrides,
+});
+
+const richImprovement = (overrides: Partial<Improvement>): Improvement => ({
+    improvementKey: "Improvement_Current",
+    displayName: "Current Improvement",
+    descriptionLines: [],
+    unique: "City",
+    cost: [],
+    unlockTechnologyKeys: [],
+    placementPrerequisites: null,
+    ...overrides,
+});
+
 const richFaction = (overrides: Partial<RichFaction>): RichFaction => ({
     factionKey: "Faction_Aspect",
     publicDisplayName: "Aspects",
@@ -121,12 +156,24 @@ const heroSkillTree = (overrides: Partial<SkillTree>): SkillTree => ({
     treeKey: "HeroSkillTree_Archer",
     treeType: "Class",
     isHidden: false,
-    tierPlacementKeys: [],
-    tierKeys: [],
-    skillKeys: [],
+    tierPlacementKeys: ["HeroSkillTree_Archer::HeroSkillTier_Archer_1"],
+    tierKeys: ["HeroSkillTier_Archer_1"],
+    skillKeys: ["HeroSkill_Archer02"],
     referenceKeys: [],
     classPrerequisiteKey: null,
     factionPrerequisiteKey: null,
+    ...overrides,
+});
+
+const heroSkillTier = (overrides: Partial<SkillTier>): SkillTier => ({
+    tierPlacementKey: "HeroSkillTree_Archer::HeroSkillTier_Archer_1",
+    tierKey: "HeroSkillTier_Archer_1",
+    treeKey: "HeroSkillTree_Archer",
+    treeType: "Class",
+    tierIndex: 0,
+    levelPrerequisite: 0,
+    skillKeys: ["HeroSkill_Archer02"],
+    referenceKeys: [],
     ...overrides,
 });
 
@@ -171,6 +218,36 @@ function seedRichUnits(units: Unit[]) {
         }, {}),
         unitKeys: units.map((unit) => unit.unitKey),
         duplicateUnitKeys: [],
+        loading: false,
+        loaded: true,
+        error: null,
+    });
+}
+
+function seedRichDistricts(districts: District[]) {
+    useDistrictStore.setState({
+        districts,
+        districtsByKey: districts.reduce<Record<string, District>>((acc, district) => {
+            acc[district.districtKey] = district;
+            return acc;
+        }, {}),
+        districtKeys: districts.map((district) => district.districtKey),
+        duplicateDistrictKeys: [],
+        loading: false,
+        loaded: true,
+        error: null,
+    });
+}
+
+function seedRichImprovements(improvements: Improvement[]) {
+    useImprovementStore.setState({
+        improvements,
+        improvementsByKey: improvements.reduce<Record<string, Improvement>>((acc, improvement) => {
+            acc[improvement.improvementKey] = improvement;
+            return acc;
+        }, {}),
+        improvementKeys: improvements.map((improvement) => improvement.improvementKey),
+        duplicateImprovementKeys: [],
         loading: false,
         loaded: true,
         error: null,
@@ -411,11 +488,15 @@ function seedActionArchiveEntries() {
 describe("CodexPage", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
+        useDistrictStore.getState().reset();
         useFactionStore.getState().reset();
         useHeroStore.getState().reset();
+        useImprovementStore.getState().reset();
         useSkillStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
+        seedRichDistricts([]);
+        seedRichImprovements([]);
         seedRichFactions([]);
         seedHeroes([]);
         seedSkills({});
@@ -426,8 +507,10 @@ describe("CodexPage", () => {
         cleanup();
         vi.unstubAllEnvs();
         useCodexStore.getState().reset();
+        useDistrictStore.getState().reset();
         useFactionStore.getState().reset();
         useHeroStore.getState().reset();
+        useImprovementStore.getState().reset();
         useSkillStore.getState().reset();
         useTechStore.getState().reset();
         useUnitStore.getState().reset();
@@ -6166,6 +6249,176 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("region", { name: "Prerequisites" })).not.toBeInTheDocument();
     });
 
+    it("enriches District details with exact planning links without changing archive rows", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "districts",
+                entryKey: "District_Current",
+                displayName: "Canal District",
+                descriptionLines: [],
+                referenceKeys: ["Tech_Irrigation", "District_GrandCanal", "Tech_RelatedOnly"],
+                facts: [{ label: "Category", value: "Food" }],
+                sections: [{ title: "Effects", lines: ["+10 [FoodColored] Food"] }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_Irrigation",
+                displayName: "Irrigation",
+                descriptionLines: ["Unlocks water planning."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_GrandCanal",
+                displayName: "Grand Canal",
+                descriptionLines: ["A larger canal district."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_RelatedOnly",
+                displayName: "Related Only",
+                descriptionLines: ["Still a normal related entry."],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichDistricts([
+            richDistrict({
+                districtKey: "District_Current",
+                unlockTechnologyKeys: ["Tech_Irrigation", "Tech_Missing"],
+                levelUp: {
+                    targetDistrictKey: "District_GrandCanal",
+                    requiredAdjacentDistrictCount: 4,
+                },
+                placementPrerequisites: {
+                    neighbourTiles: {
+                        operator: "AnyTile",
+                        territoryConstraint: "SameRegion",
+                        ignoreCliff: true,
+                    },
+                },
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=districts&entry=District_Current"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Canal District" })).toBeInTheDocument();
+
+        const planningSection = screen.getByRole("region", { name: "Planning" });
+        expect(within(planningSection).getByText("Unlocked by")).toBeInTheDocument();
+        expect(within(planningSection).getByText("Upgrades into")).toBeInTheDocument();
+        expect(within(planningSection).getByText("Placement")).toBeInTheDocument();
+        const techLink = within(planningSection).getByRole("button", {
+            name: "Open Irrigation in Codex",
+        });
+        expect(techLink).toHaveTextContent("Irrigation");
+        expect(within(planningSection).getByRole("button", {
+            name: "Open Grand Canal in Codex",
+        })).toHaveTextContent("Grand Canal");
+        expect(planningSection).toHaveTextContent("4 adjacent districts");
+        expect(planningSection).toHaveTextContent("Adjacent tile in same region");
+        expect(planningSection).not.toHaveTextContent("Tech_Missing");
+
+        const relatedSection = screen.getByRole("region", { name: /related entries/i });
+        expect(within(relatedSection).queryByRole("button", { name: /irrigation/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /grand canal/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).getByRole("button", { name: /related only/i })).toBeInTheDocument();
+
+        techLink.focus();
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Irrigation");
+        techLink.blur();
+        await waitFor(() => expect(screen.queryByRole("tooltip")).not.toBeInTheDocument());
+
+        await user.click(techLink);
+        expect(await screen.findByRole("heading", { name: "Irrigation" })).toBeInTheDocument();
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Tech_Irrigation");
+
+        await user.click(within(getCategoryToolbar()).getByRole("button", { name: /districts/i }));
+        const districtsOverview = await screen.findByLabelText("Districts overview");
+        expect(districtsOverview).toHaveTextContent("Canal District");
+        expect(within(districtsOverview).queryByText("Unlocked by")).not.toBeInTheDocument();
+        expect(within(districtsOverview).queryByText("Upgrades into")).not.toBeInTheDocument();
+    });
+
+    it("enriches Improvement details with exact unlock links and safe placement only", async () => {
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "improvements",
+                entryKey: "Improvement_Current",
+                displayName: "Public Library",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Category", value: "Science" }],
+                sections: [{ title: "Effects", lines: ["+15 [ScienceColored] Science"] }],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_PublicArchives",
+                displayName: "Public Archives",
+                descriptionLines: ["Unlocks civic libraries."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_WrongKind",
+                displayName: "Wrong Kind",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ];
+
+        seedCodexEntries(entries);
+        seedRichImprovements([
+            richImprovement({
+                improvementKey: "Improvement_Current",
+                unlockTechnologyKeys: ["Tech_PublicArchives", "District_WrongKind"],
+                placementPrerequisites: {
+                    neighbourTiles: {
+                        operator: "SpecificTerrain",
+                        territoryConstraint: "SameRegion",
+                        ignoreCliff: null,
+                    },
+                },
+            }),
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=improvements&entry=Improvement_Current"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Public Library" })).toBeInTheDocument();
+
+        const planningSection = screen.getByRole("region", { name: "Planning" });
+        expect(within(planningSection).getByText("Unlocked by")).toBeInTheDocument();
+        expect(within(planningSection).getByRole("button", {
+            name: "Open Public Archives in Codex",
+        })).toHaveTextContent("Public Archives");
+        expect(planningSection).not.toHaveTextContent("Wrong Kind");
+        expect(planningSection).not.toHaveTextContent("Placement");
+        expect(planningSection).not.toHaveTextContent("SpecificTerrain");
+    });
+
     it("enriches Unit details with exact rich evolution links without changing archive rows", async () => {
         const user = userEvent.setup();
         const entries: CodexEntry[] = [
@@ -6368,8 +6621,32 @@ describe("CodexPage", () => {
         seedSkills({
             skillTrees: [
                 heroSkillTree({ treeKey: "HeroSkillTree_Archer", treeType: "Class" }),
-                heroSkillTree({ treeKey: "HeroSkillTree_Faction", treeType: "Faction" }),
-                heroSkillTree({ treeKey: "HeroSkillTree_Synergy", treeType: "Synergy" }),
+                heroSkillTree({
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierPlacementKeys: ["HeroSkillTree_Faction::HeroSkillTier_Faction_2"],
+                    tierKeys: ["HeroSkillTier_Faction_2"],
+                    skillKeys: ["HeroSkill_Faction02"],
+                }),
+                heroSkillTree({
+                    treeKey: "HeroSkillTree_Synergy",
+                    treeType: "Synergy",
+                    tierPlacementKeys: [],
+                    tierKeys: [],
+                    skillKeys: [],
+                }),
+            ],
+            skillTiers: [
+                heroSkillTier({}),
+                heroSkillTier({
+                    tierPlacementKey: "HeroSkillTree_Faction::HeroSkillTier_Faction_2",
+                    tierKey: "HeroSkillTier_Faction_2",
+                    treeKey: "HeroSkillTree_Faction",
+                    treeType: "Faction",
+                    tierIndex: 1,
+                    levelPrerequisite: 4,
+                    skillKeys: ["HeroSkill_Faction02"],
+                }),
             ],
             skills: [
                 heroSkill({
@@ -6378,6 +6655,14 @@ describe("CodexPage", () => {
                     primaryAbilityKey: "UnitAbility_Hero_Archer02",
                     resolvedSummaryLines: [
                         "Gain 5 [Experience] Experience to all Units of the Army",
+                    ],
+                }),
+                heroSkill({
+                    skillKey: "HeroSkill_Faction02",
+                    publicDisplayName: "Patient Mentor",
+                    primaryAbilityKey: "UnitAbility_Missing",
+                    resolvedSummaryLines: [
+                        "Gain 5 [Experience] Experience to non-Hero Units of the Army",
                     ],
                 }),
             ],
@@ -6424,8 +6709,19 @@ describe("CodexPage", () => {
         expect(within(heroProfile).getAllByText("Terrain Logistics").length).toBeGreaterThanOrEqual(2);
         expect(heroProfile).toHaveTextContent("Gain 5");
         expect(heroProfile).toHaveTextContent("Experience to all Units of the Army");
+        expect(within(heroProfile).getByText("Skill options")).toBeInTheDocument();
+        expect(within(heroProfile).getByRole("region", { name: "Class skill options" })).toBeInTheDocument();
+        expect(within(heroProfile).getByRole("region", { name: "Faction skill options" })).toBeInTheDocument();
+        expect(within(heroProfile).getByRole("region", { name: "T1 skills" })).toHaveTextContent("Unlock threshold: 0");
+        expect(within(heroProfile).getByRole("region", { name: "T2 skills" })).toHaveTextContent("Unlock threshold: 4");
+        expect(heroProfile).toHaveTextContent("Patient Mentor");
+        expect(heroProfile).not.toHaveTextContent("UnitAbility_Missing");
 
-        const abilityLink = within(heroProfile).getByRole("button", { name: "Open Terrain Logistics in Codex" });
+        const abilityLinks = within(heroProfile).getAllByRole("button", {
+            name: "Open Terrain Logistics in Codex",
+        });
+        expect(abilityLinks).toHaveLength(2);
+        const abilityLink = abilityLinks[0];
         await user.hover(abilityLink);
         expect(await screen.findByRole("tooltip")).toHaveTextContent("Terrain Logistics");
         await user.unhover(abilityLink);

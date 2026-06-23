@@ -1,13 +1,13 @@
 # DB Exporter Definitive Response Index
 
-Status: current response index / closed DB Exporter response record
+Status: archived response index / closed DB Exporter response record
 Updated: 2026-06-17
 
 ## Current Source Of Truth
 
 Use this document for the DB Exporter closeout record:
 
-- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
 
 It supersedes the 2026-06-13/2026-06-14 packet-return handoffs as active
 implementation guidance. It records what DB Exporter implemented, partially
@@ -16,8 +16,8 @@ or confirmed runtime-only.
 
 EWShop-facing follow-up docs:
 
-- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-- `docs/active/codex-db-exporter-response-import-qa-results.md`
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-ewshop-reconciliation.md`
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-import-qa-results.md`
 
 EWShop import/diagnostics/browser QA for final accepted snapshot
 `20260616-210540` is complete. No EWShop-owned DB-exporter-response

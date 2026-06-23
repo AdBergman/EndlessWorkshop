@@ -37,6 +37,9 @@ const normalizeDistrict = (district: District): District => ({
     descriptionLines: (district.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),
+    unlockTechnologyKeys: stringList(district.unlockTechnologyKeys),
+    levelUp: normalizeLevelUp(district.levelUp),
+    placementPrerequisites: normalizePlacement(district.placementPrerequisites),
 });
 
 const initialState = {
@@ -53,6 +56,49 @@ const initialState = {
 
 const formatLoadError = (reason: unknown) =>
     `Failed to load districts: ${(reason as Error)?.message ?? String(reason)}`;
+
+function stringList(values: readonly unknown[] | null | undefined): string[] {
+    return (values ?? [])
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean);
+}
+
+function normalizeLevelUp(levelUp: District["levelUp"]): District["levelUp"] {
+    if (!levelUp) return null;
+
+    const targetDistrictKey = normalizeDistrictKey(levelUp.targetDistrictKey);
+    const requiredAdjacentDistrictCount = Number.isFinite(levelUp.requiredAdjacentDistrictCount)
+        ? levelUp.requiredAdjacentDistrictCount
+        : null;
+
+    return targetDistrictKey || requiredAdjacentDistrictCount !== null
+        ? { targetDistrictKey: targetDistrictKey || null, requiredAdjacentDistrictCount }
+        : null;
+}
+
+function normalizePlacement(
+    placement: District["placementPrerequisites"]
+): District["placementPrerequisites"] {
+    const neighbourTiles = placement?.neighbourTiles;
+    if (!neighbourTiles) return null;
+
+    const operator = typeof neighbourTiles.operator === "string" ? neighbourTiles.operator.trim() : "";
+    const territoryConstraint = typeof neighbourTiles.territoryConstraint === "string"
+        ? neighbourTiles.territoryConstraint.trim()
+        : "";
+    const ignoreCliff = typeof neighbourTiles.ignoreCliff === "boolean" ? neighbourTiles.ignoreCliff : null;
+
+    return operator || territoryConstraint || ignoreCliff !== null
+        ? {
+                neighbourTiles: {
+                    operator: operator || null,
+                    territoryConstraint: territoryConstraint || null,
+                    ignoreCliff,
+                },
+            }
+        : null;
+}
 
 export const useDistrictStore = create<DistrictStore>((set, get) => ({
     ...initialState,

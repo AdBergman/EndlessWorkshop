@@ -1,6 +1,6 @@
 # Active Documentation Index
 
-Current as of 2026-06-21.
+Current as of 2026-06-23.
 
 ## Purpose
 
@@ -42,7 +42,8 @@ index, then select the smallest relevant doc set for the task type.
 | Codex category evolution | `docs/active/codex-category-evolution-playbook.md` | Target category evolution doc and execution plan |
 | Final snapshot Codex ticket | `docs/active/final-snapshot-codex-ticket-plan.md` | `docs/active/final-snapshot-ticket-execution-playbook.md`, final exporter handoff/context docs |
 | Codex rich enrichment | `docs/active/codex-rich-enrichment-decision-template.md` | Architecture decision, boundary doc, relevant category docs |
-| DB exporter metadata issue | `docs/active/db-exporter-ability-metadata-handoff.md` | Related category evolution doc |
+| DB exporter handoff/follow-up | `docs/active/db-exporter-ewshop-handoff-ledger.md` | `docs/active/db-exporter-request-workflow.md`, active handoff/backlog doc linked by the ledger |
+| DB exporter metadata issue | `docs/active/db-exporter-ewshop-handoff-ledger.md` | `docs/active/db-exporter-request-workflow.md`, `docs/active/db-exporter-ability-metadata-handoff.md`, related category evolution doc |
 | Quest Explorer work | `docs/quest-explorer/README.md` | `docs/quest_explorer_canonical_semantics_v1.md` |
 | Frontend implementation | `docs/frontend/frontend-architecture-guidelines.md` | Route/component-specific docs |
 | Visual/Codex UI polish | `docs/active/codex-premium-ui-design-baseline.md` | Current priorities, relevant category docs |
@@ -125,6 +126,27 @@ index, then select the smallest relevant doc set for the task type.
     polish, or rich-import adoption ticket.
   - Status: active process guide.
 
+- `docs/active/final-snapshot-release-readiness-review.md`
+  - Purpose: release readiness assessment for the current final snapshot
+    adoption cycle.
+  - Read when: deciding whether the post-handoff Codex/import work is ready to
+    ship, what caveats remain, and what the next major direction should be.
+  - Status: active release assessment.
+
+- `docs/active/final-snapshot-technical-refactor-review.md`
+  - Purpose: technical refactor review for backend/frontend cleanup after the
+    final snapshot adoption cycle.
+  - Read when: planning post-release cleanup before the next major Codex or
+    rich-import feature track.
+  - Status: active refactor planning document.
+
+- `docs/active/final-snapshot-import-hygiene-audit.md`
+  - Purpose: import hygiene audit for final snapshot/local imports, including
+    diagnostics/internal/noisy data boundaries.
+  - Read when: checking what local JSON is imported, persisted, API-exposed,
+    frontend-consumed, or player-visible.
+  - Status: active release-support audit.
+
 - `docs/active/codex-self-sustaining-worklog.md`
   - Purpose: execution log for an earlier Codex workstream.
   - Read when: reconstructing how previous Codex UI/exporter tasks landed.
@@ -171,6 +193,21 @@ Status: active durable task memory. Update them when reopening those categories.
 
 ## DB Exporter / Import Metadata
 
+- `docs/active/db-exporter-ewshop-handoff-ledger.md`
+  - Purpose: living cross-project ledger for EWShop <-> DB Exporter requests,
+    responses, implementation results, and open follow-ups.
+  - Read when: starting any DB Exporter handoff, exporter-response,
+    exporter-follow-up, final snapshot, import/adoption, or metadata backlog
+    work.
+  - Status: active handoff ledger.
+
+- `docs/active/db-exporter-request-workflow.md`
+  - Purpose: lightweight checklist and prompt templates for creating and
+    responding to DB Exporter requests.
+  - Read when: drafting a new EWShop exporter request, reviewing whether a
+    request is justified, or asking DB Exporter for a structured response.
+  - Status: active process guide.
+
 - `docs/active/db-exporter-ability-metadata-handoff.md`
   - Purpose: active DB exporter metadata backlog. Despite the filename, it now
     also contains non-blocking category metadata findings beyond Abilities.
@@ -185,28 +222,22 @@ Status: active durable task memory. Update them when reopening those categories.
     Codex projection export, EWShop resolver work, or exporter backlog.
   - Status: active contract packet.
 
-- `docs/active/codex-db-exporter-implementation-packets/README.md`
-  - Purpose: index for the definitive DB exporter response closeout packet.
-  - Read when: reopening a DB exporter definitive-response question.
-  - Status: current response index / closed response record.
+- `docs/active/db-exporter-final-ewshop-handoff.md`
+  - Purpose: final DB Exporter handoff for EWShop import/backend/frontend
+    implementation from snapshot `20260622-055736`.
+  - Read when: implementing or auditing final snapshot adoption work.
+  - Status: active final-snapshot source input.
 
-- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
-  - Purpose: definitive DB exporter response for `DB-CODEX-DEF-*` asks.
-  - Read when: checking implemented, rejected, deferred, unavailable, or
-    runtime-only exporter decisions.
-  - Status: closed source-of-truth response.
+- `docs/active/db-exporter-final-ewshop-codex-context.json`
+  - Purpose: machine-readable final snapshot context for Codex/final-snapshot
+    adoption planning.
+  - Read when: implementing `FS-CODEX-*` work that needs exported context.
+  - Status: active final-snapshot source input.
 
-- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-  - Purpose: EWShop-facing reconciliation of definitive exporter response items.
-  - Read when: deciding whether a response item still requires EWShop work.
-  - Status: closed reconciliation record.
-
-- `docs/active/codex-db-exporter-response-import-qa-results.md`
-  - Purpose: import, diagnostics, and browser-QA result for the final accepted
-    exporter snapshot.
-  - Read when: checking whether EWShop preserved and rendered the final accepted
-    snapshot.
-  - Status: closed QA record.
+Closed DB Exporter response records from the earlier `DB-CODEX-DEF-*` cycle
+are archived under
+`docs/archive/codex/completed-2026-06-23-db-exporter-response-records/` and
+indexed by `docs/active/db-exporter-ewshop-handoff-ledger.md`.
 
 ## Quest Explorer
 

@@ -23,6 +23,14 @@ describe("useImprovementStore", () => {
                 descriptionLines: ["+10 Science"],
                 unique: "City",
                 cost: ["100 Industry"],
+                unlockTechnologyKeys: [" Technology_Public_Archives ", "", " "],
+                placementPrerequisites: {
+                    neighbourTiles: {
+                        operator: " AnyTile ",
+                        territoryConstraint: " SameRegion ",
+                        ignoreCliff: false,
+                    },
+                },
             },
         ]);
 
@@ -32,6 +40,16 @@ describe("useImprovementStore", () => {
         expect(state.getImprovementByKey("Improvement_Public_Library")?.displayName).toBe(
             "Public Library"
         );
+        expect(state.getImprovementByKey("Improvement_Public_Library")?.unlockTechnologyKeys).toEqual([
+            "Technology_Public_Archives",
+        ]);
+        expect(state.getImprovementByKey("Improvement_Public_Library")?.placementPrerequisites).toEqual({
+            neighbourTiles: {
+                operator: "AnyTile",
+                territoryConstraint: "SameRegion",
+                ignoreCliff: false,
+            },
+        });
         expect(state.improvementKeys).toEqual(["Improvement_Public_Library"]);
         expect(state.loaded).toBe(true);
         expect(state.error).toBeNull();

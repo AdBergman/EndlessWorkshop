@@ -21,6 +21,18 @@ describe("useDistrictStore", () => {
                 districtKey: " District_City_Center ",
                 displayName: "City Center",
                 descriptionLines: ["Capital district."],
+                unlockTechnologyKeys: [" Technology_City_Planning ", "", " "],
+                levelUp: {
+                    targetDistrictKey: " District_Tier2_City_Center ",
+                    requiredAdjacentDistrictCount: 2,
+                },
+                placementPrerequisites: {
+                    neighbourTiles: {
+                        operator: " AnyTile ",
+                        territoryConstraint: " SameRegion ",
+                        ignoreCliff: true,
+                    },
+                },
             },
         ]);
 
@@ -28,6 +40,20 @@ describe("useDistrictStore", () => {
 
         const state = useDistrictStore.getState();
         expect(state.getDistrictByKey("District_City_Center")?.displayName).toBe("City Center");
+        expect(state.getDistrictByKey("District_City_Center")?.unlockTechnologyKeys).toEqual([
+            "Technology_City_Planning",
+        ]);
+        expect(state.getDistrictByKey("District_City_Center")?.levelUp).toEqual({
+            targetDistrictKey: "District_Tier2_City_Center",
+            requiredAdjacentDistrictCount: 2,
+        });
+        expect(state.getDistrictByKey("District_City_Center")?.placementPrerequisites).toEqual({
+            neighbourTiles: {
+                operator: "AnyTile",
+                territoryConstraint: "SameRegion",
+                ignoreCliff: true,
+            },
+        });
         expect(state.districtKeys).toEqual(["District_City_Center"]);
         expect(state.loaded).toBe(true);
         expect(state.error).toBeNull();

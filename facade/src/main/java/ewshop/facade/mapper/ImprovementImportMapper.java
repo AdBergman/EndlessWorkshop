@@ -1,6 +1,10 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.command.ImprovementImportSnapshot;
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.facade.dto.importing.constructibles.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructiblePlacementPrerequisitesDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportImprovementDto;
 
 import java.util.List;
@@ -16,7 +20,9 @@ public class ImprovementImportMapper {
                 req(dto.constructibleKey(), "constructibleKey"),
                 req(dto.displayName(), "displayName"),
                 trimToNull(dto.category()),
-                cleanLines(dto.descriptionLines())
+                cleanLines(dto.descriptionLines()),
+                cleanLines(dto.unlockTechnologyKeys()),
+                toPlacement(dto.placementPrerequisites())
         );
     }
 
@@ -38,5 +44,25 @@ public class ImprovementImportMapper {
                 .filter(s -> s != null && !s.trim().isEmpty())
                 .map(String::trim)
                 .toList();
+    }
+
+    private static ConstructiblePlacementPrerequisites toPlacement(ConstructiblePlacementPrerequisitesDto dto) {
+        if (dto == null) return null;
+
+        ConstructiblePlacementPrerequisites placement = new ConstructiblePlacementPrerequisites(
+                toNeighbourPlacement(dto.neighbourTiles())
+        );
+        return placement.isEmpty() ? null : placement;
+    }
+
+    private static ConstructibleNeighbourPlacement toNeighbourPlacement(ConstructibleNeighbourPlacementDto dto) {
+        if (dto == null) return null;
+
+        ConstructibleNeighbourPlacement placement = new ConstructibleNeighbourPlacement(
+                trimToNull(dto.operator()),
+                trimToNull(dto.territoryConstraint()),
+                dto.ignoreCliff()
+        );
+        return placement.isEmpty() ? null : placement;
     }
 }

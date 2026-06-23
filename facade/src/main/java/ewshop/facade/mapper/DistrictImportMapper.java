@@ -1,7 +1,13 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.command.DistrictImportSnapshot;
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.domain.model.DistrictLevelUp;
+import ewshop.facade.dto.importing.constructibles.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructiblePlacementPrerequisitesDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
+import ewshop.facade.dto.importing.districts.DistrictLevelUpDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +29,15 @@ public final class DistrictImportMapper {
 
         List<String> descriptionLines = cleanLines(dto.descriptionLines());
 
-        return new DistrictImportSnapshot(key, name, category, descriptionLines);
+        return new DistrictImportSnapshot(
+                key,
+                name,
+                category,
+                descriptionLines,
+                cleanLines(dto.unlockTechnologyKeys()),
+                toLevelUp(dto.levelUp()),
+                toPlacement(dto.placementPrerequisites())
+        );
     }
 
     private static String trimToNull(String s) {
@@ -43,5 +57,35 @@ public final class DistrictImportMapper {
             out.add(t);
         }
         return out;
+    }
+
+    private static DistrictLevelUp toLevelUp(DistrictLevelUpDto dto) {
+        if (dto == null) return null;
+
+        DistrictLevelUp levelUp = new DistrictLevelUp(
+                trimToNull(dto.targetDistrictKey()),
+                dto.requiredAdjacentDistrictCount()
+        );
+        return levelUp.isEmpty() ? null : levelUp;
+    }
+
+    private static ConstructiblePlacementPrerequisites toPlacement(ConstructiblePlacementPrerequisitesDto dto) {
+        if (dto == null) return null;
+
+        ConstructiblePlacementPrerequisites placement = new ConstructiblePlacementPrerequisites(
+                toNeighbourPlacement(dto.neighbourTiles())
+        );
+        return placement.isEmpty() ? null : placement;
+    }
+
+    private static ConstructibleNeighbourPlacement toNeighbourPlacement(ConstructibleNeighbourPlacementDto dto) {
+        if (dto == null) return null;
+
+        ConstructibleNeighbourPlacement placement = new ConstructibleNeighbourPlacement(
+                trimToNull(dto.operator()),
+                trimToNull(dto.territoryConstraint()),
+                dto.ignoreCliff()
+        );
+        return placement.isEmpty() ? null : placement;
     }
 }

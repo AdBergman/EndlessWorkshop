@@ -31,6 +31,25 @@ public class DistrictEntity {
     @Column(name = "line", nullable = false, length = 800)
     private List<String> descriptionLines = new ArrayList<>();
 
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "unlock_technology_keys", columnDefinition = "text")
+    private List<String> unlockTechnologyKeys = new ArrayList<>();
+
+    @Column(name = "level_up_target_district_key")
+    private String levelUpTargetDistrictKey;
+
+    @Column(name = "level_up_required_adjacent_district_count")
+    private Integer levelUpRequiredAdjacentDistrictCount;
+
+    @Column(name = "placement_neighbour_operator")
+    private String placementNeighbourOperator;
+
+    @Column(name = "placement_neighbour_territory_constraint")
+    private String placementNeighbourTerritoryConstraint;
+
+    @Column(name = "placement_neighbour_ignore_cliff")
+    private Boolean placementNeighbourIgnoreCliff;
+
     public DistrictEntity() {}
 
     public Long getId() { return id; }
@@ -48,5 +67,37 @@ public class DistrictEntity {
     public List<String> getDescriptionLines() { return descriptionLines; }
     public void setDescriptionLines(List<String> descriptionLines) {
         this.descriptionLines = (descriptionLines == null) ? new ArrayList<>() : new ArrayList<>(descriptionLines);
+    }
+
+    public List<String> getUnlockTechnologyKeys() { return unlockTechnologyKeys; }
+    public void setUnlockTechnologyKeys(List<String> unlockTechnologyKeys) {
+        this.unlockTechnologyKeys = (unlockTechnologyKeys == null)
+                ? new ArrayList<>()
+                : new ArrayList<>(unlockTechnologyKeys);
+    }
+
+    public String getLevelUpTargetDistrictKey() { return levelUpTargetDistrictKey; }
+    public void setLevelUpTargetDistrictKey(String levelUpTargetDistrictKey) {
+        this.levelUpTargetDistrictKey = levelUpTargetDistrictKey;
+    }
+
+    public Integer getLevelUpRequiredAdjacentDistrictCount() { return levelUpRequiredAdjacentDistrictCount; }
+    public void setLevelUpRequiredAdjacentDistrictCount(Integer levelUpRequiredAdjacentDistrictCount) {
+        this.levelUpRequiredAdjacentDistrictCount = levelUpRequiredAdjacentDistrictCount;
+    }
+
+    public String getPlacementNeighbourOperator() { return placementNeighbourOperator; }
+    public void setPlacementNeighbourOperator(String placementNeighbourOperator) {
+        this.placementNeighbourOperator = placementNeighbourOperator;
+    }
+
+    public String getPlacementNeighbourTerritoryConstraint() { return placementNeighbourTerritoryConstraint; }
+    public void setPlacementNeighbourTerritoryConstraint(String placementNeighbourTerritoryConstraint) {
+        this.placementNeighbourTerritoryConstraint = placementNeighbourTerritoryConstraint;
+    }
+
+    public Boolean getPlacementNeighbourIgnoreCliff() { return placementNeighbourIgnoreCliff; }
+    public void setPlacementNeighbourIgnoreCliff(Boolean placementNeighbourIgnoreCliff) {
+        this.placementNeighbourIgnoreCliff = placementNeighbourIgnoreCliff;
     }
 }

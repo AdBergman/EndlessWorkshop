@@ -1,6 +1,6 @@
 # Current Action Priorities
 
-Current as of 2026-06-20.
+Current as of 2026-06-23.
 
 This list reflects the current product focus:
 
@@ -18,9 +18,11 @@ Status: complete for the current definitive response/import QA pass.
 
 Start here:
 
-- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
-- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-- `docs/active/codex-db-exporter-response-import-qa-results.md`
+- `docs/active/db-exporter-ewshop-handoff-ledger.md`
+- `docs/active/db-exporter-request-workflow.md`
+- `docs/active/final-snapshot-codex-ticket-plan.md`
+- `docs/active/final-snapshot-release-readiness-review.md`
+- `docs/active/final-snapshot-import-hygiene-audit.md`
 
 Current result:
 
@@ -35,11 +37,23 @@ Current result:
 
 Active exporter follow-up:
 
+- `docs/active/db-exporter-ewshop-handoff-ledger.md` - living cross-project
+  ledger for EWShop <-> DB Exporter requests, responses, implementation results,
+  and open follow-ups. Read this first for DB Exporter handoff,
+  exporter-response, exporter-follow-up, final snapshot, import/adoption, or
+  metadata backlog work.
+- `docs/active/db-exporter-request-workflow.md` - lightweight checklist and
+  prompt templates for drafting exporter requests and structured exporter
+  responses after checking the ledger.
 - `docs/active/final-snapshot-codex-ticket-plan.md` - active EWShop ticket
   plan for final snapshot Codex compatibility work. Start there when deciding
   which public Codex category needs the next small frontend/fullstack slice.
 - `docs/active/final-snapshot-ticket-execution-playbook.md` - lightweight
   execution workflow for `FS-CODEX-*` tickets.
+- `docs/active/final-snapshot-release-readiness-review.md` - release readiness
+  assessment for the current final snapshot adoption cycle. It recommends
+  release with caveats after the current constructible planning slice is either
+  committed or intentionally excluded, and after focused browser QA.
 - `docs/active/db-exporter-ability-metadata-handoff.md` - focused Ability
   metadata cleanup request for noisy `Combat role` assignments and explicit
   ability ownership metadata. This is exporter-owned follow-up, not an
@@ -84,6 +98,7 @@ DB Exporter archived historical context:
 - `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
 - `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
 - `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/`
 - `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/`
 - `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
 
@@ -175,6 +190,10 @@ Current rules:
   exporter clarification and any later presentation review. Do not mechanically
   adopt exported fields unless they improve player planning, comparison,
   discovery, or trust.
+- `FS-CODEX-015 - Release Readiness Review` is the current release assessment
+  for the post-handoff adoption cycle. The recommended post-release product
+  direction is a Faction strategy/profile shape decision, not another broad
+  metadata-adoption sweep.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only

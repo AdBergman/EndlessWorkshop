@@ -977,7 +977,8 @@
 
 .codex-techPrerequisites__groups,
 .codex-unitProfile__groups,
-.codex-heroProfile__groups {
+.codex-heroProfile__groups,
+.codex-constructiblePlanning__groups {
     display: grid;
     gap: 12px;
     margin-top: 14px;
@@ -986,7 +987,8 @@
 
 .codex-techPrerequisites__group,
 .codex-unitProfile__group,
-.codex-heroProfile__group {
+.codex-heroProfile__group,
+.codex-constructiblePlanning__group {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
     align-items: baseline;
@@ -997,7 +999,8 @@
 
 .codex-techPrerequisites__label,
 .codex-unitProfile__label,
-.codex-heroProfile__label {
+.codex-heroProfile__label,
+.codex-constructiblePlanning__label {
     color: var(--codex-gold-bright);
     font-size: 11px;
     font-weight: 700;
@@ -1008,7 +1011,8 @@
 
 .codex-techPrerequisites__links,
 .codex-unitProfile__links,
-.codex-heroProfile__value {
+.codex-heroProfile__value,
+.codex-constructiblePlanning__value {
     min-width: 0;
     color: rgba(241, 234, 220, 0.86);
     font-size: 15px;
@@ -1017,15 +1021,24 @@
 
 .codex-techPrerequisites__linkWrap,
 .codex-unitProfile__linkWrap,
-.codex-heroProfile__inlineItem {
+.codex-heroProfile__inlineItem,
+.codex-constructiblePlanning__linkWrap,
+.codex-constructiblePlanning__inlineItem {
     display: inline;
 }
 
 .codex-techPrerequisites__separator,
 .codex-unitProfile__separator,
-.codex-heroProfile__separator {
+.codex-heroProfile__separator,
+.codex-constructiblePlanning__separator {
     margin: 0 8px;
     color: rgba(195, 152, 77, 0.72);
+}
+
+.codex-constructiblePlanning__note {
+    margin-left: 7px;
+    color: var(--codex-ink-muted);
+    font-size: 12px;
 }
 
 .codex-heroProfile__inlineList {
@@ -1035,6 +1048,71 @@
 .codex-heroProfile__skillList {
     display: grid;
     gap: 10px;
+}
+
+.codex-heroProfile__treeList {
+    display: grid;
+    gap: 14px;
+}
+
+.codex-heroProfile__tree {
+    display: grid;
+    gap: 9px;
+    max-width: 680px;
+}
+
+.codex-heroProfile__treeTitle {
+    color: rgba(241, 234, 220, 0.94);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.codex-heroProfile__tierList {
+    display: grid;
+    gap: 10px;
+}
+
+.codex-heroProfile__tier {
+    display: grid;
+    gap: 8px;
+    padding: 10px 0 10px 12px;
+    border-left: 1px solid rgba(190, 150, 73, 0.14);
+}
+
+.codex-heroProfile__tierHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+    color: rgba(229, 198, 123, 0.72);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.codex-heroProfile__optionList {
+    display: grid;
+    gap: 8px;
+}
+
+.codex-heroProfile__option {
+    display: grid;
+    gap: 5px;
+}
+
+.codex-heroProfile__optionHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.codex-heroProfile__optionHeader .codex-inlineEntityLink {
+    font-size: 13px;
 }
 
 .codex-heroProfile__skill {

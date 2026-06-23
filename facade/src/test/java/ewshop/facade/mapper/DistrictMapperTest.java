@@ -1,6 +1,9 @@
 package ewshop.facade.mapper;
 
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
 import ewshop.domain.model.District;
+import ewshop.domain.model.DistrictLevelUp;
 import ewshop.facade.dto.response.DistrictDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,11 @@ class DistrictMapperTest {
                         "+1 Science on special tiles",
                         "+2 Science per level"
                 ))
+                .unlockTechnologyKeys(List.of("Technology_Science_01"))
+                .levelUp(new DistrictLevelUp("Aspect_District_Tier2_Science", 3))
+                .placementPrerequisites(new ConstructiblePlacementPrerequisites(
+                        new ConstructibleNeighbourPlacement("AnyTile", "SameRegion", true)
+                ))
                 .build();
 
         DistrictDto dto = DistrictMapper.toDto(district);
@@ -34,6 +42,14 @@ class DistrictMapperTest {
                 "+1 Science on special tiles",
                 "+2 Science per level"
         );
+        assertThat(dto.unlockTechnologyKeys()).containsExactly("Technology_Science_01");
+        assertThat(dto.levelUp()).isNotNull();
+        assertThat(dto.levelUp().targetDistrictKey()).isEqualTo("Aspect_District_Tier2_Science");
+        assertThat(dto.levelUp().requiredAdjacentDistrictCount()).isEqualTo(3);
+        assertThat(dto.placementPrerequisites()).isNotNull();
+        assertThat(dto.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
+        assertThat(dto.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
+        assertThat(dto.placementPrerequisites().neighbourTiles().ignoreCliff()).isTrue();
     }
 
     @Test

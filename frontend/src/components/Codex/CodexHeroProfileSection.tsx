@@ -3,6 +3,9 @@ import type {
     CodexHeroStartingSkill,
     CodexHeroLink,
     CodexHeroRichEnrichment,
+    CodexHeroSkillOption,
+    CodexHeroSkillTier,
+    CodexHeroSkillTree,
 } from "@/lib/codex/codexHeroRichEnrichment";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -19,7 +22,8 @@ export default function CodexHeroProfileSection({ enrichment, onSelect }: Props)
         !enrichment.origin &&
         !enrichment.classLabel &&
         enrichment.skillPathTypes.length === 0 &&
-        enrichment.startingSkills.length === 0
+        enrichment.startingSkills.length === 0 &&
+        enrichment.skillOptions.length === 0
     ) {
         return null;
     }
@@ -61,6 +65,20 @@ export default function CodexHeroProfileSection({ enrichment, onSelect }: Props)
                         <div className="codex-heroProfile__skillList">
                             {enrichment.startingSkills.map((skill) => (
                                 <HeroStartingSkill key={skill.key} skill={skill} onSelect={onSelect} />
+                            ))}
+                        </div>
+                    </HeroProfileGroup>
+                ) : null}
+
+                {enrichment.skillOptions.length > 0 ? (
+                    <HeroProfileGroup label="Skill options">
+                        <div className="codex-heroProfile__treeList">
+                            {enrichment.skillOptions.map((tree) => (
+                                <HeroSkillTreeOptions
+                                    key={tree.key}
+                                    tree={tree}
+                                    onSelect={onSelect}
+                                />
                             ))}
                         </div>
                     </HeroProfileGroup>
@@ -129,6 +147,84 @@ function HeroStartingSkill({
                 <div className="codex-heroProfile__ability">
                     <span>Ability</span>
                     <HeroProfileLink link={skill.primaryAbility} onSelect={onSelect} />
+                </div>
+            ) : null}
+        </article>
+    );
+}
+
+function HeroSkillTreeOptions({
+    tree,
+    onSelect,
+}: {
+    tree: CodexHeroSkillTree;
+    onSelect: (entry: CodexEntry) => void;
+}) {
+    return (
+        <section className="codex-heroProfile__tree" aria-label={`${tree.label} skill options`}>
+            <div className="codex-heroProfile__treeTitle">{renderCodexLabel(tree.label)}</div>
+            <div className="codex-heroProfile__tierList">
+                {tree.tiers.map((tier) => (
+                    <HeroSkillTierOptions
+                        key={tier.key}
+                        tier={tier}
+                        onSelect={onSelect}
+                    />
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function HeroSkillTierOptions({
+    tier,
+    onSelect,
+}: {
+    tier: CodexHeroSkillTier;
+    onSelect: (entry: CodexEntry) => void;
+}) {
+    const tierLabel = typeof tier.tierIndex === "number" ? `T${tier.tierIndex + 1}` : "Tier";
+
+    return (
+        <section className="codex-heroProfile__tier" aria-label={`${tierLabel} skills`}>
+            <div className="codex-heroProfile__tierHeader">
+                <span>{tierLabel}</span>
+                {typeof tier.unlockThreshold === "number" ? (
+                    <span>Unlock threshold: {tier.unlockThreshold}</span>
+                ) : null}
+            </div>
+            <div className="codex-heroProfile__optionList">
+                {tier.skills.map((skill) => (
+                    <HeroSkillOption key={skill.key} skill={skill} onSelect={onSelect} />
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function HeroSkillOption({
+    skill,
+    onSelect,
+}: {
+    skill: CodexHeroSkillOption;
+    onSelect: (entry: CodexEntry) => void;
+}) {
+    return (
+        <article className="codex-heroProfile__option">
+            <div className="codex-heroProfile__optionHeader">
+                <span className="codex-heroProfile__skillName">{renderCodexLabel(skill.label)}</span>
+                {skill.primaryAbility ? (
+                    <HeroProfileLink link={skill.primaryAbility} onSelect={onSelect} />
+                ) : null}
+            </div>
+
+            {skill.summaryLines.length > 0 ? (
+                <div className="codex-heroProfile__skillLines">
+                    {skill.summaryLines.map((line, index) => (
+                        <div className="codex-heroProfile__skillLine" key={`${skill.key}-option-line-${index}`}>
+                            {renderDescriptionLine(line)}
+                        </div>
+                    ))}
                 </div>
             ) : null}
         </article>

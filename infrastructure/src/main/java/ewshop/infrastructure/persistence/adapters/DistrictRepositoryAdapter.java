@@ -1,7 +1,10 @@
 package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.command.DistrictImportSnapshot;
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
 import ewshop.domain.model.District;
+import ewshop.domain.model.DistrictLevelUp;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.DistrictRepository;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
@@ -116,6 +119,14 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getUnlockTechnologyKeys(), update.unlockTechnologyKeys())) {
+            entity.setUnlockTechnologyKeys(update.unlockTechnologyKeys());
+            changed = true;
+        }
+
+        changed |= setLevelUpIfChanged(entity, update.levelUp());
+        changed |= setPlacementIfChanged(entity, update.placementPrerequisites());
+
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
     }
@@ -126,6 +137,74 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
                 .displayName(e.getDisplayName())
                 .category(e.getCategory())
                 .descriptionLines(e.getDescriptionLines())
+                .unlockTechnologyKeys(e.getUnlockTechnologyKeys())
+                .levelUp(toLevelUp(e))
+                .placementPrerequisites(toPlacement(e))
                 .build();
+    }
+
+    private static boolean setLevelUpIfChanged(DistrictEntity entity, DistrictLevelUp levelUp) {
+        String targetDistrictKey = levelUp == null ? null : levelUp.targetDistrictKey();
+        Integer adjacentCount = levelUp == null ? null : levelUp.requiredAdjacentDistrictCount();
+        boolean changed = false;
+
+        if (!Objects.equals(entity.getLevelUpTargetDistrictKey(), targetDistrictKey)) {
+            entity.setLevelUpTargetDistrictKey(targetDistrictKey);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getLevelUpRequiredAdjacentDistrictCount(), adjacentCount)) {
+            entity.setLevelUpRequiredAdjacentDistrictCount(adjacentCount);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static boolean setPlacementIfChanged(
+            DistrictEntity entity,
+            ConstructiblePlacementPrerequisites placement
+    ) {
+        ConstructibleNeighbourPlacement neighbour = placement == null ? null : placement.neighbourTiles();
+        String operator = neighbour == null ? null : neighbour.operator();
+        String territoryConstraint = neighbour == null ? null : neighbour.territoryConstraint();
+        Boolean ignoreCliff = neighbour == null ? null : neighbour.ignoreCliff();
+        boolean changed = false;
+
+        if (!Objects.equals(entity.getPlacementNeighbourOperator(), operator)) {
+            entity.setPlacementNeighbourOperator(operator);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementNeighbourTerritoryConstraint(), territoryConstraint)) {
+            entity.setPlacementNeighbourTerritoryConstraint(territoryConstraint);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementNeighbourIgnoreCliff(), ignoreCliff)) {
+            entity.setPlacementNeighbourIgnoreCliff(ignoreCliff);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static DistrictLevelUp toLevelUp(DistrictEntity entity) {
+        DistrictLevelUp levelUp = new DistrictLevelUp(
+                entity.getLevelUpTargetDistrictKey(),
+                entity.getLevelUpRequiredAdjacentDistrictCount()
+        );
+        return levelUp.isEmpty() ? null : levelUp;
+    }
+
+    private static ConstructiblePlacementPrerequisites toPlacement(DistrictEntity entity) {
+        ConstructiblePlacementPrerequisites placement = new ConstructiblePlacementPrerequisites(
+                new ConstructibleNeighbourPlacement(
+                        entity.getPlacementNeighbourOperator(),
+                        entity.getPlacementNeighbourTerritoryConstraint(),
+                        entity.getPlacementNeighbourIgnoreCliff()
+                )
+        );
+        return placement.isEmpty() ? null : placement;
     }
 }

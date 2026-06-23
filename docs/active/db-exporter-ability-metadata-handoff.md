@@ -29,15 +29,8 @@ a Codex projection gap, a split item, or an EWShop resolver opportunity.
 
 ## Current Source Documents Audited
 
-Keep active:
+Active:
 
-- `docs/active/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
-  - baseline for the current `Ability mechanic`, `Ability source`, and
-  `Combat role` exports.
-- `docs/active/codex-db-exporter-response-ewshop-reconciliation.md`
-  - closed EWShop reconciliation for the definitive exporter response.
-- `docs/active/codex-db-exporter-response-import-qa-results.md`
-  - current import/API/browser QA pass record for snapshot `20260616-210540`.
 - `docs/active/codex-content-quality-diagnostics.md`
   - current workflow for separating EWShop display work from exporter/content
   follow-up.
@@ -45,8 +38,15 @@ Keep active:
   - current frontend-safe icon contract guidance: do not hardcode icon filenames
   or infer icons from raw keys.
 
-Historical context already archived:
+Archived source records:
 
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-implementation-packets/codex-db-exporter-definitive-response.md`
+  - baseline for the current `Ability mechanic`, `Ability source`, and
+  `Combat role` exports.
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-ewshop-reconciliation.md`
+  - closed EWShop reconciliation for the definitive exporter response.
+- `docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-import-qa-results.md`
+  - import/API/browser QA pass record for snapshot `20260616-210540`.
 - `docs/archive/codex/db-exporter-codex-metadata-handoff-2026-06-10.md`
 - `docs/archive/codex/db-exporter-codex-reference-kinds-handoff-2026-06-10.md`
 - `docs/archive/codex/codex-metadata-adoption-audit-2026-06-11.md`

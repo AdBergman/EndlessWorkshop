@@ -1,6 +1,6 @@
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
-import type { CodexEntry, Hero, HeroSkill, HeroSkillDefault, SkillTree } from "@/types/dataTypes";
+import type { CodexEntry, Hero, HeroSkill, HeroSkillDefault, SkillTier, SkillTree } from "@/types/dataTypes";
 
 type HeroEnrichmentSource = Pick<
     Hero,
@@ -28,7 +28,14 @@ type HeroSkillSource = Pick<
 >;
 
 type HeroSkillDefaultSource = Pick<HeroSkillDefault, "heroKey" | "defaultSkillKeys">;
-type SkillTreeSource = Pick<SkillTree, "treeKey" | "treeType" | "isHidden">;
+type SkillTreeSource = Pick<
+    SkillTree,
+    "treeKey" | "treeType" | "isHidden" | "tierPlacementKeys"
+>;
+type SkillTierSource = Pick<
+    SkillTier,
+    "tierPlacementKey" | "tierIndex" | "levelPrerequisite" | "skillKeys"
+>;
 
 export type CodexHeroLink = {
     entry: CodexEntry;
@@ -43,11 +50,27 @@ export type CodexHeroStartingSkill = {
     primaryAbility: CodexHeroLink | null;
 };
 
+export type CodexHeroSkillOption = CodexHeroStartingSkill;
+
+export type CodexHeroSkillTier = {
+    key: string;
+    tierIndex: number | null;
+    unlockThreshold: number | null;
+    skills: CodexHeroSkillOption[];
+};
+
+export type CodexHeroSkillTree = {
+    key: string;
+    label: string;
+    tiers: CodexHeroSkillTier[];
+};
+
 export type CodexHeroRichEnrichment = {
     origin: CodexHeroLink | null;
     classLabel: string | null;
     skillPathTypes: string[];
     startingSkills: CodexHeroStartingSkill[];
+    skillOptions: CodexHeroSkillTree[];
 };
 
 const EMPTY_HERO_RICH_ENRICHMENT: CodexHeroRichEnrichment = {
@@ -55,6 +78,7 @@ const EMPTY_HERO_RICH_ENRICHMENT: CodexHeroRichEnrichment = {
     classLabel: null,
     skillPathTypes: [],
     startingSkills: [],
+    skillOptions: [],
 };
 
 function normalizeKey(value: unknown): string {
@@ -209,10 +233,94 @@ function resolveStartingSkills(
     return startingSkills;
 }
 
+function buildSkillOption(
+    key: string,
+    hiddenAbilityKeys: ReadonlySet<string>,
+    skillsByKey: Readonly<Record<string, HeroSkillSource | undefined>>,
+    publicEntryByKey: Record<string, CodexEntry>
+): CodexHeroSkillOption | null {
+    const skill = skillsByKey[key];
+    if (!skill || skill.isObsolete === true) return null;
+
+    const label = skillLabel(skill);
+    if (!label) return null;
+
+    const primaryAbilityKey = normalizeKey(skill.primaryAbilityKey);
+    const primaryAbilityEntry = primaryAbilityKey && !hiddenAbilityKeys.has(primaryAbilityKey)
+        ? publicEntryByKey[primaryAbilityKey]
+        : null;
+    const primaryAbility = primaryAbilityEntry && isAbilityEntry(primaryAbilityEntry)
+        ? {
+                entry: primaryAbilityEntry,
+                label: getCodexEntryLabel(primaryAbilityEntry),
+            }
+        : null;
+
+    return {
+        key,
+        label,
+        summaryLines: (skill.resolvedSummaryLines ?? []).map((line) => line.trim()).filter(Boolean).slice(0, 2),
+        mechanicKind: skill.resolvedMechanicKind?.trim() || null,
+        primaryAbility,
+    };
+}
+
+function resolveSkillOptions(
+    hero: HeroEnrichmentSource,
+    skillTreesByKey: Readonly<Record<string, SkillTreeSource | undefined>>,
+    skillTiersByKey: Readonly<Record<string, SkillTierSource | undefined>>,
+    skillsByKey: Readonly<Record<string, HeroSkillSource | undefined>>,
+    publicEntryByKey: Record<string, CodexEntry>
+): CodexHeroSkillTree[] {
+    const hiddenAbilityKeys = new Set(uniqueKeys(hero.hiddenHelperAbilityKeys ?? []));
+    const trees: CodexHeroSkillTree[] = [];
+
+    for (const treeKey of uniqueKeys(hero.applicableSkillTreeKeys ?? [])) {
+        const tree = skillTreesByKey[treeKey];
+        const label = tree?.treeType?.trim() ?? "";
+        if (!tree || tree.isHidden === true || !label) continue;
+
+        const tiers = uniqueKeys(tree.tierPlacementKeys ?? [])
+            .map((tierKey) => skillTiersByKey[tierKey])
+            .filter((tier): tier is SkillTierSource => tier !== undefined)
+            .sort((a, b) => (
+                (a.tierIndex ?? Number.MAX_SAFE_INTEGER) -
+                (b.tierIndex ?? Number.MAX_SAFE_INTEGER)
+            ))
+            .map((tier): CodexHeroSkillTier | null => {
+                const skills = uniqueKeys(tier.skillKeys ?? [])
+                    .map((skillKey) => buildSkillOption(
+                        skillKey,
+                        hiddenAbilityKeys,
+                        skillsByKey,
+                        publicEntryByKey
+                    ))
+                    .filter((skill): skill is CodexHeroSkillOption => skill !== null);
+
+                if (skills.length === 0) return null;
+
+                return {
+                    key: normalizeKey(tier.tierPlacementKey),
+                    tierIndex: Number.isFinite(tier.tierIndex) ? tier.tierIndex : null,
+                    unlockThreshold: Number.isFinite(tier.levelPrerequisite) ? tier.levelPrerequisite : null,
+                    skills,
+                };
+            })
+            .filter((tier): tier is CodexHeroSkillTier => tier !== null);
+
+        if (tiers.length === 0) continue;
+
+        trees.push({ key: treeKey, label, tiers });
+    }
+
+    return trees;
+}
+
 export function buildCodexHeroRichEnrichment(
     entry: CodexEntry,
     heroByKey: Readonly<Record<string, HeroEnrichmentSource | undefined>>,
     skillTreesByKey: Readonly<Record<string, SkillTreeSource | undefined>>,
+    skillTiersByKey: Readonly<Record<string, SkillTierSource | undefined>>,
     skillsByKey: Readonly<Record<string, HeroSkillSource | undefined>>,
     skillDefaultsByHeroKey: Readonly<Record<string, HeroSkillDefaultSource | undefined>>,
     allEntries: readonly CodexEntry[]
@@ -237,6 +345,13 @@ export function buildCodexHeroRichEnrichment(
             skillsByKey,
             publicEntryByKey
         ),
+        skillOptions: resolveSkillOptions(
+            hero,
+            skillTreesByKey,
+            skillTiersByKey,
+            skillsByKey,
+            publicEntryByKey
+        ),
     };
 }
 
@@ -245,7 +360,8 @@ export function hasCodexHeroRichEnrichment(enrichment: CodexHeroRichEnrichment):
         enrichment.origin !== null ||
         Boolean(enrichment.classLabel) ||
         enrichment.skillPathTypes.length > 0 ||
-        enrichment.startingSkills.length > 0
+        enrichment.startingSkills.length > 0 ||
+        enrichment.skillOptions.length > 0
     );
 }
 
@@ -263,6 +379,13 @@ export function getCodexHeroRichEnrichmentEntryKeys(enrichment: CodexHeroRichEnr
     addKey(enrichment.origin?.entry);
     for (const skill of enrichment.startingSkills) {
         addKey(skill.primaryAbility?.entry);
+    }
+    for (const tree of enrichment.skillOptions) {
+        for (const tier of tree.tiers) {
+            for (const skill of tier.skills) {
+                addKey(skill.primaryAbility?.entry);
+            }
+        }
     }
 
     return keys;

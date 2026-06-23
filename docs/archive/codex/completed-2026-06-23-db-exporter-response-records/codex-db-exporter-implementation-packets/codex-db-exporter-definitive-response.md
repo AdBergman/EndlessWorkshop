@@ -1281,9 +1281,9 @@ Final validated export counts for the EWShop import snapshot:
 
 EWShop used final accepted snapshot `20260616-210540` for import/QA. The
 EWShop validation pass is complete; see
-`docs/active/codex-db-exporter-response-import-qa-results.md` for the active QA
-result. No EWShop-owned DB-exporter-response implementation issues are
-currently open.
+`docs/archive/codex/completed-2026-06-23-db-exporter-response-records/codex-db-exporter-response-import-qa-results.md`
+for the archived QA result. No EWShop-owned DB-exporter-response implementation
+issues are currently open.
 
 Snapshot `20260616-200204` is retained as the validated Action/Population
 deep-dive evidence point, but it was superseded as the final accepted snapshot

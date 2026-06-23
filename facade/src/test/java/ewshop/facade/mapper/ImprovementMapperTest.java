@@ -1,5 +1,7 @@
 package ewshop.facade.mapper;
 
+import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePlacementPrerequisites;
 import ewshop.domain.model.Improvement;
 import ewshop.facade.dto.response.ImprovementDto;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +22,10 @@ class ImprovementMapperTest {
                 .displayName("Crystal Forge")
                 .category("Industry")
                 .descriptionLines(List.of("Line 1", "Line 2"))
+                .unlockTechnologyKeys(List.of("Technology_Industry_01"))
+                .placementPrerequisites(new ConstructiblePlacementPrerequisites(
+                        new ConstructibleNeighbourPlacement("AnyTile", "SameRegion", false)
+                ))
                 .build();
 
         // When
@@ -31,6 +37,11 @@ class ImprovementMapperTest {
         assertThat(dto.displayName()).isEqualTo("Crystal Forge");
         assertThat(dto.category()).isEqualTo("Industry");
         assertThat(dto.descriptionLines()).containsExactly("Line 1", "Line 2");
+        assertThat(dto.unlockTechnologyKeys()).containsExactly("Technology_Industry_01");
+        assertThat(dto.placementPrerequisites()).isNotNull();
+        assertThat(dto.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
+        assertThat(dto.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
+        assertThat(dto.placementPrerequisites().neighbourTiles().ignoreCliff()).isFalse();
     }
 
     @Test

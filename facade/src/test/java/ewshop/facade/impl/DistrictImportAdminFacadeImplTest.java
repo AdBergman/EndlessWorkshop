@@ -6,8 +6,11 @@ import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.DistrictImportService;
 import ewshop.domain.service.DistrictService;
 import ewshop.facade.dto.importing.ImportSummaryDto;
+import ewshop.facade.dto.importing.constructibles.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructiblePlacementPrerequisitesDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
+import ewshop.facade.dto.importing.districts.DistrictLevelUpDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,7 +37,12 @@ class DistrictImportAdminFacadeImplTest {
                         "District_A",
                         "District A",
                         "",
-                        List.of()
+                        List.of(),
+                        List.of("Technology_District_A"),
+                        new DistrictLevelUpDto("District_B", 2),
+                        new ConstructiblePlacementPrerequisitesDto(
+                                new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", true)
+                        )
                 ))
         ));
 
@@ -52,6 +60,15 @@ class DistrictImportAdminFacadeImplTest {
         assertThat(summary.diagnostics().details().receivedDistinctKeys()).isEqualTo(1);
         assertThat(summary.diagnostics().details().duplicatesInFile()).isZero();
         assertThat(importService.snapshots).hasSize(1);
+        DistrictImportSnapshot snapshot = importService.snapshots.getFirst();
+        assertThat(snapshot.unlockTechnologyKeys()).containsExactly("Technology_District_A");
+        assertThat(snapshot.levelUp()).isNotNull();
+        assertThat(snapshot.levelUp().targetDistrictKey()).isEqualTo("District_B");
+        assertThat(snapshot.levelUp().requiredAdjacentDistrictCount()).isEqualTo(2);
+        assertThat(snapshot.placementPrerequisites()).isNotNull();
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
+        assertThat(snapshot.placementPrerequisites().neighbourTiles().ignoreCliff()).isTrue();
         assertThat(districtService.getAllCalls).isEqualTo(1);
     }
 
