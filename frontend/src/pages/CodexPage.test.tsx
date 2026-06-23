@@ -567,17 +567,17 @@ describe("CodexPage", () => {
             "Equipment",
             "Factions",
             "Diplomacy",
-            "Victory Paths",
-            "Victory Conditions",
             "Heroes",
             "Improvements",
             "Minor Factions",
-            "Natural Wonders",
             "Populations",
             "Statuses",
             "Tech",
             "Traits",
             "Units",
+            "Victory Conditions",
+            "Victory Paths",
+            "Wonders",
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
         expect(categoryLabels).not.toContain("Extractors");
@@ -656,17 +656,17 @@ describe("CodexPage", () => {
             "Equipment",
             "Factions",
             "Diplomacy",
-            "Victory Paths",
-            "Victory Conditions",
             "Heroes",
             "Improvements",
             "Minor Factions",
-            "Natural Wonders",
             "Populations",
             "Statuses",
             "Tech",
             "Traits",
             "Units",
+            "Victory Conditions",
+            "Victory Paths",
+            "Wonders",
         ]);
         expect(categoryLabels).not.toContain("Modifiers");
         expect(categoryLabels).not.toContain("Extractors");
@@ -735,6 +735,68 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Enlightenment" })).toBeInTheDocument();
         expect(screen.getByText("Required technologies formula")).toBeInTheDocument();
         expect(screen.getByText("Game Speed Multiplier * 10")).toBeInTheDocument();
+    });
+
+    it("renders Wonders as compact reference rows from exported effects and footprint", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "naturalwonders",
+                entryKey: "NaturalWonder_CrystalDunes",
+                displayName: "Crystal Dunes",
+                category: "World",
+                kind: "Natural wonder",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Type", value: "Natural wonder" },
+                    { label: "Footprint", value: "3 tiles" },
+                    { label: "Kind", value: "Natural wonder" },
+                    { label: "Category", value: "World" },
+                ],
+                sections: [{
+                    title: "Effects",
+                    lines: [
+                        "+1 [Strategic03Colored] Lazualin per Turn",
+                        "+1 [Strategic04Colored] Hyperium per Turn",
+                        "+1 [Strategic05Colored] Eradione per Turn",
+                        "+1 [Strategic06Colored] Thalitine per Turn",
+                    ],
+                }],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex?category=naturalwonders"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "All Wonders" });
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
+        const summaryList = screen.getByLabelText("Wonders overview");
+        const entryButton = within(summaryList).getByRole("button", { name: /Crystal Dunes/i });
+        const row = entryButton.closest(".codex-summaryList__item") as HTMLElement;
+        expect(row).toHaveClass("codex-summaryList__item--shallow");
+        expect(within(row).getByText("3 tiles")).toBeInTheDocument();
+        expect(within(row).getByLabelText("Crystal Dunes effects")).toHaveTextContent("Lazualin per Turn");
+        expect(within(row).getByLabelText("Crystal Dunes effects")).toHaveTextContent("Hyperium per Turn");
+        expect(within(row).getByLabelText("Crystal Dunes effects")).toHaveTextContent("Eradione per Turn");
+        expect(within(row).queryByText(/Thalitine per Turn/i)).not.toBeInTheDocument();
+        expect(within(row).queryByText("Natural wonder")).not.toBeInTheDocument();
+        expect(within(row).queryByText("World")).not.toBeInTheDocument();
+
+        await user.click(entryButton);
+
+        expect(await screen.findByRole("heading", { name: "Crystal Dunes" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(screen.getByText("Footprint")).toBeInTheDocument();
+        expect(screen.getByText("3 tiles")).toBeInTheDocument();
+        expect(screen.getByText("Kind")).toBeInTheDocument();
+        expect(screen.getAllByText("Natural wonder")).toHaveLength(2);
     });
 
     it("renders Population archive rows from worker effects, threshold rewards, and quiet metadata", async () => {
@@ -1294,6 +1356,7 @@ describe("CodexPage", () => {
                 facts: [
                     { label: "Scope", value: "Diplomatic Ambassy" },
                     { label: "Duration", value: "10 turns" },
+                    { label: "Polarity", value: "Malus" },
                     { label: "Status type", value: "Public Opinion" },
                 ],
                 sections: [
@@ -1415,9 +1478,11 @@ describe("CodexPage", () => {
             .toBe(true);
         expect(within(metadata).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(metadata).getByText("10 turns")).toBeInTheDocument();
+        expect(within(metadata).getByText("Malus")).toBeInTheDocument();
         expect(within(metadata).queryByText("Public Opinion")).not.toBeInTheDocument();
         expect(within(effectPreview).queryByText("Diplomacy")).not.toBeInTheDocument();
         expect(within(effectPreview).queryByText("10 turns")).not.toBeInTheDocument();
+        expect(within(effectPreview).queryByText("Malus")).not.toBeInTheDocument();
         expect(within(overviewRow).queryByText("Status type")).not.toBeInTheDocument();
 
         const thinOverviewRow = within(statusesOverview).getByRole("button", { name: /unit 10 turns name only/i });
@@ -3760,11 +3825,11 @@ describe("CodexPage", () => {
             "Resources",
             "Factions",
             "Diplomacy",
-            "Victory Paths",
-            "Victory Conditions",
             "Heroes",
-            "Natural Wonders",
             "Statuses",
+            "Victory Conditions",
+            "Victory Paths",
+            "Wonders",
         ]);
         expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /statuses 1 public conditions/i })).toBeInTheDocument();
@@ -3780,7 +3845,7 @@ describe("CodexPage", () => {
         expect(within(screen.getByLabelText("Codex category index"))
             .getByRole("button", { name: /victory conditions 1/i })).toBeInTheDocument();
         expect(within(screen.getByLabelText("Codex category index"))
-            .getByRole("button", { name: /natural wonders 1/i })).toBeInTheDocument();
+            .getByRole("button", { name: /wonders 1/i })).toBeInTheDocument();
     });
 
     it("keeps exporter return kinds searchable and linkable after top-level promotion", async () => {
@@ -4276,6 +4341,7 @@ describe("CodexPage", () => {
                     { label: "Category", value: "Diplomacy" },
                     { label: "Kind", value: "Status" },
                     { label: "Duration", value: "10 turns" },
+                    { label: "Polarity", value: "Malus" },
                     { label: "Status type", value: "Public Opinion" },
                 ],
                 sections: [
@@ -4286,6 +4352,40 @@ describe("CodexPage", () => {
                     {
                         title: "Effects",
                         lines: ["Diplomatic pressure while borders are closed."],
+                    },
+                    {
+                        title: "Status interactions",
+                        items: [
+                            {
+                                label: "Ahead in the Polls",
+                                referenceKey: "Status_City_Approval_Test",
+                                facts: [{ label: "Interaction", value: "Cancels on apply" }],
+                            },
+                            {
+                                label: "Missing Status",
+                                referenceKey: "Status_Missing_Interaction",
+                                facts: [{ label: "Interaction", value: "Inhibited by" }],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                exportKind: "statuses",
+                entryKey: "Status_City_Approval_Test",
+                displayName: "Ahead in the Polls",
+                category: "Status",
+                kind: "Status",
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [
+                    { label: "Scope", value: "City" },
+                    { label: "Polarity", value: "Bonus" },
+                ],
+                sections: [
+                    {
+                        title: "Status mechanics",
+                        lines: ["+15 Approval"],
                     },
                 ],
             },
@@ -4342,12 +4442,19 @@ describe("CodexPage", () => {
         expect(within(statusProfile).getByText("Diplomacy")).toBeInTheDocument();
         expect(within(statusProfile).getByText("Duration")).toBeInTheDocument();
         expect(within(statusProfile).getByText("10 turns")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("Polarity")).toBeInTheDocument();
+        expect(within(statusProfile).getByText("Malus")).toBeInTheDocument();
         expect(within(statusProfile).queryByText("Kind")).not.toBeInTheDocument();
         expect(within(statusProfile).queryByText("Category")).not.toBeInTheDocument();
         expect(within(statusProfile).queryByText("Status type")).not.toBeInTheDocument();
         expect(screen.getByText("Changes treaty Public Opinion while active.")).toBeInTheDocument();
         expect(screen.getByRole("heading", { name: "Effects" })).toBeInTheDocument();
         expect(screen.getByText("Diplomatic pressure while borders are closed.")).toBeInTheDocument();
+        const statusInteractions = screen.getByLabelText("Status interactions");
+        expect(within(statusInteractions).getByText("Cancels on apply")).toBeInTheDocument();
+        expect(within(statusInteractions).getByRole("button", { name: "Open Ahead in the Polls in Codex" }))
+            .toBeInTheDocument();
+        expect(within(statusInteractions).queryByText("Missing Status")).not.toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i })).not.toBeInTheDocument();
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });

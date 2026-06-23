@@ -335,6 +335,9 @@ function getStatusArchiveMetadata(entry: CodexEntry): StatusArchiveMetadataItem[
     getCodexFactValues(entry, "Duration").forEach((value) =>
         addValue("duration", formatStatusDurationValue(value))
     );
+    getCodexFactValues(entry, "Polarity").forEach((value) =>
+        addValue("polarity", value)
+    );
 
     return items;
 }

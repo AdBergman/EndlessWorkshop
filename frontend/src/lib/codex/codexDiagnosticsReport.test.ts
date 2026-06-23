@@ -132,6 +132,7 @@ describe("codexDiagnosticsReport", () => {
                 displayName: "Fly",
                 descriptionLines: ["Missing [UnknownIconToken]."],
                 referenceKeys: [],
+                svgIcon: { source: "ability-icons", key: "UnitAbility_Fly" },
             },
         ]);
 

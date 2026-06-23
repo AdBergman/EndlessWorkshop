@@ -102,6 +102,7 @@ describe("codexPresentation", () => {
         expect(formatCodexKindLabel("partnerEffects")).toBe("Partner Effects");
         expect(formatCodexKindLabel("diplomatictreaties")).toBe("Diplomacy");
         expect(formatCodexKindLabel("diplomaticTreaties")).toBe("Diplomacy");
+        expect(formatCodexKindLabel("naturalwonders")).toBe("Wonders");
     });
 
     it("uses exported Quest facts for Codex context instead of key-derived step paths", () => {

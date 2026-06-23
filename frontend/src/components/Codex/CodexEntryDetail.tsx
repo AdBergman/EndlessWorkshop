@@ -206,6 +206,7 @@ export default function CodexEntryDetail({
             ) : (
                 <CodexStructuredDetail
                     entry={entry}
+                    allEntries={allEntries}
                     relatedEntries={relatedEntries}
                     onSelectInlineEntry={onSelectRelated}
                 />

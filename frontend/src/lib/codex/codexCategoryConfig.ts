@@ -27,24 +27,25 @@ export const PREFERRED_CODEX_KIND_ORDER = [
     "equipment",
     "factions",
     "diplomatictreaties",
-    "victorypaths",
-    "victoryconditions",
     "heroes",
     "improvements",
     "minorfactions",
-    "naturalwonders",
     "populations",
     "quests",
     "statuses",
     "tech",
     "traits",
     "units",
+    "victoryconditions",
+    "victorypaths",
+    "naturalwonders",
 ];
 
 const HIDDEN_TOP_LEVEL_CODEX_KINDS = new Set(["bonuses", "extractors", "modifiers", "quests"]);
 const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors", "quests"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set([
     "counciloreffects",
+    "naturalwonders",
     "partnereffects",
     "resources",
 ]);

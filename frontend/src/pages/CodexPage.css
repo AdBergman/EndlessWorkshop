@@ -1363,6 +1363,45 @@
     font-size: 15.5px;
 }
 
+.codex-statusInteractions {
+    gap: 10px;
+}
+
+.codex-statusInteractions__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.codex-statusInteractions__item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 7px;
+    max-width: 100%;
+    padding: 6px 9px;
+    border: 1px solid rgba(241, 234, 220, 0.055);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.01);
+    color: rgba(241, 234, 220, 0.72);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.codex-statusInteractions__label {
+    color: rgba(195, 152, 77, 0.74);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.codex-statusInteractions__item .codex-inlineEntityLink {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .codex-structuredItems--abilityMechanics {
     gap: 8px;
 }

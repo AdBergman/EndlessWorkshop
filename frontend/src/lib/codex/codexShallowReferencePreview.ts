@@ -16,7 +16,7 @@ export type ShallowReferenceLink = {
     prefix: string;
 };
 
-const SHALLOW_REFERENCE_KINDS = new Set(["resources", "counciloreffects", "partnereffects", "traits"]);
+const SHALLOW_REFERENCE_KINDS = new Set(["resources", "counciloreffects", "naturalwonders", "partnereffects", "traits"]);
 
 function normalizeKind(value: string | null | undefined): string {
     return (value ?? "").trim().toLowerCase();
@@ -70,6 +70,10 @@ function formatEffectContext(entry: CodexEntry): string {
 
 function formatTraitContext(entry: CodexEntry): string {
     return findFactValue(entry, "Category") || normalizeText(entry.category);
+}
+
+function formatNaturalWonderContext(entry: CodexEntry): string {
+    return findFactValue(entry, "Footprint");
 }
 
 function sectionItems(entry: CodexEntry, title: string): CodexMetadataSectionItem[] {
@@ -221,6 +225,14 @@ export function getCodexShallowReferencePreview(
             context: formatTraitContext(entry),
             effectLines: sectionLines(entry, "Effects"),
             links: minorFaction ? [minorFaction] : [],
+        };
+    }
+
+    if (kind === "naturalwonders") {
+        return {
+            context: formatNaturalWonderContext(entry),
+            effectLines: sectionLines(entry, "Effects").slice(0, 3),
+            links: [],
         };
     }
 

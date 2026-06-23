@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
+import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
 import { getStatusScopeDisplayLabel } from "@/lib/codex/codexStatusArchiveFilters";
 import {
@@ -22,17 +23,20 @@ import {
     buildTreatyStatusSummary,
     isTreatyAppliedStatusSummarySection,
 } from "@/lib/codex/codexTreatyStatusSummaries";
+import { buildStatusInteractionLinks } from "@/lib/codex/codexStatusInteractions";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
 import type { CodexEntry } from "@/types/dataTypes";
 import type { CodexStructuredSectionItem } from "@/lib/codex/codexStructuredDescription";
 import CodexAbilityEffectLine from "./CodexAbilityEffectLine";
 import CodexGrantedAbilityPreview from "./CodexGrantedAbilityPreview";
+import CodexInlineEntityLink from "./CodexInlineEntityLink";
 import CodexPopulationThresholdTargetSummary from "./CodexPopulationThresholdTargetSummary";
 import CodexTechUnlockSummary from "./CodexTechUnlockSummary";
 import CodexTreatyStatusSummary from "./CodexTreatyStatusSummary";
 
 type Props = {
     entry: CodexEntry;
+    allEntries?: readonly CodexEntry[];
     relatedEntries?: CodexEntry[];
     onSelectInlineEntry?: (entry: CodexEntry) => void;
 };
@@ -246,6 +250,9 @@ function statusProfileItems(entry: CodexEntry): Array<{ label: string; value: st
     getCodexFactValues(entry, "Duration").forEach((value) =>
         addValue("Duration", formatStatusDurationValue(value))
     );
+    getCodexFactValues(entry, "Polarity").forEach((value) =>
+        addValue("Polarity", value)
+    );
 
     return items;
 }
@@ -443,23 +450,27 @@ function AbilityStructuredDetail({
 
 function StatusStructuredDetail({
     entry,
+    allEntries,
     parsed,
     relatedEntries,
     inlineLinkCandidates,
     onSelectInlineEntry,
 }: {
     entry: CodexEntry;
+    allEntries: readonly CodexEntry[];
     parsed: ParsedCodexDescription;
     relatedEntries: CodexEntry[];
     inlineLinkCandidates: CodexAbilityInlineLinkCandidate[];
     onSelectInlineEntry?: (entry: CodexEntry) => void;
 }) {
     const profileItems = statusProfileItems(entry);
+    const interactionLinks = buildStatusInteractionLinks(entry, allEntries);
     const mechanicsSections = parsed.sections.filter((section) => isSectionLabel(section.label, "Status mechanics"));
     const effectsSections = parsed.sections.filter((section) => isSectionLabel(section.label, "Effects"));
     const remainingSections = parsed.sections.filter((section) => (
         !isSectionLabel(section.label, "Status mechanics") &&
-        !isSectionLabel(section.label, "Effects")
+        !isSectionLabel(section.label, "Effects") &&
+        !isSectionLabel(section.label, "Status interactions")
     ));
     const primarySections = [...mechanicsSections, ...effectsSections];
     const hasPrimaryContent = primarySections.some((section) =>
@@ -467,6 +478,7 @@ function StatusStructuredDetail({
     );
     const hasUsefulStructuredContent = profileItems.length > 0 ||
         hasPrimaryContent ||
+        interactionLinks.length > 0 ||
         remainingSections.length > 0 ||
         parsed.bodyLines.length > 0;
 
@@ -521,6 +533,25 @@ function StatusStructuredDetail({
                 </dl>
             ) : null}
 
+            {interactionLinks.length > 0 && onSelectInlineEntry ? (
+                <section className="codex-structuredBlock codex-statusInteractions">
+                    <h3 className="codex-structuredBlock__heading">Status interactions</h3>
+                    <div className="codex-statusInteractions__list" aria-label="Status interactions">
+                        {interactionLinks.map((link) => (
+                            <span
+                                className="codex-statusInteractions__item"
+                                key={`${link.interaction}-${link.entry.exportKind}-${link.entry.entryKey}`}
+                            >
+                                <span className="codex-statusInteractions__label">{link.interaction}</span>
+                                <CodexInlineEntityLink entry={link.entry} onSelect={onSelectInlineEntry}>
+                                    {renderCodexLabel(link.label)}
+                                </CodexInlineEntityLink>
+                            </span>
+                        ))}
+                    </div>
+                </section>
+            ) : null}
+
             {remainingSections.map((section) => (
                 <StructuredBlock
                     key={section.label}
@@ -555,6 +586,7 @@ function StatusStructuredDetail({
 
 export default function CodexStructuredDetail({
     entry,
+    allEntries = [],
     relatedEntries = [],
     onSelectInlineEntry,
 }: Props) {
@@ -589,6 +621,7 @@ export default function CodexStructuredDetail({
         return (
             <StatusStructuredDetail
                 entry={entry}
+                allEntries={allEntries}
                 parsed={parsed}
                 relatedEntries={relatedEntries}
                 inlineLinkCandidates={inlineLinkCandidates}
