@@ -36,7 +36,6 @@ import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
-import { getPopulationTypeDisplayLabel } from "@/lib/codex/codexPopulationArchiveFilters";
 import { formatUnitTierLabel } from "@/lib/codex/codexUnitArchiveFilters";
 import {
     getCodexReadablePreviewLine,
@@ -136,9 +135,9 @@ type ImprovementArchiveMetadataItem = {
     key: string;
     value: string;
 };
-type PopulationArchiveMetadataItem = {
-    key: string;
-    value: string;
+type PopulationFactionIdentity = {
+    label: string;
+    iconPath: string | null;
 };
 type PopulationArchivePreviewLine = {
     key: string;
@@ -1000,70 +999,43 @@ function getImprovementArchiveMetadata(entry: CodexEntry): ImprovementArchiveMet
     return items;
 }
 
-function getPopulationAvailabilityLabel(label: string, value: string): string {
-    const normalizedValue = value.trim().toLowerCase();
-
-    if (label === "Default population") {
-        return normalizedValue === "yes" ? "Default" : "";
-    }
-
-    if (label === "Custom faction availability") {
-        if (normalizedValue === "available") return "Custom";
-        if (normalizedValue === "not available") return "No Custom";
-    }
-
-    return value.trim();
-}
-
-function getPopulationFactionLabel(entry: CodexEntry, referenceIndexes: CodexReferenceIndexes): string {
+function getPopulationFactionIdentity(
+    entry: CodexEntry,
+    referenceIndexes: CodexReferenceIndexes
+): PopulationFactionIdentity | null {
     const factionFact = (entry.facts ?? []).find((fact) =>
         fact.label.trim().toLowerCase() === "faction" && fact.value.trim()
     );
-    if (!factionFact) return "";
+    if (!factionFact) return null;
 
     const linkedFaction = resolveCodexReference(factionFact.referenceKey, referenceIndexes);
-    if (linkedFaction) {
-        return getCodexEntryLabel(linkedFaction);
+    if (
+        linkedFaction &&
+        ["factions", "minorfactions"].includes(linkedFaction.exportKind.trim().toLowerCase())
+    ) {
+        const label = getCodexEntryLabel(linkedFaction);
+        return label
+            ? {
+                label,
+                iconPath: getFactionIconPath(linkedFaction.entryKey),
+            }
+            : null;
     }
 
-    return formatCodexMajorFactionText(factionFact.value.trim());
+    const fallbackLabel = formatCodexMajorFactionText(factionFact.value.trim());
+    return fallbackLabel ? {
+        label: fallbackLabel,
+        iconPath: null,
+    } : null;
 }
 
-function getPopulationArchiveMetadata(
+function getPopulationArchiveFactionIdentity(
     entry: CodexEntry,
     referenceIndexes: CodexReferenceIndexes
-): PopulationArchiveMetadataItem[] {
-    if (entry.exportKind.trim().toLowerCase() !== "populations") return [];
+): PopulationFactionIdentity | null {
+    if (entry.exportKind.trim().toLowerCase() !== "populations") return null;
 
-    const items: PopulationArchiveMetadataItem[] = [];
-    const seenValues = new Set<string>();
-
-    const addValue = (key: string, value: string) => {
-        const trimmedValue = value.trim();
-        if (!trimmedValue) return;
-
-        const normalizedValue = `${key}:${trimmedValue}`.toLowerCase();
-        if (seenValues.has(normalizedValue)) return;
-
-        seenValues.add(normalizedValue);
-        items.push({ key, value: trimmedValue });
-    };
-
-    getCodexFactValues(entry, "Type").forEach((value) =>
-        addValue("type", getPopulationTypeDisplayLabel(value))
-    );
-    addValue("faction", getPopulationFactionLabel(entry, referenceIndexes));
-    getCodexFactValues(entry, "Default population").forEach((value) =>
-        addValue("default", getPopulationAvailabilityLabel("Default population", value))
-    );
-    getCodexFactValues(entry, "Custom faction availability").forEach((value) =>
-        addValue("custom", getPopulationAvailabilityLabel("Custom faction availability", value))
-    );
-    getCodexFactValues(entry, "Base food cost").forEach((value) =>
-        addValue("food", `Food ${value}`)
-    );
-
-    return items;
+    return getPopulationFactionIdentity(entry, referenceIndexes);
 }
 
 function getPopulationWorkerPreviewLines(entry: CodexEntry): PopulationArchivePreviewLine[] {
@@ -1354,9 +1326,9 @@ export default function CodexSummaryDetail({
                         const heroClassMetadata = useHeroArchiveRowHierarchy ? getHeroClassMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
                         const districtArchiveMetadata = useDistrictArchiveRowHierarchy ? getDistrictArchiveMetadata(entry) : [];
-                        const populationArchiveMetadata = usePopulationArchiveRowHierarchy
-                            ? getPopulationArchiveMetadata(entry, referenceIndexes)
-                            : [];
+                        const populationFactionIdentity = usePopulationArchiveRowHierarchy
+                            ? getPopulationArchiveFactionIdentity(entry, referenceIndexes)
+                            : null;
                         const populationArchivePreviewLines = usePopulationArchiveRowHierarchy
                             ? getPopulationArchivePreviewLines(entry, referenceIndexes)
                             : [];
@@ -1756,19 +1728,29 @@ export default function CodexSummaryDetail({
                                             </span>
                                         </button>
 
-                                        {populationArchiveMetadata.length > 0 ? (
+                                        {populationFactionIdentity ? (
                                             <span
                                                 className="codex-summaryList__metadata codex-summaryList__metadata--population"
-                                                aria-label="Population metadata"
+                                                aria-label="Population faction"
                                             >
-                                                {populationArchiveMetadata.map((item) => (
+                                                {populationFactionIdentity.iconPath ? (
                                                     <span
-                                                        key={`${item.key}-${item.value}`}
-                                                        className="codex-summaryList__metadataText"
+                                                        className="codex-summaryList__metadataIcon"
+                                                        aria-label={populationFactionIdentity.label}
+                                                        title={populationFactionIdentity.label}
                                                     >
-                                                        {item.value}
+                                                        <IconImg
+                                                            path={populationFactionIdentity.iconPath}
+                                                            title={populationFactionIdentity.label}
+                                                            className="codex-kindIcon codex-kindIcon--summaryFaction"
+                                                            size={18}
+                                                            decorative
+                                                        />
                                                     </span>
-                                                ))}
+                                                ) : null}
+                                                <span className="codex-summaryList__metadataText">
+                                                    {populationFactionIdentity.label}
+                                                </span>
                                             </span>
                                         ) : null}
                                     </span>

@@ -855,27 +855,40 @@ describe("CodexPage", () => {
         await screen.findByRole("heading", { name: "All Populations" });
         const rail = screen.getByRole("complementary", { name: /population archive filters/i });
         expect(within(rail).getByRole("button", { name: /all 3/i })).toBeInTheDocument();
-        expect(within(rail).getByRole("button", { name: /major faction 1/i })).toBeInTheDocument();
-        expect(within(rail).getByRole("button", { name: /minor faction 1/i })).toBeInTheDocument();
-        expect(within(rail).getByRole("button", { name: /created by action 1/i })).toBeInTheDocument();
+        expect(within(rail).getByRole("button", { name: /other 3/i })).toBeInTheDocument();
+        expect(within(rail).queryByRole("button", { name: /major faction 1/i })).not.toBeInTheDocument();
+        expect(within(rail).queryByRole("button", { name: /minor faction 1/i })).not.toBeInTheDocument();
+        expect(within(rail).queryByRole("button", { name: /created by action 1/i })).not.toBeInTheDocument();
 
         const summaryList = screen.getByLabelText("Populations overview");
         const row = getSummaryRowForButton(within(summaryList).getByRole("button", { name: "Kin of Sheredyn" }));
         expect(row).toHaveClass("codex-summaryList__item--populationArchive");
-        expect(within(row).getByText("Major Faction")).toBeInTheDocument();
-        expect(within(row).getByText("Default")).toBeInTheDocument();
-        expect(within(row).getByText("Custom")).toBeInTheDocument();
-        expect(within(row).getByText("Food 60")).toBeInTheDocument();
+        const populationFaction = within(row).getByLabelText("Population faction");
+        expect(within(populationFaction).getByText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(within(populationFaction).getByLabelText("Kin of Sheredyn")).toBeInTheDocument();
+        expect(within(row).queryByText("Major Faction")).not.toBeInTheDocument();
+        expect(within(row).queryByText("Default")).not.toBeInTheDocument();
+        expect(within(row).queryByText("Custom")).not.toBeInTheDocument();
+        expect(within(row).queryByText("Food 60")).not.toBeInTheDocument();
         expect(within(row).getByText("Worker:")).toBeInTheDocument();
         expect(within(row).getByText(/\+2/)).toBeInTheDocument();
         expect(within(row).getByText("5 population:")).toBeInTheDocument();
         expect(within(row).getByRole("button", { name: "Open Military Press in Codex" })).toBeInTheDocument();
         expect(within(row).queryByText("Fallback should not win")).not.toBeInTheDocument();
 
+        const ametrineRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: "Ametrine" }));
+        const ametrineFaction = within(ametrineRow).getByLabelText("Population faction");
+        expect(within(ametrineFaction).getByText("Ametrine")).toBeInTheDocument();
+        expect(within(ametrineFaction).getByLabelText("Ametrine")).toBeInTheDocument();
+        expect(within(ametrineRow).queryByText("Minor Faction")).not.toBeInTheDocument();
+        expect(within(ametrineRow).queryByText("Custom")).not.toBeInTheDocument();
+        expect(within(ametrineRow).queryByText("Food 60")).not.toBeInTheDocument();
+
         const calledRow = getSummaryRowForButton(within(summaryList).getByRole("button", { name: "Called Population" }));
-        expect(within(calledRow).getByText("Created by Action")).toBeInTheDocument();
-        expect(within(calledRow).getByText("No Custom")).toBeInTheDocument();
-        expect(within(calledRow).getByText("Food 0")).toBeInTheDocument();
+        expect(within(calledRow).queryByLabelText("Population faction")).not.toBeInTheDocument();
+        expect(within(calledRow).queryByText("Created by Action")).not.toBeInTheDocument();
+        expect(within(calledRow).queryByText("No Custom")).not.toBeInTheDocument();
+        expect(within(calledRow).queryByText("Food 0")).not.toBeInTheDocument();
         expect(within(calledRow).getByText("No public population effects exported yet.")).toBeInTheDocument();
 
         await user.click(within(row).getByRole("button", { name: "Open Military Press in Codex" }));
@@ -901,6 +914,18 @@ describe("CodexPage", () => {
                     lines: ["+1 [CultureColored] Influence"],
                 }],
             },
+            ...Array.from({ length: 4 }, (_, index): CodexEntry => ({
+                exportKind: "populations",
+                entryKey: `Population_Major_${index + 2}`,
+                displayName: `Major Population ${index + 2}`,
+                descriptionLines: [],
+                referenceKeys: [],
+                facts: [{ label: "Type", value: "Major faction population" }],
+                sections: [{
+                    title: "Worker effects",
+                    lines: ["+1 [IndustryColored] Industry"],
+                }],
+            })),
             {
                 exportKind: "populations",
                 entryKey: "Population_Minor_Ametrine",
@@ -935,14 +960,16 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Aspects" })).toBeInTheDocument();
-        await user.click(screen.getByRole("button", { name: /minor faction 1/i }));
+        expect(screen.getByRole("button", { name: /major faction 5/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /other 1/i })).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /other 1/i }));
 
         expect(await screen.findByRole("heading", { name: "All Populations" })).toBeInTheDocument();
         expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=populations");
         expect(screen.getByRole("button", { name: "Ametrine" })).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "Aspects" })).not.toBeInTheDocument();
 
-        await user.click(screen.getByRole("button", { name: /minor faction 1/i }));
+        await user.click(screen.getByRole("button", { name: /other 1/i }));
         expect(screen.getByRole("button", { name: "Aspects" })).toBeInTheDocument();
 
         await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "science");

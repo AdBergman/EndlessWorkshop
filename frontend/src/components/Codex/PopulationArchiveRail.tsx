@@ -1,11 +1,14 @@
-import type { PopulationArchiveType, PopulationTypeFilterOption } from "@/lib/codex/codexPopulationArchiveFilters";
+import type {
+    PopulationArchiveFilterValue,
+    PopulationTypeFilterOption,
+} from "@/lib/codex/codexPopulationArchiveFilters";
 
 type Props = {
-    activeType: PopulationArchiveType | null;
+    activeType: PopulationArchiveFilterValue | null;
     options: readonly PopulationTypeFilterOption[];
     totalCount: number;
     onClearType: () => void;
-    onToggleType: (type: PopulationArchiveType) => void;
+    onToggleType: (type: PopulationArchiveFilterValue) => void;
 };
 
 export default function PopulationArchiveRail({

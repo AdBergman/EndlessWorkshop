@@ -45,7 +45,7 @@ import type {
 } from "@/lib/codex/codexUnitArchiveFilters";
 import type { ActionArchiveType, ActionTypeFilterOption } from "@/lib/codex/codexActionArchiveFilters";
 import type {
-    PopulationArchiveType,
+    PopulationArchiveFilterValue,
     PopulationTypeFilterOption,
 } from "@/lib/codex/codexPopulationArchiveFilters";
 import type {
@@ -88,7 +88,7 @@ type Props = {
     improvementCategoryFilter: ImprovementArchiveCategory | null;
     improvementCategoryOptions: readonly ImprovementCategoryFilterOption[];
     improvementTotalCount: number;
-    populationTypeFilter: PopulationArchiveType | null;
+    populationTypeFilter: PopulationArchiveFilterValue | null;
     populationTypeOptions: readonly PopulationTypeFilterOption[];
     populationTotalCount: number;
     isAbilityCatalogMode: boolean;
@@ -139,7 +139,7 @@ type Props = {
     onToggleHeroFilter: (filterKey: HeroArchiveFilterKey, value: string) => void;
     onToggleUnitFilter: (filterKey: UnitArchiveFilterKey, value: string) => void;
     onToggleImprovementCategory: (category: ImprovementArchiveCategory) => void;
-    onTogglePopulationType: (type: PopulationArchiveType) => void;
+    onTogglePopulationType: (type: PopulationArchiveFilterValue) => void;
     onToggleQuestCategory: (category: QuestArchiveFilterValue) => void;
     onToggleStatusScope: (scope: string) => void;
     onToggleTechFilter: (filterKey: TechArchiveFilterKey, value: string) => void;

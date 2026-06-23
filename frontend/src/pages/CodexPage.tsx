@@ -70,7 +70,7 @@ import {
 import {
     buildPopulationTypeFilterOptions,
     filterPopulationEntriesByType,
-    type PopulationArchiveType,
+    type PopulationArchiveFilterValue,
 } from "@/lib/codex/codexPopulationArchiveFilters";
 import {
     buildStatusScopeFilterOptions,
@@ -138,7 +138,7 @@ export default function CodexPage() {
         EMPTY_UNIT_ARCHIVE_FILTERS
     );
     const [activeImprovementCategory, setActiveImprovementCategory] = useState<ImprovementArchiveCategory | null>(null);
-    const [activePopulationType, setActivePopulationType] = useState<PopulationArchiveType | null>(null);
+    const [activePopulationType, setActivePopulationType] = useState<PopulationArchiveFilterValue | null>(null);
     const [activeQuestCategory, setActiveQuestCategory] = useState<QuestArchiveFilterValue | null>(null);
     const [activeStatusScope, setActiveStatusScope] = useState<string | null>(null);
     const [activeTechFilters, setActiveTechFilters] = useState<ActiveTechArchiveFilters>(
@@ -936,7 +936,7 @@ export default function CodexPage() {
         returnFiltersToArchive(isPopulationArchiveMode);
     }, [isPopulationArchiveMode, returnFiltersToArchive]);
 
-    const togglePopulationType = useCallback((type: PopulationArchiveType) => {
+    const togglePopulationType = useCallback((type: PopulationArchiveFilterValue) => {
         setActivePopulationType((current) => current === type ? null : type);
         returnFiltersToArchive(isPopulationArchiveMode);
     }, [isPopulationArchiveMode, returnFiltersToArchive]);
