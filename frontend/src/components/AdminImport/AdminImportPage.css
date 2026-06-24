@@ -79,6 +79,54 @@
     opacity: 0.65;
 }
 
+.admin-import-latestPanel {
+    border-color: rgba(255, 127, 50, 0.18);
+}
+
+.admin-import-latestNotice {
+    margin-top: 12px;
+}
+
+.admin-import-latestGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.admin-import-latestGrid > div {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.admin-import-latestGrid span,
+.admin-import-latestGrid small {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+}
+
+.admin-import-latestGrid strong {
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+@media (max-width: 860px) {
+    .admin-import-latestGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 540px) {
+    .admin-import-latestGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* =========================================================
  * Buttons
  * ========================================================= */

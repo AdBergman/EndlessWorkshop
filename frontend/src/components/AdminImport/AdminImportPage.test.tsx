@@ -11,6 +11,7 @@ import { refreshStoresAfterAdminImport } from "./adminImportRefresh";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
+        getLatestImportAdmin: vi.fn(),
         getCodex: vi.fn(),
         regenerateSeoPagesAdmin: vi.fn(),
     },
@@ -91,6 +92,54 @@ const seoResult = () => ({
     warnings: [],
     errors: [],
     sitemapUpdated: true,
+});
+
+const latestImportResult = () => ({
+    available: true,
+    runKey: "run-1",
+    trigger: "MANUAL_ADMIN",
+    status: "SUCCESS",
+    startedAtUtc: "2026-06-23T10:00:00Z",
+    completedAtUtc: "2026-06-23T10:01:00Z",
+    sourceLabel: "admin-upload",
+    fileCount: 1,
+    importedFileCount: 1,
+    skippedFileCount: 0,
+    failedFileCount: 0,
+    counts: {
+        received: 2505,
+        inserted: 0,
+        updated: 12,
+        unchanged: 2493,
+        deleted: 0,
+        failed: 0,
+    },
+    game: "Endless Legend 2",
+    gameVersion: "0.82",
+    exporterVersion: "1.0.0",
+    exportedAtUtc: "2026-06-22T05:57:36Z",
+    notes: null,
+    fileResults: [
+        {
+            filename: "victoryconditions-codex.json",
+            folder: "admin-upload",
+            exportKind: "victoryconditions",
+            importKind: "codex",
+            status: "IMPORTED",
+            skipReason: null,
+            errorMessage: null,
+            counts: {
+                received: 6,
+                inserted: 0,
+                updated: 1,
+                unchanged: 5,
+                deleted: 0,
+                failed: 0,
+            },
+            durationMs: 14,
+            fileSha256Short: "abc123",
+        },
+    ],
 });
 
 function jsonResponse(body: unknown, status = 200) {
@@ -179,6 +228,8 @@ describe("AdminImportPage", () => {
         localStorage.clear();
         localStorage.setItem("ewshop_admin_token", "valid-token");
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getLatestImportAdmin.mockReset();
+        mockedApiClient.getLatestImportAdmin.mockResolvedValue(latestImportResult());
         mockedApiClient.regenerateSeoPagesAdmin.mockReset();
         mockedRefreshStoresAfterAdminImport.mockReset();
         mockedRefreshStoresAfterAdminImport.mockResolvedValue({ ok: true });
@@ -202,6 +253,34 @@ describe("AdminImportPage", () => {
 
     afterEach(() => {
         vi.unstubAllGlobals();
+    });
+
+    it("shows the latest persisted import state after admin unlock", async () => {
+        renderAdminImportPage();
+
+        await waitForUnlockedPage();
+
+        expect(mockedApiClient.getLatestImportAdmin).toHaveBeenCalledWith("valid-token");
+        expect(await screen.findByText("Last import")).toBeInTheDocument();
+        expect(screen.getByText("Success")).toBeInTheDocument();
+        expect(screen.getByText("Endless Legend 2 v0.82")).toBeInTheDocument();
+        expect(screen.getByText("22 Jun 2026")).toBeInTheDocument();
+        expect(screen.getByText(/1 imported · 0 skipped · 0 failed · 2505 received/i)).toBeInTheDocument();
+        expect(screen.getByText(/victoryconditions-codex\.json \(Imported\)/i)).toBeInTheDocument();
+    });
+
+    it("shows an empty latest import state when no import history exists", async () => {
+        mockedApiClient.getLatestImportAdmin.mockResolvedValueOnce({
+            ...latestImportResult(),
+            available: false,
+            fileResults: [],
+        });
+
+        renderAdminImportPage();
+
+        await waitForUnlockedPage();
+
+        expect(await screen.findByText("No persisted import run has been recorded yet.")).toBeInTheDocument();
     });
 
     it("downloads the codex diagnostics report from the visible admin action", async () => {
@@ -420,6 +499,8 @@ describe("AdminImportPage", () => {
             "/api/admin/import/heroes",
             "/api/admin/import/skills",
         ]);
+        expect((postCalls[0][1]?.headers as Record<string, string>)["X-Import-Filename"])
+            .toBe("ewshop_factions_export_0.82.json");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("factions");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("heroes");
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("skills");

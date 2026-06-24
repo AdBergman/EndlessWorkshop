@@ -18,6 +18,19 @@ function nowUtcIso() {
     return new Date().toISOString();
 }
 
+function importHeaders(token: string, fileName?: string): HeadersInit {
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-Admin-Token": token,
+    };
+
+    if (fileName?.trim()) {
+        headers["X-Import-Filename"] = fileName.trim();
+    }
+
+    return headers;
+}
+
 type Props<TJson> = {
     index: number;
     token: string;
@@ -160,10 +173,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
         try {
             const res = await fetch(endpoint, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Admin-Token": token,
-                },
+                headers: importHeaders(token, drop.file.name),
                 body: drop.rawText,
             });
 
@@ -222,10 +232,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
             try {
                 const res = await fetch(endpoint, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Admin-Token": token,
-                    },
+                    headers: importHeaders(token, current.fileName),
                     body: current.rawText,
                 });
 
@@ -311,10 +318,7 @@ export default function ImportModuleRow<TJson>({ index, token, module, isOpen, o
             try {
                 const res = await fetch(current.endpoint, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Admin-Token": token,
-                    },
+                    headers: importHeaders(token, current.fileName),
                     body: current.rawText,
                 });
 

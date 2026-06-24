@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { apiClient, type SeoRegenerationResult, type TechAdminDto } from "./apiClient";
+import { apiClient, type AdminLatestImport, type SeoRegenerationResult, type TechAdminDto } from "./apiClient";
 
 function jsonResponse(payload: unknown, init: Partial<Response> = {}) {
     return {
@@ -123,6 +123,38 @@ describe("apiClient contract", () => {
 
         expect(fetchMock).toHaveBeenCalledWith("/api/admin/seo/regenerate", {
             method: "POST",
+            headers: {
+                "X-Admin-Token": "admin-token",
+            },
+        });
+    });
+
+    it("fetches the latest admin import state with the admin token header", async () => {
+        const payload: AdminLatestImport = {
+            available: true,
+            runKey: "run-1",
+            trigger: "MANUAL_ADMIN",
+            status: "SUCCESS",
+            startedAtUtc: "2026-06-23T10:00:00Z",
+            completedAtUtc: "2026-06-23T10:01:00Z",
+            sourceLabel: "admin-upload",
+            fileCount: 1,
+            importedFileCount: 1,
+            skippedFileCount: 0,
+            failedFileCount: 0,
+            counts: { received: 2, inserted: 1, updated: 1, unchanged: 0, deleted: 0, failed: 0 },
+            game: "Endless Legend 2",
+            gameVersion: "0.82",
+            exporterVersion: "1.0.0",
+            exportedAtUtc: "2026-06-22T05:57:36Z",
+            notes: null,
+            fileResults: [],
+        };
+        const fetchMock = stubFetch(jsonResponse(payload));
+
+        await expect(apiClient.getLatestImportAdmin("admin-token")).resolves.toBe(payload);
+
+        expect(fetchMock).toHaveBeenCalledWith("/api/admin/import/latest", {
             headers: {
                 "X-Admin-Token": "admin-token",
             },

@@ -7,11 +7,14 @@ import ewshop.domain.model.importing.ImportRun;
 import ewshop.domain.model.importing.ImportRunStatus;
 import ewshop.domain.model.importing.ImportTrigger;
 import ewshop.domain.repository.ImportHistoryRepository;
+import ewshop.facade.dto.importing.ImportCountsDto;
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.response.importing.AdminLatestImportDto;
 import ewshop.facade.dto.response.importing.DataFreshnessDto;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,6 +90,68 @@ class ImportHistoryFacadeImplTest {
         assertThat(dto.fileResults().get(1).skipReason()).isEqualTo("diagnostics-only");
     }
 
+    @Test
+    void recordsManualAdminImportAsLatestSuccessfulFreshness() {
+        RecordingRepository repository = new RecordingRepository(null, null);
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(repository);
+
+        facade.recordManualAdminImport(
+                "/Users/example/victoryconditions-codex.json",
+                "victoryconditions",
+                "codex",
+                "Endless Legend 2",
+                "0.82",
+                "1.2.3",
+                "2026-06-22T05:57:36Z",
+                null,
+                Instant.parse("2026-06-24T10:00:00Z"),
+                ImportSummaryDto.of(
+                        "codex",
+                        new ImportCountsDto(6, 0, 1, 5, 0, 0),
+                        null,
+                        14L
+                )
+        );
+
+        ImportRun saved = repository.savedRuns.getFirst();
+        assertThat(saved.trigger()).isEqualTo(ImportTrigger.MANUAL_ADMIN);
+        assertThat(saved.status()).isEqualTo(ImportRunStatus.SUCCESS);
+        assertThat(saved.sourceLabel()).isEqualTo("admin-upload");
+        assertThat(saved.importedFileCount()).isEqualTo(1);
+        assertThat(saved.counts().received()).isEqualTo(6);
+        assertThat(saved.fileResults()).hasSize(1);
+        assertThat(saved.fileResults().getFirst().filename()).isEqualTo("victoryconditions-codex.json");
+        assertThat(saved.fileResults().getFirst().folder()).isEqualTo("admin-upload");
+        assertThat(saved.fileResults().getFirst().status()).isEqualTo(ImportFileStatus.IMPORTED);
+        assertThat(saved.fileResults().getFirst().sourcePathHash()).isNull();
+    }
+
+    @Test
+    void recordsFailedManualAdminImportWithoutStackTracePayloads() {
+        RecordingRepository repository = new RecordingRepository(null, null);
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(repository);
+
+        facade.recordFailedManualAdminImport(
+                "bad.json",
+                "tech",
+                "tech",
+                "Endless Legend 2",
+                "0.82",
+                "1.2.3",
+                "2026-06-22T05:57:36Z",
+                null,
+                Instant.parse("2026-06-24T10:00:00Z"),
+                "validation failed"
+        );
+
+        ImportRun saved = repository.savedRuns.getFirst();
+        assertThat(saved.status()).isEqualTo(ImportRunStatus.FAILED);
+        assertThat(saved.failedFileCount()).isEqualTo(1);
+        assertThat(saved.notes()).isEqualTo("validation failed");
+        assertThat(saved.fileResults().getFirst().status()).isEqualTo(ImportFileStatus.FAILED);
+        assertThat(saved.fileResults().getFirst().errorMessage()).isEqualTo("validation failed");
+    }
+
     private static ImportRun run(
             String runKey,
             ImportRunStatus status,
@@ -144,10 +209,21 @@ class ImportHistoryFacadeImplTest {
         );
     }
 
-    private record RecordingRepository(ImportRun successful, ImportRun latest) implements ImportHistoryRepository {
+    private static final class RecordingRepository implements ImportHistoryRepository {
+
+        private final ImportRun successful;
+        private final ImportRun latest;
+        private final List<ImportRun> savedRuns = new ArrayList<>();
+
+        private RecordingRepository(ImportRun successful, ImportRun latest) {
+            this.successful = successful;
+            this.latest = latest;
+        }
 
         @Override
-        public void saveImportRun(ImportRun run) {}
+        public void saveImportRun(ImportRun run) {
+            savedRuns.add(run);
+        }
 
         @Override
         public Optional<ImportRun> findLatestSuccessfulImportRun() {

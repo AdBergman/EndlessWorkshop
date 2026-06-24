@@ -2,6 +2,7 @@ package ewshop.api.controller;
 
 import ewshop.facade.dto.response.importing.DataFreshnessDto;
 import ewshop.facade.dto.response.importing.AdminLatestImportDto;
+import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.interfaces.ImportHistoryFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -79,6 +81,36 @@ class DataFreshnessControllerTest {
         @Override
         public AdminLatestImportDto getLatestImport() {
             return AdminLatestImportDto.unavailable();
+        }
+
+        @Override
+        public void recordManualAdminImport(
+                String filename,
+                String exportKind,
+                String importKind,
+                String game,
+                String gameVersion,
+                String exporterVersion,
+                String exportedAtUtc,
+                String schemaVersion,
+                Instant startedAtUtc,
+                ImportSummaryDto summary
+        ) {
+        }
+
+        @Override
+        public void recordFailedManualAdminImport(
+                String filename,
+                String exportKind,
+                String importKind,
+                String game,
+                String gameVersion,
+                String exporterVersion,
+                String exportedAtUtc,
+                String schemaVersion,
+                Instant startedAtUtc,
+                String errorMessage
+        ) {
         }
     }
 }

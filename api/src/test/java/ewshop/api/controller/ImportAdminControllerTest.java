@@ -42,6 +42,7 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -233,6 +234,7 @@ class ImportAdminControllerTest {
 
         mockMvc.perform(post("/api/admin/import/techs")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Import-Filename", "ewshop_tech_export_0.80.json")
                         .content(payload))
                 .andExpect(status().isOk());
 
@@ -240,6 +242,12 @@ class ImportAdminControllerTest {
         assertEquals("Tech_A", techFacade.lastImportDto.techs().getFirst().techKey());
         assertEquals("Trait_A", techFacade.lastImportDto.techs().getFirst().factionTraitPrerequisites().getFirst().traitKey());
         assertEquals("District_A", techFacade.lastImportDto.techs().getFirst().unlocks().getFirst().unlockElementName());
+        assertEquals("ewshop_tech_export_0.80.json", importHistoryFacade.lastSuccessFilename);
+        assertEquals("tech", importHistoryFacade.lastSuccessExportKind);
+        assertEquals("tech", importHistoryFacade.lastSuccessImportKind);
+        assertEquals("Endless Legend 2", importHistoryFacade.lastSuccessGame);
+        assertEquals("0.80", importHistoryFacade.lastSuccessGameVersion);
+        assertEquals("now", importHistoryFacade.lastSuccessExportedAtUtc);
     }
 
     @Test
@@ -638,11 +646,17 @@ class ImportAdminControllerTest {
 
         mockMvc.perform(post("/api/admin/import/units")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Import-Filename", "ewshop_units_export_0.80.json")
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("IMPORT_REJECTED"))
                 .andExpect(jsonPath("$.message").value("Unit import produced 0 public units; refusing to write/delete."))
                 .andExpect(jsonPath("$.path").value("/api/admin/import/units"));
+
+        assertEquals("ewshop_units_export_0.80.json", importHistoryFacade.lastFailedFilename);
+        assertEquals("units", importHistoryFacade.lastFailedExportKind);
+        assertEquals("0.80", importHistoryFacade.lastFailedGameVersion);
+        assertEquals("Unit import produced 0 public units; refusing to write/delete.", importHistoryFacade.lastFailedErrorMessage);
     }
 
     @Test
@@ -989,6 +1003,16 @@ class ImportAdminControllerTest {
 
     private static final class RecordingImportHistoryFacade implements ImportHistoryFacade {
         private AdminLatestImportDto latestImport = AdminLatestImportDto.unavailable();
+        private String lastSuccessFilename;
+        private String lastSuccessExportKind;
+        private String lastSuccessImportKind;
+        private String lastSuccessGame;
+        private String lastSuccessGameVersion;
+        private String lastSuccessExportedAtUtc;
+        private String lastFailedFilename;
+        private String lastFailedExportKind;
+        private String lastFailedGameVersion;
+        private String lastFailedErrorMessage;
 
         @Override
         public DataFreshnessDto getLatestDataFreshness() {
@@ -998,6 +1022,46 @@ class ImportAdminControllerTest {
         @Override
         public AdminLatestImportDto getLatestImport() {
             return latestImport;
+        }
+
+        @Override
+        public void recordManualAdminImport(
+                String filename,
+                String exportKind,
+                String importKind,
+                String game,
+                String gameVersion,
+                String exporterVersion,
+                String exportedAtUtc,
+                String schemaVersion,
+                Instant startedAtUtc,
+                ImportSummaryDto summary
+        ) {
+            lastSuccessFilename = filename;
+            lastSuccessExportKind = exportKind;
+            lastSuccessImportKind = importKind;
+            lastSuccessGame = game;
+            lastSuccessGameVersion = gameVersion;
+            lastSuccessExportedAtUtc = exportedAtUtc;
+        }
+
+        @Override
+        public void recordFailedManualAdminImport(
+                String filename,
+                String exportKind,
+                String importKind,
+                String game,
+                String gameVersion,
+                String exporterVersion,
+                String exportedAtUtc,
+                String schemaVersion,
+                Instant startedAtUtc,
+                String errorMessage
+        ) {
+            lastFailedFilename = filename;
+            lastFailedExportKind = exportKind;
+            lastFailedGameVersion = gameVersion;
+            lastFailedErrorMessage = errorMessage;
         }
     }
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import "./AdminImportPage.css";
-import { apiClient, type SeoRegenerationResult } from "@/api/apiClient";
+import { apiClient, type AdminLatestImport, type SeoRegenerationResult } from "@/api/apiClient";
 import {
     createCodexDiagnosticsReportText,
     downloadCodexDiagnosticsReportText,
@@ -22,6 +22,11 @@ type CodexDiagnosticsActionState =
     | { status: "idle" }
     | { status: "running" }
     | { status: "success"; entryCount: number }
+    | { status: "error"; message: string };
+type LatestImportState =
+    | { status: "idle" }
+    | { status: "loading" }
+    | { status: "success"; latestImport: AdminLatestImport }
     | { status: "error"; message: string };
 
 const CODEX_MISSING_REFERENCE_AUDIT_JSON_PATH = "/__generated-seo/codex-missing-references-audit.json";
@@ -388,6 +393,150 @@ function formatDuplicateAliasImpact(audit: NonNullable<SeoRegenerationResult["mi
     return `${impact.resolvedReferences} in-app reference(s) can resolve through ${impact.uniqueReferenceKeys} duplicate-slug alias target(s).${examples}`;
 }
 
+function formatAdminDate(value: string | null | undefined): string {
+    if (!value) return "Unknown";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        month: "short",
+        timeZone: "UTC",
+        timeZoneName: "short",
+        year: "numeric",
+    }).format(date);
+}
+
+function formatSnapshotDate(value: string | null | undefined): string | null {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "numeric",
+        month: "short",
+        timeZone: "UTC",
+        year: "numeric",
+    }).format(date);
+}
+
+function formatAdminStatus(value: string | null | undefined): string {
+    if (!value) return "Unknown";
+    return value
+        .toLowerCase()
+        .split("_")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ");
+}
+
+function formatImportCounts(latestImport: AdminLatestImport): string {
+    const counts = latestImport.counts;
+    const parts = [
+        `${latestImport.importedFileCount} imported`,
+        `${latestImport.skippedFileCount} skipped`,
+        `${latestImport.failedFileCount} failed`,
+        `${counts.received} received`,
+        `${counts.inserted} inserted`,
+        `${counts.updated} updated`,
+        `${counts.unchanged} unchanged`,
+    ];
+    if (counts.deleted > 0) {
+        parts.push(`${counts.deleted} deleted`);
+    }
+    if (counts.failed > 0) {
+        parts.push(`${counts.failed} row failed`);
+    }
+    return parts.join(" · ");
+}
+
+function AdminLatestImportPanel({
+    latestImportState,
+    onRefresh,
+}: {
+    latestImportState: LatestImportState;
+    onRefresh: () => void;
+}) {
+    const latestImport = latestImportState.status === "success" ? latestImportState.latestImport : null;
+    const availableLatestImport = latestImport?.available ? latestImport : null;
+    const snapshotDate = formatSnapshotDate(availableLatestImport?.exportedAtUtc);
+    const gameVersionLine = availableLatestImport?.gameVersion
+        ? `${availableLatestImport.game ?? "Game"} v${availableLatestImport.gameVersion}`
+        : null;
+
+    return (
+        <div className="admin-import-panel admin-import-section admin-import-latestPanel">
+            <div className="admin-import-row">
+                <div style={{ flex: "1 1 320px" }}>
+                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Last import</div>
+                    <div className="admin-import-muted">
+                        Latest persisted import run used by public data freshness and admin verification.
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    className="admin-import-btn admin-import-btn--ghost"
+                    disabled={latestImportState.status === "loading"}
+                    onClick={onRefresh}
+                >
+                    {latestImportState.status === "loading" ? "Refreshing…" : "Refresh"}
+                </button>
+            </div>
+
+            {latestImportState.status === "error" ? (
+                <div className="admin-import-error admin-import-latestNotice">
+                    <div className="admin-import-errorTitle">Latest import unavailable</div>
+                    <div>{latestImportState.message}</div>
+                </div>
+            ) : null}
+
+            {latestImportState.status === "success" && !latestImportState.latestImport.available ? (
+                <div className="admin-import-muted admin-import-latestNotice">
+                    No persisted import run has been recorded yet.
+                </div>
+            ) : null}
+
+            {availableLatestImport ? (
+                <>
+                    <div className="admin-import-latestGrid" aria-label="Latest import summary">
+                        <div>
+                            <span>Status</span>
+                            <strong>{formatAdminStatus(availableLatestImport.status)}</strong>
+                        </div>
+                        <div>
+                            <span>Imported</span>
+                            <strong>{formatAdminDate(availableLatestImport.completedAtUtc)}</strong>
+                        </div>
+                        <div>
+                            <span>Source</span>
+                            <strong>{availableLatestImport.sourceLabel ?? "Unknown"}</strong>
+                        </div>
+                        <div>
+                            <span>Snapshot</span>
+                            <strong>{gameVersionLine ?? "Unknown"}</strong>
+                            {snapshotDate ? <small>{snapshotDate}</small> : null}
+                        </div>
+                    </div>
+                    <div className="admin-import-seoSummary">
+                        Counts: {formatImportCounts(availableLatestImport)}
+                    </div>
+                    {availableLatestImport.fileResults.length > 0 ? (
+                        <div className="admin-import-seoSummary">
+                            Latest files:{" "}
+                            {availableLatestImport.fileResults.slice(0, 4).map((file) => {
+                                const label = file.filename ?? file.importKind ?? file.exportKind ?? "unknown file";
+                                return `${label} (${formatAdminStatus(file.status)})`;
+                            }).join(" | ")}
+                            {availableLatestImport.fileResults.length > 4
+                                ? ` | +${availableLatestImport.fileResults.length - 4} more`
+                                : ""}
+                        </div>
+                    ) : null}
+                </>
+            ) : null}
+        </div>
+    );
+}
+
 export default function AdminImportPage() {
     const [params] = useSearchParams();
     const isAdminMode = params.get("admin") === "1";
@@ -398,6 +547,7 @@ export default function AdminImportPage() {
     const [seoActionState, setSeoActionState] = useState<SeoActionState>({ status: "idle" });
     const [codexDiagnosticsActionState, setCodexDiagnosticsActionState] =
         useState<CodexDiagnosticsActionState>({ status: "idle" });
+    const [latestImportState, setLatestImportState] = useState<LatestImportState>({ status: "idle" });
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
     const individualModules = useMemo<Array<ImportModuleDefinition<any>>>(() => {
@@ -568,6 +718,21 @@ export default function AdminImportPage() {
         }
     }, [token]);
 
+    const loadLatestImport = useCallback(async () => {
+        if (!token.trim()) return;
+
+        setLatestImportState({ status: "loading" });
+        try {
+            const latestImport = await apiClient.getLatestImportAdmin(token.trim());
+            setLatestImportState({ status: "success", latestImport });
+        } catch (error) {
+            setLatestImportState({
+                status: "error",
+                message: (error as Error)?.message ?? "Failed to load latest import state.",
+            });
+        }
+    }, [token]);
+
     const downloadCodexDiagnosticsReport = useCallback(async () => {
         setCodexDiagnosticsActionState({ status: "running" });
 
@@ -598,6 +763,12 @@ export default function AdminImportPage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (tokenStatus === "valid") {
+            void loadLatestImport();
+        }
+    }, [loadLatestImport, tokenStatus]);
 
     if (!isAdminMode) {
         // Don’t reveal how to enable admin mode
@@ -652,6 +823,11 @@ export default function AdminImportPage() {
 
                 {!isUnlocked ? null : (
                     <div className="admin-import-section">
+                        <AdminLatestImportPanel
+                            latestImportState={latestImportState}
+                            onRefresh={() => void loadLatestImport()}
+                        />
+
                         <div className="admin-import-panel admin-import-section">
                             <div className="admin-import-row">
                                 <div style={{ flex: "1 1 320px" }}>

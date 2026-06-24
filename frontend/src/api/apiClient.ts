@@ -71,6 +71,49 @@ export type DataFreshness = {
     note: string | null;
 };
 
+export type AdminImportCounts = {
+    received: number;
+    inserted: number;
+    updated: number;
+    unchanged: number;
+    deleted: number;
+    failed: number;
+};
+
+export type AdminLatestImportFileResult = {
+    filename: string | null;
+    folder: string | null;
+    exportKind: string | null;
+    importKind: string | null;
+    status: string | null;
+    skipReason: string | null;
+    errorMessage: string | null;
+    counts: AdminImportCounts;
+    durationMs: number | null;
+    fileSha256Short: string | null;
+};
+
+export type AdminLatestImport = {
+    available: boolean;
+    runKey: string | null;
+    trigger: string | null;
+    status: string | null;
+    startedAtUtc: string | null;
+    completedAtUtc: string | null;
+    sourceLabel: string | null;
+    fileCount: number;
+    importedFileCount: number;
+    skippedFileCount: number;
+    failedFileCount: number;
+    counts: AdminImportCounts;
+    game: string | null;
+    gameVersion: string | null;
+    exporterVersion: string | null;
+    exportedAtUtc: string | null;
+    notes: string | null;
+    fileResults: AdminLatestImportFileResult[];
+};
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 async function fetcherJson<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -134,6 +177,13 @@ export const apiClient = {
     regenerateSeoPagesAdmin: (adminToken: string) =>
         fetcherJson<SeoRegenerationResult>("/admin/seo/regenerate", {
             method: "POST",
+            headers: {
+                "X-Admin-Token": adminToken,
+            },
+        }),
+
+    getLatestImportAdmin: (adminToken: string) =>
+        fetcherJson<AdminLatestImport>("/admin/import/latest", {
             headers: {
                 "X-Admin-Token": adminToken,
             },
