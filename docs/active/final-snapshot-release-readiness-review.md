@@ -5,7 +5,7 @@ Created: 2026-06-23
 
 ## Executive Recommendation
 
-Recommendation: **Release with caveats**.
+Recommendation: **Do not release until post-deploy blockers are cleared**.
 
 EWShop has adopted the highest-value final-snapshot public Codex improvements
 and the first rich source-truth enrichment paths. The current player-facing
@@ -24,6 +24,17 @@ for production data.
 Do not release Victory Paths or Victory Conditions as normal public top-level
 categories yet. They remain local/dev-visible only until the `Master` Victory
 Path data-quality issue is resolved or explicitly product-accepted.
+
+Post-deploy verification on 2026-06-24 found that production is serving current
+Codex/rich data and current Hero/Faction enrichment code, but two release
+blockers remain:
+
+- `/api/codex` did not return `Content-Encoding: gzip` when requested with
+  `Accept-Encoding: gzip`.
+- `/api/data-freshness` returned `available: false`, so the public Codex Game
+  Data Version block cannot render in production.
+
+Clear these before treating the final snapshot release as production-ready.
 
 ## Completed Ticket Summary
 

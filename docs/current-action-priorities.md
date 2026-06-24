@@ -51,9 +51,10 @@ Active exporter follow-up:
 - `docs/active/final-snapshot-ticket-execution-playbook.md` - lightweight
   execution workflow for `FS-CODEX-*` tickets.
 - `docs/active/final-snapshot-release-readiness-review.md` - release readiness
-  assessment for the current final snapshot adoption cycle. It recommends
-  release with caveats after the current constructible planning slice is either
-  committed or intentionally excluded, and after focused browser QA.
+  assessment for the current final snapshot adoption cycle. Post-deploy
+  verification on 2026-06-24 changed the status to do-not-release until
+  production `/api/codex` compression and `/api/data-freshness` availability are
+  fixed.
 - `docs/active/db-exporter-ability-metadata-handoff.md` - focused Ability
   metadata cleanup request for noisy `Combat role` assignments and explicit
   ability ownership metadata. This is exporter-owned follow-up, not an
