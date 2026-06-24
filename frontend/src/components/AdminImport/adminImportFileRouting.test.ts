@@ -37,6 +37,27 @@ const rawExportModules: Array<ImportModuleDefinition<any>> = [
         endpoint: "/api/admin/import/techs",
         validate: (json) => Array.isArray(json.techs) ? null : "Missing techs.",
     },
+    {
+        id: "factions",
+        title: "Factions rich export",
+        enabled: true,
+        endpoint: "/api/admin/import/factions",
+        validate: (json) => Array.isArray(json.factions) ? null : "Missing factions.",
+    },
+    {
+        id: "heroes",
+        title: "Heroes rich export",
+        enabled: true,
+        endpoint: "/api/admin/import/heroes",
+        validate: (json) => Array.isArray(json.units) ? null : "Missing hero units.",
+    },
+    {
+        id: "skills",
+        title: "Skills rich export",
+        enabled: true,
+        endpoint: "/api/admin/import/skills",
+        validate: (json) => Array.isArray(json.skills) ? null : "Missing skills.",
+    },
 ];
 
 describe("admin import file routing helpers", () => {
@@ -44,6 +65,9 @@ describe("admin import file routing helpers", () => {
         const files = createBulkExportSelectedFiles(
             dropMany([
                 { fileName: "units.json", json: { exportKind: "units", units: [] } },
+                { fileName: "factions.json", json: { exportKind: "factions", factions: [] } },
+                { fileName: "heroes.json", json: { exportKind: "heroes", units: [] } },
+                { fileName: "skills.json", json: { exportKind: "skills", skills: [] } },
                 { fileName: "quests.json", json: { exportKind: "quest_explorer", entries: [{ entryKey: "Quest_A" }] } },
                 { fileName: "battle-skills.json", json: { exportKind: "battleSkills", battleSkills: [] } },
             ]),
@@ -56,6 +80,27 @@ describe("admin import file routing helpers", () => {
                 exportKind: "units",
                 moduleId: "units",
                 endpoint: "/api/admin/import/units",
+                status: "ready",
+            }),
+            expect.objectContaining({
+                fileName: "factions.json",
+                exportKind: "factions",
+                moduleId: "factions",
+                endpoint: "/api/admin/import/factions",
+                status: "ready",
+            }),
+            expect.objectContaining({
+                fileName: "heroes.json",
+                exportKind: "heroes",
+                moduleId: "heroes",
+                endpoint: "/api/admin/import/heroes",
+                status: "ready",
+            }),
+            expect.objectContaining({
+                fileName: "skills.json",
+                exportKind: "skills",
+                moduleId: "skills",
+                endpoint: "/api/admin/import/skills",
                 status: "ready",
             }),
             expect.objectContaining({

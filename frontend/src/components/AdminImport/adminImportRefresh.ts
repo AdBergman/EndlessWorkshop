@@ -1,11 +1,23 @@
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
+import { useFactionStore } from "@/stores/factionStore";
+import { useHeroStore } from "@/stores/heroStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useQuestStore } from "@/stores/questStore";
+import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 
-export type AdminImportModuleId = "districts" | "improvements" | "units" | "techs" | "codex" | "quests";
+export type AdminImportModuleId =
+    | "districts"
+    | "factions"
+    | "heroes"
+    | "improvements"
+    | "skills"
+    | "units"
+    | "techs"
+    | "codex"
+    | "quests";
 
 export type AdminImportRefreshResult =
     | { ok: true }
@@ -22,8 +34,17 @@ export async function refreshStoresAfterAdminImport(
             case "districts":
                 await useDistrictStore.getState().refreshDistricts();
                 break;
+            case "factions":
+                await useFactionStore.getState().refreshFactions();
+                break;
+            case "heroes":
+                await useHeroStore.getState().refreshHeroes();
+                break;
             case "improvements":
                 await useImprovementStore.getState().refreshImprovements();
+                break;
+            case "skills":
+                await useSkillStore.getState().refreshSkills();
                 break;
             case "units":
                 await useUnitStore.getState().refreshUnits();

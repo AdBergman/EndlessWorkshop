@@ -380,6 +380,51 @@ describe("AdminImportPage", () => {
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("techs");
     });
 
+    it("bulk-imports rich factions, heroes, and skills exports for production enrichment", async () => {
+        const user = userEvent.setup();
+        const factions = createJsonFile("ewshop_factions_export_0.82.json", JSON.stringify({
+            exportKind: "factions",
+            factions: [{ factionKey: "Faction_Necrophage", publicDisplayName: "Necrophages" }],
+        }));
+        const heroes = createJsonFile("ewshop_heroes_export_0.82.json", JSON.stringify({
+            exportKind: "heroes",
+            units: [{ unitKey: "Hero_Necrophage_Warrior_1", displayName: "Acid-Clicker" }],
+        }));
+        const skills = createJsonFile("ewshop_skills_export_0.82.json", JSON.stringify({
+            exportKind: "skills",
+            skillTrees: [{ treeKey: "HeroSkillTree_Necrophage" }],
+            skillTiers: [{ tierPlacementKey: "HeroSkillTierPlacement_Necrophage_1" }],
+            skills: [{ skillKey: "HeroSkill_Necrophage_A", publicDisplayName: "Terrain Logistics" }],
+            heroSkillDefaults: [{ heroKey: "Hero_Necrophage_Warrior_1", defaultSkillKeys: ["HeroSkill_Necrophage_A"] }],
+        }));
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        dropFiles(0, [factions, heroes, skills]);
+
+        await screen.findByText(factions.name);
+        expect(screen.getByText(heroes.name)).toBeInTheDocument();
+        expect(screen.getByText(skills.name)).toBeInTheDocument();
+        expect(screen.getByText("Ready to import factions rich export")).toBeInTheDocument();
+        expect(screen.getByText("Ready to import heroes rich export")).toBeInTheDocument();
+        expect(screen.getByText("Ready to import skills rich export")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: /^Import supported exports$/i }));
+
+        await screen.findByText(/3 supported export file\(s\) imported\. 0 unsupported file\(s\) skipped\./i);
+
+        const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
+        expect(postCalls.map(([url]) => url)).toEqual([
+            "/api/admin/import/factions",
+            "/api/admin/import/heroes",
+            "/api/admin/import/skills",
+        ]);
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("factions");
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("heroes");
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("skills");
+    });
+
     it("preserves codex bulk import behavior", async () => {
         const user = userEvent.setup();
         const codexUnits = fixtureFile("local-imports/codex/ewshop_units_codex_export_0.78.json", {
@@ -451,6 +496,9 @@ describe("AdminImportPage", () => {
         expect(screen.getByText("Districts")).toBeInTheDocument();
         expect(screen.getByText("Improvements")).toBeInTheDocument();
         expect(screen.getByText("Units")).toBeInTheDocument();
+        expect(screen.getByText("Factions rich export")).toBeInTheDocument();
+        expect(screen.getByText("Heroes rich export")).toBeInTheDocument();
+        expect(screen.getByText("Skills rich export")).toBeInTheDocument();
         expect(screen.getByText("Techs")).toBeInTheDocument();
         expect(screen.getByText("Codex")).toBeInTheDocument();
     });

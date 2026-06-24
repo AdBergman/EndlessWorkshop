@@ -135,6 +135,117 @@ function validateUnitFile(json: UnitImportFile): string | null {
     return null;
 }
 
+type FactionImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    exportKind?: string;
+    factions?: unknown[];
+};
+
+function metaFromFactionFile(json: FactionImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.factions) ? json.factions.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Export kind", value: json.exportKind ?? "—" },
+        { label: "Faction count", value: String(count) },
+    ];
+}
+
+function validateFactionFile(json: FactionImportFile): string | null {
+    if (json?.exportKind !== "factions") {
+        return "File parsed, but it is not a factions rich export.";
+    }
+    if (!Array.isArray(json.factions) || json.factions.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'factions' array.";
+    }
+    return null;
+}
+
+type HeroImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    exportKind?: string;
+    units?: unknown[];
+};
+
+function metaFromHeroFile(json: HeroImportFile): ModuleMetaKV[] {
+    const count = Array.isArray(json.units) ? json.units.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Export kind", value: json.exportKind ?? "—" },
+        { label: "Hero count", value: String(count) },
+    ];
+}
+
+function validateHeroFile(json: HeroImportFile): string | null {
+    if (json?.exportKind !== "heroes") {
+        return "File parsed, but it is not a heroes rich export.";
+    }
+    if (!Array.isArray(json.units) || json.units.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'units' array.";
+    }
+    return null;
+}
+
+type SkillImportFile = {
+    game?: string;
+    gameVersion?: string;
+    exporterVersion?: string;
+    exportedAtUtc?: string;
+    exportKind?: string;
+    skillTrees?: unknown[];
+    skillTiers?: unknown[];
+    skills?: unknown[];
+    heroSkillDefaults?: unknown[];
+};
+
+function metaFromSkillFile(json: SkillImportFile): ModuleMetaKV[] {
+    const treeCount = Array.isArray(json.skillTrees) ? json.skillTrees.length : 0;
+    const tierCount = Array.isArray(json.skillTiers) ? json.skillTiers.length : 0;
+    const skillCount = Array.isArray(json.skills) ? json.skills.length : 0;
+    const defaultCount = Array.isArray(json.heroSkillDefaults) ? json.heroSkillDefaults.length : 0;
+
+    return [
+        { label: "Game", value: json.game ?? "—" },
+        { label: "Game version", value: json.gameVersion ?? "—" },
+        { label: "Exporter version", value: json.exporterVersion ?? "—" },
+        { label: "Exported at (UTC)", value: json.exportedAtUtc ?? "—" },
+        { label: "Export kind", value: json.exportKind ?? "—" },
+        { label: "Skill tree count", value: String(treeCount) },
+        { label: "Skill tier count", value: String(tierCount) },
+        { label: "Skill count", value: String(skillCount) },
+        { label: "Hero default count", value: String(defaultCount) },
+    ];
+}
+
+function validateSkillFile(json: SkillImportFile): string | null {
+    if (json?.exportKind !== "skills") {
+        return "File parsed, but it is not a skills rich export.";
+    }
+    if (!Array.isArray(json.skillTrees) || json.skillTrees.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'skillTrees' array.";
+    }
+    if (!Array.isArray(json.skillTiers) || json.skillTiers.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'skillTiers' array.";
+    }
+    if (!Array.isArray(json.skills) || json.skills.length === 0) {
+        return "File parsed, but it does not contain a non-empty 'skills' array.";
+    }
+    return null;
+}
+
 type CodexImportFile = {
     game?: string;
     gameVersion?: string;
@@ -322,6 +433,36 @@ export default function AdminImportPage() {
                 importButtonLabel: "Import units",
             },
             {
+                id: "factions",
+                title: "Factions rich export",
+                description: "Upload the rich/source-truth factions export used by Faction Codex enrichment.",
+                enabled: true,
+                endpoint: "/api/admin/import/factions",
+                getMeta: metaFromFactionFile,
+                validate: validateFactionFile,
+                importButtonLabel: "Import factions",
+            },
+            {
+                id: "heroes",
+                title: "Heroes rich export",
+                description: "Upload the rich/source-truth heroes export used by Hero Codex enrichment.",
+                enabled: true,
+                endpoint: "/api/admin/import/heroes",
+                getMeta: metaFromHeroFile,
+                validate: validateHeroFile,
+                importButtonLabel: "Import heroes",
+            },
+            {
+                id: "skills",
+                title: "Skills rich export",
+                description: "Upload the rich/source-truth skills export used by Hero skill enrichment.",
+                enabled: true,
+                endpoint: "/api/admin/import/skills",
+                getMeta: metaFromSkillFile,
+                validate: validateSkillFile,
+                importButtonLabel: "Import skills",
+            },
+            {
                 id: "techs",
                 title: "Techs",
                 description: "Upload a tech export and import it into the database.",
@@ -362,7 +503,7 @@ export default function AdminImportPage() {
             {
                 id: "exports",
                 title: "Import supported exports",
-                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, and quest_explorer. Other raw exports are skipped.",
+                description: "Drop raw exporter JSON files together. Supported now: tech, units, districts, improvements, factions, heroes, skills, and quest_explorer. Other raw exports are skipped.",
                 enabled: true,
                 bulkExportModules: rawExportModules,
                 importButtonLabel: "Import supported exports",

@@ -11,9 +11,11 @@ import ewshop.app.seo.audit.CodexMissingReferenceAuditSummary;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
+import ewshop.facade.interfaces.HeroImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
+import ewshop.facade.interfaces.SkillImportAdminFacade;
 import ewshop.facade.interfaces.TechAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
@@ -143,6 +145,8 @@ class AdminTokenFilterAdminEndpointsTest {
                 mock(ImprovementImportAdminFacade.class),
                 mock(UnitImportAdminFacade.class),
                 mock(FactionImportAdminFacade.class),
+                mock(HeroImportAdminFacade.class),
+                mock(SkillImportAdminFacade.class),
                 mock(CodexImportAdminFacade.class),
                 mock(QuestExplorerImportAdminFacade.class),
                 mock(ImportHistoryFacade.class)

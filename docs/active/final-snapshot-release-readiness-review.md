@@ -17,6 +17,10 @@ Release should proceed only after the current uncommitted constructible planning
 slice is either committed or intentionally excluded from the release branch, and
 after a focused browser QA pass covers the checklist below.
 
+Production Admin Import must include both public Codex files and the rich
+source-truth exports used by frontend enrichment. Do not rely on `local-imports/`
+for production data.
+
 Do not release Victory Paths or Victory Conditions as normal public top-level
 categories yet. They remain local/dev-visible only until the `Master` Victory
 Path data-quality issue is resolved or explicitly product-accepted.
@@ -127,7 +131,11 @@ Moderate-risk areas:
   including a Flyway migration. Release from this workspace requires committing
   or excluding that slice deliberately.
 - Rich import APIs add new backend/API/store surface area. Focused tests pass,
-  but browser QA should verify Codex detail pages after startup import.
+  but browser QA should verify Codex detail pages after production Admin Import.
+- Hero enrichment requires populated `/api/heroes` and `/api/skills`; Faction
+  enrichment requires populated `/api/factions`. Production deploys must import
+  those rich exports through Admin Import, because `local-imports/` only covers
+  development/local startup.
 - Victory categories must stay local-only; accidentally exposing them publicly
   would ship a known data-quality caveat as normal browse content.
 
@@ -141,7 +149,16 @@ High-risk areas to avoid:
 
 ## Browser QA Checklist
 
-Run against a production build or release-like local build after startup import:
+Run against a production build or release-like local build after Admin Import.
+
+Production import order:
+
+1. Import public Codex files from `local-imports/codex/` or the equivalent final
+   snapshot Codex bundle.
+2. Import supported rich/source-truth exports: factions, heroes, skills, tech,
+   units, districts, improvements, and quest_explorer as needed by the release.
+3. Verify `/api/factions`, `/api/heroes`, and `/api/skills` are populated before
+   checking Faction/Hero Codex enrichment.
 
 1. `/codex`
    - Category navigation is stable.

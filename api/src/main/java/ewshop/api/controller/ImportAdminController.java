@@ -6,16 +6,20 @@ import ewshop.facade.dto.response.importing.AdminLatestImportDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
+import ewshop.facade.dto.importing.heroes.HeroImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
+import ewshop.facade.dto.importing.skills.SkillImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
+import ewshop.facade.interfaces.HeroImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
+import ewshop.facade.interfaces.SkillImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.springframework.http.HttpStatus;
@@ -30,6 +34,8 @@ public class ImportAdminController {
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
     private final UnitImportAdminFacade unitImportAdminFacade;
     private final FactionImportAdminFacade factionImportAdminFacade;
+    private final HeroImportAdminFacade heroImportAdminFacade;
+    private final SkillImportAdminFacade skillImportAdminFacade;
     private final CodexImportAdminFacade codexImportAdminFacade;
     private final QuestExplorerImportAdminFacade questExplorerImportAdminFacade;
     private final ImportHistoryFacade importHistoryFacade;
@@ -40,6 +46,8 @@ public class ImportAdminController {
             ImprovementImportAdminFacade improvementImportAdminFacade,
             UnitImportAdminFacade unitImportAdminFacade,
             FactionImportAdminFacade factionImportAdminFacade,
+            HeroImportAdminFacade heroImportAdminFacade,
+            SkillImportAdminFacade skillImportAdminFacade,
             CodexImportAdminFacade codexImportAdminFacade,
             QuestExplorerImportAdminFacade questExplorerImportAdminFacade,
             ImportHistoryFacade importHistoryFacade
@@ -49,6 +57,8 @@ public class ImportAdminController {
         this.improvementImportAdminFacade = improvementImportAdminFacade;
         this.unitImportAdminFacade = unitImportAdminFacade;
         this.factionImportAdminFacade = factionImportAdminFacade;
+        this.heroImportAdminFacade = heroImportAdminFacade;
+        this.skillImportAdminFacade = skillImportAdminFacade;
         this.codexImportAdminFacade = codexImportAdminFacade;
         this.questExplorerImportAdminFacade = questExplorerImportAdminFacade;
         this.importHistoryFacade = importHistoryFacade;
@@ -98,6 +108,16 @@ public class ImportAdminController {
     @PostMapping(value = "/factions", consumes = "application/json", produces = "application/json")
     public ImportSummaryDto importFactions(@RequestBody FactionImportBatchDto dto) {
         return factionImportAdminFacade.importFactions(dto);
+    }
+
+    @PostMapping(value = "/heroes", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importHeroes(@RequestBody HeroImportBatchDto dto) {
+        return heroImportAdminFacade.importHeroes(dto);
+    }
+
+    @PostMapping(value = "/skills", consumes = "application/json", produces = "application/json")
+    public ImportSummaryDto importSkills(@RequestBody SkillImportBatchDto dto) {
+        return skillImportAdminFacade.importSkills(dto);
     }
 
     @PostMapping(value = "/codex", consumes = "application/json", produces = "application/json")

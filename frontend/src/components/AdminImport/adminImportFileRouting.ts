@@ -61,14 +61,20 @@ const QUEST_IMPORT_ENDPOINT = "/api/admin/import/quests/explorer";
 
 const BULK_EXPORT_KIND_BY_MODULE_ID: Record<string, string> = {
     districts: "districts",
+    factions: "factions",
+    heroes: "heroes",
     improvements: "improvements",
+    skills: "skills",
     techs: "tech",
     units: "units",
 };
 
 const BULK_EXPORT_ARRAY_FIELD_BY_MODULE_ID: Record<string, string> = {
     districts: "districts",
+    factions: "factions",
+    heroes: "units",
     improvements: "improvements",
+    skills: "skills",
     techs: "techs",
     units: "units",
 };

@@ -10,12 +10,14 @@ import ewshop.facade.dto.response.importing.DataFreshnessDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.factions.FactionImportBatchDto;
+import ewshop.facade.dto.importing.heroes.HeroImportBatchDto;
 import ewshop.facade.dto.importing.improvements.ImprovementImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportBatchDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportEntryDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportLoreViewDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportNavigationDto;
 import ewshop.facade.dto.importing.quests.QuestExplorerImportStrategyViewDto;
+import ewshop.facade.dto.importing.skills.SkillImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportBatchDto;
 import ewshop.facade.dto.importing.tech.TechImportTechDto;
 import ewshop.facade.dto.importing.units.UnitImportBatchDto;
@@ -23,9 +25,11 @@ import ewshop.facade.dto.importing.units.UnitImportUnitDto;
 import ewshop.facade.interfaces.CodexImportAdminFacade;
 import ewshop.facade.interfaces.DistrictImportAdminFacade;
 import ewshop.facade.interfaces.FactionImportAdminFacade;
+import ewshop.facade.interfaces.HeroImportAdminFacade;
 import ewshop.facade.interfaces.ImprovementImportAdminFacade;
 import ewshop.facade.interfaces.ImportHistoryFacade;
 import ewshop.facade.interfaces.QuestExplorerImportAdminFacade;
+import ewshop.facade.interfaces.SkillImportAdminFacade;
 import ewshop.facade.interfaces.TechImportAdminFacade;
 import ewshop.facade.interfaces.UnitImportAdminFacade;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +63,8 @@ class ImportAdminControllerTest {
     private RecordingImprovementImportAdminFacade improvementFacade;
     private RecordingUnitImportAdminFacade unitFacade;
     private RecordingFactionImportAdminFacade factionFacade;
+    private RecordingHeroImportAdminFacade heroFacade;
+    private RecordingSkillImportAdminFacade skillFacade;
     private RecordingQuestExplorerImportAdminFacade questFacade;
     private RecordingCodexImportAdminFacade codexFacade;
     private RecordingImportHistoryFacade importHistoryFacade;
@@ -71,6 +77,8 @@ class ImportAdminControllerTest {
         improvementFacade = new RecordingImprovementImportAdminFacade();
         unitFacade = new RecordingUnitImportAdminFacade();
         factionFacade = new RecordingFactionImportAdminFacade();
+        heroFacade = new RecordingHeroImportAdminFacade();
+        skillFacade = new RecordingSkillImportAdminFacade();
         questFacade = new RecordingQuestExplorerImportAdminFacade();
         codexFacade = new RecordingCodexImportAdminFacade();
         importHistoryFacade = new RecordingImportHistoryFacade();
@@ -80,6 +88,8 @@ class ImportAdminControllerTest {
                 improvementFacade,
                 unitFacade,
                 factionFacade,
+                heroFacade,
+                skillFacade,
                 codexFacade,
                 questFacade,
                 importHistoryFacade
@@ -423,6 +433,102 @@ class ImportAdminControllerTest {
         assertEquals("Faction_Aspect", factionFacade.lastDto.factions().getFirst().factionKey());
         assertEquals("FactionTrait_Aspects_Cohabitation", factionFacade.lastDto.factions().getFirst().traitKeys().getFirst());
         assertEquals("Aspect_Technology_00", factionFacade.lastDto.factions().getFirst().gatedTechnologyKeys().getFirst());
+    }
+
+    @Test
+    void importHeroes_usesRichHeroesUnitsCollection() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.82",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "heroes",
+                  "ignoredExporterBatchField": true,
+                  "units": [
+                    {
+                      "unitKey": "Hero_Necrophage_Warrior_1",
+                      "displayName": "Acid-Clicker",
+                      "factionKey": "Faction_Necrophage",
+                      "heroClassKey": "UnitClass_Flying",
+                      "defaultSkillKeys": ["HeroSkill_Default_A"],
+                      "applicableSkillTreeKeys": ["HeroSkillTree_Necrophage"],
+                      "ignoredExporterHeroField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/heroes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(heroFacade.lastDto);
+        assertEquals("Hero_Necrophage_Warrior_1", heroFacade.lastDto.units().getFirst().unitKey());
+        assertEquals("Acid-Clicker", heroFacade.lastDto.units().getFirst().displayName());
+        assertEquals("HeroSkill_Default_A", heroFacade.lastDto.units().getFirst().defaultSkillKeys().getFirst());
+        assertEquals("HeroSkillTree_Necrophage", heroFacade.lastDto.units().getFirst().applicableSkillTreeKeys().getFirst());
+    }
+
+    @Test
+    void importSkills_preservesSkillTreesAndSkillPayload() throws Exception {
+        String payload = """
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.82",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "now",
+                  "exportKind": "skills",
+                  "ignoredExporterBatchField": true,
+                  "skillTrees": [
+                    {
+                      "treeKey": "HeroSkillTree_Necrophage",
+                      "treeType": "Faction",
+                      "tierKeys": ["HeroSkillTier_Necrophage_1"],
+                      "skillKeys": ["HeroSkill_Necrophage_A"],
+                      "ignoredExporterTreeField": "future"
+                    }
+                  ],
+                  "skillTiers": [
+                    {
+                      "tierPlacementKey": "HeroSkillTierPlacement_Necrophage_1",
+                      "tierKey": "HeroSkillTier_Necrophage_1",
+                      "treeKey": "HeroSkillTree_Necrophage",
+                      "levelPrerequisite": 4,
+                      "skillKeys": ["HeroSkill_Necrophage_A"],
+                      "ignoredExporterTierField": "future"
+                    }
+                  ],
+                  "skills": [
+                    {
+                      "skillKey": "HeroSkill_Necrophage_A",
+                      "publicDisplayName": "Terrain Logistics",
+                      "primaryAbilityKey": "UnitAbility_TerrainLogistics",
+                      "resolvedSummaryLines": ["Moves better on rough terrain."],
+                      "ignoredExporterSkillField": "future"
+                    }
+                  ],
+                  "heroSkillDefaults": [
+                    {
+                      "heroKey": "Hero_Necrophage_Warrior_1",
+                      "defaultSkillKeys": ["HeroSkill_Necrophage_A"],
+                      "ignoredExporterDefaultField": "future"
+                    }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/admin/import/skills")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isOk());
+
+        assertNotNull(skillFacade.lastDto);
+        assertEquals("HeroSkillTree_Necrophage", skillFacade.lastDto.skillTrees().getFirst().treeKey());
+        assertEquals("HeroSkillTierPlacement_Necrophage_1", skillFacade.lastDto.skillTiers().getFirst().tierPlacementKey());
+        assertEquals("Terrain Logistics", skillFacade.lastDto.skills().getFirst().publicDisplayName());
+        assertEquals("HeroSkill_Necrophage_A", skillFacade.lastDto.heroSkillDefaults().getFirst().defaultSkillKeys().getFirst());
     }
 
     @Test
@@ -980,6 +1086,26 @@ class ImportAdminControllerTest {
             }
             lastDto = file;
             return okSummary("factions");
+        }
+    }
+
+    private static final class RecordingHeroImportAdminFacade implements HeroImportAdminFacade {
+        private HeroImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importHeroes(HeroImportBatchDto file) {
+            lastDto = file;
+            return okSummary("heroes");
+        }
+    }
+
+    private static final class RecordingSkillImportAdminFacade implements SkillImportAdminFacade {
+        private SkillImportBatchDto lastDto;
+
+        @Override
+        public ImportSummaryDto importSkills(SkillImportBatchDto file) {
+            lastDto = file;
+            return okSummary("skills");
         }
     }
 }

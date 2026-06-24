@@ -194,6 +194,11 @@ Current rules:
   for the post-handoff adoption cycle. The recommended post-release product
   direction is a Faction strategy/profile shape decision, not another broad
   metadata-adoption sweep.
+- Production is populated through Admin Import, not `local-imports/`. Any
+  prod-ready frontend enrichment that depends on rich APIs must have a working
+  Admin Import path and populated target APIs; Hero enrichment requires
+  `/api/heroes` and `/api/skills`, and Faction enrichment requires
+  `/api/factions`.
 - No `EW-CODEX-UI-006` ticket is currently defined.
 
 ## P0 - Quest Documentation Cleanup Only
