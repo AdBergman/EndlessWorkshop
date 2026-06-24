@@ -22,6 +22,7 @@ vi.mock("@/api/apiClient", () => ({
         getUnits: vi.fn(),
         getCodex: vi.fn(),
         getQuestExplorer: vi.fn(),
+        getDataFreshness: vi.fn(),
         getSavedBuild: vi.fn(),
         createSavedBuild: vi.fn(),
     },
@@ -77,6 +78,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
         mockedApiClient.getQuestExplorer.mockReset();
+        mockedApiClient.getDataFreshness.mockReset();
         mockedApiClient.getSavedBuild.mockReset();
         mockedApiClient.createSavedBuild.mockReset();
 
@@ -86,6 +88,18 @@ describe("App route data hydration", () => {
         mockedApiClient.getUnits.mockResolvedValue(units);
         mockedApiClient.getCodex.mockResolvedValue(codexEntries);
         mockedApiClient.getQuestExplorer.mockResolvedValue(questPayload);
+        mockedApiClient.getDataFreshness.mockResolvedValue({
+            available: false,
+            latestImportAtUtc: null,
+            game: null,
+            gameVersion: null,
+            exporterVersion: null,
+            exportedAtUtc: null,
+            sourceLabel: null,
+            importedFileCount: 0,
+            importedKinds: [],
+            note: null,
+        });
     });
 
     function renderFromInfoRoute() {
