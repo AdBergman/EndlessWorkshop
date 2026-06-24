@@ -104,7 +104,9 @@ Existing backend cache:
 
 - Domain service caches the complete Codex entry list.
 - No evidence of HTTP ETag/Last-Modified handling for `/api/codex`.
-- No Spring API compression setting was found in app configuration.
+- Spring response compression is enabled for prod/staging as of
+  `2026-06-24`, with a `2KB` minimum response size and JSON/HTML/text/CSS/JS/SVG
+  MIME types. Dev remains uncompressed for simpler local debugging.
 - Static frontend shell/assets have cache headers, but API responses are not
   covered by `FrontendCacheHeaderFilter`.
 
@@ -338,7 +340,10 @@ Recommendation:
 Part 1 - verify or enable compression:
 
 - Check production response headers for `/api/codex`.
-- If absent, enable Spring response compression for JSON API responses.
+- Spring compression is enabled in prod/staging config; verify after deploy
+  with:
+  - `curl -I -H "Accept-Encoding: gzip" https://endlessworkshop.dev/api/codex`
+  - expect `Content-Encoding: gzip`
 - Add a small backend test or documented curl check for `Content-Encoding` where
   practical.
 
@@ -438,11 +443,11 @@ For the recommended implementation:
 ## Open Questions
 
 - Is production currently compressing `/api/codex` through Spring, reverse proxy,
-  or CDN? Source configuration does not show Spring API compression, but
-  production headers should be checked before making a config change.
+  or CDN after the prod/staging config change? Production headers should be
+  checked after deploy because the Codex environment could not connect to
+  `endlessworkshop.dev` during the investigation.
 - How often do users land on `/codex` versus direct category/detail routes?
 - Is slow load mostly network transfer, backend serialization, or frontend main
   thread work in production browsers?
 - Should the summary endpoint return backend-owned labels, or should frontend
   continue owning player-facing category labels?
-

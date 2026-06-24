@@ -56,3 +56,18 @@ admin:
 ewshop:
   cors:
     allowed-origins: ${EWSHOP_CORS_ALLOWED_ORIGINS:https://endlessworkshop.dev}
+
+server:
+  compression:
+    enabled: true
+    min-response-size: 2KB
+    mime-types:
+      - application/json
+      - application/problem+json
+      - text/html
+      - text/plain
+      - text/css
+      - application/javascript
+      - image/svg+xml
+      - application/xml
+      - text/xml
