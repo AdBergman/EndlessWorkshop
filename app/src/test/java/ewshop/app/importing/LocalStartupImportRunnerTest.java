@@ -745,6 +745,16 @@ class LocalStartupImportRunnerTest {
         }
 
         @Override
+        public Optional<ImportRun> findLatestSuccessfulImportRunByImportedKind(String importKind) {
+            return runs.stream()
+                    .filter(run -> run.status() == ImportRunStatus.SUCCESS)
+                    .filter(run -> run.fileResults().stream().anyMatch(result ->
+                            result.status() == ewshop.domain.model.importing.ImportFileStatus.IMPORTED
+                                    && importKind.equals(result.importKind())))
+                    .findFirst();
+        }
+
+        @Override
         public Optional<ImportRun> findLatestImportRun() {
             return runs.stream().findFirst();
         }

@@ -43,9 +43,44 @@ class ImportHistoryFacadeImplTest {
     }
 
     @Test
+    void latestDataFreshnessUsesLatestSuccessfulCodexRunInsteadOfLatestRichRun() {
+        ImportRun codexSuccess = run("codex-success", ImportRunStatus.SUCCESS, "2026-06-23T10:00:00Z", 1, List.of(
+                file("abilities-codex.json", "abilities", "codex", ImportFileStatus.IMPORTED)
+        ));
+        ImportRun richSuccess = run("rich-success", ImportRunStatus.SUCCESS, "2026-06-24T10:00:00Z", 1, List.of(
+                file("skills.json", "skills", "skills", ImportFileStatus.IMPORTED)
+        ));
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(
+                new RecordingRepository(codexSuccess, richSuccess, richSuccess)
+        );
+
+        DataFreshnessDto dto = facade.getLatestDataFreshness();
+
+        assertThat(dto.available()).isTrue();
+        assertThat(dto.latestImportAtUtc()).isEqualTo("2026-06-23T10:00:00Z");
+        assertThat(dto.importedKinds()).containsExactly("codex");
+    }
+
+    @Test
+    void latestDataFreshnessIsUnavailableWhenOnlyRichRunsExist() {
+        ImportRun richSuccess = run("rich-success", ImportRunStatus.SUCCESS, "2026-06-24T10:00:00Z", 1, List.of(
+                file("heroes.json", "heroes", "heroes", ImportFileStatus.IMPORTED)
+        ));
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(
+                new RecordingRepository(null, richSuccess, richSuccess)
+        );
+
+        DataFreshnessDto dto = facade.getLatestDataFreshness();
+
+        assertThat(dto.available()).isFalse();
+        assertThat(dto.importedKinds()).isEmpty();
+    }
+
+    @Test
     void latestDataFreshnessFallsBackToUsefulPartialRunWithCaveat() {
         ImportRun partial = run("partial", ImportRunStatus.PARTIAL_SUCCESS, "2026-06-24T10:00:00Z", 1, List.of(
                 file("tech.json", "tech", "tech", ImportFileStatus.IMPORTED),
+                file("codex.json", "abilities", "codex", ImportFileStatus.IMPORTED),
                 file("diagnostics.json", "actions-codex-inventory", null, ImportFileStatus.SKIPPED)
         ));
         ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(new RecordingRepository(null, partial));
@@ -54,7 +89,7 @@ class ImportHistoryFacadeImplTest {
 
         assertThat(dto.available()).isTrue();
         assertThat(dto.latestImportAtUtc()).isEqualTo("2026-06-24T10:00:00Z");
-        assertThat(dto.importedKinds()).containsExactly("tech");
+        assertThat(dto.importedKinds()).containsExactly("codex", "tech");
         assertThat(dto.note()).contains("skipped or failed");
     }
 
@@ -212,10 +247,16 @@ class ImportHistoryFacadeImplTest {
     private static final class RecordingRepository implements ImportHistoryRepository {
 
         private final ImportRun successful;
+        private final ImportRun successfulByImportedKind;
         private final ImportRun latest;
         private final List<ImportRun> savedRuns = new ArrayList<>();
 
         private RecordingRepository(ImportRun successful, ImportRun latest) {
+            this(successful != null && hasImportedKind(successful, "codex") ? successful : null, successful, latest);
+        }
+
+        private RecordingRepository(ImportRun successfulByImportedKind, ImportRun successful, ImportRun latest) {
+            this.successfulByImportedKind = successfulByImportedKind;
             this.successful = successful;
             this.latest = latest;
         }
@@ -231,8 +272,19 @@ class ImportHistoryFacadeImplTest {
         }
 
         @Override
+        public Optional<ImportRun> findLatestSuccessfulImportRunByImportedKind(String importKind) {
+            return Optional.ofNullable(successfulByImportedKind);
+        }
+
+        @Override
         public Optional<ImportRun> findLatestImportRun() {
             return Optional.ofNullable(latest);
+        }
+
+        private static boolean hasImportedKind(ImportRun run, String importKind) {
+            return run.fileResults().stream()
+                    .anyMatch(result -> result.status() == ImportFileStatus.IMPORTED
+                            && importKind.equals(result.importKind()));
         }
     }
 }

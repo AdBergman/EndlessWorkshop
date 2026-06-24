@@ -116,6 +116,12 @@ class ImportHistoryRepositoryAdapterIT {
                 "2026-06-23T10:00:00Z",
                 List.of(importedFile("tech.json", "tech"))
         );
+        ImportRun codexSuccess = run(
+                "codex-success-run",
+                ImportRunStatus.SUCCESS,
+                "2026-06-22T10:00:00Z",
+                List.of(importedFile("abilities-codex.json", "codex"))
+        );
         ImportRun newerPartial = run(
                 "partial-run",
                 ImportRunStatus.PARTIAL_SUCCESS,
@@ -126,6 +132,7 @@ class ImportHistoryRepositoryAdapterIT {
                 )
         );
 
+        importHistoryRepository.saveImportRun(codexSuccess);
         importHistoryRepository.saveImportRun(success);
         importHistoryRepository.saveImportRun(newerPartial);
 
@@ -133,6 +140,10 @@ class ImportHistoryRepositoryAdapterIT {
         assertThat(latestSuccessful.runKey()).isEqualTo("success-run");
         assertThat(latestSuccessful.fileResults()).hasSize(1);
         assertThat(latestSuccessful.fileResults().getFirst().filename()).isEqualTo("tech.json");
+
+        ImportRun latestSuccessfulCodex = importHistoryRepository.findLatestSuccessfulImportRunByImportedKind("codex").orElseThrow();
+        assertThat(latestSuccessfulCodex.runKey()).isEqualTo("codex-success-run");
+        assertThat(latestSuccessfulCodex.fileResults().getFirst().filename()).isEqualTo("abilities-codex.json");
 
         ImportRun latest = importHistoryRepository.findLatestImportRun().orElseThrow();
         assertThat(latest.runKey()).isEqualTo("partial-run");

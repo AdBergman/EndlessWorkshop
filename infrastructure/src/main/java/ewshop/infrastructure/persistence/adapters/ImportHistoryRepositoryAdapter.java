@@ -40,6 +40,18 @@ public class ImportHistoryRepositoryAdapter implements ImportHistoryRepository {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<ImportRun> findLatestSuccessfulImportRunByImportedKind(String importKind) {
+        return importRunJpaRepository
+                .findFirstDistinctByStatusAndFileResultsStatusAndFileResultsImportKindOrderByCompletedAtUtcDescIdDesc(
+                        "SUCCESS",
+                        "IMPORTED",
+                        importKind
+                )
+                .map(ImportHistoryRepositoryAdapter::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<ImportRun> findLatestImportRun() {
         return importRunJpaRepository.findFirstByOrderByCompletedAtUtcDescIdDesc()
                 .map(ImportHistoryRepositoryAdapter::toDomain);

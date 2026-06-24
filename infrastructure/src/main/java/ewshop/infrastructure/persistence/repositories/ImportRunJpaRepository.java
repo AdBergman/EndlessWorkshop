@@ -9,5 +9,11 @@ public interface ImportRunJpaRepository extends JpaRepository<ImportRunEntity, L
 
     Optional<ImportRunEntity> findFirstByStatusOrderByCompletedAtUtcDescIdDesc(String status);
 
+    Optional<ImportRunEntity> findFirstDistinctByStatusAndFileResultsStatusAndFileResultsImportKindOrderByCompletedAtUtcDescIdDesc(
+            String status,
+            String fileStatus,
+            String importKind
+    );
+
     Optional<ImportRunEntity> findFirstByOrderByCompletedAtUtcDescIdDesc();
 }

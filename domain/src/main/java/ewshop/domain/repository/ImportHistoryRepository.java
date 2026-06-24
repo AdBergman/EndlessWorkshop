@@ -10,5 +10,7 @@ public interface ImportHistoryRepository {
 
     Optional<ImportRun> findLatestSuccessfulImportRun();
 
+    Optional<ImportRun> findLatestSuccessfulImportRunByImportedKind(String importKind);
+
     Optional<ImportRun> findLatestImportRun();
 }

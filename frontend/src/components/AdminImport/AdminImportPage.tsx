@@ -467,9 +467,9 @@ function AdminLatestImportPanel({
         <div className="admin-import-panel admin-import-section admin-import-latestPanel">
             <div className="admin-import-row">
                 <div style={{ flex: "1 1 320px" }}>
-                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Last import</div>
+                    <div style={{ fontWeight: 800, marginBottom: 6 }}>Last import record</div>
                     <div className="admin-import-muted">
-                        Latest persisted import run used by public data freshness and admin verification.
+                        Latest persisted import run used by admin verification. Bulk imports are recorded one file at a time.
                     </div>
                 </div>
                 <button

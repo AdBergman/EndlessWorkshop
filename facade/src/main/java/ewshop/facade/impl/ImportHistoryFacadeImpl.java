@@ -25,6 +25,7 @@ public class ImportHistoryFacadeImpl implements ImportHistoryFacade {
     private static final String PARTIAL_PUBLIC_NOTE = "Latest import completed with some skipped or failed files.";
     private static final String MANUAL_ADMIN_SOURCE_LABEL = "admin-upload";
     private static final String MANUAL_ADMIN_FOLDER = "admin-upload";
+    private static final String PUBLIC_CODEX_IMPORT_KIND = "codex";
 
     private final ImportHistoryRepository importHistoryRepository;
 
@@ -34,7 +35,8 @@ public class ImportHistoryFacadeImpl implements ImportHistoryFacade {
 
     @Override
     public DataFreshnessDto getLatestDataFreshness() {
-        Optional<ImportRun> successful = importHistoryRepository.findLatestSuccessfulImportRun();
+        Optional<ImportRun> successful = importHistoryRepository
+                .findLatestSuccessfulImportRunByImportedKind(PUBLIC_CODEX_IMPORT_KIND);
         if (successful.isPresent()) {
             return toFreshnessDto(successful.get(), null);
         }
@@ -42,7 +44,7 @@ public class ImportHistoryFacadeImpl implements ImportHistoryFacade {
         Optional<ImportRun> latest = importHistoryRepository.findLatestImportRun();
         if (latest.isPresent()
                 && latest.get().status() == ImportRunStatus.PARTIAL_SUCCESS
-                && latest.get().importedFileCount() > 0) {
+                && hasImportedKind(latest.get(), PUBLIC_CODEX_IMPORT_KIND)) {
             return toFreshnessDto(latest.get(), PARTIAL_PUBLIC_NOTE);
         }
 
@@ -259,6 +261,12 @@ public class ImportHistoryFacadeImpl implements ImportHistoryFacade {
             }
         }
         return kinds.stream().sorted().toList();
+    }
+
+    private static boolean hasImportedKind(ImportRun run, String importKind) {
+        return run.fileResults().stream()
+                .anyMatch(result -> result.status() == ImportFileStatus.IMPORTED
+                        && importKind.equalsIgnoreCase(trimToNull(result.importKind())));
     }
 
     private static String kindLabel(ImportFileResult result) {
