@@ -3,7 +3,8 @@
 Status: active evidence packet  
 Created: 2026-06-24  
 Source artifact: local Admin Codex diagnostics report
-`docs/active/codex-diagnostics-report.txt` (not committed; summarized here)
+`docs/archive/codex/diagnostics-evidence-2026-06-24/codex-diagnostics-report.txt`
+(archived evidence; summarized here)
 
 ## Purpose
 

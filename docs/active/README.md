@@ -1,6 +1,6 @@
 # Active Documentation Index
 
-Current as of 2026-06-23.
+Current as of 2026-06-24.
 
 ## Purpose
 
@@ -154,11 +154,6 @@ index, then select the smallest relevant doc set for the task type.
     tracking, Admin Import history, or Codex data freshness UI.
   - Status: active implementation design.
 
-- `docs/active/codex-self-sustaining-worklog.md`
-  - Purpose: execution log for an earlier Codex workstream.
-  - Read when: reconstructing how previous Codex UI/exporter tasks landed.
-  - Status: historical active reference; do not treat as current backlog.
-
 ### Codex Category Evolution Docs
 
 Category evolution docs are durable memory for individual Codex categories.
@@ -180,23 +175,16 @@ Status: active category memory. These are not chat summaries; they record
 accepted decisions, rejected approaches, open questions, exporter findings, and
 closeout results.
 
-### Codex Category Execution Plans
+### Archived Codex Execution Records
 
-Execution plans preserve long-running task state and should be updated during
-future multi-slice category work:
+Completed category execution plans and older worklogs now live in:
 
-- `docs/active/codex-actions-execution-plan.md`
-- `docs/active/codex-diplomacy-execution-plan.md`
-- `docs/active/codex-districts-execution-plan.md`
-- `docs/active/codex-equipment-execution-plan.md`
-- `docs/active/codex-heroes-execution-plan.md`
-- `docs/active/codex-improvements-execution-plan.md`
-- `docs/active/codex-quests-execution-plan.md`
-- `docs/active/codex-technologies-execution-plan.md`
-- `docs/active/codex-traits-execution-plan.md`
-- `docs/active/codex-units-execution-plan.md`
+- `docs/archive/codex/completed-2026-06-24-category-execution-plans/`
+- `docs/archive/codex/completed-2026-06-24-worklogs/`
 
-Status: active durable task memory. Update them when reopening those categories.
+Status: historical task-state records. Use the active category evolution docs
+first; read archived execution records only when reconstructing a completed
+category pass.
 
 ## DB Exporter / Import Metadata
 
@@ -350,6 +338,12 @@ doc points to a specific archived record or the user explicitly asks for history
 Archived docs may contain superseded handoffs, old audits, design templates,
 completed investigations, and implementation bundles. They are evidence, not
 current instructions.
+
+Recently archived Codex records:
+
+- `docs/archive/codex/completed-2026-06-24-category-execution-plans/`
+- `docs/archive/codex/completed-2026-06-24-worklogs/`
+- `docs/archive/codex/diagnostics-evidence-2026-06-24/`
 
 ## Maintenance Rules
 

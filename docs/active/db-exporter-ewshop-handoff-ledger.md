@@ -247,14 +247,15 @@ Related token/icon clarification:
 
 - Direction: EWShop -> DB Exporter
 - Topic: current Admin Codex diagnostics evidence for unresolved references
-- Summary: EWShop distilled `docs/active/codex-diagnostics-report.txt` into a
-  concise handoff packet, separating exporter candidates from EWShop-owned
-  follow-ups and expected/no-action noise.
+- Summary: EWShop distilled an Admin Codex diagnostics report into a concise
+  handoff packet, separating exporter candidates from EWShop-owned follow-ups
+  and expected/no-action noise.
 - Source docs/files:
   - `docs/active/db-exporter-codex-diagnostics-evidence-handoff.md`
   - `docs/active/db-exporter-request-workflow.md`
-  - Local input artifact: `docs/active/codex-diagnostics-report.txt`
-    (summarized, not committed)
+  - Archived input artifact:
+    `docs/archive/codex/diagnostics-evidence-2026-06-24/codex-diagnostics-report.txt`
+    (summarized, not active guidance)
 - Snapshot/export version: current imported Codex data as of 2026-06-24.
 - Decision/result: 42 `unresolved-imported-domain-ref` diagnostics and 84
   `unresolved-ref` diagnostics were summarized. Exporter candidates are
@@ -600,6 +601,7 @@ Archived historical context:
 - `docs/archive/codex/superseded-2026-06-13-exporter-packet-inputs/`
 - `docs/archive/codex/superseded-2026-06-16-db-exporter-definitive-response/`
 - `docs/archive/codex/superseded-2026-06-17-premium-ui-baseline/`
+- `docs/archive/codex/diagnostics-evidence-2026-06-24/`
 - `docs/archive/exporter-handoffs/exporter-handoff-status.md`
 - `docs/archive/exporter-handoffs/ewshop-handoff-2026-06.md`
 - `docs/archive/exporter-handoffs/description-token-icons-handoff-2026-06.md`
