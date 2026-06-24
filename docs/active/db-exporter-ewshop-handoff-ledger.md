@@ -213,7 +213,61 @@ Open gap:
 - If product wants constructible resource prerequisites, exporter/import data
   needs exact public refs or source-backed display metadata.
 
+### Codex Diagnostics Imported-Domain Reference Triage
+
+Source: `docs/active/db-exporter-codex-diagnostics-evidence-handoff.md`
+
+Status: open, non-blocking.
+
+Open gap:
+
+- Admin Codex diagnostics report from 2026-06-24 found 42
+  `unresolved-imported-domain-ref` diagnostics and 84 `unresolved-ref`
+  diagnostics.
+- Highest-signal imported-domain buckets are quest, ability, faction,
+  minor-faction, district, and unit references that EWShop cannot safely
+  resolve to public Codex targets.
+- DB Exporter should classify referenced targets as public Codex, rich-only,
+  internal/prototype, obsolete, or unavailable.
+- If public, emit exact public Codex refs or matching public Codex target rows.
+- If non-public, mark or omit them so EWShop does not expose them as public
+  relationships.
+- Raw fallback references were counted separately and are not currently treated
+  as missing-data bugs.
+
+Related token/icon clarification:
+
+- `DoubleArrow`, `PopulationCategory_01`, `PopulationCategory_02`, and
+  `PopulationCategory_Homeless` need source/contract clarification before
+  EWShop treats them as stable player-facing icon tokens.
+
 ## Chronological Ledger
+
+### 2026-06-24 - Codex Diagnostics Evidence Packet
+
+- Direction: EWShop -> DB Exporter
+- Topic: current Admin Codex diagnostics evidence for unresolved references
+- Summary: EWShop distilled `docs/active/codex-diagnostics-report.txt` into a
+  concise handoff packet, separating exporter candidates from EWShop-owned
+  follow-ups and expected/no-action noise.
+- Source docs/files:
+  - `docs/active/db-exporter-codex-diagnostics-evidence-handoff.md`
+  - `docs/active/db-exporter-request-workflow.md`
+  - Local input artifact: `docs/active/codex-diagnostics-report.txt`
+    (summarized, not committed)
+- Snapshot/export version: current imported Codex data as of 2026-06-24.
+- Decision/result: 42 `unresolved-imported-domain-ref` diagnostics and 84
+  `unresolved-ref` diagnostics were summarized. Exporter candidates are
+  unresolved imported-domain refs, selected Ability -> Status refs, selected
+  protectorate trait refs, selected Tech/constructible aliases, and token/icon
+  clarification for `DoubleArrow` and population category tokens.
+- EWShop implementation result: no code changes; evidence packet only.
+- Follow-up generated: DB Exporter should classify unresolved imported-domain
+  refs as public Codex, rich-only, internal/prototype, obsolete, or unavailable,
+  and emit exact public refs when public. EWShop-owned findings include raw
+  fallback hardening, Action/Bonus/Modifier noise handling, and admin
+  diagnostics download plumbing.
+- Status: open.
 
 ### 2026-06-09 - SVG / Icon Contract Guardrails
 

@@ -872,9 +872,9 @@
     grid-template-columns: minmax(220px, max-content) minmax(0, 1fr);
     gap: 18px;
     align-items: end;
-    margin-top: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(190, 150, 73, 0.11);
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(190, 150, 73, 0.11);
 }
 
 .codex-overview__freshnessPrimary {

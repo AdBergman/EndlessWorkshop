@@ -58,6 +58,9 @@ Use this checklist before creating a DB Exporter request:
   importer/API preservation, or product navigation?
 - Is there exact evidence: category, entry key, exported field/section/ref, and
   current displayed result?
+- For unresolved-reference claims, have we generated or attached the Admin
+  Codex diagnostics evidence packet, missing-link JSON/Markdown, or diagnostics
+  report when available?
 - Are we avoiding inference from keys, names, prose, duplicate titles, SVG
   filenames, GUIDs, Unity paths, mapper names, or fuzzy matching?
 - Is this request asking for source-backed public metadata or explicit
@@ -83,6 +86,7 @@ Context:
 - Current EWShop behavior:
 - Current exported JSON evidence:
 - Current API/UI evidence, if relevant:
+- Admin Codex diagnostics evidence packet attached, if unresolved refs are claimed:
 - Prior related ledger entry:
 - Why this is not already answered/superseded:
 

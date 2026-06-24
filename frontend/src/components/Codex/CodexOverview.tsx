@@ -62,20 +62,6 @@ export default function CodexOverview({ dataFreshness, options, onSelectKind }: 
                 </div>
             </div>
 
-            {dataFreshness ? (
-                <aside className="codex-overview__freshness" aria-label="Game data version">
-                    <div className="codex-overview__freshnessPrimary">
-                        <span className="codex-overview__freshnessLabel">Game Data Version</span>
-                        <strong>{dataFreshness.mainLine}</strong>
-                        <span>Snapshot date: {dataFreshness.snapshotDate}</span>
-                    </div>
-                    <p>
-                        Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this
-                        data was last extracted from the game.
-                    </p>
-                </aside>
-            ) : null}
-
             <div className="codex-overview__index" aria-label="Codex category index">
                 {options.map((option) => (
                     <button
@@ -101,6 +87,20 @@ export default function CodexOverview({ dataFreshness, options, onSelectKind }: 
                     </button>
                 ))}
             </div>
+
+            {dataFreshness ? (
+                <aside className="codex-overview__freshness" aria-label="Game data version">
+                    <div className="codex-overview__freshnessPrimary">
+                        <span className="codex-overview__freshnessLabel">Game Data Version</span>
+                        <strong>{dataFreshness.mainLine}</strong>
+                        <span>Snapshot date: {dataFreshness.snapshotDate}</span>
+                    </div>
+                    <p>
+                        Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this
+                        data was last extracted from the game.
+                    </p>
+                </aside>
+            ) : null}
         </section>
     );
 }

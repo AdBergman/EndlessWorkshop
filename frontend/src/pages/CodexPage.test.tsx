@@ -621,9 +621,13 @@ describe("CodexPage", () => {
         );
 
         const freshnessBlock = await screen.findByLabelText("Game data version");
+        const categoryIndex = getLandingCategoryIndex();
+        expect(Boolean(categoryIndex.compareDocumentPosition(freshnessBlock) & Node.DOCUMENT_POSITION_FOLLOWING))
+            .toBe(true);
+        expect(freshnessBlock).toBeVisible();
         expect(within(freshnessBlock).getByText("Game Data Version")).toBeInTheDocument();
-        expect(within(freshnessBlock).getByText("Endless Legend 2 v0.82")).toBeInTheDocument();
-        expect(within(freshnessBlock).getByText("Snapshot date: 22 Jun 2026")).toBeInTheDocument();
+        expect(within(freshnessBlock).getByText("Endless Legend 2 v0.82")).toBeVisible();
+        expect(within(freshnessBlock).getByText("Snapshot date: 22 Jun 2026")).toBeVisible();
         expect(within(freshnessBlock).getByText(
             "Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this data was last extracted from the game."
         )).toBeInTheDocument();
@@ -643,6 +647,35 @@ describe("CodexPage", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        await waitFor(() => expect(apiClient.getDataFreshness).toHaveBeenCalled());
+        expect(screen.queryByLabelText("Game data version")).not.toBeInTheDocument();
+    });
+
+    it.each([
+        ["/codex?category=districts"],
+        ["/codex?category=districts&entry=District_MarketSquare"],
+    ])("does not show the game data version block outside the landing page at %s", async (route) => {
+        vi.mocked(apiClient.getDataFreshness).mockResolvedValueOnce({
+            available: true,
+            latestImportAtUtc: "2026-06-23T10:30:00Z",
+            game: "Endless Legend 2",
+            gameVersion: "0.82",
+            exporterVersion: "0.1.0",
+            exportedAtUtc: "2026-06-22T05:57:36Z",
+            sourceLabel: "local-imports",
+            importedFileCount: 22,
+            importedKinds: ["districts"],
+            note: null,
+        });
+
+        render(
+            <MemoryRouter initialEntries={[route]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
         await waitFor(() => expect(apiClient.getDataFreshness).toHaveBeenCalled());
         expect(screen.queryByLabelText("Game data version")).not.toBeInTheDocument();
     });
