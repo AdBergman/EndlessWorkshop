@@ -598,6 +598,61 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
     });
 
+    it("shows stable landing placeholders while Codex categories are hydrating", async () => {
+        const originalLoadEntries = useCodexStore.getState().loadEntries;
+        const loadEntries = vi.fn().mockResolvedValue(undefined);
+
+        useCodexStore.setState({
+            entries: [],
+            entriesByKey: {},
+            entriesByKind: {},
+            entriesByKindKey: {},
+            loading: true,
+            error: null,
+            loadEntries,
+        });
+
+        try {
+            render(
+                <MemoryRouter initialEntries={["/codex"]}>
+                    <Routes>
+                        <Route path="/codex" element={<CodexPage />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+
+            expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+            expect(screen.getByLabelText("Loading categories")).toBeInTheDocument();
+            const loadingIndex = screen.getByLabelText("Codex category index loading");
+            expect(loadingIndex).toBeInTheDocument();
+            expect(within(loadingIndex).getByText("Loading encyclopedia categories…")).toBeInTheDocument();
+            expect(within(loadingIndex).queryAllByRole("button")).toHaveLength(0);
+            expect(screen.queryByLabelText("Codex category index")).not.toBeInTheDocument();
+        } finally {
+            useCodexStore.setState({ loadEntries: originalLoadEntries });
+        }
+    });
+
+    it("keeps existing landing category cards visible during a refetch", async () => {
+        seedDefaultCodexStore();
+        useCodexStore.setState({ loading: true });
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex category index loading")).not.toBeInTheDocument();
+        const categoryIndex = getLandingCategoryIndex();
+        expect(within(categoryIndex).getByRole("button", {
+            name: /districts 2 city tiles, exploitations, and terrain infrastructure/i,
+        })).toBeInTheDocument();
+    });
+
     it("shows the game data version block on the landing page when freshness is available", async () => {
         vi.mocked(apiClient.getDataFreshness).mockResolvedValueOnce({
             available: true,

@@ -154,6 +154,13 @@ index, then select the smallest relevant doc set for the task type.
     tracking, Admin Import history, or Codex data freshness UI.
   - Status: active implementation design.
 
+- `docs/active/codex-hydration-performance-investigation.md`
+  - Purpose: performance investigation for Codex initial hydration, API payload
+    shape, frontend indexing, rich-store loading, and route-specific load needs.
+  - Read when: improving `/codex` load time, adding Codex summary/scoped
+    endpoints, or changing Codex store hydration behavior.
+  - Status: active performance investigation.
+
 ### Codex Category Evolution Docs
 
 Category evolution docs are durable memory for individual Codex categories.

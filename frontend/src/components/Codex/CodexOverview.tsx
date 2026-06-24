@@ -13,6 +13,7 @@ export type CodexOverviewFreshness = {
 
 type Props = {
     dataFreshness?: CodexOverviewFreshness | null;
+    isLoading?: boolean;
     options: CodexOverviewOption[];
     onSelectKind: (kind: string) => void;
 };
@@ -44,7 +45,9 @@ function descriptionFor(kind: string): string {
     return KIND_DESCRIPTIONS[kind] ?? "Indexed game entries.";
 }
 
-export default function CodexOverview({ dataFreshness, options, onSelectKind }: Props) {
+const LOADING_PLACEHOLDERS = Array.from({ length: 8 }, (_, index) => index);
+
+export default function CodexOverview({ dataFreshness, isLoading = false, options, onSelectKind }: Props) {
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
             <div className="codex-overview__header">
@@ -56,37 +59,77 @@ export default function CodexOverview({ dataFreshness, options, onSelectKind }: 
                         Browse categories, then inspect descriptions and resolved related links.
                     </p>
                 </div>
-                <div className="codex-overview__categoryTotal" aria-label={`${options.length} categories`}>
-                    <span>{options.length}</span>
-                    <small>categories</small>
+                <div
+                    className={`codex-overview__categoryTotal ${
+                        isLoading ? "codex-overview__categoryTotal--loading" : ""
+                    }`}
+                    aria-label={isLoading ? "Loading categories" : `${options.length} categories`}
+                >
+                    {isLoading ? (
+                        <>
+                            <span aria-hidden="true">—</span>
+                            <small>loading</small>
+                        </>
+                    ) : (
+                        <>
+                            <span>{options.length}</span>
+                            <small>categories</small>
+                        </>
+                    )}
                 </div>
             </div>
 
-            <div className="codex-overview__index" aria-label="Codex category index">
-                {options.map((option) => (
-                    <button
-                        key={option.kind}
-                        type="button"
-                        className="codex-overview__row"
-                        onClick={() => onSelectKind(option.kind)}
-                        aria-label={`${option.label} ${option.count} ${descriptionFor(option.kind)}`}
-                    >
-                        <span className="codex-overview__rowTop">
-                            <span className="codex-overview__kindWrap">
-                                <CodexKindIcon
-                                    kind={option.kind}
-                                    label={option.label}
-                                    className="codex-kindIcon codex-kindIcon--overview"
-                                    size={22}
-                                />
-                                <span className="codex-overview__kind">{option.label}</span>
+            {isLoading ? (
+                <div
+                    className="codex-overview__index codex-overview__index--loading"
+                    aria-busy="true"
+                    aria-label="Codex category index loading"
+                >
+                    {LOADING_PLACEHOLDERS.map((index) => (
+                        <div
+                            key={index}
+                            className="codex-overview__row codex-overview__row--loading"
+                            aria-hidden="true"
+                        >
+                            <span className="codex-overview__rowTop">
+                                <span className="codex-overview__kindWrap">
+                                    <span className="codex-overview__skeletonIcon" />
+                                    <span className="codex-overview__skeletonText codex-overview__skeletonText--title" />
+                                </span>
+                                <span className="codex-overview__skeletonText codex-overview__skeletonText--count" />
                             </span>
-                            <span className="codex-overview__count">{option.count}</span>
-                        </span>
-                        <span className="codex-overview__description">{descriptionFor(option.kind)}</span>
-                    </button>
-                ))}
-            </div>
+                            <span className="codex-overview__skeletonText codex-overview__skeletonText--description" />
+                        </div>
+                    ))}
+                    <p className="codex-overview__loadingText">Loading encyclopedia categories…</p>
+                </div>
+            ) : (
+                <div className="codex-overview__index" aria-label="Codex category index">
+                    {options.map((option) => (
+                        <button
+                            key={option.kind}
+                            type="button"
+                            className="codex-overview__row"
+                            onClick={() => onSelectKind(option.kind)}
+                            aria-label={`${option.label} ${option.count} ${descriptionFor(option.kind)}`}
+                        >
+                            <span className="codex-overview__rowTop">
+                                <span className="codex-overview__kindWrap">
+                                    <CodexKindIcon
+                                        kind={option.kind}
+                                        label={option.label}
+                                        className="codex-kindIcon codex-kindIcon--overview"
+                                        size={22}
+                                    />
+                                    <span className="codex-overview__kind">{option.label}</span>
+                                </span>
+                                <span className="codex-overview__count">{option.count}</span>
+                            </span>
+                            <span className="codex-overview__description">{descriptionFor(option.kind)}</span>
+                        </button>
+                    ))}
+                </div>
+            )}
 
             {dataFreshness ? (
                 <aside className="codex-overview__freshness" aria-label="Game data version">

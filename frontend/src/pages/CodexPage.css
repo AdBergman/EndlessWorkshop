@@ -867,6 +867,10 @@
     text-transform: uppercase;
 }
 
+.codex-overview__categoryTotal--loading span {
+    color: rgba(195, 152, 77, 0.62);
+}
+
 .codex-overview__freshness {
     display: grid;
     grid-template-columns: minmax(220px, max-content) minmax(0, 1fr);
@@ -1939,6 +1943,19 @@
     outline: none;
 }
 
+.codex-overview__row--loading {
+    cursor: default;
+    pointer-events: none;
+}
+
+.codex-overview__row--loading:hover,
+.codex-overview__row--loading:focus-visible {
+    border-color: rgba(190, 150, 73, 0.09);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent),
+        rgba(13, 15, 16, 0.3);
+}
+
 .codex-overview__rowTop {
     display: flex;
     align-items: center;
@@ -1975,6 +1992,41 @@
     color: rgba(255, 255, 255, 0.62);
     font-size: 13px;
     line-height: 1.55;
+}
+
+.codex-overview__skeletonIcon,
+.codex-overview__skeletonText {
+    display: inline-block;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(195, 152, 77, 0.12), rgba(255, 255, 255, 0.055));
+}
+
+.codex-overview__skeletonIcon {
+    width: 22px;
+    height: 22px;
+}
+
+.codex-overview__skeletonText--title {
+    width: min(150px, 42vw);
+    height: 15px;
+}
+
+.codex-overview__skeletonText--count {
+    width: 30px;
+    height: 13px;
+}
+
+.codex-overview__skeletonText--description {
+    width: min(230px, 72%);
+    height: 12px;
+    margin-top: 7px;
+}
+
+.codex-overview__loadingText {
+    margin: 2px 0 0;
+    color: var(--codex-ink-muted);
+    font-size: 13px;
+    line-height: 1.5;
 }
 
 .codex-summaryList {

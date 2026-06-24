@@ -673,6 +673,7 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
+    const isOverviewLoading = isOverviewState && loading && entries.length === 0;
     const isFullWidthReferenceOverviewState =
         supportsFullWidthReferenceOverview(activeKind) &&
         !hasDeferredQuery &&
@@ -1202,6 +1203,7 @@ export default function CodexPage() {
                             {isOverviewState ? (
                                 <CodexOverview
                                     dataFreshness={dataFreshness}
+                                    isLoading={isOverviewLoading}
                                     options={overviewOptions}
                                     onSelectKind={selectKind}
                                 />
