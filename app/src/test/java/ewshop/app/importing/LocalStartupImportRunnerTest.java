@@ -37,6 +37,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.env.MockEnvironment;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -50,6 +51,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(OutputCaptureExtension.class)
 class LocalStartupImportRunnerTest {
@@ -209,6 +211,25 @@ class LocalStartupImportRunnerTest {
         assertThat(facades.techCalls).isZero();
         assertThat(facades.totalCalls()).isZero();
         assertThat(summary).isEqualTo(LocalStartupImportSummary.empty());
+    }
+
+    @Test
+    void failsFastWhenLocalImportIsEnabledWithDeployedProfile() throws Exception {
+        Files.createDirectories(tempDir.resolve("exports"));
+        Files.writeString(tempDir.resolve("exports/ewshop_tech_export_0.78.json"), """
+                {"exportKind":"tech","techs":[{"techKey":"t","displayName":"Tech"}]}
+                """);
+
+        RecordingFacades facades = new RecordingFacades();
+        MockEnvironment environment = new MockEnvironment();
+        environment.setActiveProfiles("prod", "dev");
+        LocalStartupImportRunner runner = newRunner(facades, true, new RecordingImportHistoryRepository(), environment);
+
+        assertThatThrownBy(runner::runStartupImport)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Local startup import is not allowed")
+                .hasMessageContaining("Admin Import");
+        assertThat(facades.totalCalls()).isZero();
     }
 
     @Test
@@ -521,6 +542,17 @@ class LocalStartupImportRunnerTest {
             boolean enabled,
             ImportHistoryRepository importHistoryRepository
     ) {
+        MockEnvironment environment = new MockEnvironment();
+        environment.setActiveProfiles("dev");
+        return newRunner(facades, enabled, importHistoryRepository, environment);
+    }
+
+    private LocalStartupImportRunner newRunner(
+            RecordingFacades facades,
+            boolean enabled,
+            ImportHistoryRepository importHistoryRepository,
+            MockEnvironment environment
+    ) {
         LocalStartupImportProperties properties = new LocalStartupImportProperties();
         properties.setEnabled(enabled);
         properties.setRoot(tempDir);
@@ -528,6 +560,7 @@ class LocalStartupImportRunnerTest {
         return new LocalStartupImportRunner(
                 properties,
                 objectMapper(),
+                environment,
                 facades,
                 facades,
                 facades,

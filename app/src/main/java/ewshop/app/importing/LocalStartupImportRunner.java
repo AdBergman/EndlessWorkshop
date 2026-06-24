@@ -35,6 +35,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -47,6 +48,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -70,6 +72,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     );
     private final LocalStartupImportProperties properties;
     private final ObjectMapper objectMapper;
+    private final Environment environment;
     private final TechImportAdminFacade techImportAdminFacade;
     private final DistrictImportAdminFacade districtImportAdminFacade;
     private final ImprovementImportAdminFacade improvementImportAdminFacade;
@@ -84,6 +87,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     public LocalStartupImportRunner(
             LocalStartupImportProperties properties,
             ObjectMapper objectMapper,
+            Environment environment,
             TechImportAdminFacade techImportAdminFacade,
             DistrictImportAdminFacade districtImportAdminFacade,
             ImprovementImportAdminFacade improvementImportAdminFacade,
@@ -97,6 +101,7 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     ) {
         this.properties = properties;
         this.objectMapper = objectMapper;
+        this.environment = environment;
         this.techImportAdminFacade = techImportAdminFacade;
         this.districtImportAdminFacade = districtImportAdminFacade;
         this.improvementImportAdminFacade = improvementImportAdminFacade;
@@ -115,6 +120,8 @@ public class LocalStartupImportRunner implements ApplicationRunner {
     }
 
     LocalStartupImportSummary runStartupImport() {
+        assertAllowedProfiles();
+
         if (!properties.isEnabled()) {
             log.info("Local startup import is disabled.");
             return LocalStartupImportSummary.empty();
@@ -195,6 +202,19 @@ public class LocalStartupImportRunner implements ApplicationRunner {
         );
         historyRecorder.save();
         return new LocalStartupImportSummary(imported, skipped, failed);
+    }
+
+    private void assertAllowedProfiles() {
+        Set<String> activeProfiles = Arrays.stream(environment.getActiveProfiles())
+                .map(profile -> profile.toLowerCase(Locale.ROOT))
+                .collect(java.util.stream.Collectors.toSet());
+
+        if (activeProfiles.contains("prod") || activeProfiles.contains("staging")) {
+            throw new IllegalStateException(
+                    "Local startup import is not allowed when prod or staging profile is active. "
+                            + "Use Admin Import/Web UI/API imports for deployed environments."
+            );
+        }
     }
 
     private List<LocalImportFile> jsonFiles(Path dir, LocalImportFolder folder) {

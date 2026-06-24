@@ -26,6 +26,7 @@ docs.
 - Put raw supported exports in `local-imports/exports/`; startup imports currently support `districts`, `improvements`, `units`, `factions`, `heroes`, `skills`, `tech`, and `quest_explorer`.
 - Put codex exports in `local-imports/codex/`; codex exports use the generic `exportKind` plus `entries[]` contract and do not require a fixed kind allow-list.
 - Startup imports run only for `dev`, `local`, `ai`, or `codex` profiles when `ewshop.local-import.enabled=true`.
+- If `prod` or `staging` is active, local startup import must fail fast rather than populate deployed data from `local-imports/`.
 - Unsupported raw exporter files, such as battle abilities, battle skills, and descriptor evaluations, may coexist locally and are skipped with a log message.
 - Any frontend feature depending on a rich API must have a production Admin
   Import path before release. Before prod-ready, verify the rich APIs used by
