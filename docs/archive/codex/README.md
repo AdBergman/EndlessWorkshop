@@ -17,6 +17,10 @@ Current Codex docs live in `docs/active/`.
 
 ## Completed EWShop Implementation Context
 
+- `design-2026-06-25/` - superseded Codex landing design explorations,
+  including the older premium landing review and Imperial Atlas creative
+  direction. Use active Research Atlas docs before following these historical
+  notes.
 - `codex-metadata-adoption-audit-2026-06-11.md` - Phase 1 metadata adoption
   report before the current implementation completed.
 - `ewshop-codex-metadata-reference-kind-stories-2026-06-11.md` - implementation

@@ -566,7 +566,7 @@ describe("CodexPage", () => {
         expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
         expect(screen.queryByRole("heading", { name: "Codex Overview" })).not.toBeInTheDocument();
         expect(screen.queryByLabelText("Codex encyclopedia statistics")).not.toBeInTheDocument();
-        expect(screen.getByText("Browse categories, then inspect descriptions and resolved related links.")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Codex landing summary")).not.toBeInTheDocument();
         const categoryIndex = screen.getByLabelText("Codex category index");
         expect(categoryIndex).toBeInTheDocument();
         expect(within(categoryIndex).getByRole("button", {
@@ -622,7 +622,6 @@ describe("CodexPage", () => {
             );
 
             expect(await screen.findByRole("heading", { name: "Encyclopedia Index" })).toBeInTheDocument();
-            expect(screen.getByLabelText("Loading categories")).toBeInTheDocument();
             const loadingIndex = screen.getByLabelText("Codex category index loading");
             expect(loadingIndex).toBeInTheDocument();
             expect(within(loadingIndex).getByText("Loading encyclopedia categories…")).toBeInTheDocument();

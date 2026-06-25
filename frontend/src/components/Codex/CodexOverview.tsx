@@ -8,7 +8,7 @@ type CodexOverviewOption = {
 
 export type CodexOverviewFreshness = {
     mainLine: string;
-    snapshotDate: string;
+    snapshotDate?: string | null;
 };
 
 type Props = {
@@ -47,37 +47,17 @@ function descriptionFor(kind: string): string {
 
 const LOADING_PLACEHOLDERS = Array.from({ length: 8 }, (_, index) => index);
 
-export default function CodexOverview({ dataFreshness, isLoading = false, options, onSelectKind }: Props) {
+export default function CodexOverview({
+    dataFreshness,
+    isLoading = false,
+    options,
+    onSelectKind,
+}: Props) {
     return (
         <section className="codex-overview" aria-labelledby="codex-overview-title">
-            <div className="codex-overview__header">
-                <div>
-                    <h2 className="codex-sectionLabel codex-overview__label" id="codex-overview-title">
-                        Encyclopedia Index
-                    </h2>
-                    <p className="codex-overview__intro">
-                        Browse categories, then inspect descriptions and resolved related links.
-                    </p>
-                </div>
-                <div
-                    className={`codex-overview__categoryTotal ${
-                        isLoading ? "codex-overview__categoryTotal--loading" : ""
-                    }`}
-                    aria-label={isLoading ? "Loading categories" : `${options.length} categories`}
-                >
-                    {isLoading ? (
-                        <>
-                            <span aria-hidden="true">—</span>
-                            <small>loading</small>
-                        </>
-                    ) : (
-                        <>
-                            <span>{options.length}</span>
-                            <small>categories</small>
-                        </>
-                    )}
-                </div>
-            </div>
+            <h2 className="seo-hidden" id="codex-overview-title">
+                Encyclopedia Index
+            </h2>
 
             {isLoading ? (
                 <div
@@ -134,9 +114,14 @@ export default function CodexOverview({ dataFreshness, isLoading = false, option
             {dataFreshness ? (
                 <aside className="codex-overview__freshness" aria-label="Game data version">
                     <div className="codex-overview__freshnessPrimary">
-                        <span className="codex-overview__freshnessLabel">Game Data Version</span>
+                        <span className="codex-overview__freshnessLabel">Archive Edition</span>
+                        <span className="seo-hidden">Game Data Version</span>
                         <strong>{dataFreshness.mainLine}</strong>
-                        <span>Snapshot date: {dataFreshness.snapshotDate}</span>
+                        <span>
+                            {dataFreshness.snapshotDate
+                                ? `Snapshot date: ${dataFreshness.snapshotDate}`
+                                : "Snapshot date unavailable"}
+                        </span>
                     </div>
                     <p>
                         Data shown on Endless Workshop is generated from game files. Snapshot date indicates when this

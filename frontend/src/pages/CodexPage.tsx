@@ -130,14 +130,14 @@ function toCodexOverviewFreshness(dataFreshness: DataFreshness | null | undefine
     if (
         !dataFreshness?.available ||
         !dataFreshness.game ||
-        !dataFreshness.gameVersion ||
-        !dataFreshness.exportedAtUtc
+        !dataFreshness.gameVersion
     ) {
         return null;
     }
 
-    const snapshotDate = formatCodexSnapshotDate(dataFreshness.exportedAtUtc);
-    if (!snapshotDate) return null;
+    const snapshotDate = dataFreshness.exportedAtUtc
+        ? formatCodexSnapshotDate(dataFreshness.exportedAtUtc)
+        : null;
 
     return {
         mainLine: `${dataFreshness.game} v${dataFreshness.gameVersion}`,

@@ -70,6 +70,25 @@ index, then select the smallest relevant doc set for the task type.
   - Read when: doing Codex visual/UI work.
   - Status: active design baseline.
 
+- `docs/active/codex-landing-evolution-review.md`
+  - Purpose: release-pragmatic landing direction that preserves validated
+    retrieval behavior and records the production-style landing baseline.
+  - Read when: planning Codex landing polish before release.
+  - Status: active design direction.
+
+- `docs/active/codex-spiritual-parent-review.md`
+  - Purpose: Codex product-identity direction that reframes earlier Imperial
+    Atlas exploration into Research Atlas.
+  - Read when: making Codex visual/product identity decisions.
+  - Status: active design direction.
+
+- `docs/active/codex-product-experience-review.md`
+  - Purpose: product-level Codex UX review across landing, category overview,
+    and entry detail experiences.
+  - Read when: prioritizing future Codex UX work or checking which reusable
+    Codex experience is weakest.
+  - Status: active product experience review.
+
 - `docs/active/codex-premium-ui-ticket-plan.md`
   - Purpose: historical/current ticket framing for Codex premium UI slices.
   - Read when: checking how earlier Codex UI tickets were intended or closed.

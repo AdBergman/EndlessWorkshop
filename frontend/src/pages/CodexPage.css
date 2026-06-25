@@ -288,6 +288,14 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.018);
 }
 
+.codex-header:not(.codex-header--compact) .codex-controlBand {
+    margin-top: 9px;
+    padding: 8px 0;
+    border-color: rgba(190, 150, 73, 0.075);
+    background: transparent;
+    box-shadow: none;
+}
+
 .codex-header--compact .codex-controlBand {
     grid-area: search;
     justify-self: end;
@@ -825,60 +833,20 @@
 }
 
 .codex-overview {
-    padding-top: 0;
-}
-
-.codex-overview__header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--codex-line);
-}
-
-.codex-overview__label {
-    margin: 0;
-}
-
-.codex-overview__categoryTotal {
-    display: grid;
-    min-width: 86px;
-    padding: 9px 11px;
-    border: 1px solid var(--codex-line);
-    border-radius: 6px;
-    background: rgba(13, 15, 16, 0.48);
-    text-align: right;
-}
-
-.codex-overview__categoryTotal span {
-    color: var(--codex-gold-bright);
-    font-size: 1.1rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-}
-
-.codex-overview__categoryTotal small {
-    margin-top: 4px;
-    color: var(--codex-ink-muted);
-    font-size: 10px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-}
-
-.codex-overview__categoryTotal--loading span {
-    color: rgba(195, 152, 77, 0.62);
+    position: relative;
+    min-width: 0;
+    padding: 0 0 10px;
+    z-index: 1;
 }
 
 .codex-overview__freshness {
     display: grid;
-    grid-template-columns: minmax(220px, max-content) minmax(0, 1fr);
-    gap: 18px;
-    align-items: end;
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(190, 150, 73, 0.11);
+    grid-template-columns: minmax(210px, max-content) minmax(0, 1fr);
+    gap: 20px;
+    align-items: center;
+    margin-top: 24px;
+    padding: 16px 0 0;
+    border-top: 1px solid rgba(190, 150, 73, 0.075);
 }
 
 .codex-overview__freshnessPrimary {
@@ -1896,33 +1864,28 @@
     margin-top: 0;
 }
 
-.codex-overview__intro {
-    margin: 9px 0 0;
-    max-width: 680px;
-    color: var(--codex-ink-muted);
-    font-size: 15px;
-    line-height: 1.7;
-}
-
 .codex-overview__index {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 .codex-overview__row {
+    position: relative;
     display: grid;
     gap: 6px;
     width: 100%;
     min-height: 96px;
     align-content: start;
     padding: 13px 14px 14px;
-    border: 1px solid rgba(190, 150, 73, 0.09);
+    border: 1px solid rgba(190, 150, 73, 0.075);
     border-radius: 6px;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent),
-        rgba(13, 15, 16, 0.3);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent),
+        rgba(13, 15, 16, 0.28);
+    box-shadow: none;
     color: inherit;
     text-align: left;
     cursor: pointer;
@@ -1931,14 +1894,14 @@
 
 .codex-overview__row:hover .codex-overview__kind,
 .codex-overview__row:focus-visible .codex-overview__kind {
-    color: var(--codex-gold-bright);
+    color: #fff4df;
 }
 
 .codex-overview__row:hover,
 .codex-overview__row:focus-visible {
-    border-color: rgba(195, 152, 77, 0.34);
+    border-color: rgba(195, 152, 77, 0.28);
     background:
-        linear-gradient(90deg, rgba(255, 122, 42, 0.055), rgba(255, 255, 255, 0.018) 62%, transparent 100%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent),
         rgba(13, 15, 16, 0.36);
     outline: none;
 }
@@ -1950,10 +1913,10 @@
 
 .codex-overview__row--loading:hover,
 .codex-overview__row--loading:focus-visible {
-    border-color: rgba(190, 150, 73, 0.09);
+    border-color: rgba(190, 150, 73, 0.075);
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent),
-        rgba(13, 15, 16, 0.3);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.01), transparent),
+        rgba(13, 15, 16, 0.28);
 }
 
 .codex-overview__rowTop {
@@ -3334,7 +3297,6 @@
     }
 
     .codex-header__top,
-    .codex-overview__header,
     .codex-overview__freshness,
     .codex-summaryDossier__hero {
         align-items: flex-start;

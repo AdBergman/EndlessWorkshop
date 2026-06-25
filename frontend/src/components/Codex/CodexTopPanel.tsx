@@ -36,6 +36,19 @@ export default function CodexTopPanel({
     onSelectCategory,
     onSelectSearchSuggestion,
 }: Props) {
+    const search = (
+        <CodexSearch
+            value={searchValue}
+            onChange={onSearchChange}
+            resultCount={resultCount}
+            totalCount={totalSearchCount}
+            suggestions={searchSuggestions}
+            onSelectSuggestion={onSelectSearchSuggestion}
+            onConfirmQuery={onConfirmSearch}
+            enableAutocomplete={false}
+        />
+    );
+
     return (
         <header className={`codex-header ${useCompactHeader ? "codex-header--compact" : ""}`}>
             <div className={`codex-header__top ${useCompactHeader ? "codex-header__top--compact" : ""}`}>
@@ -49,16 +62,7 @@ export default function CodexTopPanel({
             </div>
 
             <div className="codex-controlBand">
-                <CodexSearch
-                    value={searchValue}
-                    onChange={onSearchChange}
-                    resultCount={resultCount}
-                    totalCount={totalSearchCount}
-                    suggestions={searchSuggestions}
-                    onSelectSuggestion={onSelectSearchSuggestion}
-                    onConfirmQuery={onConfirmSearch}
-                    enableAutocomplete={false}
-                />
+                {search}
             </div>
             {enableCategoryShelf ? (
                 <div
