@@ -1,5 +1,5 @@
 # ---------- Stage 1: Build frontend ----------
-FROM node:24.16.0 AS frontend-build
+FROM node:24.18.0 AS frontend-build
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
