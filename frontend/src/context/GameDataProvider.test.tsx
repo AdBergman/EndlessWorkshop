@@ -149,7 +149,7 @@ describe("GameDataProvider orchestration boundary", () => {
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
     });
 
-    it("does not load Quest Explorer data during app startup", async () => {
+    it("keeps route-owned datasets out of app startup", async () => {
         render(
             <MemoryRouter>
                 <GameDataProvider>
@@ -163,9 +163,9 @@ describe("GameDataProvider orchestration boundary", () => {
             expect(mockedApiClient.getImprovements).toHaveBeenCalled();
             expect(mockedApiClient.getUnits).toHaveBeenCalled();
             expect(mockedApiClient.getTechs).toHaveBeenCalled();
-            expect(mockedApiClient.getCodex).toHaveBeenCalled();
         });
 
+        expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
         expect(mockedApiClient.getQuestExplorer).not.toHaveBeenCalled();
     });
 

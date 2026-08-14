@@ -4,18 +4,30 @@ import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
 import { buildEntriesByKey, buildEntriesByKindKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
-import type { CodexEntry, CodexMetadataFact, CodexMetadataSection, CodexMetadataSectionItem, CodexSvgIcon } from "@/types/dataTypes";
+import type {
+    CodexEntry,
+    CodexKindSummary,
+    CodexMetadataFact,
+    CodexMetadataSection,
+    CodexMetadataSectionItem,
+    CodexSvgIcon,
+} from "@/types/dataTypes";
 
 type Store = {
     entries: CodexEntry[];
     entriesByKey: Record<string, CodexEntry>;
     entriesByKind: Record<string, CodexEntry[]>;
     entriesByKindKey: Record<string, Record<string, CodexEntry>>;
+    categorySummaries: CodexKindSummary[];
     loading: boolean;
     error: string | null;
+    summaryLoaded: boolean;
+    summaryLoading: boolean;
+    summaryError: string | null;
     lastLoadedAt?: string;
 
     loadEntries: (opts?: { force?: boolean }) => Promise<void>;
+    loadSummary: (opts?: { force?: boolean }) => Promise<void>;
     reset: () => void;
 
     getEntry: (exportKind: string, entryKey: string) => CodexEntry | undefined;
@@ -26,6 +38,7 @@ type Store = {
 };
 
 let inflightLoad: Promise<void> | null = null;
+let inflightSummaryLoad: Promise<void> | null = null;
 
 function cleanStrings(values: unknown): string[] {
     return Array.isArray(values)
@@ -148,6 +161,22 @@ function normalizeEntry(entry: CodexEntry): CodexEntry {
     };
 }
 
+function normalizeSummary(summary: CodexKindSummary): CodexKindSummary | null {
+    const exportKind = normalizeBonusDerivedKind({
+        exportKind: summary.exportKind,
+        entryKey: "",
+        displayName: "",
+        category: null,
+        kind: null,
+        descriptionLines: [],
+        referenceKeys: [],
+    }).trim().toLowerCase();
+    const count = Number(summary.count);
+
+    if (!exportKind || !Number.isFinite(count) || count <= 0) return null;
+    return { exportKind, count };
+}
+
 function buildEntriesByKind(entries: CodexEntry[]): Record<string, CodexEntry[]> {
     return entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
         if (!entry.exportKind) return acc;
@@ -161,13 +190,28 @@ function buildEntriesByKind(entries: CodexEntry[]): Record<string, CodexEntry[]>
     }, {});
 }
 
+function buildSummariesFromEntries(entries: CodexEntry[]): CodexKindSummary[] {
+    const countsByKind = entries.reduce<Record<string, number>>((acc, entry) => {
+        if (!entry.exportKind) return acc;
+
+        acc[entry.exportKind] = (acc[entry.exportKind] ?? 0) + 1;
+        return acc;
+    }, {});
+
+    return Object.entries(countsByKind).map(([exportKind, count]) => ({ exportKind, count }));
+}
+
 export const useCodexStore = create<Store>((set, get) => ({
     entries: [],
     entriesByKey: {},
     entriesByKind: {},
     entriesByKindKey: {},
+    categorySummaries: [],
     loading: false,
     error: null,
+    summaryLoaded: false,
+    summaryLoading: false,
+    summaryError: null,
     lastLoadedAt: undefined,
 
     loadEntries: async (opts) => {
@@ -197,8 +241,12 @@ export const useCodexStore = create<Store>((set, get) => ({
                     entriesByKey: buildEntriesByKey(entries),
                     entriesByKind: buildEntriesByKind(entries),
                     entriesByKindKey: buildEntriesByKindKey(entries),
+                    categorySummaries: buildSummariesFromEntries(entries),
                     loading: false,
                     error: null,
+                    summaryLoaded: true,
+                    summaryLoading: false,
+                    summaryError: null,
                     lastLoadedAt: new Date().toISOString(),
                 });
 
@@ -217,15 +265,71 @@ export const useCodexStore = create<Store>((set, get) => ({
         return inflightLoad;
     },
 
+    loadSummary: async (opts) => {
+        const force = opts?.force ?? false;
+        const state = get();
+
+        if (!force && state.entries.length > 0) {
+            set({
+                categorySummaries: buildSummariesFromEntries(state.entries),
+                summaryLoaded: true,
+                summaryLoading: false,
+                summaryError: null,
+            });
+            return;
+        }
+
+        if (!force && state.summaryLoading && inflightSummaryLoad) {
+            return inflightSummaryLoad;
+        }
+
+        if (!force && state.categorySummaries.length > 0) {
+            return;
+        }
+
+        set({ summaryLoading: true, summaryError: null });
+
+        inflightSummaryLoad = (async () => {
+            try {
+                const summaries = (await apiClient.getCodexSummary())
+                    .map((summary) => normalizeSummary(summary))
+                    .filter((summary): summary is CodexKindSummary => summary !== null);
+
+                set({
+                    categorySummaries: summaries,
+                    summaryLoaded: true,
+                    summaryLoading: false,
+                    summaryError: null,
+                });
+            } catch (err) {
+                console.error("Failed to load codex summary:", err);
+                set({
+                    summaryLoaded: false,
+                    summaryLoading: false,
+                    summaryError: (err as Error)?.message ?? "Failed to load codex summary.",
+                });
+            } finally {
+                inflightSummaryLoad = null;
+            }
+        })();
+
+        return inflightSummaryLoad;
+    },
+
     reset: () => {
         inflightLoad = null;
+        inflightSummaryLoad = null;
         set({
             entries: [],
             entriesByKey: {},
             entriesByKind: {},
             entriesByKindKey: {},
+            categorySummaries: [],
             loading: false,
             error: null,
+            summaryLoaded: false,
+            summaryLoading: false,
+            summaryError: null,
             lastLoadedAt: undefined,
         });
     },

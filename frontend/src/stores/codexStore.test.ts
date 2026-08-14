@@ -5,6 +5,7 @@ import { useCodexStore } from "@/stores/codexStore";
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
         getCodex: vi.fn(),
+        getCodexSummary: vi.fn(),
     },
 }));
 
@@ -18,6 +19,7 @@ describe("useCodexStore", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexSummary.mockReset();
         resetCodexTokenAuditDevFlagsForTests();
         delete auditWindow.__downloadCodexTokenAudit;
         delete auditWindow.__downloadCodexDiagnosticsReport;
@@ -298,6 +300,59 @@ describe("useCodexStore", () => {
         await useCodexStore.getState().loadEntries();
 
         expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
+    });
+
+    it("loads lightweight category summaries without loading full entries", async () => {
+        mockedApiClient.getCodexSummary.mockResolvedValue([
+            { exportKind: "districts", count: 2 },
+            { exportKind: "diplomaticTreaties", count: 3 },
+            { exportKind: "empty", count: 0 },
+        ]);
+
+        await useCodexStore.getState().loadSummary();
+        await useCodexStore.getState().loadSummary();
+
+        const state = useCodexStore.getState();
+        expect(mockedApiClient.getCodexSummary).toHaveBeenCalledTimes(1);
+        expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
+        expect(state.entries).toHaveLength(0);
+        expect(state.categorySummaries).toEqual([
+            { exportKind: "districts", count: 2 },
+            { exportKind: "diplomatictreaties", count: 3 },
+        ]);
+    });
+
+    it("refreshes category summaries from full entries when the full Codex is loaded", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            {
+                exportKind: "districts",
+                entryKey: "District_A",
+                displayName: "District A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
+                entryKey: "District_B",
+                displayName: "District B",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "tech",
+                entryKey: "Tech_A",
+                displayName: "Tech A",
+                descriptionLines: [],
+                referenceKeys: [],
+            },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        expect(useCodexStore.getState().categorySummaries).toEqual([
+            { exportKind: "districts", count: 2 },
+            { exportKind: "tech", count: 1 },
+        ]);
     });
 
     it("filters invalid display names before store population while keeping valid bracket-prefixed names", async () => {

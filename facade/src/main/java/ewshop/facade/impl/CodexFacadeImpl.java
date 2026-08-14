@@ -4,6 +4,7 @@ import ewshop.domain.service.CodexService;
 import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexFilterResult;
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexSummaryDto;
 import ewshop.facade.interfaces.CodexFacade;
 import ewshop.facade.mapper.CodexMapper;
 
@@ -31,6 +32,28 @@ public class CodexFacadeImpl implements CodexFacade {
         return filterResult.codexEntries().stream()
                 .map(CodexMapper::toDto)
                 .map(dto -> withResolvedRelationAliases(dto, relationTargetAliases))
+                .toList();
+    }
+
+    @Override
+    public List<CodexSummaryDto> getCodexSummary() {
+        CodexFilterResult filterResult = codexFilterService.filterForCodexApi(codexService.getAllCodexEntries());
+        Map<String, Long> countsByKind = new LinkedHashMap<>();
+
+        filterResult.codexEntries().forEach(entry -> {
+            String exportKind = normalizeSummaryKind(
+                    entry.getExportKind(),
+                    entry.getCategory(),
+                    entry.getKind(),
+                    entry.getEntryKey()
+            );
+            if (!exportKind.isBlank()) {
+                countsByKind.merge(exportKind, 1L, Long::sum);
+            }
+        });
+
+        return countsByKind.entrySet().stream()
+                .map(entry -> new CodexSummaryDto(entry.getKey(), entry.getValue()))
                 .toList();
     }
 
@@ -78,5 +101,43 @@ public class CodexFacadeImpl implements CodexFacade {
 
     private static String trimToEmpty(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private static String normalizeSummaryKind(String exportKind, String category, String kind, String entryKey) {
+        String normalizedExportKind = trimToEmpty(exportKind).toLowerCase();
+        if (!"bonuses".equals(normalizedExportKind)) {
+            return normalizedExportKind;
+        }
+
+        if (isBonusStatusEntry(category, kind, entryKey)) {
+            return "statuses";
+        }
+
+        if (isBonusModifierEntry(category, kind, entryKey)) {
+            return "modifiers";
+        }
+
+        return normalizedExportKind;
+    }
+
+    private static boolean isBonusStatusEntry(String category, String kind, String entryKey) {
+        String normalizedCategory = trimToEmpty(category).toLowerCase();
+        String normalizedKind = trimToEmpty(kind).toLowerCase();
+        String normalizedKey = trimToEmpty(entryKey);
+        return "status".equals(normalizedCategory) ||
+                "status".equals(normalizedKind) ||
+                normalizedKey.startsWith("Status_") ||
+                normalizedKey.startsWith("HeroStatus_") ||
+                normalizedKey.startsWith("TreatyPublicOpinion_");
+    }
+
+    private static boolean isBonusModifierEntry(String category, String kind, String entryKey) {
+        String normalizedCategory = trimToEmpty(category).toLowerCase();
+        String normalizedKind = trimToEmpty(kind).toLowerCase();
+        String normalizedKey = trimToEmpty(entryKey);
+        return "cost modifier".equals(normalizedCategory) ||
+                "cost modifier".equals(normalizedKind) ||
+                normalizedKey.contains("CostModifier") ||
+                normalizedKey.contains("CostModifer");
     }
 }

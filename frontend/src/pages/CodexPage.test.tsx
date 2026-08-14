@@ -514,6 +514,7 @@ describe("CodexPage", () => {
             importedKinds: [],
             note: null,
         });
+        vi.spyOn(apiClient, "getCodexSummary").mockResolvedValue([]);
     });
 
     afterEach(() => {
@@ -598,18 +599,22 @@ describe("CodexPage", () => {
         expect(screen.queryByRole("button", { name: /all categories/i })).not.toBeInTheDocument();
     });
 
-    it("shows stable landing placeholders while Codex categories are hydrating", async () => {
-        const originalLoadEntries = useCodexStore.getState().loadEntries;
-        const loadEntries = vi.fn().mockResolvedValue(undefined);
+    it("shows stable landing placeholders while Codex summaries are hydrating", async () => {
+        const originalLoadSummary = useCodexStore.getState().loadSummary;
+        const loadSummary = vi.fn().mockResolvedValue(undefined);
 
         useCodexStore.setState({
             entries: [],
             entriesByKey: {},
             entriesByKind: {},
             entriesByKindKey: {},
+            categorySummaries: [],
             loading: true,
             error: null,
-            loadEntries,
+            summaryLoaded: false,
+            summaryLoading: true,
+            summaryError: null,
+            loadSummary,
         });
 
         try {
@@ -628,7 +633,7 @@ describe("CodexPage", () => {
             expect(within(loadingIndex).queryAllByRole("button")).toHaveLength(0);
             expect(screen.queryByLabelText("Codex category index")).not.toBeInTheDocument();
         } finally {
-            useCodexStore.setState({ loadEntries: originalLoadEntries });
+            useCodexStore.setState({ loadSummary: originalLoadSummary });
         }
     });
 
@@ -3825,19 +3830,26 @@ describe("CodexPage", () => {
         expect(document.querySelector(".codex-workspace--referenceOverview")).not.toBeInTheDocument();
     });
 
-    it("requests codex entries on page mount when the global bootstrap has not populated the store yet", async () => {
+    it("requests only codex summaries on the default landing route when entries are not cached", async () => {
         const originalLoadEntries = useCodexStore.getState().loadEntries;
+        const originalLoadSummary = useCodexStore.getState().loadSummary;
         const loadEntries = vi.fn().mockResolvedValue(undefined);
+        const loadSummary = vi.fn().mockResolvedValue(undefined);
 
         useCodexStore.setState({
             entries: [],
             entriesByKey: {},
             entriesByKind: {},
             entriesByKindKey: {},
+            categorySummaries: [],
             loading: false,
             error: null,
+            summaryLoaded: false,
+            summaryLoading: false,
+            summaryError: null,
             lastLoadedAt: undefined,
             loadEntries,
+            loadSummary,
         });
 
         try {
@@ -3850,10 +3862,57 @@ describe("CodexPage", () => {
             );
 
             await waitFor(() => {
+                expect(loadSummary).toHaveBeenCalledTimes(1);
+            });
+            expect(loadEntries).not.toHaveBeenCalled();
+        } finally {
+            useCodexStore.setState({
+                loadEntries: originalLoadEntries,
+                loadSummary: originalLoadSummary,
+            });
+        }
+    });
+
+    it("requests full codex entries for category routes when entries are not cached", async () => {
+        const originalLoadEntries = useCodexStore.getState().loadEntries;
+        const originalLoadSummary = useCodexStore.getState().loadSummary;
+        const loadEntries = vi.fn().mockResolvedValue(undefined);
+        const loadSummary = vi.fn().mockResolvedValue(undefined);
+
+        useCodexStore.setState({
+            entries: [],
+            entriesByKey: {},
+            entriesByKind: {},
+            entriesByKindKey: {},
+            categorySummaries: [],
+            loading: true,
+            error: null,
+            summaryLoaded: false,
+            summaryLoading: false,
+            summaryError: null,
+            lastLoadedAt: undefined,
+            loadEntries,
+            loadSummary,
+        });
+
+        try {
+            render(
+                <MemoryRouter initialEntries={["/codex?category=districts"]}>
+                    <Routes>
+                        <Route path="/codex" element={<CodexPage />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+
+            await waitFor(() => {
                 expect(loadEntries).toHaveBeenCalledTimes(1);
             });
+            expect(loadSummary).not.toHaveBeenCalled();
         } finally {
-            useCodexStore.setState({ loadEntries: originalLoadEntries });
+            useCodexStore.setState({
+                loadEntries: originalLoadEntries,
+                loadSummary: originalLoadSummary,
+            });
         }
     });
 

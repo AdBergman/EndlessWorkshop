@@ -3,7 +3,6 @@ import GameDataContext from "./GameDataContext";
 import { Faction, FactionInfo } from "@/types/dataTypes";
 import { apiClient, SavedTechBuild } from "@/api/apiClient";
 import { useNavigate } from "react-router-dom";
-import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
 import { useImprovementStore } from "@/stores/improvementStore";
 import { useUnitStore } from "@/stores/unitStore";
@@ -53,7 +52,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
 
     const initialShareUuid = new URLSearchParams(window.location.search).get("share");
     const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
-    const loadCodexEntries = useCodexStore((s) => s.loadEntries);
     const loadDistricts = useDistrictStore((s) => s.loadDistricts);
     const loadImprovements = useImprovementStore((s) => s.loadImprovements);
     const loadUnits = useUnitStore((s) => s.loadUnits);
@@ -65,10 +63,6 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
         void loadUnits();
         void loadTechs();
     }, [loadDistricts, loadImprovements, loadTechs, loadUnits]);
-
-    useEffect(() => {
-        void loadCodexEntries();
-    }, [loadCodexEntries]);
 
     useEffect(() => {
         if (sharedBuildLoaded) return;

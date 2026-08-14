@@ -1,4 +1,4 @@
-import { District, Improvement, Tech, Unit, Codex, RichFaction, Hero, Skills } from "@/types/dataTypes";
+import { District, Improvement, Tech, Unit, Codex, CodexKindSummary, RichFaction, Hero, Skills } from "@/types/dataTypes";
 import type { QuestExplorerResponse } from "@/types/questTypes";
 
 export type SavedTechBuild = {
@@ -151,6 +151,7 @@ export const apiClient = {
     getHeroes: () => fetcherJson<Hero[]>("/heroes"),
     getSkills: () => fetcherJson<Skills>("/skills"),
     getCodex: () => fetcherJson<Codex[]>("/codex"),
+    getCodexSummary: () => fetcherJson<CodexKindSummary[]>("/codex/summary"),
     getQuestExplorer: () => fetcherJson<QuestExplorerResponse>("/quests/explorer"),
     getDataFreshness: () => fetcherJson<DataFreshness>("/data-freshness"),
 

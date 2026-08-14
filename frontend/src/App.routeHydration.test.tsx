@@ -21,6 +21,7 @@ vi.mock("@/api/apiClient", () => ({
         getTechs: vi.fn(),
         getUnits: vi.fn(),
         getCodex: vi.fn(),
+        getCodexSummary: vi.fn(),
         getQuestExplorer: vi.fn(),
         getDataFreshness: vi.fn(),
         getSavedBuild: vi.fn(),
@@ -77,6 +78,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockReset();
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexSummary.mockReset();
         mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getDataFreshness.mockReset();
         mockedApiClient.getSavedBuild.mockReset();
@@ -87,6 +89,9 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockResolvedValue([]);
         mockedApiClient.getUnits.mockResolvedValue(units);
         mockedApiClient.getCodex.mockResolvedValue(codexEntries);
+        mockedApiClient.getCodexSummary.mockResolvedValue([
+            { exportKind: "districts", count: 1 },
+        ]);
         mockedApiClient.getQuestExplorer.mockResolvedValue(questPayload);
         mockedApiClient.getDataFreshness.mockResolvedValue({
             available: false,
@@ -110,7 +115,7 @@ describe("App route data hydration", () => {
         );
     }
 
-    it("loads codex data on the first Codex navigation instead of rendering a permanent empty result", async () => {
+    it("loads codex summary data on the first Codex navigation instead of rendering a permanent empty result", async () => {
         const user = userEvent.setup();
 
         renderFromInfoRoute();
@@ -119,7 +124,8 @@ describe("App route data hydration", () => {
 
         expect(await screen.findByRole("heading", { name: "Encyclopedia" })).toBeInTheDocument();
         expect(screen.getAllByRole("button", { name: /districts 1/i }).length).toBeGreaterThan(0);
-        expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
+        expect(mockedApiClient.getCodexSummary).toHaveBeenCalledTimes(1);
+        expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
     });
 
     it("loads units data on the first Units navigation", async () => {

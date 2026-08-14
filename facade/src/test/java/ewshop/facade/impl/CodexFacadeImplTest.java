@@ -5,6 +5,7 @@ import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexFilterResult;
 import ewshop.domain.service.CodexService;
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexSummaryDto;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -126,6 +127,44 @@ class CodexFacadeImplTest {
                         "FactionQuest_LastLord_Chapter03_Step01=The Fork in the Road",
                         "FactionQuest_Necrophage_Chapter01_Step01=Brave New World",
                         "FactionQuest_Necrophage_Chapter04_Step01=A Fresh Lead"
+                );
+    }
+
+    @Test
+    void returnsFilteredKindCountsForCodexSummaryWithoutDetailPayload() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("districts", "District_A", "District A", List.of("Useful public description.")),
+                codexEntry("districts", "District_B", "District B", List.of("Useful public description.")),
+                codexEntry("tech", "Tech_A", "Tech A", List.of("Useful public description.")),
+                codexEntry("abilities", "Ability_Invalid", "% Placeholder", List.of("Should be filtered."))
+        ));
+
+        List<CodexSummaryDto> result = facade.getCodexSummary();
+
+        assertThat(result)
+                .containsExactly(
+                        new CodexSummaryDto("districts", 2),
+                        new CodexSummaryDto("tech", 1)
+                );
+    }
+
+    @Test
+    void codexSummaryUsesFrontendCompatibleBonusDerivedKinds() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("bonuses", "Status_PublicOpinion_Test", "Public Opinion Status", "Status", "Status", List.of("Useful public description."), List.of()),
+                codexEntry("bonuses", "ActionCostModifier_Test", "Action Cost Modifier Test", "Cost Modifier", "Cost Modifier", List.of("Useful public description."), List.of())
+        ));
+
+        assertThat(facade.getCodexSummary())
+                .containsExactlyInAnyOrder(
+                        new CodexSummaryDto("statuses", 1),
+                        new CodexSummaryDto("modifiers", 1)
                 );
     }
 

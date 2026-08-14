@@ -130,6 +130,11 @@ export interface Codex {
 
 export type CodexEntry = Codex;
 
+export interface CodexKindSummary {
+    exportKind: string;
+    count: number;
+}
+
 export interface RichFaction {
     factionKey: string;
     publicDisplayName: string;

@@ -150,9 +150,14 @@ export default function CodexPage() {
     const entries = useCodexStore((state) => state.entries);
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
     const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
+    const categorySummaries = useCodexStore((state) => state.categorySummaries);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
+    const summaryLoaded = useCodexStore((state) => state.summaryLoaded);
+    const summaryLoading = useCodexStore((state) => state.summaryLoading);
+    const summaryError = useCodexStore((state) => state.summaryError);
     const loadEntries = useCodexStore((state) => state.loadEntries);
+    const loadSummary = useCodexStore((state) => state.loadSummary);
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
@@ -186,6 +191,10 @@ export default function CodexPage() {
     const selectedEntryKey = selectedEntryParam ?? (
         activeKind === ALL_CODEX_KIND ? null : getCodexSummaryEntryKey(activeKind)
     );
+    const shouldLoadFullEntries =
+        activeKind !== ALL_CODEX_KIND ||
+        Boolean(selectedEntryParam) ||
+        query.trim().length > 0;
     const codexResetNonce = (location.state as { codexResetNonce?: string } | null)?.codexResetNonce ?? null;
 
     const resultListRef = useRef<HTMLDivElement>(null);
@@ -195,8 +204,16 @@ export default function CodexPage() {
     const lastHandledResetNonceRef = useRef<string | null>(null);
 
     useEffect(() => {
+        if (!shouldLoadFullEntries) return;
+
         void loadEntries();
-    }, [loadEntries]);
+    }, [loadEntries, shouldLoadFullEntries]);
+
+    useEffect(() => {
+        if (shouldLoadFullEntries || entries.length > 0) return;
+
+        void loadSummary();
+    }, [entries.length, loadSummary, shouldLoadFullEntries]);
 
     useEffect(() => {
         let cancelled = false;
@@ -221,14 +238,22 @@ export default function CodexPage() {
     const includeLocalOnlyCategories = isLocalCodexTopLevelVisibilityEnabled();
 
     const filterOptions = useMemo(() => {
-        const kindCounts = entries.reduce<Map<string, number>>((acc, entry) => {
-            const exportKind = normalizeCodexKind(entry.exportKind);
-            if (!exportKind) return acc;
+        const kindCounts = entries.length > 0
+            ? entries.reduce<Map<string, number>>((acc, entry) => {
+                const exportKind = normalizeCodexKind(entry.exportKind);
+                if (!exportKind) return acc;
 
-            const nextCount = (acc.get(exportKind) ?? 0) + 1;
-            acc.set(exportKind, nextCount);
-            return acc;
-        }, new Map<string, number>());
+                const nextCount = (acc.get(exportKind) ?? 0) + 1;
+                acc.set(exportKind, nextCount);
+                return acc;
+            }, new Map<string, number>())
+            : categorySummaries.reduce<Map<string, number>>((acc, summary) => {
+                const exportKind = normalizeCodexKind(summary.exportKind);
+                if (!exportKind || summary.count <= 0) return acc;
+
+                acc.set(exportKind, (acc.get(exportKind) ?? 0) + summary.count);
+                return acc;
+            }, new Map<string, number>());
 
         const knownKinds = PREFERRED_CODEX_KIND_ORDER
             .filter((kind) => kindCounts.has(kind))
@@ -245,14 +270,18 @@ export default function CodexPage() {
         const orderedKinds = [...knownKinds, ...extraKinds];
 
         return [
-            { kind: ALL_CODEX_KIND, label: "All", count: entries.length },
+            {
+                kind: ALL_CODEX_KIND,
+                label: "All",
+                count: Array.from(kindCounts.values()).reduce((sum, count) => sum + count, 0),
+            },
             ...orderedKinds.map((kind) => ({
                 kind,
                 label: formatCodexKindLabel(kind),
                 count: kindCounts.get(kind) ?? 0,
             })),
         ];
-    }, [entries, includeLocalOnlyCategories]);
+    }, [categorySummaries, entries, includeLocalOnlyCategories]);
 
     const searchFilteredEntries = useMemo(
         () => filterCodexEntries(entries, { query: deferredQuery, kind: activeKind }),
@@ -669,11 +698,18 @@ export default function CodexPage() {
         () => filterOptions.filter((option) => option.kind !== ALL_CODEX_KIND),
         [filterOptions]
     );
+    const totalEntryCount = filterOptions.find((option) => option.kind === ALL_CODEX_KIND)?.count ?? entries.length;
     const isOverviewState =
         activeKind === ALL_CODEX_KIND &&
         !hasDeferredQuery &&
         (!selectedEntryKey || selectedListItem === null);
-    const isOverviewLoading = isOverviewState && loading && entries.length === 0;
+    const hasOverviewCategories = overviewOptions.length > 0;
+    const isOverviewLoading =
+        isOverviewState &&
+        entries.length === 0 &&
+        !hasOverviewCategories &&
+        !summaryError &&
+        (loading || summaryLoading || !summaryLoaded);
     const isFullWidthReferenceOverviewState =
         supportsFullWidthReferenceOverview(activeKind) &&
         !hasDeferredQuery &&
@@ -1063,7 +1099,7 @@ export default function CodexPage() {
                     resultCount={filteredEntries.length}
                     searchSuggestions={autocompleteEntries}
                     searchValue={query}
-                    totalSearchCount={entries.length}
+                    totalSearchCount={totalEntryCount}
                     useCompactHeader={useCompactHeader}
                     onConfirmSearch={() => {
                         const firstVisibleEntry = filteredEntries[0];

@@ -5,6 +5,7 @@ import ewshop.facade.dto.response.CodexDto;
 import ewshop.facade.dto.response.CodexMetadataFactDto;
 import ewshop.facade.dto.response.CodexMetadataSectionDto;
 import ewshop.facade.dto.response.CodexMetadataSectionItemDto;
+import ewshop.facade.dto.response.CodexSummaryDto;
 import ewshop.facade.interfaces.CodexFacade;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,5 +78,25 @@ class CodexControllerTest {
                 .andExpect(jsonPath("$[0].sections[0].items[0].label").value("Klax Extractor"))
                 .andExpect(jsonPath("$[0].sections[0].items[0].referenceKey").value("Extractor_Luxury01"))
                 .andExpect(jsonPath("$[0].publicContextKeys[0]").value("Resource_Luxury01"));
+    }
+
+    @Test
+    void getCodexSummary_returnsOnlyKindCounts() throws Exception {
+        when(codexFacade.getCodexSummary()).thenReturn(List.of(
+                new CodexSummaryDto("districts", 2),
+                new CodexSummaryDto("tech", 1)
+        ));
+
+        mockMvc.perform(get("/api/codex/summary")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].exportKind").value("districts"))
+                .andExpect(jsonPath("$[0].count").value(2))
+                .andExpect(jsonPath("$[0].displayName").doesNotExist())
+                .andExpect(jsonPath("$[0].descriptionLines").doesNotExist())
+                .andExpect(jsonPath("$[0].facts").doesNotExist())
+                .andExpect(jsonPath("$[0].sections").doesNotExist());
     }
 }
