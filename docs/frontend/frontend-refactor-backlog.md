@@ -11,6 +11,35 @@ Quest Explorer semantic reference: future Quest Explorer refactors should use
 Existing names such as `questPathFlow` are legacy implementation vocabulary and
 should not trigger behavior changes by themselves.
 
+## Current Forward Plan - 2026-08-14
+
+Status: active principal frontend refactor track.
+
+Goal: reduce concentrated frontend file-size risk without changing product
+behavior, route contracts, or backend DTO contracts. Each slice should be a
+separate commit with targeted tests before broader verification.
+
+Carry this plan forward in the next handoff:
+
+1. Keep the frontend architecture guideline current with React 2026 pragmatic
+   practices and the file-size review thresholds.
+2. Split `frontend/src/pages/CodexPage.test.tsx` by behavior area so future
+   Codex work does not keep growing one oversized integration spec.
+3. Split `frontend/src/pages/CodexPage.css` by stable Codex surface sections
+   only when imports and screenshots/tests can prove no visual behavior changed.
+4. Extract stable view-model/helper/component boundaries from
+   `frontend/src/components/Codex/CodexSummaryDetail.tsx`; add focused tests for
+   any pure helper behavior that is not already covered through page tests.
+5. Split `frontend/src/features/quests/questPathFlow.ts` by stable pure-domain
+   concerns, keeping current Quest semantic tests as the safety harness.
+6. Extract one focused orchestration hook or helper from
+   `frontend/src/pages/QuestExplorerPage.tsx` only after the helper boundary is
+   clear and covered by existing route/deep-link tests.
+
+Skip or defer any slice that would require product behavior decisions, visual
+redesign decisions, route-contract changes, or speculative framework/tooling
+changes.
+
 ## Audit Summary
 
 The frontend is generally healthy outside a few concentrated hotspots. The highest-value work is not a rewrite; it is staged, behavior-preserving extraction around Quest Explorer and one admin import surface.

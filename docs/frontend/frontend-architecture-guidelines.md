@@ -37,6 +37,9 @@ This is guidance, not automated lint enforcement.
 - Good page-local state: active tab, transient hover/focus, expanded panels, scroll-active segment, reader choices, debug toggles.
 - Do not duplicate lookup state in pages when a canonical store already owns it.
 - Do not fetch related stores just because DTO keys exist; fetch only what the UI intentionally renders.
+- Derive render data from existing props/store/page state during render when practical.
+- Use Effects for synchronization with external systems such as network, browser APIs, timers, observers, and route updates; avoid Effects whose only job is to mirror derived data into another state variable.
+- Use `useMemo`, `useCallback`, and `React.memo` deliberately for expensive derivation, stable Effect dependencies, or measured render churn. Do not add memoization by reflex, and do not remove existing memoization during unrelated work without profiling or focused tests.
 
 ## Tests
 
@@ -55,6 +58,35 @@ This is guidance, not automated lint enforcement.
 - Do not split files purely to satisfy line counts.
 - Do not introduce generic frameworks until two real product surfaces need the same contract.
 - During refactors, keep routes, query params, debug tooling, store ownership, copy, and layout stable unless the task explicitly changes them.
+
+## File Size Review
+
+Line counts are prompts for architectural review, not mechanical refactor
+requirements. Large cohesive files may remain large when splitting would add
+indirection without reducing risk.
+
+| File type | Target | Review threshold | Hard review/refactor threshold |
+| --- | ---: | ---: | ---: |
+| React page files | 300-500 LOC | 700 LOC | 1000 LOC unless justified |
+| React component files | 200-300 LOC | 400 LOC | 600 LOC unless justified |
+| Pure helper/view-model files | 300-500 LOC | 700 LOC | 1000 LOC unless justified |
+| CSS files | Feature-scoped and sectioned | 1000 LOC | 1500 LOC unless intentionally centralized |
+
+When a file crosses a review threshold, record:
+- why it is large
+- whether the size is cohesive or mixed-responsibility
+- likely extraction candidates
+- whether extraction is behavior-preserving
+- tests needed before and after extraction
+- recommended status: `safe now`, `needs product decision`, `needs techlead decision`, or `defer`
+
+Prioritize by safety and payoff rather than size alone:
+- prefer behavior-preserving extraction of coherent responsibilities
+- prefer pure-helper tests before risky movement
+- avoid style-only churn
+- avoid splitting cohesive product concepts into vague fragments
+- avoid product behavior changes during refactor goals
+- defer anything that needs unresolved UX, routing, store, or product decisions
 
 ## Review Signals
 

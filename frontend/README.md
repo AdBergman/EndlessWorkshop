@@ -4,7 +4,7 @@ Vite + React + TypeScript frontend for EWShop.
 
 ## Requirements
 
-- Node.js >=20.19.0. Docker builds currently use Node 24.
+- Node.js >=24.0.0 and <25, as declared by `package.json`.
 - npm 11.6.0, as declared by `packageManager`.
 
 ## Commands
@@ -44,4 +44,7 @@ Do not casually refactor share hydration, route/deep-link hydration, startup ord
 
 Prefer small, tested changes that follow existing stores, selectors, helpers, and route semantics.
 
-For deeper architecture context, see `docs/architecture/2026-05-zustand-next-wave.md`.
+For deeper architecture context, see
+`docs/frontend/frontend-architecture-guidelines.md`,
+`docs/frontend/frontend-testing-strategy.md`, and
+`docs/frontend/frontend-refactor-backlog.md`.
