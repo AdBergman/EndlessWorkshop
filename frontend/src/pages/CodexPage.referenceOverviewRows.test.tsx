@@ -1,39 +1,17 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
-import { apiClient } from "@/api/apiClient";
-import TopContainer from "@/components/TopContainer/TopContainer";
-import CodexPage from "./CodexPage";
-import { useCodexStore } from "@/stores/codexStore";
-import { useTechStore } from "@/stores/techStore";
-import { useUnitStore } from "@/stores/unitStore";
-import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
-import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
+import { buildEntriesByKey,buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import {
-    cleanupCodexPageStores,
-    getSummaryRowForButton,
-    heroFixture,
-    heroSkill,
-    heroSkillTier,
-    heroSkillTree,
-    mockDefaultCodexPageApi,
-    resetCodexPageTestState,
-    richDistrict,
-    richFaction,
-    richImprovement,
-    richTech,
-    richUnit,
-    seedActionArchiveEntries,
-    seedCodexEntries,
-    seedHeroes,
-    seedRichDistricts,
-    seedRichFactions,
-    seedRichImprovements,
-    seedRichUnits,
-    seedShallowReferenceLayoutEntries,
-    seedSkills,
+cleanupCodexPageStores,
+getSummaryRowForButton,
+resetCodexPageTestState,
+seedCodexEntries
 } from "@/pages/testUtils/codexPageHarness";
+import { LocationProbe } from "@/pages/testUtils/codexPageTestUtils";
+import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry } from "@/types/dataTypes";
+import { cleanup,render,screen,within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter,Route,Routes } from "react-router-dom";
+import CodexPage from "./CodexPage";
 
 describe("CodexPage reference overview rows", () => {
     beforeEach(() => {
@@ -49,16 +27,6 @@ describe("CodexPage reference overview rows", () => {
 
     function getCategoryToolbar() {
         return screen.getByRole("toolbar", { name: /filter codex by category/i });
-    }
-
-    function getLandingCategoryIndex() {
-        return screen.getByLabelText("Codex category index");
-    }
-
-    function getLandingCategoryLabels() {
-        return within(getLandingCategoryIndex())
-            .getAllByRole("button")
-            .map((button) => button.querySelector(".codex-overview__kind")?.textContent?.trim());
     }
 
     it("renders shallow reference category lists with exact resource, effect, and trait context", async () => {

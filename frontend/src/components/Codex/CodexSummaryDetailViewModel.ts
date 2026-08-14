@@ -1,27 +1,6 @@
-import { getFactionIconPath } from "@/features/icons/factionIconResolver";
 import { getStatusScopeDisplayLabel } from "@/lib/codex/codexStatusArchiveFilters";
-import {
-    formatCodexMajorFactionText,
-    getCodexEntryPreview,
-    getCodexEntryLabel,
-} from "@/lib/codex/codexPresentation";
-import { getCodexHeroStatGroups } from "@/lib/codex/codexHeroStats";
 import { getCodexFactValues } from "@/lib/codex/codexFactValues";
-import {
-    buildTechUnlockSummary,
-    type CodexTechUnlockSummary as TechUnlockSummary,
-} from "@/lib/codex/codexTechUnlockSummaries";
-import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
-import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
-import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
-import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
-import { formatUnitTierLabel } from "@/lib/codex/codexUnitArchiveFilters";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
-import {
-    resolveCodexReference,
-    resolveRelatedEntries,
-    type CodexReferenceIndexes,
-} from "@/lib/codex/codexRefs";
 import type { CodexEntry } from "@/types/dataTypes";
 
 export type OverviewMetadataConfig = {
@@ -463,4 +442,3 @@ export function getAbilityCatalogEffectPreviewLines(entry: CodexEntry, searchQue
 export function isSameAbilityPreviewLine(left: string | null, right: string): boolean {
     return normalizeAbilityTaxonomyText(left ?? "") === normalizeAbilityTaxonomyText(right);
 }
-

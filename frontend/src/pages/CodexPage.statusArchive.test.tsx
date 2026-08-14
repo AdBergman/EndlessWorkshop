@@ -1,39 +1,13 @@
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
-import { apiClient } from "@/api/apiClient";
-import TopContainer from "@/components/TopContainer/TopContainer";
-import CodexPage from "./CodexPage";
-import { useCodexStore } from "@/stores/codexStore";
-import { useTechStore } from "@/stores/techStore";
-import { useUnitStore } from "@/stores/unitStore";
-import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
-import { BackButton, LocationProbe, seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
 import {
-    cleanupCodexPageStores,
-    getSummaryRowForButton,
-    heroFixture,
-    heroSkill,
-    heroSkillTier,
-    heroSkillTree,
-    mockDefaultCodexPageApi,
-    resetCodexPageTestState,
-    richDistrict,
-    richFaction,
-    richImprovement,
-    richTech,
-    richUnit,
-    seedActionArchiveEntries,
-    seedCodexEntries,
-    seedHeroes,
-    seedRichDistricts,
-    seedRichFactions,
-    seedRichImprovements,
-    seedRichUnits,
-    seedShallowReferenceLayoutEntries,
-    seedSkills,
+cleanupCodexPageStores,
+resetCodexPageTestState,
+seedCodexEntries
 } from "@/pages/testUtils/codexPageHarness";
-import type { CodexEntry } from "@/types/dataTypes";
+import { LocationProbe } from "@/pages/testUtils/codexPageTestUtils";
+import { cleanup,render,screen,within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { MemoryRouter,Route,Routes } from "react-router-dom";
+import CodexPage from "./CodexPage";
 
 describe("CodexPage status archive", () => {
     beforeEach(() => {
@@ -46,20 +20,6 @@ describe("CodexPage status archive", () => {
         vi.unstubAllEnvs();
         cleanupCodexPageStores();
     });
-
-    function getCategoryToolbar() {
-        return screen.getByRole("toolbar", { name: /filter codex by category/i });
-    }
-
-    function getLandingCategoryIndex() {
-        return screen.getByLabelText("Codex category index");
-    }
-
-    function getLandingCategoryLabels() {
-        return within(getLandingCategoryIndex())
-            .getAllByRole("button")
-            .map((button) => button.querySelector(".codex-overview__kind")?.textContent?.trim());
-    }
 
     it("renders Status overview metadata from exported facts with a Scope rail", async () => {
         seedCodexEntries([

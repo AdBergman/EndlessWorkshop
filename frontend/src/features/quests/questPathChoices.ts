@@ -1,5 +1,4 @@
 import type {
-    QuestBranch,
     QuestExplorerEntry,
     QuestExplorerProgression,
     QuestProgressionStep,
@@ -37,12 +36,9 @@ import {
     continuationKeys,
     dependentContinuationBranches,
     hasRevealMetadata,
-    isContinuationBranch,
-    isSameProgressionChapter,
     knownEntryKey,
     nextProgressionChapterLocation,
     normalizeQuestExplorerEntryForPathFlow,
-    progressionLocationOutsideCurrentChapterForKeys,
     revealMetadataSatisfied,
     stepMatchesKeys,
     stepIndexForBranchStepOrder,

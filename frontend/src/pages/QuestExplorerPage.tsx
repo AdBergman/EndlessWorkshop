@@ -28,20 +28,15 @@ import {
     getQuestCategoryLabel,
     majorFactionInfoForQuest,
     QUEST_CATEGORY_OPTIONS,
-    type QuestCategoryKey,
 } from "@/features/quests/questCategories";
 import {
     buildQuestRailGroups,
     resolveRailSelectionKey,
-    type QuestRailGroup,
 } from "@/features/quests/questRail";
 import {
     EMPTY_CHOICE_PATH,
     findDetailProgression,
     progressionContextKey,
-    type QuestDetailProgression,
-    type QuestPathChoice,
-    type QuestPathChoiceSelection,
 } from "@/features/quests/questPathFlow";
 import {
     activeLoreSegmentForModel,
@@ -49,7 +44,6 @@ import {
 } from "@/features/quests/questLoreFlow";
 import {
     buildStrategyFlowModel,
-    type StrategyFlowModel,
 } from "@/features/quests/questStrategyFlow";
 import {
     LORE_SCROLL_ENTRY_QUERY_PARAM,
@@ -68,17 +62,11 @@ import {
     selectSelectedFaction,
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
-import type {
-    QuestExplorerEntry,
-    QuestExplorerProgression,
-} from "@/types/questTypes";
+import type { QuestExplorerEntry } from "@/types/questTypes";
 import { CategorySelector, QuestList } from "./QuestExplorerRail";
 import { EntryStrategyContent, LoreHeader, StrategyHeader, StrategyOverview } from "./QuestExplorerStrategyContent";
-import {
-    choiceDebugDetailsForStep,
-    stepTitle,
-    StrategyProgression,
-} from "./QuestExplorerStrategyProgression";
+import { choiceDebugDetailsForStep, stepTitle } from "./QuestExplorerStrategyDebug";
+import { StrategyProgression } from "./QuestExplorerStrategyProgression";
 import "@/components/Quests/QuestExplorer.css";
 
 function routeEntryKey(pathname: string): string | null {

@@ -18,7 +18,6 @@ import {
     detailEntryCounts,
     findDetailProgression,
     isSameProgressionChapter,
-    nextProgressionChapterLocation,
     progressionContextKey,
     progressionLocationOutsideCurrentChapterForKeys,
     railEntryKeyForProgression,

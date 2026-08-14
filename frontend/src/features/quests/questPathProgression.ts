@@ -8,11 +8,6 @@ import type {
     QuestProgressionStep,
     QuestProgressionVariant,
 } from "@/types/questTypes";
-import { getQuestCategoryKey } from "@/features/quests/questCategories";
-import {
-    chapterPositionLabel,
-    stepPositionLabel,
-} from "@/features/quests/questDisplay";
 import type {
     QuestDetailProgression,
     QuestPathChoice,

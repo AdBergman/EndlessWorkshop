@@ -48,7 +48,6 @@ import {
     type PopulationArchivePreviewLine,
     type PopulationFactionIdentity,
     type QuestArchiveLink,
-    type TechArchiveMetadataItem,
     type UnitArchiveMetadataItem,
     type UnitFactionIdentity,
     type VictoryConditionArchiveMetadataItem,
@@ -799,4 +798,3 @@ export function getDiplomacyArchiveMetadata(entry: CodexEntry): DiplomacyArchive
 
     return items;
 }
-

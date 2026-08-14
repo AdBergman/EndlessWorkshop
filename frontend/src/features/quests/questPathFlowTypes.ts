@@ -1,7 +1,5 @@
 import type {
-    QuestBranch,
     QuestExplorerEntry,
-    QuestExplorerProgression,
     QuestProgressionChapter,
     QuestProgressionQuestline,
     QuestProgressionStep,
