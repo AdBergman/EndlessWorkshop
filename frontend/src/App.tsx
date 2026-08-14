@@ -113,8 +113,8 @@ const AppLayout: React.FC = () => {
     }
 
     useEffect(() => {
-        warmPrimaryRouteChunks();
-    }, []);
+        warmPrimaryRouteChunks(location.pathname);
+    }, [location.pathname]);
 
     return (
         <div className={appClassName} data-ew-hue={appHue}>

@@ -48,6 +48,7 @@ describe("apiClient contract", () => {
         ["getHeroes", () => apiClient.getHeroes(), "/api/heroes"],
         ["getSkills", () => apiClient.getSkills(), "/api/skills"],
         ["getCodex", () => apiClient.getCodex(), "/api/codex"],
+        ["getCodexSummary", () => apiClient.getCodexSummary(), "/api/codex/summary"],
         ["getQuestExplorer", () => apiClient.getQuestExplorer(), "/api/quests/explorer"],
         ["getDataFreshness", () => apiClient.getDataFreshness(), "/api/data-freshness"],
         ["getSavedBuild", () => apiClient.getSavedBuild("saved-build-id"), "/api/builds/saved-build-id"],
