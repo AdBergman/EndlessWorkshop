@@ -1,116 +1,19 @@
-import React, { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useCallback, useState } from "react";
 import GameDataContext from "./GameDataContext";
-import { Faction, FactionInfo } from "@/types/dataTypes";
-import { apiClient, SavedTechBuild } from "@/api/apiClient";
-import { useNavigate } from "react-router-dom";
-import { useDistrictStore } from "@/stores/districtStore";
-import { useImprovementStore } from "@/stores/improvementStore";
-import { useUnitStore } from "@/stores/unitStore";
-import { useTechStore } from "@/stores/techStore";
-import { selectSelectedTechs, selectSetSelectedTechs, useTechPlannerStore } from "@/stores/techPlannerStore";
-import {
-    selectSelectedFaction,
-    selectSetSelectedFaction,
-    useFactionSelectionStore,
-} from "@/stores/factionSelectionStore";
+import ShareBuildHydrator from "@/context/ShareBuildHydrator";
+import { useSavedTechBuildActions } from "@/features/techBuilds/useSavedTechBuildActions";
 
 interface Props {
     children: ReactNode;
 }
 
-const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
-    isMajor: true,
-    enumFaction: faction,
-    uiLabel: String(faction).toLowerCase(),
-    minorName: null,
-});
-
-const toFactionInfoFromSavedValue = (faction: string): FactionInfo => {
-    const label = String(faction ?? "").trim();
-    const enumKey = label.toUpperCase().replace(/[\s-]+/g, "_") as keyof typeof Faction;
-    const knownFaction = Faction[enumKey];
-
-    if (knownFaction) return toFactionInfoFromEnum(knownFaction);
-
-    return {
-        isMajor: true,
-        enumFaction: label as Faction,
-        uiLabel: label,
-        minorName: null,
-    };
-};
-
 const GameDataProvider: React.FC<Props> = ({ children }) => {
-    const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
-    const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
-    const selectedTechs = useTechPlannerStore(selectSelectedTechs);
-    const setSelectedTechs = useTechPlannerStore(selectSetSelectedTechs);
-
     const [sharedBuildLoaded, setSharedBuildLoaded] = useState(false);
-
-    const navigate = useNavigate();
-
-    const initialShareUuid = new URLSearchParams(window.location.search).get("share");
-    const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(!!initialShareUuid);
-    const loadDistricts = useDistrictStore((s) => s.loadDistricts);
-    const loadImprovements = useImprovementStore((s) => s.loadImprovements);
-    const loadUnits = useUnitStore((s) => s.loadUnits);
-    const loadTechs = useTechStore((s) => s.loadTechs);
-
-    useEffect(() => {
-        void loadDistricts();
-        void loadImprovements();
-        void loadUnits();
-        void loadTechs();
-    }, [loadDistricts, loadImprovements, loadTechs, loadUnits]);
-
-    useEffect(() => {
-        if (sharedBuildLoaded) return;
-
-        const params = new URLSearchParams(window.location.search);
-        const shareUuid = params.get("share");
-        if (!shareUuid) {
-            setIsProcessingSharedBuild(false);
-            return;
-        }
-
-        const loadSharedBuild = async () => {
-            try {
-                const res = await apiClient.getSavedBuild(shareUuid);
-
-                setSelectedFaction(toFactionInfoFromSavedValue(res.selectedFaction));
-                setSelectedTechs(res.techIds);
-                setSharedBuildLoaded(true);
-
-                params.delete("share");
-                const newSearch = params.toString() ? `?${params.toString()}` : "";
-                navigate(`/tech${newSearch}`, { replace: true });
-            } catch (err) {
-                console.error("Failed to load shared build:", err);
-            } finally {
-                setIsProcessingSharedBuild(false);
-            }
-        };
-
-        void loadSharedBuild();
-    }, [navigate, setSelectedFaction, setSelectedTechs, sharedBuildLoaded]);
-
-    const createSavedTechBuild = async (
-        name: string,
-        faction: FactionInfo = selectedFaction,
-        techIds: string[] = selectedTechs
-    ): Promise<SavedTechBuild> => {
-        return await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
-    };
-
-    const getSavedBuild = async (uuid: string): Promise<SavedTechBuild> => {
-        const saved = await apiClient.getSavedBuild(uuid);
-
-        setSelectedFaction(toFactionInfoFromSavedValue(saved.selectedFaction));
-        setSelectedTechs(saved.techIds);
-
-        return saved;
-    };
+    const { applySavedTechBuild, createSavedTechBuild, getSavedBuild } = useSavedTechBuildActions();
+    const [isProcessingSharedBuild, setIsProcessingSharedBuild] = useState(
+        () => !!new URLSearchParams(window.location.search).get("share")
+    );
+    const handleSharedBuildLoaded = useCallback(() => setSharedBuildLoaded(true), []);
 
     return (
         <GameDataContext.Provider
@@ -121,6 +24,12 @@ const GameDataProvider: React.FC<Props> = ({ children }) => {
                 isProcessingSharedBuild,
             }}
         >
+            <ShareBuildHydrator
+                sharedBuildLoaded={sharedBuildLoaded}
+                onSharedBuildLoaded={handleSharedBuildLoaded}
+                onProcessingChange={setIsProcessingSharedBuild}
+                applySavedTechBuild={applySavedTechBuild}
+            />
             {children}
         </GameDataContext.Provider>
     );

@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { StrictMode } from "react";
 import { MemoryRouter, useLocation } from "react-router-dom";
 import GameDataProvider from "@/context/GameDataProvider";
 import { useGameData } from "@/context/GameDataContext";
@@ -129,7 +130,7 @@ describe("GameDataProvider orchestration boundary", () => {
         mockedApiClient.getCodex.mockResolvedValue([]);
     });
 
-    it("keeps startup loads flowing into the normalized stores", async () => {
+    it("does not load route-owned datasets during app startup", async () => {
         render(
             <MemoryRouter>
                 <GameDataProvider>
@@ -138,33 +139,19 @@ describe("GameDataProvider orchestration boundary", () => {
             </MemoryRouter>
         );
 
-        await waitFor(() => {
-            expect(screen.getByTestId("district-label")).toHaveTextContent("City Center");
-            expect(screen.getByTestId("improvement-label")).toHaveTextContent("Public Library");
-            expect(screen.getByTestId("tech-label")).toHaveTextContent("Kin Workshop");
-        });
+        await waitFor(() => expect(screen.getByTestId("share-processing")).toHaveTextContent("false"));
 
-        expect(screen.getByTestId("tech-count")).toHaveTextContent("1");
+        expect(screen.getByTestId("district-label")).toHaveTextContent("missing");
+        expect(screen.getByTestId("improvement-label")).toHaveTextContent("missing");
+        expect(screen.getByTestId("tech-label")).toHaveTextContent("missing");
+        expect(screen.getByTestId("tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("0");
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("kin");
-    });
 
-    it("keeps route-owned datasets out of app startup", async () => {
-        render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <StoreProbe />
-                </GameDataProvider>
-            </MemoryRouter>
-        );
-
-        await waitFor(() => {
-            expect(mockedApiClient.getDistricts).toHaveBeenCalled();
-            expect(mockedApiClient.getImprovements).toHaveBeenCalled();
-            expect(mockedApiClient.getUnits).toHaveBeenCalled();
-            expect(mockedApiClient.getTechs).toHaveBeenCalled();
-        });
-
+        expect(mockedApiClient.getDistricts).not.toHaveBeenCalled();
+        expect(mockedApiClient.getImprovements).not.toHaveBeenCalled();
+        expect(mockedApiClient.getUnits).not.toHaveBeenCalled();
+        expect(mockedApiClient.getTechs).not.toHaveBeenCalled();
         expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
         expect(mockedApiClient.getQuestExplorer).not.toHaveBeenCalled();
     });
@@ -362,56 +349,42 @@ describe("GameDataProvider orchestration boundary", () => {
 
         expect(screen.getByTestId("location")).toHaveTextContent("/tech");
         expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("shared-build-id");
+        expect(mockedApiClient.getDistricts).not.toHaveBeenCalled();
+        expect(mockedApiClient.getImprovements).not.toHaveBeenCalled();
+        expect(mockedApiClient.getUnits).not.toHaveBeenCalled();
+        expect(mockedApiClient.getTechs).not.toHaveBeenCalled();
 
         window.history.pushState({}, "", "/");
     });
 
-    it("keeps identical district and improvement keys separated in their stores", async () => {
-        mockedApiClient.getDistricts.mockResolvedValue([
-            {
-                districtKey: "Shared_Constructible_Key",
-                displayName: "Shared District",
-                descriptionLines: ["District text"],
-            },
-        ]);
-        mockedApiClient.getImprovements.mockResolvedValue([
-            {
-                improvementKey: "Shared_Constructible_Key",
-                displayName: "Shared Improvement",
-                descriptionLines: ["Improvement text"],
-                unique: "City",
-                cost: [],
-            },
-        ]);
-
-        const SharedProbe = () => {
-            const districtsByKey = useDistrictStore((state) => state.districtsByKey);
-            const improvementsByKey = useImprovementStore((state) => state.improvementsByKey);
-
-            return (
-                <div>
-                    <div data-testid="shared-district">
-                        {districtsByKey.Shared_Constructible_Key?.displayName ?? "missing"}
-                    </div>
-                    <div data-testid="shared-improvement">
-                        {improvementsByKey.Shared_Constructible_Key?.displayName ?? "missing"}
-                    </div>
-                </div>
-            );
-        };
+    it("dedupes shared-build hydration under StrictMode startup effects", async () => {
+        window.history.pushState({}, "", "/tech?share=shared-build-id");
+        mockedApiClient.getSavedBuild.mockResolvedValue({
+            uuid: "shared-build-id",
+            name: "Shared Build",
+            selectedFaction: "Aspects",
+            techIds: ["Tech_Shared_First"],
+            createdAt: "2026-05-12T00:00:00Z",
+        });
 
         render(
-            <MemoryRouter>
-                <GameDataProvider>
-                    <SharedProbe />
-                </GameDataProvider>
-            </MemoryRouter>
+            <StrictMode>
+                <MemoryRouter initialEntries={["/tech?share=shared-build-id"]}>
+                    <GameDataProvider>
+                        <StoreProbe />
+                    </GameDataProvider>
+                </MemoryRouter>
+            </StrictMode>
         );
 
         await waitFor(() => {
-            expect(screen.getByTestId("shared-district")).toHaveTextContent("Shared District");
-            expect(screen.getByTestId("shared-improvement")).toHaveTextContent("Shared Improvement");
+            expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("1");
+            expect(screen.getByTestId("share-processing")).toHaveTextContent("false");
         });
+
+        expect(mockedApiClient.getSavedBuild).toHaveBeenCalledTimes(1);
+
+        window.history.pushState({}, "", "/");
     });
 
     it("leaves selected tech and faction state owned by their stores", () => {

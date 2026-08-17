@@ -10,7 +10,7 @@ vi.mock("./components/Seo/PageSeo", () => ({
     default: () => null,
 }));
 
-vi.mock("./components/Tech/TechContainer", async () => {
+vi.mock("@/components/Tech/TechContainer", async () => {
     const { useLocation } = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
 
     function MockTechRoute() {

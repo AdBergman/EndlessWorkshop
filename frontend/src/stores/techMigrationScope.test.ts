@@ -55,14 +55,33 @@ describe("tech data ownership migration scope", () => {
         ], [forbiddenHeroPlumbing]);
     });
 
-    it("leaves share orchestration and saved builds in GameDataProvider", () => {
+    it("keeps share orchestration in GameDataProvider and saved-build actions in the Tech feature", () => {
         const source = readSrc("context/GameDataProvider.tsx");
+        const shareHydratorSource = readSrc("context/ShareBuildHydrator.tsx");
+        const savedBuildSource = readSrc("features/techBuilds/useSavedTechBuildActions.ts");
         const contextSource = readSrc("context/GameDataContext.ts");
 
         expectSourceToInclude(source, [
+            /ShareBuildHydrator/,
+            /useSavedTechBuildActions/,
+            /isProcessingSharedBuild/,
+        ]);
+        expectSourceToExclude(source, [
+            /loadTechs/,
+            /loadDistricts/,
+            /loadImprovements/,
+            /loadUnits/,
+            /apiClient\.createSavedBuild/,
+            /apiClient\.getSavedBuild/,
+        ]);
+        expectSourceToInclude(shareHydratorSource, [
+            /onProcessingChange/,
+            /apiClient\.getSavedBuild/,
+            /navigate\(`\/tech/,
+        ]);
+        expectSourceToInclude(savedBuildSource, [
             /useFactionSelectionStore/,
             /useTechPlannerStore/,
-            /isProcessingSharedBuild/,
             /apiClient\.createSavedBuild/,
             /apiClient\.getSavedBuild/,
         ]);

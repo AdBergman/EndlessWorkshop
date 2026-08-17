@@ -8,7 +8,6 @@ import {
     Navigate,
 } from "react-router-dom";
 import TopContainer from "./components/TopContainer/TopContainer";
-import TechContainer from "./components/Tech/TechContainer";
 import InfoPage from "./components/InfoPage/InfoPage";
 import GameDataProvider from "./context/GameDataProvider";
 import { useShareProcessingGate } from "./context/appOrchestration";
@@ -20,12 +19,14 @@ import {
     loadGameSummaryPage,
     loadModsPage,
     loadQuestExplorerPage,
+    loadTechContainer,
     loadUnitEvolutionExplorer,
     warmPrimaryRouteChunks,
 } from "@/routeLoaders";
 
 import "./App.css";
 
+const TechContainer = lazy(loadTechContainer);
 const GameSummaryPage = lazy(loadGameSummaryPage);
 const UnitEvolutionExplorer = lazy(loadUnitEvolutionExplorer);
 const AdminImportPage = lazy(loadAdminImportPage);
@@ -169,7 +170,9 @@ export function AppRoutes() {
                     path="tech"
                     element={
                         <SeoRoute routeKey="tech">
-                            <TechContainer />
+                            <LazyRoute>
+                                <TechContainer />
+                            </LazyRoute>
                         </SeoRoute>
                     }
                 />

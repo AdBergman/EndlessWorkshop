@@ -53,6 +53,28 @@ describe("route data hydration scope", () => {
         expectSourceToInclude(readSrc("pages/QuestExplorerPage.tsx"), [/loadQuestExplorer/]);
     });
 
+    it("keeps root app startup free of route-owned data warmups", () => {
+        expectSourceToExclude(readSrc("context/GameDataProvider.tsx"), [
+            /loadTechs/,
+            /loadDistricts/,
+            /loadImprovements/,
+            /loadUnits/,
+            /loadEntries/,
+            /loadQuestExplorer/,
+        ]);
+    });
+
+    it("keeps the Tech route behind the route chunk loader", () => {
+        expectSourceToExclude(readSrc("App.tsx"), [
+            /from ["']\.\/components\/Tech\/TechContainer["']/,
+            /from ["']@\/components\/Tech\/TechContainer["']/,
+        ]);
+        expectSourceToInclude(readSrc("routeLoaders.ts"), [
+            /loadTechContainer/,
+            /import\(["']@\/components\/Tech\/TechContainer["']\)/,
+        ]);
+    });
+
     it("keeps route chunk preloading separate from API/store data hydration", () => {
         expectSourceToExclude(readSrc("routeLoaders.ts"), [
             /apiClient/,

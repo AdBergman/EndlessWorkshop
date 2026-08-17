@@ -1,5 +1,6 @@
 const routePreloads = new Map<string, Promise<unknown>>();
 
+export const loadTechContainer = () => import("@/components/Tech/TechContainer");
 export const loadGameSummaryPage = () => import("./components/GameSummary/GameSummaryPage");
 
 export const loadUnitEvolutionExplorer = () =>
@@ -13,11 +14,15 @@ export const loadModsPage = () => import("@/pages/ModsPage");
 export const loadQuestExplorerPage = () => import("@/pages/QuestExplorerPage");
 
 const preloaders: Record<string, () => Promise<unknown>> = {
+    "/tech": loadTechContainer,
     "/units": loadUnitEvolutionExplorer,
     "/codex": loadCodexPage,
     "/quests": loadQuestExplorerPage,
+    "/summary": loadGameSummaryPage,
     "/mods": loadModsPage,
 };
+
+const PRIMARY_WARMUP_ROUTES = ["/units", "/codex", "/quests", "/mods"];
 
 type RouteWarmupConnection = {
     effectiveType?: string;
@@ -50,7 +55,7 @@ export function getPrimaryRoutePreloadPaths(
     if (!connectionAllowsWarmup(connection)) return [];
     if (ROUTES_WITH_HEAVY_STARTUP.some((routePath) => routeMatches(pathname, routePath))) return [];
 
-    return Object.keys(preloaders).filter((routePath) => !routeMatches(pathname, routePath));
+    return PRIMARY_WARMUP_ROUTES.filter((routePath) => !routeMatches(pathname, routePath));
 }
 
 export function preloadRoutePath(path: string): void {
@@ -64,6 +69,10 @@ export function preloadRoutePath(path: string): void {
 
     routePreloads.set(path, preload);
     void preload.catch(() => undefined);
+}
+
+export function isRoutePreloadable(path: string): boolean {
+    return Boolean(preloaders[path]);
 }
 
 export function warmPrimaryRouteChunks(currentPath = window.location.pathname): void {

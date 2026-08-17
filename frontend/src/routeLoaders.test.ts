@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getPrimaryRoutePreloadPaths } from "./routeLoaders";
+import { getPrimaryRoutePreloadPaths, isRoutePreloadable } from "./routeLoaders";
 
 describe("route chunk warmup planning", () => {
     it("warms secondary interactive routes from lightweight shell routes", () => {
@@ -9,6 +9,16 @@ describe("route chunk warmup planning", () => {
             "/quests",
             "/mods",
         ]);
+    });
+
+    it("keeps Summary explicitly preloadable without adding it to background warmups", () => {
+        expect(isRoutePreloadable("/summary")).toBe(true);
+        expect(getPrimaryRoutePreloadPaths("/tech")).not.toContain("/summary");
+    });
+
+    it("keeps Tech explicitly preloadable for navigation intent from non-Tech routes", () => {
+        expect(isRoutePreloadable("/tech")).toBe(true);
+        expect(getPrimaryRoutePreloadPaths("/info")).not.toContain("/tech");
     });
 
     it("does not re-warm the active route chunk", () => {
