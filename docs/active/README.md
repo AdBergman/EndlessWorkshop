@@ -1,6 +1,6 @@
 # Active Documentation Index
 
-Current as of 2026-06-24.
+Current as of 2026-08-17.
 
 ## Purpose
 
@@ -45,6 +45,12 @@ index, then select the smallest relevant doc set for the task type.
 | DB exporter handoff/follow-up | `docs/active/db-exporter-ewshop-handoff-ledger.md` | `docs/active/db-exporter-request-workflow.md`, active handoff/backlog doc linked by the ledger |
 | DB exporter metadata issue | `docs/active/db-exporter-ewshop-handoff-ledger.md` | `docs/active/db-exporter-request-workflow.md`, `docs/active/db-exporter-ability-metadata-handoff.md`, related category evolution doc |
 | Quest Explorer work | `docs/quest-explorer/README.md` | `docs/quest_explorer_canonical_semantics_v1.md` |
+| Backend implementation | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | `AGENTS.md`; broad cleanup planning may also read `docs/backend/backend-documentation-and-agent-rules-review-2026-08-17.md` |
+| Backend API contract change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | Relevant `api` controller tests and affected frontend type/client/store/rendering tests |
+| Backend import change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | `docs/active/import-history-and-data-freshness-design.md`; DB Exporter work also starts with `docs/active/db-exporter-ewshop-handoff-ledger.md` |
+| Backend persistence/Flyway change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/dependency-and-ci-maintenance.md` | Relevant infrastructure migration/roundtrip tests |
+| Generated SEO backend change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/backend-deploy-smoke-checklist.md`, `docs/backend/seo-architecture.md` | `docs/backend/seo-backend-review.md` when planning cleanup |
+| Backend documentation/architecture review | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/documentation-guidelines.md` | `docs/backend/backend-documentation-and-agent-rules-review-2026-08-17.md` |
 | Frontend implementation | `docs/frontend/frontend-architecture-guidelines.md` | Route/component-specific docs |
 | Visual/Codex UI polish | `docs/active/codex-premium-ui-design-baseline.md` | Current priorities, relevant category docs |
 | Docs cleanup | `docs/documentation-guidelines.md` | This active README |
@@ -368,6 +374,28 @@ category boundary. The rich `/quests` route owns Quest exploration.
   - Purpose: Java/backend coding style.
   - Read when: changing backend Java code.
   - Status: active backend style guide.
+
+- `docs/backend/backend-architecture-and-testing-guidelines.md`
+  - Purpose: canonical backend architecture, package, contract, testing, file
+    size, runtime, and AI-agent implementation guidance.
+  - Read when: changing backend Java, API contracts, imports, persistence,
+    Flyway migrations, generated SEO, backend runtime config, or backend tests.
+  - Status: active backend source of truth.
+
+- `docs/backend/backend-deploy-smoke-checklist.md`
+  - Purpose: canonical backend deploy/runtime smoke checklist aligned with the
+    deploy workflow.
+  - Read when: changing backend runtime, Docker/deploy configuration,
+    production route behavior, generated SEO persistence, compression, or
+    public API availability.
+  - Status: active backend smoke guidance.
+
+- `docs/backend/backend-documentation-and-agent-rules-review-2026-08-17.md`
+  - Purpose: backend documentation, AI-agent rule, application-state, and
+    technical debt review with action plan.
+  - Read when: improving backend rules/docs, planning backend cleanup, or
+    checking current backend documentation gaps before a broad backend pass.
+  - Status: active backend improvement review.
 
 ## Archives
 

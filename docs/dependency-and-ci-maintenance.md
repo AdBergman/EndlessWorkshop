@@ -57,6 +57,18 @@ Backend and frontend CI should pass before dependency changes are merged:
 Deploy still runs from `main`. Dependency PRs should be merged deliberately and
 then allowed to pass the normal deploy gate.
 
+## Runtime Version Policy
+
+- Backend Java is JDK 26.
+- Keep the root Maven `<java.version>`, GitHub Actions Java setup, Docker
+  build/runtime images, README, and backend architecture guidance aligned to
+  JDK 26.
+- Treat changes to the backend JDK, Spring Boot major/minor line, Maven build
+  plugins, Docker base images, or deploy smoke as runtime-affecting changes.
+- For runtime-affecting changes, run the strongest reasonable Maven gate and a
+  Docker build before merging. If local tooling cannot supply the target JDK,
+  say so explicitly and rely on CI only as a conscious choice.
+
 ## AI Guidance
 
 When an AI agent handles dependency or CI changes:

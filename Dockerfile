@@ -10,7 +10,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # ---------- Stage 2: Build backend ----------
-FROM eclipse-temurin:25-jdk-alpine AS backend-build
+FROM eclipse-temurin:26-jdk-alpine AS backend-build
 WORKDIR /app
 
 # Copy only poms first for better layer caching
@@ -43,7 +43,7 @@ COPY app/src/main/resources/static/seo ./app/src/main/resources/static/seo
 RUN ./mvnw -B clean package -DskipTests
 
 # ---------- Stage 3: Run Spring Boot ----------
-FROM eclipse-temurin:25-jdk AS runtime
+FROM eclipse-temurin:26-jdk AS runtime
 WORKDIR /app
 
 # Copy the built jar regardless of version -> stable filename in runtime image

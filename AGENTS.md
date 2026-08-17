@@ -15,7 +15,8 @@ docs.
 - Do not deep-audit importer, DB, or Flyway layers unless explicitly requested, the API contract is ambiguous, or a contract mismatch is suspected.
 - For DB Exporter handoff, response, or follow-up work, read `docs/active/db-exporter-ewshop-handoff-ledger.md` first, check whether the issue was previously requested/answered/rejected/superseded/implemented, and update the ledger when new requests, responses, findings, or follow-ups are created.
 - For documentation cleanup, read and follow `docs/documentation-guidelines.md`; keep active docs short and archive completed handoffs under `docs/archive/`.
-- For backend Java changes, read and follow `docs/backend/java-code-style.md`; do not duplicate those rules here.
+- For backend Java changes, read and follow `docs/backend/backend-architecture-and-testing-guidelines.md` and `docs/backend/java-code-style.md`; do not duplicate those rules here.
+- For backend deploy/runtime smoke checks, read and follow `docs/backend/backend-deploy-smoke-checklist.md`.
 - For dependency, CI, or workflow changes, read and follow `docs/dependency-and-ci-maintenance.md`; document any required manual maintainer action there.
 
 ## Local Import Fixtures

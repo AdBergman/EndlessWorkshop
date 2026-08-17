@@ -26,7 +26,7 @@ The project originated from a series of Spring Boot experiments and prototypes, 
 ## Tech stack
 
 ### Backend
-- Java 24
+- JDK 26
 - Spring Boot
 - PostgreSQL
 - JPA / Hibernate
@@ -137,7 +137,9 @@ Design principles:
 - Free of infrastructure details
 - Focused on behavior rather than persistence mechanics
 
-This layer is designed to be testable in isolation.
+This is a pragmatic Spring-managed domain, not a framework-free core. Domain
+services may use Spring service, transaction, and cache annotations where they
+match established project conventions.
 
 ---
 
@@ -158,14 +160,17 @@ Special considerations:
 ---
 
 ### app
-**Responsibility:** Application assembly and wiring.
+**Responsibility:** Application assembly, runtime-edge use cases, and wiring.
 
 Contains:
 - Spring Boot entry point
 - Configuration and component scanning
 - Profile-specific and cross-cutting configuration
+- Generated SEO orchestration
+- Local development startup import orchestration
 
-This module contains no business logic.
+This module should not absorb domain policy. It owns runtime concerns that sit
+at the edge of the running Spring Boot service.
 
 ---
 
@@ -238,9 +243,8 @@ VITE_API_BASE_URL=http://localhost:8080/api
 
 ### Backend
 ```bash
-cd backend
-mvn clean package
-mvn spring-boot:run
+./mvnw -B clean package
+./mvnw -pl app spring-boot:run
 ```
 Runs at: http://localhost:8080
 
@@ -268,8 +272,8 @@ Application available at: http://localhost:8080
 
 The Docker build uses a multi-stage setup:
 - Node 24 for building the React frontend
-- Maven + Temurin for building the Spring Boot JAR
-- Temurin JDK runtime for execution
+- Maven + Temurin JDK 26 for building the Spring Boot JAR
+- Temurin JDK 26 runtime for execution
 - Frontend assets copied into Spring Boot /static
 
 ---

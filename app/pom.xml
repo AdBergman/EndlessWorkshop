@@ -13,7 +13,7 @@
 
     <artifactId>app</artifactId>
     <name>ewshop.app.Application Module</name>
-    <description>The main runnable Spring Boot application.</description>
+    <description>The runnable Spring Boot application, wiring, and runtime-edge use cases.</description>
 
     <dependencies>
         <!-- Spring Boot -->

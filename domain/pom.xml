@@ -14,21 +14,21 @@
 
     <artifactId>domain</artifactId>
     <name>Domain Module</name>
-    <description>Core business logic, JPA entities, and domain models.</description>
+    <description>Spring-managed domain services, repository ports, commands, and domain models.</description>
 
     <dependencies>
-        <!-- For JPA annotations like @Embeddable -->
+        <!-- Limited JPA annotations for shared domain value objects such as @Embeddable. JPA entities live in infrastructure. -->
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
         </dependency>
-        <!-- For Spring annotations like @Service -->
+        <!-- EWShop uses a pragmatic Spring-managed domain for services. -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
 
-        <!-- Add Spring Data Commons for Repository abstraction -->
+        <!-- Repository abstractions and paging/sorting contracts used by domain ports. -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
@@ -36,6 +36,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

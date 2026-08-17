@@ -3,6 +3,10 @@
 Guidance for humans and AI agents working on EWShop backend Java. This is not
 enforced by Checkstyle, Spotless, Qodana, or formatter rules.
 
+For backend architecture boundaries, package ownership, task-based testing, file
+size thresholds, and runtime guidance, read
+`docs/backend/backend-architecture-and-testing-guidelines.md` first.
+
 ## Core Style
 
 - Prefer explicit Java over generated or hidden behavior.
