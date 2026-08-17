@@ -137,7 +137,10 @@ describe("CodexPage rich planning enrichment", () => {
                 displayName: "Canal District",
                 descriptionLines: [],
                 referenceKeys: ["Tech_Irrigation", "District_GrandCanal", "Tech_RelatedOnly"],
-                facts: [{ label: "Category", value: "Food" }],
+                facts: [
+                    { label: "Category", value: "Food" },
+                    { label: "Tier", value: "1" },
+                ],
                 sections: [{ title: "Effects", lines: ["+10 [FoodColored] Food"] }],
             },
             {

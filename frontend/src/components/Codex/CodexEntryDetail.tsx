@@ -134,7 +134,7 @@ export default function CodexEntryDetail({
                     richImprovementByKey,
                     allEntries
                 )
-            : { unlockedBy: [], upgradesInto: [], placementLines: [] },
+            : { profileLines: [], unlockedBy: [], upgradesInto: [], placementLines: [] },
         [allEntries, entry, richDistrictByKey, richImprovementByKey]
     );
     const isFactionEntry = normalizedExportKind === "factions";

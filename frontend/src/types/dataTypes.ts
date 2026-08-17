@@ -69,8 +69,17 @@ export interface Improvement {
 export interface District {
     districtKey: string;
     displayName: string;
+    category?: string | null;
+    tier?: number | null;
+    constructibleLevel?: number | null;
     descriptionLines: string[];
+    constructionCost?: string[];
+    descriptorKeys?: string[];
+    referenceKeys?: string[];
     unlockTechnologyKeys?: string[];
+    isFactionSpecific?: boolean | null;
+    isVariant?: boolean | null;
+    isPlayerFacing?: boolean | null;
     levelUp?: DistrictLevelUp | null;
     placementPrerequisites?: ConstructiblePlacementPrerequisites | null;
 }
@@ -88,6 +97,9 @@ export interface ConstructiblePlacementPrerequisites {
 export interface DistrictLevelUp {
     targetDistrictKey: string | null;
     requiredAdjacentDistrictCount: number | null;
+    validNeighbourDescriptorKeys?: string[];
+    validNeighbourUiMapperKey?: string | null;
+    requiredFactionTraitKeys?: string[];
 }
 
 export interface CodexMetadataFact {

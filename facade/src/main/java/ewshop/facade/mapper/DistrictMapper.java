@@ -24,8 +24,16 @@ public class DistrictMapper {
                 domain.getDistrictKey(),
                 domain.getDisplayName(),
                 domain.getCategory(),
+                domain.getTier(),
+                domain.getConstructibleLevel(),
                 lines,
+                domain.getConstructionCost() == null ? List.of() : List.copyOf(domain.getConstructionCost()),
+                domain.getDescriptorKeys() == null ? List.of() : List.copyOf(domain.getDescriptorKeys()),
+                domain.getReferenceKeys() == null ? List.of() : List.copyOf(domain.getReferenceKeys()),
                 domain.getUnlockTechnologyKeys() == null ? List.of() : List.copyOf(domain.getUnlockTechnologyKeys()),
+                domain.getFactionSpecific(),
+                domain.getVariant(),
+                domain.getPlayerFacing(),
                 toLevelUpDto(domain.getLevelUp()),
                 toPlacementDto(domain.getPlacementPrerequisites())
         );
@@ -34,7 +42,13 @@ public class DistrictMapper {
     private static DistrictLevelUpDto toLevelUpDto(DistrictLevelUp levelUp) {
         return levelUp == null
                 ? null
-                : new DistrictLevelUpDto(levelUp.targetDistrictKey(), levelUp.requiredAdjacentDistrictCount());
+                : new DistrictLevelUpDto(
+                        levelUp.targetDistrictKey(),
+                        levelUp.requiredAdjacentDistrictCount(),
+                        levelUp.validNeighbourDescriptorKeys(),
+                        levelUp.validNeighbourUiMapperKey(),
+                        levelUp.requiredFactionTraitKeys()
+                );
     }
 
     private static ConstructiblePlacementPrerequisitesDto toPlacementDto(

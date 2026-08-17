@@ -34,10 +34,21 @@ const normalizeDistrict = (district: District): District => ({
     ...district,
     districtKey: normalizeDistrictKey(district.districtKey),
     displayName: district.displayName ?? "",
+    category: typeof district.category === "string" ? district.category.trim() || null : null,
+    tier: typeof district.tier === "number" && Number.isFinite(district.tier) ? district.tier : null,
+    constructibleLevel: typeof district.constructibleLevel === "number" && Number.isFinite(district.constructibleLevel)
+        ? district.constructibleLevel
+        : null,
     descriptionLines: (district.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),
+    constructionCost: stringList(district.constructionCost),
+    descriptorKeys: stringList(district.descriptorKeys),
+    referenceKeys: stringList(district.referenceKeys),
     unlockTechnologyKeys: stringList(district.unlockTechnologyKeys),
+    isFactionSpecific: typeof district.isFactionSpecific === "boolean" ? district.isFactionSpecific : null,
+    isVariant: typeof district.isVariant === "boolean" ? district.isVariant : null,
+    isPlayerFacing: typeof district.isPlayerFacing === "boolean" ? district.isPlayerFacing : null,
     levelUp: normalizeLevelUp(district.levelUp),
     placementPrerequisites: normalizePlacement(district.placementPrerequisites),
 });
@@ -71,9 +82,22 @@ function normalizeLevelUp(levelUp: District["levelUp"]): District["levelUp"] {
     const requiredAdjacentDistrictCount = Number.isFinite(levelUp.requiredAdjacentDistrictCount)
         ? levelUp.requiredAdjacentDistrictCount
         : null;
+    const validNeighbourDescriptorKeys = stringList(levelUp.validNeighbourDescriptorKeys);
+    const validNeighbourUiMapperKey = normalizeDistrictKey(levelUp.validNeighbourUiMapperKey);
+    const requiredFactionTraitKeys = stringList(levelUp.requiredFactionTraitKeys);
 
-    return targetDistrictKey || requiredAdjacentDistrictCount !== null
-        ? { targetDistrictKey: targetDistrictKey || null, requiredAdjacentDistrictCount }
+    return targetDistrictKey ||
+        requiredAdjacentDistrictCount !== null ||
+        validNeighbourDescriptorKeys.length > 0 ||
+        validNeighbourUiMapperKey ||
+        requiredFactionTraitKeys.length > 0
+        ? {
+                targetDistrictKey: targetDistrictKey || null,
+                requiredAdjacentDistrictCount,
+                validNeighbourDescriptorKeys,
+                validNeighbourUiMapperKey: validNeighbourUiMapperKey || null,
+                requiredFactionTraitKeys,
+            }
         : null;
 }
 

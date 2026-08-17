@@ -13,6 +13,7 @@ type Props = {
 
 export default function CodexConstructiblePlanningSection({ enrichment, onSelect }: Props) {
     if (
+        enrichment.profileLines.length === 0 &&
         enrichment.unlockedBy.length === 0 &&
         enrichment.upgradesInto.length === 0 &&
         enrichment.placementLines.length === 0
@@ -30,6 +31,21 @@ export default function CodexConstructiblePlanningSection({ enrichment, onSelect
             </div>
 
             <div className="codex-constructiblePlanning__groups">
+                {enrichment.profileLines.length > 0 ? (
+                    <div className="codex-constructiblePlanning__group">
+                        <div className="codex-constructiblePlanning__label">Profile</div>
+                        <div className="codex-constructiblePlanning__value">
+                            {enrichment.profileLines.map((line, index) => (
+                                <span className="codex-constructiblePlanning__inlineItem" key={line}>
+                                    {index > 0 ? (
+                                        <span className="codex-constructiblePlanning__separator">·</span>
+                                    ) : null}
+                                    <span>{line}</span>
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                ) : null}
                 {enrichment.unlockedBy.length > 0 ? (
                     <ConstructiblePlanningLinkGroup
                         label="Unlocked by"

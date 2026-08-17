@@ -478,6 +478,41 @@ export function getDistrictArchiveEffectPreviewLines(entry: CodexEntry): string[
     return effectLines.slice(0, MAX_DISTRICT_EFFECT_PREVIEW_LINES);
 }
 
+function getDistrictYieldSummary(entry: CodexEntry): string[] {
+    const yields = new Set<string>();
+
+    const addYield = (effectText: string, label: string, patterns: readonly RegExp[]) => {
+        if (patterns.some((pattern) => pattern.test(effectText))) {
+            yields.add(label);
+        }
+    };
+
+    for (const line of getDistrictArchiveEffectPreviewLines(entry)) {
+        const grantText = line
+            .split(/\s+(?:if|when|while)\s+/i)[0]
+            .trim()
+            .toLowerCase();
+
+        if (!/^(?:\+|doubles?\b|increases?\b)/i.test(grantText)) continue;
+        if (/\bcost\b/.test(grantText)) continue;
+
+        addYield(grantText, "Food", [/\bfood\b/, /foodcolored/]);
+        addYield(grantText, "Industry", [/\bindustry\b/, /industrycolored/]);
+        addYield(grantText, "Dust", [/\bdust\b/, /moneycolored/, /dustcolored/]);
+        addYield(grantText, "Science", [/\bscience\b/, /sciencecolored/]);
+        addYield(grantText, "Influence", [/\binfluence\b/, /culturecolored/]);
+        addYield(grantText, "Approval", [/\bapproval\b/, /publicordercolored/]);
+        addYield(grantText, "Population", [/\bpopulation\b/]);
+        addYield(grantText, "Resource", [/\bresource\b/, /resourceall/]);
+        addYield(grantText, "Fortification", [/\bfortification\b/]);
+        addYield(grantText, "Vision", [/\bvision\b/]);
+        addYield(grantText, "Experience", [/\bexperience\b/]);
+        addYield(grantText, "Corpses", [/\bcorpses?\b/]);
+    }
+
+    return Array.from(yields);
+}
+
 export function formatDistrictTierValue(value: string): string {
     const trimmedValue = value.trim();
     if (!trimmedValue) return "";
@@ -500,6 +535,11 @@ export function getDistrictArchiveMetadata(entry: CodexEntry): DistrictArchiveMe
         seenValues.add(normalizedValue);
         items.push({ key, value: trimmedValue });
     };
+
+    const yieldSummary = getDistrictYieldSummary(entry);
+    if (yieldSummary.length > 0) {
+        addValue("yield", `Yields: ${yieldSummary.join(", ")}`);
+    }
 
     getCodexFactValues(entry, "Category").forEach((value) =>
         addValue("category", getDistrictCategoryDisplayLabel(value))

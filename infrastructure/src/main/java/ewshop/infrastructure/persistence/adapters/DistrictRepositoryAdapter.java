@@ -112,6 +112,16 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getTier(), update.tier())) {
+            entity.setTier(update.tier());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getConstructibleLevel(), update.constructibleLevel())) {
+            entity.setConstructibleLevel(update.constructibleLevel());
+            changed = true;
+        }
+
         if (!Objects.equals(entity.getDescriptionLines(), update.descriptionLines())) {
             entity.setDescriptionLines(update.descriptionLines() == null
                     ? List.of()
@@ -119,8 +129,38 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getConstructionCost(), update.constructionCost())) {
+            entity.setConstructionCost(update.constructionCost());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getDescriptorKeys(), update.descriptorKeys())) {
+            entity.setDescriptorKeys(update.descriptorKeys());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getReferenceKeys(), update.referenceKeys())) {
+            entity.setReferenceKeys(update.referenceKeys());
+            changed = true;
+        }
+
         if (!Objects.equals(entity.getUnlockTechnologyKeys(), update.unlockTechnologyKeys())) {
             entity.setUnlockTechnologyKeys(update.unlockTechnologyKeys());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getFactionSpecific(), update.factionSpecific())) {
+            entity.setFactionSpecific(update.factionSpecific());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getVariant(), update.variant())) {
+            entity.setVariant(update.variant());
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlayerFacing(), update.playerFacing())) {
+            entity.setPlayerFacing(update.playerFacing());
             changed = true;
         }
 
@@ -136,8 +176,16 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
                 .districtKey(e.getDistrictKey())
                 .displayName(e.getDisplayName())
                 .category(e.getCategory())
+                .tier(e.getTier())
+                .constructibleLevel(e.getConstructibleLevel())
                 .descriptionLines(e.getDescriptionLines())
+                .constructionCost(e.getConstructionCost())
+                .descriptorKeys(e.getDescriptorKeys())
+                .referenceKeys(e.getReferenceKeys())
                 .unlockTechnologyKeys(e.getUnlockTechnologyKeys())
+                .factionSpecific(e.getFactionSpecific())
+                .variant(e.getVariant())
+                .playerFacing(e.getPlayerFacing())
                 .levelUp(toLevelUp(e))
                 .placementPrerequisites(toPlacement(e))
                 .build();
@@ -146,6 +194,11 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
     private static boolean setLevelUpIfChanged(DistrictEntity entity, DistrictLevelUp levelUp) {
         String targetDistrictKey = levelUp == null ? null : levelUp.targetDistrictKey();
         Integer adjacentCount = levelUp == null ? null : levelUp.requiredAdjacentDistrictCount();
+        List<String> validNeighbourDescriptorKeys = levelUp == null
+                ? List.of()
+                : levelUp.validNeighbourDescriptorKeys();
+        String validNeighbourUiMapperKey = levelUp == null ? null : levelUp.validNeighbourUiMapperKey();
+        List<String> requiredFactionTraitKeys = levelUp == null ? List.of() : levelUp.requiredFactionTraitKeys();
         boolean changed = false;
 
         if (!Objects.equals(entity.getLevelUpTargetDistrictKey(), targetDistrictKey)) {
@@ -155,6 +208,21 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
 
         if (!Objects.equals(entity.getLevelUpRequiredAdjacentDistrictCount(), adjacentCount)) {
             entity.setLevelUpRequiredAdjacentDistrictCount(adjacentCount);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getLevelUpValidNeighbourDescriptorKeys(), validNeighbourDescriptorKeys)) {
+            entity.setLevelUpValidNeighbourDescriptorKeys(validNeighbourDescriptorKeys);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getLevelUpValidNeighbourUiMapperKey(), validNeighbourUiMapperKey)) {
+            entity.setLevelUpValidNeighbourUiMapperKey(validNeighbourUiMapperKey);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getLevelUpRequiredFactionTraitKeys(), requiredFactionTraitKeys)) {
+            entity.setLevelUpRequiredFactionTraitKeys(requiredFactionTraitKeys);
             changed = true;
         }
 
@@ -192,7 +260,10 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
     private static DistrictLevelUp toLevelUp(DistrictEntity entity) {
         DistrictLevelUp levelUp = new DistrictLevelUp(
                 entity.getLevelUpTargetDistrictKey(),
-                entity.getLevelUpRequiredAdjacentDistrictCount()
+                entity.getLevelUpRequiredAdjacentDistrictCount(),
+                entity.getLevelUpValidNeighbourDescriptorKeys(),
+                entity.getLevelUpValidNeighbourUiMapperKey(),
+                entity.getLevelUpRequiredFactionTraitKeys()
         );
         return levelUp.isEmpty() ? null : levelUp;
     }

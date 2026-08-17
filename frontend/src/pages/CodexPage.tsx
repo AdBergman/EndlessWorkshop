@@ -30,9 +30,11 @@ import {
     type DiplomacyArchiveCategory,
 } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import {
-    buildDistrictCategoryFilterOptions,
-    filterDistrictEntriesByCategory,
-    type DistrictArchiveCategory,
+    buildDistrictArchiveFilterGroups,
+    DEFAULT_DISTRICT_ARCHIVE_FILTERS,
+    filterDistrictEntriesByArchiveFilters,
+    type ActiveDistrictArchiveFilters,
+    type DistrictArchiveFilterKey,
 } from "@/lib/codex/codexDistrictArchiveFilters";
 import {
     buildAbilityArchiveFilterOptions,
@@ -164,7 +166,9 @@ export default function CodexPage() {
     const [selectionIntent, setSelectionIntent] = useState<SelectionIntent>("passive");
     const [activeActionType, setActiveActionType] = useState<ActionArchiveType | null>(null);
     const [activeDiplomacyCategory, setActiveDiplomacyCategory] = useState<DiplomacyArchiveCategory | null>(null);
-    const [activeDistrictCategory, setActiveDistrictCategory] = useState<DistrictArchiveCategory | null>(null);
+    const [activeDistrictFilters, setActiveDistrictFilters] = useState<ActiveDistrictArchiveFilters>(
+        DEFAULT_DISTRICT_ARCHIVE_FILTERS
+    );
     const [activeFactFilters, setActiveFactFilters] = useState<ActiveCodexFactFilters>({});
     const [activeEquipmentFilters, setActiveEquipmentFilters] = useState<ActiveEquipmentArchiveFilters>(
         EMPTY_EQUIPMENT_ARCHIVE_FILTERS
@@ -340,16 +344,20 @@ export default function CodexPage() {
     useEffect(() => {
         if (isDistrictArchiveMode) return;
 
-        setActiveDistrictCategory((current) => current ? null : current);
+        setActiveDistrictFilters((current) => (
+            current.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier || current.focus
+                ? DEFAULT_DISTRICT_ARCHIVE_FILTERS
+                : current
+        ));
     }, [isDistrictArchiveMode]);
 
-    const districtCategoryOptions = useMemo(
+    const districtFilterGroups = useMemo(
         () => (
             isDistrictArchiveMode
-                ? buildDistrictCategoryFilterOptions(searchFilteredEntries)
+                ? buildDistrictArchiveFilterGroups(searchFilteredEntries, activeDistrictFilters)
                 : []
         ),
-        [isDistrictArchiveMode, searchFilteredEntries]
+        [activeDistrictFilters, isDistrictArchiveMode, searchFilteredEntries]
     );
 
     const factFilterOptions = useMemo(
@@ -527,7 +535,11 @@ export default function CodexPage() {
             }
 
             if (isDistrictArchiveMode) {
-                return filterDistrictEntriesByCategory(searchFilteredEntries, activeDistrictCategory);
+                return filterDistrictEntriesByArchiveFilters(
+                    searchFilteredEntries,
+                    activeDistrictFilters,
+                    selectedEntryParam
+                );
             }
 
             if (isAbilityCatalogMode) {
@@ -605,7 +617,7 @@ export default function CodexPage() {
         [
             activeActionType,
             activeDiplomacyCategory,
-            activeDistrictCategory,
+            activeDistrictFilters,
             activeEquipmentFilters,
             activeFactFilters,
             activeHeroFilters,
@@ -617,6 +629,7 @@ export default function CodexPage() {
             activeTechFilters,
             activeTraitType,
             activeUnitFilters,
+            selectedEntryParam,
             factFilterConfig,
             isActionArchiveMode,
             isAbilityCatalogMode,
@@ -650,6 +663,10 @@ export default function CodexPage() {
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
+    const hasActiveDistrictArchiveFilters = isDistrictArchiveMode && (
+        activeDistrictFilters.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier ||
+        Boolean(activeDistrictFilters.focus)
+    );
     const activeFactFilterItems = useMemo(
         () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
@@ -842,6 +859,7 @@ export default function CodexPage() {
     useEffect(() => {
         if (loading) return;
         if (activeKind === ALL_CODEX_KIND) return;
+        if (shouldLoadFullEntries && entries.length === 0) return;
 
         const filterStillExists =
             filterOptions.some((option) => option.kind === activeKind) ||
@@ -852,7 +870,7 @@ export default function CodexPage() {
         if (!filterStillExists) {
             updateSelectedEntry(null, { category: null, replace: true });
         }
-    }, [activeKind, entries, filterOptions, loading, updateSelectedEntry]);
+    }, [activeKind, entries, filterOptions, loading, shouldLoadFullEntries, updateSelectedEntry]);
 
     useEffect(() => {
         if (loading) return;
@@ -951,13 +969,25 @@ export default function CodexPage() {
         returnFiltersToArchive(isDiplomacyArchiveMode);
     }, [isDiplomacyArchiveMode, returnFiltersToArchive]);
 
-    const clearDistrictCategory = useCallback(() => {
-        setActiveDistrictCategory(null);
+    const clearDistrictFilters = useCallback(() => {
+        setActiveDistrictFilters(DEFAULT_DISTRICT_ARCHIVE_FILTERS);
         returnFiltersToArchive(isDistrictArchiveMode);
     }, [isDistrictArchiveMode, returnFiltersToArchive]);
 
-    const toggleDistrictCategory = useCallback((category: DistrictArchiveCategory) => {
-        setActiveDistrictCategory((current) => current === category ? null : category);
+    const toggleDistrictFilter = useCallback((filterKey: DistrictArchiveFilterKey, value: string) => {
+        setActiveDistrictFilters((current) => {
+            if (filterKey === "tier") {
+                return {
+                    ...current,
+                    tier: value,
+                };
+            }
+
+            return {
+                ...current,
+                focus: current.focus === value ? null : value as ActiveDistrictArchiveFilters["focus"],
+            };
+        });
         returnFiltersToArchive(isDistrictArchiveMode);
     }, [isDistrictArchiveMode, returnFiltersToArchive]);
 
@@ -1161,9 +1191,8 @@ export default function CodexPage() {
                         diplomacyCategoryFilter={activeDiplomacyCategory}
                         diplomacyCategoryOptions={diplomacyCategoryOptions}
                         diplomacyTotalCount={isDiplomacyArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
-                        districtCategoryFilter={activeDistrictCategory}
-                        districtCategoryOptions={districtCategoryOptions}
-                        districtTotalCount={isDistrictArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
+                        activeDistrictFilters={activeDistrictFilters}
+                        districtFilterGroups={districtFilterGroups}
                         displayEntries={displayEntries}
                         equipmentFilterGroups={equipmentFilterGroups}
                         error={error}
@@ -1204,7 +1233,7 @@ export default function CodexPage() {
                         unitFilterGroups={unitFilterGroups}
                         onClearActionType={clearActionType}
                         onClearDiplomacyCategory={clearDiplomacyCategory}
-                        onClearDistrictCategory={clearDistrictCategory}
+                        onClearDistrictFilters={clearDistrictFilters}
                         onClearFactFilters={clearFactFilters}
                         onClearEquipmentFilters={clearEquipmentFilters}
                         onClearHeroFilters={clearHeroFilters}
@@ -1218,7 +1247,7 @@ export default function CodexPage() {
                         onSelectEntry={(entry) => selectEntry(entry)}
                         onToggleActionType={toggleActionType}
                         onToggleDiplomacyCategory={toggleDiplomacyCategory}
-                        onToggleDistrictCategory={toggleDistrictCategory}
+                        onToggleDistrictFilter={toggleDistrictFilter}
                         onToggleEquipmentFilter={toggleEquipmentFilter}
                         onToggleHeroFilter={toggleHeroFilter}
                         onToggleUnitFilter={toggleUnitFilter}
@@ -1253,7 +1282,7 @@ export default function CodexPage() {
                                     titleOverride={abilityArchiveSummary?.title}
                                     contextOverride={abilityArchiveSummary?.context}
                                     searchQuery={deferredQuery}
-                                    hasActiveFilters={hasActiveFactFilters}
+                                    hasActiveFilters={hasActiveFactFilters || hasActiveDistrictArchiveFilters}
                                 />
                             ) : (
                             <CodexEntryDetail

@@ -3,7 +3,15 @@ import type { CodexEntry, District, Improvement } from "@/types/dataTypes";
 
 type ConstructibleRichSource = Pick<
     District,
-    "districtKey" | "unlockTechnologyKeys" | "levelUp" | "placementPrerequisites"
+    | "districtKey"
+    | "tier"
+    | "constructibleLevel"
+    | "constructionCost"
+    | "isFactionSpecific"
+    | "isVariant"
+    | "unlockTechnologyKeys"
+    | "levelUp"
+    | "placementPrerequisites"
 > | Pick<
     Improvement,
     "improvementKey" | "unlockTechnologyKeys" | "placementPrerequisites"
@@ -16,12 +24,14 @@ export type CodexConstructibleLink = {
 };
 
 export type CodexConstructibleRichEnrichment = {
+    profileLines: string[];
     unlockedBy: CodexConstructibleLink[];
     upgradesInto: CodexConstructibleLink[];
     placementLines: string[];
 };
 
 const EMPTY_CONSTRUCTIBLE_RICH_ENRICHMENT: CodexConstructibleRichEnrichment = {
+    profileLines: [],
     unlockedBy: [],
     upgradesInto: [],
     placementLines: [],
@@ -123,6 +133,40 @@ function buildPlacementLines(source: Pick<ConstructibleRichSource, "placementPre
     return [];
 }
 
+function buildDistrictProfileLines(
+    district: Pick<
+        District,
+        "tier" | "constructibleLevel" | "constructionCost" | "isFactionSpecific" | "isVariant"
+    >
+): string[] {
+    const lines: string[] = [];
+
+    if (typeof district.tier === "number" && Number.isFinite(district.tier)) {
+        lines.push(`Tier ${district.tier}`);
+    }
+
+    if (
+        typeof district.constructibleLevel === "number" &&
+        Number.isFinite(district.constructibleLevel) &&
+        district.constructibleLevel !== 0
+    ) {
+        lines.push(`Constructible level ${district.constructibleLevel}`);
+    }
+
+    if (district.isFactionSpecific) {
+        lines.push("Faction-specific variant");
+    } else if (district.isVariant) {
+        lines.push("Variant");
+    }
+
+    const constructionCost = district.constructionCost ?? [];
+    if (constructionCost.length > 0) {
+        lines.push(`Cost: ${constructionCost.join(", ")}`);
+    }
+
+    return lines;
+}
+
 export function buildCodexConstructibleRichEnrichment(
     entry: CodexEntry,
     richDistrictByKey: Readonly<Record<string, District | undefined>>,
@@ -141,6 +185,7 @@ export function buildCodexConstructibleRichEnrichment(
         const publicCodexDistrictByKey = buildPublicCodexIndex(allEntries, isDistrictEntry);
 
         return {
+            profileLines: buildDistrictProfileLines(richDistrict),
             unlockedBy: resolveLinks(
                 richDistrict.unlockTechnologyKeys ?? [],
                 publicCodexTechByKey,
@@ -156,6 +201,7 @@ export function buildCodexConstructibleRichEnrichment(
         if (!richImprovement) return EMPTY_CONSTRUCTIBLE_RICH_ENRICHMENT;
 
         return {
+            profileLines: [],
             unlockedBy: resolveLinks(
                 richImprovement.unlockTechnologyKeys ?? [],
                 publicCodexTechByKey,
@@ -173,6 +219,7 @@ export function hasCodexConstructibleRichEnrichment(
     enrichment: CodexConstructibleRichEnrichment
 ): boolean {
     return (
+        enrichment.profileLines.length > 0 ||
         enrichment.unlockedBy.length > 0 ||
         enrichment.upgradesInto.length > 0 ||
         enrichment.placementLines.length > 0

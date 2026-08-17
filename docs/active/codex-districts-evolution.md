@@ -350,3 +350,42 @@ Lessons:
 - Exact extracted resource links can appear in archive rows as compact inline affordances.
 - Tier is useful row metadata but not strong enough as first navigation.
 - Thin District rows need honest fallbacks rather than inferred descriptions.
+
+## 2026-08-17 District UX Implementation Update
+
+Implemented after product review:
+
+- District Archive filters are now grouped as `Tier` and `Focus`.
+- `Tier 1` is the default District archive view.
+- There is no District `All` filter chip.
+- Tier counts and result rows collapse duplicate public variants by display name,
+  Tier, Category, and public Effects, while preserving direct-linked variants.
+- Tierless legacy/thin Codex rows fall into the default Tier 1 view so they do
+  not disappear when no `All` bucket exists.
+- District archive rows now include a compact yield summary before Category/Tier
+  metadata when public Effect lines expose yields.
+- Rich District import/API/store data now carries the richer district profile
+  fields needed by detail pages:
+  - tier;
+  - constructible level;
+  - construction cost;
+  - descriptor/reference keys;
+  - faction-specific/variant/player-facing flags;
+  - richer level-up neighbour/faction-trait metadata.
+
+Verification:
+
+- Focused Codex/District frontend tests passed.
+- Frontend TypeScript passed.
+- Frontend production build passed.
+- Backend District mapper/import/repository/API/facade tests passed with JDK 26.
+
+Exporter/data conclusion:
+
+- `Works` Ridge/Mountain adjacency is missing from the current 0.82 rich
+  District and Codex District JSON as player-readable/structured metadata.
+- Current 0.82 exports only expose opaque `Effect_Synergy_Industry_A/B`
+  descriptor keys for that bonus.
+- Older static EWShop data did contain `+1 Industry for each adjacent Ridge`,
+  so this is an exporter/source JSON gap rather than an EWShop frontend
+  translation loss.

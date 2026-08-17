@@ -910,6 +910,40 @@ Priority:
   public top-level Codex browsing. Current EWShop behavior remains local/dev
   visibility with direct routes available for QA.
 
+### District Terrain/Adjacency Yield Metadata
+
+Classification: rich District export source-truth gap, with Codex projection
+follow-up after rich data is fixed.
+
+EWShop `DISTRICTS-UI-002` found that current 0.82 District exports do not expose
+the player-readable Works terrain/adjacency bonus that older local static data
+contained.
+
+Evidence:
+
+- `app/src/main/resources/data/districts.json` contained
+  `+1 Industry for each adjacent Ridge` for `Works`.
+- `local-imports/exports/ewshop_districts_export_0.82.json` contains `Works`
+  entries, but the relevant metadata is only opaque descriptor keys such as
+  `Effect_Synergy_Industry_A` and `Effect_Synergy_Industry_B`.
+- `local-imports/codex/ewshop_districts_codex_export_0.82.json` likewise lacks a
+  public/structured Ridge or Mountain adjacency effect line for `Works`.
+
+Request:
+
+- emit player-facing District terrain/adjacency yield effects when source data
+  proves them;
+- include stable structured fields or public effect lines that identify terrain
+  or neighbour requirements, yielded resource, amount, and affected District;
+- preserve exact references/keys for the terrain or tile feature when available;
+- do not require EWShop to infer Ridge/Mountain adjacency from descriptor key
+  names, district names, or old static JSON.
+
+Priority:
+
+- non-blocking for the current District Archive UX, but important before
+  Districts can be considered trustworthy for 4X planning decisions.
+
 ## Expected Exporter Validation
 
 Before returning the next ability metadata snapshot, provide:

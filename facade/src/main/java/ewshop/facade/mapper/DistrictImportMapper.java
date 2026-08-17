@@ -33,8 +33,16 @@ public final class DistrictImportMapper {
                 key,
                 name,
                 category,
+                dto.tier(),
+                dto.constructibleLevel(),
                 descriptionLines,
+                cleanLines(dto.constructionCost()),
+                cleanLines(dto.descriptorKeys()),
+                cleanLines(dto.referenceKeys()),
                 cleanLines(dto.unlockTechnologyKeys()),
+                dto.isFactionSpecific(),
+                dto.isVariant(),
+                dto.isPlayerFacing(),
                 toLevelUp(dto.levelUp()),
                 toPlacement(dto.placementPrerequisites())
         );
@@ -64,7 +72,10 @@ public final class DistrictImportMapper {
 
         DistrictLevelUp levelUp = new DistrictLevelUp(
                 trimToNull(dto.targetDistrictKey()),
-                dto.requiredAdjacentDistrictCount()
+                dto.requiredAdjacentDistrictCount(),
+                cleanLines(dto.validNeighbourDescriptorKeys()),
+                trimToNull(dto.validNeighbourUiMapperKey()),
+                cleanLines(dto.requiredFactionTraitKeys())
         );
         return levelUp.isEmpty() ? null : levelUp;
     }

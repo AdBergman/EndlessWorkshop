@@ -53,8 +53,9 @@ import type {
     DiplomacyCategoryFilterOption,
 } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import type {
-    DistrictArchiveCategory,
-    DistrictCategoryFilterOption,
+    ActiveDistrictArchiveFilters,
+    DistrictArchiveFilterGroup,
+    DistrictArchiveFilterKey,
 } from "@/lib/codex/codexDistrictArchiveFilters";
 import type {
     QuestArchiveFilterValue,
@@ -73,9 +74,8 @@ type Props = {
     diplomacyCategoryFilter: DiplomacyArchiveCategory | null;
     diplomacyCategoryOptions: readonly DiplomacyCategoryFilterOption[];
     diplomacyTotalCount: number;
-    districtCategoryFilter: DistrictArchiveCategory | null;
-    districtCategoryOptions: readonly DistrictCategoryFilterOption[];
-    districtTotalCount: number;
+    activeDistrictFilters: ActiveDistrictArchiveFilters;
+    districtFilterGroups: readonly DistrictArchiveFilterGroup[];
     displayEntries: CodexListItem[];
     equipmentFilterGroups: readonly EquipmentArchiveFilterGroup[];
     activeEquipmentFilters: ActiveEquipmentArchiveFilters;
@@ -121,7 +121,7 @@ type Props = {
     onClearActionType: () => void;
     onClearFactFilters: () => void;
     onClearDiplomacyCategory: () => void;
-    onClearDistrictCategory: () => void;
+    onClearDistrictFilters: () => void;
     onClearEquipmentFilters: () => void;
     onClearHeroFilters: () => void;
     onClearUnitFilters: () => void;
@@ -134,7 +134,7 @@ type Props = {
     onSelectEntry: (entry: CodexListItem) => void;
     onToggleActionType: (type: ActionArchiveType) => void;
     onToggleDiplomacyCategory: (category: DiplomacyArchiveCategory) => void;
-    onToggleDistrictCategory: (category: DistrictArchiveCategory) => void;
+    onToggleDistrictFilter: (filterKey: DistrictArchiveFilterKey, value: string) => void;
     onToggleEquipmentFilter: (filterKey: EquipmentArchiveFilterKey, value: string) => void;
     onToggleHeroFilter: (filterKey: HeroArchiveFilterKey, value: string) => void;
     onToggleUnitFilter: (filterKey: UnitArchiveFilterKey, value: string) => void;
@@ -162,9 +162,8 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         diplomacyCategoryFilter,
         diplomacyCategoryOptions,
         diplomacyTotalCount,
-        districtCategoryFilter,
-        districtCategoryOptions,
-        districtTotalCount,
+        activeDistrictFilters,
+        districtFilterGroups,
         displayEntries,
         equipmentFilterGroups,
         error,
@@ -205,7 +204,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         unitFilterGroups,
         onClearActionType,
         onClearDiplomacyCategory,
-        onClearDistrictCategory,
+        onClearDistrictFilters,
         onClearFactFilters,
         onClearEquipmentFilters,
         onClearHeroFilters,
@@ -219,7 +218,7 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
         onSelectEntry,
         onToggleActionType,
         onToggleDiplomacyCategory,
-        onToggleDistrictCategory,
+        onToggleDistrictFilter,
         onToggleEquipmentFilter,
         onToggleHeroFilter,
         onToggleUnitFilter,
@@ -309,11 +308,10 @@ const CodexLeftPane = React.forwardRef<HTMLDivElement, Props>(function CodexLeft
 
             {isDistrictArchiveMode ? (
                 <DistrictArchiveRail
-                    activeCategory={districtCategoryFilter}
-                    options={districtCategoryOptions}
-                    totalCount={districtTotalCount}
-                    onClearCategory={onClearDistrictCategory}
-                    onToggleCategory={onToggleDistrictCategory}
+                    activeFilters={activeDistrictFilters}
+                    groups={districtFilterGroups}
+                    onClearFilters={onClearDistrictFilters}
+                    onToggleFilter={onToggleDistrictFilter}
                 />
             ) : null}
 

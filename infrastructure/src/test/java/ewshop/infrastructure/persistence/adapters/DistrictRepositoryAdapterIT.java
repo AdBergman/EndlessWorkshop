@@ -12,7 +12,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(properties = "ewshop.cache-preload.enabled=false")
 @Transactional
 class DistrictRepositoryAdapterIT {
 

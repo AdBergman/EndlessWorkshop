@@ -20,11 +20,23 @@ describe("useDistrictStore", () => {
             {
                 districtKey: " District_City_Center ",
                 displayName: "City Center",
+                category: " City ",
+                tier: 1,
+                constructibleLevel: 0,
                 descriptionLines: ["Capital district."],
+                constructionCost: [" 120 Industry ", ""],
+                descriptorKeys: [" Tag_District_City ", " "],
+                referenceKeys: [" Tech_City_Planning "],
                 unlockTechnologyKeys: [" Technology_City_Planning ", "", " "],
+                isFactionSpecific: false,
+                isVariant: true,
+                isPlayerFacing: true,
                 levelUp: {
                     targetDistrictKey: " District_Tier2_City_Center ",
                     requiredAdjacentDistrictCount: 2,
+                    validNeighbourDescriptorKeys: [" Tag_CountInDistrictLevelUp "],
+                    validNeighbourUiMapperKey: " District_City_Neighbour ",
+                    requiredFactionTraitKeys: [" FactionTrait_City "],
                 },
                 placementPrerequisites: {
                     neighbourTiles: {
@@ -39,15 +51,27 @@ describe("useDistrictStore", () => {
         await useDistrictStore.getState().loadDistricts();
 
         const state = useDistrictStore.getState();
-        expect(state.getDistrictByKey("District_City_Center")?.displayName).toBe("City Center");
-        expect(state.getDistrictByKey("District_City_Center")?.unlockTechnologyKeys).toEqual([
+        const district = state.getDistrictByKey("District_City_Center");
+        expect(district?.displayName).toBe("City Center");
+        expect(district?.category).toBe("City");
+        expect(district?.tier).toBe(1);
+        expect(district?.constructionCost).toEqual(["120 Industry"]);
+        expect(district?.descriptorKeys).toEqual(["Tag_District_City"]);
+        expect(district?.referenceKeys).toEqual(["Tech_City_Planning"]);
+        expect(district?.isFactionSpecific).toBe(false);
+        expect(district?.isVariant).toBe(true);
+        expect(district?.isPlayerFacing).toBe(true);
+        expect(district?.unlockTechnologyKeys).toEqual([
             "Technology_City_Planning",
         ]);
-        expect(state.getDistrictByKey("District_City_Center")?.levelUp).toEqual({
+        expect(district?.levelUp).toEqual({
             targetDistrictKey: "District_Tier2_City_Center",
             requiredAdjacentDistrictCount: 2,
+            validNeighbourDescriptorKeys: ["Tag_CountInDistrictLevelUp"],
+            validNeighbourUiMapperKey: "District_City_Neighbour",
+            requiredFactionTraitKeys: ["FactionTrait_City"],
         });
-        expect(state.getDistrictByKey("District_City_Center")?.placementPrerequisites).toEqual({
+        expect(district?.placementPrerequisites).toEqual({
             neighbourTiles: {
                 operator: "AnyTile",
                 territoryConstraint: "SameRegion",

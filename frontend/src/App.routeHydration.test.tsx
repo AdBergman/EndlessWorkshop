@@ -128,6 +128,18 @@ describe("App route data hydration", () => {
         expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
     });
 
+    it("hydrates direct Codex category routes before validating category availability", async () => {
+        render(
+            <MemoryRouter initialEntries={["/codex?category=districts"]}>
+                <AppRoutes />
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Districts overview")).toHaveTextContent("Market Square");
+        expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
+    });
+
     it("loads units data on the first Units navigation", async () => {
         const user = userEvent.setup();
 

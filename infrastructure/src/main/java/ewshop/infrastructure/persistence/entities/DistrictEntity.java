@@ -25,6 +25,12 @@ public class DistrictEntity {
     @Column(name = "category", length = 200)
     private String category;
 
+    @Column(name = "tier")
+    private Integer tier;
+
+    @Column(name = "constructible_level")
+    private Integer constructibleLevel;
+
     @ElementCollection
     @CollectionTable(name = "district_description_lines", joinColumns = @JoinColumn(name = "district_id"))
     @OrderColumn(name = "line_index")
@@ -32,14 +38,46 @@ public class DistrictEntity {
     private List<String> descriptionLines = new ArrayList<>();
 
     @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "construction_cost", columnDefinition = "text")
+    private List<String> constructionCost = new ArrayList<>();
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "descriptor_keys", columnDefinition = "text")
+    private List<String> descriptorKeys = new ArrayList<>();
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "reference_keys", columnDefinition = "text")
+    private List<String> referenceKeys = new ArrayList<>();
+
+    @Convert(converter = StringListJsonConverter.class)
     @Column(name = "unlock_technology_keys", columnDefinition = "text")
     private List<String> unlockTechnologyKeys = new ArrayList<>();
+
+    @Column(name = "is_faction_specific")
+    private Boolean factionSpecific;
+
+    @Column(name = "is_variant")
+    private Boolean variant;
+
+    @Column(name = "is_player_facing")
+    private Boolean playerFacing;
 
     @Column(name = "level_up_target_district_key")
     private String levelUpTargetDistrictKey;
 
     @Column(name = "level_up_required_adjacent_district_count")
     private Integer levelUpRequiredAdjacentDistrictCount;
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "level_up_valid_neighbour_descriptor_keys", columnDefinition = "text")
+    private List<String> levelUpValidNeighbourDescriptorKeys = new ArrayList<>();
+
+    @Column(name = "level_up_valid_neighbour_ui_mapper_key")
+    private String levelUpValidNeighbourUiMapperKey;
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "level_up_required_faction_trait_keys", columnDefinition = "text")
+    private List<String> levelUpRequiredFactionTraitKeys = new ArrayList<>();
 
     @Column(name = "placement_neighbour_operator")
     private String placementNeighbourOperator;
@@ -64,9 +102,30 @@ public class DistrictEntity {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
+    public Integer getTier() { return tier; }
+    public void setTier(Integer tier) { this.tier = tier; }
+
+    public Integer getConstructibleLevel() { return constructibleLevel; }
+    public void setConstructibleLevel(Integer constructibleLevel) { this.constructibleLevel = constructibleLevel; }
+
     public List<String> getDescriptionLines() { return descriptionLines; }
     public void setDescriptionLines(List<String> descriptionLines) {
         this.descriptionLines = (descriptionLines == null) ? new ArrayList<>() : new ArrayList<>(descriptionLines);
+    }
+
+    public List<String> getConstructionCost() { return constructionCost; }
+    public void setConstructionCost(List<String> constructionCost) {
+        this.constructionCost = (constructionCost == null) ? new ArrayList<>() : new ArrayList<>(constructionCost);
+    }
+
+    public List<String> getDescriptorKeys() { return descriptorKeys; }
+    public void setDescriptorKeys(List<String> descriptorKeys) {
+        this.descriptorKeys = (descriptorKeys == null) ? new ArrayList<>() : new ArrayList<>(descriptorKeys);
+    }
+
+    public List<String> getReferenceKeys() { return referenceKeys; }
+    public void setReferenceKeys(List<String> referenceKeys) {
+        this.referenceKeys = (referenceKeys == null) ? new ArrayList<>() : new ArrayList<>(referenceKeys);
     }
 
     public List<String> getUnlockTechnologyKeys() { return unlockTechnologyKeys; }
@@ -76,6 +135,15 @@ public class DistrictEntity {
                 : new ArrayList<>(unlockTechnologyKeys);
     }
 
+    public Boolean getFactionSpecific() { return factionSpecific; }
+    public void setFactionSpecific(Boolean factionSpecific) { this.factionSpecific = factionSpecific; }
+
+    public Boolean getVariant() { return variant; }
+    public void setVariant(Boolean variant) { this.variant = variant; }
+
+    public Boolean getPlayerFacing() { return playerFacing; }
+    public void setPlayerFacing(Boolean playerFacing) { this.playerFacing = playerFacing; }
+
     public String getLevelUpTargetDistrictKey() { return levelUpTargetDistrictKey; }
     public void setLevelUpTargetDistrictKey(String levelUpTargetDistrictKey) {
         this.levelUpTargetDistrictKey = levelUpTargetDistrictKey;
@@ -84,6 +152,25 @@ public class DistrictEntity {
     public Integer getLevelUpRequiredAdjacentDistrictCount() { return levelUpRequiredAdjacentDistrictCount; }
     public void setLevelUpRequiredAdjacentDistrictCount(Integer levelUpRequiredAdjacentDistrictCount) {
         this.levelUpRequiredAdjacentDistrictCount = levelUpRequiredAdjacentDistrictCount;
+    }
+
+    public List<String> getLevelUpValidNeighbourDescriptorKeys() { return levelUpValidNeighbourDescriptorKeys; }
+    public void setLevelUpValidNeighbourDescriptorKeys(List<String> levelUpValidNeighbourDescriptorKeys) {
+        this.levelUpValidNeighbourDescriptorKeys = levelUpValidNeighbourDescriptorKeys == null
+                ? new ArrayList<>()
+                : new ArrayList<>(levelUpValidNeighbourDescriptorKeys);
+    }
+
+    public String getLevelUpValidNeighbourUiMapperKey() { return levelUpValidNeighbourUiMapperKey; }
+    public void setLevelUpValidNeighbourUiMapperKey(String levelUpValidNeighbourUiMapperKey) {
+        this.levelUpValidNeighbourUiMapperKey = levelUpValidNeighbourUiMapperKey;
+    }
+
+    public List<String> getLevelUpRequiredFactionTraitKeys() { return levelUpRequiredFactionTraitKeys; }
+    public void setLevelUpRequiredFactionTraitKeys(List<String> levelUpRequiredFactionTraitKeys) {
+        this.levelUpRequiredFactionTraitKeys = levelUpRequiredFactionTraitKeys == null
+                ? new ArrayList<>()
+                : new ArrayList<>(levelUpRequiredFactionTraitKeys);
     }
 
     public String getPlacementNeighbourOperator() { return placementNeighbourOperator; }

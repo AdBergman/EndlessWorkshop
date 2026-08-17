@@ -60,6 +60,10 @@ describe("buildCodexConstructibleRichEnrichment", () => {
             {
                 District_Current: richDistrict({
                     districtKey: "District_Current",
+                    tier: 1,
+                    constructibleLevel: 2,
+                    constructionCost: ["120 Industry"],
+                    isFactionSpecific: true,
                     unlockTechnologyKeys: ["Tech_Irrigation", "Tech_Missing"],
                     levelUp: {
                         targetDistrictKey: "District_GrandCanal",
@@ -78,6 +82,12 @@ describe("buildCodexConstructibleRichEnrichment", () => {
             entries
         );
 
+        expect(enrichment.profileLines).toEqual([
+            "Tier 1",
+            "Constructible level 2",
+            "Faction-specific variant",
+            "Cost: 120 Industry",
+        ]);
         expect(enrichment.unlockedBy.map((link) => link.label)).toEqual(["Irrigation"]);
         expect(enrichment.upgradesInto.map((link) => link.label)).toEqual(["Grand Canal"]);
         expect(enrichment.upgradesInto[0]?.note).toBe("3 adjacent districts");
@@ -145,7 +155,7 @@ describe("buildCodexConstructibleRichEnrichment", () => {
             [currentEntry]
         );
 
-        expect(enrichment).toEqual({ unlockedBy: [], upgradesInto: [], placementLines: [] });
+        expect(enrichment).toEqual({ profileLines: [], unlockedBy: [], upgradesInto: [], placementLines: [] });
         expect(hasCodexConstructibleRichEnrichment(enrichment)).toBe(false);
     });
 });

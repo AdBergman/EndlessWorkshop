@@ -8,8 +8,16 @@ public record DistrictImportDistrictDto(
         String districtKey,
         String displayName,
         String category,
+        Integer tier,
+        Integer constructibleLevel,
         List<String> descriptionLines,
+        List<String> constructionCost,
+        List<String> descriptorKeys,
+        List<String> referenceKeys,
         List<String> unlockTechnologyKeys,
+        Boolean isFactionSpecific,
+        Boolean isVariant,
+        Boolean isPlayerFacing,
         DistrictLevelUpDto levelUp,
         ConstructiblePlacementPrerequisitesDto placementPrerequisites
 ) {
@@ -17,8 +25,52 @@ public record DistrictImportDistrictDto(
             String districtKey,
             String displayName,
             String category,
+            List<String> descriptionLines,
+            List<String> unlockTechnologyKeys,
+            DistrictLevelUpDto levelUp,
+            ConstructiblePlacementPrerequisitesDto placementPrerequisites
+    ) {
+        this(
+                districtKey,
+                displayName,
+                category,
+                null,
+                null,
+                descriptionLines,
+                List.of(),
+                List.of(),
+                List.of(),
+                unlockTechnologyKeys,
+                null,
+                null,
+                null,
+                levelUp,
+                placementPrerequisites
+        );
+    }
+
+    public DistrictImportDistrictDto(
+            String districtKey,
+            String displayName,
+            String category,
             List<String> descriptionLines
     ) {
-        this(districtKey, displayName, category, descriptionLines, List.of(), null, null);
+        this(
+                districtKey,
+                displayName,
+                category,
+                null,
+                null,
+                descriptionLines,
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 }
