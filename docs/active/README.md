@@ -229,6 +229,19 @@ category pass.
     request is justified, or asking DB Exporter for a structured response.
   - Status: active process guide.
 
+- `docs/active/db-exporter-open-requests.md`
+  - Purpose: canonical active work queue for what EWShop is currently asking
+    DB Exporter to do.
+  - Read when: asking "what is currently requested from DB Exporter?" or
+    preparing a focused exporter work batch.
+  - Status: active exporter backlog.
+
+- `docs/active/db-exporter-current-handoff-package.md`
+  - Purpose: concise current package summary for what to send to DB Exporter
+    now, what not to send, current asks, and handoff message wording.
+  - Read when: preparing the next EWShop -> DB Exporter handoff packet.
+  - Status: active handoff summary.
+
 - `docs/active/db-exporter-ability-metadata-handoff.md`
   - Purpose: active DB exporter metadata backlog. Despite the filename, it now
     also contains non-blocking category metadata findings beyond Abilities.
