@@ -8,9 +8,15 @@ registries.
 
 ## Project Policy
 
-- Keep normal feature work main-first when that is the fastest safe flow.
-- Use branches or PRs for dependency updates, migrations, deploy changes, and
-  large refactors.
+- Substantial Codex implementation normally uses a dedicated `codex/*` task
+  branch and a PR into `main` for review; after merge/closeout, the task branch
+  should be deleted.
+- Direct `main` work remains acceptable for genuinely small, low-risk changes
+  when explicitly appropriate.
+- This is a lightweight hobby-project workflow, not GitFlow: short-lived task
+  branches, PR review, then branch cleanup.
+- Use branch/PR workflows for dependency updates, migrations,
+  deploy/runtime changes, and large refactors.
 - Dependabot PRs are suggestions, not auto-approved changes.
 - Do not auto-merge dependency PRs.
 - Prefer patch and minor updates in small batches.
@@ -76,6 +82,7 @@ When an AI agent handles dependency or CI changes:
 - Keep changes grouped by ecosystem or by one migration goal.
 - Do not add paid tooling, strict SHA pinning, SBOM generation, or broad scanners
   unless explicitly requested.
-- Do not change the main-first workflow into mandatory PR-only development.
+- Do not turn branch/PR-based Codex implementation into heavyweight process
+  bureaucracy for small local changes.
 - Document any manual maintainer action in this file.
 - Link back to this file instead of duplicating these rules in `AGENTS.md`.

@@ -8,6 +8,51 @@ For active project documentation, start with `docs/active/README.md`. Do not
 read all active docs by default; use its task-type table to select relevant
 docs.
 
+## Codex Branch Workflow
+
+Substantial Codex implementation work should normally happen on a dedicated
+`codex/*` task branch rather than directly on `main`. This is the default model
+for implementation work and does not depend on detecting whether other agents or
+workstreams are currently active. Keep this lightweight: this is task-branch
+development for a hobby project, not GitFlow.
+
+Standard lifecycle for substantial Codex work:
+
+```text
+task branch -> PR into main -> maintainer merge/closeout -> delete task branch
+```
+
+Use simple branch names:
+
+- `codex/frontend-<task>` for frontend-focused work.
+- `codex/backend-<task>` for backend-focused work.
+- `codex/dependencies-<task>` for dependency, CI, Docker, runtime, or maintenance work.
+- `codex/<task>` for genuinely cross-cutting work.
+
+Stay within the requested task scope, avoid unrelated cleanup, and preserve
+unrelated local changes. Do not reset, discard, overwrite, rebase, merge,
+cherry-pick, or rewrite another branch or workstream unless explicitly
+instructed. If significant overlap or a dependency on another branch is
+discovered, report it instead of silently absorbing unrelated work.
+
+Branch work should not be left as an unreviewable limbo branch. When Codex
+finishes implementation work on a task branch, the normal handoff is to commit
+the coherent work, push the branch, and open a PR into `main`. If Codex cannot
+push or open the PR, report that clearly. Do not merge directly unless the
+maintainer explicitly asks for it, and do not amend, squash, or rewrite history
+unless the requested workflow permits it. Leave final PR review, branch
+integration, and merge ordering to the maintainer unless explicitly delegated.
+
+After a task branch is merged or otherwise closed, the expected cleanup is to
+delete the task branch locally and remotely. Branch deletion is part of
+maintainer-owned integration unless explicitly delegated; do not delete branches
+from another workstream without instruction.
+
+Separate Git worktrees are useful when the maintainer wants to run multiple task
+branches concurrently. Worktree creation and orchestration are normally a
+maintainer concern; agents do not need to infer concurrency before using a task
+branch for substantial implementation.
+
 ## Backend/Frontend Contract Discipline
 
 - Frontend changes using backend DTO fields should verify frontend types/API client/store usage against backend response DTOs.
