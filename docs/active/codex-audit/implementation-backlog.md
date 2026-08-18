@@ -146,6 +146,7 @@ Priority: P1
 Effort: S
 Risk: Medium
 Exporter-blocked: no
+Status: completed 2026-08-18
 
 Problem: Factions are a high-value strategy hub, but adding more links to the
 current generic detail risks becoming a wall of references.
@@ -163,12 +164,22 @@ Evidence:
 Proposed solution: design/product decision doc comparing "Codex detail
 enrichment", "small `/factions` route", and "defer until art/icon contracts".
 
+Result: recorded `docs/active/codex-faction-strategy-profile-decision.md`.
+Chosen path is to improve the existing Codex Faction detail page as the
+strategy/profile surface. A new `/factions` route is deferred, waiting for
+art/icon contracts is rejected for the next slice, and adding more raw related
+links is rejected. The first implementation slice is
+`EW-CODEX-FACTIONS-002 - Faction Strategy Profile Header`.
+
 Non-goals: no implementation, no `/heroes` dashboard, no inferred ownership.
 
 Acceptance criteria:
 
 - Product shape decision recorded.
 - Clear first implementation slice with dependencies and tests.
+
+Verification: revalidated 5 public Faction Codex entries, 21 imported rich
+faction-like records, and the existing exact-key package enrichment helper.
 
 ### EW-CODEX-REL-001 - Codex Unresolved Reference Diagnostics
 

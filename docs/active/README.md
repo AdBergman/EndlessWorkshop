@@ -95,6 +95,14 @@ index, then select the smallest relevant doc set for the task type.
     Codex experience is weakest.
   - Status: active product experience review.
 
+- `docs/active/codex-faction-strategy-profile-decision.md`
+  - Purpose: active decision for the next Faction strategy/profile shape inside
+    Codex detail, including deferred alternatives and the first implementation
+    slice.
+  - Read when: touching Factions or Minor Factions profile/detail/package
+    information architecture.
+  - Status: active decision.
+
 - `docs/active/codex-audit/README.md`
   - Purpose: comprehensive 2026-08-18 Codex category inventory, quality audit,
     remediation backlog, and exporter request register.
