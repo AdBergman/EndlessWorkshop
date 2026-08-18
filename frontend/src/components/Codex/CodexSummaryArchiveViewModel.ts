@@ -13,9 +13,13 @@ import {
 import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
 import {
+    findDistrictArchiveFamilyForEntry,
     getDistrictCategoryDisplayLabel,
+    getDistrictArchiveFamilyLabel,
     getDistrictEntryFactionLabels,
-    getDistrictEntryTypeLabels,
+    getDistrictFamilyDisplayName,
+    isDistrictArchiveEntry,
+    type DistrictArchiveFamily,
 } from "@/lib/codex/codexDistrictArchiveFilters";
 import { getDistrictPlacementLines } from "@/lib/codex/codexDistrictReference";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
@@ -471,14 +475,38 @@ export function getImprovementArchiveEffectPreviewLines(entry: CodexEntry): stri
     return effectLines.slice(0, MAX_IMPROVEMENT_EFFECT_PREVIEW_LINES);
 }
 
-export function getDistrictArchiveEffectPreviewLines(entry: CodexEntry): string[] {
-    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+export function getDistrictArchiveEffectPreviewLines(
+    entry: CodexEntry,
+    allEntries: readonly CodexEntry[] = [],
+    richDistrictByKey: Readonly<Record<string, District | undefined>> = {}
+): string[] {
+    if (!isDistrictArchiveEntry(entry)) return [];
 
-    const parsed = parseCodexStructuredDescription(entry);
-    const effectsSection = parsed.sections.find((section) =>
-        section.label.trim().toLowerCase() === "effects"
-    );
-    const effectLines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    const entries = family?.entries ?? [entry];
+    const effectLines: string[] = [];
+    const seen = new Set<string>();
+
+    const addLine = (line: string) => {
+        const value = line.trim();
+        if (!value) return;
+
+        const normalizedValue = value.toLowerCase().replace(/\s+/g, " ");
+        if (seen.has(normalizedValue)) return;
+
+        seen.add(normalizedValue);
+        effectLines.push(value);
+    };
+
+    for (const familyEntry of entries) {
+        const parsed = parseCodexStructuredDescription(familyEntry);
+        const effectsSection = parsed.sections.find((section) =>
+            section.label.trim().toLowerCase() === "effects"
+        );
+        const lines = effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+        lines.forEach(addLine);
+        if (effectLines.length >= MAX_DISTRICT_EFFECT_PREVIEW_LINES) break;
+    }
 
     return effectLines.slice(0, MAX_DISTRICT_EFFECT_PREVIEW_LINES);
 }
@@ -491,9 +519,10 @@ export function formatDistrictTierValue(value: string): string {
 
 export function getDistrictArchiveMetadata(
     entry: CodexEntry,
-    richDistrictByKey: Readonly<Record<string, District | undefined>> = {}
+    richDistrictByKey: Readonly<Record<string, District | undefined>> = {},
+    allEntries: readonly CodexEntry[] = []
 ): DistrictArchiveMetadataItem[] {
-    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+    if (!isDistrictArchiveEntry(entry)) return [];
 
     const items: DistrictArchiveMetadataItem[] = [];
     const seenValues = new Set<string>();
@@ -509,15 +538,21 @@ export function getDistrictArchiveMetadata(
         items.push({ key, value: trimmedValue });
     };
 
-    getDistrictEntryTypeLabels(entry).forEach((value) => addValue("type", value));
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    if (family) {
+        const familyGroupLabel = getDistrictArchiveFamilyLabel(family.group);
+        addValue("family", familyGroupLabel);
+        family.categoryLabels.forEach((value) => addValue("category", value));
+        if (family.factionLabel && family.factionLabel !== familyGroupLabel) {
+            addValue("faction", family.factionLabel);
+        }
+        return items;
+    }
 
     getCodexFactValues(entry, "Category").forEach((value) =>
         addValue("category", getDistrictCategoryDisplayLabel(value))
     );
     getDistrictEntryFactionLabels(entry, richDistrictByKey).forEach((value) => addValue("faction", value));
-    getCodexFactValues(entry, "Tier").forEach((value) =>
-        addValue("tier", formatDistrictTierValue(value))
-    );
 
     return items;
 }
@@ -526,7 +561,7 @@ export function getDistrictExtractedResourceLinks(
     entry: CodexEntry,
     referenceIndexes: { entriesByKey: Record<string, CodexEntry> }
 ): DistrictExtractedResourceLink[] {
-    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+    if (!isDistrictArchiveEntry(entry)) return [];
 
     const parsed = parseCodexStructuredDescription(entry);
     const extractedResourceSection = parsed.sections.find((section) =>
@@ -557,23 +592,35 @@ export function getDistrictArchivePlanningLines(
     richDistrictByKey: Readonly<Record<string, District | undefined>>,
     allEntries: readonly CodexEntry[] = []
 ): string[] {
-    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+    if (!isDistrictArchiveEntry(entry)) return [];
 
-    const richDistrict = richDistrictByKey[entry.entryKey.trim()];
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    const familyEntries = family?.entries ?? [entry];
+    const richDistricts = familyEntries
+        .map((familyEntry) => richDistrictByKey[familyEntry.entryKey.trim()])
+        .filter((candidate): candidate is District => Boolean(candidate));
+    const richDistrict = richDistricts[0];
     if (!richDistrict) return [];
 
     const lines: string[] = [];
-    const constructionCost = richDistrict.constructionCost ?? [];
-    if (constructionCost.length > 0) {
-        lines.push(`Cost: ${constructionCost.join(", ")}`);
+    const constructionCosts = getFamilyConstructionCostLabels(richDistricts);
+    if (constructionCosts.length > 0) {
+        lines.push(`Cost: ${constructionCosts.join(" / ")}`);
     }
 
-    const upgradeLine = getDistrictArchiveUpgradeLine(entry, richDistrict, richDistrictByKey, allEntries);
-    if (upgradeLine) {
-        lines.push(upgradeLine);
+    if (family && family.entries.length > 1) {
+        const progressionLine = getDistrictArchiveProgressionLine(family);
+        if (progressionLine) {
+            lines.push(progressionLine);
+        }
+    } else {
+        const upgradeLine = getDistrictArchiveUpgradeLine(entry, richDistrict, richDistrictByKey, allEntries);
+        if (upgradeLine) {
+            lines.push(upgradeLine);
+        }
     }
 
-    const placementHighlights = getDistrictPlacementLines(richDistrict).filter((line) =>
+    const placementHighlights = getBestFamilyPlacementHighlights(richDistricts).filter((line) =>
         line !== "Cannot build on wasteland" &&
         line !== "Cannot build on mud" &&
         line !== "No river" &&
@@ -589,6 +636,83 @@ export function getDistrictArchivePlanningLines(
     return lines;
 }
 
+function getDistrictArchiveProgressionLine(family: DistrictArchiveFamily): string {
+    if (family.isResourceExtractorFamily) {
+        const extractorProgression = getGenericExtractorProgressionLabels(family.entries);
+        return extractorProgression.length > 1
+            ? `Progression: ${extractorProgression.join(" -> ")}`
+            : "";
+    }
+
+    const labels = getUniqueProgressionLabels(family.entries.map((familyEntry) => getCodexEntryLabel(familyEntry)));
+    return labels.length > 1 ? `Progression: ${labels.join(" -> ")}` : "";
+}
+
+function getGenericExtractorProgressionLabels(entries: readonly CodexEntry[]): string[] {
+    const labels = new Set<string>();
+    for (const entry of entries) {
+        const label = getCodexEntryLabel(entry);
+        if (/^Grand\b/i.test(label)) {
+            labels.add("Grand Extractor");
+        } else if (/^Advanced\b/i.test(label)) {
+            labels.add("Advanced Extractor");
+        } else {
+            labels.add("Extractor");
+        }
+    }
+
+    return ["Extractor", "Advanced Extractor", "Grand Extractor"].filter((label) => labels.has(label));
+}
+
+function getUniqueProgressionLabels(labels: readonly string[]): string[] {
+    const seen = new Set<string>();
+    const values: string[] = [];
+    for (const label of labels) {
+        const trimmedLabel = label.trim();
+        const normalizedLabel = trimmedLabel.toLowerCase();
+        if (!trimmedLabel || seen.has(normalizedLabel)) continue;
+
+        seen.add(normalizedLabel);
+        values.push(trimmedLabel);
+    }
+
+    return values;
+}
+
+function getFamilyConstructionCostLabels(richDistricts: readonly District[]): string[] {
+    const seen = new Set<string>();
+    const labels: string[] = [];
+
+    for (const richDistrict of richDistricts) {
+        const constructionCost = richDistrict.constructionCost ?? [];
+        if (constructionCost.length === 0) continue;
+
+        const label = constructionCost.join(", ");
+        const normalizedLabel = label.toLowerCase();
+        if (seen.has(normalizedLabel)) continue;
+
+        seen.add(normalizedLabel);
+        labels.push(label);
+    }
+
+    return labels.slice(0, 3);
+}
+
+function getBestFamilyPlacementHighlights(richDistricts: readonly District[]): string[] {
+    return richDistricts
+        .map((richDistrict) => getDistrictPlacementLines(richDistrict))
+        .sort((left, right) => right.length - left.length)[0] ?? [];
+}
+
+export function getDistrictArchiveDisplayName(
+    entry: CodexEntry,
+    allEntries: readonly CodexEntry[] = [],
+    richDistrictByKey: Readonly<Record<string, District | undefined>> = {}
+): string {
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    return family?.displayName ?? getDistrictFamilyDisplayName(entry, richDistrictByKey);
+}
+
 function getDistrictArchiveUpgradeLine(
     entry: CodexEntry,
     richDistrict: District,
@@ -597,7 +721,7 @@ function getDistrictArchiveUpgradeLine(
 ): string {
     const publicDistrictByKey = new Map(
         allEntries
-            .filter((candidate) => candidate.exportKind.trim().toLowerCase() === "districts")
+            .filter(isDistrictArchiveEntry)
             .map((candidate) => [candidate.entryKey.trim(), candidate])
     );
     const adjacentCount = richDistrict.levelUp?.requiredAdjacentDistrictCount;

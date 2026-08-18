@@ -23,6 +23,7 @@ import {
     getCodexDistrictReferenceEntryKeys,
     hasCodexDistrictReferenceModel,
 } from "@/lib/codex/codexDistrictReference";
+import { isDistrictArchiveEntry } from "@/lib/codex/codexDistrictArchiveFilters";
 import {
     buildCodexHeroRichEnrichment,
     getCodexHeroRichEnrichmentEntryKeys,
@@ -100,7 +101,7 @@ export default function CodexEntryDetail({
     const normalizedEntryKey = entry?.entryKey.trim() ?? "";
     const normalizedExportKind = entry?.exportKind.trim().toLowerCase() ?? "";
     const isHeroEntry = normalizedExportKind === "heroes";
-    const isDistrictEntry = normalizedExportKind === "districts";
+    const isDistrictEntry = entry ? isDistrictArchiveEntry(entry) : false;
     const isImprovementEntry = normalizedExportKind === "improvements";
     const richFaction = useFactionStore(selectFactionByKey(normalizedEntryKey));
     const factionsLoaded = useFactionStore(selectFactionLoaded);
@@ -156,6 +157,7 @@ export default function CodexEntryDetail({
                     effectLines: [],
                     extractedResources: [],
                     unlockedBy: [],
+                    progression: [],
                     upgradesFrom: [],
                     upgradesInto: [],
                     placementLines: [],

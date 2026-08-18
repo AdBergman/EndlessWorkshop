@@ -52,6 +52,10 @@ export default function CodexDistrictReferenceSection({ model, onSelect }: Props
                     <LinkGroup label="Unlocked by" links={model.unlockedBy} onSelect={onSelect} />
                 ) : null}
 
+                {model.progression.length > 0 ? (
+                    <LinkGroup label="Progression" links={model.progression} onSelect={onSelect} />
+                ) : null}
+
                 {model.upgradesFrom.length > 0 ? (
                     <LinkGroup
                         label="Upgrades from"

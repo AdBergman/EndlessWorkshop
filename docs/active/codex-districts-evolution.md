@@ -445,8 +445,8 @@ current import pipeline is substantially correct.
   wasteland, mud, and neighbour-tile constraints. The remaining UX problem is no
   longer "data missing"; it is choosing what to surface in list rows versus
   detail without making every row noisy.
-- Thin records still need honest treatment. Empty upgrade/special rows should
-  say that no public effects are exported instead of looking like broken UI.
+- Thin records still need honest treatment, but the archive should not routinely
+  render empty-effect fallback copy as if it were strategic content.
 
 ### Implemented Frontend UX
 
@@ -472,13 +472,14 @@ current import pipeline is substantially correct.
 - District archive rows now show compact planning previews from rich District
   data: construction cost, adjacent-district upgrade requirements, and
   high-signal placement conditions such as resource-deposit requirements.
-- District archive filtering now has a `Placement` rail backed by structured
-  rich District fields. Current safe buckets are Normal expansion, No adjacency,
-  River, Resource deposit, Point of interest, and Terrain restricted.
+- District archive filtering briefly had a `Placement` rail backed by
+  structured rich District fields. This was superseded by the family archive
+  pass below; placement now appears as row/detail planning information.
 - Player-facing record notes were cleaned up so the District detail does not
   expose implementation/data-pipeline language such as missing planning profile
   or archive fallback mechanics.
-- District archive filtering was redesigned around player intent:
+- District archive filtering was redesigned around player intent, then
+  superseded by the family archive pass below:
   - `Type` is now primary, derived only from explicit District `Category`
     metadata. Current safe groups are Core yield, City base, Infrastructure,
     Resource extractor, Wonder / anomaly, and Unclassified.
@@ -487,7 +488,8 @@ current import pipeline is substantially correct.
   - `Placement` remains backed by structured rich District placement fields.
   - `Faction` is backed by rich District `factionKey` when present, with
     Universal/Faction-specific fallbacks from `isFactionSpecific`.
-- `Progression` contains Tier chips and is no longer the default worldview.
+- `Progression` briefly contained Tier chips and was no longer the default
+  worldview. This was removed from the archive filter UI in the family pass.
 - Tier filters now use explicit exported `Tier` facts only; tierless rows remain
   visible in the default archive and are not inferred from keys or counted as
   Tier 1.
@@ -495,12 +497,59 @@ current import pipeline is substantially correct.
 - District archive row metadata no longer emits redundant derived `Yields: ...`
   summaries when the effect lines already show the yields. That space now shows
   additive Type, Yield/Role, Faction, and Progression metadata.
-- District archive planning previews now resolve upgrade targets/sources when
-  the exact public District row is available, with adjacent-district counts as
-  fallback context.
+- District archive planning previews now resolve upgrade targets/sources or
+  family progression when the exact public District rows are available, with
+  adjacent-district counts as fallback context.
 - The District rich import/API/frontend contract now preserves `factionKey`.
   The 0.82 rich export contains exact faction keys for faction-specific
   Districts: Necrophage, LastLord, Mukag, and MangroveOfHarmony.
+
+## 2026-08-18 District Family Archive Pass
+
+Browser QA showed the Type/Yield/Placement/Faction/Progression rails still felt
+database-oriented. The archive now treats Districts as player-facing families:
+Farm, Works, Laboratory, Bridge, Extractor, Holy Oculum, etc. Exported
+Tier/progression records are not archive rows.
+
+Implemented:
+
+- The production District archive now folds exported `districts` plus hidden
+  `extractors` records into player-facing District families. In the local 0.82
+  data this browser-tests at 40 family rows before search/filter narrowing.
+- Family identity uses bounded presentation mapping:
+  - exact rich `levelUp.targetDistrictKey` relationships establish progression
+    chains when present;
+  - display prefixes such as `Advanced`, `Grand`, `Great`, `Sacred`, and
+    `Divine` are stripped only for family presentation;
+  - family keys include exact `factionKey`, and preserve category separation
+    except for bounded universal infrastructure families such as Camp, Bridge,
+    Foundation, Trading Post, and Extractor;
+  - resource Districts with explicit `Resource` category and Extractor display
+    names collapse into a generic `Extractor` family.
+- The archive filter UI is now a single secondary `Family` rail:
+  - Core;
+  - Infrastructure;
+  - Kin, Lords, Tahuk, Aspects, Necrophages in game/EWShop faction order when
+    present;
+  - Other.
+- Removed archive Tier/Progression chips and the Type/Yield/Placement/Faction
+  facet overload.
+- Archive rows use the family display name and show useful family-level effects,
+  costs, progression summaries, extracted resource links, and placement
+  highlights when available.
+- The archive no longer emits `No public district effects exported yet.` as a
+  routine row fallback.
+- District detail now includes a `Progression` link group so tier records live
+  inside the family reference instead of the archive list.
+
+Preserved:
+
+- structured placement rendering;
+- construction costs;
+- exact upgrade relationships;
+- exact `factionKey` handling;
+- the District detail/reference section;
+- the `if on` provenance finding and no rewrite of those phrases.
 
 ### Still Blocked Or Deferred
 
