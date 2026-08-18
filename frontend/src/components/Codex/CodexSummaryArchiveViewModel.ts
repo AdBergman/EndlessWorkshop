@@ -21,7 +21,10 @@ import {
     isDistrictArchiveEntry,
     type DistrictArchiveFamily,
 } from "@/lib/codex/codexDistrictArchiveFilters";
-import { getDistrictPlacementLines } from "@/lib/codex/codexDistrictReference";
+import {
+    formatDistrictConstructionCostLabel,
+    getDistrictPlacementLines,
+} from "@/lib/codex/codexDistrictReference";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
 import { formatUnitTierLabel } from "@/lib/codex/codexUnitArchiveFilters";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
@@ -484,6 +487,10 @@ export function getDistrictArchiveEffectPreviewLines(
 
     const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
     const entries = family?.entries ?? [entry];
+    if (family?.isResourceExtractorFamily) {
+        return getGenericExtractorEffectPreviewLines(entries);
+    }
+
     const effectLines: string[] = [];
     const seen = new Set<string>();
 
@@ -509,6 +516,26 @@ export function getDistrictArchiveEffectPreviewLines(
     }
 
     return effectLines.slice(0, MAX_DISTRICT_EFFECT_PREVIEW_LINES);
+}
+
+function getGenericExtractorEffectPreviewLines(entries: readonly CodexEntry[]): string[] {
+    const allEffectLines = entries.flatMap((entry) => {
+        const parsed = parseCodexStructuredDescription(entry);
+        const effectsSection = parsed.sections.find((section) =>
+            section.label.trim().toLowerCase() === "effects"
+        );
+        return effectsSection ? getStructuredSectionPreviewLines(effectsSection) : [];
+    });
+
+    const lines: string[] = [];
+    if (allEffectLines.some((line) => /per District Level/i.test(line))) {
+        lines.push("+1 extracted resource per District Level");
+    }
+    if (allEffectLines.some((line) => /stock capacity/i.test(line))) {
+        lines.push("+10 extracted resource stock capacity per District Level");
+    }
+
+    return lines;
 }
 
 export function formatDistrictTierValue(value: string): string {
@@ -620,13 +647,17 @@ export function getDistrictArchivePlanningLines(
         }
     }
 
-    const placementHighlights = getBestFamilyPlacementHighlights(richDistricts).filter((line) =>
+    const rawPlacementHighlights = getBestFamilyPlacementHighlights(richDistricts);
+    let placementHighlights = rawPlacementHighlights.filter((line) =>
         line !== "Cannot build on wasteland" &&
         line !== "Cannot build on mud" &&
         line !== "No river" &&
         line !== "No resource deposit" &&
         !line.startsWith("Forbidden terrain:")
     );
+    if (placementHighlights.length === 0 && lines.length === 0) {
+        placementHighlights = rawPlacementHighlights;
+    }
     if (placementHighlights.length > 0) {
         const visibleHighlights = placementHighlights.slice(0, 3);
         const overflowCount = placementHighlights.length - visibleHighlights.length;
@@ -687,7 +718,7 @@ function getFamilyConstructionCostLabels(richDistricts: readonly District[]): st
         const constructionCost = richDistrict.constructionCost ?? [];
         if (constructionCost.length === 0) continue;
 
-        const label = constructionCost.join(", ");
+        const label = formatDistrictConstructionCostLabel(constructionCost);
         const normalizedLabel = label.toLowerCase();
         if (seen.has(normalizedLabel)) continue;
 

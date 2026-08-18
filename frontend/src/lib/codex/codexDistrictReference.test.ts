@@ -81,6 +81,19 @@ describe("buildCodexDistrictReferenceModel", () => {
                             territoryConstraint: "SameRegion",
                             ignoreCliff: true,
                         },
+                        terrain: {
+                            constraint: "Forbidden",
+                            terrainTypeKeys: ["TerrainType_Ocean", "TerrainType_Lake"],
+                            canBuildOnWasteland: false,
+                            canBuildOnMud: false,
+                        },
+                        river: {
+                            constraint: "NoRiver",
+                        },
+                        pointOfInterest: {
+                            constraint: "NoResourceDeposit",
+                            pointOfInterestKeys: [],
+                        },
                     },
                 }),
                 District_Previous: richDistrict({
@@ -111,9 +124,14 @@ describe("buildCodexDistrictReferenceModel", () => {
         expect(model.placementLines).toEqual([
             "Adjacent tile in same region",
             "Cliffs ignored for adjacency",
+            "Forbidden terrain: Ocean, Lake",
+            "Cannot build on wasteland",
+            "Cannot build on mud",
+            "No river",
+            "No resource deposit",
         ]);
         expect(model.recordNotes).toEqual([
-            "Next upgrade has an additional faction trait prerequisite.",
+            "Next upgrade requires a faction trait.",
         ]);
         expect(getCodexDistrictReferenceEntryKeys(model)).toEqual([
             "Resource_Luxury01",
@@ -137,13 +155,9 @@ describe("buildCodexDistrictReferenceModel", () => {
 
         expect(model.profileItems).toEqual(["Bridge"]);
         expect(model.effectLines).toEqual([]);
-        expect(model.placementLines).toEqual([
-            "Specific terrain, river, and POI restrictions are not available in this view.",
-        ]);
+        expect(model.placementLines).toEqual([]);
         expect(model.recordNotes).toEqual([
-            "No public effects exported for this district record.",
-            "No public tier exported; archive browsing treats tierless rows as Tier 1.",
-            "Rich planning profile is not available for this district.",
+            "No listed strategic effects.",
         ]);
     });
 
@@ -163,27 +177,6 @@ describe("buildCodexDistrictReferenceModel", () => {
         );
 
         expect(model.effectLines).toEqual(["Level up when surrounded by 4 Districts (Level 2)"]);
-        expect(model.recordNotes).toEqual([
-            "Rich planning profile is not available for this district.",
-        ]);
-    });
-
-    it("does not show missing rich-data notes while district profiles are still loading", () => {
-        const currentEntry = codexEntry({
-            facts: [{ label: "Category", value: "Bridge" }],
-        });
-
-        const model = buildCodexDistrictReferenceModel(
-            currentEntry,
-            {},
-            [currentEntry],
-            { richDistrictsLoaded: false }
-        );
-
-        expect(model.placementLines).toEqual([]);
-        expect(model.recordNotes).toEqual([
-            "No public effects exported for this district record.",
-            "No public tier exported; archive browsing treats tierless rows as Tier 1.",
-        ]);
+        expect(model.recordNotes).toEqual([]);
     });
 });

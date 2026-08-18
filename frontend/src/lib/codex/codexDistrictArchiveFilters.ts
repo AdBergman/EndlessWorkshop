@@ -227,19 +227,20 @@ export function buildDistrictArchiveFamilies(
     richDistrictByKey: Readonly<Record<string, District | undefined>> = {}
 ): DistrictArchiveFamily[] {
     const districtEntries = entries.filter(isDistrictArchiveEntry);
-    const categoryByFactionAndBaseName = buildCategoryByFactionAndBaseName(districtEntries, richDistrictByKey);
     const familyEntries = districtEntries.reduce<Map<string, CodexEntry[]>>((acc, entry) => {
-        const familyKey = getDistrictFamilyKey(entry, richDistrictByKey, categoryByFactionAndBaseName);
+        const familyKey = getDistrictFamilyKey(entry, richDistrictByKey);
         const existing = acc.get(familyKey) ?? [];
         existing.push(entry);
         acc.set(familyKey, existing);
         return acc;
     }, new Map<string, CodexEntry[]>());
 
-    return Array.from(familyEntries.entries())
+    const families = Array.from(familyEntries.entries())
         .map(([familyKey, familyEntryList]) =>
             buildDistrictArchiveFamily(familyKey, familyEntryList, richDistrictByKey)
         );
+
+    return disambiguateDuplicateFamilyDisplayNames(families);
 }
 
 export function isDistrictArchiveEntry(entry: CodexEntry): boolean {
@@ -410,44 +411,19 @@ function getDistrictTierNumber(
     return typeof richTier === "number" && Number.isFinite(richTier) ? richTier : Number.MAX_SAFE_INTEGER;
 }
 
-function buildCategoryByFactionAndBaseName(
-    entries: readonly CodexEntry[],
-    richDistrictByKey: Readonly<Record<string, District | undefined>>
-): Map<string, string> {
-    const values = new Map<string, string>();
-
-    for (const entry of entries) {
-        const baseName = normalizeFamilyName(getDistrictFamilyDisplayName(entry, richDistrictByKey));
-        const faction = getDistrictFactionKey(entry, richDistrictByKey) || "universal";
-        const category = getDistrictCategory(entry, richDistrictByKey);
-        if (!baseName || !category) continue;
-
-        values.set(`${faction}::${baseName}`, category);
-    }
-
-    return values;
-}
-
 function getDistrictFamilyKey(
     entry: CodexEntry,
-    richDistrictByKey: Readonly<Record<string, District | undefined>>,
-    categoryByFactionAndBaseName: ReadonlyMap<string, string>
+    richDistrictByKey: Readonly<Record<string, District | undefined>>
 ): string {
     const faction = getDistrictFactionKey(entry, richDistrictByKey) || "universal";
     const familyDisplayName = getDistrictFamilyDisplayName(entry, richDistrictByKey);
     const familyName = normalizeFamilyName(familyDisplayName);
-    const category = getDistrictCategory(entry, richDistrictByKey) ||
-        categoryByFactionAndBaseName.get(`${faction}::${familyName}`) ||
-        "uncategorized";
 
     if (isGenericResourceExtractor(entry, richDistrictByKey)) {
         return `${faction}::resource::extractor`;
     }
-    if (isInfrastructureFamilyName(familyName)) {
-        return `${faction}::infrastructure::${familyName}`;
-    }
 
-    return `${faction}::${category.toLowerCase()}::${familyName}`;
+    return `${faction}::${familyName}`;
 }
 
 export function getDistrictFamilyDisplayName(
@@ -502,6 +478,30 @@ function getFamilyGroupOrder(value: DistrictFamilyGroup): number {
     return DISTRICT_FAMILY_GROUPS.findIndex((option) => option.value === value);
 }
 
+function disambiguateDuplicateFamilyDisplayNames(families: readonly DistrictArchiveFamily[]): DistrictArchiveFamily[] {
+    const displayNameCounts = families.reduce<Map<string, number>>((counts, family) => {
+        const normalizedDisplayName = normalizeFamilyName(family.displayName);
+        counts.set(normalizedDisplayName, (counts.get(normalizedDisplayName) ?? 0) + 1);
+        return counts;
+    }, new Map<string, number>());
+
+    return families.map((family) => {
+        const normalizedDisplayName = normalizeFamilyName(family.displayName);
+        if ((displayNameCounts.get(normalizedDisplayName) ?? 0) <= 1) {
+            return family;
+        }
+
+        if (family.factionLabel) {
+            return {
+                ...family,
+                displayName: `${family.displayName} (${family.factionLabel})`,
+            };
+        }
+
+        return family;
+    });
+}
+
 function getFamilyCategoryLabels(
     entries: readonly CodexEntry[],
     richDistrictByKey: Readonly<Record<string, District | undefined>>
@@ -509,7 +509,9 @@ function getFamilyCategoryLabels(
     const values = new Set<string>();
     for (const entry of entries) {
         const category = getDistrictCategory(entry, richDistrictByKey);
-        if (category) values.add(getDistrictCategoryDisplayLabel(category));
+        if (category && category.trim().toLowerCase() !== "none") {
+            values.add(getDistrictCategoryDisplayLabel(category));
+        }
     }
 
     return Array.from(values);
