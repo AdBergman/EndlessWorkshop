@@ -98,6 +98,7 @@ Priority: P1
 Effort: XS
 Risk: Low
 Exporter-blocked: yes for completeness claim
+Status: blocked/no-op 2026-08-18 pending source confirmation
 
 Problem: Councilors may be incomplete, but EWShop currently has no evidence
 that rows are filtered or lost.
@@ -116,6 +117,14 @@ Proposed solution: ask DBExporter/source owner for expected public Councilor
 count and exclusion rules. If 43 is complete, consider small FE Role rail. If
 not, create exact exporter request with missing examples.
 
+Result: revalidated local EWShop evidence and found no implementation defect.
+The current `councilors-codex` export contains 43 rows, all 128 Councilor
+outbound refs resolve locally, no rich Councilor export exists under
+`local-imports/exports`, and no Councilor-specific EWShop import/frontend filter
+was found. Completeness cannot be proven without DBExporter/source confirmation
+of expected public Councilor count and exclusion policy. No UI/backend change was
+made just to produce code.
+
 Non-goals: no inferred faction/role ownership from names; no UI redesign before
 source count is known.
 
@@ -124,6 +133,10 @@ Acceptance criteria:
 - Written source confirmation of expected public rows and exclusion policy.
 - If complete: update audit and optionally create FE polish story.
 - If incomplete: add precise `DBX-CODEX-COUNCILORS-*` request.
+
+Current verification: `jq` source count/role/reference checks and the
+`diagnostics:codex-references` JSON run against `../local-imports/codex`
+confirmed zero unresolved Councilor-sourced refs.
 
 ### EW-CODEX-FACTIONS-001 - Faction Strategy/Profile Shape Decision
 
