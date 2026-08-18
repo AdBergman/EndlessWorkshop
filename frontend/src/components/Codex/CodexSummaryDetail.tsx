@@ -9,7 +9,7 @@ import {
     buildEntriesByKey,
     buildEntriesByKindKey,
 } from "@/lib/codex/codexRefs";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, District } from "@/types/dataTypes";
 import CodexSummaryList from "./CodexSummaryList";
 
 type Props = {
@@ -22,6 +22,7 @@ type Props = {
     contextOverride?: string;
     searchQuery?: string;
     hasActiveFilters?: boolean;
+    richDistrictByKey?: Readonly<Record<string, District | undefined>>;
 };
 
 export default function CodexSummaryDetail({
@@ -34,6 +35,7 @@ export default function CodexSummaryDetail({
     contextOverride,
     searchQuery = "",
     hasActiveFilters = false,
+    richDistrictByKey = {},
 }: Props) {
     const isShallowReferenceSummary = isShallowReferenceKind(summaryEntry.summaryKind);
     const summaryContext = contextOverride ?? (isShallowReferenceSummary ? "Reference list" : "Category overview");
@@ -79,6 +81,7 @@ export default function CodexSummaryDetail({
                 hasActiveFilters={hasActiveFilters}
                 onSelectEntry={onSelectEntry}
                 referenceIndexes={referenceIndexes}
+                richDistrictByKey={richDistrictByKey}
                 searchQuery={searchQuery}
                 summaryEntry={summaryEntry}
             />
