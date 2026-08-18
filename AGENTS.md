@@ -49,6 +49,47 @@ maintainer explicitly asks for it, and do not amend, squash, or rewrite history
 unless the requested workflow permits it. Leave final PR review, branch
 integration, and merge ordering to the maintainer unless explicitly delegated.
 
+## PR-First Handoff Standard
+
+For completed work that has been committed and pushed, the GitHub branch / PR is
+the authoritative code handoff. The final response should be a concise human
+engineering summary, not a data dump or repository snapshot.
+
+For routine pushed work, the final handoff is exactly: PR, Status, What Changed,
+Working Tree. Status describes the engineering work itself, such as work
+complete and ready for review, blocked by a concrete issue, or implementation
+incomplete. Add extra information only for exceptional failures or blockers that
+require maintainer action; do not report routine draft state or pending checks.
+
+Do not create a full-repository handoff zip merely because work is complete and
+pushed. For local-only evidence and supplemental package guidance, follow
+`docs/documentation-guidelines.md`.
+
+## Sequential Continuation Workstreams
+
+When the user explicitly authorizes sequential or continuous work, the work
+queue is dynamic rather than frozen at task start. If completing one story
+creates a new successor story that is sufficiently specified, unblocked, within
+the authorized domain, and safe to implement, that successor joins the current
+workstream automatically.
+
+Creating a successor story is not a valid stopping point when that story can
+reasonably be implemented now. Likewise, a blocker in one story should not stop
+unrelated actionable work inside the same authorized workstream.
+
+Before ending a sequential workstream, scan newly created docs, backlog items,
+TODOs, and follow-up notes. Classify each as one of:
+
+- completed;
+- externally blocked;
+- explicitly deferred;
+- out of scope;
+- unsafe to continue.
+
+Do not leave an actionable successor as "next work" without a concrete reason.
+This rule does not authorize unrelated scope expansion; continue only within the
+domain the user actually authorized.
+
 After a task branch is merged or otherwise closed, the expected cleanup is to
 delete the task branch locally and remotely. Branch deletion is part of
 maintainer-owned integration unless explicitly delegated; do not delete branches
