@@ -17,6 +17,7 @@ import ewshop.facade.dto.importing.districts.DistrictLevelUpDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public final class DistrictImportMapper {
 
@@ -42,7 +43,7 @@ public final class DistrictImportMapper {
                 dto.tier(),
                 dto.constructibleLevel(),
                 descriptionLines,
-                cleanLines(dto.constructionCost()),
+                cleanConstructionCost(dto.constructionCost()),
                 cleanLines(dto.descriptorKeys()),
                 cleanLines(dto.referenceKeys()),
                 cleanLines(dto.unlockTechnologyKeys()),
@@ -71,6 +72,66 @@ public final class DistrictImportMapper {
             out.add(t);
         }
         return out;
+    }
+
+    private static List<String> cleanConstructionCost(Object value) {
+        if (value == null) return List.of();
+
+        if (value instanceof List<?> list) {
+            List<String> out = new ArrayList<>(list.size());
+            for (Object item : list) {
+                addTrimmedString(out, item);
+            }
+            return out;
+        }
+
+        if (value instanceof Map<?, ?> map) {
+            List<String> out = new ArrayList<>();
+            addTrimmedString(out, map.get("productionCostType"));
+
+            Object resourcePrerequisites = map.get("resourcePrerequisites");
+            if (resourcePrerequisites instanceof List<?> resources) {
+                for (Object resource : resources) {
+                    if (resource instanceof Map<?, ?> resourceMap) {
+                        String resourceType = trimToNull(asString(resourceMap.get("resourceType")));
+                        String amount = formatAmount(resourceMap.get("amount"));
+                        if (resourceType != null && amount != null) {
+                            out.add(amount + " " + resourceType);
+                        } else {
+                            addTrimmedString(out, resourceType);
+                        }
+                    }
+                }
+            }
+
+            return out;
+        }
+
+        String singleValue = trimToNull(asString(value));
+        return singleValue == null ? List.of() : List.of(singleValue);
+    }
+
+    private static void addTrimmedString(List<String> out, Object value) {
+        String stringValue = trimToNull(asString(value));
+        if (stringValue != null) {
+            out.add(stringValue);
+        }
+    }
+
+    private static String asString(Object value) {
+        return value instanceof String stringValue ? stringValue : null;
+    }
+
+    private static String formatAmount(Object value) {
+        if (value instanceof Number number) {
+            double amount = number.doubleValue();
+            if (amount == Math.rint(amount)) {
+                return Long.toString(Math.round(amount));
+            }
+            return Double.toString(amount);
+        }
+
+        return trimToNull(asString(value));
     }
 
     private static DistrictLevelUp toLevelUp(DistrictLevelUpDto dto) {
