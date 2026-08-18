@@ -4,8 +4,8 @@ import {
     parseCodexEntityRef,
     parseEntityRefId,
     type EntityRef,
-} from "@/lib/entityRef/entityRef";
-import type { CodexEntry } from "@/types/dataTypes";
+} from "../entityRef/entityRef.ts";
+import type { CodexEntry } from "../../types/dataTypes.ts";
 
 export type CodexReference = string | EntityRef<"codex">;
 

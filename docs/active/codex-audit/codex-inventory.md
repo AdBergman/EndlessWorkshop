@@ -104,6 +104,8 @@ normalization against local 0.82 JSON:
 ## Cross-Link Snapshot
 
 Reference-key resolution from local JSON is generally strong but not complete.
+`EW-CODEX-REL-001` added `npm run diagnostics:codex-references` so unresolved
+clusters can be regenerated deterministically with source entry context.
 Important unresolved clusters:
 
 - Abilities: 5 unresolved `Status_*` references.

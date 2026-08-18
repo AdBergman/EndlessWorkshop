@@ -165,6 +165,7 @@ Priority: P1
 Effort: S
 Risk: Low
 Exporter-blocked: no
+Status: completed 2026-08-18
 
 Problem: unresolved references are currently discovered ad hoc.
 
@@ -178,6 +179,14 @@ Proposed solution: extend existing Codex diagnostics/report tooling to produce
 category/prefix examples and classify hidden-support vs truly missing public
 targets.
 
+Result: added `npm run diagnostics:codex-references`, backed by
+`codexReferenceDiagnosticReport`, reusing canonical Codex reference resolution,
+reference diagnostics, diagnostic classification, and top-level visibility
+helpers. The report lists source category, source entry, field/index, referenced
+key, target prefix, diagnostic kind, visibility class, and classification in
+deterministic order. The 2026-08-18 local run checked 9,992 references and
+reported 271 unresolved or malformed references.
+
 Non-goals: no player-facing warning badges; no automatic exporter requests.
 
 Acceptance criteria:
@@ -185,6 +194,10 @@ Acceptance criteria:
 - Diagnostics output lists category, source key, missing key, target prefix, and
   likely visibility class.
 - Tests cover at least status, improvement, and hidden modifier examples.
+
+Verification: focused Vitest coverage for report output, canonical reference
+diagnostics, and diagnostic classification passed. CLI run against
+`../local-imports/codex` passed.
 
 ### EW-CODEX-ACTIONS-001 - Action Ownership and Public Purpose Metadata
 
