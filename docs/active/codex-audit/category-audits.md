@@ -108,10 +108,11 @@ Filtering/completeness:
 
 Improve now:
 
-- FE: add a small Role rail or reference-style overview if product review wants
-  better browsing.
-- FE: make Councilor rows show effect/partner/role more prominently using
-  already-exported facts.
+- No EWShop implementation defect is currently proven. `EW-CODEX-COUNCILORS-001`
+  revalidated 43 local Councilor rows, 128 locally resolved Councilor outbound
+  references, no rich Councilor export, and no Councilor-specific EWShop filter.
+- FE polish such as a small Role rail remains optional only after product review
+  or source confirmation that 43 rows is complete.
 
 Exporter-needed:
 

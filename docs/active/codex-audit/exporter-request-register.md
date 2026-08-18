@@ -227,6 +227,8 @@ Current evidence:
 - No Councilor-specific EWShop filters were found.
 - All Councilor references resolve locally.
 - No rich Councilor export exists for comparison.
+- `EW-CODEX-COUNCILORS-001` revalidated this on 2026-08-18 and found zero
+  unresolved Councilor-sourced refs in `diagnostics:codex-references`.
 
 Needed before request:
 
