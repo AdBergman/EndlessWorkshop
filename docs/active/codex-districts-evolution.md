@@ -410,3 +410,81 @@ Exporter/data conclusion:
 - Older static EWShop data did contain `+1 Industry for each adjacent Ridge`,
   so this is an exporter/source JSON gap rather than an EWShop frontend
   translation loss.
+
+## 2026-08-18 Hardcore 4X Reference Review And UX Pass
+
+Reviewer posture: production Districts as a strategic reference, assuming the
+current import pipeline is substantially correct.
+
+### Why Districts Still Failed
+
+- Archive browsing improved after the Tier/Focus pass, but District detail still
+  read as a generic Codex record with a small `Planning` appendix. A player
+  comparing build decisions needs the inverse hierarchy: what it does, what it
+  extracts, how it unlocks, how it upgrades, where it can be placed, and whether
+  the record is faction-specific or thin.
+- Filtering remained useful but incomplete as a planning tool. Tier + Focus
+  helps with comparison, but the detail route did not reinforce those same
+  distinctions, so moving from list to detail felt like losing context.
+- Faction-specific and special/tierless records were present but too quiet.
+  These are not necessarily bad data; they need to be labeled so players do not
+  compare a faction-locked or legacy/special row against a universal district as
+  if they were the same thing.
+- Upgrade and adjacency facts were technically available for many rich District
+  rows, but the UI only exposed a forward upgrade link. Players also need
+  incoming upgrade context when landing on Advanced/Grand rows.
+- Resource extractor identity was compact in archive rows but generic in detail.
+  Extracted resources should appear as a planning relationship, not just a raw
+  section.
+- Placement remains only partially unblocked in EWShop. The raw rich export has
+  terrain, river, and POI/resource-deposit placement constraints, but the current
+  backend/API/frontend District contract preserves only `neighbourTiles`
+  placement. Frontend must not infer terrain/river/POI rules from keys or older
+  static JSON.
+- Thin records still need honest treatment. Empty upgrade/special rows should
+  say that no public effects are exported instead of looking like broken UI.
+
+### Implemented Frontend UX
+
+- Added a District-specific detail reference model and section.
+- District details now prioritize:
+  - strategic profile: Focus, Tier, constructible level, faction/variant marker,
+    and construction cost when available;
+  - strategic effect lines, including public `descriptionLines` fallback for
+    level-up rows without an `Effects` section;
+  - exact extracted resource links;
+  - exact technology unlock links;
+  - incoming and outgoing upgrade links, with adjacent-district count notes;
+  - known neighbour-tile placement lines;
+  - record notes for thin/tierless/missing-rich/faction-trait-gated cases.
+- District detail no longer duplicates the generic structured renderer when the
+  District reference section is available.
+- Planning links shown in the District reference section are hidden from the
+  generic `Related entries` list so the detail page does not repeat the same
+  relationship in two places.
+- Improvement details continue to use the existing constructible planning
+  section; this pass is District-specific.
+
+### Still Blocked Or Deferred
+
+- Terrain, river, POI, resource-deposit, wasteland, and mud placement conditions
+  are still blocked by the current backend/API/frontend contract. The UI now
+  states that those conditions are not available in the detail view rather than
+  inventing them.
+- Structured terrain/adjacency yield filters remain blocked. Existing public
+  effect text exposes some synergies, but current EWShop should not create
+  filterable Ridge/Mountain/etc. adjacency categories from descriptor keys or
+  prose.
+- Explicit faction names for faction-specific Districts remain unresolved unless
+  a future rich/API field provides safe faction ownership.
+- Archive-level upgrade-chain grouping is deferred. Detail-level incoming and
+  outgoing upgrade links provide the first useful slice without reorganizing the
+  whole archive.
+
+### Verification
+
+- Focused frontend tests passed:
+  - `src/lib/codex/codexDistrictReference.test.ts`
+  - `src/lib/codex/codexConstructibleRichEnrichment.test.ts`
+  - `src/pages/CodexPage.richPlanningEnrichment.test.tsx`
+- Frontend TypeScript passed.
