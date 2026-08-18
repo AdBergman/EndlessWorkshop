@@ -38,6 +38,7 @@ public class DistrictMapper {
                 domain.getReferenceKeys() == null ? List.of() : List.copyOf(domain.getReferenceKeys()),
                 domain.getUnlockTechnologyKeys() == null ? List.of() : List.copyOf(domain.getUnlockTechnologyKeys()),
                 domain.getFactionSpecific(),
+                domain.getFactionKey(),
                 domain.getVariant(),
                 domain.getPlayerFacing(),
                 toLevelUpDto(domain.getLevelUp()),

@@ -74,6 +74,7 @@ class DistrictControllerTest {
                 .andExpect(jsonPath("$[0].descriptorKeys.length()").value(0))
                 .andExpect(jsonPath("$[0].referenceKeys.length()").value(0))
                 .andExpect(jsonPath("$[0].isFactionSpecific").doesNotExist())
+                .andExpect(jsonPath("$[0].factionKey").doesNotExist())
                 .andExpect(jsonPath("$[0].isVariant").doesNotExist())
                 .andExpect(jsonPath("$[0].isPlayerFacing").doesNotExist())
                 .andExpect(jsonPath("$[0].descriptionLines[0]").value("+2 Science per District Level"))

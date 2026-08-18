@@ -27,7 +27,7 @@ import {
 } from "@/lib/codex/codexStructuredDescription";
 import { resolveRelatedEntries, type CodexReferenceIndexes } from "@/lib/codex/codexRefs";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, District } from "@/types/dataTypes";
 import CodexAbilityEffectLine from "./CodexAbilityEffectLine";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
 import { DiplomacyArchiveRow, EquipmentArchiveRow, QuestArchiveRow, TechArchiveRow } from "./CodexSummaryProgressionRows";
@@ -55,6 +55,7 @@ import {
     getDiplomacyArchiveSignalLines,
     getDistrictArchiveEffectPreviewLines,
     getDistrictArchiveMetadata,
+    getDistrictArchivePlanningLines,
     getDistrictExtractedResourceLinks,
     getEquipmentArchiveEffectPreviewLines,
     getHeroArchiveStatPreviewLines,
@@ -83,6 +84,7 @@ type Props = {
     entries: CodexListItem[];
     allEntries: CodexEntry[];
     referenceIndexes: CodexReferenceIndexes;
+    richDistrictByKey?: Readonly<Record<string, District | undefined>>;
     onSelectEntry: (entry: CodexListItem) => void;
     searchQuery: string;
     hasActiveFilters: boolean;
@@ -93,6 +95,7 @@ export default function CodexSummaryList({
     entries,
     allEntries,
     referenceIndexes,
+    richDistrictByKey = {},
     onSelectEntry,
     searchQuery,
     hasActiveFilters,
@@ -146,7 +149,9 @@ export default function CodexSummaryList({
                             : null;
                         const heroClassMetadata = useHeroArchiveRowHierarchy ? getHeroClassMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
-                        const districtArchiveMetadata = useDistrictArchiveRowHierarchy ? getDistrictArchiveMetadata(entry) : [];
+                        const districtArchiveMetadata = useDistrictArchiveRowHierarchy
+                            ? getDistrictArchiveMetadata(entry, richDistrictByKey)
+                            : [];
                         const populationFactionIdentity = usePopulationArchiveRowHierarchy
                             ? getPopulationArchiveFactionIdentity(entry, referenceIndexes)
                             : null;
@@ -249,6 +254,9 @@ export default function CodexSummaryList({
                             : [];
                         const districtExtractedResourceLinks = useDistrictArchiveRowHierarchy
                             ? getDistrictExtractedResourceLinks(entry, referenceIndexes)
+                            : [];
+                        const districtArchivePlanningLines = useDistrictArchiveRowHierarchy
+                            ? getDistrictArchivePlanningLines(entry, richDistrictByKey, allEntries)
                             : [];
                         const equipmentGrantedAbilityPreviews = useEquipmentArchiveRowHierarchy
                             ? parseCodexStructuredDescription(entry).sections
@@ -761,6 +769,22 @@ export default function CodexSummaryList({
                                                 </span>
                                             )}
                                         </span>
+
+                                        {districtArchivePlanningLines.length > 0 ? (
+                                            <span
+                                                className="codex-summaryList__districtPlanning"
+                                                aria-label="District planning preview"
+                                            >
+                                                {districtArchivePlanningLines.map((line) => (
+                                                    <span
+                                                        className="codex-summaryList__districtPlanningLine"
+                                                        key={`${entry.entryKey}-planning-${line}`}
+                                                    >
+                                                        {line}
+                                                    </span>
+                                                ))}
+                                            </span>
+                                        ) : null}
                                     </button>
 
                                     {districtExtractedResourceLinks.length > 0 ? (

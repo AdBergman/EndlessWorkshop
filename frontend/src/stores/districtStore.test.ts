@@ -29,6 +29,7 @@ describe("useDistrictStore", () => {
                 referenceKeys: [" Tech_City_Planning "],
                 unlockTechnologyKeys: [" Technology_City_Planning ", "", " "],
                 isFactionSpecific: false,
+                factionKey: " Faction_Aspect ",
                 isVariant: true,
                 isPlayerFacing: true,
                 levelUp: {
@@ -72,6 +73,7 @@ describe("useDistrictStore", () => {
         expect(district?.descriptorKeys).toEqual(["Tag_District_City"]);
         expect(district?.referenceKeys).toEqual(["Tech_City_Planning"]);
         expect(district?.isFactionSpecific).toBe(false);
+        expect(district?.factionKey).toBe("Faction_Aspect");
         expect(district?.isVariant).toBe(true);
         expect(district?.isPlayerFacing).toBe(true);
         expect(district?.unlockTechnologyKeys).toEqual([

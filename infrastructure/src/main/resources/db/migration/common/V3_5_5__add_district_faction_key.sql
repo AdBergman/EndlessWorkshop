@@ -1,0 +1,2 @@
+ALTER TABLE districts
+    ADD COLUMN IF NOT EXISTS faction_key VARCHAR(220);

@@ -112,6 +112,7 @@ import {
 import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
+import { useDistrictStore } from "@/stores/districtStore";
 import "./CodexPage.css";
 
 type SelectionIntent = "passive" | "related";
@@ -160,6 +161,10 @@ export default function CodexPage() {
     const summaryError = useCodexStore((state) => state.summaryError);
     const loadEntries = useCodexStore((state) => state.loadEntries);
     const loadSummary = useCodexStore((state) => state.loadSummary);
+    const richDistrictByKey = useDistrictStore((state) => state.districtsByKey);
+    const districtStoreLoaded = useDistrictStore((state) => state.loaded);
+    const districtStoreLoading = useDistrictStore((state) => state.loading);
+    const loadDistricts = useDistrictStore((state) => state.loadDistricts);
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [query, setQuery] = useState("");
@@ -345,19 +350,29 @@ export default function CodexPage() {
         if (isDistrictArchiveMode) return;
 
         setActiveDistrictFilters((current) => (
-            current.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier || current.focus
+            current.type ||
+            current.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier ||
+            current.focus ||
+            current.placement ||
+            current.faction
                 ? DEFAULT_DISTRICT_ARCHIVE_FILTERS
                 : current
         ));
     }, [isDistrictArchiveMode]);
 
+    useEffect(() => {
+        if (!isDistrictArchiveMode || districtStoreLoaded || districtStoreLoading) return;
+
+        void loadDistricts();
+    }, [districtStoreLoaded, districtStoreLoading, isDistrictArchiveMode, loadDistricts]);
+
     const districtFilterGroups = useMemo(
         () => (
             isDistrictArchiveMode
-                ? buildDistrictArchiveFilterGroups(searchFilteredEntries, activeDistrictFilters)
+                ? buildDistrictArchiveFilterGroups(searchFilteredEntries, activeDistrictFilters, richDistrictByKey)
                 : []
         ),
-        [activeDistrictFilters, isDistrictArchiveMode, searchFilteredEntries]
+        [activeDistrictFilters, isDistrictArchiveMode, richDistrictByKey, searchFilteredEntries]
     );
 
     const factFilterOptions = useMemo(
@@ -538,7 +553,8 @@ export default function CodexPage() {
                 return filterDistrictEntriesByArchiveFilters(
                     searchFilteredEntries,
                     activeDistrictFilters,
-                    selectedEntryParam
+                    selectedEntryParam,
+                    richDistrictByKey
                 );
             }
 
@@ -644,6 +660,7 @@ export default function CodexPage() {
             isTechArchiveMode,
             isTraitArchiveMode,
             isUnitArchiveMode,
+            richDistrictByKey,
             searchFilteredEntries,
         ]
     );
@@ -664,8 +681,11 @@ export default function CodexPage() {
     const hasDeferredQuery = deferredQuery.trim().length > 0;
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
     const hasActiveDistrictArchiveFilters = isDistrictArchiveMode && (
+        Boolean(activeDistrictFilters.type) ||
         activeDistrictFilters.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier ||
-        Boolean(activeDistrictFilters.focus)
+        Boolean(activeDistrictFilters.focus) ||
+        Boolean(activeDistrictFilters.placement) ||
+        Boolean(activeDistrictFilters.faction)
     );
     const activeFactFilterItems = useMemo(
         () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
@@ -979,13 +999,34 @@ export default function CodexPage() {
             if (filterKey === "tier") {
                 return {
                     ...current,
-                    tier: value,
+                    tier: current.tier === value ? "" : value,
+                };
+            }
+
+            if (filterKey === "type") {
+                return {
+                    ...current,
+                    type: current.type === value ? null : value as ActiveDistrictArchiveFilters["type"],
+                };
+            }
+
+            if (filterKey === "focus") {
+                return {
+                    ...current,
+                    focus: current.focus === value ? null : value as ActiveDistrictArchiveFilters["focus"],
+                };
+            }
+
+            if (filterKey === "faction") {
+                return {
+                    ...current,
+                    faction: current.faction === value ? null : value,
                 };
             }
 
             return {
                 ...current,
-                focus: current.focus === value ? null : value as ActiveDistrictArchiveFilters["focus"],
+                placement: current.placement === value ? null : value as ActiveDistrictArchiveFilters["placement"],
             };
         });
         returnFiltersToArchive(isDistrictArchiveMode);
@@ -1283,6 +1324,7 @@ export default function CodexPage() {
                                     contextOverride={abilityArchiveSummary?.context}
                                     searchQuery={deferredQuery}
                                     hasActiveFilters={hasActiveFactFilters || hasActiveDistrictArchiveFilters}
+                                    richDistrictByKey={richDistrictByKey}
                                 />
                             ) : (
                             <CodexEntryDetail

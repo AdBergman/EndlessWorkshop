@@ -78,6 +78,7 @@ export interface District {
     referenceKeys?: string[];
     unlockTechnologyKeys?: string[];
     isFactionSpecific?: boolean | null;
+    factionKey?: string | null;
     isVariant?: boolean | null;
     isPlayerFacing?: boolean | null;
     levelUp?: DistrictLevelUp | null;

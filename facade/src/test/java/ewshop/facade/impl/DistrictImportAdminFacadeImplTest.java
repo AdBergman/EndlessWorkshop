@@ -118,6 +118,8 @@ class DistrictImportAdminFacadeImplTest {
                       "districtKey": "DistrictDefinition_District_Tier1_DivinePopMonument",
                       "displayName": "Divined Monument",
                       "category": "City",
+                      "isFactionSpecific": true,
+                      "factionKey": "KinOfSheredyn",
                       "descriptionLines": ["+8 Influence"],
                       "constructionCost": {
                         "productionCostType": "Production",
@@ -152,6 +154,8 @@ class DistrictImportAdminFacadeImplTest {
 
         assertThat(summary.counts().failed()).isZero();
         DistrictImportSnapshot snapshot = importService.snapshots.getFirst();
+        assertThat(snapshot.factionSpecific()).isTrue();
+        assertThat(snapshot.factionKey()).isEqualTo("KinOfSheredyn");
         assertThat(snapshot.constructionCost()).containsExactly("Production", "10 Resource02");
         assertThat(snapshot.placementPrerequisites()).isNotNull();
         assertThat(snapshot.placementPrerequisites().terrain().constraint()).isEqualTo("Forbidden");

@@ -18,6 +18,7 @@ public final class DistrictImportSnapshot {
     private final List<String> referenceKeys;
     private final List<String> unlockTechnologyKeys;
     private final Boolean factionSpecific;
+    private final String factionKey;
     private final Boolean variant;
     private final Boolean playerFacing;
     private final DistrictLevelUp levelUp;
@@ -43,6 +44,7 @@ public final class DistrictImportSnapshot {
                 List.of(),
                 List.of(),
                 unlockTechnologyKeys,
+                null,
                 null,
                 null,
                 null,
@@ -72,6 +74,7 @@ public final class DistrictImportSnapshot {
                 null,
                 null,
                 null,
+                null,
                 null
         );
     }
@@ -88,6 +91,7 @@ public final class DistrictImportSnapshot {
             List<String> referenceKeys,
             List<String> unlockTechnologyKeys,
             Boolean factionSpecific,
+            String factionKey,
             Boolean variant,
             Boolean playerFacing,
             DistrictLevelUp levelUp,
@@ -104,6 +108,7 @@ public final class DistrictImportSnapshot {
         this.referenceKeys = referenceKeys == null ? List.of() : List.copyOf(referenceKeys);
         this.unlockTechnologyKeys = unlockTechnologyKeys == null ? List.of() : List.copyOf(unlockTechnologyKeys);
         this.factionSpecific = factionSpecific;
+        this.factionKey = trimToNull(factionKey);
         this.variant = variant;
         this.playerFacing = playerFacing;
         this.levelUp = levelUp != null && levelUp.isEmpty() ? null : levelUp;
@@ -123,8 +128,15 @@ public final class DistrictImportSnapshot {
     public List<String> referenceKeys() { return referenceKeys; }
     public List<String> unlockTechnologyKeys() { return unlockTechnologyKeys; }
     public Boolean factionSpecific() { return factionSpecific; }
+    public String factionKey() { return factionKey; }
     public Boolean variant() { return variant; }
     public Boolean playerFacing() { return playerFacing; }
     public DistrictLevelUp levelUp() { return levelUp; }
     public ConstructiblePlacementPrerequisites placementPrerequisites() { return placementPrerequisites; }
+
+    private static String trimToNull(String value) {
+        if (value == null) return null;
+        String trimmedValue = value.trim();
+        return trimmedValue.isEmpty() ? null : trimmedValue;
+    }
 }

@@ -12,7 +12,12 @@ import {
 } from "@/lib/codex/codexTechUnlockSummaries";
 import { buildTreatyStatusSummary } from "@/lib/codex/codexTreatyStatusSummaries";
 import { getDiplomacyCategoryDisplayLabel } from "@/lib/codex/codexDiplomacyArchiveFilters";
-import { getDistrictCategoryDisplayLabel } from "@/lib/codex/codexDistrictArchiveFilters";
+import {
+    getDistrictCategoryDisplayLabel,
+    getDistrictEntryFactionLabels,
+    getDistrictEntryTypeLabels,
+} from "@/lib/codex/codexDistrictArchiveFilters";
+import { getDistrictPlacementLines } from "@/lib/codex/codexDistrictReference";
 import { getImprovementCategoryDisplayLabel } from "@/lib/codex/codexImprovementArchiveFilters";
 import { formatUnitTierLabel } from "@/lib/codex/codexUnitArchiveFilters";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
@@ -21,7 +26,7 @@ import {
     resolveRelatedEntries,
     type CodexReferenceIndexes,
 } from "@/lib/codex/codexRefs";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, District } from "@/types/dataTypes";
 import {
     MAX_DIPLOMACY_SIGNAL_LINES,
     MAX_DISTRICT_EFFECT_PREVIEW_LINES,
@@ -478,48 +483,16 @@ export function getDistrictArchiveEffectPreviewLines(entry: CodexEntry): string[
     return effectLines.slice(0, MAX_DISTRICT_EFFECT_PREVIEW_LINES);
 }
 
-function getDistrictYieldSummary(entry: CodexEntry): string[] {
-    const yields = new Set<string>();
-
-    const addYield = (effectText: string, label: string, patterns: readonly RegExp[]) => {
-        if (patterns.some((pattern) => pattern.test(effectText))) {
-            yields.add(label);
-        }
-    };
-
-    for (const line of getDistrictArchiveEffectPreviewLines(entry)) {
-        const grantText = line
-            .split(/\s+(?:if|when|while)\s+/i)[0]
-            .trim()
-            .toLowerCase();
-
-        if (!/^(?:\+|doubles?\b|increases?\b)/i.test(grantText)) continue;
-        if (/\bcost\b/.test(grantText)) continue;
-
-        addYield(grantText, "Food", [/\bfood\b/, /foodcolored/]);
-        addYield(grantText, "Industry", [/\bindustry\b/, /industrycolored/]);
-        addYield(grantText, "Dust", [/\bdust\b/, /moneycolored/, /dustcolored/]);
-        addYield(grantText, "Science", [/\bscience\b/, /sciencecolored/]);
-        addYield(grantText, "Influence", [/\binfluence\b/, /culturecolored/]);
-        addYield(grantText, "Approval", [/\bapproval\b/, /publicordercolored/]);
-        addYield(grantText, "Population", [/\bpopulation\b/]);
-        addYield(grantText, "Resource", [/\bresource\b/, /resourceall/]);
-        addYield(grantText, "Fortification", [/\bfortification\b/]);
-        addYield(grantText, "Vision", [/\bvision\b/]);
-        addYield(grantText, "Experience", [/\bexperience\b/]);
-        addYield(grantText, "Corpses", [/\bcorpses?\b/]);
-    }
-
-    return Array.from(yields);
-}
-
 export function formatDistrictTierValue(value: string): string {
     const trimmedValue = value.trim();
     if (!trimmedValue) return "";
     return trimmedValue === "0" ? "Tier 0" : `Tier ${trimmedValue}`;
 }
 
-export function getDistrictArchiveMetadata(entry: CodexEntry): DistrictArchiveMetadataItem[] {
+export function getDistrictArchiveMetadata(
+    entry: CodexEntry,
+    richDistrictByKey: Readonly<Record<string, District | undefined>> = {}
+): DistrictArchiveMetadataItem[] {
     if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
 
     const items: DistrictArchiveMetadataItem[] = [];
@@ -536,14 +509,12 @@ export function getDistrictArchiveMetadata(entry: CodexEntry): DistrictArchiveMe
         items.push({ key, value: trimmedValue });
     };
 
-    const yieldSummary = getDistrictYieldSummary(entry);
-    if (yieldSummary.length > 0) {
-        addValue("yield", `Yields: ${yieldSummary.join(", ")}`);
-    }
+    getDistrictEntryTypeLabels(entry).forEach((value) => addValue("type", value));
 
     getCodexFactValues(entry, "Category").forEach((value) =>
         addValue("category", getDistrictCategoryDisplayLabel(value))
     );
+    getDistrictEntryFactionLabels(entry, richDistrictByKey).forEach((value) => addValue("faction", value));
     getCodexFactValues(entry, "Tier").forEach((value) =>
         addValue("tier", formatDistrictTierValue(value))
     );
@@ -579,6 +550,91 @@ export function getDistrictExtractedResourceLinks(
     }
 
     return links;
+}
+
+export function getDistrictArchivePlanningLines(
+    entry: CodexEntry,
+    richDistrictByKey: Readonly<Record<string, District | undefined>>,
+    allEntries: readonly CodexEntry[] = []
+): string[] {
+    if (entry.exportKind.trim().toLowerCase() !== "districts") return [];
+
+    const richDistrict = richDistrictByKey[entry.entryKey.trim()];
+    if (!richDistrict) return [];
+
+    const lines: string[] = [];
+    const constructionCost = richDistrict.constructionCost ?? [];
+    if (constructionCost.length > 0) {
+        lines.push(`Cost: ${constructionCost.join(", ")}`);
+    }
+
+    const upgradeLine = getDistrictArchiveUpgradeLine(entry, richDistrict, richDistrictByKey, allEntries);
+    if (upgradeLine) {
+        lines.push(upgradeLine);
+    }
+
+    const placementHighlights = getDistrictPlacementLines(richDistrict).filter((line) =>
+        line !== "Cannot build on wasteland" &&
+        line !== "Cannot build on mud" &&
+        line !== "No river" &&
+        line !== "No resource deposit" &&
+        !line.startsWith("Forbidden terrain:")
+    );
+    if (placementHighlights.length > 0) {
+        const visibleHighlights = placementHighlights.slice(0, 3);
+        const overflowCount = placementHighlights.length - visibleHighlights.length;
+        lines.push(`Placement: ${visibleHighlights.join("; ")}${overflowCount > 0 ? ` +${overflowCount} more` : ""}`);
+    }
+
+    return lines;
+}
+
+function getDistrictArchiveUpgradeLine(
+    entry: CodexEntry,
+    richDistrict: District,
+    richDistrictByKey: Readonly<Record<string, District | undefined>>,
+    allEntries: readonly CodexEntry[]
+): string {
+    const publicDistrictByKey = new Map(
+        allEntries
+            .filter((candidate) => candidate.exportKind.trim().toLowerCase() === "districts")
+            .map((candidate) => [candidate.entryKey.trim(), candidate])
+    );
+    const adjacentCount = richDistrict.levelUp?.requiredAdjacentDistrictCount;
+    const adjacentNote = formatAdjacentDistrictNote(adjacentCount);
+    const targetKey = richDistrict.levelUp?.targetDistrictKey?.trim() ?? "";
+    const targetEntry = targetKey ? publicDistrictByKey.get(targetKey) : undefined;
+
+    if (targetEntry) {
+        return `Upgrades to: ${getCodexEntryLabel(targetEntry)}${adjacentNote ? ` (${adjacentNote})` : ""}`;
+    }
+
+    const sourceEntry = Object.values(richDistrictByKey)
+        .filter((candidate): candidate is District => Boolean(candidate))
+        .map((candidate) => {
+            const sourceKey = candidate.districtKey.trim();
+            const sourceTargetKey = candidate.levelUp?.targetDistrictKey?.trim() ?? "";
+            const publicEntry = publicDistrictByKey.get(sourceKey);
+            return sourceTargetKey === entry.entryKey.trim() && publicEntry
+                ? {
+                    entry: publicEntry,
+                    adjacentNote: formatAdjacentDistrictNote(candidate.levelUp?.requiredAdjacentDistrictCount),
+                }
+                : null;
+        })
+        .find((candidate): candidate is { entry: CodexEntry; adjacentNote: string } => candidate !== null);
+
+    if (sourceEntry) {
+        return `Upgrades from: ${getCodexEntryLabel(sourceEntry.entry)}${sourceEntry.adjacentNote ? ` (${sourceEntry.adjacentNote})` : ""}`;
+    }
+
+    return adjacentNote ? `Upgrade: ${adjacentNote}` : "";
+}
+
+function formatAdjacentDistrictNote(adjacentCount: number | null | undefined): string {
+    if (typeof adjacentCount !== "number" || !Number.isFinite(adjacentCount)) return "";
+
+    return `${adjacentCount} adjacent ${adjacentCount === 1 ? "district" : "districts"}`;
 }
 
 export function getImprovementArchiveMetadata(entry: CodexEntry): ImprovementArchiveMetadataItem[] {

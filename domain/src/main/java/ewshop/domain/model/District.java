@@ -14,6 +14,7 @@ public class District {
     private final List<String> referenceKeys;
     private final List<String> unlockTechnologyKeys;
     private final Boolean factionSpecific;
+    private final String factionKey;
     private final Boolean variant;
     private final Boolean playerFacing;
     private final DistrictLevelUp levelUp;
@@ -31,6 +32,7 @@ public class District {
         this.referenceKeys = List.copyOf(b.referenceKeys);
         this.unlockTechnologyKeys = List.copyOf(b.unlockTechnologyKeys);
         this.factionSpecific = b.factionSpecific;
+        this.factionKey = trimToNull(b.factionKey);
         this.variant = b.variant;
         this.playerFacing = b.playerFacing;
         this.levelUp = b.levelUp != null && b.levelUp.isEmpty() ? null : b.levelUp;
@@ -50,6 +52,7 @@ public class District {
     public List<String> getReferenceKeys() { return referenceKeys; }
     public List<String> getUnlockTechnologyKeys() { return unlockTechnologyKeys; }
     public Boolean getFactionSpecific() { return factionSpecific; }
+    public String getFactionKey() { return factionKey; }
     public Boolean getVariant() { return variant; }
     public Boolean getPlayerFacing() { return playerFacing; }
     public DistrictLevelUp getLevelUp() { return levelUp; }
@@ -69,6 +72,7 @@ public class District {
         private final java.util.ArrayList<String> referenceKeys = new java.util.ArrayList<>();
         private final java.util.ArrayList<String> unlockTechnologyKeys = new java.util.ArrayList<>();
         private Boolean factionSpecific;
+        private String factionKey;
         private Boolean variant;
         private Boolean playerFacing;
         private DistrictLevelUp levelUp;
@@ -105,6 +109,7 @@ public class District {
             return this;
         }
         public Builder factionSpecific(Boolean v) { this.factionSpecific = v; return this; }
+        public Builder factionKey(String v) { this.factionKey = v; return this; }
         public Builder variant(Boolean v) { this.variant = v; return this; }
         public Builder playerFacing(Boolean v) { this.playerFacing = v; return this; }
         public Builder levelUp(DistrictLevelUp v) { this.levelUp = v; return this; }
@@ -114,5 +119,11 @@ public class District {
         }
 
         public District build() { return new District(this); }
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) return null;
+        String trimmedValue = value.trim();
+        return trimmedValue.isEmpty() ? null : trimmedValue;
     }
 }

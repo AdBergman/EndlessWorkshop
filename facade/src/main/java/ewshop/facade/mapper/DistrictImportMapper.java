@@ -48,6 +48,7 @@ public final class DistrictImportMapper {
                 cleanLines(dto.referenceKeys()),
                 cleanLines(dto.unlockTechnologyKeys()),
                 dto.isFactionSpecific(),
+                trimToNull(dto.factionKey()),
                 dto.isVariant(),
                 dto.isPlayerFacing(),
                 toLevelUp(dto.levelUp()),
