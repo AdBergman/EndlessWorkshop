@@ -5,6 +5,7 @@ import {
     buildCodexRichFactionPackageGroups,
     getCodexFactionPackageEntryKeys,
 } from "@/lib/codex/codexFactionPackage";
+import { buildCodexFactionStrategyProfile } from "@/lib/codex/codexFactionPresentation";
 import {
     formatCodexKindLabel,
     getCodexDetailContextLines,
@@ -53,7 +54,7 @@ import { useUnitStore } from "@/stores/unitStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexConstructiblePlanningSection from "./CodexConstructiblePlanningSection";
 import CodexDistrictReferenceSection from "./CodexDistrictReferenceSection";
-import CodexFactionDetail from "./CodexFactionDetail";
+import CodexFactionDetail, { CodexFactionStrategyProfileSection } from "./CodexFactionDetail";
 import CodexFactionPackage from "./CodexFactionPackage";
 import CodexHeroProfileSection from "./CodexHeroProfileSection";
 import CodexStructuredDetail from "./CodexStructuredDetail";
@@ -175,6 +176,19 @@ export default function CodexEntryDetail({
 
         return isFactionEntry ? buildCodexFactionPackageGroups(entry, allEntries) : [];
     }, [allEntries, entry, isFactionEntry, isFactionLikeEntry, richFaction]);
+    const factionPackageCounts = useMemo(
+        () => factionPackageGroups.reduce<Record<string, number>>((acc, group) => {
+            acc[group.id] = group.totalCount;
+            return acc;
+        }, {}),
+        [factionPackageGroups]
+    );
+    const factionStrategyProfile = useMemo(
+        () => entry && isFactionLikeEntry
+            ? buildCodexFactionStrategyProfile(entry, factionPackageCounts, richFaction)
+            : null,
+        [entry, factionPackageCounts, isFactionLikeEntry, richFaction]
+    );
     const richFactionPackageEntryKeys = useMemo(
         () => (richFaction ? getCodexFactionPackageEntryKeys(factionPackageGroups) : []),
         [factionPackageGroups, richFaction]
@@ -279,16 +293,23 @@ export default function CodexEntryDetail({
             {isFactionEntry ? (
                 <CodexFactionDetail
                     entry={entry}
+                    richFaction={richFaction}
                     packageGroups={factionPackageGroups}
                     onSelectEntry={onSelectRelated}
                 />
             ) : showHeroRichEnrichment || showDistrictReference ? null : (
-                <CodexStructuredDetail
-                    entry={entry}
-                    allEntries={allEntries}
-                    relatedEntries={relatedEntries}
-                    onSelectInlineEntry={onSelectRelated}
-                />
+                <>
+                    {isMinorFactionEntry && factionStrategyProfile ? (
+                        <CodexFactionStrategyProfileSection profile={factionStrategyProfile} />
+                    ) : null}
+
+                    <CodexStructuredDetail
+                        entry={entry}
+                        allEntries={allEntries}
+                        relatedEntries={relatedEntries}
+                        onSelectInlineEntry={onSelectRelated}
+                    />
+                </>
             )}
 
             {showDistrictReference ? (

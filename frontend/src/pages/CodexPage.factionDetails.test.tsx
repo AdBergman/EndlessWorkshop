@@ -67,7 +67,7 @@ describe("CodexPage faction details", () => {
 
 
 
-    it("structures faction details into affinity, traits, notes, and dossier index anchors", async () => {
+    it("structures faction details into a strategy profile, core effects, and traits", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "factions",
@@ -120,9 +120,12 @@ describe("CodexPage faction details", () => {
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
         expect(within(detailPane).getByRole("heading", { name: "Aspects" })).toBeInTheDocument();
+        expect(within(detailPane).getByText("Strategy profile")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Major faction profile")).toBeInTheDocument();
+        expect(within(detailPane).getByText("2 traits")).toBeInTheDocument();
         expect(within(detailPane).getByText("Faction dossier")).toBeInTheDocument();
         expect(within(detailPane).queryByRole("navigation", { name: /faction dossier index/i })).not.toBeInTheDocument();
-        expect(within(detailPane).getByRole("heading", { name: "Affinity" })).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Core Effects" })).toBeInTheDocument();
         expect(within(detailPane).getAllByText("Aspects").length).toBeGreaterThan(0);
         expect(within(detailPane).getByRole("heading", { name: "Unlocks" })).toBeInTheDocument();
         expect(within(detailPane).getByText("Force Treaty")).toBeInTheDocument();
@@ -130,8 +133,7 @@ describe("CodexPage faction details", () => {
         expect(within(detailPane).getByText("They prioritize Diplomacy and peace.")).toBeInTheDocument();
         expect(within(detailPane).getByRole("heading", { name: "Common Rights" })).toBeInTheDocument();
         expect(within(detailPane).getByText(/Public Opinion due to neighbors/)).toBeInTheDocument();
-        expect(within(detailPane).getByRole("heading", { name: "Notes" })).toBeInTheDocument();
-        expect(within(detailPane).getByText("Opening faction note.")).toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Opening faction note.").length).toBeGreaterThan(0);
         expect(within(detailPane).queryByText("Description")).not.toBeInTheDocument();
     });
 
@@ -396,7 +398,7 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Population")).toBeInTheDocument();
         expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
         expect(within(packageSection).getByText("Faction Techs")).toBeInTheDocument();
@@ -411,10 +413,10 @@ describe("CodexPage faction details", () => {
         expect(within(packageSection).getByRole("button", { name: /Common Rights/ })).toBeInTheDocument();
         expect(within(packageSection).getByRole("button", { name: /Aspect Tech III/ })).toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /Aspect Tech IV/ })).not.toBeInTheDocument();
-        expect(within(packageSection).getByText("Showing 4 of 6 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 4 of 6")).toBeInTheDocument();
         expect(within(packageSection).getAllByRole("button", { name: /Aspect Quest 01/ })).toHaveLength(1);
         expect(within(packageSection).getByRole("button", { name: /Aspect Quest 04/ })).toBeInTheDocument();
-        expect(within(packageSection).getByText("Showing 3 of 4 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 3 of 4")).toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Diplomat\b/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Aspect Parley\b/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Klax\b/ })).not.toBeInTheDocument();
@@ -510,7 +512,7 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Associated Units")).toBeInTheDocument();
         expect(within(packageSection).queryByText("Core Units")).not.toBeInTheDocument();
         expect(within(packageSection).getByRole("button", { name: /Tahuk Guard/ })).toBeInTheDocument();
@@ -617,7 +619,13 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
+        expect(within(detailPane).getByText("Strategy profile")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Major faction profile")).toBeInTheDocument();
+        expect(within(detailPane).getByText("1 population")).toBeInTheDocument();
+        expect(within(detailPane).getByText("1 unit")).toBeInTheDocument();
+        expect(within(detailPane).getByText("1 tech")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Available")).toBeInTheDocument();
         expect(within(packageSection).getByText("Faction Traits")).toBeInTheDocument();
         expect(within(packageSection).getByText("Population")).toBeInTheDocument();
         expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
@@ -721,7 +729,10 @@ describe("CodexPage faction details", () => {
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
         expect(within(detailPane).getByText("Identity")).toBeInTheDocument();
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(detailPane).getByText("Strategy profile")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Minor faction profile")).toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Pacifist").length).toBeGreaterThan(0);
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Core Unit")).toBeInTheDocument();
         expect(within(packageSection).getByText("Protectorate Traits")).toBeInTheDocument();
         expect(within(packageSection).getByText("Quest")).toBeInTheDocument();

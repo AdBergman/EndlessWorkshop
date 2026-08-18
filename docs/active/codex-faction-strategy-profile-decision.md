@@ -1,8 +1,8 @@
 # Codex Faction Strategy Profile Decision
 
-Status: active decision
+Status: implemented 2026-08-19
 Created: 2026-08-18
-Related: `EW-CODEX-FACTIONS-001`
+Related: `EW-CODEX-FACTIONS-001`, `EW-CODEX-FACTIONS-002`
 
 ## Decision
 
@@ -73,8 +73,45 @@ Non-goals:
 Verification:
 
 - focused `codexFactionPackage` and Faction detail render tests;
-- direct-link `/codex?entry=Faction_Aspect` browser QA;
+- `/codex?category=factions&entry=Faction_Aspect` / representative clicked
+  browser QA;
 - standard frontend type/build checks at PR close.
+
+Result:
+
+- Implemented a detail-first `Strategy profile` section for major Factions and
+  Minor Factions using exact rich faction joins, rich lore where available,
+  exported affinity/disposition facts, parsed public trait lines, and existing
+  capped package groups.
+- Major Faction archive rows now lead with exported strategic effect text
+  rather than trait-name summaries, so the category answers what makes each
+  empire play differently before click-through.
+- Major Faction detail now puts `Core Effects` before the trait list and removes
+  the redundant standalone Affinity block because the profile carries that
+  planning fact.
+- The old `Faction package` section is now `Faction systems`, and capped group
+  overflow copy no longer exposes implementation wording such as `exact refs`.
+- Minor Factions keep their structured dossier body but gain the same compact
+  profile for affinity, disposition, population, unit, heroes, protectorate
+  traits, and quest presence. Redundant `Kind=MinorFaction` structured facts are
+  hidden as implementation noise.
+- Browser review covered Aspects, Necrophages, Tahuk, Ametrine, desktop and a
+  mobile-width viewport. A metric-grid layout flaw found during review was fixed
+  immediately.
+
+Closeout classification:
+
+- Still actionable in EWShop now: none discovered within the Faction category
+  after the profile/header, row preview, package-label, Minor Faction noise, and
+  metric layout fixes.
+- Exporter/source blocked: richer faction art/portrait contracts and stronger
+  canonical ownership metadata for unrelated categories such as Actions/Traits
+  remain exporter-owned if future Faction pages need them.
+- Deliberately deferred because another EWShop route owns the experience:
+  full Tech trees, Unit evolution/planner flows, and Quest Explorer branch
+  traversal remain summarized and linked rather than recreated inside Codex.
+- Optional future enhancement: a route-owned `/factions` planner can be
+  reconsidered only after the Codex profile shape proves insufficient.
 
 ## Later Questions
 
