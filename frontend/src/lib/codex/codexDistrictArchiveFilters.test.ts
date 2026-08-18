@@ -121,7 +121,7 @@ describe("codexDistrictArchiveFilters", () => {
         expect(families.map((family) => family.displayName).sort()).toEqual([
             "Extractor",
             "Farm",
-            "Farm",
+            "Farm (Necrophages)",
         ]);
 
         const universalFarm = families.find((family) =>
@@ -172,5 +172,107 @@ describe("codexDistrictArchiveFilters", () => {
 
         expect(getDistrictFamilyDisplayName(habitation)).toBe("Communal Habitations");
         expect(getDistrictFamilyDisplayName(oculum)).toBe("Holy Oculum");
+    });
+
+    it("collapses production-shaped category splits while disambiguating faction-owned duplicates", () => {
+        const entries = [
+            districtEntry({
+                entryKey: "DistrictDefinition_District_Tier1_DivinePopMonument",
+                displayName: "Divined Monument",
+                facts: [
+                    { label: "Category", value: "City" },
+                    { label: "Tier", value: "1" },
+                ],
+            }),
+            districtEntry({
+                entryKey: "DistrictDefinition_District_Tier3_DivinePopMonument",
+                displayName: "Grand Divined Monument",
+                facts: [
+                    { label: "Category", value: "ArtificialWonder" },
+                    { label: "Tier", value: "3" },
+                ],
+            }),
+            districtEntry({
+                entryKey: "LastLord_District_Repository00",
+                displayName: "Soul Repository",
+                facts: [{ label: "Category", value: "Resource" }],
+            }),
+            districtEntry({
+                entryKey: "LastLord_District_Repository00_Tier1",
+                displayName: "Soul Repository",
+                facts: [
+                    { label: "Category", value: "City" },
+                    { label: "Tier", value: "1" },
+                ],
+            }),
+            districtEntry({
+                entryKey: "Necrophage_District_Tier1_Food_v2",
+                displayName: "Farm",
+                facts: [
+                    { label: "Category", value: "Food" },
+                    { label: "Tier", value: "1" },
+                ],
+            }),
+            districtEntry({
+                entryKey: "District_Tier1_Food",
+                displayName: "Farm",
+                facts: [
+                    { label: "Category", value: "Food" },
+                    { label: "Tier", value: "1" },
+                ],
+            }),
+        ];
+        const richDistrictByKey = {
+            DistrictDefinition_District_Tier1_DivinePopMonument: richDistrict({
+                districtKey: "DistrictDefinition_District_Tier1_DivinePopMonument",
+                category: "City",
+                levelUp: {
+                    targetDistrictKey: "DistrictDefinition_District_Tier3_DivinePopMonument",
+                    requiredAdjacentDistrictCount: 4,
+                },
+            }),
+            DistrictDefinition_District_Tier3_DivinePopMonument: richDistrict({
+                districtKey: "DistrictDefinition_District_Tier3_DivinePopMonument",
+                category: "ArtificialWonder",
+                tier: 3,
+            }),
+            LastLord_District_Repository00: richDistrict({
+                districtKey: "LastLord_District_Repository00",
+                category: "Resource",
+                factionKey: "LastLord",
+                isFactionSpecific: true,
+            }),
+            LastLord_District_Repository00_Tier1: richDistrict({
+                districtKey: "LastLord_District_Repository00_Tier1",
+                category: "City",
+                factionKey: "LastLord",
+                isFactionSpecific: true,
+                tier: 1,
+            }),
+            Necrophage_District_Tier1_Food_v2: richDistrict({
+                districtKey: "Necrophage_District_Tier1_Food_v2",
+                category: "Food",
+                factionKey: "Necrophage",
+                isFactionSpecific: true,
+            }),
+            District_Tier1_Food: richDistrict({
+                districtKey: "District_Tier1_Food",
+                category: "Food",
+            }),
+        };
+
+        const families = buildDistrictArchiveFamilies(entries, richDistrictByKey);
+        const displayNames = families.map((family) => family.displayName).sort();
+        expect(displayNames).toEqual([
+            "Divined Monument",
+            "Farm",
+            "Farm (Necrophages)",
+            "Soul Repository",
+        ]);
+        expect(new Set(displayNames.map((value) => value.toLowerCase())).size).toBe(displayNames.length);
+        expect(families.find((family) => family.displayName === "Divined Monument")?.entries)
+            .toHaveLength(2);
+        expect(families.find((family) => family.displayName === "Soul Repository")?.entries)
+            .toHaveLength(2);
     });
 });

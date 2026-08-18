@@ -515,15 +515,17 @@ Implemented:
 
 - The production District archive now folds exported `districts` plus hidden
   `extractors` records into player-facing District families. In the local 0.82
-  data this browser-tests at 40 family rows before search/filter narrowing.
+  data this browser-tests at 38 family rows before search/filter narrowing.
 - Family identity uses bounded presentation mapping:
-  - exact rich `levelUp.targetDistrictKey` relationships establish progression
-    chains when present;
   - display prefixes such as `Advanced`, `Grand`, `Great`, `Sacred`, and
     `Divine` are stripped only for family presentation;
-  - family keys include exact `factionKey`, and preserve category separation
-    except for bounded universal infrastructure families such as Camp, Bridge,
-    Foundation, Trading Post, and Extractor;
+  - family keys include exact `factionKey` to prevent genuinely faction-owned
+    concepts from merging into universal rows;
+  - same-faction category splits collapse into one player-facing family, so
+    records such as City/Wonder Divined Monument and City/Resource Soul
+    Repository no longer create duplicate archive rows;
+  - cross-faction duplicate display names are disambiguated in archive labels,
+    for example `Farm (Necrophages)`;
   - resource Districts with explicit `Resource` category and Extractor display
     names collapse into a generic `Extractor` family.
 - The archive filter UI is now a single secondary `Family` rail:
@@ -537,6 +539,13 @@ Implemented:
 - Archive rows use the family display name and show useful family-level effects,
   costs, progression summaries, extracted resource links, and placement
   highlights when available.
+- Generic Extractor rows summarize the extractor concept instead of surfacing
+  arbitrary resource-specific records first.
+- Raw resource-code and placement-code labels such as `Resource27` and
+  `Resource Deposit Luxury 14` are normalized for District archive/detail
+  display.
+- Thin/special rows with no effects or cost can still surface useful placement
+  constraints instead of looking empty.
 - The archive no longer emits `No public district effects exported yet.` as a
   routine row fallback.
 - District detail now includes a `Progression` link group so tier records live

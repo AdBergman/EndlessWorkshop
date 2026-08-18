@@ -149,8 +149,7 @@ export default function CodexEntryDetail({
             ? buildCodexDistrictReferenceModel(
                     entry,
                     richDistrictByKey,
-                    allEntries,
-                    { richDistrictsLoaded: districtStoreLoaded }
+                    allEntries
                 )
             : {
                     profileItems: [],

@@ -27,10 +27,6 @@ export type CodexDistrictReferenceModel = {
     recordNotes: string[];
 };
 
-type DistrictReferenceOptions = {
-    richDistrictsLoaded?: boolean;
-};
-
 const EMPTY_DISTRICT_REFERENCE: CodexDistrictReferenceModel = {
     profileItems: [],
     effectLines: [],
@@ -158,16 +154,26 @@ function resolveFamilyProgression(
         return getGenericExtractorProgressionLinks(family.entries);
     }
 
+    const progressionEntries = getProgressionEntries(family.entries, richDistrictByKey);
     const links: CodexDistrictReferenceLink[] = [];
+    const labelCounts = progressionEntries.reduce<Map<string, number>>((counts, familyEntry) => {
+        const normalizedLabel = getCodexEntryLabel(familyEntry).trim().toLowerCase();
+        counts.set(normalizedLabel, (counts.get(normalizedLabel) ?? 0) + 1);
+        return counts;
+    }, new Map<string, number>());
     const seenLabels = new Set<string>();
 
-    for (const familyEntry of family.entries) {
-        const label = getCodexEntryLabel(familyEntry);
+    for (const familyEntry of progressionEntries) {
+        const richDistrict = richDistrictByKey[familyEntry.entryKey.trim()];
+        const label = getProgressionLinkLabel(
+            familyEntry,
+            richDistrict,
+            (labelCounts.get(getCodexEntryLabel(familyEntry).trim().toLowerCase()) ?? 0) > 1
+        );
         const normalizedLabel = label.trim().toLowerCase();
         if (!normalizedLabel || seenLabels.has(normalizedLabel)) continue;
 
         seenLabels.add(normalizedLabel);
-        const richDistrict = richDistrictByKey[familyEntry.entryKey.trim()];
         links.push({
             entry: familyEntry,
             label,
@@ -178,6 +184,39 @@ function resolveFamilyProgression(
     }
 
     return links.length > 1 ? links : [];
+}
+
+function getProgressionEntries(
+    entries: readonly CodexEntry[],
+    richDistrictByKey: Readonly<Record<string, District | undefined>>
+): readonly CodexEntry[] {
+    const tieredEntries = entries.filter((entry) => getDistrictProgressionTier(entry, richDistrictByKey) !== null);
+    return tieredEntries.length > 1 ? tieredEntries : entries;
+}
+
+function getDistrictProgressionTier(
+    entry: CodexEntry,
+    richDistrictByKey: Readonly<Record<string, District | undefined>>
+): number | null {
+    const factTier = getCodexFactValues(entry, "Tier")[0]?.trim().replace(/^tier\s*/i, "");
+    if (factTier && /^\d+$/.test(factTier)) return Number(factTier);
+
+    const richTier = richDistrictByKey[entry.entryKey.trim()]?.tier;
+    return typeof richTier === "number" && Number.isFinite(richTier) ? richTier : null;
+}
+
+function getProgressionLinkLabel(
+    entry: CodexEntry,
+    richDistrict: District | undefined,
+    includeTier: boolean
+): string {
+    const label = getCodexEntryLabel(entry);
+    if (!includeTier) return label;
+
+    const tier = getCodexFactValues(entry, "Tier")[0]?.trim() ?? (
+        typeof richDistrict?.tier === "number" ? String(richDistrict.tier) : ""
+    );
+    return tier ? `${label} (Tier ${tier})` : label;
 }
 
 function getGenericExtractorProgressionLinks(entries: readonly CodexEntry[]): CodexDistrictReferenceLink[] {
@@ -233,6 +272,30 @@ function getEffectLines(entry: CodexEntry): string[] {
         .filter(Boolean);
 }
 
+function getReferenceEffectLines(
+    entry: CodexEntry,
+    richDistrictByKey: Readonly<Record<string, District | undefined>>,
+    allEntries: readonly CodexEntry[]
+): string[] {
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    if (!family || family.isResourceExtractorFamily) return getEffectLines(entry);
+
+    const lines: string[] = [];
+    const seen = new Set<string>();
+    for (const familyEntry of family.entries) {
+        for (const line of getEffectLines(familyEntry)) {
+            const value = line.trim();
+            const normalizedValue = value.toLowerCase().replace(/\s+/g, " ");
+            if (!value || seen.has(normalizedValue)) continue;
+
+            seen.add(normalizedValue);
+            lines.push(value);
+        }
+    }
+
+    return lines;
+}
+
 function getExtractedResourceLinks(
     entry: CodexEntry,
     publicCodexResourceByKey: Record<string, CodexEntry>
@@ -276,11 +339,13 @@ function buildProfileItems(entry: CodexEntry, richDistrict: District | undefined
         items.push(trimmedValue);
     };
 
-    getCodexFactValues(entry, "Category").forEach((value) =>
-        add(getDistrictCategoryDisplayLabel(value))
-    );
+    getCodexFactValues(entry, "Category")
+        .filter((value) => value.trim().toLowerCase() !== "none")
+        .forEach((value) => add(getDistrictCategoryDisplayLabel(value)));
     if (richDistrict?.category && getCodexFactValues(entry, "Category").length === 0) {
-        add(getDistrictCategoryDisplayLabel(richDistrict.category));
+        if (richDistrict.category.trim().toLowerCase() !== "none") {
+            add(getDistrictCategoryDisplayLabel(richDistrict.category));
+        }
     }
 
     getCodexFactValues(entry, "Tier").forEach((value) =>
@@ -303,7 +368,7 @@ function buildProfileItems(entry: CodexEntry, richDistrict: District | undefined
 
     const constructionCost = richDistrict?.constructionCost ?? [];
     if (constructionCost.length > 0) {
-        add(`Cost: ${constructionCost.join(", ")}`);
+        add(`Cost: ${formatDistrictConstructionCostLabel(constructionCost)}`);
     }
 
     return items;
@@ -316,9 +381,24 @@ function formatDistrictTierDetailLabel(value: string): string {
     return /^\d+$/.test(trimmedValue) ? `Tier ${trimmedValue}` : value.trim();
 }
 
-function buildPlacementLines(richDistrict: District | undefined, richDistrictsLoaded: boolean): string[] {
-    const neighbourTiles = richDistrict?.placementPrerequisites?.neighbourTiles;
+export function formatDistrictConstructionCostLabel(constructionCost: readonly string[]): string {
+    return constructionCost
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map((value) => {
+            if (value.toLowerCase() === "none") return "No production cost";
+            if (value.toLowerCase() === "turnbased") return "Turn-based";
+            return value;
+        })
+        .map((value) => value.replace(/\bResource\d+\b/g, "Resource"))
+        .join(" + ")
+        .replace(/\s+/g, " ");
+}
+
+export function getDistrictPlacementLines(richDistrict: District | undefined): string[] {
     const lines: string[] = [];
+    const placement = richDistrict?.placementPrerequisites;
+    const neighbourTiles = placement?.neighbourTiles;
 
     if (neighbourTiles) {
         const operator = normalizeKey(neighbourTiles.operator).toLowerCase();
@@ -326,6 +406,8 @@ function buildPlacementLines(richDistrict: District | undefined, richDistrictsLo
 
         if (operator === "anytile" && territoryConstraint === "sameregion") {
             lines.push("Adjacent tile in same region");
+        } else if (operator === "notile") {
+            lines.push("No neighbouring tile required");
         }
 
         if (neighbourTiles.ignoreCliff === true) {
@@ -333,40 +415,93 @@ function buildPlacementLines(richDistrict: District | undefined, richDistrictsLo
         }
     }
 
-    if (lines.length === 0 && richDistrictsLoaded) {
-        lines.push("Specific terrain, river, and POI restrictions are not available in this view.");
+    const terrain = placement?.terrain;
+    if (terrain) {
+        const terrainLabels = (terrain.terrainTypeKeys ?? [])
+            .map(formatPlacementKey)
+            .filter(Boolean);
+        if (normalizeKey(terrain.constraint).toLowerCase() === "forbidden" && terrainLabels.length > 0) {
+            lines.push(`Forbidden terrain: ${terrainLabels.join(", ")}`);
+        }
+        if (terrain.canBuildOnWasteland === false) {
+            lines.push("Cannot build on wasteland");
+        }
+        if (terrain.canBuildOnMud === false) {
+            lines.push("Cannot build on mud");
+        }
+    }
+
+    const riverConstraint = normalizeKey(placement?.river?.constraint).toLowerCase();
+    if (riverConstraint === "noriver") {
+        lines.push("No river");
+    } else if (riverConstraint === "anyriver") {
+        lines.push("Requires river");
+    } else if (riverConstraint === "rivernormal") {
+        lines.push("Requires normal river");
+    }
+
+    const pointOfInterest = placement?.pointOfInterest;
+    const pointOfInterestConstraint = normalizeKey(pointOfInterest?.constraint).toLowerCase();
+    if (pointOfInterestConstraint === "noresourcedeposit") {
+        lines.push("No resource deposit");
+    } else if (pointOfInterestConstraint === "nopoi") {
+        lines.push("No point of interest");
+    } else if (pointOfInterestConstraint === "anypoibutresourcedeposit") {
+        lines.push("Any point of interest except resource deposit");
+    } else if (pointOfInterestConstraint === "authorized") {
+        const pointOfInterestLabels = (pointOfInterest?.pointOfInterestKeys ?? [])
+            .map(formatPlacementKey)
+            .filter(Boolean);
+        if (pointOfInterestLabels.length > 0) {
+            lines.push(`Requires: ${pointOfInterestLabels.join(", ")}`);
+        }
     }
 
     return lines;
 }
 
+function formatPlacementKey(value: string): string {
+    const normalized = normalizeKey(value)
+        .replace(/^TerrainType_/, "")
+        .replace(/^POI_/, "")
+        .replace(/_/g, " ");
+    if (!normalized) return "";
+
+    const label = normalized
+        .replace(/([a-z])([A-Z0-9])/g, "$1 $2")
+        .replace(/([0-9])([A-Za-z])/g, "$1 $2")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (character) => character.toUpperCase());
+    const lowerLabel = label.toLowerCase();
+    if (/^resource deposit luxury \d+$/.test(lowerLabel)) {
+        return "Luxury resource deposit";
+    }
+    if (/^resource deposit strategic \d+$/.test(lowerLabel)) {
+        return "Strategic resource deposit";
+    }
+    if (/^resource deposit/.test(lowerLabel)) {
+        return "Resource deposit";
+    }
+
+    return label;
+}
+
 function buildRecordNotes(
     entry: CodexEntry,
     richDistrict: District | undefined,
-    effectLines: readonly string[],
-    richDistrictsLoaded: boolean
+    effectLines: readonly string[]
 ): string[] {
     const notes: string[] = [];
 
     if (effectLines.length === 0) {
-        notes.push("No public effects exported for this district record.");
-    }
-
-    if (getCodexFactValues(entry, "Tier").length === 0 && richDistrict?.tier == null) {
-        notes.push("No public tier exported; archive browsing treats tierless rows as Tier 1.");
-    }
-
-    if (!richDistrict && richDistrictsLoaded) {
-        notes.push("Rich planning profile is not available for this district.");
-    }
-
-    if (richDistrict?.isPlayerFacing === false) {
-        notes.push("Rich data marks this as non-player-facing.");
+        notes.push("No listed strategic effects.");
     }
 
     const requiredFactionTraitKeys = richDistrict?.levelUp?.requiredFactionTraitKeys ?? [];
     if (requiredFactionTraitKeys.length > 0) {
-        notes.push("Next upgrade has an additional faction trait prerequisite.");
+        notes.push("Next upgrade requires a faction trait.");
     }
 
     return notes;
@@ -375,8 +510,7 @@ function buildRecordNotes(
 export function buildCodexDistrictReferenceModel(
     entry: CodexEntry,
     richDistrictByKey: Readonly<Record<string, District | undefined>>,
-    allEntries: readonly CodexEntry[],
-    options: DistrictReferenceOptions = {}
+    allEntries: readonly CodexEntry[]
 ): CodexDistrictReferenceModel {
     if (!isDistrictEntry(entry)) return EMPTY_DISTRICT_REFERENCE;
 
@@ -387,9 +521,8 @@ export function buildCodexDistrictReferenceModel(
     const publicCodexTechByKey = buildPublicCodexIndex(allEntries, isTechEntry);
     const publicCodexDistrictByKey = buildPublicCodexIndex(allEntries, isDistrictEntry);
     const publicCodexResourceByKey = buildPublicCodexIndex(allEntries, isResourceEntry);
-    const effectLines = getEffectLines(entry);
-    const richDistrictsLoaded = options.richDistrictsLoaded ?? true;
     const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    const effectLines = getReferenceEffectLines(entry, richDistrictByKey, allEntries);
     const familyDisplayName = family?.displayName ?? getDistrictFamilyDisplayName(entry, richDistrictByKey);
 
     return {
@@ -409,8 +542,8 @@ export function buildCodexDistrictReferenceModel(
         upgradesInto: richDistrict
             ? resolveUpgradeInto(richDistrict, publicCodexDistrictByKey, currentEntryKey)
             : [],
-        placementLines: buildPlacementLines(richDistrict, richDistrictsLoaded),
-        recordNotes: buildRecordNotes(entry, richDistrict, effectLines, richDistrictsLoaded),
+        placementLines: getDistrictPlacementLines(richDistrict),
+        recordNotes: buildRecordNotes(entry, richDistrict, effectLines),
     };
 }
 

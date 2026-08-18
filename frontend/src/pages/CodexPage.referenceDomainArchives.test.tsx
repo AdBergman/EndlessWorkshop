@@ -437,7 +437,7 @@ describe("CodexPage reference domain archives", () => {
         expect(farmRow).not.toHaveTextContent("Yields:");
         expect(farmRow).toHaveTextContent("Core");
         expect(farmRow).toHaveTextContent("Food");
-        expect(farmRow).toHaveTextContent("Cost: Production, 10 Resource02");
+        expect(farmRow).toHaveTextContent("Cost: Production + 10 Resource");
         expect(farmRow).toHaveTextContent("Progression: Farm -> Advanced Farm");
         expect(within(farmRow).getAllByRole("img", { name: "FoodColored" }).length).toBeGreaterThan(0);
         expect(farmRow).not.toHaveTextContent("Kind District");
@@ -447,7 +447,7 @@ describe("CodexPage reference domain archives", () => {
             within(districtsOverview).getByRole("button", { name: /extractor/i })
         );
         expect(extractorRow).toHaveTextContent("Extracts:");
-        expect(extractorRow).toHaveTextContent("Placement: Requires: Resource Deposit Luxury 01");
+        expect(extractorRow).toHaveTextContent("Placement: Requires: Luxury resource deposit");
         expect(within(extractorRow).getByRole("button", { name: /open klax in codex/i })).toBeInTheDocument();
 
         expect(within(districtsOverview).getByRole("button", { name: /keep/i })).toBeInTheDocument();
