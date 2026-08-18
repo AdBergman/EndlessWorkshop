@@ -313,7 +313,10 @@ Filtering/completeness:
 
 Improve now:
 
-- FE: define Faction strategy/profile shape before adding more links.
+- FE: `EW-CODEX-FACTIONS-001` recorded the strategy/profile shape decision in
+  `docs/active/codex-faction-strategy-profile-decision.md`. The next slice is a
+  compact Codex detail strategy profile header using exact existing rich faction
+  groups, not a new `/factions` route or uncapped related-link wall.
 - FE: add package relationship diagnostics to prevent giant link walls.
 
 Exporter-needed:
