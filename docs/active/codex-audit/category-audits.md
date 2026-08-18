@@ -59,6 +59,9 @@ Trace:
 - Import path is generic Codex; no rich Action export exists.
 - Frontend mode is `actionArchive`; rows prefer description/effect preview and
   avoid `Action mechanics` in archive rows.
+- Revalidated on 2026-08-18: all 139 raw rows have `Category`, `Action type`,
+  and `Kind` facts, but only 10 have exact `Origin faction` facts and no public
+  purpose/strategic-use fact exists.
 
 Filtering/completeness:
 
@@ -78,6 +81,8 @@ Exporter-needed:
 
 - Explicit owner/faction metadata for faction/empire actions.
 - Public action purpose/category metadata that is less modifier-oriented.
+- Tracked as `DBX-CODEX-ACTIONS-001`; do not infer these values from keys or
+  hidden Modifier relationships.
 
 ## Councilors
 
@@ -265,10 +270,12 @@ coverage.
 Trace:
 
 - Source: `local-imports/codex/ewshop_equipment_codex_export_0.82.json`.
-- 160 rows; all have Type, Slot, Rarity, Tier, Value facts; 152 have Granted
-  abilities; 149 have Effects.
+- 160 rows; all have Type, Slot, Rarity, Tier, and Value facts; 149 have
+  Granted abilities.
 - Generic Codex import; frontend `equipmentArchive` with Type/Rarity filters.
 - No rich Equipment export.
+- Revalidated on 2026-08-18: 149 rows have `Granted abilities` sections in the
+  local export and zero rows export per-item `svgIcon` metadata.
 
 Filtering/completeness:
 
@@ -655,10 +662,11 @@ Exporter-needed:
 
 ## Traits
 
-Scores: UX 7, completeness 6, usefulness 7, trust 6. Confidence: PROVEN.
+Scores: UX 7, completeness 7, usefulness 7, trust 7. Confidence: PROVEN.
 
 Verdict: useful reference/archive hybrid, with public-release filtering and
-ownership/category gaps.
+exact Protectorate ownership links. Major-faction ownership remains an exporter
+question rather than a frontend inference target.
 
 Trace:
 
@@ -667,6 +675,10 @@ Trace:
   unreleased/custom faction traits.
 - Frontend `traitArchive` uses exported `Trait type`.
 - No rich Trait source.
+- Revalidated on 2026-08-18: the export includes 30 exact `Origin faction`
+  facts, all on checked Protectorate examples with `MinorFaction_*` references.
+  Existing Trait rows expose those exact Minor Faction links and suppress
+  duplicate `Protectorate: ...` preview text.
 
 Filtering/completeness:
 
@@ -676,7 +688,9 @@ Filtering/completeness:
 
 Improve now:
 
-- FE: optional review of `Origin faction` row metadata where exported exactly.
+- No immediate implementation. `EW-CODEX-TRAITS-001` closed as completed/no-op:
+  current Trait Type filtering and exact related Minor Faction links already
+  cover the safe exported ownership signal.
 
 Exporter-needed:
 
@@ -732,6 +746,9 @@ Filtering/completeness:
 - No import filter.
 - Existing evidence says `Master` appears as a Victory path value for Supremacy
   and Insights without a matching public `VictoryPath_*` row/reference.
+- Revalidated on 2026-08-18: Supremacy and Insights still have `Victory path`
+  value `Master` with no `referenceKey`, while `victorypaths-codex` still has
+  only `VictoryPath_Enrich` and `VictoryPath_Glorify`.
 
 Improve now:
 

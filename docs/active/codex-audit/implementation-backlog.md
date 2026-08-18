@@ -7,12 +7,12 @@ not a request to implement everything immediately.
 
 1. `EW-CODEX-DISTRICTS-001` - preserve and render constructible placement
    constraints already present in rich exports.
-2. `EW-CODEX-COUNCILORS-001` - verify Councilor completeness with exporter
-   source count before changing UI/data.
-3. `EW-CODEX-FACTIONS-001` - define the next Faction strategy/profile product
-   shape.
-4. `EW-CODEX-REL-001` - add Codex unresolved-reference diagnostics for
+2. `EW-CODEX-REL-001` - add Codex unresolved-reference diagnostics for
    player-facing categories.
+3. `EW-CODEX-COUNCILORS-001` - verify Councilor completeness with exporter
+   source count before changing UI/data.
+4. `EW-CODEX-FACTIONS-001` - define the next Faction strategy/profile product
+   shape.
 5. `EW-CODEX-ACTIONS-001` - improve Action ownership/public-purpose metadata
    once exporter facts exist.
 6. `EW-CODEX-TRAITS-001` - review exact Trait origin/ownership metadata for
@@ -231,12 +231,24 @@ Priority: P2
 Effort: M after exporter data
 Risk: Medium
 Exporter-blocked: yes
+Status: blocked 2026-08-18 pending `DBX-CODEX-ACTIONS-001`
 
 Problem: Action rows are intentionally shallow because ownership and
 player-purpose facts are sparse, while mechanics are modifier-heavy.
 
 Proposed solution: after exporter emits ownership/purpose metadata, add a
 targeted Action row/filter polish slice.
+
+Result: revalidated local source data and confirmed this is still
+exporter-blocked. `ewshop_actions_codex_export_0.82.json` has 139 raw Action
+rows with complete `Category`, `Action type`, and `Kind` facts, but only 10 rows carry an
+exact `Origin faction` fact and no row exposes a public-purpose/strategic-use
+field. Many rows are descriptionless and rely on `Action mechanics` sections
+that link hidden Modifiers. EWShop should keep the current conservative Action
+archive rather than infer ownership or purpose from keys/modifier links.
+
+Verification: `jq` source fact-label/count inspection on the local Action
+Codex export.
 
 Acceptance criteria:
 
@@ -251,12 +263,26 @@ Priority: P2
 Effort: S
 Risk: Low
 Exporter-blocked: maybe
+Status: completed/no-op 2026-08-18
 
 Problem: Traits have useful Type filtering, but major-faction ownership is not
 safe to infer.
 
 Proposed solution: review exact exported `Origin faction`/related facts where
 available; add quiet row/detail metadata only when exact.
+
+Result: revalidated local Trait source and current UI behavior. The export has
+178 raw Trait rows and 30 exact `Origin faction` facts, all on Protectorate
+traits in the checked examples. The existing Trait archive already uses the
+exact `Trait type` rail and exact related references; Protectorate rows expose
+Minor Faction links while suppressing duplicate `Protectorate: ...` preview
+text. No additional row/detail metadata was added because it would duplicate
+the current exact relationship UI, and major-faction ownership still is not
+safe to infer.
+
+Verification: `jq` Trait fact-label/origin inspection plus existing
+`CodexPage.referenceDomainArchives` and `CodexPage.referenceOverviewRows`
+coverage for Trait Type filtering and Minor Faction links.
 
 Acceptance criteria:
 
@@ -271,12 +297,22 @@ Priority: P2
 Effort: M after exporter data
 Risk: Low
 Exporter-blocked: yes
+Status: blocked 2026-08-18 pending `DBX-CODEX-EQUIPMENT-001`
 
 Problem: Equipment lacks explicit item icon metadata and some granted ability
 refs do not resolve.
 
 Proposed solution: request exact icon metadata and public ability target
 coverage, then render item icons using the existing semantic icon path.
+
+Result: revalidated local Equipment source data and confirmed this remains
+exporter-blocked. `ewshop_equipment_codex_export_0.82.json` has 160 rows with
+clean Type/Slot/Rarity/Tier/Value facts and 149 rows with `Granted abilities`
+sections, but zero rows export `svgIcon` metadata. EWShop should not guess item
+icons from filenames or keys.
+
+Verification: `jq` Equipment fact-label, `svgIcon`, and granted-ability section
+inspection on the local Equipment Codex export.
 
 Acceptance criteria:
 
@@ -291,12 +327,21 @@ Priority: P1
 Effort: S after exporter response
 Risk: Medium
 Exporter-blocked: yes
+Status: blocked 2026-08-18 pending `DBX-CODEX-VICTORY-001`
 
 Problem: Victory data is useful but local-only because `Master` appears as a
 path value without matching public path row/reference.
 
 Proposed solution: keep local-only until exporter clarifies `Master`; after
 response, decide whether Victory can become public.
+
+Result: revalidated local Victory data and kept the category local-only. The
+six Victory Conditions include two `Victory path` facts with value `Master`
+and no `referenceKey`; `victorypaths-codex` still has only
+`VictoryPath_Enrich` and `VictoryPath_Glorify`.
+
+Verification: `jq` Victory Condition path fact inspection and Victory Path row
+inspection on local Codex exports.
 
 Acceptance criteria:
 
@@ -312,12 +357,24 @@ Priority: P3
 Effort: L
 Risk: High
 Exporter-blocked: yes
+Status: deferred/exporter-blocked 2026-08-18 pending product decision and
+`DBX-CODEX-QUESTS-001`
 
 Problem: current Quest Codex rows are not safe for top-level encyclopedia
 grouping, and Quest Explorer is route-owned.
 
 Proposed solution: only if product wants Quests back in top-level Codex, request
 source-truth questline encyclopedia records from exporter.
+
+Result: revalidated local Quest data and deferred implementation. The Codex
+Quest export still has 300 branch/step-style rows, many duplicate display names
+such as `A Bitter Truth` appearing 18 times and `A Fresh Lead` appearing 10
+times. The dedicated `/quests` route remains the route-owned Quest Explorer, so
+top-level Codex grouping should wait for explicit Questline projection records
+and product direction.
+
+Verification: `jq` Quest row count, duplicate display-name, and fact-label
+inspection on the local Quest Codex export.
 
 Acceptance criteria:
 

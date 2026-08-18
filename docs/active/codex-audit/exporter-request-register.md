@@ -88,6 +88,56 @@ keeping Modifiers out of top-level navigation.
 Validation expectation: representative action/trait/diplomacy modifiers import
 with exact source metadata or an explicit non-public/unknown source caveat.
 
+## DBX-CODEX-ACTIONS-001 - Emit Action Ownership and Public Purpose Metadata
+
+Affected categories: Actions
+Priority: P2
+Blocking EWShop stories: `EW-CODEX-ACTIONS-001`
+Exporter-blocked: yes
+
+Player-facing need: Action archive rows should explain who can use an action and
+why a player should care about it, without elevating hidden Modifier mechanics
+or inferring ownership from implementation keys.
+
+Evidence information is not already available:
+
+- `ewshop_actions_codex_export_0.82.json` has 139 raw Action rows.
+- All 139 rows have `Category`, `Action type`, and `Kind` facts.
+- Only 10 rows have exact `Origin faction` facts.
+- No public-purpose or strategic-use fact is present in the local Action Codex
+  export.
+- Many rows have no public description and rely on `Action mechanics` sections
+  that link hidden Modifiers.
+
+Existing related fields/keys:
+
+- `Category`, `Action type`, `Kind`, and sparse `Origin faction` facts.
+- `Action mechanics` section items and `referenceKeys`, often pointing to
+  hidden Modifier rows.
+
+Requested shape:
+
+- For each public action where source-truth information exists, emit:
+  - `ownerKind`
+  - `ownerKey`
+  - `ownerDisplayName`
+  - `ownerReferenceKey` when it resolves to a public Codex entry
+  - `publicPurpose` or equivalent concise player-facing strategic role
+  - optional `availabilityContext` for shared/faction/empire/army contexts
+  - optional explicit unknown/non-public caveat when ownership or purpose is
+    intentionally absent
+
+Why EWShop cannot derive it: Action key prefixes, display names, categories,
+and hidden Modifier relationships are not a stable public ownership or
+player-purpose model.
+
+Intended EWShop use: add safe Action row/filter polish while keeping hidden
+Modifier mechanics secondary.
+
+Validation expectation: representative faction, empire, army, constructible,
+and terraforming actions import with exact owner/purpose metadata or explicit
+unknown/non-public caveats.
+
 ## DBX-CODEX-ABILITIES-001 - Clean Ability Role and Ownership Metadata
 
 Affected categories: Abilities, Units, Heroes, Equipment, Statuses
