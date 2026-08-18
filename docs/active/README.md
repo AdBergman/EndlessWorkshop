@@ -95,6 +95,14 @@ index, then select the smallest relevant doc set for the task type.
     Codex experience is weakest.
   - Status: active product experience review.
 
+- `docs/active/codex-audit/README.md`
+  - Purpose: comprehensive 2026-08-18 Codex category inventory, quality audit,
+    remediation backlog, and exporter request register.
+  - Read when: planning Codex remediation, checking category provenance,
+    distinguishing FE/BE/pipeline/exporter ownership, or validating whether a
+    suspected gap was already audited.
+  - Status: active remediation program.
+
 - `docs/active/codex-premium-ui-ticket-plan.md`
   - Purpose: historical/current ticket framing for Codex premium UI slices.
   - Read when: checking how earlier Codex UI tickets were intended or closed.
