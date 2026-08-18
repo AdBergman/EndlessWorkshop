@@ -19,6 +19,11 @@ import {
     hasCodexConstructibleRichEnrichment,
 } from "@/lib/codex/codexConstructibleRichEnrichment";
 import {
+    buildCodexDistrictReferenceModel,
+    getCodexDistrictReferenceEntryKeys,
+    hasCodexDistrictReferenceModel,
+} from "@/lib/codex/codexDistrictReference";
+import {
     buildCodexHeroRichEnrichment,
     getCodexHeroRichEnrichmentEntryKeys,
     hasCodexHeroRichEnrichment,
@@ -46,6 +51,7 @@ import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
 import type { CodexEntry } from "@/types/dataTypes";
 import CodexConstructiblePlanningSection from "./CodexConstructiblePlanningSection";
+import CodexDistrictReferenceSection from "./CodexDistrictReferenceSection";
 import CodexFactionDetail from "./CodexFactionDetail";
 import CodexFactionPackage from "./CodexFactionPackage";
 import CodexHeroProfileSection from "./CodexHeroProfileSection";
@@ -137,6 +143,26 @@ export default function CodexEntryDetail({
             : { profileLines: [], unlockedBy: [], upgradesInto: [], placementLines: [] },
         [allEntries, entry, richDistrictByKey, richImprovementByKey]
     );
+    const districtReferenceModel = useMemo(
+        () => entry
+            ? buildCodexDistrictReferenceModel(
+                    entry,
+                    richDistrictByKey,
+                    allEntries,
+                    { richDistrictsLoaded: districtStoreLoaded }
+                )
+            : {
+                    profileItems: [],
+                    effectLines: [],
+                    extractedResources: [],
+                    unlockedBy: [],
+                    upgradesFrom: [],
+                    upgradesInto: [],
+                    placementLines: [],
+                    recordNotes: [],
+                },
+        [allEntries, districtStoreLoaded, entry, richDistrictByKey]
+    );
     const isFactionEntry = normalizedExportKind === "factions";
     const isMinorFactionEntry = normalizedExportKind === "minorfactions";
     const isFactionLikeEntry = isFactionEntry || isMinorFactionEntry;
@@ -204,12 +230,15 @@ export default function CodexEntryDetail({
     const kindLabel = formatCodexKindLabel(entry.exportKind);
     const displayedGrantedAbilityKeys = getDisplayedGrantedAbilityKeys(entry, relatedEntries);
     const displayedThresholdTargetKeys = getDisplayedPopulationThresholdTargetKeys(entry, relatedEntries);
+    const showDistrictReference = isDistrictEntry && hasCodexDistrictReferenceModel(districtReferenceModel);
     const hiddenRelatedEntryKeys = new Set([
         ...displayedGrantedAbilityKeys,
         ...displayedThresholdTargetKeys,
         ...richFactionPackageEntryKeys,
         ...getCodexHeroRichEnrichmentEntryKeys(heroRichEnrichment),
-        ...getCodexConstructibleRichEnrichmentEntryKeys(constructibleRichEnrichment),
+        ...(isDistrictEntry
+            ? getCodexDistrictReferenceEntryKeys(districtReferenceModel)
+            : getCodexConstructibleRichEnrichmentEntryKeys(constructibleRichEnrichment)),
     ]);
     const relatedEntriesForDisplay = hiddenRelatedEntryKeys.size > 0
         ? relatedEntries.filter((relatedEntry) => (
@@ -224,7 +253,7 @@ export default function CodexEntryDetail({
     const showHeroRichEnrichment = isHeroEntry && hasCodexHeroRichEnrichment(heroRichEnrichment);
     const heroStatGroups = isHeroEntry ? getCodexHeroStatGroups(entry) : [];
     const showHeroProfile = isHeroEntry && (showHeroRichEnrichment || heroStatGroups.length > 0);
-    const showConstructibleRichEnrichment = (isDistrictEntry || isImprovementEntry) &&
+    const showConstructibleRichEnrichment = isImprovementEntry &&
         hasCodexConstructibleRichEnrichment(constructibleRichEnrichment);
 
     return (
@@ -252,7 +281,7 @@ export default function CodexEntryDetail({
                     packageGroups={factionPackageGroups}
                     onSelectEntry={onSelectRelated}
                 />
-            ) : showHeroRichEnrichment ? null : (
+            ) : showHeroRichEnrichment || showDistrictReference ? null : (
                 <CodexStructuredDetail
                     entry={entry}
                     allEntries={allEntries}
@@ -260,6 +289,13 @@ export default function CodexEntryDetail({
                     onSelectInlineEntry={onSelectRelated}
                 />
             )}
+
+            {showDistrictReference ? (
+                <CodexDistrictReferenceSection
+                    model={districtReferenceModel}
+                    onSelect={onSelectRelated}
+                />
+            ) : null}
 
             {isMinorFactionEntry ? (
                 <CodexFactionPackage groups={factionPackageGroups} onSelectEntry={onSelectRelated} />

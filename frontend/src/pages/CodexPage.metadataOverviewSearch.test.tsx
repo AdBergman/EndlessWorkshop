@@ -354,7 +354,7 @@ describe("CodexPage metadata overview and search rendering", () => {
 
 
 
-    it("keeps non-faction detail entries on the generic description renderer", async () => {
+    it("keeps District detail entries out of faction dossier rendering", async () => {
         render(
             <MemoryRouter initialEntries={["/codex?entry=District_MarketSquare"]}>
                 <Routes>
@@ -364,7 +364,8 @@ describe("CodexPage metadata overview and search rendering", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        expect(within(detailPane).getByText("Description")).toBeInTheDocument();
+        expect(within(detailPane).getByText("District Reference")).toBeInTheDocument();
+        expect(within(detailPane).getByText("Strategic effects")).toBeInTheDocument();
         expect(within(detailPane).getByText("Centralized trade district.")).toBeInTheDocument();
         expect(within(detailPane).queryByText("Faction dossier")).not.toBeInTheDocument();
     });

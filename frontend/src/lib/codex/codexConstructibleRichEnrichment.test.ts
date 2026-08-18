@@ -36,7 +36,7 @@ const richImprovement = (overrides: Partial<Improvement>): Improvement => ({
 });
 
 describe("buildCodexConstructibleRichEnrichment", () => {
-    it("resolves district unlock tech and upgrade links from exact public Codex entries", () => {
+    it("resolves district unlock tech and upgrade links from exact public Codex entries for legacy callers", () => {
         const currentEntry = codexEntry({
             exportKind: "districts",
             entryKey: "District_Current",

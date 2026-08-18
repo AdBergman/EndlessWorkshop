@@ -136,12 +136,18 @@ describe("CodexPage rich planning enrichment", () => {
                 entryKey: "District_Current",
                 displayName: "Canal District",
                 descriptionLines: [],
-                referenceKeys: ["Tech_Irrigation", "District_GrandCanal", "Tech_RelatedOnly"],
+                referenceKeys: ["Tech_Irrigation", "District_OldCanal", "District_GrandCanal", "Resource_Pearls", "Tech_RelatedOnly"],
                 facts: [
                     { label: "Category", value: "Food" },
                     { label: "Tier", value: "1" },
                 ],
-                sections: [{ title: "Effects", lines: ["+10 [FoodColored] Food"] }],
+                sections: [
+                    { title: "Effects", lines: ["+10 [FoodColored] Food"] },
+                    {
+                        title: "Extracted resource",
+                        items: [{ label: "Pearls", referenceKey: "Resource_Pearls" }],
+                    },
+                ],
             },
             {
                 exportKind: "tech",
@@ -152,9 +158,23 @@ describe("CodexPage rich planning enrichment", () => {
             },
             {
                 exportKind: "districts",
+                entryKey: "District_OldCanal",
+                displayName: "Old Canal",
+                descriptionLines: ["A smaller canal district."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "districts",
                 entryKey: "District_GrandCanal",
                 displayName: "Grand Canal",
                 descriptionLines: ["A larger canal district."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "resources",
+                entryKey: "Resource_Pearls",
+                displayName: "Pearls",
+                descriptionLines: ["Luxury resource."],
                 referenceKeys: [],
             },
             {
@@ -169,7 +189,17 @@ describe("CodexPage rich planning enrichment", () => {
         seedCodexEntries(entries);
         seedRichDistricts([
             richDistrict({
+                districtKey: "District_OldCanal",
+                levelUp: {
+                    targetDistrictKey: "District_Current",
+                    requiredAdjacentDistrictCount: 2,
+                },
+            }),
+            richDistrict({
                 districtKey: "District_Current",
+                constructibleLevel: 2,
+                constructionCost: ["120 Industry"],
+                isFactionSpecific: true,
                 unlockTechnologyKeys: ["Tech_Irrigation", "Tech_Missing"],
                 levelUp: {
                     targetDistrictKey: "District_GrandCanal",
@@ -216,29 +246,49 @@ describe("CodexPage rich planning enrichment", () => {
 
         expect(await screen.findByRole("heading", { name: "Canal District" })).toBeInTheDocument();
 
-        const planningSection = screen.getByRole("region", { name: "Planning" });
-        expect(within(planningSection).getByText("Unlocked by")).toBeInTheDocument();
-        expect(within(planningSection).getByText("Upgrades into")).toBeInTheDocument();
-        expect(within(planningSection).getByText("Placement")).toBeInTheDocument();
-        const techLink = within(planningSection).getByRole("button", {
+        const referenceSection = screen.getByRole("region", { name: "District Reference" });
+        expect(within(referenceSection).getByText("Strategic profile")).toBeInTheDocument();
+        expect(referenceSection).toHaveTextContent("Food");
+        expect(referenceSection).toHaveTextContent("Tier 1");
+        expect(referenceSection).toHaveTextContent("Constructible level 2");
+        expect(referenceSection).toHaveTextContent("Faction-specific");
+        expect(referenceSection).toHaveTextContent("Cost: 120 Industry");
+        expect(within(referenceSection).getByText("Strategic effects")).toBeInTheDocument();
+        expect(referenceSection).toHaveTextContent("+10 Food");
+        expect(within(referenceSection).getByText("Extracts")).toBeInTheDocument();
+        expect(within(referenceSection).getByRole("button", {
+            name: "Open Pearls in Codex",
+        })).toHaveTextContent("Pearls");
+        expect(within(referenceSection).getByText("Unlocked by")).toBeInTheDocument();
+        expect(within(referenceSection).getByText("Upgrades from")).toBeInTheDocument();
+        expect(within(referenceSection).getByText("Upgrades into")).toBeInTheDocument();
+        expect(within(referenceSection).getByText("Known placement")).toBeInTheDocument();
+        const techLink = within(referenceSection).getByRole("button", {
             name: "Open Irrigation in Codex",
         });
         expect(techLink).toHaveTextContent("Irrigation");
-        expect(within(planningSection).getByRole("button", {
+        expect(within(referenceSection).getByRole("button", {
+            name: "Open Old Canal in Codex",
+        })).toHaveTextContent("Old Canal");
+        expect(within(referenceSection).getByRole("button", {
             name: "Open Grand Canal in Codex",
         })).toHaveTextContent("Grand Canal");
-        expect(planningSection).toHaveTextContent("4 adjacent districts");
-        expect(planningSection).toHaveTextContent("Adjacent tile in same region");
-        expect(planningSection).toHaveTextContent("Forbidden terrain: Ocean, Lake");
-        expect(planningSection).toHaveTextContent("Cannot build on wasteland");
-        expect(planningSection).toHaveTextContent("Cannot build on mud");
-        expect(planningSection).toHaveTextContent("No river");
-        expect(planningSection).toHaveTextContent("No resource deposit");
-        expect(planningSection).not.toHaveTextContent("Tech_Missing");
+        expect(referenceSection).toHaveTextContent("2 adjacent districts");
+        expect(referenceSection).toHaveTextContent("4 adjacent districts");
+        expect(referenceSection).toHaveTextContent("Adjacent tile in same region");
+        expect(referenceSection).toHaveTextContent("Cliffs ignored for adjacency");
+        expect(referenceSection).toHaveTextContent("Forbidden terrain: Ocean, Lake");
+        expect(referenceSection).toHaveTextContent("Cannot build on wasteland");
+        expect(referenceSection).toHaveTextContent("Cannot build on mud");
+        expect(referenceSection).toHaveTextContent("No river");
+        expect(referenceSection).toHaveTextContent("No resource deposit");
+        expect(referenceSection).not.toHaveTextContent("Tech_Missing");
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });
         expect(within(relatedSection).queryByRole("button", { name: /irrigation/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /old canal/i })).not.toBeInTheDocument();
         expect(within(relatedSection).queryByRole("button", { name: /grand canal/i })).not.toBeInTheDocument();
+        expect(within(relatedSection).queryByRole("button", { name: /pearls/i })).not.toBeInTheDocument();
         expect(within(relatedSection).getByRole("button", { name: /related only/i })).toBeInTheDocument();
 
         techLink.focus();

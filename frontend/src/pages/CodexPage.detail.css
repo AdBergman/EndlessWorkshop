@@ -90,7 +90,8 @@
 
 .codex-techPrerequisites__groups,
 .codex-unitProfile__groups,
-.codex-constructiblePlanning__groups {
+.codex-constructiblePlanning__groups,
+.codex-districtReference__groups {
     display: grid;
     gap: 12px;
     margin-top: 14px;
@@ -106,7 +107,8 @@
 
 .codex-techPrerequisites__group,
 .codex-unitProfile__group,
-.codex-constructiblePlanning__group {
+.codex-constructiblePlanning__group,
+.codex-districtReference__group {
     display: grid;
     grid-template-columns: minmax(140px, max-content) minmax(0, 1fr);
     align-items: baseline;
@@ -126,7 +128,8 @@
 .codex-techPrerequisites__label,
 .codex-unitProfile__label,
 .codex-heroProfile__label,
-.codex-constructiblePlanning__label {
+.codex-constructiblePlanning__label,
+.codex-districtReference__label {
     color: var(--codex-gold-bright);
     font-size: 11px;
     font-weight: 700;
@@ -138,7 +141,9 @@
 .codex-techPrerequisites__links,
 .codex-unitProfile__links,
 .codex-heroProfile__value,
-.codex-constructiblePlanning__value {
+.codex-constructiblePlanning__value,
+.codex-districtReference__value,
+.codex-districtReference__lines {
     min-width: 0;
     color: rgba(241, 234, 220, 0.86);
     font-size: 15px;
@@ -149,22 +154,41 @@
 .codex-unitProfile__linkWrap,
 .codex-heroProfile__inlineItem,
 .codex-constructiblePlanning__linkWrap,
-.codex-constructiblePlanning__inlineItem {
+.codex-constructiblePlanning__inlineItem,
+.codex-districtReference__linkWrap,
+.codex-districtReference__inlineItem {
     display: inline;
 }
 
 .codex-techPrerequisites__separator,
 .codex-unitProfile__separator,
 .codex-heroProfile__separator,
-.codex-constructiblePlanning__separator {
+.codex-constructiblePlanning__separator,
+.codex-districtReference__separator {
     margin: 0 8px;
     color: rgba(195, 152, 77, 0.72);
 }
 
-.codex-constructiblePlanning__note {
+.codex-constructiblePlanning__note,
+.codex-districtReference__note {
     margin-left: 7px;
     color: var(--codex-ink-muted);
     font-size: 12px;
+}
+
+.codex-districtReference__group--effects {
+    align-items: start;
+}
+
+.codex-districtReference__lines {
+    display: grid;
+    gap: 8px;
+}
+
+.codex-districtReference__lines .codex-detail__line {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
 }
 
 .codex-heroProfile__inlineList {
