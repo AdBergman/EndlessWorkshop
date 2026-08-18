@@ -162,7 +162,7 @@ export default function CodexEntryDetail({
                     placementLines: [],
                     recordNotes: [],
                 },
-        [allEntries, districtStoreLoaded, entry, richDistrictByKey]
+        [allEntries, entry, richDistrictByKey]
     );
     const isFactionEntry = normalizedExportKind === "factions";
     const isMinorFactionEntry = normalizedExportKind === "minorfactions";
