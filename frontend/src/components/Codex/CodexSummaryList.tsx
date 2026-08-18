@@ -27,6 +27,7 @@ import {
 } from "@/lib/codex/codexStructuredDescription";
 import { resolveRelatedEntries, type CodexReferenceIndexes } from "@/lib/codex/codexRefs";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
+import { isDistrictArchiveEntry } from "@/lib/codex/codexDistrictArchiveFilters";
 import type { CodexEntry, District } from "@/types/dataTypes";
 import CodexAbilityEffectLine from "./CodexAbilityEffectLine";
 import CodexInlineEntityLink from "./CodexInlineEntityLink";
@@ -54,6 +55,7 @@ import {
     getDiplomacyArchivePreview,
     getDiplomacyArchiveSignalLines,
     getDistrictArchiveEffectPreviewLines,
+    getDistrictArchiveDisplayName,
     getDistrictArchiveMetadata,
     getDistrictArchivePlanningLines,
     getDistrictExtractedResourceLinks,
@@ -129,7 +131,7 @@ export default function CodexSummaryList({
                         const useStatusArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "statuses";
                         const useEquipmentArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "equipment";
                         const useImprovementArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "improvements";
-                        const useDistrictArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "districts";
+                        const useDistrictArchiveRowHierarchy = isDistrictArchiveEntry(entry);
                         const useDiplomacyArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "diplomatictreaties";
                         const useHeroArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "heroes";
                         const usePopulationArchiveRowHierarchy = entry.exportKind.trim().toLowerCase() === "populations";
@@ -150,7 +152,7 @@ export default function CodexSummaryList({
                         const heroClassMetadata = useHeroArchiveRowHierarchy ? getHeroClassMetadata(entry) : [];
                         const improvementArchiveMetadata = useImprovementArchiveRowHierarchy ? getImprovementArchiveMetadata(entry) : [];
                         const districtArchiveMetadata = useDistrictArchiveRowHierarchy
-                            ? getDistrictArchiveMetadata(entry, richDistrictByKey)
+                            ? getDistrictArchiveMetadata(entry, richDistrictByKey, allEntries)
                             : [];
                         const populationFactionIdentity = usePopulationArchiveRowHierarchy
                             ? getPopulationArchiveFactionIdentity(entry, referenceIndexes)
@@ -250,7 +252,7 @@ export default function CodexSummaryList({
                             ? getImprovementArchiveEffectPreviewLines(entry)
                             : [];
                         const districtEffectPreviewLines = useDistrictArchiveRowHierarchy
-                            ? getDistrictArchiveEffectPreviewLines(entry)
+                            ? getDistrictArchiveEffectPreviewLines(entry, allEntries, richDistrictByKey)
                             : [];
                         const districtExtractedResourceLinks = useDistrictArchiveRowHierarchy
                             ? getDistrictExtractedResourceLinks(entry, referenceIndexes)
@@ -717,6 +719,12 @@ export default function CodexSummaryList({
                         }
 
                         if (useDistrictArchiveRowHierarchy) {
+                            const districtArchiveDisplayName = getDistrictArchiveDisplayName(
+                                entry,
+                                allEntries,
+                                richDistrictByKey
+                            );
+
                             return (
                                 <div
                                     key={entry.entryKey}
@@ -730,7 +738,7 @@ export default function CodexSummaryList({
                                         <span className="codex-summaryList__titleLine">
                                             <span className="codex-summaryList__titleIdentity">
                                                 <span className="codex-summaryList__name">
-                                                    {renderCodexLabel(getCodexEntryLabel(entry))}
+                                                    {renderCodexLabel(districtArchiveDisplayName)}
                                                 </span>
                                             </span>
                                             {districtArchiveMetadata.length > 0 ? (
@@ -763,11 +771,7 @@ export default function CodexSummaryList({
                                                         {renderDescriptionLine(formatCodexMajorFactionText(line))}
                                                     </span>
                                                 ))
-                                            ) : (
-                                                <span className="codex-summaryList__statusFallback">
-                                                    No public district effects exported yet.
-                                                </span>
-                                            )}
+                                            ) : null}
                                         </span>
 
                                         {districtArchivePlanningLines.length > 0 ? (

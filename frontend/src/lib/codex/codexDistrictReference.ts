@@ -2,7 +2,10 @@ import { getCodexFactValues } from "@/lib/codex/codexFactValues";
 import { getCodexEntryLabel } from "@/lib/codex/codexPresentation";
 import { parseCodexStructuredDescription } from "@/lib/codex/codexStructuredDescription";
 import {
+    findDistrictArchiveFamilyForEntry,
     getDistrictCategoryDisplayLabel,
+    getDistrictFamilyDisplayName,
+    isDistrictArchiveEntry,
 } from "@/lib/codex/codexDistrictArchiveFilters";
 import type { CodexEntry, District } from "@/types/dataTypes";
 
@@ -17,6 +20,7 @@ export type CodexDistrictReferenceModel = {
     effectLines: string[];
     extractedResources: CodexDistrictReferenceLink[];
     unlockedBy: CodexDistrictReferenceLink[];
+    progression: CodexDistrictReferenceLink[];
     upgradesFrom: CodexDistrictReferenceLink[];
     upgradesInto: CodexDistrictReferenceLink[];
     placementLines: string[];
@@ -32,6 +36,7 @@ const EMPTY_DISTRICT_REFERENCE: CodexDistrictReferenceModel = {
     effectLines: [],
     extractedResources: [],
     unlockedBy: [],
+    progression: [],
     upgradesFrom: [],
     upgradesInto: [],
     placementLines: [],
@@ -47,7 +52,7 @@ function normalizedExportKind(entry: CodexEntry): string {
 }
 
 function isDistrictEntry(entry: CodexEntry): boolean {
-    return normalizedExportKind(entry) === "districts";
+    return isDistrictArchiveEntry(entry);
 }
 
 function isResourceEntry(entry: CodexEntry): boolean {
@@ -139,6 +144,64 @@ function resolveUpgradeFrom(
     }
 
     return links;
+}
+
+function resolveFamilyProgression(
+    entry: CodexEntry,
+    richDistrictByKey: Readonly<Record<string, District | undefined>>,
+    allEntries: readonly CodexEntry[]
+): CodexDistrictReferenceLink[] {
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    if (!family || family.entries.length <= 1) return [];
+
+    if (family.isResourceExtractorFamily) {
+        return getGenericExtractorProgressionLinks(family.entries);
+    }
+
+    const links: CodexDistrictReferenceLink[] = [];
+    const seenLabels = new Set<string>();
+
+    for (const familyEntry of family.entries) {
+        const label = getCodexEntryLabel(familyEntry);
+        const normalizedLabel = label.trim().toLowerCase();
+        if (!normalizedLabel || seenLabels.has(normalizedLabel)) continue;
+
+        seenLabels.add(normalizedLabel);
+        const richDistrict = richDistrictByKey[familyEntry.entryKey.trim()];
+        links.push({
+            entry: familyEntry,
+            label,
+            note: richDistrict?.levelUp?.targetDistrictKey
+                ? formatUpgradeRequirementNote(richDistrict.levelUp.requiredAdjacentDistrictCount)
+                : undefined,
+        });
+    }
+
+    return links.length > 1 ? links : [];
+}
+
+function getGenericExtractorProgressionLinks(entries: readonly CodexEntry[]): CodexDistrictReferenceLink[] {
+    const entryByLabel = new Map<string, CodexEntry>();
+    for (const entry of entries) {
+        const label = getGenericExtractorProgressionLabel(entry);
+        if (!entryByLabel.has(label)) {
+            entryByLabel.set(label, entry);
+        }
+    }
+
+    return ["Extractor", "Advanced Extractor", "Grand Extractor"]
+        .map((label) => {
+            const entry = entryByLabel.get(label);
+            return entry ? { entry, label } : null;
+        })
+        .filter((link): link is CodexDistrictReferenceLink => link !== null);
+}
+
+function getGenericExtractorProgressionLabel(entry: CodexEntry): string {
+    const label = getCodexEntryLabel(entry);
+    if (/^Grand\b/i.test(label)) return "Grand Extractor";
+    if (/^Advanced\b/i.test(label)) return "Advanced Extractor";
+    return "Extractor";
 }
 
 function formatUpgradeRequirementNote(requiredAdjacentDistrictCount: number | null | undefined): string | undefined {
@@ -326,9 +389,14 @@ export function buildCodexDistrictReferenceModel(
     const publicCodexResourceByKey = buildPublicCodexIndex(allEntries, isResourceEntry);
     const effectLines = getEffectLines(entry);
     const richDistrictsLoaded = options.richDistrictsLoaded ?? true;
+    const family = findDistrictArchiveFamilyForEntry(entry, allEntries, richDistrictByKey);
+    const familyDisplayName = family?.displayName ?? getDistrictFamilyDisplayName(entry, richDistrictByKey);
 
     return {
-        profileItems: buildProfileItems(entry, richDistrict),
+        profileItems: [
+            familyDisplayName && familyDisplayName !== getCodexEntryLabel(entry) ? `Family: ${familyDisplayName}` : "",
+            ...buildProfileItems(entry, richDistrict),
+        ].filter((value): value is string => Boolean(value)),
         effectLines,
         extractedResources: getExtractedResourceLinks(entry, publicCodexResourceByKey),
         unlockedBy: resolveLinks(
@@ -336,6 +404,7 @@ export function buildCodexDistrictReferenceModel(
             publicCodexTechByKey,
             currentEntryKey
         ),
+        progression: resolveFamilyProgression(entry, richDistrictByKey, allEntries),
         upgradesFrom: resolveUpgradeFrom(richDistrictByKey, publicCodexDistrictByKey, currentEntryKey),
         upgradesInto: richDistrict
             ? resolveUpgradeInto(richDistrict, publicCodexDistrictByKey, currentEntryKey)
@@ -350,6 +419,7 @@ export function hasCodexDistrictReferenceModel(model: CodexDistrictReferenceMode
         model.effectLines.length > 0 ||
         model.extractedResources.length > 0 ||
         model.unlockedBy.length > 0 ||
+        model.progression.length > 0 ||
         model.upgradesFrom.length > 0 ||
         model.upgradesInto.length > 0 ||
         model.placementLines.length > 0 ||
@@ -360,6 +430,7 @@ export function getCodexDistrictReferenceEntryKeys(model: CodexDistrictReference
     return [
         ...model.extractedResources,
         ...model.unlockedBy,
+        ...model.progression,
         ...model.upgradesFrom,
         ...model.upgradesInto,
     ].map((link) => link.entry.entryKey);

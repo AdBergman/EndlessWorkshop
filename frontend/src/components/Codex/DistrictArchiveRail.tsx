@@ -17,11 +17,7 @@ export default function DistrictArchiveRail({
     onClearFilters,
     onToggleFilter,
 }: Props) {
-    const hasActiveFilters = Boolean(activeFilters.type) ||
-        Boolean(activeFilters.focus) ||
-        Boolean(activeFilters.placement) ||
-        Boolean(activeFilters.faction) ||
-        Boolean(activeFilters.tier);
+    const hasActiveFilters = Boolean(activeFilters.family);
 
     return (
         <div className="codex-resultsFilters" aria-label="District filters">

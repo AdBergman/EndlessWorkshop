@@ -18,6 +18,7 @@ import {
     entryMatchesQuery,
     filterCodexEntries,
     getAutocompleteEntries,
+    sortCodexEntries,
 } from "@/lib/codex/codexSearch";
 import {
     buildActionTypeFilterOptions,
@@ -33,6 +34,8 @@ import {
     buildDistrictArchiveFilterGroups,
     DEFAULT_DISTRICT_ARCHIVE_FILTERS,
     filterDistrictEntriesByArchiveFilters,
+    hasActiveDistrictArchiveFilters,
+    isDistrictArchiveEntry,
     type ActiveDistrictArchiveFilters,
     type DistrictArchiveFilterKey,
 } from "@/lib/codex/codexDistrictArchiveFilters";
@@ -292,10 +295,6 @@ export default function CodexPage() {
         ];
     }, [categorySummaries, entries, includeLocalOnlyCategories]);
 
-    const searchFilteredEntries = useMemo(
-        () => filterCodexEntries(entries, { query: deferredQuery, kind: activeKind }),
-        [entries, deferredQuery, activeKind]
-    );
     const categoryMode = getCodexCategoryMode(activeKind);
     const isActionArchiveMode = categoryMode === "actionArchive";
     const isAbilityCatalogMode = categoryMode === "abilityArchive";
@@ -310,6 +309,26 @@ export default function CodexPage() {
     const isTechArchiveMode = categoryMode === "techArchive";
     const isTraitArchiveMode = categoryMode === "traitArchive";
     const isUnitArchiveMode = categoryMode === "unitArchive";
+    const districtArchiveEntries = useMemo(
+        () => sortCodexEntries(entries.filter(isDistrictArchiveEntry)),
+        [entries]
+    );
+    const searchFilteredEntries = useMemo(
+        () => (
+            isDistrictArchiveMode
+                ? districtArchiveEntries.filter((entry) => entryMatchesQuery(entry, deferredQuery))
+                : filterCodexEntries(entries, { query: deferredQuery, kind: activeKind })
+        ),
+        [activeKind, deferredQuery, districtArchiveEntries, entries, isDistrictArchiveMode]
+    );
+    const activeKindEntries = useMemo(
+        () => (
+            isDistrictArchiveMode
+                ? districtArchiveEntries
+                : filterCodexEntries(entries, { kind: activeKind })
+        ),
+        [activeKind, districtArchiveEntries, entries, isDistrictArchiveMode]
+    );
 
     const factFilterConfig = useMemo(
         () => getAbilityArchiveFactFilterConfig(activeKind),
@@ -350,11 +369,7 @@ export default function CodexPage() {
         if (isDistrictArchiveMode) return;
 
         setActiveDistrictFilters((current) => (
-            current.type ||
-            current.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier ||
-            current.focus ||
-            current.placement ||
-            current.faction
+            hasActiveDistrictArchiveFilters(current)
                 ? DEFAULT_DISTRICT_ARCHIVE_FILTERS
                 : current
         ));
@@ -369,10 +384,15 @@ export default function CodexPage() {
     const districtFilterGroups = useMemo(
         () => (
             isDistrictArchiveMode
-                ? buildDistrictArchiveFilterGroups(searchFilteredEntries, activeDistrictFilters, richDistrictByKey)
+                ? buildDistrictArchiveFilterGroups(
+                    searchFilteredEntries,
+                    activeDistrictFilters,
+                    richDistrictByKey,
+                    activeKindEntries
+                )
                 : []
         ),
-        [activeDistrictFilters, isDistrictArchiveMode, richDistrictByKey, searchFilteredEntries]
+        [activeDistrictFilters, activeKindEntries, isDistrictArchiveMode, richDistrictByKey, searchFilteredEntries]
     );
 
     const factFilterOptions = useMemo(
@@ -554,7 +574,8 @@ export default function CodexPage() {
                     searchFilteredEntries,
                     activeDistrictFilters,
                     selectedEntryParam,
-                    richDistrictByKey
+                    richDistrictByKey,
+                    activeKindEntries
                 );
             }
 
@@ -632,6 +653,7 @@ export default function CodexPage() {
         },
         [
             activeActionType,
+            activeKindEntries,
             activeDiplomacyCategory,
             activeDistrictFilters,
             activeEquipmentFilters,
@@ -666,8 +688,12 @@ export default function CodexPage() {
     );
 
     const autocompleteEntries = useMemo(
-        () => getAutocompleteEntries(entries, { query, kind: activeKind, limit: 7 }),
-        [entries, query, activeKind]
+        () => (
+            isDistrictArchiveMode
+                ? filterCodexEntries(districtArchiveEntries, { query }).slice(0, 7)
+                : getAutocompleteEntries(entries, { query, kind: activeKind, limit: 7 })
+        ),
+        [activeKind, districtArchiveEntries, entries, isDistrictArchiveMode, query]
     );
 
     const activeKindLabel = useMemo(
@@ -680,13 +706,8 @@ export default function CodexPage() {
     );
     const hasDeferredQuery = deferredQuery.trim().length > 0;
     const hasActiveFactFilters = Object.keys(activeFactFilters).length > 0;
-    const hasActiveDistrictArchiveFilters = isDistrictArchiveMode && (
-        Boolean(activeDistrictFilters.type) ||
-        activeDistrictFilters.tier !== DEFAULT_DISTRICT_ARCHIVE_FILTERS.tier ||
-        Boolean(activeDistrictFilters.focus) ||
-        Boolean(activeDistrictFilters.placement) ||
-        Boolean(activeDistrictFilters.faction)
-    );
+    const hasActiveDistrictFilters = isDistrictArchiveMode &&
+        hasActiveDistrictArchiveFilters(activeDistrictFilters);
     const activeFactFilterItems = useMemo(
         () => getActiveAbilityArchiveFilterItems(activeFactFilters, factFilterConfig),
         [activeFactFilters, factFilterConfig]
@@ -996,38 +1017,14 @@ export default function CodexPage() {
 
     const toggleDistrictFilter = useCallback((filterKey: DistrictArchiveFilterKey, value: string) => {
         setActiveDistrictFilters((current) => {
-            if (filterKey === "tier") {
+            if (filterKey === "family") {
                 return {
                     ...current,
-                    tier: current.tier === value ? "" : value,
+                    family: current.family === value ? null : value as ActiveDistrictArchiveFilters["family"],
                 };
             }
 
-            if (filterKey === "type") {
-                return {
-                    ...current,
-                    type: current.type === value ? null : value as ActiveDistrictArchiveFilters["type"],
-                };
-            }
-
-            if (filterKey === "focus") {
-                return {
-                    ...current,
-                    focus: current.focus === value ? null : value as ActiveDistrictArchiveFilters["focus"],
-                };
-            }
-
-            if (filterKey === "faction") {
-                return {
-                    ...current,
-                    faction: current.faction === value ? null : value,
-                };
-            }
-
-            return {
-                ...current,
-                placement: current.placement === value ? null : value as ActiveDistrictArchiveFilters["placement"],
-            };
+            return current;
         });
         returnFiltersToArchive(isDistrictArchiveMode);
     }, [isDistrictArchiveMode, returnFiltersToArchive]);
@@ -1323,7 +1320,7 @@ export default function CodexPage() {
                                     titleOverride={abilityArchiveSummary?.title}
                                     contextOverride={abilityArchiveSummary?.context}
                                     searchQuery={deferredQuery}
-                                    hasActiveFilters={hasActiveFactFilters || hasActiveDistrictArchiveFilters}
+                                    hasActiveFilters={hasActiveFactFilters || hasActiveDistrictFilters}
                                     richDistrictByKey={richDistrictByKey}
                                 />
                             ) : (
