@@ -135,10 +135,6 @@ export function buildDistrictCategoryFilterOptions(
     }));
 }
 
-function factLabelForFilter(filterKey: DistrictArchiveFilterKey): string {
-    return filterKey === "tier" ? DISTRICT_TIER_FACT_LABEL : DISTRICT_CATEGORY_FACT_LABEL;
-}
-
 function optionMatchesFilter(
     entry: CodexEntry,
     filterKey: DistrictArchiveFilterKey,

@@ -176,7 +176,7 @@ function formatAbilityShelfValue(value: string): string {
 
 export function getAbilityArchiveSummary(
     activeFilters: readonly ActiveCodexFactFilterItem[],
-    count: number
+    _count: number
 ): AbilityArchiveSummary | null {
     if (activeFilters.length === 0) {
         return {

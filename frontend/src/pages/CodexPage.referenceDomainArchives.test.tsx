@@ -398,7 +398,6 @@ describe("CodexPage reference domain archives", () => {
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by category/i })).getByRole("button", { name: /districts/i }));
         await screen.findByRole("heading", { name: "All Districts" });
         districtRail = screen.getByRole("complementary", { name: /district archive filters/i });
-        districtsOverview = screen.getByLabelText("Districts overview");
 
         await user.click(within(districtRail).getByRole("button", { name: "Tier 2 1" }));
         districtsOverview = screen.getByLabelText("Districts overview");

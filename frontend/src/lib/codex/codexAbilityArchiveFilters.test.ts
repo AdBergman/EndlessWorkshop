@@ -28,7 +28,6 @@ function ability(
 describe("codexAbilityArchiveFilters", () => {
     const filters = getAbilityArchiveFactFilterConfig("abilities");
     const roleFilter = filters.find((filter) => filter.label === "Combat role");
-    const mechanicFilter = filters.find((filter) => filter.label === "Ability mechanic");
 
     it("exposes only the curated Ability Archive filter groups for abilities", () => {
         expect(filters.map((filter) => filter.displayLabel)).toEqual([
