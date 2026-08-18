@@ -29,6 +29,12 @@ Use simple branch names:
 - `codex/dependencies-<task>` for dependency, CI, Docker, runtime, or maintenance work.
 - `codex/<task>` for genuinely cross-cutting work.
 
+Within one interactive Codex session, continue using the same task branch when
+follow-up requests are part of the same coherent development effort. Do not
+branch from the task branch for each follow-up. Start a fresh branch from
+current `main` when the user begins a separate task, a new Codex session is
+started, or the work no longer belongs in the same reviewable PR.
+
 Stay within the requested task scope, avoid unrelated cleanup, and preserve
 unrelated local changes. Do not reset, discard, overwrite, rebase, merge,
 cherry-pick, or rewrite another branch or workstream unless explicitly

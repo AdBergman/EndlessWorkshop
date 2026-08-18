@@ -15,6 +15,8 @@ registries.
   when explicitly appropriate.
 - This is a lightweight hobby-project workflow, not GitFlow: short-lived task
   branches, PR review, then branch cleanup.
+- Long interactive Codex sessions may keep one task branch/PR for continuous
+  related work; separate tasks or new sessions should start fresh from `main`.
 - Use branch/PR workflows for dependency updates, migrations,
   deploy/runtime changes, and large refactors.
 - Dependabot PRs are suggestions, not auto-approved changes.
