@@ -44,6 +44,19 @@ describe("useDistrictStore", () => {
                         territoryConstraint: " SameRegion ",
                         ignoreCliff: true,
                     },
+                    terrain: {
+                        constraint: " Forbidden ",
+                        terrainTypeKeys: [" TerrainType_Ocean ", "", " TerrainType_Lake "],
+                        canBuildOnWasteland: false,
+                        canBuildOnMud: false,
+                    },
+                    river: {
+                        constraint: " NoRiver ",
+                    },
+                    pointOfInterest: {
+                        constraint: " Authorized ",
+                        pointOfInterestKeys: [" POI_ResourceDepositLuxury01 ", " "],
+                    },
                 },
             },
         ]);
@@ -76,6 +89,19 @@ describe("useDistrictStore", () => {
                 operator: "AnyTile",
                 territoryConstraint: "SameRegion",
                 ignoreCliff: true,
+            },
+            terrain: {
+                constraint: "Forbidden",
+                terrainTypeKeys: ["TerrainType_Ocean", "TerrainType_Lake"],
+                canBuildOnWasteland: false,
+                canBuildOnMud: false,
+            },
+            river: {
+                constraint: "NoRiver",
+            },
+            pointOfInterest: {
+                constraint: "Authorized",
+                pointOfInterestKeys: ["POI_ResourceDepositLuxury01"],
             },
         });
         expect(state.districtKeys).toEqual(["District_City_Center"]);

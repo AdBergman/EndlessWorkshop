@@ -120,17 +120,78 @@ function buildUpgradeLink(
 }
 
 function buildPlacementLines(source: Pick<ConstructibleRichSource, "placementPrerequisites">): string[] {
+    const lines: string[] = [];
     const neighbourTiles = source.placementPrerequisites?.neighbourTiles;
-    if (!neighbourTiles) return [];
 
-    const operator = normalizeKey(neighbourTiles.operator).toLowerCase();
-    const territoryConstraint = normalizeKey(neighbourTiles.territoryConstraint).toLowerCase();
+    if (neighbourTiles) {
+        const operator = normalizeKey(neighbourTiles.operator).toLowerCase();
+        const territoryConstraint = normalizeKey(neighbourTiles.territoryConstraint).toLowerCase();
 
-    if (operator === "anytile" && territoryConstraint === "sameregion") {
-        return ["Adjacent tile in same region"];
+        if (operator === "anytile" && territoryConstraint === "sameregion") {
+            lines.push("Adjacent tile in same region");
+        } else if (operator === "notile") {
+            lines.push("No neighbouring tile required");
+        }
     }
 
-    return [];
+    const terrain = source.placementPrerequisites?.terrain;
+    if (terrain) {
+        const terrainKeys = terrain.terrainTypeKeys ?? [];
+        const terrainLabels = terrainKeys.map(formatPlacementKey).filter(Boolean);
+        if (normalizeKey(terrain.constraint).toLowerCase() === "forbidden" && terrainLabels.length > 0) {
+            lines.push(`Forbidden terrain: ${terrainLabels.join(", ")}`);
+        }
+        if (terrain.canBuildOnWasteland === false) {
+            lines.push("Cannot build on wasteland");
+        }
+        if (terrain.canBuildOnMud === false) {
+            lines.push("Cannot build on mud");
+        }
+    }
+
+    const riverConstraint = normalizeKey(source.placementPrerequisites?.river?.constraint).toLowerCase();
+    if (riverConstraint === "noriver") {
+        lines.push("No river");
+    } else if (riverConstraint === "anyriver") {
+        lines.push("Requires river");
+    } else if (riverConstraint === "rivernormal") {
+        lines.push("Requires normal river");
+    }
+
+    const pointOfInterest = source.placementPrerequisites?.pointOfInterest;
+    const pointOfInterestConstraint = normalizeKey(pointOfInterest?.constraint).toLowerCase();
+    if (pointOfInterestConstraint === "noresourcedeposit") {
+        lines.push("No resource deposit");
+    } else if (pointOfInterestConstraint === "nopoi") {
+        lines.push("No point of interest");
+    } else if (pointOfInterestConstraint === "anypoibutresourcedeposit") {
+        lines.push("Any point of interest except resource deposit");
+    } else if (pointOfInterestConstraint === "authorized") {
+        const pointOfInterestLabels = (pointOfInterest?.pointOfInterestKeys ?? [])
+            .map(formatPlacementKey)
+            .filter(Boolean);
+        if (pointOfInterestLabels.length > 0) {
+            lines.push(`Requires: ${pointOfInterestLabels.join(", ")}`);
+        }
+    }
+
+    return lines;
+}
+
+function formatPlacementKey(value: string): string {
+    const normalized = normalizeKey(value)
+        .replace(/^TerrainType_/, "")
+        .replace(/^POI_/, "")
+        .replace(/_/g, " ");
+    if (!normalized) return "";
+
+    return normalized
+        .replace(/([a-z])([A-Z0-9])/g, "$1 $2")
+        .replace(/([0-9])([A-Za-z])/g, "$1 $2")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function buildDistrictProfileLines(

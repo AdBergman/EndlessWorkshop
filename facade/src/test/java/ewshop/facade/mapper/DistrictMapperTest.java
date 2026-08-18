@@ -1,7 +1,10 @@
 package ewshop.facade.mapper;
 
 import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePointOfInterestPlacement;
 import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.domain.model.ConstructibleRiverPlacement;
+import ewshop.domain.model.ConstructibleTerrainPlacement;
 import ewshop.domain.model.District;
 import ewshop.domain.model.DistrictLevelUp;
 import ewshop.facade.dto.response.DistrictDto;
@@ -28,7 +31,18 @@ class DistrictMapperTest {
                 .unlockTechnologyKeys(List.of("Technology_Science_01"))
                 .levelUp(new DistrictLevelUp("Aspect_District_Tier2_Science", 3))
                 .placementPrerequisites(new ConstructiblePlacementPrerequisites(
-                        new ConstructibleNeighbourPlacement("AnyTile", "SameRegion", true)
+                        new ConstructibleNeighbourPlacement("AnyTile", "SameRegion", true),
+                        new ConstructibleTerrainPlacement(
+                                "Forbidden",
+                                List.of("TerrainType_Ocean", "TerrainType_PointOfInterest"),
+                                false,
+                                false
+                        ),
+                        new ConstructibleRiverPlacement("NoRiver"),
+                        new ConstructiblePointOfInterestPlacement(
+                                "NoResourceDeposit",
+                                List.of()
+                        )
                 ))
                 .build();
 
@@ -50,6 +64,13 @@ class DistrictMapperTest {
         assertThat(dto.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
         assertThat(dto.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
         assertThat(dto.placementPrerequisites().neighbourTiles().ignoreCliff()).isTrue();
+        assertThat(dto.placementPrerequisites().terrain().constraint()).isEqualTo("Forbidden");
+        assertThat(dto.placementPrerequisites().terrain().terrainTypeKeys())
+                .containsExactly("TerrainType_Ocean", "TerrainType_PointOfInterest");
+        assertThat(dto.placementPrerequisites().terrain().canBuildOnWasteland()).isFalse();
+        assertThat(dto.placementPrerequisites().terrain().canBuildOnMud()).isFalse();
+        assertThat(dto.placementPrerequisites().river().constraint()).isEqualTo("NoRiver");
+        assertThat(dto.placementPrerequisites().pointOfInterest().constraint()).isEqualTo("NoResourceDeposit");
     }
 
     @Test

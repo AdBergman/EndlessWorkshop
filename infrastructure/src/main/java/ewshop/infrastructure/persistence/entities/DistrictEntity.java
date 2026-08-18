@@ -88,6 +88,29 @@ public class DistrictEntity {
     @Column(name = "placement_neighbour_ignore_cliff")
     private Boolean placementNeighbourIgnoreCliff;
 
+    @Column(name = "placement_terrain_constraint")
+    private String placementTerrainConstraint;
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "placement_terrain_type_keys", columnDefinition = "text")
+    private List<String> placementTerrainTypeKeys = new ArrayList<>();
+
+    @Column(name = "placement_terrain_can_build_on_wasteland")
+    private Boolean placementTerrainCanBuildOnWasteland;
+
+    @Column(name = "placement_terrain_can_build_on_mud")
+    private Boolean placementTerrainCanBuildOnMud;
+
+    @Column(name = "placement_river_constraint")
+    private String placementRiverConstraint;
+
+    @Column(name = "placement_point_of_interest_constraint")
+    private String placementPointOfInterestConstraint;
+
+    @Convert(converter = StringListJsonConverter.class)
+    @Column(name = "placement_point_of_interest_keys", columnDefinition = "text")
+    private List<String> placementPointOfInterestKeys = new ArrayList<>();
+
     public DistrictEntity() {}
 
     public Long getId() { return id; }
@@ -186,5 +209,44 @@ public class DistrictEntity {
     public Boolean getPlacementNeighbourIgnoreCliff() { return placementNeighbourIgnoreCliff; }
     public void setPlacementNeighbourIgnoreCliff(Boolean placementNeighbourIgnoreCliff) {
         this.placementNeighbourIgnoreCliff = placementNeighbourIgnoreCliff;
+    }
+
+    public String getPlacementTerrainConstraint() { return placementTerrainConstraint; }
+    public void setPlacementTerrainConstraint(String placementTerrainConstraint) {
+        this.placementTerrainConstraint = placementTerrainConstraint;
+    }
+
+    public List<String> getPlacementTerrainTypeKeys() { return placementTerrainTypeKeys; }
+    public void setPlacementTerrainTypeKeys(List<String> placementTerrainTypeKeys) {
+        this.placementTerrainTypeKeys = placementTerrainTypeKeys == null
+                ? new ArrayList<>()
+                : new ArrayList<>(placementTerrainTypeKeys);
+    }
+
+    public Boolean getPlacementTerrainCanBuildOnWasteland() { return placementTerrainCanBuildOnWasteland; }
+    public void setPlacementTerrainCanBuildOnWasteland(Boolean placementTerrainCanBuildOnWasteland) {
+        this.placementTerrainCanBuildOnWasteland = placementTerrainCanBuildOnWasteland;
+    }
+
+    public Boolean getPlacementTerrainCanBuildOnMud() { return placementTerrainCanBuildOnMud; }
+    public void setPlacementTerrainCanBuildOnMud(Boolean placementTerrainCanBuildOnMud) {
+        this.placementTerrainCanBuildOnMud = placementTerrainCanBuildOnMud;
+    }
+
+    public String getPlacementRiverConstraint() { return placementRiverConstraint; }
+    public void setPlacementRiverConstraint(String placementRiverConstraint) {
+        this.placementRiverConstraint = placementRiverConstraint;
+    }
+
+    public String getPlacementPointOfInterestConstraint() { return placementPointOfInterestConstraint; }
+    public void setPlacementPointOfInterestConstraint(String placementPointOfInterestConstraint) {
+        this.placementPointOfInterestConstraint = placementPointOfInterestConstraint;
+    }
+
+    public List<String> getPlacementPointOfInterestKeys() { return placementPointOfInterestKeys; }
+    public void setPlacementPointOfInterestKeys(List<String> placementPointOfInterestKeys) {
+        this.placementPointOfInterestKeys = placementPointOfInterestKeys == null
+                ? new ArrayList<>()
+                : new ArrayList<>(placementPointOfInterestKeys);
     }
 }

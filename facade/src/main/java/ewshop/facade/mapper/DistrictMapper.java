@@ -2,10 +2,16 @@ package ewshop.facade.mapper;
 
 import ewshop.domain.model.District;
 import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePointOfInterestPlacement;
 import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.domain.model.ConstructibleRiverPlacement;
+import ewshop.domain.model.ConstructibleTerrainPlacement;
 import ewshop.domain.model.DistrictLevelUp;
 import ewshop.facade.dto.response.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.response.ConstructiblePointOfInterestPlacementDto;
 import ewshop.facade.dto.response.ConstructiblePlacementPrerequisitesDto;
+import ewshop.facade.dto.response.ConstructibleRiverPlacementDto;
+import ewshop.facade.dto.response.ConstructibleTerrainPlacementDto;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.dto.response.DistrictLevelUpDto;
 
@@ -56,7 +62,12 @@ public class DistrictMapper {
     ) {
         return placement == null
                 ? null
-                : new ConstructiblePlacementPrerequisitesDto(toNeighbourPlacementDto(placement.neighbourTiles()));
+                : new ConstructiblePlacementPrerequisitesDto(
+                        toNeighbourPlacementDto(placement.neighbourTiles()),
+                        toTerrainPlacementDto(placement.terrain()),
+                        toRiverPlacementDto(placement.river()),
+                        toPointOfInterestPlacementDto(placement.pointOfInterest())
+                );
     }
 
     private static ConstructibleNeighbourPlacementDto toNeighbourPlacementDto(
@@ -68,6 +79,32 @@ public class DistrictMapper {
                         placement.operator(),
                         placement.territoryConstraint(),
                         placement.ignoreCliff()
+                );
+    }
+
+    private static ConstructibleTerrainPlacementDto toTerrainPlacementDto(ConstructibleTerrainPlacement placement) {
+        return placement == null
+                ? null
+                : new ConstructibleTerrainPlacementDto(
+                        placement.constraint(),
+                        placement.terrainTypeKeys(),
+                        placement.canBuildOnWasteland(),
+                        placement.canBuildOnMud()
+                );
+    }
+
+    private static ConstructibleRiverPlacementDto toRiverPlacementDto(ConstructibleRiverPlacement placement) {
+        return placement == null ? null : new ConstructibleRiverPlacementDto(placement.constraint());
+    }
+
+    private static ConstructiblePointOfInterestPlacementDto toPointOfInterestPlacementDto(
+            ConstructiblePointOfInterestPlacement placement
+    ) {
+        return placement == null
+                ? null
+                : new ConstructiblePointOfInterestPlacementDto(
+                        placement.constraint(),
+                        placement.pointOfInterestKeys()
                 );
     }
 }

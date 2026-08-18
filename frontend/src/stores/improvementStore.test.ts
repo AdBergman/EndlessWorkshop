@@ -30,6 +30,19 @@ describe("useImprovementStore", () => {
                         territoryConstraint: " SameRegion ",
                         ignoreCliff: false,
                     },
+                    terrain: {
+                        constraint: " Forbidden ",
+                        terrainTypeKeys: [" TerrainType_PointOfInterest "],
+                        canBuildOnWasteland: null,
+                        canBuildOnMud: false,
+                    },
+                    river: {
+                        constraint: " NoRiver ",
+                    },
+                    pointOfInterest: {
+                        constraint: " NoResourceDeposit ",
+                        pointOfInterestKeys: [],
+                    },
                 },
             },
         ]);
@@ -48,6 +61,19 @@ describe("useImprovementStore", () => {
                 operator: "AnyTile",
                 territoryConstraint: "SameRegion",
                 ignoreCliff: false,
+            },
+            terrain: {
+                constraint: "Forbidden",
+                terrainTypeKeys: ["TerrainType_PointOfInterest"],
+                canBuildOnWasteland: null,
+                canBuildOnMud: false,
+            },
+            river: {
+                constraint: "NoRiver",
+            },
+            pointOfInterest: {
+                constraint: "NoResourceDeposit",
+                pointOfInterestKeys: [],
             },
         });
         expect(state.improvementKeys).toEqual(["Improvement_Public_Library"]);

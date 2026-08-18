@@ -241,11 +241,11 @@ Current evidence:
 
 - Rich district/exporter JSON already contains terrain, river, POI/resource
   deposit constraints and level-up adjacent district counts.
-- EWShop currently drops terrain/river/POI placement fields by DTO/domain/API
-  shape.
+- `EW-CODEX-DISTRICTS-001` fixed EWShop preservation/rendering for the existing
+  rich `placementPrerequisites.neighbourTiles`, `terrain`, `river`, and
+  `pointOfInterest` fields.
 
 Needed before request:
 
-- Implement `EW-CODEX-DISTRICTS-001`.
 - Re-audit whether any needed structured adjacency/placement information is
   still absent from source JSON.

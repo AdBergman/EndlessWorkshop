@@ -7,7 +7,10 @@ import ewshop.domain.service.DistrictImportService;
 import ewshop.domain.service.DistrictService;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.constructibles.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructiblePointOfInterestPlacementDto;
 import ewshop.facade.dto.importing.constructibles.ConstructiblePlacementPrerequisitesDto;
+import ewshop.facade.dto.importing.constructibles.ConstructibleRiverPlacementDto;
+import ewshop.facade.dto.importing.constructibles.ConstructibleTerrainPlacementDto;
 import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.districts.DistrictLevelUpDto;
@@ -41,7 +44,18 @@ class DistrictImportAdminFacadeImplTest {
                         List.of("Technology_District_A"),
                         new DistrictLevelUpDto("District_B", 2),
                         new ConstructiblePlacementPrerequisitesDto(
-                                new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", true)
+                                new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", true),
+                                new ConstructibleTerrainPlacementDto(
+                                        "Forbidden",
+                                        List.of("TerrainType_Ocean", "TerrainType_Lake"),
+                                        false,
+                                        false
+                                ),
+                                new ConstructibleRiverPlacementDto("NoRiver"),
+                                new ConstructiblePointOfInterestPlacementDto(
+                                        "NoResourceDeposit",
+                                        List.of()
+                                )
                         )
                 ))
         ));
@@ -69,6 +83,13 @@ class DistrictImportAdminFacadeImplTest {
         assertThat(snapshot.placementPrerequisites().neighbourTiles().operator()).isEqualTo("AnyTile");
         assertThat(snapshot.placementPrerequisites().neighbourTiles().territoryConstraint()).isEqualTo("SameRegion");
         assertThat(snapshot.placementPrerequisites().neighbourTiles().ignoreCliff()).isTrue();
+        assertThat(snapshot.placementPrerequisites().terrain().constraint()).isEqualTo("Forbidden");
+        assertThat(snapshot.placementPrerequisites().terrain().terrainTypeKeys())
+                .containsExactly("TerrainType_Ocean", "TerrainType_Lake");
+        assertThat(snapshot.placementPrerequisites().terrain().canBuildOnWasteland()).isFalse();
+        assertThat(snapshot.placementPrerequisites().terrain().canBuildOnMud()).isFalse();
+        assertThat(snapshot.placementPrerequisites().river().constraint()).isEqualTo("NoRiver");
+        assertThat(snapshot.placementPrerequisites().pointOfInterest().constraint()).isEqualTo("NoResourceDeposit");
         assertThat(districtService.getAllCalls).isEqualTo(1);
     }
 

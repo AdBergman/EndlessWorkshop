@@ -32,6 +32,7 @@ Priority: P0
 Effort: M
 Risk: Medium
 Exporter-blocked: no
+Status: completed 2026-08-18
 
 Problem: rich District/Improvement JSON includes structured terrain, river, and
 POI/resource-deposit placement constraints, but EWShop import/domain/API only
@@ -64,6 +65,13 @@ point-of-interest constraints; preserve them through rich APIs; render concise
 detail-only placement lines. Consider filters only after preserved values are
 stable and useful.
 
+Result: implemented explicit neighbour, terrain, river, and point-of-interest
+placement submodels through facade import DTOs, domain placement model,
+persistence columns, facade response DTOs, frontend District/Improvement store
+normalizers, and Codex detail Planning enrichment. District/Extractor examples
+now render concise detail-only terrain, river, and resource-deposit placement
+lines. Archive rows and visibility policy were left unchanged.
+
 Non-goals: no archive redesign, no terrain matrix, no inferred adjacency
 parser, no DBExporter request until EWShop preserves current data.
 
@@ -77,6 +85,10 @@ Acceptance criteria:
   enrichment.
 
 Verification: relevant Maven tests, frontend Codex tests, TypeScript, build.
+
+Completed verification: targeted Maven mapper/API tests and targeted frontend
+store/Codex rich planning tests passed. Broader final verification is still run
+at program close.
 
 ### EW-CODEX-COUNCILORS-001 - Prove Councilor Completeness Before Remediation
 

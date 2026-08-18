@@ -181,6 +181,19 @@ describe("CodexPage rich planning enrichment", () => {
                         territoryConstraint: "SameRegion",
                         ignoreCliff: true,
                     },
+                    terrain: {
+                        constraint: "Forbidden",
+                        terrainTypeKeys: ["TerrainType_Ocean", "TerrainType_Lake"],
+                        canBuildOnWasteland: false,
+                        canBuildOnMud: false,
+                    },
+                    river: {
+                        constraint: "NoRiver",
+                    },
+                    pointOfInterest: {
+                        constraint: "NoResourceDeposit",
+                        pointOfInterestKeys: [],
+                    },
                 },
             }),
         ]);
@@ -216,6 +229,11 @@ describe("CodexPage rich planning enrichment", () => {
         })).toHaveTextContent("Grand Canal");
         expect(planningSection).toHaveTextContent("4 adjacent districts");
         expect(planningSection).toHaveTextContent("Adjacent tile in same region");
+        expect(planningSection).toHaveTextContent("Forbidden terrain: Ocean, Lake");
+        expect(planningSection).toHaveTextContent("Cannot build on wasteland");
+        expect(planningSection).toHaveTextContent("Cannot build on mud");
+        expect(planningSection).toHaveTextContent("No river");
+        expect(planningSection).toHaveTextContent("No resource deposit");
         expect(planningSection).not.toHaveTextContent("Tech_Missing");
 
         const relatedSection = screen.getByRole("region", { name: /related entries/i });

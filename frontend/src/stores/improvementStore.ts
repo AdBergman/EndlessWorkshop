@@ -7,6 +7,8 @@ type LoadOptions = {
     force?: boolean;
 };
 
+type Placement = NonNullable<Improvement["placementPrerequisites"]>;
+
 type ImprovementStore = {
     improvements: Improvement[];
     improvementsByKey: Record<string, Improvement>;
@@ -67,9 +69,20 @@ function stringList(values: readonly unknown[] | null | undefined): string[] {
 function normalizePlacement(
     placement: Improvement["placementPrerequisites"]
 ): Improvement["placementPrerequisites"] {
-    const neighbourTiles = placement?.neighbourTiles;
-    if (!neighbourTiles) return null;
+    if (!placement) return null;
 
+    const neighbourTiles = normalizeNeighbourPlacement(placement.neighbourTiles);
+    const terrain = normalizeTerrainPlacement(placement.terrain);
+    const river = normalizeRiverPlacement(placement.river);
+    const pointOfInterest = normalizePointOfInterestPlacement(placement.pointOfInterest);
+
+    return neighbourTiles || terrain || river || pointOfInterest
+        ? { neighbourTiles, terrain, river, pointOfInterest }
+        : null;
+}
+
+function normalizeNeighbourPlacement(neighbourTiles: Placement["neighbourTiles"]) {
+    if (!neighbourTiles) return null;
     const operator = typeof neighbourTiles.operator === "string" ? neighbourTiles.operator.trim() : "";
     const territoryConstraint = typeof neighbourTiles.territoryConstraint === "string"
         ? neighbourTiles.territoryConstraint.trim()
@@ -78,11 +91,49 @@ function normalizePlacement(
 
     return operator || territoryConstraint || ignoreCliff !== null
         ? {
-                neighbourTiles: {
-                    operator: operator || null,
-                    territoryConstraint: territoryConstraint || null,
-                    ignoreCliff,
-                },
+                operator: operator || null,
+                territoryConstraint: territoryConstraint || null,
+                ignoreCliff,
+            }
+        : null;
+}
+
+function normalizeTerrainPlacement(terrain: Placement["terrain"]) {
+    if (!terrain) return null;
+
+    const constraint = typeof terrain.constraint === "string" ? terrain.constraint.trim() : "";
+    const terrainTypeKeys = stringList(terrain.terrainTypeKeys);
+    const canBuildOnWasteland = typeof terrain.canBuildOnWasteland === "boolean"
+        ? terrain.canBuildOnWasteland
+        : null;
+    const canBuildOnMud = typeof terrain.canBuildOnMud === "boolean" ? terrain.canBuildOnMud : null;
+
+    return constraint || terrainTypeKeys.length > 0 || canBuildOnWasteland !== null || canBuildOnMud !== null
+        ? {
+                constraint: constraint || null,
+                terrainTypeKeys,
+                canBuildOnWasteland,
+                canBuildOnMud,
+            }
+        : null;
+}
+
+function normalizeRiverPlacement(river: Placement["river"]) {
+    if (!river) return null;
+
+    const constraint = typeof river.constraint === "string" ? river.constraint.trim() : "";
+    return constraint ? { constraint } : null;
+}
+
+function normalizePointOfInterestPlacement(pointOfInterest: Placement["pointOfInterest"]) {
+    if (!pointOfInterest) return null;
+
+    const constraint = typeof pointOfInterest.constraint === "string" ? pointOfInterest.constraint.trim() : "";
+    const pointOfInterestKeys = stringList(pointOfInterest.pointOfInterestKeys);
+    return constraint || pointOfInterestKeys.length > 0
+        ? {
+                constraint: constraint || null,
+                pointOfInterestKeys,
             }
         : null;
 }
