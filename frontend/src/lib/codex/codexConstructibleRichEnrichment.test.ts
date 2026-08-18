@@ -75,6 +75,19 @@ describe("buildCodexConstructibleRichEnrichment", () => {
                             territoryConstraint: "SameRegion",
                             ignoreCliff: true,
                         },
+                        terrain: {
+                            constraint: "Forbidden",
+                            terrainTypeKeys: ["TerrainType_Ocean", "TerrainType_CoastalWater"],
+                            canBuildOnWasteland: false,
+                            canBuildOnMud: false,
+                        },
+                        river: {
+                            constraint: "NoRiver",
+                        },
+                        pointOfInterest: {
+                            constraint: "NoResourceDeposit",
+                            pointOfInterestKeys: [],
+                        },
                     },
                 }),
             },
@@ -91,7 +104,14 @@ describe("buildCodexConstructibleRichEnrichment", () => {
         expect(enrichment.unlockedBy.map((link) => link.label)).toEqual(["Irrigation"]);
         expect(enrichment.upgradesInto.map((link) => link.label)).toEqual(["Grand Canal"]);
         expect(enrichment.upgradesInto[0]?.note).toBe("3 adjacent districts");
-        expect(enrichment.placementLines).toEqual(["Adjacent tile in same region"]);
+        expect(enrichment.placementLines).toEqual([
+            "Adjacent tile in same region",
+            "Forbidden terrain: Ocean, Coastal Water",
+            "Cannot build on wasteland",
+            "Cannot build on mud",
+            "No river",
+            "No resource deposit",
+        ]);
         expect(getCodexConstructibleRichEnrichmentEntryKeys(enrichment)).toEqual([
             "Tech_Irrigation",
             "District_GrandCanal",
@@ -140,6 +160,48 @@ describe("buildCodexConstructibleRichEnrichment", () => {
         expect(enrichment.unlockedBy.map((link) => link.label)).toEqual(["Gardening"]);
         expect(enrichment.upgradesInto).toEqual([]);
         expect(enrichment.placementLines).toEqual([]);
+    });
+
+    it("renders authorized point-of-interest placement from rich extractor data", () => {
+        const currentEntry = codexEntry({
+            exportKind: "districts",
+            entryKey: "Extractor_Luxury01",
+            displayName: "[Luxury01] Klax Extractor",
+        });
+
+        const enrichment = buildCodexConstructibleRichEnrichment(
+            currentEntry,
+            {
+                Extractor_Luxury01: richDistrict({
+                    districtKey: "Extractor_Luxury01",
+                    placementPrerequisites: {
+                        terrain: {
+                            constraint: "Forbidden",
+                            terrainTypeKeys: ["TerrainType_River"],
+                            canBuildOnWasteland: false,
+                            canBuildOnMud: false,
+                        },
+                        river: {
+                            constraint: "NoRiver",
+                        },
+                        pointOfInterest: {
+                            constraint: "Authorized",
+                            pointOfInterestKeys: ["POI_ResourceDepositLuxury01"],
+                        },
+                    },
+                }),
+            },
+            {},
+            [currentEntry]
+        );
+
+        expect(enrichment.placementLines).toEqual([
+            "Forbidden terrain: River",
+            "Cannot build on wasteland",
+            "Cannot build on mud",
+            "No river",
+            "Requires: Resource Deposit Luxury 01",
+        ]);
     });
 
     it("fails closed when the rich record is missing", () => {

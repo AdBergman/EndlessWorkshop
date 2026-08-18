@@ -2,7 +2,10 @@ package ewshop.infrastructure.persistence.mappers;
 
 import ewshop.domain.model.District;
 import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePointOfInterestPlacement;
 import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.domain.model.ConstructibleRiverPlacement;
+import ewshop.domain.model.ConstructibleTerrainPlacement;
 import ewshop.domain.model.DistrictLevelUp;
 import ewshop.infrastructure.persistence.entities.DistrictEntity;
 import org.springframework.stereotype.Component;
@@ -78,6 +81,17 @@ public class DistrictMapper {
                         entity.getPlacementNeighbourOperator(),
                         entity.getPlacementNeighbourTerritoryConstraint(),
                         entity.getPlacementNeighbourIgnoreCliff()
+                ),
+                new ConstructibleTerrainPlacement(
+                        entity.getPlacementTerrainConstraint(),
+                        entity.getPlacementTerrainTypeKeys(),
+                        entity.getPlacementTerrainCanBuildOnWasteland(),
+                        entity.getPlacementTerrainCanBuildOnMud()
+                ),
+                new ConstructibleRiverPlacement(entity.getPlacementRiverConstraint()),
+                new ConstructiblePointOfInterestPlacement(
+                        entity.getPlacementPointOfInterestConstraint(),
+                        entity.getPlacementPointOfInterestKeys()
                 )
         );
         return placement.isEmpty() ? null : placement;
@@ -99,8 +113,18 @@ public class DistrictMapper {
 
     private static void applyPlacement(DistrictEntity entity, ConstructiblePlacementPrerequisites placement) {
         ConstructibleNeighbourPlacement neighbour = placement == null ? null : placement.neighbourTiles();
+        ConstructibleTerrainPlacement terrain = placement == null ? null : placement.terrain();
+        ConstructibleRiverPlacement river = placement == null ? null : placement.river();
+        ConstructiblePointOfInterestPlacement pointOfInterest = placement == null ? null : placement.pointOfInterest();
         entity.setPlacementNeighbourOperator(neighbour == null ? null : neighbour.operator());
         entity.setPlacementNeighbourTerritoryConstraint(neighbour == null ? null : neighbour.territoryConstraint());
         entity.setPlacementNeighbourIgnoreCliff(neighbour == null ? null : neighbour.ignoreCliff());
+        entity.setPlacementTerrainConstraint(terrain == null ? null : terrain.constraint());
+        entity.setPlacementTerrainTypeKeys(terrain == null ? List.of() : terrain.terrainTypeKeys());
+        entity.setPlacementTerrainCanBuildOnWasteland(terrain == null ? null : terrain.canBuildOnWasteland());
+        entity.setPlacementTerrainCanBuildOnMud(terrain == null ? null : terrain.canBuildOnMud());
+        entity.setPlacementRiverConstraint(river == null ? null : river.constraint());
+        entity.setPlacementPointOfInterestConstraint(pointOfInterest == null ? null : pointOfInterest.constraint());
+        entity.setPlacementPointOfInterestKeys(pointOfInterest == null ? List.of() : pointOfInterest.pointOfInterestKeys());
     }
 }

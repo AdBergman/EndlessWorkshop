@@ -2,7 +2,10 @@ package ewshop.infrastructure.persistence.adapters;
 
 import ewshop.domain.command.ImprovementImportSnapshot;
 import ewshop.domain.model.ConstructibleNeighbourPlacement;
+import ewshop.domain.model.ConstructiblePointOfInterestPlacement;
 import ewshop.domain.model.ConstructiblePlacementPrerequisites;
+import ewshop.domain.model.ConstructibleRiverPlacement;
+import ewshop.domain.model.ConstructibleTerrainPlacement;
 import ewshop.domain.model.Improvement;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.repository.ImprovementRepository;
@@ -145,9 +148,19 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
             ConstructiblePlacementPrerequisites placement
     ) {
         ConstructibleNeighbourPlacement neighbour = placement == null ? null : placement.neighbourTiles();
+        ConstructibleTerrainPlacement terrain = placement == null ? null : placement.terrain();
+        ConstructibleRiverPlacement river = placement == null ? null : placement.river();
+        ConstructiblePointOfInterestPlacement pointOfInterest = placement == null ? null : placement.pointOfInterest();
         String operator = neighbour == null ? null : neighbour.operator();
         String territoryConstraint = neighbour == null ? null : neighbour.territoryConstraint();
         Boolean ignoreCliff = neighbour == null ? null : neighbour.ignoreCliff();
+        String terrainConstraint = terrain == null ? null : terrain.constraint();
+        List<String> terrainTypeKeys = terrain == null ? List.of() : terrain.terrainTypeKeys();
+        Boolean canBuildOnWasteland = terrain == null ? null : terrain.canBuildOnWasteland();
+        Boolean canBuildOnMud = terrain == null ? null : terrain.canBuildOnMud();
+        String riverConstraint = river == null ? null : river.constraint();
+        String pointOfInterestConstraint = pointOfInterest == null ? null : pointOfInterest.constraint();
+        List<String> pointOfInterestKeys = pointOfInterest == null ? List.of() : pointOfInterest.pointOfInterestKeys();
         boolean changed = false;
 
         if (!Objects.equals(entity.getPlacementNeighbourOperator(), operator)) {
@@ -165,6 +178,41 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getPlacementTerrainConstraint(), terrainConstraint)) {
+            entity.setPlacementTerrainConstraint(terrainConstraint);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementTerrainTypeKeys(), terrainTypeKeys)) {
+            entity.setPlacementTerrainTypeKeys(terrainTypeKeys);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementTerrainCanBuildOnWasteland(), canBuildOnWasteland)) {
+            entity.setPlacementTerrainCanBuildOnWasteland(canBuildOnWasteland);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementTerrainCanBuildOnMud(), canBuildOnMud)) {
+            entity.setPlacementTerrainCanBuildOnMud(canBuildOnMud);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementRiverConstraint(), riverConstraint)) {
+            entity.setPlacementRiverConstraint(riverConstraint);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementPointOfInterestConstraint(), pointOfInterestConstraint)) {
+            entity.setPlacementPointOfInterestConstraint(pointOfInterestConstraint);
+            changed = true;
+        }
+
+        if (!Objects.equals(entity.getPlacementPointOfInterestKeys(), pointOfInterestKeys)) {
+            entity.setPlacementPointOfInterestKeys(pointOfInterestKeys);
+            changed = true;
+        }
+
         return changed;
     }
 
@@ -174,6 +222,17 @@ public class ImprovementRepositoryAdapter implements ImprovementRepository {
                         entity.getPlacementNeighbourOperator(),
                         entity.getPlacementNeighbourTerritoryConstraint(),
                         entity.getPlacementNeighbourIgnoreCliff()
+                ),
+                new ConstructibleTerrainPlacement(
+                        entity.getPlacementTerrainConstraint(),
+                        entity.getPlacementTerrainTypeKeys(),
+                        entity.getPlacementTerrainCanBuildOnWasteland(),
+                        entity.getPlacementTerrainCanBuildOnMud()
+                ),
+                new ConstructibleRiverPlacement(entity.getPlacementRiverConstraint()),
+                new ConstructiblePointOfInterestPlacement(
+                        entity.getPlacementPointOfInterestConstraint(),
+                        entity.getPlacementPointOfInterestKeys()
                 )
         );
         return placement.isEmpty() ? null : placement;

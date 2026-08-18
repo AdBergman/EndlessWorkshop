@@ -2,7 +2,10 @@ package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
 import ewshop.facade.dto.response.ConstructibleNeighbourPlacementDto;
+import ewshop.facade.dto.response.ConstructiblePointOfInterestPlacementDto;
 import ewshop.facade.dto.response.ConstructiblePlacementPrerequisitesDto;
+import ewshop.facade.dto.response.ConstructibleRiverPlacementDto;
+import ewshop.facade.dto.response.ConstructibleTerrainPlacementDto;
 import ewshop.facade.dto.response.DistrictDto;
 import ewshop.facade.dto.response.DistrictLevelUpDto;
 import ewshop.facade.interfaces.DistrictFacade;
@@ -40,7 +43,18 @@ class DistrictControllerTest {
                 List.of("Technology_Science_01"),
                 new DistrictLevelUpDto("Aspect_District_Tier2_Science", 3),
                 new ConstructiblePlacementPrerequisitesDto(
-                        new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", true)
+                        new ConstructibleNeighbourPlacementDto("AnyTile", "SameRegion", true),
+                        new ConstructibleTerrainPlacementDto(
+                                "Forbidden",
+                                List.of("TerrainType_Ocean", "TerrainType_Lake"),
+                                false,
+                                false
+                        ),
+                        new ConstructibleRiverPlacementDto("NoRiver"),
+                        new ConstructiblePointOfInterestPlacementDto(
+                                "Authorized",
+                                List.of("POI_ResourceDepositLuxury01")
+                        )
                 )
         );
 
@@ -71,6 +85,15 @@ class DistrictControllerTest {
                 .andExpect(jsonPath("$[0].levelUp.requiredFactionTraitKeys.length()").value(0))
                 .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.operator").value("AnyTile"))
                 .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.territoryConstraint").value("SameRegion"))
-                .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.ignoreCliff").value(true));
+                .andExpect(jsonPath("$[0].placementPrerequisites.neighbourTiles.ignoreCliff").value(true))
+                .andExpect(jsonPath("$[0].placementPrerequisites.terrain.constraint").value("Forbidden"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.terrain.terrainTypeKeys[0]").value("TerrainType_Ocean"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.terrain.terrainTypeKeys[1]").value("TerrainType_Lake"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.terrain.canBuildOnWasteland").value(false))
+                .andExpect(jsonPath("$[0].placementPrerequisites.terrain.canBuildOnMud").value(false))
+                .andExpect(jsonPath("$[0].placementPrerequisites.river.constraint").value("NoRiver"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.pointOfInterest.constraint").value("Authorized"))
+                .andExpect(jsonPath("$[0].placementPrerequisites.pointOfInterest.pointOfInterestKeys[0]")
+                        .value("POI_ResourceDepositLuxury01"));
     }
 }

@@ -90,8 +90,27 @@ export interface ConstructibleNeighbourPlacement {
     ignoreCliff: boolean | null;
 }
 
+export interface ConstructibleTerrainPlacement {
+    constraint: string | null;
+    terrainTypeKeys?: string[];
+    canBuildOnWasteland: boolean | null;
+    canBuildOnMud: boolean | null;
+}
+
+export interface ConstructibleRiverPlacement {
+    constraint: string | null;
+}
+
+export interface ConstructiblePointOfInterestPlacement {
+    constraint: string | null;
+    pointOfInterestKeys?: string[];
+}
+
 export interface ConstructiblePlacementPrerequisites {
     neighbourTiles?: ConstructibleNeighbourPlacement | null;
+    terrain?: ConstructibleTerrainPlacement | null;
+    river?: ConstructibleRiverPlacement | null;
+    pointOfInterest?: ConstructiblePointOfInterestPlacement | null;
 }
 
 export interface DistrictLevelUp {

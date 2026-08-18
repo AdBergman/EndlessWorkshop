@@ -43,9 +43,11 @@ It does not implement the remediation backlog.
   districts, improvements, factions, heroes, skills, Quest Explorer, tech, and
   units through rich APIs.
 - District placement/terrain/resource-deposit information is present in rich
-  exporter JSON but EWShop rich constructible DTO/domain/API currently preserve
-  only `neighbourTiles`. Do not ask DB Exporter for generic "district adjacency"
-  until this pipeline loss is fixed.
+  exporter JSON. `EW-CODEX-DISTRICTS-001` fixed the EWShop rich constructible
+  DTO/domain/persistence/API/frontend loss for neighbour, terrain, river, and
+  point-of-interest placement fields. Do not ask DB Exporter for generic
+  "district adjacency" unless a follow-up re-audit proves source data is still
+  missing after this preservation path.
 - Councilor completeness is not proven to be an EWShop filtering issue:
   `councilors-codex` has 43 rows, no EWShop councilor-specific filter, and no
   imported rich sibling source. Any completeness claim needs exporter/source

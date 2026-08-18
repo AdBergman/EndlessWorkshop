@@ -179,11 +179,10 @@ Exporter-needed:
 
 ## Districts
 
-Scores: UX 7, completeness 6, usefulness 7, trust 7. Confidence: PROVEN.
+Scores: UX 7, completeness 7, usefulness 8, trust 7. Confidence: PROVEN.
 
-Verdict: strong archive, but rich placement/terrain/source-truth data is
-partially lost in EWShop. The current UI is not proof that DBExporter lacks
-district adjacency/placement data.
+Verdict: strong archive. `EW-CODEX-DISTRICTS-001` now preserves and renders
+rich placement/terrain/source-truth data that EWShop previously dropped.
 
 Trace:
 
@@ -191,11 +190,13 @@ Trace:
 - Rich source: `local-imports/exports/ewshop_districts_export_0.82.json`.
 - `CodexImportMapper` reclassifies `Extractor_*` rows into `extractors`.
 - Rich District import maps `districtKey`, category, tier, constructible level,
-  cost, descriptor keys, references, unlock techs, level-up, and only
-  `placementPrerequisites.neighbourTiles`.
-- `ConstructiblePlacementPrerequisitesDto` contains only `neighbourTiles`;
-  rich source fields such as `terrain`, `river`, and `pointOfInterest` are not
-  represented in import/domain/API.
+  cost, descriptor keys, references, unlock techs, level-up, and
+  `placementPrerequisites.neighbourTiles`, `terrain`, `river`, and
+  `pointOfInterest`.
+- `ConstructiblePlacementPrerequisitesDto`, the domain placement model,
+  persistence columns, response DTOs, frontend stores, and Codex detail
+  enrichment now preserve the rich source `terrain`, `river`, and
+  `pointOfInterest` fields.
 - Frontend `buildCodexConstructibleRichEnrichment` renders upgrade links and a
   very limited placement line: only `AnyTile` + `SameRegion`.
 
@@ -206,28 +207,28 @@ Representative field-loss table:
 | Public effects | yes | yes via Codex | yes | yes | yes | yes | OK |
 | Category/Tier | mostly yes | yes | yes | yes | yes | yes | OK |
 | Level-up target/count | yes rich | yes | yes | yes | yes | yes detail-only |
-| Terrain forbidden/allowed | yes rich | no | no | no | no | no | PIPELINE loss |
-| River constraint | yes rich | no | no | no | no | no | PIPELINE loss |
-| POI/resource deposit constraint | yes rich | no | no | no | no | no | PIPELINE loss |
+| Terrain forbidden/allowed | yes rich | yes | yes | yes | yes | yes detail-only | fixed |
+| River constraint | yes rich | yes | yes | yes | yes | yes detail-only | fixed |
+| POI/resource deposit constraint | yes rich | yes | yes | yes | yes | yes detail-only | fixed |
 | Exact adjacency effect semantics | effect text/descriptors | descriptor keys only | yes rich descriptor keys | yes | no structured parser | no filter | BE/FE after placement DTO fix |
 
-Improve now:
+Completed:
 
-- PIPELINE: extend rich constructible placement DTO/domain/API to preserve
-  terrain, river, and POI/resource-deposit constraints.
-- FE: after preservation, render concise placement lines and add safe filters
-  only for exact structured values.
-- FE: keep archive effect-first; do not replace with a terrain matrix.
+- PIPELINE/FE: extended rich constructible placement DTO/domain/persistence/API
+  and frontend detail enrichment to preserve and show terrain, river, and
+  POI/resource-deposit constraints already present in rich District exports.
+- FE: archive rows remain effect-first; no terrain matrix or inferred adjacency
+  parser was added.
 
 Exporter-needed:
 
-- Only for canonical public adjacency/placement metadata that is still absent
-  after EWShop preserves current rich fields. Request exact fields, not
-  "adjacency bonuses."
+- Only for canonical public adjacency/placement metadata that a follow-up
+  re-audit proves is still absent after EWShop preserves current rich fields.
+  Request exact fields, not "adjacency bonuses."
 
 ## Extractors
 
-Scores: UX 6, completeness 6, usefulness 6, trust 8. Confidence: PROVEN.
+Scores: UX 6, completeness 7, usefulness 7, trust 8. Confidence: PROVEN.
 
 Verdict: hidden support category split from Districts. It works well as a
 Resource-linked reference target.
@@ -239,12 +240,14 @@ Trace:
   to `Extractors`.
 - 66 rows resolve exact Resource links.
 - Rich district source contains POI/resource-deposit placement constraints for
-  extractor rows, but EWShop drops those fields as described in Districts.
+  extractor rows, and EWShop now preserves/renders those fields through the
+  constructible placement path described in Districts.
 
-Improve now:
+Completed:
 
-- PIPELINE: same constructible placement preservation as Districts.
-- FE: keep hidden top-level policy; Resources should remain the entry point.
+- PIPELINE/FE: same constructible placement preservation as Districts.
+- FE: hidden top-level policy remains unchanged; Resources remains the entry
+  point.
 
 Exporter-needed:
 
@@ -361,7 +364,9 @@ Trace:
   `local-imports/codex/ewshop_improvements_codex_export_0.82.json`.
 - Rich source:
   `local-imports/exports/ewshop_improvements_export_0.82.json`.
-- Rich import preserves unlock techs and only `placementPrerequisites.neighbourTiles`.
+- Rich import/API/frontend now preserve `placementPrerequisites.neighbourTiles`,
+  `terrain`, `river`, and `pointOfInterest`. Current local Improvement source
+  examples only exercise neighbour placement.
 - Frontend mode is `improvementArchive`; detail enrichment shows exact unlock
   links and limited placement text.
 
@@ -372,12 +377,11 @@ Filtering/completeness:
 - Rich source includes construction cost/resource/family/faction fields not all
   exposed in current API; this is intentional unless product needs them.
 
-Improve now:
+Completed:
 
-- PIPELINE: preserve structured terrain/river/POI placement fields for rich
-  constructibles.
-- FE: add concise placement/resource-prerequisite detail only after API fields
-  are safe and player-facing.
+- PIPELINE/FE: shared rich constructible placement shape can preserve
+  structured terrain/river/POI fields for Improvements when exporter data
+  supplies them. Current local Improvement data remains neighbour-only.
 
 Exporter-needed:
 
