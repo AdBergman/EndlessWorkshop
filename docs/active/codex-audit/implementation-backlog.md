@@ -186,6 +186,41 @@ Acceptance criteria:
 Verification: revalidated 5 public Faction Codex entries, 21 imported rich
 faction-like records, and the existing exact-key package enrichment helper.
 
+### EW-CODEX-FACTIONS-002 - Faction Strategy Profile Detail Pass
+
+Category: Factions, Minor Factions
+Classification: FE
+Priority: P1
+Effort: S
+Risk: Medium
+Exporter-blocked: no
+Status: completed 2026-08-19
+
+Problem: Major Faction detail pages had useful exact package links, but the
+first screen still read like a generic dossier. The strongest strategy signals
+were buried below trait sections, and archive rows emphasized trait names rather
+than faction-defining mechanics.
+
+Player value: a 4X player can quickly answer who the faction is, what makes it
+strategically different, what systems it gets, and where to continue into Units,
+Tech, Heroes, Populations, Traits, or Quest Explorer-owned quest details.
+
+Result: implemented a compact `Strategy profile` section above Faction detail
+content; used exact rich faction joins and existing capped package groups for
+affinity/disposition, population, unit, tech, hero, quest, and trait counts;
+used rich lore where available; promoted exported strategic effect lines in
+Faction archive rows; renamed `Faction package` to `Faction systems`; removed
+`exact refs` overflow wording; moved major Faction core effects ahead of trait
+lists; and suppressed redundant `Kind=MinorFaction` structured facts.
+
+Non-goals preserved: no new `/factions` route, no planner/dashboard, no inferred
+facts from keys or prose, no art/portrait work, no uncapped relationship wall,
+and no recreation of route-owned Tech, Unit, or Quest Explorer experiences.
+
+Verification: focused Faction package/detail tests, structured description
+tests, browser review for Aspects, Necrophages, Tahuk, Ametrine, desktop
+viewport, and mobile-width viewport. Full frontend checks are run at PR close.
+
 ### EW-CODEX-REL-001 - Codex Unresolved Reference Diagnostics
 
 Category: Cross-Codex

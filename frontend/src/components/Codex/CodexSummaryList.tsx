@@ -13,6 +13,7 @@ import {
 import {
     getCodexFactionAffinityLabel,
     getCodexFactionSummaryPreview,
+    getCodexFactionStrategicPreview,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
 import { getCodexShallowReferencePreview } from "@/lib/codex/codexShallowReferencePreview";
@@ -110,11 +111,15 @@ export default function CodexSummaryList({
                         const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
+                        const factionStrategicPreview = isFactionEntry ? getCodexFactionStrategicPreview(entry) : "";
                         const readablePreview = !isFactionEntry && !isActionEntry
                             ? getCodexReadablePreviewLine(entry)
                             : "";
                         const basePreview = isFactionEntry
-                            ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
+                            ? factionStrategicPreview ||
+                                factionTraits ||
+                                getCodexFactionSummaryPreview(entry) ||
+                                getCodexEntryPreview(entry, 240)
                             : readablePreview || getCodexEntryPreview(entry, 240);
                         const preview = isActionEntry
                             ? getActionArchivePreview(entry)

@@ -250,6 +250,7 @@ function isPublicFact(kind: string, fact: CodexStructuredFact, facts: CodexStruc
 
     if (label === "reference key") return false;
     if (isDuplicateKindFact(fact, facts)) return false;
+    if (kind === "minorfactions" && label === "kind") return false;
 
     if (kind === "modifiers" && hasDisplayValueFact(facts) && (label === "operation" || label === "value")) {
         return false;

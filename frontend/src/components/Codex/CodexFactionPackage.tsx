@@ -33,7 +33,7 @@ export default function CodexFactionPackage({ groups, onSelectEntry }: Props) {
     return (
         <section className="codex-factionPackage" aria-labelledby="codex-faction-package-heading">
             <div className="codex-sectionLabel" id="codex-faction-package-heading">
-                Faction package
+                Faction systems
             </div>
 
             <div className="codex-factionPackage__groups">
@@ -97,7 +97,7 @@ export default function CodexFactionPackage({ groups, onSelectEntry }: Props) {
 
                         {group.totalCount > group.visibleEntries.length ? (
                             <div className="codex-factionPackage__more">
-                                Showing {group.visibleEntries.length} of {group.totalCount} exact refs
+                                Showing {group.visibleEntries.length} of {group.totalCount}
                             </div>
                         ) : null}
                     </div>
