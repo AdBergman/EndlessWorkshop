@@ -14,6 +14,7 @@ public record DistrictDto(
         List<String> referenceKeys,
         List<String> unlockTechnologyKeys,
         Boolean isFactionSpecific,
+        String factionKey,
         Boolean isVariant,
         Boolean isPlayerFacing,
         DistrictLevelUpDto levelUp,
@@ -42,6 +43,7 @@ public record DistrictDto(
                 null,
                 null,
                 null,
+                null,
                 levelUp,
                 placementPrerequisites
         );
@@ -64,6 +66,7 @@ public record DistrictDto(
                 List.of(),
                 List.of(),
                 List.of(),
+                null,
                 null,
                 null,
                 null,

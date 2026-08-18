@@ -157,6 +157,11 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
             changed = true;
         }
 
+        if (!Objects.equals(entity.getFactionKey(), update.factionKey())) {
+            entity.setFactionKey(update.factionKey());
+            changed = true;
+        }
+
         if (!Objects.equals(entity.getVariant(), update.variant())) {
             entity.setVariant(update.variant());
             changed = true;
@@ -187,6 +192,7 @@ public class DistrictRepositoryAdapter implements DistrictRepository {
                 .referenceKeys(e.getReferenceKeys())
                 .unlockTechnologyKeys(e.getUnlockTechnologyKeys())
                 .factionSpecific(e.getFactionSpecific())
+                .factionKey(e.getFactionKey())
                 .variant(e.getVariant())
                 .playerFacing(e.getPlayerFacing())
                 .levelUp(toLevelUp(e))

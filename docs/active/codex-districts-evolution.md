@@ -353,17 +353,21 @@ Lessons:
 
 ## 2026-08-17 District UX Implementation Update
 
-Implemented after product review:
+Implemented after product review, superseded by the 2026-08-18 archive IA
+pass below:
 
-- District Archive filters are now grouped as `Tier` and `Focus`.
-- `Tier 1` is the default District archive view.
+- District Archive filters were grouped as `Tier` and `Focus`.
+- `Tier 1` was temporarily the default District archive view.
 - There is no District `All` filter chip.
 - Tier counts and result rows collapse duplicate public variants by display name,
   Tier, Category, and public Effects, while preserving direct-linked variants.
-- Tierless legacy/thin Codex rows fall into the default Tier 1 view so they do
-  not disappear when no `All` bucket exists.
+- Tierless legacy/thin Codex rows temporarily fell into the default Tier 1 view
+  so they did not disappear when no `All` bucket existed. This was removed in
+  the player-intent IA pass; tierless rows are now visible by default but do not
+  count as Tier 1.
 - District archive rows now include a compact yield summary before Category/Tier
-  metadata when public Effect lines expose yields.
+  metadata when public Effect lines expose yields. This was later replaced with
+  additive Type/Yield/Faction/Progression metadata.
 - Rich District import/API/store data now carries the richer district profile
   fields needed by detail pages:
   - tier;
@@ -436,11 +440,11 @@ current import pipeline is substantially correct.
 - Resource extractor identity was compact in archive rows but generic in detail.
   Extracted resources should appear as a planning relationship, not just a raw
   section.
-- Placement remains only partially unblocked in EWShop. The raw rich export has
-  terrain, river, and POI/resource-deposit placement constraints, but the current
-  backend/API/frontend District contract preserves only `neighbourTiles`
-  placement. Frontend must not infer terrain/river/POI rules from keys or older
-  static JSON.
+- Placement is now structurally available through the District API/frontend
+  contract, including terrain, river, point-of-interest/resource-deposit,
+  wasteland, mud, and neighbour-tile constraints. The remaining UX problem is no
+  longer "data missing"; it is choosing what to surface in list rows versus
+  detail without making every row noisy.
 - Thin records still need honest treatment. Empty upgrade/special rows should
   say that no public effects are exported instead of looking like broken UI.
 
@@ -455,8 +459,9 @@ current import pipeline is substantially correct.
   - exact extracted resource links;
   - exact technology unlock links;
   - incoming and outgoing upgrade links, with adjacent-district count notes;
-  - known neighbour-tile placement lines;
-  - record notes for thin/tierless/missing-rich/faction-trait-gated cases.
+  - structured placement lines for adjacency, terrain, river,
+    point-of-interest/resource-deposit, wasteland, and mud conditions;
+  - player-facing record notes for thin/tierless/faction-trait-gated cases.
 - District detail no longer duplicates the generic structured renderer when the
   District reference section is available.
 - Planning links shown in the District reference section are hidden from the
@@ -464,27 +469,70 @@ current import pipeline is substantially correct.
   relationship in two places.
 - Improvement details continue to use the existing constructible planning
   section; this pass is District-specific.
+- District archive rows now show compact planning previews from rich District
+  data: construction cost, adjacent-district upgrade requirements, and
+  high-signal placement conditions such as resource-deposit requirements.
+- District archive filtering now has a `Placement` rail backed by structured
+  rich District fields. Current safe buckets are Normal expansion, No adjacency,
+  River, Resource deposit, Point of interest, and Terrain restricted.
+- Player-facing record notes were cleaned up so the District detail does not
+  expose implementation/data-pipeline language such as missing planning profile
+  or archive fallback mechanics.
+- District archive filtering was redesigned around player intent:
+  - `Type` is now primary, derived only from explicit District `Category`
+    metadata. Current safe groups are Core yield, City base, Infrastructure,
+    Resource extractor, Wonder / anomaly, and Unclassified.
+  - `Yield / role` keeps the exact Category values such as Food, Industry,
+    Dust, Science, Military, Resource, Bridge, and City.
+  - `Placement` remains backed by structured rich District placement fields.
+  - `Faction` is backed by rich District `factionKey` when present, with
+    Universal/Faction-specific fallbacks from `isFactionSpecific`.
+- `Progression` contains Tier chips and is no longer the default worldview.
+- Tier filters now use explicit exported `Tier` facts only; tierless rows remain
+  visible in the default archive and are not inferred from keys or counted as
+  Tier 1.
+- Zero-count District filter options were removed.
+- District archive row metadata no longer emits redundant derived `Yields: ...`
+  summaries when the effect lines already show the yields. That space now shows
+  additive Type, Yield/Role, Faction, and Progression metadata.
+- District archive planning previews now resolve upgrade targets/sources when
+  the exact public District row is available, with adjacent-district counts as
+  fallback context.
+- The District rich import/API/frontend contract now preserves `factionKey`.
+  The 0.82 rich export contains exact faction keys for faction-specific
+  Districts: Necrophage, LastLord, Mukag, and MangroveOfHarmony.
 
 ### Still Blocked Or Deferred
 
-- Terrain, river, POI, resource-deposit, wasteland, and mud placement conditions
-  are still blocked by the current backend/API/frontend contract. The UI now
-  states that those conditions are not available in the detail view rather than
-  inventing them.
 - Structured terrain/adjacency yield filters remain blocked. Existing public
   effect text exposes some synergies, but current EWShop should not create
   filterable Ridge/Mountain/etc. adjacency categories from descriptor keys or
   prose.
-- Explicit faction names for faction-specific Districts remain unresolved unless
-  a future rich/API field provides safe faction ownership.
-- Archive-level upgrade-chain grouping is deferred. Detail-level incoming and
-  outgoing upgrade links provide the first useful slice without reorganizing the
-  whole archive.
+- Archive-level upgrade-chain grouping and side-by-side comparison remain
+  deferred. Detail-level incoming/outgoing upgrade links, archive planning
+  previews, and placement filters provide the unblocked slice without
+  reorganizing the whole archive.
+- Exact semantics for District text such as `-3 Food if on Works Districts` and
+  Bridge `+3 Food if on Farms Districts` remain unresolved. Provenance check:
+  those phrases arrive unchanged from rich District `descriptionLines` into
+  Codex `Effects`, paired with descriptor keys such as `Effect_Synergy_Food_D`,
+  `Effect_Synergy_Bridge_A`, and
+  `Effect_SynergyDefinition_District_DivinePopMonument_Food`. Current exported
+  District records do not expose a structured adjacency/target relation for
+  these synergy lines. EWShop should not rewrite `if on` to adjacency until the
+  exporter/source data provides explicit semantics.
 
 ### Verification
 
 - Focused frontend tests passed:
+  - `src/lib/codex/codexDistrictArchiveFilters.test.ts`
   - `src/lib/codex/codexDistrictReference.test.ts`
   - `src/lib/codex/codexConstructibleRichEnrichment.test.ts`
+  - `src/pages/CodexPage.referenceDomainArchives.test.tsx`
   - `src/pages/CodexPage.richPlanningEnrichment.test.tsx`
+  - `src/stores/districtStore.test.ts`
+- Focused backend/API contract tests passed:
+  - `DistrictImportAdminFacadeImplTest`
+  - facade/infrastructure `DistrictMapperTest`
+  - `DistrictControllerTest`
 - Frontend TypeScript passed.

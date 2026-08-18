@@ -18,6 +18,7 @@ class DistrictMapperTest {
         entity.setDistrictKey("Aspect_District_Tier1_Science");
         entity.setDisplayName("Laboratory");
         entity.setCategory("Science");
+        entity.setFactionKey("Faction_Aspect");
         entity.setDescriptionLines(List.of(
                 "+1 [ScienceColored] on Tile producing at least two types of yields",
                 "+2 [ScienceColored] Science per District Level"
@@ -29,6 +30,7 @@ class DistrictMapperTest {
         assertThat(domain.getDistrictKey()).isEqualTo("Aspect_District_Tier1_Science");
         assertThat(domain.getDisplayName()).isEqualTo("Laboratory");
         assertThat(domain.getCategory()).isEqualTo("Science");
+        assertThat(domain.getFactionKey()).isEqualTo("Faction_Aspect");
         assertThat(domain.getDescriptionLines()).containsExactly(
                 "+1 [ScienceColored] on Tile producing at least two types of yields",
                 "+2 [ScienceColored] Science per District Level"
@@ -41,6 +43,7 @@ class DistrictMapperTest {
                 .districtKey("Aspect_District_Tier1_Science")
                 .displayName("Laboratory")
                 .category("Science")
+                .factionKey("Faction_Aspect")
                 .descriptionLines(List.of(
                         "+1 [ScienceColored] on Tile producing at least two types of yields",
                         "+2 [ScienceColored] Science per District Level"
@@ -53,6 +56,7 @@ class DistrictMapperTest {
         assertThat(entity.getDistrictKey()).isEqualTo("Aspect_District_Tier1_Science");
         assertThat(entity.getDisplayName()).isEqualTo("Laboratory");
         assertThat(entity.getCategory()).isEqualTo("Science");
+        assertThat(entity.getFactionKey()).isEqualTo("Faction_Aspect");
         assertThat(entity.getDescriptionLines()).containsExactly(
                 "+1 [ScienceColored] on Tile producing at least two types of yields",
                 "+2 [ScienceColored] Science per District Level"

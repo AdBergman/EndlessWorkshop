@@ -56,6 +56,9 @@ public class DistrictEntity {
     @Column(name = "is_faction_specific")
     private Boolean factionSpecific;
 
+    @Column(name = "faction_key", length = 220)
+    private String factionKey;
+
     @Column(name = "is_variant")
     private Boolean variant;
 
@@ -160,6 +163,9 @@ public class DistrictEntity {
 
     public Boolean getFactionSpecific() { return factionSpecific; }
     public void setFactionSpecific(Boolean factionSpecific) { this.factionSpecific = factionSpecific; }
+
+    public String getFactionKey() { return factionKey; }
+    public void setFactionKey(String factionKey) { this.factionKey = factionKey; }
 
     public Boolean getVariant() { return variant; }
     public void setVariant(Boolean variant) { this.variant = variant; }

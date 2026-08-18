@@ -3,7 +3,9 @@ import {
 cleanupCodexPageStores,
 getSummaryRowForButton,
 resetCodexPageTestState,
+richDistrict,
 seedCodexEntries,
+seedRichDistricts,
 seedShallowReferenceLayoutEntries
 } from "@/pages/testUtils/codexPageHarness";
 import { LocationProbe } from "@/pages/testUtils/codexPageTestUtils";
@@ -329,6 +331,53 @@ describe("CodexPage reference domain archives", () => {
         ];
 
         seedCodexEntries(entries);
+        seedRichDistricts([
+            richDistrict({
+                districtKey: "District_Tier1_Food",
+                isFactionSpecific: false,
+                constructionCost: ["Production", "10 Resource02"],
+                levelUp: {
+                    targetDistrictKey: "District_Tier2_Food",
+                    requiredAdjacentDistrictCount: 4,
+                },
+            }),
+            richDistrict({
+                districtKey: "Necrophage_District_Tier1_Food_v2",
+                isFactionSpecific: false,
+                constructionCost: ["Production", "10 Resource02"],
+                levelUp: {
+                    targetDistrictKey: "Necrophage_District_Tier2_Food",
+                    requiredAdjacentDistrictCount: 4,
+                },
+            }),
+            richDistrict({
+                districtKey: "Extractor_Luxury01",
+                isFactionSpecific: false,
+                placementPrerequisites: {
+                    pointOfInterest: {
+                        constraint: "Authorized",
+                        pointOfInterestKeys: ["POI_ResourceDepositLuxury01"],
+                    },
+                },
+            }),
+            richDistrict({
+                districtKey: "District_Tier0_Science",
+                isFactionSpecific: true,
+                factionKey: "Mukag",
+            }),
+            richDistrict({
+                districtKey: "District_Tier4_City",
+                isFactionSpecific: false,
+            }),
+            richDistrict({
+                districtKey: "District_Tier2_Military",
+                isFactionSpecific: false,
+                levelUp: {
+                    targetDistrictKey: "District_Tier3_Military",
+                    requiredAdjacentDistrictCount: 6,
+                },
+            }),
+        ]);
 
         render(
             <MemoryRouter initialEntries={["/codex?category=districts"]}>
@@ -352,24 +401,36 @@ describe("CodexPage reference domain archives", () => {
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(document.querySelector(".codex-workspace--districtArchive")).toBeInTheDocument();
         expect(within(districtRail).queryByRole("button", { name: /all/i })).not.toBeInTheDocument();
-        expect(within(districtRail).getByRole("button", { name: "Tier 1 2" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(districtRail).getByRole("button", { name: "Core yield 2" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "City base 1" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Infrastructure 1" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Resource extractor 1" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Tier 1 2" })).toHaveAttribute("aria-pressed", "false");
+        expect(within(districtRail).getByRole("button", { name: "Tier 0 1" })).toBeInTheDocument();
         expect(within(districtRail).getByRole("button", { name: "Tier 2 1" })).toBeInTheDocument();
-        expect(within(districtRail).getByRole("button", { name: "City 0" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Tier 4 1" })).toBeInTheDocument();
+        expect(within(districtRail).queryByRole("button", { name: "Tier 3 0" })).not.toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "City 1" })).toBeInTheDocument();
         expect(within(districtRail).getByRole("button", { name: "Food 1" })).toBeInTheDocument();
-        expect(within(districtRail).getByRole("button", { name: "Dust 0" })).toBeInTheDocument();
-        expect(within(districtRail).getByRole("button", { name: "Science 0" })).toBeInTheDocument();
+        expect(within(districtRail).queryByRole("button", { name: "Dust 0" })).not.toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Science 1" })).toBeInTheDocument();
         expect(within(districtRail).getByRole("button", { name: "Resource 1" })).toBeInTheDocument();
-        expect(within(districtRail).getByRole("button", { name: "Wonder 0" })).toBeInTheDocument();
+        expect(within(districtRail).queryByRole("button", { name: "Wonder 0" })).not.toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Universal 4" })).toBeInTheDocument();
+        expect(within(districtRail).getByRole("button", { name: "Tahuk 1" })).toBeInTheDocument();
 
         let districtsOverview = screen.getByLabelText("Districts overview");
         const farmRow = getSummaryRowForButton(
             within(districtsOverview).getByRole("button", { name: /farm/i })
         );
         expect(farmRow).toHaveTextContent("+3 Food per District Level");
-        expect(farmRow).toHaveTextContent("Yields: Food");
-        expect(farmRow).not.toHaveTextContent("Yields: Food, Industry");
+        expect(farmRow).not.toHaveTextContent("Yields:");
+        expect(farmRow).toHaveTextContent("Core yield");
         expect(farmRow).toHaveTextContent("Food");
+        expect(farmRow).toHaveTextContent("Universal");
         expect(farmRow).toHaveTextContent("Tier 1");
+        expect(farmRow).toHaveTextContent("Cost: Production, 10 Resource02");
+        expect(farmRow).toHaveTextContent("Upgrade: 4 adjacent districts");
         expect(within(farmRow).getAllByRole("img", { name: "FoodColored" }).length).toBeGreaterThan(0);
         expect(farmRow).not.toHaveTextContent("Kind District");
         expect(within(districtsOverview).getAllByRole("button", { name: /farm/i })).toHaveLength(1);
@@ -378,11 +439,29 @@ describe("CodexPage reference domain archives", () => {
             within(districtsOverview).getByRole("button", { name: /klax extractor/i })
         );
         expect(extractorRow).toHaveTextContent("Extracts:");
+        expect(extractorRow).toHaveTextContent("Placement: Requires: Resource Deposit Luxury 01");
         expect(within(extractorRow).getByRole("button", { name: /open klax in codex/i })).toBeInTheDocument();
 
-        expect(within(districtsOverview).queryByRole("button", { name: /advanced keep/i })).not.toBeInTheDocument();
-        expect(within(districtsOverview).queryByRole("button", { name: /holy oculum/i })).not.toBeInTheDocument();
-        expect(within(districtsOverview).queryByRole("button", { name: /great matriarch/i })).not.toBeInTheDocument();
+        expect(within(districtsOverview).getByRole("button", { name: /advanced keep/i })).toBeInTheDocument();
+        expect(within(districtsOverview).getByRole("button", { name: /holy oculum/i })).toBeInTheDocument();
+        expect(within(districtsOverview).getByRole("button", { name: /great matriarch/i })).toBeInTheDocument();
+
+        await user.click(within(districtRail).getByRole("button", { name: "Tahuk 1" }));
+
+        expect(within(districtRail).getByRole("button", { name: "Tahuk 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(districtsOverview).getByRole("button", { name: /holy oculum/i })).toBeInTheDocument();
+        expect(within(districtsOverview).queryByText("Farm")).not.toBeInTheDocument();
+
+        await user.click(within(districtRail).getByRole("button", { name: "Tahuk 1" }));
+
+        expect(within(districtRail).getByRole("button", { name: "Resource deposit 1" })).toBeInTheDocument();
+        await user.click(within(districtRail).getByRole("button", { name: "Resource deposit 1" }));
+
+        expect(within(districtRail).getByRole("button", { name: "Resource deposit 1" })).toHaveAttribute("aria-pressed", "true");
+        expect(within(districtsOverview).getByRole("button", { name: /klax extractor/i })).toBeInTheDocument();
+        expect(within(districtsOverview).queryByText("Farm")).not.toBeInTheDocument();
+
+        await user.click(within(districtRail).getByRole("button", { name: "Resource deposit 1" }));
 
         await user.click(within(districtRail).getByRole("button", { name: "Resource 1" }));
 
@@ -409,6 +488,7 @@ describe("CodexPage reference domain archives", () => {
         );
         expect(keepRow).toHaveTextContent("Military");
         expect(keepRow).toHaveTextContent("Tier 2");
+        expect(keepRow).toHaveTextContent("Upgrade: 6 adjacent districts");
         expect(keepRow).toHaveTextContent("No public district effects exported yet.");
 
         cleanup();

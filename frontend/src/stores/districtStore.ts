@@ -49,6 +49,7 @@ const normalizeDistrict = (district: District): District => ({
     referenceKeys: stringList(district.referenceKeys),
     unlockTechnologyKeys: stringList(district.unlockTechnologyKeys),
     isFactionSpecific: typeof district.isFactionSpecific === "boolean" ? district.isFactionSpecific : null,
+    factionKey: normalizeDistrictKey(district.factionKey),
     isVariant: typeof district.isVariant === "boolean" ? district.isVariant : null,
     isPlayerFacing: typeof district.isPlayerFacing === "boolean" ? district.isPlayerFacing : null,
     levelUp: normalizeLevelUp(district.levelUp),

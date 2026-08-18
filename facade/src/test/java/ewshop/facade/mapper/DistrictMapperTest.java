@@ -24,6 +24,8 @@ class DistrictMapperTest {
                 .districtKey("Aspect_District_Tier1_Science")
                 .displayName("Laboratory")
                 .category("Science")
+                .factionSpecific(true)
+                .factionKey("Faction_Aspect")
                 .descriptionLines(List.of(
                         "+1 Science on special tiles",
                         "+2 Science per level"
@@ -52,6 +54,8 @@ class DistrictMapperTest {
         assertThat(dto.districtKey()).isEqualTo("Aspect_District_Tier1_Science");
         assertThat(dto.displayName()).isEqualTo("Laboratory");
         assertThat(dto.category()).isEqualTo("Science");
+        assertThat(dto.isFactionSpecific()).isTrue();
+        assertThat(dto.factionKey()).isEqualTo("Faction_Aspect");
         assertThat(dto.descriptionLines()).containsExactly(
                 "+1 Science on special tiles",
                 "+2 Science per level"

@@ -33,6 +33,7 @@ public class DistrictMapper {
                 .referenceKeys(entity.getReferenceKeys())
                 .unlockTechnologyKeys(entity.getUnlockTechnologyKeys())
                 .factionSpecific(entity.getFactionSpecific())
+                .factionKey(entity.getFactionKey())
                 .variant(entity.getVariant())
                 .playerFacing(entity.getPlayerFacing())
                 .levelUp(toLevelUp(entity))
@@ -57,6 +58,7 @@ public class DistrictMapper {
         entity.setReferenceKeys(domain.getReferenceKeys());
         entity.setUnlockTechnologyKeys(domain.getUnlockTechnologyKeys());
         entity.setFactionSpecific(domain.getFactionSpecific());
+        entity.setFactionKey(domain.getFactionKey());
         entity.setVariant(domain.getVariant());
         entity.setPlayerFacing(domain.getPlayerFacing());
         applyLevelUp(entity, domain.getLevelUp());
