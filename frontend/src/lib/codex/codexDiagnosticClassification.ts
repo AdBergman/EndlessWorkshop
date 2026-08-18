@@ -1,5 +1,5 @@
-import type { DescriptionTokenDiagnostic } from "@/lib/descriptionLine/descriptionDiagnostics";
-import type { CodexReferenceDiagnostic } from "./codexReferenceDiagnostics";
+import type { DescriptionTokenDiagnostic } from "../descriptionLine/descriptionDiagnostics.ts";
+import type { CodexReferenceDiagnostic } from "./codexReferenceDiagnostics.ts";
 
 export type CodexDiagnosticSeverity = "warning" | "low" | "info";
 
@@ -51,6 +51,8 @@ const USER_FACING_REFERENCE_PATTERNS = [
     /^Faction_/i,
     /^FactionQuest_/i,
     /^Population_/i,
+    /^Status_/i,
+    /^HeroStatus_/i,
     /^Trait_/i,
 ];
 

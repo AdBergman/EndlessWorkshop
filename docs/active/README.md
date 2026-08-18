@@ -120,6 +120,13 @@ index, then select the smallest relevant doc set for the task type.
   - Read when: investigating thin/noisy/missing Codex content.
   - Status: active diagnostic guide.
 
+- `docs/active/codex-reference-diagnostics.md`
+  - Purpose: deterministic engineering diagnostic for unresolved or malformed
+    Codex references, including source entry context and visibility hints.
+  - Read when: comparing relationship quality across Codex snapshots, imports,
+    or exporter responses.
+  - Status: active diagnostic guide.
+
 - `docs/active/codex-rich-enrichment-decision-template.md`
   - Purpose: gate for deciding whether rich/domain exports should enrich Codex.
   - Read when: proposing any new Codex rich-import resolver.

@@ -61,11 +61,14 @@ substantial logic.
 ### Strengthen Unresolved Reference Diagnostics
 
 Exact reference keys are a strategic asset, but unresolved clusters currently
-require ad hoc investigation. Existing diagnostics code can be extended to sort
-missing refs by source category, missing prefix, visibility class, and sample
-source entries.
+no longer require only ad hoc investigation. `EW-CODEX-REL-001` added
+`npm run diagnostics:codex-references`, which reuses canonical Codex reference
+resolution and sorts missing refs by source category, source entry, field/index,
+target prefix, diagnostic kind, visibility class, and classification.
 
-Recommended action: implement `EW-CODEX-REL-001`.
+Recommended action: run the diagnostic when comparing new Codex releases or
+exporter responses; create evidence-backed backlog/exporter items for high
+signal unresolved clusters rather than expanding the diagnostic slice.
 
 ### Keep Icon Resolution Contract-Bound
 

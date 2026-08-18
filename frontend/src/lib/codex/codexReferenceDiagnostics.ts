@@ -6,9 +6,9 @@ import {
     type CodexIdentity,
     type EntityKind,
     type EntityRef,
-} from "@/lib/entityRef/entityRef";
-import type { CodexEntry } from "@/types/dataTypes";
-import { type CodexReferenceIndexes, resolveCodexReference } from "./codexRefs";
+} from "../entityRef/entityRef.ts";
+import type { CodexEntry } from "../../types/dataTypes.ts";
+import { type CodexReferenceIndexes, resolveCodexReference } from "./codexRefs.ts";
 
 export type ImportedDomainKind = Exclude<EntityKind, "codex">;
 
