@@ -15,6 +15,9 @@ import ewshop.facade.dto.importing.districts.DistrictImportBatchDto;
 import ewshop.facade.dto.importing.districts.DistrictImportDistrictDto;
 import ewshop.facade.dto.importing.districts.DistrictLevelUpDto;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DistrictImportAdminFacadeImplTest {
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     @Test
     void importDistricts_reportsDiagnosticsAndWarningCodes() {
@@ -91,6 +98,65 @@ class DistrictImportAdminFacadeImplTest {
         assertThat(snapshot.placementPrerequisites().river().constraint()).isEqualTo("NoRiver");
         assertThat(snapshot.placementPrerequisites().pointOfInterest().constraint()).isEqualTo("NoResourceDeposit");
         assertThat(districtService.getAllCalls).isEqualTo(1);
+    }
+
+    @Test
+    void importDistricts_acceptsCurrentExporterConstructionCostObject() throws Exception {
+        RecordingDistrictImportService importService = new RecordingDistrictImportService(importResultWithInsert());
+        RecordingDistrictService districtService = new RecordingDistrictService();
+        DistrictImportAdminFacadeImpl facade = new DistrictImportAdminFacadeImpl(importService, districtService);
+
+        DistrictImportBatchDto file = OBJECT_MAPPER.readValue("""
+                {
+                  "game": "Endless Legend 2",
+                  "gameVersion": "0.82",
+                  "exporterVersion": "0.1.0",
+                  "exportedAtUtc": "2026-08-18T00:00:00Z",
+                  "exportKind": "districts",
+                  "districts": [
+                    {
+                      "districtKey": "DistrictDefinition_District_Tier1_DivinePopMonument",
+                      "displayName": "Divined Monument",
+                      "category": "City",
+                      "descriptionLines": ["+8 Influence"],
+                      "constructionCost": {
+                        "productionCostType": "Production",
+                        "productionRpnKey": "ProductionCost_District_KinOfSheredyn_DivinePopMonument",
+                        "resourcePrerequisites": [
+                          {
+                            "resourceType": "Resource02",
+                            "amount": 10.0
+                          }
+                        ]
+                      },
+                      "placementPrerequisites": {
+                        "terrain": {
+                          "constraint": "Forbidden",
+                          "terrainTypeKeys": ["TerrainType_Ocean"],
+                          "canBuildOnWasteland": false,
+                          "canBuildOnMud": false
+                        },
+                        "river": {
+                          "constraint": "NoRiver"
+                        },
+                        "pointOfInterest": {
+                          "constraint": "NoResourceDeposit"
+                        }
+                      }
+                    }
+                  ]
+                }
+                """, DistrictImportBatchDto.class);
+
+        ImportSummaryDto summary = facade.importDistricts(file);
+
+        assertThat(summary.counts().failed()).isZero();
+        DistrictImportSnapshot snapshot = importService.snapshots.getFirst();
+        assertThat(snapshot.constructionCost()).containsExactly("Production", "10 Resource02");
+        assertThat(snapshot.placementPrerequisites()).isNotNull();
+        assertThat(snapshot.placementPrerequisites().terrain().constraint()).isEqualTo("Forbidden");
+        assertThat(snapshot.placementPrerequisites().river().constraint()).isEqualTo("NoRiver");
+        assertThat(snapshot.placementPrerequisites().pointOfInterest().constraint()).isEqualTo("NoResourceDeposit");
     }
 
     @Test

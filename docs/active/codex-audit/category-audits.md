@@ -199,6 +199,9 @@ Trace:
   cost, descriptor keys, references, unlock techs, level-up, and
   `placementPrerequisites.neighbourTiles`, `terrain`, `river`, and
   `pointOfInterest`.
+- Current object-shaped rich `constructionCost` values are accepted and mapped
+  to stable cost lines such as `Production` and `10 Resource02`; internal
+  production RPN keys are not rendered as player-facing cost text.
 - `ConstructiblePlacementPrerequisitesDto`, the domain placement model,
   persistence columns, response DTOs, frontend stores, and Codex detail
   enrichment now preserve the rich source `terrain`, `river`, and
@@ -223,6 +226,8 @@ Completed:
 - PIPELINE/FE: extended rich constructible placement DTO/domain/persistence/API
   and frontend detail enrichment to preserve and show terrain, river, and
   POI/resource-deposit constraints already present in rich District exports.
+- PIPELINE: made rich District import tolerant of current object-shaped
+  construction-cost data so fresh 0.82 local startup imports complete.
 - FE: archive rows remain effect-first; no terrain matrix or inferred adjacency
   parser was added.
 

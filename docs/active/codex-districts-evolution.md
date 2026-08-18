@@ -373,6 +373,27 @@ Implemented after product review:
   - faction-specific/variant/player-facing flags;
   - richer level-up neighbour/faction-trait metadata.
 
+## 2026-08-18 District Audit Remediation Update
+
+Implemented after the comprehensive Codex category audit:
+
+- Rich District and Improvement placement data now preserves terrain, river,
+  point-of-interest/resource-deposit, and neighbour constraints through import,
+  domain, persistence, API, frontend stores, and Codex detail Planning
+  enrichment.
+- Rich District import now accepts the current exporter object-shaped
+  `constructionCost` value and turns it into stable player-facing cost lines,
+  for example `Production` and `10 Resource02`.
+- Internal production RPN keys remain importer/reference metadata, not visible
+  cost copy.
+
+Verification:
+
+- Targeted District facade import tests cover current exporter construction
+  cost shape plus terrain/river/POI placement.
+- Browser QA on a fresh local startup import confirmed Divined Monument renders
+  cost and placement Planning lines.
+
 Verification:
 
 - Focused Codex/District frontend tests passed.

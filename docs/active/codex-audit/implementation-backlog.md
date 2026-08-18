@@ -70,7 +70,10 @@ placement submodels through facade import DTOs, domain placement model,
 persistence columns, facade response DTOs, frontend District/Improvement store
 normalizers, and Codex detail Planning enrichment. District/Extractor examples
 now render concise detail-only terrain, river, and resource-deposit placement
-lines. Archive rows and visibility policy were left unchanged.
+lines. The rich District import also accepts the current exporter
+object-shaped `constructionCost` value and converts it to stable
+player-readable cost lines, preventing fresh local startup imports from failing
+on current 0.82 data. Archive rows and visibility policy were left unchanged.
 
 Non-goals: no archive redesign, no terrain matrix, no inferred adjacency
 parser, no DBExporter request until EWShop preserves current data.
@@ -87,8 +90,10 @@ Acceptance criteria:
 Verification: relevant Maven tests, frontend Codex tests, TypeScript, build.
 
 Completed verification: targeted Maven mapper/API tests and targeted frontend
-store/Codex rich planning tests passed. Broader final verification is still run
-at program close.
+store/Codex rich planning tests passed. Browser QA confirmed the Divined
+Monument detail Planning panel renders `Production`, `10 Resource02`, forbidden
+terrain, no-river, and no-resource-deposit lines after a fresh local startup
+import. Broader final verification is still run at program close.
 
 ### EW-CODEX-COUNCILORS-001 - Prove Councilor Completeness Before Remediation
 

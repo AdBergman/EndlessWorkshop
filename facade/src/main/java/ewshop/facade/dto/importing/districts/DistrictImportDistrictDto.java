@@ -11,7 +11,7 @@ public record DistrictImportDistrictDto(
         Integer tier,
         Integer constructibleLevel,
         List<String> descriptionLines,
-        List<String> constructionCost,
+        Object constructionCost,
         List<String> descriptorKeys,
         List<String> referenceKeys,
         List<String> unlockTechnologyKeys,
