@@ -15,6 +15,26 @@ Keep project documentation small, current, and placed by purpose.
   what landed, where it is consumed, what remains open, and where the archive
   lives.
 
+## PR Handoffs And Evidence
+
+For pushed work, the PR is the authoritative review artifact. Final handoffs
+should stay human-readable and concise. For routine completed work, use a short
+shape: PR, Status, What Changed, and Working Tree. Add extra sections only for
+failures, blockers, unusual conditions requiring maintainer action, or important
+local-only evidence.
+
+Do not paste large diffs, source files, or repository contents into a handoff
+when GitHub already contains them. Do not create a full-repository zip just
+because a branch was pushed. If important work is intentionally uncommitted or
+local-only, say so explicitly so reviewers do not assume it is in the PR.
+
+Small evidence packages are appropriate only when the reviewer needs material
+that is not available from GitHub, such as local-only exporter files, generated
+diagnostics, browser QA screenshots, captured UI evidence, benchmark output, or
+external-tool artifacts. Package only the evidence, add a short `README.md` or
+`HANDOFF.md` when the contents are not self-explanatory, and explain in the
+final handoff why the package exists.
+
 ## Update Discipline
 
 - Update active docs when a task creates, changes, or supersedes durable project
