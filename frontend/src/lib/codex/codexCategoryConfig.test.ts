@@ -62,6 +62,8 @@ describe("codexCategoryConfig", () => {
         expect(getCodexCategoryMode("counciloreffects")).toBe("referenceSheet");
         expect(getCodexCategoryMode("resources")).toBe("referenceSheet");
         expect(getCodexCategoryMode("naturalwonders")).toBe("referenceSheet");
+        expect(getCodexCategoryMode("factions")).toBe("referenceSheet");
+        expect(getCodexCategoryMode("minorfactions")).toBe("referenceSheet");
         expect(getCodexCategoryMode("traits")).toBe("traitArchive");
     });
 });

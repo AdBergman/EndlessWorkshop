@@ -1,15 +1,15 @@
 # Codex Faction Strategy Profile Decision
 
-Status: implemented 2026-08-19
+Status: implemented and revised 2026-08-19
 Created: 2026-08-18
 Related: `EW-CODEX-FACTIONS-001`, `EW-CODEX-FACTIONS-002`
 
 ## Decision
 
-Use the existing Codex Faction detail page as the Faction strategy/profile
-surface. The next implementation slice should improve the first-screen
-information hierarchy inside Faction detail, not create a new `/factions` route
-and not wait for an art/icon contract.
+Use the existing Codex Faction category as the Faction strategy/profile surface.
+The winning shape is a full-width category archive for Major and Minor Factions,
+with richer detail on click. Do not create a new `/factions` route and do not
+wait for an art/icon contract.
 
 ## Why
 
@@ -47,19 +47,22 @@ groups and preserve progressive disclosure.
 
 ## First Implementation Slice
 
-`EW-CODEX-FACTIONS-002 - Faction Strategy Profile Header`
+`EW-CODEX-FACTIONS-002 - Faction Codex Archive and Detail Pass`
 
 Scope:
 
-- Add a compact detail-only strategy profile section above the existing Faction
-  dossier/package sections.
-- Use only exact Codex facts, parsed Faction trait lines, and exact rich faction
-  package counts/links already available in `buildCodexRichFactionPackageGroups`.
-- Surface high-signal planning dimensions: affinity, population, core-unit
-  count, faction-tech count, hero count, questline presence, and trait count.
+- Use the established full-width Codex reference overview pattern for the small
+  Major Faction and Minor Faction category archives.
+- Use only exact Codex facts, exported sections, parsed public description
+  lines, and exact rich faction package links already available in
+  `buildCodexRichFactionPackageGroups`.
+- Surface high-signal row content: affinity/disposition, faction-defining
+  mechanics, minor-faction identity, units, and traits.
+- Keep detail pages richer than rows, but avoid duplicating Core Effects in a
+  separate branded profile section.
 - Preserve existing Faction package caps and related-entry hiding.
-- Preserve minor-faction package behavior; adjust only where the same strategy
-  profile model has exact minor-faction data.
+- Preserve minor-faction package behavior and avoid implementation facts such
+  as `Kind=MinorFaction`.
 
 Non-goals:
 
@@ -79,31 +82,33 @@ Verification:
 
 Result:
 
-- Implemented a detail-first `Strategy profile` section for major Factions and
-  Minor Factions using exact rich faction joins, rich lore where available,
-  exported affinity/disposition facts, parsed public trait lines, and existing
-  capped package groups.
-- Major Faction archive rows now lead with exported strategic effect text
-  rather than trait-name summaries, so the category answers what makes each
-  empire play differently before click-through.
+- The initial detail-first `Strategy profile` section was browser-reviewed and
+  rejected as too much frontend-created count telemetry and duplicated effect
+  text. It was removed.
+- Major and Minor Faction category routes now use the established full-width
+  overview pattern instead of a left result rail, giving the small archives the
+  space they need.
+- Major Faction overview rows now lead with affinity plus one or two exported
+  strategic effect hooks rather than trait-name summaries.
+- Minor Faction overview rows now lead with disposition, affinity, sourced
+  identity text, unit identity, and trait identity.
 - Major Faction detail now puts `Core Effects` before the trait list and removes
-  the redundant standalone Affinity block because the profile carries that
-  planning fact.
+  the redundant standalone Affinity block.
 - The old `Faction package` section is now `Faction systems`, and capped group
   overflow copy no longer exposes implementation wording such as `exact refs`.
-- Minor Factions keep their structured dossier body but gain the same compact
-  profile for affinity, disposition, population, unit, heroes, protectorate
-  traits, and quest presence. Redundant `Kind=MinorFaction` structured facts are
-  hidden as implementation noise.
-- Browser review covered Aspects, Necrophages, Tahuk, Ametrine, desktop and a
-  mobile-width viewport. A metric-grid layout flaw found during review was fixed
-  immediately.
+- Minor Factions keep their structured dossier body and exact Faction systems
+  links. Redundant `Kind=MinorFaction` structured facts are hidden as
+  implementation noise.
+- Browser review covered all five Major Factions, representative Minor Factions
+  including Ametrine, Blackhammers, Hydracorns, and Mangrove of Harmony, desktop
+  and mobile-width archive layouts. A metric-grid/layout direction from the
+  first pass was removed rather than defended.
 
 Closeout classification:
 
 - Still actionable in EWShop now: none discovered within the Faction category
-  after the profile/header, row preview, package-label, Minor Faction noise, and
-  metric layout fixes.
+  after the full-width archive, sourced row-preview, package-label, Minor
+  Faction noise, and duplicate-profile fixes.
 - Exporter/source blocked: richer faction art/portrait contracts and stronger
   canonical ownership metadata for unrelated categories such as Actions/Traits
   remain exporter-owned if future Faction pages need them.

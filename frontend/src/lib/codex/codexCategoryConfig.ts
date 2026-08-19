@@ -48,6 +48,8 @@ const LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS = new Set(["victoryconditions", "victoryp
 const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors", "quests"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set([
     "counciloreffects",
+    "factions",
+    "minorfactions",
     "naturalwonders",
     "partnereffects",
     "resources",
