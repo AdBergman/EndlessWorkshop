@@ -24,7 +24,6 @@ COPY facade/pom.xml facade/pom.xml
 COPY infrastructure/pom.xml infrastructure/pom.xml
 
 RUN chmod +x mvnw
-RUN ./mvnw -B dependency:go-offline
 
 # Copy sources
 COPY app ./app
