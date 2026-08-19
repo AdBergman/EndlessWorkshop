@@ -52,7 +52,7 @@ describe("CodexPage faction details", () => {
             error: null,
         });
 
-        render(
+        const { container } = render(
             <MemoryRouter initialEntries={["/codex?category=factions"]}>
                 <Routes>
                     <Route path="/codex" element={<CodexPage />} />
@@ -66,6 +66,7 @@ describe("CodexPage faction details", () => {
 
         const overview = screen.getByLabelText("Factions overview");
         expect(within(overview).getByRole("button", { name: /Tahuk/i })).toBeInTheDocument();
+        expect(container.querySelector(".codex-kindIcon--summaryResource")).toBeInTheDocument();
         expect(within(overview).getByText("Affinity: Tahuk")).toBeInTheDocument();
         expect(within(overview).getByLabelText("Tahuk effects"))
             .toHaveTextContent("Tahuk can spend Science on territorial empire actions.");
@@ -73,7 +74,8 @@ describe("CodexPage faction details", () => {
 
 
 
-    it("uses a full-width Minor Faction overview with disposition, identity, and unit hooks", async () => {
+    it("uses a full-width Minor Faction overview with disposition, identity, and linked unit hooks", async () => {
+        const user = userEvent.setup();
         const entries: CodexEntry[] = [
             {
                 exportKind: "minorFactions",
@@ -89,7 +91,12 @@ describe("CodexPage faction details", () => {
                     "Unit: Elite Crusher",
                     "Trait: Chant of the Rocks",
                 ],
-                referenceKeys: [],
+                referenceKeys: [
+                    "Population_Ametrine",
+                    "Unit_Crusher",
+                    "Unit_EliteCrusher",
+                    "Trait_ChantOfTheRocks",
+                ],
                 facts: [
                     { label: "Disposition", value: "Pacifist" },
                     { label: "Faction affinity", value: "Ametrine" },
@@ -99,20 +106,54 @@ describe("CodexPage faction details", () => {
                     { title: "Traits", lines: ["Chant of the Rocks"] },
                 ],
             },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: ["Ametrine population bonus."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Crusher",
+                displayName: "Crusher",
+                descriptionLines: ["Front-line crusher."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "0" }],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_EliteCrusher",
+                displayName: "Elite Crusher",
+                descriptionLines: ["Elite front-line crusher."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "2" }],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_ChantOfTheRocks",
+                displayName: "Chant of the Rocks",
+                descriptionLines: ["Protectorate trait for mineral folk."],
+                referenceKeys: [],
+                facts: [{ label: "Trait type", value: "Protectorate" }],
+            },
         ];
 
         useCodexStore.setState({
             entries,
             entriesByKey: buildEntriesByKey(entries),
             entriesByKind: {
-                minorfactions: entries,
+                minorfactions: entries.filter((entry) => entry.exportKind.toLowerCase() === "minorfactions"),
+                populations: entries.filter((entry) => entry.exportKind.toLowerCase() === "populations"),
+                units: entries.filter((entry) => entry.exportKind.toLowerCase() === "units"),
+                traits: entries.filter((entry) => entry.exportKind.toLowerCase() === "traits"),
             },
             entriesByKindKey: buildEntriesByKindKey(entries),
             loading: false,
             error: null,
         });
 
-        render(
+        const { container } = render(
             <MemoryRouter initialEntries={["/codex?category=minorfactions"]}>
                 <Routes>
                     <Route path="/codex" element={<CodexPage />} />
@@ -123,13 +164,26 @@ describe("CodexPage faction details", () => {
         expect(await screen.findByRole("heading", { name: "All Minor Factions" })).toBeInTheDocument();
         expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         const overview = screen.getByLabelText("Minor Factions overview");
-        expect(within(overview).getByText("Pacifist · Affinity: Ametrine")).toBeInTheDocument();
+        expect(container.querySelector(".codex-kindIcon--summaryResource")).toBeInTheDocument();
+        expect(within(overview).getByText("Pacifist")).toBeInTheDocument();
+        expect(within(overview).queryByText(/Affinity: Ametrine/)).not.toBeInTheDocument();
         expect(within(overview).getByLabelText("Ametrine effects"))
             .toHaveTextContent("Ancient mineral folk seek their ossified ancestors.");
-        expect(within(overview).getByLabelText("Ametrine effects"))
-            .toHaveTextContent("Units: Crusher / Elite Crusher");
-        expect(within(overview).getByLabelText("Ametrine effects"))
-            .toHaveTextContent("Traits: Chant of the Rocks");
+        const associated = within(overview).getByLabelText("Ametrine associated entries");
+        expect(within(associated).getByText("Population:")).toBeInTheDocument();
+        expect(within(associated).getByText("Unit:")).toBeInTheDocument();
+        expect(within(associated).getByText("Elite Unit:")).toBeInTheDocument();
+        expect(within(associated).getByText("Protectorate Trait:")).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Ametrine in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Crusher in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Elite Crusher in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Chant of the Rocks in Codex" }))
+            .toBeInTheDocument();
+
+        await user.hover(within(associated).getByRole("button", { name: "Open Crusher in Codex" }));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Crusher");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Front-line crusher.");
     });
 
 
