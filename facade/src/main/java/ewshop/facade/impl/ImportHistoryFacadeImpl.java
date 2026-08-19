@@ -291,14 +291,18 @@ public class ImportHistoryFacadeImpl implements ImportHistoryFacade {
     }
 
     private static String safeFilename(String filename, String exportKind) {
-        String fallback = firstNonBlank(exportKind, "admin-import") + ".json";
-        String value = firstNonBlank(filename, fallback);
+        String fallbackKind = trimToNull(exportKind);
+        String fallback = (fallbackKind == null ? "admin-import" : fallbackKind) + ".json";
+        String value = trimToNull(filename);
+        if (value == null) {
+            value = fallback;
+        }
         value = value.replace('\\', '/');
         int lastSlash = value.lastIndexOf('/');
         if (lastSlash >= 0) {
             value = value.substring(lastSlash + 1);
         }
-        value = value.replaceAll("[\\p{Cntrl}]", "").trim();
+        value = value.replaceAll("\\p{Cntrl}", "").trim();
         return value.isBlank() ? fallback : value;
     }
 

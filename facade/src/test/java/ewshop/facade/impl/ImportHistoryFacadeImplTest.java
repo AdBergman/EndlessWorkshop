@@ -162,6 +162,60 @@ class ImportHistoryFacadeImplTest {
     }
 
     @Test
+    void recordsManualAdminImportWithDefaultFilenameWhenInputsAreBlank() {
+        RecordingRepository repository = new RecordingRepository(null, null);
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(repository);
+
+        facade.recordManualAdminImport(
+                null,
+                " ",
+                "codex",
+                "Endless Legend 2",
+                "0.82",
+                "1.2.3",
+                "2026-06-22T05:57:36Z",
+                null,
+                Instant.parse("2026-06-24T10:00:00Z"),
+                ImportSummaryDto.of(
+                        "codex",
+                        new ImportCountsDto(1, 0, 0, 1, 0, 0),
+                        null,
+                        14L
+                )
+        );
+
+        ImportRun saved = repository.savedRuns.getFirst();
+        assertThat(saved.fileResults().getFirst().filename()).isEqualTo("admin-import.json");
+    }
+
+    @Test
+    void recordsManualAdminImportWithSanitizedUploadedFilename() {
+        RecordingRepository repository = new RecordingRepository(null, null);
+        ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(repository);
+
+        facade.recordManualAdminImport(
+                "C:\\exports\\bad\u0000name.json",
+                "codex",
+                "codex",
+                "Endless Legend 2",
+                "0.82",
+                "1.2.3",
+                "2026-06-22T05:57:36Z",
+                null,
+                Instant.parse("2026-06-24T10:00:00Z"),
+                ImportSummaryDto.of(
+                        "codex",
+                        new ImportCountsDto(1, 0, 0, 1, 0, 0),
+                        null,
+                        14L
+                )
+        );
+
+        ImportRun saved = repository.savedRuns.getFirst();
+        assertThat(saved.fileResults().getFirst().filename()).isEqualTo("badname.json");
+    }
+
+    @Test
     void recordsFailedManualAdminImportWithoutStackTracePayloads() {
         RecordingRepository repository = new RecordingRepository(null, null);
         ImportHistoryFacadeImpl facade = new ImportHistoryFacadeImpl(repository);
