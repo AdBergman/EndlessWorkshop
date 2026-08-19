@@ -222,6 +222,11 @@ function sourceVisibility(entry: CodexEntry): CodexTopLevelVisibility {
     return getCodexTopLevelVisibility(entry.exportKind);
 }
 
+// Quest imported-domain refs are policy noise only while Quests stay hidden and route-owned.
+function isQuestRouteOwnedPolicyActive(): boolean {
+    return getCodexTopLevelVisibility("quests") === "hidden";
+}
+
 function unresolvedVisibilityClass(diagnostic: CodexReferenceDiagnostic): CodexReferenceVisibilityClass {
     const identityKind = diagnostic.identity?.exportKind;
     if (identityKind) {
@@ -277,7 +282,8 @@ function rootCauseForUnresolvedDiagnostic(
 
     if (
         diagnostic.kind === "unresolved-imported-domain-ref" &&
-        diagnostic.importedKindHint === "quest"
+        diagnostic.importedKindHint === "quest" &&
+        isQuestRouteOwnedPolicyActive()
     ) {
         return "relationship/reference policy";
     }
