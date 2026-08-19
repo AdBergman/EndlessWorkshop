@@ -4,6 +4,21 @@ Each section records the category verdict, evidence trace, main filtering/data
 facts, current UI shape, and highest-value remediation decision. Scores use the
 methodology in `audit-methodology.md`.
 
+## 2026-08-19 Rich-Domain Integrity Closeout
+
+Final explicit sweep after rebasing onto current `origin/main`.
+
+| Rich domain | Closeout classification | Evidence |
+| --- | --- | --- |
+| Districts | Already fixed on current main; no additional material contract loss found. | Rich import preserves key, category/tier/level, cost lines, descriptor/reference/unlock keys, faction/variant/player-facing flags, level-up data, and placement prerequisites through import DTO, domain, persistence, API DTO, frontend type/store, and Codex constructible enrichment. Exporter/debug fields such as source line keys and template/prototype flags that are not part of the current player-facing District API remain intentionally outside the contract. |
+| Improvements | EWShop-owned gap fixed in this branch. | API already exposed `category`, but frontend type/store did not preserve it; this branch fixes that contract loss. Current rich import/API also preserve description lines, unlock tech keys, and placement prerequisites. Rich construction/family/faction/provenance fields are intentionally not imported/exposed unless a future product slice needs them. |
+| Units | No material contract loss found. | Unit key, display name/art id, faction display, major/hero/chosen/spawn flags, evolution keys, class/attack skill, merged ability keys, descriptions, and veterancy progression lines survive import DTO, domain, persistence, API, frontend store, and Codex detail enrichment. Raw grouped/helper ability buckets beyond the merged ability contract remain documented rich-route/detail candidates, not current API promises. |
+| Factions | No material contract loss found. | Rich faction identity, public label, lore, kind, affinity, trait/population/unit/base-unit/hero/gated-tech/quest/protectorate relationship arrays preserve through the chain and feed exact Codex faction package enrichment. Visual/advisor mapper fields remain intentionally outside the current player-facing API contract. |
+| Heroes | No material contract loss found. | Hero identity, faction/origin/class keys, grouped ability buckets, default skills, applicable skill trees, descriptions, and reference keys preserve through import, persistence, API, frontend type/store, and hero detail enrichment. Portrait/icon and planner-grade skill progression remain outside current scope. |
+| Skills | No material contract loss found. | Skill trees, tiers, hero defaults, skill prerequisites/locks/inhibitors, placements, effects, resolved summaries, mechanic tags, ability/effect/reference arrays, and default hero links preserve through import DTOs, domain snapshots, JSON-backed persistence, API DTO, frontend type/store, and Hero Codex enrichment. |
+| Tech | EWShop-owned gap fixed in this branch. | Full `technologyPrerequisiteTechKeys` and `exclusiveTechnologyPrerequisiteTechKeys` arrays now preserve from rich export through import DTO, domain, JPA collection tables, API DTO, frontend type/store, and Codex tech detail enrichment. `V3_5_6` hardens the existing collection tables with FK cascade, indexes, and uniqueness coverage. |
+| Quest Explorer | EWShop-owned gap fixed in this branch; proven source/reference gaps already represented by canonical `DBX-CODEX-REFERENCES-001`. | Root `chapterRootEvidence` existed in rich Quest Explorer source but was dropped by EWShop; this branch preserves it through import metadata, persistence, API, frontend type, and normalizer. Entry navigation, lore, strategy, branch, requirement/reward, quality, progression, and debug summary fields remain preserved. Generic Quest rows still reference rich `FactionQuest_*` targets absent from generic Codex exports, which remains the existing canonical exporter/reference issue rather than a new EWShop substitute. |
+
 ## Abilities
 
 Scores: UX 8, completeness 7, usefulness 8, trust 7. Confidence: PROVEN.
