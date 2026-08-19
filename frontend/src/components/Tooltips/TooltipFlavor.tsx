@@ -1,6 +1,6 @@
 import React from "react";
 
-export class TooltipFlavor extends React.Component<{ unique: "City" | "District" }> {
+export class TooltipFlavor extends React.Component<{ unique?: "City" | "District" }> {
     render() {
         return <>
             {this.props.unique && (

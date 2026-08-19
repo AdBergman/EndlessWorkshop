@@ -168,9 +168,21 @@ public class TechRepositoryAdapter implements TechRepository {
             TechImportSnapshot snapshot = snapshotsByKey.get(entity.getTechKey());
             if (snapshot == null) continue;
 
+            Set<String> nextPrereqKeys = toKeySet(snapshot.prereqTechKeys());
+            Set<String> nextExclusivePrereqKeys = toKeySet(snapshot.exclusivePrereqTechKeys());
             TechEntity nextPrereq = firstReferencedEntity(snapshot.prereqTechKeys(), entitiesByKey);
             TechEntity nextExcludes = firstReferencedEntity(snapshot.exclusivePrereqTechKeys(), entitiesByKey);
             boolean relationshipChanged = false;
+
+            if (!toKeySet(entity.getTechnologyPrerequisiteTechKeys()).equals(nextPrereqKeys)) {
+                entity.setTechnologyPrerequisiteTechKeys(nextPrereqKeys);
+                relationshipChanged = true;
+            }
+
+            if (!toKeySet(entity.getExclusiveTechnologyPrerequisiteTechKeys()).equals(nextExclusivePrereqKeys)) {
+                entity.setExclusiveTechnologyPrerequisiteTechKeys(nextExclusivePrereqKeys);
+                relationshipChanged = true;
+            }
 
             if (!sameTechKey(entity.getPrereq(), nextPrereq)) {
                 entity.setPrereq(nextPrereq);
@@ -282,6 +294,26 @@ public class TechRepositoryAdapter implements TechRepository {
 
         if (isInsert) return UpsertOutcome.INSERTED;
         return changed ? UpsertOutcome.UPDATED : UpsertOutcome.UNCHANGED;
+    }
+
+    private static Set<String> toKeySet(List<String> in) {
+        if (in == null || in.isEmpty()) {
+            return Set.of();
+        }
+        return in.stream()
+                .filter(key -> key != null && !key.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private static Set<String> toKeySet(Set<String> in) {
+        if (in == null || in.isEmpty()) {
+            return Set.of();
+        }
+        return in.stream()
+                .filter(key -> key != null && !key.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private static Set<String> toFactionSet(Set<String> in) {

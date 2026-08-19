@@ -37,6 +37,8 @@ public interface TechJpaRepository extends JpaRepository<TechEntity, Long> {
           left join fetch tech.excludes
           left join fetch tech.descriptionLines
           left join fetch tech.unlocks
+          left join fetch tech.technologyPrerequisiteTechKeys
+          left join fetch tech.exclusiveTechnologyPrerequisiteTechKeys
     """)
     List<TechEntity> findAllForCache();
 

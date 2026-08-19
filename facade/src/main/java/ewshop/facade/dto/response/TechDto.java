@@ -12,6 +12,8 @@ public record TechDto(
         String prereq,
         List<String> factions,
         String excludes,
+        List<String> technologyPrerequisiteTechKeys,
+        List<String> exclusiveTechnologyPrerequisiteTechKeys,
         TechCoordsDto coords
 ) {
 }

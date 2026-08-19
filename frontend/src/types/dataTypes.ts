@@ -59,9 +59,10 @@ export interface Tech {
 export interface Improvement {
     improvementKey: string;
     displayName: string;
+    category?: string | null;
     descriptionLines: string[];
-    unique: "City" | "District";
-    cost: string[];
+    unique?: "City" | "District";
+    cost?: string[];
     unlockTechnologyKeys?: string[];
     placementPrerequisites?: ConstructiblePlacementPrerequisites | null;
 }

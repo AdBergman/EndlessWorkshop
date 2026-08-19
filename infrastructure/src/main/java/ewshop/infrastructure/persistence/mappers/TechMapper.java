@@ -8,6 +8,7 @@ import ewshop.infrastructure.persistence.entities.TechUnlockRefEmbeddable;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +41,8 @@ public class TechMapper {
                         .collect(Collectors.toList())
                         : Collections.emptyList()
         );
+        entity.setTechnologyPrerequisiteTechKeys(toKeySet(domain.getTechnologyPrerequisiteTechKeys()));
+        entity.setExclusiveTechnologyPrerequisiteTechKeys(toKeySet(domain.getExclusiveTechnologyPrerequisiteTechKeys()));
 
         entity.setTechCoords(domain.getTechCoords());
         entity.setFactions(domain.getFactions() != null ? cleanFactions(domain.getFactions()) : Collections.emptySet());
@@ -124,6 +127,8 @@ public class TechMapper {
                 .era(entity.getEra())
                 .descriptionLines(entity.getDescriptionLines() != null ? entity.getDescriptionLines() : Collections.emptyList())
                 .unlocks(unlocks)
+                .technologyPrerequisiteTechKeys(toKeyList(entity.getTechnologyPrerequisiteTechKeys()))
+                .exclusiveTechnologyPrerequisiteTechKeys(toKeyList(entity.getExclusiveTechnologyPrerequisiteTechKeys()))
                 .techCoords(entity.getTechCoords())
                 .prereq(entity.getPrereq() != null
                         ? Tech.builder()
@@ -152,5 +157,22 @@ public class TechMapper {
                 .map(FactionNamePolicy::canonicalMajorDisplayNameOrSelf)
                 .filter(faction -> faction != null && !faction.isBlank())
                 .collect(Collectors.toCollection(java.util.LinkedHashSet::new));
+    }
+
+    private static LinkedHashSet<String> toKeySet(List<String> keys) {
+        if (keys == null || keys.isEmpty()) return new LinkedHashSet<>();
+        return keys.stream()
+                .filter(key -> key != null && !key.isBlank())
+                .map(String::trim)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private static List<String> toKeyList(java.util.Set<String> keys) {
+        if (keys == null || keys.isEmpty()) return List.of();
+        return keys.stream()
+                .filter(key -> key != null && !key.isBlank())
+                .map(String::trim)
+                .sorted()
+                .toList();
     }
 }

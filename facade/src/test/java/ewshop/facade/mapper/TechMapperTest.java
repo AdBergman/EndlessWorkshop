@@ -57,6 +57,8 @@ class TechMapperTest {
                 .techCoords(new TechCoords(0.5, 0.75))
                 .prereq(prereqTech)
                 .excludes(excludesTech)
+                .technologyPrerequisiteTechKeys(List.of("Tech_Prereq", "Tech_SecondPrereq"))
+                .exclusiveTechnologyPrerequisiteTechKeys(List.of("Tech_Excludes"))
                 .factions(Set.of("Aspects", "Lords"))
                 .build();
 
@@ -83,6 +85,10 @@ class TechMapperTest {
 
         assertThat(techDto.prereq()).isEqualTo("Tech_Prereq");
         assertThat(techDto.excludes()).isEqualTo("Tech_Excludes");
+        assertThat(techDto.technologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Prereq", "Tech_SecondPrereq");
+        assertThat(techDto.exclusiveTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Excludes");
         assertThat(techDto.factions()).containsExactly("Aspects", "Lords");
 
         assertThat(techDto.coords()).isNotNull();
@@ -113,6 +119,8 @@ class TechMapperTest {
         assertThat(techDto).isNotNull();
         assertThat(techDto.descriptionLines()).isEmpty();
         assertThat(techDto.unlocks()).isEmpty();
+        assertThat(techDto.technologyPrerequisiteTechKeys()).isEmpty();
+        assertThat(techDto.exclusiveTechnologyPrerequisiteTechKeys()).isEmpty();
         assertThat(techDto.factions()).isEmpty();
     }
 

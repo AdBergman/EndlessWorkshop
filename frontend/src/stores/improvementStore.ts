@@ -36,6 +36,7 @@ const normalizeImprovement = (improvement: Improvement): Improvement => ({
     ...improvement,
     improvementKey: normalizeImprovementKey(improvement.improvementKey),
     displayName: improvement.displayName ?? "",
+    category: typeof improvement.category === "string" ? improvement.category.trim() || null : null,
     descriptionLines: (improvement.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),

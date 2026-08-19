@@ -34,6 +34,8 @@ class TechIT {
         tech.setFactions(Set.of("Kin"));
         tech.setTechCoords(new TechCoords(50, 50));
         tech.setDescriptionLines(List.of("Unlocks a powerful new weapon."));
+        tech.setTechnologyPrerequisiteTechKeys(Set.of("Tech_Masonry"));
+        tech.setExclusiveTechnologyPrerequisiteTechKeys(Set.of("Tech_AlternativeWeapons"));
 
         entityManager.persistAndFlush(tech);
 
@@ -49,5 +51,9 @@ class TechIT {
                 .containsExactly("Unlocks a powerful new weapon.");
         assertThat(result.getFactions())
                 .containsExactly("Kin");
+        assertThat(result.getTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Masonry");
+        assertThat(result.getExclusiveTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_AlternativeWeapons");
     }
 }

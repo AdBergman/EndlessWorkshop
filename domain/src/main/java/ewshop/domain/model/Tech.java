@@ -13,6 +13,8 @@ public class Tech {
 
     private final List<String> descriptionLines;
     private final List<TechUnlockRef> unlocks;
+    private final List<String> technologyPrerequisiteTechKeys;
+    private final List<String> exclusiveTechnologyPrerequisiteTechKeys;
 
     private final TechCoords techCoords;
     private Tech prereq;
@@ -27,6 +29,8 @@ public class Tech {
 
         this.descriptionLines = List.copyOf(builder.descriptionLines);
         this.unlocks = List.copyOf(builder.unlocks);
+        this.technologyPrerequisiteTechKeys = List.copyOf(builder.technologyPrerequisiteTechKeys);
+        this.exclusiveTechnologyPrerequisiteTechKeys = List.copyOf(builder.exclusiveTechnologyPrerequisiteTechKeys);
 
         this.techCoords = builder.techCoords;
         this.prereq = builder.prereq;
@@ -41,6 +45,8 @@ public class Tech {
 
     public List<String> getDescriptionLines() { return descriptionLines; }
     public List<TechUnlockRef> getUnlocks() { return unlocks; }
+    public List<String> getTechnologyPrerequisiteTechKeys() { return technologyPrerequisiteTechKeys; }
+    public List<String> getExclusiveTechnologyPrerequisiteTechKeys() { return exclusiveTechnologyPrerequisiteTechKeys; }
 
     public TechCoords getTechCoords() { return techCoords; }
     public Tech getPrereq() { return prereq; }
@@ -60,6 +66,8 @@ public class Tech {
 
         private final List<String> descriptionLines = new ArrayList<>();
         private final List<TechUnlockRef> unlocks = new ArrayList<>();
+        private final List<String> technologyPrerequisiteTechKeys = new ArrayList<>();
+        private final List<String> exclusiveTechnologyPrerequisiteTechKeys = new ArrayList<>();
 
         private TechCoords techCoords;
         private Tech prereq;
@@ -92,6 +100,18 @@ public class Tech {
             return this;
         }
 
+        public Builder technologyPrerequisiteTechKeys(List<String> keys) {
+            this.technologyPrerequisiteTechKeys.clear();
+            addCleanKeys(this.technologyPrerequisiteTechKeys, keys);
+            return this;
+        }
+
+        public Builder exclusiveTechnologyPrerequisiteTechKeys(List<String> keys) {
+            this.exclusiveTechnologyPrerequisiteTechKeys.clear();
+            addCleanKeys(this.exclusiveTechnologyPrerequisiteTechKeys, keys);
+            return this;
+        }
+
         public Builder techCoords(TechCoords techCoords) { this.techCoords = techCoords; return this; }
         public Builder prereq(Tech prereq) { this.prereq = prereq; return this; }
         public Builder excludes(Tech excludes) { this.excludes = excludes; return this; }
@@ -117,5 +137,15 @@ public class Tech {
         }
 
         public Tech build() { return new Tech(this); }
+
+        private static void addCleanKeys(List<String> target, List<String> keys) {
+            if (keys == null || keys.isEmpty()) return;
+            keys.stream()
+                    .filter(Objects::nonNull)
+                    .map(String::trim)
+                    .filter(key -> !key.isBlank())
+                    .distinct()
+                    .forEach(target::add);
+        }
     }
 }

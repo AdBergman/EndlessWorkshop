@@ -4,6 +4,7 @@ import ewshop.domain.model.TechCoords;
 import ewshop.domain.model.enums.TechType;
 import jakarta.persistence.*;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -38,6 +39,16 @@ public class TechEntity {
     @CollectionTable(name = "tech_unlocks", joinColumns = @JoinColumn(name = "tech_id"))
     @OrderColumn(name = "order_index")
     private List<TechUnlockRefEmbeddable> unlocks;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "tech_prereq_key", joinColumns = @JoinColumn(name = "tech_id"))
+    @Column(name = "prereq_tech_key", nullable = false)
+    private Set<String> technologyPrerequisiteTechKeys = new LinkedHashSet<>();
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "tech_exclusive_prereq_key", joinColumns = @JoinColumn(name = "tech_id"))
+    @Column(name = "exclusive_prereq_tech_key", nullable = false)
+    private Set<String> exclusiveTechnologyPrerequisiteTechKeys = new LinkedHashSet<>();
 
     // Legacy – replaced by tech_prereq_key
     @ManyToOne(fetch = FetchType.LAZY)
@@ -113,6 +124,22 @@ public class TechEntity {
         this.unlocks = unlocks;
     }
 
+    public Set<String> getTechnologyPrerequisiteTechKeys() {
+        return technologyPrerequisiteTechKeys;
+    }
+
+    public void setTechnologyPrerequisiteTechKeys(Set<String> technologyPrerequisiteTechKeys) {
+        this.technologyPrerequisiteTechKeys = cleanKeySet(technologyPrerequisiteTechKeys);
+    }
+
+    public Set<String> getExclusiveTechnologyPrerequisiteTechKeys() {
+        return exclusiveTechnologyPrerequisiteTechKeys;
+    }
+
+    public void setExclusiveTechnologyPrerequisiteTechKeys(Set<String> exclusiveTechnologyPrerequisiteTechKeys) {
+        this.exclusiveTechnologyPrerequisiteTechKeys = cleanKeySet(exclusiveTechnologyPrerequisiteTechKeys);
+    }
+
     public TechCoords getTechCoords() {
         return techCoords;
     }
@@ -182,6 +209,16 @@ public class TechEntity {
 
     public void setHidden(Boolean hidden) {
         this.hidden = hidden;
+    }
+
+    private static Set<String> cleanKeySet(Set<String> keys) {
+        if (keys == null || keys.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        return keys.stream()
+                .filter(key -> key != null && !key.isBlank())
+                .map(String::trim)
+                .collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new));
     }
 
 }
