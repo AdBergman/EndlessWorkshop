@@ -283,12 +283,14 @@ export default function CodexEntryDetail({
                     onSelectEntry={onSelectRelated}
                 />
             ) : showHeroRichEnrichment || showDistrictReference ? null : (
-                <CodexStructuredDetail
-                    entry={entry}
-                    allEntries={allEntries}
-                    relatedEntries={relatedEntries}
-                    onSelectInlineEntry={onSelectRelated}
-                />
+                <>
+                    <CodexStructuredDetail
+                        entry={entry}
+                        allEntries={allEntries}
+                        relatedEntries={relatedEntries}
+                        onSelectInlineEntry={onSelectRelated}
+                    />
+                </>
             )}
 
             {showDistrictReference ? (

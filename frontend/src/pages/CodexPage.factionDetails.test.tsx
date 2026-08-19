@@ -26,14 +26,18 @@ describe("CodexPage faction details", () => {
         cleanupCodexPageStores();
     });
 
-    it("renders the all-factions summary icon as a monochrome category icon", async () => {
+    it("uses a full-width major Faction overview with strategic hooks", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "factions",
                 entryKey: "Faction_Mukag",
                 displayName: "Faction_Mukag",
-                descriptionLines: ["Affinity: Tahuks"],
+                descriptionLines: ["Affinity: Tahuks", "Mukag can spend Science on territorial empire actions."],
                 referenceKeys: [],
+                sections: [{
+                    title: "Effects",
+                    lines: ["Mukag can spend Science on territorial empire actions."],
+                }],
             },
         ];
 
@@ -57,17 +61,134 @@ describe("CodexPage faction details", () => {
         );
 
         expect(await screen.findByRole("heading", { name: "All Factions" })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /all factions/i })).toBeInTheDocument();
-        expect(
-            container.querySelector(
-                'img.codex-kindIcon--result.codex-kindIcon--monochrome[src="/svg/quests/UI_QuestCategory_Faction.svg"]'
-            )
-        ).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        expect(document.querySelector(".codex-workspace--referenceOverview")).toBeInTheDocument();
+
+        const overview = screen.getByLabelText("Factions overview");
+        expect(within(overview).getByRole("button", { name: /Tahuk/i })).toBeInTheDocument();
+        expect(container.querySelector(".codex-kindIcon--summaryResource")).toBeInTheDocument();
+        expect(within(overview).getByText("Affinity: Tahuk")).toBeInTheDocument();
+        expect(within(overview).getByLabelText("Tahuk effects"))
+            .toHaveTextContent("Tahuk can spend Science on territorial empire actions.");
     });
 
 
 
-    it("structures faction details into affinity, traits, notes, and dossier index anchors", async () => {
+    it("uses a full-width Minor Faction overview with disposition, identity, and linked unit hooks", async () => {
+        const user = userEvent.setup();
+        const entries: CodexEntry[] = [
+            {
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_Ametrine",
+                displayName: "Ametrine",
+                kind: "MinorFaction",
+                descriptionLines: [
+                    "Disposition: Pacifist",
+                    "Faction affinity: Ametrine",
+                    "Ancient mineral folk seek their ossified ancestors.",
+                    "Population: Ametrine",
+                    "Unit: Crusher",
+                    "Unit: Elite Crusher",
+                    "Trait: Chant of the Rocks",
+                ],
+                referenceKeys: [
+                    "Population_Ametrine",
+                    "Unit_Crusher",
+                    "Unit_EliteCrusher",
+                    "Trait_ChantOfTheRocks",
+                ],
+                facts: [
+                    { label: "Disposition", value: "Pacifist" },
+                    { label: "Faction affinity", value: "Ametrine" },
+                ],
+                sections: [
+                    { title: "Identity", lines: ["Ancient mineral folk seek their ossified ancestors."] },
+                    { title: "Traits", lines: ["Chant of the Rocks"] },
+                ],
+            },
+            {
+                exportKind: "populations",
+                entryKey: "Population_Ametrine",
+                displayName: "Ametrine",
+                descriptionLines: ["Ametrine population bonus."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_Crusher",
+                displayName: "Crusher",
+                descriptionLines: ["Front-line crusher."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "0" }],
+            },
+            {
+                exportKind: "units",
+                entryKey: "Unit_EliteCrusher",
+                displayName: "Elite Crusher",
+                descriptionLines: ["Elite front-line crusher."],
+                referenceKeys: [],
+                facts: [{ label: "Tier", value: "2" }],
+            },
+            {
+                exportKind: "traits",
+                entryKey: "Trait_ChantOfTheRocks",
+                displayName: "Chant of the Rocks",
+                descriptionLines: ["Protectorate trait for mineral folk."],
+                referenceKeys: [],
+                facts: [{ label: "Trait type", value: "Protectorate" }],
+            },
+        ];
+
+        useCodexStore.setState({
+            entries,
+            entriesByKey: buildEntriesByKey(entries),
+            entriesByKind: {
+                minorfactions: entries.filter((entry) => entry.exportKind.toLowerCase() === "minorfactions"),
+                populations: entries.filter((entry) => entry.exportKind.toLowerCase() === "populations"),
+                units: entries.filter((entry) => entry.exportKind.toLowerCase() === "units"),
+                traits: entries.filter((entry) => entry.exportKind.toLowerCase() === "traits"),
+            },
+            entriesByKindKey: buildEntriesByKindKey(entries),
+            loading: false,
+            error: null,
+        });
+
+        const { container } = render(
+            <MemoryRouter initialEntries={["/codex?category=minorfactions"]}>
+                <Routes>
+                    <Route path="/codex" element={<CodexPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(await screen.findByRole("heading", { name: "All Minor Factions" })).toBeInTheDocument();
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
+        const overview = screen.getByLabelText("Minor Factions overview");
+        expect(container.querySelector(".codex-kindIcon--summaryResource")).toBeInTheDocument();
+        expect(within(overview).getByText("Pacifist")).toBeInTheDocument();
+        expect(within(overview).queryByText(/Affinity: Ametrine/)).not.toBeInTheDocument();
+        expect(within(overview).getByLabelText("Ametrine effects"))
+            .toHaveTextContent("Ancient mineral folk seek their ossified ancestors.");
+        const associated = within(overview).getByLabelText("Ametrine associated entries");
+        expect(within(associated).getByText("Population:")).toBeInTheDocument();
+        expect(within(associated).getByText("Unit:")).toBeInTheDocument();
+        expect(within(associated).getByText("Elite Unit:")).toBeInTheDocument();
+        expect(within(associated).getByText("Protectorate Trait:")).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Ametrine in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Crusher in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Elite Crusher in Codex" })).toBeInTheDocument();
+        expect(within(associated).getByRole("button", { name: "Open Chant of the Rocks in Codex" }))
+            .toBeInTheDocument();
+
+        await user.hover(within(associated).getByRole("button", { name: "Open Crusher in Codex" }));
+
+        expect(await screen.findByRole("tooltip")).toHaveTextContent("Crusher");
+        expect(screen.getByRole("tooltip")).toHaveTextContent("Front-line crusher.");
+    });
+
+
+
+    it("structures faction details into core effects and traits without a duplicate strategy profile", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "factions",
@@ -120,9 +241,12 @@ describe("CodexPage faction details", () => {
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
         expect(within(detailPane).getByRole("heading", { name: "Aspects" })).toBeInTheDocument();
+        expect(screen.getByRole("complementary", { name: /codex results/i })).toBeInTheDocument();
+        expect(within(detailPane).queryByText("Strategy profile")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("Major faction profile")).not.toBeInTheDocument();
         expect(within(detailPane).getByText("Faction dossier")).toBeInTheDocument();
         expect(within(detailPane).queryByRole("navigation", { name: /faction dossier index/i })).not.toBeInTheDocument();
-        expect(within(detailPane).getByRole("heading", { name: "Affinity" })).toBeInTheDocument();
+        expect(within(detailPane).getByRole("heading", { name: "Core Effects" })).toBeInTheDocument();
         expect(within(detailPane).getAllByText("Aspects").length).toBeGreaterThan(0);
         expect(within(detailPane).getByRole("heading", { name: "Unlocks" })).toBeInTheDocument();
         expect(within(detailPane).getByText("Force Treaty")).toBeInTheDocument();
@@ -130,8 +254,7 @@ describe("CodexPage faction details", () => {
         expect(within(detailPane).getByText("They prioritize Diplomacy and peace.")).toBeInTheDocument();
         expect(within(detailPane).getByRole("heading", { name: "Common Rights" })).toBeInTheDocument();
         expect(within(detailPane).getByText(/Public Opinion due to neighbors/)).toBeInTheDocument();
-        expect(within(detailPane).getByRole("heading", { name: "Notes" })).toBeInTheDocument();
-        expect(within(detailPane).getByText("Opening faction note.")).toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Opening faction note.").length).toBeGreaterThan(0);
         expect(within(detailPane).queryByText("Description")).not.toBeInTheDocument();
     });
 
@@ -396,7 +519,7 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Population")).toBeInTheDocument();
         expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
         expect(within(packageSection).getByText("Faction Techs")).toBeInTheDocument();
@@ -411,10 +534,10 @@ describe("CodexPage faction details", () => {
         expect(within(packageSection).getByRole("button", { name: /Common Rights/ })).toBeInTheDocument();
         expect(within(packageSection).getByRole("button", { name: /Aspect Tech III/ })).toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /Aspect Tech IV/ })).not.toBeInTheDocument();
-        expect(within(packageSection).getByText("Showing 4 of 6 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 4 of 6")).toBeInTheDocument();
         expect(within(packageSection).getAllByRole("button", { name: /Aspect Quest 01/ })).toHaveLength(1);
         expect(within(packageSection).getByRole("button", { name: /Aspect Quest 04/ })).toBeInTheDocument();
-        expect(within(packageSection).getByText("Showing 3 of 4 exact refs")).toBeInTheDocument();
+        expect(within(packageSection).getByText("Showing 3 of 4")).toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Diplomat\b/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Aspect Parley\b/ })).not.toBeInTheDocument();
         expect(within(packageSection).queryByRole("button", { name: /^Klax\b/ })).not.toBeInTheDocument();
@@ -510,7 +633,7 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Associated Units")).toBeInTheDocument();
         expect(within(packageSection).queryByText("Core Units")).not.toBeInTheDocument();
         expect(within(packageSection).getByRole("button", { name: /Tahuk Guard/ })).toBeInTheDocument();
@@ -617,7 +740,12 @@ describe("CodexPage faction details", () => {
         );
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
+        expect(within(detailPane).queryByText("Strategy profile")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("Major faction profile")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("1 population")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("1 unit")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("1 tech")).not.toBeInTheDocument();
         expect(within(packageSection).getByText("Faction Traits")).toBeInTheDocument();
         expect(within(packageSection).getByText("Population")).toBeInTheDocument();
         expect(within(packageSection).getByText("Core Units")).toBeInTheDocument();
@@ -721,7 +849,10 @@ describe("CodexPage faction details", () => {
 
         const detailPane = await screen.findByLabelText(/selected codex entry/i);
         expect(within(detailPane).getByText("Identity")).toBeInTheDocument();
-        const packageSection = within(detailPane).getByRole("region", { name: "Faction package" });
+        expect(within(detailPane).queryByText("Strategy profile")).not.toBeInTheDocument();
+        expect(within(detailPane).queryByText("Minor faction profile")).not.toBeInTheDocument();
+        expect(within(detailPane).getAllByText("Pacifist").length).toBeGreaterThan(0);
+        const packageSection = within(detailPane).getByRole("region", { name: "Faction systems" });
         expect(within(packageSection).getByText("Core Unit")).toBeInTheDocument();
         expect(within(packageSection).getByText("Protectorate Traits")).toBeInTheDocument();
         expect(within(packageSection).getByText("Quest")).toBeInTheDocument();

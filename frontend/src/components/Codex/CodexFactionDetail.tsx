@@ -1,5 +1,8 @@
 import { useMemo } from "react";
-import { parseCodexFactionDescription, type CodexFactionTrait } from "@/lib/codex/codexFactionPresentation";
+import {
+    parseCodexFactionDescription,
+    type CodexFactionTrait,
+} from "@/lib/codex/codexFactionPresentation";
 import type { CodexFactionPackageGroup } from "@/lib/codex/codexFactionPackage";
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
@@ -28,10 +31,6 @@ function traitId(entry: CodexEntry, trait: CodexFactionTrait, index: number): st
     return sectionId(entry, `trait-${index + 1}-${anchorSafe(trait.name)}`);
 }
 
-function stripPrefix(line: string, prefix: "Affinity" | "Trait"): string {
-    return line.replace(new RegExp(`^${prefix}:\\s*`, "i"), "").trim();
-}
-
 function RenderLine({ line, className }: { line: string; className: string }) {
     return (
         <p className={className}>
@@ -57,7 +56,6 @@ export default function CodexFactionDetail({ entry, packageGroups, onSelectEntry
         () => getExportedSectionLines(entry, "Unlocks"),
         [entry]
     );
-    const affinityId = sectionId(entry, "affinity");
     const unlocksId = sectionId(entry, "unlocks");
     const traitsId = sectionId(entry, "traits");
     const notesId = sectionId(entry, "notes");
@@ -79,18 +77,23 @@ export default function CodexFactionDetail({ entry, packageGroups, onSelectEntry
                     <p className="codex-detail__placeholder">No public description has been added for this entry yet.</p>
                 ) : null}
 
-                {parsed.affinityLine ? (
+                {parsed.ungroupedLines.length > 0 ? (
                     <section
                         className="codex-factionBlock"
-                        id={affinityId}
+                        id={notesId}
                         tabIndex={-1}
-                        aria-labelledby={`${affinityId}-heading`}
+                        aria-labelledby={`${notesId}-heading`}
                     >
-                        <h3 className="codex-factionBlock__heading" id={`${affinityId}-heading`}>Affinity</h3>
-                        <RenderLine
-                            line={stripPrefix(parsed.affinityLine, "Affinity")}
-                            className="codex-factionBlock__lead"
-                        />
+                        <h3 className="codex-factionBlock__heading" id={`${notesId}-heading`}>Core Effects</h3>
+                        <div className="codex-detail__description codex-detail__description--factionNotes">
+                            {parsed.ungroupedLines.map((line, index) => (
+                                <RenderLine
+                                    key={`${entry.entryKey}-note-${index}`}
+                                    line={line}
+                                    className="codex-detail__line"
+                                />
+                            ))}
+                        </div>
                     </section>
                 ) : null}
 
@@ -157,25 +160,6 @@ export default function CodexFactionDetail({ entry, packageGroups, onSelectEntry
                     </section>
                 ) : null}
 
-                {parsed.ungroupedLines.length > 0 ? (
-                    <section
-                        className="codex-factionBlock"
-                        id={notesId}
-                        tabIndex={-1}
-                        aria-labelledby={`${notesId}-heading`}
-                    >
-                        <h3 className="codex-factionBlock__heading" id={`${notesId}-heading`}>Notes</h3>
-                        <div className="codex-detail__description codex-detail__description--factionNotes">
-                            {parsed.ungroupedLines.map((line, index) => (
-                                <RenderLine
-                                    key={`${entry.entryKey}-note-${index}`}
-                                    line={line}
-                                    className="codex-detail__line"
-                                />
-                            ))}
-                        </div>
-                    </section>
-                ) : null}
             </section>
 
             <CodexFactionPackage groups={packageGroups} onSelectEntry={onSelectEntry} />

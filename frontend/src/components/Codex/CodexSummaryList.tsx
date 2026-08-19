@@ -11,8 +11,10 @@ import {
     type CodexSummaryEntry,
 } from "@/lib/codex/codexPresentation";
 import {
+    buildCodexFactionArchivePreview,
     getCodexFactionAffinityLabel,
     getCodexFactionSummaryPreview,
+    getCodexFactionStrategicPreview,
     getCodexFactionTraitSummary,
 } from "@/lib/codex/codexFactionPresentation";
 import { getCodexShallowReferencePreview } from "@/lib/codex/codexShallowReferencePreview";
@@ -107,14 +109,28 @@ export default function CodexSummaryList({
                 {entries.length > 0 ? (
                     entries.map((entry) => {
                         const isActionEntry = entry.exportKind.trim().toLowerCase() === "actions";
-                        const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
+                        const normalizedExportKind = entry.exportKind.trim().toLowerCase();
+                        const isFactionEntry = normalizedExportKind === "factions";
+                        const isFactionLikeEntry = isFactionEntry || normalizedExportKind === "minorfactions";
+                        const factionArchivePreview = isFactionLikeEntry
+                            ? buildCodexFactionArchivePreview(entry, allEntries)
+                            : null;
+                        const factionArchiveClass = factionArchivePreview
+                            ? normalizedExportKind === "minorfactions"
+                                ? "codex-summaryList__item--factionArchive codex-summaryList__item--minorFactionArchive"
+                                : "codex-summaryList__item--factionArchive codex-summaryList__item--majorFactionArchive"
+                            : "";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
+                        const factionStrategicPreview = isFactionEntry ? getCodexFactionStrategicPreview(entry) : "";
                         const readablePreview = !isFactionEntry && !isActionEntry
                             ? getCodexReadablePreviewLine(entry)
                             : "";
                         const basePreview = isFactionEntry
-                            ? factionTraits || getCodexFactionSummaryPreview(entry) || getCodexEntryPreview(entry, 240)
+                            ? factionStrategicPreview ||
+                                factionTraits ||
+                                getCodexFactionSummaryPreview(entry) ||
+                                getCodexEntryPreview(entry, 240)
                             : readablePreview || getCodexEntryPreview(entry, 240);
                         const preview = isActionEntry
                             ? getActionArchivePreview(entry)
@@ -280,15 +296,22 @@ export default function CodexSummaryList({
                         )
                             ? null
                             : catalogPreview;
-                        const shallowPreview = !isFactionEntry
-                            ? getCodexShallowReferencePreview(entry, allEntries, preview)
-                            : null;
+                        const shallowPreview = factionArchivePreview
+                            ? {
+                                context: factionArchivePreview.context,
+                                effectLines: factionArchivePreview.lines,
+                                iconEntry: factionArchivePreview.iconEntry,
+                                links: [],
+                            }
+                            : getCodexShallowReferencePreview(entry, allEntries, preview);
 
                         if (shallowPreview) {
                             return (
                                 <div
                                     key={entry.entryKey}
-                                    className="codex-summaryList__item codex-summaryList__item--shallow"
+                                    className={`codex-summaryList__item codex-summaryList__item--shallow ${
+                                        factionArchiveClass
+                                    }`}
                                 >
                                     <div className="codex-summaryList__shallowHeader">
                                         <button
@@ -349,6 +372,30 @@ export default function CodexSummaryList({
                                         <span className="codex-summaryList__description">
                                             No public description has been added for this entry yet.
                                         </span>
+                                    ) : null}
+
+                                    {factionArchivePreview?.links.length ? (
+                                        <div
+                                            className="codex-summaryList__factionLinks"
+                                            aria-label={`${getCodexEntryLabel(entry)} associated entries`}
+                                        >
+                                            {factionArchivePreview.links.map((link) => (
+                                                <span
+                                                    className="codex-summaryList__factionLink"
+                                                    key={`${entry.entryKey}-${link.prefix}-${link.entry.entryKey}`}
+                                                >
+                                                    <span className="codex-summaryList__factionLinkPrefix">
+                                                        {link.prefix}:
+                                                    </span>
+                                                    <CodexInlineEntityLink
+                                                        entry={link.entry}
+                                                        onSelect={(linkedEntry) => onSelectEntry(linkedEntry)}
+                                                    >
+                                                        {renderCodexLabel(link.label)}
+                                                    </CodexInlineEntityLink>
+                                                </span>
+                                            ))}
+                                        </div>
                                     ) : null}
                                 </div>
                             );

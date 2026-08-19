@@ -58,6 +58,26 @@ function mergeEntries(...groups: CodexEntry[][]): CodexEntry[] {
     return out;
 }
 
+function dedupePlayerDuplicateEntries(entries: readonly CodexEntry[]): CodexEntry[] {
+    const seen = new Set<string>();
+    const out: CodexEntry[] = [];
+
+    for (const entry of entries) {
+        const displayKey = [
+            normalizeKind(entry.exportKind),
+            (entry.displayName || entry.entryKey).trim().toLowerCase(),
+            (entry.descriptionLines ?? []).map((line) => line.trim()).join("\n").toLowerCase(),
+        ].join("::");
+
+        if (!displayKey || seen.has(displayKey)) continue;
+
+        seen.add(displayKey);
+        out.push(entry);
+    }
+
+    return out;
+}
+
 function byCategory(entries: CodexEntry[], category: string): CodexEntry[] {
     return entries.filter((entry) => visibleCategory(entry) === category);
 }
@@ -68,15 +88,19 @@ function createGroup(
     entries: CodexEntry[],
     visibleSource: CodexEntry[] = entries
 ): CodexFactionPackageGroup | null {
-    if (entries.length === 0) return null;
+    const displayEntries = dedupePlayerDuplicateEntries(entries);
+    const displayVisibleSource = visibleSource === entries
+        ? displayEntries
+        : dedupePlayerDuplicateEntries(visibleSource);
+    if (displayEntries.length === 0) return null;
 
     const cap = GROUP_CAPS[id];
     return {
         id,
         label,
-        entries,
-        visibleEntries: visibleSource.slice(0, cap),
-        totalCount: entries.length,
+        entries: displayEntries,
+        visibleEntries: displayVisibleSource.slice(0, cap),
+        totalCount: displayEntries.length,
         cap,
     };
 }

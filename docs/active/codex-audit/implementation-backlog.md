@@ -170,11 +170,11 @@ Proposed solution: design/product decision doc comparing "Codex detail
 enrichment", "small `/factions` route", and "defer until art/icon contracts".
 
 Result: recorded `docs/active/codex-faction-strategy-profile-decision.md`.
-Chosen path is to improve the existing Codex Faction detail page as the
+Chosen path is to improve the existing Codex Faction category as the
 strategy/profile surface. A new `/factions` route is deferred, waiting for
 art/icon contracts is rejected for the next slice, and adding more raw related
 links is rejected. The first implementation slice is
-`EW-CODEX-FACTIONS-002 - Faction Strategy Profile Header`.
+`EW-CODEX-FACTIONS-002 - Faction Codex Archive and Detail Pass`.
 
 Non-goals: no implementation, no `/heroes` dashboard, no inferred ownership.
 
@@ -185,6 +185,45 @@ Acceptance criteria:
 
 Verification: revalidated 5 public Faction Codex entries, 21 imported rich
 faction-like records, and the existing exact-key package enrichment helper.
+
+### EW-CODEX-FACTIONS-002 - Faction Codex Archive and Detail Pass
+
+Category: Factions, Minor Factions
+Classification: FE
+Priority: P1
+Effort: S
+Risk: Medium
+Exporter-blocked: no
+Status: completed 2026-08-19
+
+Problem: Major Faction detail pages had useful exact package links, but the
+category still read like a cramped generic dossier. The strongest strategy
+signals were buried below trait sections, archive rows emphasized trait names
+rather than faction-defining mechanics, and the small Major/Minor archives lost
+space to an unnecessary result rail.
+
+Player value: a 4X player can quickly answer who the faction is, what makes it
+strategically different, what systems it gets, and where to continue into Units,
+Tech, Heroes, Populations, Traits, or Quest Explorer-owned quest details.
+
+Result: moved Major and Minor Faction category routes onto the established
+full-width Codex overview pattern; promoted sourced major-faction strategic
+effect hooks into archive rows; added minor-faction archive rows with sourced
+disposition, affinity, identity, unit, and trait signals; removed the
+detail-first `Strategy profile` count cards after browser review showed they
+duplicated Core Effects and exposed low-value relationship counts; renamed
+`Faction package` to `Faction systems`; removed `exact refs` overflow wording;
+moved major Faction core effects ahead of trait lists; and suppressed redundant
+`Kind=MinorFaction` structured facts.
+
+Non-goals preserved: no new `/factions` route, no planner/dashboard, no inferred
+facts from keys or prose, no art/portrait work, no uncapped relationship wall,
+and no recreation of route-owned Tech, Unit, or Quest Explorer experiences.
+
+Verification: focused Faction package/detail/category tests, structured
+description tests, browser review for all five Major Factions and
+representative Minor Factions, plus desktop and mobile-width archive checks.
+Full frontend checks are run at PR close.
 
 ### EW-CODEX-REL-001 - Codex Unresolved Reference Diagnostics
 
