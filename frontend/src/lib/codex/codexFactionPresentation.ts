@@ -1,4 +1,4 @@
-import type { CodexEntry, RichFaction } from "@/types/dataTypes";
+import type { CodexEntry } from "@/types/dataTypes";
 import { formatCodexMajorFactionText, stripCodexDescriptionLine } from "./codexPresentation";
 
 export type CodexFactionTrait = {
@@ -13,18 +13,9 @@ export type CodexFactionDescription = {
     ungroupedLines: string[];
 };
 
-export type CodexFactionProfileMetric = {
-    id: string;
-    label: string;
-    value: string;
-};
-
-export type CodexFactionStrategyProfile = {
-    kindLabel: string;
-    affinityLabel: string | null;
-    loreLine: string | null;
-    signalLines: string[];
-    metrics: CodexFactionProfileMetric[];
+export type CodexFactionArchivePreview = {
+    context: string;
+    lines: string[];
 };
 
 const AFFINITY_RE = /^Affinity:\s*(.*)$/i;
@@ -141,6 +132,30 @@ function getSectionLines(entry: Pick<CodexEntry, "sections">, title: string): st
         .filter(Boolean) ?? [];
 }
 
+function getMinorFactionDescriptionValue(
+    entry: Pick<CodexEntry, "descriptionLines">,
+    label: string,
+    limit = 1
+): string[] {
+    const prefix = `${label.toLowerCase()}:`;
+
+    return entry.descriptionLines
+        .map(cleanLine)
+        .filter((line) => line.toLowerCase().startsWith(prefix))
+        .map((line) => cleanPreviewText(line.slice(prefix.length)))
+        .filter(Boolean)
+        .slice(0, limit);
+}
+
+function joinLimited(label: string, values: readonly string[], limit: number): string | null {
+    const visibleValues = values
+        .map(cleanPreviewText)
+        .filter(Boolean)
+        .slice(0, limit);
+
+    return visibleValues.length > 0 ? `${label}: ${visibleValues.join(" / ")}` : null;
+}
+
 export function getCodexFactionStrategicLines(
     entry: Pick<CodexEntry, "descriptionLines" | "sections">,
     lineLimit = 3
@@ -161,62 +176,41 @@ export function getCodexFactionStrategicPreview(
     return getCodexFactionStrategicLines(entry, lineLimit).join(" ");
 }
 
-function metric(
-    id: string,
-    label: string,
-    count: number | null | undefined,
-    singular: string,
-    plural = `${singular}s`
-): CodexFactionProfileMetric | null {
-    if (typeof count !== "number" || count <= 0) return null;
-
-    return {
-        id,
-        label,
-        value: `${count} ${count === 1 ? singular : plural}`,
-    };
-}
-
-export function buildCodexFactionStrategyProfile(
-    entry: Pick<CodexEntry, "exportKind" | "descriptionLines" | "facts" | "sections">,
-    packageCounts: Readonly<Record<string, number>>,
-    richFaction?: Pick<RichFaction, "lore"> | null
-): CodexFactionStrategyProfile {
+export function buildCodexFactionArchivePreview(
+    entry: Pick<CodexEntry, "exportKind" | "descriptionLines" | "facts" | "sections">
+): CodexFactionArchivePreview | null {
     const kind = entry.exportKind.trim().toLowerCase();
-    const parsed = parseCodexFactionDescription(entry.descriptionLines);
-    const isMinorFaction = kind === "minorfactions";
-    const affinityLabel = isMinorFaction
-        ? getFactValue(entry, "Faction affinity")
-        : getCodexFactionAffinityLabel(entry);
-    const disposition = isMinorFaction ? getFactValue(entry, "Disposition") : null;
-    const loreLine = cleanPreviewText(richFaction?.lore ?? "") || (getSectionLines(entry, "Identity")[0] ?? null);
-    const signalLines = isMinorFaction ? [] : getCodexFactionStrategicLines(entry, 3);
-    const questCount = packageCounts.quests ?? 0;
-    const questMetric = questCount > 0
-        ? {
-            id: "quests",
-            label: isMinorFaction ? "Quest" : "Questline",
-            value: questCount === 1 ? "Available" : `${questCount} available`,
-        }
-        : null;
-    const metrics = [
-        affinityLabel ? { id: "affinity", label: "Affinity", value: affinityLabel } : null,
-        disposition ? { id: "disposition", label: "Disposition", value: disposition } : null,
-        metric("traits", isMinorFaction ? "Protectorate Traits" : "Traits", isMinorFaction
-            ? packageCounts.traits
-            : parsed.traits.length, "trait"),
-        metric("population", "Population", packageCounts.population, "population", "populations"),
-        metric("units", isMinorFaction ? "Core Unit" : "Core Units", packageCounts.units, "unit"),
-        metric("tech", "Faction Techs", packageCounts.tech, "tech", "techs"),
-        metric("heroes", "Heroes", packageCounts.heroes, "hero", "heroes"),
-        questMetric,
-    ].filter((item): item is CodexFactionProfileMetric => Boolean(item));
 
-    return {
-        kindLabel: isMinorFaction ? "Minor faction profile" : "Major faction profile",
-        affinityLabel,
-        loreLine,
-        signalLines: signalLines.map(cleanPreviewText).filter(Boolean),
-        metrics,
-    };
+    if (kind === "factions") {
+        const affinity = getCodexFactionAffinityLabel(entry);
+
+        return {
+            context: affinity ? `Affinity: ${affinity}` : "",
+            lines: getCodexFactionStrategicLines(entry, 2),
+        };
+    }
+
+    if (kind === "minorfactions") {
+        const disposition = getFactValue(entry, "Disposition");
+        const affinity = getFactValue(entry, "Faction affinity");
+        const unitLines = getMinorFactionDescriptionValue(entry, "Unit", 2);
+        const traitLines = getSectionLines(entry, "Traits").slice(0, 2);
+        const identityLine = getSectionLines(entry, "Identity")[0] ?? null;
+        const context = [
+            disposition,
+            affinity ? `Affinity: ${affinity}` : null,
+        ].filter(Boolean).join(" · ");
+        const lines = [
+            identityLine,
+            joinLimited("Units", unitLines, 2),
+            joinLimited("Traits", traitLines, 2),
+        ].filter((line): line is string => Boolean(line));
+
+        return {
+            context,
+            lines,
+        };
+    }
+
+    return null;
 }

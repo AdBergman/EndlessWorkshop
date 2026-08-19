@@ -11,6 +11,7 @@ import {
     type CodexSummaryEntry,
 } from "@/lib/codex/codexPresentation";
 import {
+    buildCodexFactionArchivePreview,
     getCodexFactionAffinityLabel,
     getCodexFactionSummaryPreview,
     getCodexFactionStrategicPreview,
@@ -108,7 +109,10 @@ export default function CodexSummaryList({
                 {entries.length > 0 ? (
                     entries.map((entry) => {
                         const isActionEntry = entry.exportKind.trim().toLowerCase() === "actions";
-                        const isFactionEntry = entry.exportKind.trim().toLowerCase() === "factions";
+                        const normalizedExportKind = entry.exportKind.trim().toLowerCase();
+                        const isFactionEntry = normalizedExportKind === "factions";
+                        const isFactionLikeEntry = isFactionEntry || normalizedExportKind === "minorfactions";
+                        const factionArchivePreview = isFactionLikeEntry ? buildCodexFactionArchivePreview(entry) : null;
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
                         const factionStrategicPreview = isFactionEntry ? getCodexFactionStrategicPreview(entry) : "";
@@ -285,9 +289,13 @@ export default function CodexSummaryList({
                         )
                             ? null
                             : catalogPreview;
-                        const shallowPreview = !isFactionEntry
-                            ? getCodexShallowReferencePreview(entry, allEntries, preview)
-                            : null;
+                        const shallowPreview = factionArchivePreview
+                            ? {
+                                context: factionArchivePreview.context,
+                                effectLines: factionArchivePreview.lines,
+                                links: [],
+                            }
+                            : getCodexShallowReferencePreview(entry, allEntries, preview);
 
                         if (shallowPreview) {
                             return (

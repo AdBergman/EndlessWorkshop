@@ -521,8 +521,7 @@ describe("CodexPage Action and Diplomacy archives", () => {
 
 
 
-    it("summarizes faction rows with affinity and trait metadata", async () => {
-        const user = userEvent.setup();
+    it("summarizes faction overview rows with affinity and strategic hooks", async () => {
         const entries: CodexEntry[] = [
             {
                 exportKind: "factions",
@@ -530,6 +529,7 @@ describe("CodexPage Action and Diplomacy archives", () => {
                 displayName: "Faction_Aspect",
                 descriptionLines: [
                     "Affinity: Aspects",
+                    "Aspects can spread [Coral] Coral on the map.",
                     "Trait: Diplomat",
                     "They prioritize Diplomacy and peace.",
                     "Trait: Common Rights",
@@ -539,6 +539,10 @@ describe("CodexPage Action and Diplomacy archives", () => {
                     "Trait: Trade Code",
                     "Markets are stronger.",
                 ],
+                sections: [{
+                    title: "Effects",
+                    lines: ["Aspects can spread [Coral] Coral on the map."],
+                }],
                 referenceKeys: [],
             },
         ];
@@ -562,14 +566,13 @@ describe("CodexPage Action and Diplomacy archives", () => {
             </MemoryRouter>
         );
 
-        const resultsPane = await screen.findByLabelText("Codex results");
-        expect(within(resultsPane).getByText("Affinity: Aspects")).toBeInTheDocument();
-        expect(within(resultsPane).getByText("Traits: Diplomat, Common Rights, +2 traits")).toBeInTheDocument();
-
-        await user.click(within(resultsPane).getByRole("button", { name: /all factions/i }));
         const summaryList = await screen.findByLabelText("Factions overview");
+        expect(screen.queryByRole("complementary", { name: /codex results/i })).not.toBeInTheDocument();
         expect(within(summaryList).getByText("Affinity: Aspects")).toBeInTheDocument();
-        expect(within(summaryList).getByText("Traits: Diplomat, Common Rights, Fencing, +1 trait")).toBeInTheDocument();
+        expect(within(summaryList).getByLabelText("Aspects effects"))
+            .toHaveTextContent("Aspects can spread Coral on the map.");
+        expect(within(summaryList).queryByText("Traits: Diplomat, Common Rights, Fencing, +1 trait"))
+            .not.toBeInTheDocument();
         expect(within(summaryList).queryByText(/They prioritize Diplomacy and peace.*Population bonuses/s)).not.toBeInTheDocument();
     });
 

@@ -1,19 +1,16 @@
 import { useMemo } from "react";
 import {
-    buildCodexFactionStrategyProfile,
     parseCodexFactionDescription,
     type CodexFactionTrait,
-    type CodexFactionStrategyProfile,
 } from "@/lib/codex/codexFactionPresentation";
 import type { CodexFactionPackageGroup } from "@/lib/codex/codexFactionPackage";
 import { formatCodexMajorFactionText } from "@/lib/codex/codexPresentation";
 import { renderDescriptionLine } from "@/lib/descriptionLine/descriptionLineRenderer";
-import type { CodexEntry, RichFaction } from "@/types/dataTypes";
+import type { CodexEntry } from "@/types/dataTypes";
 import CodexFactionPackage from "./CodexFactionPackage";
 
 type Props = {
     entry: CodexEntry;
-    richFaction?: RichFaction | null;
     packageGroups: CodexFactionPackageGroup[];
     onSelectEntry: (entry: CodexEntry) => void;
 };
@@ -50,65 +47,10 @@ function getExportedSectionLines(entry: CodexEntry, title: string): string[] {
         .filter(Boolean) ?? [];
 }
 
-function getPackageCounts(groups: readonly CodexFactionPackageGroup[]): Record<string, number> {
-    return groups.reduce<Record<string, number>>((acc, group) => {
-        acc[group.id] = group.totalCount;
-        return acc;
-    }, {});
-}
-
-export function CodexFactionStrategyProfileSection({ profile }: { profile: CodexFactionStrategyProfile }) {
-    if (profile.metrics.length === 0 && !profile.loreLine && profile.signalLines.length === 0) {
-        return null;
-    }
-
-    return (
-        <section className="codex-detail__section codex-factionProfile" aria-labelledby="codex-faction-profile-heading">
-            <div className="codex-sectionLabel" id="codex-faction-profile-heading">
-                Strategy profile
-            </div>
-
-            <div className="codex-factionProfile__intro">
-                <span className="codex-factionProfile__kind">{profile.kindLabel}</span>
-                {profile.loreLine ? (
-                    <p className="codex-factionProfile__lore">
-                        {renderDescriptionLine(formatCodexMajorFactionText(profile.loreLine))}
-                    </p>
-                ) : null}
-            </div>
-
-            {profile.metrics.length > 0 ? (
-                <dl className="codex-factionProfile__metrics" aria-label="Faction planning summary">
-                    {profile.metrics.map((item) => (
-                        <div className="codex-factionProfile__metric" key={item.id}>
-                            <dt>{item.label}</dt>
-                            <dd>{item.value}</dd>
-                        </div>
-                    ))}
-                </dl>
-            ) : null}
-
-            {profile.signalLines.length > 0 ? (
-                <div className="codex-factionProfile__signals" aria-label="Strategic hooks">
-                    {profile.signalLines.map((line, index) => (
-                        <p className="codex-factionProfile__signal" key={`${line}-${index}`}>
-                            {renderDescriptionLine(formatCodexMajorFactionText(line))}
-                        </p>
-                    ))}
-                </div>
-            ) : null}
-        </section>
-    );
-}
-
-export default function CodexFactionDetail({ entry, richFaction, packageGroups, onSelectEntry }: Props) {
+export default function CodexFactionDetail({ entry, packageGroups, onSelectEntry }: Props) {
     const parsed = useMemo(
         () => parseCodexFactionDescription(entry.descriptionLines),
         [entry.descriptionLines]
-    );
-    const strategyProfile = useMemo(
-        () => buildCodexFactionStrategyProfile(entry, getPackageCounts(packageGroups), richFaction),
-        [entry, packageGroups, richFaction]
     );
     const unlockLines = useMemo(
         () => getExportedSectionLines(entry, "Unlocks"),
@@ -126,8 +68,6 @@ export default function CodexFactionDetail({ entry, richFaction, packageGroups, 
 
     return (
         <>
-            <CodexFactionStrategyProfileSection profile={strategyProfile} />
-
             <section className="codex-detail__section codex-factionDossier" aria-labelledby="codex-faction-dossier-heading">
                 <div className="codex-sectionLabel" id="codex-faction-dossier-heading">
                     Faction dossier
