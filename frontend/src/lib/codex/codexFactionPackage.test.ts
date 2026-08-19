@@ -112,6 +112,41 @@ describe("codexFactionPackage", () => {
             .toEqual(["Hero_Ametrine"]);
     });
 
+    it("collapses same-name same-effect package rows into one player-facing item", () => {
+        const factionEntry = codexEntry("MinorFaction_Ametrine", "Ametrine", "minorFactions");
+        const firstTrait = {
+            ...codexEntry("Trait_Ametrine_01", "Chant of the Rocks", "traits"),
+            descriptionLines: ["+5% Industry on Cities"],
+        };
+        const duplicateTrait = {
+            ...codexEntry("Trait_Ametrine_02", "Chant of the Rocks", "traits"),
+            descriptionLines: ["+5% Industry on Cities"],
+        };
+        const differentTrait = {
+            ...codexEntry("Trait_Ametrine_03", "Chant of the Rocks", "traits"),
+            descriptionLines: ["+5% Fortification on Cities"],
+        };
+
+        const groups = buildCodexRichFactionPackageGroups(
+            factionEntry,
+            richFaction({
+                factionKey: "MinorFaction_Ametrine",
+                factionKind: "minor",
+                protectorateTraitKeys: [
+                    "Trait_Ametrine_01",
+                    "Trait_Ametrine_02",
+                    "Trait_Ametrine_03",
+                ],
+            }),
+            [factionEntry, firstTrait, duplicateTrait, differentTrait]
+        );
+
+        const traitGroup = groups.find((group) => group.label === "Protectorate Traits");
+        expect(traitGroup?.totalCount).toBe(2);
+        expect(traitGroup?.visibleEntries.map((entry) => entry.entryKey))
+            .toEqual(["Trait_Ametrine_01", "Trait_Ametrine_03"]);
+    });
+
     it("fails closed when rich faction identity does not exactly match the Codex entry", () => {
         expect(buildCodexRichFactionPackageGroups(
             codexEntry("Faction_Aspect", "Aspects", "factions"),
