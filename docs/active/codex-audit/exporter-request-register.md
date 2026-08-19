@@ -221,6 +221,72 @@ preview coverage.
 Validation expectation: sample common/uncommon/rare/legendary equipment rows
 resolve item icons and granted ability targets from explicit exported metadata.
 
+## DBX-CODEX-REFERENCES-001 - Classify Unresolved Public Codex Reference Targets
+
+Affected categories: Abilities, Factions, Heroes, Minor Factions, Populations,
+Tech, Units
+Priority: P2
+Blocking EWShop stories: future reference-integrity hardening
+Exporter-blocked: source-confirmation gated
+
+Player-facing need: public Codex records should not imply relationships to
+nonexistent, internal, obsolete, or rich-only targets. When a referenced target
+is public, EWShop needs an exact public Codex row/ref; when it is non-public,
+EWShop needs a source-backed caveat or omission policy.
+
+Evidence information is not already available:
+
+- `npm run diagnostics:codex-references` on 2026-08-19 checked 9,992 refs in
+  current `local-imports/codex`.
+- The upgraded diagnostic found 61 unique public-source unresolved
+  relationships; after expected internal/effect and Quest-policy buckets, 34
+  unique public unresolved relationships remain `unresolved pending further
+  evidence`.
+- The unresolved public set is not explained by EWShop top-level filters:
+  target rows such as `Faction_Tormented`, `Faction_Hero`,
+  `MinorFaction_GreenScions`, `MinorFaction_Dungeon`,
+  `MinorFaction_MangroveOfHarmony_Elder`,
+  `ProtectorateTrait_Blackhammer_Trait01/02`, selected Status keys, and
+  selected Tech constructible aliases are absent from current public Codex
+  targets.
+- Rich/source exports prove some adjacent canonical rows exist, for example
+  `MinorFaction_GreenScion` exists while Units reference
+  `MinorFaction_GreenScions`; `Necrophage_District_Base_CityCenter_Tier1`
+  exists while Factions reference `Necrophage_District_Base_CityCenter_Tier1_v2`.
+
+Existing related fields/keys:
+
+- `referenceKeys` and `publicContextKeys` in generic Codex entries.
+- Current exact public Codex targets by `entryKey`.
+- Rich/domain exports for Units, Heroes, Factions, Districts, Improvements, and
+  Tech, where available, for source comparison only.
+
+Requested shape:
+
+- For each unresolved public relationship, classify the referenced target as:
+  - public Codex;
+  - rich-only/source-truth data;
+  - internal/prototype;
+  - obsolete/renamed alias;
+  - unavailable/deferred.
+- If public, emit a matching public Codex row or change the relationship to an
+  exact public target key.
+- If non-public, omit the relationship from public Codex refs or emit an
+  explicit non-public/unknown caveat that diagnostics can classify without
+  treating it as a player-facing missing target.
+
+Why EWShop cannot derive it: pluralization, faction prefixes, `_v2` suffixes,
+status aliases, and constructible aliases are not safe public identity rules.
+EWShop must not invent canonical targets from key similarity.
+
+Intended EWShop use: keep public relationship rendering exact and fail-closed,
+reduce diagnostic false positives/false negatives, and support future
+raw-fallback hardening without losing legitimate relationships.
+
+Validation expectation: a future `diagnostics:codex-references` run shows no
+public unresolved relationship in this set unless it carries an explicit
+non-public/source-unavailable classification.
+
 ## DBX-CODEX-QUESTS-001 - Public Questline Encyclopedia Projection
 
 Affected categories: Quests, Quest Explorer

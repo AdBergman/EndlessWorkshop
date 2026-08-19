@@ -58,9 +58,55 @@ Icon/token summary:
 
 ## DB Exporter Follow-Up Candidates
 
+### 2026-08-19 Current Reference Integrity Refresh
+
+The upgraded `npm run diagnostics:codex-references` run against current
+`local-imports/codex` keeps the old unresolved-reference follow-up valid, but
+refines the evidence:
+
+- 9,992 references checked.
+- 271 unresolved/malformed findings before field-level deduplication.
+- 146 unique unresolved relationships.
+- 122 public-source unresolved/malformed findings.
+- 61 public-source unique unresolved relationships.
+- 34 unique public unresolved relationships remain `unresolved pending further
+  evidence` after classifying effect/internal and Quest-policy noise.
+
+Largest remaining public unresolved clusters needing source/exporter
+classification:
+
+- Units -> Faction/MinorFaction imported-domain aliases:
+  `Faction_Tormented`, `MinorFaction_Dungeon`, and
+  `MinorFaction_GreenScions`.
+- Tech -> constructible/unit aliases: `Aspect_DistrictImprovement_01/02/03`,
+  `Necrophage_District_Appendage00/01/02_Tier1_v2`, and
+  `Unit_MinorFaction_MangroveOfHarmony_Final`.
+- Heroes -> `Faction_Hero`.
+- Abilities -> missing Status targets: `Status_Unit_Bodyguard`,
+  `Status_Unit_Entangled`, `Status_Unit_Ecstatic`, and
+  `Status_Hero_BaseAbility_02`.
+- Factions -> `District_Base_CityCenter_Tier1` and
+  `Necrophage_District_Base_CityCenter_Tier1_v2`.
+- Minor Factions -> `ProtectorateTrait_Blackhammer_Trait01/02`.
+- Populations -> `MinorFaction_MangroveOfHarmony_Elder`.
+
+Important no-action/expected refinements:
+
+- Public Improvement refs such as `Mukag_Effect_DistrictImprovement_00` are now
+  classified as mechanical/internal effect projections, not public target gaps.
+- `MinorFaction_SpecificQuest_MangroveOfHarmony01` is classified as
+  Quest-domain relationship policy because Quests remain hidden and route-owned.
+- 4,095 public cross-entry refs currently resolve through raw-key fallback. This
+  is EWShop/reference-contract hardening risk, not proof of missing exporter
+  data by itself.
+- 275 public refs resolve to hidden support targets, mostly Ability/Action/Treaty
+  links to hidden `bonuses` and Minor Faction links to hidden Quests. Current
+  product policy allows direct/search support targets without top-level
+  promotion.
+
 ### Imported-Domain References That Do Not Resolve To Public Codex Targets
 
-Current count: 42.
+Historical 2026-06-24 count: 42.
 
 Breakdown by source export kind:
 
