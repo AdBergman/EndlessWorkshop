@@ -98,7 +98,138 @@ describe("codexReferenceDiagnosticReport", () => {
         ]);
 
         expect(formatCodexReferenceDiagnosticReport(report)).toContain(
-            "| tech | Source Tech (Tech_Source) | referenceKeys[0] | DistrictImprovement_Missing | DistrictImprovement | unresolved-ref | likely-public-target | user-facing unresolved reference |"
+            "| tech | public | Source Tech (Tech_Source) | referenceKeys[0] | DistrictImprovement_Missing | DistrictImprovement | unresolved-ref | - | likely-public-target | user-facing unresolved reference | unresolved pending further evidence | no |"
         );
+    });
+
+    it("reports public records that resolve to hidden support targets without treating them as unresolved", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "actions",
+                entryKey: "Action_Source",
+                displayName: "Source Action",
+                referenceKeys: [entityRefId(codexEntityRef("bonuses", "Modifier_Target")!)],
+            }),
+            entry({
+                exportKind: "bonuses",
+                entryKey: "Modifier_Target",
+                displayName: "Target Modifier",
+            }),
+        ]);
+
+        expect(report.totalUnresolved).toBe(0);
+        expect(report.relationshipPolicyItems).toEqual([
+            expect.objectContaining({
+                findingKind: "public-to-hidden-support-target",
+                sourceCategory: "actions",
+                resolvedTargetCategory: "bonuses",
+                resolvedTargetVisibility: "hidden",
+                rootCauseClass: "relationship/reference policy",
+            }),
+        ]);
+    });
+
+    it("deduplicates unresolved relationships across public context and reference keys", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "abilities",
+                entryKey: "Ability_Source",
+                displayName: "Source Ability",
+                publicContextKeys: ["Status_Missing"],
+                referenceKeys: ["Status_Missing"],
+            }),
+        ]);
+
+        expect(report.totalUnresolved).toBe(2);
+        expect(report.totalUniqueUnresolvedRelationships).toBe(1);
+        expect(report.items).toEqual([
+            expect.objectContaining({
+                sourceField: "publicContextKeys",
+                isDuplicateAcrossSourceFields: true,
+            }),
+            expect.objectContaining({
+                sourceField: "referenceKeys",
+                isDuplicateAcrossSourceFields: true,
+            }),
+        ]);
+    });
+
+    it("does not report raw-fallback self references as relationship policy findings", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "abilities",
+                entryKey: "UnitAbility_Aware",
+                displayName: "Aware",
+                publicContextKeys: ["UnitAbility_Aware"],
+            }),
+        ]);
+
+        expect(report.totalUnresolved).toBe(0);
+        expect(report.relationshipPolicyItems).toEqual([]);
+    });
+
+    it("reports duplicate player-facing display identities by category", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "districts",
+                entryKey: "District_A",
+                displayName: "Farm",
+            }),
+            entry({
+                exportKind: "districts",
+                entryKey: "District_B",
+                displayName: "Farm",
+            }),
+        ]);
+
+        expect(report.duplicateIdentityGroups).toEqual([
+            expect.objectContaining({
+                sourceCategory: "districts",
+                sourceVisibility: "public",
+                displayName: "Farm",
+                entryCount: 2,
+                severity: "review",
+                rootCauseClass: "unresolved pending further evidence",
+            }),
+        ]);
+    });
+
+    it("classifies faction-prefixed effect references as mechanical/internal diagnostic noise", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "improvements",
+                entryKey: "Mukag_DistrictImprovement_00",
+                displayName: "Celestial Guidance",
+                referenceKeys: ["Mukag_Effect_DistrictImprovement_00"],
+            }),
+        ]);
+
+        expect(report.items).toEqual([
+            expect.objectContaining({
+                referencedKey: "Mukag_Effect_DistrictImprovement_00",
+                visibilityClass: "mechanical-or-internal",
+                rootCauseClass: "expected thin/internal data",
+            }),
+        ]);
+    });
+
+    it("infers specific minor faction quest references as quest-domain policy ambiguity", () => {
+        const report = createCodexReferenceDiagnosticReport([
+            entry({
+                exportKind: "minorFactions",
+                entryKey: "MinorFaction_MangroveOfHarmony",
+                displayName: "Mangrove of Harmony",
+                referenceKeys: ["MinorFaction_SpecificQuest_MangroveOfHarmony01"],
+            }),
+        ]);
+
+        expect(report.items).toEqual([
+            expect.objectContaining({
+                referencedKey: "MinorFaction_SpecificQuest_MangroveOfHarmony01",
+                diagnosticKind: "unresolved-imported-domain-ref",
+                importedDomainKindHint: "quest",
+                rootCauseClass: "relationship/reference policy",
+            }),
+        ]);
     });
 });

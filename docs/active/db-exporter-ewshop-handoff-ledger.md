@@ -221,19 +221,28 @@ Status: open, non-blocking.
 
 Open gap:
 
-- Admin Codex diagnostics report from 2026-06-24 found 42
-  `unresolved-imported-domain-ref` diagnostics and 84 `unresolved-ref`
-  diagnostics.
-- Highest-signal imported-domain buckets are quest, ability, faction,
-  minor-faction, district, and unit references that EWShop cannot safely
-  resolve to public Codex targets.
+- The upgraded 2026-08-19 `diagnostics:codex-references` run checked 9,992
+  refs, found 271 unresolved/malformed findings before field-level
+  deduplication, 146 unique unresolved relationships, and 61 unique
+  public-source unresolved relationships.
+- After classifying expected internal/effect refs and Quest-policy refs, 34
+  unique public unresolved relationships remain source-confirmation-gated.
+- Highest-signal buckets are Units -> Faction/MinorFaction aliases, Tech ->
+  constructible/unit aliases, Heroes -> `Faction_Hero`, Ability -> Status refs,
+  Faction -> City Center district aliases, MinorFaction -> Blackhammer
+  ProtectorateTrait refs, and Population -> `MinorFaction_MangroveOfHarmony_Elder`.
 - DB Exporter should classify referenced targets as public Codex, rich-only,
   internal/prototype, obsolete, or unavailable.
 - If public, emit exact public Codex refs or matching public Codex target rows.
 - If non-public, mark or omit them so EWShop does not expose them as public
   relationships.
-- Raw fallback references were counted separately and are not currently treated
-  as missing-data bugs.
+- Public Improvement refs such as `Mukag_Effect_DistrictImprovement_00` are now
+  classified as expected internal/effect projection noise, not exporter target
+  gaps.
+- `MinorFaction_SpecificQuest_MangroveOfHarmony01` is relationship/reference
+  policy while Quests remain hidden and route-owned.
+- 4,095 public cross-entry raw-fallback refs were counted separately and are not
+  currently treated as missing-data bugs.
 
 Related token/icon clarification:
 
@@ -242,6 +251,37 @@ Related token/icon clarification:
   EWShop treats them as stable player-facing icon tokens.
 
 ## Chronological Ledger
+
+### 2026-08-19 - Codex Reference Integrity Diagnostics Refresh
+
+- Direction: EWShop -> DB Exporter
+- Topic: current Codex reference integrity, public identity duplicates, and
+  diagnostic false-positive reduction
+- Summary: EWShop upgraded the reusable Codex reference diagnostic with
+  source visibility, root-cause class, imported-domain hint, duplicate
+  cross-field detection, relationship policy/contract findings, duplicate
+  display identity groups, strict-thin public record checks, and category
+  summaries.
+- Source docs/files:
+  - `docs/active/codex-reference-diagnostics.md`
+  - `docs/active/db-exporter-codex-diagnostics-evidence-handoff.md`
+  - `docs/active/codex-audit/exporter-request-register.md`
+  - `frontend/scripts/codex-reference-diagnostics.ts`
+  - `frontend/src/lib/codex/codexReferenceDiagnosticReport.ts`
+  - `frontend/src/lib/codex/codexReferenceDiagnostics.ts`
+- Snapshot/export version: local `0.82` Codex exports in
+  `local-imports/codex` as of 2026-08-19.
+- Decision/result: historical imported-domain reference triage remains valid,
+  but old 2026-06-24 counts are superseded for current data. The current
+  source-confirmation-gated set is 34 unique public unresolved relationships
+  after expected internal/effect and Quest-policy buckets are separated.
+- EWShop implementation result: diagnostic false positives were reduced for
+  faction-prefixed `*_Effect_*` refs and `MinorFaction_SpecificQuest_*` quest
+  refs; raw-fallback self refs no longer inflate policy counts.
+- Follow-up generated: `DBX-CODEX-REFERENCES-001` now tracks source/exporter
+  classification for unresolved public Codex reference targets. Public duplicate
+  identity groups remain review signals, not merge/suppression instructions.
+- Status: open.
 
 ### 2026-06-24 - Codex Diagnostics Evidence Packet
 
