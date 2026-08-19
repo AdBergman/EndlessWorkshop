@@ -4,6 +4,7 @@ export type QuestExplorerResponse = {
     exportedAtUtc: string | null;
     exportKind: "quest_explorer";
     schemaVersion: "quest_explorer.v3";
+    chapterRootEvidence: Record<string, unknown>;
     entries: QuestExplorerEntry[];
     progression: QuestExplorerProgression | null;
 };

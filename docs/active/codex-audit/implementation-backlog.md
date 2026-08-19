@@ -415,7 +415,9 @@ Quest export still has 300 branch/step-style rows, many duplicate display names
 such as `A Bitter Truth` appearing 18 times and `A Fresh Lead` appearing 10
 times. The dedicated `/quests` route remains the route-owned Quest Explorer, so
 top-level Codex grouping should wait for explicit Questline projection records
-and product direction.
+and product direction. Separate from top-level Codex grouping, EWShop now
+preserves rich Quest Explorer `chapterRootEvidence` route metadata end to end
+for diagnostics/link context only.
 
 Verification: `jq` Quest row count, duplicate display-name, and fact-label
 inspection on the local Quest Codex export.

@@ -33,6 +33,7 @@ public class QuestExplorerReadService {
                 explorer.exportedAtUtc(),
                 explorer.exportKind(),
                 explorer.schemaVersion(),
+                explorer.chapterRootEvidence(),
                 entries,
                 QuestExplorerProgressionProjector.project(new QuestExplorer(
                         explorer.gameVersion(),
@@ -40,6 +41,7 @@ public class QuestExplorerReadService {
                         explorer.exportedAtUtc(),
                         explorer.exportKind(),
                         explorer.schemaVersion(),
+                        explorer.chapterRootEvidence(),
                         entries
                 ))
         );

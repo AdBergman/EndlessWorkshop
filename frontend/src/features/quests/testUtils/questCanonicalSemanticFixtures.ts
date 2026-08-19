@@ -503,6 +503,7 @@ export const canonicalSemanticQuestExplorer: QuestExplorerResponse = {
   exportedAtUtc: "deterministic",
   exportKind: "quest_explorer",
   schemaVersion: "quest_explorer.v3",
+  chapterRootEvidence: {},
   entries: canonicalSemanticEntriesList,
   progression: canonicalSemanticProgression,
 };

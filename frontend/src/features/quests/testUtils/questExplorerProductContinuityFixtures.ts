@@ -216,6 +216,7 @@ export const productContinuityPayload: QuestExplorerResponse = {
     exportedAtUtc: "2026-05-24T05:30:13Z",
     exportKind: "quest_explorer",
     schemaVersion: "quest_explorer.v3",
+    chapterRootEvidence: {},
     entries: [
         productEntry({
             entryKey: kinCh0,

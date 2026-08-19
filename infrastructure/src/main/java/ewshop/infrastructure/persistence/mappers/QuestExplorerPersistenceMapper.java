@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class QuestExplorerPersistenceMapper {
@@ -32,6 +34,7 @@ public class QuestExplorerPersistenceMapper {
         entity.exportedAtUtc = metadata == null ? null : metadata.exportedAtUtc();
         entity.exportKind = metadata == null ? "quest_explorer" : metadata.exportKind();
         entity.schemaVersion = metadata == null ? "quest_explorer.v3" : metadata.schemaVersion();
+        entity.chapterRootEvidence = metadata == null ? new HashMap<>() : new HashMap<>(metadata.chapterRootEvidence());
         entity.importedAt = LocalDateTime.now();
     }
 
@@ -71,6 +74,7 @@ public class QuestExplorerPersistenceMapper {
                 metadata == null ? null : metadata.exportedAtUtc,
                 metadata == null ? "quest_explorer" : metadata.exportKind,
                 metadata == null ? "quest_explorer.v3" : metadata.schemaVersion,
+                metadata == null ? Map.of() : metadata.chapterRootEvidence,
                 entries.stream().map(this::toModel).toList()
         );
     }

@@ -35,6 +35,11 @@ const cleanStringMatrix = (values: readonly unknown[] | null | undefined): strin
         .map((value) => cleanStringList(value))
         .filter((value) => value.length > 0);
 
+const cleanRecord = (value: unknown): Record<string, unknown> =>
+    typeof value === "object" && value !== null && !Array.isArray(value)
+        ? { ...(value as Record<string, unknown>) }
+        : {};
+
 const normalizeRequirement = (requirement: any) => ({
     requirementKey: cleanRequiredString(requirement?.requirementKey),
     kind: cleanRequiredString(requirement?.kind),
@@ -312,6 +317,7 @@ export const normalizeQuestExplorer = (questExplorer: QuestExplorerResponse) => 
             ...questExplorer,
             exportKind: "quest_explorer" as const,
             schemaVersion: "quest_explorer.v3" as const,
+            chapterRootEvidence: cleanRecord(questExplorer.chapterRootEvidence),
             entries,
             progression: normalizeProgression(questExplorer.progression),
         },

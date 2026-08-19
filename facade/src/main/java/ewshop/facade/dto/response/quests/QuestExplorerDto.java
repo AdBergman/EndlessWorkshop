@@ -2,6 +2,7 @@ package ewshop.facade.dto.response.quests;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public record QuestExplorerDto(
         String gameVersion,
@@ -9,6 +10,7 @@ public record QuestExplorerDto(
         String exportedAtUtc,
         String exportKind,
         String schemaVersion,
+        Map<String, Object> chapterRootEvidence,
         List<EntryDto> entries,
         ProgressionDto progression
 ) {
@@ -20,7 +22,19 @@ public record QuestExplorerDto(
             String schemaVersion,
             List<EntryDto> entries
     ) {
-        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, entries, null);
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, Map.of(), entries, null);
+    }
+
+    public QuestExplorerDto(
+            String gameVersion,
+            String exporterVersion,
+            String exportedAtUtc,
+            String exportKind,
+            String schemaVersion,
+            List<EntryDto> entries,
+            ProgressionDto progression
+    ) {
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, Map.of(), entries, progression);
     }
 
     public record ProgressionDto(

@@ -116,6 +116,7 @@ const explorer = (): QuestExplorerResponse => ({
     exportedAtUtc: "now",
     exportKind: "quest_explorer",
     schemaVersion: "quest_explorer.v3",
+    chapterRootEvidence: {},
     entries: [
         entry(),
         entry({

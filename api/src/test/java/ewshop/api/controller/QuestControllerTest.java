@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,6 +26,7 @@ class QuestControllerTest {
                 "now",
                 "quest_explorer",
                 "quest_explorer.v3",
+                Map.of("evidenceCounts", Map.of("chapterRows", 52)),
                 List.of(new QuestExplorerDto.EntryDto(
                         "Quest_A",
                         "First Quest",
@@ -106,10 +108,11 @@ class QuestControllerTest {
 
         mockMvc.perform(get("/api/quests/explorer"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(7))
+                .andExpect(jsonPath("$.length()").value(8))
                 .andExpect(jsonPath("$.entries.length()").value(1))
                 .andExpect(jsonPath("$.exportKind").value("quest_explorer"))
                 .andExpect(jsonPath("$.schemaVersion").value("quest_explorer.v3"))
+                .andExpect(jsonPath("$.chapterRootEvidence.evidenceCounts.chapterRows").value(52))
                 .andExpect(jsonPath("$.entries[0].length()").value(12))
                 .andExpect(jsonPath("$.entries[0].entryKey").value("Quest_A"))
                 .andExpect(jsonPath("$.entries[0].aliases[0]").value("Source_A"))

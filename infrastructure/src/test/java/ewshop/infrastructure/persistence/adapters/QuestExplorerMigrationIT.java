@@ -24,7 +24,8 @@ class QuestExplorerMigrationIT {
         new ResourceDatabasePopulator(
                 new ClassPathResource("db/migration/common/V3_4_0__quest_chronicle_vertical_slice.sql"),
                 new ClassPathResource("db/migration/common/V3_4_1__quest_explorer_v3_vertical_slice.sql"),
-                new ClassPathResource("db/migration/common/V3_4_3__quest_explorer_branch_continuity_metadata.sql")
+                new ClassPathResource("db/migration/common/V3_4_3__quest_explorer_branch_continuity_metadata.sql"),
+                new ClassPathResource("db/migration/common/V3_5_7__add_quest_explorer_chapter_root_evidence.sql")
         ).execute(dataSource);
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -36,6 +37,11 @@ class QuestExplorerMigrationIT {
         assertThat(tableExists(jdbcTemplate, "QUEST_EXPLORER_NAVIGATION")).isTrue();
         assertThat(tableExists(jdbcTemplate, "QUEST_EXPLORER_BRANCHES")).isTrue();
         assertThat(tableExists(jdbcTemplate, "QUEST_EXPLORER_BRANCH_CONDITIONS")).isTrue();
+        assertThat(columnExists(
+                jdbcTemplate,
+                "QUEST_EXPLORER_IMPORT_METADATA",
+                "CHAPTER_ROOT_EVIDENCE_JSON"
+        )).isTrue();
         assertThat(primaryKeyColumns(
                 jdbcTemplate,
                 "QUEST_EXPLORER_BRANCH_PREREQUISITE_KEYS",
@@ -55,6 +61,17 @@ class QuestExplorerMigrationIT {
                 WHERE TABLE_SCHEMA = 'PUBLIC'
                   AND TABLE_NAME = ?
                 """, Integer.class, tableName);
+        return count != null && count > 0;
+    }
+
+    private static boolean columnExists(JdbcTemplate jdbcTemplate, String tableName, String columnName) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = 'PUBLIC'
+                  AND TABLE_NAME = ?
+                  AND COLUMN_NAME = ?
+                """, Integer.class, tableName, columnName);
         return count != null && count > 0;
     }
 
