@@ -112,7 +112,14 @@ export default function CodexSummaryList({
                         const normalizedExportKind = entry.exportKind.trim().toLowerCase();
                         const isFactionEntry = normalizedExportKind === "factions";
                         const isFactionLikeEntry = isFactionEntry || normalizedExportKind === "minorfactions";
-                        const factionArchivePreview = isFactionLikeEntry ? buildCodexFactionArchivePreview(entry) : null;
+                        const factionArchivePreview = isFactionLikeEntry
+                            ? buildCodexFactionArchivePreview(entry, allEntries)
+                            : null;
+                        const factionArchiveClass = factionArchivePreview
+                            ? normalizedExportKind === "minorfactions"
+                                ? "codex-summaryList__item--factionArchive codex-summaryList__item--minorFactionArchive"
+                                : "codex-summaryList__item--factionArchive codex-summaryList__item--majorFactionArchive"
+                            : "";
                         const factionAffinity = isFactionEntry ? getCodexFactionAffinityLabel(entry) : null;
                         const factionTraits = isFactionEntry ? getCodexFactionTraitSummary(entry) : "";
                         const factionStrategicPreview = isFactionEntry ? getCodexFactionStrategicPreview(entry) : "";
@@ -293,6 +300,7 @@ export default function CodexSummaryList({
                             ? {
                                 context: factionArchivePreview.context,
                                 effectLines: factionArchivePreview.lines,
+                                iconEntry: factionArchivePreview.iconEntry,
                                 links: [],
                             }
                             : getCodexShallowReferencePreview(entry, allEntries, preview);
@@ -301,7 +309,9 @@ export default function CodexSummaryList({
                             return (
                                 <div
                                     key={entry.entryKey}
-                                    className="codex-summaryList__item codex-summaryList__item--shallow"
+                                    className={`codex-summaryList__item codex-summaryList__item--shallow ${
+                                        factionArchiveClass
+                                    }`}
                                 >
                                     <div className="codex-summaryList__shallowHeader">
                                         <button
@@ -362,6 +372,30 @@ export default function CodexSummaryList({
                                         <span className="codex-summaryList__description">
                                             No public description has been added for this entry yet.
                                         </span>
+                                    ) : null}
+
+                                    {factionArchivePreview?.links.length ? (
+                                        <div
+                                            className="codex-summaryList__factionLinks"
+                                            aria-label={`${getCodexEntryLabel(entry)} associated entries`}
+                                        >
+                                            {factionArchivePreview.links.map((link) => (
+                                                <span
+                                                    className="codex-summaryList__factionLink"
+                                                    key={`${entry.entryKey}-${link.prefix}-${link.entry.entryKey}`}
+                                                >
+                                                    <span className="codex-summaryList__factionLinkPrefix">
+                                                        {link.prefix}:
+                                                    </span>
+                                                    <CodexInlineEntityLink
+                                                        entry={link.entry}
+                                                        onSelect={(linkedEntry) => onSelectEntry(linkedEntry)}
+                                                    >
+                                                        {renderCodexLabel(link.label)}
+                                                    </CodexInlineEntityLink>
+                                                </span>
+                                            ))}
+                                        </div>
                                     ) : null}
                                 </div>
                             );

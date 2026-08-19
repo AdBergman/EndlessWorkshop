@@ -265,6 +265,42 @@
     cursor: default;
 }
 
+.codex-summaryList__item--factionArchive {
+    gap: 14px;
+    padding: 18px 12px 18px 18px;
+    border-left-width: 3px;
+    background: linear-gradient(90deg, rgba(195, 152, 77, 0.018), transparent 72%);
+}
+
+.codex-summaryList__item--minorFactionArchive {
+    gap: 10px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+.codex-summaryList__item--factionArchive .codex-summaryList__name {
+    color: rgba(241, 234, 220, 0.94);
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.codex-summaryList__item--factionArchive .codex-summaryList__context {
+    color: rgba(195, 152, 77, 0.78);
+    font-size: 11px;
+}
+
+.codex-summaryList__item--factionArchive .codex-summaryList__effectLine {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    color: rgba(241, 234, 220, 0.82);
+}
+
+.codex-summaryList__item--minorFactionArchive .codex-summaryList__effectLine {
+    -webkit-line-clamp: 1;
+}
+
 .codex-summaryList__shallowHeader {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -359,6 +395,49 @@
 
 .codex-kindIcon--summaryResource {
     flex: 0 0 auto;
+}
+
+.codex-summaryList__item--factionArchive .codex-kindIcon--summaryResource {
+    width: 22px;
+    height: 22px;
+    filter: drop-shadow(0 0 6px rgba(195, 152, 77, 0.18));
+}
+
+.codex-summaryList__factionLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.codex-summaryList__factionLink {
+    display: inline-flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 5px;
+    padding: 3px 7px;
+    border: 1px solid rgba(195, 152, 77, 0.18);
+    border-radius: 4px;
+    background: rgba(195, 152, 77, 0.055);
+    color: rgba(241, 234, 220, 0.82);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.codex-summaryList__item--minorFactionArchive .codex-summaryList__factionLink {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.codex-summaryList__factionLinkPrefix {
+    flex: 0 0 auto;
+    color: rgba(195, 152, 77, 0.82);
+    font-weight: 700;
+}
+
+.codex-summaryList__factionLink .codex-inlineEntityLink {
+    min-width: 0;
+    color: rgba(241, 234, 220, 0.86);
+    font-weight: 700;
 }
 
 .codex-summaryList__entryButton:focus-visible,
