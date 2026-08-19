@@ -23,6 +23,7 @@ public final class QuestExplorerMapper {
                 model.exportedAtUtc(),
                 model.exportKind(),
                 model.schemaVersion(),
+                model.chapterRootEvidence(),
                 safeList(model.entries()).stream().map(QuestExplorerMapper::toDto).toList(),
                 toDto(model.progression())
         );

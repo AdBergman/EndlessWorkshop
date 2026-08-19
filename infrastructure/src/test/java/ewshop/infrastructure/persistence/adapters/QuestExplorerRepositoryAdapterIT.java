@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,6 +63,7 @@ class QuestExplorerRepositoryAdapterIT {
 
         assertThat(loaded.exportKind()).isEqualTo("quest_explorer");
         assertThat(loaded.schemaVersion()).isEqualTo("quest_explorer.v3");
+        assertThat(loaded.chapterRootEvidence()).containsEntry("evidenceCounts", Map.of("chapterRows", 52));
         assertThat(loaded.entries()).hasSize(2);
         QuestExplorer.Entry entry = loaded.entries().getFirst();
         assertThat(entry.entryKey()).isEqualTo("Quest_A");
@@ -151,7 +153,8 @@ class QuestExplorerRepositoryAdapterIT {
                 "0.1.0",
                 "2026-05-19T00:00:00Z",
                 "quest_explorer",
-                "quest_explorer.v3"
+                "quest_explorer.v3",
+                Map.of("evidenceCounts", Map.of("chapterRows", 52))
         );
     }
 

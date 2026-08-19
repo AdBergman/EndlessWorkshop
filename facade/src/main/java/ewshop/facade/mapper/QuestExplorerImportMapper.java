@@ -56,7 +56,8 @@ public final class QuestExplorerImportMapper {
                 trimToNull(dto.exporterVersion()),
                 trimToNull(dto.exportedAtUtc()),
                 EXPORT_KIND,
-                SCHEMA_VERSION
+                SCHEMA_VERSION,
+                dto.chapterRootEvidence()
         );
     }
 

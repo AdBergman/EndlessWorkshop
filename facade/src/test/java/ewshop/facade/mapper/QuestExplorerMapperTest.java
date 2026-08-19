@@ -21,6 +21,7 @@ import tools.jackson.databind.json.JsonMapper;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +36,7 @@ class QuestExplorerMapperTest {
 
         assertThat(metadata.exportKind()).isEqualTo("quest_explorer");
         assertThat(metadata.schemaVersion()).isEqualTo("quest_explorer.v3");
+        assertThat(metadata.chapterRootEvidence()).containsEntry("evidenceCounts", Map.of("chapterRows", 52));
         assertThat(snapshots).hasSize(2);
         assertThat(snapshots.getFirst().entryKey()).isEqualTo("Quest_A");
         assertThat(snapshots.getFirst().navigation().nextEntryKeys()).containsExactly("Quest_B");
@@ -257,6 +259,7 @@ class QuestExplorerMapperTest {
 
         assertThat(metadata.exportKind()).isEqualTo("quest_explorer");
         assertThat(metadata.schemaVersion()).isEqualTo("quest_explorer.v3");
+        assertThat(metadata.chapterRootEvidence()).containsKeys("chapters", "evidenceCounts");
         assertThat(snapshots).hasSize(149);
         assertThat(snapshots)
                 .extracting(entry -> entry.navigation().sequenceIndex())
@@ -315,6 +318,7 @@ class QuestExplorerMapperTest {
                 "2026-05-19T00:00:00Z",
                 "quest_explorer",
                 "quest_explorer.v3",
+                Map.of("evidenceCounts", Map.of("chapterRows", 52)),
                 entries
         );
     }

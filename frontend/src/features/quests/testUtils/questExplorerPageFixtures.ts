@@ -14,6 +14,7 @@ export const payload: QuestExplorerResponse = {
     exportedAtUtc: "now",
     exportKind: "quest_explorer",
     schemaVersion: "quest_explorer.v3",
+    chapterRootEvidence: {},
     entries: [
         {
             entryKey: "Quest_A",

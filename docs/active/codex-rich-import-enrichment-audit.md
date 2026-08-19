@@ -108,8 +108,9 @@ Decision update:
 - Districts and Improvements are already imported through rich/domain endpoints,
   but their resolver use should remain detail/profile-only unless public Codex
   facts are explicitly added by the exporter.
-- Hero, Skills, Populations, and Abilities rich exports exist locally but are not
-  imported by EWShop today; they require explicit importer/API/store work before
+- Factions, Heroes, and Skills now have EWShop import/API/frontend-contract
+  support. Populations and Abilities rich exports still exist locally without an
+  EWShop rich import path; they require explicit importer/API/store work before
   any resolver can use them.
 
 ## Input Files
@@ -126,7 +127,7 @@ Decision update:
 | `ewshop_diplomatic_treaties_codex_export_0.82.json` | `diplomaticTreaties` | 22 | `entries[]` | no | No rich sibling found. |
 | `ewshop_districts_codex_export_0.82.json` | `districts` | 167 | `entries[]` | no | Rich sibling exists. |
 | `ewshop_equipment_codex_export_0.82.json` | `equipment` | 160 | `entries[]` | no | No rich sibling found. |
-| `ewshop_factions_codex_export_0.82.json` | `factions` | 5 | `entries[]` | no | No rich sibling found. |
+| `ewshop_factions_codex_export_0.82.json` | `factions` | 5 | `entries[]` | no | Rich sibling exists. |
 | `ewshop_heroes_codex_export_0.82.json` | `heroes` | 79 | `entries[]` | no | Rich sibling exists. |
 | `ewshop_improvements_codex_export_0.82.json` | `improvements` | 123 | `entries[]` | no | Rich sibling exists. |
 | `ewshop_minor_factions_codex_export_0.82.json` | `minorFactions` | 16 | `entries[]` | no | No rich sibling found. |
@@ -144,6 +145,7 @@ Decision update:
 | --- | --- | ---: | --- | --- | --- |
 | `ewshop_abilities_export_0.82.json` | `abilities` | 364 | `entries[]` | yes | Visibility flags, source category, mechanic kind/tags, tactical profiles, battle summaries, descriptor keys. |
 | `ewshop_districts_export_0.82.json` | `districts` | 167 | `districts[]` | yes | Prototype/variant/repair/aspect flags, faction specificity, descriptor keys, raw category/tier. |
+| `ewshop_factions_export_0.82.json` | `factions` | 21 | `factions[]` | yes | Major/minor faction join points: traits, populations, units, heroes, gated technologies, quests, protectorate traits, affinity, and public labels/lore. |
 | `ewshop_heroes_export_0.82.json` | `heroes` | 79 | `units[]` | yes | Faction/origin keys, hero class, unit class, ability group keys, default skills, applicable skill trees. |
 | `ewshop_improvements_export_0.82.json` | `improvements` | 123 | `improvements[]` | yes | Constructible kind, faction key, variant/prototype flags, descriptor keys. |
 | `ewshop_populations_export_0.82.json` | `populations` | 26 | `populations[]` | no | Food cost, faction keys, affinity, custom-faction availability, worker lines, threshold rewards. |
@@ -162,6 +164,7 @@ Decision update:
 | Tech | `ewshop_tech_codex_export_0.82.json` | 133 | `ewshop_tech_export_0.82.json` | 133 | exact count/key match | Strong exact unlock/prereq enrichment candidate; tree remains `/tech` owned. |
 | Improvements | `ewshop_improvements_codex_export_0.82.json` | 123 | `ewshop_improvements_export_0.82.json` | 123 | exact count/key match | Moderate candidate; Codex already has most row-ready effects. |
 | Districts | `ewshop_districts_codex_export_0.82.json` | 167 | `ewshop_districts_export_0.82.json` | 167 | exact count/key match | Moderate candidate; progression/variant flags are mostly detail/debug until product-approved. |
+| Factions | `ewshop_factions_codex_export_0.82.json` | 5 | `ewshop_factions_export_0.82.json` | 21 | public major rows plus richer faction/minor-faction join source | Imported and used for exact faction package enrichment. |
 | Populations | `ewshop_populations_codex_export_0.82.json` | 26 | `ewshop_populations_export_0.82.json` | 26 | exact count/key match | Strong candidate if Populations becomes a richer archive. |
 | Quests | `ewshop_quests_codex_export_0.82.json` | 300 | `ewshop_quest_explorer_export_0.82.json` | 156 | related but not 1:1 | High-risk. Rich export owns `/quests` semantics; do not use it to reconstruct Codex grouping casually. |
 | Skills | no Codex category | 0 | `ewshop_skills_export_0.82.json` | 147 skills | related but not 1:1 | Sidecar for Heroes and maybe future Skills category. |

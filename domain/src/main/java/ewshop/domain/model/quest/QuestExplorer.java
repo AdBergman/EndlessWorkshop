@@ -2,7 +2,10 @@ package ewshop.domain.model.quest;
 
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public record QuestExplorer(
         String gameVersion,
@@ -10,6 +13,7 @@ public record QuestExplorer(
         String exportedAtUtc,
         String exportKind,
         String schemaVersion,
+        Map<String, Object> chapterRootEvidence,
         List<Entry> entries,
         Progression progression
 ) {
@@ -21,10 +25,37 @@ public record QuestExplorer(
             String schemaVersion,
             List<Entry> entries
     ) {
-        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, entries, null);
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, Map.of(), entries, null);
+    }
+
+    public QuestExplorer(
+            String gameVersion,
+            String exporterVersion,
+            String exportedAtUtc,
+            String exportKind,
+            String schemaVersion,
+            List<Entry> entries,
+            Progression progression
+    ) {
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, Map.of(), entries, progression);
+    }
+
+    public QuestExplorer(
+            String gameVersion,
+            String exporterVersion,
+            String exportedAtUtc,
+            String exportKind,
+            String schemaVersion,
+            Map<String, Object> chapterRootEvidence,
+            List<Entry> entries
+    ) {
+        this(gameVersion, exporterVersion, exportedAtUtc, exportKind, schemaVersion, chapterRootEvidence, entries, null);
     }
 
     public QuestExplorer {
+        chapterRootEvidence = chapterRootEvidence == null
+                ? Map.of()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(chapterRootEvidence));
         entries = safeList(entries);
     }
 

@@ -3,6 +3,8 @@ package ewshop.infrastructure.persistence.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -27,6 +29,10 @@ public class QuestExplorerImportMetadataEntity {
 
     @Column(name = "schema_version", nullable = false, length = 80)
     public String schemaVersion;
+
+    @Convert(converter = JsonMapConverter.class)
+    @Column(name = "chapter_root_evidence_json", columnDefinition = "TEXT")
+    public Map<String, Object> chapterRootEvidence = new HashMap<>();
 
     @Column(name = "imported_at", nullable = false)
     public LocalDateTime importedAt;

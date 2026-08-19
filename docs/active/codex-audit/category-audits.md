@@ -585,9 +585,17 @@ Filtering/completeness:
   export. The same keys exist in the rich Quest Explorer export, confirming a
   generic-vs-rich relationship/diagnostics gap rather than a raw quest-source
   absence.
+- Revalidated on 2026-08-19: rich Quest Explorer export metadata
+  `chapterRootEvidence` exists in local source data but was dropped by the
+  EWShop import/API/frontend contract. EWShop now preserves that evidence as
+  route metadata for diagnostics/link context only; it is not used to recreate a
+  top-level Quest Codex grouping.
 
 Improve now:
 
+- Done 2026-08-19: preserve `chapterRootEvidence` from rich Quest Explorer
+  import through persistence, `/api/quests/explorer`, frontend type, and
+  normalizer.
 - FE: keep hidden; do not group from titles or Quest Explorer branch data.
 
 Exporter-needed:

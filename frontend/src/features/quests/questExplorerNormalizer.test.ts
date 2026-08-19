@@ -10,6 +10,9 @@ describe("questExplorerNormalizer", () => {
             gameVersion: null,
             exporterVersion: null,
             exportedAtUtc: null,
+            chapterRootEvidence: {
+                evidenceCounts: { chapterRows: 52 },
+            },
             progression: null,
             entries: [{
                 entryKey: "Quest_Formula",
@@ -58,6 +61,9 @@ describe("questExplorerNormalizer", () => {
         } as any);
 
         const entry = normalized.entries[0];
+        expect(normalized.questExplorer.chapterRootEvidence).toEqual({
+            evidenceCounts: { chapterRows: 52 },
+        });
         expect(entry?.strategyView.objectives[0]?.choiceKey).toBe("Choice_Formula");
         expect(entry?.strategyView.objectives[0]?.requirements[0]).toEqual(expect.objectContaining({
             displayText: "Research Cartography.",

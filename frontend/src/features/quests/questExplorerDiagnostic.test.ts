@@ -87,6 +87,7 @@ const diagnosticPayload: QuestExplorerResponse = {
     exportedAtUtc: "deterministic",
     exportKind: "quest_explorer",
     schemaVersion: "quest_explorer.v3",
+    chapterRootEvidence: {},
     entries: [
         entry("Quest_Shared", "Shared Chronicle", {
             aliases: ["Quest_Shared_Alias_Step02"],
