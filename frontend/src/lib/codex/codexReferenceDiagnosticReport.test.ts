@@ -213,7 +213,7 @@ describe("codexReferenceDiagnosticReport", () => {
         ]);
     });
 
-    it("infers specific minor faction quest references as quest-domain policy ambiguity", () => {
+    it("classifies specific minor faction quest refs as policy while quests are hidden and route-owned", () => {
         const report = createCodexReferenceDiagnosticReport([
             entry({
                 exportKind: "minorFactions",

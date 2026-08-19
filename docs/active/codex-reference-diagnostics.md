@@ -82,7 +82,9 @@ Root-cause classification from the upgraded diagnostic:
   references emitted on Improvement rows.
 - 1 unique public unresolved relationship is `relationship/reference policy`:
   `MinorFaction_SpecificQuest_MangroveOfHarmony01`, a hidden Quest-domain
-  reference from a public Minor Faction.
+  reference from a public Minor Faction. This classification depends on the
+  current Quests-hidden/route-owned policy; if Quests become public Codex
+  records later, unresolved Quest refs should be reclassified from fresh data.
 - 0 strict thin public records were found by the reference diagnostic. The
   separate content-quality diagnostic still reports classification-facts-only
   District/Improvement records and Population raw-key text as exporter/editorial
