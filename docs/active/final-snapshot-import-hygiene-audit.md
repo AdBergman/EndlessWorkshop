@@ -20,6 +20,9 @@ important safety boundaries mostly hold:
 - Victory Paths and Victory Conditions remain local/dev-visible only.
 - Rich District/Improvement APIs expose only the planning-safe fields currently
   needed by Codex enrichment, not raw cost formulas or raw resource IDs.
+- 2026-08-19 data-path audit fixed two EWShop-owned contract losses:
+  Improvement `category` is now preserved in the frontend store, and full rich
+  Tech prerequisite arrays are now persisted and exposed through `/api/techs`.
 
 Recommended next action: add a small EWShop hardening ticket for diagnostics
 deny-list coverage and keep the existing DB Exporter follow-ups open. Do not
@@ -102,11 +105,11 @@ Unsupported rich export kinds are skipped with a log warning.
 | `ewshop_districts_export_0.82.json` / `districts` | yes | yes | `/api/districts` | `districtStore` | detail enrichment only | Low-medium. Raw resource IDs/RPN exist locally, but current DTO/UI expose only unlock tech, level-up, and limited placement. |
 | `ewshop_factions_export_0.82.json` / `factions` | yes | yes | `/api/factions` | `factionStore` | Codex faction detail enrichment | Low. Mapper keys in JSON are not exposed in the API DTO. |
 | `ewshop_heroes_export_0.82.json` / `heroes` | yes | yes | `/api/heroes` | `heroStore` | Codex hero detail enrichment | Medium-low. Helper ability keys are preserved as source truth but filtered from rendered starting-skill primary ability links. |
-| `ewshop_improvements_export_0.82.json` / `improvements` | yes | yes | `/api/improvements` | `improvementStore` | detail enrichment only | Low-medium. Raw resource IDs/RPN exist locally, but current DTO/UI expose only unlock tech and limited placement. |
+| `ewshop_improvements_export_0.82.json` / `improvements` | yes | yes | `/api/improvements` | `improvementStore` | detail enrichment only | Low-medium. Raw resource IDs/RPN exist locally, but current DTO/UI expose only category, unlock tech, and limited placement. |
 | `ewshop_populations_export_0.82.json` / `populations` | skipped | no | no | no | no | Safe. Public population UI uses `populations-codex`; rich population import is deferred. |
 | `ewshop_quest_explorer_export_0.82.json` / `quest_explorer` | yes | yes | `/api/quests/explorer` | `questStore` | `/quests`, not Codex | Low-medium. Route-owned data may contain diagnostics/evidence fields, but Quest Explorer owns rendering and Codex does not consume it. |
 | `ewshop_skills_export_0.82.json` / `skills` | yes | yes | `/api/skills` | `skillStore` | Codex hero detail enrichment only | Medium-low. Raw sidecar keys are preserved, but no public Skills category or planner exists. |
-| `ewshop_tech_export_0.82.json` / `tech` | yes | yes | `/api/techs` | `techStore` | existing tech/rich enrichment surfaces | Low-medium. Descriptor/modifier keys are source truth; public Codex uses exact projected fields. |
+| `ewshop_tech_export_0.82.json` / `tech` | yes | yes | `/api/techs` | `techStore` | existing tech/rich enrichment surfaces | Low-medium. Full exported prerequisite arrays are preserved; descriptor/modifier keys remain source truth and public Codex uses exact projected fields. |
 | `ewshop_units_export_0.82.json` / `units` | yes | yes | `/api/units` | `unitStore` | existing unit/rich enrichment surfaces | Low-medium. Helper/class keys are source truth; current public rendering uses bounded unit presentation. |
 
 ## High-Risk Findings
@@ -154,6 +157,12 @@ Quest Codex records import and remain direct/search-linkable. They are hidden
 from top-level Codex browsing because repeated titles are not safe grouping
 keys, and `/quests` owns the rich quest experience.
 
+2026-08-19 revalidation found 22 generic Quest Codex references to
+`FactionQuest_*` choice/continuation keys absent from the generic Quest Codex
+export. Those keys are present in `ewshop_quest_explorer_export_0.82.json`, so
+this is a generic-vs-rich diagnostics/relationship boundary, not proof that raw
+Quest Explorer source data is missing.
+
 Owner: product/EWShop for keeping Codex Quests hidden; DB Exporter only if a
 future public Questline encyclopedia projection is explicitly requested.  
 Severity: medium-low.  
@@ -194,6 +203,37 @@ EWShop for continuing to suppress raw resource IDs and formula dumps.
 Severity: medium-low.  
 Release impact: not blocking.
 
+### 8. Exported Public Relationships Still Point At Missing Public Targets
+
+The 2026-08-19 `diagnostics:codex-references` run against current local Codex
+exports reported 9,992 references and 271 unresolved/malformed items. High
+signal public-target clusters are source/exporter-owned when the referenced key
+is absent from all current generic Codex files and from available rich exports.
+
+Validated examples:
+
+- public Faction rows reference `District_Base_CityCenter_Tier1`, but generic
+  District Codex and rich District exports only contain the Necrophage-specific
+  City Hall variants and `District_Camp_CampCenter`;
+- public Bonus rows reference custom district keys such as
+  `District_Tier1_Military_Custom_Specific12` and
+  `District_Tier1_Science_Custom_Specific24`, absent from generic/rich District
+  exports;
+- public Unit rows reference `Faction_Tormented`, `MinorFaction_Dungeon`, and
+  `MinorFaction_GreenScions`, absent from generic Codex and available rich
+  faction/minor-faction exports;
+- public Hero rows reference `Faction_Hero`, absent from generic/rich faction
+  targets, while retaining human-readable Lesser Faction facts;
+- public Ability rows reference status keys such as `Status_Unit_Ecstatic` that
+  are absent from all current generic Codex files.
+
+Owner: DB Exporter for target classification and exact public target rows or
+explicit non-public/obsolete caveats; EWShop for continuing to fail closed and
+not inventing substitute target records.
+Severity: medium.
+Release impact: not blocking while unresolved links are not elevated into
+inferred public content.
+
 ## Safe / No-Action Findings
 
 - Rich `abilities` export is skipped; public Ability Codex data remains the
@@ -211,7 +251,16 @@ Release impact: not blocking.
 
 ## EWShop Fixes Needed
 
-No release-blocking EWShop fixes were found.
+No release-blocking EWShop fixes remain from this pass.
+
+Completed 2026-08-19:
+
+- Frontend Improvement contract now preserves the backend-exposed `category`
+  field and no longer models `unique`/`cost` as required API fields.
+- Rich Tech import now preserves
+  `technologyPrerequisiteTechKeys`/`exclusiveTechnologyPrerequisiteTechKeys`
+  from import DTO through persistence, `/api/techs`, frontend store, and Codex
+  rich detail enrichment.
 
 Recommended follow-up:
 
@@ -225,10 +274,14 @@ Recommended follow-up:
 
 ## DB Exporter Follow-Ups
 
-No new exporter-owned findings were discovered by this audit.
+One exporter-owned follow-up was refreshed from current diagnostics:
+`DBX-CODEX-REFERENCES-001` should classify referenced public-looking targets
+that are absent from current generic/rich exports, then emit exact public Codex
+targets or explicit non-public/obsolete caveats.
 
 Existing validated follow-ups remain:
 
+- Codex diagnostics imported-domain/public-target reference triage.
 - Victory Path `Master` public/non-public clarification.
 - Modifier provenance metadata.
 - Hero full selectable skill progression metadata/art contracts, if a future

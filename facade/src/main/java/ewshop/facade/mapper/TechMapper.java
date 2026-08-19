@@ -57,6 +57,8 @@ public final class TechMapper {
                 prereq,
                 factions,
                 excludes,
+                t.getTechnologyPrerequisiteTechKeys(),
+                t.getExclusiveTechnologyPrerequisiteTechKeys(),
                 coords
         );
     }

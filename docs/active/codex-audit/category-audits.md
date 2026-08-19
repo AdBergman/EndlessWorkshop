@@ -29,6 +29,9 @@ Filtering/completeness:
   `codexAbilityArchiveFilters.ts`.
 - Five local ability references point at unavailable `Status_*` rows, including
   `Status_Unit_Bodyguard` and `Status_Unit_Ecstatic`.
+- Revalidated on 2026-08-19: sampled unresolved status targets are absent from
+  all current generic Codex files; `Status_Unit_Bodyguarded` exists, but
+  `Status_Unit_Bodyguard` does not.
 - Current exporter follow-up for role/ownership remains valid; rich ability
   data should not be imported casually because it contains helper/internal
   classifications.
@@ -383,6 +386,9 @@ Trace:
 - Rich import/API/frontend now preserve `placementPrerequisites.neighbourTiles`,
   `terrain`, `river`, and `pointOfInterest`. Current local Improvement source
   examples only exercise neighbour placement.
+- Rich API already exposed `category`; 2026-08-19 audit found the frontend
+  `Improvement` type/store did not preserve it and still declared stale
+  `unique`/`cost` requirements.
 - Frontend mode is `improvementArchive`; detail enrichment shows exact unlock
   links and limited placement text.
 
@@ -398,6 +404,8 @@ Completed:
 - PIPELINE/FE: shared rich constructible placement shape can preserve
   structured terrain/river/POI fields for Improvements when exporter data
   supplies them. Current local Improvement data remains neighbour-only.
+- FE contract: `useImprovementStore` now preserves nullable `category`; the
+  frontend type no longer requires fields the API does not return.
 
 Exporter-needed:
 
@@ -422,6 +430,10 @@ Filtering/completeness:
 - No import filter.
 - Three local minor-faction references are unresolved, including protectorate
   trait references for Blackhammer and a Mangrove quest reference.
+- Revalidated on 2026-08-19: `MinorFaction_SpecificQuest_MangroveOfHarmony01`
+  and `MinorFaction_MangroveOfHarmony_Elder` are referenced by current public
+  Codex rows but absent from the generic Codex corpus; no rich minor-faction
+  export exists in the local snapshot.
 
 Improve now:
 
@@ -568,6 +580,11 @@ Filtering/completeness:
 - Release gate exists for faction quest keys but current local snapshot count
   remains 300 after policy.
 - Repeated titles and branch records make title/key grouping unsafe.
+- Revalidated on 2026-08-19: 22 generic quest references point at
+  `FactionQuest_*` choice/continuation keys absent from the generic Quest Codex
+  export. The same keys exist in the rich Quest Explorer export, confirming a
+  generic-vs-rich relationship/diagnostics gap rather than a raw quest-source
+  absence.
 
 Improve now:
 
@@ -649,6 +666,11 @@ Trace:
 - Rich import supports `/api/techs` and `techStore`.
 - Frontend `techArchive` uses Era/Quadrant/Faction filters; detail enrichment
   adds exact prerequisite links from rich tech when public Codex targets resolve.
+- Rich export fields `technologyPrerequisiteTechKeys` and
+  `exclusiveTechnologyPrerequisiteTechKeys` are now preserved from import DTO
+  through persistence, `/api/techs`, `Tech` frontend type/store, and Codex tech
+  detail enrichment. Legacy singular `prereq`/`excludes` remain compatibility
+  fields.
 
 Filtering/completeness:
 
@@ -658,6 +680,8 @@ Filtering/completeness:
 
 Improve now:
 
+- Done 2026-08-19: preserve full exported prerequisite arrays end-to-end and
+  add focused backend/API/frontend regression tests.
 - FE: keep current split; small unresolved unlock diagnostics only.
 
 Exporter-needed:
@@ -721,7 +745,10 @@ Filtering/completeness:
 
 - No Codex import filter.
 - 156 rows; all have Stats and Tier/Class facts.
-- Some faction/minor-faction refs remain unresolved.
+- Revalidated on 2026-08-19: public unit rows reference `Faction_Tormented`,
+  `MinorFaction_Dungeon`, and `MinorFaction_GreenScions`; those targets are
+  absent from all current generic Codex files and from available rich
+  faction/minor-faction exports.
 
 Improve now:
 

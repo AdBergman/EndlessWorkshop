@@ -20,6 +20,7 @@ describe("useImprovementStore", () => {
             {
                 improvementKey: " Improvement_Public_Library ",
                 displayName: "Public Library",
+                category: " Science ",
                 descriptionLines: ["+10 Science"],
                 unique: "City",
                 cost: ["100 Industry"],
@@ -53,6 +54,7 @@ describe("useImprovementStore", () => {
         expect(state.getImprovementByKey("Improvement_Public_Library")?.displayName).toBe(
             "Public Library"
         );
+        expect(state.getImprovementByKey("Improvement_Public_Library")?.category).toBe("Science");
         expect(state.getImprovementByKey("Improvement_Public_Library")?.unlockTechnologyKeys).toEqual([
             "Technology_Public_Archives",
         ]);

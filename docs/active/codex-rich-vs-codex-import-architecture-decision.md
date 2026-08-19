@@ -32,8 +32,8 @@ The chosen architecture is a hybrid per-field ownership model.
 | Districts rich | `local-imports/exports/ewshop_districts_export_0.82.json`, `districts[]` | `/api/admin/import/districts`, `/api/districts`, `DistrictRepository` | `apiClient.getDistricts`, `useDistrictStore` | Tech unlock/resource support | Already imported; clean data source, no current rich route. |
 | Improvements rich | `local-imports/exports/ewshop_improvements_export_0.82.json`, `improvements[]` | `/api/admin/import/improvements`, `/api/improvements`, `ImprovementRepository` | `apiClient.getImprovements`, `useImprovementStore` | Tech unlock/resource support | Already imported; clean data source, no current rich route. |
 | Quest Explorer rich | `local-imports/exports/ewshop_quest_explorer_export_0.82.json`, `entries[]` | `/api/admin/import/quests/explorer`, `/api/quests/explorer`, `QuestExplorerRepository` | `apiClient.getQuestExplorer`, `useQuestStore` | `/quests` Strategy/Lore explorer | Already imported but route-owned; not a safe Codex grouping source. |
-| Heroes rich | `local-imports/exports/ewshop_heroes_export_0.82.json`, `units[]` | unsupported local startup export kind today | none | none | Export exists but is not imported. |
-| Skills rich | `local-imports/exports/ewshop_skills_export_0.82.json`, skill tree/skill arrays | unsupported local startup export kind today | none | none | Export exists but is not imported. |
+| Heroes rich | `local-imports/exports/ewshop_heroes_export_0.82.json`, `units[]` | `/api/admin/import/heroes`, `/api/heroes`, `HeroRepository` | `apiClient.getHeroes`, `useHeroStore` | Codex hero detail enrichment | Already imported; helper ability keys stay source truth, with bounded Codex rendering. |
+| Skills rich | `local-imports/exports/ewshop_skills_export_0.82.json`, skill tree/skill arrays | `/api/admin/import/skills`, `/api/skills`, `SkillRepository` | `apiClient.getSkills`, `useSkillStore` | Codex hero detail enrichment | Already imported; not a public Skills category or planner. |
 | Populations rich | `local-imports/exports/ewshop_populations_export_0.82.json`, `populations[]` | unsupported local startup export kind today | none | none | Export exists but is not imported. |
 | Abilities rich | `local-imports/exports/ewshop_abilities_export_0.82.json`, `entries[]` | unsupported local startup export kind today | none | none | Export exists but is not imported. |
 | Equipment | Codex export only | Codex API only | `useCodexStore` | `/codex` | Codex-only. |
@@ -43,9 +43,9 @@ The chosen architecture is a hybrid per-field ownership model.
 | Resources/Statuses/Factions/Minor Factions/Councilors/Effects | Codex export only | Codex API only | `useCodexStore` | `/codex` | Codex-only. |
 
 Supported local startup `exports/` kinds are currently `districts`,
-`improvements`, `units`, `tech`, and `quest_explorer`. Other rich files may
-exist locally, but EWShop currently skips them until import/API/store work is
-explicitly added.
+`improvements`, `units`, `factions`, `heroes`, `skills`, `tech`, and
+`quest_explorer`. Other rich files may exist locally, but EWShop currently skips
+them until import/API/store work is explicitly added.
 
 ## Ownership Decision Rules
 
@@ -344,10 +344,10 @@ Implementation result:
 - `CODEX-RICH-001` proved the first resolver slice on Codex Tech detail pages.
 - The resolver reads the existing frontend `useTechStore` data populated from
   `/api/techs`; Codex does not import local rich JSON directly.
-- The current Tech API DTO exposes one `prereq` and one `excludes` field, while
-  the resolver also tolerates future
+- The Tech API DTO now exposes legacy `prereq`/`excludes` compatibility fields
+  and the full exported
   `technologyPrerequisiteTechKeys`/`exclusiveTechnologyPrerequisiteTechKeys`
-  arrays if the API later carries them.
+  arrays.
 - Only exact public Codex Tech `entryKey` targets render as inline
   link/tooltip affordances.
 - Archive rows, the `/tech` route, and backend/exporter contracts remain

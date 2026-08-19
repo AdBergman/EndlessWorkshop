@@ -35,6 +35,8 @@ const normalizeTech = (tech: Tech): Tech => ({
     ...tech,
     techKey: normalizeTechKey(tech.techKey),
     factions: (tech.factions ?? []).map((faction) => faction.toUpperCase()),
+    technologyPrerequisiteTechKeys: stringList(tech.technologyPrerequisiteTechKeys),
+    exclusiveTechnologyPrerequisiteTechKeys: stringList(tech.exclusiveTechnologyPrerequisiteTechKeys),
     descriptionLines: (tech.descriptionLines ?? []).filter(
         (line): line is string => typeof line === "string"
     ),
@@ -62,6 +64,13 @@ const initialState = {
 
 const formatLoadError = (reason: unknown) =>
     `Failed to load techs: ${(reason as Error)?.message ?? String(reason)}`;
+
+function stringList(values: readonly unknown[] | null | undefined): string[] {
+    return (values ?? [])
+        .filter((value): value is string => typeof value === "string")
+        .map((value) => value.trim())
+        .filter(Boolean);
+}
 
 const normalizeTechCollection = (rawTechs: Tech[]) => {
     const normalizedTechs = rawTechs.map(normalizeTech);

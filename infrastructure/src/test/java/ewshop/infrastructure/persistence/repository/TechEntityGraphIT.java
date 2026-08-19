@@ -42,6 +42,8 @@ class TechEntityGraphIT {
         tech.setDescriptionLines(List.of("Unlocks something"));
         tech.setFactions(Set.of("Aspects"));
         tech.setPrereq(prereq);
+        tech.setTechnologyPrerequisiteTechKeys(Set.of("Tech_Masonry"));
+        tech.setExclusiveTechnologyPrerequisiteTechKeys(Set.of("Tech_AlternativeWeapons"));
 
         em.persist(prereq);
         em.persistAndFlush(tech);
@@ -55,5 +57,7 @@ class TechEntityGraphIT {
         assertThat(loaded.getDescriptionLines()).containsExactly("Unlocks something");
         assertThat(loaded.getPrereq()).isNotNull();
         assertThat(loaded.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(loaded.getTechnologyPrerequisiteTechKeys()).containsExactly("Tech_Masonry");
+        assertThat(loaded.getExclusiveTechnologyPrerequisiteTechKeys()).containsExactly("Tech_AlternativeWeapons");
     }
 }

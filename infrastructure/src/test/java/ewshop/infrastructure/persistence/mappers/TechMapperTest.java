@@ -48,6 +48,8 @@ class TechMapperTest {
         techEntity.setFactions(Set.of("Aspects"));
         techEntity.setTechCoords(new TechCoords(50.5, 75.5));
         techEntity.setPrereq(prereqEntity);
+        techEntity.setTechnologyPrerequisiteTechKeys(Set.of("Tech_Masonry", "Tech_Bronze"));
+        techEntity.setExclusiveTechnologyPrerequisiteTechKeys(Set.of("Tech_Alternative"));
 
         Tech tech = techMapper.toDomain(techEntity);
 
@@ -77,6 +79,10 @@ class TechMapperTest {
         assertThat(tech.getPrereq()).isNotNull();
         assertThat(tech.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(tech.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(tech.getTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Bronze", "Tech_Masonry");
+        assertThat(tech.getExclusiveTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Alternative");
 
         assertThat(tech.getExcludes()).isNull();
     }
@@ -106,6 +112,8 @@ class TechMapperTest {
                 .factions(Set.of("Aspects"))
                 .techCoords(new TechCoords(50.5, 75.5))
                 .prereq(prereqTech)
+                .technologyPrerequisiteTechKeys(List.of("Tech_Masonry", "Tech_Bronze"))
+                .exclusiveTechnologyPrerequisiteTechKeys(List.of("Tech_Alternative"))
                 .build();
 
         TechEntity techEntity = techMapper.toEntity(tech);
@@ -136,6 +144,10 @@ class TechMapperTest {
         assertThat(techEntity.getPrereq()).isNotNull();
         assertThat(techEntity.getPrereq().getName()).isEqualTo("Masonry");
         assertThat(techEntity.getPrereq().getTechKey()).isEqualTo("Tech_Masonry");
+        assertThat(techEntity.getTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Masonry", "Tech_Bronze");
+        assertThat(techEntity.getExclusiveTechnologyPrerequisiteTechKeys())
+                .containsExactly("Tech_Alternative");
 
         assertThat(techEntity.getExcludes()).isNull();
     }
@@ -164,6 +176,8 @@ class TechMapperTest {
         assertThat(tech).isNotNull();
         assertThat(tech.getDescriptionLines()).isNotNull().isEmpty();
         assertThat(tech.getUnlocks()).isNotNull().isEmpty();
+        assertThat(tech.getTechnologyPrerequisiteTechKeys()).isNotNull().isEmpty();
+        assertThat(tech.getExclusiveTechnologyPrerequisiteTechKeys()).isNotNull().isEmpty();
         assertThat(tech.getFactions()).isNotNull().isEmpty();
     }
 
@@ -182,6 +196,8 @@ class TechMapperTest {
         assertThat(techEntity).isNotNull();
         assertThat(techEntity.getDescriptionLines()).isNotNull().isEmpty();
         assertThat(techEntity.getUnlocks()).isNotNull().isEmpty();
+        assertThat(techEntity.getTechnologyPrerequisiteTechKeys()).isNotNull().isEmpty();
+        assertThat(techEntity.getExclusiveTechnologyPrerequisiteTechKeys()).isNotNull().isEmpty();
         assertThat(techEntity.getFactions()).isNotNull().isEmpty();
     }
 

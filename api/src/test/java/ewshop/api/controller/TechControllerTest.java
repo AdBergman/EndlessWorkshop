@@ -46,6 +46,8 @@ class TechControllerTest {
                 "Masonry",
                 List.of("Aspect", "Kin"),
                 null,
+                List.of("Masonry"),
+                List.of("AlternativeTech"),
                 new TechCoordsDto(10.5, 20.5)
         );
 
@@ -56,7 +58,7 @@ class TechControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].length()").value(10))
+                .andExpect(jsonPath("$[0].length()").value(12))
                 .andExpect(jsonPath("$[0].name").value("Stonework"))
                 .andExpect(jsonPath("$[0].techKey").value("Stonework_X"))
                 .andExpect(jsonPath("$[0].era").value(1))
@@ -73,6 +75,8 @@ class TechControllerTest {
                 .andExpect(jsonPath("$[0].unlocks[0].fallbackDescriptionLines[0]").value("+2 Food on Capital"))
                 .andExpect(jsonPath("$[0].prereq").value("Masonry"))
                 .andExpect(jsonPath("$[0].excludes").isEmpty())
+                .andExpect(jsonPath("$[0].technologyPrerequisiteTechKeys[0]").value("Masonry"))
+                .andExpect(jsonPath("$[0].exclusiveTechnologyPrerequisiteTechKeys[0]").value("AlternativeTech"))
                 .andExpect(jsonPath("$[0].coords.length()").value(2))
                 .andExpect(jsonPath("$[0].coords.yPct").value(20.5))
                 .andExpect(jsonPath("$[0].coords.xPct").value(10.5));

@@ -36,6 +36,8 @@ describe("useTechStore", () => {
                 techKey: " Tech_Kin_Workshop ",
                 name: "Kin Workshop",
                 factions: ["kin"],
+                technologyPrerequisiteTechKeys: [" Tech_Prereq ", "", " "],
+                exclusiveTechnologyPrerequisiteTechKeys: [" Tech_Exclusive "],
                 descriptionLines: ["Build better tools."],
             }),
         ]);
@@ -45,6 +47,10 @@ describe("useTechStore", () => {
         const state = useTechStore.getState();
         expect(state.getTechByKey("Tech_Kin_Workshop")?.name).toBe("Kin Workshop");
         expect(state.techsByKey.Tech_Kin_Workshop?.factions).toEqual(["KIN"]);
+        expect(state.techsByKey.Tech_Kin_Workshop?.technologyPrerequisiteTechKeys).toEqual(["Tech_Prereq"]);
+        expect(state.techsByKey.Tech_Kin_Workshop?.exclusiveTechnologyPrerequisiteTechKeys).toEqual([
+            "Tech_Exclusive",
+        ]);
         expect(state.techKeys).toEqual(["Tech_Kin_Workshop"]);
         expect(state.loaded).toBe(true);
         expect(state.error).toBeNull();
