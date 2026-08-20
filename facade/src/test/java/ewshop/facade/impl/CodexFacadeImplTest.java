@@ -169,6 +169,49 @@ class CodexFacadeImplTest {
     }
 
     @Test
+    void returnsOnlyRequestedCategoryFromCategoryScopedServiceQuery() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getCodexEntriesByExportKind("populations")).thenReturn(List.of(
+                codexEntry("populations", "Population_Minor_Ametrine", "Ametrine", List.of("Public population.")),
+                codexEntry("populations", "Population_Internal", "% Internal", List.of("Filtered entry."))
+        ));
+
+        assertThat(facade.getCodexEntriesByCategory(" Populations "))
+                .extracting(CodexDto::entryKey)
+                .containsExactly("Population_Minor_Ametrine");
+    }
+
+    @Test
+    void returnsOnlyRequestedBonusDerivedCategory() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getCodexEntriesByExportKind("bonuses")).thenReturn(List.of(
+                codexEntry("bonuses", "Status_Unit_Hobbled", "Hobbled", "Status", "Status", List.of("Status entry."), List.of()),
+                codexEntry("bonuses", "ActionCostModifier_Test", "Action Cost", "Cost Modifier", "Cost Modifier", List.of("Modifier entry."), List.of()),
+                codexEntry("bonuses", "Bonus_Test", "Ordinary Bonus", "Bonus", "Bonus", List.of("Bonus entry."), List.of())
+        ));
+
+        assertThat(facade.getCodexEntriesByCategory("statuses"))
+                .extracting(CodexDto::entryKey)
+                .containsExactly("Status_Unit_Hobbled");
+        assertThat(facade.getCodexEntriesByCategory("modifiers"))
+                .extracting(CodexDto::entryKey)
+                .containsExactly("ActionCostModifier_Test");
+    }
+
+    @Test
+    void unknownCategoryReturnsEmptyList() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+        when(codexService.getCodexEntriesByExportKind("unknown")).thenReturn(List.of());
+
+        assertThat(facade.getCodexEntriesByCategory("unknown")).isEmpty();
+    }
+
+    @Test
     void codexFilterReasons_areStableForDiagnostics() {
         CodexFilterService filterService = new CodexFilterService();
 

@@ -10,5 +10,7 @@ public interface CodexRepository {
 
     List<Codex> findAll();
 
+    List<Codex> findAllByExportKind(String exportKind);
+
     ImportResult importCodexSnapshot(List<CodexImportSnapshot> snapshots);
 }

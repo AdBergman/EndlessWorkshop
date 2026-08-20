@@ -22,4 +22,10 @@ public class CodexService {
     public List<Codex> getAllCodexEntries() {
         return codexRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "codex", key = "'category:' + #exportKind.trim().toLowerCase()")
+    public List<Codex> getCodexEntriesByExportKind(String exportKind) {
+        return codexRepository.findAllByExportKind(exportKind);
+    }
 }

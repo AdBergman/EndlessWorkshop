@@ -179,7 +179,7 @@ describe("CodexPage rich granted ability enrichment", () => {
 
         await user.click(coordinatedPreview);
         expect(await screen.findByRole("heading", { name: "Coordinated Attack I" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_TeamPlayer_1");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_TeamPlayer_1");
     });
 
 
@@ -326,7 +326,7 @@ describe("CodexPage rich granted ability enrichment", () => {
 
         await user.click(breachingPreview);
         expect(await screen.findByRole("heading", { name: "Breaching Attack I" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack_1");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_BreachingAttack_1");
     });
 
 
@@ -470,7 +470,7 @@ describe("CodexPage rich granted ability enrichment", () => {
 
         await user.click(evasivePreview);
         expect(await screen.findByRole("heading", { name: "Evasive Maneuvers" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Quickfooted");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_Quickfooted");
     });
 
 

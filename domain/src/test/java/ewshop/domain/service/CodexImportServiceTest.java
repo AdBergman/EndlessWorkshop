@@ -239,6 +239,11 @@ class CodexImportServiceTest {
         }
 
         @Override
+        public List<Codex> findAllByExportKind(String exportKind) {
+            return List.of();
+        }
+
+        @Override
         public ImportResult importCodexSnapshot(List<CodexImportSnapshot> snapshots) {
             capturedSnapshots = List.copyOf(snapshots);
             ImportResult result = new ImportResult();

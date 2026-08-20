@@ -338,8 +338,10 @@ describe("CodexPage action and diplomacy metadata rendering", () => {
         expect(within(detailPane).getByText("Statuses")).toBeInTheDocument();
 
         await user.click(statusSummary);
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_PublicOpinion_YouClosedBorders");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses&entry=Status_PublicOpinion_YouClosedBorders");
 
+        await user.click(within(getCategoryToolbar()).getByRole("button", { name: /^all/i }));
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "Missing Status Treaty");
         const resultsPane = screen.getByRole("complementary", { name: /codex results/i });
         await user.click(within(resultsPane).getByRole("button", { name: /missing status treaty/i }));
         expect(await screen.findByRole("heading", { name: "Missing Status Treaty" })).toBeInTheDocument();

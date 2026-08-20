@@ -242,7 +242,7 @@ describe("CodexPage rich hero enrichment", () => {
 
         await user.click(abilityLink);
         expect(await screen.findByRole("heading", { name: "Terrain Logistics" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Hero_Archer02");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_Hero_Archer02");
 
         await user.click(within(getCategoryToolbar()).getByRole("button", { name: "Heroes" }));
         const heroesOverview = await screen.findByLabelText("Heroes overview");

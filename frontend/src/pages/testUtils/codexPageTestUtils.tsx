@@ -54,5 +54,6 @@ export function seedDefaultCodexStore(entries: CodexEntry[] = defaultCodexEntrie
         entriesByKind: entriesByKind(entries),
         loading: false,
         error: null,
+        fullLoaded: true,
     });
 }

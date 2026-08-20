@@ -5,6 +5,7 @@ import ewshop.facade.dto.response.CodexSummaryDto;
 import ewshop.facade.interfaces.CodexFacade;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,8 +21,12 @@ public class CodexController {
     }
 
     @GetMapping
-    public List<CodexDto> getAll() {
-        return codexFacade.getAllCodexEntries();
+    public List<CodexDto> getAll(@RequestParam(required = false) String category) {
+        if (category == null || category.isBlank()) {
+            return codexFacade.getAllCodexEntries();
+        }
+
+        return codexFacade.getCodexEntriesByCategory(category);
     }
 
     @GetMapping("/summary")

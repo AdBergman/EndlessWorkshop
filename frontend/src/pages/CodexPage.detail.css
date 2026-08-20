@@ -88,6 +88,23 @@
     color: var(--codex-ink-muted);
 }
 
+.codex-detail__retry {
+    margin-top: 18px;
+    padding: 9px 14px;
+    border: 1px solid rgba(195, 152, 77, 0.45);
+    border-radius: 4px;
+    background: rgba(195, 152, 77, 0.08);
+    color: var(--codex-gold-bright);
+    font: inherit;
+    cursor: pointer;
+}
+
+.codex-detail__retry:hover,
+.codex-detail__retry:focus-visible {
+    border-color: rgba(255, 190, 92, 0.78);
+    background: rgba(195, 152, 77, 0.14);
+}
+
 .codex-techPrerequisites__groups,
 .codex-unitProfile__groups,
 .codex-constructiblePlanning__groups,

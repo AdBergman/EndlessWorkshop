@@ -523,7 +523,7 @@ describe("CodexPage ability archive", () => {
 
         await user.click(inlineLink);
         expect(await screen.findByRole("heading", { name: "Jinxed II" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses&entry=Status_Unit_Jinxed_2");
     });
 
 

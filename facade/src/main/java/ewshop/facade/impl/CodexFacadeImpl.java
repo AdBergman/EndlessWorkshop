@@ -10,6 +10,7 @@ import ewshop.facade.mapper.CodexMapper;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CodexFacadeImpl implements CodexFacade {
@@ -26,13 +27,44 @@ public class CodexFacadeImpl implements CodexFacade {
 
     @Override
     public List<CodexDto> getAllCodexEntries() {
-        CodexFilterResult filterResult = codexFilterService.filterForCodexApi(codexService.getAllCodexEntries());
+        return toDtos(codexFilterService.filterForCodexApi(codexService.getAllCodexEntries()));
+    }
+
+    @Override
+    public List<CodexDto> getCodexEntriesByCategory(String category) {
+        String normalizedCategory = trimToEmpty(category).toLowerCase(Locale.ROOT);
+        if (normalizedCategory.isBlank()) {
+            return List.of();
+        }
+
+        String sourceExportKind = isBonusDerivedKind(normalizedCategory)
+                ? "bonuses"
+                : normalizedCategory;
+        CodexFilterResult filterResult = codexFilterService.filterForCodexApi(
+                codexService.getCodexEntriesByExportKind(sourceExportKind)
+        );
+
+        return toDtos(filterResult).stream()
+                .filter(dto -> normalizedCategory.equals(normalizeSummaryKind(
+                        dto.exportKind(),
+                        dto.category(),
+                        dto.kind(),
+                        dto.entryKey()
+                )))
+                .toList();
+    }
+
+    private static List<CodexDto> toDtos(CodexFilterResult filterResult) {
         Map<String, String> relationTargetAliases = relationTargetAliases(filterResult);
 
         return filterResult.codexEntries().stream()
                 .map(CodexMapper::toDto)
                 .map(dto -> withResolvedRelationAliases(dto, relationTargetAliases))
                 .toList();
+    }
+
+    private static boolean isBonusDerivedKind(String normalizedCategory) {
+        return "statuses".equals(normalizedCategory) || "modifiers".equals(normalizedCategory);
     }
 
     @Override
@@ -104,7 +136,7 @@ public class CodexFacadeImpl implements CodexFacade {
     }
 
     private static String normalizeSummaryKind(String exportKind, String category, String kind, String entryKey) {
-        String normalizedExportKind = trimToEmpty(exportKind).toLowerCase();
+        String normalizedExportKind = trimToEmpty(exportKind).toLowerCase(Locale.ROOT);
         if (!"bonuses".equals(normalizedExportKind)) {
             return normalizedExportKind;
         }
@@ -121,8 +153,8 @@ public class CodexFacadeImpl implements CodexFacade {
     }
 
     private static boolean isBonusStatusEntry(String category, String kind, String entryKey) {
-        String normalizedCategory = trimToEmpty(category).toLowerCase();
-        String normalizedKind = trimToEmpty(kind).toLowerCase();
+        String normalizedCategory = trimToEmpty(category).toLowerCase(Locale.ROOT);
+        String normalizedKind = trimToEmpty(kind).toLowerCase(Locale.ROOT);
         String normalizedKey = trimToEmpty(entryKey);
         return "status".equals(normalizedCategory) ||
                 "status".equals(normalizedKind) ||
@@ -132,8 +164,8 @@ public class CodexFacadeImpl implements CodexFacade {
     }
 
     private static boolean isBonusModifierEntry(String category, String kind, String entryKey) {
-        String normalizedCategory = trimToEmpty(category).toLowerCase();
-        String normalizedKind = trimToEmpty(kind).toLowerCase();
+        String normalizedCategory = trimToEmpty(category).toLowerCase(Locale.ROOT);
+        String normalizedKind = trimToEmpty(kind).toLowerCase(Locale.ROOT);
         String normalizedKey = trimToEmpty(entryKey);
         return "cost modifier".equals(normalizedCategory) ||
                 "cost modifier".equals(normalizedKind) ||

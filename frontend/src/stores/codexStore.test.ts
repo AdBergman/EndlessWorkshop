@@ -5,6 +5,7 @@ import { useCodexStore } from "@/stores/codexStore";
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
         getCodex: vi.fn(),
+        getCodexCategory: vi.fn(),
         getCodexSummary: vi.fn(),
     },
 }));
@@ -15,10 +16,21 @@ const auditWindow = window as Window & typeof globalThis & {
     __downloadCodexDiagnosticsReport?: unknown;
 };
 
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    let reject!: (reason?: unknown) => void;
+    const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+        resolve = resolvePromise;
+        reject = rejectPromise;
+    });
+    return { promise, resolve, reject };
+}
+
 describe("useCodexStore", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexCategory.mockReset();
         mockedApiClient.getCodexSummary.mockReset();
         resetCodexTokenAuditDevFlagsForTests();
         delete auditWindow.__downloadCodexTokenAudit;
@@ -355,6 +367,182 @@ describe("useCodexStore", () => {
         ]);
     });
 
+    it("loads and caches categories independently while merging stable indexes", async () => {
+        mockedApiClient.getCodexCategory.mockImplementation(async (category) => category === "districts"
+            ? [{
+                exportKind: "districts",
+                entryKey: "District_A",
+                displayName: "District A",
+                descriptionLines: ["District entry."],
+                referenceKeys: [],
+            }]
+            : [{
+                exportKind: "units",
+                entryKey: "Unit_A",
+                displayName: "Unit A",
+                descriptionLines: ["Unit entry."],
+                referenceKeys: ["District_A"],
+            }]);
+
+        await useCodexStore.getState().loadCategory("districts");
+        await useCodexStore.getState().loadCategory("units");
+        await useCodexStore.getState().loadCategory("districts");
+
+        const state = useCodexStore.getState();
+        expect(mockedApiClient.getCodexCategory).toHaveBeenCalledTimes(2);
+        expect(state.categoryLoadStates).toMatchObject({ districts: "loaded", units: "loaded" });
+        expect(state.entries.map((entry) => entry.entryKey)).toEqual(["District_A", "Unit_A"]);
+        expect(state.getEntry("districts", "District_A")?.displayName).toBe("District A");
+        expect(state.getRelatedEntries(state.getEntry("units", "Unit_A")!))
+            .toEqual([state.getEntry("districts", "District_A")]);
+    });
+
+    it("deduplicates concurrent callers for the same category", async () => {
+        const request = deferred<any[]>();
+        mockedApiClient.getCodexCategory.mockReturnValue(request.promise);
+
+        const first = useCodexStore.getState().loadCategory("heroes");
+        const second = useCodexStore.getState().loadCategory("heroes");
+
+        expect(mockedApiClient.getCodexCategory).toHaveBeenCalledTimes(1);
+        expect(useCodexStore.getState().categoryLoadStates.heroes).toBe("loading");
+
+        request.resolve([]);
+        await Promise.all([first, second]);
+        expect(useCodexStore.getState().categoryLoadStates.heroes).toBe("loaded");
+    });
+
+    it("allows separate categories to resolve independently", async () => {
+        const districts = deferred<any[]>();
+        const heroes = deferred<any[]>();
+        mockedApiClient.getCodexCategory.mockImplementation((category) => (
+            category === "districts" ? districts.promise : heroes.promise
+        ));
+
+        const districtLoad = useCodexStore.getState().loadCategory("districts");
+        const heroLoad = useCodexStore.getState().loadCategory("heroes");
+        districts.resolve([{ exportKind: "districts", entryKey: "District_A", displayName: "District A", descriptionLines: [], referenceKeys: [] }]);
+        await districtLoad;
+
+        expect(useCodexStore.getState().categoryLoadStates).toMatchObject({
+            districts: "loaded",
+            heroes: "loading",
+        });
+
+        heroes.resolve([{ exportKind: "heroes", entryKey: "Hero_A", displayName: "Hero A", descriptionLines: [], referenceKeys: [] }]);
+        await heroLoad;
+        expect(useCodexStore.getState().entriesByKind.heroes).toHaveLength(1);
+    });
+
+    it("records category failures and permits an explicit retry", async () => {
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        mockedApiClient.getCodexCategory
+            .mockRejectedValueOnce(new Error("category unavailable"))
+            .mockResolvedValueOnce([{ exportKind: "populations", entryKey: "Population_A", displayName: "Population A", descriptionLines: [], referenceKeys: [] }]);
+
+        await useCodexStore.getState().loadCategory("populations");
+        expect(useCodexStore.getState().categoryLoadStates.populations).toBe("error");
+        expect(useCodexStore.getState().categoryErrors.populations).toBe("category unavailable");
+
+        await useCodexStore.getState().loadCategory("populations", { force: true });
+        expect(useCodexStore.getState().categoryLoadStates.populations).toBe("loaded");
+        expect(useCodexStore.getState().categoryErrors.populations).toBeNull();
+        expect(useCodexStore.getState().getEntry("populations", "Population_A")).toBeDefined();
+        errorSpy.mockRestore();
+    });
+
+    it("lets full search hydration replace partial caches and mark the dataset complete", async () => {
+        mockedApiClient.getCodexCategory.mockResolvedValue([{ exportKind: "districts", entryKey: "District_A", displayName: "District A", descriptionLines: [], referenceKeys: [] }]);
+        mockedApiClient.getCodex.mockResolvedValue([
+            { exportKind: "districts", entryKey: "District_A", displayName: "District A", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "heroes", entryKey: "Hero_A", displayName: "Hero A", descriptionLines: [], referenceKeys: [] },
+        ]);
+
+        await useCodexStore.getState().loadCategory("districts");
+        await useCodexStore.getState().loadEntries();
+
+        const state = useCodexStore.getState();
+        expect(state.fullLoaded).toBe(true);
+        expect(state.entries).toHaveLength(2);
+        expect(state.categoryLoadStates).toMatchObject({ districts: "loaded", heroes: "loaded" });
+        await state.loadCategory("heroes");
+        expect(mockedApiClient.getCodexCategory).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps completed full hydration authoritative over an older category request", async () => {
+        const categoryRequest = deferred<any[]>();
+        mockedApiClient.getCodexCategory.mockReturnValue(categoryRequest.promise);
+        mockedApiClient.getCodex.mockResolvedValue([{
+            exportKind: "districts",
+            entryKey: "District_Current",
+            displayName: "Current District",
+            descriptionLines: [],
+            referenceKeys: [],
+        }]);
+
+        const categoryLoad = useCodexStore.getState().loadCategory("districts");
+        await useCodexStore.getState().loadEntries();
+        categoryRequest.resolve([{
+            exportKind: "districts",
+            entryKey: "District_Stale",
+            displayName: "Stale District",
+            descriptionLines: [],
+            referenceKeys: [],
+        }]);
+        await categoryLoad;
+
+        const state = useCodexStore.getState();
+        expect(state.fullLoaded).toBe(true);
+        expect(state.getEntry("districts", "District_Current")).toBeDefined();
+        expect(state.getEntry("districts", "District_Stale")).toBeUndefined();
+    });
+
+    it("prefetches categories with a two-request concurrency bound", async () => {
+        const requests: Array<ReturnType<typeof deferred<any[]>>> = [];
+        mockedApiClient.getCodexCategory.mockImplementation(() => {
+            const request = deferred<any[]>();
+            requests.push(request);
+            return request.promise;
+        });
+
+        const prefetch = useCodexStore.getState().prefetchCategories(["abilities", "districts", "heroes"]);
+        await vi.waitFor(() => expect(requests).toHaveLength(2));
+        expect(mockedApiClient.getCodexCategory).toHaveBeenCalledTimes(2);
+
+        requests[0].resolve([]);
+        await vi.waitFor(() => expect(requests).toHaveLength(3));
+        requests[1].resolve([]);
+        requests[2].resolve([]);
+        await prefetch;
+    });
+
+    it("keeps reset state empty when in-flight category and summary requests resolve later", async () => {
+        const categoryRequest = deferred<any[]>();
+        const summaryRequest = deferred<any[]>();
+        mockedApiClient.getCodexCategory.mockReturnValue(categoryRequest.promise);
+        mockedApiClient.getCodexSummary.mockReturnValue(summaryRequest.promise);
+
+        const categoryLoad = useCodexStore.getState().loadCategory("populations");
+        const summaryLoad = useCodexStore.getState().loadSummary();
+        useCodexStore.getState().reset();
+
+        categoryRequest.resolve([{
+            exportKind: "populations",
+            entryKey: "Population_A",
+            displayName: "Population A",
+            descriptionLines: [],
+            referenceKeys: [],
+        }]);
+        summaryRequest.resolve([{ exportKind: "populations", count: 1 }]);
+        await Promise.all([categoryLoad, summaryLoad]);
+
+        const state = useCodexStore.getState();
+        expect(state.entries).toEqual([]);
+        expect(state.categorySummaries).toEqual([]);
+        expect(state.categoryLoadStates).toEqual({});
+        expect(state.summaryLoaded).toBe(false);
+    });
+
     it("filters invalid display names before store population while keeping valid bracket-prefixed names", async () => {
         mockedApiClient.getCodex.mockResolvedValue([
             {
@@ -428,8 +616,8 @@ describe("useCodexStore", () => {
         expect(state.entries).toHaveLength(3);
         expect(state.entries.map((entry) => entry.entryKey)).toEqual([
             "Ability_ValidBracket",
-            "Ability_Resolved",
             "Ability_ValidText",
+            "Ability_Resolved",
         ]);
         expect(state.getEntryByKey("Ability_Percent")).toBeUndefined();
         expect(state.getEntryByKey("Ability_Tbd")).toBeUndefined();

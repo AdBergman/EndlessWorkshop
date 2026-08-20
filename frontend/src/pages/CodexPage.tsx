@@ -159,10 +159,16 @@ export default function CodexPage() {
     const categorySummaries = useCodexStore((state) => state.categorySummaries);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
+    const fullLoaded = useCodexStore((state) => state.fullLoaded);
+    const categoryLoadStates = useCodexStore((state) => state.categoryLoadStates);
+    const categoryErrors = useCodexStore((state) => state.categoryErrors);
+    const prefetching = useCodexStore((state) => state.prefetching);
     const summaryLoaded = useCodexStore((state) => state.summaryLoaded);
     const summaryLoading = useCodexStore((state) => state.summaryLoading);
     const summaryError = useCodexStore((state) => state.summaryError);
     const loadEntries = useCodexStore((state) => state.loadEntries);
+    const loadCategory = useCodexStore((state) => state.loadCategory);
+    const prefetchCategories = useCodexStore((state) => state.prefetchCategories);
     const loadSummary = useCodexStore((state) => state.loadSummary);
     const richDistrictByKey = useDistrictStore((state) => state.districtsByKey);
     const districtStoreLoaded = useDistrictStore((state) => state.loaded);
@@ -204,9 +210,27 @@ export default function CodexPage() {
         activeKind === ALL_CODEX_KIND ? null : getCodexSummaryEntryKey(activeKind)
     );
     const shouldLoadFullEntries =
-        activeKind !== ALL_CODEX_KIND ||
-        Boolean(selectedEntryParam) ||
-        query.trim().length > 0;
+        activeKind === ALL_CODEX_KIND && (
+            Boolean(selectedEntryParam && !entriesByKey[selectedEntryParam]) ||
+            query.trim().length > 0
+        );
+    const activeCategoryLoadState = activeKind === ALL_CODEX_KIND
+        ? "idle"
+        : fullLoaded
+            ? "loaded"
+            : categoryLoadStates[activeKind] ?? "idle";
+    const activeCategoryResolved = activeKind !== ALL_CODEX_KIND && activeCategoryLoadState === "loaded";
+    const routeEntriesLoading = shouldLoadFullEntries
+        ? !fullLoaded && !error
+        : activeKind !== ALL_CODEX_KIND && (
+            activeCategoryLoadState === "idle" || activeCategoryLoadState === "loading"
+        );
+    const routeEntriesResolved = activeKind === ALL_CODEX_KIND
+        ? !shouldLoadFullEntries || fullLoaded
+        : activeCategoryResolved;
+    const routeEntriesError = activeKind === ALL_CODEX_KIND
+        ? error
+        : categoryErrors[activeKind] ?? null;
     const codexResetNonce = (location.state as { codexResetNonce?: string } | null)?.codexResetNonce ?? null;
 
     const resultListRef = useRef<HTMLDivElement>(null);
@@ -222,10 +246,40 @@ export default function CodexPage() {
     }, [loadEntries, shouldLoadFullEntries]);
 
     useEffect(() => {
-        if (shouldLoadFullEntries || entries.length > 0) return;
+        if (activeKind === ALL_CODEX_KIND) return;
+
+        void loadCategory(activeKind);
+    }, [activeKind, loadCategory]);
+
+    useEffect(() => {
+        if (summaryLoaded || summaryLoading) return;
 
         void loadSummary();
-    }, [entries.length, loadSummary, shouldLoadFullEntries]);
+    }, [loadSummary, summaryLoaded, summaryLoading]);
+
+    useEffect(() => {
+        if (
+            activeKind === ALL_CODEX_KIND ||
+            !activeCategoryResolved ||
+            !summaryLoaded ||
+            fullLoaded
+        ) {
+            return;
+        }
+
+        void prefetchCategories(
+            categorySummaries
+                .map((summary) => normalizeCodexKind(summary.exportKind))
+                .filter((category) => category && category !== activeKind)
+        );
+    }, [
+        activeCategoryResolved,
+        activeKind,
+        categorySummaries,
+        fullLoaded,
+        prefetchCategories,
+        summaryLoaded,
+    ]);
 
     useEffect(() => {
         let cancelled = false;
@@ -250,20 +304,20 @@ export default function CodexPage() {
     const includeLocalOnlyCategories = isLocalCodexTopLevelVisibilityEnabled();
 
     const filterOptions = useMemo(() => {
-        const kindCounts = entries.length > 0
-            ? entries.reduce<Map<string, number>>((acc, entry) => {
+        const kindCounts = categorySummaries.length > 0
+            ? categorySummaries.reduce<Map<string, number>>((acc, summary) => {
+                const exportKind = normalizeCodexKind(summary.exportKind);
+                if (!exportKind || summary.count <= 0) return acc;
+
+                acc.set(exportKind, (acc.get(exportKind) ?? 0) + summary.count);
+                return acc;
+            }, new Map<string, number>())
+            : entries.reduce<Map<string, number>>((acc, entry) => {
                 const exportKind = normalizeCodexKind(entry.exportKind);
                 if (!exportKind) return acc;
 
                 const nextCount = (acc.get(exportKind) ?? 0) + 1;
                 acc.set(exportKind, nextCount);
-                return acc;
-            }, new Map<string, number>())
-            : categorySummaries.reduce<Map<string, number>>((acc, summary) => {
-                const exportKind = normalizeCodexKind(summary.exportKind);
-                if (!exportKind || summary.count <= 0) return acc;
-
-                acc.set(exportKind, (acc.get(exportKind) ?? 0) + summary.count);
                 return acc;
             }, new Map<string, number>());
 
@@ -792,6 +846,18 @@ export default function CodexPage() {
         () => resolveRelatedEntries(selectedEntry, codexReferenceIndexes),
         [codexReferenceIndexes, selectedEntry]
     );
+    const relatedEntriesLoading = useMemo(() => {
+        if (!prefetching || !selectedEntry) return false;
+
+        const resolvedKeys = new Set(resolvedRelatedEntries.map((entry) => entry.entryKey));
+        return [...(selectedEntry.publicContextKeys ?? []), ...(selectedEntry.referenceKeys ?? [])]
+            .map((referenceKey) => referenceKey.trim())
+            .some((referenceKey) => (
+                referenceKey &&
+                referenceKey !== selectedEntry.entryKey &&
+                !resolvedKeys.has(referenceKey)
+            ));
+    }, [prefetching, resolvedRelatedEntries, selectedEntry]);
 
     const updateSelectedEntry = useCallback(
         (entryKey: string | null, options?: { category?: string | null; replace?: boolean; suppressPlainRouteReset?: boolean }) => {
@@ -810,6 +876,8 @@ export default function CodexPage() {
                     }
 
                     if (entryKey && !entryKey.startsWith("__summary__:")) {
+                        // Keep route URLs canonical when a category is added to an existing entry-only link.
+                        nextParams.delete("entry");
                         nextParams.set("entry", entryKey);
                     } else {
                         nextParams.delete("entry");
@@ -853,8 +921,11 @@ export default function CodexPage() {
             }
 
             const entryKind = normalizeCodexKind(entry.exportKind);
-            const nextCategory = activeKind !== ALL_CODEX_KIND && entryKind === activeKind
-                ? activeKind
+            const nextCategory = (
+                filterOptions.some((option) => option.kind === entryKind) ||
+                isDirectRoutableHiddenCodexKind(entryKind)
+            )
+                ? entryKind
                 : null;
 
             if (activeKind !== ALL_CODEX_KIND && entryKind !== activeKind) {
@@ -868,7 +939,7 @@ export default function CodexPage() {
             setSelectionIntent(intent);
             updateSelectedEntry(selectableEntryKey, { category: nextCategory });
         },
-        [activeKind, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
+        [activeKind, filterOptions, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
     );
 
     useEffect(() => {
@@ -898,9 +969,8 @@ export default function CodexPage() {
     }, [codexResetNonce, location.key, location.pathname, location.search]);
 
     useEffect(() => {
-        if (loading) return;
         if (activeKind === ALL_CODEX_KIND) return;
-        if (shouldLoadFullEntries && entries.length === 0) return;
+        if (!activeCategoryResolved || !summaryLoaded) return;
 
         const filterStillExists =
             filterOptions.some((option) => option.kind === activeKind) ||
@@ -911,10 +981,10 @@ export default function CodexPage() {
         if (!filterStillExists) {
             updateSelectedEntry(null, { category: null, replace: true });
         }
-    }, [activeKind, entries, filterOptions, loading, shouldLoadFullEntries, updateSelectedEntry]);
+    }, [activeCategoryResolved, activeKind, entries, filterOptions, summaryLoaded, updateSelectedEntry]);
 
     useEffect(() => {
-        if (loading) return;
+        if (!routeEntriesResolved) return;
         if (isPlainRouteReset) return;
 
         const firstVisibleEntry = displayEntries[0] ?? null;
@@ -946,7 +1016,7 @@ export default function CodexPage() {
         getSelectableEntryKey,
         hasDeferredQuery,
         isPlainRouteReset,
-        loading,
+        routeEntriesResolved,
         selectedEntryParam,
         selectedEntryKey,
         selectedListItem,
@@ -1149,6 +1219,15 @@ export default function CodexPage() {
         returnFiltersToArchive(isTraitArchiveMode);
     }, [isTraitArchiveMode, returnFiltersToArchive]);
 
+    const retryRouteEntries = useCallback(() => {
+        if (activeKind === ALL_CODEX_KIND) {
+            void loadEntries({ force: true });
+            return;
+        }
+
+        void loadCategory(activeKind, { force: true });
+    }, [activeKind, loadCategory, loadEntries]);
+
     return (
         <main className="codex-page">
             <h1 className="seo-hidden">
@@ -1233,7 +1312,7 @@ export default function CodexPage() {
                         districtFilterGroups={districtFilterGroups}
                         displayEntries={displayEntries}
                         equipmentFilterGroups={equipmentFilterGroups}
-                        error={error}
+                        error={routeEntriesError}
                         filteredEntryCount={filteredEntries.length}
                         filterOptions={factFilterOptions}
                         heroFilterGroups={heroFilterGroups}
@@ -1257,7 +1336,7 @@ export default function CodexPage() {
                         isTraitArchiveMode={isTraitArchiveMode}
                         isUnitArchiveMode={isUnitArchiveMode}
                         isVisible={showResultsPane}
-                        loading={loading}
+                        loading={routeEntriesLoading}
                         questCategoryFilter={activeQuestCategory}
                         questCategoryGroups={questCategoryGroups}
                         questTotalCount={isQuestArchiveMode ? searchFilteredEntries.length : filteredEntries.length}
@@ -1303,7 +1382,28 @@ export default function CodexPage() {
                         aria-label={isOverviewState ? "Codex overview" : "Selected codex entry"}
                     >
                         <div className="codex-detailPane__body">
-                            {isOverviewState ? (
+                            {routeEntriesLoading ? (
+                                <section className="codex-detail codex-detail--empty" aria-live="polite">
+                                    <div className="codex-sectionLabel">Codex entry</div>
+                                    <h2 className="codex-detail__title">Loading {activeKindLabel}</h2>
+                                    <p className="codex-detail__placeholder">
+                                        The requested route will remain selected while its encyclopedia data loads.
+                                    </p>
+                                </section>
+                            ) : routeEntriesError ? (
+                                <section className="codex-detail codex-detail--empty" role="alert">
+                                    <div className="codex-sectionLabel">Codex entry</div>
+                                    <h2 className="codex-detail__title">Unable to load {activeKindLabel}</h2>
+                                    <p className="codex-detail__placeholder">{routeEntriesError}</p>
+                                    <button
+                                        type="button"
+                                        className="codex-detail__retry"
+                                        onClick={retryRouteEntries}
+                                    >
+                                        Try again
+                                    </button>
+                                </section>
+                            ) : isOverviewState ? (
                                 <CodexOverview
                                     dataFreshness={dataFreshness}
                                     isLoading={isOverviewLoading}
@@ -1324,10 +1424,11 @@ export default function CodexPage() {
                                     richDistrictByKey={richDistrictByKey}
                                 />
                             ) : (
-                            <CodexEntryDetail
-                                entry={selectedEntry}
-                                allEntries={entries}
+                                <CodexEntryDetail
+                                    entry={selectedEntry}
+                                    allEntries={entries}
                                     relatedEntries={resolvedRelatedEntries}
+                                    relatedEntriesLoading={relatedEntriesLoading}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}
                                 />

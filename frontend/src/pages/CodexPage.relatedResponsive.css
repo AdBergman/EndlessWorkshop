@@ -21,6 +21,12 @@
     margin-top: 12px;
 }
 
+.codex-related__loading {
+    margin: 10px 0 0;
+    color: var(--codex-ink-muted);
+    font-size: 13px;
+}
+
 .codex-related__group {
     padding: 12px 0 0;
     border-top: 1px solid var(--codex-line);

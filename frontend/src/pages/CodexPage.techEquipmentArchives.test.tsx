@@ -330,11 +330,12 @@ describe("CodexPage Tech Equipment Hero Unit archives", () => {
         await user.click(within(filteredBloodmarkRow).getByRole("button", { name: "Open Ranged IV in Codex" }));
 
         expect(await screen.findByRole("heading", { name: "Ranged IV" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_Ranged_4");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_Ranged_4");
 
-        await user.click(within(typeGroup).getByRole("button", { name: "Bow 1" }));
+        const categoryToolbar = screen.getByRole("toolbar", { name: /filter codex by category/i });
+        await user.click(within(categoryToolbar).getByRole("button", { name: /equipment/i }));
 
-        expect(screen.getByText("Archite Plate")).toBeInTheDocument();
+        expect(await screen.findByText("Archite Plate")).toBeInTheDocument();
     });
 
 

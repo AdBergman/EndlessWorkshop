@@ -16,6 +16,7 @@ type Props = {
     onSelect: (entry: CodexEntry) => void;
     priorityMode?: "default" | "faction";
     headingLabel?: string;
+    loading?: boolean;
 };
 
 type RelatedEntryGroup = {
@@ -66,10 +67,16 @@ function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorit
     });
 }
 
-export default function RelatedEntries({ entries, onSelect, priorityMode = "default", headingLabel = "Related entries" }: Props) {
+export default function RelatedEntries({
+    entries,
+    onSelect,
+    priorityMode = "default",
+    headingLabel = "Related entries",
+    loading = false,
+}: Props) {
     const headingId = useId();
 
-    if (entries.length === 0) {
+    if (entries.length === 0 && !loading) {
         return null;
     }
 
@@ -81,7 +88,13 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
                 {headingLabel}
             </div>
 
-            <div className="codex-related__groups">
+            {loading ? (
+                <p className="codex-related__loading" aria-live="polite">
+                    Loading linked encyclopedia entries…
+                </p>
+            ) : null}
+
+            {groups.length > 0 ? <div className="codex-related__groups">
                 {groups.map((group) => (
                     <div className="codex-related__group" key={group.kind}>
                         <div className="codex-related__groupHeader">
@@ -140,7 +153,7 @@ export default function RelatedEntries({ entries, onSelect, priorityMode = "defa
                         </div>
                     </div>
                 ))}
-            </div>
+            </div> : null}
         </section>
     );
 }

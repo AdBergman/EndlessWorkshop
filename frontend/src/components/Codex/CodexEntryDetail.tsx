@@ -66,6 +66,7 @@ type Props = {
     entry: CodexEntry | null;
     allEntries: readonly CodexEntry[];
     relatedEntries: CodexEntry[];
+    relatedEntriesLoading?: boolean;
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectRelated: (entry: CodexEntry) => void;
 };
@@ -74,6 +75,7 @@ export default function CodexEntryDetail({
     entry,
     allEntries,
     relatedEntries,
+    relatedEntriesLoading = false,
     titleRef,
     onSelectRelated,
 }: Props) {
@@ -343,6 +345,7 @@ export default function CodexEntryDetail({
 
             <RelatedEntries
                 entries={relatedEntriesForDisplay}
+                loading={relatedEntriesLoading}
                 onSelect={onSelectRelated}
                 priorityMode={isFactionEntry ? "faction" : "default"}
                 headingLabel={isAbilityEntry ? "Linked Statuses & References" : "Related entries"}
