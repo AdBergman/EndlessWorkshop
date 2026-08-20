@@ -276,10 +276,10 @@ describe("CodexPage category overview layouts", () => {
 
 
 
-    it("requests full codex entries for category routes when entries are not cached", async () => {
-        const originalLoadEntries = useCodexStore.getState().loadEntries;
+    it("requests only the active category when entries are not cached", async () => {
+        const originalLoadCategory = useCodexStore.getState().loadCategory;
         const originalLoadSummary = useCodexStore.getState().loadSummary;
-        const loadEntries = vi.fn().mockResolvedValue(undefined);
+        const loadCategory = vi.fn().mockResolvedValue(undefined);
         const loadSummary = vi.fn().mockResolvedValue(undefined);
 
         useCodexStore.setState({
@@ -288,13 +288,15 @@ describe("CodexPage category overview layouts", () => {
             entriesByKind: {},
             entriesByKindKey: {},
             categorySummaries: [],
-            loading: true,
+            loading: false,
             error: null,
+            fullLoaded: false,
+            categoryLoadStates: {},
             summaryLoaded: false,
             summaryLoading: false,
             summaryError: null,
             lastLoadedAt: undefined,
-            loadEntries,
+            loadCategory,
             loadSummary,
         });
 
@@ -308,12 +310,12 @@ describe("CodexPage category overview layouts", () => {
             );
 
             await waitFor(() => {
-                expect(loadEntries).toHaveBeenCalledTimes(1);
+                expect(loadCategory).toHaveBeenCalledWith("districts");
             });
-            expect(loadSummary).not.toHaveBeenCalled();
+            expect(loadSummary).toHaveBeenCalledTimes(1);
         } finally {
             useCodexStore.setState({
-                loadEntries: originalLoadEntries,
+                loadCategory: originalLoadCategory,
                 loadSummary: originalLoadSummary,
             });
         }

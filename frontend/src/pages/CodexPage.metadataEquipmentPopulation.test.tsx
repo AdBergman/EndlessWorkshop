@@ -432,7 +432,7 @@ describe("CodexPage equipment and population metadata rendering", () => {
 
         await user.click(thresholdSummary);
         expect(await screen.findByRole("heading", { name: "Bor’s Sparring Ring" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=DistrictImprovement_MinorFaction_06");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=improvements&entry=DistrictImprovement_MinorFaction_06");
     });
 
 
@@ -531,7 +531,7 @@ describe("CodexPage equipment and population metadata rendering", () => {
 
         await user.click(thresholdSummary);
         expect(await screen.findByRole("heading", { name: "Horatio Clone" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_HoratioBeta");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=units&entry=Unit_HoratioBeta");
     });
 
 

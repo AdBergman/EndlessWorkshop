@@ -99,4 +99,40 @@ class CodexControllerTest {
                 .andExpect(jsonPath("$[0].facts").doesNotExist())
                 .andExpect(jsonPath("$[0].sections").doesNotExist());
     }
+
+    @Test
+    void getAllCodex_withCategoryReturnsOnlyRequestedCategory() throws Exception {
+        CodexDto dto = new CodexDto(
+                "populations",
+                "Population_Minor_Ametrine",
+                "Ametrine",
+                "Minor Faction",
+                "Population",
+                List.of("Public population entry."),
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of()
+        );
+        when(codexFacade.getCodexEntriesByCategory("populations")).thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/codex")
+                        .queryParam("category", "populations")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].exportKind").value("populations"))
+                .andExpect(jsonPath("$[0].entryKey").value("Population_Minor_Ametrine"));
+    }
+
+    @Test
+    void getAllCodex_withUnknownCategoryReturnsEmptyList() throws Exception {
+        when(codexFacade.getCodexEntriesByCategory("unknown")).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/codex")
+                        .queryParam("category", "unknown")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+    }
 }

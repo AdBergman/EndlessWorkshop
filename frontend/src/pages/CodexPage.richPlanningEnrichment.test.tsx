@@ -298,7 +298,7 @@ describe("CodexPage rich planning enrichment", () => {
 
         await user.click(techLink);
         expect(await screen.findByRole("heading", { name: "Irrigation" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Tech_Irrigation");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=tech&entry=Tech_Irrigation");
 
         await user.click(within(getCategoryToolbar()).getByRole("button", { name: /districts/i }));
         const districtsOverview = await screen.findByLabelText("Districts overview");
@@ -555,7 +555,7 @@ describe("CodexPage rich planning enrichment", () => {
 
         await user.click(unlockSummary);
         expect(await screen.findByRole("heading", { name: "Ascetic Existence" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Aspect_DistrictImprovement_01");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=improvements&entry=Aspect_DistrictImprovement_01");
     });
 
 

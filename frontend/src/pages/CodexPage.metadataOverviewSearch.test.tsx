@@ -300,6 +300,7 @@ describe("CodexPage metadata overview and search rendering", () => {
             entriesByKindKey: buildEntriesByKindKey(entries),
             loading: false,
             error: null,
+            fullLoaded: true,
         });
 
         render(
@@ -332,6 +333,7 @@ describe("CodexPage metadata overview and search rendering", () => {
             entriesByKindKey: buildEntriesByKindKey(entries),
             loading: false,
             error: null,
+            fullLoaded: true,
         });
 
         render(

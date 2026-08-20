@@ -472,7 +472,7 @@ describe("CodexPage reference domain archives", () => {
         await user.click(within(districtsOverview).getByRole("button", { name: /open klax in codex/i }));
 
         expect(await screen.findByRole("heading", { name: "Klax" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Resource_Luxury01");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=resources&entry=Resource_Luxury01");
 
         await user.click(within(screen.getByRole("toolbar", { name: /filter codex by category/i })).getByRole("button", { name: /districts/i }));
         await screen.findByRole("heading", { name: "All Districts" });

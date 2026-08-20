@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface CodexJpaRepository extends JpaRepository<CodexEntity, Long> {
 
+    List<CodexEntity> findAllByExportKindIgnoreCase(String exportKind);
+
     List<CodexEntity> findAllByExportKindAndEntryKeyIn(String exportKind, List<String> entryKeys);
 
     List<CodexEntity> findAllByExportKindAndEntryKeyNotIn(String exportKind, List<String> entryKeys);

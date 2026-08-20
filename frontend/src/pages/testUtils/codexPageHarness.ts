@@ -35,6 +35,7 @@ export function seedCodexEntries(entries: CodexEntry[]) {
         entriesByKindKey: buildEntriesByKindKey(entries),
         loading: false,
         error: null,
+        fullLoaded: true,
     });
 }
 

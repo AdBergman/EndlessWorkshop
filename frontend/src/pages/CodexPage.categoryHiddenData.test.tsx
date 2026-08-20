@@ -552,8 +552,9 @@ describe("CodexPage hidden and promoted data categories", () => {
         expect(within(detailMeta).getByText("Councilor Effects")).toBeInTheDocument();
         expect(within(detailMeta).getByText("Defense")).toBeInTheDocument();
         expect(within(detailMeta).queryByText("Defense / Councilor Effect")).not.toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=CouncilorEffect_Defense21");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=counciloreffects&entry=CouncilorEffect_Defense21");
 
+        await user.click(within(getCategoryToolbar()).getByRole("button", { name: /^all/i }));
         const input = screen.getByRole("combobox", { name: /search the encyclopedia/i });
         await user.clear(input);
         await user.type(input, "Klax");

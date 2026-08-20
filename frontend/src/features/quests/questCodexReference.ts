@@ -79,5 +79,9 @@ export function resolveQuestCodexReference(
 }
 
 export function codexEntryHref(entry: CodexEntry): string {
-    return `/codex?entry=${encodeURIComponent(entry.entryKey)}`;
+    const params = new URLSearchParams({
+        category: entry.exportKind.trim().toLowerCase(),
+        entry: entry.entryKey,
+    });
+    return `/codex?${params.toString()}`;
 }

@@ -547,7 +547,7 @@ describe("CodexPage faction details", () => {
         expect(within(relatedSection).getByRole("button", { name: /Common Rights/ })).toBeInTheDocument();
 
         await user.click(within(packageSection).getByRole("button", { name: /Sentry/ }));
-        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_Sentry");
+        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?category=units&entry=Unit_Sentry");
     });
 
 
@@ -760,7 +760,7 @@ describe("CodexPage faction details", () => {
         expect(relatedSection).toBeNull();
 
         await user.click(within(packageSection).getByRole("button", { name: /Sentry/ }));
-        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?entry=Unit_Sentry");
+        expect(await screen.findByTestId("location-probe")).toHaveTextContent("/codex?category=units&entry=Unit_Sentry");
     });
 
 

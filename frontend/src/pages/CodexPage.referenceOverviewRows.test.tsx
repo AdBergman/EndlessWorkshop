@@ -587,7 +587,7 @@ describe("CodexPage reference overview rows", () => {
 
         await user.click(within(row).getByRole("button", { name: "Open Military Press in Codex" }));
         expect(await screen.findByRole("heading", { name: "Military Press" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=KinOfSheredyn_DistrictImprovement_01");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=improvements&entry=KinOfSheredyn_DistrictImprovement_01");
     });
 
 

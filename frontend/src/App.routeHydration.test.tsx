@@ -21,6 +21,7 @@ vi.mock("@/api/apiClient", () => ({
         getTechs: vi.fn(),
         getUnits: vi.fn(),
         getCodex: vi.fn(),
+        getCodexCategory: vi.fn(),
         getCodexSummary: vi.fn(),
         getQuestExplorer: vi.fn(),
         getDataFreshness: vi.fn(),
@@ -78,6 +79,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockReset();
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexCategory.mockReset();
         mockedApiClient.getCodexSummary.mockReset();
         mockedApiClient.getQuestExplorer.mockReset();
         mockedApiClient.getDataFreshness.mockReset();
@@ -89,6 +91,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockResolvedValue([]);
         mockedApiClient.getUnits.mockResolvedValue(units);
         mockedApiClient.getCodex.mockResolvedValue(codexEntries);
+        mockedApiClient.getCodexCategory.mockResolvedValue(codexEntries);
         mockedApiClient.getCodexSummary.mockResolvedValue([
             { exportKind: "districts", count: 1 },
         ]);
@@ -137,7 +140,8 @@ describe("App route data hydration", () => {
 
         expect(await screen.findByRole("heading", { name: "All Districts" })).toBeInTheDocument();
         expect(screen.getByLabelText("Districts overview")).toHaveTextContent("Market Square");
-        expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
+        expect(mockedApiClient.getCodexCategory).toHaveBeenCalledWith("districts");
+        expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
     });
 
     it("loads units data on the first Units navigation", async () => {

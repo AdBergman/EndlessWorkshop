@@ -8,5 +8,7 @@ import java.util.List;
 public interface CodexFacade {
     List<CodexDto> getAllCodexEntries();
 
+    List<CodexDto> getCodexEntriesByCategory(String category);
+
     List<CodexSummaryDto> getCodexSummary();
 }

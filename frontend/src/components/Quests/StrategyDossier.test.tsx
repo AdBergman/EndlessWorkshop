@@ -498,7 +498,7 @@ describe("StrategyDossier", () => {
         expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+            "/codex?category=units&entry=Unit_KinOfSheredyn_Chosen"
         );
         expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 
@@ -579,7 +579,7 @@ describe("StrategyDossier", () => {
         expect(screen.queryByRole("link", { name: "Research Ridge Logistics." })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Ridge Logistics in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Technology_RidgeLogistics"
+            "/codex?category=tech&entry=Technology_RidgeLogistics"
         );
         expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
 
@@ -653,7 +653,7 @@ describe("StrategyDossier", () => {
         expect(screen.queryByRole("link", { name: "Research Ridge Logistics." })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Ridge Logistics in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Technology_RidgeLogistics"
+            "/codex?category=tech&entry=Technology_RidgeLogistics"
         );
         expect(screen.getByText("Chosen").closest("a")).toBeNull();
         expect(screen.queryByText("Unlock constructible:")).not.toBeInTheDocument();
@@ -661,15 +661,15 @@ describe("StrategyDossier", () => {
         expect(screen.queryByRole("link", { name: "Unlock constructible: Chosen" })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+            "/codex?category=units&entry=Unit_KinOfSheredyn_Chosen"
         );
         expect(screen.getByRole("link", { name: "Open The Adjudicator in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Equipment_TwoHanded_19_Definition"
+            "/codex?category=equipment&entry=Equipment_TwoHanded_19_Definition"
         );
         expect(screen.getByRole("link", { name: "Open Ahead in the Polls in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest"
+            "/codex?category=traits&entry=FactionTrait_KinOfSheredyn_ChosenCap_FactionQuest"
         );
         expect(screen.getByText("The Adjudicator")).toBeInTheDocument();
         expect(screen.getByText("Ahead in the Polls")).toBeInTheDocument();
@@ -722,13 +722,13 @@ describe("StrategyDossier", () => {
         expect(screen.queryByRole("link", { name: "Use action: Build Bridge." })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Build Bridge in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=ActionTypeBuildBridge"
+            "/codex?category=actions&entry=ActionTypeBuildBridge"
         );
         expect(screen.getByText("Vision Exchange").closest("a")).toBeNull();
         expect(screen.queryByRole("link", { name: "Unlock diplomatic treaty: Vision Exchange" })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Vision Exchange in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Treaty_VisionExchange"
+            "/codex?category=diplomatictreaties&entry=Treaty_VisionExchange"
         );
     });
 
@@ -767,7 +767,7 @@ describe("StrategyDossier", () => {
         expect(screen.queryByText("Unlock an elite constructible:", { exact: false })).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
             "href",
-            "/codex?entry=Unit_KinOfSheredyn_Chosen"
+            "/codex?category=units&entry=Unit_KinOfSheredyn_Chosen"
         );
 
         fireEvent.focus(fallbackPreviewTarget!);
@@ -815,12 +815,12 @@ describe("StrategyDossier", () => {
         const onChoose = renderDossier(modelForOptions([linkedRewardOption, plainOption], null));
 
         const requirementOpenIcon = screen.getByRole("link", { name: "Open Ridge Logistics in Codex" });
-        expect(requirementOpenIcon).toHaveAttribute("href", "/codex?entry=Technology_RidgeLogistics");
+        expect(requirementOpenIcon).toHaveAttribute("href", "/codex?category=tech&entry=Technology_RidgeLogistics");
         requirementOpenIcon.addEventListener("click", (event) => event.preventDefault(), { once: true });
         fireEvent.click(requirementOpenIcon);
 
         const rewardOpenIcon = screen.getByRole("link", { name: "Open Chosen in Codex" });
-        expect(rewardOpenIcon).toHaveAttribute("href", "/codex?entry=Unit_KinOfSheredyn_Chosen");
+        expect(rewardOpenIcon).toHaveAttribute("href", "/codex?category=units&entry=Unit_KinOfSheredyn_Chosen");
 
         rewardOpenIcon.addEventListener("click", (event) => event.preventDefault(), { once: true });
         fireEvent.click(rewardOpenIcon);

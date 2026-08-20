@@ -82,7 +82,7 @@ describe("CodexPage metadata relationship rendering", () => {
 
         await user.click(within(heroTags).getByRole("button", { name: /open flying in codex/i }));
         await waitFor(() => {
-            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Ability_Fly");
+            expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=Ability_Fly");
         });
         expect(screen.getByRole("heading", { name: "Flying" })).toBeInTheDocument();
     });
@@ -437,7 +437,7 @@ describe("CodexPage metadata relationship rendering", () => {
         await user.click(within(exactReferences).getByRole("button", { name: /breaching attack abilities/i }));
 
         expect(await screen.findByRole("heading", { name: "Breaching Attack" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=UnitAbility_BreachingAttack");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=abilities&entry=UnitAbility_BreachingAttack");
     });
 
 
@@ -613,7 +613,7 @@ describe("CodexPage metadata relationship rendering", () => {
 
         await user.click(inlineLink);
         expect(await screen.findByRole("heading", { name: "Jinxed II" })).toBeInTheDocument();
-        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?entry=Status_Unit_Jinxed_2");
+        expect(screen.getByTestId("location-probe")).toHaveTextContent("/codex?category=statuses&entry=Status_Unit_Jinxed_2");
     });
 
 
