@@ -51,6 +51,10 @@ maintainer explicitly asks for it, and do not amend, squash, or rewrite history
 unless the requested workflow permits it. Leave final PR review, branch
 integration, and merge ordering to the maintainer unless explicitly delegated.
 
+For EWShop GitHub auth/PR instability, follow the canonical host-authenticated
+`git`/`gh` path in `docs/dependency-and-ci-maintenance.md` before reporting PR
+creation blocked.
+
 ## PR-First Handoff Standard
 
 For completed work that has been committed and pushed, the GitHub branch / PR is

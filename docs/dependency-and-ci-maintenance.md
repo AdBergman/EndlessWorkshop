@@ -38,6 +38,33 @@ These settings are not fully represented by files in the repository:
 - Do not grant broad repository write permissions to workflows unless a workflow
   explicitly needs them.
 
+## Codex GitHub Auth
+
+EWShop Codex sessions can see three distinct GitHub execution paths:
+
+- Git fetch/push uses the repository remote. The canonical EWShop remote is SSH,
+  `git@github.com:AdBergman/EndlessWorkshop.git`, backed by the host SSH
+  agent/keychain.
+- Local `gh` uses the host GitHub CLI account/keyring. For EWShop handoff, run
+  it with `GH_TOKEN` and `GITHUB_TOKEN` unset so stale or under-scoped
+  environment tokens cannot override the keyring account.
+- The GitHub connector uses a separate Codex GitHub App installation. Connector
+  reads are useful for PR/repo inspection, but connector `403 Resource not
+  accessible by integration` errors are app-permission failures and do not prove
+  the host `gh` account or SSH Git path is unavailable.
+
+Canonical push/PR handoff path:
+
+```bash
+env -u GH_TOKEN -u GITHUB_TOKEN git push origin HEAD
+env -u GH_TOKEN -u GITHUB_TOKEN gh pr create --repo AdBergman/EndlessWorkshop --base main --head <branch>
+```
+
+Do not report PR creation blocked after a sandbox network failure or GitHub
+connector 403 until the canonical host-authenticated `git`/`gh` path has also
+failed. Use `scripts/github-auth-diagnostic.sh` for non-secret diagnostics; it
+reports token presence only, never credential values.
+
 ## Dependabot Review Checklist
 
 For each dependency PR:
