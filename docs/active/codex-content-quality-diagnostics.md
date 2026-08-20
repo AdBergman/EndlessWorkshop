@@ -62,9 +62,12 @@ Owners mean:
 
 - `EWShop`: safe display cleanup, such as hiding duplicate fact lines.
 - `Exporter`: source data, missing metadata, placeholder text, raw generated
-  names, or missing public explanation.
+  names, or missing public explanation after evidence/manual review establishes
+  an exporter/content-side gap.
 - `Both`: EWShop can mask the symptom, but exporter/editorial data should still
   improve.
+- `Unresolved`: checked EWShop generic/rich inputs did not contain useful
+  content, but ownership needs manual source/export evidence before assignment.
 
 The player-facing diagnostic first identifies candidates, then assigns root
 cause only when current generic/rich source evidence supports it.
@@ -147,6 +150,11 @@ Root-cause counts after checking current generic/rich inputs:
 
 - `ewshop-rich-import-render-gap`: 12
 - `no-richer-source-found`: 184
+
+Owner counts:
+
+- `EWShop`: 12
+- `Unresolved`: 184
 
 Category counts:
 
@@ -240,8 +248,8 @@ as proof that useful rich source data exists.
 1. Run the diagnostic against current local Codex imports.
 2. Read the summary by owner and issue type.
 3. For `EWShop` findings, batch only high-value low-risk display fixes.
-4. For `Exporter` findings, copy representative examples into the active
-   exporter handoff or create a short focused handoff doc.
+4. For `Unresolved` findings, sample current generic/rich source evidence before
+   assigning exporter/content ownership.
 5. For `Both` findings, decide whether EWShop masking is enough for the current
    release or whether exporter/editorial follow-up should remain explicit.
 6. Keep active docs short; archive completed evidence bundles under

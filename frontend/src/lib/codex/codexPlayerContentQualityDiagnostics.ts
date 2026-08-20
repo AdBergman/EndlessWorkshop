@@ -15,7 +15,7 @@ export type CodexPlayerContentQualityCandidateKind =
     | "bookkeeping-classification-dominated"
     | "missing-category-gameplay-content";
 
-export type CodexPlayerContentQualityOwner = "EWShop" | "Exporter" | "Both";
+export type CodexPlayerContentQualityOwner = "EWShop" | "Exporter" | "Both" | "Unresolved";
 
 export type CodexPlayerContentRichSource = {
     kind: string;
@@ -646,7 +646,7 @@ function classifyFinding(
         evidence.push(...usefulUnrenderedCodexSourceEvidence(entry, policy));
     } else if (options.richRecordsByKindKey) {
         classification = "no-richer-source-found";
-        owner = "Exporter";
+        owner = "Unresolved";
         recommendation = "Evidence review should decide whether exporter/content must add category-relevant gameplay content or explicit unavailable/internal/deferred absence semantics.";
     }
 
