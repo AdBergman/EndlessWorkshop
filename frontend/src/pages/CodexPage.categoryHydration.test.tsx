@@ -125,6 +125,33 @@ describe("CodexPage category hydration", () => {
         expect(getFullCodex).not.toHaveBeenCalled();
     });
 
+    it("prefetches only the next two public categories after a category visit", async () => {
+        vi.mocked(apiClient.getCodexSummary).mockResolvedValue([
+            { exportKind: "abilities", count: 1 },
+            { exportKind: "heroes", count: 1 },
+            { exportKind: "populations", count: 1 },
+            { exportKind: "quests", count: 1 },
+            { exportKind: "statuses", count: 1 },
+            { exportKind: "tech", count: 1 },
+            { exportKind: "traits", count: 1 },
+            { exportKind: "units", count: 1 },
+        ]);
+        const getCategory = vi.spyOn(apiClient, "getCodexCategory").mockImplementation(async (category) => (
+            category === "populations" ? [AMETRINE_ENTRY] : []
+        ));
+
+        renderCodex("/codex?category=populations");
+
+        expect(await screen.findByRole("heading", { name: "All Populations" })).toBeInTheDocument();
+        await waitFor(() => expect(getCategory).toHaveBeenCalledTimes(3));
+        await waitFor(() => expect(useCodexStore.getState().prefetching).toBe(false));
+        expect(getCategory.mock.calls.map(([category]) => category)).toEqual([
+            "populations",
+            "statuses",
+            "tech",
+        ]);
+    });
+
     it("keeps the landing summary-only and lazily loads the full Codex for global search", async () => {
         const user = userEvent.setup();
         const getCategory = vi.spyOn(apiClient, "getCodexCategory");
