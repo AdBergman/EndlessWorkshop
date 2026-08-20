@@ -8,15 +8,21 @@ registries.
 
 ## Project Policy
 
-- Substantial Codex implementation normally uses a dedicated `codex/*` task
-  branch and a PR into `main` for review; after merge/closeout, the task branch
-  should be deleted.
-- Direct `main` work remains acceptable for genuinely small, low-risk changes
-  when explicitly appropriate.
+- Codex implementation work uses a dedicated `codex/*` task branch and a PR into
+  `main` for review; after merge/closeout, the task branch should be deleted.
+- Before implementation edits, Codex should either confirm it is continuing the
+  same coherent task/PR branch or checkout `main`, refresh it from the remote
+  when network access is available, and create a fresh `codex/*` task branch
+  from that refreshed `main`.
+- Task size, perceived risk level, solo-maintainer status, and lack of detected
+  concurrent agents are not reasons for Codex to work directly on `main`.
+- Direct `main` work remains acceptable for the human maintainer when
+  explicitly appropriate.
 - This is a lightweight hobby-project workflow, not GitFlow: short-lived task
   branches, PR review, then branch cleanup.
 - Long interactive Codex sessions may keep one task branch/PR for continuous
-  related work; separate tasks or new sessions should start fresh from `main`.
+  related work; separate tasks or new sessions should start fresh from refreshed
+  `main` unless the user explicitly says they continue an existing branch/PR.
 - Use branch/PR workflows for dependency updates, migrations,
   deploy/runtime changes, and large refactors.
 - Dependabot PRs are suggestions, not auto-approved changes.
