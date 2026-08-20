@@ -65,6 +65,8 @@ Evidence used:
 - category mode, visibility, rail/filter helpers, archive/detail renderers
 - rich constructible, tech, unit, faction, hero, and skill import/store paths
 - active category evolution and release-readiness docs
+- `npm run diagnostics:codex-player-content` for player-facing public records
+  missing category-relevant gameplay content
 
 No production imports, remote infrastructure, or broad verification test suites
 were run for this documentation-only audit.

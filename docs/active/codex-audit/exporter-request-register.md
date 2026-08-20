@@ -331,6 +331,90 @@ Intended EWShop use: future top-level Quest Codex archive that links into
 Validation expectation: no top-level questline row depends on title grouping,
 key prefix parsing, or frontend branch reconstruction.
 
+## DBX-CODEX-PUBLIC-CONTENT-001 - Fill or Classify Public Records Missing Gameplay Content
+
+Affected categories: Abilities, Actions, Diplomatic Treaties, Equipment,
+Improvements, Resources, Statuses, Traits
+Priority: P2
+Blocking EWShop stories: future Codex content-quality polish
+Exporter-blocked: yes for source-thin aggregates; EWShop-owned ability rich
+render gaps are excluded from this exporter ask
+
+Player-facing need: public Codex records should satisfy small category-aware
+semantic expectations. Traits, Abilities, and Statuses should normally expose
+effect/mechanical content; Equipment should expose effects or granted
+abilities; constructibles should expose effects, unlocks, requirements,
+level-up rules, or placement constraints. Records that only show
+classification/bookkeeping facts, or only context/provenance without category
+gameplay content, are structurally present but not useful.
+
+Evidence information is not already available:
+
+- `npm run diagnostics:codex-player-content -- --input ../local-imports/codex
+  --rich-input ../local-imports/exports --limit 160` on 2026-08-20 scanned
+  2,588 Codex entries and 2,030 public entries.
+- The category-aware run found 196 diagnostic candidates: Abilities 23, Actions
+  84, Diplomatic Treaties 11, Equipment 2, Improvements 20, Resources 2,
+  Statuses 20, Traits 34.
+- These are not 196 exporter requests. Twelve Ability candidates are proven
+  EWShop rich/import/render gaps because rich ability export rows contain
+  nonzero effect lines, for example `Master of Arrows` has `+20% Damage on
+  Units of this Ranged class` while generic public Codex shows only
+  classification facts.
+- The remaining 184 current candidates classify as `no-richer-source-found`
+  after checking current generic Codex exports and available rich sidecars. This
+  automatic status is intentionally less absolute than source-proven absence;
+  sampled categories provide aggregate exporter/content evidence.
+- `Feeding Frenzy`
+  (`FactionTrait_LastLord_Chapter06AChoice01_FactionQuest`) is a live
+  `missing-category-gameplay-content` Trait candidate: it has `Cost: 1`, `Kind:
+  Trait`, `Trait type: Faction`, and quest reward/objective context, but no
+  trait effect, granted ability, unlock, or requirement. Quest provenance is not
+  mechanical/player-useful trait content.
+- Ability shape-only examples such as `Collateral Damage I` have rich ability
+  rows marked with `exclusionReason: missingUsefulDescription` and only provide
+  labels such as `Shape: AoE 1`; EWShop should not treat that as useful rich
+  enrichment.
+- Sample no-richer-source-found examples include `Apotheosis Dirge` equipment,
+  `Frenzied` status, `Builders' Quarters` improvement, `Surrender Demand`
+  diplomatic treaty, and `Corpses` resource.
+- Actions overlap with `DBX-CODEX-ACTIONS-001`; keep that request as the
+  detailed ownership/purpose ask for Action rows.
+
+Existing related fields/keys:
+
+- Generic Codex `descriptionLines`, `facts`, `sections`, `referenceKeys`, and
+  `publicContextKeys`.
+- Rich/domain sidecars for abilities, districts, improvements, factions, heroes,
+  populations, tech, units, and Quest Explorer, used only as evidence.
+
+Requested shape:
+
+- Address this as aggregate semantic needs by category, not per-row asks:
+  - Traits/Abilities/Statuses: effect/mechanics, granted abilities,
+    interactions, requirements, or explicit absent/internal semantics.
+  - Equipment: effects, granted abilities, consumable use, or explicit
+    unavailable/internal semantics.
+  - Improvements/constructibles: effects, unlocks, requirements, level-up
+    rules, placement constraints, or explicit absent/internal semantics.
+  - Diplomatic Treaties/Resources/Actions: public purpose, effect, use,
+    requirement/consequence, or explicit absent/internal semantics.
+- If a row is internal/support data, mark or omit it so EWShop can keep it out
+  of public Codex navigation and direct search results as appropriate.
+
+Why EWShop cannot derive it: EWShop must not invent gameplay meaning from
+classification labels, key names, cost values, faction prefixes, descriptors,
+quest reward provenance, or rich diagnostic scaffolding.
+
+Intended EWShop use: keep the player-facing content-quality diagnostic separate
+from reference-integrity diagnostics and use it to distinguish EWShop render
+gaps from genuine source/editorial thinness.
+
+Validation expectation: a future `diagnostics:codex-player-content` run shows no
+public records missing category-relevant gameplay content unless they carry an
+explicit source-unavailable/internal/deferred classification that the diagnostic
+can classify without opening a new exporter request.
+
 ## Gated / Not Yet Registered
 
 ### Councilor Completeness
