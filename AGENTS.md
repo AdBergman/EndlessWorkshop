@@ -10,13 +10,35 @@ docs.
 
 ## Codex Branch Workflow
 
-Substantial Codex implementation work should normally happen on a dedicated
-`codex/*` task branch rather than directly on `main`. This is the default model
-for implementation work and does not depend on detecting whether other agents or
-workstreams are currently active. Keep this lightweight: this is task-branch
-development for a hobby project, not GitFlow.
+Startup rule for Codex implementation work: before the first implementation
+edit, establish the current branch, understand the working-tree state, refresh
+`main`, and work from a fresh `codex/*` task branch created from that refreshed
+`main`, unless the user explicitly says this is a continuation of the same
+coherent task/PR branch.
 
-Standard lifecycle for substantial Codex work:
+Default startup procedure:
+
+1. Determine whether the request continues the same coherent task/PR already on
+   the current branch.
+2. If yes, remain on that task branch after checking the working tree.
+3. Otherwise, checkout `main`, fetch/pull the latest `main` when network access
+   is available, create a fresh `codex/*` task branch from that refreshed
+   `main`, and begin implementation only after that branch is active.
+
+If unrelated local work prevents safely moving the current checkout to
+refreshed `main`, preserve it and use a separate worktree or report the blocker;
+do not discard, reset, overwrite, rebase, merge, cherry-pick, or rewrite another
+branch or workstream unless explicitly instructed.
+
+Codex implementation work uses a dedicated `codex/*` task branch rather than
+directly on `main`. Task size, perceived risk level, solo-maintainer status, and
+lack of detected concurrent agents are not reasons for Codex to work directly on
+`main`. Codex does not need to infer whether other agents are running before
+creating a task branch. Human-maintainer direct-`main` work may still be
+reasonable when explicitly chosen by the maintainer. Keep this lightweight: this
+is task-branch development for a hobby project, not GitFlow.
+
+Standard lifecycle for Codex implementation work:
 
 ```text
 task branch -> PR into main -> maintainer merge/closeout -> delete task branch
@@ -31,17 +53,14 @@ Use simple branch names:
 
 Within one interactive Codex session, continue using the same task branch when
 follow-up requests are part of the same coherent development effort. Do not
-branch from the task branch for each follow-up. Start a fresh branch from
-current `main` when the user begins a separate task, a new Codex session is
-started, or the work no longer belongs in the same reviewable PR. Before
-creating that branch, fetch/pull the latest `main` when network access is
-available; if it cannot be refreshed, say so clearly in the handoff.
+branch from the task branch for each follow-up. Treat a new Codex session as a
+new task branch unless the user explicitly says it is continuing an existing
+branch/PR. Start a fresh branch from refreshed `main` when the user begins a
+separate task or the work no longer belongs in the same reviewable PR.
 
 Stay within the requested task scope, avoid unrelated cleanup, and preserve
-unrelated local changes. Do not reset, discard, overwrite, rebase, merge,
-cherry-pick, or rewrite another branch or workstream unless explicitly
-instructed. If significant overlap or a dependency on another branch is
-discovered, report it instead of silently absorbing unrelated work.
+unrelated local changes. If significant overlap or a dependency on another
+branch is discovered, report it instead of silently absorbing unrelated work.
 
 Branch work should not be left as an unreviewable limbo branch. When Codex
 finishes implementation work on a task branch, the normal handoff is to commit
@@ -102,9 +121,9 @@ maintainer-owned integration unless explicitly delegated; do not delete branches
 from another workstream without instruction.
 
 Separate Git worktrees are useful when the maintainer wants to run multiple task
-branches concurrently. Worktree creation and orchestration are normally a
-maintainer concern; agents do not need to infer concurrency before using a task
-branch for substantial implementation.
+branches concurrently or when an agent must preserve unrelated local work while
+starting from refreshed `main`. Agents do not need to infer concurrency before
+using a task branch for implementation.
 
 ## Backend/Frontend Contract Discipline
 
