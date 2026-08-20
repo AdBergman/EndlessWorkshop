@@ -364,7 +364,9 @@ Evidence information is not already available:
 - The remaining 184 current candidates classify as `no-richer-source-found`
   after checking current generic Codex exports and available rich sidecars. This
   automatic status is intentionally less absolute than source-proven absence;
-  sampled categories provide aggregate exporter/content evidence.
+  sampled categories provide aggregate exporter/content evidence. Individual
+  automatic findings retain unresolved ownership until manual evidence review
+  establishes an exporter/content-side gap.
 - `Feeding Frenzy`
   (`FactionTrait_LastLord_Chapter06AChoice01_FactionQuest`) is a live
   `missing-category-gameplay-content` Trait candidate: it has `Cost: 1`, `Kind:

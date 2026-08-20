@@ -269,7 +269,8 @@ Open gap:
   Codex does not expose.
 - The remaining 184 candidates classify as `no-richer-source-found` after
   checking current generic/rich inputs. Treat these as aggregate semantic needs,
-  not 184 individual exporter asks.
+  not 184 individual exporter asks. Automatic findings use unresolved ownership
+  until evidence/manual review establishes an exporter/content-side gap.
 - Sample-reviewed no-richer-source-found categories include
   quest-provenance-only Traits such as `Feeding Frenzy`, shape-only Abilities
   such as `Collateral Damage I`, consumable Equipment with no use/effect,
@@ -306,8 +307,9 @@ Open gap:
 - EWShop implementation result: twelve Ability candidates are EWShop-owned
   rich/import/render gaps where current rich ability rows contain nonzero effect
   lines. Automatic source-side findings now use `no-richer-source-found`; zero-
-  valued rich modifiers are not treated as proof of useful source data. Manual
-  sample review removed three false positives for past-tense/disabling
+  valued rich modifiers are not treated as proof of useful source data, and
+  unresolved ownership avoids assigning exporter/content blame automatically.
+  Manual sample review removed three false positives for past-tense/disabling
   mechanical Trait text.
 - Follow-up generated: `DBX-CODEX-PUBLIC-CONTENT-001` tracks aggregate
   source-thin semantic needs by category, not per-row exporter asks. Current

@@ -215,7 +215,7 @@ describe("codexPlayerContentQualityDiagnostics", () => {
         expect(report.findings).toEqual([
             expect.objectContaining({
                 classification: "no-richer-source-found",
-                owner: "Exporter",
+                owner: "Unresolved",
             }),
         ]);
     });
@@ -244,6 +244,7 @@ describe("codexPlayerContentQualityDiagnostics", () => {
                 exportKind: "statuses",
                 expectedContent: "status effect/mechanical description or interactions",
                 classification: "no-richer-source-found",
+                owner: "Unresolved",
             }),
         ]);
     });
