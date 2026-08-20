@@ -120,6 +120,28 @@ import "./CodexPage.css";
 
 type SelectionIntent = "passive" | "related";
 
+const AUTOMATIC_CATEGORY_PREFETCH_LIMIT = 2;
+
+function getAutomaticCategoryPrefetchCandidates(
+    activeKind: string,
+    summaries: readonly { exportKind: string }[]
+): string[] {
+    const activeIndex = PREFERRED_CODEX_KIND_ORDER.indexOf(activeKind);
+    if (activeIndex < 0) return [];
+
+    const availableKinds = new Set(
+        summaries
+            .map((summary) => normalizeCodexKind(summary.exportKind))
+            .filter(Boolean)
+    );
+
+    return PREFERRED_CODEX_KIND_ORDER
+        .slice(activeIndex + 1)
+        .filter((category) => availableKinds.has(category))
+        .filter((category) => isVisibleTopLevelCodexKind(category))
+        .slice(0, AUTOMATIC_CATEGORY_PREFETCH_LIMIT);
+}
+
 function formatCodexSnapshotDate(value: string): string | null {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return null;
@@ -267,11 +289,7 @@ export default function CodexPage() {
             return;
         }
 
-        void prefetchCategories(
-            categorySummaries
-                .map((summary) => normalizeCodexKind(summary.exportKind))
-                .filter((category) => category && category !== activeKind)
-        );
+        void prefetchCategories(getAutomaticCategoryPrefetchCandidates(activeKind, categorySummaries));
     }, [
         activeCategoryResolved,
         activeKind,

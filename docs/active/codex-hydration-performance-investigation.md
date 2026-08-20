@@ -11,8 +11,8 @@ Codex uses route-scoped hydration:
 - the first global search loads the existing full `GET /api/codex` dataset;
 - successfully loaded categories are cached and merged into the in-session Codex
   indexes;
-- after the requested category renders, remaining categories may warm in the
-  background with a two-request concurrency limit.
+- after the requested category renders, at most the next two public categories
+  in preferred navigation order may warm in the background.
 
 The full endpoint remains the global-search fallback. No pagination, generic
 query cache, search-document endpoint, or exact-entry endpoint is part of this
@@ -95,10 +95,13 @@ entries already present in merged indexes render immediately; unresolved links
 show an explicit background-loading fallback while category warming is active.
 
 The background warmer starts only after the requested category and summary are
-ready. Two workers are used: enough to improve cross-reference availability
-without replacing one large request with an unbounded burst. Direct navigation
-does not enter that queue and therefore retains priority. Starting a global load
-stops workers from dequeuing further speculative requests.
+ready. It receives at most two candidates: the next available public categories
+after the active category in `PREFERRED_CODEX_KIND_ORDER`. It does not wrap to
+the start of the order or automatically warm hidden/local-only kinds. The two
+existing workers can complete that single bounded wave without repeatedly
+rebuilding indexes for the rest of the Codex. Direct navigation does not enter
+that queue and therefore retains priority. Starting a global load stops workers
+from dequeuing further speculative requests.
 
 ## Race-Safety Review
 
@@ -168,9 +171,9 @@ Local validation against the imported 0.82 snapshot on 2026-08-20 measured:
 The blocking Populations payload was therefore about 98.4% smaller than the
 full raw payload. A cold browser navigation to the exact Ametrine URL requested
 Populations and summary first, rendered the `Ametrine` heading without changing
-the URL, and did not request the full endpoint. Only after that render did the
-two-worker category warmer start. Browser back returned to the exact Ametrine
-URL and forward returned to the Heroes category used for the history check.
+the URL, and did not request the full endpoint. Browser back returned to the
+exact Ametrine URL and forward returned to the Heroes category used for the
+history check.
 
 ## Remaining Follow-Ups
 
@@ -179,8 +182,8 @@ URL and forward returned to the Heroes category used for the history check.
 - An exact-entry endpoint was intentionally omitted because loading one category
   is sufficient for the current direct-link contract and keeps related archive
   context available.
-- Measure production category sizes and the effect of background warming. If it
-  creates unnecessary traffic, removing the warmer does not affect correctness.
+- Measure whether the two-category preferred-order warmup improves production
+  navigation. Removing it later would not affect hydration correctness.
 - No global provider eagerly hydrates Codex. Rich faction/hero/district stores
   remain detail-triggered as before.
 - Local QA also surfaced a pre-existing React key warning in
