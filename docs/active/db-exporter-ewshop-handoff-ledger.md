@@ -250,7 +250,70 @@ Related token/icon clarification:
   `PopulationCategory_Homeless` need source/contract clarification before
   EWShop treats them as stable player-facing icon tokens.
 
+### Public Codex Records Missing Category Gameplay Content
+
+Source: `docs/active/codex-audit/exporter-request-register.md`
+
+Status: open, non-blocking.
+
+Open gap:
+
+- `diagnostics:codex-player-content` on 2026-08-20 now uses bounded
+  category-aware usefulness expectations and separates candidates from
+  root-cause proof.
+- The current run found 196 public candidates: Abilities 23, Actions 84,
+  Diplomatic Treaties 11, Equipment 2, Improvements 20, Resources 2, Statuses
+  20, and Traits 34.
+- Twelve Ability candidates are EWShop-owned rich/import/render gaps because
+  current rich ability rows contain nonzero effect lines that generic public
+  Codex does not expose.
+- The remaining 184 candidates classify as `no-richer-source-found` after
+  checking current generic/rich inputs. Treat these as aggregate semantic needs,
+  not 184 individual exporter asks.
+- Sample-reviewed no-richer-source-found categories include
+  quest-provenance-only Traits such as `Feeding Frenzy`, shape-only Abilities
+  such as `Collateral Damage I`, consumable Equipment with no use/effect,
+  Statuses with only scope/polarity, constructibles with no
+  effect/unlock/constraint, Diplomatic Treaties with only category/bilateral
+  facts, and Resources with only type/trade/kind.
+- DB Exporter should emit category-relevant gameplay content or explicit
+  unavailable/unsafe/runtime-only/internal/deferred absence semantics when
+  canonical source content is absent.
+
 ## Chronological Ledger
+
+### 2026-08-20 - Player-Facing Codex Content-Quality Diagnostic Refinement
+
+- Direction: EWShop -> DB Exporter, with EWShop implementation follow-up.
+- Topic: category-aware public Codex player usefulness separate from reference
+  integrity and strict-thin structure checks.
+- Summary: EWShop added a separate `diagnostics:codex-player-content` workflow
+  and then refined it so context/provenance does not count as category gameplay
+  content. Traits/Abilities/Statuses, Equipment, constructibles, Actions,
+  Diplomatic Treaties, Resources, and similar public categories now use small
+  explicit usefulness expectations.
+- Source docs/files:
+  - `docs/active/codex-content-quality-diagnostics.md`
+  - `docs/active/codex-audit/exporter-request-register.md`
+  - `frontend/scripts/codex-player-content-quality-diagnostic.ts`
+  - `frontend/src/lib/codex/codexPlayerContentQualityDiagnostics.ts`
+- Snapshot/export version: local `0.82` Codex and rich exports in
+  `local-imports/codex` and `local-imports/exports` as of 2026-08-20.
+- Decision/result: the earlier 117-row bookkeeping-only snapshot is superseded.
+  The current candidate count is 196, split into 151
+  bookkeeping/classification-dominated candidates and 45 candidates with
+  context/provenance but missing category gameplay content.
+- EWShop implementation result: twelve Ability candidates are EWShop-owned
+  rich/import/render gaps where current rich ability rows contain nonzero effect
+  lines. Automatic source-side findings now use `no-richer-source-found`; zero-
+  valued rich modifiers are not treated as proof of useful source data. Manual
+  sample review removed three false positives for past-tense/disabling
+  mechanical Trait text.
+- Follow-up generated: `DBX-CODEX-PUBLIC-CONTENT-001` tracks aggregate
+  source-thin semantic needs by category, not per-row exporter asks. Current
+  `Feeding Frenzy` is the representative Trait false-negative fix: quest
+  reward/objective context does not explain what the Trait does.
+- Status: open.
 
 ### 2026-08-19 - Codex Data Integrity Audit Tech/Improvement Fixes
 
@@ -657,6 +720,31 @@ Related token/icon clarification:
 - Follow-up generated: optional EWShop diagnostics deny-list hardening/test
   coverage; no new DB Exporter request.
 - Status: implemented.
+
+### 2026-08-20 - Initial Player-Facing Codex Content Quality Diagnostic
+
+- Direction: EWShop -> DB Exporter
+- Topic: public records that are structurally present but player-content thin
+- Summary: EWShop added a separate player-facing content-quality diagnostic for
+  public records that only expose classification/bookkeeping facts, while
+  leaving reference integrity and strict-thin structural diagnostics unchanged.
+- Source docs/files:
+  - `docs/active/codex-content-quality-diagnostics.md`
+  - `docs/active/codex-audit/exporter-request-register.md`
+  - `frontend/scripts/codex-player-content-quality-diagnostic.ts`
+  - `frontend/src/lib/codex/codexPlayerContentQualityDiagnostics.ts`
+- Snapshot/export version: local `0.82` Codex and rich exports in
+  `local-imports/codex` and `local-imports/exports` as of 2026-08-20.
+- Decision/result: initial snapshot superseded by the refined 2026-08-20
+  category-aware diagnostic entry above. Do not use the initial count as current
+  evidence.
+- EWShop implementation result: added `npm run diagnostics:codex-player-content`
+  and tests for Feeding Frenzy-style thinness, meaningful content suppression,
+  rich-domain ownership classification, source render-drop classification, and
+  internal/support-publication classification.
+- Follow-up generated: `DBX-CODEX-PUBLIC-CONTENT-001` tracks exporter/content
+  follow-up for aggregate public content gaps.
+- Status: superseded by the refined same-day diagnostic entry.
 
 ## Archived / Superseded Handoff Docs
 
