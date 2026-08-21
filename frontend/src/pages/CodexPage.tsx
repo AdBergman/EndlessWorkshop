@@ -112,10 +112,14 @@ import {
     PREFERRED_CODEX_KIND_ORDER,
     supportsFullWidthReferenceOverview,
 } from "@/lib/codex/codexCategoryConfig";
-import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import {
+    resolveRelatedCodexTargets,
+    resolveRelatedEntries,
+} from "@/lib/codex/codexRefs";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
+import type { CodexIdentityRecord } from "@/types/dataTypes";
 import "./CodexPage.css";
 
 type SelectionIntent = "passive" | "related";
@@ -178,6 +182,8 @@ export default function CodexPage() {
     const entries = useCodexStore((state) => state.entries);
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
     const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
+    const identitiesByKey = useCodexStore((state) => state.identitiesByKey);
+    const identitiesByKindKey = useCodexStore((state) => state.identitiesByKindKey);
     const categorySummaries = useCodexStore((state) => state.categorySummaries);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
@@ -189,6 +195,7 @@ export default function CodexPage() {
     const summaryLoading = useCodexStore((state) => state.summaryLoading);
     const summaryError = useCodexStore((state) => state.summaryError);
     const loadEntries = useCodexStore((state) => state.loadEntries);
+    const loadIdentities = useCodexStore((state) => state.loadIdentities);
     const loadCategory = useCodexStore((state) => state.loadCategory);
     const prefetchCategories = useCodexStore((state) => state.prefetchCategories);
     const loadSummary = useCodexStore((state) => state.loadSummary);
@@ -260,6 +267,10 @@ export default function CodexPage() {
     const suppressNextPlainRouteResetRef = useRef(false);
     const lastPlainRouteResetSignatureRef = useRef<string | null>(null);
     const lastHandledResetNonceRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        void loadIdentities();
+    }, [loadIdentities]);
 
     useEffect(() => {
         if (!shouldLoadFullEntries) return;
@@ -574,6 +585,10 @@ export default function CodexPage() {
         () => ({ entriesByKey, entriesByKindKey }),
         [entriesByKey, entriesByKindKey]
     );
+    const codexIdentityIndexes = useMemo(
+        () => ({ identitiesByKey, identitiesByKindKey }),
+        [identitiesByKey, identitiesByKindKey]
+    );
 
     const questCategoryGroups = useMemo(
         () => (
@@ -864,6 +879,10 @@ export default function CodexPage() {
         () => resolveRelatedEntries(selectedEntry, codexReferenceIndexes),
         [codexReferenceIndexes, selectedEntry]
     );
+    const resolvedRelatedTargets = useMemo(
+        () => resolveRelatedCodexTargets(selectedEntry, codexReferenceIndexes, codexIdentityIndexes),
+        [codexIdentityIndexes, codexReferenceIndexes, selectedEntry]
+    );
     const relatedEntriesLoading = useMemo(() => {
         if (!prefetching || !selectedEntry) return false;
 
@@ -958,6 +977,28 @@ export default function CodexPage() {
             updateSelectedEntry(selectableEntryKey, { category: nextCategory });
         },
         [activeKind, filterOptions, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
+    );
+
+    const selectIdentity = useCallback(
+        (identity: CodexIdentityRecord, intent: SelectionIntent = "related") => {
+            const entryKind = normalizeCodexKind(identity.routeKind);
+            const nextCategory = (
+                filterOptions.some((option) => option.kind === entryKind) ||
+                isDirectRoutableHiddenCodexKind(entryKind)
+            )
+                ? entryKind
+                : null;
+
+            if (activeKind !== ALL_CODEX_KIND && entryKind !== activeKind) {
+                setSelectionIntent("passive");
+            }
+            if (query) {
+                setQuery("");
+            }
+            setSelectionIntent(intent);
+            updateSelectedEntry(identity.entryKey, { category: nextCategory });
+        },
+        [activeKind, filterOptions, query, updateSelectedEntry]
     );
 
     useEffect(() => {
@@ -1446,9 +1487,11 @@ export default function CodexPage() {
                                     entry={selectedEntry}
                                     allEntries={entries}
                                     relatedEntries={resolvedRelatedEntries}
+                                    relatedTargets={resolvedRelatedTargets}
                                     relatedEntriesLoading={relatedEntriesLoading}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}
+                                    onSelectRelatedIdentity={(identity) => selectIdentity(identity, "related")}
                                 />
                             )}
                         </div>

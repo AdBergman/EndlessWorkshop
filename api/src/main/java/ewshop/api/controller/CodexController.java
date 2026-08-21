@@ -1,6 +1,7 @@
 package ewshop.api.controller;
 
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexIdentityDto;
 import ewshop.facade.dto.response.CodexSummaryDto;
 import ewshop.facade.interfaces.CodexFacade;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +33,10 @@ public class CodexController {
     @GetMapping("/summary")
     public List<CodexSummaryDto> getSummary() {
         return codexFacade.getCodexSummary();
+    }
+
+    @GetMapping("/identities")
+    public List<CodexIdentityDto> getIdentities() {
+        return codexFacade.getCodexIdentities();
     }
 }

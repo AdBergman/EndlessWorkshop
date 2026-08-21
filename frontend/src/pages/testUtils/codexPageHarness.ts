@@ -8,7 +8,12 @@ import { useImprovementStore } from "@/stores/improvementStore";
 import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
-import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
+import {
+    buildCodexIdentityIndexes,
+    buildEntriesByKey,
+    buildEntriesByKindKey,
+    codexIdentityFromEntry,
+} from "@/lib/codex/codexRefs";
 import { seedDefaultCodexStore } from "@/pages/testUtils/codexPageTestUtils";
 import type {
     CodexEntry,
@@ -25,7 +30,13 @@ import type {
 } from "@/types/dataTypes";
 
 export function seedCodexEntries(entries: CodexEntry[]) {
+    const identities = entries.map(codexIdentityFromEntry);
     useCodexStore.setState({
+        identities,
+        ...buildCodexIdentityIndexes(identities),
+        identityLoaded: true,
+        identityLoading: false,
+        identityError: null,
         entries,
         entriesByKey: buildEntriesByKey(entries),
         entriesByKind: entries.reduce<Record<string, CodexEntry[]>>((acc, entry) => {
@@ -500,6 +511,7 @@ export function resetCodexPageStores() {
 }
 
 export function mockDefaultCodexPageApi() {
+    vi.spyOn(apiClient, "getCodexIdentities").mockResolvedValue([]);
     vi.spyOn(apiClient, "getDataFreshness").mockResolvedValue({
         available: false,
         latestImportAtUtc: null,

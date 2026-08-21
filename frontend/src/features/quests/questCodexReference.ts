@@ -1,5 +1,12 @@
-import { resolveCodexReference, type CodexReferenceIndexes } from "@/lib/codex/codexRefs";
-import type { CodexEntry } from "@/types/dataTypes";
+import {
+    codexIdentityFromEntry,
+    isAmbiguousCodexIdentityKey,
+    resolveCodexIdentity,
+    resolveCodexReference,
+    type CodexIdentityIndexes,
+    type CodexReferenceIndexes,
+} from "@/lib/codex/codexRefs";
+import type { CodexEntry, CodexIdentityRecord } from "@/types/dataTypes";
 
 export type QuestCodexReferenceSource = {
     displayText: string;
@@ -65,6 +72,23 @@ function resolveTypedQuestReference(
     return undefined;
 }
 
+function resolveTypedQuestIdentity(
+    kind: string | null | undefined,
+    key: string | null | undefined,
+    indexes: CodexIdentityIndexes
+): CodexIdentityRecord | undefined {
+    const referenceKey = cleanString(key);
+    if (!referenceKey) return undefined;
+
+    const routeKinds = QUEST_REFERENCE_KIND_TO_CODEX_EXPORT_KINDS[normalizeQuestReferenceKind(kind)] ?? [];
+    for (const routeKind of routeKinds) {
+        const identity = indexes.identitiesByKindKey[routeKind]?.[referenceKey];
+        if (identity) return identity;
+    }
+
+    return undefined;
+}
+
 export function resolveQuestCodexReference(
     source: QuestCodexReferenceSource,
     indexes: CodexReferenceIndexes
@@ -78,10 +102,34 @@ export function resolveQuestCodexReference(
     return resolveTypedQuestReference(source.assetKind, source.assetKey, indexes);
 }
 
+export function resolveQuestCodexIdentity(
+    source: QuestCodexReferenceSource,
+    indexes: CodexIdentityIndexes,
+    entryIndexes?: CodexReferenceIndexes
+): CodexIdentityRecord | undefined {
+    const directIdentity = resolveCodexIdentity(source.codexEntryKey, indexes);
+    if (directIdentity) return directIdentity;
+
+    const referenceIdentity = resolveTypedQuestIdentity(source.referenceKind, source.referenceKey, indexes);
+    if (referenceIdentity) return referenceIdentity;
+
+    const assetIdentity = resolveTypedQuestIdentity(source.assetKind, source.assetKey, indexes);
+    if (assetIdentity) return assetIdentity;
+
+    const hydratedEntry = entryIndexes ? resolveQuestCodexReference(source, entryIndexes) : undefined;
+    return hydratedEntry && !isAmbiguousCodexIdentityKey(hydratedEntry.entryKey, indexes)
+        ? codexIdentityFromEntry(hydratedEntry)
+        : undefined;
+}
+
 export function codexEntryHref(entry: CodexEntry): string {
+    return codexIdentityHref(codexIdentityFromEntry(entry));
+}
+
+export function codexIdentityHref(identity: CodexIdentityRecord): string {
     const params = new URLSearchParams({
-        category: entry.exportKind.trim().toLowerCase(),
-        entry: entry.entryKey,
+        category: identity.routeKind.trim().toLowerCase(),
+        entry: identity.entryKey,
     });
     return `/codex?${params.toString()}`;
 }

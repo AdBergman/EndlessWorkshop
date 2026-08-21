@@ -1,6 +1,6 @@
 # Codex Hydration Architecture
 
-Updated: 2026-08-20
+Updated: 2026-08-21
 
 ## Status
 
@@ -13,6 +13,9 @@ Codex uses route-scoped hydration:
   indexes;
 - after the requested category renders, at most the next two public categories
   in preferred navigation order may warm in the background.
+- Codex and Quest Explorer load a three-field global identity directory so cold
+  cross-category references retain names and routes without hydrating target
+  presentation data.
 
 The full endpoint remains the global-search fallback. No pagination, generic
 query cache, search-document endpoint, or exact-entry endpoint is part of this
@@ -47,6 +50,7 @@ Backend endpoints:
 | Route | Purpose |
 | --- | --- |
 | `GET /api/codex/summary` | Category counts for landing and navigation |
+| `GET /api/codex/identities` | Public `{entryKey, displayName, routeKind}` identity directory |
 | `GET /api/codex?category=<kind>` | Complete public DTOs for one normalized category |
 | `GET /api/codex` | Full public dataset, loaded only for global search or legacy entry-only URLs |
 
@@ -54,9 +58,12 @@ The category controller path uses a repository query by `export_kind`; it does
 not call `findAll()` and filter the complete table. `statuses` and `modifiers`
 are derived from the stored `bonuses` export kind, then filtered by the same
 normalization used by summary counts. Every response passes through the existing
-public Codex filter and relation-alias mapper. Category results share the
-existing `codex` cache with category-specific keys, and existing import eviction
-clears the whole cache.
+public Codex filter; complete-entry responses also use the relation-alias mapper.
+Category results share the existing `codex` cache with category-specific keys,
+and existing import eviction clears the whole cache. The identity response uses
+that cache under its own key, so the same import eviction invalidates it. Identity
+`routeKind` uses the same derived `statuses`/`modifiers` normalization as summary
+and category routing.
 
 Frontend state keeps summary and full-load state separately from:
 
@@ -65,6 +72,13 @@ Frontend state keeps summary and full-load state separately from:
 - per-category in-flight request deduplication;
 - merged `entriesByKey`, `entriesByKind`, and `entriesByKindKey` indexes;
 - `fullLoaded`, which means the global dataset is genuinely complete.
+
+Identity records have separate arrays, kind-scoped indexes, unique-key indexes,
+and load/error state. A key present in multiple route kinds is excluded from the
+untyped index; callers must use `routeKind + entryKey`. Loading identity never
+inserts partial objects into full-entry indexes and never changes category or
+full completeness. Its request has independent in-flight deduplication, retry,
+generation, and reset guards.
 
 An empty successful category response is `loaded`, not `idle`. Only that state
 proves that a requested entry is absent. The current URL always selects which
@@ -91,8 +105,16 @@ Category and direct entry:
 Cross-category links include the target category when it is visible or directly
 routable. Navigation therefore loads the target category on demand. Hidden
 modifier links retain the legacy entry-only fallback where needed. Related
-entries already present in merged indexes render immediately; unresolved links
-show an explicit background-loading fallback while category warming is active.
+entries render their name and route from identity even when the target category
+is cold. Hover or keyboard focus starts the existing category loader immediately;
+a warm category supplies the detailed preview synchronously, while loading or
+failure keeps the identity label and destination usable. Concurrent previews
+into one category share the existing in-flight request.
+
+Identity is loaded only by the two routes that currently consume cross-Codex
+references: Codex and Quest Explorer. It is not mounted in the global provider,
+so unrelated routes do not acquire the directory. Admin Codex import refresh
+forces both complete-entry and identity snapshots to refresh.
 
 The background warmer starts only after the requested category and summary are
 ready. It receives at most two candidates: the next available public categories
@@ -118,7 +140,7 @@ from dequeuing further speculative requests.
   the same merged snapshot; full hydration remains authoritative and marks the
   dataset complete.
 - Reset and StrictMode: cache generations and request versions ignore stale
-  full, category, and summary completions; StrictMode callers deduplicate.
+  full, category, summary, and identity completions; StrictMode callers deduplicate.
 - Unmount: a completed request may safely warm its keyed cache, but cannot change
   the URL owned by a later mount.
 - Prefetch after navigation: speculative responses only populate keyed caches;
@@ -147,6 +169,8 @@ browser DevTools (Disable cache enabled) for:
 3. `/codex?category=populations&entry=Population_Minor_Ametrine` — expect the
    same category-first waterfall and the URL to remain unchanged;
 4. type into global search from `/codex` — expect one lazy `/api/codex` request.
+5. activate a cold cross-category reference preview — expect one request for
+   the referenced category, with repeated/same-category activations reusing it.
 
 Transport checks:
 
@@ -155,18 +179,21 @@ curl -sS -D - -o /dev/null -H 'Accept-Encoding: gzip' \
   'https://endlessworkshop.dev/api/codex?category=populations'
 curl -sS -o /dev/null -w 'bytes=%{size_download} total=%{time_total}s\n' \
   'https://endlessworkshop.dev/api/codex?category=populations'
+curl -sS -o /dev/null -w 'bytes=%{size_download} total=%{time_total}s\n' \
+  'https://endlessworkshop.dev/api/codex/identities'
 ```
 
 Production/staging Spring configuration enables JSON compression above 2 KB;
 the first command should show `Content-Encoding: gzip` after deployment.
 
-Local validation against the imported 0.82 snapshot on 2026-08-20 measured:
+Local validation against the imported 0.82 snapshot on 2026-08-21 measured:
 
-| Response | Entries | Raw bytes |
-| --- | ---: | ---: |
-| summary | category counts | 946 |
-| populations | 26 | 47,085 |
-| full Codex | all public entries | 2,858,430 |
+| Response | Entries | Raw bytes | Local gzip bytes |
+| --- | ---: | ---: | ---: |
+| summary | category counts | 946 | 281 |
+| identity directory | 2,505 | 269,976 | 33,550 |
+| populations | 26 | 47,085 | 3,737 |
+| full Codex | all public entries | 2,858,430 | 208,898 |
 
 The blocking Populations payload was therefore about 98.4% smaller than the
 full raw payload. A cold browser navigation to the exact Ametrine URL requested
@@ -174,6 +201,16 @@ Populations and summary first, rendered the `Ametrine` heading without changing
 the URL, and did not request the full endpoint. Browser back returned to the
 exact Ametrine URL and forward returned to the Heroes category used for the
 history check.
+
+Cold browser QA on 2026-08-21 loaded `Accurse I` from Abilities: identity made
+the `Jinxed I` Status relationship visible before the Statuses category was
+present, keyboard focus requested `statuses` once, and the complete preview then
+rendered. Quest Explorer likewise rendered the canonical `Build Coral Spore`
+action link from identity; focus requested `actions` and upgraded the tooltip to
+the complete kind/category presentation. A cold global search for `approval`
+requested the full Codex and returned 104 results, including `Dream Haze`, whose
+title/key do not contain the query but whose detailed effect does. No browser
+console errors were observed.
 
 ## Remaining Follow-Ups
 

@@ -21,6 +21,7 @@ vi.mock("@/api/apiClient", () => ({
         getTechs: vi.fn(),
         getUnits: vi.fn(),
         getCodex: vi.fn(),
+        getCodexIdentities: vi.fn().mockResolvedValue([]),
         getCodexCategory: vi.fn(),
         getCodexSummary: vi.fn(),
         getQuestExplorer: vi.fn(),
@@ -79,6 +80,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockReset();
         mockedApiClient.getUnits.mockReset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexIdentities.mockReset();
         mockedApiClient.getCodexCategory.mockReset();
         mockedApiClient.getCodexSummary.mockReset();
         mockedApiClient.getQuestExplorer.mockReset();
@@ -91,6 +93,7 @@ describe("App route data hydration", () => {
         mockedApiClient.getTechs.mockResolvedValue([]);
         mockedApiClient.getUnits.mockResolvedValue(units);
         mockedApiClient.getCodex.mockResolvedValue(codexEntries);
+        mockedApiClient.getCodexIdentities.mockResolvedValue([]);
         mockedApiClient.getCodexCategory.mockResolvedValue(codexEntries);
         mockedApiClient.getCodexSummary.mockResolvedValue([
             { exportKind: "districts", count: 1 },
@@ -126,7 +129,7 @@ describe("App route data hydration", () => {
         await user.click(screen.getByRole("link", { name: "Codex" }));
 
         expect(await screen.findByRole("heading", { name: "Encyclopedia" })).toBeInTheDocument();
-        expect(screen.getAllByRole("button", { name: /districts 1/i }).length).toBeGreaterThan(0);
+        expect((await screen.findAllByRole("button", { name: /districts 1/i })).length).toBeGreaterThan(0);
         expect(mockedApiClient.getCodexSummary).toHaveBeenCalledTimes(1);
         expect(mockedApiClient.getCodex).not.toHaveBeenCalled();
     });

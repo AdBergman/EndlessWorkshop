@@ -2,6 +2,7 @@ package ewshop.api.controller;
 
 import ewshop.api.TestApplication;
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexIdentityDto;
 import ewshop.facade.dto.response.CodexMetadataFactDto;
 import ewshop.facade.dto.response.CodexMetadataSectionDto;
 import ewshop.facade.dto.response.CodexMetadataSectionItemDto;
@@ -98,6 +99,29 @@ class CodexControllerTest {
                 .andExpect(jsonPath("$[0].descriptionLines").doesNotExist())
                 .andExpect(jsonPath("$[0].facts").doesNotExist())
                 .andExpect(jsonPath("$[0].sections").doesNotExist());
+    }
+
+    @Test
+    void getCodexIdentitiesReturnsOnlyTheThreeFieldContract() throws Exception {
+        when(codexFacade.getCodexIdentities()).thenReturn(List.of(
+                new CodexIdentityDto("Population_Minor_Ametrine", "Ametrine", "populations")
+        ));
+
+        mockMvc.perform(get("/api/codex/identities")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].entryKey").value("Population_Minor_Ametrine"))
+                .andExpect(jsonPath("$[0].displayName").value("Ametrine"))
+                .andExpect(jsonPath("$[0].routeKind").value("populations"))
+                .andExpect(jsonPath("$[0].exportKind").doesNotExist())
+                .andExpect(jsonPath("$[0].category").doesNotExist())
+                .andExpect(jsonPath("$[0].kind").doesNotExist())
+                .andExpect(jsonPath("$[0].descriptionLines").doesNotExist())
+                .andExpect(jsonPath("$[0].facts").doesNotExist())
+                .andExpect(jsonPath("$[0].sections").doesNotExist())
+                .andExpect(jsonPath("$[0].svgIcon").doesNotExist());
     }
 
     @Test

@@ -3,9 +3,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StrategyDossier } from "@/components/Quests/StrategyDossier";
 import { shortenMechanicalStrategyRequirementLabel } from "@/components/Quests/strategyDossierLabels";
-import { buildEntriesByKey, buildEntriesByKindKey } from "@/lib/codex/codexRefs";
+import { apiClient } from "@/api/apiClient";
+import {
+    buildCodexIdentityIndexes,
+    buildEntriesByKey,
+    buildEntriesByKindKey,
+    codexIdentityFromEntry,
+} from "@/lib/codex/codexRefs";
 import { useCodexStore } from "@/stores/codexStore";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexEntry, CodexIdentityRecord } from "@/types/dataTypes";
 import type {
     StrategyDossierBranchOption,
     StrategyDossierModel,
@@ -44,7 +50,11 @@ function codexEntry(
 }
 
 function setCodexEntries(entries: CodexEntry[]) {
+    const identities = entries.map(codexIdentityFromEntry);
     useCodexStore.setState({
+        identities,
+        ...buildCodexIdentityIndexes(identities),
+        identityLoaded: true,
         entries,
         entriesByKey: buildEntriesByKey(entries),
         entriesByKindKey: buildEntriesByKindKey(entries),
@@ -57,6 +67,24 @@ function setCodexEntries(entries: CodexEntry[]) {
         loading: false,
         error: null,
     });
+}
+
+function setCodexIdentities(identities: CodexIdentityRecord[]) {
+    useCodexStore.setState({
+        identities,
+        ...buildCodexIdentityIndexes(identities),
+        identityLoaded: true,
+        identityLoading: false,
+        identityError: null,
+    });
+}
+
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((resolvePromise) => {
+        resolve = resolvePromise;
+    });
+    return { promise, resolve };
 }
 
 function choice(overrides: Partial<QuestPathChoice> = {}): QuestPathChoice {
@@ -187,6 +215,7 @@ function renderDossier(model: StrategyDossierModel, debugChoiceDetails?: Map<str
 
 describe("StrategyDossier", () => {
     beforeEach(() => {
+        vi.restoreAllMocks();
         useCodexStore.getState().reset();
     });
 
@@ -596,6 +625,112 @@ describe("StrategyDossier", () => {
 
         fireEvent.focus(requirementPreviewTarget!);
         expect(await screen.findByRole("tooltip")).toBeInTheDocument();
+    });
+
+    it("renders cold identity links and deduplicates category hydration across concurrent previews", async () => {
+        const categoryRequest = deferred<CodexEntry[]>();
+        const getCategory = vi.spyOn(apiClient, "getCodexCategory").mockReturnValue(categoryRequest.promise);
+        setCodexIdentities([
+            { entryKey: "Unit_Chosen", displayName: "Chosen", routeKind: "units" },
+            { entryKey: "Unit_Warden", displayName: "Warden", routeKind: "units" },
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                rewardLines: ["Unlock constructible: Chosen", "Unlock constructible: Warden"],
+                rewardDetails: [
+                    {
+                        ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                        assetKind: "Unit",
+                        assetKey: "Unit_Chosen",
+                        assetDisplayName: "Chosen",
+                    },
+                    {
+                        ...rewardDisplaysFromText(["Unlock constructible: Warden"])[0]!,
+                        assetKind: "Unit",
+                        assetKey: "Unit_Warden",
+                        assetDisplayName: "Warden",
+                    },
+                ],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+
+        expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?category=units&entry=Unit_Chosen"
+        );
+        expect(screen.getByRole("link", { name: "Open Warden in Codex" })).toHaveAttribute(
+            "href",
+            "/codex?category=units&entry=Unit_Warden"
+        );
+        expect(useCodexStore.getState().entries).toEqual([]);
+
+        const chosenTarget = screen.getByText("Chosen").closest(".questExplorer-codexPreviewTarget");
+        const wardenTarget = screen.getByText("Warden").closest(".questExplorer-codexPreviewTarget");
+        fireEvent.mouseEnter(chosenTarget!);
+        expect(await screen.findByText("Loading Codex preview…")).toBeInTheDocument();
+        expect(getCategory).toHaveBeenCalledTimes(1);
+
+        fireEvent.focus(wardenTarget!);
+        expect(getCategory).toHaveBeenCalledTimes(1);
+
+        categoryRequest.resolve([
+            codexEntry("units", "Unit_Chosen", "Chosen", {
+                kind: "Unit",
+                descriptionLines: ["Elite Kin warriors."],
+            }),
+            codexEntry("units", "Unit_Warden", "Warden", {
+                kind: "Unit",
+                descriptionLines: ["A stalwart defensive unit."],
+            }),
+        ]);
+
+        await waitFor(() => expect(useCodexStore.getState().categoryLoadStates.units).toBe("loaded"));
+        fireEvent.mouseEnter(screen.getByText("Chosen").closest(".questExplorer-codexPreviewTarget")!);
+        expect(await screen.findByText("Elite Kin warriors.")).toBeInTheDocument();
+        fireEvent.focus(screen.getByText("Warden").closest(".questExplorer-codexPreviewTarget")!);
+        expect(await screen.findByText("A stalwart defensive unit.")).toBeInTheDocument();
+        expect(getCategory).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the identity link usable when focus-triggered preview hydration fails", async () => {
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        const getCategory = vi.spyOn(apiClient, "getCodexCategory").mockRejectedValue(new Error("category unavailable"));
+        setCodexIdentities([
+            { entryKey: "Technology_RidgeLogistics", displayName: "Ridge Logistics", routeKind: "tech" },
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                requirementLines: ["Research Ridge Logistics."],
+                requirementDetails: [{
+                    ...requirementDisplaysFromText(["Research Ridge Logistics."])[0]!,
+                    referenceKind: "Tech",
+                    referenceKey: "Technology_RidgeLogistics",
+                    referenceDisplayName: "Ridge Logistics",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+
+        renderDossier(modelForOptions([option], null));
+        const link = screen.getByRole("link", { name: "Open Ridge Logistics in Codex" });
+        const previewTarget = screen.getByText("Ridge Logistics").closest(".questExplorer-codexPreviewTarget");
+
+        fireEvent.focus(previewTarget!);
+
+        expect(getCategory).toHaveBeenCalledWith("tech");
+        expect(await screen.findByText("Preview unavailable. The Codex link remains available.")).toBeInTheDocument();
+        expect(link).toHaveAttribute("href", "/codex?category=tech&entry=Technology_RidgeLogistics");
+        expect(useCodexStore.getState().entries).toEqual([]);
+        errorSpy.mockRestore();
     });
 
     it("uses explicit Codex open icons for resolved requirement and reward metadata", () => {

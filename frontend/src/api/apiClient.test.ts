@@ -48,6 +48,7 @@ describe("apiClient contract", () => {
         ["getHeroes", () => apiClient.getHeroes(), "/api/heroes"],
         ["getSkills", () => apiClient.getSkills(), "/api/skills"],
         ["getCodex", () => apiClient.getCodex(), "/api/codex"],
+        ["getCodexIdentities", () => apiClient.getCodexIdentities(), "/api/codex/identities"],
         ["getCodexCategory", () => apiClient.getCodexCategory("minor factions"), "/api/codex?category=minor%20factions"],
         ["getCodexSummary", () => apiClient.getCodexSummary(), "/api/codex/summary"],
         ["getQuestExplorer", () => apiClient.getQuestExplorer(), "/api/quests/explorer"],
