@@ -11,6 +11,7 @@ import {
     useState,
 } from "react";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { useShallow } from "zustand/react/shallow";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
 import {
@@ -18,11 +19,11 @@ import {
     type PixelTooltipCoords,
 } from "@/components/Tooltips/hoverHelpers";
 import {
-    codexIdentityHref,
     resolveQuestCodexIdentity,
     type QuestCodexReferenceSource,
 } from "@/features/quests/questCodexReference";
 import { useCodexReferenceTarget } from "@/hooks/useCodexReferenceTarget";
+import { codexIdentityHref } from "@/lib/codex/codexRoute";
 import {
     formatCodexKindLabel,
     formatCodexMajorFactionText,
@@ -45,15 +46,11 @@ export function QuestCodexReferenceLink({
     presentation?: "default" | "compactReward";
 }) {
     const tooltipId = useId();
-    const entriesByKey = useCodexStore((state) => state.entriesByKey);
-    const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
-    const identitiesByKey = useCodexStore((state) => state.identitiesByKey);
-    const identitiesByKindKey = useCodexStore((state) => state.identitiesByKindKey);
-    const identity = resolveQuestCodexIdentity(
+    const identity = useCodexStore(useShallow((state) => resolveQuestCodexIdentity(
         source,
-        { identitiesByKey, identitiesByKindKey },
-        { entriesByKey, entriesByKindKey }
-    );
+        state,
+        state
+    )));
     const { entry, previewStatus, hydrate } = useCodexReferenceTarget(identity);
     const [tooltipCoords, setTooltipCoords] = useState<TooltipCoords | null>(null);
     const hideTimerRef = useRef<number | null>(null);

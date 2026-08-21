@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { Profiler } from "react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { StrategyDossier } from "@/components/Quests/StrategyDossier";
@@ -696,6 +697,66 @@ describe("StrategyDossier", () => {
         fireEvent.focus(screen.getByText("Warden").closest(".questExplorer-codexPreviewTarget")!);
         expect(await screen.findByText("A stalwart defensive unit.")).toBeInTheDocument();
         expect(getCategory).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not rerender identity-backed Quest references for unrelated category hydration", () => {
+        setCodexIdentities([
+            { entryKey: "Unit_Chosen", displayName: "Chosen", routeKind: "units" },
+        ]);
+        const option = branchOption({
+            choice: choice({
+                sectionRole: "continuation",
+                semanticStageKind: "deterministic_continuation",
+                rewardLines: ["Unlock constructible: Chosen"],
+                rewardDetails: [{
+                    ...rewardDisplaysFromText(["Unlock constructible: Chosen"])[0]!,
+                    assetKind: "Unit",
+                    assetKey: "Unit_Chosen",
+                    assetDisplayName: "Chosen",
+                }],
+            }),
+            isSelected: false,
+            isInSelectedPath: false,
+        });
+        let commitCount = 0;
+
+        render(
+            <Profiler id="quest-codex-reference" onRender={() => { commitCount += 1; }}>
+                <StrategyDossier
+                    model={modelForOptions([option], null)}
+                    step={step}
+                    onChoose={() => {}}
+                />
+            </Profiler>
+        );
+
+        expect(screen.getByRole("link", { name: "Open Chosen in Codex" })).toBeInTheDocument();
+        const commitsAfterMount = commitCount;
+        const unrelatedEntry = codexEntry("districts", "District_Unrelated", "Unrelated District");
+
+        act(() => {
+            useCodexStore.setState((state) => ({
+                entries: [...state.entries, unrelatedEntry],
+                entriesByKey: {
+                    ...state.entriesByKey,
+                    [unrelatedEntry.entryKey]: unrelatedEntry,
+                },
+                entriesByKind: {
+                    ...state.entriesByKind,
+                    districts: [unrelatedEntry],
+                },
+                entriesByKindKey: {
+                    ...state.entriesByKindKey,
+                    districts: { [unrelatedEntry.entryKey]: unrelatedEntry },
+                },
+                categoryLoadStates: {
+                    ...state.categoryLoadStates,
+                    districts: "loaded",
+                },
+            }));
+        });
+
+        expect(commitCount).toBe(commitsAfterMount);
     });
 
     it("keeps the identity link usable when focus-triggered preview hydration fails", async () => {

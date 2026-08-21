@@ -45,7 +45,7 @@ export type CodexTopLevelVisibility = "public" | "localOnly" | "hidden";
 
 const HIDDEN_TOP_LEVEL_CODEX_KINDS = new Set(["bonuses", "extractors", "modifiers", "quests"]);
 const LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS = new Set(["victoryconditions", "victorypaths"]);
-const DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS = new Set(["extractors", "quests"]);
+const HIDDEN_CATEGORY_BROWSE_KINDS = new Set(["extractors", "quests"]);
 const FULL_WIDTH_REFERENCE_OVERVIEW_KINDS = new Set([
     "counciloreffects",
     "factions",
@@ -152,9 +152,9 @@ export function isVisibleTopLevelCodexKind(
     return visibility === "public" || (visibility === "localOnly" && options.includeLocalOnly === true);
 }
 
-export function isDirectRoutableHiddenCodexKind(kind: string): boolean {
+export function supportsHiddenCodexCategoryBrowse(kind: string): boolean {
     const normalizedKind = normalizeCodexKind(kind);
 
-    return DIRECT_ROUTABLE_HIDDEN_CODEX_KINDS.has(normalizedKind) ||
+    return HIDDEN_CATEGORY_BROWSE_KINDS.has(normalizedKind) ||
         LOCAL_ONLY_TOP_LEVEL_CODEX_KINDS.has(normalizedKind);
 }

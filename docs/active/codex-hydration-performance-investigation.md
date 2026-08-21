@@ -87,6 +87,33 @@ change route intent.
 
 ## Route Behavior
 
+Routing policy separates public availability, top-level visibility, and direct
+addressing. The backend public filter decides whether an entry exists in the
+public summary, identity, category, and full-search responses. For every
+identity that survives that filter, `routeKind + entryKey` is its canonical
+address, including kinds that are hidden from browse navigation:
+
+```text
+/codex?category=<normalized routeKind>&entry=<stable entryKey>
+```
+
+The current presentation taxonomy is:
+
+| Policy | Kinds |
+| --- | --- |
+| Hidden from top-level navigation, category browsing retained | `extractors`, `quests` |
+| Hidden from top-level navigation, exact-entry routes only | `bonuses`, `modifiers` |
+| Local-only top-level navigation and category browsing | `victoryconditions`, `victorypaths` |
+| Public derived kind, visible top-level | `statuses` |
+
+All other public summary kinds use normal visible top-level navigation. The
+exact-entry rule is uniform across every public identity; the table controls
+only navigation and category-only UX. In particular, `/codex?category=modifiers`
+returns to the index rather than creating a Modifier archive, while a valid
+Modifier exact-entry URL hydrates and renders normally. Local-only visibility
+continues to depend on the existing environment policy, without changing public
+API filtering or canonical identity routes.
+
 Landing:
 
 - renders category navigation from summary counts;
@@ -102,14 +129,19 @@ Category and direct entry:
 - validate the entry only after the category is `loaded`;
 - reuse a successfully loaded category without another request.
 
-Cross-category links include the target category when it is visible or directly
-routable. Navigation therefore loads the target category on demand. Hidden
-modifier links retain the legacy entry-only fallback where needed. Related
-entries render their name and route from identity even when the target category
-is cold. Hover or keyboard focus starts the existing category loader immediately;
-a warm category supplies the detailed preview synchronously, while loading or
-failure keeps the identity label and destination usable. Concurrent previews
-into one category share the existing in-flight request.
+Cross-category links always include the public identity's normalized route kind
+and stable entry key. Navigation therefore loads the target category on demand,
+including hidden Modifier and Bonus targets. Related entries render their name
+and canonical route from identity even when the target category is cold. Hover
+or keyboard focus starts the existing category loader immediately; a warm
+category supplies the detailed preview synchronously, while loading or failure
+keeps the identity label and destination usable. Concurrent previews into one
+category share the existing in-flight request.
+
+Legacy entry-only URLs first consult the identity directory. An unambiguous
+identity is canonicalized in place with `replace` and then uses category
+hydration, avoiding a full-Codex request. Ambiguous keys are not guessed. The
+existing full-data fallback remains available when identity loading fails.
 
 Identity is loaded only by the two routes that currently consume cross-Codex
 references: Codex and Quest Explorer. It is not mounted in the global provider,
