@@ -121,15 +121,3 @@ export function resolveQuestCodexIdentity(
         ? codexIdentityFromEntry(hydratedEntry)
         : undefined;
 }
-
-export function codexEntryHref(entry: CodexEntry): string {
-    return codexIdentityHref(codexIdentityFromEntry(entry));
-}
-
-export function codexIdentityHref(identity: CodexIdentityRecord): string {
-    const params = new URLSearchParams({
-        category: identity.routeKind.trim().toLowerCase(),
-        entry: identity.entryKey,
-    });
-    return `/codex?${params.toString()}`;
-}

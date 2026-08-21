@@ -1,5 +1,10 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { buildEntriesByKey } from "@/lib/codex/codexRefs";
+import {
+    buildCodexIdentityIndexes,
+    buildEntriesByKey,
+    buildEntriesByKindKey,
+    codexIdentityFromEntry,
+} from "@/lib/codex/codexRefs";
 import { useCodexStore } from "@/stores/codexStore";
 import type { CodexEntry } from "@/types/dataTypes";
 
@@ -48,10 +53,17 @@ export const defaultCodexEntries: CodexEntry[] = [
 ];
 
 export function seedDefaultCodexStore(entries: CodexEntry[] = defaultCodexEntries) {
+    const identities = entries.map(codexIdentityFromEntry);
     useCodexStore.setState({
+        identities,
+        ...buildCodexIdentityIndexes(identities),
+        identityLoaded: true,
+        identityLoading: false,
+        identityError: null,
         entries,
         entriesByKey: buildEntriesByKey(entries),
         entriesByKind: entriesByKind(entries),
+        entriesByKindKey: buildEntriesByKindKey(entries),
         loading: false,
         error: null,
         fullLoaded: true,

@@ -183,13 +183,12 @@ function useRewardMarkerIcon(
     reward: QuestRewardDisplay,
     overrideIcon?: DescriptionTokenIcon | null
 ): DescriptionTokenIcon | null {
-    const entriesByKey = useCodexStore((state) => state.entriesByKey);
-    const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
+    const linkedEntry = useCodexStore((state) => resolveQuestCodexReference(reward, state));
 
     if (overrideIcon !== undefined) return overrideIcon;
 
     return rewardMarkerIcon(reward)
-        ?? linkedCodexRewardIcon(reward, { entriesByKey, entriesByKindKey });
+        ?? linkedCodexRewardIcon(linkedEntry);
 }
 
 function rewardMarkerIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | null {
@@ -198,10 +197,8 @@ function rewardMarkerIcon(reward: QuestRewardDisplay): DescriptionTokenIcon | nu
 }
 
 function linkedCodexRewardIcon(
-    reward: QuestRewardDisplay,
-    indexes: Parameters<typeof resolveQuestCodexReference>[1]
+    entry: ReturnType<typeof resolveQuestCodexReference>
 ): DescriptionTokenIcon | null {
-    const entry = resolveQuestCodexReference(reward, indexes);
     const path = entry ? getCodexEntryIconPath(entry) : null;
 
     return path ? { path } : null;

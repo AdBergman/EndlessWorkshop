@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
     getCodexCategoryMode,
     getCodexTopLevelVisibility,
-    isDirectRoutableHiddenCodexKind,
     isVisibleTopLevelCodexKind,
     normalizeCodexKind,
+    supportsHiddenCodexCategoryBrowse,
     supportsFullWidthReferenceOverview,
 } from "@/lib/codex/codexCategoryConfig";
 
@@ -49,12 +49,13 @@ describe("codexCategoryConfig", () => {
         expect(isVisibleTopLevelCodexKind("victoryconditions", { includeLocalOnly: true })).toBe(true);
     });
 
-    it("allows only approved hidden categories to remain direct-routable", () => {
-        expect(isDirectRoutableHiddenCodexKind("extractors")).toBe(true);
-        expect(isDirectRoutableHiddenCodexKind("quests")).toBe(true);
-        expect(isDirectRoutableHiddenCodexKind("victorypaths")).toBe(true);
-        expect(isDirectRoutableHiddenCodexKind("victoryconditions")).toBe(true);
-        expect(isDirectRoutableHiddenCodexKind("modifiers")).toBe(false);
+    it("keeps category-only browsing separate from exact identity routing", () => {
+        expect(supportsHiddenCodexCategoryBrowse("extractors")).toBe(true);
+        expect(supportsHiddenCodexCategoryBrowse("quests")).toBe(true);
+        expect(supportsHiddenCodexCategoryBrowse("victorypaths")).toBe(true);
+        expect(supportsHiddenCodexCategoryBrowse("victoryconditions")).toBe(true);
+        expect(supportsHiddenCodexCategoryBrowse("modifiers")).toBe(false);
+        expect(supportsHiddenCodexCategoryBrowse("bonuses")).toBe(false);
     });
 
     it("classifies only deliberate full-width reference categories as reference sheets", () => {

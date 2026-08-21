@@ -212,6 +212,7 @@ class CodexFacadeImplTest {
         when(codexService.getCodexEntriesByExportKind("bonuses")).thenReturn(List.of(
                 codexEntry("bonuses", "Status_Unit_Hobbled", "Hobbled", "Status", "Status", List.of("Status entry."), List.of()),
                 codexEntry("bonuses", "ActionCostModifier_Test", "Action Cost", "Cost Modifier", "Cost Modifier", List.of("Modifier entry."), List.of()),
+                codexEntry("bonuses", "ActionCostModifier_Private", "% Internal Modifier", "Cost Modifier", "Cost Modifier", List.of("Filtered modifier."), List.of()),
                 codexEntry("bonuses", "Bonus_Test", "Ordinary Bonus", "Bonus", "Bonus", List.of("Bonus entry."), List.of())
         ));
 
