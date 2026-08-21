@@ -50,7 +50,8 @@ import { useImprovementStore } from "@/stores/improvementStore";
 import { useSkillStore } from "@/stores/skillStore";
 import { useTechStore } from "@/stores/techStore";
 import { useUnitStore } from "@/stores/unitStore";
-import type { CodexEntry } from "@/types/dataTypes";
+import { codexIdentityFromEntry, type CodexRelatedTarget } from "@/lib/codex/codexRefs";
+import type { CodexEntry, CodexIdentityRecord } from "@/types/dataTypes";
 import CodexConstructiblePlanningSection from "./CodexConstructiblePlanningSection";
 import CodexDistrictReferenceSection from "./CodexDistrictReferenceSection";
 import CodexFactionDetail from "./CodexFactionDetail";
@@ -66,18 +67,22 @@ type Props = {
     entry: CodexEntry | null;
     allEntries: readonly CodexEntry[];
     relatedEntries: CodexEntry[];
+    relatedTargets: CodexRelatedTarget[];
     relatedEntriesLoading?: boolean;
     titleRef: RefObject<HTMLHeadingElement | null>;
     onSelectRelated: (entry: CodexEntry) => void;
+    onSelectRelatedIdentity: (identity: CodexIdentityRecord) => void;
 };
 
 export default function CodexEntryDetail({
     entry,
     allEntries,
     relatedEntries,
+    relatedTargets,
     relatedEntriesLoading = false,
     titleRef,
     onSelectRelated,
+    onSelectRelatedIdentity,
 }: Props) {
     const richTechByKey = useTechStore((state) => state.techsByKey);
     const richUnitByKey = useUnitStore((state) => state.unitsByKey);
@@ -243,14 +248,18 @@ export default function CodexEntryDetail({
             ? getCodexDistrictReferenceEntryKeys(districtReferenceModel)
             : getCodexConstructibleRichEnrichmentEntryKeys(constructibleRichEnrichment)),
     ]);
-    const relatedEntriesForDisplay = hiddenRelatedEntryKeys.size > 0
-        ? relatedEntries.filter((relatedEntry) => (
-            !hiddenRelatedEntryKeys.has(relatedEntry.entryKey)
+    const relatedTargetsForDisplay = hiddenRelatedEntryKeys.size > 0
+        ? relatedTargets.filter((relatedTarget) => (
+            !hiddenRelatedEntryKeys.has(relatedTarget.identity.entryKey)
         ))
-        : relatedEntries;
+        : relatedTargets;
     const statusRelationshipSourceEntries = isStatusEntry
         ? buildStatusRelationshipSourceEntries(entry, allEntries)
         : [];
+    const statusRelationshipSourceTargets = statusRelationshipSourceEntries.map((sourceEntry) => ({
+        identity: codexIdentityFromEntry(sourceEntry),
+        entry: sourceEntry,
+    }));
     const showTechRichEnrichment = isTechEntry && hasCodexTechRichEnrichment(techRichEnrichment);
     const showUnitRichEnrichment = isUnitEntry && hasCodexUnitRichEnrichment(unitRichEnrichment);
     const showHeroRichEnrichment = isHeroEntry && hasCodexHeroRichEnrichment(heroRichEnrichment);
@@ -337,16 +346,16 @@ export default function CodexEntryDetail({
 
             {isStatusEntry ? (
                 <RelatedEntries
-                    entries={statusRelationshipSourceEntries}
-                    onSelect={onSelectRelated}
+                    targets={statusRelationshipSourceTargets}
+                    onSelect={onSelectRelatedIdentity}
                     headingLabel="Exact Status References"
                 />
             ) : null}
 
             <RelatedEntries
-                entries={relatedEntriesForDisplay}
+                targets={relatedTargetsForDisplay}
                 loading={relatedEntriesLoading}
-                onSelect={onSelectRelated}
+                onSelect={onSelectRelatedIdentity}
                 priorityMode={isFactionEntry ? "faction" : "default"}
                 headingLabel={isAbilityEntry ? "Linked Statuses & References" : "Related entries"}
             />

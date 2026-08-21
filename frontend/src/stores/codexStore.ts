@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import { apiClient } from "@/api/apiClient";
 import { maybePublishCodexTokenAudit } from "@/lib/codex/codexTokenAudit";
-import { buildEntriesByKey, buildEntriesByKindKey, resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import {
+    buildCodexIdentityIndexes,
+    buildEntriesByKey,
+    buildEntriesByKindKey,
+    resolveRelatedEntries,
+} from "@/lib/codex/codexRefs";
 import { filterCodexEntries } from "@/lib/codex/codexSearch";
 import { isValidDisplayName } from "@/lib/codex/codexValidation";
 import type {
     CodexEntry,
+    CodexIdentityRecord,
     CodexKindSummary,
     CodexMetadataFact,
     CodexMetadataSection,
@@ -16,6 +22,13 @@ import type {
 export type CodexLoadStatus = "idle" | "loading" | "loaded" | "error";
 
 type Store = {
+    identities: CodexIdentityRecord[];
+    identitiesByKey: Record<string, CodexIdentityRecord>;
+    identitiesByKindKey: Record<string, Record<string, CodexIdentityRecord>>;
+    ambiguousIdentityKeys: Record<string, true>;
+    identityLoaded: boolean;
+    identityLoading: boolean;
+    identityError: string | null;
     entries: CodexEntry[];
     entriesByKey: Record<string, CodexEntry>;
     entriesByKind: Record<string, CodexEntry[]>;
@@ -33,12 +46,15 @@ type Store = {
     summaryError: string | null;
     lastLoadedAt?: string;
 
+    loadIdentities: (opts?: { force?: boolean }) => Promise<void>;
     loadEntries: (opts?: { force?: boolean }) => Promise<void>;
     loadCategory: (category: string, opts?: { force?: boolean }) => Promise<void>;
     prefetchCategories: (categories: readonly string[]) => Promise<void>;
     loadSummary: (opts?: { force?: boolean }) => Promise<void>;
     reset: () => void;
 
+    getIdentity: (routeKind: string, entryKey: string) => CodexIdentityRecord | undefined;
+    getIdentityByKey: (entryKey: string) => CodexIdentityRecord | undefined;
     getEntry: (exportKind: string, entryKey: string) => CodexEntry | undefined;
     getEntryByKey: (key: string) => CodexEntry | undefined;
     getEntriesByKind: (kind: string) => CodexEntry[];
@@ -48,6 +64,9 @@ type Store = {
 
 let inflightLoad: Promise<void> | null = null;
 let fullRequestVersion = 0;
+let inflightIdentityLoad: Promise<void> | null = null;
+let identityRequestVersion = 0;
+let identityGeneration = 0;
 let inflightSummaryLoad: Promise<void> | null = null;
 let summaryRequestVersion = 0;
 const inflightCategoryLoads = new Map<string, Promise<void>>();
@@ -226,6 +245,30 @@ function normalizeEntries(rawEntries: CodexEntry[]): CodexEntry[] {
         .filter((entry) => isValidDisplayName(entry.displayName));
 }
 
+function normalizeIdentities(rawIdentities: CodexIdentityRecord[]): CodexIdentityRecord[] {
+    return rawIdentities
+        .map((identity) => ({
+            entryKey: (identity.entryKey ?? "").trim(),
+            displayName: identity.displayName ?? "",
+            routeKind: (identity.routeKind ?? "").trim().toLowerCase(),
+        }))
+        .filter((identity) => identity.entryKey.length > 0 && identity.routeKind.length > 0)
+        .filter((identity) => isValidDisplayName(identity.displayName))
+        .sort((left, right) => {
+            const kindOrder = left.routeKind.localeCompare(right.routeKind);
+            if (kindOrder !== 0) return kindOrder;
+            const nameOrder = left.displayName.localeCompare(right.displayName, undefined, { sensitivity: "base" });
+            return nameOrder !== 0 ? nameOrder : left.entryKey.localeCompare(right.entryKey);
+        });
+}
+
+function identityState(identities: CodexIdentityRecord[]) {
+    return {
+        identities,
+        ...buildCodexIdentityIndexes(identities),
+    };
+}
+
 function sortEntriesForStableIndexes(entries: CodexEntry[]): CodexEntry[] {
     return [...entries].sort((left, right) => {
         const kindOrder = left.exportKind.localeCompare(right.exportKind);
@@ -267,6 +310,13 @@ function loadedCategoryStates(entries: CodexEntry[]): Record<string, CodexLoadSt
 }
 
 export const useCodexStore = create<Store>((set, get) => ({
+    identities: [],
+    identitiesByKey: {},
+    identitiesByKindKey: {},
+    ambiguousIdentityKeys: {},
+    identityLoaded: false,
+    identityLoading: false,
+    identityError: null,
     entries: [],
     entriesByKey: {},
     entriesByKind: {},
@@ -283,6 +333,63 @@ export const useCodexStore = create<Store>((set, get) => ({
     summaryLoading: false,
     summaryError: null,
     lastLoadedAt: undefined,
+
+    loadIdentities: async (opts) => {
+        const force = opts?.force ?? false;
+        const state = get();
+
+        if (!force && inflightIdentityLoad) {
+            return inflightIdentityLoad;
+        }
+        if (!force && state.identityLoaded) {
+            return;
+        }
+
+        if (force) identityGeneration += 1;
+        const requestGeneration = identityGeneration;
+        const requestVersion = ++identityRequestVersion;
+        set({ identityLoading: true, identityError: null });
+
+        const request: Promise<void> = (async () => {
+            try {
+                const identities = normalizeIdentities(await apiClient.getCodexIdentities());
+                if (
+                    requestGeneration !== identityGeneration ||
+                    requestVersion !== identityRequestVersion
+                ) {
+                    return;
+                }
+
+                set({
+                    ...identityState(identities),
+                    identityLoaded: true,
+                    identityLoading: false,
+                    identityError: null,
+                });
+            } catch (err) {
+                if (
+                    requestGeneration !== identityGeneration ||
+                    requestVersion !== identityRequestVersion
+                ) {
+                    return;
+                }
+
+                console.error("Failed to load Codex identities:", err);
+                set({
+                    identityLoaded: false,
+                    identityLoading: false,
+                    identityError: (err as Error)?.message ?? "Failed to load Codex identities.",
+                });
+            } finally {
+                if (requestVersion === identityRequestVersion) {
+                    inflightIdentityLoad = null;
+                }
+            }
+        })();
+
+        inflightIdentityLoad = request;
+        return request;
+    },
 
     loadEntries: async (opts) => {
         const force = opts?.force ?? false;
@@ -536,15 +643,25 @@ export const useCodexStore = create<Store>((set, get) => ({
 
     reset: () => {
         cacheGeneration += 1;
+        identityGeneration += 1;
+        identityRequestVersion += 1;
         fullRequestVersion += 1;
         summaryRequestVersion += 1;
         prefetchRunId += 1;
         inflightLoad = null;
+        inflightIdentityLoad = null;
         inflightSummaryLoad = null;
         inflightCategoryLoads.clear();
         categoryRequestVersions.clear();
         inflightPrefetch = null;
         set({
+            identities: [],
+            identitiesByKey: {},
+            identitiesByKindKey: {},
+            ambiguousIdentityKeys: {},
+            identityLoaded: false,
+            identityLoading: false,
+            identityError: null,
             entries: [],
             entriesByKey: {},
             entriesByKind: {},
@@ -562,6 +679,19 @@ export const useCodexStore = create<Store>((set, get) => ({
             summaryError: null,
             lastLoadedAt: undefined,
         });
+    },
+
+    getIdentity: (routeKind, entryKey) => {
+        const normalizedKind = (routeKind ?? "").trim().toLowerCase();
+        const normalizedKey = (entryKey ?? "").trim();
+        if (!normalizedKind || !normalizedKey) return undefined;
+        return get().identitiesByKindKey[normalizedKind]?.[normalizedKey];
+    },
+
+    getIdentityByKey: (entryKey) => {
+        const normalizedKey = (entryKey ?? "").trim();
+        if (!normalizedKey || get().ambiguousIdentityKeys[normalizedKey]) return undefined;
+        return get().identitiesByKey[normalizedKey];
     },
 
     getEntry: (exportKind, entryKey) => {

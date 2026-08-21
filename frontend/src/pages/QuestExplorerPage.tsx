@@ -18,6 +18,7 @@ import {
     selectSelectedQuest,
     useQuestStore,
 } from "@/stores/questStore";
+import { useCodexStore } from "@/stores/codexStore";
 import {
     DEFAULT_QUEST_EXPLORER_MODE,
     normalizeQuestExplorerMode,
@@ -124,6 +125,7 @@ export default function QuestExplorerPage() {
     const selectedFaction = useFactionSelectionStore(selectSelectedFaction);
     const setSelectedFaction = useFactionSelectionStore(selectSetSelectedFaction);
     const loadQuestExplorer = useQuestStore((state) => state.loadQuestExplorer);
+    const loadCodexIdentities = useCodexStore((state) => state.loadIdentities);
     const setSelectedEntryKey = useQuestStore((state) => state.setSelectedEntryKey);
     const setMode = useQuestStore((state) => state.setMode);
     const setFilters = useQuestStore((state) => state.setFilters);
@@ -237,6 +239,10 @@ export default function QuestExplorerPage() {
     useEffect(() => {
         void loadQuestExplorer();
     }, [loadQuestExplorer]);
+
+    useEffect(() => {
+        void loadCodexIdentities();
+    }, [loadCodexIdentities]);
 
     useEffect(() => {
         if (mode !== requestedMode) setMode(requestedMode);

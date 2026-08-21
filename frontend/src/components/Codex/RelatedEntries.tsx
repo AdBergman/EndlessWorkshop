@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useCodexReferenceTarget } from "@/hooks/useCodexReferenceTarget";
 import { renderCodexLabel } from "@/lib/codex/codexLabelRenderer";
 import {
     formatCodexKindLabel,
@@ -6,14 +7,15 @@ import {
     getCodexEntryLabel,
     getCodexRelatedContext,
 } from "@/lib/codex/codexPresentation";
-import type { CodexEntry } from "@/types/dataTypes";
+import type { CodexIdentityRecord } from "@/types/dataTypes";
 import { CodexKindIcon } from "@/features/icons/CodexKindIcon";
 import { CodexEntryIcon } from "@/features/icons/CodexEntryIcon";
 import { getCodexReadablePreviewLine } from "@/lib/codex/codexStructuredDescription";
+import type { CodexRelatedTarget } from "@/lib/codex/codexRefs";
 
 type Props = {
-    entries: CodexEntry[];
-    onSelect: (entry: CodexEntry) => void;
+    targets: CodexRelatedTarget[];
+    onSelect: (identity: CodexIdentityRecord) => void;
     priorityMode?: "default" | "faction";
     headingLabel?: string;
     loading?: boolean;
@@ -22,7 +24,7 @@ type Props = {
 type RelatedEntryGroup = {
     kind: string;
     label: string;
-    entries: CodexEntry[];
+    targets: CodexRelatedTarget[];
 };
 
 const FACTION_RELATED_KIND_ORDER = [
@@ -34,22 +36,22 @@ const FACTION_RELATED_KIND_ORDER = [
     "populations",
 ];
 
-function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorityMode"]): RelatedEntryGroup[] {
+function groupRelatedEntries(targets: CodexRelatedTarget[], priorityMode: Props["priorityMode"]): RelatedEntryGroup[] {
     const groups = new Map<string, RelatedEntryGroup>();
 
-    entries.forEach((entry) => {
-        const kind = entry.exportKind.trim().toLowerCase() || "unknown";
+    targets.forEach((target) => {
+        const kind = target.identity.routeKind.trim().toLowerCase() || "unknown";
         const existing = groups.get(kind);
 
         if (existing) {
-            existing.entries.push(entry);
+            existing.targets.push(target);
             return;
         }
 
         groups.set(kind, {
             kind,
             label: formatCodexKindLabel(kind),
-            entries: [entry],
+            targets: [target],
         });
     });
 
@@ -68,7 +70,7 @@ function groupRelatedEntries(entries: CodexEntry[], priorityMode: Props["priorit
 }
 
 export default function RelatedEntries({
-    entries,
+    targets,
     onSelect,
     priorityMode = "default",
     headingLabel = "Related entries",
@@ -76,11 +78,11 @@ export default function RelatedEntries({
 }: Props) {
     const headingId = useId();
 
-    if (entries.length === 0 && !loading) {
+    if (targets.length === 0 && !loading) {
         return null;
     }
 
-    const groups = groupRelatedEntries(entries, priorityMode);
+    const groups = groupRelatedEntries(targets, priorityMode);
 
     return (
         <section className="codex-related" aria-labelledby={headingId}>
@@ -107,53 +109,80 @@ export default function RelatedEntries({
                                 />
                                 <span>{group.label}</span>
                             </span>
-                            <span>{group.entries.length}</span>
+                            <span>{group.targets.length}</span>
                         </div>
 
                         <div className="codex-related__list">
-                            {group.entries.map((entry) => {
-                                const entryLabel = getCodexEntryLabel(entry);
-                                const kindLabel = formatCodexKindLabel(entry.exportKind);
-                                const relatedContext = getCodexRelatedContext(entry);
-                                const contextLabel = relatedContext.startsWith("Quest ·")
-                                    ? relatedContext
-                                    : relatedContext
-                                        ? `${kindLabel} / ${relatedContext}`
-                                        : kindLabel;
-                                const previewLine = getCodexReadablePreviewLine(entry) ||
-                                    getCodexDescriptionPreviewLine(entry.descriptionLines);
-                                const accessibilityLabel = [entryLabel, contextLabel, previewLine]
-                                    .filter(Boolean)
-                                    .join(" ");
-
-                                return (
-                                    <button
-                                        key={entry.entryKey}
-                                        type="button"
-                                        className="codex-related__chip"
-                                        aria-label={accessibilityLabel}
-                                        onClick={() => onSelect(entry)}
-                                    >
-                                        <CodexEntryIcon
-                                            entry={entry}
-                                            label={kindLabel}
-                                            className="codex-kindIcon codex-kindIcon--relatedChip"
-                                            size={16}
-                                        />
-                                        <span className="codex-related__copy">
-                                            <span className="codex-related__name">{renderCodexLabel(entryLabel)}</span>
-                                            <span className="codex-related__kind">{contextLabel}</span>
-                                            {previewLine ? (
-                                                <span className="codex-related__preview">{previewLine}</span>
-                                            ) : null}
-                                        </span>
-                                    </button>
-                                );
-                            })}
+                            {group.targets.map((target) => (
+                                <RelatedEntryTarget
+                                    key={`${target.identity.routeKind}:${target.identity.entryKey}`}
+                                    target={target}
+                                    onSelect={onSelect}
+                                />
+                            ))}
                         </div>
                     </div>
                 ))}
             </div> : null}
         </section>
+    );
+}
+
+function RelatedEntryTarget({
+    target,
+    onSelect,
+}: {
+    target: CodexRelatedTarget;
+    onSelect: (identity: CodexIdentityRecord) => void;
+}) {
+    const hydratedTarget = useCodexReferenceTarget(target.identity);
+    const entry = hydratedTarget.entry ?? target.entry;
+    const entryLabel = getCodexEntryLabel(target.identity);
+    const kindLabel = formatCodexKindLabel(target.identity.routeKind);
+    const relatedContext = entry ? getCodexRelatedContext(entry) : "";
+    const contextLabel = relatedContext.startsWith("Quest ·")
+        ? relatedContext
+        : relatedContext
+            ? `${kindLabel} / ${relatedContext}`
+            : kindLabel;
+    const previewLine = entry
+        ? getCodexReadablePreviewLine(entry) || getCodexDescriptionPreviewLine(entry.descriptionLines)
+        : "";
+    const accessibilityLabel = [entryLabel, contextLabel, previewLine]
+        .filter(Boolean)
+        .join(" ");
+
+    return (
+        <button
+            type="button"
+            className="codex-related__chip"
+            aria-label={accessibilityLabel}
+            onClick={() => onSelect(target.identity)}
+            onMouseEnter={hydratedTarget.hydrate}
+            onFocus={hydratedTarget.hydrate}
+        >
+            {entry ? (
+                <CodexEntryIcon
+                    entry={entry}
+                    label={kindLabel}
+                    className="codex-kindIcon codex-kindIcon--relatedChip"
+                    size={16}
+                />
+            ) : (
+                <CodexKindIcon
+                    kind={target.identity.routeKind}
+                    label={kindLabel}
+                    className="codex-kindIcon codex-kindIcon--relatedChip"
+                    size={16}
+                />
+            )}
+            <span className="codex-related__copy">
+                <span className="codex-related__name">{renderCodexLabel(entryLabel)}</span>
+                <span className="codex-related__kind">{contextLabel}</span>
+                {previewLine ? (
+                    <span className="codex-related__preview">{previewLine}</span>
+                ) : null}
+            </span>
+        </button>
     );
 }

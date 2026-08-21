@@ -4,9 +4,11 @@ import ewshop.domain.service.CodexService;
 import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexFilterResult;
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexIdentityDto;
 import ewshop.facade.dto.response.CodexSummaryDto;
 import ewshop.facade.interfaces.CodexFacade;
 import ewshop.facade.mapper.CodexMapper;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,6 +53,25 @@ public class CodexFacadeImpl implements CodexFacade {
                         dto.kind(),
                         dto.entryKey()
                 )))
+                .toList();
+    }
+
+    @Override
+    @Cacheable(value = "codex", key = "'identities'")
+    public List<CodexIdentityDto> getCodexIdentities() {
+        CodexFilterResult filterResult = codexFilterService.filterForCodexApi(codexService.getAllCodexEntries());
+
+        return filterResult.codexEntries().stream()
+                .map(entry -> new CodexIdentityDto(
+                        entry.getEntryKey(),
+                        entry.getDisplayName(),
+                        normalizeSummaryKind(
+                                entry.getExportKind(),
+                                entry.getCategory(),
+                                entry.getKind(),
+                                entry.getEntryKey()
+                        )
+                ))
                 .toList();
     }
 

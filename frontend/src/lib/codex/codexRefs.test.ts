@@ -1,8 +1,11 @@
 import { codexEntityRef, entityRefId } from "@/lib/entityRef/entityRef";
 import {
+    buildCodexIdentityIndexes,
     buildEntriesByKey,
     buildEntriesByKindKey,
+    resolveCodexIdentity,
     resolveCodexReference,
+    resolveRelatedCodexTargets,
     resolveRelatedEntries,
 } from "@/lib/codex/codexRefs";
 import type { CodexEntry } from "@/types/dataTypes";
@@ -474,5 +477,57 @@ describe("resolveCodexReference", () => {
         };
 
         expect(resolveCodexReference("codex:heroes%3A%E0%A4%A", indexes)?.displayName).toBe("Raw Fallback");
+    });
+});
+
+describe("Codex identity references", () => {
+    it("uses kind-scoped identity lookup and refuses to guess ambiguous raw keys", () => {
+        const indexes = buildCodexIdentityIndexes([
+            { entryKey: "Shared_Key", displayName: "District Shared", routeKind: "districts" },
+            { entryKey: "Shared_Key", displayName: "Improvement Shared", routeKind: "improvements" },
+        ]);
+
+        expect(resolveCodexIdentity("districts:Shared_Key", indexes)?.displayName).toBe("District Shared");
+        expect(resolveCodexIdentity("improvements:Shared_Key", indexes)?.displayName).toBe("Improvement Shared");
+        expect(resolveCodexIdentity("Shared_Key", indexes)).toBeUndefined();
+
+        const source: CodexEntry = {
+            exportKind: "abilities",
+            entryKey: "Ability_A",
+            displayName: "Ability A",
+            descriptionLines: [],
+            referenceKeys: ["Shared_Key"],
+        };
+        const fullEntries: CodexEntry[] = [
+            source,
+            { exportKind: "districts", entryKey: "Shared_Key", displayName: "District Shared", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "improvements", entryKey: "Shared_Key", displayName: "Improvement Shared", descriptionLines: [], referenceKeys: [] },
+        ];
+        expect(resolveRelatedCodexTargets(source, {
+            entriesByKey: buildEntriesByKey(fullEntries),
+            entriesByKindKey: buildEntriesByKindKey(fullEntries),
+        }, indexes)).toEqual([]);
+    });
+
+    it("keeps a cold relationship visible from source reference plus identity", () => {
+        const source: CodexEntry = {
+            exportKind: "abilities",
+            entryKey: "Ability_Rally",
+            displayName: "Rally",
+            descriptionLines: [],
+            referenceKeys: ["Unit_Warden"],
+        };
+        const identityIndexes = buildCodexIdentityIndexes([
+            { entryKey: "Unit_Warden", displayName: "Warden", routeKind: "units" },
+        ]);
+
+        expect(resolveRelatedCodexTargets(
+            source,
+            { entriesByKey: buildEntriesByKey([source]), entriesByKindKey: buildEntriesByKindKey([source]) },
+            identityIndexes
+        )).toEqual([{
+            identity: { entryKey: "Unit_Warden", displayName: "Warden", routeKind: "units" },
+            entry: undefined,
+        }]);
     });
 });

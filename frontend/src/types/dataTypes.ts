@@ -163,6 +163,12 @@ export interface Codex {
 
 export type CodexEntry = Codex;
 
+export interface CodexIdentityRecord {
+    entryKey: string;
+    displayName: string;
+    routeKind: string;
+}
+
 export interface CodexKindSummary {
     exportKind: string;
     count: number;

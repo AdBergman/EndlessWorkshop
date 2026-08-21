@@ -1905,6 +1905,14 @@
     text-transform: uppercase;
 }
 
+.questExplorer-codexTooltip > .questExplorer-codexTooltipStatus {
+    color: rgba(242, 233, 211, 0.72);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.35;
+    text-transform: none;
+}
+
 .questExplorer-codexTooltipPreview {
     display: grid;
     gap: 4px;

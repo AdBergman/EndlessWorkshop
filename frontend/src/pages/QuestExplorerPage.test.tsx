@@ -13,6 +13,7 @@ import { useQuestStore } from "@/stores/questStore";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
+        getCodexIdentities: vi.fn().mockResolvedValue([]),
         getQuestExplorer: vi.fn(),
     },
 }));

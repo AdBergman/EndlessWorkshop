@@ -5,6 +5,7 @@ import ewshop.domain.service.CodexFilterService;
 import ewshop.domain.service.CodexFilterResult;
 import ewshop.domain.service.CodexService;
 import ewshop.facade.dto.response.CodexDto;
+import ewshop.facade.dto.response.CodexIdentityDto;
 import ewshop.facade.dto.response.CodexSummaryDto;
 import org.junit.jupiter.api.Test;
 
@@ -165,6 +166,26 @@ class CodexFacadeImplTest {
                 .containsExactlyInAnyOrder(
                         new CodexSummaryDto("statuses", 1),
                         new CodexSummaryDto("modifiers", 1)
+                );
+    }
+
+    @Test
+    void returnsOnlyPublicCodexIdentitiesWithRouteNormalizedKinds() {
+        CodexService codexService = mock(CodexService.class);
+        CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
+
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("populations", "Population_Minor_Ametrine", "Ametrine", List.of("Public population.")),
+                codexEntry("bonuses", "Status_Unit_Hobbled", "Hobbled", "Status", "Status", List.of("Status entry."), List.of()),
+                codexEntry("bonuses", "ActionCostModifier_Test", "Action Cost", "Cost Modifier", "Cost Modifier", List.of("Modifier entry."), List.of()),
+                codexEntry("abilities", "Ability_Internal", "% Internal", List.of("Filtered entry."))
+        ));
+
+        assertThat(facade.getCodexIdentities())
+                .containsExactly(
+                        new CodexIdentityDto("ActionCostModifier_Test", "Action Cost", "modifiers"),
+                        new CodexIdentityDto("Status_Unit_Hobbled", "Hobbled", "statuses"),
+                        new CodexIdentityDto("Population_Minor_Ametrine", "Ametrine", "populations")
                 );
     }
 
