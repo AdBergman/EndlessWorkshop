@@ -1,7 +1,8 @@
 import { buildEntriesByKey,buildEntriesByKindKey } from "@/lib/codex/codexRefs";
 import {
 cleanupCodexPageStores,
-resetCodexPageTestState
+resetCodexPageTestState,
+seedCodexEntries
 } from "@/pages/testUtils/codexPageHarness";
 import { LocationProbe } from "@/pages/testUtils/codexPageTestUtils";
 import { useCodexStore } from "@/stores/codexStore";
@@ -237,6 +238,61 @@ describe("CodexPage hidden and promoted data categories", () => {
         expect(await screen.findByRole("heading", { name: "A Fragile Dawn" })).toBeInTheDocument();
         expect(screen.getByLabelText("Selected codex entry")).toBeInTheDocument();
         expect(within(getCategoryToolbar()).queryByRole("button", { name: /quests/i })).not.toBeInTheDocument();
+    });
+
+    it("opens a hidden rich-search result through its canonical category route", async () => {
+        const user = userEvent.setup();
+        seedCodexEntries([
+            {
+                exportKind: "modifiers",
+                entryKey: "ActionCostModifier_RaiseRuin_Decrease_00",
+                displayName: "Ruin Expedition Discount",
+                category: "Cost Modifier",
+                kind: "Cost Modifier",
+                descriptionLines: ["Spend less Influence while protecting Approval during ruin expeditions."],
+                referenceKeys: [],
+            },
+            {
+                exportKind: "abilities",
+                entryKey: "Ability_GuardedAdvance",
+                displayName: "Guarded Advance",
+                descriptionLines: ["A public ability."],
+                referenceKeys: [],
+            },
+        ]);
+
+        render(
+            <MemoryRouter initialEntries={["/codex"]}>
+                <Routes>
+                    <Route
+                        path="/codex"
+                        element={(
+                            <>
+                                <LocationProbe />
+                                <CodexPage />
+                            </>
+                        )}
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        await screen.findByRole("heading", { name: "Encyclopedia Index" });
+        expect(getLandingCategoryLabels()).not.toContain("Modifiers");
+
+        await user.type(screen.getByRole("combobox", { name: /search the encyclopedia/i }), "approval");
+
+        const results = await screen.findByLabelText("Codex results");
+        const hiddenResult = within(results).getByRole("button", { name: /ruin expedition discount/i });
+        await user.click(hiddenResult);
+
+        await waitFor(() => expect(screen.getByTestId("location-probe")).toHaveTextContent(
+            "/codex?category=modifiers&entry=ActionCostModifier_RaiseRuin_Decrease_00"
+        ));
+        expect(await screen.findByRole("heading", { name: "Ruin Expedition Discount" }))
+            .toBeInTheDocument();
+        expect(within(getCategoryToolbar()).queryByRole("button", { name: /modifiers/i }))
+            .not.toBeInTheDocument();
     });
 
 

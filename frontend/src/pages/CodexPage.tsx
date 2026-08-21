@@ -106,16 +106,22 @@ import {
 import {
     getCodexCategoryMode,
     isLocalCodexTopLevelVisibilityEnabled,
-    isDirectRoutableHiddenCodexKind,
     isVisibleTopLevelCodexKind,
     normalizeCodexKind,
     PREFERRED_CODEX_KIND_ORDER,
+    supportsHiddenCodexCategoryBrowse,
     supportsFullWidthReferenceOverview,
 } from "@/lib/codex/codexCategoryConfig";
-import { resolveRelatedEntries } from "@/lib/codex/codexRefs";
+import {
+    codexIdentityFromEntry,
+    resolveRelatedCodexTargets,
+    resolveRelatedEntries,
+} from "@/lib/codex/codexRefs";
+import { getCanonicalCodexIdentityRoute } from "@/lib/codex/codexRoute";
 import { sortResourceReferenceEntries } from "@/lib/codex/codexShallowReferencePreview";
 import { useCodexStore } from "@/stores/codexStore";
 import { useDistrictStore } from "@/stores/districtStore";
+import type { CodexIdentityRecord } from "@/types/dataTypes";
 import "./CodexPage.css";
 
 type SelectionIntent = "passive" | "related";
@@ -178,6 +184,11 @@ export default function CodexPage() {
     const entries = useCodexStore((state) => state.entries);
     const entriesByKey = useCodexStore((state) => state.entriesByKey);
     const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
+    const identitiesByKey = useCodexStore((state) => state.identitiesByKey);
+    const identitiesByKindKey = useCodexStore((state) => state.identitiesByKindKey);
+    const ambiguousIdentityKeys = useCodexStore((state) => state.ambiguousIdentityKeys);
+    const identityLoaded = useCodexStore((state) => state.identityLoaded);
+    const identityError = useCodexStore((state) => state.identityError);
     const categorySummaries = useCodexStore((state) => state.categorySummaries);
     const loading = useCodexStore((state) => state.loading);
     const error = useCodexStore((state) => state.error);
@@ -189,6 +200,7 @@ export default function CodexPage() {
     const summaryLoading = useCodexStore((state) => state.summaryLoading);
     const summaryError = useCodexStore((state) => state.summaryError);
     const loadEntries = useCodexStore((state) => state.loadEntries);
+    const loadIdentities = useCodexStore((state) => state.loadIdentities);
     const loadCategory = useCodexStore((state) => state.loadCategory);
     const prefetchCategories = useCodexStore((state) => state.prefetchCategories);
     const loadSummary = useCodexStore((state) => state.loadSummary);
@@ -228,12 +240,37 @@ export default function CodexPage() {
     const deferredQuery = useDeferredValue(query);
     const selectedEntryParam = (searchParams.get("entry") ?? "").trim() || null;
     const activeKind = (searchParams.get("category") ?? "").trim().toLowerCase() || ALL_CODEX_KIND;
+    const isLegacyEntryOnlyRoute =
+        activeKind === ALL_CODEX_KIND &&
+        Boolean(selectedEntryParam) &&
+        query.trim().length === 0;
+    const uniqueLegacyFullEntry = useMemo(() => {
+        if (!isLegacyEntryOnlyRoute || !selectedEntryParam) return undefined;
+
+        const matches = entries.filter((entry) => entry.entryKey === selectedEntryParam);
+        return matches.length === 1 ? matches[0] : undefined;
+    }, [entries, isLegacyEntryOnlyRoute, selectedEntryParam]);
+    const legacyIdentityKeyIsAmbiguous = selectedEntryParam
+        ? Boolean(ambiguousIdentityKeys[selectedEntryParam])
+        : false;
+    const legacyRouteIdentity = selectedEntryParam
+        ? identitiesByKey[selectedEntryParam] ?? (
+            uniqueLegacyFullEntry && !legacyIdentityKeyIsAmbiguous
+                ? codexIdentityFromEntry(uniqueLegacyFullEntry)
+                : undefined
+        )
+        : undefined;
     const selectedEntryKey = selectedEntryParam ?? (
         activeKind === ALL_CODEX_KIND ? null : getCodexSummaryEntryKey(activeKind)
     );
     const shouldLoadFullEntries =
         activeKind === ALL_CODEX_KIND && (
-            Boolean(selectedEntryParam && !entriesByKey[selectedEntryParam]) ||
+            Boolean(
+                isLegacyEntryOnlyRoute &&
+                identityError &&
+                selectedEntryParam &&
+                !entriesByKey[selectedEntryParam]
+            ) ||
             query.trim().length > 0
         );
     const activeCategoryLoadState = activeKind === ALL_CODEX_KIND
@@ -242,13 +279,20 @@ export default function CodexPage() {
             ? "loaded"
             : categoryLoadStates[activeKind] ?? "idle";
     const activeCategoryResolved = activeKind !== ALL_CODEX_KIND && activeCategoryLoadState === "loaded";
-    const routeEntriesLoading = shouldLoadFullEntries
-        ? !fullLoaded && !error
-        : activeKind !== ALL_CODEX_KIND && (
+    const legacyEntryRouteResolved = !isLegacyEntryOnlyRoute || (
+        identityLoaded
+            ? !legacyRouteIdentity
+            : Boolean(identityError && selectedEntryParam && (entriesByKey[selectedEntryParam] || fullLoaded))
+    );
+    const routeEntriesLoading = isLegacyEntryOnlyRoute && !legacyEntryRouteResolved
+        ? true
+        : shouldLoadFullEntries
+            ? !fullLoaded && !error
+            : activeKind !== ALL_CODEX_KIND && (
             activeCategoryLoadState === "idle" || activeCategoryLoadState === "loading"
-        );
+            );
     const routeEntriesResolved = activeKind === ALL_CODEX_KIND
-        ? !shouldLoadFullEntries || fullLoaded
+        ? legacyEntryRouteResolved && (!shouldLoadFullEntries || fullLoaded)
         : activeCategoryResolved;
     const routeEntriesError = activeKind === ALL_CODEX_KIND
         ? error
@@ -260,6 +304,11 @@ export default function CodexPage() {
     const suppressNextPlainRouteResetRef = useRef(false);
     const lastPlainRouteResetSignatureRef = useRef<string | null>(null);
     const lastHandledResetNonceRef = useRef<string | null>(null);
+    const transientSearchEntryKeyRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        void loadIdentities();
+    }, [loadIdentities]);
 
     useEffect(() => {
         if (!shouldLoadFullEntries) return;
@@ -366,6 +415,10 @@ export default function CodexPage() {
             })),
         ];
     }, [categorySummaries, entries, includeLocalOnlyCategories]);
+    const activeCategorySupportsBrowse = activeKind !== ALL_CODEX_KIND && (
+        filterOptions.some((option) => option.kind === activeKind) ||
+        supportsHiddenCodexCategoryBrowse(activeKind)
+    );
 
     const categoryMode = getCodexCategoryMode(activeKind);
     const isActionArchiveMode = categoryMode === "actionArchive";
@@ -573,6 +626,10 @@ export default function CodexPage() {
     const codexReferenceIndexes = useMemo(
         () => ({ entriesByKey, entriesByKindKey }),
         [entriesByKey, entriesByKindKey]
+    );
+    const codexIdentityIndexes = useMemo(
+        () => ({ identitiesByKey, identitiesByKindKey }),
+        [identitiesByKey, identitiesByKindKey]
     );
 
     const questCategoryGroups = useMemo(
@@ -798,8 +855,10 @@ export default function CodexPage() {
             return filteredEntries;
         }
 
-        return [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...filteredEntries];
-    }, [activeKind, activeKindLabel, filteredEntries]);
+        return activeCategorySupportsBrowse
+            ? [createCodexSummaryEntry(activeKind, activeKindLabel, filteredEntries.length), ...filteredEntries]
+            : filteredEntries;
+    }, [activeCategorySupportsBrowse, activeKind, activeKindLabel, filteredEntries]);
 
     const groupedFilteredEntries = useMemo(
         () => filteredEntries,
@@ -863,6 +922,10 @@ export default function CodexPage() {
     const resolvedRelatedEntries = useMemo(
         () => resolveRelatedEntries(selectedEntry, codexReferenceIndexes),
         [codexReferenceIndexes, selectedEntry]
+    );
+    const resolvedRelatedTargets = useMemo(
+        () => resolveRelatedCodexTargets(selectedEntry, codexReferenceIndexes, codexIdentityIndexes),
+        [codexIdentityIndexes, codexReferenceIndexes, selectedEntry]
     );
     const relatedEntriesLoading = useMemo(() => {
         if (!prefetching || !selectedEntry) return false;
@@ -938,15 +1001,11 @@ export default function CodexPage() {
                 return;
             }
 
-            const entryKind = normalizeCodexKind(entry.exportKind);
-            const nextCategory = (
-                filterOptions.some((option) => option.kind === entryKind) ||
-                isDirectRoutableHiddenCodexKind(entryKind)
-            )
-                ? entryKind
-                : null;
+            const route = getCanonicalCodexIdentityRoute(codexIdentityFromEntry(entry));
+            if (!route) return;
+            transientSearchEntryKeyRef.current = null;
 
-            if (activeKind !== ALL_CODEX_KIND && entryKind !== activeKind) {
+            if (activeKind !== ALL_CODEX_KIND && route.category !== activeKind) {
                 setSelectionIntent("passive");
             }
 
@@ -955,10 +1014,47 @@ export default function CodexPage() {
             }
 
             setSelectionIntent(intent);
-            updateSelectedEntry(selectableEntryKey, { category: nextCategory });
+            updateSelectedEntry(route.entry, { category: route.category });
         },
-        [activeKind, filterOptions, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
+        [activeKind, getSelectableEntryKey, query, selectKind, updateSelectedEntry]
     );
+
+    const selectIdentity = useCallback(
+        (identity: CodexIdentityRecord, intent: SelectionIntent = "related") => {
+            const route = getCanonicalCodexIdentityRoute(identity);
+            if (!route) return;
+            transientSearchEntryKeyRef.current = null;
+
+            if (activeKind !== ALL_CODEX_KIND && route.category !== activeKind) {
+                setSelectionIntent("passive");
+            }
+            if (query) {
+                setQuery("");
+            }
+            setSelectionIntent(intent);
+            updateSelectedEntry(route.entry, { category: route.category });
+        },
+        [activeKind, query, updateSelectedEntry]
+    );
+
+    useEffect(() => {
+        if (!isLegacyEntryOnlyRoute || !identityLoaded || !legacyRouteIdentity) return;
+        if (transientSearchEntryKeyRef.current === selectedEntryParam) return;
+
+        const route = getCanonicalCodexIdentityRoute(legacyRouteIdentity);
+        if (!route) return;
+
+        updateSelectedEntry(route.entry, {
+            category: route.category,
+            replace: true,
+        });
+    }, [
+        identityLoaded,
+        isLegacyEntryOnlyRoute,
+        legacyRouteIdentity,
+        selectedEntryParam,
+        updateSelectedEntry,
+    ]);
 
     useEffect(() => {
         if (location.pathname !== "/codex" || location.search !== "") {
@@ -990,20 +1086,40 @@ export default function CodexPage() {
         if (activeKind === ALL_CODEX_KIND) return;
         if (!activeCategoryResolved || !summaryLoaded) return;
 
-        const filterStillExists =
-            filterOptions.some((option) => option.kind === activeKind) ||
-            (
-                isDirectRoutableHiddenCodexKind(activeKind) &&
-                entries.some((entry) => normalizeCodexKind(entry.exportKind) === activeKind)
-            );
-        if (!filterStillExists) {
+        if (selectedEntryParam) {
+            const requestedEntry = entriesByKindKey[activeKind]?.[selectedEntryParam];
+            if (requestedEntry) return;
+
+            updateSelectedEntry(null, {
+                category: activeCategorySupportsBrowse ? activeKind : null,
+                replace: true,
+            });
+            return;
+        }
+
+        if (!activeCategorySupportsBrowse) {
             updateSelectedEntry(null, { category: null, replace: true });
         }
-    }, [activeCategoryResolved, activeKind, entries, filterOptions, summaryLoaded, updateSelectedEntry]);
+    }, [
+        activeCategorySupportsBrowse,
+        activeCategoryResolved,
+        activeKind,
+        entriesByKindKey,
+        selectedEntryParam,
+        summaryLoaded,
+        updateSelectedEntry,
+    ]);
 
     useEffect(() => {
         if (!routeEntriesResolved) return;
         if (isPlainRouteReset) return;
+        if (
+            activeKind !== ALL_CODEX_KIND &&
+            !activeCategorySupportsBrowse &&
+            !selectedEntryParam
+        ) {
+            return;
+        }
 
         const firstVisibleEntry = displayEntries[0] ?? null;
         const isSelectedVisible = Boolean(selectedEntryKey && selectedListItem);
@@ -1022,18 +1138,24 @@ export default function CodexPage() {
 
         if (!isSelectedVisible) {
             if (activeKind !== ALL_CODEX_KIND && selectedEntryParam) {
-                updateSelectedEntry(null, { category: activeKind, replace: true });
+                // Exact category routes are validated after the requested category resolves.
                 return;
             }
 
-            updateSelectedEntry(getSelectableEntryKey(firstVisibleEntry), { replace: true });
+            const firstVisibleEntryKey = getSelectableEntryKey(firstVisibleEntry);
+            if (activeKind === ALL_CODEX_KIND && query.trim().length > 0) {
+                transientSearchEntryKeyRef.current = firstVisibleEntryKey;
+            }
+            updateSelectedEntry(firstVisibleEntryKey, { replace: true });
         }
     }, [
+        activeCategorySupportsBrowse,
         activeKind,
         displayEntries,
         getSelectableEntryKey,
         hasDeferredQuery,
         isPlainRouteReset,
+        query,
         routeEntriesResolved,
         selectedEntryParam,
         selectedEntryKey,
@@ -1446,9 +1568,11 @@ export default function CodexPage() {
                                     entry={selectedEntry}
                                     allEntries={entries}
                                     relatedEntries={resolvedRelatedEntries}
+                                    relatedTargets={resolvedRelatedTargets}
                                     relatedEntriesLoading={relatedEntriesLoading}
                                     titleRef={detailTitleRef}
                                     onSelectRelated={(entry) => selectEntry(entry, "related")}
+                                    onSelectRelatedIdentity={(identity) => selectIdentity(identity, "related")}
                                 />
                             )}
                         </div>

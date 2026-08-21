@@ -26,6 +26,7 @@ import QuestExplorerPage from "./QuestExplorerPage";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
+        getCodexIdentities: vi.fn().mockResolvedValue([]),
         getQuestExplorer: vi.fn(),
     },
 }));

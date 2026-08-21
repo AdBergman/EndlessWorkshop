@@ -5,6 +5,7 @@ import { useCodexStore } from "@/stores/codexStore";
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
         getCodex: vi.fn(),
+        getCodexIdentities: vi.fn(),
         getCodexCategory: vi.fn(),
         getCodexSummary: vi.fn(),
     },
@@ -30,6 +31,7 @@ describe("useCodexStore", () => {
     beforeEach(() => {
         useCodexStore.getState().reset();
         mockedApiClient.getCodex.mockReset();
+        mockedApiClient.getCodexIdentities.mockReset();
         mockedApiClient.getCodexCategory.mockReset();
         mockedApiClient.getCodexSummary.mockReset();
         resetCodexTokenAuditDevFlagsForTests();
@@ -312,6 +314,73 @@ describe("useCodexStore", () => {
         await useCodexStore.getState().loadEntries();
 
         expect(mockedApiClient.getCodex).toHaveBeenCalledTimes(1);
+    });
+
+    it("loads identities separately, deduplicates callers, and treats duplicate untyped keys as ambiguous", async () => {
+        const request = deferred<any[]>();
+        mockedApiClient.getCodexIdentities.mockReturnValue(request.promise);
+
+        const first = useCodexStore.getState().loadIdentities();
+        const second = useCodexStore.getState().loadIdentities();
+
+        expect(mockedApiClient.getCodexIdentities).toHaveBeenCalledTimes(1);
+        expect(useCodexStore.getState().identityLoading).toBe(true);
+
+        request.resolve([
+            { entryKey: "Shared_Key", displayName: "District Label", routeKind: "districts" },
+            { entryKey: "Shared_Key", displayName: "Improvement Label", routeKind: "improvements" },
+            { entryKey: "Population_A", displayName: "Population A", routeKind: "populations" },
+        ]);
+        await Promise.all([first, second]);
+
+        const state = useCodexStore.getState();
+        expect(state.identityLoaded).toBe(true);
+        expect(state.getIdentity("districts", "Shared_Key")?.displayName).toBe("District Label");
+        expect(state.getIdentity("improvements", "Shared_Key")?.displayName).toBe("Improvement Label");
+        expect(state.getIdentityByKey("Shared_Key")).toBeUndefined();
+        expect(state.ambiguousIdentityKeys.Shared_Key).toBe(true);
+        expect(state.getIdentityByKey("Population_A")?.routeKind).toBe("populations");
+        expect(state.entries).toEqual([]);
+        expect(state.entriesByKey).toEqual({});
+        expect(state.entriesByKindKey).toEqual({});
+        expect(state.categoryLoadStates).toEqual({});
+        expect(state.fullLoaded).toBe(false);
+    });
+
+    it("allows identity retry after failure", async () => {
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        mockedApiClient.getCodexIdentities
+            .mockRejectedValueOnce(new Error("identity unavailable"))
+            .mockResolvedValueOnce([
+                { entryKey: "Tech_A", displayName: "Tech A", routeKind: "tech" },
+            ]);
+
+        await useCodexStore.getState().loadIdentities();
+        expect(useCodexStore.getState().identityError).toBe("identity unavailable");
+
+        await useCodexStore.getState().loadIdentities();
+        expect(mockedApiClient.getCodexIdentities).toHaveBeenCalledTimes(2);
+        expect(useCodexStore.getState().identityLoaded).toBe(true);
+        expect(useCodexStore.getState().getIdentity("tech", "Tech_A")).toBeDefined();
+        errorSpy.mockRestore();
+    });
+
+    it("keeps reset identity state empty when an older request completes", async () => {
+        const request = deferred<any[]>();
+        mockedApiClient.getCodexIdentities.mockReturnValue(request.promise);
+
+        const load = useCodexStore.getState().loadIdentities();
+        useCodexStore.getState().reset();
+        request.resolve([
+            { entryKey: "Hero_A", displayName: "Hero A", routeKind: "heroes" },
+        ]);
+        await load;
+
+        const state = useCodexStore.getState();
+        expect(state.identityLoaded).toBe(false);
+        expect(state.identityLoading).toBe(false);
+        expect(state.identities).toEqual([]);
+        expect(state.identitiesByKindKey).toEqual({});
     });
 
     it("loads lightweight category summaries without loading full entries", async () => {

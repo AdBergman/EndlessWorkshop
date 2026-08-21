@@ -68,6 +68,7 @@ describe("refreshStoresAfterAdminImport", () => {
     const refreshUnits = vi.fn();
     const refreshTechs = vi.fn();
     const loadEntries = vi.fn();
+    const loadIdentities = vi.fn();
     const refreshQuestExplorer = vi.fn();
 
     beforeEach(() => {
@@ -80,7 +81,7 @@ describe("refreshStoresAfterAdminImport", () => {
         mockedSkillGetState.mockReturnValue({ refreshSkills });
         mockedUnitGetState.mockReturnValue({ refreshUnits });
         mockedTechGetState.mockReturnValue({ refreshTechs });
-        mockedCodexGetState.mockReturnValue({ loadEntries });
+        mockedCodexGetState.mockReturnValue({ loadEntries, loadIdentities });
         mockedQuestGetState.mockReturnValue({ refreshQuestExplorer });
 
         refreshDistricts.mockResolvedValue(undefined);
@@ -91,6 +92,7 @@ describe("refreshStoresAfterAdminImport", () => {
         refreshUnits.mockResolvedValue(undefined);
         refreshTechs.mockResolvedValue(undefined);
         loadEntries.mockResolvedValue(undefined);
+        loadIdentities.mockResolvedValue(undefined);
         refreshQuestExplorer.mockResolvedValue(undefined);
     });
 
@@ -109,10 +111,11 @@ describe("refreshStoresAfterAdminImport", () => {
         expect(refresh).toHaveBeenCalledTimes(1);
     });
 
-    it("force-loads codex entries after codex import", async () => {
+    it("force-loads codex entries and identities after codex import", async () => {
         await expect(refreshStoresAfterAdminImport("codex")).resolves.toEqual({ ok: true });
 
         expect(loadEntries).toHaveBeenCalledWith({ force: true });
+        expect(loadIdentities).toHaveBeenCalledWith({ force: true });
     });
 
     it("reports refresh failures without throwing", async () => {

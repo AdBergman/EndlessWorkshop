@@ -19,6 +19,7 @@ import { Faction } from "@/types/dataTypes";
 
 vi.mock("@/api/apiClient", () => ({
     apiClient: {
+        getCodexIdentities: vi.fn().mockResolvedValue([]),
         getQuestExplorer: vi.fn(),
     },
 }));

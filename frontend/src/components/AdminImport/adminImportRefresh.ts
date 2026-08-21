@@ -53,7 +53,10 @@ export async function refreshStoresAfterAdminImport(
                 await useTechStore.getState().refreshTechs();
                 break;
             case "codex":
-                await useCodexStore.getState().loadEntries({ force: true });
+                await Promise.all([
+                    useCodexStore.getState().loadEntries({ force: true }),
+                    useCodexStore.getState().loadIdentities({ force: true }),
+                ]);
                 break;
             case "quests":
                 await useQuestStore.getState().refreshQuestExplorer();

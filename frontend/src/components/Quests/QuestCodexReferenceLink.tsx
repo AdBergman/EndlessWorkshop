@@ -11,6 +11,7 @@ import {
     useState,
 } from "react";
 import { FaExternalLinkAlt } from "react-icons/fa";
+import { useShallow } from "zustand/react/shallow";
 
 import BaseTooltip from "@/components/Tooltips/BaseTooltip";
 import {
@@ -18,10 +19,11 @@ import {
     type PixelTooltipCoords,
 } from "@/components/Tooltips/hoverHelpers";
 import {
-    codexEntryHref,
-    resolveQuestCodexReference,
+    resolveQuestCodexIdentity,
     type QuestCodexReferenceSource,
 } from "@/features/quests/questCodexReference";
+import { useCodexReferenceTarget } from "@/hooks/useCodexReferenceTarget";
+import { codexIdentityHref } from "@/lib/codex/codexRoute";
 import {
     formatCodexKindLabel,
     formatCodexMajorFactionText,
@@ -44,9 +46,12 @@ export function QuestCodexReferenceLink({
     presentation?: "default" | "compactReward";
 }) {
     const tooltipId = useId();
-    const entriesByKey = useCodexStore((state) => state.entriesByKey);
-    const entriesByKindKey = useCodexStore((state) => state.entriesByKindKey);
-    const entry = resolveQuestCodexReference(source, { entriesByKey, entriesByKindKey });
+    const identity = useCodexStore(useShallow((state) => resolveQuestCodexIdentity(
+        source,
+        state,
+        state
+    )));
+    const { entry, previewStatus, hydrate } = useCodexReferenceTarget(identity);
     const [tooltipCoords, setTooltipCoords] = useState<TooltipCoords | null>(null);
     const hideTimerRef = useRef<number | null>(null);
     const referenceRef = useRef<HTMLSpanElement | null>(null);
@@ -71,6 +76,7 @@ export function QuestCodexReferenceLink({
     const showTooltipForElement = (element: HTMLElement) => {
         if (!showTooltip) return;
         clearHideTimer();
+        hydrate();
         setTooltipCoords(tooltipCoordsForElement(element));
     };
 
@@ -128,24 +134,35 @@ export function QuestCodexReferenceLink({
         };
     }, [hideTooltip, tooltipCoords, tooltipId]);
 
-    if (!entry) return <>{children}</>;
+    if (!identity) return <>{children}</>;
 
-    const label = getCodexEntryLabel(entry);
+    const label = getCodexEntryLabel(identity);
     const textParts = referenceTextParts(source, label);
     const tooltip = showTooltip && tooltipCoords
         ? ReactDOM.createPortal(
             <BaseTooltip coords={tooltipCoords} onMouseEnter={clearHideTimer} onMouseLeave={hideTooltipSoon}>
                 <div className="questExplorer-codexTooltip" id={tooltipId} role="tooltip">
                     <strong>{label}</strong>
-                    <span>{codexKindLine(entry.exportKind, entry.kind, entry.category)}</span>
+                    <span>{entry
+                        ? codexKindLine(entry.exportKind, entry.kind, entry.category)
+                        : formatCodexKindLabel(identity.routeKind)}
+                    </span>
                     {tooltipLines.length > 0 ? (
                         <div className="questExplorer-codexTooltipPreview">
                             {tooltipLines.map((line, index) => (
-                                <p key={`${entry.entryKey}:preview:${index}`}>
+                                <p key={`${identity.entryKey}:preview:${index}`}>
                                     {renderDescriptionLine(formatCodexMajorFactionText(line))}
                                 </p>
                             ))}
                         </div>
+                    ) : previewStatus === "error" || previewStatus === "missing" ? (
+                        <span className="questExplorer-codexTooltipStatus" aria-live="polite">
+                            Preview unavailable. The Codex link remains available.
+                        </span>
+                    ) : !entry ? (
+                        <span className="questExplorer-codexTooltipStatus" aria-live="polite">
+                            Loading Codex preview…
+                        </span>
                     ) : null}
                 </div>
             </BaseTooltip>,
@@ -156,7 +173,7 @@ export function QuestCodexReferenceLink({
     if (showTooltip) {
         if (presentation === "compactReward") {
             const compactPrimary = textParts.matchedEntity ? textParts.entityText : label;
-            const compactKind = compactRewardKindLabel(source, textParts, entry.exportKind, entry.kind);
+            const compactKind = compactRewardKindLabel(source, textParts, identity.routeKind, entry?.kind);
 
             return (
                 <span
@@ -184,7 +201,7 @@ export function QuestCodexReferenceLink({
                     </span>
                     <a
                         className="questExplorer-codexOpenLink"
-                        href={codexEntryHref(entry)}
+                        href={codexIdentityHref(identity)}
                         aria-label={`Open ${label} in Codex`}
                         onClick={stopContainingAction}
                         onMouseDown={stopContainingAction}
@@ -225,7 +242,7 @@ export function QuestCodexReferenceLink({
                 ) : null}
                 <a
                     className="questExplorer-codexOpenLink"
-                    href={codexEntryHref(entry)}
+                    href={codexIdentityHref(identity)}
                     aria-label={`Open ${label} in Codex`}
                     onClick={stopContainingAction}
                     onMouseDown={stopContainingAction}
@@ -242,7 +259,7 @@ export function QuestCodexReferenceLink({
     return (
         <a
             className="questExplorer-codexMetaLink"
-            href={codexEntryHref(entry)}
+            href={codexIdentityHref(identity)}
             title={`Open ${label} in Codex`}
             onClick={stopContainingAction}
             onMouseDown={stopContainingAction}
