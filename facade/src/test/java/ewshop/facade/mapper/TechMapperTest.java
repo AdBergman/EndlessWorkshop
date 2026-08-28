@@ -156,7 +156,7 @@ class TechMapperTest {
                 .descriptionLines(List.of())
                 .unlocks(List.of())
                 .techCoords(new TechCoords(0.1, 0.1))
-                .factions(Set.of("Necrophages", "Kin", "Tahuk"))
+                .factions(Set.of("Faction Necrophage", "Kin", "Tahuk"))
                 .build();
 
         TechDto techDto = TechMapper.toDto(tech);

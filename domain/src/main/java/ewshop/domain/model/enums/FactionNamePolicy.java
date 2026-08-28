@@ -68,7 +68,7 @@ public final class FactionNamePolicy {
         if (value == null) return null;
         if (BLOCKED_MAJOR_FACTIONS.contains(value)) return null;
 
-        MajorFaction faction = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
+        MajorFaction faction = knownMajorFaction(value);
         if (faction == null) {
             throw new IllegalArgumentException("Unknown imported major faction: " + raw);
         }
@@ -84,7 +84,7 @@ public final class FactionNamePolicy {
         String value = trimToNull(raw);
         if (value == null) return null;
 
-        MajorFaction known = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
+        MajorFaction known = knownMajorFaction(value);
         if (known != null) return known.getDisplayName();
         if (BLOCKED_MAJOR_FACTIONS.contains(value)) return null;
 
@@ -123,6 +123,17 @@ public final class FactionNamePolicy {
         if (raw == null) return null;
         String value = raw.trim();
         return value.isEmpty() ? null : value;
+    }
+
+    private static MajorFaction knownMajorFaction(String value) {
+        MajorFaction exactMatch = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
+        if (exactMatch != null) return exactMatch;
+
+        if (value.startsWith("Faction_") || value.startsWith("Faction ")) {
+            return ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value.substring("Faction_".length()));
+        }
+
+        return null;
     }
 
     private static String humanizeFactionKey(String value) {

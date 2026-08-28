@@ -31,10 +31,32 @@ let inflightLoad: Promise<void> | null = null;
 
 export const normalizeTechKey = (key: string | null | undefined) => (key ?? "").trim();
 
+const normalizeTechFaction = (faction: string): string => {
+    const normalized = faction.trim().toUpperCase().replace(/^FACTION[\s_-]+/, "");
+
+    if (normalized === "ASPECT" || normalized === "ASPECTS") return "ASPECTS";
+    if (
+        normalized === "KIN" ||
+        normalized === "KIN OF SHEREDYN" ||
+        normalized === "KINOFSHEREDYN"
+    ) return "KIN";
+    if (
+        normalized === "LORD" ||
+        normalized === "LORDS" ||
+        normalized === "LAST LORD" ||
+        normalized === "LASTLORD" ||
+        normalized === "LASTLORDS"
+    ) return "LORDS";
+    if (normalized === "NECROPHAGE" || normalized === "NECROPHAGES") return "NECROPHAGES";
+    if (normalized === "MUKAG" || normalized === "TAHUK") return "TAHUK";
+
+    return faction.trim().toUpperCase();
+};
+
 const normalizeTech = (tech: Tech): Tech => ({
     ...tech,
     techKey: normalizeTechKey(tech.techKey),
-    factions: (tech.factions ?? []).map((faction) => faction.toUpperCase()),
+    factions: (tech.factions ?? []).map(normalizeTechFaction),
     technologyPrerequisiteTechKeys: stringList(tech.technologyPrerequisiteTechKeys),
     exclusiveTechnologyPrerequisiteTechKeys: stringList(tech.exclusiveTechnologyPrerequisiteTechKeys),
     descriptionLines: (tech.descriptionLines ?? []).filter(

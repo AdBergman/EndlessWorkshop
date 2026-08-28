@@ -265,13 +265,13 @@ class TechImportMapperTest {
     @Test
     void toDomain_shouldCanonicalizeFactionKeyWithoutEnumBinding() {
         TechImportTechDto knownFaction = new TechImportTechDto(
-                "Mukag_Technology_02",
-                "Celestial Scrying",
+                "Necrophage_Technology_00",
+                "Fungal Lab",
                 null,
                 false,
-                1,
-                "Discovery",
-                "Mukag",
+                2,
+                "Development",
+                "Faction_Necrophage",
                 true,
                 false,
                 false,
@@ -302,7 +302,7 @@ class TechImportMapperTest {
                 List.of()
         );
 
-        assertThat(TechImportMapper.toDomain(knownFaction).factionDisplayName()).isEqualTo("Tahuk");
+        assertThat(TechImportMapper.toDomain(knownFaction).factionDisplayName()).isEqualTo("Necrophages");
         assertThat(TechImportMapper.toDomain(futureFaction).factionDisplayName()).isEqualTo("New Major Faction");
     }
 
