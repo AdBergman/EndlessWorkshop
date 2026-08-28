@@ -190,13 +190,14 @@ class CodexFacadeImplTest {
     }
 
     @Test
-    void returnsOnlyRequestedCategoryFromCategoryScopedServiceQuery() {
+    void returnsOnlyRequestedCategoryFromCachedFullCatalog() {
         CodexService codexService = mock(CodexService.class);
         CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
 
-        when(codexService.getCodexEntriesByExportKind("populations")).thenReturn(List.of(
-                codexEntry("populations", "Population_Minor_Ametrine", "Ametrine", List.of("Public population.")),
-                codexEntry("populations", "Population_Internal", "% Internal", List.of("Filtered entry."))
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("Populations", "Population_Minor_Ametrine", "Ametrine", List.of("Public population.")),
+                codexEntry("populations", "Population_Internal", "% Internal", List.of("Filtered entry.")),
+                codexEntry("tech", "Tech_Industry", "Industry", List.of("Unrelated technology."))
         ));
 
         assertThat(facade.getCodexEntriesByCategory(" Populations "))
@@ -209,11 +210,12 @@ class CodexFacadeImplTest {
         CodexService codexService = mock(CodexService.class);
         CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
 
-        when(codexService.getCodexEntriesByExportKind("bonuses")).thenReturn(List.of(
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
                 codexEntry("bonuses", "Status_Unit_Hobbled", "Hobbled", "Status", "Status", List.of("Status entry."), List.of()),
                 codexEntry("bonuses", "ActionCostModifier_Test", "Action Cost", "Cost Modifier", "Cost Modifier", List.of("Modifier entry."), List.of()),
                 codexEntry("bonuses", "ActionCostModifier_Private", "% Internal Modifier", "Cost Modifier", "Cost Modifier", List.of("Filtered modifier."), List.of()),
-                codexEntry("bonuses", "Bonus_Test", "Ordinary Bonus", "Bonus", "Bonus", List.of("Bonus entry."), List.of())
+                codexEntry("bonuses", "Bonus_Test", "Ordinary Bonus", "Bonus", "Bonus", List.of("Bonus entry."), List.of()),
+                codexEntry("populations", "Population_Minor_Ametrine", "Ametrine", List.of("Unrelated population."))
         ));
 
         assertThat(facade.getCodexEntriesByCategory("statuses"))
@@ -228,7 +230,9 @@ class CodexFacadeImplTest {
     void unknownCategoryReturnsEmptyList() {
         CodexService codexService = mock(CodexService.class);
         CodexFacadeImpl facade = new CodexFacadeImpl(codexService, new CodexFilterService());
-        when(codexService.getCodexEntriesByExportKind("unknown")).thenReturn(List.of());
+        when(codexService.getAllCodexEntries()).thenReturn(List.of(
+                codexEntry("abilities", "Ability_A", "Ability A", List.of("Public ability."))
+        ));
 
         assertThat(facade.getCodexEntriesByCategory("unknown")).isEmpty();
     }

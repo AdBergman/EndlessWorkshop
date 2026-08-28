@@ -128,11 +128,8 @@ public class FacadeConfig {
     }
 
     @Bean
-    public CodexImportAdminFacade codexImportAdminFacade(
-            CodexImportService codexImportService,
-            CodexService codexService
-    ) {
-        return new CodexImportAdminFacadeImpl(codexImportService, codexService);
+    public CodexImportAdminFacade codexImportAdminFacade(CodexImportService codexImportService) {
+        return new CodexImportAdminFacadeImpl(codexImportService);
     }
 
     @Bean

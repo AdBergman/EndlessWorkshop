@@ -3,7 +3,6 @@ package ewshop.facade.impl;
 import ewshop.domain.command.CodexImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.CodexImportService;
-import ewshop.domain.service.CodexService;
 import ewshop.facade.dto.importing.ImportSummaryDto;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
@@ -22,9 +21,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         CodexImportBatchDto dto = new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -45,7 +42,6 @@ class CodexImportAdminFacadeImplTest {
         ImportSummaryDto summary = facade.importCodex(dto);
 
         assertTrue(codexImportService.called);
-        assertEquals(1, codexService.getAllCalls);
         List<CodexImportSnapshot> snapshots = codexImportService.capturedSnapshots;
         assertEquals(1, snapshots.size());
         assertEquals("equipment", snapshots.get(0).exportKind());
@@ -61,8 +57,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -112,8 +107,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -147,8 +141,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -160,7 +153,6 @@ class CodexImportAdminFacadeImplTest {
         ));
 
         assertEquals(List.of("futureKind"), codexImportService.capturedExportKinds);
-        assertEquals(1, codexService.getAllCalls);
     }
 
     @Test
@@ -169,8 +161,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -205,8 +196,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -252,8 +242,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -281,8 +270,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -312,8 +300,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -343,8 +330,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -390,12 +376,7 @@ class CodexImportAdminFacadeImplTest {
     @Test
     void importCodex_rejectsBlankExportKind() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
-        RecordingCodexService codexService = new RecordingCodexService();
-
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(
-                codexImportService,
-                codexService
-        );
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         CodexImportBatchDto dto = new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -409,18 +390,12 @@ class CodexImportAdminFacadeImplTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> facade.importCodex(dto));
         assertEquals("exportKind is missing", ex.getMessage());
         assertFalse(codexImportService.called);
-        assertEquals(0, codexService.getAllCalls);
     }
 
     @Test
     void importCodex_rejectsDuplicateEntryKeys() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
-        RecordingCodexService codexService = new RecordingCodexService();
-
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(
-                codexImportService,
-                codexService
-        );
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         CodexImportBatchDto dto = new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -437,18 +412,12 @@ class CodexImportAdminFacadeImplTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> facade.importCodex(dto));
         assertEquals("Duplicate entryKey in import file: Hero_A", ex.getMessage());
         assertFalse(codexImportService.called);
-        assertEquals(0, codexService.getAllCalls);
     }
 
     @Test
     void importCodex_returnsFailedSummary_whenAllRowsAreInvalid() {
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(new ImportResult());
-        RecordingCodexService codexService = new RecordingCodexService();
-
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(
-                codexImportService,
-                codexService
-        );
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         CodexImportBatchDto dto = new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -465,7 +434,6 @@ class CodexImportAdminFacadeImplTest {
         assertEquals(1, summary.counts().failed());
         assertEquals(1, summary.diagnostics().errors().size());
         assertFalse(codexImportService.called);
-        assertEquals(0, codexService.getAllCalls);
     }
 
     @Test
@@ -474,8 +442,7 @@ class CodexImportAdminFacadeImplTest {
         result.incrementInserted();
 
         RecordingCodexImportService codexImportService = new RecordingCodexImportService(result);
-        RecordingCodexService codexService = new RecordingCodexService();
-        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService, codexService);
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(codexImportService);
 
         ImportSummaryDto summary = facade.importCodex(new CodexImportBatchDto(
                 "Endless Legend 2",
@@ -516,17 +483,4 @@ class CodexImportAdminFacadeImplTest {
         }
     }
 
-    private static final class RecordingCodexService extends CodexService {
-        private int getAllCalls;
-
-        private RecordingCodexService() {
-            super(null);
-        }
-
-        @Override
-        public List<ewshop.domain.model.Codex> getAllCodexEntries() {
-            getAllCalls++;
-            return List.of();
-        }
-    }
 }

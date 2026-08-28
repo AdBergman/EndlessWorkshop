@@ -3,7 +3,6 @@ package ewshop.facade.impl;
 import ewshop.domain.command.CodexImportSnapshot;
 import ewshop.domain.model.results.ImportResult;
 import ewshop.domain.service.CodexImportService;
-import ewshop.domain.service.CodexService;
 import ewshop.facade.dto.importing.*;
 import ewshop.facade.dto.importing.codex.CodexImportBatchDto;
 import ewshop.facade.dto.importing.codex.CodexImportEntryDto;
@@ -18,12 +17,9 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
     private static final int MAX_ERRORS = 50;
 
     private final CodexImportService codexImportService;
-    private final CodexService codexService;
 
-    public CodexImportAdminFacadeImpl(CodexImportService codexImportService,
-                                      CodexService codexService) {
+    public CodexImportAdminFacadeImpl(CodexImportService codexImportService) {
         this.codexImportService = codexImportService;
-        this.codexService = codexService;
     }
 
     @Override
@@ -100,8 +96,6 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
                 errors,
                 buildDetails(snapshots, received)
         );
-
-        codexService.getAllCodexEntries();
 
         return ImportSummaryDto.of("codex", counts, diagnostics, durationMs);
     }

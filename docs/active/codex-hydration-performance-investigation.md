@@ -1,6 +1,6 @@
 # Codex Hydration Architecture
 
-Updated: 2026-08-21
+Updated: 2026-08-28
 
 ## Status
 
@@ -54,16 +54,21 @@ Backend endpoints:
 | `GET /api/codex?category=<kind>` | Complete public DTOs for one normalized category |
 | `GET /api/codex` | Full public dataset, loaded only for global search or legacy entry-only URLs |
 
-The category controller path uses a repository query by `export_kind`; it does
-not call `findAll()` and filter the complete table. `statuses` and `modifiers`
-are derived from the stored `bonuses` export kind, then filtered by the same
-normalization used by summary counts. Every response passes through the existing
-public Codex filter; complete-entry responses also use the relation-alias mapper.
-Category results share the existing `codex` cache with category-specific keys,
-and existing import eviction clears the whole cache. The identity response uses
-that cache under its own key, so the same import eviction invalidates it. Identity
-`routeKind` uses the same derived `statuses`/`modifiers` normalization as summary
-and category routing.
+The server keeps one synchronized, process-local raw Codex catalog cache. A
+cold summary, category, full-entry, or identity request reconstructs that
+catalog once; concurrent cold callers share the same repository load. Category
+responses prefilter the cached list in memory by source `exportKind` before
+public filtering and DTO mapping, so the HTTP response remains category-scoped
+without a category-specific database query. `statuses` and `modifiers` both
+prefilter stored `bonuses` rows, then use the same normalization as summary
+counts.
+
+Every response passes through the existing public Codex filter; complete-entry
+responses also use the relation-alias mapper. The identity response retains its
+derived cache key, while import eviction clears both it and the raw catalog.
+Identity `routeKind` uses the same derived `statuses`/`modifiers` normalization
+as summary and category routing. The raw catalog has no TTL or scheduled warm:
+it is reconstructed only after import invalidation or application restart.
 
 Frontend state keeps summary and full-load state separately from:
 
@@ -179,6 +184,20 @@ from dequeuing further speculative requests.
   direct route loads bypass the prefetch queue.
 
 ## Performance Baseline And Expected Change
+
+The backend persistence regression test added on 2026-08-28 uses 205 Codex
+parents with values in all three ordered element collections. Before the fetch
+change it measured 616 prepared statements: one root query plus three queries
+per parent. Targeted Hibernate subselect fetching reduced the same complete
+mapping to four statements: one root query plus one query for each collection.
+The normal Maven test run now enforces an upper bound of six statements.
+
+Admin Import no longer reconstructs the full catalog after every successful
+file. Each file writes its snapshot, evicts Codex cache entries, and returns.
+After all files succeed, the existing frontend refresh requests full entries
+and identities in parallel; synchronized raw-catalog caching collapses those
+requests to one repository load. Later summary, category, full, and identity
+reads reuse process memory until the next import or restart.
 
 The 2026-06-24 local snapshot contained approximately 2,588 entries. Its merged
 API-shaped full payload was about 2.46 MB raw and 195 KB gzipped. Largest source
