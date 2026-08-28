@@ -29,6 +29,13 @@ const kinFaction: FactionInfo = {
     uiLabel: "Kin",
 };
 
+const necrophageFaction: FactionInfo = {
+    isMajor: true,
+    enumFaction: Faction.NECROPHAGES,
+    minorName: null,
+    uiLabel: "Necrophages",
+};
+
 const baseTechs = new Map<string, Tech>([
     [
         "Tech_First",
@@ -150,5 +157,28 @@ describe("TechTree selected tech interactions", () => {
 
         expect(screen.getByTestId("selected-techs")).toBeEmptyDOMElement();
         expect(screen.getByTestId("selected-faction")).toHaveTextContent("Lords");
+    });
+
+    it("renders an imported Necrophage-exclusive tech for the selected faction", () => {
+        useTechStore.getState().replaceTechs([
+            tech({
+                techKey: "Necrophage_Technology_00",
+                name: "Fungal Lab",
+                era: 2,
+                factions: ["Faction Necrophage"],
+                coords: { xPct: 73.4959, yPct: 27.5294 },
+            }),
+        ]);
+        useFactionSelectionStore.getState().setSelectedFaction(necrophageFaction);
+
+        render(
+            <MemoryRouter initialEntries={["/tech"]}>
+                <TechTree era={2} maxUnlockedEra={2} onEraChange={vi.fn()} />
+            </MemoryRouter>
+        );
+
+        const node = screen.getByTestId("tech-node");
+        expect(node).toHaveStyle({ left: "73.4959%", top: "27.5294%" });
+        expect(useTechStore.getState().getTechByKey("Necrophage_Technology_00")?.name).toBe("Fungal Lab");
     });
 });
