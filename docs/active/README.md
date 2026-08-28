@@ -1,6 +1,6 @@
 # Active Documentation Index
 
-Current as of 2026-08-17.
+Current as of 2026-08-28.
 
 ## Purpose
 
@@ -48,6 +48,7 @@ index, then select the smallest relevant doc set for the task type.
 | Backend implementation | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | `AGENTS.md`; broad cleanup planning may also read `docs/backend/backend-documentation-and-agent-rules-review-2026-08-17.md` |
 | Backend API contract change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | Relevant `api` controller tests and affected frontend type/client/store/rendering tests |
 | Backend import change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/java-code-style.md` | `docs/active/import-history-and-data-freshness-design.md`; DB Exporter work also starts with `docs/active/db-exporter-ewshop-handoff-ledger.md` |
+| Codex import performance | `docs/active/codex-import-performance-implementation-plan.md` | `docs/active/codex-hydration-performance-investigation.md`, backend import docs |
 | Backend persistence/Flyway change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/dependency-and-ci-maintenance.md` | Relevant infrastructure migration/roundtrip tests |
 | Generated SEO backend change | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/backend/backend-deploy-smoke-checklist.md`, `docs/backend/seo-architecture.md` | `docs/backend/seo-backend-review.md` when planning cleanup |
 | Backend documentation/architecture review | `docs/backend/backend-architecture-and-testing-guidelines.md`, `docs/documentation-guidelines.md` | `docs/backend/backend-documentation-and-agent-rules-review-2026-08-17.md` |
@@ -208,6 +209,13 @@ index, then select the smallest relevant doc set for the task type.
   - Read when: improving `/codex` load time, adding Codex summary/scoped
     endpoints, or changing Codex store hydration behavior.
   - Status: active performance investigation.
+
+- `docs/active/codex-import-performance-implementation-plan.md`
+  - Purpose: actionable plan to remove Codex import cache-rebuild and
+    persistence query amplification while preserving Neon scale-to-zero.
+  - Read when: implementing or reviewing Codex import persistence fetching,
+    cache invalidation/warming, category reads, or Admin Import refresh changes.
+  - Status: ready-for-implementation performance plan.
 
 ### Codex Category Evolution Docs
 
