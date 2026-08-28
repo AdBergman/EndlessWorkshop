@@ -18,6 +18,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,13 +44,58 @@ class CodexIdentityCacheTest {
                     .containsExactly("Ability_A");
             assertThat(facade.getCodexIdentities()).extracting(identity -> identity.entryKey())
                     .containsExactly("Ability_A");
-            assertThat(repository.findCalls).isEqualTo(1);
+            assertThat(repository.findCalls()).isEqualTo(1);
 
             importService.importCodex(List.of(snapshot("Ability_B", "Ability B")));
 
             assertThat(facade.getCodexIdentities()).extracting(identity -> identity.entryKey())
                     .containsExactly("Ability_B");
-            assertThat(repository.findCalls).isEqualTo(2);
+            assertThat(repository.findCalls()).isEqualTo(2);
+        }
+    }
+
+    @Test
+    void concurrentFullAndIdentityReadsShareOneCanonicalCatalogLoad() throws Exception {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().setActiveProfiles("codex-identity-cache-test");
+            context.register(TestConfig.class);
+            context.refresh();
+
+            CodexFacade facade = context.getBean(CodexFacade.class);
+            InMemoryCodexRepository repository = context.getBean(InMemoryCodexRepository.class);
+            repository.blockFindAll();
+
+            ExecutorService executor = Executors.newFixedThreadPool(2);
+            try {
+                CountDownLatch callersReady = new CountDownLatch(2);
+                CountDownLatch startCalls = new CountDownLatch(1);
+                Future<?> fullEntries = executor.submit(() -> {
+                    callersReady.countDown();
+                    startCalls.await();
+                    return facade.getAllCodexEntries();
+                });
+                Future<?> identities = executor.submit(() -> {
+                    callersReady.countDown();
+                    startCalls.await();
+                    return facade.getCodexIdentities();
+                });
+
+                assertThat(callersReady.await(2, TimeUnit.SECONDS)).isTrue();
+                startCalls.countDown();
+                assertThat(repository.awaitFirstFind()).isTrue();
+                assertThat(repository.awaitSecondFind()).isFalse();
+                repository.releaseFindAll();
+
+                fullEntries.get(2, TimeUnit.SECONDS);
+                identities.get(2, TimeUnit.SECONDS);
+
+                assertThat(facade.getCodexSummary()).hasSize(1);
+                assertThat(facade.getCodexEntriesByCategory("abilities")).hasSize(1);
+                assertThat(repository.findCalls()).isEqualTo(1);
+            } finally {
+                repository.releaseFindAll();
+                executor.shutdownNow();
+            }
         }
     }
 
@@ -86,7 +137,11 @@ class CodexIdentityCacheTest {
 
     static class InMemoryCodexRepository implements CodexRepository {
         private List<Codex> entries;
-        private int findCalls;
+        private final AtomicInteger findCalls = new AtomicInteger();
+        private final CountDownLatch firstFindStarted = new CountDownLatch(1);
+        private final CountDownLatch secondFindStarted = new CountDownLatch(1);
+        private final CountDownLatch releaseFind = new CountDownLatch(1);
+        private volatile boolean blockFind;
 
         InMemoryCodexRepository(Codex initialEntry) {
             this.entries = List.of(initialEntry);
@@ -94,15 +149,37 @@ class CodexIdentityCacheTest {
 
         @Override
         public List<Codex> findAll() {
-            findCalls += 1;
+            int call = findCalls.incrementAndGet();
+            if (call == 1) {
+                firstFindStarted.countDown();
+            } else if (call == 2) {
+                secondFindStarted.countDown();
+            }
+            if (blockFind) {
+                await(releaseFind, 2, TimeUnit.SECONDS);
+            }
             return entries;
         }
 
-        @Override
-        public List<Codex> findAllByExportKind(String exportKind) {
-            return entries.stream()
-                    .filter(entry -> exportKind.equals(entry.getExportKind()))
-                    .toList();
+        int findCalls() {
+            return findCalls.get();
+        }
+
+        void blockFindAll() {
+            blockFind = true;
+        }
+
+        boolean awaitFirstFind() {
+            return await(firstFindStarted, 2, TimeUnit.SECONDS);
+        }
+
+        boolean awaitSecondFind() {
+            return await(secondFindStarted, 200, TimeUnit.MILLISECONDS);
+        }
+
+        void releaseFindAll() {
+            blockFind = false;
+            releaseFind.countDown();
         }
 
         @Override
@@ -113,6 +190,15 @@ class CodexIdentityCacheTest {
             ImportResult result = new ImportResult();
             snapshots.forEach(ignored -> result.incrementInserted());
             return result;
+        }
+
+        private static boolean await(CountDownLatch latch, long timeout, TimeUnit unit) {
+            try {
+                return latch.await(timeout, unit);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while coordinating cache test", ex);
+            }
         }
     }
 

@@ -215,7 +215,7 @@ index, then select the smallest relevant doc set for the task type.
     persistence query amplification while preserving Neon scale-to-zero.
   - Read when: implementing or reviewing Codex import persistence fetching,
     cache invalidation/warming, category reads, or Admin Import refresh changes.
-  - Status: ready-for-implementation performance plan.
+  - Status: implemented locally; production smoke and Neon observation pending.
 
 ### Codex Category Evolution Docs
 

@@ -1,6 +1,8 @@
 package ewshop.infrastructure.persistence.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,12 +43,14 @@ public class CodexEntity {
     private String svgIconKey;
 
     @ElementCollection
+    @Fetch(FetchMode.SUBSELECT)
     @CollectionTable(name = "codex_description_lines", joinColumns = @JoinColumn(name = "codex_id"))
     @OrderColumn(name = "line_index")
     @Column(name = "line", nullable = false, length = 800)
     private List<String> descriptionLines = new ArrayList<>();
 
     @ElementCollection
+    @Fetch(FetchMode.SUBSELECT)
     @CollectionTable(name = "codex_reference_keys", joinColumns = @JoinColumn(name = "codex_id"))
     @OrderColumn(name = "ref_index")
     @Column(name = "ref_key", nullable = false, length = 220)
@@ -59,6 +63,7 @@ public class CodexEntity {
     private String sectionsJson;
 
     @ElementCollection
+    @Fetch(FetchMode.SUBSELECT)
     @CollectionTable(name = "codex_public_context_keys", joinColumns = @JoinColumn(name = "codex_id"))
     @OrderColumn(name = "context_index")
     @Column(name = "context_key", nullable = false, length = 220)

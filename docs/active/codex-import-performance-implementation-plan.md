@@ -4,8 +4,9 @@ Updated: 2026-08-28
 
 ## Status
 
-Ready for implementation after the active Codex identity-hydration work is
-merged or explicitly rebased into the implementation branch.
+Implemented locally on 2026-08-28, stacked on the active Codex
+identity-hydration branch. Automated verification is complete; production smoke
+and the seven-day Neon observation remain pending deployment.
 
 This plan addresses the measured Codex import slowdown without introducing an
 asynchronous job system, distributed cache, scheduled cache warmer, or new
@@ -80,7 +81,7 @@ The import summary's `durationMs` did not expose this cost because
 `codexService.getAllCodexEntries()`. The HTTP request still waited for that
 call.
 
-The current runtime path is:
+The pre-change runtime path was:
 
 ```text
 Admin Import page
@@ -94,8 +95,32 @@ Admin Import page
   -> one final frontend loadEntries({ force: true })
 ```
 
-This means a 22-file import can rebuild the same full catalog 22 times in the
+This meant a 22-file import could rebuild the same full catalog 22 times in the
 backend and then request it once more from the frontend.
+
+## Implementation Results
+
+Local verification on 2026-08-28 produced these results:
+
+- the new 205-row persistence regression test failed against the old mapping at
+  616 prepared statements;
+- targeted `@Fetch(FetchMode.SUBSELECT)` reduced the same complete mapping to
+  four prepared statements;
+- concurrent full-entry and identity reads caused one repository `findAll()`;
+- subsequent summary and previously unseen category reads caused no additional
+  repository call;
+- import eviction caused the next identity read to refill once and expose the
+  replacement snapshot;
+- multi-file Admin Import refreshed Codex once after success and did not refresh
+  after a stopped/failed sequence;
+- the ignored two-entry Codex fixture completed through the local Admin Import
+  HTTP endpoint in 6 ms server-side (67 ms round trip), with both rows unchanged
+  and no failures;
+- the full Maven test suite, all 899 frontend tests, TypeScript compilation, and
+  the production frontend build passed.
+
+The persistence regression class is named `CodexRepositoryReadPlanTest`, not
+`*IT`, so the repository's normal Surefire test run executes it in CI.
 
 ## Constraints
 
@@ -257,7 +282,7 @@ on timing.
 Files:
 
 - add
-  `infrastructure/src/test/java/ewshop/infrastructure/persistence/adapters/CodexRepositoryReadPlanIT.java`;
+  `infrastructure/src/test/java/ewshop/infrastructure/persistence/adapters/CodexRepositoryReadPlanTest.java`;
 - use existing `CodexEntity`, `CodexJpaRepository`, `CodexRepositoryAdapter`,
   and `CodexMapper`.
 
@@ -477,7 +502,7 @@ Run focused tests during implementation:
 
 ```sh
 ./mvnw -pl infrastructure -am test \
-  -Dtest=CodexRepositoryReadPlanIT \
+  -Dtest=CodexRepositoryReadPlanTest \
   -Dsurefire.failIfNoSpecifiedTests=false
 
 ./mvnw -pl facade -am test \
@@ -603,21 +628,21 @@ listed trigger.
 
 The approach is complete when all of the following are true:
 
-- [ ] A query-count integration test guards all three Codex element
+- [x] A query-count integration test guards all three Codex element
   collections.
-- [ ] A cold full catalog read meets the subselect bound, or the documented
+- [x] A cold full catalog read meets the subselect bound, or the documented
   batch fallback bound is selected with evidence.
-- [ ] A successful Codex import POST never warms the full catalog in the
+- [x] A successful Codex import POST never warms the full catalog in the
   backend facade.
-- [ ] The frontend performs one final refresh after all selected Codex files.
-- [ ] Full, summary, category, and identity reads share one synchronized raw
+- [x] The frontend performs one final refresh after all selected Codex files.
+- [x] Full, summary, category, and identity reads share one synchronized raw
   catalog cache.
-- [ ] A warm request for a previously unseen category performs zero Codex SQL.
-- [ ] Import eviction causes the next reader to see the newly imported data.
-- [ ] Ordinary and bonus-derived category responses are contract-equivalent to
+- [x] A warm request for a previously unseen category performs zero Codex SQL.
+- [x] Import eviction causes the next reader to see the newly imported data.
+- [x] Ordinary and bonus-derived category responses are contract-equivalent to
   the current behavior.
-- [ ] Backend and affected frontend verification pass.
-- [ ] Active hydration documentation describes the new server-side cache
+- [x] Backend and affected frontend verification pass.
+- [x] Active hydration documentation describes the new server-side cache
   behavior.
 - [ ] Production smoke confirms correct import results and one expected Neon
   activity window.

@@ -34,14 +34,6 @@ public class CodexRepositoryAdapter implements CodexRepository {
                 .toList();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Codex> findAllByExportKind(String exportKind) {
-        return codexJpaRepository.findAllByExportKindIgnoreCase(exportKind).stream()
-                .map(codexMapper::toDomain)
-                .toList();
-    }
-
     private enum UpsertOutcome { INSERTED, UPDATED, UNCHANGED }
 
     @Override

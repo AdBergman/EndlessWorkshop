@@ -536,6 +536,57 @@ describe("AdminImportPage", () => {
             "/api/admin/import/codex",
         ]);
         expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledWith("codex");
+        expect(mockedRefreshStoresAfterAdminImport).toHaveBeenCalledTimes(1);
+    });
+
+    it("stops codex bulk import after a failed file without refreshing", async () => {
+        const user = userEvent.setup();
+        const codexUnits = createJsonFile("codex-units.json", JSON.stringify({
+            exportKind: "units",
+            entries: [{ entryKey: "Unit_Test", displayName: "Unit Test" }],
+        }));
+        const codexTech = createJsonFile("codex-tech.json", JSON.stringify({
+            exportKind: "tech",
+            entries: [{ entryKey: "Tech_Test", displayName: "Tech Test" }],
+        }));
+        const codexDistricts = createJsonFile("codex-districts.json", JSON.stringify({
+            exportKind: "districts",
+            entries: [{ entryKey: "District_Test", displayName: "District Test" }],
+        }));
+        let postCount = 0;
+        vi.stubGlobal("fetch", vi.fn((_url: string, init?: RequestInit) => {
+            if (init?.method === "POST") {
+                postCount++;
+                return Promise.resolve(postCount === 1
+                    ? jsonResponse(importSummary("codex"))
+                    : jsonResponse({ message: "Import failed" }, 500));
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 204,
+                headers: { get: () => null },
+                json: vi.fn(),
+                text: vi.fn().mockResolvedValue(""),
+            });
+        }));
+
+        renderAdminImportPage();
+        await waitForUnlockedPage();
+
+        await user.click(screen.getByRole("button", { name: /Import codex files/i }));
+        dropFilesByTitle(
+            /Drag & drop your Codex JSON files here/i,
+            [codexUnits, codexTech, codexDistricts]
+        );
+
+        await screen.findByText(codexUnits.name);
+        await user.click(screen.getByRole("button", { name: /^Import all codex$/i }));
+        await screen.findByText(/Import stopped after tech failed/i);
+
+        const postCalls = vi.mocked(fetch).mock.calls.filter(([, init]) => init?.method === "POST");
+        expect(postCalls).toHaveLength(2);
+        expect(mockedRefreshStoresAfterAdminImport).not.toHaveBeenCalled();
+        expect(screen.queryByText(/All selected Codex files imported successfully/i)).not.toBeInTheDocument();
     });
 
     it("accepts arbitrary non-empty codex import kinds", async () => {

@@ -43,7 +43,10 @@ public class CodexFacadeImpl implements CodexFacade {
                 ? "bonuses"
                 : normalizedCategory;
         CodexFilterResult filterResult = codexFilterService.filterForCodexApi(
-                codexService.getCodexEntriesByExportKind(sourceExportKind)
+                codexService.getAllCodexEntries().stream()
+                        .filter(entry -> entry != null
+                                && sourceExportKind.equalsIgnoreCase(trimToEmpty(entry.getExportKind())))
+                        .toList()
         );
 
         return toDtos(filterResult).stream()
