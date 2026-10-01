@@ -260,10 +260,10 @@ describe("AdminImportPage", () => {
 
         await waitForUnlockedPage();
 
+        expect(await screen.findByText("Success")).toBeInTheDocument();
+        expect(screen.getByText("Last import record")).toBeInTheDocument();
         expect(mockedApiClient.getLatestImportAdmin).toHaveBeenCalledWith("valid-token");
-        expect(await screen.findByText("Last import record")).toBeInTheDocument();
         expect(screen.getByText(/Bulk imports are recorded one file at a time/i)).toBeInTheDocument();
-        expect(screen.getByText("Success")).toBeInTheDocument();
         expect(screen.getByText("Endless Legend 2 v0.82")).toBeInTheDocument();
         expect(screen.getByText("22 Jun 2026")).toBeInTheDocument();
         expect(screen.getByText(/1 imported · 0 skipped · 0 failed · 2505 received/i)).toBeInTheDocument();
