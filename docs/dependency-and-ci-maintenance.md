@@ -54,10 +54,10 @@ to a release published today. See the [Dependabot options reference](https://doc
 ### Current Dependency Follow-Up
 
 The October 2026 backend, security, Node, Actions, frontend tooling, and
-React/router batches (#79–#84) are merged and deployed. The Admin Import test
+React/router and jest-dom batches (#79–#85) are merged and validated. The Admin Import test
 race is repaired in [#88](https://github.com/AdBergman/EndlessWorkshop/pull/88):
-wait for loaded import data before checking its metadata. Jest-dom 7 (#85) is
-awaiting fresh CI. PRs are the detailed review and validation records.
+wait for loaded import data before checking its metadata. PRs are the detailed
+review and validation records.
 
 [The paired jsdom 30/Vitest 5 upgrade (#86)](https://github.com/AdBergman/EndlessWorkshop/pull/86)
 remains held until **3 October 2026 after 13:31 Europe/Stockholm**, when Vitest
@@ -73,8 +73,8 @@ typecheck, build, lint, and audit on the actual combined result. Wait for each
 runtime batch's production deploy and smoke checks before merging the next.
 
 Framer Motion 13 is explicitly deferred: the current application has no identified
-feature, bug, or security requirement for this major migration. Close the current
-proposal and revisit in November 2026, or earlier for a relevant fix/security
+feature, bug, or security requirement for this major migration. The original proposal is closed;
+revisit in November 2026, or earlier for a relevant fix/security
 advisory. Do not permanently ignore the dependency or suppress security alerts.
 The superseded bot proposals should stay closed; each has a replacement PR or
 this explicit deferral. Keep automatic merging disabled.
