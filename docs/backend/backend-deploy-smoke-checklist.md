@@ -54,6 +54,17 @@ When changing generated SEO persistence, verify:
 - The host mount exists.
 - Regenerated pages and `sitemap.xml` survive container restart or redeploy.
 
+When changing generated SEO analytics, deploy the renderer and use **Regenerate
+SEO pages** in `/admin/import` (or the authenticated
+`POST /api/admin/seo/regenerate`) to update the persisted HTML. Redeploy alone
+does not rewrite existing pages. Check `/encyclopedia`, one category page, and
+one entity page for exactly one Cloudflare Web Analytics beacon using the same
+site token as the SPA shells. In a browser without analytics blocking, confirm
+that the beacon loads and its POST to `cloudflareinsights.com/cdn-cgi/rum`
+succeeds. Missing entry-page beacons can hide external arrivals while later SPA
+page views are recorded with an internal referrer; past missing events cannot
+be recovered by regenerating HTML.
+
 ## Change Discipline
 
 - Do not weaken deploy smoke to make a deployment pass without recording the

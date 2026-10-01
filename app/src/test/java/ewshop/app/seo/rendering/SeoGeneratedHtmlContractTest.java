@@ -53,6 +53,21 @@ class SeoGeneratedHtmlContractTest {
                 .contains("<section class=\"seo-section entity-page__section entity-page__references\"> <h2 class=\"seo-heading\">Related</h2>")
                 .contains("<a class=\"seo-chip\" href=\"/encyclopedia/units/sentinel\" data-entry-key=\"Unit_Sentinel\">Sentinel</a>")
                 .doesNotContain("Missing_Key");
+
+        assertAnalyticsBeacon(html);
+    }
+
+    @Test
+    void tracksEncyclopediaIndexAndCategoryEntryPages() {
+        assertAnalyticsBeacon(renderer.renderEncyclopediaRootHtml(List.of()));
+        assertAnalyticsBeacon(renderer.renderEncyclopediaKindHtml("tech", List.of()));
+    }
+
+    private static void assertAnalyticsBeacon(String html) {
+        String beacon = "<script defer src=\"https://static.cloudflareinsights.com/beacon.min.js\" "
+                + "data-cf-beacon='{\"token\": \"ddf9aa99d6af4a199aceb33b44806912\"}'></script>";
+        assertThat(html).containsOnlyOnce(beacon);
+        assertThat(html.indexOf(beacon)).isLessThan(html.indexOf("</head>"));
     }
 
     private static String normalizeHtml(String html) {
