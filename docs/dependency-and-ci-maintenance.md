@@ -174,6 +174,10 @@ then allowed to pass the normal deploy gate.
 
 ## Runtime Version Policy
 
+- Frontend tooling stays on Node 24 LTS. `.nvmrc` defines the exact local and
+  GitHub Actions version; use `nvm install` / `nvm use` from the repository root.
+- Keep the Docker frontend build image aligned with `.nvmrc` when accepting a
+  Node update. A Docker-only bot update needs this companion change.
 - Backend Java is JDK 26.
 - Keep the root Maven `<java.version>`, GitHub Actions Java setup, Docker
   build/runtime images, README, and backend architecture guidance aligned to
