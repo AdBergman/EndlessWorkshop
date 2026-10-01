@@ -103,6 +103,7 @@ public class SeoPageRenderer {
                     <meta name="twitter:image" content="%s" />
                     <script type="application/ld+json">%s</script>
                     <script type="application/ld+json">%s</script>
+                    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
                 </head>
                 <body class="seo-page">
                 <header class="seo-topbar">
@@ -302,6 +303,7 @@ public class SeoPageRenderer {
                     <meta name="twitter:description" content="%s" />
                     <meta name="twitter:image" content="%s" />
                     <script type="application/ld+json">%s</script>
+                    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "ddf9aa99d6af4a199aceb33b44806912"}'></script>
                 </head>
                 <body class="seo-page">
                 <header class="seo-topbar">
