@@ -260,8 +260,8 @@ describe("AdminImportPage", () => {
 
         await waitForUnlockedPage();
 
-        expect(mockedApiClient.getLatestImportAdmin).toHaveBeenCalledWith("valid-token");
         expect(await screen.findByText("Last import record")).toBeInTheDocument();
+        expect(mockedApiClient.getLatestImportAdmin).toHaveBeenCalledWith("valid-token");
         expect(screen.getByText(/Bulk imports are recorded one file at a time/i)).toBeInTheDocument();
         expect(screen.getByText("Success")).toBeInTheDocument();
         expect(screen.getByText("Endless Legend 2 v0.82")).toBeInTheDocument();
