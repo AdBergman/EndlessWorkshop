@@ -48,6 +48,7 @@ build/
 
 # Misc caches
 /frontend/.cache/
+/frontend/.vitest/
 
 # Logs
 *.log
