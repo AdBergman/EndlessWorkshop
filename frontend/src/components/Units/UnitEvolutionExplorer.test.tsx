@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation, useNavigate } from "react-router-dom";
 import { UnitEvolutionExplorer } from "@/components/Units/UnitEvolutionExplorer";
@@ -206,6 +206,31 @@ describe("/units smoke behavior", () => {
                 evolutionTierIndex: 1,
             }),
         ]);
+    });
+
+    it.each([
+        ["Faction_SandShaper", "Sand Shaper"],
+        ["Faction_KinOfSheredyn02", "Kin Of Sheredyn02"],
+        ["Faction_Tormented", "Tormented"],
+    ])("opens imported %s units while keeping the five top-nav faction buttons", async (key, faction) => {
+        mockedApiClient.getUnits.mockResolvedValue([unit({unitKey: "Unit_Live", displayName: "Live Scout", faction})]);
+        const { container } = render(
+            <MemoryRouter initialEntries={[`/units?faction=${key}&unitKey=Unit_Live`]}>
+                <TopContainer /><UnitEvolutionExplorer /><LocationProbe />
+            </MemoryRouter>
+        );
+        await waitFor(() => expect(container.querySelector(".unitCarouselContainer")).toHaveTextContent("Live Scout"));
+        expect(useFactionSelectionStore.getState().selectedFaction.factionKey).toBe(key);
+        expect(within(container.querySelector("header")!).getAllByRole("button")).toHaveLength(5);
+    });
+
+    it.each(["Dungeon", "New People"])("shows imported minor faction %s units", async (faction) => {
+        mockedApiClient.getUnits.mockResolvedValue([
+            unit({ unitKey: "Unit_Minor_Live", displayName: "Live Minor Scout", faction, isMajorFaction: false }),
+        ]);
+        const { container } = renderExplorer("/units?faction=kin&unitKey=Unit_Minor_Live&minor=1");
+        await waitFor(() => expect(container.querySelector(".unitCarouselContainer")).toHaveTextContent("Live Minor Scout"));
+        expect(screen.getByRole("button", { name: "Hide minor faction units" })).toHaveAttribute("aria-pressed", "true");
     });
 
     it("hydrates selected unit URL params and renders the evolution chain from unitStore records", async () => {

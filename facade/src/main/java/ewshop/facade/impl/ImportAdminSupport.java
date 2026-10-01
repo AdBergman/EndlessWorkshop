@@ -1,6 +1,7 @@
 package ewshop.facade.impl;
 
 import ewshop.facade.dto.importing.ImportCountDto;
+import ewshop.facade.dto.importing.ImportIssueDto;
 
 import java.util.HashSet;
 import java.util.List;
@@ -8,6 +9,14 @@ import java.util.Set;
 import java.util.function.Function;
 
 final class ImportAdminSupport {
+
+    static void refusePartialSnapshot(int failed, List<ImportIssueDto> errors) {
+        if (failed > 0) {
+            String detail = errors.isEmpty() ? "" : " First error: " + errors.getFirst().details();
+            throw new IllegalArgumentException("Snapshot has " + failed
+                    + " invalid rows; no data was written or deleted." + detail);
+        }
+    }
 
     private ImportAdminSupport() {}
 

@@ -708,6 +708,19 @@ describe("useCodexStore", () => {
         expect(state.entriesByKind.abilities).toHaveLength(3);
     });
 
+    it("keeps numbered alternate faction records in the frontend collection", async () => {
+        mockedApiClient.getCodex.mockResolvedValue([
+            { exportKind: "factions", entryKey: "Faction_KinOfSheredyn102", displayName: "Kin 102", descriptionLines: [], referenceKeys: [] },
+            { exportKind: "minorfactions", entryKey: "MinorFaction_NewPeople102", displayName: "New People 102", descriptionLines: [], referenceKeys: [] },
+        ]);
+
+        await useCodexStore.getState().loadEntries();
+
+        expect(useCodexStore.getState().entries.map((entry) => entry.entryKey)).toEqual([
+            "Faction_KinOfSheredyn102", "MinorFaction_NewPeople102",
+        ]);
+    });
+
     it("publishes and auto-downloads a dev-only token audit exactly once when explicitly requested", async () => {
         window.history.replaceState({}, "", "/codex?codexAudit=1");
         const downloadClick = vi.fn();

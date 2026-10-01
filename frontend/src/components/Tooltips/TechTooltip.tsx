@@ -1,3 +1,4 @@
+import { factionRouteValue } from "@/utils/factionIdentity";
 import React, { useMemo, useState } from "react";
 import { District, Improvement, Tech, Unit, TechUnlockRef } from "@/types/dataTypes";
 import BaseTooltip from "./BaseTooltip";
@@ -49,7 +50,7 @@ const TechTooltip: React.FC<TechTooltipProps> = ({ hoveredTech, onMouseEnter, on
 
     const handleCopyLink = () => {
         if (!selectedFaction) return;
-        const faction = selectedFaction.uiLabel.toLowerCase();
+        const faction = encodeURIComponent(factionRouteValue(selectedFaction));
         const tech = hoveredTech.name.toLowerCase().replace(/\s+/g, "_");
         const link = `${window.location.origin}/tech?faction=${faction}&tech=${tech}`;
         navigator.clipboard.writeText(link).then(() => {

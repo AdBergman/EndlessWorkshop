@@ -304,7 +304,7 @@ class CodexFacadeIntegrationTest extends BaseIT {
     }
 
     @Test
-    void importCodexThroughFacade_doesNotExposeUnavailableFactionOrEmpireActions() {
+    void importCodexThroughFacade_preservesNewFactionAndEmpireActions() {
         codexImportAdminFacade.importCodex(batch("actions", List.of(
                 entry("FactionActionTypeMukag_PublicAction", "Public Faction Action", "Faction Action", "Action", List.of("Line"), List.of()),
                 entry("FactionActionTypeUnknown_TestAction", "Unknown Test Action", "Faction Action", "Action", List.of("Line"), List.of()),
@@ -312,8 +312,8 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 entry("EmpireActionTypeMukag_PublicAction", "Public Empire Action", "Empire Action", "Action", List.of("Line"), List.of()),
                 entry("EmpireActionTypeUnknown_TestAction", "Unknown Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
                 entry("EmpireActionTypeFutureFaction_TestAction", "Future Empire Test Action", "Empire Action", "Action", List.of("Line"), List.of()),
-                entry("ActionTypeRaiseSandRuin", "Unavailable Standalone Action", "Action", "Action", List.of("Line"), List.of()),
-                entry("ConstructibleAction_TerraformationBiomeSandBanks", "Unavailable Constructible Action", "Terraforming Action", "Action", List.of("Line"), List.of()),
+                entry("ActionTypeRaiseSandRuin", "Sand Standalone Action", "Action", "Action", List.of("Line"), List.of()),
+                entry("ConstructibleAction_TerraformationBiomeSandBanks", "Sand Constructible Action", "Terraforming Action", "Action", List.of("Line"), List.of()),
                 entry(
                         "ActionTypeBuildBridge",
                         "Build Bridge",
@@ -329,7 +329,7 @@ class CodexFacadeIntegrationTest extends BaseIT {
                 )
         )));
         codexImportAdminFacade.importCodex(batch("bonuses", List.of(
-                entry("ActionCostModifier_RaiseRuin_Decrease_00", "Unavailable Action Cost Modifier", "Cost Modifier", "Bonus", List.of("Line"), List.of()),
+                entry("ActionCostModifier_RaiseRuin_Decrease_00", "Sand Action Cost Modifier", "Cost Modifier", "Bonus", List.of("Line"), List.of()),
                 entry("Status_Empire_PublicStatus", "Public Status", "Status", "Bonus", List.of("Line"), List.of("ActionCostModifier_RaiseRuin_Decrease_00"))
         )));
         entityManager.flush();
@@ -339,7 +339,7 @@ class CodexFacadeIntegrationTest extends BaseIT {
 
         assertThat(result).extracting(CodexDto::entryKey)
                 .contains("FactionActionTypeMukag_PublicAction", "EmpireActionTypeMukag_PublicAction", "ActionTypeBuildBridge")
-                .doesNotContain(
+                .contains(
                         "FactionActionTypeUnknown_TestAction",
                         "FactionActionTypeFutureFaction_TestAction",
                         "EmpireActionTypeUnknown_TestAction",
@@ -348,12 +348,15 @@ class CodexFacadeIntegrationTest extends BaseIT {
                         "ConstructibleAction_TerraformationBiomeSandBanks",
                         "ActionCostModifier_RaiseRuin_Decrease_00"
                 );
-        assertThat(findCodex(result, "ActionTypeBuildBridge").referenceKeys()).isEmpty();
-        assertThat(findCodex(result, "Status_Empire_PublicStatus").referenceKeys()).isEmpty();
+        assertThat(findCodex(result, "ActionTypeBuildBridge").referenceKeys()).containsExactly(
+                "FactionActionTypeUnknown_TestAction", "EmpireActionTypeUnknown_TestAction",
+                "ActionTypeRaiseSandRuin", "ConstructibleAction_TerraformationBiomeSandBanks");
+        assertThat(findCodex(result, "Status_Empire_PublicStatus").referenceKeys())
+                .containsExactly("ActionCostModifier_RaiseRuin_Decrease_00");
     }
 
     @Test
-    void importCodexThroughFacade_filtersHighConfidenceFactionScopedRowsAndRelationshipKeys() {
+    void importCodexThroughFacade_preservesNewFactionScopedRowsAndRelationshipKeys() {
         codexImportAdminFacade.importCodex(batch("traits", List.of(
                 entry("FactionTrait_Mukag_PublicTrait", "Public Trait", "Trait", "Trait", List.of("Line"), List.of()),
                 entry("FactionTrait_FutureFaction_Test", "Future Trait", "Trait", "Trait", List.of("Line"), List.of()),
@@ -406,7 +409,7 @@ class CodexFacadeIntegrationTest extends BaseIT {
                         "FactionTrait_Mukag_PublicBonus",
                         "Status_Empire_PublicStatus"
                 )
-                .doesNotContain(
+                .contains(
                         "FactionTrait_FutureFaction_Test",
                         "FactionQuest_FutureFaction_Test",
                         "FactionTrait_FutureFaction_TestBonus"
@@ -415,12 +418,17 @@ class CodexFacadeIntegrationTest extends BaseIT {
         CodexDto status = findCodex(result, "Status_Empire_PublicStatus");
         assertThat(status.referenceKeys())
                 .containsExactly(
+                        "FactionTrait_FutureFaction_Test",
+                        "FactionQuest_FutureFaction_Test",
+                        "FactionActionTypeFutureFaction_TestAction",
                         "FactionTrait_Mukag_PublicTrait",
                         "FactionQuest_Mukag_PublicQuest",
                         "Unit_FutureFaction_Test"
                 );
         assertThat(status.publicContextKeys())
                 .containsExactly(
+                        "FactionTrait_FutureFaction_Test",
+                        "FactionQuest_FutureFaction_Test",
                         "FactionTrait_Mukag_PublicTrait",
                         "FactionQuest_Mukag_PublicQuest",
                         "Hero_FutureFaction_Test"

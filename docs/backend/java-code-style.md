@@ -41,8 +41,10 @@ api -> facade -> domain <- infrastructure
 - Avoid broad `@NullMarked` unless the project adopts a formal nullness policy.
 - Annotations document contracts; they do not replace importer validation.
 - Bad importer data should fail or skip deliberately, with useful errors or logs.
-- Import facades map, diagnose, and orchestrate; domain services decide import policy and release gates; infrastructure persists accepted snapshots and owns DB mechanics.
-- Faction allow-lists are intentional release-safety gates, not incidental enum restrictions.
+- Import facades map, diagnose, and orchestrate; domain services decide import and content visibility policy; infrastructure persists accepted snapshots and owns DB mechanics.
+- The live game accepts arbitrary major, minor, and alternate faction keys. Never use enums or release allow-lists to determine faction eligibility; enums may supply legacy aliases and asset names.
+- Keep explicit visibility/prototype/placeholder/internal flags and garbage markers filtered. Validate malformed snapshots before persistence; partial failures must not prune previously imported content.
+- Tech availability derives from imported faction traits and affinities. Import rich factions before tech; the legacy trait map is only a bootstrap for installations with no major faction dataset.
 
 ## DTOs And Mappers
 

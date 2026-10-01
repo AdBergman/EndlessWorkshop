@@ -73,6 +73,8 @@ public class FactionImportAdminFacadeImpl implements FactionImportAdminFacade {
             return ImportSummaryDto.of("factions", counts, diagnostics, durationMs);
         }
 
+        ImportAdminSupport.refusePartialSnapshot(failed, errors);
+
         ImportAdminSupport.assertNoDuplicateKeys(
                 snapshots,
                 FactionImportSnapshot::factionKey,

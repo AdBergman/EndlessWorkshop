@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Faction, type FactionInfo, type Tech } from "@/types/dataTypes";
+import { type FactionInfo, type Tech } from "@/types/dataTypes";
+import { factionInfoForKey, factionIdentityToken } from "@/utils/factionIdentity";
 import { selectTechs, selectTechsByKey, useTechStore } from "@/stores/techStore";
 import { selectSetSelectedTechs, useTechPlannerStore } from "@/stores/techPlannerStore";
 import {
@@ -31,25 +32,7 @@ export function resolveFactionFromKeyHint(hint: unknown): FactionInfo | null {
     const raw = cleanString(hint);
     if (!raw) return null;
 
-    const normalized = raw.toLowerCase().replace(/[\s_-]+/g, "");
-
-    if (normalized.includes("lastlord") || normalized.includes("lastlords") || normalized === "lords") {
-        return { isMajor: true, enumFaction: Faction.LORDS, minorName: null, uiLabel: "Lords" };
-    }
-    if (normalized.includes("kinofsheredyn") || normalized === "kin") {
-        return { isMajor: true, enumFaction: Faction.KIN, minorName: null, uiLabel: "Kin" };
-    }
-    if (normalized.includes("mukag") || normalized.includes("tahuk")) {
-        return { isMajor: true, enumFaction: Faction.TAHUK, minorName: null, uiLabel: "Tahuk" };
-    }
-    if (normalized.includes("aspect")) {
-        return { isMajor: true, enumFaction: Faction.ASPECTS, minorName: null, uiLabel: "Aspects" };
-    }
-    if (normalized.includes("necro") || normalized.includes("necrophage")) {
-        return { isMajor: true, enumFaction: Faction.NECROPHAGES, minorName: null, uiLabel: "Necrophages" };
-    }
-
-    return null;
+    return factionInfoForKey(raw);
 }
 
 export function resolveImportedTechKeys(incomingTechKeys: unknown, techsByKey: Record<string, Tech>) {
@@ -149,14 +132,8 @@ export function useTechRouteHydration({ setEra, setImportToast }: UseTechRouteHy
 
         deepLinkAppliedRef.current = true;
 
-        const deepLinkFaction: FactionInfo = {
-            isMajor: true,
-            enumFaction: factionParam.toUpperCase() as Faction,
-            minorName: null,
-            uiLabel: factionParam.toLowerCase(),
-        };
-
-        if (!selectedFaction?.isMajor || selectedFaction.enumFaction !== deepLinkFaction.enumFaction) {
+        const deepLinkFaction = factionInfoForKey(factionParam);
+        if (!selectedFaction?.isMajor || factionIdentityToken(selectedFaction.factionKey ?? selectedFaction.enumFaction) !== factionIdentityToken(deepLinkFaction.factionKey)) {
             setSelectedFaction(deepLinkFaction);
         }
 

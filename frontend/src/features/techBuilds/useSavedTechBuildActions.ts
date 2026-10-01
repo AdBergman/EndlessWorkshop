@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { apiClient, type SavedTechBuild } from "@/api/apiClient";
 import { Faction, type FactionInfo } from "@/types/dataTypes";
+import { factionInfoForKey } from "@/utils/factionIdentity";
 import { selectSelectedTechs, selectSetSelectedTechs, useTechPlannerStore } from "@/stores/techPlannerStore";
 import {
     selectSelectedFaction,
@@ -8,26 +9,11 @@ import {
     useFactionSelectionStore,
 } from "@/stores/factionSelectionStore";
 
-const toFactionInfoFromEnum = (faction: Faction): FactionInfo => ({
-    isMajor: true,
-    enumFaction: faction,
-    uiLabel: String(faction).toLowerCase(),
-    minorName: null,
-});
-
 export const toFactionInfoFromSavedValue = (faction: string): FactionInfo => {
-    const label = String(faction ?? "").trim();
-    const enumKey = label.toUpperCase().replace(/[\s-]+/g, "_") as keyof typeof Faction;
-    const knownFaction = Faction[enumKey];
-
-    if (knownFaction) return toFactionInfoFromEnum(knownFaction);
-
-    return {
-        isMajor: true,
-        enumFaction: label as Faction,
-        uiLabel: label,
-        minorName: null,
-    };
+    const info = factionInfoForKey(faction);
+    return Object.values(Faction).includes(info.enumFaction as Faction)
+        ? { ...info, uiLabel: info.uiLabel.toLowerCase() }
+        : info;
 };
 
 export function useSavedTechBuildActions() {
@@ -50,7 +36,7 @@ export function useSavedTechBuildActions() {
             faction: FactionInfo = selectedFaction,
             techIds: string[] = selectedTechs
         ): Promise<SavedTechBuild> => {
-            return await apiClient.createSavedBuild(name, faction.enumFaction!.toString(), techIds);
+            return await apiClient.createSavedBuild(name, faction.factionKey ?? faction.enumFaction ?? faction.uiLabel, techIds);
         },
         [selectedFaction, selectedTechs]
     );

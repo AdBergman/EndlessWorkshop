@@ -307,7 +307,9 @@ export enum Faction {
 
 export interface FactionInfo {
     isMajor: boolean;
-    enumFaction: Faction | null;
+    /** Legacy selection value; arbitrary imported factions are supported. */
+    enumFaction: string | null;
+    factionKey?: string;
     uiLabel: string;
     minorName: string | null;
 }

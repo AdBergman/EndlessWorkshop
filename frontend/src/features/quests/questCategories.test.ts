@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Faction } from "@/types/dataTypes";
 import type { QuestExplorerEntry } from "@/types/questTypes";
 import {
+    majorFactionInfoForQuest,
     getQuestCategoryKey,
     getQuestCategoryLabel,
     questMatchesSelectedMajorFaction,
@@ -73,6 +74,19 @@ describe("quest category mapping", () => {
             uiLabel: "Lords",
             minorName: null,
         })).toBe(false);
+    });
+
+    it("supports unknown factions and exact alternate selection without an enum lookup", () => {
+        const sand = entry({ navigation: { ...entry().navigation, factionKey: "Faction_SandShaper" } });
+        const faction = majorFactionInfoForQuest(sand)!;
+        expect(faction.factionKey).toBe("Faction_SandShaper");
+        expect(questMatchesSelectedMajorFaction(sand, faction)).toBe(true);
+        expect(questMatchesSelectedMajorFaction(entry(), faction)).toBe(false);
+
+        const alternate = entry({ navigation: { ...entry().navigation, factionKey: "Faction_KinOfSheredyn02" } });
+        const selectedAlternate = majorFactionInfoForQuest(alternate)!;
+        expect(questMatchesSelectedMajorFaction(alternate, selectedAlternate)).toBe(true);
+        expect(questMatchesSelectedMajorFaction(entry(), selectedAlternate)).toBe(false);
     });
 
     it("does not faction-scope world, minor, or other quest categories", () => {

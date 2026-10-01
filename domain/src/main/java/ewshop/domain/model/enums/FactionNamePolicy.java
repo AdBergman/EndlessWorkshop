@@ -10,8 +10,8 @@ public final class FactionNamePolicy {
     private static final Set<String> BLOCKED_MAJOR_FACTIONS = Set.of("Placeholder");
     private static final Set<String> BLOCKED_MINOR_FACTIONS = Set.of();
 
-    // Add newly release-approved importer faction keys here.
-    private static final Map<String, MajorFaction> ALLOWED_MAJOR_IMPORT_FACTION_ALIASES = Map.ofEntries(
+    // Compatibility aliases for older exports and saved builds; never an import allow-list.
+    private static final Map<String, MajorFaction> MAJOR_FACTION_ALIASES = Map.ofEntries(
             entry("Aspect", MajorFaction.ASPECTS),
             entry("Aspects", MajorFaction.ASPECTS),
             entry("ASPECTS", MajorFaction.ASPECTS),
@@ -32,7 +32,7 @@ public final class FactionNamePolicy {
             entry("TORMENTED", MajorFaction.TORMENTED)
     );
 
-    private static final Map<String, String> ALLOWED_MINOR_IMPORT_FACTION_ALIASES = Map.ofEntries(
+    private static final Map<String, String> MINOR_FACTION_ALIASES = Map.ofEntries(
             entry("Ametrine", "Ametrine"),
             entry("Blackhammer", "Blackhammers"),
             entry("Blackhammers", "Blackhammers"),
@@ -76,8 +76,7 @@ public final class FactionNamePolicy {
     }
 
     public static String canonicalMajorDisplayName(String raw) {
-        MajorFaction faction = parseImportedMajorFaction(raw);
-        return faction == null ? null : faction.getDisplayName();
+        return canonicalMajorDisplayNameOrSelf(raw);
     }
 
     public static String canonicalMajorDisplayNameOrSelf(String raw) {
@@ -86,21 +85,24 @@ public final class FactionNamePolicy {
 
         MajorFaction known = knownMajorFaction(value);
         if (known != null) return known.getDisplayName();
-        if (BLOCKED_MAJOR_FACTIONS.contains(value)) return null;
+        if (BLOCKED_MAJOR_FACTIONS.contains(withoutPrefix(value, "Faction_", "Faction "))) return null;
 
-        return humanizeFactionKey(value);
+        return humanizeFactionKey(withoutPrefix(value, "Faction_", "Faction "));
+    }
+
+    public static String canonicalSavedFactionOrSelf(String raw) {
+        String value = trimToNull(raw);
+        if (value == null) return null;
+        MajorFaction known = knownMajorFaction(value);
+        return known == null ? value : known.getDisplayName();
     }
 
     public static String canonicalMinorDisplayName(String raw) {
         String value = trimToNull(raw);
         if (value == null) return null;
+        value = withoutPrefix(value, "MinorFaction_", "MinorFaction ");
         if (BLOCKED_MINOR_FACTIONS.contains(value)) return null;
-
-        String displayName = ALLOWED_MINOR_IMPORT_FACTION_ALIASES.get(value);
-        if (displayName == null) {
-            throw new IllegalArgumentException("Unknown imported minor faction: " + raw);
-        }
-        return displayName;
+        return MINOR_FACTION_ALIASES.getOrDefault(value, humanizeFactionKey(value));
     }
 
     public static String bestEffortMajorDisplayName(String raw) {
@@ -126,14 +128,21 @@ public final class FactionNamePolicy {
     }
 
     private static MajorFaction knownMajorFaction(String value) {
-        MajorFaction exactMatch = ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value);
+        MajorFaction exactMatch = MAJOR_FACTION_ALIASES.get(value);
         if (exactMatch != null) return exactMatch;
 
         if (value.startsWith("Faction_") || value.startsWith("Faction ")) {
-            return ALLOWED_MAJOR_IMPORT_FACTION_ALIASES.get(value.substring("Faction_".length()));
+            return MAJOR_FACTION_ALIASES.get(value.substring("Faction_".length()));
         }
 
         return null;
+    }
+
+    private static String withoutPrefix(String value, String... prefixes) {
+        for (String prefix : prefixes) {
+            if (value.startsWith(prefix)) return value.substring(prefix.length());
+        }
+        return value;
     }
 
     private static String humanizeFactionKey(String value) {

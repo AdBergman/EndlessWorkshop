@@ -52,9 +52,22 @@ class SavedTechBuildFacadeTest extends  BaseIT {
         assertThat(fetched).isPresent();
         assertThat(fetched.get().uuid()).isEqualTo(created.uuid());
         assertThat(fetched.get().name()).isEqualTo("Release Candidate Build");
-        assertThat(fetched.get().selectedFaction()).isEqualTo("New Major Faction");
+        assertThat(fetched.get().selectedFaction()).isEqualTo("NewMajorFaction");
         assertThat(fetched.get().techIds())
                 .containsExactly("Tech_FirstEra_One", "Tech_FirstEra_Two", "Tech_FirstEra_Three");
+    }
+
+    @Test
+    void preservesCanonicalNewAndAlternateFactionKeysWhenCreatingAndFetchingBuilds() {
+        for (String key : List.of("Faction_SandShaper", "Faction_KinOfSheredyn02")) {
+            SavedTechBuildDto created = savedTechBuildFacade.createSavedBuild(
+                    new CreateSavedTechBuildRequest("Live build", key, List.of("Technology_Common")));
+            entityManager.flush();
+            entityManager.clear();
+
+            assertThat(savedTechBuildFacade.getSavedBuildByUuid(created.uuid())).get()
+                    .satisfies(build -> assertThat(build.selectedFaction()).isEqualTo(key));
+        }
     }
 
     @Test

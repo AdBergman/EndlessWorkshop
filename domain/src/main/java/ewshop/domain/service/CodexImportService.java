@@ -13,11 +13,6 @@ import java.util.Objects;
 @Service
 public class CodexImportService {
 
-    private static final String ACTIONS_EXPORT_KIND = "actions";
-    private static final String BONUSES_EXPORT_KIND = "bonuses";
-    private static final String QUESTS_EXPORT_KIND = "quests";
-    private static final String TRAITS_EXPORT_KIND = "traits";
-
     private final CodexRepository codexRepository;
 
     public CodexImportService(CodexRepository codexRepository) {
@@ -37,20 +32,8 @@ public class CodexImportService {
     }
 
     private static boolean isImportableCodexSnapshot(CodexImportSnapshot snapshot) {
-        String exportKind = trimToEmpty(snapshot.exportKind());
-        if (ACTIONS_EXPORT_KIND.equalsIgnoreCase(exportKind)) {
-            return PublicReleaseFactionPolicy.isReleasedActionKey(snapshot.entryKey());
-        }
-        if (BONUSES_EXPORT_KIND.equalsIgnoreCase(exportKind)) {
-            return PublicReleaseFactionPolicy.isReleasedBonusKey(snapshot.entryKey());
-        }
-        if (QUESTS_EXPORT_KIND.equalsIgnoreCase(exportKind)) {
-            return PublicReleaseFactionPolicy.isReleasedFactionQuestKey(snapshot.entryKey());
-        }
-        if (TRAITS_EXPORT_KIND.equalsIgnoreCase(exportKind)) {
-            return PublicReleaseFactionPolicy.isReleasedFactionTraitKey(snapshot.entryKey());
-        }
-        return true;
+        return PublicContentPolicy.isPublicKey(snapshot.entryKey())
+                && PublicContentPolicy.isPublicDisplayName(snapshot.displayName());
     }
 
     private static CodexImportSnapshot cleanHiddenRelationshipKeys(CodexImportSnapshot snapshot) {
@@ -73,11 +56,8 @@ public class CodexImportService {
         if (keys == null || keys.isEmpty()) return List.of();
 
         return keys.stream()
-                .filter(PublicReleaseFactionPolicy::isPublicCodexRelationshipKey)
+                .filter(PublicContentPolicy::isPublicKey)
                 .toList();
     }
 
-    private static String trimToEmpty(String value) {
-        return value == null ? "" : value.trim();
-    }
 }

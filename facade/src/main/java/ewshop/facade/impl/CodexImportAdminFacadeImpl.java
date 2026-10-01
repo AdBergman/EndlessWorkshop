@@ -37,7 +37,12 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         List<ImportIssueDto> errors = new ArrayList<>();
         List<CodexImportSnapshot> snapshots = new ArrayList<>(received);
 
+        int filtered = 0;
         for (CodexImportEntryDto dto : rows) {
+            if (dto != null && dto.filteredFromImport()) {
+                filtered++;
+                continue;
+            }
             try {
                 snapshots.add(CodexImportMapper.toSnapshot(fileDto.exportKind(), dto));
             } catch (RuntimeException ex) {
@@ -47,7 +52,11 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
             }
         }
 
-        int failed = received - snapshots.size();
+        int failed = received - filtered - snapshots.size();
+
+        if (snapshots.isEmpty() && failed == 0) {
+            throw new IllegalStateException("Codex import produced 0 public entries; refusing to write/delete.");
+        }
 
         if (snapshots.isEmpty()) {
             long durationMs = System.currentTimeMillis() - startMs;
@@ -70,6 +79,8 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
             return ImportSummaryDto.of("codex", counts, diagnostics, durationMs);
         }
 
+        ImportAdminSupport.refusePartialSnapshot(failed, errors);
+
         ImportAdminSupport.assertNoDuplicateKeys(
                 snapshots,
                 CodexImportSnapshot::entryKey,
@@ -77,6 +88,7 @@ public class CodexImportAdminFacadeImpl implements CodexImportAdminFacade {
         );
 
         List<ImportCountDto> warnings = buildWarnings(fileDto, snapshots);
+        if (filtered > 0) warnings.add(new ImportCountDto("FILTERED_CODEX_ROWS", filtered));
 
         ImportResult result = codexImportService.importCodex(snapshots);
 

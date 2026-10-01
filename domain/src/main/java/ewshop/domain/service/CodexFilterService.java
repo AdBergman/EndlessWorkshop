@@ -63,13 +63,16 @@ public class CodexFilterService {
                     String normalizedDisplayName = normalizeDisplayName(rawDisplayName);
                     String normalizedEntryKey = trimToEmpty(entry.getEntryKey());
 
-                    if (!isValidDisplayName(rawDisplayName, normalizedDisplayName)) {
+                    boolean factionEntry = "factions".equals(normalizedExportKind) || "minorfactions".equals(normalizedExportKind);
+                    if (!PublicContentPolicy.isPublicKey(normalizedEntryKey)
+                            || !PublicContentPolicy.isPublicDisplayName(rawDisplayName)
+                            || !isValidDisplayName(rawDisplayName, normalizedDisplayName, factionEntry)) {
                         recordSkip(skippedEntries, skippedByReason, entry, INVALID_DISPLAY_NAME);
                         return;
                     }
 
                     List<String> meaningfulDescriptionLines = cleanMeaningfulTextList(entry.getDescriptionLines());
-                    if (meaningfulDescriptionLines.isEmpty() && !hasMeaningfulStructuredMetadata(entry)) {
+                    if (!factionEntry && meaningfulDescriptionLines.isEmpty() && !hasMeaningfulStructuredMetadata(entry)) {
                         recordSkip(skippedEntries, skippedByReason, entry, WEAK_DESCRIPTION_LINES);
                         return;
                     }
@@ -218,20 +221,20 @@ public class CodexFilterService {
                 && hasBalancedFormatting(normalized);
     }
 
-    private static boolean isValidDisplayName(String rawValue, String normalizedValue) {
+    private static boolean isValidDisplayName(String rawValue, String normalizedValue, boolean factionEntry) {
         String raw = trimToEmpty(rawValue);
         String normalized = normalizeDisplayName(normalizedValue);
         return !normalized.isBlank()
                 && isMeaningfulText(raw)
                 && isMeaningfulText(normalized)
-                && !containsUnsafeDisplayNamePattern(raw)
-                && !containsUnsafeDisplayNamePattern(normalized);
+                && !containsUnsafeDisplayNamePattern(raw, factionEntry)
+                && !containsUnsafeDisplayNamePattern(normalized, factionEntry);
     }
 
-    private static boolean containsUnsafeDisplayNamePattern(String value) {
+    private static boolean containsUnsafeDisplayNamePattern(String value, boolean factionEntry) {
         String normalized = trimToEmpty(value);
         return normalized.startsWith("%")
-                || DIGIT_CLUSTER_PATTERN.matcher(normalized).find();
+                || (!factionEntry && DIGIT_CLUSTER_PATTERN.matcher(normalized).find());
     }
 
     private static boolean hasBalancedFormatting(String value) {

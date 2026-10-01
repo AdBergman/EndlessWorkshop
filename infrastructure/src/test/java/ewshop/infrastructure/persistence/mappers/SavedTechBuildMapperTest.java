@@ -16,6 +16,16 @@ class SavedTechBuildMapperTest {
     private final SavedTechBuildMapper savedTechBuildMapper = new SavedTechBuildMapper();
 
     @Test
+    void roundTripsCanonicalKeysForNewAndAlternateFactions() {
+        for (String key : List.of("Faction_SandShaper", "Faction_KinOfSheredyn02")) {
+            SavedTechBuild build = SavedTechBuild.builder().faction(key).name("Live faction build").build();
+            SavedTechBuildEntity entity = savedTechBuildMapper.toEntity(build);
+            assertThat(entity.getFaction()).isEqualTo(key);
+            assertThat(savedTechBuildMapper.toDomain(entity).getFaction()).isEqualTo(key);
+        }
+    }
+
+    @Test
     void toDomain_shouldMapAllFields() {
         // Setup
         UUID uuid = UUID.randomUUID();

@@ -3,9 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { UnitCarousel } from "./UnitCarousel";
 import { EvolutionTreeViewer } from "./EvolutionTreeViewer";
 import { VeterancyLens } from "@/components/Units/VeterancyLens";
-import type { FactionInfo, Unit } from "@/types/dataTypes";
+import type { Unit } from "@/types/dataTypes";
 import { FACTION_COLORS } from "@/types/factionColors";
 import { getCarouselModelForFaction } from "@/lib/units/necrophageRoots";
+import { factionInfoForKey, factionIdentityToken, factionRouteValue } from "@/utils/factionIdentity";
+import { unitMatchesSelectedMajorFaction } from "@/utils/unitFaction";
 import { deriveUnit } from "@/lib/units/deriveUnit";
 import { isVeterancyApplicable } from "@/components/Units/utils/applyVeterancy";
 import { selectUnitError, selectUnitLoaded, selectUnitLoading, selectUnits, useUnitStore } from "@/stores/unitStore";
@@ -17,36 +19,6 @@ import {
 import "./UnitEvolutionExplorer.css";
 
 const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, "_").trim();
-const normFaction = (s: string | null | undefined) => normalize(String(s ?? ""));
-
-const toFactionInfo = (f: string): FactionInfo => ({
-    isMajor: true,
-    enumFaction: f.toUpperCase() as any, // legacy; toolbar/context still uses this
-    minorName: null,
-    uiLabel: f.toLowerCase(),
-});
-
-function doesUnitMatchSelectedMajorFaction(unit: Unit, selectedFaction: FactionInfo): boolean {
-    if (unit.isMajorFaction !== true) return false;
-    if (!selectedFaction?.isMajor) return false;
-
-    const uf = normFaction(unit.faction);
-    const label = normFaction(selectedFaction.uiLabel);
-    const enumKey = normFaction(selectedFaction.enumFaction as any);
-
-    const ufSingular = uf.endsWith("s") ? uf.slice(0, -1) : uf;
-    const labelSingular = label.endsWith("s") ? label.slice(0, -1) : label;
-    const enumSingular = enumKey.endsWith("s") ? enumKey.slice(0, -1) : enumKey;
-
-    return uf === label || uf === enumKey || ufSingular === labelSingular || ufSingular === enumSingular;
-}
-
-function isHiddenInUi(u: Unit): boolean {
-    const f = (u.faction ?? "").trim();
-    if (f === "Tormented") return true; // keep in DB, hide in /units for now
-    if (u.isMajorFaction === false && f === "Dungeon") return true; // hide minor "Dungeon" for now
-    return false;
-}
 
 function getUnitControlColors(unit: Unit | null): { border: string; accent: string } {
     if (!unit) return FACTION_COLORS.PLACEHOLDER;
@@ -106,10 +78,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
         // This effect is only reacting to toolbar state.
     }, [selectedFaction]);
 
-    const allVisibleUnits = useMemo(() => {
-        if (units.length === 0) return [];
-        return units.filter((u) => !isHiddenInUi(u));
-    }, [units]);
+    const allVisibleUnits = units;
 
     // Build the *faction-scoped* pool of units (not just roots),
     // then apply Necro carousel model (pinned larvae + tier-1 roots).
@@ -125,7 +94,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
 
         if (!selectedFaction?.isMajor) return { pinned: null, roots: [] };
 
-        const factionUnits = allVisibleUnits.filter((u) => doesUnitMatchSelectedMajorFaction(u, selectedFaction));
+        const factionUnits = allVisibleUnits.filter((u) => unitMatchesSelectedMajorFaction(u, selectedFaction));
         return getCarouselModelForFaction(factionUnits, false);
     }, [allVisibleUnits, selectedFaction, showMinorUnits]);
 
@@ -166,9 +135,9 @@ export const UnitEvolutionExplorer: React.FC = () => {
         }
 
         // 1) Faction from URL should win over toolbar if it's a real navigation event.
-        const fi = toFactionInfo(factionParam);
+        const fi = factionInfoForKey(factionParam);
         const factionMatches =
-            selectedFaction?.isMajor && selectedFaction.enumFaction === fi.enumFaction;
+            selectedFaction?.isMajor && factionIdentityToken(selectedFaction.factionKey ?? selectedFaction.enumFaction) === factionIdentityToken(fi.factionKey);
 
         if (!factionMatches) {
             setSelectedFaction(fi);
@@ -217,7 +186,7 @@ export const UnitEvolutionExplorer: React.FC = () => {
         const selectedUnit: Unit | null = carouselUnits[selectedIndex] || null;
         if (!selectedUnit) return;
 
-        const factionKey = normFaction(selectedFaction.uiLabel || (selectedFaction.enumFaction as any));
+        const factionKey = factionRouteValue(selectedFaction);
         const unitKey = selectedUnit.unitKey;
 
         const isMinor = selectedUnit.isMajorFaction === false;

@@ -1,4 +1,5 @@
 // TechTree.tsx
+import { factionMatchesSelection } from "@/utils/factionIdentity";
 import React, { useCallback, useMemo, useRef } from "react";
 import TechNode from "./TechNode";
 import { Tech } from "@/types/dataTypes";
@@ -56,17 +57,15 @@ const TechTree: React.FC<TechTreeProps> = ({ era, onEraChange, maxUnlockedEra })
     }, [selectedTechs, allTechs]);
 
     const currentFactionTechs = useMemo(() => {
-        const factionKey = selectedFaction.enumFaction?.toLowerCase() ?? "";
-        return allTechs.filter((t) => t.factions.some((f) => f.toLowerCase() === factionKey));
+        return allTechs.filter((t) => t.factions.some((f) => factionMatchesSelection(f, selectedFaction)));
     }, [selectedFaction, allTechs]);
 
     const eraTechsByEra = useMemo(() => {
-        const factionKey = selectedFaction.enumFaction?.toLowerCase() ?? "";
         const map: Record<number, Tech[]> = {};
         for (let e = MIN_ERA; e <= MAX_ERA; e++) {
             map[e] = allTechs.filter((t) => {
                 if (t.era !== e) return false;
-                return t.factions.some((f) => f.toLowerCase() === factionKey);
+                return t.factions.some((f) => factionMatchesSelection(f, selectedFaction));
             });
         }
         return map;

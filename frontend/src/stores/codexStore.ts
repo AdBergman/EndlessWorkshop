@@ -242,7 +242,7 @@ function normalizeEntries(rawEntries: CodexEntry[]): CodexEntry[] {
     return rawEntries
         .map(normalizeEntry)
         .filter((entry) => entry.entryKey.length > 0)
-        .filter((entry) => isValidDisplayName(entry.displayName));
+        .filter((entry) => isValidDisplayName(entry.displayName, ["factions", "minorfactions"].includes(entry.exportKind)));
 }
 
 function normalizeIdentities(rawIdentities: CodexIdentityRecord[]): CodexIdentityRecord[] {
@@ -253,7 +253,7 @@ function normalizeIdentities(rawIdentities: CodexIdentityRecord[]): CodexIdentit
             routeKind: (identity.routeKind ?? "").trim().toLowerCase(),
         }))
         .filter((identity) => identity.entryKey.length > 0 && identity.routeKind.length > 0)
-        .filter((identity) => isValidDisplayName(identity.displayName))
+        .filter((identity) => isValidDisplayName(identity.displayName, ["factions", "minorfactions"].includes(identity.routeKind)))
         .sort((left, right) => {
             const kindOrder = left.routeKind.localeCompare(right.routeKind);
             if (kindOrder !== 0) return kindOrder;

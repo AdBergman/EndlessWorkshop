@@ -790,3 +790,19 @@ Then update:
 - `docs/active/README.md` only if a new active doc was created;
 - `docs/current-action-priorities.md` only if the current direction or active
   source-of-truth docs changed.
+
+### 2026-10-01 - Live Faction Admission Policy
+
+- Direction: EWShop internal investigation and implementation.
+- Topic: new/alternate faction eligibility across import and frontend.
+- Decision/result: removed EWShop enum/release faction gates; retain explicit
+  non-public/prototype/placeholder/internal filtering. Rich faction traits now
+  drive tech availability. Top navigation remains the existing five factions.
+- Source: `docs/active/final-snapshot-import-hygiene-audit.md` (live policy).
+- Snapshot/export version: available local evidence remains game 0.82, June 22.
+  Regression fixtures cover SandShaper, unknown minors and alternate keys.
+- Follow-up: maintainer imports current live exports via Admin Import, rich
+  factions before tech, and verifies public APIs/UI after deployment. This is
+  an environment/data refresh, not a new exporter contract request.
+- Status: EWShop implemented; current production export/import verification
+  externally pending maintainer access.

@@ -105,6 +105,20 @@ describe("TechContainer routing regressions", () => {
         vi.stubGlobal("Image", originalImage);
     });
 
+    it("hydrates a new faction tech without an enum value or new faction assets", async () => {
+        vi.stubGlobal("Image", class {
+            onerror: (() => void) | null = null;
+            set src(_value: string) { queueMicrotask(() => this.onerror?.()); }
+        });
+        useTechStore.getState().replaceTechs([tech({techKey: "Technology_Sand", name: "Sand Wisdom", factions: ["Sand Shaper"]})]);
+        render(<MemoryRouter initialEntries={["/tech?faction=Faction_SandShaper&tech=Technology_Sand"]}>
+            <TechContainer /><Probe />
+        </MemoryRouter>);
+        await waitFor(() => expect(screen.getByTestId("selected-techs")).toHaveTextContent("Technology_Sand"));
+        expect(useFactionSelectionStore.getState().selectedFaction.factionKey).toBe("Faction_SandShaper");
+        expect(await screen.findByTestId("tech-node")).toHaveClass("selected");
+    });
+
     it("hydrates faction and selected tech from faction/tech deep links without changing URL semantics", async () => {
         window.history.pushState({}, "", "/tech?faction=kin&tech=workshop");
 
