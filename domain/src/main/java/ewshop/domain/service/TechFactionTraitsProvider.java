@@ -1,6 +1,11 @@
 package ewshop.domain.service;
 
 import org.springframework.stereotype.Component;
+import ewshop.domain.repository.FactionRepository;
+import ewshop.domain.model.enums.FactionNamePolicy;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 
 import java.util.Map;
 import java.util.Set;
@@ -8,8 +13,27 @@ import java.util.Set;
 @Component
 public class TechFactionTraitsProvider {
 
-    public Set<String> getAllowedFactions() {
-        return PublicReleaseFactionPolicy.releasedMajorFactionDisplayNames();
+    private final FactionRepository factionRepository;
+
+    public TechFactionTraitsProvider(FactionRepository factionRepository) {
+        this.factionRepository = factionRepository;
+    }
+
+    public Map<String, Set<String>> getFactionTraits() {
+        Map<String, Set<String>> imported = new LinkedHashMap<>();
+        for (var faction : factionRepository.findAll()) {
+            if ("minor".equalsIgnoreCase(faction.getFactionKind())
+                    || faction.getFactionKey().startsWith("MinorFaction_")) continue;
+            String name = FactionNamePolicy.canonicalMajorDisplayNameOrSelf(faction.getFactionKey());
+            if (name == null || name.isBlank()) continue;
+            Set<String> traits = new LinkedHashSet<>(faction.getTraitKeys());
+            if (faction.getAffinityKey() != null && !faction.getAffinityKey().isBlank()) {
+                traits.add(faction.getAffinityKey());
+            }
+            imported.put(name, traits);
+        }
+        // Older installations can import tech before the rich faction dataset exists.
+        return imported.isEmpty() ? legacyFactionTraits() : imported;
     }
 
     /**
@@ -17,7 +41,7 @@ public class TechFactionTraitsProvider {
      * - Quest-related trait keys intentionally omitted.
      * - Includes a few aliases (old vs new naming) to avoid exporter naming drift causing missing techs.
      */
-    public Map<String, Set<String>> getFactionTraits() {
+    private static Map<String, Set<String>> legacyFactionTraits() {
         return Map.of(
                 "Kin", Set.of(
                         "FactionAffinity_KinOfSheredyn",

@@ -15,7 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TechFactionGateEvaluatorTest {
 
-    private final TechFactionGateEvaluator evaluator = new TechFactionGateEvaluator(new TechFactionTraitsProvider());
+    private final TechFactionGateEvaluator evaluator = new TechFactionGateEvaluator(new TechFactionTraitsProvider(emptyFactionRepository()));
+
+    private static ewshop.domain.repository.FactionRepository emptyFactionRepository() {
+        var repository = org.mockito.Mockito.mock(ewshop.domain.repository.FactionRepository.class);
+        org.mockito.Mockito.when(repository.findAll()).thenReturn(List.of());
+        return repository;
+    }
 
     @Test
     void derivesVisibleFactionSpecificTechFromFactionKeyWhenTraitIsNotInStaticMap() {

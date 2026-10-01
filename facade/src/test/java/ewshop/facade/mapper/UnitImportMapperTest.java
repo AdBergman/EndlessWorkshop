@@ -145,8 +145,8 @@ class UnitImportMapperTest {
     }
 
     @Test
-    void rejectsUnknownMajorFactionRows() {
-        assertThatThrownBy(() -> UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+    void acceptsUnknownMajorFactionRows() {
+        assertThat(UnitImportMapper.toSnapshot(new UnitImportUnitDto(
                         "Unit_NewMajorFaction_Scout",
                         "Wayfinder",
                         "NewMajorFaction",
@@ -164,14 +164,12 @@ class UnitImportMapperTest {
                         List.of("A future major faction row."),
                         List.of(),
                         List.of()
-                )))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unknown imported major faction");
+                )).faction()).isEqualTo("New Major Faction");
     }
 
     @Test
-    void rejectsUnknownMinorFactionRows() {
-        assertThatThrownBy(() -> UnitImportMapper.toSnapshot(new UnitImportUnitDto(
+    void acceptsUnknownMinorFactionRows() {
+        assertThat(UnitImportMapper.toSnapshot(new UnitImportUnitDto(
                         "Unit_MinorFaction_NewMinorFaction",
                         "Glimmerhand",
                         "NewMinorFaction",
@@ -189,9 +187,7 @@ class UnitImportMapperTest {
                         List.of("A future minor faction row."),
                         List.of(),
                         List.of()
-                )))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unknown imported minor faction");
+                )).faction()).isEqualTo("New Minor Faction");
     }
 
     @Test

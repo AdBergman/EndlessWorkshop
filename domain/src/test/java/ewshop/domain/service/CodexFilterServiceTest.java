@@ -15,6 +15,18 @@ class CodexFilterServiceTest {
     private final CodexFilterService codexFilterService = new CodexFilterService();
 
     @Test
+    void servesThinAndNumberedFactionEntriesButStillExcludesExplicitJunk() {
+        CodexFilterResult result = codexFilterService.filterForCodexApi(List.of(
+                codexEntry("factions", "Faction_SandShaper", "Sandshapers", List.of()),
+                codexEntry("factions", "Faction_KinOfSheredyn102", "Kin 102", List.of()),
+                codexEntry("minorfactions", "MinorFaction_NewPeople", "New People", List.of()),
+                codexEntry("factions", "Faction_Prototype", "Prototype Faction", List.of("Prototype details")),
+                codexEntry("factions", "Faction_Old", "[DEPRECATED] Old Faction", List.of("Old details"))));
+        assertThat(result.codexEntries()).extracting(Codex::getEntryKey)
+                .containsExactlyInAnyOrder("Faction_SandShaper", "Faction_KinOfSheredyn102", "MinorFaction_NewPeople");
+    }
+
+    @Test
     void filtersInvalidCodexEntriesUsingFrontendMirroredRules() {
         CodexFilterResult result = codexFilterService.filter(List.of(
                 codexEntry("abilities", "Ability_ValidBracket", "[LuxuryResource01] Auric Coral", List.of("Should remain.")),

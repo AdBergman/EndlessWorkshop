@@ -3,6 +3,32 @@
 Status: active audit  
 Created: 2026-06-23
 
+## Live Faction Policy (2026-10-01)
+
+The game is live. EWShop accepts new major/minor factions, SandShaper, Tormented,
+Dungeon, and alternate faction keys throughout import, persistence, public APIs,
+Codex, units, tech routes, saved builds, and quest selection. Enums provide
+compatibility aliases, not admission rules. The frontend top navigation remains
+at the existing five factions until additional assets are available.
+
+Removed gates: major/minor unit allow-lists, Codex release/name/reference gates,
+frontend unit hiding and hard-coded route/quest identities. Thin faction Codex
+records and numbered alternate names are retained. Tech candidates and traits
+come from the rich faction dataset, with the previous trait map used only when
+no imported major factions exist. Source-specific tech remains scoped to its
+exact faction; exported trait prerequisites still apply.
+
+Explicit visibility flags, prototype classes, garbage key tokens and tagged
+placeholder/deprecated/internal names remain filtered. Faction/unit/tech/Codex
+imports refuse mixed valid/malformed snapshots before writes or deletions;
+filtered garbage rows are not malformed rows.
+
+Validation includes JSON-to-JPA-to-public-DTO integration coverage and frontend
+regressions for arbitrary/alternate keys, links, saved identity and the unchanged
+five-button navbar. The available local exports are still game 0.82 from June;
+a current live export and deployed Admin Import smoke check require maintainer
+access. See `docs/dependency-and-ci-maintenance.md` for import order.
+
 ## Executive Recommendation
 
 Release is not blocked by import hygiene.

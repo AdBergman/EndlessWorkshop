@@ -190,8 +190,8 @@ class UnitFacadeTest extends BaseIT {
         ImportSummaryDto firstImport = unitImportAdminFacade.importUnits(file);
         entityManager.flush();
 
-        assertThat(firstImport.counts().inserted()).isEqualTo(2);
-        assertThat(firstImport.counts().failed()).isEqualTo(1);
+        assertThat(firstImport.counts().inserted()).isEqualTo(3);
+        assertThat(firstImport.counts().failed()).isZero();
         assertThat(firstImport.diagnostics().warnings())
                 .anySatisfy(warning -> assertThat(warning.code()).isEqualTo("EMPTY_DESCRIPTION_LINES_IN_FILE"));
 
@@ -219,7 +219,8 @@ class UnitFacadeTest extends BaseIT {
         assertThat(result).extracting(UnitDto::unitKey)
                 .containsExactlyInAnyOrder(
                         "Unit_Kin_Root",
-                        "Unit_MinorFaction_MangroveOfHarmony"
+                        "Unit_MinorFaction_MangroveOfHarmony",
+                        "Unit_FutureFaction_Scout"
                 );
 
         UnitDto kin = findUnit(result, "Unit_Kin_Root");

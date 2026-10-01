@@ -64,8 +64,8 @@ const UnitTooltip: React.FC<UnitTooltipProps> = ({ hoveredUnit }) => {
 
     const unitsByKey = useUnitStore(selectUnitsByKey);
     const factionKey = derived.majorEnumFaction ?? "PLACEHOLDER";
-    const factionIconPath = !derived.isMinor && derived.majorEnumFaction
-        ? getFactionIconPath(data.faction ?? derived.majorEnumFaction)
+    const factionIconPath = !derived.isMinor && data.faction
+        ? getFactionIconPath(data.faction)
         : null;
     const factionColor = FACTION_COLORS[factionKey]?.border ?? FACTION_COLORS.PLACEHOLDER.border;
 

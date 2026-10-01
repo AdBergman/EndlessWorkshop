@@ -79,6 +79,8 @@ public class UnitImportAdminFacadeImpl implements UnitImportAdminFacade {
             return ImportSummaryDto.of("units", counts, diagnostics, durationMs);
         }
 
+        ImportAdminSupport.refusePartialSnapshot(failed, errors);
+
         ImportAdminSupport.assertNoDuplicateKeys(
                 snapshots,
                 UnitImportSnapshot::unitKey,

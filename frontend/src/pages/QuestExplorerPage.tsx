@@ -347,7 +347,7 @@ export default function QuestExplorerPage() {
                 if (
                     routeFaction
                     && requestedFactionSyncKeyRef.current !== requestedEntryKey
-                    && selectedFaction.enumFaction !== routeFaction.enumFaction
+                    && (selectedFaction.factionKey ?? selectedFaction.enumFaction) !== (routeFaction.factionKey ?? routeFaction.enumFaction)
                 ) {
                     requestedFactionSyncKeyRef.current = requestedEntryKey;
                     setSelectedFaction(routeFaction);
@@ -373,7 +373,7 @@ export default function QuestExplorerPage() {
         if (!selectedEntryKey || !visibleEntryKeys.has(selectedEntryKey)) {
             setSelectedEntryKey(firstVisibleRailEntryKey);
         }
-    }, [debugQuestProgression, entriesByKey, firstVisibleRailEntryKey, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, selectedFaction.enumFaction, setSelectedEntryKey, setSelectedFaction, visibleEntryKeys]);
+    }, [debugQuestProgression, entriesByKey, firstVisibleRailEntryKey, loaded, mode, navigate, requestedEntryKey, resolveEntryKey, selectedEntryKey, selectedFaction.enumFaction, selectedFaction.factionKey, setSelectedEntryKey, setSelectedFaction, visibleEntryKeys]);
 
     const categoryOptions = useMemo(() => (
         QUEST_CATEGORY_OPTIONS.map((option) => ({

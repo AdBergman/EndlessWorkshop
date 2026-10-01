@@ -25,7 +25,8 @@ describe("tech route hydration helpers", () => {
         expect(resolveFactionFromKeyHint("kin_of_sheredyn")?.enumFaction).toBe(Faction.KIN);
         expect(resolveFactionFromKeyHint("last-lords")?.enumFaction).toBe(Faction.LORDS);
         expect(resolveFactionFromKeyHint("necrophages")?.enumFaction).toBe(Faction.NECROPHAGES);
-        expect(resolveFactionFromKeyHint("unknown")).toBeNull();
+        expect(resolveFactionFromKeyHint("Faction_SandShaper")?.factionKey).toBe("Faction_SandShaper");
+        expect(resolveFactionFromKeyHint("Faction_KinOfSheredyn02")?.factionKey).toBe("Faction_KinOfSheredyn02");
     });
 
     it("resolves imported tech keys in incoming order and counts missing keys", () => {

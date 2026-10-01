@@ -10,12 +10,10 @@ import java.util.Set;
 @Service
 public class TechFactionGateEvaluator {
 
-    private final Map<String, Set<String>> factionTraits;
-    private final Set<String> allowedMajorFactions;
+    private final TechFactionTraitsProvider traitsProvider;
 
     public TechFactionGateEvaluator(TechFactionTraitsProvider traitsProvider) {
-        this.factionTraits = traitsProvider.getFactionTraits();
-        this.allowedMajorFactions = traitsProvider.getAllowedFactions();
+        this.traitsProvider = traitsProvider;
     }
 
     /**
@@ -34,7 +32,17 @@ public class TechFactionGateEvaluator {
     }
 
     public TechImportSnapshot withDerivedAvailableFactions(TechImportSnapshot s, Set<String> additionalMajorFactions) {
-        Set<String> candidateFactions = candidateFactions(additionalMajorFactions);
+        return withDerivedAvailableFactions(s, additionalMajorFactions, factionTraits());
+    }
+
+    public Map<String, Set<String>> factionTraits() {
+        return traitsProvider.getFactionTraits();
+    }
+
+    public TechImportSnapshot withDerivedAvailableFactions(
+            TechImportSnapshot s, Set<String> additionalMajorFactions, Map<String, Set<String>> factionTraits
+    ) {
+        Set<String> candidateFactions = candidateFactions(additionalMajorFactions, factionTraits.keySet());
 
         if (s.traitPrereqs() == null || s.traitPrereqs().isEmpty()) {
             if (s.factionDisplayName() != null) {
@@ -46,7 +54,8 @@ public class TechFactionGateEvaluator {
         Set<String> passing = new LinkedHashSet<>();
         for (String f : candidateFactions) {
             Set<String> traits = factionTraits.getOrDefault(f, Set.of());
-            if (passesTraitGate(s, traits)) {
+            if ((s.factionDisplayName() == null || s.factionDisplayName().equals(f))
+                    && passesTraitGate(s, traits)) {
                 passing.add(f);
             }
         }
@@ -58,8 +67,8 @@ public class TechFactionGateEvaluator {
         return s.withAvailableFactions(passing);
     }
 
-    private Set<String> candidateFactions(Set<String> additionalMajorFactions) {
-        LinkedHashSet<String> candidates = new LinkedHashSet<>(allowedMajorFactions);
+    private Set<String> candidateFactions(Set<String> additionalMajorFactions, Set<String> knownFactions) {
+        LinkedHashSet<String> candidates = new LinkedHashSet<>(knownFactions);
         if (additionalMajorFactions != null) {
             additionalMajorFactions.stream()
                     .filter(faction -> faction != null && !faction.isBlank())

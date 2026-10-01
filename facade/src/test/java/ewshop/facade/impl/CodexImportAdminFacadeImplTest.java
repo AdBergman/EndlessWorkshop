@@ -461,6 +461,32 @@ class CodexImportAdminFacadeImplTest {
         );
     }
 
+    @Test
+    void rejectsMixedInvalidSnapshotWithoutWritingTheValidEntry() {
+        RecordingCodexImportService service = new RecordingCodexImportService(new ImportResult());
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(service);
+        CodexImportBatchDto file = new CodexImportBatchDto("EL2", "1", "1", "now", "factions",
+                List.of(new CodexImportEntryDto("Faction_SandShaper", "Sandshapers", List.of(), List.of()),
+                        new CodexImportEntryDto(null, "Missing key", List.of(), List.of())));
+        assertThrows(IllegalArgumentException.class, () -> facade.importCodex(file));
+        assertFalse(service.called);
+    }
+
+    @Test
+    void filtersExplicitPrototypeFlagsAndDeprecatedNamesBeforeDisplayNormalization() {
+        RecordingCodexImportService service = new RecordingCodexImportService(new ImportResult());
+        CodexImportAdminFacadeImpl facade = new CodexImportAdminFacadeImpl(service);
+        CodexImportEntryDto prototype = new CodexImportEntryDto("Faction_NewPrototype", "Prototype", null, null,
+                List.of(), List.of(), List.of(), List.of(), List.of(), null,
+                null, null, true, true, null, null, null);
+        ImportSummaryDto summary = facade.importCodex(new CodexImportBatchDto("EL2", "1", "1", "now", "factions",
+                List.of(new CodexImportEntryDto("Faction_SandShaper", "Sandshapers", List.of(), List.of()), prototype,
+                        new CodexImportEntryDto("Faction_Old", "[DEPRECATED] Old", List.of(), List.of()))));
+        assertEquals(List.of("Faction_SandShaper"), service.capturedSnapshots.stream().map(CodexImportSnapshot::entryKey).toList());
+        assertEquals(0, summary.counts().failed());
+        assertTrue(summary.diagnostics().warnings().stream().anyMatch(w -> w.code().equals("FILTERED_CODEX_ROWS") && w.count() == 2));
+    }
+
     private static final class RecordingCodexImportService extends CodexImportService {
         private final ImportResult result;
         private List<CodexImportSnapshot> capturedSnapshots = List.of();

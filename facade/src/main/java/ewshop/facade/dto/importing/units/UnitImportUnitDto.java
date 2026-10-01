@@ -94,6 +94,7 @@ public record UnitImportUnitDto(
                 isBaseTemplate,
                 isPlaceholder,
                 isInternal
-        );
+        ) || ImportVisibilityPolicy.isNonPublicContent(unitKey, displayName)
+                || ImportVisibilityPolicy.isNonPublicContent(faction, null);
     }
 }

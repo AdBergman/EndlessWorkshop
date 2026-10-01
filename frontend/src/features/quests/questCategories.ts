@@ -1,4 +1,5 @@
-import { Faction, type FactionInfo } from "@/types/dataTypes";
+import { type FactionInfo } from "@/types/dataTypes";
+import { factionIdentityToken, factionInfoForKey } from "@/utils/factionIdentity";
 import type { QuestExplorerEntry } from "@/types/questTypes";
 
 export type QuestCategoryKey = "faction" | "minorFaction" | "world" | "other";
@@ -41,64 +42,18 @@ export function getQuestCategoryLabel(questType: string | null | undefined): str
     return categoryLabels.get(getQuestCategoryKey(questType)) ?? "Other Quests";
 }
 
-const normalizeToken = (value: string | null | undefined) =>
-    (value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 
-const majorFactionAliases: Record<Faction, string[]> = {
-    [Faction.KIN]: ["kin", "kinofsheredyn", "sheredyn"],
-    [Faction.LORDS]: ["lords", "lastlord", "lastlords"],
-    [Faction.TAHUK]: ["tahuk", "tahuks", "mukag"],
-    [Faction.ASPECTS]: ["aspect", "aspects"],
-    [Faction.NECROPHAGES]: ["necrophage", "necrophages"],
-};
-
-const majorFactionLabels: Record<Faction, string> = {
-    [Faction.KIN]: "Kin",
-    [Faction.LORDS]: "Lords",
-    [Faction.TAHUK]: "Tahuk",
-    [Faction.ASPECTS]: "Aspects",
-    [Faction.NECROPHAGES]: "Necrophages",
-};
-
-function selectedFactionAliases(selectedFaction: FactionInfo | null | undefined): string[] {
-    if (!selectedFaction?.isMajor || !selectedFaction.enumFaction) return [];
-
-    return [
-        selectedFaction.uiLabel,
-        selectedFaction.enumFaction,
-        ...majorFactionAliases[selectedFaction.enumFaction],
-    ].map(normalizeToken).filter(Boolean);
-}
-
-function questFactionTokens(entry: QuestExplorerEntry): string[] {
-    return [
-        entry.navigation.factionKey,
-        entry.navigation.factionName,
-        entry.navigation.questLineKey,
-        entry.navigation.questLineName,
-        entry.entryKey,
-    ].map(normalizeToken).filter(Boolean);
+function questFactionKey(entry: QuestExplorerEntry): string | null {
+    if (entry.navigation.factionKey) return entry.navigation.factionKey;
+    const questLine = entry.navigation.questLineKey ?? entry.entryKey;
+    const match = questLine?.match(/^FactionQuest_([^_]+)/);
+    return match ? `Faction_${match[1]}` : entry.navigation.factionName;
 }
 
 export function majorFactionInfoForQuest(entry: QuestExplorerEntry): FactionInfo | null {
     if (getQuestCategoryKey(entry.questType) !== "faction") return null;
-
-    const tokens = questFactionTokens(entry);
-    const matchingFaction = Object.values(Faction).find((faction) => {
-        const aliases = [faction, ...majorFactionAliases[faction]].map(normalizeToken);
-        return tokens.some((token) =>
-            aliases.some((alias) => token.includes(alias))
-        );
-    });
-
-    if (!matchingFaction) return null;
-
-    return {
-        isMajor: true,
-        enumFaction: matchingFaction,
-        uiLabel: majorFactionLabels[matchingFaction],
-        minorName: null,
-    };
+    const key = questFactionKey(entry);
+    return key ? factionInfoForKey(key) : null;
 }
 
 export function questMatchesSelectedMajorFaction(
@@ -106,13 +61,11 @@ export function questMatchesSelectedMajorFaction(
     selectedFaction: FactionInfo | null | undefined
 ): boolean {
     if (getQuestCategoryKey(entry.questType) !== "faction") return true;
-
-    const aliases = selectedFactionAliases(selectedFaction);
-    if (aliases.length === 0) return true;
-
-    const tokens = questFactionTokens(entry);
-
-    return tokens.some((token) =>
-        aliases.some((alias) => token.includes(alias))
-    );
+    if (!selectedFaction?.isMajor) return true;
+    const selected = factionIdentityToken(selectedFaction.factionKey ?? selectedFaction.enumFaction ?? selectedFaction.uiLabel);
+    if (!selected) return true;
+    const quest = factionIdentityToken(questFactionKey(entry));
+    if (quest === selected) return true;
+    // Base selection represents a family; numeric alternate selection remains exact.
+    return !/\d+$/.test(selected) && quest.replace(/\d+$/, "") === selected;
 }

@@ -80,38 +80,28 @@ class FactionImportAdminFacadeImplTest {
     }
 
     @Test
-    void importFactions_reportsFilteredAndInvalidRowsWithoutInferringMissingData() {
+    void importFactions_refusesPartialSnapshotWithoutWritingValidRows() {
         RecordingFactionImportService importService = new RecordingFactionImportService(importResultWithInsert());
-        RecordingFactionService factionService = new RecordingFactionService();
-        FactionImportAdminFacadeImpl facade = new FactionImportAdminFacadeImpl(importService, factionService);
+        FactionImportAdminFacadeImpl facade = new FactionImportAdminFacadeImpl(importService, new RecordingFactionService());
+        FactionImportBatchDto file = new FactionImportBatchDto("Endless Legend 2", "1.0", "1", "now", "factions",
+                List.of(faction("Faction_SandShaper", "Sandshapers", false, true),
+                        faction(null, "Missing Key", false, true)));
 
-        ImportSummaryDto summary = facade.importFactions(new FactionImportBatchDto(
-                "Endless Legend 2",
-                "0.82",
-                null,
-                "",
-                "factions",
-                List.of(
-                        faction("Faction_Public", "Public Faction", false, true),
-                        faction("Faction_Hidden", "Hidden Faction", true, true),
-                        faction(null, "Missing Key", false, true)
-                )
-        ));
+        assertThatThrownBy(() -> facade.importFactions(file)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no data was written or deleted");
+        assertThat(importService.snapshots).isEmpty();
+    }
 
-        assertThat(summary.counts().received()).isEqualTo(3);
-        assertThat(summary.counts().inserted()).isEqualTo(1);
-        assertThat(summary.counts().failed()).isEqualTo(1);
-        assertThat(summary.diagnostics().warnings()).extracting("code")
-                .contains(
-                        "FILTERED_FACTION_ROWS",
-                        "EMPTY_LORE_IN_FILE",
-                        "MISSING_EXPORTER_VERSION",
-                        "MISSING_EXPORTED_AT_UTC"
-                );
-        assertThat(summary.diagnostics().errors()).hasSize(1);
-        assertThat(summary.diagnostics().errors().getFirst().code()).isEqualTo("FACTION_IMPORT_INVALID_ROW");
-        assertThat(importService.snapshots).extracting(FactionImportSnapshot::factionKey)
-                .containsExactly("Faction_Public");
+    @Test
+    void reportsExplicitVisibilityFilteringAlongsideNewFactions() {
+        RecordingFactionImportService importService = new RecordingFactionImportService(importResultWithInsert());
+        FactionImportAdminFacadeImpl facade = new FactionImportAdminFacadeImpl(importService, new RecordingFactionService());
+        ImportSummaryDto summary = facade.importFactions(new FactionImportBatchDto("Endless Legend 2", "1", "1", "now", "factions",
+                List.of(faction("Faction_SandShaper", "Sandshapers", false, true),
+                        faction("Faction_Prototype", "Prototype", true, false))));
+        assertThat(summary.counts().failed()).isZero();
+        assertThat(summary.diagnostics().warnings()).extracting("code").contains("FILTERED_FACTION_ROWS");
+        assertThat(importService.snapshots).extracting(FactionImportSnapshot::factionKey).containsExactly("Faction_SandShaper");
     }
 
     @Test

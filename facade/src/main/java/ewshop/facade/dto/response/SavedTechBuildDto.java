@@ -30,7 +30,7 @@ public record SavedTechBuildDto(
         public Builder name(String name) { this.name = name; return this; }
         public Builder selectedFaction(MajorFaction selectedMajorFaction) { this.selectedFaction = selectedMajorFaction.getDisplayName(); return this; }
         public Builder selectedFaction(String selectedMajorFaction) {
-            this.selectedFaction = FactionNamePolicy.canonicalMajorDisplayNameOrSelf(selectedMajorFaction);
+            this.selectedFaction = FactionNamePolicy.canonicalSavedFactionOrSelf(selectedMajorFaction);
             return this;
         }
         public Builder techIds(List<String> techIds) { this.techIds = techIds; return this; }

@@ -81,6 +81,8 @@ public class TechImportAdminFacadeImpl implements TechImportAdminFacade {
             return ImportSummaryDto.of("tech", counts, diagnostics, durationMs);
         }
 
+        ImportAdminSupport.refusePartialSnapshot(failed, errors);
+
         ImportAdminSupport.assertNoDuplicateKeys(
                 snapshots,
                 TechImportSnapshot::techKey,

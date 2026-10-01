@@ -38,6 +38,7 @@ public record FactionImportFactionDto(
                 isBaseTemplate,
                 isPlaceholder,
                 isInternal
-        );
+        ) || ImportVisibilityPolicy.isNonPublicContent(factionKey == null ? entryKey : factionKey, displayName)
+                || ImportVisibilityPolicy.isNonPublicContent(null, publicDisplayName);
     }
 }

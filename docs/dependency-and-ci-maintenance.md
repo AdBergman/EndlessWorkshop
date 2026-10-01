@@ -44,6 +44,21 @@ These settings are not fully represented by files in the repository:
 - Do not grant broad repository write permissions to workflows unless a workflow
   explicitly needs them.
 
+## Live Faction Rollout: Manual Data Refresh
+
+After deploying live-faction support, use the production Admin Import UI/API to
+import current game exports. Import rich `factions` before `tech`, then refresh
+`units`, `heroes`, `quest_explorer`, and affected Codex categories. Existing tech
+availability is stored at import time, so changing faction traits requires
+reimporting tech even if its export has not changed. Tech-first imports without
+any major faction dataset retain legacy bootstrap behavior.
+
+Verify `/api/factions`, `/api/units`, `/api/techs`, Codex faction browsing, and a
+SandShaper/alternate direct link and saved build. Explicit prototypes and internal
+rows should remain absent. The top navigation should still show five factions.
+Current live export acquisition and production imports require maintainer access;
+local startup fixtures must never populate production.
+
 ## Codex GitHub Auth
 
 EWShop Codex sessions can see three distinct GitHub execution paths:

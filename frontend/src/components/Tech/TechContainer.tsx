@@ -1,6 +1,7 @@
 // TechContainer.tsx
 
 import React, {useEffect, useMemo, useState} from "react";
+import { getBackgroundUrl } from "@/utils/getBackgroundUrl";
 import TechTree from "@/components/Tech/TechTree";
 import SpreadSheetView from "@/components/Tech/views/SpreadSheetView";
 import {useDistrictStore} from "@/stores/districtStore";
@@ -51,7 +52,7 @@ const TechContainer: React.FC = () => {
         setFirstEraLoaded(false);
 
         const preload = new Image();
-        preload.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_1.webp`;
+        preload.src = getBackgroundUrl(selectedFaction.uiLabel, 1);
 
         preload.onload = () => {
             if (!cancelled) setFirstEraLoaded(true);
@@ -72,7 +73,7 @@ const TechContainer: React.FC = () => {
 
         for (let eraIndex = 2; eraIndex <= MAX_TECH_ERA; eraIndex++) {
             const img = new Image();
-            img.src = `/graphics/techEraScreens/${selectedFaction.uiLabel.toLowerCase()}_era_${eraIndex}.webp`;
+            img.src = getBackgroundUrl(selectedFaction.uiLabel, eraIndex);
         }
     }, [selectedFaction, firstEraLoaded]);
 

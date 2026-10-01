@@ -65,6 +65,7 @@ public record TechImportTechDto(
                 isBaseTemplate,
                 isPlaceholder,
                 isInternal
-        );
+        ) || ImportVisibilityPolicy.isNonPublicContent(techKey, displayName)
+                || ImportVisibilityPolicy.isNonPublicContent(factionKey, null);
     }
 }

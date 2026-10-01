@@ -1,4 +1,4 @@
-export function isValidDisplayName(name: string | null | undefined): boolean {
+export function isValidDisplayName(name: string | null | undefined, factionEntry = false): boolean {
     const normalized = (name ?? "").trim().toLowerCase();
     if (!normalized) return true;
 
@@ -6,6 +6,6 @@ export function isValidDisplayName(name: string | null | undefined): boolean {
         normalized.startsWith("%") ||
         normalized.startsWith("tbd") ||
         normalized.startsWith("[tbd]") ||
-        /\d{3}/.test(normalized)
+        (!factionEntry && /\d{3}/.test(normalized))
     );
 }

@@ -1,8 +1,15 @@
 package ewshop.facade.dto.importing;
 
+import ewshop.domain.service.PublicContentPolicy;
+
 public final class ImportVisibilityPolicy {
 
     private ImportVisibilityPolicy() {
+    }
+
+    public static boolean isNonPublicContent(String key, String displayName) {
+        return (key != null && !key.isBlank() && !PublicContentPolicy.isPublicKey(key))
+                || !PublicContentPolicy.isPublicDisplayName(displayName);
     }
 
     public static boolean shouldFilter(

@@ -28,7 +28,7 @@ class UnitImportAdminFacadeImplTest {
                 List.of(
                         unit("Unit_Kin_Visible", "Kin", true, "UnitClass_Ranged", null),
                         unit("Unit_Kin_Hidden", "Kin", true, "UnitClass_Ranged", false),
-                        unit("Unit_Kin_Prototype", "Kin", true, "UnitClass_Prototype_LandUnit", true),
+                        unit("Unit_Kin_LandUnit", "Kin", true, "UnitClass_Prototype_LandUnit", true),
                         unit("Unit_Unknown", "FutureFaction", true, "UnitClass_Ranged", true)
                 )
         );
@@ -37,10 +37,10 @@ class UnitImportAdminFacadeImplTest {
 
         assertThat(summary.kind()).isEqualTo("units");
         assertThat(summary.received()).isEqualTo(4);
-        assertThat(summary.valid()).isEqualTo(3);
-        assertThat(summary.importable()).isEqualTo(1);
+        assertThat(summary.valid()).isEqualTo(4);
+        assertThat(summary.importable()).isEqualTo(2);
         assertThat(summary.filtered()).isEqualTo(2);
-        assertThat(summary.failed()).isEqualTo(1);
+        assertThat(summary.failed()).isZero();
         assertThat(summary.filters()).anySatisfy(filter -> {
             assertThat(filter.code()).isEqualTo("MISSING_OR_FILTERED_FACTION");
             assertThat(filter.count()).isEqualTo(1);
@@ -49,7 +49,7 @@ class UnitImportAdminFacadeImplTest {
             assertThat(filter.code()).isEqualTo("PROTOTYPE_UNIT_CLASS");
             assertThat(filter.count()).isEqualTo(1);
         });
-        assertThat(summary.errors()).hasSize(1);
+        assertThat(summary.errors()).isEmpty();
     }
 
     @Test
@@ -62,7 +62,7 @@ class UnitImportAdminFacadeImplTest {
                 "units",
                 List.of(
                         unit("Unit_Kin_Hidden", "Kin", true, "UnitClass_Ranged", false),
-                        unit("Unit_Kin_Prototype", "Kin", true, "UnitClass_Prototype_LandUnit", true)
+                        unit("Unit_Kin_LandUnit", "Kin", true, "UnitClass_Prototype_LandUnit", true)
                 )
         );
 
@@ -80,7 +80,7 @@ class UnitImportAdminFacadeImplTest {
                 "2026-06-06T00:00:00Z",
                 "units",
                 List.of(
-                        unit("Unit_Unknown", "FutureFaction", true, "UnitClass_Ranged", true)
+                        unit(null, "FutureFaction", true, "UnitClass_Ranged", true)
                 )
         );
 
@@ -90,6 +90,15 @@ class UnitImportAdminFacadeImplTest {
         assertThat(summary.counts().failed()).isEqualTo(1);
         assertThat(summary.counts().inserted()).isZero();
         assertThat(summary.diagnostics().errors()).hasSize(1);
+    }
+
+    @Test
+    void rejectsMixedInvalidSnapshotBeforeCallingPersistence() {
+        UnitImportBatchDto file = new UnitImportBatchDto("EL2", "1", "1", "now", "units", List.of(
+                unit("Unit_SandShaper", "SandShaper", true, "UnitClass_Ranged", true),
+                unit(null, "SandShaper", true, "UnitClass_Ranged", true)));
+        assertThatThrownBy(() -> facade.importUnits(file)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("no data was written or deleted");
     }
 
     private static UnitImportUnitDto unit(

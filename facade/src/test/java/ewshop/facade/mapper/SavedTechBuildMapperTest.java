@@ -134,6 +134,6 @@ class SavedTechBuildMapperTest {
 
         SavedTechBuild domain = SavedTechBuildMapper.toDomain(request);
 
-        assertThat(domain.getFaction()).isEqualTo("New Major Faction");
+        assertThat(domain.getFaction()).isEqualTo("NewMajorFaction");
     }
 }

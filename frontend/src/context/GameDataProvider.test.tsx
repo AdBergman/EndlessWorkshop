@@ -285,12 +285,12 @@ describe("GameDataProvider orchestration boundary", () => {
         expect(mockedApiClient.getSavedBuild).toHaveBeenCalledWith("saved-build-id");
     });
 
-    it("keeps future saved-build faction strings loadable", async () => {
+    it.each(["New Major Faction", "Faction_SandShaper", "Faction_KinOfSheredyn02"])("keeps saved-build faction %s loadable", async (factionKey) => {
         const user = userEvent.setup();
         mockedApiClient.getSavedBuild.mockResolvedValue({
             uuid: "saved-build-id",
             name: "Saved Build",
-            selectedFaction: "New Major Faction",
+            selectedFaction: factionKey,
             techIds: ["Tech_Shared_First"],
             createdAt: "2026-05-12T00:00:00Z",
         });
@@ -318,7 +318,9 @@ describe("GameDataProvider orchestration boundary", () => {
 
         await waitFor(() => {
             expect(screen.getByTestId("selected-tech-count")).toHaveTextContent("1");
-            expect(screen.getByTestId("selected-faction")).toHaveTextContent("New Major Faction");
+            expect(useFactionSelectionStore.getState().selectedFaction.factionKey).toBe(
+                factionKey.startsWith("Faction_") ? factionKey : "Faction_New Major Faction"
+            );
         });
     });
 
