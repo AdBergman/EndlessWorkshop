@@ -34,6 +34,60 @@ registries.
   strong reason to move immediately.
 - Security updates can move faster, but still need tests and a quick diff review.
 
+## Batching And Integration
+
+Group compatible updates by what can be reviewed, tested, and rolled back
+together. Keep Maven, npm runtime, npm development tooling, Docker/runtime
+alignment, and GitHub Actions in separate batches. React, React DOM, and their
+types belong in one family even though their manifest dependency types differ.
+Group npm patch/minor security fixes separately from routine version updates;
+major migrations remain individual proposals unless an upstream compatibility
+requirement makes a paired migration necessary.
+
+Keep the existing weekly Maven/npm and monthly Actions/Docker schedules. Normal
+npm releases wait three days for patches, seven for minors, and 21 for majors;
+Maven majors wait 30 days. Security updates bypass Dependabot's version-update
+cooldown, but still require the relevant gates. A manual update must also check
+the resolved lockfile versions: a mature requested version can otherwise resolve
+to a release published today. See the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
+
+### October 2026 Integration Queue
+
+The replacement PRs preserve separate rollback boundaries. Integration and
+production deployment remain maintainer-owned; merge deliberately in this order
+and allow each runtime batch through the normal deploy gate.
+
+| Order | Batch | Integration condition |
+| --- | --- | --- |
+| 1 | [#79](https://github.com/AdBergman/EndlessWorkshop/pull/79): Spring Boot/springdoc patches | Maven, Docker, and isolated production-profile smoke passed; check the deployed environment after integration. |
+| 2 | [#80](https://github.com/AdBergman/EndlessWorkshop/pull/80): frontend security fixes | Full frontend gates passed and local audit is zero; default-branch alerts resolve after merge. |
+| 3 | [#81](https://github.com/AdBergman/EndlessWorkshop/pull/81): Node 24.21 alignment; [#82](https://github.com/AdBergman/EndlessWorkshop/pull/82): setup-java v6 | Independent batches; Docker/CI checks passed. |
+| 4 | [#83](https://github.com/AdBergman/EndlessWorkshop/pull/83): mature frontend tooling patch/minor updates | Merge #80 first; preserve reviewed Vite 8.3.0 and typescript-eslint 8.70.0 lock versions. |
+| 5 | [#84](https://github.com/AdBergman/EndlessWorkshop/pull/84): React/types/router patch/minor updates | Merge #80 first; maintainer browser smoke for startup, routes/back-forward, shared builds, tooltips, and admin import. |
+| 6 | [#85](https://github.com/AdBergman/EndlessWorkshop/pull/85): jest-dom 7 | Merge #80 first; Vitest matcher entry point and one asynchronous test assertion migrated. |
+| 7 | [#86](https://github.com/AdBergman/EndlessWorkshop/pull/86): paired jsdom 30/Vitest 5 | Merge #81/#85 first; hold until 3 October 2026 after 13:31 Europe/Stockholm for the Vitest 5.0.3 patch cooldown. Recheck upstream regressions and CI. |
+
+Frontend replacements share the #80 security baseline so each can be tested
+without vulnerable tooling. After #80 merges their shared diffs shrink. If later
+lockfiles conflict, regenerate only the approved package changes against the
+reviewed integration baseline, preserve mature versions, and rerun tests,
+typecheck, build, lint, and audit. Never replace the whole lockfile with an older
+PR's copy and thereby undo a preceding batch. A passing individual PR is not a
+substitute for checking the combined result.
+
+Disposable combined snapshots of #80/#83/#84/#85, and of those batches plus #86,
+passed all 913 frontend tests, typecheck, build, lint, and a zero-vulnerability
+audit on Node 24.21.0. These are compatibility evidence, not a merge or a
+production browser smoke. Recheck the actual integration result if its lockfile
+differs. The grouping-policy change can land independently of the package queue.
+
+Framer Motion 13 is explicitly deferred: the current application has no identified
+feature, bug, or security requirement for this major migration. Close the current
+proposal and revisit in November 2026, or earlier for a relevant fix/security
+advisory. Do not permanently ignore the dependency or suppress security alerts.
+The superseded bot proposals should stay closed; each has a replacement PR or
+this explicit deferral. Keep automatic merging disabled.
+
 ## Manual GitHub Setup
 
 These settings are not fully represented by files in the repository:
@@ -43,6 +97,11 @@ These settings are not fully represented by files in the repository:
 - Keep deploy secrets available only to trusted main/deploy workflows.
 - Do not grant broad repository write permissions to workflows unless a workflow
   explicitly needs them.
+
+Dependabot alerts and automatic security-update PRs were enabled on 1 October
+2026. Keep both enabled. The 23 existing default-branch alerts are addressed by
+#80's compatible lockfile updates; do not dismiss them manually while its merge
+is outstanding.
 
 ## Live Faction Rollout: Manual Data Refresh
 
