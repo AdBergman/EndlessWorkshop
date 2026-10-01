@@ -34,6 +34,51 @@ registries.
   strong reason to move immediately.
 - Security updates can move faster, but still need tests and a quick diff review.
 
+## Batching And Integration
+
+Group compatible updates by what can be reviewed, tested, and rolled back
+together. Keep Maven, npm runtime, npm development tooling, Docker/runtime
+alignment, and GitHub Actions in separate batches. React, React DOM, and their
+types belong in one family even though their manifest dependency types differ.
+Group npm patch/minor security fixes separately from routine version updates;
+major migrations remain individual proposals unless an upstream compatibility
+requirement makes a paired migration necessary.
+
+Keep the existing weekly Maven/npm and monthly Actions/Docker schedules. Normal
+npm releases wait three days for patches, seven for minors, and 21 for majors;
+Maven majors wait 30 days. Security updates bypass Dependabot's version-update
+cooldown, but still require the relevant gates. A manual update must also check
+the resolved lockfile versions: a mature requested version can otherwise resolve
+to a release published today. See the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
+
+### Current Dependency Follow-Up
+
+The October 2026 backend, security, Node, Actions, frontend tooling, and
+React/router and jest-dom batches (#79–#85) are merged and validated. The Admin Import test
+race is repaired in [#88](https://github.com/AdBergman/EndlessWorkshop/pull/88):
+wait for loaded import data before checking its metadata. PRs are the detailed
+review and validation records.
+
+[The paired jsdom 30/Vitest 5 upgrade (#86)](https://github.com/AdBergman/EndlessWorkshop/pull/86)
+remains held until **3 October 2026 after 13:31 Europe/Stockholm**, when Vitest
+5.0.3 clears the three-day patch cooldown. Recheck upstream regressions, refresh
+from current main, and rerun the full frontend gates before merging. This pair
+is necessary because Vitest 5.0.3 supplies jsdom 30.1 Blob compatibility; do not
+mask the incompatibility with test stubs or skipped assertions.
+
+When integrating overlapping dependency PRs, resolve from current main and apply
+only the named, reviewed package changes. Preserve preceding security fixes and
+mature lock versions; do not copy an older PR's entire lockfile. Rerun tests,
+typecheck, build, lint, and audit on the actual combined result. Wait for each
+runtime batch's production deploy and smoke checks before merging the next.
+
+Framer Motion 13 is explicitly deferred: the current application has no identified
+feature, bug, or security requirement for this major migration. The original proposal is closed;
+revisit in November 2026, or earlier for a relevant fix/security
+advisory. Do not permanently ignore the dependency or suppress security alerts.
+The superseded bot proposals should stay closed; each has a replacement PR or
+this explicit deferral. Keep automatic merging disabled.
+
 ## Manual GitHub Setup
 
 These settings are not fully represented by files in the repository:
@@ -43,6 +88,11 @@ These settings are not fully represented by files in the repository:
 - Keep deploy secrets available only to trusted main/deploy workflows.
 - Do not grant broad repository write permissions to workflows unless a workflow
   explicitly needs them.
+
+Dependabot alerts and automatic security-update PRs were enabled on 1 October
+2026. Keep both enabled. The 23 prior default-branch alerts were resolved by
+#80; GitHub reports zero open alerts as of 2 October 2026. Let fixes resolve
+alerts rather than dismissing them manually.
 
 ## Live Faction Rollout: Manual Data Refresh
 

@@ -36,6 +36,24 @@ updates:
       semver-minor-days: 7
       semver-major-days: 21
     groups:
+      npm-security-minor-and-patch:
+        applies-to: "security-updates"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      # Keep React runtime packages and their development types together.
+      # Version updates use the first matching group.
+      npm-react-minor-and-patch:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+        update-types:
+          - "minor"
+          - "patch"
       npm-runtime-minor-and-patch:
         dependency-type: "production"
         patterns:
