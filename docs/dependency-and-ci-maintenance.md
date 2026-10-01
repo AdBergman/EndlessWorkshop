@@ -51,35 +51,26 @@ cooldown, but still require the relevant gates. A manual update must also check
 the resolved lockfile versions: a mature requested version can otherwise resolve
 to a release published today. See the [Dependabot options reference](https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference).
 
-### October 2026 Integration Queue
+### Current Dependency Follow-Up
 
-The replacement PRs preserve separate rollback boundaries. Integration and
-production deployment remain maintainer-owned; merge deliberately in this order
-and allow each runtime batch through the normal deploy gate.
+The October 2026 backend, security, Node, Actions, frontend tooling, and
+React/router batches (#79–#84) are merged and deployed. The Admin Import test
+race is repaired in [#88](https://github.com/AdBergman/EndlessWorkshop/pull/88):
+wait for loaded import data before checking its metadata. Jest-dom 7 (#85) is
+awaiting fresh CI. PRs are the detailed review and validation records.
 
-| Order | Batch | Integration condition |
-| --- | --- | --- |
-| 1 | [#79](https://github.com/AdBergman/EndlessWorkshop/pull/79): Spring Boot/springdoc patches | Maven, Docker, and isolated production-profile smoke passed; check the deployed environment after integration. |
-| 2 | [#80](https://github.com/AdBergman/EndlessWorkshop/pull/80): frontend security fixes | Full frontend gates passed and local audit is zero; default-branch alerts resolve after merge. |
-| 3 | [#81](https://github.com/AdBergman/EndlessWorkshop/pull/81): Node 24.21 alignment; [#82](https://github.com/AdBergman/EndlessWorkshop/pull/82): setup-java v6 | Independent batches; Docker/CI checks passed. |
-| 4 | [#83](https://github.com/AdBergman/EndlessWorkshop/pull/83): mature frontend tooling patch/minor updates | Merge #80 first; preserve reviewed Vite 8.3.0 and typescript-eslint 8.70.0 lock versions. |
-| 5 | [#84](https://github.com/AdBergman/EndlessWorkshop/pull/84): React/types/router patch/minor updates | Merge #80 first; maintainer browser smoke for startup, routes/back-forward, shared builds, tooltips, and admin import. |
-| 6 | [#85](https://github.com/AdBergman/EndlessWorkshop/pull/85): jest-dom 7 | Merge #80 first; Vitest matcher entry point and one asynchronous test assertion migrated. |
-| 7 | [#86](https://github.com/AdBergman/EndlessWorkshop/pull/86): paired jsdom 30/Vitest 5 | Merge #81/#85 first; hold until 3 October 2026 after 13:31 Europe/Stockholm for the Vitest 5.0.3 patch cooldown. Recheck upstream regressions and CI. |
+[The paired jsdom 30/Vitest 5 upgrade (#86)](https://github.com/AdBergman/EndlessWorkshop/pull/86)
+remains held until **3 October 2026 after 13:31 Europe/Stockholm**, when Vitest
+5.0.3 clears the three-day patch cooldown. Recheck upstream regressions, refresh
+from current main, and rerun the full frontend gates before merging. This pair
+is necessary because Vitest 5.0.3 supplies jsdom 30.1 Blob compatibility; do not
+mask the incompatibility with test stubs or skipped assertions.
 
-Frontend replacements share the #80 security baseline so each can be tested
-without vulnerable tooling. After #80 merges their shared diffs shrink. If later
-lockfiles conflict, regenerate only the approved package changes against the
-reviewed integration baseline, preserve mature versions, and rerun tests,
-typecheck, build, lint, and audit. Never replace the whole lockfile with an older
-PR's copy and thereby undo a preceding batch. A passing individual PR is not a
-substitute for checking the combined result.
-
-Disposable combined snapshots of #80/#83/#84/#85, and of those batches plus #86,
-passed all 913 frontend tests, typecheck, build, lint, and a zero-vulnerability
-audit on Node 24.21.0. These are compatibility evidence, not a merge or a
-production browser smoke. Recheck the actual integration result if its lockfile
-differs. The grouping-policy change can land independently of the package queue.
+When integrating overlapping dependency PRs, resolve from current main and apply
+only the named, reviewed package changes. Preserve preceding security fixes and
+mature lock versions; do not copy an older PR's entire lockfile. Rerun tests,
+typecheck, build, lint, and audit on the actual combined result. Wait for each
+runtime batch's production deploy and smoke checks before merging the next.
 
 Framer Motion 13 is explicitly deferred: the current application has no identified
 feature, bug, or security requirement for this major migration. Close the current
@@ -99,9 +90,9 @@ These settings are not fully represented by files in the repository:
   explicitly needs them.
 
 Dependabot alerts and automatic security-update PRs were enabled on 1 October
-2026. Keep both enabled. The 23 existing default-branch alerts are addressed by
-#80's compatible lockfile updates; do not dismiss them manually while its merge
-is outstanding.
+2026. Keep both enabled. The 23 prior default-branch alerts were resolved by
+#80; GitHub reports zero open alerts as of 2 October 2026. Let fixes resolve
+alerts rather than dismissing them manually.
 
 ## Live Faction Rollout: Manual Data Refresh
 
